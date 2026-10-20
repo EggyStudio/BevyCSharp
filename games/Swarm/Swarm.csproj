@@ -11,13 +11,13 @@
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!--
-          The first package of 0.5 or later, which NuGet takes as the lowest published version at or
-          past it, since the game calls MainThread, which no version published before 0.5 carries.
-          Until one is published the game is built on a pack of the checkout under a version of its
-          own, named with -p:BevyCSharpVersion, as BUILDING.md shows and continuous integration does
-          with the package it packs for the run.
+          The newest version published on nuget.org this game builds on, raised in a commit after a
+          publish (BUILDING.md). A build names another with -p:BevyCSharpVersion, as continuous
+          integration does with the package it packs for the run. A version the feed never had
+          resolves to the next one up with NuGet's warning NU1603, which a build without warnings
+          fails on, as 0.5.0 did on the pack run of 3b0e54d7.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.0</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.174</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>

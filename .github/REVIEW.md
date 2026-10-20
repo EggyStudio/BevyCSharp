@@ -10,7 +10,35 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `41ebc700`, item 35 and nothing else, the workflow and BUILDING.md, with no review
+Reviewed up to `d56e7cb7`, item 36 and nothing else, carrying the review's file and the ledger's
+row. The physics world reads a joint's force as the accumulated impulse magnitude of the joint's own
+constraint, the first in its list, over the last step's length, which the step records after the
+library's timestep, answering zero for a joint that is gone, a rope with slack or before the first
+step, and leaving out a hinge's motor and limit, a ball joint's cone and a slider's angular lock,
+travel and drive, the slider reading its point-on-line servo as 3DEngine leaves its slider's lock
+out, at no cost until called, both engines on the same library version, which has the call. A test
+hangs a 3 kg box on a 1.5 m distance joint from a kinematic hook and reads 0 before a step, 29.416
+after 120 steps against 29.43, 0 with slack and 0 once disconnected, one fact at the one substep
+this world solves a step in, having no setting for more; the physics guide has the paragraph after
+the rope example with a compiled snippet that disconnects past 2,000 N, and the surface listing and
+the cheat sheet are written again; this engine has no upgrading page, so there is no entry, the
+ledger's new row saying so. Checked were the suite, 1,532 passed and 3 skipped of 1,535, and the
+documents check, with no native change. Read at 11:36 and pushed at 11:41 once the build run of
+`41ebc700` had ended green, whose page showed item 35's names, linux, windows, macos and digest
+green and the pack-only jobs skipped by their ids; the pack run of `3b0e54d7` runs on. At 11:51 the
+pack run of `3b0e54d7` had every build job green, the drive at 11:30 and Courtyard at 11:22, and its
+pack job had logged in and pushed the package to nuget.org at 11:48 through the policy and said what
+was made before the games' step, Verdict 36's form on the page, the games' step waiting on the feed;
+the build run of this head runs. At 12:15 the pack run of `3b0e54d7` had ended red at 12:12 on its
+pack job's last step alone: the feed listed `0.5.174` and the templates within 24 minutes of the
+push, so the wait held and Verdict 36 is settled, the package's nuspec naming `3b0e54d7` with 9
+lines of notes, the 9 engine commits since `0.5.149`'s `3eaa0a44` and none of the review's; then the
+games built on their defaults failed on Swarm, whose project names `0.5.0`, a version the feed never
+had (Verdict 40), the prerelease warning on the physics library standing for the owner. The coder
+mends Verdict 40, one small commit; the ledger's two features and the budget's report wait on the
+owner's word.
+
+Before it, `41ebc700` came, item 35 and nothing else, the workflow and BUILDING.md, with no review
 edits to carry. Every job dropped its name but the suite's, which keeps its matrix as include
 entries of a system and its runner and is named by the system, linux, windows and macos, its cache
 keys, digest artifacts and steps still reading the runner so nothing else changed; the ids native,
@@ -20,15 +48,7 @@ moved, and the artifacts keep their names; the head comment names each job by it
 only the suite carries a name, worded with no expression; the comments that called the job the game
 or the play job say the games job, BUILDING.md's one mention following, and the step script's line
 on an old run keeps the job's name as it was then. The workflow, script, norm and document script
-tests gave 65; no test named the old ids. Read at 10:42; its push waits for the build run of
-`3b0e54d7` to end, and the pack run with publish on of `3b0e54d7` runs on under the old names. The
-cached render-target bridges on the machine are at ABI 295 and stale, used by the coder's scratch
-scripts alone. At 11:11 the ledger gave item 36, the joint's force read from 3DEngine's `fdcfd435`;
-At 11:20 the pack run of `3b0e54d7` had its suites, native builds, README, storm and the Fedora six
-green, the Fedora job passing for the first time at 11:17, which settles Verdicts 37 and 39, its
-first and second shards green, Verdict 38's second of three, and the other shards, the drive and
-Courtyard running, the pack job after them; the build run of `3b0e54d7` ended green, so `41ebc700`
-was pushed; the ledger's two features and the budget's report wait on the owner's word.
+tests gave 65; no test named the old ids. Pushed at 11:21 once the build run before it had ended.
 
 Before it, `3b0e54d7` came, Verdict 39's mend and nothing else, carrying the review's file. The
 reading finished: it is the seed's order, not the pipelines, a dry run of the anisotropy mend with
@@ -55,37 +75,6 @@ cheat sheet test failing until the sheet was written again, and the norm tests, 
 after the previous build run had ended, and the pack run with publish on started at once,
 `39395229271`, which proves item 29's (h), (i) and (j), Verdict 36's wait and Verdicts 37 to 39's
 mends together and gives the feed's second listing time.
-
-Before it, `20f3d5c0` came, item 34 and nothing else, carrying Decision 44's sentence in COMMITS.md
-and the review's file. The bridge keeps a per-thread row guard, the runner taking its address
-through a new native call, the ABI at 297, and a check at every exit from the world while a walk is
-under way looks the named entity's component up and sets moved where its address differs or the
-entity is gone; the sequential walks, one component and with others, hand the method copies and
-write each back to the row where moved stays clear, and where it is set put each by entity, list the
-runs again unmarked, go on after the entity passed last and skip moved entities for the rest of the
-walk, which stays on the calling thread, the parallel path untouched; a method that throws leaves
-its components as they were, its copy not written back, the try and finally dropped since it cost 2
-ns an entity. The guide's threading section says what is promised, a change to the method's own
-entity made at once, and that a change to another entity is still queued, since made at once it may
-run an entity twice that frame or not at all, the how-it-works page and the chunk's remark
-following. The cost in nanoseconds an entity, 100,000 walked on the calling thread with a
-one-addition method, best and middle of the last thirty of ninety frames after tiering, in the rows'
-remark: a 16-byte component 1.5 and 2.4 before and 4.9 and 7.0 after, with a 40-byte transform
-beside it 3.8 and 6.4 to 12.4 and 16.0, and a 128-byte component 6.5 and 9.0 to 14.4 and 18.1; most
-of the first cut's cost was a store forwarding stall, the method's last four-byte store followed by
-a 16-byte read of the copy, 11 ns against 3.3 four bytes at a time, so the write back copies four
-bytes at a time up to 64 bytes and whole above; walks across the thread pool pay nothing, so
-PERFORMANCE.md's table stands; sixty rounds inside one frame timed the JIT's first tier, so the
-figures are from frames 60 to 90. Four tests, a method marking its own entity keeping its write and
-running once a frame, the two-component form keeping both writes after the move, a method growing
-its own table with 4,096 entities keeping its write with the component's address asserted moved, and
-a method playing a graph on its own entity playing once and keeping its write, all failing on the
-old bridge, where the growth test read a garbage entity from the table's freed memory; two Rust
-tests, a write not noticed, an insert or despawn noticed, and a table grown by 4,096 spawns noticed.
-Checked were the three profiles, the cargo tests, 104 and 179, the Windows and macOS cross checks,
-the headless tests, 26 passing and 3 skipped, the suite, 1,531 passed and 3 skipped of 1,534, the
-norm tests, 18, and the documents check. Pushed at once. The pack run of `05ed21e4` ended red at
-08:34 on the Fedora job alone, every other job green, the pack job skipped.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1087,7 +1076,8 @@ from [SHARED.md](SHARED.md).
     reason. The graph then reads as 3DEngine's, the three suites, the digest and the examples on a
     push with the pack-only jobs skipped by id, and the whole set on a pack run. The workflow tests
     follow the ids, and BUILDING.md's job names with them. One commit, after item 34. Done at
-    `41ebc700` on 2026-10-20, as the head says.
+    `41ebc700` on 2026-10-20, as the head says. Proven on the build run of `41ebc700` at 11:40 on
+    2026-10-20, the page as the item says.
 
 36. **A program reads the force a joint held its bodies with over the last step, from 3DEngine's
     `GetPhysicsJointForce`.** SHARED.md's row, taken on 2026-10-20 since this engine simulates its
@@ -1099,7 +1089,8 @@ from [SHARED.md](SHARED.md).
     step, its limit and motor apart, costing nothing until called, with its cheat sheet line, the
     surface listing, the upgrading page's entry and the physics guide's paragraph on joints, and a
     test of a box hanging on a distance joint reading its weight within a percent at the substep
-    counts the engine runs. One commit, carrying the review's files.
+    counts the engine runs. One commit, carrying the review's files. Done at `d56e7cb7` on
+    2026-10-20, as the head says.
 
 ## Verdicts
 
@@ -1223,7 +1214,11 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     up two minutes before the one listing read, and the job's limit at 120; the pack run with
     publish on started on it is the second reading of the feed's time, and its pack job passing
     whole settles the verdict. A reading of the feed's time from the other engine: its `5.2.155`,
-    pushed at 08:38 on 2026-10-20, was listed at 08:48, ten minutes.
+    pushed at 08:38 on 2026-10-20, was listed at 08:48, ten minutes. On the pack run of `3b0e54d7`
+    on 2026-10-20 the package was pushed at 11:48 and the feed listed `0.5.174` and the templates
+    within 24 minutes, inside the ninety, the summary standing before the games' step on the page;
+    the games' step then failed on a game's own default, Verdict 40, not on the wait. Settled on the
+    pack run of `3b0e54d7` on 2026-10-20.
 
 37. **The Fedora capture job compares its six pictures on the runner, which has no decoder for
     them.** On the pack run of `d0e58c56`, 2026-10-20 at 05:07, the job's compare step failed at its
@@ -1328,6 +1323,17 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     pack run started on it is the check. The Fedora job passed on the pack run of `3b0e54d7` on
     2026-10-20 at 11:17 with the seeded picture. Settled on the pack run of `3b0e54d7` on
     2026-10-20.
+
+40. **Swarm's project names `0.5.0` as its default engine version, which the feed never had, so the
+    games built on their defaults fail on it after every publish.** On the pack run of `3b0e54d7`,
+    2026-10-20 at 12:12, the pack job's last step found `0.5.174` listed and built each game on the
+    default its project names, and Swarm's, `0.5.0` since `5e750133`, does not build, nuget.org
+    holding no such version, where the other three games name `0.4.129`; the step's own message says
+    to raise each to the version the run pushed. So the four games' defaults go to `0.5.174` in one
+    commit, with the step's script run on the machine against the feed as the check, as its message
+    asks, and item 22's check of Swarm read again against the feed and not a local pack, so a
+    default names a published version from here; the step stays as it is, since it found the fault.
+    Settled when the step passes whole on the next pack run with publish on.
 
 ## Decisions
 

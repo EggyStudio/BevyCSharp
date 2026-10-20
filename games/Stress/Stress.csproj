@@ -15,7 +15,7 @@
           publish (BUILDING.md). A build names another with -p:BevyCSharpVersion, as continuous
           integration does with the package it packs for the run.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.4.129</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.174</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>

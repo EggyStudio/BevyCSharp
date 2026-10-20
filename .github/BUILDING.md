@@ -370,11 +370,11 @@ A game under `games/` names in its own project the version it builds on where no
 `BevyCSharpVersion`, the newest published on nuget.org it builds on, so a reader cloning the
 repository builds it from nuget.org with nothing of the repository's but its own folder, as a game
 outside the repository is built. After a publish, raising a game to the version that run pushed is
-a commit of one line a game. A game that calls what no published version carries names the version
-it needs as a minimum, which NuGet takes as the lowest published version at or past it, as Swarm
-names 0.5.0 for `MainThread`, and until that is published it is built on a pack of the checkout
-under a version of its own, new for each pack, since NuGet keeps the first package it restored
-under a version:
+a commit of one line a game. A default is a version the feed has, since one it never had resolves to
+the next one up with NuGet's warning NU1603, which a build without warnings fails on, as Swarm's
+0.5.0 did once 0.5.174 was published. A game that calls what no published version carries is built
+on a pack of the checkout until a version carrying it is published, under a version of its own, new
+for each pack, since NuGet keeps the first package it restored under a version:
 
 ```bash
 build/build-native.sh --render
