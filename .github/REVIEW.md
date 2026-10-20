@@ -10,7 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5195e95a`, item 29's part (i) and nothing else, with the review's commit between,
+Reviewed up to `0f8e89b4`, item 29's part (j) and nothing else, with the review's commit between,
+and item 29 has no part open. The bridge, in the render profile alone, mends Bevy's standard
+material fragment shader by three exact replacements in its text once it has loaded, closing the
+block that skips the prepass normals before anisotropy's part, giving anisotropy's setup a tangent
+frame of its own from the world normal and tangent, and dropping the brace the setup was inside,
+each replacement finding its text exactly once in Bevy 0.20's file, the mended text differing in
+those lines alone, and outside a normal prepass the frame the same call on the same normal and
+tangent, so nothing else draws otherwise; the mended source is set on the loaded shader asset and
+the render world compiles it again as for a shader written while the game runs. No copy of Bevy's
+shader is kept, only the lines changed, so no file of Bevy's needs its license notice, the notices
+covering the crate already. A replacement that does not find its text exactly once refuses the whole
+mend, warns naming the file to follow and leaves Bevy's shader, and a native call answers mended or
+refused, read as an internal flag. The anisotropy prepass tests' highlight theory takes four
+cameras, forward, deferred with occlusion, a normal prepass and occlusion, each under a fiftieth of
+the pixels blown white; the pinned test goes and a test asserts the mend took, so a Bevy whose text
+moved fails there naming the file; a Rust test covers the exactly-once rule; the remarks on the
+anisotropy strength and the materials guide's line say the bridge mends it, and TODO.md's pinned
+paragraph goes. Checked were the five anisotropy prepass tests on the editor bridge, six 3D examples
+taken again on it identical to their pictures, the cargo checks of the four profiles with the
+Windows and macOS cross checks, the cargo tests, 102 and 177, the whole suite after a clean strict
+build, 1,525 passed and 3 skipped, and the cheat sheet and surface unchanged. Decision 39 asked a
+patched shader with a test that fails when Bevy's original changes, and this is that in the smaller
+form, the lines in place of a copy. The push's build run cancels the one of `9b6dceaa` and carries
+Verdicts 34 and 35's third suites. Next Verdict 36's mend, then the pack run with publish on that
+proves (h), (i), (j) and the mend together.
+
+Before it, `5195e95a` came, item 29's part (i) and nothing else, with the review's commit between,
 and with it the differ list holds no line. Each power of two of the cluster budget was taken twice
 on the GPU with the editor bridge and compared with the whole crowd at 2 to the 20th, 2 to the 13th
 203,842 pixels from whole and its two takes 64,547 apart, 2 to the 14th 184,531 and 100,647, 2 to
@@ -25,9 +51,7 @@ own documentation, and EXAMPLES.md follows; the picture is the GPU's whole grid 
 4.5's list has it, its gallery thumbnail made again; the line leaves the differ file, which keeps
 its header, and TODO.md's paragraph on lavapipe's bunnies goes; no Mesa report is written, and the
 budget's report to Bevy is the owner's call. Checked were a strict build of the solution, the norm
-and example catalog tests, 19, the documents check and the table's check. Next (j), the patched
-fragment shader with its guard test, then Verdict 36, then the pack run with publish on that proves
-(h), (i), (j) and the mend together.
+and example catalog tests, 19, the documents check and the table's check.
 
 Before it, `17b004c0` came, item 29's part (h) and nothing else, with the review's commits between.
 The native job's matrix gains a Linux entry built with meshlets and Solari for the captures,
@@ -53,39 +77,6 @@ captured in 726 seconds on every core, the six matching, `clustered_decals` 2 pi
 5.5 percent inside its line, and the workflow, script and norm tests, 65. The job's first real run
 is the next pack run's, which the reviewer starts when Verdict 36's mend is in with (i) and (j), so
 one run proves them all; the push's build run carries Verdicts 34 and 35's third suites.
-
-Before it, `93600e85` came, item 29's part (g), and `93b19994` before it, the layouts test's mend,
-both in the pack run with publish on started at 23:55, 39331259657 on the review's commit after
-them. The layouts test catches the bridge's refusal of a type it does not register and leaves the
-type out, counts the layouts read and asks for more than a hundred, its remarks saying the
-description comes from the fullest bridge, passing on the editor bridge and the render bridge with
-the table, 7 of 7 on each. Part (g): the lookup table's feature is in the render profile, its
-comment giving the table as 64 by 64 pairs of half floats, 14 KB compressed, read from the header of
-Bevy's texture, and saying Solari turns it on as well and it adds no crate, the image crate's
-compression feature an empty marker already on, the lock byte-identical by comparison and by the
-locked build, the render bridge grown 14,920 bytes with the decode; BUILDING.md's paragraph says a
-picture is the same on any bridge with the renderer and the meshlet and Solari five need the bridges
-built with them, TODO.md's paragraph on pictures taken on a bridge without Solari goes, and the
-eleven pictures and their thumbnails are in with the decal maps kept. Checked were `cargo check` in
-the container on three profiles, `cargo test` headless and on render, the whole suite on the render
-bridge with the table, 1,509 passed and 17 skipped with the one failure the layouts test since
-mended and the lit-color pixel tests passing with their figures as they stand, the notices' and the
-table script's checks, the norm tests and the comparison matching 373. At 00:43 on 2026-10-20 the
-push run of `3eaa0a44` was whole green and the pack run's three suites and digest green with its
-natives finishing, so the Linux suites of `e7ea1a06`'s run and both runs of `3eaa0a44` settle
-Verdict 33, and the Windows and macOS suites of the two runs are Verdicts 34's and 35's second of
-three. Right. Next (h), then (i) and (j), item 29's last three parts, and the pack job's push read
-when the run ends. At 02:20 on 2026-10-20 the pack run of `3eaa0a44` had every job green and its
-pack job at the step that builds each game on the package from the feed: the login through the
-trusted publishing policy and the push to nuget.org both passed at 02:00, the first package
-published through the policy, and the feed listed `BevyCSharp.Templates` `0.5.149` from `3eaa0a44`
-with the engine's `0.5.149` still being indexed, so item 33 is proven; item 32's notes are read on
-the package's page when the feed lists it, and Verdicts 34 and 35 take the run's suites as their
-second of three. At 02:48 the feed listed `0.5.149` with its notes of 12 lines, the engine's commits
-since `0.5.120` and none of the review's, which proves item 32, and the pack job had ended red on
-its last step, the games built on their defaults, which waited 20 minutes for the feed to list the
-package and gave up where the feed took longer (Verdict 36); the pack step warned that a stable
-package should not depend on a prerelease, the physics library's, noted under the verdict.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -940,7 +931,7 @@ from [SHARED.md](SHARED.md).
     the owner's call, as upstream reports are. Order: (h)'s commit first with the line's reason as
     the budget's, then (i)'s commit taking the line off, two things, two commits. (h) done at
     `17b004c0` on 2026-10-20, as the head says. (i) done at `5195e95a` on 2026-10-20, as the head
-    says.
+    says. (j) done at `0f8e89b4` on 2026-10-20, as the head says, and no part of the item is open.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
@@ -1114,7 +1105,11 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     says, when it gives up, that the package was pushed and stands, so a red run is not read as an
     unpublished package. An aside kept here: the pack step warns that a stable package should not
     take a prerelease dependency, the physics library's, which the owner decides on. Settled when
-    the pack job passes whole on the next pack run with publish on.
+    the pack job passes whole on the next pack run with publish on. The coder's reading on
+    2026-10-20 is the first form, the wait set from what the feed took, the templates listed within
+    20 minutes and the engine by 47, so a wait of 45 minutes with the job's limit raised to hold it,
+    and the summary moved before the games' step, so a run says the push stood even where the wait
+    gives up; the reviewer takes it.
 
 ## Decisions
 
