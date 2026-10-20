@@ -10,7 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `17b004c0`, item 29's part (h) and nothing else, with the review's commits between.
+Reviewed up to `5195e95a`, item 29's part (i) and nothing else, with the review's commit between,
+and with it the differ list holds no line. Each power of two of the cluster budget was taken twice
+on the GPU with the editor bridge and compared with the whole crowd at 2 to the 20th, 2 to the 13th
+203,842 pixels from whole and its two takes 64,547 apart, 2 to the 14th 184,531 and 100,647, 2 to
+the 15th 70,504 and 90,767, and 2 to the 16th, 17th and 18th 0 from whole and 0 between takes, so
+65,536 slots is the smallest power of two that draws the crowd whole, 256 KB of the device's memory
+against Bevy's 32, and on Fedora 44's lavapipe through the container script with the meshlet and
+Solari bridge it comes within 1.2 pixels of the GPU's whole picture, the comparison matching with no
+line to allow it. The example's configuration takes 65,536 clusters with a comment giving Bevy's
+8,192, the documentation's missing or blinking meshes, the measurement and the cost; its triage row
+says it takes 65,536 cluster slots where Bevy's takes 8,192, too few for its 2,500 bunnies by Bevy's
+own documentation, and EXAMPLES.md follows; the picture is the GPU's whole grid at 1920 by 1080 as N
+4.5's list has it, its gallery thumbnail made again; the line leaves the differ file, which keeps
+its header, and TODO.md's paragraph on lavapipe's bunnies goes; no Mesa report is written, and the
+budget's report to Bevy is the owner's call. Checked were a strict build of the solution, the norm
+and example catalog tests, 19, the documents check and the table's check. Next (j), the patched
+fragment shader with its guard test, then Verdict 36, then the pack run with publish on that proves
+(h), (i), (j) and the mend together.
+
+Before it, `17b004c0` came, item 29's part (h) and nothing else, with the review's commits between.
 The native job's matrix gains a Linux entry built with meshlets and Solari for the captures,
 uploaded under a name the pack's pattern never takes, its cache key its own so the other entries'
 caches stay warm, a cold build 18 minutes 51 seconds on the development machine; a fifth capture
@@ -33,8 +52,7 @@ captured in 726 seconds on every core, the six matching, `clustered_decals` 2 pi
 `test_meshlet` 481, `solari` 1,636, `solari_reflections` 1,198 and `many_meshlet_materials` 50,657,
 5.5 percent inside its line, and the workflow, script and norm tests, 65. The job's first real run
 is the next pack run's, which the reviewer starts when Verdict 36's mend is in with (i) and (j), so
-one run proves them all; the push's build run carries Verdicts 34 and 35's third suites. Next (i),
-then (j), then Verdict 36.
+one run proves them all; the push's build run carries Verdicts 34 and 35's third suites.
 
 Before it, `93600e85` came, item 29's part (g), and `93b19994` before it, the layouts test's mend,
 both in the pack run with publish on started at 23:55, 39331259657 on the review's commit after
@@ -68,18 +86,6 @@ since `0.5.120` and none of the review's, which proves item 32, and the pack job
 its last step, the games built on their defaults, which waited 20 minutes for the feed to list the
 package and gave up where the feed took longer (Verdict 36); the pack step warned that a stable
 package should not depend on a prerelease, the physics library's, noted under the verdict.
-
-Before it, `a7895887` came, item 32's rule and nothing else, with the review's commit between. The
-notes script walks the commits after the start and leaves out one whose files all lie under
-`.github/`, a commit with no files or with any file elsewhere staying in, as 3DEngine's `8e3ff67a`
-has it, the docstring and BUILDING.md saying why; the test's history gains a review record touching
-the review alone, left out, and a commit touching a workflow and the README, kept; the release
-notes, norm and script tests pass, 59 of 59, after a clean build. Against the feed's `0.5.120` the
-notes hold 9 lines from the commits after `35ca43b1`, the review's records and the trusted
-publishing commit, whose three files lie under the folder, left out and the list's commit kept for
-its file under the build folder. Right. The reviewer starts the pack run with publish on as the
-check of items 32 and 33 and of Verdicts 34 and 35 (Decision 43). Next the layouts test's mend,
-(g)'s commit, then (h).
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -933,7 +939,8 @@ from [SHARED.md](SHARED.md).
     are, the differ line comes off and TODO.md's paragraph goes; a report of the budget to Bevy is
     the owner's call, as upstream reports are. Order: (h)'s commit first with the line's reason as
     the budget's, then (i)'s commit taking the line off, two things, two commits. (h) done at
-    `17b004c0` on 2026-10-20, as the head says.
+    `17b004c0` on 2026-10-20, as the head says. (i) done at `5195e95a` on 2026-10-20, as the head
+    says.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
