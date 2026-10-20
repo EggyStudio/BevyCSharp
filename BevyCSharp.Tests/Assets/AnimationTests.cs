@@ -255,4 +255,80 @@ public sealed class AnimationTests
         Assert.True(Moved(0, rest.Width / 2) > 30, "the left strip did not turn");
         Assert.True(Moved(rest.Width / 2, rest.Width) > 30, "the right strip did not turn");
     }
+
+    /// <summary>
+    /// A behavior on each of several scenes' roots starts its clip once and keeps what it wrote
+    /// after the call, as each fox of many_foxes starts its run.
+    /// </summary>
+    /// <remarks>
+    /// The behavior holds its own row of the roots' table by reference while it calls, and the
+    /// calls put what the bridge keeps of a scene's clips on the root. A component of the table
+    /// moved the root to another table and the last row into its place, so the write after the
+    /// call landed in another root's row, and the root that called, left unmarked, started its clip
+    /// again a frame later. Eight roots share a table, so a write that lands elsewhere lands on one of them.
+    /// </remarks>
+    [SkippableFact]
+    public void ABehaviorPlayingItsOwnScenesClipKeepsWhatItWrote()
+    {
+        Needs.Renderer();
+
+        ClipStarts.Plays.Clear();
+        var roots = new List<Entity>();
+        var marked = 0;
+
+        var run = new PictureRun
+        {
+            Build = app =>
+            {
+                app.AddPlugin(EngineHarness.Behaviors());
+                app.AddState(Screen.Menu);
+            },
+            Scene = ecs =>
+            {
+                var model = AssetServer.LoadGltfScene(Model);
+                for (var i = 0; i < 8; i++)
+                {
+                    var root = ecs.SpawnScene(model);
+                    ecs.Add(root, new ClipStarter());
+                    roots.Add(root);
+                }
+            },
+        };
+
+        run.Until("every clip starts", _ => ClipStarts.Plays.Count == roots.Count)
+            .Wait(10)
+            .Do("reading the roots", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                marked = roots.Count(root => ecs.TryGet<ClipStarter>(root, out var starter) && starter.Started);
+            })
+            .Go();
+
+        Assert.Equal(roots.Count, marked);
+        Assert.All(roots, root => Assert.Equal(1, ClipStarts.Plays[root]));
+    }
+}
+
+/// <summary>A behavior starting its scene's clip until it has, which counts each start.</summary>
+[Behavior]
+public partial struct ClipStarter
+{
+    /// <summary>Whether the clip has started.</summary>
+    public bool Started;
+
+    /// <summary>Starts the clip until it starts, and counts the start.</summary>
+    [OnUpdate]
+    public void Start(BehaviorContext ctx)
+    {
+        if (Started) return;
+        Started = Animation.Play(ctx.Entity, "Bend", new AnimationSettings { Repeat = true });
+        if (Started) ClipStarts.Plays[ctx.Entity] = ClipStarts.Plays.GetValueOrDefault(ctx.Entity) + 1;
+    }
+}
+
+/// <summary>How many times <see cref="ClipStarter"/> started each root's clip.</summary>
+public static class ClipStarts
+{
+    /// <summary>Each root's count of starts.</summary>
+    public static readonly Dictionary<Entity, int> Plays = [];
 }

@@ -18,8 +18,16 @@ use crate::interop::status;
 
 /// What a scene's clips became, the players that play them and the node each clip is in the
 /// graph, in the order the file lists them.
+///
+/// Kept in a sparse set, as the file's handle is while the clips are gathered, and not in the
+/// root's table. Each call on a scene's clips takes the animator off the root and puts it back, and
+/// the first puts it there, which a behavior on the root makes while it holds its own row of the
+/// table by reference. A component of the table moves the root to another table and the last row
+/// into its place, so what the behavior wrote after the call landed in another entity's row, and
+/// half the foxes of many_foxes started their run a second time a frame after the first.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component)]
+#[component(storage = "SparseSet")]
 pub struct BcsAnimator {
     /// Every entity below the scene's root carrying an `AnimationPlayer`, one for each top node of
     /// what the file animates.
@@ -43,6 +51,7 @@ pub struct BcsAnimator {
 /// root holds the handle until the clips have been gathered.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::component::Component)]
+#[component(storage = "SparseSet")]
 struct BcsAnimationSource(bevy::asset::Handle<bevy::gltf::Gltf>);
 
 /// Clips that played once and reached their end, by the scene root they play on and the clip's
@@ -123,6 +132,9 @@ fn animator(world: &mut bevy::ecs::world::World, root: bevy::ecs::entity::Entity
         Some(source) => source.0.clone(),
         None => {
             let handle = world.resource::<AssetServer>().load::<Gltf>(path);
+            if let Some(mut hold) = world.get_resource_mut::<crate::sync::ClockHold>() {
+                hold.wait_for(handle.id().untyped());
+            }
             world.entity_mut(root).insert(BcsAnimationSource(handle.clone()));
             handle
         }

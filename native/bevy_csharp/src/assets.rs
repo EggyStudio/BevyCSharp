@@ -194,15 +194,16 @@ impl AssetHandles {
     /// so neither counts. What a held clock waits on (`sync::hold_clock`), so it is asked once a
     /// frame only while that hold is on.
     pub(crate) fn loading(&self, server: &AssetServer) -> bool {
-        use bevy::asset::RecursiveDependencyLoadState;
-
-        self.slots.iter().filter_map(|slot| slot.handle.as_ref()).any(|handle| {
-            matches!(
-                server.get_recursive_dependency_load_state(handle.id()),
-                Some(RecursiveDependencyLoadState::Loading)
-            )
-        })
+        self.slots.iter().filter_map(|slot| slot.handle.as_ref()).any(|handle| is_loading(server, handle.id()))
     }
+}
+
+/// Whether an asset, or one of the assets it depends on, is loading, by Bevy's recursive state.
+pub(crate) fn is_loading(server: &AssetServer, id: bevy::asset::UntypedAssetId) -> bool {
+    matches!(
+        server.get_recursive_dependency_load_state(id),
+        Some(bevy::asset::RecursiveDependencyLoadState::Loading)
+    )
 }
 
 /// Takes ownership of a handle and returns the value C# will refer to it by.

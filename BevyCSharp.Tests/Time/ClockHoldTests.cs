@@ -60,6 +60,56 @@ public sealed class ClockHoldTests
     }
 
     /// <summary>
+    /// Held for loads, a set clock stands still while the first clip played on a scene reads the
+    /// file the scene came from again for the clips' names, so the clip starts at the moment of the
+    /// clock it was first asked for, on any device.
+    /// </summary>
+    /// <remarks>
+    /// Bevy frees a glTF file's own asset once the scene asked for by its label has loaded and
+    /// nothing holds the file, so the scene stands ten frames before its clip is asked for, and the
+    /// first ask finds the file gone and reads it again, as many_foxes did on every device. The
+    /// ask's frame moves the clock, and each after it stands still until the clip plays.
+    /// </remarks>
+    [SkippableFact]
+    public void AClockHeldForLoadsStandsStillWhileAScenesClipsAreRead()
+    {
+        Needs.Renderer();
+
+        var model = AssetHandle.None;
+        var scene = Entity.None;
+        (double Elapsed, ulong Clock)? asked = null, played = null;
+        var refused = 0;
+
+        var run = new PictureRun
+        {
+            Configure = config => config.FrameSeconds = 0.1,
+            Scene = ecs => scene = ecs.SpawnScene(model = AssetServer.LoadGltfScene("models/bend.gltf")),
+        };
+
+        run.Do("holding the clock for loads", world => world.Resource<Time>().Holds = ClockHolds.Loads)
+            .Until("the scene arrives", _ => AssetServer.StateWithDependenciesOf(model) == AssetLoadState.Loaded)
+            .Wait(10)
+            .Until("the clip plays", world =>
+            {
+                var time = world.Resource<Time>();
+                asked ??= (time.ElapsedSeconds, time.ClockFrames);
+                if (!Animation.Play(scene, "Bend"))
+                {
+                    refused++;
+                    return false;
+                }
+
+                played = (time.ElapsedSeconds, time.ClockFrames);
+                return true;
+            })
+            .Go();
+
+        Assert.True(refused > 0, "the clip played at its first ask, so the file was not read again and the test held nothing");
+        Assert.Equal(asked!.Value.Elapsed, played!.Value.Elapsed, 9);
+        Assert.Equal(asked.Value.Clock, played.Value.Clock);
+    }
+
+    /// <summary>
     /// Held still, as the server holds it between commands, a set clock passes no time to the game
     /// and runs no fixed step until it is let go, and the frames it stood in are left out of its
     /// count.

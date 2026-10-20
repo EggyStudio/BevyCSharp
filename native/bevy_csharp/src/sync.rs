@@ -328,7 +328,8 @@ pub unsafe extern "C" fn bcs_time_frame_seconds(seconds: *mut f64) -> i32 {
 
 /// The holds [`bcs_time_set_hold`] takes, each a bit.
 pub mod hold {
-    /// Stands still while an asset the app asked for, or one it depends on, is loading.
+    /// Stands still while an asset the app asked for, or one it depends on, is loading, or a file
+    /// the bridge reads for the app, such as a scene's file read again for its clips' names.
     pub const LOADS: u32 = 1;
     /// Stands still until the bit is cleared.
     pub const STILL: u32 = 2;
@@ -344,6 +345,27 @@ pub mod hold {
 pub struct ClockHold {
     holds: u32,
     kept: Option<std::time::Duration>,
+    /// The loads the bridge started for the app while the hold on loads was on, each dropped once
+    /// it is no longer loading ([`ClockHold::wait_for`]).
+    reads: Vec<bevy::asset::UntypedAssetId>,
+}
+
+impl ClockHold {
+    /// Holds a set clock while a load the bridge started for the app runs, as a load C# asked for
+    /// holds it, where the hold on loads is on, and does nothing where it is off.
+    ///
+    /// The first clip played on a scene reads the file the scene came from again, for the clips'
+    /// names, since Bevy freed the file's own asset once the scene had loaded. The read spans as
+    /// many frames as the device's loading takes against its drawing, so a clip started once it
+    /// arrives would start at another moment of the clock on each device, as the foxes of
+    /// many_foxes did on a capture shard of the pack run of d0e58c56, each a step along in its run.
+    /// Only the render profile plays clips, so only it has a read to wait for.
+    #[cfg(feature = "render")]
+    pub(crate) fn wait_for(&mut self, read: bevy::asset::UntypedAssetId) {
+        if self.holds & hold::LOADS != 0 && !self.reads.contains(&read) {
+            self.reads.push(read);
+        }
+    }
 }
 
 /// Sets this frame's step of a set clock to nothing where a hold asks it to, before Bevy advances
@@ -363,7 +385,10 @@ pub(crate) fn hold_clock(
 
     let still = hold.holds & hold::STILL != 0
         || (hold.holds & hold::LOADS != 0
-            && server.zip(handles).is_some_and(|(server, handles)| handles.loading(&server)));
+            && server.is_some_and(|server| {
+                hold.reads.retain(|&read| crate::assets::is_loading(&server, read));
+                !hold.reads.is_empty() || handles.is_some_and(|handles| handles.loading(&server))
+            }));
 
     if still {
         hold.kept = Some(length);
@@ -501,7 +526,7 @@ mod tests {
         let length = Duration::from_millis(100);
         let mut world = World::new();
         world.insert_resource(TimeUpdateStrategy::ManualDuration(length));
-        world.insert_resource(ClockHold { holds: hold::STILL, kept: None });
+        world.insert_resource(ClockHold { holds: hold::STILL, ..Default::default() });
         let before = world.register_system(hold_clock);
         let after = world.register_system(release_clock);
 
