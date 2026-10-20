@@ -37,7 +37,11 @@ trusted publishing policy and the push to nuget.org both passed at 02:00, the fi
 published through the policy, and the feed listed `BevyCSharp.Templates` `0.5.149` from `3eaa0a44`
 with the engine's `0.5.149` still being indexed, so item 33 is proven; item 32's notes are read on
 the package's page when the feed lists it, and Verdicts 34 and 35 take the run's suites as their
-second of three.
+second of three. At 02:48 the feed listed `0.5.149` with its notes of 12 lines, the engine's commits
+since `0.5.120` and none of the review's, which proves item 32, and the pack job had ended red on
+its last step, the games built on their defaults, which waited 20 minutes for the feed to list the
+package and gave up where the feed took longer (Verdict 36); the pack step warned that a stable
+package should not depend on a prerelease, the physics library's, noted under the verdict.
 
 Before it, `a7895887` came, item 32's rule and nothing else, with the review's commit between. The
 notes script walks the commits after the start and leaves out one whose files all lie under
@@ -933,7 +937,8 @@ from [SHARED.md](SHARED.md).
     file lies under `.github/` is left out, since the package carries nothing from there, which
     takes the review's and the workflows' commits by what they touch, the README, the guides, the
     license and the notices staying in; a small commit after (g)'s. The rule is in at `a7895887`,
-    the notes at 9 lines of the engine's alone.
+    the notes at 9 lines of the engine's alone. Proven on `0.5.149`'s page on 2026-10-20, 12 lines
+    of the engine's alone.
 
 33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
     42).** The pack job gains the identity token's write permission beside its read of the contents,
@@ -1045,6 +1050,21 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     milliseconds unpaced, and it paces its frames at sixty a second up to six hundred. Settled at
     three green macOS suites in a row after the mend. The push run and the pack run of `3eaa0a44`
     passed the suite, two of three.
+
+36. **The pack job waits 20 minutes for nuget.org to list the package it pushed, and the feed took
+    longer.** On the pack run of `3eaa0a44`, 2026-10-20, the pack job logged in and pushed `0.5.149`
+    at 02:00, and its last step, which builds each game on its own default from nuget.org, waited 20
+    minutes for the feed to list the package and failed at 02:20 saying so, while the feed listed
+    the package by 02:47, the templates package of the same push listed within the twenty; so the
+    run ends red with the package published and the games unbuilt on it, and the run's page says a
+    step failed where the feed was slow. The mend is one thing, under N 3.5: the wait set from what
+    the feed takes, read from this run and the next, with the job's own limit raised to hold it, or
+    the games' build on their defaults moved out of the pack job into a step that runs on the next
+    build run, where the package is listed by then, said in the workflow's comment; and the step
+    says, when it gives up, that the package was pushed and stands, so a red run is not read as an
+    unpublished package. An aside kept here: the pack step warns that a stable package should not
+    take a prerelease dependency, the physics library's, which the owner decides on. Settled when
+    the pack job passes whole on the next pack run with publish on.
 
 ## Decisions
 
