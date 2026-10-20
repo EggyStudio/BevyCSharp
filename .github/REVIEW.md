@@ -890,7 +890,37 @@ from [SHARED.md](SHARED.md).
     the pinned version, the three, stays on the package script's list with the reason naming them,
     carrying what they carry and nothing of the port's own, since the list's rule is against helpers
     of the port's own and a mirror of what Bevy's examples share is the port's fidelity, not its
-    shortcut; the radio buttons go with Feathers.
+    shortcut; the radio buttons go with Feathers. (h) read by 03:11 on 2026-10-20 against three
+    distribution images, each capturing the six from a fresh checkout on lavapipe held to four cores
+    with a bridge built with meshlets and Solari, cold in 18 minutes 51 seconds, inside the native
+    job's 45. Fedora 44, Mesa 26.2.4 and the .NET SDK from its own archive, draws all six,
+    `clustered_decals` 2 pixels off the GPU's picture, `meshlet` 0, `test_meshlet` 467 and
+    `solari_reflections` 1,407, all within 2 percent, and `many_meshlet_materials` 48,354, 5.2
+    percent, inside its 10 percent line, which the GPU's own takes differing by 6.9 percent explain,
+    so the line stays with that reason; `solari` needs some 13 minutes for its 400 frames, past a
+    shot's 600 seconds, so its wait rises to 1,500. Ubuntu 26.04's Mesa 26.0.8 crashes on
+    `clustered_decals` as the runner's 25.2 does, and Debian trixie's 25.0.7 is older than the
+    runner's, both out. But Fedora's lavapipe runs some scenes two to seven times slower than the
+    runner's Mesa, `many_foxes` 316 seconds where 152, `multi_asset_sync` 331 where 57,
+    `pan_orbit_camera_minimal` 332 where 75 and `error_handling` past 600 where 141, about 6.7
+    seconds a frame alone, the heavy scenes alike at 200 to 290 on both, so the four shards run
+    there in parallel on four cores with 40 minutes reached 65, 60, 38 and 41 of their 93 or 94
+    examples and none finished, everything reached matching its picture with no allowance. The
+    reviewer takes the coder's proposal under Decision 39's constraints, a container of a
+    distribution image, the distribution's own Mesa and no runner with a graphics card, so the four
+    shards stay on the runner's image and bridge, where they pass in 22 to 36 minutes, and a fifth
+    capture job runs the six in Fedora 44 through docker from the runner with the meshlet and Solari
+    bridge, some 25 to 30 minutes on the development machine, Solari's 13 of it, and compares them,
+    the shards still capturing the six as words compared with nothing; the native job's matrix gains
+    the Linux entry with meshlets and Solari, uploaded under a name that is not `native-*`, so the
+    pack never packs it; the Mesa version is named in the workflow and asserted when the job starts,
+    so a change of the distribution's Mesa is a commit that names it with the six retaken, not a
+    silent shift of the reference; the job's limit carries its reason (N 6.8), the Solari wait its
+    reason in the script's remark, and BUILDING.md says which image draws which pictures. One
+    commit, with the SHARED.md row for the reviewer to write. The alternative, every capture in
+    Fedora on eight shards or a raised budget, costs two to five times the capture minutes on a Mesa
+    slower for some scenes, and is not taken; the owner is told that the shards stay on the runner's
+    Mesa, a narrowing of Decision 39's words by the measured cost.
 
 30. **The templates package is published beside the engine, and the README's install line follows
     (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
