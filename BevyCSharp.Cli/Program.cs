@@ -22,6 +22,8 @@ return verb switch
     "list" => Verbs.List(options),
     "command" or "cmd" => Verbs.Command(options, remainder),
     "shot" or "screenshot" => Verbs.Shot(options, remainder),
+    "record" => Animations.Record(options, remainder),
+    "animate" => Animations.Animate(options, remainder),
     "stop" => Verbs.Stop(options),
     "open" => Launch.Open(options, remainder),
     "logs" => Launch.Logs(options, remainder),

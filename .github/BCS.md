@@ -48,6 +48,7 @@ What is usually there:
 | `app.frametime [seconds\|off]`, `app.hold [loads\|commands\|off]` | Each frame a set length to the game, and that clock held still while a load runs or between commands |
 | `frame.profile [frames]` | What a frame spends on managed systems by name, calls into the bridge, Bevy's schedule and the render's phases |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
+| `record <path> <length> [every <step>] [scale <s>] [play <time>]`, `record.stop`, `record.status` | Record the window as an animated GIF or PNG, for `5s`, `120f` or a count of pictures, one every `250ms`, `1s` or `15f` (use `./bcs record`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |
 | `do <Menu/Path>`, `select <name>`, `undo`, `redo`, `world.save`/`world.load` | Editor only |
@@ -122,6 +123,14 @@ host), and that one is worth retrying once.
 A capture is read back off the GPU over the frames after the request, so `./bcs shot` waits for the
 file to appear and settle. Use it rather than `./bcs command shot`, which returns as soon as the
 request is accepted.
+
+```bash
+./bcs record /tmp/walk.gif 5s --every 250ms --scale 0.5   # a picture a quarter second, as one GIF
+```
+
+`./bcs record` records an animation the same way, a picture at each step of the app's clock, and
+asks `record.status` until the app says the file is written, however long the recording takes by
+the machine's clock, so it answers with the path or with why there is none.
 
 **A capture taken in the first moments of a session shows an empty scene**, because a material's
 render pipeline is compiled the first time something asks to be drawn with it and the renderer

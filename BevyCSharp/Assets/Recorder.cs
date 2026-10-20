@@ -31,6 +31,8 @@ internal static class Recorder
     private static readonly object Gate = new();
     private static Session? _session;
     private static Task<string>? _last;
+    private static string? _writing;
+    private static string _said = "nothing has been recorded";
 
     /// <summary>A measure of the clock, in seconds or in the frames it moved in.</summary>
     /// <param name="Value">How many.</param>
@@ -86,6 +88,34 @@ internal static class Recorder
         get
         {
             lock (Gate) return _last;
+        }
+    }
+
+    /// <summary>
+    /// How the recording stands, as <c>record.status</c> says it: recording or finishing with the
+    /// pictures taken, writing its file, or, once none is, what the last one wrote or why it wrote
+    /// nothing.
+    /// </summary>
+    /// <remarks>
+    /// What <c>./bcs record</c> asks until the file is written, since a length on the app's clock
+    /// is no fixed time of the machine's, and a recording that fails says why here as well as on
+    /// the log.
+    /// </remarks>
+    public static string Status
+    {
+        get
+        {
+            lock (Gate)
+            {
+                if (_session is { } session)
+                {
+                    return session.Stopping
+                        ? $"finishing, {session.Taken} pictures taken and {session.Pending.Count} on their way back"
+                        : $"recording, {session.Taken} pictures taken";
+                }
+
+                return _writing is { } path ? $"writing {path}" : _said;
+            }
         }
     }
 
@@ -208,7 +238,7 @@ internal static class Recorder
         catch (Exception error)
         {
             Log.Error($"[record] the recording to {session.Request.Path} ended: {error.Message}");
-            Finish(session);
+            Finish(session, null, $"failed: the recording to {session.Request.Path} ended: {error.Message}");
             foreach (var (ticket, _) in session.Pending) Render.ReleaseCapture(ticket);
             session.Written.TrySetException(error);
             return;
@@ -216,7 +246,7 @@ internal static class Recorder
 
         if (!session.Stopping || session.Pending.Count > 0) return;
 
-        Finish(session);
+        Finish(session, session.Request.Path, null);
         _ = Task.Run(() => Write(session));
     }
 
@@ -274,11 +304,14 @@ internal static class Recorder
     private static bool Reached(Measure length, double seconds, ulong frames) =>
         length.InFrames ? frames >= (ulong)Math.Round(length.Value) : seconds >= length.Value - 1e-6;
 
-    private static void Finish(Session session)
+    /// <summary>Ends a session, saying the file it is writing, or what it came to.</summary>
+    private static void Finish(Session session, string? writing, string? said)
     {
         lock (Gate)
         {
             if (ReferenceEquals(_session, session)) _session = null;
+            _writing = writing;
+            if (said is not null) _said = said;
         }
     }
 
@@ -309,11 +342,13 @@ internal static class Recorder
 
             File.Move(part, request.Path, overwrite: true);
             Log.Info($"[record] wrote {frames.Length} frames to {request.Path}");
+            Finish(session, null, $"wrote {frames.Length} frames to {request.Path}");
             session.Written.TrySetResult(request.Path);
         }
         catch (Exception error)
         {
             Log.Error($"[record] the recording to {session.Request.Path} was not written: {error.Message}");
+            Finish(session, null, $"failed: the recording to {session.Request.Path} was not written: {error.Message}");
             session.Written.TrySetException(error);
         }
     }

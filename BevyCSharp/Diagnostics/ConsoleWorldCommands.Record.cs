@@ -70,6 +70,15 @@ internal static partial class ConsoleWorldCommands
         return "stopping, and the file is written once the last pictures are back";
     }
 
+    /// <summary>How the recording stands, or what the last one wrote or why it wrote nothing.</summary>
+    /// <remarks>
+    /// Recording with the pictures taken, finishing while the last ones come back, writing its file,
+    /// then <c>wrote</c> with the count and the path, or <c>failed</c> with why, which
+    /// <c>./bcs record</c> asks until the file is there.
+    /// </remarks>
+    [Command("record.status", "Says how the recording stands, or what the last one wrote")]
+    internal static string RecordStatus() => Recorder.Status;
+
     /// <summary>Why this run draws nothing to record, said as a failure, or nothing where it draws.</summary>
     private static string? Unrecordable()
     {

@@ -10,32 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `08d03b4d`, item 38's first half, the edit mesh with its seven primitives, its
-selection and what moves it, and nothing else, carrying the review's files: `EditMesh` under
-`BevyCSharp/Modeling`, the primitives placed by their bounds' lowest corner or middle and selected
-after, the selection by all, none, invert, index, axis direction, box and slot in the three modes,
-move, rotate, scale, grid, snap and material, the counts, the volume, the open edges, closed and
-bounds; 22 tests of exact counts, closedness and volume, the box 8, 12 and 6 with 24, the stairs of
-four 20, 30 and 12; the guide page between drawing and materials, the cheat sheet's group, the
-AGENTS.md row N 1.5 asks for; the suite 1,554 passed and 3 skipped; `SelectionMode` named so since
-the sockets' `SelectMode` is in the CLI's server. The Reply fixes the recipe's words for items 38 to
-45 and 3DEngine's 59 to 66, the line forms, the command form `model.<verb> <name> <words>`, the
-commands outside the recipe, each primitive's outline and numbering so a face's index is the same in
-both engines, the selection's rules and the facing tie order, y then x; the one choice differing
-from the item stands, a typed measure taken as given and `snap` rounding the selection to the grid,
-where a point picked or dragged lands, since a move of a fifth of a meter on a meter's grid would
-otherwise move nothing. Read at 00:32 on 2026-10-21 and pushed at 00:32, no build run being in
-flight, the pack run of `cf70c650` going on beside it. Next item 46's two commits, the animated
-capture, then item 38's second half, the topology operations, the recipe, the build and the
-collider, whose bridge change asks Bevy's tangents by a flag bit, the ABI at 299; then items 39 to
-45 in order.
+Reviewed up to `585497f1`, item 46's first half, the recorder, and nothing else, carrying the
+review's file with its Shared line: frames asked of the frame being drawn at a step of the app's
+clock, read back as they arrive, scaled where asked and written on a worker to a part file moved
+whole into place; the GIF writer's median cut to 255 colors over all the frames with Bayer dithering
+between the two nearest, each frame after the first its changed rectangle, the delays rounded so
+their sum stays nearest, the format's LZW and a loop forever; the PNG writer moved out of the
+captured image and writing animated PNG with its frame chunks over changed rectangles; an internal
+reader of both for the tests; `Capture.StartRecording(path, intervalMs, scale)`, `StopRecording` and
+`IsRecording`; the `record` and `record.stop` commands; the tools guide's section and the cheat
+sheet's group. The words: `record <path> <length> [every <step>] [scale <s>] [play <time>]`, the
+length `5s`, `120f` or a count, the step `250ms`, `1s` or `15f` and a tenth of a second by default,
+`play` taking a time where the item wrote milliseconds, a bare number read as milliseconds, which
+stands and 3DEngine's item 70 takes. Eleven tests, two of them real offscreen runs on a sixtieth
+clock giving a GIF of 8 frames at 250 ms and an animated PNG at half scale; N 3.3 caught a polling
+helper's clock and the tests take the file from the recording's task instead; the suite 1,561 passed
+and 3 skipped. Read at 01:12 on 2026-10-21 and pushed at 01:12, run 39513500438, which ended green
+at 01:30, Windows in 17 minutes; the build run of `08d03b4d` had ended green at 00:50 in 12 minutes,
+and the pack run of `cf70c650` is at its drive and its capture shards. Next the second half, `./bcs
+record` with a `record.status` command, `build/animate.py` with Pillow or a `bcs animate` verb over
+the engine's writers through an internals-visible line with its reason, and a recording of Swarm
+above the README's generated gallery block since the block is the examples script's; then item 38's
+second half with the ABI at 299, then 39 to 45.
+
+Before it, `08d03b4d` came, item 38's first half, the edit mesh with its seven primitives, its
+selection and what moves it, and nothing else, carrying the review's files, the recipe's words for
+the modeling items in the Reply. Pushed at 00:32, its build run green in 12 minutes.
 
 Before it, `cf70c650` came, item 37, the feature test moved to `games/FeatureTest`, and nothing
-else, carrying the review's file and the ledger's, the tree's reference kept through explicit SDK
-imports. Pushed at 00:01, the day's pack run with publish on started then, run 39505038553.
-
-Before it, `2949041f` came, Verdict 40's mend and nothing else, carrying the review's file and the
-ledger's, the four games naming `0.5.174` as their default.
+else, carrying the review's file and the ledger's. Pushed at 00:01, the day's pack run with publish
+on started then, run 39505038553.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1248,7 +1252,8 @@ from [SHARED.md](SHARED.md).
     engine's reader frame by frame, a palette of a known picture within a distance of its colors,
     and the script run over three captures in the suite. Two commits, the recorder with its formats
     and the command, then the client's step and the script. One or two days, before item 38's second
-    commit.
+    commit. First half done at `585497f1` on 2026-10-21, the recorder, the two writers, the calls
+    and the command, as the head says; the second half follows.
 
 ## Verdicts
 
@@ -1989,3 +1994,18 @@ so their sum stays nearest the sum given. The animated PNG's frames after the fi
 rectangle that changed, written over, rows filtered adaptively. Both are read back in the tests by
 a reader that lays each frame over the last as a browser does. The client's step and
 `build/animate.py` come with the second half.
+
+Shared: the client's step and the script for item 46, in the commit carrying this line, the words
+3DEngine's item 70 takes. `./bcs record <path> <length> [--every <step>] [--scale <s>] [--play
+<time>]` sends `record` with the path made full and quoted, then asks `record.status` for as long as
+it answers `recording`, `finishing` or `writing`, and answers with the path and its size where
+it says `wrote <n> frames to <path>`, or `NOT_RECORDED` with what it said, so a length on the app's
+clock is waited for however long it takes by the machine's. `build/animate.py <out> <pictures...>
+--delay <ms> [--loop <n>] [--scale <s>]` makes PNG or WebP captures into a GIF, an animated PNG or
+an animated WebP by the out's extension, each fitted to the first's size, with Pillow where it is
+installed, its GIF's palette cut over every frame laid in a strip, and where it is not through
+`./bcs animate` with the engine's own writers, PNG in and GIF or animated PNG out, a WebP either
+way needing Pillow; `BCS_ANIMATE_WRITER=engine` asks for the engine's where Pillow is installed, as
+the suite's test does to try both. The README's first animation is Swarm's third wave, recorded by
+`./bcs record` and set above the examples' generated gallery, since that block is the examples
+script's and its pictures are the captures the pack run compares.

@@ -25,6 +25,9 @@ internal static class Help
               command <name> [args]      Run one against the live world
               shot <path> [frame]        Capture the window, at a frame of the clock counted from
                                          the first if one is given, and wait for the file
+              record <path> <length>     Record the window as a GIF or an animated PNG, for 5s, 120f
+                [--every <step>]         or a count of pictures, one every 250ms, 1s or 15f, and wait
+                [--scale <s>] [--play <time>]  for the file
               logs [-n N] [--follow]     What a launched app has been saying
               stop                       Ask it to close
 
@@ -34,6 +37,9 @@ internal static class Help
               test [--filter F]          The test suite; exit 8 means tests failed, 6 means it never ran
               run [-- args]              One headless run of the feature test
               doctor                     Why nothing works: the bridge, the ABI, stale sessions
+              animate <out> <pictures...> --delay <ms> [--loop <n>] [--scale <s>]
+                                         PNG captures made into a GIF or an animated PNG, by the
+                                         engine's own writers, which build/animate.py falls back to
               scenes                     The scene packs the checkout's manifests name, and which are fetched
                 [fetch <name>]           Fetch one into the folder every game shares, checking its hash
                 [pack <folder> <pack>]   Write a folder as a pack, as build/make-scene-pack.py does

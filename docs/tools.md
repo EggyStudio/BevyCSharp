@@ -298,6 +298,7 @@ devlog:
 ./bcs command record /tmp/turn.png 8 every 1s scale 0.5       # eight a second apart, half as wide and high
 ./bcs command record /tmp/run.gif 120f every 15f play 100ms   # every fifteenth of 120 frames, played faster
 ./bcs command record.stop                                     # ends one sooner, with what it took
+./bcs record /tmp/walk.gif 5s --every 250ms                   # the first, waiting until the file is written
 ```
 
 The length is seconds, frames of the clock or a count of pictures, and the step after `every` is
@@ -314,6 +315,23 @@ not move costs nothing after the first frame. It counts time in hundredths of a 
 play a delay under two hundredths slower. An animated PNG keeps every color as drawn and every
 millisecond, in a larger file. The engine writes both itself, and browsers and GitHub's pages play
 both.
+
+`./bcs record` sends `record` and asks `record.status` until the app says the file is written,
+however long the recording takes by the machine's clock, and answers with the path or with why there
+is none.
+
+Captures on disk, those the pack run takes or `./bcs shot` wrote, are made into one
+animation by `build/animate.py`, a GIF, an animated PNG or an animated WebP by its extension, each
+picture shown for the delay and fitted to the first's size:
+
+```bash
+build/animate.py /tmp/turn.gif /tmp/turn-1.png /tmp/turn-2.png /tmp/turn-3.png --delay 1000
+build/animate.py /tmp/turn.webp /tmp/turn-*.png --delay 250 --scale 0.5 --loop 3
+```
+
+Pillow writes it where it is installed. Where it is not, the script runs `./bcs animate`, which
+writes a GIF or an animated PNG from PNG pictures with the writers a recording uses, and a WebP,
+read or written, needs Pillow.
 
 A program records the same way, until it stops, and the task each call returns finishes with the
 file's path once it is written:
