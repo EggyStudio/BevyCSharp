@@ -48,11 +48,12 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    # Forty-five minutes, where the pack, the templates, the listing and the package's tests take a
-    # few, and a run that publishes then waits as long as twenty minutes for nuget.org to list the
-    # package and builds the four games on it, a minute or two each, so a step that waits fails
-    # within the run's patience rather than at GitHub's six hours.
-    timeout-minutes: 45
+    # Two hours, where the pack, the templates, the listing and the package's tests take a few, and
+    # a run that publishes then waits as long as ninety minutes for nuget.org to list the package,
+    # which listed 0.5.149 47 minutes after its push, and builds the four games on it, a minute or
+    # two each, so a step that waits fails within the run's patience rather than at GitHub's six
+    # hours.
+    timeout-minutes: 120
     # Each step through build/step.py, as the build workflow's jobs that run programs have it.
     defaults:
       run:
@@ -142,14 +143,8 @@ jobs:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
-      # Each game built on the version its own project names, from nuget.org alone, as a reader
-      # cloning the repository builds it, once nuget.org lists the package this run pushed, which a
-      # game's default may resolve to (build/games-on-defaults.sh). A game whose default does not
-      # build is named in an error with this version as the one to raise it to (BUILDING.md).
-      - name: Build each game on its own default from nuget.org
-        if: ${{ inputs.publish }}
-        run: build/games-on-defaults.sh ${{ steps.version.outputs.version }}
-
+      # Said before the games are built, so a run whose wait for nuget.org's listing ends red still
+      # says on its page that the package was pushed.
       - name: Say what was made
         run: |
           echo "### BevyCSharp ${{ steps.version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
@@ -158,3 +153,12 @@ jobs:
           else
             echo "Packed and kept as this run's artifact, not pushed." >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      # Each game built on the version its own project names, from nuget.org alone, as a reader
+      # cloning the repository builds it, once nuget.org lists the package this run pushed, which a
+      # game's default may resolve to (build/games-on-defaults.sh). A game whose default does not
+      # build is named in an error with this version as the one to raise it to (BUILDING.md).
+      - name: Build each game on its own default from nuget.org
+        if: ${{ inputs.publish }}
+        run: build/games-on-defaults.sh ${{ steps.version.outputs.version }}
+

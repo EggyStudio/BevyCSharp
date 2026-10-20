@@ -6,10 +6,13 @@
 #
 #   build/games-on-defaults.sh <version this run pushed>
 #
-# The wait is bounded, twenty minutes unless GAMES_WAIT_MINUTES says otherwise, since nuget.org
-# validates and indexes a package for some minutes after its push. A game whose default does not
-# build is named in an error with the version this run pushed as the one to raise it to, which is a
-# commit of one line a game (BUILDING.md).
+# The wait is bounded, ninety minutes unless GAMES_WAIT_MINUTES says otherwise, since nuget.org
+# validates and indexes a package after its push, and the pack run of 3eaa0a44 found the engine's
+# 0.5.149 listed 47 minutes after it, the templates within twenty, so the wait is nearly twice what
+# it took. A wait that ends with the package unlisted says the package was pushed and stands, so a
+# run red here is not read as one that published nothing. A game whose default does not build is
+# named in an error with the version this run pushed as the one to raise it to, which is a commit of
+# one line a game (BUILDING.md).
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -18,7 +21,7 @@ if [ $# -ne 1 ]; then
     exit 2
 fi
 version="$1"
-minutes="${GAMES_WAIT_MINUTES:-20}"
+minutes="${GAMES_WAIT_MINUTES:-90}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
@@ -31,7 +34,7 @@ for _ in $(seq 1 $((minutes * 2))); do
     sleep 30
 done
 if [ "$listed" != true ]; then
-    echo "::error title=The games were not built on their defaults::BevyCSharp $version was not listed on nuget.org within $minutes minutes of its push, so no game was built on its default. Run build/games-on-defaults.sh $version once it is."
+    echo "::error title=The games were not built on their defaults::BevyCSharp $version was pushed and stands on nuget.org, which had not listed it within $minutes minutes of its push, so no game was built on its default. Run build/games-on-defaults.sh $version once nuget.org lists it."
     exit 1
 fi
 echo "BevyCSharp $version is listed on nuget.org"

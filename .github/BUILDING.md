@@ -383,9 +383,11 @@ dotnet build games/Swarm -p:BevyCSharpVersion=0.0.1-local1
 ```
 
 A run that publishes then builds each game on its own default from nuget.org alone, once the
-package it pushed is listed there, waiting as long as twenty minutes for that
-(`build/games-on-defaults.sh <version>`), and names in an error each game whose default does not
-build, with the version the run pushed as the one to raise it to.
+package it pushed is listed there, waiting as long as ninety minutes for that, since nuget.org listed
+0.5.149 47 minutes after its push (`build/games-on-defaults.sh <version>`), and names in an error
+each game whose default does not build, with the version the run pushed as the one to raise it to.
+A wait that ends unlisted says the package was pushed and stands, and the run's summary says so
+before the games are built.
 
 The feature test is run through Intel Sponza by hand on a machine with a GPU rather than in a
 workflow, since its pack is hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets
