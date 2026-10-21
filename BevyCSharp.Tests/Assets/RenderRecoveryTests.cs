@@ -18,6 +18,12 @@ public sealed class RenderRecoveryTests
     /// <summary>The frame the error is caused in, once the renderer has drawn a few.</summary>
     private const ulong CausedAt = 10;
 
+    /// <summary>
+    /// The frames a run that waits for the error to be counted goes to at most, far past the
+    /// frame the device reports it in, so a run that reaches it found no error to count.
+    /// </summary>
+    private const uint Bound = 600;
+
     /// <summary>Unless told otherwise, an error closes the app with an error, long before its last frame.</summary>
     [SkippableFact]
     [ExpectsError("bevy", "Validation")]
@@ -33,7 +39,7 @@ public sealed class RenderRecoveryTests
     }
 
     /// <summary>
-    /// Ignored, an error is counted and its text kept, and the app runs to its last frame.
+    /// Ignored, an error is counted and its text kept, and the app runs on thirty frames past it.
     /// </summary>
     [SkippableFact]
     [ExpectsError("bevy", "Validation Error")]
@@ -41,28 +47,35 @@ public sealed class RenderRecoveryTests
     {
         Needs.Renderer();
 
-        var run = Run(RenderErrorPolicy.Ignore, RenderErrorCause.Validation, frames: 40);
+        var run = Run(RenderErrorPolicy.Ignore, RenderErrorCause.Validation, frames: Bound, framesAfter: 30);
 
+        Assert.True(run.CountedAt is not null, $"no error was counted by frame {run.LastFrame}");
         Assert.Equal(0, run.Exit);
-        Assert.Equal(39ul, run.LastFrame);
+        Assert.Equal(run.CountedAt + 30, run.LastFrame);
         Assert.True(run.Errors >= 1, "no error was counted");
         Assert.False(string.IsNullOrEmpty(run.Text), "the error's text was not kept");
     }
 
     /// <summary>
-    /// With drawing stopped the app's systems run on to its last frame, and the error Bevy hands
-    /// back every frame since is counted once.
+    /// With drawing stopped the app's systems run on thirty frames past the error, and the error
+    /// Bevy hands back every frame since is counted once.
     /// </summary>
+    /// <remarks>
+    /// The count arrives when the device reports the error, a frame or two after it is caused on
+    /// a machine with nothing else to do and later on a loaded one, so the run goes on until it
+    /// is counted and thirty frames more, rather than to a frame set beforehand.
+    /// </remarks>
     [SkippableFact]
     [ExpectsError("bevy", "Validation Error")]
     public void StoppedDrawingLeavesTheSystemsRunningAndCountsTheErrorOnce()
     {
         Needs.Renderer();
 
-        var run = Run(RenderErrorPolicy.StopRendering, RenderErrorCause.Validation, frames: 40);
+        var run = Run(RenderErrorPolicy.StopRendering, RenderErrorCause.Validation, frames: Bound, framesAfter: 30);
 
+        Assert.True(run.CountedAt is not null, $"no error was counted by frame {run.LastFrame}");
         Assert.Equal(0, run.Exit);
-        Assert.Equal(39ul, run.LastFrame);
+        Assert.Equal(run.CountedAt + 30, run.LastFrame);
         Assert.Equal(1, run.Errors);
     }
 
@@ -110,18 +123,21 @@ public sealed class RenderRecoveryTests
     /// <param name="Errors">How many errors the renderer reported during it.</param>
     /// <param name="Text">The last error's text.</param>
     /// <param name="Picture">The picture captured where one was asked for.</param>
-    private sealed record Outcome(int Exit, ulong LastFrame, int Errors, string Text, CapturedImage? Picture);
+    /// <param name="CountedAt">The frame the first error was counted in, or nothing where none was.</param>
+    private sealed record Outcome(int Exit, ulong LastFrame, int Errors, string Text, CapturedImage? Picture, ulong? CountedAt);
 
     /// <summary>
     /// Runs a small scene offscreen under <paramref name="policy"/>, causing the error at
     /// <see cref="CausedAt"/>, and puts the policy back after.
     /// </summary>
-    private static Outcome Run(RenderErrorPolicy policy, RenderErrorCause cause, uint frames, ulong captureAt = 0)
+    /// <param name="framesAfter">Where given, how many frames past the one the error was counted in the run ends, before its last frame.</param>
+    private static Outcome Run(RenderErrorPolicy policy, RenderErrorCause cause, uint frames, ulong captureAt = 0, ulong? framesAfter = null)
     {
         var config = Config.OffscreenFor(64, 64, frames);
         config.AssetRoot = EngineHarness.AssetDirectory;
 
         ulong lastFrame = 0;
+        ulong? countedAt = null;
         var before = Render.ErrorCount;
         Capture? capture = null;
         CapturedImage? picture = null;
@@ -154,6 +170,10 @@ public sealed class RenderRecoveryTests
                         lastFrame = world.Resource<Time>().FrameCount;
                         if (lastFrame == CausedAt) Render.CauseError(cause);
 
+                        // The count read each frame, as the device's report comes when it comes.
+                        if (countedAt is null && Render.ErrorCount > before) countedAt = lastFrame;
+                        if (countedAt is { } at && framesAfter is { } after && lastFrame >= at + after) App.RequestExit();
+
                         if (captureAt > 0 && lastFrame == captureAt) capture = Render.BeginCapture();
                         if (capture is { } asked && picture is null && Render.TryReadCapture(asked, out var arrived)) picture = arrived;
                     },
@@ -162,7 +182,7 @@ public sealed class RenderRecoveryTests
                 exit = app.Run();
             }
 
-            return new Outcome(exit, lastFrame, Render.ErrorCount - before, Shaders.LastRenderError, picture);
+            return new Outcome(exit, lastFrame, Render.ErrorCount - before, Shaders.LastRenderError, picture, countedAt);
         }
         finally
         {

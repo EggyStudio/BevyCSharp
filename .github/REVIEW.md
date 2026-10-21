@@ -10,34 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3fb5643e`, item 40's second half, the modeling window, and nothing else, carrying
-the review's file with its Shared line: `Modeling.DrawWindow` and `DrawPanel` with the counts, the
-grid, the select and facing buttons, undo and redo, the recipe's lines and the operations as fields
-and buttons, each a recipe line and a refused line showing its message; in the view a click picking
-a face by the ray against the edit mesh's faces with shift adding and control removing, a drag past
-four pixels along the normal extruding by whole grid steps on release with the distance in a tooltip
-and a cyan preview, moving with alt read while the button is held, a drag back to zero writing
-nothing, the selection outlined orange and the face under the pointer yellow;
-`Modeling.WantsPointer` true while a window's pointer is over or pressed on a face, so the editor's
-alt orbit begins only where it is false, found live when an alt drag on a face moved it and turned
-the camera together; `Modeling.Source` giving the edit mesh behind a handle, and the editor's Model
-tab opening on the selected entity's model with picking and marquee off; tests of picks on a moved
-box and a turned, scaled one, the drag distances, and an engine test clicking the top, dragging it
-to extrude 1 and alt-dragging to move 0 1 0 through the synthetic input, a headless app after it,
-which caught through N 3.7 an outline outliving its app and mended it with the outlines and the
-pointer state cleared by the next app; the guide's section and the tools guide's sentence, the cheat
-sheet and the listing written again, 22 blocks on a scratch package; the suite 1,629 passed and 3
-skipped with one failure outside the batch, the render recovery test counting 0 errors where 1 was
-expected eleven minutes into the run, passing alone and in the run before, which is item 48. Read at
-05:39 on 2026-10-21 and pushed at 05:39, its build run green at 05:55; the build run of `3d045110`
-had ended green at 04:51. Item 40 is done. Next item 41, the texture coordinates and the materials
-by slot, then item 48, then 42 to 45.
+Reviewed up to `fc63b7ba`, item 41, the texture coordinates and the materials by slot, and nothing
+else, carrying the review's file with its Shared line giving 3DEngine's item 62 the full words: a
+face holding its own per-corner coordinates or none for the world-aligned default, the lines for
+planar by an axis or the view's direction, box, cylinder, sphere with the seam wrapped from each
+face's middle, move, scale, rotate, density by pixels a meter and the texture's width, and reset,
+carried through flip, the mirroring scale, triangulate, duplicate, join and extrude's cap, an
+inset's face and the booleans' pieces taking the affine fit of the face's coordinates and the merge
+joining pieces only with equal fits; slots each a name with a look, the color, the texture and the
+engine's maps, the lines to add, rename and remove a slot and to set each part of its look, the
+materials one a look per app with the prototype until a look is given, a join or a boolean keeping
+this mesh's look for a shared slot, an undo restoring the first slot; `model.uv` and `model.slot`, a
+one-number density taking the first selected face's slot texture's width; the window's texture and
+slots groups with a preview of the selected faces' coordinates over the slot's picture; the editor's
+panel laid out in two columns where its strip is wider than twice its height, found live when the
+recipe list took the wheel; the removed slot's mesh emptied and the registry setting each part again
+on a change; the room capture's wall in the parallax example's block texture with its normal map and
+its floor in the chair's wood, asserted by their colors and skipped where the assets are not
+fetched; thirteen new tests; the suite 1,642 passed and 3 skipped, its one failure item 48's
+recovery test again, two of the last three runs. Read at 06:34 on 2026-10-21 and pushed at 06:34,
+its build run green at 06:52; the build run of `3fb5643e` had ended green at 05:55. Next item 48,
+the recovery test's bound, then 42 to 45.
+
+Before it, `3fb5643e` came, item 40's second half, the modeling window, and nothing else, carrying
+the review's file with its Shared line. Pushed at 05:39, its build run green at 05:55.
 
 Before it, `3d045110` came, item 47, the screenshot on F2, and nothing else, carrying the review's
 file with its Shared line. Pushed at 04:33, its build run green at 04:51.
-
-Before it, `bee54e98` came, item 40's first half, the commands, and nothing else, carrying the
-review's file with its Shared line. Pushed at 04:09, its build run green at 04:27.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1175,7 +1174,8 @@ from [SHARED.md](SHARED.md).
     operations too, so a saved recipe rebuilds them. A section of the window shows the selection's
     coordinates over the slot's texture. Tests: each projection's coordinates on a box's known face,
     the density on a two meter face with a 512 pixel texture, and a capture of a room with a brick
-    wall and a wooden floor from the examples' resources. One commit.
+    wall and a wooden floor from the examples' resources. One commit. Done at `fc63b7ba` on
+    2026-10-21, as the head says.
 
 42. **A game that is a level blocked out with the tools, Blockout unless the owner names it
     otherwise (Decision 46).** A game under `games/` built on the package as the others are: a level
