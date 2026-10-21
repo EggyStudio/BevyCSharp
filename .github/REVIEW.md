@@ -10,33 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `fc63b7ba`, item 41, the texture coordinates and the materials by slot, and nothing
-else, carrying the review's file with its Shared line giving 3DEngine's item 62 the full words: a
-face holding its own per-corner coordinates or none for the world-aligned default, the lines for
-planar by an axis or the view's direction, box, cylinder, sphere with the seam wrapped from each
-face's middle, move, scale, rotate, density by pixels a meter and the texture's width, and reset,
-carried through flip, the mirroring scale, triangulate, duplicate, join and extrude's cap, an
-inset's face and the booleans' pieces taking the affine fit of the face's coordinates and the merge
-joining pieces only with equal fits; slots each a name with a look, the color, the texture and the
-engine's maps, the lines to add, rename and remove a slot and to set each part of its look, the
-materials one a look per app with the prototype until a look is given, a join or a boolean keeping
-this mesh's look for a shared slot, an undo restoring the first slot; `model.uv` and `model.slot`, a
-one-number density taking the first selected face's slot texture's width; the window's texture and
-slots groups with a preview of the selected faces' coordinates over the slot's picture; the editor's
-panel laid out in two columns where its strip is wider than twice its height, found live when the
-recipe list took the wheel; the removed slot's mesh emptied and the registry setting each part again
-on a change; the room capture's wall in the parallax example's block texture with its normal map and
-its floor in the chair's wood, asserted by their colors and skipped where the assets are not
-fetched; thirteen new tests; the suite 1,642 passed and 3 skipped, its one failure item 48's
-recovery test again, two of the last three runs. Read at 06:34 on 2026-10-21 and pushed at 06:34,
-its build run green at 06:52; the build run of `3fb5643e` had ended green at 05:55. Next item 48,
-the recovery test's bound, then 42 to 45.
+Reviewed up to `5f051299`, item 48, the recovery test's bound, and nothing else, carrying the
+review's file: the run recording the frame the first error is counted in by reading the count each
+frame and asking the exit that many frames past it within a bound of 600, the stopped-drawing test
+asserting the count arrived, exit 0, the last frame thirty past the counted one and one error, the
+ignored-error test taking the same shape, the quit and recover tests left as they were; measured for
+N 3.5 and in the commit's description, the device reporting the error 14 to 45 frames after it was
+caused idle and 24 to 47 under a load of 32 threads, all passing, where the old test read the count
+only after the app ended at frame 39; the suite 1,643 passed and 3 skipped, nothing failing. Read at
+07:04 on 2026-10-21 and pushed at 07:04, its build run ended at 07:21 with Linux and Windows green
+and macOS red on the app leak test, Verdict 42, read first and mended before the next push; the
+build run of `fc63b7ba` had ended green at 06:52. The ledger's rows of Decision 57 ride with item
+42. Shortly before 07:15 the owner asked for 3DEngine's radiance cascades in this engine, Decision
+51 and items 50 to 52. Next item 53, ImGui's pass in the render profile found by item 42, then item
+42, Blockout, then item 49, the F1 and F3 keys, then 43 to 45, then 50, the field; items 51 and 52
+wait on the owner's word of 07:28 until 3DEngine's cascades settle.
+
+Before it, `fc63b7ba` came, item 41, the texture coordinates and the materials by slot, and nothing
+else, carrying the review's file with its Shared line. Pushed at 06:34, its build run green at
+06:52.
 
 Before it, `3fb5643e` came, item 40's second half, the modeling window, and nothing else, carrying
 the review's file with its Shared line. Pushed at 05:39, its build run green at 05:55.
-
-Before it, `3d045110` came, item 47, the screenshot on F2, and nothing else, carrying the review's
-file with its Shared line. Pushed at 04:33, its build run green at 04:51.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1182,13 +1177,23 @@ from [SHARED.md](SHARED.md).
     of three rooms, a corridor, stairs between two floors, a window and two doors, made from one
     recipe file of some forty lines in the game's resources and rebuilt at load, in the prototype
     materials; a character walking it through the character controller as Courtyard has, the level
-    solid through the built collider; F1 opening the modeling window on the level's edit mesh so the
-    level is reshaped while walking in it, the collider rebuilt on a change, and F5 saving the
-    recipe; a sun and the global illumination on, so the grid walls show the light. Commands
-    `blockout.status` and `blockout.autopilot` for the drive and the soak, the drive walking the
-    stairs to the upper floor and reading the character's height, cutting a window by a command and
-    reading the counts, and a capture; the game joins the build-all, drive, soak and storm lists and
-    the README's gallery with its capture, and the guide's page names it. One commit.
+    solid through the built collider; Tab opening and closing the modeling window, Blender's key for
+    edit mode, F1 to F3 being the engine's on the level's edit mesh so the level is reshaped while
+    walking in it, the collider rebuilt on a change, and F5 saving the recipe; a sun and the global
+    illumination on, so the grid walls show the light. Commands `blockout.status` and
+    `blockout.autopilot` for the drive and the soak, the drive walking the stairs to the upper floor
+    and reading the character's height, cutting a window by a command and reading the counts, and a
+    capture; the game joins the build-all, drive, soak and storm lists and the README's gallery with
+    its capture, and the guide's page names it. One commit. Read at 07:05 on 2026-10-21 for this
+    engine: the global illumination is Solari, asked for when the app is made with the level's
+    meshes marked ray traced, and where ray tracing is not active, the package and CI among them,
+    the sun with shadows, an ambient fill and SSAO light the level, the status command saying which,
+    the README's capture from whichever runs on the machine taking it and named in the commit; the
+    feature test's screen-space reference stays out of the game as the guide says. Blockout joins
+    the games job's build, play and soak lists, the defaults script taking it by its glob. With the
+    radiance cascades coming as items 50 to 52, Blockout keeps the lighting read at 07:05 and
+    switches to the cascades once item 51 exists, a line in its item then. Item 53 first, ImGui's
+    pass in the render profile, so the window opens on the package.
 
 43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The owner's later
     wave: selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
@@ -1282,7 +1287,110 @@ from [SHARED.md](SHARED.md).
     count at frame 39, a bound in frames on a count that arrives when the device reports, which a
     loaded machine stretches. The mend: the test reads the count each frame until it is one or a
     bound of frames well past the device's reporting, failing then with the count, under N 3.5. One
-    commit, small, after item 41's first commit.
+    commit, small, after item 41's first commit. Done at `5f051299` on 2026-10-21, as the head says,
+    the device's reporting measured idle and under load.
+
+49. **F1 hides the interface, F3 shows a debug overlay like the newest Minecraft's with sections a
+    program adds, and Shift+F3 the profiler with it (Decision 50).** The owner asked shortly before
+    07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine feature, F2 the
+    screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts logically with
+    modules a game adds, world generation among them, showing the system, the camera and the
+    renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
+    BevyCSharp and 3DEngine, F1 hiding the interface and ImGui but not the F3 overlay so everything
+    hides but the overlay over the renderer, and Shift+F3 showing the frame debugger too; and
+    answered the reviewer's questions shortly before 07:06: the interface hidden by a scope, F3 the
+    overlay's on its release alone with any chord left to the program, the look Minecraft's with no
+    header, window styling or border, text on a transparent backing, and the order as the reviewer
+    sees fit. The keys, engine-wide by default: F1 hides what the program draws inside the scope,
+    its HUD and any ImGui window submitted inside it, and nothing outside it, so a pause screen, a
+    menu or an inventory drawn outside the scope stays whatever F1 says, as Minecraft hides its HUD
+    and never its screens, the engine's overlay staying, the world drawing on; F3 on its release
+    with no other key pressed during its hold toggles the overlay, so a program's own F3 chords
+    stand and the overlay never opens on one; Shift+F3 toggles the overlay with the profiler's pass
+    timings under it. The overlay is the engine's own text and lines, never an ImGui window, in
+    Minecraft's look, two columns of lines in the engine's font on a dark half-clear backing a line,
+    no header, no border, no window: the left column the engine's version and build, the fps and the
+    frametime with a strip of the last 240 frames' times under it as the RivaTuner overlay draws it,
+    the current, the average and the one percent low beside it and the GPU time as a second line,
+    the camera's position, facing and field of view, the entities and the world's counts, then the
+    program's sections; the right column the system, OS, CPU and its cores, memory in use and the
+    managed heap, GPU, driver and its memory in use, the display mode, then the renderer, passes,
+    draw calls, triangles, lights, shadows, global illumination's state and the frame's GPU time,
+    the frame's times and the passes' GPU times from Bevy's diagnostics. The calls: `Ui.BeginHidden`
+    and `Ui.EndHidden` around a program's own interface nodes and ImGui drawing of its interface,
+    hidden while asked, `Ui.Hidden`, `Ui.HiddenKey` and `Debug.OverlayKey` moving the keys or
+    turning them off, and `Debug.AddOverlaySection(string name, Func<IEnumerable<string>> lines)`
+    with a remove, the sections drawn in the left column under the engine's own in the order added;
+    the diagnostics overlay folded into it where one overlaps. The same keys, layout, words and
+    registration in both engines. The guides' section on the debug keys, the cheat sheet lines
+    through the script, the surface listing and the upgrading entry; the feature test adding a
+    section and the voxel game its own when the package comes. Tests: F1 dropping the scope's draws
+    and the ImGui windows and keeping the overlay, read from the frame's pixels on the device; F3's
+    release alone toggling and a chord not; a section's lines in the overlay's text; the graph's
+    strip holding the last 240 times. Two commits, F1 and the overlay's columns, then the graph, the
+    profiler and the sections' registration. After item 42, before 43.
+
+50. **The scene's distance field, 3DEngine's first phase of its global illumination, through the
+    bridge (Decision 51).** The owner wrote to the coder shortly before 07:15 on 2026-10-21 that
+    3DEngine's radiance cascades were always meant for this engine too, built there first, and can
+    be done here. The three phases come as 3DEngine's did, each read from its code and RENDERING.md
+    as the model and its Slang kernels taken through the bridge's compute chain, plain Slang the
+    bridge compiles, changed only where the bridge's bindings ask. First the scene's distance field:
+    the meshes the renderer draws, pooled by their triangles as 3DEngine pools them, splatted into a
+    cascaded distance field around the camera, cascades from one to eight with the finest's cell a
+    given size, rebuilt under a budget of cascades a frame, moving meshes stamped as their boxes,
+    with `Render.SetSceneField(cascades, cellSize, budget)` and the field's state in the `gi.state`
+    command and the debug overlay's renderer section; a window drawing the field's slices as
+    3DEngine's bounce window does, through ImGui; the contact shadows of the sun through the field
+    where the shadow map does not reach, as a setting. Tests on the device: a box's distance read at
+    known points, a tunnel one cell wide clear in its middle, a moving mesh's stamp following it,
+    and the budget keeping a frame's builds to the cascades asked, with the feature test's gallery
+    holding the field's view. Two commits, the field and its builds, then the contact shadows and
+    the window. Placed after items 43 to 45, since the field has stood stable in 3DEngine for days.
+
+51. **Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's surfaces through an
+    additive pass (Decision 51).** The world's probes in cascades over the field as 3DEngine traces
+    them, each cascade's rays marching the field, merged upward, the last cascade's rays reaching
+    the field's edge and the sky, the sun's and the lamps' light gathered at the hits with the
+    materials' colors from the meshes' vertex colors and base colors as 3DEngine's are; the light
+    read per pixel in the bridge's pass after the opaque geometry, added as indirect diffuse times
+    the surface's base color and occlusion from the deferred prepass, since Bevy's lighting takes no
+    indirect input of its own, with `Render.SetGlobalIllumination(quality)` at off, low, medium and
+    high as 3DEngine's levels; the glossy term and the emissive blocks' light as 3DEngine's phase
+    two has them; the path-traced reference of a view, `gi.reference` and `gi.compare`, giving each
+    region's distance, which the ledger's open question on this engine's reference answers; the
+    bounce rooms as a test scene with their bounds, the rule that no view's distance to its
+    reference widens taken from 3DEngine as the mends' rule. Tests: the red wall tinting a white
+    block's side, a lit room's floor within the bound of its reference, and the quality levels'
+    costs read on the Cornell box. Three commits, the probes and their tracing, the pass and the
+    reference, then the glossy term and the emitters. Waits: the method is still moving in 3DEngine,
+    its items 71, 72 and 74 open, and the owner said shortly before 07:28 on 2026-10-21 that if it
+    is not yet ready BevyCSharp waits, so this item starts only once those are mended and the voxel
+    game's captures say the light holds, the port carrying the mends in.
+
+52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
+    mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
+    few pixels beside the cascades with the filter and the history as 3DEngine's,
+    `Render.SetGlobalIlluminationScreenProbes` leaving them out with the glow-only pass of
+    3DEngine's item 71 so a world of small emitters pays no per-pixel march, the glow lights of
+    small emitters, the field's read of a mesh a compute shader wrote with its count read back,
+    3DEngine's item 69, and the field's budget in triangles a frame, its item 74; the blotches, the
+    edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
+    it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
+    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
+
+53. **ImGui's pass moves from the editor profile to the render profile, so a game on the package
+    draws ImGui.** Found by item 42 on 2026-10-21 at 07:16: the bridge's ImGui pass, the render pass
+    rasterizing ImGui's draw lists, is built under the editor feature alone, the package's bridges
+    are built with render for the six targets, and `Config.Gui` says it needs the editor profile, so
+    a game built on the package, Blockout, Courtyard and Swarm among them, has no ImGui and the
+    modeling window opens nothing on Tab; the pass needs no crate of its own, using what render
+    already names, so the move leaves the lock file as it is, the editor profile keeping the file
+    watcher and the reflection it is for, and ImGui staying opt-in at run time through `Config.Gui`
+    so a game that does not ask pays nothing but the code. The mend: the pass and its entry points
+    under render, `Config.Gui`'s words and BUILDING.md's profile table changed, the three profiles'
+    cargo checks and the cross-target checks run. One commit, small, before item 42's commit, so
+    Blockout on the package opens its window on Tab.
 
 ## Verdicts
 
@@ -1553,6 +1661,26 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     after it. The first, the build run of `32c8467e` on 2026-10-21, green in 14 minutes. The second,
     the build run of `a1babb72`, green in 13 minutes. Settled on the build run of `bfe1fc63` on
     2026-10-21, the third green Linux suite in a row after the mend, in 12 minutes.
+
+42. **The macOS suite of the push of `5f051299` fails the app leak test, the heap's floor rising 6
+    MB from the twentieth app to the hundredth.** On the build run 39547498414 on 2026-10-21, the
+    Linux and Windows suites passed and the macOS suite, 1,166 passed in 4 minutes 46 seconds,
+    failed the test that an app made and closed a hundred times leaves nothing behind: the heap
+    after every ten apps read 91.89, 101.10, 103.34, 90.84, 92.82, 94.81, 96.85, 98.88, 100.96 and
+    102.94 MB, a collection at the fortieth and two MB a ten apps after it, and what grew from the
+    twentieth to the hundredth was 8,548 strings of about 199 KB, 684 runtime parameter infos of
+    about 59 KB, 255 runtime method infos of about 26 KB, twelve int arrays and an event source's
+    metadata table; the same test passed on the macOS suites of `fc63b7ba` and `3fb5643e` and on the
+    other two systems of this run. The parameter and method infos say reflection over methods is
+    kept across apps, about nine parameters and three methods an app, which a registration by
+    reflection each app would leave in a static, and the strings with them; or the floor's rule
+    reads a sawtooth as a rise where the collections fell differently on the runner. Read first
+    which static holds the infos across apps, from a count of them after twenty and after a hundred
+    apps on the machine, and whether `5f051299` or the two before it could have added it; then the
+    mend, the static emptied or the cache keyed once rather than an app, or, where the infos stand
+    still and the floor's rule is the fault, the base taken as the greatest of the readings after
+    the collections as 3DEngine's Verdict 75 took it, under N 3.5. One commit, before the next push.
+    Mended at `?`.
 
 ## Decisions
 
@@ -1921,6 +2049,39 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     the captures put in the root or a subfolder. So item 47 here, item 73 in 3DEngine and item 40 in
     the voxel game: a built-in key writing the frame into a screenshots folder beside the program,
     named by the time as the source names its own, movable and off by a setting.
+
+50. **F1 hides the interface and F3 shows the debug overlay, in both engines.** The owner asked
+    shortly before 07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine
+    feature, F2 the screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts
+    logically with modules a game adds, world generation among them, showing the system, the camera
+    and the renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
+    BevyCSharp and 3DEngine, F1 hiding the interface and ImGui but not the F3 overlay so everything
+    hides but the overlay over the renderer, and Shift+F3 showing the frame debugger too; and
+    answered the reviewer's questions shortly before 07:06: the interface hidden by a scope, F3 the
+    overlay's on its release alone with any chord left to the program, the look Minecraft's with no
+    header, window styling or border, text on a transparent backing, and the order as the reviewer
+    sees fit. So item 49 here and item 78 in 3DEngine, the same in both, after Blockout here and
+    after the cascade faults there, and the voxel game taking them when the package comes. Shortly
+    before 07:10 the owner added that Minecraft hides its HUD only while the player's camera shows
+    and not in the pause or any other screen, so hiding every panel at any point, even in menus,
+    would be wrong; the scope gives that, the HUD inside it hidden and a screen drawn outside it
+    never, which the items say.
+
+51. **3DEngine's radiance cascades come to this engine.** The owner wrote to the coder shortly
+    before 07:15 on 2026-10-21, on Blockout's lighting, that the radiance cascades of 3DEngine were
+    always intended for this engine as well, built there first, and can be done here too, and said
+    to ask the reviewer. So items 50 to 52, the three phases as 3DEngine built them, the field, the
+    cascades with the additive pass and the reference, then the screen's probes, the glow lights and
+    the mends of the day, each read from 3DEngine's code and RENDERING.md as the model with its
+    kernels taken through the bridge; items 50 and 51 after item 49 and before 43 to 45, item 52
+    after them; Blockout keeps its lighting and switches to the cascades once item 51 exists. The
+    ledger's row changes from to consider to to take. Asked shortly before 07:28 whether the
+    cascades are ready to copy, the reviewer said not yet, the method still moving in 3DEngine with
+    its faults, the fill cascades and the budget open, and the owner said that if not yet ready,
+    BevyCSharp waits; so item 50, the field, goes after items 43 to 45, and items 51 and 52 wait
+    until 3DEngine's items 71, 72 and 74 are mended and the voxel game's captures say the light
+    holds, Blockout and the games keeping Solari where the GPU has ray queries and the sun with
+    ambient and occlusion elsewhere.
 
 ## Replies
 
