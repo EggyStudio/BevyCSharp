@@ -4387,9 +4387,12 @@ static class Bevy.Modeling
   static AssetHandle Prototype(Color color)
   static AssetHandle Prototype(string name)
   static AssetHandle[] Meshes(EditMesh mesh)
+  static EditMesh? Find(string name)
   static IReadOnlyDictionary<string, Color> PrototypeColors { get; }
+  static IReadOnlyList<string> Names { get; }
   static MeshData[] Build(EditMesh mesh)
   static PhysicsShape Collider(EditMesh mesh)
+  static void Register(string name, EditMesh mesh)
 readonly struct Bevy.MonitorInfo : IEquatable<MonitorInfo>
   MonitorInfo(uint Width, uint Height, int X, int Y, float RefreshHz, float ScaleFactor)
   bool Equals(MonitorInfo other)

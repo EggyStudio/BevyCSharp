@@ -10,36 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `bfe1fc63`, item 39's first half, the grid image, the prototype materials and the box
-mapping, and nothing else, carrying the review's file with its Shared line, which gives the grid's
-measures, the levels' mean, the sampler and the seven prototype colors as sRGB numbers for
-3DEngine's item 60: the bridge's additive export making an image from a chain of levels laid one
-after another, refusing a zero size or more levels than the size halves to, with a Rust test of the
-chain's bytes and the ABI at 299; the chain made in C# in a file of its own under N 1.3, each level
-half the one above with each pixel the mean of four taken as light; the grid image at 16 to 4096
-pixels a meter with the meter's line and the tenth's scaled to it, repeating, filtered linearly
-across the levels with anisotropy 16; the seven prototype colors and the materials by name and by
-color, the grid tinted at roughness 0.85, one grid an app and one material a color keyed by the
-running app; the box mapping from item 38's build, no recipe line added since a slot's name picks
-the material; the modeling guide's grid prototyping section and the window guide's levels, 29 blocks
-building on a scratch package; the bridge checked clean across its features and cross-checked for
-Windows and macOS, its tests 105 and 180; the grid's lines at their pixels at two densities and a
-checker's levels at the light's mean; an engine run drawing a floor in the floor's prototype; the
-suite 1,613 passed and 3 skipped. Read at 03:06 on 2026-10-21 and pushed at 03:06, its build run
-39525327372 green at 03:23, Linux in 12 minutes, the third after Verdict 41's mend, which settles
-it; the build run of `a1babb72` had ended green at 02:56. Next the second half, the booleans by
-csg.js's partition ported to C# with its MIT notice in the file and in THIRD-PARTY-NOTICES, the
-merge back into faces with the vertices welded, the T-junctions mended and the coplanar pieces
-joined, and the lines fixed in that commit's Reply, union, subtract and intersect of a path placed,
-cut of a primitive's line, cut window and cut door through the first selected face as deep as the
-wall, room with a thickness and ramp, the cutter's faces selected after; then 40 to 45.
+Reviewed up to `76f784af`, item 39's second half, the booleans and the openings, and nothing else,
+carrying the review's file with its Shared line, which holds the lines and the rules keeping a mesh
+after a boolean the same in both engines, the partition's piece order, the weld, the mended
+T-junctions, the joining order and its refusal, the straight corners taken, the room's prisms and
+the opening's frame, depth and margins: csg.js's partition ported in doubles with its MIT notice at
+the file's head and its row in the notices, a polygon carrying its slot, smoothing and solid through
+every split; the merge welding at ten times the epsilon, cutting each edge at the welded points
+along it, joining coplanar pieces of one slot along shared edges while the loop holds no vertex
+twice, and taking the corners straight in every face of theirs; union, subtract and intersect of a
+path placed, cut of a primitive's line refused for a plane, window and door through the first
+selected wall measured over every selected face in its plane and cut as deep as a ray finds the
+wall's other side and a centimeter past each face, room as an outer prism and an inner one wound
+back, ramp, and an epsilon line reset by an undo, the second solid's faces selected after; the
+guide's section with the limit on two faces in one plane and 15 blocks on a scratch package; the
+feature test's gallery room of 6 by 5 by 3 in the prototype materials with a door, a window and
+stairs inside, each slot solid, the drive's room view checking the door; seven boolean tests, a wall
+cut through closed at 5.5 with 20, 32 and 12, two cubes united to a box, two boxes intersected and
+subtracted to 1 and 7, a room 16, 24 and 12, a window taking 0.2 and leaving the back whole, a ramp
+6 and 5 at 3, every new line read back; the suite 1,620 passed and 3 skipped; the course run whole,
+exit 0, 22 captures. Read at 03:41 on 2026-10-21 and pushed at 03:41, its build run green at 03:58;
+the build run of `bfe1fc63` had ended green at 03:23. Item 39 is done. Next item 40, the commands in
+the recipe's words as the Reply has them, then item 47, the F2 screenshot the owner asked for
+shortly before 03:42, then the window; then 41 to 45.
+
+Before it, `bfe1fc63` came, item 39's first half, the grid image with the bridge's levels at ABI
+299, the prototype materials and the box mapping, and nothing else, carrying the review's file with
+its Shared line. Pushed at 03:06, its build run green at 03:23.
 
 Before it, `a1babb72` came, item 38's second half, the topology, the recipe, the build, the collider
 and the feature test's row, and nothing else, carrying the review's file with its Shared line.
 Pushed at 02:39, its build run green at 02:56.
-
-Before it, `32c8467e` came, Verdict 41's mend, and nothing else, carrying the review's file. Pushed
-at 02:19, its build run green, Linux in 14 minutes.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1135,9 +1136,9 @@ from [SHARED.md](SHARED.md).
     watertight and has the volume of the two less their overlap; a union of two boxes sharing a
     face; the grid image's lines at the right pixels; the box mapping giving a two meter face
     coordinates spanning two; a capture of a room with a window and a door and stairs in it. Two
-    commits, the grid image, the materials and the mapping, then the booleans and the openings.
-    First half done at `bfe1fc63` on 2026-10-21, the grid image with the bridge's levels, the
-    prototype materials and the box mapping, as the head says; the booleans and the openings follow.
+    commits, the grid image, the materials and the mapping, then the booleans and the openings. Done
+    at `bfe1fc63` and `76f784af` on 2026-10-21, the grid image, the prototype materials and the box
+    mapping, then the booleans, the merge and the openings, as the heads say.
 
 40. **The modeling commands, so a level is blocked out from the terminal, and a window in the game
     to shape by hand (Decision 46).** The owner asked that all of it be possible from the command
@@ -1258,6 +1259,21 @@ from [SHARED.md](SHARED.md).
     commit. Done at `585497f1` and `27b3f8eb` on 2026-10-21, the recorder, the two writers, the
     calls and the command, then the client's step, the script and the README's animation, as the
     heads say.
+
+47. **F2 takes a screenshot in every program, to a screenshots folder beside it (Decision 49).** The
+    owner wrote shortly before 03:42 on 2026-10-21 that, as in Minecraft, a screenshot is to be
+    taken in the game with F2, the same for BevyCSharp, the captures put in the root or a subfolder.
+    The engine gains a built-in key: F2 writes the frame being drawn as a PNG into a `screenshots`
+    folder beside the program, made on first use, the file named by the time as the source names its
+    own, `2026-10-21_03.45.12.png` and a count where two fall in one second, through the capture the
+    `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves it or turns
+    it off with none, and a program that reads F2 itself still sees the press. The cheat sheet line
+    through the script, the surface listing and the tools guide's paragraph beside the captures.
+    Tests: a press through the input writing a file of the frame's size into the folder in a
+    headless run, two in one second given two names, the key moved and turned off. One commit, after
+    item 40's first commit. Where the engine has a default key of its own on F2, it moves to F3 as
+    3DEngine's performance window does, with a setting to move it to match, the move said in the
+    tools guide.
 
 ## Verdicts
 
@@ -1891,6 +1907,12 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     client step for it, and a script assembling an animation from captures on disk, with one
     animation in the README as its first use; the same in both engines.
 
+49. **A screenshot on F2 in every program.** The owner wrote shortly before 03:42 on 2026-10-21
+    that, as in Minecraft, a screenshot is to be taken in the game with F2, the same for BevyCSharp,
+    the captures put in the root or a subfolder. So item 47 here, item 73 in 3DEngine and item 40 in
+    the voxel game: a built-in key writing the frame into a screenshots folder beside the program,
+    named by the time as the source names its own, movable and off by a setting.
+
 ## Replies
 
 Shared: a set clock held still while an asset the app asked for is loading and between the commands
@@ -2131,3 +2153,22 @@ each face, as deep as a ray from a centimeter outside the face, at the middle of
 the nearest other face it leaves the wall through, less that centimeter, or the mesh's diagonal
 where it finds none, and a door's box starts a centimeter below the wall's bottom. A ramp is a
 wedge's outline about X, (y, z) from (0, 0), (0, RUN), (RISE, RUN), as wide as WIDTH.
+
+Shared: the modeling commands, in the commit carrying this line, item 40's first half, for the
+Modeling row of commands, in the words of item 38's Reply. Each line of the recipe is a command,
+`model.<verb> <name> <the line's words after the verb>`, thirty-one of them, which runs the line on
+the model of that name and answers with its counts, `<name>: <v> vertices, <e> edges, <f> faces, <sf>
+faces and <sv> vertices selected`, so a script reads what each did. A primitive (box, plane,
+cylinder, cone, wedge, stairs, arch, room or ramp), a join or a union makes the model where there is
+none of the name, and any other verb on a name no model has is refused as `NO_SUCH_MODEL`, so a
+mistyped name makes no model; a line the recipe cannot read is refused as `BAD_ARGUMENT` with the
+recipe's own message. Outside the recipe, `model.new <name>` makes an empty one, `model.free <name>`
+forgets it and takes away what draws it, `model.list` gives each one's counts, `model.info <name>`
+its counts, bounds, volume, open edges and whether closed, slots, grid, epsilon and the recipe's
+length, `model.recipe <name>` its file's text, `model.undo` and `model.redo <name>` the counts after
+(`NOTHING_TO_UNDO`, `NOTHING_TO_REDO`), `model.save <name> <path>` and `model.load <name> <path>`
+the recipe's file under the asset root, and `model.show <name> [<x> <y> <z>]` a root entity at the
+point with a child for each slot in that slot's prototype material, its meshes written again once a
+frame where the model changed. A game's mesh answers to them once `Modeling.Register(name, mesh)`
+names it, `Modeling.Find(name)` and `Modeling.Names` read them, and the names last while the app
+runs, the next app starting with none. `model.export` and `model.import` wait for item 45.

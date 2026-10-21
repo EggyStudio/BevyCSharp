@@ -333,6 +333,30 @@ for (var slot = 0; slot < meshes.Length; slot++)
 }
 ```
 
+## From the terminal
+
+Every line of a recipe is a command of the console's, the model's name after the verb, so a level is
+blocked out from the terminal in a running app, each command answering with the model's counts:
+
+```bash
+./bcs open --feature-test --offscreen --frames 0
+./bcs command model.room hall 6 3 5 0.2          # hall: 16 vertices, 24 edges, 12 faces, ...
+./bcs command model.material hall wall
+./bcs command model.select hall -z               # the front wall's outside
+./bcs command model.cut hall window 1 1.2 2 0.9  # hall: 30 vertices, 47 edges, 19 faces, 4 faces ... selected
+./bcs command model.material hall window
+./bcs command model.show hall 0 0 -14            # drawn in its slots' prototype materials, and kept drawn
+./bcs command model.info hall                    # bounds, volume, open edges, slots
+./bcs command model.save hall models/hall.model
+```
+
+A primitive, a join or a union makes the model where there is none of its name, and any other
+operation on a name no model has is refused, so a mistyped name makes no model. `model.new`,
+`model.free`, `model.list`, `model.recipe`, `model.undo`, `model.redo` and `model.load` do what
+their names say, and `model.show` draws a model where a point says and keeps drawing it as the
+commands change it. A game's own mesh answers to the commands once `Modeling.Register("level",
+mesh)` names it, so a drive cuts a window in a level by a command and reads the counts.
+
 ## Drawing and colliding
 
 `Modeling.Build(mesh)` builds the mesh into a `MeshData` for each material slot, each face cut into

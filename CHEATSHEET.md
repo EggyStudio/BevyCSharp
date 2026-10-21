@@ -1143,6 +1143,8 @@ static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes th
 static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots
 static AssetHandle Prototype(string name);                      // The prototype material of a part of a level, the grid tinted by its color
 static AssetHandle Prototype(Color color);                      // A prototype material of any color, the grid tinted by it
+static void Register(string name, EditMesh mesh);               // Gives a mesh a name the console's model commands reach it by, so a game's level is shaped from the terminal and by a drive, model.cut level window 1 1 2 0.9 cutting a window in it
+static EditMesh? Find(string name);                             // The model of a name, or nothing where none has it
 ```
 
 ### `Images`

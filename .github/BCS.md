@@ -48,6 +48,7 @@ What is usually there:
 | `app.frametime [seconds\|off]`, `app.hold [loads\|commands\|off]` | Each frame a set length to the game, and that clock held still while a load runs or between commands |
 | `frame.profile [frames]` | What a frame spends on managed systems by name, calls into the bridge, Bevy's schedule and the render's phases |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
+| `model.<operation> <name> <words>`, as `model.box room 8 3 6` or `model.cut room window 1 1 2 0.9` | Shape a model a line of its recipe at a time, each answering the model's counts; `model.new`, `free`, `list`, `info`, `recipe`, `undo`, `redo`, `save`, `load` and `show` besides (docs/modeling.md) |
 | `record <path> <length> [every <step>] [scale <s>] [play <time>]`, `record.stop`, `record.status` | Record the window as an animated GIF or PNG, for `5s`, `120f` or a count of pictures, one every `250ms`, `1s` or `15f` (use `./bcs record`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |

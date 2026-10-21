@@ -416,6 +416,9 @@ public sealed unsafe partial class App : IDisposable
                 // A recording's picture of this frame asked for, and those of frames before kept
                 // as they come back off the GPU.
                 Recorder.Tick(world.Resource<Time>());
+
+                // The models the console shows drawn again where its commands changed them.
+                Modeling.Tick(world.Resource<EcsWorld>());
             }
 
             DataAssets.PostChanges(world.Resource<MessageBus>());
