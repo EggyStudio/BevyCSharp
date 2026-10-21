@@ -95,13 +95,13 @@ warnings, so its check needs no such flag.
 
 ## Native profiles
 
-The bridge builds in two profiles:
+The bridge builds in three profiles:
 
 | Profile    | What it includes                                                       |
 |------------|------------------------------------------------------------------------|
 | `headless` | App, ECS, time, input, transform, assets. No window, no GPU. The default. |
-| `render`   | The above plus windowing, the renderer, post processing, UI, 2D, gizmos and audio. |
-| `editor`   | The above plus Dear ImGui, entity introspection and picking, for `BevyCSharp.Editor`. |
+| `render`   | The above plus windowing, the renderer, post processing, UI, 2D, gizmos, audio and Dear ImGui's pass, which an app asks for with `Config.Gui`. |
+| `editor`   | The above plus the asset watcher and the documentation of Bevy's reflected types, for `BevyCSharp.Editor`. |
 
 The editor profile costs about a hundred crates and several minutes of build time over the render
 one, which is why it is a profile of its own rather than part of it, since the test suite and the

@@ -77,11 +77,11 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>True when the loaded native bridge has Bevy's renderer compiled in.</summary>
     public static bool HasRenderer => Native.bcs_has_render() != 0;
 
-    /// <summary>True when the loaded native bridge has the HTML and CSS UI compiled in.</summary>
+    /// <summary>True when the loaded native bridge was built with the editor profile, the asset watcher and Bevy's reflected documentation.</summary>
     /// <remarks>
     /// A separate question from <see cref="HasRenderer"/>. The editor profile is a superset of the
-    /// render one, so a bridge can draw a scene without carrying the document surface, and a panel
-    /// opened against one that does not is refused rather than ignored.
+    /// render one, which draws Dear ImGui as well, so a game's bridge draws an interface without
+    /// the editor's additions, and an editor's panel needing them asks this.
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
 

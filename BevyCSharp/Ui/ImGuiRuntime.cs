@@ -90,11 +90,11 @@ public static unsafe class ImGuiRuntime
     {
         if (IsRunning) return;
 
-        if (!App.HasEditor)
+        if (!App.HasRenderer)
         {
             Console.WriteLine(
-                "[imgui] this bridge has no interface compiled in, so nothing is drawn."
-                + " Rebuild it with build/build-native.sh --editor.");
+                "[imgui] this bridge draws nothing, so no interface is drawn."
+                + " Rebuild it with build/build-native.sh --render.");
             return;
         }
 

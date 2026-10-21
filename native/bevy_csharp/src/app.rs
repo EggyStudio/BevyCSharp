@@ -262,14 +262,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // How the pointer stands on each interactive node, which the managed side reads.
             crate::ui::install(&mut app);
 
-            // an interface written in HTML and CSS, when the profile carries it and the app asked
-            // for it.
+            // Dear ImGui's pass, which draws the triangles the managed side's interface came to,
+            // where the app asked for it.
             //
-            // Asked for rather than assumed, because the plugin is not free to an app that never
-            // opens a document. It spawns a camera of its own, registers its widget systems and
-            // watches for documents to build. The editor profile is a superset of the render
-            // one, so the sample and a game are built against exactly this library.
-            #[cfg(feature = "editor")]
+            // Asked for rather than assumed, because the pass is not free to an app that never
+            // draws an interface. In every profile that draws, so a game built on the package,
+            // whose bridges are the render profile's, draws the windows it asks for, as the
+            // modeling window, and the editor's profile adds only what editing files needs.
             if config.gui != 0 {
                 crate::imgui::install(&mut app);
                 crate::capabilities::INTERFACE_INSTALLED.store(true, std::sync::atomic::Ordering::Relaxed);

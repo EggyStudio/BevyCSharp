@@ -181,7 +181,7 @@ public sealed class RenderTargetTests : IDisposable
     [SkippableFact]
     public void ATargetCanBeDrawnByTheInterface()
     {
-        Needs.Editor();
+        Needs.Renderer();
 
         // The interface has to be installed for a picture to have anywhere to be named, and it is
         // installed only when an app asks to draw one. An offscreen run can, which makes this

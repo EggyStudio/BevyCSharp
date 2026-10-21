@@ -31,7 +31,7 @@ internal static partial class ConsoleWorldCommands
         return $"frame {time.FrameCount}{clock} at {time.SmoothedFps:0.#} fps, "
                + $"{time.ElapsedSeconds:0.##}s elapsed, {world.All().Length} entities, "
                + $"renderer {(App.HasRenderer ? "yes" : "no")}, "
-               + $"interface {(App.HasEditor ? "yes" : "no")}, "
+               + $"interface {(App.HasInterface ? "yes" : "no")}, "
                + $"adapter {App.DescribeAdapter() ?? "none"}";
     }
 

@@ -27,14 +27,6 @@ internal static class Needs
     internal static void Renderer() =>
         Skip.IfNot(App.HasRenderer, "needs a bridge built with the render or editor profile");
 
-    /// <summary>The editor profile.</summary>
-    internal static void Editor() =>
-        Skip.IfNot(App.HasEditor, "needs a bridge built with the editor profile");
-
-    /// <summary>A bridge without the editor profile, for a test of what a smaller build does.</summary>
-    internal static void NoEditor() =>
-        Skip.If(App.HasEditor, "is about a bridge without the editor profile");
-
     /// <summary>A headless bridge, for a test of what a build that cannot draw does.</summary>
     internal static void NoRenderer() =>
         Skip.If(App.HasRenderer, "is about a headless bridge");

@@ -8,10 +8,10 @@
 //! Nothing in this module knows what a window or a widget is. It draws clipped, textured triangles
 //! in screen space, which is the whole of what an ImGui backend has to do.
 
-#[cfg(feature = "editor")]
+#[cfg(feature = "render")]
 pub mod render;
 
-#[cfg(feature = "editor")]
+#[cfg(feature = "render")]
 use crate::interop::status;
 
 /// One vertex, laid out exactly as `ImDrawVert` is.
@@ -94,13 +94,13 @@ pub struct BcsImGuiFrame {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_imgui_frame(frame: *const BcsImGuiFrame) -> i32 {
     crate::interop::guard(|| {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = frame;
             crate::interop::status::UNSUPPORTED
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             if frame.is_null() {
                 return status::NULL_ARG;
@@ -172,13 +172,13 @@ pub unsafe extern "C" fn bcs_imgui_frame(frame: *const BcsImGuiFrame) -> i32 {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height: u32) -> u64 {
     crate::interop::guard_with(0, || {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = (pixels, width, height);
             0
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             if pixels.is_null() || width == 0 || height == 0 {
                 return 0;
@@ -216,13 +216,13 @@ pub unsafe extern "C" fn bcs_imgui_texture(pixels: *const u8, width: u32, height
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u64 {
     crate::interop::guard_with(0, || {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = path;
             0
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
                 return 0;
@@ -259,13 +259,13 @@ pub unsafe extern "C" fn bcs_imgui_picture(path: *const core::ffi::c_char) -> u6
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_imgui_asset_texture(image: i32) -> u64 {
     crate::interop::guard_with(0, || {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = image;
             0
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             crate::state::with_world_opt(|world| {
                 let handle = crate::assets::clone_handle(world, image)?
@@ -284,13 +284,13 @@ pub extern "C" fn bcs_imgui_asset_texture(image: i32) -> u64 {
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_imgui_drop_texture(texture: u64) -> i32 {
     crate::interop::guard(|| {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = texture;
             crate::interop::status::UNSUPPORTED
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             crate::state::with_world(|world| {
                 let Some(mut pictures) = world.get_resource_mut::<render::Pictures>() else {
@@ -305,7 +305,7 @@ pub extern "C" fn bcs_imgui_drop_texture(texture: u64) -> i32 {
 }
 
 /// Puts the interface into an app.
-#[cfg(feature = "editor")]
+#[cfg(feature = "render")]
 pub fn install(app: &mut bevy::app::App) {
     render::install(app);
 }
@@ -327,13 +327,13 @@ pub unsafe extern "C" fn bcs_imgui_picture_size(
     height: *mut u32,
 ) -> i32 {
     crate::interop::guard(|| {
-        #[cfg(not(feature = "editor"))]
+        #[cfg(not(feature = "render"))]
         {
             let _ = (picture, width, height);
             crate::interop::status::UNSUPPORTED
         }
 
-        #[cfg(feature = "editor")]
+        #[cfg(feature = "render")]
         {
             use crate::interop::status;
 

@@ -26,7 +26,7 @@ public sealed class ImGuiConsoleTests : IDisposable
     [SkippableFact]
     public void TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt()
     {
-        Needs.Editor();
+        Needs.Renderer();
         ConsoleLog.Write(LogLevel.Error, "a line the console shows");
 
         var run = new PictureRun

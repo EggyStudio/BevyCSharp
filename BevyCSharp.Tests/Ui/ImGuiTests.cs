@@ -19,7 +19,7 @@ public sealed class ImGuiTests
     [SkippableFact]
     public void ABuildWithoutTheInterfaceDrawsNothingRatherThanCrashing()
     {
-        Needs.NoEditor();
+        Needs.NoRenderer();
 
         using var harness = new EngineHarness(frames: 3);
 

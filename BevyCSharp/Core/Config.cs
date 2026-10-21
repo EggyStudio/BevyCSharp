@@ -169,8 +169,9 @@ public sealed class Config
     /// run against the same library and this tells them apart.
     /// </para>
     /// <para>
-    /// Needs a bridge built with that profile, which <see cref="App.HasEditor"/> reports. On a
-    /// build without it this does nothing.
+    /// Needs a bridge that draws, the render profile or the editor one, which
+    /// <see cref="App.HasRenderer"/> reports, so a game built on the package draws its windows. On
+    /// a headless build this does nothing.
     /// </para>
     /// </remarks>
     public bool Gui { get; set; }

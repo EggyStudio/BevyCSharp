@@ -36,8 +36,8 @@ public partial struct Interface
 ```
 
 The feature test draws its admin panel, its overlay and its console that way, in
-`games/FeatureTest/Behaviors/Interface.cs`. It needs a bridge with the interface compiled in
-(`build/build-native.sh --editor`) and `Config.Gui` asked for.
+`games/FeatureTest/Behaviors/Interface.cs`. It needs a bridge that draws, the package's or one built with
+`build/build-native.sh --render`, and `Config.Gui` asked for.
 
 **A console is one call.** `ImGuiConsole.Draw` between `Begin` and `End` gives a game the editor's
 console, opened and closed by the key under Escape along the top of the window. It shows the log,

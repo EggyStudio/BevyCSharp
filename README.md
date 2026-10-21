@@ -385,7 +385,7 @@ dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj
 
 The two halves are built separately, and a rebuilt bridge is invisible until a managed build copies
 it, which is why the second line is not optional. `build/build-native.sh --render` adds the renderer
-and `--editor` adds the interface on top of it.
+and Dear ImGui's pass, and `--editor` adds the asset watcher the editor edits files with on top of it.
 
 [.github/BUILDING.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/BUILDING.md) has the rest, the three native profiles and what each
 costs, the platforms and their prerequisites, how the package is assembled for six runtime
