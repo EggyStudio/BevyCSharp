@@ -61,11 +61,10 @@ public static partial class Modeling
         {
             if (made.TryGetValue(color, out var known)) return known;
 
-            var grid = Grids.GetValue(app, _ => new StrongBox<AssetHandle>(Images.Grid())).Value;
             var material = Render.CreateMaterial(new MaterialSettings
             {
                 BaseColor = (color.R, color.G, color.B, color.A),
-                BaseColorTexture = grid,
+                BaseColorTexture = GridOf(app),
                 Roughness = 0.85f,
             });
 
@@ -73,4 +72,7 @@ public static partial class Modeling
             return material;
         }
     }
+
+    /// <summary>The grid image an app's prototype materials share, made the first time one is asked for.</summary>
+    private static AssetHandle GridOf(App app) => Grids.GetValue(app, _ => new StrongBox<AssetHandle>(Images.Grid())).Value;
 }

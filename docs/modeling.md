@@ -183,6 +183,31 @@ var cell = new EditMesh()
     .Material("floor");
 ```
 
+A slot is drawn with the prototype material of its name, as [Grid prototyping](#grid-prototyping)
+shows, until it is given a look, a color, a texture and the maps of the engine's material, each a
+line of the recipe, the slot made where the mesh has none of its name:
+
+| Call | Line | Does |
+|---|---|---|
+| `SlotColor("wall", 0.8f, 0.3f, 0.2f)` | `slot color wall 0.8 0.3 0.2` | Tints the texture, or the grid where there is none, in sRGB, an alpha below one after the three drawing the faces blended |
+| `SlotTexture("wall", "textures/brick.png")` | `slot texture wall textures/brick.png` | Shows a picture in the grid's place, `none` taking it away |
+| `SlotNormalMap("wall", "textures/brick_normal.png")` | `slot normal-map wall textures/brick_normal.png` | Gives the faces a normal map |
+| `SlotOcclusionMap("wall", "textures/brick_ao.png")` | `slot occlusion-map wall textures/brick_ao.png` | Gives them an ambient occlusion map |
+| `SlotMetallicRoughnessMap("wall", "textures/brick_mr.png")` | `slot metallic-roughness-map wall textures/brick_mr.png` | Gives them metalness in blue and roughness in green, as glTF lays them out |
+| `SlotEmissive("lamp", 4f, 3f, 2f)` | `slot emissive lamp 4 3 2` | Makes them emissive, in linear numbers that may pass one |
+| `SlotEmissiveMap("lamp", "textures/lamp.png")` | `slot emissive-map lamp textures/lamp.png` | Gives them an emissive map, emissive in white where no emissive color is given |
+| `SlotMetallic("wall", 0f)` | `slot metallic wall 0` | Sets how metal they are, from zero to one |
+| `SlotRoughness("wall", 0.8f)` | `slot roughness wall 0.8` | Sets how rough they are, from zero to one |
+| `SlotAdd("trim")` | `slot add trim` | Adds a slot no face is in yet |
+| `SlotRename("trim", "edge")` | `slot rename trim edge` | Gives a slot another name, its faces and its look kept |
+| `SlotRemove("edge")` | `slot remove edge` | Takes a slot away, its faces given the first slot |
+
+`LookOf("wall")` reads what a slot was given, and `Modeling.Materials(mesh)` makes a material for
+each slot from its look, one a look while the app runs, which the meshes of `Modeling.Meshes` are
+drawn with one for one. A path is relative to the asset root, and every texture repeats, since a
+face's coordinates run as far past one as the face is meters wide. A model joined or cut with
+another keeps its own look for a slot both have and takes the other's for a slot it lacks.
+
 ## Changing the faces
 
 These change which vertices and faces there are, on what is selected:
@@ -314,14 +339,15 @@ on across faces. `Modeling.Prototype(name)` is the grid tinted by the color of a
 | `hazard` | Red |
 
 Any other name takes the grid's own gray, and `Modeling.Prototype(color)` any color. A material
-slot named for a part is drawn with that part's material, so a room sorted into slots is drawn by
-color with one line a slot:
+slot named for a part is drawn with that part's material until it is given a look, which
+`Modeling.Materials` follows, so a room sorted into slots is drawn by color with one line a slot:
 
 <!-- compiled with:
 var room = new EditMesh();
 -->
 ```csharp
 var meshes = Modeling.Meshes(room);
+var materials = Modeling.Materials(room);
 for (var slot = 0; slot < meshes.Length; slot++)
 {
     if (meshes[slot] == AssetHandle.None) continue;          // a slot no face is in
@@ -329,8 +355,44 @@ for (var slot = 0; slot < meshes.Length; slot++)
     var part = ctx.Ecs.Spawn();
     ctx.Ecs.Add(part, Transform.Identity);
     Render.SetMesh(ctx.Ecs, part, meshes[slot]);
-    Render.SetMaterial(ctx.Ecs, part, Modeling.Prototype(room.Slots[slot]));
+    Render.SetMaterial(ctx.Ecs, part, materials[slot]);
 }
+```
+
+## Texture coordinates
+
+A face's texture coordinates are its corners' places in meters, seen along the axis its normal is
+nearest, which follow the face wherever it moves. The `uv` operations give the selected faces
+coordinates of their own, which stay on their corners as they move, as a texture stuck to the face,
+and are carried onto the pieces a cut, an inset or a boolean makes of the face:
+
+| Call | Line | Does |
+|---|---|---|
+| `UvPlanar(Vec3.UnitY)` | `uv planar +y` | Projects along a direction, as a picture shone onto the faces from that side, `uv planar 0.3 0.5 0.8` along any |
+| `UvBox()` | `uv box` | Projects each face along the axis its normal is nearest, the default written onto the faces |
+| `UvCylinder(Vec3.UnitY)` | `uv cylinder y` | Wraps round an axis through the selection's middle, or `at` a point, in meters round and down |
+| `UvSphere()` | `uv sphere` | Wraps round the selection's middle, or `at` a point, as a globe |
+| `UvMove(0.5f, 0f)` | `uv move 0.5 0` | Moves the coordinates |
+| `UvScale(2f)` | `uv scale 2` | Scales them about the selection's middle, two factors for the two coordinates, `each` about each face's own |
+| `UvRotate(90f)` | `uv rotate 90` | Turns them about the middle, `each` as for a scale |
+| `UvDensity(512f, 1024)` | `uv density 512 1024` | Scales them so a texture 1024 pixels wide shows 512 of its pixels a meter |
+| `UvReset()` | `uv reset` | Puts the faces back on the default |
+
+`model.uv` and the window read a density's width from the texture of the first selected face's
+slot when the line gives one number, and the line written keeps the width, so the recipe makes the
+same coordinates whether the texture has loaded or not. `UvsOf(face)` reads a face's coordinates
+and `HasOwnUvs(face)` says whether they are its own. A wall of bricks shown at 512 pixels a meter
+is these lines:
+
+<!-- compiled with:
+var hall = new EditMesh();
+-->
+```csharp
+hall.SelectFacing(Vec3.UnitZ)
+    .Material("wall")
+    .SlotTexture("wall", "textures/brick.png")
+    .SlotNormalMap("wall", "textures/brick_normal.png")
+    .UvDensity(512f, 1024);
 ```
 
 ## From the terminal
@@ -348,6 +410,15 @@ blocked out from the terminal in a running app, each command answering with the 
 ./bcs command model.show hall 0 0 -14            # drawn in its slots' prototype materials, and kept drawn
 ./bcs command model.info hall                    # bounds, volume, open edges, slots
 ./bcs command model.save hall models/hall.model
+```
+
+A slot's look and the faces' coordinates are commands as well, and a density given one number reads
+the width of the slot's texture once it has loaded:
+
+```bash
+./bcs command model.slot hall texture wall textures/brick.png
+./bcs command model.select hall slot wall
+./bcs command model.uv hall density 512
 ```
 
 A primitive, a join or a union makes the model where there is none of its name, and any other
@@ -382,6 +453,10 @@ from a face along its normal extrudes the selection by whole grid steps once the
 the distance shown beside the pointer and the face where it would go outlined in cyan, and with alt
 held it moves the selection as far instead. The face under the pointer is outlined in yellow and
 the selection in orange. A drag that comes back to where it began does nothing.
+
+The Texture group projects the selected faces' coordinates, along the view among the directions,
+moves, scales and turns them, and draws them over their slot's texture, repeated as far as they
+reach. The Slots group gives the slots their looks and adds, renames and takes away slots.
 
 `Modeling.WantsPointer` is true while the pointer is over a face or pressed on one, so a camera that
 turns on a drag, as the editor's does with alt, begins one only where it is false, as it asks

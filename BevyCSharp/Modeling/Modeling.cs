@@ -16,10 +16,11 @@ namespace Bevy;
 /// its area, so a cylinder's sides are round and its ends flat.
 /// </para>
 /// <para>
-/// A face's texture coordinates are its corners' places in meters, seen along the axis its normal
-/// is nearest, so a texture of a meter's grid shows a meter on every face and carries on across
-/// faces meeting along a line, and a face moved shows the grid of the place it was moved to, as a
-/// level's prototype grid should. <see cref="Meshes"/> works tangents out from them where the
+/// A face's texture coordinates are its own where a <c>uv</c> operation gave it some
+/// (<see cref="EditMesh.UvsOf"/>), and otherwise its corners' places in meters, seen along the axis
+/// its normal is nearest, so a texture of a meter's grid shows a meter on every face and carries on
+/// across faces meeting along a line, and a face moved shows the grid of the place it was moved
+/// to, as a level's prototype grid should. <see cref="Meshes"/> works tangents out from them where the
 /// bridge draws (<see cref="Render.GenerateTangents"/>), so a material with a normal map lights
 /// the faces right.
 /// </para>
@@ -74,7 +75,7 @@ public static partial class Modeling
             var normal = faceNormals[face].Normalized;
             var smooth = mesh.SmoothOf(face);
             var first = (uint)positions[slot].Count;
-            var (u, v) = Projection(normal);
+            var coordinates = mesh.UvsOf(face);
 
             var points = new Vec3[corners.Length];
             for (var i = 0; i < corners.Length; i++) points[i] = mesh.Position(corners[i]);
@@ -84,8 +85,8 @@ public static partial class Modeling
                 var point = points[i];
                 positions[slot].Add(point);
                 normals[slot].Add(smooth > 0f ? Smoothed(corners[i], normal, smooth, faceNormals, around, mesh) : normal);
-                uvs[slot].Add(Vec3.Dot(point, u));
-                uvs[slot].Add(Vec3.Dot(point, v));
+                uvs[slot].Add(coordinates[i].X);
+                uvs[slot].Add(coordinates[i].Y);
             }
 
             foreach (var index in EarClipping.Cut(points, faceNormals[face])) indices[slot].Add(first + (uint)index);
@@ -153,6 +154,12 @@ public static partial class Modeling
             lock (Sources) Sources[known] = new WeakReference<EditMesh>(mesh);
         }
 
+        // A slot taken away leaves its mesh drawing nothing, for whatever still draws with it.
+        for (var slot = built.Length; slot < drawn.Meshes.Length; slot++)
+        {
+            if (drawn.Meshes[slot] != AssetHandle.None) Render.WriteMesh(drawn.Meshes[slot], Nothing());
+        }
+
         drawn.Meshes = handles;
         drawn.Version = mesh.Version;
         return [.. handles];
@@ -195,21 +202,6 @@ public static partial class Modeling
         }
 
         return PhysicsShape.Mesh(positions, [.. indices]);
-    }
-
-    /// <summary>
-    /// The two directions a face's texture coordinates are measured along, by the axis its normal is
-    /// nearest, chosen so the texture reads the right way round seen from in front of the face, its
-    /// top up on a wall.
-    /// </summary>
-    internal static (Vec3 U, Vec3 V) Projection(Vec3 normal)
-    {
-        float x = MathF.Abs(normal.X), y = MathF.Abs(normal.Y), z = MathF.Abs(normal.Z);
-
-        // A texture's second coordinate grows downward, so a wall's runs down the world's Y.
-        if (y >= x && y >= z) return normal.Y >= 0f ? (Vec3.UnitX, Vec3.UnitZ) : (Vec3.UnitX, -Vec3.UnitZ);
-        if (x >= z) return normal.X >= 0f ? (-Vec3.UnitZ, -Vec3.UnitY) : (Vec3.UnitZ, -Vec3.UnitY);
-        return normal.Z >= 0f ? (Vec3.UnitX, -Vec3.UnitY) : (-Vec3.UnitX, -Vec3.UnitY);
     }
 
     /// <summary>

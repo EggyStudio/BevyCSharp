@@ -69,6 +69,20 @@ public static partial class Modeling
         ("Cut", "subtract", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
         ("Cut", "intersect", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
         ("Cut", "join", [new("path", "models/part.model")]),
+        ("Texture", "uv planar", [new("+x to -z, or x y z", "+y")]),
+        ("Texture", "uv cylinder", [new("x, y, z, or x y z", "y")]),
+        ("Texture", "uv move", [new("u v", "0.5 0")]),
+        ("Texture", "uv scale", [new("factor, or u v, then each", "2")]),
+        ("Texture", "uv rotate", [new("degrees, then each", "90")]),
+        ("Texture", "uv density", [new("pixels a meter", "256")]),
+        ("Slots", "slot texture", [new("slot path, or none", "default textures/wall.png")]),
+        ("Slots", "slot normal-map", [new("slot path, or none", "default textures/wall_normal.png")]),
+        ("Slots", "slot color", [new("slot r g b", "default 1 1 1")]),
+        ("Slots", "slot roughness", [new("slot value", "default 0.8")]),
+        ("Slots", "slot metallic", [new("slot value", "default 0")]),
+        ("Slots", "slot add", [new("slot", "trim")]),
+        ("Slots", "slot rename", [new("slot new", "default floor")]),
+        ("Slots", "slot remove", [new("slot", "trim")]),
     ];
 
     private static readonly NumericsVector4 Warning = new(1f, 0.45f, 0.35f, 1f);
@@ -87,7 +101,9 @@ public static partial class Modeling
     /// The window lists the recipe, its last lines taken back and done again by its buttons, the
     /// counts and what is selected, the grid step, and each operation with its measures as fields
     /// and a button that runs its line, so each change made in the window is a line of the recipe,
-    /// as a command's is. A line that cannot run says why under the selection's buttons.
+    /// as a command's is. A line that cannot run says why under the selection's buttons. Its Texture
+    /// group draws the selected faces' texture coordinates over their slot's texture, and projects
+    /// them along the camera's view among its directions.
     /// </para>
     /// <para>
     /// In the 3D view, a click on a face selects it by a ray from the camera tested against the
@@ -133,9 +149,28 @@ public static partial class Modeling
 
         if (ImGuiRuntime.IsRunning)
         {
-            Summary(mesh, state);
-            Recipe(mesh);
-            Operations(mesh, state);
+            // A strip wider than it is tall, as the editor's tab is, takes the operations in a
+            // column beside the recipe, scrolled on its own, where a window taller than it is wide
+            // takes them below, so neither leaves the operations past where the panel ends.
+            var room = ImGui.GetContentRegionAvail();
+            if (room.X > 640f && room.X > 2f * room.Y && ImGui.BeginTable("columns##bcs-model", 2, ImGuiTableFlags.Resizable))
+            {
+                ImGui.TableSetupColumn("recipe", ImGuiTableColumnFlags.WidthStretch, 0.4f);
+                ImGui.TableSetupColumn("operations", ImGuiTableColumnFlags.WidthStretch, 0.6f);
+                ImGui.TableNextColumn();
+                Summary(mesh, state);
+                Recipe(mesh, MathF.Max(ImGui.GetContentRegionAvail().Y - 4f, 60f));
+                ImGui.TableNextColumn();
+                if (ImGui.BeginChild("operations##bcs-model", new NumericsVector2(0f, MathF.Max(room.Y - 4f, 60f)))) Operations(ctx, mesh, state, camera, where);
+                ImGui.EndChild();
+                ImGui.EndTable();
+            }
+            else
+            {
+                Summary(mesh, state);
+                Recipe(mesh, 140f);
+                Operations(ctx, mesh, state, camera, where);
+            }
         }
 
         if (!camera.IsNone) Pointer(ctx, mesh, camera, where, state);
@@ -263,7 +298,7 @@ public static partial class Modeling
         if (state.Problem is { } problem) ImGui.TextColored(Warning, problem);
     }
 
-    private static void Recipe(EditMesh mesh)
+    private static void Recipe(EditMesh mesh, float height)
     {
         ImGui.BeginDisabled(!mesh.CanUndo);
         if (ImGui.Button("Undo##bcs-model")) mesh.Undo();
@@ -273,7 +308,7 @@ public static partial class Modeling
         if (ImGui.Button("Redo##bcs-model")) mesh.Redo();
         ImGui.EndDisabled();
 
-        if (ImGui.BeginChild("recipe##bcs-model", new NumericsVector2(0f, 140f), ImGuiChildFlags.Borders))
+        if (ImGui.BeginChild("recipe##bcs-model", new NumericsVector2(0f, height), ImGuiChildFlags.Borders))
         {
             for (var line = 0; line < mesh.Recipe.Count; line++) ImGui.TextUnformatted(mesh.Recipe[line]);
 
@@ -284,11 +319,12 @@ public static partial class Modeling
         ImGui.EndChild();
     }
 
-    private static void Operations(EditMesh mesh, WindowState state)
+    private static void Operations(BehaviorContext ctx, EditMesh mesh, WindowState state, Entity camera, Transform placed)
     {
         foreach (var group in Offered.Select(offer => offer.Group).Distinct())
         {
             if (!ImGui.CollapsingHeader($"{group}##bcs-model-group", group == "Add" ? ImGuiTreeNodeFlags.DefaultOpen : ImGuiTreeNodeFlags.None)) continue;
+            if (group == "Texture") Coordinates(ctx, mesh, state, camera, placed);
 
             foreach (var (_, verb, fields) in Offered.Where(offer => offer.Group == group))
             {
@@ -314,12 +350,96 @@ public static partial class Modeling
         }
     }
 
+    /// <summary>
+    /// The projections that take no measure as buttons, the one along the view among them, and the
+    /// selected faces' coordinates over their slot's picture.
+    /// </summary>
+    private static void Coordinates(BehaviorContext ctx, EditMesh mesh, WindowState state, Entity camera, Transform placed)
+    {
+        foreach (var (label, line) in (ReadOnlySpan<(string, string)>)[("box", "uv box"), ("sphere", "uv sphere"), ("reset", "uv reset")])
+        {
+            if (label != "box") ImGui.SameLine();
+            if (ImGui.SmallButton($"{label}##bcs-model-uv")) Apply(mesh, state, line);
+        }
+
+        // Along the view, the way from the faces back toward the camera, in the mesh's own space.
+        if (!camera.IsNone && ctx.Ecs.TryGet<GlobalTransform>(camera, out var eye))
+        {
+            ImGui.SameLine();
+            if (ImGui.SmallButton("from the view##bcs-model-uv"))
+            {
+                var facing = placed.Rotation.Conjugate * -eye.Forward;
+                Apply(mesh, state, string.Create(CultureInfo.InvariantCulture, $"uv planar {facing.X} {facing.Y} {facing.Z}"));
+            }
+        }
+
+        Preview(mesh);
+    }
+
+    /// <summary>The selected faces' coordinates drawn over their slot's picture, repeated as far as they reach.</summary>
+    private static void Preview(EditMesh mesh)
+    {
+        var faces = Enumerable.Range(0, mesh.FaceCount).Where(mesh.IsFaceSelected).ToArray();
+        if (faces.Length == 0 || !App.HasRenderer)
+        {
+            ImGui.TextDisabled("Select faces to see their coordinates over their slot's texture.");
+            return;
+        }
+
+        var loops = faces.Select(mesh.UvsOf).ToArray();
+        var (low, high) = (new Vec2(float.MaxValue), new Vec2(float.MinValue));
+        foreach (var uv in loops.SelectMany(loop => loop))
+        {
+            low = new Vec2(MathF.Min(low.X, uv.X), MathF.Min(low.Y, uv.Y));
+            high = new Vec2(MathF.Max(high.X, uv.X), MathF.Max(high.Y, uv.Y));
+        }
+
+        // A square of whole repeats from the one the coordinates start in, as many to a side as
+        // they reach along the farther of the two.
+        var (fromU, fromV) = (MathF.Floor(low.X), MathF.Floor(low.Y));
+        var repeats = MathF.Max(1f, MathF.Max(MathF.Ceiling(high.X) - fromU, MathF.Ceiling(high.Y) - fromV));
+        var side = MathF.Max(MathF.Min(ImGui.GetContentRegionAvail().X, 240f), 64f);
+        var cell = side / repeats;
+        var origin = ImGui.GetCursorScreenPos();
+        var draw = ImGui.GetWindowDrawList();
+
+        // The picture once for each repeat, up to eight to a side, past which the lines are drawn
+        // over the dark, which a wall of sixty-four meters on a meter's grid would reach.
+        draw.AddRectFilled(origin, origin + new NumericsVector2(side, side), ImGui.GetColorU32(new NumericsVector4(0.1f, 0.1f, 0.1f, 1f)));
+        var slot = mesh.SlotOf(faces[0]);
+        var picture = ImGuiTextures.Of(PictureOf(mesh.LookOf(slot)));
+        var drawn = (int)MathF.Min(repeats, 8f);
+        for (var x = 0; x < drawn && picture != 0; x++)
+        {
+            for (var y = 0; y < drawn; y++)
+                draw.AddImage((IntPtr)picture, origin + new NumericsVector2(x * cell, y * cell), origin + new NumericsVector2((x + 1) * cell, (y + 1) * cell));
+        }
+
+        var color = ImGui.GetColorU32(new NumericsVector4(1f, 0.55f, 0.1f, 1f));
+        foreach (var loop in loops)
+        {
+            for (var i = 0; i < loop.Length; i++)
+            {
+                var (a, b) = (loop[i], loop[(i + 1) % loop.Length]);
+                draw.AddLine(
+                    origin + new NumericsVector2((a.X - fromU) * cell, (a.Y - fromV) * cell),
+                    origin + new NumericsVector2((b.X - fromU) * cell, (b.Y - fromV) * cell),
+                    color,
+                    1.5f);
+            }
+        }
+
+        ImGui.Dummy(new NumericsVector2(side, side));
+        ImGui.TextDisabled(string.Create(CultureInfo.InvariantCulture, $"slot {slot}, {repeats} to a side from ({fromU}, {fromV})"));
+    }
+
     /// <summary>Runs a line on the mesh, saying why where it cannot run.</summary>
+    /// <remarks>A density typed with one number takes the width of its slot's texture, as the console's command does.</remarks>
     private static void Apply(EditMesh mesh, WindowState state, string line)
     {
         try
         {
-            mesh.Run(line);
+            mesh.Run(Completed(mesh, line));
             state.Problem = null;
         }
         catch (Exception error) when (error is FormatException or ArgumentException or InvalidOperationException or IOException)

@@ -182,6 +182,9 @@ public sealed partial class EditMesh
         _positions.Clear();
         _faces.Clear();
         _slots.RemoveRange(1, _slots.Count - 1);
+        _slots[0] = DefaultSlot;
+        _looks.RemoveRange(1, _looks.Count - 1);
+        _looks[0] = new SlotLook();
         _selectedVertices.Clear();
         _selectedFaces.Clear();
         _recipe.Clear();
@@ -256,6 +259,8 @@ public sealed partial class EditMesh
                 case "room": mesh.Room(Vector(), Number(), Where(out centered), centered); break;
                 case "ramp": mesh.Ramp(Number(), Number(), Number(), Where(out centered), centered); break;
                 case "epsilon": mesh.Epsilon(Number()); break;
+                case "uv": Uv(mesh); break;
+                case "slot": Slot(mesh); break;
                 default: throw new FormatException($"{words[0]} is not an operation of a model's recipe.");
             }
 
@@ -303,20 +308,103 @@ public sealed partial class EditMesh
             }
         }
 
-        private void Rotate(EditMesh mesh)
+        private void Rotate(EditMesh mesh) => mesh.Rotate(Axis(), Number(), Pivot());
+
+        private void Uv(EditMesh mesh)
         {
-            Vec3 axis;
-            if (_at < words.Length && words[_at] is "x" or "y" or "z")
+            var what = Word("planar, box, cylinder, sphere, move, scale, rotate, density or reset");
+            switch (what)
             {
-                var named = words[_at++][0] - 'x';
-                axis = new Vec3(named == 0 ? 1f : 0f, named == 1 ? 1f : 0f, named == 2 ? 1f : 0f);
+                case "planar":
+                    mesh.UvPlanar(Facing());
+                    return;
+                case "box":
+                    mesh.UvBox();
+                    return;
+                case "cylinder":
+                    mesh.UvCylinder(Axis(), Pivot());
+                    return;
+                case "sphere":
+                    mesh.UvSphere(Pivot());
+                    return;
+                case "move":
+                    mesh.UvMove(Number(), Number());
+                    return;
+                case "scale":
+                    // One factor or two, told apart by whether a number follows the first.
+                    var u = Number();
+                    var v = _at < words.Length && words[_at] != "each" ? Number() : u;
+                    mesh.UvScale(u, v, Optional("each"));
+                    return;
+                case "rotate":
+                    mesh.UvRotate(Number(), Optional("each"));
+                    return;
+                case "density":
+                    mesh.UvDensity(Number(), Count());
+                    return;
+                case "reset":
+                    mesh.UvReset();
+                    return;
+                default:
+                    throw new FormatException($"uv {what} is none of planar, box, cylinder, sphere, move, scale, rotate, density or reset.");
             }
-            else
+        }
+
+        private void Slot(EditMesh mesh)
+        {
+            var what = Word("add, rename, remove, color, texture, a map, emissive, metallic or roughness");
+            if (what is not ("add" or "rename" or "remove" or "color" or "texture" or "normal-map" or "occlusion-map"
+                or "metallic-roughness-map" or "emissive" or "emissive-map" or "metallic" or "roughness"))
             {
-                axis = Vector();
+                throw new FormatException($"slot {what} is none of add, rename, remove, color, texture, normal-map, occlusion-map, metallic-roughness-map, emissive, emissive-map, metallic or roughness.");
             }
 
-            mesh.Rotate(axis, Number(), Pivot());
+            var slot = Word("a slot's name");
+            switch (what)
+            {
+                case "add": mesh.SlotAdd(slot); return;
+                case "rename": mesh.SlotRename(slot, Word("the slot's new name")); return;
+                case "remove": mesh.SlotRemove(slot); return;
+                case "texture": mesh.SlotTexture(slot, PathOrNone()); return;
+                case "normal-map": mesh.SlotNormalMap(slot, PathOrNone()); return;
+                case "occlusion-map": mesh.SlotOcclusionMap(slot, PathOrNone()); return;
+                case "metallic-roughness-map": mesh.SlotMetallicRoughnessMap(slot, PathOrNone()); return;
+                case "emissive-map": mesh.SlotEmissiveMap(slot, PathOrNone()); return;
+                case "emissive": mesh.SlotEmissive(slot, Number(), Number(), Number()); return;
+                case "metallic": mesh.SlotMetallic(slot, Number()); return;
+                case "roughness": mesh.SlotRoughness(slot, Number()); return;
+                case "color":
+                    var (red, green, blue) = (Number(), Number(), Number());
+                    mesh.SlotColor(slot, red, green, blue, _at < words.Length ? Number() : 1f);
+                    return;
+            }
+        }
+
+        /// <summary>An axis as its letter, x, y or z, or as three numbers.</summary>
+        private Vec3 Axis()
+        {
+            if (_at >= words.Length || words[_at] is not ("x" or "y" or "z")) return Vector();
+
+            var named = words[_at++][0] - 'x';
+            return new Vec3(named == 0 ? 1f : 0f, named == 1 ? 1f : 0f, named == 2 ? 1f : 0f);
+        }
+
+        /// <summary>A direction as the way along an axis, such as +y, or as three numbers.</summary>
+        private Vec3 Facing()
+        {
+            if (_at >= words.Length || words[_at] is not { Length: 2 } way || way[0] is not ('+' or '-') || way[1] is not ('x' or 'y' or 'z'))
+                return Vector();
+
+            _at++;
+            var axis = way[1] - 'x';
+            var sign = way[0] == '-' ? -1f : 1f;
+            return new Vec3(axis == 0 ? sign : 0f, axis == 1 ? sign : 0f, axis == 2 ? sign : 0f);
+        }
+
+        private string? PathOrNone()
+        {
+            var path = Word("a texture's path, or none");
+            return path == "none" ? null : path;
         }
 
         private void Scale(EditMesh mesh)

@@ -69,7 +69,7 @@ public static partial class Modeling
     }
 
     /// <summary>
-    /// Draws a model where a point says, each slot a child entity in its slot's prototype material,
+    /// Draws a model where a point says, each slot a child entity in its slot's material,
     /// written again in place after each change. Only valid inside a system.
     /// </summary>
     internal static void Show(EcsWorld world, Named named, Vec3 at)
@@ -102,20 +102,33 @@ public static partial class Modeling
     private static void Redraw(EcsWorld world, Named named)
     {
         var meshes = Meshes(named.Mesh);
+        var materials = Materials(named.Mesh);
+
+        // A slot's part made once its first face is in it, its mesh written in place from then on,
+        // and its mesh, material and name set again on each change, since a slot renamed, given a
+        // look or taken away, which moves the slots after it down by one, changes what each draws.
         for (var slot = 0; slot < meshes.Length; slot++)
         {
-            if (slot < named.Parts.Count && !named.Parts[slot].IsNone) continue;
             while (named.Parts.Count <= slot) named.Parts.Add(Entity.None);
             if (meshes[slot] == AssetHandle.None) continue;
 
-            // A slot's part made once its first face is in it, its mesh written in place from then on.
-            var part = world.Spawn();
-            world.Add(part, Transform.Identity);
+            var part = named.Parts[slot];
+            if (part.IsNone)
+            {
+                part = named.Parts[slot] = world.Spawn();
+                world.Add(part, Transform.Identity);
+                world.SetParent(part, named.Root);
+            }
+
             Render.SetMesh(world, part, meshes[slot]);
-            Render.SetMaterial(world, part, Prototype(named.Mesh.Slots[slot]));
+            Render.SetMaterial(world, part, materials[slot]);
             world.SetName(part, $"Model {named.Mesh.Slots[slot]}");
-            world.SetParent(part, named.Root);
-            named.Parts[slot] = part;
+        }
+
+        for (var slot = named.Parts.Count - 1; slot >= meshes.Length; slot--)
+        {
+            if (!named.Parts[slot].IsNone) world.Despawn(named.Parts[slot]);
+            named.Parts.RemoveAt(slot);
         }
 
         named.DrawnVersion = named.Mesh.Version;

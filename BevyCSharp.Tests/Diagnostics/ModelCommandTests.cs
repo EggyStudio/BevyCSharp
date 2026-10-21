@@ -6,7 +6,8 @@ namespace Bevy.Tests;
 /// <summary>
 /// Covers the modeling commands through the console, the guide's room with a window made a line at
 /// a time and its counts read from the answers, a save loaded back as the same model, undo and redo,
-/// the refusals, and a model shown in a running app following the commands' edits.
+/// the refusals, the texture coordinates and the slots' looks, and a model shown in a running app
+/// following the commands' edits, its material among them.
 /// </summary>
 /// <remarks>
 /// The models outlive a test where no app runs, so each test names its own and forgets them after.
@@ -71,11 +72,35 @@ public sealed class ModelCommandTests : IDisposable
         Assert.Equal("forgot plane3", ConsoleCommands.Run("model.free plane3"));
     }
 
+    [Fact]
+    public void ADensityTypedWithOneNumberTakesTheWidthOfItsSlotsTextureAndInfoSaysTheLooks()
+    {
+        Assert.StartsWith("uvs5: 8 vertices", ConsoleCommands.Run("model.box uvs5 2 2 2"));
+        ConsoleCommands.Run("model.select uvs5 +z");
+
+        // A slot with no texture shows the grid, a meter of 1024 pixels.
+        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.uv uvs5 density 512"));
+        Assert.Equal("uv density 512 1024", Modeling.Find("uvs5")!.Recipe[^1]);
+
+        // A texture's width is read once it has loaded, which no app runs to do here, so the
+        // density is refused with how to give the width, and given it the line runs.
+        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.slot uvs5 texture default textures/checker.png"));
+        Assert.Contains("Give it after the density", ConsoleCommands.Run("model.uv uvs5 density 512"));
+        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.uv uvs5 density 512 256"));
+        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.slot uvs5 roughness default 0.9"));
+        Assert.Contains("is none of", ConsoleCommands.Run("model.uv uvs5 wrap"));
+
+        Assert.Contains("slots default (texture textures/checker.png, roughness 0.9)", ConsoleCommands.Run("model.info uvs5"));
+        Assert.EndsWith("uv density 512 256\nslot roughness default 0.9", ConsoleCommands.Run("model.recipe uvs5"));
+        Assert.Equal("forgot uvs5", ConsoleCommands.Run("model.free uvs5"));
+    }
+
     [SkippableFact]
     public void AShownModelIsDrawnAndFollowsTheCommandsEdits()
     {
         Needs.Renderer();
         var (before, after) = (0f, 0f);
+        var (prototype, given, expected) = (AssetHandle.None, AssetHandle.None, AssetHandle.None);
 
         var run = new PictureRun { Width = 32, Height = 32 };
         string? freed = null;
@@ -91,16 +116,20 @@ public sealed class ModelCommandTests : IDisposable
             .Do("read and move", world =>
             {
                 before = Highest(world);
+                prototype = Render.MaterialOf(world.Resource<EcsWorld>(), Modeling.Entry("shown4")!.Parts[0]);
                 using (ConsoleHost.Lend(world))
                 {
                     ConsoleCommands.Run("model.select shown4 +y");
                     ConsoleCommands.Run("model.move shown4 0 1 0");
+                    ConsoleCommands.Run("model.slot shown4 color default 1 0 0");
                 }
             })
             .Wait(2)
             .Do("read again and forget", world =>
             {
                 after = Highest(world);
+                given = Render.MaterialOf(world.Resource<EcsWorld>(), Modeling.Entry("shown4")!.Parts[0]);
+                expected = Modeling.Materials(Modeling.Find("shown4")!)[0];
                 using (ConsoleHost.Lend(world)) freed = ConsoleCommands.Run("model.free shown4");
             })
             .Go();
@@ -109,6 +138,11 @@ public sealed class ModelCommandTests : IDisposable
         // it, written in place by the frame's tick.
         Assert.Equal((1f, 2f), (before, after));
         Assert.Equal("forgot shown4", freed);
+
+        // Drawn in its slot's prototype, then in the material of the color the slot was given.
+        Assert.NotEqual(AssetHandle.None, prototype);
+        Assert.NotEqual(prototype, given);
+        Assert.Equal(expected, given);
 
         static float Highest(World world)
         {

@@ -10,30 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `3d045110`, item 47, the screenshot on F2, and nothing else, carrying the review's
-file with its Shared line for 3DEngine's item 73: the key, the folder beside the program made on
-first use and the call, through the capture the `shot` command takes, the names from the local time
-with the second file in a second `_2` and the third `_3` as the source's own code counts, the names
-given out remembered since a file comes a frame or two after its press, a log line a picture, the
-key read in the frame-sync after the input in a run that draws and the press left for the program,
-nothing of the engine's, the editor's, the feature test's or the examples' on F2 so nothing moves,
-the tools guide's section, the cheat sheet line, the surface listing and the feature test's key
-list; tests of the names counted from two, two presses through the synthetic input in an offscreen
-run writing two pictures of the window's size with the program seeing both, the key moved to F12 and
-none with null; the suite 1,626 passed and 3 skipped. Read at 04:33 on 2026-10-21 and pushed at
-04:33, its build run green at 04:51; the build run of `bee54e98` had ended green at 04:27. Next item
-40's second half, the window, `Modeling.DrawWindow` listing the recipe with undo and redo, the
-counts, the grid step and each operation with its measures, picking by the engine's ray against the
-edit mesh's faces with shift adding and control removing and skipped while ImGui holds the pointer,
-a drag along the face's normal snapped to the grid step extruding on release and moving with alt,
-outlines of the hovered face and the selection as gizmos, and the editor's panel opened on the edit
-mesh an entity's mesh was built from; then 41 to 45.
+Reviewed up to `3fb5643e`, item 40's second half, the modeling window, and nothing else, carrying
+the review's file with its Shared line: `Modeling.DrawWindow` and `DrawPanel` with the counts, the
+grid, the select and facing buttons, undo and redo, the recipe's lines and the operations as fields
+and buttons, each a recipe line and a refused line showing its message; in the view a click picking
+a face by the ray against the edit mesh's faces with shift adding and control removing, a drag past
+four pixels along the normal extruding by whole grid steps on release with the distance in a tooltip
+and a cyan preview, moving with alt read while the button is held, a drag back to zero writing
+nothing, the selection outlined orange and the face under the pointer yellow;
+`Modeling.WantsPointer` true while a window's pointer is over or pressed on a face, so the editor's
+alt orbit begins only where it is false, found live when an alt drag on a face moved it and turned
+the camera together; `Modeling.Source` giving the edit mesh behind a handle, and the editor's Model
+tab opening on the selected entity's model with picking and marquee off; tests of picks on a moved
+box and a turned, scaled one, the drag distances, and an engine test clicking the top, dragging it
+to extrude 1 and alt-dragging to move 0 1 0 through the synthetic input, a headless app after it,
+which caught through N 3.7 an outline outliving its app and mended it with the outlines and the
+pointer state cleared by the next app; the guide's section and the tools guide's sentence, the cheat
+sheet and the listing written again, 22 blocks on a scratch package; the suite 1,629 passed and 3
+skipped with one failure outside the batch, the render recovery test counting 0 errors where 1 was
+expected eleven minutes into the run, passing alone and in the run before, which is item 48. Read at
+05:39 on 2026-10-21 and pushed at 05:39, its build run green at 05:55; the build run of `3d045110`
+had ended green at 04:51. Item 40 is done. Next item 41, the texture coordinates and the materials
+by slot, then item 48, then 42 to 45.
+
+Before it, `3d045110` came, item 47, the screenshot on F2, and nothing else, carrying the review's
+file with its Shared line. Pushed at 04:33, its build run green at 04:51.
 
 Before it, `bee54e98` came, item 40's first half, the commands, and nothing else, carrying the
 review's file with its Shared line. Pushed at 04:09, its build run green at 04:27.
-
-Before it, `76f784af` came, item 39's second half, the booleans and the openings, and nothing else,
-carrying the review's file with its Shared line. Pushed at 03:41, its build run green at 03:58.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1155,8 +1159,9 @@ from [SHARED.md](SHARED.md).
     blocking out a level from the terminal, as a script of `./bcs command` lines making a room with
     a window. Tests: the commands through the console host making the room of the guide and reading
     its counts, a load after a save giving the same, and the window's picking tested through the ray
-    against a known face. Two commits, the commands, then the window. First half done at `bee54e98`
-    on 2026-10-21, the commands, as the head says; the window follows item 47.
+    against a known face. Two commits, the commands, then the window. Done at `bee54e98` and
+    `3fb5643e` on 2026-10-21, the commands, then the window with its picking and its drag and the
+    editor's Model tab, as the heads say.
 
 41. **Texture coordinates shaped and textures given to faces (Decision 46).** The owner asked for UV
     processing and adding textures to surfaces. The selection's texture coordinates by projection,
@@ -1269,6 +1274,15 @@ from [SHARED.md](SHARED.md).
     after item 40's first commit. Where the engine has a default key of its own on F2, it moves to
     F3 as 3DEngine's performance window does, with a setting to move it to match, the move said in
     the tools guide. Done at `3d045110` on 2026-10-21, as the head says.
+
+48. **The render recovery test reads its error count until it is one or a bound of frames.** Found
+    by item 40's suite run on 2026-10-21: the test that a stopped drawing leaves the systems running
+    and counts the error once read 0 errors where 1 was expected, eleven minutes into a loaded run,
+    and passed alone and in the run before; it causes a validation error at frame 10 and reads the
+    count at frame 39, a bound in frames on a count that arrives when the device reports, which a
+    loaded machine stretches. The mend: the test reads the count each frame until it is one or a
+    bound of frames well past the device's reporting, failing then with the count, under N 3.5. One
+    commit, small, after item 41's first commit.
 
 ## Verdicts
 
@@ -2204,3 +2218,54 @@ over a face or pressed on one this frame or the last, and the editor's alt orbit
 it is false. `Modeling.Source(handle)` gives the edit mesh behind a mesh of `Meshes`, which the
 editor's Model tab opens on for the entity selected, its picking and its marquee off while the tab
 is drawn.
+
+Shared: texture coordinates and material slots, in the commit carrying this line, item 41, for the
+Modeling row, in the words of item 38's Reply. A face holds coordinates of its own, one for each
+corner, or none for the default, each corner's place in meters along two directions picked by the
+axis its normal is nearest (the largest absolute part, Y winning a tie, then X), (X, Z) for +Y,
+(X, -Z) for -Y, (-Z, -Y) for +X, (Z, -Y) for -X, (X, -Y) for +Z and (-X, -Y) for -Z. A face's own
+coordinates stay on its corners as they move. `uv planar +x` to `-z` or `<x y z>` projects along a
+direction, the way from the faces toward the projector, taking the default's directions for that
+side where the direction's Y is above 0.999 in size, and otherwise right as the world's up crossed
+with the direction, made a length of one, and down as right crossed with the direction. `uv box`
+writes the default onto the faces. `uv cylinder x|y|z|<x y z> [at <x y z>]` wraps about an axis
+through the point, by default the middle of the box holding the selected faces' corners, across
+being the planar right of the axis and side the axis crossed with it, each corner's angle the
+arctangent of its offset along side over along across, taken within a half turn of the angle of the
+face's mean corner, a corner on the axis taking that angle, the first coordinate the angle times
+the mean distance of the selection's corners from the axis (one where that is below a millionth)
+and the second minus the height along the axis. `uv sphere [at <x y z>]` takes X and minus Z for the
+angle, and minus the arctangent of the height over the level distance for the second, both times
+the mean distance from the point. `uv move <u> <v>`, `uv scale <s> [<t>] [each]` and
+`uv rotate <degrees> [each]`, turning from the first coordinate toward the second, act about the
+middle of the box holding the selected faces' coordinates, or each face's own with `each`, and
+write the default onto a face first. `uv density <pixels a meter> <texture width>` scales about that
+middle by the density over the width over the square root of the summed size of the faces'
+coordinate areas over their summed area in square meters, and refuses where those cover nothing.
+`uv reset` takes them back to the default. A flip and a mirroring scale reverse a face's coordinates
+with its corners, a triangulation, a duplicate and a join copy them, an extrude's cap keeps them, and
+an inset's smaller face and the pieces a boolean leaves take the least squares affine fit of the
+face's coordinates over its plane at their new corners, the merge after a boolean joining pieces
+only where their fits are equal. The faces an operation adds, an extrude's sides, an inset's ring, a
+fill's cap and the cutter's faces, take the default. A slot is a name with a look, changed by
+`slot add <slot>`, `slot rename <slot> <new>`, `slot remove <slot>`, refused for the first, whose
+faces go to the first slot and after which the slots move down by one, `slot color <slot> <r> <g>
+<b> [<a>]` in sRGB as typed, `slot texture`, `normal-map`, `occlusion-map`,
+`metallic-roughness-map` and `emissive-map <slot> <path>`, with `none` taking one away,
+`slot emissive <slot> <r> <g> <b>` in linear numbers, and `slot metallic` and `roughness <slot>
+<value>` from zero to one, a look's line making the slot where there is none, and a recipe made
+again starting from a first slot called `default` with no look. A look with nothing given is the
+prototype material of the slot's name, a color alone tints the grid, a texture takes the grid's
+place tinted by the color or white, the roughness is 0.85 without a texture and 0.5 with one, an
+emissive map alone is emissive in white, an alpha below one blends, every texture repeats, the picture and
+the emissive map are read as colors and the other maps as data, and an app makes one material a
+look. A join or a boolean keeps this mesh's look for a slot both have and takes the other's for one
+it lacks. `model.uv <name> <words>` and `model.slot <name> <words>` run the lines, a density of one
+number given the width of the texture of the first selected face's slot, the grid's 1024 where it
+has none, and refused while the texture loads or where no app runs, and `model.info` lists each slot
+with its look in the recipe's words. The window's Texture group has box, sphere, reset and from the
+view, the way back toward the camera in the mesh's space, rows for the other lines, and the
+selected faces' coordinates drawn over the slot's picture, a square of whole repeats from the
+repeat their least coordinates fall in, eight pictures a side at most, and its Slots group a row a
+look's line. The examples' resources hold no brick, so the test's wall takes the parallax example's
+block texture with its normal map, shown a picture a meter, and the floor the chair's wood.

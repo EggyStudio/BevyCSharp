@@ -38,10 +38,7 @@ public sealed partial class EditMesh
         foreach (var vertex in vertices) _positions[vertex] = center + turn * (_positions[vertex] - center);
 
         Changed();
-
-        // An axis along X, Y or Z is written as its letter, and any other as its three numbers.
-        var named = axis.Y == 0f && axis.Z == 0f && axis.X > 0f ? "x" : axis.X == 0f && axis.Z == 0f && axis.Y > 0f ? "y" : axis.X == 0f && axis.Y == 0f && axis.Z > 0f ? "z" : V(axis);
-        return Did($"rotate {named} {F(degrees)}{(pivot is { } at ? " at " + V(at) : "")}");
+        return Did($"rotate {AxisWords(axis)} {F(degrees)}{(pivot is { } at ? " at " + V(at) : "")}");
     }
 
     /// <summary>Scales the selected vertices toward or away from a point.</summary>
@@ -70,7 +67,7 @@ public sealed partial class EditMesh
             var moved = vertices.ToHashSet();
             foreach (var face in _faces)
             {
-                if (face.Corners.All(moved.Contains)) Array.Reverse(face.Corners);
+                if (face.Corners.All(moved.Contains)) face.Reverse();
             }
         }
 
@@ -127,21 +124,14 @@ public sealed partial class EditMesh
     /// <param name="slot">The slot's name.</param>
     /// <returns>This mesh, for the next operation.</returns>
     /// <remarks>
-    /// A slot holds a name rather than a material, so a mesh is shaped and its faces sorted into
-    /// floors, walls and trims before what each is drawn with is decided, and every face of a slot
-    /// is drawn with the one material that slot is given.
+    /// A slot is a name with a look, so a mesh is shaped and its faces sorted into floors, walls and
+    /// trims before what each is drawn with is decided, and every face of a slot is drawn with the
+    /// one material its look makes (<see cref="Modeling.Materials"/>).
     /// </remarks>
     public EditMesh Material(string slot)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(slot);
-        if (slot.Any(char.IsWhiteSpace)) throw new ArgumentException("A slot's name is one word.", nameof(slot));
-
-        var index = _slots.IndexOf(slot);
-        if (index < 0)
-        {
-            _slots.Add(slot);
-            index = _slots.Count - 1;
-        }
+        OneWord(slot, nameof(slot));
+        var index = SlotIndex(slot);
 
         foreach (var face in _selectedFaces) _faces[face].Slot = index;
         Changed();

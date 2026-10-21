@@ -55,7 +55,7 @@ internal static class Csg
     }
 
     /// <summary>What a polygon came from, carried through every split.</summary>
-    internal readonly record struct Source(string Slot, float Smooth, bool Second);
+    internal readonly record struct Source(string Slot, float Smooth, bool Second, SlotLook? Look = null, EditMesh.UvMap? Uvs = null);
 
     /// <summary>A plane, its normal of a length of one and how far along it from the origin.</summary>
     internal sealed class Plane(Point normal, double w)

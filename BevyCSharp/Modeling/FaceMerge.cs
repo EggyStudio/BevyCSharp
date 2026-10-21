@@ -49,7 +49,8 @@ internal static class FaceMerge
 
         Mend(loops, points, weld);
 
-        // Joined within each group of pieces in one plane and one slot, smoothed alike.
+        // Joined within each group of pieces in one plane and one slot, smoothed alike and with the
+        // same coordinates, so pieces of two faces whose own coordinates differ stay two faces.
         var groups = new List<(Csg.Point Normal, double Offset, Csg.Source Source, List<List<int>> Loops, List<bool> Second)>();
         foreach (var (corners, source) in loops)
         {
@@ -58,7 +59,7 @@ internal static class FaceMerge
             normal = normal.Unit;
             var offset = Csg.Point.Dot(normal, points[corners[0]]);
 
-            var group = groups.FindIndex(known => known.Source.Slot == source.Slot && known.Source.Smooth == source.Smooth
+            var group = groups.FindIndex(known => known.Source.Slot == source.Slot && known.Source.Smooth == source.Smooth && known.Source.Uvs == source.Uvs
                 && Csg.Point.Dot(known.Normal, normal) > 1 - 1e-6 && Math.Abs(known.Offset - offset) < weld);
             if (group < 0)
             {

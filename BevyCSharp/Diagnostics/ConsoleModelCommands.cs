@@ -16,8 +16,9 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// The models are those <see cref="Modeling.Register"/> named as well, so a game's level answers to
-/// them, and they last while the app runs. <c>model.show</c> draws one in its slots' prototype
-/// materials and keeps drawing it as the commands change it.
+/// them, and they last while the app runs. <c>model.show</c> draws one in its slots' materials,
+/// the prototype materials of their names until <c>model.slot</c> gives them a look, and keeps
+/// drawing it as the commands change it.
 /// </para>
 /// </remarks>
 internal static class ConsoleModelCommands
@@ -64,7 +65,7 @@ internal static class ConsoleModelCommands
             Counts(name, mesh),
             string.Create(culture, $"bounds ({low.X}, {low.Y}, {low.Z}) to ({high.X}, {high.Y}, {high.Z})"),
             string.Create(culture, $"volume {mesh.Volume} cubic meters, {mesh.OpenEdges} open edges, {(mesh.IsClosed ? "closed" : "open")}"),
-            $"slots {string.Join(", ", mesh.Slots)}",
+            $"slots {string.Join(", ", mesh.Slots.Select(slot => Look(slot, mesh.LookOf(slot))))}",
             string.Create(culture, $"grid {mesh.GridStep}, epsilon {mesh.BooleanEpsilon}, {mesh.Recipe.Count} lines of recipe"));
     }
 
@@ -130,7 +131,7 @@ internal static class ConsoleModelCommands
         }
     }
 
-    /// <summary>Draws a model in its slots' prototype materials where a point says, and keeps drawing it as it changes.</summary>
+    /// <summary>Draws a model in its slots' materials where a point says, and keeps drawing it as it changes.</summary>
     [Command("model.show", "Draws a model where a point says, following its edits: model.show <name> <x> <y> <z>")]
     internal static string Show(string line)
     {
@@ -242,6 +243,14 @@ internal static class ConsoleModelCommands
     [Command("model.epsilon", "Sets how near a point is to a plane to lie in it: model.epsilon <name> <distance>")]
     internal static string Epsilon(string line) => Run("epsilon", line);
 
+    // A density typed with one number takes the width of the texture of the first selected face's
+    // slot, which the line run is given, so the recipe makes the same coordinates without it.
+    [Command("model.uv", "Shapes the selected faces' texture coordinates: model.uv <name> planar +x..-z|<x y z>|box|cylinder x|y|z|<x y z> [at <x> <y> <z>]|sphere [at <x> <y> <z>]|move <u> <v>|scale <s> [<t>] [each]|rotate <degrees> [each]|density <pixels a meter> [<texture width>]|reset")]
+    internal static string Uv(string line) => Run("uv", line);
+
+    [Command("model.slot", "Changes a material slot: model.slot <name> add|remove <slot>|rename <slot> <new>|color <slot> <r> <g> <b> [a]|texture|normal-map|occlusion-map|metallic-roughness-map|emissive-map <slot> <path>|none|emissive <slot> <r> <g> <b>|metallic|roughness <slot> <value>")]
+    internal static string Slot(string line) => Run("slot", line);
+
     /// <summary>Runs an operation's line on a model, made first where the operation makes one, and answers its counts.</summary>
     private static string Run(string verb, string line, bool makes = false)
     {
@@ -257,7 +266,7 @@ internal static class ConsoleModelCommands
 
         try
         {
-            mesh.Run(rest.Length == 0 ? verb : $"{verb} {rest}");
+            mesh.Run(Modeling.Completed(mesh, rest.Length == 0 ? verb : $"{verb} {rest}"));
         }
         catch (Exception error) when (error is FormatException or ArgumentException or InvalidOperationException or IOException)
         {
@@ -265,6 +274,23 @@ internal static class ConsoleModelCommands
         }
 
         return Counts(name, mesh);
+    }
+
+    /// <summary>A slot's name with what its look gives, in the recipe's words, or the name alone for a prototype.</summary>
+    private static string Look(string slot, SlotLook look)
+    {
+        var given = new List<string>();
+        var culture = CultureInfo.InvariantCulture;
+        if (look.Color is { } color) given.Add(string.Create(culture, $"color {color.X} {color.Y} {color.Z} {color.W}"));
+        if (look.Texture is { } texture) given.Add($"texture {texture}");
+        if (look.NormalMap is { } normal) given.Add($"normal-map {normal}");
+        if (look.OcclusionMap is { } occlusion) given.Add($"occlusion-map {occlusion}");
+        if (look.MetallicRoughnessMap is { } metal) given.Add($"metallic-roughness-map {metal}");
+        if (look.Emissive is { } light) given.Add(string.Create(culture, $"emissive {light.X} {light.Y} {light.Z}"));
+        if (look.EmissiveMap is { } glow) given.Add($"emissive-map {glow}");
+        if (look.Metallic is { } metallic) given.Add(string.Create(culture, $"metallic {metallic}"));
+        if (look.Roughness is { } roughness) given.Add(string.Create(culture, $"roughness {roughness}"));
+        return given.Count == 0 ? slot : $"{slot} ({string.Join(", ", given)})";
     }
 
     /// <summary>What a model holds and what of it is selected, the answer of every operation.</summary>

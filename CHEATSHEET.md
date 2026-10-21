@@ -1116,6 +1116,19 @@ EditMesh SelectFaces(IEnumerable<int> faces, SelectionMode mode = SelectionMode.
 EditMesh SelectFacing(Vec3 direction, SelectionMode mode = SelectionMode.Replace);  // Selects the faces that face nearest one way along an axis, such as up
 EditMesh SelectInside(Vec3 corner, Vec3 opposite, SelectionMode mode = SelectionMode.Replace);  // Selects the vertices inside a box, the faces all of whose corners are inside it, and the edges between
 EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace);  // Selects the faces in a material slot
+SlotLook LookOf(string slot);                                   // What a slot is drawn with, nothing given where it is the prototype material of its name
+EditMesh SlotAdd(string slot);                                  // Adds a slot no face is in yet, drawn with the prototype material of its name
+EditMesh SlotRename(string slot, string name);                  // Gives a slot another name, its faces and its look kept
+EditMesh SlotRemove(string slot);                               // Takes a slot away, its faces given the first slot
+EditMesh SlotColor(string slot, float red, float green, float blue, float alpha = 1f);  // Gives a slot a color, which tints its texture, or its grid where it has no texture
+EditMesh SlotTexture(string slot, string? path);                // Gives a slot a picture its faces show, in the grid's place, or takes it away
+EditMesh SlotNormalMap(string slot, string? path);              // Gives a slot a normal map, or takes it away
+EditMesh SlotOcclusionMap(string slot, string? path);           // Gives a slot an ambient occlusion map, or takes it away
+EditMesh SlotMetallicRoughnessMap(string slot, string? path);   // Gives a slot a map of metalness and roughness, or takes it away
+EditMesh SlotEmissive(string slot, float red, float green, float blue);  // Gives a slot an emissive color
+EditMesh SlotEmissiveMap(string slot, string? path);            // Gives a slot an emissive map, or takes it away
+EditMesh SlotMetallic(string slot, float metallic);             // Sets how metal a slot's faces are
+EditMesh SlotRoughness(string slot, float roughness);           // Sets how rough a slot's faces are
 EditMesh Extrude(float distance);                               // Pushes the selected faces out along their normals, the sides between them and what they left filled
 EditMesh Extrude(Vec3 by);                                      // Pushes the selected faces out by one vector, the sides between them and what they left filled
 EditMesh Inset(float distance);                                 // Makes each selected face a smaller face inside it, with a band of faces round it
@@ -1133,6 +1146,18 @@ EditMesh Scale(float factor, Vec3? pivot = null);               // Scales the se
 EditMesh Grid(float step);                                      // Sets the grid step a point picked by hand lands on and Snap rounds to
 EditMesh Snap();                                                // Puts each selected vertex on the nearest point of the grid
 EditMesh Material(string slot);                                 // Puts the selected faces in a material slot, which is made where the mesh has none of that name
+Vec2[] UvsOf(int face);                                         // The texture coordinates of a face's corners, in their order, its own or the world-aligned default
+bool HasOwnUvs(int face);                                       // Whether a face has texture coordinates of its own, given by a uv operation, rather than the world-aligned default
+EditMesh UvPlanar(Vec3 facing);                                 // Projects the selected faces' coordinates along a direction, as a picture shone onto them from that side
+EditMesh UvBox();                                               // Gives the selected faces the world-aligned default as coordinates of their own, which then follow their corners
+EditMesh UvCylinder(Vec3 axis, Vec3? center = null);            // Wraps the selected faces' coordinates round an axis, as a label round a can
+EditMesh UvSphere(Vec3? center = null);                         // Wraps the selected faces' coordinates round a point, as a map of the world round a globe
+EditMesh UvMove(float u, float v);                              // Moves the selected faces' coordinates
+EditMesh UvScale(float u, float v, bool each = false);          // Scales the selected faces' coordinates about their middle, so a picture is shown smaller where they grow
+EditMesh UvScale(float factor, bool each = false);              // Scales the selected faces' coordinates by one factor about their middle
+EditMesh UvRotate(float degrees, bool each = false);            // Turns the selected faces' coordinates about their middle
+EditMesh UvDensity(float pixelsPerMeter, int texturePixels);    // Scales the selected faces' coordinates about their middle so a texture of a size shows so many of its pixels a meter
+EditMesh UvReset();                                             // Puts the selected faces back on the world-aligned default
 ```
 
 ### `Modeling`
@@ -1142,6 +1167,8 @@ static MeshData[] Build(EditMesh mesh);                         // Builds the me
 static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
 static EditMesh? Source(AssetHandle mesh);                      // The edit mesh a mesh of Meshes was built from, or nothing for a mesh it did not build
 static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots
+static AssetHandle[] Materials(EditMesh mesh);                  // The material each slot of a mesh is drawn with, in the order of its slots
+static AssetHandle Material(string name, SlotLook look);        // The material a look makes, for a slot of a name
 static AssetHandle Prototype(string name);                      // The prototype material of a part of a level, the grid tinted by its color
 static AssetHandle Prototype(Color color);                      // A prototype material of any color, the grid tinted by it
 static void Register(string name, EditMesh mesh);               // Gives a mesh a name the console's model commands reach it by, so a game's level is shaped from the terminal and by a drive, model.cut level window 1 1 2 0.9 cutting a window in it

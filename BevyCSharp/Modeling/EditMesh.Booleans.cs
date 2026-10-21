@@ -124,7 +124,7 @@ public sealed partial class EditMesh
         var (first, firstFace) = AddPrism([new(0f, 0f), new(size.Z, 0f), new(size.Z, size.X), new(0f, size.X)], Axis.Y, 0f, size.Y);
         var (innerFace, t) = (_faces.Count, thickness);
         AddPrism([new(t, t), new(size.Z - t, t), new(size.Z - t, size.X - t), new(t, size.X - t)], Axis.Y, t, size.Y - t);
-        for (var face = innerFace; face < _faces.Count; face++) Array.Reverse(_faces[face].Corners);
+        for (var face = innerFace; face < _faces.Count; face++) _faces[face].Reverse();
 
         Placed(first, firstFace, at, centered);
         return Did($"room {V(size)} {F(thickness)}{Placement(at, centered)}");
@@ -210,14 +210,10 @@ public sealed partial class EditMesh
 
         foreach (var (corners, source) in faces)
         {
-            var slot = _slots.IndexOf(source.Slot);
-            if (slot < 0)
-            {
-                _slots.Add(source.Slot);
-                slot = _slots.Count - 1;
-            }
-
-            var face = AddFace(corners, slot, source.Smooth);
+            // A piece of a face with coordinates of its own takes them where the face had them.
+            var slot = SlotIndex(source.Slot, source.Look);
+            var uvs = source.Uvs is { } map ? corners.Select(corner => map.At(_positions[corner])).ToArray() : null;
+            var face = AddFace(corners, slot, source.Smooth, uvs);
             if (!source.Second) continue;
             _selectedFaces.Add(face);
             _selectedVertices.UnionWith(corners);
@@ -233,7 +229,7 @@ public sealed partial class EditMesh
         {
             var points = face.Corners.Select(corner => mesh._positions[corner]).ToArray();
             var triangles = EarClipping.Cut(points, mesh.Newell(face.Corners));
-            var source = new Csg.Source(mesh._slots[face.Slot], face.Smooth, second);
+            var source = new Csg.Source(mesh._slots[face.Slot], face.Smooth, second, mesh._looks[face.Slot], mesh.FitOf(face));
 
             for (var t = 0; t < triangles.Length; t += 3)
             {

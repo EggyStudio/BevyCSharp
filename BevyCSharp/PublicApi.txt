@@ -1756,11 +1756,33 @@ sealed class Bevy.EditMesh
   EditMesh SelectNone()
   EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace)
   EditMesh Shade(bool smooth, float degrees = 30f)
+  EditMesh SlotAdd(string slot)
+  EditMesh SlotColor(string slot, float red, float green, float blue, float alpha = 1f)
+  EditMesh SlotEmissive(string slot, float red, float green, float blue)
+  EditMesh SlotEmissiveMap(string slot, string? path)
+  EditMesh SlotMetallic(string slot, float metallic)
+  EditMesh SlotMetallicRoughnessMap(string slot, string? path)
+  EditMesh SlotNormalMap(string slot, string? path)
+  EditMesh SlotOcclusionMap(string slot, string? path)
+  EditMesh SlotRemove(string slot)
+  EditMesh SlotRename(string slot, string name)
+  EditMesh SlotRoughness(string slot, float roughness)
+  EditMesh SlotTexture(string slot, string? path)
   EditMesh Snap()
   EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false)
   EditMesh Subtract(string path, Vec3 at = default)
   EditMesh Triangulate()
   EditMesh Union(string path, Vec3 at = default)
+  EditMesh UvBox()
+  EditMesh UvCylinder(Vec3 axis, Vec3? center = null)
+  EditMesh UvDensity(float pixelsPerMeter, int texturePixels)
+  EditMesh UvMove(float u, float v)
+  EditMesh UvPlanar(Vec3 facing)
+  EditMesh UvReset()
+  EditMesh UvRotate(float degrees, bool each = false)
+  EditMesh UvScale(float factor, bool each = false)
+  EditMesh UvScale(float u, float v, bool each = false)
+  EditMesh UvSphere(Vec3? center = null)
   EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false)
   EditMesh Window(float width, float height, float along, float sill)
   EditMesh()
@@ -1768,11 +1790,14 @@ sealed class Bevy.EditMesh
   IReadOnlyList<string> Recipe { get; }
   IReadOnlyList<string> Slots { get; }
   ReadOnlySpan<int> Corners(int face)
+  SlotLook LookOf(string slot)
+  Vec2[] UvsOf(int face)
   Vec3 Center(int face)
   Vec3 Normal(int face)
   Vec3 Position(int vertex)
   bool CanRedo { get; }
   bool CanUndo { get; }
+  bool HasOwnUvs(int face)
   bool IsClosed { get; }
   bool IsFaceSelected(int face)
   bool IsVertexSelected(int vertex)
@@ -4387,8 +4412,10 @@ sealed class Bevy.MethodHints : IEquatable<MethodHints>
   string? Tooltip { get; init; }
   void Deconstruct(out string? Label, out string? Tooltip, out bool Hidden, out ButtonLine Line, out double Weight, out bool Space, out bool Separator, out string? Header, out string? Foldout, out bool FoldoutOpen, out string? Note, out NoteKind NoteKind, out int Order)
 static class Bevy.Modeling
+  static AssetHandle Material(string name, SlotLook look)
   static AssetHandle Prototype(Color color)
   static AssetHandle Prototype(string name)
+  static AssetHandle[] Materials(EditMesh mesh)
   static AssetHandle[] Meshes(EditMesh mesh)
   static EditMesh? Find(string name)
   static EditMesh? Source(AssetHandle mesh)
@@ -13106,6 +13133,24 @@ enum Bevy.SliderReadout : int
   Box = 1
   None = 2
   Number = 0
+sealed class Bevy.SlotLook : IEquatable<SlotLook>
+  SlotLook()
+  Vec3? Emissive { get; init; }
+  Vec4? Color { get; init; }
+  bool Equals(SlotLook? other)
+  bool IsPrototype { get; }
+  float? Metallic { get; init; }
+  float? Roughness { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(SlotLook? left, SlotLook? right)
+  static bool op_Inequality(SlotLook? left, SlotLook? right)
+  string? EmissiveMap { get; init; }
+  string? MetallicRoughnessMap { get; init; }
+  string? NormalMap { get; init; }
+  string? OcclusionMap { get; init; }
+  string? Texture { get; init; }
 sealed class Bevy.SpaceAttribute : Attribute
   SpaceAttribute()
 readonly struct Bevy.Sphere : IEquatable<Sphere>

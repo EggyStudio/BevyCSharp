@@ -91,7 +91,10 @@ public sealed partial class EditMesh
                 AddFace([corners[i], corners[next], inner[next], inner[i]], face.Slot, face.Smooth);
             }
 
+            // The smaller face keeps the coordinates the face had where its corners moved to.
+            var fit = FitOf(face);
             face.Corners = inner;
+            if (fit is { } map) face.Uvs = inner.Select(corner => map.At(_positions[corner])).ToArray();
             _selectedVertices.UnionWith(inner);
         }
 
@@ -218,16 +221,21 @@ public sealed partial class EditMesh
             var gone = new HashSet<int>();
             for (var index = 0; index < _faces.Count; index++)
             {
-                var corners = _faces[index].Corners.Select(corner => into.GetValueOrDefault(corner, corner)).ToList();
+                var face = _faces[index];
+                var corners = face.Corners.Select(corner => into.GetValueOrDefault(corner, corner)).ToList();
+                var uvs = face.Uvs?.ToList();
 
-                // A corner the same as the one before it, round to the first, said once.
+                // A corner the same as the one before it, round to the first, said once, its
+                // coordinates going with it.
                 for (var i = corners.Count - 1; i >= 0 && corners.Count > 0; i--)
                 {
-                    if (corners[i] == corners[(i + 1) % corners.Count] && corners.Count > 1) corners.RemoveAt(i);
+                    if (corners[i] != corners[(i + 1) % corners.Count] || corners.Count <= 1) continue;
+                    corners.RemoveAt(i);
+                    uvs?.RemoveAt(i);
                 }
 
                 if (corners.Count < 3) gone.Add(index);
-                else _faces[index].Corners = [.. corners];
+                else (face.Corners, face.Uvs) = ([.. corners], uvs is null ? null : [.. uvs]);
             }
 
             _selectedVertices.ExceptWith(into.Keys);
@@ -242,7 +250,7 @@ public sealed partial class EditMesh
     /// <returns>This mesh, for the next operation.</returns>
     public EditMesh Flip()
     {
-        foreach (var face in _selectedFaces) Array.Reverse(_faces[face].Corners);
+        foreach (var face in _selectedFaces) _faces[face].Reverse();
 
         Changed();
         return Did("flip");
@@ -262,12 +270,16 @@ public sealed partial class EditMesh
             var face = _faces[index];
             if (face.Corners.Length == 3) continue;
 
-            var corners = face.Corners;
+            var (corners, uvs) = (face.Corners, face.Uvs);
             var triangles = EarClipping.Cut(corners.Select(corner => _positions[corner]).ToArray(), Newell(corners));
             face.Corners = [corners[triangles[0]], corners[triangles[1]], corners[triangles[2]]];
+            face.Uvs = uvs is null ? null : [uvs[triangles[0]], uvs[triangles[1]], uvs[triangles[2]]];
 
             for (var t = 3; t < triangles.Length; t += 3)
-                _selectedFaces.Add(AddFace([corners[triangles[t]], corners[triangles[t + 1]], corners[triangles[t + 2]]], face.Slot, face.Smooth));
+            {
+                Vec2[]? own = uvs is null ? null : [uvs[triangles[t]], uvs[triangles[t + 1]], uvs[triangles[t + 2]]];
+                _selectedFaces.Add(AddFace([corners[triangles[t]], corners[triangles[t + 1]], corners[triangles[t + 2]]], face.Slot, face.Smooth, own));
+            }
         }
 
         Changed();
@@ -290,7 +302,7 @@ public sealed partial class EditMesh
                 if (!copies.TryGetValue(corner, out var copy)) copies[corner] = copy = AddVertex(_positions[corner]);
                 return copy;
             }).ToArray();
-            made.Add(AddFace(corners, face.Slot, face.Smooth));
+            made.Add(AddFace(corners, face.Slot, face.Smooth, face.Uvs is { } uvs ? [.. uvs] : null));
         }
 
         _selectedFaces.Clear();
@@ -325,15 +337,8 @@ public sealed partial class EditMesh
         var made = new List<int>();
         foreach (var face in other._faces)
         {
-            var name = other._slots[face.Slot];
-            var slot = _slots.IndexOf(name);
-            if (slot < 0)
-            {
-                _slots.Add(name);
-                slot = _slots.Count - 1;
-            }
-
-            made.Add(AddFace(face.Corners.Select(corner => corner + offset).ToArray(), slot, face.Smooth));
+            var slot = SlotIndex(other._slots[face.Slot], other._looks[face.Slot]);
+            made.Add(AddFace(face.Corners.Select(corner => corner + offset).ToArray(), slot, face.Smooth, face.Uvs is { } uvs ? [.. uvs] : null));
         }
 
         _selectedFaces.Clear();
