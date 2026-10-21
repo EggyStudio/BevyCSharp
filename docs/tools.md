@@ -287,6 +287,17 @@ game built on BevyCSharp is drivable exactly the way the editor is. The editor a
 registers `eval`, which compiles a fragment of C# and runs it against the live world through the
 same script host that reloads behavior scripts.
 
+## Screenshots
+
+F2 saves a picture of the frame being drawn into a folder named `screenshots` beside the program,
+made on first use, named by the local time as Minecraft names its own, `2026-10-21_03.45.12.png`,
+the second taken in one second `2026-10-21_03.45.12_2.png` and the third `_3`, and the log says
+where it went. The press is left for the program to read as well. `Capture.ScreenshotKey` moves it to
+another key, or with `null` turns it off, for a game that uses F2 for something of its own,
+`Capture.ScreenshotFolder` puts the pictures elsewhere, and `Capture.Screenshot()` takes one from
+code. A run that draws nothing, headless, takes none. The engine holds no other key of its own on
+F2.
+
 ## Animated captures
 
 `record` takes pictures of what the window shows at a step of the app's clock and writes them as

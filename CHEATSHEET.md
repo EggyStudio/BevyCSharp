@@ -1844,6 +1844,7 @@ The guide's page is [tools.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 
 ```csharp
 static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f);  // Starts recording what this run draws, a picture at each interval of its clock, until StopRecording, as an animated GIF or PNG
+static string Screenshot();                                     // Saves a picture of the frame being drawn into ScreenshotFolder, as the key does
 static Task<string>? StopRecording();                           // Stops a recording, whose file is written once the pictures it asked for have come back
 ```
 

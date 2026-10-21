@@ -60,6 +60,58 @@ public readonly record struct Capture(int Id)
         return Recorder.Start(new Recorder.Request(path, new Recorder.Measure(intervalMs / 1000.0, false), null, null, scale, null));
     }
 
+    /// <summary>
+    /// The key that saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>,
+    /// F2 unless set, or nothing for none.
+    /// </summary>
+    /// <remarks>
+    /// As Minecraft's F2, a picture named by the time, so a player or a tester takes one without a
+    /// tool, and the log says where it went. The press is read and left alone, so a program reading
+    /// the key itself sees it too, and a program using it for something else of its own moves this
+    /// to another key or turns it off. A run that draws nothing, headless, takes none.
+    /// </remarks>
+    public static Key? ScreenshotKey { get; set; } = Key.F2;
+
+    /// <summary>Where a screenshot goes, a folder named <c>screenshots</c> beside the program unless set, made on first use.</summary>
+    public static string ScreenshotFolder { get; set; } = Path.Combine(AppContext.BaseDirectory, "screenshots");
+
+    /// <summary>Saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>, as the key does. Only valid inside a system.</summary>
+    /// <returns>The file's full path, where the picture is written a frame or two later, once it is back off the GPU.</returns>
+    /// <remarks>
+    /// Named by the local time as Minecraft names its own, <c>2026-10-21_03.45.12.png</c>, then
+    /// <c>2026-10-21_03.45.12_2.png</c> and <c>_3</c> for a second and a third taken in the same
+    /// second, counting the first as one as Minecraft does, the names given out remembered, since a
+    /// file is not there until its picture is written. The capture is the one
+    /// <c>shot</c> and <see cref="Render.Screenshot(string)"/> take.
+    /// </remarks>
+    public static string Screenshot()
+    {
+        var folder = Path.GetFullPath(ScreenshotFolder);
+        Directory.CreateDirectory(folder);
+
+        string path;
+        lock (Given)
+        {
+            path = ScreenshotName(folder, DateTime.Now, candidate => Given.Contains(candidate) || File.Exists(candidate));
+            Given.Add(path);
+        }
+
+        Render.Screenshot(path);
+        Log.Info($"[screenshot] saved to {path}");
+        return path;
+    }
+
+    private static readonly HashSet<string> Given = new(StringComparer.Ordinal);
+
+    /// <summary>A screenshot's name in a folder for a moment, the moment's own or with the first count not taken.</summary>
+    internal static string ScreenshotName(string folder, DateTime at, Func<string, bool> taken)
+    {
+        var stem = at.ToString("yyyy-MM-dd_HH.mm.ss", System.Globalization.CultureInfo.InvariantCulture);
+        var path = Path.Combine(folder, stem + ".png");
+        for (var count = 2; taken(path); count++) path = Path.Combine(folder, $"{stem}_{count}.png");
+        return path;
+    }
+
     /// <summary>Stops a recording, whose file is written once the pictures it asked for have come back.</summary>
     /// <returns>The recording's task, finished with the file's path once it is written, or nothing where none was being made.</returns>
     public static Task<string>? StopRecording() => Recorder.Stop();

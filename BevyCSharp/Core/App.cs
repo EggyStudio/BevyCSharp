@@ -419,6 +419,11 @@ public sealed unsafe partial class App : IDisposable
 
                 // The models the console shows drawn again where its commands changed them.
                 Modeling.Tick(world.Resource<EcsWorld>());
+
+                // A picture of this frame where the screenshot key was pressed, the press left for the
+                // program to read as well, in a run that draws.
+                if (Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
+                    Capture.Screenshot();
             }
 
             DataAssets.PostChanges(world.Resource<MessageBus>());

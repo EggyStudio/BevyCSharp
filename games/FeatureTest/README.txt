@@ -29,6 +29,7 @@ Keys
   F5               step the view, from the eyes, from behind and from in front
   F11              fullscreen
   F1               the panel
+  F2               a screenshot, into the screenshots folder beside the program
   F3               the overlay, the frame time, where you stand and what the program holds
   Key under Esc    the console
 

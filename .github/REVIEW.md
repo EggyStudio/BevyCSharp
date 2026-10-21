@@ -10,37 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `76f784af`, item 39's second half, the booleans and the openings, and nothing else,
-carrying the review's file with its Shared line, which holds the lines and the rules keeping a mesh
-after a boolean the same in both engines, the partition's piece order, the weld, the mended
-T-junctions, the joining order and its refusal, the straight corners taken, the room's prisms and
-the opening's frame, depth and margins: csg.js's partition ported in doubles with its MIT notice at
-the file's head and its row in the notices, a polygon carrying its slot, smoothing and solid through
-every split; the merge welding at ten times the epsilon, cutting each edge at the welded points
-along it, joining coplanar pieces of one slot along shared edges while the loop holds no vertex
-twice, and taking the corners straight in every face of theirs; union, subtract and intersect of a
-path placed, cut of a primitive's line refused for a plane, window and door through the first
-selected wall measured over every selected face in its plane and cut as deep as a ray finds the
-wall's other side and a centimeter past each face, room as an outer prism and an inner one wound
-back, ramp, and an epsilon line reset by an undo, the second solid's faces selected after; the
-guide's section with the limit on two faces in one plane and 15 blocks on a scratch package; the
-feature test's gallery room of 6 by 5 by 3 in the prototype materials with a door, a window and
-stairs inside, each slot solid, the drive's room view checking the door; seven boolean tests, a wall
-cut through closed at 5.5 with 20, 32 and 12, two cubes united to a box, two boxes intersected and
-subtracted to 1 and 7, a room 16, 24 and 12, a window taking 0.2 and leaving the back whole, a ramp
-6 and 5 at 3, every new line read back; the suite 1,620 passed and 3 skipped; the course run whole,
-exit 0, 22 captures. Read at 03:41 on 2026-10-21 and pushed at 03:41, its build run green at 03:58;
-the build run of `bfe1fc63` had ended green at 03:23. Item 39 is done. Next item 40, the commands in
-the recipe's words as the Reply has them, then item 47, the F2 screenshot the owner asked for
-shortly before 03:42, then the window; then 41 to 45.
+Reviewed up to `bee54e98`, item 40's first half, the commands, and nothing else, carrying the
+review's file with its Shared line for the commands' forms, their answer and their refusals:
+thirty-one `model.<verb> <name> <words>` commands, one a recipe line, each answering the counts and
+the selection; a primitive, a join or a union making the model where none has the name and any other
+verb on a missing name refused, so a typo makes no model; a line the recipe cannot read refused with
+the recipe's own message; new, free, list, info with the counts, bounds, volume, open edges, slots,
+grid, epsilon and the recipe's length, recipe, undo and redo with their refusals, save, load and
+show; a registry of named models emptied when another app starts, with register, find and names
+public so a game's level answers to the commands; show making a root entity with a child a slot in
+its prototype material, written again where the model changed; the guide's section a script of
+client lines making the room with a window and saving it, the catalog's row, the cheat sheet and the
+listing; tests running the guide's room a line at a time, the save loaded back, undo and redo, the
+refusals, and a shown model drawn and following a move in an offscreen run; each command answered by
+hand through the client on the feature test; the suite 1,623 passed and 3 skipped after one nullable
+warning mended. Read at 04:09 on 2026-10-21 and pushed at 04:09, its build run green at 04:27; the
+build run of `76f784af` had ended green at 03:58. Next item 47, the F2 screenshot, nothing in this
+engine holding F2 so nothing moves, the key, the folder and the names in the capture class with the
+names given out remembered since the file comes a frame later; then item 40's second half, the
+window; then 41 to 45.
+
+Before it, `76f784af` came, item 39's second half, the booleans and the openings, and nothing else,
+carrying the review's file with its Shared line. Pushed at 03:41, its build run green at 03:58.
 
 Before it, `bfe1fc63` came, item 39's first half, the grid image with the bridge's levels at ABI
 299, the prototype materials and the box mapping, and nothing else, carrying the review's file with
 its Shared line. Pushed at 03:06, its build run green at 03:23.
-
-Before it, `a1babb72` came, item 38's second half, the topology, the recipe, the build, the collider
-and the feature test's row, and nothing else, carrying the review's file with its Shared line.
-Pushed at 02:39, its build run green at 02:56.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1162,7 +1157,8 @@ from [SHARED.md](SHARED.md).
     blocking out a level from the terminal, as a script of `./bcs command` lines making a room with
     a window. Tests: the commands through the console host making the room of the guide and reading
     its counts, a load after a save giving the same, and the window's picking tested through the ray
-    against a known face. Two commits, the commands, then the window.
+    against a known face. Two commits, the commands, then the window. First half done at `bee54e98`
+    on 2026-10-21, the commands, as the head says; the window follows item 47.
 
 41. **Texture coordinates shaped and textures given to faces (Decision 46).** The owner asked for UV
     processing and adding textures to surfaces. The selection's texture coordinates by projection,
@@ -1265,15 +1261,16 @@ from [SHARED.md](SHARED.md).
     taken in the game with F2, the same for BevyCSharp, the captures put in the root or a subfolder.
     The engine gains a built-in key: F2 writes the frame being drawn as a PNG into a `screenshots`
     folder beside the program, made on first use, the file named by the time as the source names its
-    own, `2026-10-21_03.45.12.png` and a count where two fall in one second, through the capture the
-    `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves it or turns
-    it off with none, and a program that reads F2 itself still sees the press. The cheat sheet line
-    through the script, the surface listing and the tools guide's paragraph beside the captures.
-    Tests: a press through the input writing a file of the frame's size into the folder in a
-    headless run, two in one second given two names, the key moved and turned off. One commit, after
-    item 40's first commit. Where the engine has a default key of its own on F2, it moves to F3 as
-    3DEngine's performance window does, with a setting to move it to match, the move said in the
-    tools guide.
+    own, `2026-10-21_03.45.12.png` and a count where two fall in one second, the second file `_2`
+    and the third `_3` as the source's own code counts, read by the game's coder, through the
+    capture the `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves
+    it or turns it off with none, and a program that reads F2 itself still sees the press. The cheat
+    sheet line through the script, the surface listing and the tools guide's paragraph beside the
+    captures. Tests: a press through the input writing a file of the frame's size into the folder in
+    a headless run, two in one second given two names, the key moved and turned off. One commit,
+    after item 40's first commit. Where the engine has a default key of its own on F2, it moves to
+    F3 as 3DEngine's performance window does, with a setting to move it to match, the move said in
+    the tools guide.
 
 ## Verdicts
 
@@ -2172,3 +2169,13 @@ point with a child for each slot in that slot's prototype material, its meshes w
 frame where the model changed. A game's mesh answers to them once `Modeling.Register(name, mesh)`
 names it, `Modeling.Find(name)` and `Modeling.Names` read them, and the names last while the app
 runs, the next app starting with none. `model.export` and `model.import` wait for item 45.
+
+Shared: the screenshot key, in the commit carrying this line, item 47, for its row, in the words
+3DEngine's item 73 takes. `Capture.ScreenshotKey`, F2 unless set and none with `null`, saves the
+frame being drawn through the capture `shot` takes, read after the frame's input with the press left
+for the program, into `Capture.ScreenshotFolder`, a folder named `screenshots` beside the program,
+made on first use, the file named by the local time as `yyyy-MM-dd_HH.mm.ss.png`, the second in one
+second `_2` and the third `_3` as Minecraft counts them, the names given out remembered since a file comes a frame or two
+after its press, and a line of the log, `[screenshot] saved to <path>`, saying where. A headless run
+takes none. `Capture.Screenshot()` takes one from code. Nothing of this engine's, its editor, the
+feature test or the examples held F2, so no key of its own moves to F3.
