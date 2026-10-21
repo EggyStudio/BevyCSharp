@@ -8,8 +8,12 @@ set -eu
 root=$(cd "$(dirname "$0")" && pwd)
 binary="$root/BevyCSharp.Cli/bin/Debug/net10.0/bcs"
 
+# Built with no node kept for reuse, since MSBuild's worker nodes start with the standard streams
+# of whatever ran this and idle on after the build waiting to be used again, so a caller reading
+# this tool's output, a test or a workflow's step, would read until they ended rather than until
+# this did.
 if [ ! -x "$binary" ]; then
-    dotnet build "$root/BevyCSharp.Cli/BevyCSharp.Cli.csproj" -v q --nologo >&2
+    dotnet build "$root/BevyCSharp.Cli/BevyCSharp.Cli.csproj" -v q --nologo -nodeReuse:false >&2
 fi
 
 exec "$binary" "$@"

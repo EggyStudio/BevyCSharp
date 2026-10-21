@@ -10,36 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `585497f1`, item 46's first half, the recorder, and nothing else, carrying the
-review's file with its Shared line: frames asked of the frame being drawn at a step of the app's
-clock, read back as they arrive, scaled where asked and written on a worker to a part file moved
-whole into place; the GIF writer's median cut to 255 colors over all the frames with Bayer dithering
-between the two nearest, each frame after the first its changed rectangle, the delays rounded so
-their sum stays nearest, the format's LZW and a loop forever; the PNG writer moved out of the
-captured image and writing animated PNG with its frame chunks over changed rectangles; an internal
-reader of both for the tests; `Capture.StartRecording(path, intervalMs, scale)`, `StopRecording` and
-`IsRecording`; the `record` and `record.stop` commands; the tools guide's section and the cheat
-sheet's group. The words: `record <path> <length> [every <step>] [scale <s>] [play <time>]`, the
-length `5s`, `120f` or a count, the step `250ms`, `1s` or `15f` and a tenth of a second by default,
-`play` taking a time where the item wrote milliseconds, a bare number read as milliseconds, which
-stands and 3DEngine's item 70 takes. Eleven tests, two of them real offscreen runs on a sixtieth
-clock giving a GIF of 8 frames at 250 ms and an animated PNG at half scale; N 3.3 caught a polling
-helper's clock and the tests take the file from the recording's task instead; the suite 1,561 passed
-and 3 skipped. Read at 01:12 on 2026-10-21 and pushed at 01:12, run 39513500438, which ended green
-at 01:30, Windows in 17 minutes; the build run of `08d03b4d` had ended green at 00:50 in 12 minutes,
-and the pack run of `cf70c650` is at its drive and its capture shards. Next the second half, `./bcs
-record` with a `record.status` command, `build/animate.py` with Pillow or a `bcs animate` verb over
-the engine's writers through an internals-visible line with its reason, and a recording of Swarm
-above the README's generated gallery block since the block is the examples script's; then item 38's
-second half with the ABI at 299, then 39 to 45.
+Reviewed up to `27b3f8eb`, item 46's second half, and nothing else, carrying the review's file with
+its second Shared line: `record.status` answering recording, finishing, writing or the frames
+written; `./bcs record <path> <length> [--every] [--scale] [--play]` sending the command and asking
+the status until the file is written, so a length on the app's clock is waited for whatever the
+machine's time; `build/animate.py <out> <pictures...> --delay <ms> [--loop n] [--scale s]` with
+Pillow where installed and `./bcs animate` over the engine's writers elsewhere, a WebP needing
+Pillow either way, the library's internals visible to the client with the reason said; the help,
+BCS.md and the tools guide; Swarm's third wave above the README's generated gallery, 30 frames at
+100 ms, 453 KB; a test of the script's two writers in the suite, listed under N 1.4 as a
+build-script test; the suite 1,568 passed and 3 skipped. Read at 01:38 on 2026-10-21 and pushed at
+01:38, run 39516364351, which ended at 01:57 with its Windows and macOS suites green and its Linux
+suite lost to the animate script's test hanging for five minutes and taking the test host down,
+Verdict 41, its mend before item 38's second half's commit; the build run of `585497f1` had ended
+green at 01:30, Windows in 17 minutes. The pack run of `cf70c650` has its drive green in 1 hour 10
+minutes and its four capture shards green, which settles Verdict 38, and its pack job running since
+01:29, which is Verdict 40's step whole; the next version comes from it, its listing and notes to
+read. Item 38's second half is in testing, with no bridge change after all, since
+`Render.GenerateTangents` already gives a mesh made in code its tangents in render builds and the
+modeling calls it after each create or write, the bridge staying at 298; then items 39 to 45.
+
+Before it, `585497f1` came, item 46's first half, the recorder with its GIF and animated PNG
+writers, the calls and the command, and nothing else, carrying the review's file. Pushed at 01:12,
+its build run green in 17 minutes.
 
 Before it, `08d03b4d` came, item 38's first half, the edit mesh with its seven primitives, its
 selection and what moves it, and nothing else, carrying the review's files, the recipe's words for
 the modeling items in the Reply. Pushed at 00:32, its build run green in 12 minutes.
-
-Before it, `cf70c650` came, item 37, the feature test moved to `games/FeatureTest`, and nothing
-else, carrying the review's file and the ledger's. Pushed at 00:01, the day's pack run with publish
-on started then, run 39505038553.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1252,8 +1249,9 @@ from [SHARED.md](SHARED.md).
     engine's reader frame by frame, a palette of a known picture within a distance of its colors,
     and the script run over three captures in the suite. Two commits, the recorder with its formats
     and the command, then the client's step and the script. One or two days, before item 38's second
-    commit. First half done at `585497f1` on 2026-10-21, the recorder, the two writers, the calls
-    and the command, as the head says; the second half follows.
+    commit. Done at `585497f1` and `27b3f8eb` on 2026-10-21, the recorder, the two writers, the
+    calls and the command, then the client's step, the script and the README's animation, as the
+    heads say.
 
 ## Verdicts
 
@@ -1436,6 +1434,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     Settled at three green first shards in a row after the mend. The first shard of the pack run of
     `05ed21e4` passed at 07:40 on 2026-10-20 with the example matching, the first of three. The
     first shard of the pack run of `3b0e54d7` passed at 11:19 on 2026-10-20, the second of three.
+    Settled on the pack run of `cf70c650` on 2026-10-21, its four capture shards green, the third in
+    a row.
 
 39. **`meshlet`'s colored bunnies differ in their patches between the Fedora job's capture and the
     picture.** On the pack run of `05ed21e4`, 2026-10-20 at 07:39, the Fedora job's compare, running
@@ -1498,6 +1498,24 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     default names a published version from here; the step stays as it is, since it found the fault.
     Settled when the step passes whole on the next pack run with publish on. Mended at `2949041f` on
     2026-10-20, as the head says, the script's check passing on the machine against the feed.
+
+41. **The Linux suite of the push of `27b3f8eb` is lost to the animate script's test, which hung for
+    five minutes and took the test host down.** On the build run 39516364351 on 2026-10-21, the
+    Windows and macOS suites passed and the Linux suite's test step ended with the suite lost: 295
+    passed, 0 failed, 5 skipped, then
+    `AnimateScriptTests.ThreeCapturesMakeAnAnimationOfThreeFramesWithTheDelayGiven` hung after 5
+    minutes 22 seconds and the run was aborted with the test host process crashed, the suite's own
+    output file not carried to an artifact, so the job's log holds no more. The test runs
+    `build/animate.py` over three captures, which takes Pillow where it is installed and otherwise
+    `./bcs animate`, which builds and runs the client; a test that starts a build or an interpreter
+    with no bound of its own waits for whatever that process waits on, here for five minutes on the
+    Linux runner where the two other systems returned. Read first what the process waited on,
+    running the script on a Linux machine as the runner has it, with and without Pillow, under the
+    test's conditions; then the mend: the test holds its process to a bound of seconds and fails
+    with the process's output where it is passed, the script's engine path runs the client built by
+    the suite's own build and never builds inside a test, and the Pillow path is tested only where
+    Pillow is found. One commit, before item 38's second half's commit, since the push is red on
+    Linux. Mended at `?`.
 
 ## Decisions
 
@@ -1944,8 +1962,8 @@ engine's to match. A box, a cylinder, a wedge, a flight and an arch are an outli
 an axis, the outline's points at the near end numbered first and then at the far end, the faces
 the near end (its corners the outline backwards), the far end (the outline forwards), then a side
 for each edge of the outline in order, `[i, i+1, n+i+1, n+i]`, and an outline whose area turns
-clockwise about the axis is reversed first. The outlines, as (first, second) coordinates: a box
-about Y in (z, x) from (0, 0), (Z, 0), (Z, X), (0, X); a cylinder about Y in (z, x) with point i at
+clockwise about the axis is reversed first. The outlines are given as (first, second) coordinates, a
+box about Y in (z, x) from (0, 0), (Z, 0), (Z, X), (0, X); a cylinder about Y in (z, x) with point i at
 radius times (cos a, sin a), a = 360° (i + ½) / SIDES; a wedge about X in (y, z) from (0, 0), (0,
 Z), (Y, Z), which is reversed; a flight about X in (y, z) from (0, 0), then (k+1)·RISE, k·RUN and
 (k+1)·RISE, (k+1)·RUN for each step k, then (0, STEPS·RUN); an arch about Z in (x, y), the outside
@@ -1963,8 +1981,8 @@ removing by a box removes every face with a corner it picks. A face faces the wa
 Newell normal is nearest, Y first where two are as near, then X. A turn and a scale are about the
 middle of the selection's bounds unless `at` gives a point, a turn counter-clockwise looking back
 along its axis, and a scale whose three factors multiply to less than zero reverses in place the
-corners of each face whose every corner it moved. One choice differs from the item, which the
-guide says: a measure typed is taken as given and never rounded to the grid, as Blender takes a
+corners of each face whose every corner it moved. One choice differs from the item, as the guide
+says. A measure typed is taken as given and never rounded to the grid, as Blender takes a
 number typed, since a move of a fifth of a meter on a meter's grid would otherwise move nothing.
 The grid step is where a point picked or dragged by hand lands (item 40), and `snap` rounds each
 selected vertex to it, halfway going away from zero. `grid` takes a meter or a power of two of it

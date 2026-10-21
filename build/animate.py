@@ -14,7 +14,8 @@ Pillow writes it where Pillow is installed, which it is wherever the README's pi
 Where it is not, `./bcs animate` writes a GIF or an animated PNG with the engine's own writers, the
 ones a recording is written with (`record`), from PNG pictures, and a WebP, read or written, needs
 Pillow. BCS_ANIMATE_WRITER=engine asks for the engine's writers where Pillow is installed too, as
-the suite does to try both.
+the suite does to try both, and BCS_CLIENT names a built client to run in place of the checkout's
+./bcs, which builds one first where there is none, as the suite names the one its own build made.
 """
 
 import argparse
@@ -84,7 +85,12 @@ def with_engine(given):
     if kind == ".webp" or any(picture.lower().endswith(".webp") for picture in given.pictures):
         sys.exit("animate.py: a WebP, read or written, needs Pillow (python3 -m pip install Pillow)")
 
-    launcher = ["pwsh", "-NoProfile", "-File", os.path.join(ROOT, "bcs.ps1")] if os.name == "nt" else [os.path.join(ROOT, "bcs")]
+    if os.environ.get("BCS_CLIENT"):
+        launcher = [os.environ["BCS_CLIENT"]]
+    elif os.name == "nt":
+        launcher = ["pwsh", "-NoProfile", "-File", os.path.join(ROOT, "bcs.ps1")]
+    else:
+        launcher = [os.path.join(ROOT, "bcs")]
     command = [*launcher, "animate", given.out, *given.pictures, "--delay", str(given.delay), "--loop", str(given.loop), "--scale", str(given.scale)]
     sys.exit(subprocess.run(command, check=False).returncode)
 
