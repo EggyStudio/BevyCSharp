@@ -1140,11 +1140,14 @@ EditMesh Material(string slot);                                 // Puts the sele
 ```csharp
 static MeshData[] Build(EditMesh mesh);                         // Builds the mesh into one mesh's data for each material slot, in the order of Slots
 static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
+static EditMesh? Source(AssetHandle mesh);                      // The edit mesh a mesh of Meshes was built from, or nothing for a mesh it did not build
 static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots
 static AssetHandle Prototype(string name);                      // The prototype material of a part of a level, the grid tinted by its color
 static AssetHandle Prototype(Color color);                      // A prototype material of any color, the grid tinted by it
 static void Register(string name, EditMesh mesh);               // Gives a mesh a name the console's model commands reach it by, so a game's level is shaped from the terminal and by a drive, model.cut level window 1 1 2 0.9 cutting a window in it
 static EditMesh? Find(string name);                             // The model of a name, or nothing where none has it
+static void DrawWindow(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null);  // Draws the modeling window on a mesh, and takes the pointer in the 3D view, where a camera is given, to pick its faces and extrude or move them
+static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null);  // Draws the modeling window's contents where the program has begun a window or a panel of its own, as the editor's Model tab does, and takes the pointer in the 3D view as DrawWindow does
 ```
 
 ### `Images`

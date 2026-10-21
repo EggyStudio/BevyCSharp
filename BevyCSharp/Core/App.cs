@@ -417,8 +417,9 @@ public sealed unsafe partial class App : IDisposable
                 // as they come back off the GPU.
                 Recorder.Tick(world.Resource<Time>());
 
-                // The models the console shows drawn again where its commands changed them.
-                Modeling.Tick(world.Resource<EcsWorld>());
+                // The models the console shows drawn again where its commands changed them, and
+                // the modeling windows' outlines in a run that draws.
+                Modeling.Tick(world.Resource<EcsWorld>(), !world.Resource<Config>().Headless);
 
                 // A picture of this frame where the screenshot key was pressed, the press left for the
                 // program to read as well, in a run that draws.

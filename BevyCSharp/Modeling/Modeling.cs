@@ -28,6 +28,10 @@ public static partial class Modeling
 {
     private static readonly ConditionalWeakTable<EditMesh, Drawn> Handles = new();
 
+    // The edit mesh behind each mesh handle, held weakly, so a mesh a program let go of is not kept
+    // for the handles it was drawn with.
+    private static readonly Dictionary<AssetHandle, WeakReference<EditMesh>> Sources = [];
+
     /// <summary>The handles a mesh was drawn with and the version they were last written at.</summary>
     private sealed class Drawn
     {
@@ -146,11 +150,20 @@ public static partial class Modeling
 
             Render.GenerateTangents(known);
             handles[slot] = known;
+            lock (Sources) Sources[known] = new WeakReference<EditMesh>(mesh);
         }
 
         drawn.Meshes = handles;
         drawn.Version = mesh.Version;
         return [.. handles];
+    }
+
+    /// <summary>The edit mesh a mesh of <see cref="Meshes"/> was built from, or nothing for a mesh it did not build.</summary>
+    /// <param name="mesh">A mesh an entity is drawn with.</param>
+    /// <remarks>What the editor's Model tab opens on, the edit mesh behind the entity selected.</remarks>
+    public static EditMesh? Source(AssetHandle mesh)
+    {
+        lock (Sources) return Sources.TryGetValue(mesh, out var source) && source.TryGetTarget(out var found) ? found : null;
     }
 
     /// <summary>The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots.</summary>

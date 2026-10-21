@@ -61,6 +61,10 @@ public static class EditorPicking
     {
         ArgumentNullException.ThrowIfNull(ctx);
 
+        // The Model tab open on a model takes the scene's clicks for its faces, so the entity it is
+        // shaping stays selected.
+        if (ModelTab.HoldsPointer) return;
+
         MarqueeSelect.Tick(ctx);
 
         // Where the click that is being answered began. Asked at the press rather than now,

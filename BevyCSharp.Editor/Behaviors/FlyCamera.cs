@@ -214,7 +214,9 @@ public partial struct FlyCamera
         var onScene = !EditorShell.PointerOverPanel;
         if (input.MousePressed(MouseButton.Right)) _flyBegun = onScene;
         if (input.MousePressed(MouseButton.Middle)) _panBegun = onScene;
-        if (input.MousePressed(MouseButton.Left)) _orbitBegun = onScene && alt;
+        // A drag with alt begun on a face the Model tab is shaping moves the face, so it turns
+        // nothing here, and one begun anywhere else turns the view.
+        if (input.MousePressed(MouseButton.Left)) _orbitBegun = onScene && alt && !Modeling.WantsPointer;
 
         var flying = _flyBegun && input.MouseDown(MouseButton.Right);
         var panning = _panBegun && input.MouseDown(MouseButton.Middle);

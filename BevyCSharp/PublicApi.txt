@@ -4391,10 +4391,14 @@ static class Bevy.Modeling
   static AssetHandle Prototype(string name)
   static AssetHandle[] Meshes(EditMesh mesh)
   static EditMesh? Find(string name)
+  static EditMesh? Source(AssetHandle mesh)
   static IReadOnlyDictionary<string, Color> PrototypeColors { get; }
   static IReadOnlyList<string> Names { get; }
   static MeshData[] Build(EditMesh mesh)
   static PhysicsShape Collider(EditMesh mesh)
+  static bool WantsPointer { get; }
+  static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null)
+  static void DrawWindow(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null)
   static void Register(string name, EditMesh mesh)
 readonly struct Bevy.MonitorInfo : IEquatable<MonitorInfo>
   MonitorInfo(uint Width, uint Height, int X, int Y, float RefreshHz, float ScaleFactor)

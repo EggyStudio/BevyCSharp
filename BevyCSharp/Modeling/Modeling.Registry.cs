@@ -84,9 +84,11 @@ public static partial class Modeling
         Redraw(world, named);
     }
 
-    /// <summary>Writes each shown model's meshes again where it changed since they were last written, once a frame.</summary>
-    internal static void Tick(EcsWorld world)
+    /// <summary>Outlines what the modeling windows are on where the run draws, and writes each shown model's meshes again where it changed since they were last written, once a frame.</summary>
+    internal static void Tick(EcsWorld world, bool draws)
     {
+        OutlineWindows(draws);
+
         Named[] shown;
         lock (Gate)
         {

@@ -31,7 +31,9 @@ title where its config leaves the default, and its window's icon, which Windows 
 The Play tab runs the game in a window of its own and stops it again, builds it without running it,
 exports it for a player and shows what each wrote. `F5` plays the scene being edited instead,
 through `BevyCSharp.Player`, so a change made in the editor is seen without being saved or written
-into code. [.github/PLAY.md](../.github/PLAY.md) has the plan past that.
+into code. [.github/PLAY.md](../.github/PLAY.md) has the plan past that. The Model tab shapes the
+model an entity selected is drawn with, its faces picked, extruded and moved in the scene, as
+[Modeling](modeling.md#the-window) describes.
 
 Opened on a project, the editor edits that project's assets rather than its own:
 

@@ -10,32 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `bee54e98`, item 40's first half, the commands, and nothing else, carrying the
-review's file with its Shared line for the commands' forms, their answer and their refusals:
-thirty-one `model.<verb> <name> <words>` commands, one a recipe line, each answering the counts and
-the selection; a primitive, a join or a union making the model where none has the name and any other
-verb on a missing name refused, so a typo makes no model; a line the recipe cannot read refused with
-the recipe's own message; new, free, list, info with the counts, bounds, volume, open edges, slots,
-grid, epsilon and the recipe's length, recipe, undo and redo with their refusals, save, load and
-show; a registry of named models emptied when another app starts, with register, find and names
-public so a game's level answers to the commands; show making a root entity with a child a slot in
-its prototype material, written again where the model changed; the guide's section a script of
-client lines making the room with a window and saving it, the catalog's row, the cheat sheet and the
-listing; tests running the guide's room a line at a time, the save loaded back, undo and redo, the
-refusals, and a shown model drawn and following a move in an offscreen run; each command answered by
-hand through the client on the feature test; the suite 1,623 passed and 3 skipped after one nullable
-warning mended. Read at 04:09 on 2026-10-21 and pushed at 04:09, its build run green at 04:27; the
-build run of `76f784af` had ended green at 03:58. Next item 47, the F2 screenshot, nothing in this
-engine holding F2 so nothing moves, the key, the folder and the names in the capture class with the
-names given out remembered since the file comes a frame later; then item 40's second half, the
-window; then 41 to 45.
+Reviewed up to `3d045110`, item 47, the screenshot on F2, and nothing else, carrying the review's
+file with its Shared line for 3DEngine's item 73: the key, the folder beside the program made on
+first use and the call, through the capture the `shot` command takes, the names from the local time
+with the second file in a second `_2` and the third `_3` as the source's own code counts, the names
+given out remembered since a file comes a frame or two after its press, a log line a picture, the
+key read in the frame-sync after the input in a run that draws and the press left for the program,
+nothing of the engine's, the editor's, the feature test's or the examples' on F2 so nothing moves,
+the tools guide's section, the cheat sheet line, the surface listing and the feature test's key
+list; tests of the names counted from two, two presses through the synthetic input in an offscreen
+run writing two pictures of the window's size with the program seeing both, the key moved to F12 and
+none with null; the suite 1,626 passed and 3 skipped. Read at 04:33 on 2026-10-21 and pushed at
+04:33, its build run green at 04:51; the build run of `bee54e98` had ended green at 04:27. Next item
+40's second half, the window, `Modeling.DrawWindow` listing the recipe with undo and redo, the
+counts, the grid step and each operation with its measures, picking by the engine's ray against the
+edit mesh's faces with shift adding and control removing and skipped while ImGui holds the pointer,
+a drag along the face's normal snapped to the grid step extruding on release and moving with alt,
+outlines of the hovered face and the selection as gizmos, and the editor's panel opened on the edit
+mesh an entity's mesh was built from; then 41 to 45.
+
+Before it, `bee54e98` came, item 40's first half, the commands, and nothing else, carrying the
+review's file with its Shared line. Pushed at 04:09, its build run green at 04:27.
 
 Before it, `76f784af` came, item 39's second half, the booleans and the openings, and nothing else,
 carrying the review's file with its Shared line. Pushed at 03:41, its build run green at 03:58.
-
-Before it, `bfe1fc63` came, item 39's first half, the grid image with the bridge's levels at ABI
-299, the prototype materials and the box mapping, and nothing else, carrying the review's file with
-its Shared line. Pushed at 03:06, its build run green at 03:23.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1270,7 +1268,7 @@ from [SHARED.md](SHARED.md).
     a headless run, two in one second given two names, the key moved and turned off. One commit,
     after item 40's first commit. Where the engine has a default key of its own on F2, it moves to
     F3 as 3DEngine's performance window does, with a setting to move it to match, the move said in
-    the tools guide.
+    the tools guide. Done at `3d045110` on 2026-10-21, as the head says.
 
 ## Verdicts
 
@@ -2179,3 +2177,30 @@ second `_2` and the third `_3` as Minecraft counts them, the names given out rem
 after its press, and a line of the log, `[screenshot] saved to <path>`, saying where. A headless run
 takes none. `Capture.Screenshot()` takes one from code. Nothing of this engine's, its editor, the
 feature test or the examples held F2, so no key of its own moves to F3.
+
+Shared: the modeling window, in the commit carrying this line, item 40's second half, for the
+Modeling row, in the words of item 38's Reply. `Modeling.DrawWindow(ctx, mesh, camera, placed)`
+draws an ImGui window titled `Model` on an edit mesh, and `Modeling.DrawPanel` draws its contents
+where a program has begun a window of its own. It shows `<v> vertices, <e> edges, <f> faces` and
+`<sf> faces and <sv> vertices selected`, a grid list from a sixteenth of a meter to 64 by powers of
+two writing `grid <step>`, buttons writing `select all`, `select none`, `select invert` and `select
++x` through `select -z`, Undo and Redo, the recipe's lines in a list kept scrolled to its end, and
+each verb with its measures as text fields, grouped Add (box, plane, cylinder, cone, wedge, stairs,
+arch, room, ramp), Change (move, rotate, scale, material, extrude, inset, merge, shade, delete, flip,
+triangulate, duplicate, snap) and Cut (cut, union, subtract, intersect, join), its button running
+`<verb> <fields>` with `at` written before a place, and a line that throws shows `<line>: <message>`
+under the selection's buttons. In the 3D view a ray from the camera through the pointer, turned into
+the mesh's space by the inverse of `placed`, meets the first face by its triangles. A left press on
+a face released within 4 pixels of it, counted as the sum of the two axes, writes `select face <n>`,
+`select add face <n>` with shift and `select remove face <n>` with control. Past 4 pixels it is a
+drag, whose distance is the point of the face's normal line through its middle nearest the ray, in
+the mesh's space, rounded to the grid step with halves away from zero and shown beside the pointer
+as `<d> m`. On release a distance of 0 writes nothing, and otherwise the face is selected first
+where it is not and the line is `extrude <d>`, or `move <nx·d> <ny·d> <nz·d>` where alt was held in
+the last frame the button was down. The outlines are drawn from the frame's tick, the selection in
+orange (1, 0.55, 0.1), the face under the pointer in yellow (1, 0.95, 0.2) and the dragged face at
+its distance in cyan (0.3, 0.85, 1). `Modeling.WantsPointer` is true where a window's pointer was
+over a face or pressed on one this frame or the last, and the editor's alt orbit begins only where
+it is false. `Modeling.Source(handle)` gives the edit mesh behind a mesh of `Meshes`, which the
+editor's Model tab opens on for the entity selected, its picking and its marquee off while the tab
+is drawn.

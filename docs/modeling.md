@@ -357,6 +357,40 @@ their names say, and `model.show` draws a model where a point says and keeps dra
 commands change it. A game's own mesh answers to the commands once `Modeling.Register("level",
 mesh)` names it, so a drive cuts a window in a level by a command and reads the counts.
 
+## The window
+
+`Modeling.DrawWindow` draws a window that shapes a mesh by hand, called every frame it is to be up
+from a system of an app with the interface on (`Config.Gui`), with the camera the 3D view is drawn
+by and where the mesh is drawn:
+
+<!-- compiled with:
+Entity camera = default;
+var level = new EditMesh();
+-->
+```csharp
+Modeling.DrawWindow(ctx, level, camera, Transform.At(0f, 0f, -14f));
+```
+
+The window lists the recipe with buttons taking its last line back and doing it again, the counts
+and what is selected, the grid step, and each operation with its measures as fields and a button
+that runs its line, so each change made in the window is a line of the recipe, as a command's is.
+A line that cannot run says why under the selection's buttons.
+
+In the 3D view, a click on a face selects it, by a ray from the camera tested against the mesh's
+faces where the transform draws them, with shift adding the face and control taking it away. A drag
+from a face along its normal extrudes the selection by whole grid steps once the button is let go,
+the distance shown beside the pointer and the face where it would go outlined in cyan, and with alt
+held it moves the selection as far instead. The face under the pointer is outlined in yellow and
+the selection in orange. A drag that comes back to where it began does nothing.
+
+`Modeling.WantsPointer` is true while the pointer is over a face or pressed on one, so a camera that
+turns on a drag, as the editor's does with alt, begins one only where it is false, as it asks
+`ImGuiRuntime.WantsMouse` over the interface. `Modeling.DrawPanel` draws the same contents where a
+program has begun a window of its own, and `Modeling.Source` gives the edit mesh a mesh of
+`Meshes` was built from. The editor's Model tab is the window on the entity selected, so once an
+entity drawn with a model's mesh is selected, one `model.show` made for instance, and the tab is
+open, a click on the scene picks the model's faces while the entity stays selected.
+
 ## Drawing and colliding
 
 `Modeling.Build(mesh)` builds the mesh into a `MeshData` for each material slot, each face cut into
