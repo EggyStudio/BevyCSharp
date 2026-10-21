@@ -10,33 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `27b3f8eb`, item 46's second half, and nothing else, carrying the review's file with
-its second Shared line: `record.status` answering recording, finishing, writing or the frames
-written; `./bcs record <path> <length> [--every] [--scale] [--play]` sending the command and asking
-the status until the file is written, so a length on the app's clock is waited for whatever the
-machine's time; `build/animate.py <out> <pictures...> --delay <ms> [--loop n] [--scale s]` with
-Pillow where installed and `./bcs animate` over the engine's writers elsewhere, a WebP needing
-Pillow either way, the library's internals visible to the client with the reason said; the help,
-BCS.md and the tools guide; Swarm's third wave above the README's generated gallery, 30 frames at
-100 ms, 453 KB; a test of the script's two writers in the suite, listed under N 1.4 as a
-build-script test; the suite 1,568 passed and 3 skipped. Read at 01:38 on 2026-10-21 and pushed at
-01:38, run 39516364351, which ended at 01:57 with its Windows and macOS suites green and its Linux
-suite lost to the animate script's test hanging for five minutes and taking the test host down,
-Verdict 41, its mend before item 38's second half's commit; the build run of `585497f1` had ended
-green at 01:30, Windows in 17 minutes. The pack run of `cf70c650` has its drive green in 1 hour 10
-minutes and its four capture shards green, which settles Verdict 38, and its pack job running since
-01:29, which is Verdict 40's step whole; the next version comes from it, its listing and notes to
-read. Item 38's second half is in testing, with no bridge change after all, since
-`Render.GenerateTangents` already gives a mesh made in code its tangents in render builds and the
-modeling calls it after each create or write, the bridge staying at 298; then items 39 to 45.
+Reviewed up to `32c8467e`, Verdict 41's mend, and nothing else, carrying the review's file. The
+cause, read in a scratch worktree under the runner's conditions: the workflow builds the suite in
+Release and the launcher looks for a Debug client, so the first engine row built the client from
+inside the test, and the MSBuild worker node that build started, idling to be reused, held the write
+end of the script's output pipe after the script had ended, so the test's read waited on the node;
+on the machine the script reused nodes already running and closed its pipes in 14 seconds, which is
+why it never hung here. The mend: the script runs the client a variable names where set, the test
+names the client the suite's own build made beside the test assembly and skips where none is built,
+so nothing is built inside a test, the script's process held to 60 seconds and killed with its tree
+past them with the test failing on what it printed, the streams read by events and their end waited
+5 seconds at most, the Pillow check bounded too, the Pillow rows run only where the import succeeds,
+and the launchers build with node reuse off with the reason said; each half clears the hang on its
+own, 6 passed in 4 seconds with Pillow and the engine rows passing without it. Read at 02:19 on
+2026-10-21 and pushed at 02:19, run 39520636599 started; the mended test runs in the Debug tree
+before item 38's commit. The pack run of `cf70c650` ended green at 02:16: its pack job pushed
+`0.5.178` at 01:31, listed at 02:16 after 45 minutes of the step's 90-minute wait, the games then
+built on their defaults, which is Verdict 40's step whole and settles it; the nuspec names
+`cf70c650` and three lines of notes, the feature test's move, the games' defaults and the joint's
+force. Next item 38's second half, topology, the recipe with undo, redo, save, load and join, the
+build, the collider and the feature test's gallery row, no bridge change; then items 39 to 45.
+
+Before it, `27b3f8eb` came, item 46's second half, the client's record step, the animate script and
+the README's animation, and nothing else, carrying the review's file. Pushed at 01:38, its build run
+red on Linux, Verdict 41.
 
 Before it, `585497f1` came, item 46's first half, the recorder with its GIF and animated PNG
 writers, the calls and the command, and nothing else, carrying the review's file. Pushed at 01:12,
 its build run green in 17 minutes.
-
-Before it, `08d03b4d` came, item 38's first half, the edit mesh with its seven primitives, its
-selection and what moves it, and nothing else, carrying the review's files, the recipe's words for
-the modeling items in the Reply. Pushed at 00:32, its build run green in 12 minutes.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1498,6 +1499,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     default names a published version from here; the step stays as it is, since it found the fault.
     Settled when the step passes whole on the next pack run with publish on. Mended at `2949041f` on
     2026-10-20, as the head says, the script's check passing on the machine against the feed.
+    Settled on the pack run of `cf70c650` on 2026-10-21, the step passing whole with `0.5.178`
+    listed after 45 minutes and the four games built on `0.5.174`.
 
 41. **The Linux suite of the push of `27b3f8eb` is lost to the animate script's test, which hung for
     five minutes and took the test host down.** On the build run 39516364351 on 2026-10-21, the
@@ -1515,7 +1518,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     with the process's output where it is passed, the script's engine path runs the client built by
     the suite's own build and never builds inside a test, and the Pillow path is tested only where
     Pillow is found. One commit, before item 38's second half's commit, since the push is red on
-    Linux. Mended at `?`.
+    Linux. Mended at `32c8467e` on 2026-10-21, the cause an MSBuild node of the client's build
+    inside the test holding the script's pipe, as the head says. Settles on three green Linux suites
+    after it.
 
 ## Decisions
 
@@ -2027,3 +2032,40 @@ way needing Pillow; `BCS_ANIMATE_WRITER=engine` asks for the engine's where Pill
 the suite's test does to try both. The README's first animation is Swarm's third wave, recorded by
 `./bcs record` and set above the examples' generated gallery, since that block is the examples
 script's and its pictures are the captures the pack run compares.
+
+Shared: the edit mesh's topology operations, its recipe, its build and its collider, in the commit
+carrying this line, item 38's second half, for the first row of Modeling, in the first half's
+words, with what keeps the numbering the same in both engines. An extrude moves the selected faces
+as one region. A rim edge is an edge of a selected face that no other selected face runs the other
+way, taken in the order of the faces' indices and of their corners; each rim corner is copied, the
+copies numbered after the last vertex in the order the rim meets them, an edge's start before its
+end; the region's faces take the copies, a corner inside the region moves itself, and each rim edge
+(a, b) takes a side face [a, b, b', a'] appended in rim order in its face's slot. By a distance, a
+corner moves so each distinct normal of the region's faces round it is met at the distance, d n for
+one, d (n1 + n2) / (1 + n1 · n2) for two, and for more the least squares answer by Cramer's rule,
+the mean normal where that is singular. An inset goes face by face in index order, each corner
+moved in by d (a + b) / (1 + a · b), a and b the inward normals of its two edges (the face's normal
+crossed with the edge), its new corners numbered in the face's order, the face taking them and a
+band face [c_i, c_i+1, q_i+1, q_i] appended for each edge. A delete takes the selected faces, or with
+none the faces using a selected vertex; a fill follows the rim, the taken faces' edges a kept face
+runs the other way, from its lowest vertex, each loop a face appended in the taken faces' direction
+in the slot of its first edge's face. A merge joins each selected vertex, in index order, to the
+first kept vertex within the distance, drops a corner equal to the next one round, and removes a
+face left with fewer than three. After a delete or a merge the vertices no face uses go and the
+rest are numbered again in order. A triangulate cuts each selected face in index order by ear
+clipping, the face laid flat across the axis its Newell normal is nearest and turned
+counter-clockwise, the ear cut the first of the corners left whose triangle (before, it, after)
+turns counter-clockwise and holds no other corner left, inside or on its sides, the first triangle
+kept at the face's index and the rest appended, a face with no ear left finished as a fan. A
+duplicate copies the selected faces in index order, each corner's copy numbered at its first use. A
+join appends the other model's vertices and faces in order, its slots matched by name. `shade
+smooth` with no angle is thirty degrees. An undo runs the lines before the last from an empty mesh,
+and a recipe's file is UTF-8 with `model 1` first. The build makes one mesh a slot, each face's
+corners copied in order and cut by the same ear clipping; a corner's normal is the face's, or for a
+smoothed face the mean, weighted by area, of the smoothed faces round the corner within the face's
+angle of it; its texture coordinates are its place in meters along two directions chosen by the
+axis the face's normal is nearest, y first and then x where two are as near: +y (x, z), -y (x, -z),
++x (-z, -y), -x (z, -y), +z (x, -y), -z (-x, -y); and tangents are mikktspace's from those, which
+this engine has from `Render.GenerateTangents`, so the bridge is unchanged. The collider is the edit
+mesh's own vertices with the ear clipping's triangles. The feature test's gallery holds a row of the
+seven primitives north of its wall, solid as their triangles, and the drive takes it as `5-models`.

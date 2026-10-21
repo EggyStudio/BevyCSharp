@@ -5,7 +5,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// The render gallery west of the hub, a wall of spheres across metallic and roughness with rows
-/// for clearcoat and anisotropy, and a Cornell box.
+/// for clearcoat and anisotropy, a Cornell box, and a row of the edit mesh's primitives.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -22,6 +22,12 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// started with ray-traced lighting (the panel's graphics page, from the next start) and the
 /// bridge and the GPU have Solari, by rays from the panel instead, the walls' colors carried onto
 /// the blocks by global illumination, the room's meshes given to the rays as they are made.
+/// </para>
+/// <para>
+/// North of the wall stands a row of the primitives an <see cref="EditMesh"/> is shaped from, a box,
+/// a plane, a cylinder and a cone smoothed round, a wedge, a flight of stairs and an arch, each
+/// built into its mesh by <see cref="Modeling.Meshes"/> and solid as the triangles it is drawn
+/// with, so the player climbs the stairs and walks under the arch.
 /// </para>
 /// <para>
 /// Every sphere and block is a static body (<see cref="Blocks"/>), so the player walks round the
@@ -81,6 +87,7 @@ public partial struct Gallery
         Blocks.Static(ecs, "Gallery wall", new Vec3(-64.2f, Ground + 4.2f, -2.4f), new Vec3(0.3f, 8.8f, 13.8f), Render.CreateMaterial(0.12f, 0.12f, 0.13f, roughness: 1f));
 
         Cornell(ecs);
+        Models(ecs);
     }
 
     /// <summary>Names the rows and columns of the wall and the box, every frame, as gizmos do.</summary>
@@ -97,6 +104,9 @@ public partial struct Gallery
         Gizmos.Text("roughness, up", new Vec3(-63.9f, Spot(0, 2f).Y, -4.7f), facing, 0.22f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text("clearcoat, polished to rough", new Vec3(-63.9f, Spot(0, 5.3f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text("anisotropy, none to whole", new Vec3(-63.9f, Spot(0, 6.5f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
+        // The row's name faces south, toward the road it is seen from, a half turn from the way a
+        // text faces unturned.
+        Gizmos.Text("an edit mesh's primitives", new Vec3(ModelsFrom + 3f * ModelsApart, Ground + 2.4f, ModelsZ), Quat.FromRotationY(MathF.PI), 0.25f, (0f, 0f), ink, inFront: false);
         Gizmos.Text(
             Render.RayTracingActive ? "Cornell box, lit by rays" : Lights.CastShadows ? "Cornell box, lit by a shadow map" : "Cornell box, lit with no shadows while meshlets run",
             new Vec3(-67.9f, Ground + 5.6f, -13f), facing, 0.25f, (0f, -0.5f), ink, inFront: false);
@@ -148,6 +158,46 @@ public partial struct Gallery
         if (!Render.RayTracingActive) return;
 
         foreach (var piece in room) Render.SetRayTraced(piece, Render.MeshOf(ecs, piece));
+    }
+
+    /// <summary>
+    /// Where along X the first of the row of primitives stands, east of the others, the row clear
+    /// of the wall of spheres for a view along it from the road.
+    /// </summary>
+    private const float ModelsFrom = -52f;
+
+    /// <summary>How far apart the primitives stand, along X.</summary>
+    private const float ModelsApart = -1.7f;
+
+    /// <summary>Where along Z the row stands, north of the wall, facing the road from the hub.</summary>
+    private const float ModelsZ = 9f;
+
+    /// <summary>
+    /// A row of the edit mesh's primitives, each made by its own few operations, set on the ground by
+    /// its middle, drawn with a color of its own and solid as the triangles it is drawn with.
+    /// </summary>
+    private static void Models(EcsWorld ecs)
+    {
+        (string Name, EditMesh Mesh, (float R, float G, float B) Color)[] row =
+        [
+            ("box", new EditMesh().Box(new Vec3(1f), centered: true), (0.85f, 0.45f, 0.25f)),
+            ("plane", new EditMesh().Plane(1.2f, 1.2f, centered: true), (0.55f, 0.55f, 0.6f)),
+            ("cylinder", new EditMesh().Cylinder(0.5f, 1.2f, 16, centered: true).SelectAll().Shade(true, 40f), (0.3f, 0.6f, 0.85f)),
+            ("cone", new EditMesh().Cone(0.55f, 1.3f, 16, centered: true).SelectAll().Shade(true, 40f), (0.85f, 0.75f, 0.3f)),
+            ("wedge", new EditMesh().Wedge(new Vec3(1f, 1f, 1.2f), centered: true), (0.45f, 0.75f, 0.4f)),
+            ("stairs", new EditMesh().Stairs(5, 0.2f, 0.25f, 1f, centered: true), (0.75f, 0.4f, 0.7f)),
+            ("arch", new EditMesh().Arch(0.75f, 0.2f, 0.4f, 12, centered: true), (0.9f, 0.9f, 0.85f)),
+        ];
+
+        for (var i = 0; i < row.Length; i++)
+        {
+            var (name, mesh, (r, g, b)) = row[i];
+            // Set on the ground by its middle, the flat plane a little over it so the two do not
+            // fight for the same depth.
+            var height = mesh.Bounds.High.Y - mesh.Bounds.Low.Y;
+            var at = Transform.At(ModelsFrom + i * ModelsApart, Ground + MathF.Max(height / 2f, 0.02f), ModelsZ);
+            Blocks.Shape(ecs, $"Modeled {name}", Modeling.Meshes(mesh)[0], Render.CreateMaterial(r, g, b, roughness: 0.7f), at, ColliderShape.Mesh);
+        }
     }
 
     private static void Ball(EcsWorld ecs, AssetHandle mesh, string name, Vec3 at, MaterialSettings material) =>

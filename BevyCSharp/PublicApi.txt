@@ -1723,11 +1723,20 @@ sealed class Bevy.EditMesh
   EditMesh Clear()
   EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool centered = false)
   EditMesh Cylinder(float radius, float height, int sides, Vec3 at = default, bool centered = false)
+  EditMesh Delete(bool fill = false)
+  EditMesh Duplicate()
+  EditMesh Extrude(Vec3 by)
+  EditMesh Extrude(float distance)
+  EditMesh Flip()
   EditMesh Grid(float step)
+  EditMesh Inset(float distance)
+  EditMesh Join(string path)
   EditMesh Material(string slot)
+  EditMesh Merge(float distance)
   EditMesh Move(Vec3 by)
   EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false)
   EditMesh Rotate(Vec3 axis, float degrees, Vec3? pivot = null)
+  EditMesh Run(string line)
   EditMesh Scale(Vec3 factor, Vec3? pivot = null)
   EditMesh Scale(float factor, Vec3? pivot = null)
   EditMesh SelectAll()
@@ -1737,23 +1746,34 @@ sealed class Bevy.EditMesh
   EditMesh SelectInvert()
   EditMesh SelectNone()
   EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace)
+  EditMesh Shade(bool smooth, float degrees = 30f)
   EditMesh Snap()
   EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false)
+  EditMesh Triangulate()
   EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false)
   EditMesh()
   IEnumerable<(int, int)> Edges()
+  IReadOnlyList<string> Recipe { get; }
   IReadOnlyList<string> Slots { get; }
   ReadOnlySpan<int> Corners(int face)
   Vec3 Center(int face)
   Vec3 Normal(int face)
   Vec3 Position(int vertex)
+  bool CanRedo { get; }
+  bool CanUndo { get; }
   bool IsClosed { get; }
   bool IsFaceSelected(int face)
   bool IsVertexSelected(int vertex)
+  bool Redo()
+  bool Undo()
   const float CoarsestGrid = 64f
+  const float DefaultSmoothAngle = 30f
   const float FinestGrid = 0.0625f
   const string DefaultSlot = "default"
+  const string Extension = ".model"
+  const string Header = "model 1"
   float GridStep { get; }
+  float SmoothOf(int face)
   float Volume { get; }
   int EdgeCount { get; }
   int FaceCount { get; }
@@ -1761,7 +1781,12 @@ sealed class Bevy.EditMesh
   int SelectedEdgeCount { get; }
   int SelectedFaceCount { get; }
   int SelectedVertexCount { get; }
+  int Version { get; }
   int VertexCount { get; }
+  static EditMesh FromRecipe(string text, string name = "the recipe")
+  static EditMesh Load(string path)
+  string RecipeText { get; }
+  string Save(string path)
   string SlotOf(int face)
 sealed class Bevy.EffectSettings
   (float, float) DistortionAxes { get; set; }
@@ -4338,6 +4363,10 @@ sealed class Bevy.MethodHints : IEquatable<MethodHints>
   string? Note { get; init; }
   string? Tooltip { get; init; }
   void Deconstruct(out string? Label, out string? Tooltip, out bool Hidden, out ButtonLine Line, out double Weight, out bool Space, out bool Separator, out string? Header, out string? Foldout, out bool FoldoutOpen, out string? Note, out NoteKind NoteKind, out int Order)
+static class Bevy.Modeling
+  static AssetHandle[] Meshes(EditMesh mesh)
+  static MeshData[] Build(EditMesh mesh)
+  static PhysicsShape Collider(EditMesh mesh)
 readonly struct Bevy.MonitorInfo : IEquatable<MonitorInfo>
   MonitorInfo(uint Width, uint Height, int X, int Y, float RefreshHz, float ScaleFactor)
   bool Equals(MonitorInfo other)

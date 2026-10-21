@@ -28,7 +28,7 @@ public sealed partial class EditMesh
     {
         _selectedVertices.UnionWith(Enumerable.Range(0, _positions.Count));
         _selectedFaces.UnionWith(Enumerable.Range(0, _faces.Count));
-        return this;
+        return Did("select all");
     }
 
     /// <summary>Selects nothing.</summary>
@@ -37,7 +37,7 @@ public sealed partial class EditMesh
     {
         _selectedVertices.Clear();
         _selectedFaces.Clear();
-        return this;
+        return Did("select none");
     }
 
     /// <summary>Selects what was not selected, and leaves what was.</summary>
@@ -57,7 +57,7 @@ public sealed partial class EditMesh
         _selectedVertices.Clear();
         _selectedVertices.UnionWith(vertices);
         PickFaces(faces, SelectionMode.Add);
-        return this;
+        return Did("select invert");
     }
 
     /// <summary>Selects faces by their indices.</summary>
@@ -72,7 +72,7 @@ public sealed partial class EditMesh
         foreach (var face in picked) ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual((uint)face, (uint)_faces.Count, nameof(faces));
 
         PickFaces(picked, mode);
-        return this;
+        return Did($"select {Mode(mode)}face {string.Join(' ', picked)}");
     }
 
     /// <summary>Selects the faces that face nearest one way along an axis, such as up.</summary>
@@ -95,7 +95,7 @@ public sealed partial class EditMesh
 
         var way = Nearest(direction);
         PickFaces(Enumerable.Range(0, _faces.Count).Where(face => Newell(_faces[face].Corners) is var normal && normal != Vec3.Zero && Nearest(normal) == way).ToArray(), mode);
-        return this;
+        return Did($"select {Mode(mode)}{Way(way)}");
     }
 
     /// <summary>Selects the vertices inside a box, the faces all of whose corners are inside it, and the edges between.</summary>
@@ -142,7 +142,7 @@ public sealed partial class EditMesh
                 break;
         }
 
-        return this;
+        return Did($"select {Mode(mode)}box {V(corner)} {V(opposite)}");
     }
 
     /// <summary>Selects the faces in a material slot.</summary>
@@ -156,7 +156,7 @@ public sealed partial class EditMesh
 
         var index = _slots.IndexOf(slot);
         PickFaces(Enumerable.Range(0, _faces.Count).Where(face => _faces[face].Slot == index).ToArray(), mode);
-        return this;
+        return Did($"select {Mode(mode)}slot {slot}");
     }
 
     /// <summary>

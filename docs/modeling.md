@@ -11,6 +11,18 @@ var room = new EditMesh()
     .Move(new Vec3(0f, 1f, 0f));      // the ceiling a meter higher
 ```
 
+Each operation writes a line to the mesh's recipe, so those three calls are these three lines, and
+the lines run from an empty mesh make it again:
+
+```text
+box 8 3 6
+select +y
+move 0 1 0
+```
+
+The recipe is the mesh's history, its undo and its file, as [The recipe](#the-recipe) shows, and
+each section here gives an operation's line beside its call.
+
 A vertex is a point, and a face is a loop of three or more vertices, wound counter-clockwise seen
 from the side it faces. A face of any count is kept whole, so a box's side is one face of four
 corners and a staircase's side is one face of many, and it is cut into triangles only when it is
@@ -47,18 +59,21 @@ var mesh = new EditMesh()
 
 ### Box
 
-`Box(size)`, eight vertices and six faces of four corners, as wide along X, as tall along Y and as
-deep along Z as `size` says. A box of two by three by four holds 24 cubic meters.
+`Box(size)`, or `box X Y Z`, eight vertices and six faces of four corners, as wide along X, as tall
+along Y and as deep along Z as `size` says. A box of two by three by four holds 24 cubic meters. A
+primitive's line ends in `at X Y Z` where it is placed elsewhere and `center` where it is placed by
+its middle, as `box 1 1 1 at 0 5 0 center`.
 
 ### Plane
 
-`Plane(width, depth)`, one face of four corners lying flat and facing up, as wide along X and as deep
-along Z as given. Its four edges are open, as a floor's are before walls meet it.
+`Plane(width, depth)`, or `plane X Z`, one face of four corners lying flat and facing up, as wide
+along X and as deep along Z as given. Its four edges are open, as a floor's are before walls meet it.
 
 ### Cylinder and cone
 
-`Cylinder(radius, height, sides)` stands along Y, its round side made of `sides` flat sides, and
-`Cone(radius, height, sides)` stands on a base of as many sides with its point over the middle.
+`Cylinder(radius, height, sides)`, or `cylinder RADIUS HEIGHT SIDES`, stands along Y, its round side
+made of `sides` flat sides, and `Cone(radius, height, sides)`, or `cone RADIUS HEIGHT SIDES`, stands
+on a base of as many sides with its point over the middle.
 Their corners stand half a side round from the axes, so a cylinder of four sides is a box with its
 sides facing along X and Z, and one of eight has a flat side facing each way along them.
 
@@ -69,13 +84,13 @@ var spire = new EditMesh().Cone(1f, 2f, 6);           // 7 vertices, 12 edges, 7
 
 ### Wedge
 
-`Wedge(size)` is a box cut through from one bottom edge to the opposite top edge. It is nothing tall
+`Wedge(size)`, or `wedge X Y Z`, is a box cut through from one bottom edge to the opposite top edge. It is nothing tall
 at its lowest Z and its full height at its highest, so it rises along Z as stairs do, and a wedge
 laid over a flight of stairs makes their ramp.
 
 ### Stairs
 
-`Stairs(steps, rise, run, width)` is a flight rising along Z, each step `rise` high and `run` deep,
+`Stairs(steps, rise, run, width)`, or `stairs STEPS RISE RUN WIDTH`, is a flight rising along Z, each step `rise` high and `run` deep,
 as wide along X as `width`. It is closed underneath, a back face as tall as the flight at its far end
 and a floor under it, so it is a solid that stands on the ground and against a wall:
 
@@ -89,7 +104,7 @@ stands.
 
 ### Arch
 
-`Arch(radius, thickness, depth, sides)` is half a ring standing on its two feet, its curve made of
+`Arch(radius, thickness, depth, sides)`, or `arch RADIUS THICKNESS DEPTH SIDES`, is half a ring standing on its two feet, its curve made of
 `sides` flat sides and its opening along Z. It is twice its radius wide and its radius tall, so it
 stands over a doorway as wide as its inside, `radius - thickness` either side of its middle.
 
@@ -99,17 +114,17 @@ Operations act on what is selected, a set of vertices and a set of faces. Select
 its corners, so moving the vertices selected moves the faces selected, and an edge is selected where
 both its ends are.
 
-| Call | Selects |
-|---|---|
-| `SelectAll()`, `SelectNone()` | Everything, or nothing |
-| `SelectInvert()` | What was not selected, faces with their corners |
-| `SelectFaces([0, 3])` | Faces by their indices |
-| `SelectFacing(Vec3.UnitY)` | The faces facing nearest a way along an axis, here up |
-| `SelectInside(corner, opposite)` | The vertices inside a box, and the faces all of whose corners are |
-| `SelectSlot("wall")` | The faces in a material slot |
+| Call | Line | Selects |
+|---|---|---|
+| `SelectAll()`, `SelectNone()` | `select all`, `select none` | Everything, or nothing |
+| `SelectInvert()` | `select invert` | What was not selected, faces with their corners |
+| `SelectFaces([0, 3])` | `select face 0 3` | Faces by their indices |
+| `SelectFacing(Vec3.UnitY)` | `select +y` | The faces facing nearest a way along an axis, here up |
+| `SelectInside(corner, opposite)` | `select box 0 0 0 4 3 4` | The vertices inside a box, and the faces all of whose corners are |
+| `SelectSlot("wall")` | `select slot wall` | The faces in a material slot |
 
 Each but the first three takes a `SelectionMode` after it, `Replace` unless it says `Add` or
-`Remove`. `SelectFacing` sorts a face by which of the six directions along the axes its normal is
+`Remove`, which a line says after `select`, as `select add -y`. `SelectFacing` sorts a face by which of the six directions along the axes its normal is
 nearest, so every face is a floor, a ceiling or one of four walls. A slope rising exactly as far as
 it runs, at forty-five degrees, is taken as a floor, where a character walks it.
 
@@ -123,7 +138,9 @@ var hall = new EditMesh()
 ## Moving, turning and scaling
 
 `Move(by)` moves the selected vertices, `Rotate(axis, degrees)` turns them about an axis and
-`Scale(factor)` stretches them, each along one axis or all three. A turn or a scale is about the
+`Scale(factor)` stretches them, each along one axis or all three, the lines `move X Y Z`,
+`rotate y 90` (or an axis's three numbers, `rotate 1 0 1 45`) and `scale 2` or `scale 1 2 1`, each
+ending in `at X Y Z` where a pivot is given. A turn or a scale is about the
 middle of the box holding the selection unless a pivot is given, so a part turned a quarter in place
 stays on the grid it stood on, and a negative scale mirrors the selection with its faces still
 facing out.
@@ -139,9 +156,9 @@ var tower = new EditMesh()
 
 ## The grid
 
-A mesh holds a grid step, a meter unless `Grid(step)` sets a power of two of one from a sixteenth to
-sixty-four. A measure typed is taken as given, so a move of a fifth of a meter moves a fifth of a
-meter whatever the step. `Snap()` puts each selected vertex on the nearest point of the grid,
+A mesh holds a grid step, a meter unless `Grid(step)`, or `grid STEP`, sets a power of two of one
+from a sixteenth to sixty-four. A measure typed is taken as given, so a move of a fifth of a meter moves a fifth of a
+meter whatever the step. `Snap()`, or `snap`, puts each selected vertex on the nearest point of the grid,
 which mends what turns and scales left off it:
 
 ```csharp
@@ -155,7 +172,7 @@ var crate = new EditMesh()
 ## Material slots
 
 Each face has a material slot, a name, the first of which, `default`, every new face takes.
-`Material("wall")` puts the selected faces in the slot of that name, made where there is none, so a
+`Material("wall")`, or `material wall`, puts the selected faces in the slot of that name, made where there is none, so a
 mesh's faces are sorted into floors, walls and trims before what each is drawn with is decided:
 
 ```csharp
@@ -164,6 +181,105 @@ var cell = new EditMesh()
     .Material("wall")
     .SelectFacing(-Vec3.UnitY)
     .Material("floor");
+```
+
+## Changing the faces
+
+These change which vertices and faces there are, on what is selected:
+
+| Call | Line | Does |
+|---|---|---|
+| `Extrude(1f)` | `extrude 1` | Pushes the selected faces out a meter along their normals as one region, sides filled |
+| `Extrude(new Vec3(0f, 3f, 0f))` | `extrude 0 3 0` | Pushes them by one vector, as walls pushed up from a floor's edge |
+| `Inset(0.25f)` | `inset 0.25` | Makes each a smaller face a quarter in from its edges, with a band round it |
+| `Delete()`, `Delete(fill: true)` | `delete`, `delete fill` | Takes them away, or the selected vertices with their faces, leaving the hole or closing it |
+| `Merge(0.01f)` | `merge 0.01` | Joins selected vertices within a centimeter into one |
+| `Flip()` | `flip` | Turns the faces to face the other way |
+| `Triangulate()` | `triangulate` | Cuts each into triangles, as the drawing cuts it |
+| `Duplicate()` | `duplicate` | Copies them in place with vertices of their own, the copy selected |
+| `Join("models/pillar.model")` | `join models/pillar.model` | Adds another model made from its file, selected |
+
+An extrude moves the region's faces together, so faces side by side stay joined and each goes the
+whole distance along its own normal, and selects them after, so a second extrude pushes them
+further. A box whose top is pushed up a meter has twelve vertices and ten faces, and a window's
+recess is an inset followed by an extrude inward:
+
+```csharp
+var wall = new EditMesh()
+    .Box(new Vec3(4f, 3f, 0.3f))
+    .SelectFacing(Vec3.UnitZ)
+    .Inset(0.8f)
+    .Extrude(-0.2f);                 // a recess twenty centimeters deep
+```
+
+`Shade(true, 45f)`, or `shade smooth 45`, draws the selected faces smoothed into the faces beside
+them that meet them at under 45 degrees, thirty where no angle is given, so a cylinder's sides are
+round and its ends flat, and `shade flat` draws them flat again.
+
+## The recipe
+
+`Recipe` is the list of lines, `Undo()` takes the last back by making the mesh again from the lines
+before it, and `Redo()` does it again. `Run(line)` runs a line as its call would, so a line typed is
+an operation done, and `Save(path)` writes the recipe as a file of its own, `*.model`, which
+`EditMesh.Load(path)` makes the mesh from, reading it as the game reads its assets:
+
+```csharp
+var room = new EditMesh().Box(new Vec3(8f, 3f, 6f)).SelectFacing(Vec3.UnitY).Extrude(1f);
+room.Undo();                                     // the box again, its top selected
+room.Run("extrude 2");
+room.Save("models/room.model");                  // under the asset root
+
+var again = EditMesh.Load("models/room.model");
+```
+
+The file starts with the line `model 1`, its form and the form's version, and skips blank lines and
+what follows a `#`, so a model is a short text a reader follows and a diff reads line by line:
+
+```text
+model 1
+# a room with a raised ceiling
+box 8 3 6
+select +y
+extrude 2
+```
+
+A line that is not an operation is named in the error with its number. The words are the same in
+3DEngine's, so a recipe written in either engine makes the same mesh in the other, its faces
+numbered alike.
+
+## Drawing and colliding
+
+`Modeling.Build(mesh)` builds the mesh into a `MeshData` for each material slot, each face cut into
+triangles by ear clipping, so a concave face such as a flight's side is cut inside its outline.
+`Modeling.Meshes(mesh)` makes a mesh from each the first time and writes it again in place once the
+edit mesh has changed, so an entity drawn with one follows the edits:
+
+<!-- compiled with:
+Entity floor = default;
+var mesh = new EditMesh();
+var grid = Render.CreateMaterial(0.6f, 0.6f, 0.6f);
+-->
+```csharp
+var meshes = Modeling.Meshes(mesh);              // in a system, each frame if it likes
+Render.SetMesh(ctx.Ecs, floor, meshes[0]);
+Render.SetMaterial(ctx.Ecs, floor, grid);
+```
+
+A face's texture coordinates are its corners' places in meters, seen along the axis its normal is
+nearest, so a texture of a meter's grid shows a meter on every face and carries on across faces
+meeting along a line, and `Meshes` works out from them the tangents a normal map needs.
+
+`Modeling.Collider(mesh)` is the mesh's triangles as a shape a static body collides as, so a level
+blocked out is walked on:
+
+<!-- compiled with:
+using Bevy.Physics;
+Entity level = default;
+var mesh = new EditMesh();
+var physics = new PhysicsWorld(new PhysicsSettings());
+-->
+```csharp
+physics.Add(level, Modeling.Collider(mesh), BodyKind.Static, Transform.Identity);
 ```
 
 ---

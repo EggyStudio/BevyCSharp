@@ -293,7 +293,7 @@ transform the renderer reads and a sound played from C# is an entity in the same
 | [Scenes and saves](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/scenes-and-saves.md) | Data assets, scene files, instances, saved games and types that change |
 | [Assets and models](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/assets-and-models.md) | Loading from a folder, an assembly or a pack, and glTF models |
 | [Drawing](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/drawing.md) | Meshes and materials made in code, and meshlets |
-| [Modeling](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md) | Meshes shaped by operations, from primitives through a selection moved on a grid |
+| [Modeling](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md) | Meshes shaped by operations, kept as a recipe and built into meshes and colliders |
 | [Materials and textures](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/materials.md) | Bevy's physically based material and its images |
 | [Shaders](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/shaders.md) | Materials and passes written in Slang, compiled and reloaded as the game runs |
 | [Compute](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/compute.md) | Compute shaders on their own and on a camera |

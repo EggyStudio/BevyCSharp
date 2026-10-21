@@ -1079,6 +1079,7 @@ The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/
 Vec3 Position(int vertex);                                      // Where a vertex is
 ReadOnlySpan<int> Corners(int face);                            // A face's vertices, in order round it, counter-clockwise seen from the side it faces
 string SlotOf(int face);                                        // The name of a face's material slot
+float SmoothOf(int face);                                       // The angle in degrees up to which a face is smoothed into those beside it, or zero where it is drawn flat
 Vec3 Normal(int face);                                          // The way a face faces, a length of one, or zero for a face with no area
 Vec3 Center(int face);                                          // The middle of a face, the mean of its corners
 IEnumerable<(int, int)> Edges();                                // The edges, each once, its ends in the order of their indices
@@ -1090,6 +1091,12 @@ EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool cen
 EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a wedge, a box cut through from one bottom edge to the opposite top edge, rising along Z
 EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false);  // Adds a flight of stairs rising along Z, closed underneath
 EditMesh Arch(float radius, float thickness, float depth, int sides, Vec3 at = default, bool centered = false);  // Adds an arch, half a ring standing on its two feet, its opening along Z
+bool Undo();                                                    // Takes back the last operation, by making the mesh again from the lines before it
+bool Redo();                                                    // Does again the operation last taken back
+EditMesh Run(string line);                                      // Runs one line of a recipe on the mesh, as though its operation were called
+static EditMesh FromRecipe(string text, string name = "the recipe");  // Makes a mesh from a recipe's text, its lines run in order from an empty mesh
+static EditMesh Load(string path);                              // Makes a mesh from a recipe's file, read as the game reads its assets
+string Save(string path);                                       // Writes the recipe to a file, from which Load makes the mesh again
 bool IsVertexSelected(int vertex);                              // Whether a vertex is selected
 bool IsFaceSelected(int face);                                  // Whether a face is selected
 EditMesh SelectAll();                                           // Selects every vertex and every face
@@ -1099,6 +1106,16 @@ EditMesh SelectFaces(IEnumerable<int> faces, SelectionMode mode = SelectionMode.
 EditMesh SelectFacing(Vec3 direction, SelectionMode mode = SelectionMode.Replace);  // Selects the faces that face nearest one way along an axis, such as up
 EditMesh SelectInside(Vec3 corner, Vec3 opposite, SelectionMode mode = SelectionMode.Replace);  // Selects the vertices inside a box, the faces all of whose corners are inside it, and the edges between
 EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace);  // Selects the faces in a material slot
+EditMesh Extrude(float distance);                               // Pushes the selected faces out along their normals, the sides between them and what they left filled
+EditMesh Extrude(Vec3 by);                                      // Pushes the selected faces out by one vector, the sides between them and what they left filled
+EditMesh Inset(float distance);                                 // Makes each selected face a smaller face inside it, with a band of faces round it
+EditMesh Delete(bool fill = false);                             // Takes away the selected faces, or where none is selected the selected vertices with every face using them
+EditMesh Merge(float distance);                                 // Joins the selected vertices nearer one another than a distance into one, where the first of them is
+EditMesh Flip();                                                // Turns the selected faces to face the other way, their corners run backwards
+EditMesh Triangulate();                                         // Cuts each selected face of more than three corners into triangles, as the drawing cuts it
+EditMesh Duplicate();                                           // Copies the selected faces where they are, with vertices of their own, and selects the copy
+EditMesh Join(string path);                                     // Adds another model's mesh, made from its recipe's file, to this one, and selects it
+EditMesh Shade(bool smooth, float degrees = 30f);               // Draws the selected faces smoothed into one another, or flat
 EditMesh Move(Vec3 by);                                         // Moves the selected vertices
 EditMesh Rotate(Vec3 axis, float degrees, Vec3? pivot = null);  // Turns the selected vertices about an axis
 EditMesh Scale(Vec3 factor, Vec3? pivot = null);                // Scales the selected vertices toward or away from a point
@@ -1106,6 +1123,14 @@ EditMesh Scale(float factor, Vec3? pivot = null);               // Scales the se
 EditMesh Grid(float step);                                      // Sets the grid step a point picked by hand lands on and Snap rounds to
 EditMesh Snap();                                                // Puts each selected vertex on the nearest point of the grid
 EditMesh Material(string slot);                                 // Puts the selected faces in a material slot, which is made where the mesh has none of that name
+```
+
+### `Modeling`
+
+```csharp
+static MeshData[] Build(EditMesh mesh);                         // Builds the mesh into one mesh's data for each material slot, in the order of Slots
+static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
+static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots
 ```
 
 ## Shaders

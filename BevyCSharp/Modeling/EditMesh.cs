@@ -54,11 +54,14 @@ public sealed partial class EditMesh
     // every operation that moves a corner between faces would otherwise have to mend them.
     private Dictionary<(int Low, int High), EdgeUse>? _edges;
 
-    /// <summary>A face, its corners in order round it, and its slot.</summary>
-    private sealed class Face(int[] corners, int slot)
+    /// <summary>A face, its corners in order round it, its slot, and the angle it is smoothed across.</summary>
+    private sealed class Face(int[] corners, int slot, float smooth = 0f)
     {
         public int[] Corners = corners;
         public int Slot = slot;
+
+        /// <summary>The angle in degrees up to which its corners share a normal with the faces beside them, or zero for flat.</summary>
+        public float Smooth = smooth;
     }
 
     /// <summary>How often the faces run along an edge from its lower vertex and from its higher.</summary>
@@ -80,6 +83,13 @@ public sealed partial class EditMesh
     /// <summary>The names of the material slots, the first of which every new face takes.</summary>
     public IReadOnlyList<string> Slots => _slots;
 
+    /// <summary>A count that moves on every change to what the mesh draws as, and not on a change of the selection.</summary>
+    /// <remarks>
+    /// What <see cref="Modeling.Meshes"/> compares with the count it last built at, so a mesh is
+    /// written again only once it changed, however often it is asked for.
+    /// </remarks>
+    public int Version { get; private set; }
+
     /// <summary>The grid step a point picked by hand lands on, and that <see cref="Snap"/> rounds to.</summary>
     /// <remarks>One meter until <see cref="Grid"/> sets another.</remarks>
     public float GridStep { get; private set; } = 1f;
@@ -95,6 +105,16 @@ public sealed partial class EditMesh
     /// <summary>The name of a face's material slot.</summary>
     /// <param name="face">Its index, from zero to <see cref="FaceCount"/>.</param>
     public string SlotOf(int face) => _slots[_faces[face].Slot];
+
+    /// <summary>The angle in degrees up to which a face is smoothed into those beside it, or zero where it is drawn flat.</summary>
+    /// <param name="face">Its index, from zero to <see cref="FaceCount"/>.</param>
+    public float SmoothOf(int face) => _faces[face].Smooth;
+
+    /// <summary>A face's slot, as its index in <see cref="Slots"/>.</summary>
+    internal int SlotIndexOf(int face) => _faces[face].Slot;
+
+    /// <summary>A face's normal at twice its area, Newell's sum, which the drawing weighs a smoothed corner's normal by.</summary>
+    internal Vec3 Area(int face) => Newell(_faces[face].Corners);
 
     /// <summary>The way a face faces, a length of one, or zero for a face with no area.</summary>
     /// <param name="face">Its index, from zero to <see cref="FaceCount"/>.</param>
@@ -175,6 +195,7 @@ public sealed partial class EditMesh
 
     /// <summary>Takes away every vertex, face and slot but the first, and the selection with them.</summary>
     /// <returns>This mesh, for the next operation.</returns>
+    /// <remarks>The recipe keeps it as a line, <c>clear</c>, so an undo after it brings back what it took.</remarks>
     public EditMesh Clear()
     {
         _positions.Clear();
@@ -183,11 +204,15 @@ public sealed partial class EditMesh
         _selectedVertices.Clear();
         _selectedFaces.Clear();
         Changed();
-        return this;
+        return Did("clear");
     }
 
-    /// <summary>Says the shape changed, so what is read from the faces is read again.</summary>
-    private void Changed() => _edges = null;
+    /// <summary>Says the shape changed, so what is read from the faces is read again and the drawing built again.</summary>
+    private void Changed()
+    {
+        _edges = null;
+        Version++;
+    }
 
     private Dictionary<(int Low, int High), EdgeUse> EdgeUses()
     {
@@ -257,9 +282,9 @@ public sealed partial class EditMesh
         return _positions.Count - 1;
     }
 
-    private int AddFace(int[] corners, int slot = 0)
+    private int AddFace(int[] corners, int slot = 0, float smooth = 0f)
     {
-        _faces.Add(new Face(corners, slot));
+        _faces.Add(new Face(corners, slot, smooth));
         return _faces.Count - 1;
     }
 }

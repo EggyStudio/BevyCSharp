@@ -18,7 +18,8 @@ public sealed partial class EditMesh
         Positive(size.Z, nameof(size));
 
         // The floor's outline in Z and X, the order that makes it turn counter-clockwise about Y.
-        return Prism([new(0f, 0f), new(size.Z, 0f), new(size.Z, size.X), new(0f, size.X)], Axis.Y, size.Y, at, centered);
+        Prism([new(0f, 0f), new(size.Z, 0f), new(size.Z, size.X), new(0f, size.X)], Axis.Y, size.Y, at, centered);
+        return Did($"box {V(size)}{Placement(at, centered)}");
     }
 
     /// <summary>Adds a flat rectangle facing up.</summary>
@@ -43,7 +44,8 @@ public sealed partial class EditMesh
         AddVertex(new Vec3(width, 0f, 0f));
         AddFace([first, first + 1, first + 2, first + 3]);
 
-        return Placed(first, _faces.Count - 1, at, centered);
+        Placed(first, _faces.Count - 1, at, centered);
+        return Did($"plane {F(width)} {F(depth)}{Placement(at, centered)}");
     }
 
     /// <summary>Adds a cylinder standing along Y, its round side made of flat sides.</summary>
@@ -64,7 +66,8 @@ public sealed partial class EditMesh
         Positive(height, nameof(height));
         ArgumentOutOfRangeException.ThrowIfLessThan(sides, 3);
 
-        return Prism(Round(radius, sides), Axis.Y, height, at, centered);
+        Prism(Round(radius, sides), Axis.Y, height, at, centered);
+        return Did($"cylinder {F(radius)} {F(height)} {sides}{Placement(at, centered)}");
     }
 
     /// <summary>Adds a cone standing along Y, its point at the top over the middle of its base.</summary>
@@ -93,7 +96,8 @@ public sealed partial class EditMesh
         AddFace(Enumerable.Range(0, sides).Select(i => first + sides - 1 - i).ToArray());
         for (var i = 0; i < sides; i++) AddFace([first + i, first + (i + 1) % sides, top]);
 
-        return Placed(first, firstFace, at, centered);
+        Placed(first, firstFace, at, centered);
+        return Did($"cone {F(radius)} {F(height)} {sides}{Placement(at, centered)}");
     }
 
     /// <summary>Adds a wedge, a box cut through from one bottom edge to the opposite top edge, rising along Z.</summary>
@@ -113,7 +117,8 @@ public sealed partial class EditMesh
         Positive(size.Z, nameof(size));
 
         // The side's outline in Y and Z, which is the plane X is pushed out from.
-        return Prism([new(0f, 0f), new(0f, size.Z), new(size.Y, size.Z)], Axis.X, size.X, at, centered);
+        Prism([new(0f, 0f), new(0f, size.Z), new(size.Y, size.Z)], Axis.X, size.X, at, centered);
+        return Did($"wedge {V(size)}{Placement(at, centered)}");
     }
 
     /// <summary>Adds a flight of stairs rising along Z, closed underneath.</summary>
@@ -154,7 +159,8 @@ public sealed partial class EditMesh
         }
 
         outline.Add(new Vec2(0f, steps * run));
-        return Prism([.. outline], Axis.X, width, at, centered);
+        Prism([.. outline], Axis.X, width, at, centered);
+        return Did($"stairs {steps} {F(rise)} {F(run)} {F(width)}{Placement(at, centered)}");
     }
 
     /// <summary>Adds an arch, half a ring standing on its two feet, its opening along Z.</summary>
@@ -185,7 +191,8 @@ public sealed partial class EditMesh
         for (var i = 0; i <= sides; i++) outline.Add(OnCircle(radius, MathF.PI * i / sides));
         for (var i = sides; i >= 0; i--) outline.Add(OnCircle(inner, MathF.PI * i / sides));
 
-        return Prism([.. outline], Axis.Z, depth, at, centered);
+        Prism([.. outline], Axis.Z, depth, at, centered);
+        return Did($"arch {F(radius)} {F(thickness)} {F(depth)} {sides}{Placement(at, centered)}");
     }
 
     /// <summary>The three axes a prism is pushed out along.</summary>

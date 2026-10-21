@@ -11,7 +11,7 @@ public sealed partial class EditMesh
         foreach (var vertex in SelectedVertices()) _positions[vertex] += by;
 
         Changed();
-        return this;
+        return Did($"move {V(by)}");
     }
 
     /// <summary>Turns the selected vertices about an axis.</summary>
@@ -38,7 +38,10 @@ public sealed partial class EditMesh
         foreach (var vertex in vertices) _positions[vertex] = center + turn * (_positions[vertex] - center);
 
         Changed();
-        return this;
+
+        // An axis along X, Y or Z is written as its letter, and any other as its three numbers.
+        var named = axis.Y == 0f && axis.Z == 0f && axis.X > 0f ? "x" : axis.X == 0f && axis.Z == 0f && axis.Y > 0f ? "y" : axis.X == 0f && axis.Y == 0f && axis.Z > 0f ? "z" : V(axis);
+        return Did($"rotate {named} {F(degrees)}{(pivot is { } at ? " at " + V(at) : "")}");
     }
 
     /// <summary>Scales the selected vertices toward or away from a point.</summary>
@@ -72,7 +75,8 @@ public sealed partial class EditMesh
         }
 
         Changed();
-        return this;
+        var factors = factor.X == factor.Y && factor.Y == factor.Z ? F(factor.X) : V(factor);
+        return Did($"scale {factors}{(pivot is { } at ? " at " + V(at) : "")}");
     }
 
     /// <summary>Scales the selected vertices by one factor along every axis.</summary>
@@ -100,7 +104,7 @@ public sealed partial class EditMesh
         }
 
         GridStep = step;
-        return this;
+        return Did($"grid {F(step)}");
     }
 
     /// <summary>Puts each selected vertex on the nearest point of the grid.</summary>
@@ -116,7 +120,7 @@ public sealed partial class EditMesh
         }
 
         Changed();
-        return this;
+        return Did("snap");
     }
 
     /// <summary>Puts the selected faces in a material slot, which is made where the mesh has none of that name.</summary>
@@ -140,7 +144,8 @@ public sealed partial class EditMesh
         }
 
         foreach (var face in _selectedFaces) _faces[face].Slot = index;
-        return this;
+        Changed();
+        return Did($"material {slot}");
     }
 
     /// <summary>The middle of the box holding some vertices.</summary>
