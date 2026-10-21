@@ -283,13 +283,17 @@ meet cut and the pieces joined back into faces where they lie in one plane and o
 | `Subtract("models/arch.model", at)` | `subtract models/arch.model at 2 0 0` | Takes another model's solid away |
 | `Intersect("models/block.model", at)` | `intersect models/block.model` | Keeps what both hold |
 | `Cut("box 1 1 2 at 1.5 1 -0.5")` | `cut box 1 1 2 at 1.5 1 -0.5` | Takes away a solid primitive made where its line places it |
+| `Union("stairs 16 0.2 0.3 1.2 at 0.2 0.2 1.4")` | `union stairs 16 0.2 0.3 1.2 at 0.2 0.2 1.4` | Adds a solid primitive made where its line places it, as `subtract` and `intersect` take one too |
 | `Room(new Vec3(6f, 3f, 5f), 0.2f)` | `room 6 3 5 0.2` | Adds a box hollowed by walls, floor and ceiling two tenths thick |
 | `Window(1f, 1.2f, 2f, 0.9f)` | `cut window 1 1.2 2 0.9` | Cuts a window through the wall selected, its middle two meters along, its sill at 0.9 |
 | `Door(1f, 2.1f, 1.5f)` | `cut door 1 2.1 1.5` | Cuts a door from the wall's bottom, its middle a meter and a half along |
 | `Ramp(1f, 3f, 2f)` | `ramp 1 3 2` | Adds a ramp a meter high over three, two wide, in a flight of stairs' words |
 
 The faces the second solid left are selected after, so `material window` after a window
-gives its sides a slot of their own. A window and a door are cut through the wall whose face was
+gives its sides a slot of their own, and a primitive's faces start in the mesh's first slot. A
+flight of stairs standing on a floor and against a wall is joined with `union` rather than added
+with `stairs`, since a solid added touches the floor and the wall as a second one, and a boolean
+after it welds their edges together, four faces along each, which counts every one of them open. A window and a door are cut through the wall whose face was
 selected first, measured from its left edge, seen from in front, and its bottom, over every selected
 face in its plane, so a wall a window cut into pieces is measured whole when its pieces are
 selected. Each is as deep as a ray from the face finds the wall's other side, so a room's front wall
@@ -456,7 +460,18 @@ the selection in orange. A drag that comes back to where it began does nothing.
 
 The Texture group projects the selected faces' coordinates, along the view among the directions,
 moves, scales and turns them, and draws them over their slot's texture, repeated as far as they
-reach. The Slots group gives the slots their looks and adds, renames and takes away slots.
+reach. The Slots group gives the slots their looks and adds, renames and takes away slots. The
+window takes no focus as it appears, so the key that opened it moves into none of its fields, and
+the program's keys stay its own until the window is clicked. A shortcut asks
+`ImGuiRuntime.Typing`, which is true while a field has the caret.
+
+[Blockout](../games/Blockout/assets/scripts/Blockout.cs), under `games/`, is a level made this way
+from [one recipe](../games/Blockout/assets/levels/blockout.model), three rooms, a corridor, stairs
+between two floors, two doors, a window and a lamp, cut from one block. It is walked through the
+character controller on `Modeling.Collider`'s shape, made again each time the level changes, Tab
+opens this window on the level while it is walked in, and F5 saves the recipe.
+`blockout.autopilot` walks it up the stairs or round every room for a scripted run, and
+`blockout.status` says where the walker stands and what lights the level.
 
 `Modeling.WantsPointer` is true while the pointer is over a face or pressed on one, so a camera that
 turns on a drag, as the editor's does with alt, begins one only where it is false, as it asks

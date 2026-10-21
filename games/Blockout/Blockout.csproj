@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!--
+      A level blocked out with the engine's modeling tools and walked in, made the way a game outside
+      this repository is made, from the BevyCSharp package and nothing of the repository's own projects.
+      Its level is a recipe in assets, rebuilt as the game loads, and its behaviors are the scripts
+      beside it.
+    -->
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+
+        <!--
+          The newest version published on nuget.org, which this game builds on once a version
+          carrying the modeling tools is published and the default raised to it (BUILDING.md). Until
+          then it is built on a pack of the checkout, named with -p:BevyCSharpVersion, as continuous
+          integration does with the package it packs for the run.
+        -->
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.178</BevyCSharpVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BevyCSharp" Version="$(BevyCSharpVersion)" />
+    </ItemGroup>
+
+</Project>

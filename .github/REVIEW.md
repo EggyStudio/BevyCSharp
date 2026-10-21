@@ -10,28 +10,43 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5f051299`, item 48, the recovery test's bound, and nothing else, carrying the
-review's file: the run recording the frame the first error is counted in by reading the count each
-frame and asking the exit that many frames past it within a bound of 600, the stopped-drawing test
-asserting the count arrived, exit 0, the last frame thirty past the counted one and one error, the
-ignored-error test taking the same shape, the quit and recover tests left as they were; measured for
-N 3.5 and in the commit's description, the device reporting the error 14 to 45 frames after it was
-caused idle and 24 to 47 under a load of 32 threads, all passing, where the old test read the count
-only after the app ended at frame 39; the suite 1,643 passed and 3 skipped, nothing failing. Read at
-07:04 on 2026-10-21 and pushed at 07:04, its build run ended at 07:21 with Linux and Windows green
-and macOS red on the app leak test, Verdict 42, read first and mended before the next push; the
-build run of `fc63b7ba` had ended green at 06:52. The ledger's rows of Decision 57 ride with item
-42. Shortly before 07:15 the owner asked for 3DEngine's radiance cascades in this engine, Decision
-51 and items 50 to 52. Next item 53, ImGui's pass in the render profile found by item 42, then item
-42, Blockout, then item 49, the F1 and F3 keys, then 43 to 45, then 50, the field; items 51 and 52
-wait on the owner's word of 07:28 until 3DEngine's cascades settle.
+Reviewed up to `45526e4b`, item 53, ImGui's pass in the render profile, after `722cb062`, Verdict
+42's mend, and nothing else, the first of them carrying the review's file and the SHARED.md edits.
+The mend: the floor's rule takes its base as the greater of the twentieth and thirtieth readings
+against the least from the seventieth on, and the test writes the census's growth on a pass; read
+with dotnet-gcdump and the test alone, the heap flat at 16.77 MB from the twentieth app to the
+hundredth, the parameter and method infos, the event source's table and the strings grown from the
+twentieth app to the sixtieth and not from the sixtieth to the hundredth, so made once by the
+census's own diagnostics session, whose event source builds its manifest by reflection, no app
+making them and nothing of the three commits involved, macOS's rise of 6 MB the old rule reading the
+trough at the fortieth app as its base, the new rule reading those figures as a fall of 6.49, a leak
+of an eighth of a megabyte an app still failing over the forty apps from the thirtieth to the
+seventieth; the remarks name the run and the command, the description the numbers. Item 53: the
+imgui module's fifteen gates and the install in app.rs move from editor to render,
+`ImGuiRuntime.Start` asks `HasRenderer`, the docs of `Config.Gui`, `App.HasEditor` and the
+capability follow, BUILDING.md's table says three profiles over its three rows, the console and
+render target tests need a renderer and the build-without-interface test needs none, Needs.Editor
+and NoEditor gone as unused; the three profiles checked in the container without warnings and on
+Windows and macOS, Cargo's 105 and 183 tests passing, the lock file unchanged, 1,643 passed and 3
+skipped on the editor bridge. Read at 08:20 on 2026-10-21 and pushed at 08:20; the build run of
+`5f051299` had ended red on macOS at 07:21, Verdict 42, and the build run 39554837971 of this push
+ended green at 08:42, the macOS suite 1,167 passed and 584 skipped in 5 minutes, Linux and Windows
+green, so Verdict 42 is settled. Item 42 is under way: the level's recipe of 43 lines, closed, 95
+faces, 258 ms to build, a window cut later in 55 ms with no open edge, the game, its play script and
+the soak written and run on a local pack, with a small engine change coming in its commit, `union`,
+`subtract` and `intersect` taking a solid primitive's line as `cut` does, since stairs added as a
+second solid touching the floor and wall had their welded edges counted open by a later boolean, a
+union making them one solid from the one recipe file; a Shared line goes with it. Next item 42, then
+item 49, the F1 and F3 keys, then 43 to 45, then 50, the field; items 51 and 52 wait on the owner's
+word of 07:28 until 3DEngine's cascades settle.
+
+Before it, `5f051299` came, item 48, the recovery test's bound, and nothing else, carrying the
+review's file. Pushed at 07:04, its build run ended at 07:21 with Linux and Windows green and macOS
+red on the app leak test, Verdict 42.
 
 Before it, `fc63b7ba` came, item 41, the texture coordinates and the materials by slot, and nothing
 else, carrying the review's file with its Shared line. Pushed at 06:34, its build run green at
 06:52.
-
-Before it, `3fb5643e` came, item 40's second half, the modeling window, and nothing else, carrying
-the review's file with its Shared line. Pushed at 05:39, its build run green at 05:55.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1390,7 +1405,37 @@ from [SHARED.md](SHARED.md).
     so a game that does not ask pays nothing but the code. The mend: the pass and its entry points
     under render, `Config.Gui`'s words and BUILDING.md's profile table changed, the three profiles'
     cargo checks and the cross-target checks run. One commit, small, before item 42's commit, so
-    Blockout on the package opens its window on Tab.
+    Blockout on the package opens its window on Tab. Done at `45526e4b` on 2026-10-21, as the head
+    says.
+
+54. **A denoiser over Solari's lit result, so the ray-traced tier's picture is clean (Decision
+    52).** Solari writes the direct and indirect light it resampled into the view target as one
+    color, the surface's color already in it, and leaves the noise to DLSS Ray Reconstruction, which
+    the bridge does not build, so the picture is grainy wherever it runs. A node of the bridge's own
+    in the `solari` profile, after Solari's node and before Bevy's post-processing, in five stages.
+    First the color is demodulated, the deferred prepass's emissive taken off and the rest divided
+    by its base color above a floor. Then it is accumulated in time, reprojected by the motion
+    vectors onto the previous frame's accumulation and kept where the previous depth, which Solari
+    double-buffers, and the normal agree within a plane distance and a normal threshold, the history
+    clamped at 32 frames, the first and second moments of luminance accumulated beside it. Then the
+    variance, from the moments where the history holds four frames or more, else from a 7 by 7
+    neighborhood. Then an à-trous filter of five passes at steps 1, 2, 4, 8 and 16, each tap
+    weighted by its depth, normal and luminance differences, the luminance's against the root of the
+    blurred variance, the variance filtered along, and the first pass's result fed back as the next
+    frame's history, as SVGF does. Last the color is remodulated, times the base color plus the
+    emissive, into the view target. `Render.SetRayTracedDenoiser(on)` turns it off for a capture
+    beside, on wherever ray tracing is active, and the history's clamp and the three weights' widths
+    are a settings struct with SVGF's defaults, the guide naming them. The reading, on a machine
+    with ray queries since the runners have none, the local command named under N 3.6: the mean of
+    256 frames of Solari standing still as the reference of each of the feature test's reference
+    views, the denoised single frame nearer it than the noisy one at every view, the camera strafing
+    past a pillar for thirty frames leaving no trail, read as the disoccluded pixels no further from
+    the reference than the noisy frame's, and the node's time at 1080p from Bevy's diagnostics, the
+    budget set from the first reading. Cargo tests of the weights and the reprojection as pure
+    functions, a headless test that a bridge without `solari` has no node, the ray tracing guide's
+    grainy sentence changed and RENDERING.md's node added. H-Trace's denoiser is read for its stage
+    order and constants, nothing of its code taken (Decision 52). Two commits, the node with its
+    stages, then the setting, the guide and the readings. After item 50 and before items 51 and 52.
 
 ## Verdicts
 
@@ -1680,7 +1725,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     mend, the static emptied or the cache keyed once rather than an app, or, where the infos stand
     still and the floor's rule is the fault, the base taken as the greatest of the readings after
     the collections as 3DEngine's Verdict 75 took it, under N 3.5. One commit, before the next push.
-    Mended at `?`.
+    Mended at `722cb062`, the floor's rule, the infos read as the census's own; settled on the build
+    run 39554837971 of `45526e4b`, read at 08:42 on 2026-10-21, the macOS suite green with 1,167
+    passed in 5 minutes and the two other systems green.
 
 ## Decisions
 
@@ -2083,6 +2130,21 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     holds, Blockout and the games keeping Solari where the GPU has ray queries and the sun with
     ambient and occlusion elsewhere.
 
+52. **A denoiser for the ray-traced tier of global illumination, beside the cascades, in both
+    engines.** The owner asked at 08:42 on 2026-10-21 why BevyCSharp has no denoiser, was answered
+    that Bevy's Solari at 0.20 knows only DLSS Ray Reconstruction, which the bridge does not build,
+    ReSTIR halving the noise meanwhile, and said shortly before 08:56 that a denoiser for Solari is
+    necessary as the higher-definition solution for global illumination beside the radiance
+    cascades, and that it is implemented for both engines in the future. So the engines carry two
+    tiers, the cascades everywhere, which need no denoiser since they integrate over directions, and
+    a ray-traced lighting with a denoiser where the GPU has ray queries, here over Solari's output
+    as item 54, after item 50 and before items 51 and 52, and in 3DEngine over a ray-traced pass of
+    its own once its cascades settle, its Decision 59, no item there yet. The owner holds the source
+    of H-Trace, a Unity asset received from its developer as a patron; it is read for the method's
+    shape and its constants as the modpack's shaders were read by the voxel game, and nothing of its
+    code enters either repository, the license being the owner's to use and not to publish, unless
+    the developer grants it in writing, which the owner may ask.
+
 ## Replies
 
 Shared: a set clock held still while an asset the app asked for is loading and between the commands
@@ -2430,3 +2492,44 @@ selected faces' coordinates drawn over the slot's picture, a square of whole rep
 repeat their least coordinates fall in, eight pictures a side at most, and its Slots group a row a
 look's line. The examples' resources hold no brick, so the test's wall takes the parallax example's
 block texture with its normal map, shown a picture a meter, and the floor the chair's wood.
+
+Shared: Blockout, in the commit carrying this line, item 42, for its row, in the words of item 38's
+Reply. The level is `games/Blockout/assets/levels/blockout.model`, whose recipe words are the
+engines' shared ones, so item 63 takes the file as it is. It is cut from one block, `box 22 6.6 8`,
+so every cut works on one closed solid. The hall is x 0.2 to 9.8 and z 0.2 to 7.8 under a slab, the
+room over it is open to the sky, the corridor is x 10 to 15.8 and z 3 to 5, and the second room is x
+16 to 21.8, with walls 0.2 thick. There are two doors 1.2 by 2.2 at z 4, a window 1.6 by 1.2 on a
+sill of 1, a stairwell over the stairs from z 2, and a lamp, an emissive panel joined under the
+hall's ceiling. The stairs, 16 steps of 0.2 by 0.3 and 1.2 wide, are joined by `union stairs 16 0.2
+0.3 1.2 at 0.2 0.2 1.4`, since `union`, `subtract` and `intersect` take a solid primitive's line as
+`cut` does, made where its own words place it, refused with an `at` of the boolean's own, and its
+faces put in the mesh's first slot. A flight added with `stairs` touches the floor and the wall as a
+second solid, and a later cut welds their edges, four faces along each, all of them counted open. The
+walker is a capsule 0.7 wide and 1.8 tall at an offset of 0.9, of 70 kg, with the character
+controller, walking at 4 m/s along the view, jumping at 4.5 when grounded, its eyes 1.6 up, starting
+at (5, 0.2, 4) looking along -Z. The right button held turns the view 0.004 radians a pixel and the
+arrows 2 radians a second, its pitch held within 1.4, and no key acts while a field has the caret,
+which `ImGuiRuntime.Typing` says. The camera has a field of view of 70, the clear color (0.55, 0.7,
+0.9) and one sample a pixel. The sun gives 10,000 lux with shadows from (-6, 30, -24) toward (11, 0,
+4), the sky's light is (0.75, 0.82, 1) at 400 with ambient occlusion at the medium quality, and a
+point lamp of 400,000 lumens and a range of 16 hangs at (5, 2.9, 4). Where ray-traced lighting comes
+on, the parts are handed to it and the sky's light and the occlusion go off. Tab opens and closes the
+modeling window, which opens without taking focus so the opening key moves into no field, and F5
+saves the recipe to its file with `[blockout] saved the level to <path>` in the log. The level
+answers the model commands as `level`, a model loaded under that name becomes the level, and its
+parts and its collider, a static body of `Modeling.Collider` removed and added again, are made again
+when its version moves. `blockout.status` answers five lines, `at x y z, on the ground` or `in the
+air`, `on the ground floor` or `upper floor` above 3 m; `lighting ray traced` or `the sun, the sky's
+light and ambient occlusion`; `modeling window open` or `closed`; `autopilot off`, `<route> at point
+n of m`, `<route> done` or `<route> stuck before point n of m`; and `level V vertices, E edges, F
+faces, collider made N times`. `blockout.autopilot upstairs|downstairs|loop|tour|off` walks routes of
+points on the floors, each reached within 0.3 m along the ground, stuck after three seconds no
+nearer by a centimeter. Upstairs is (2.5, 1), (0.8, 1), (0.8, 6.8), (5, 6.8) and (5, 4.5),
+downstairs the same back to (5, 4), the loop (7, 4) and (5, 4), and the tour goes
+through both doors to (19, 1.5) by the window and back, then up and down. The play script waits 240 frames at a sixtieth of a
+second each, walks upstairs and reads 3.3 to 3.6 m, cuts `cut window 1.4 1.2 4 1` through the upper
+room's north wall after `select box 0.2 3.4 7.8 9.8 6.6 7.8`, reads more faces, its four sides
+selected and the collider made once more, turns 94 frames to take the window's picture, opens and
+closes the window on Tab, saves on F5 and finds the window's line in the file, walks downstairs and
+the tour, and puts the level's file back. The soak's round walks the loop, cuts that window and takes
+it and the selection back, and opens and closes the window.

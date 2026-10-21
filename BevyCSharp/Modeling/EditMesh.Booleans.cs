@@ -27,26 +27,33 @@ public sealed partial class EditMesh
         return Did($"epsilon {F(distance)}");
     }
 
-    /// <summary>Adds another model's solid, made from its file and moved by an offset, joined into this one where they overlap.</summary>
-    /// <param name="path">The model's file, relative to the asset root unless it is a full path.</param>
-    /// <param name="at">How far the other model is moved before it is joined.</param>
+    /// <summary>Adds another model's solid, made from its file and moved by an offset, or a solid primitive, joined into this one where they overlap.</summary>
+    /// <param name="path">
+    /// The model's file, relative to the asset root unless it is a full path, or a solid
+    /// primitive's line, such as <c>stairs 16 0.2 0.3 1.2 at 0.2 0.2 0.6</c>, made where its own
+    /// words place it.
+    /// </param>
+    /// <param name="at">How far the other model is moved before it is joined, nothing for a primitive's line.</param>
     /// <returns>This mesh, its faces from the other model selected.</returns>
     /// <remarks>
     /// The faces where the two overlap are taken away and the rest joined, faces in one plane and one
     /// slot joined into one, so two boxes side by side make one box. Both are closed solids, as a
-    /// boolean needs, and what is made is too.
+    /// boolean needs, and what is made is too. A primitive added rather than joined, as a flight of
+    /// stairs standing on a floor and against a wall, is a second solid touching the first, whose
+    /// edges a later boolean welds to the floor's and the wall's, four faces then running along each
+    /// and every one of them counted open, so a level's stairs are joined from its one recipe.
     /// </remarks>
     public EditMesh Union(string path, Vec3 at = default) => Combine(path, at, Csg.Union, "union");
 
-    /// <summary>Takes another model's solid, made from its file and moved by an offset, away from this one.</summary>
-    /// <param name="path">The model's file, relative to the asset root unless it is a full path.</param>
-    /// <param name="at">How far the other model is moved before it is taken away.</param>
+    /// <summary>Takes another model's solid, made from its file and moved by an offset, or a solid primitive, away from this one.</summary>
+    /// <param name="path">The model's file, relative to the asset root unless it is a full path, or a solid primitive's line, as <see cref="Cut"/> takes it.</param>
+    /// <param name="at">How far the other model is moved before it is taken away, nothing for a primitive's line.</param>
     /// <returns>This mesh, the faces the other model left in it selected.</returns>
     public EditMesh Subtract(string path, Vec3 at = default) => Combine(path, at, Csg.Subtract, "subtract");
 
-    /// <summary>Keeps what this solid and another model's, made from its file and moved by an offset, both hold.</summary>
-    /// <param name="path">The model's file, relative to the asset root unless it is a full path.</param>
-    /// <param name="at">How far the other model is moved before it is kept to.</param>
+    /// <summary>Keeps what this solid and another model's, made from its file and moved by an offset, or a solid primitive, both hold.</summary>
+    /// <param name="path">The model's file, relative to the asset root unless it is a full path, or a solid primitive's line.</param>
+    /// <param name="at">How far the other model is moved before it is kept to, nothing for a primitive's line.</param>
     /// <returns>This mesh, its faces from the other model selected.</returns>
     public EditMesh Intersect(string path, Vec3 at = default) => Combine(path, at, Csg.Intersect, "intersect");
 
@@ -64,7 +71,7 @@ public sealed partial class EditMesh
         var first = primitive.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)[0];
         if (!Solids.Contains(first)) throw new ArgumentException($"A cut is made with a solid primitive, a box, cylinder, cone, wedge, stairs, arch, room or ramp, and {first} is none.", nameof(primitive));
 
-        var cutter = new EditMesh().Run(primitive);
+        var cutter = Solid(primitive);
         Apply(cutter, Csg.Subtract);
         return Did($"cut {cutter.Recipe[0]}");
     }
@@ -183,7 +190,19 @@ public sealed partial class EditMesh
     private EditMesh Combine(string path, Vec3 at, Func<IEnumerable<Csg.Polygon>, IEnumerable<Csg.Polygon>, double, List<Csg.Polygon>> operation, string word)
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
-        if (path.Any(char.IsWhiteSpace)) throw new ArgumentException("A model's path in a boolean is one word, with no space in it.", nameof(path));
+
+        // A solid primitive's line in the path's place, which a path of one word cannot be taken for.
+        var words = path.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length > 1 && Solids.Contains(words[0]))
+        {
+            if (at != Vec3.Zero) throw new ArgumentException("A primitive's line places it with its own at, and a boolean moves only a model read from a file.", nameof(at));
+
+            var solid = Solid(path);
+            Apply(solid, operation);
+            return Did($"{word} {solid.Recipe[0]}");
+        }
+
+        if (path.Any(char.IsWhiteSpace)) throw new ArgumentException("A model's path in a boolean is one word, with no space in it, or a solid primitive's line.", nameof(path));
 
         var other = Nested(path);
         for (var vertex = 0; vertex < other._positions.Count; vertex++) other._positions[vertex] += at;
@@ -282,6 +301,7 @@ public sealed partial class EditMesh
             : (Bounds.High - Bounds.Low).Length;
 
         var cutter = new EditMesh().Box(new Vec3(width, tall, depth + 2f * OpeningMargin));
+        cutter._slots[0] = _slots[0];
         var origin = right * (left + along - width / 2f) + up * foot + normal * (plane - depth - OpeningMargin);
         for (var vertex = 0; vertex < cutter._positions.Count; vertex++)
         {
@@ -311,6 +331,17 @@ public sealed partial class EditMesh
 
         var t = Vec3.Dot(other, q) * inverse;
         return t > 0f ? t : null;
+    }
+
+    /// <summary>
+    /// A solid primitive made from its line for a boolean, its faces in this mesh's first slot, so a
+    /// mesh whose first slot was renamed takes no slot called <see cref="DefaultSlot"/> from it.
+    /// </summary>
+    private EditMesh Solid(string line)
+    {
+        var solid = new EditMesh().Run(line);
+        solid._slots[0] = _slots[0];
+        return solid;
     }
 
     /// <summary>A model made from its file inside a join or a boolean, refused where models are read inside one another sixteen deep.</summary>

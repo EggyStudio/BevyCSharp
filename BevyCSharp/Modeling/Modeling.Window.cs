@@ -125,8 +125,10 @@ public static partial class Modeling
         ArgumentNullException.ThrowIfNull(mesh);
         if (!ImGuiRuntime.IsRunning) return;
 
+        // Not focused as it appears, so the key that opened it, a Tab as often as not, does not move
+        // into its first field, and the program's keys stay its own until the window is clicked.
         ImGui.SetNextWindowSize(new NumericsVector2(380f, 560f), ImGuiCond.FirstUseEver);
-        if (ImGui.Begin("Model##bcs-model")) DrawPanel(ctx, mesh, camera, placed);
+        if (ImGui.Begin("Model##bcs-model", ImGuiWindowFlags.NoFocusOnAppearing)) DrawPanel(ctx, mesh, camera, placed);
         ImGui.End();
     }
 

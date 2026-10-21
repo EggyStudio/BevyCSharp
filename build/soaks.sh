@@ -3,7 +3,7 @@
 # (build/soak-check.py), as the pack run does, keeping the readings, the logs, each soak's errors
 # and each check's words in build/soak.
 #
-#   build/soaks.sh <seconds> <courtyard|stress|swarm|feature-test>...
+#   build/soaks.sh <seconds> <courtyard|stress|swarm|blockout|feature-test>...
 #
 # A failure is said as one error carrying each soak's FAILED lines and each value the check found
 # climbing, or too few readings to judge, so the page names the program and the figure. The pack run

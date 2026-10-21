@@ -1,8 +1,8 @@
 # A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
 # test job builds (test), and puts the three systems' pages on one (digest). The pack workflow calls
 # this one with `pack` (pack.yml), which adds the render bridge built for all six platforms (native)
-# and, on the Linux one, Courtyard and Swarm played from a package of this commit with the games
-# soaked and Courtyard published native (games), the feature test run through its course (drive),
+# and, on the Linux one, Courtyard, Swarm and Blockout played from a package of this commit with
+# the games soaked and Courtyard published native (games), the feature test run through its course (drive),
 # every example captured (captures), the six drawn with meshlets, Solari and clustered decals
 # captured in Fedora (captures-fedora), a window stormed (storm) and the README walked in a
 # container (readme), and the pack run packs only once every job here passed.
@@ -297,8 +297,10 @@ jobs:
     runs-on: ubuntu-24.04
     # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
     # to four processors, two frames a second with its creatures in their hundreds, and the job
-    # plays two games after it builds the guide and every example, then soaks three for ten minutes,
-    # or fifteen where a game's rounds are too slow for six readings in ten, and publishes.
+    # plays three games after it builds the guide and every example, Blockout's play taking 270
+    # seconds on that lavapipe (games/Blockout/play.sh under LP_NUM_THREADS=4 taskset -c 0-3), then
+    # soaks four for ten minutes, or fifteen where a game's rounds are too slow for six readings in
+    # ten, and publishes.
     timeout-minutes: 60
     needs: [native]
     # Each step through build/step.py, which gives one that fails having said nothing an error
@@ -339,6 +341,9 @@ jobs:
       - name: Build Swarm
         run: dotnet build games/Swarm -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
+      - name: Build Blockout
+        run: dotnet build games/Blockout -p:BevyCSharpVersion=0.0.0-ci -warnaserror
+
       - name: Build the stress program
         run: dotnet build games/Stress -p:BevyCSharpVersion=0.0.0-ci -warnaserror
 
@@ -372,19 +377,32 @@ jobs:
           BCS_STEP_LOGS: ${{ runner.temp }}/swarm
         run: mkdir -p "$SHOTS" && games/Swarm/play.sh
 
-      # Courtyard, the stress program and Swarm built on the package played at once a round at a
-      # time, while what each holds is read after its rounds (build/soak.sh), failing when any of it
-      # climbs without leveling off (build/soak-check.py), as a leak does, with an error naming each
-      # game's failure and each value that climbed (build/soaks.sh). Ten minutes, since lavapipe
-      # held to four processors of the working machine played a round of each in 67 to 100 seconds
-      # with the feature test beside them, and the two and a half minutes the pack run of 5e01491e
-      # gave them read each two or three times where the check judges six; ten minutes read the
-      # three seven to ten times there, nothing climbing. The feature test is soaked in the job that
-      # runs its course, alone on its runner.
+      # A level made from one recipe of the modeling tools, walked up its stairs and round its rooms
+      # by its autopilot, a window cut in it by a command, its modeling window opened and its recipe
+      # saved.
+      - name: Play Blockout
+        env:
+          SHOTS: ${{ runner.temp }}/blockout
+          BCS_STEP_LOGS: ${{ runner.temp }}/blockout
+        run: mkdir -p "$SHOTS" && games/Blockout/play.sh
+
+      # Courtyard, the stress program, Swarm and Blockout built on the package played at once a
+      # round at a time, while what each holds is read after its rounds (build/soak.sh), failing when
+      # any of it climbs without leveling off (build/soak-check.py), as a leak does, with an error
+      # naming each game's failure and each value that climbed (build/soaks.sh). Ten minutes, since
+      # lavapipe held to four processors of the working machine played a round of each in 67 to 100
+      # seconds with the feature test beside them, and the two and a half minutes the pack run of
+      # 5e01491e gave them read each two or three times where the check judges six; ten minutes read
+      # the three seven to ten times there, nothing climbing. With Blockout the fourth, its round two
+      # meters walked by its autopilot, a window cut and taken back and its modeling window opened
+      # and closed, the four read six to eight times in 784 seconds there (build/soaks.sh 600
+      # courtyard stress swarm blockout under LP_NUM_THREADS=4 taskset -c 0-3), Swarm's six past
+      # the ten minutes. The feature test is soaked in the job that runs its course, alone on its
+      # runner.
       - name: Play the games a while and check nothing they hold grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
-        run: build/soaks.sh 600 courtyard stress swarm
+        run: build/soaks.sh 600 courtyard stress swarm blockout
 
       # The same game published as native code from the package, as a player gets it, which keeps
       # only what the compiler sees used, and played to its win the same way (NORM.md, N 2.5). The

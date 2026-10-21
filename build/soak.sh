@@ -5,11 +5,14 @@
 # without leveling off, as a leak does. A game whose rounds are slow plays on past the seconds
 # given, by as much as half of them again, until it has been read as often as the check judges.
 #
-#   build/soak.sh <courtyard|stress|swarm|feature-test> <seconds> [folder the game was built to]
+#   build/soak.sh <courtyard|stress|swarm|blockout|feature-test> <seconds> [folder the game was built to]
 #
 # A round ends where the game is the same each time, so two readings of a game that leaks nothing
 # match. Courtyard's starts from the menu, saves, walks a square, loads the save, pauses and goes
 # back to the menu. Swarm's starts a game, fights its first wave walking a square and ends the game.
+# Blockout's walks two meters out and back by its autopilot, cuts a window in the room over the hall
+# by a command and takes it back, which makes the level and its collider again twice, and opens and
+# closes the modeling window.
 # The stress program spawns its cubes once and draws them for as long as it runs, so its rounds are
 # frames alone, and they find what a frame leaks. The feature test's walks a square on the hub
 # under the day and the weather, which go on as they would for a tester left at it, and its
@@ -26,8 +29,9 @@ case "$name" in
     courtyard) program=Courtyard; args=() ;;
     stress) program=Stress; args=(drawn 1000) ;;
     swarm) program=Swarm; args=() ;;
+    blockout) program=Blockout; args=() ;;
     feature-test) program=BevyCSharp.FeatureTest; args=(--offscreen --frames 0 --serve) ;;
-    *) echo "soak.sh: no game called $name, only courtyard, stress, swarm and feature-test" >&2; exit 2 ;;
+    *) echo "soak.sh: no game called $name, only courtyard, stress, swarm, blockout and feature-test" >&2; exit 2 ;;
 esac
 if [ "$name" = feature-test ]; then
     folder="${3:-games/FeatureTest/bin/Release/net10.0}"
@@ -85,6 +89,20 @@ round() {
             quiet input.hold A 30
             quiet input.hold W 30
             quiet frames.wait 10 ;;
+        blockout)
+            quiet blockout.autopilot loop
+            for _ in $(seq 1 60); do
+                quiet frames.wait 15
+                c blockout.status | grep -q "^autopilot loop done" && break
+            done
+            quiet model.select level box 0.2 3.4 7.8 9.8 6.6 7.8
+            quiet model.cut level window 1.4 1.2 4 1
+            quiet model.undo level
+            quiet model.undo level
+            quiet input.key Tab
+            quiet frames.wait 5
+            quiet input.key Tab
+            quiet frames.wait 5 ;;
         swarm)
             quiet input.key Enter
             quiet input.hold D 40

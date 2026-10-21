@@ -5,8 +5,9 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// Covers the edit mesh's booleans, a box cut through a wall, two boxes joined, two kept where they
-/// overlap, and the room, the window, the door and the ramp made with them, each closed with every
-/// edge shared by two faces, holding the volume the operation leaves, and joined back into few faces.
+/// overlap, a flight of stairs joined by its primitive's line, and the room, the window, the door
+/// and the ramp made with them, each closed with every edge shared by two faces, holding the volume
+/// the operation leaves, and joined back into few faces.
 /// </summary>
 /// <remarks>
 /// The partition leaves convex pieces, which are joined back where they lie in one plane and one
@@ -117,6 +118,47 @@ public sealed class BooleanTests : IDisposable
         Assert.Equal(3, sides.Length);
         Assert.All(sides, center => Assert.InRange(center.X, 1f - Close, 2f + Close));
         Assert.Equal(new[] { "box 6 3 0.2", "select +z", "cut window 1 1 4 1", "select box -1 -1 0.199 7 4 0.201", "cut door 1 2.1 1.5" }, wall.Recipe);
+    }
+
+    [Fact]
+    public void AFlightJoinedByItsLineIsOneSolidWithTheFloorAndTheWallItStandsOn()
+    {
+        // A hall's floor and wall the flight stands on and against, as Blockout's stairs do.
+        static EditMesh Hall() => new EditMesh().Box(new Vec3(6f, 3f, 6f)).Cut("box 5.6 2.6 5.6 at 0.2 0.2 0.2");
+        var shell = 6f * 3f * 6f - 5.6f * 2.6f * 5.6f;
+
+        var hall = Hall().Union("stairs 8 0.2 0.3 1 at 0.2 0.2 1");
+        Assert.True(hall.IsClosed);
+        Assert.Equal("union stairs 8 0.2 0.3 1 at 0.2 0.2 1", hall.Recipe[^1]);
+        Assert.Equal(shell + 0.3f * 1f * 0.2f * 36f, hall.Volume, Close);
+
+        // A window cut after it leaves every edge shared by two faces, where a flight added as a
+        // second solid touching the floor and the wall has its edges welded to theirs by the cut,
+        // four faces along each, and every one of them counted open.
+        static EditMesh Window(EditMesh mesh) => mesh.SelectInside(new Vec3(5.8f, 0.2f, 0.2f), new Vec3(5.8f, 2.8f, 5.8f)).Window(1f, 1f, 2.8f, 1f);
+        Assert.Equal(0, Window(hall).OpenEdges);
+        Assert.True(Window(Hall().Stairs(8, 0.2f, 0.3f, 1f, new Vec3(0.2f, 0.2f, 1f))).OpenEdges > 0);
+    }
+
+    [Fact]
+    public void APrimitivesLineInABooleanTakesTheMeshsFirstSlotAndReadsBack()
+    {
+        var mesh = new EditMesh().Box(new Vec3(2f)).SlotRename("default", "stone");
+        mesh.Union("box 1 1 1 at 2 0 0");
+        mesh.Subtract("box 0.5 0.5 0.5");
+        mesh.Intersect("box 3 3 3 at -0.5 -0.5 -0.5");
+
+        // The primitives' faces in the stone the mesh's first slot was renamed to, and no slot
+        // called default made for them.
+        Assert.Equal(new[] { "stone" }, mesh.Slots);
+        Assert.True(mesh.IsClosed);
+        Assert.Equal(
+            new[] { "box 2 2 2", "slot rename default stone", "union box 1 1 1 at 2 0 0", "subtract box 0.5 0.5 0.5", "intersect box 3 3 3 at -0.5 -0.5 -0.5" },
+            mesh.Recipe);
+        Assert.Equal(mesh.Recipe, EditMesh.FromRecipe(mesh.RecipeText).Recipe);
+
+        // A primitive's line places it with its own at, which a boolean's move of a file's model is not.
+        Assert.Throws<ArgumentException>(() => mesh.Union("box 1 1 1", Vec3.One));
     }
 
     [Fact]

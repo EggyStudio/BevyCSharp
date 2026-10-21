@@ -252,9 +252,9 @@ public sealed partial class EditMesh
                 case "duplicate": mesh.Duplicate(); break;
                 case "join": mesh.Join(Word("a model's path")); break;
                 case "shade": Shade(mesh); break;
-                case "union": mesh.Union(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
-                case "subtract": mesh.Subtract(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
-                case "intersect": mesh.Intersect(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
+                case "union": mesh.Union(PathOrSolid(), Pivot() ?? Vec3.Zero); break;
+                case "subtract": mesh.Subtract(PathOrSolid(), Pivot() ?? Vec3.Zero); break;
+                case "intersect": mesh.Intersect(PathOrSolid(), Pivot() ?? Vec3.Zero); break;
                 case "cut": Cut(mesh); break;
                 case "room": mesh.Room(Vector(), Number(), Where(out centered), centered); break;
                 case "ramp": mesh.Ramp(Number(), Number(), Number(), Where(out centered), centered); break;
@@ -399,6 +399,16 @@ public sealed partial class EditMesh
             var axis = way[1] - 'x';
             var sign = way[0] == '-' ? -1f : 1f;
             return new Vec3(axis == 0 ? sign : 0f, axis == 1 ? sign : 0f, axis == 2 ? sign : 0f);
+        }
+
+        /// <summary>A model's path, or the rest of the line where it is a solid primitive's, read by the primitive's own words.</summary>
+        private string PathOrSolid()
+        {
+            if (_at >= words.Length || !Solids.Contains(words[_at])) return Word("a model's path or a solid primitive's line");
+
+            var solid = string.Join(' ', words[_at..]);
+            _at = words.Length;
+            return solid;
         }
 
         private string? PathOrNone()

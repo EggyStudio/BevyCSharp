@@ -1078,9 +1078,9 @@ The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/
 
 ```csharp
 EditMesh Epsilon(float distance);                               // Sets how near a point is to a plane to lie in it, for the booleans
-EditMesh Union(string path, Vec3 at = default);                 // Adds another model's solid, made from its file and moved by an offset, joined into this one where they overlap
-EditMesh Subtract(string path, Vec3 at = default);              // Takes another model's solid, made from its file and moved by an offset, away from this one
-EditMesh Intersect(string path, Vec3 at = default);             // Keeps what this solid and another model's, made from its file and moved by an offset, both hold
+EditMesh Union(string path, Vec3 at = default);                 // Adds another model's solid, made from its file and moved by an offset, or a solid primitive, joined into this one where they overlap
+EditMesh Subtract(string path, Vec3 at = default);              // Takes another model's solid, made from its file and moved by an offset, or a solid primitive, away from this one
+EditMesh Intersect(string path, Vec3 at = default);             // Keeps what this solid and another model's, made from its file and moved by an offset, or a solid primitive, both hold
 EditMesh Cut(string primitive);                                 // Takes a solid primitive, made where its line places it, away from this mesh
 EditMesh Window(float width, float height, float along, float sill);  // Cuts a window through the wall whose face was selected first, measured on every selected face in its plane, as deep as the wall
 EditMesh Door(float width, float height, float along);          // Cuts a door through the wall whose face was selected first, from its bottom, as deep as the wall
