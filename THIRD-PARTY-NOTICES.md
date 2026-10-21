@@ -15,9 +15,11 @@ and NormTests holds it to the lock, so it is written again rather than edited.
 | Twizzle.ImGui-Bundle.NET | Dear ImGui's bindings and its native build, cimgui, for the editor and a game's tools | MIT | https://github.com/JoeTwizzle/ImGui.NET |
 | Dear ImGui, inside it | The interface those tools are drawn with | MIT | https://github.com/ocornut/imgui |
 | BepuPhysics and BepuUtilities | Rigid bodies, simulated on the managed side | Apache-2.0 | https://github.com/bepu/bepuphysics2 |
+| csg.js, written in C# after it | The edit mesh's booleans, its binary space partition, in `BevyCSharp/Modeling/Csg.cs` | MIT, Copyright (c) 2011 Evan Wallace | https://github.com/evanw/csg.js |
 
-A restore fetches them with their own license files. A shader written in Slang is compiled by
-`slangc`, which the package does not carry.
+A restore fetches them with their own license files, and csg.js's notice is carried at the head of
+the file written after it. A shader written in Slang is compiled by `slangc`, which the package
+does not carry.
 
 ## The bridge's crates
 

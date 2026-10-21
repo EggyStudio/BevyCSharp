@@ -972,7 +972,6 @@ static AssetHandle CreateTarget(uint width, uint height, TargetFormat format = T
 static void SetMipGeneration(AssetHandle image, bool on);       // Has the GPU make an image's mipmaps from its top level each frame, as Bevy's MipGenerationJobs does, or stop
 static void SetSampler(AssetHandle image, TextureSettings settings);  // Gives an image how it repeats past its edges and how it is filtered
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true);  // Makes an image out of pixels held here, and hands back a handle to it
-static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
 static void MakeCubemap(AssetHandle image);                     // Has an image of six square faces treated as a cubemap
 static AssetHandle CubemapFromFaces(AssetHandle positiveX, AssetHandle negativeX, AssetHandle positiveY, AssetHandle negativeY, AssetHandle positiveZ, AssetHandle negativeZ);  // Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is
 static void MakeTextureArray(AssetHandle image, int layers);    // Has an image of layers equal pictures stacked from top to bottom treated as an array of them
@@ -988,6 +987,7 @@ static void SetShadowMapSize(uint directional = 0, uint point = 0);  // Sets how
 static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an entity on a set of render layers, as a bit per layer
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
 static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
+static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
@@ -1077,6 +1077,15 @@ The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/
 ### `EditMesh`
 
 ```csharp
+EditMesh Epsilon(float distance);                               // Sets how near a point is to a plane to lie in it, for the booleans
+EditMesh Union(string path, Vec3 at = default);                 // Adds another model's solid, made from its file and moved by an offset, joined into this one where they overlap
+EditMesh Subtract(string path, Vec3 at = default);              // Takes another model's solid, made from its file and moved by an offset, away from this one
+EditMesh Intersect(string path, Vec3 at = default);             // Keeps what this solid and another model's, made from its file and moved by an offset, both hold
+EditMesh Cut(string primitive);                                 // Takes a solid primitive, made where its line places it, away from this mesh
+EditMesh Window(float width, float height, float along, float sill);  // Cuts a window through the wall whose face was selected first, measured on every selected face in its plane, as deep as the wall
+EditMesh Door(float width, float height, float along);          // Cuts a door through the wall whose face was selected first, from its bottom, as deep as the wall
+EditMesh Room(Vec3 size, float thickness, Vec3 at = default, bool centered = false);  // Adds a room, a box with its inside hollowed out by a thickness of wall, floor and ceiling
+EditMesh Ramp(float rise, float run, float width, Vec3 at = default, bool centered = false);  // Adds a ramp rising along Z, a wedge given in the words of a flight of stairs
 Vec3 Position(int vertex);                                      // Where a vertex is
 ReadOnlySpan<int> Corners(int face);                            // A face's vertices, in order round it, counter-clockwise seen from the side it faces
 string SlotOf(int face);                                        // The name of a face's material slot

@@ -186,6 +186,7 @@ public sealed partial class EditMesh
         _selectedFaces.Clear();
         _recipe.Clear();
         GridStep = 1f;
+        BooleanEpsilon = DefaultEpsilon;
         Changed();
 
         _replaying = true;
@@ -248,6 +249,13 @@ public sealed partial class EditMesh
                 case "duplicate": mesh.Duplicate(); break;
                 case "join": mesh.Join(Word("a model's path")); break;
                 case "shade": Shade(mesh); break;
+                case "union": mesh.Union(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
+                case "subtract": mesh.Subtract(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
+                case "intersect": mesh.Intersect(Word("a model's path"), Pivot() ?? Vec3.Zero); break;
+                case "cut": Cut(mesh); break;
+                case "room": mesh.Room(Vector(), Number(), Where(out centered), centered); break;
+                case "ramp": mesh.Ramp(Number(), Number(), Number(), Where(out centered), centered); break;
+                case "epsilon": mesh.Epsilon(Number()); break;
                 default: throw new FormatException($"{words[0]} is not an operation of a model's recipe.");
             }
 
@@ -322,6 +330,24 @@ public sealed partial class EditMesh
             }
 
             mesh.Scale(first, Pivot());
+        }
+
+        private void Cut(EditMesh mesh)
+        {
+            switch (Word("window, door or a solid primitive's line"))
+            {
+                case "window":
+                    mesh.Window(Number(), Number(), Number(), Number());
+                    return;
+                case "door":
+                    mesh.Door(Number(), Number(), Number());
+                    return;
+                default:
+                    // The rest of the line is the primitive's own, which is read by its own words.
+                    mesh.Cut(string.Join(' ', words[(_at - 1)..]));
+                    _at = words.Length;
+                    return;
+            }
         }
 
         private void Shade(EditMesh mesh)

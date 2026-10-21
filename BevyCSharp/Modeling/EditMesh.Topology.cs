@@ -317,19 +317,8 @@ public sealed partial class EditMesh
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
         if (path.Any(char.IsWhiteSpace)) throw new ArgumentException("A joined model's path is one word, with no space in it.", nameof(path));
-        if (_joinDepth >= 16) throw new InvalidOperationException($"{path} joins models inside one another sixteen deep, which is a model joining itself.");
 
-        EditMesh other;
-        _joinDepth++;
-        try
-        {
-            other = Load(path);
-        }
-        finally
-        {
-            _joinDepth--;
-        }
-
+        var other = Nested(path);
         var offset = _positions.Count;
         _positions.AddRange(other._positions);
 

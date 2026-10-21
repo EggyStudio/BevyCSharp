@@ -1722,19 +1722,25 @@ sealed class Bevy.EditMesh
   EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false)
   EditMesh Clear()
   EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool centered = false)
+  EditMesh Cut(string primitive)
   EditMesh Cylinder(float radius, float height, int sides, Vec3 at = default, bool centered = false)
   EditMesh Delete(bool fill = false)
+  EditMesh Door(float width, float height, float along)
   EditMesh Duplicate()
+  EditMesh Epsilon(float distance)
   EditMesh Extrude(Vec3 by)
   EditMesh Extrude(float distance)
   EditMesh Flip()
   EditMesh Grid(float step)
   EditMesh Inset(float distance)
+  EditMesh Intersect(string path, Vec3 at = default)
   EditMesh Join(string path)
   EditMesh Material(string slot)
   EditMesh Merge(float distance)
   EditMesh Move(Vec3 by)
   EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false)
+  EditMesh Ramp(float rise, float run, float width, Vec3 at = default, bool centered = false)
+  EditMesh Room(Vec3 size, float thickness, Vec3 at = default, bool centered = false)
   EditMesh Rotate(Vec3 axis, float degrees, Vec3? pivot = null)
   EditMesh Run(string line)
   EditMesh Scale(Vec3 factor, Vec3? pivot = null)
@@ -1749,8 +1755,11 @@ sealed class Bevy.EditMesh
   EditMesh Shade(bool smooth, float degrees = 30f)
   EditMesh Snap()
   EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false)
+  EditMesh Subtract(string path, Vec3 at = default)
   EditMesh Triangulate()
+  EditMesh Union(string path, Vec3 at = default)
   EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false)
+  EditMesh Window(float width, float height, float along, float sill)
   EditMesh()
   IEnumerable<(int, int)> Edges()
   IReadOnlyList<string> Recipe { get; }
@@ -1767,11 +1776,14 @@ sealed class Bevy.EditMesh
   bool Redo()
   bool Undo()
   const float CoarsestGrid = 64f
+  const float DefaultEpsilon = 1E-05f
   const float DefaultSmoothAngle = 30f
   const float FinestGrid = 0.0625f
+  const float OpeningMargin = 0.01f
   const string DefaultSlot = "default"
   const string Extension = ".model"
   const string Header = "model 1"
+  float BooleanEpsilon { get; }
   float GridStep { get; }
   float SmoothOf(int face)
   float Volume { get; }

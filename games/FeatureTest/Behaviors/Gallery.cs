@@ -27,7 +27,9 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// North of the wall stands a row of the primitives an <see cref="EditMesh"/> is shaped from, a box,
 /// a plane, a cylinder and a cone smoothed round, a wedge, a flight of stairs and an arch, each
 /// built into its mesh by <see cref="Modeling.Meshes"/> and solid as the triangles it is drawn
-/// with, so the player climbs the stairs and walks under the arch.
+/// with, so the player climbs the stairs and walks under the arch. West of the row stands a room cut
+/// by the edit mesh's booleans, a door and a window through its front and a flight of stairs inside,
+/// each part in its prototype material, the grid a meter on every face.
 /// </para>
 /// <para>
 /// Every sphere and block is a static body (<see cref="Blocks"/>), so the player walks round the
@@ -88,6 +90,7 @@ public partial struct Gallery
 
         Cornell(ecs);
         Models(ecs);
+        Room(ecs);
     }
 
     /// <summary>Names the rows and columns of the wall and the box, every frame, as gizmos do.</summary>
@@ -197,6 +200,37 @@ public partial struct Gallery
             var height = mesh.Bounds.High.Y - mesh.Bounds.Low.Y;
             var at = Transform.At(ModelsFrom + i * ModelsApart, Ground + MathF.Max(height / 2f, 0.02f), ModelsZ);
             Blocks.Shape(ecs, $"Modeled {name}", Modeling.Meshes(mesh)[0], Render.CreateMaterial(r, g, b, roughness: 0.7f), at, ColliderShape.Mesh);
+        }
+    }
+
+    /// <summary>Where the room cut by booleans has its lowest corner, west of the row, its front facing the road.</summary>
+    private static readonly Vec3 RoomCorner = new(-70f, Ground, 12f);
+
+    /// <summary>
+    /// A room of six by five meters and three high, its walls, floor and ceiling two tenths thick, a
+    /// door and a window cut through its front, which faces the road, and a flight of stairs inside
+    /// along its west wall, each part in a slot of its own drawn in that part's prototype material,
+    /// and solid as the triangles it is drawn with, so the player walks in through the door.
+    /// </summary>
+    private static void Room(EcsWorld ecs)
+    {
+        // The front's outside, the faces in the plane of the room's lowest Z, picked whole so the
+        // window is measured on the wall the door left in pieces.
+        var front = (Low: RoomCorner + new Vec3(-1f, -1f, -0.01f), High: RoomCorner + new Vec3(7f, 4f, 0.01f));
+        var room = new EditMesh()
+            .Room(new Vec3(6f, 3f, 5f), 0.2f, RoomCorner)
+            .Material("wall")
+            .SelectFacing(Vec3.UnitY).Material("floor")
+            .SelectFacing(-Vec3.UnitY).Material("ceiling")
+            .SelectInside(front.Low, front.High).Door(1f, 2.1f, 1.5f).Material("door")
+            .SelectInside(front.Low, front.High).Window(1.4f, 1f, 4.2f, 1.1f).Material("window")
+            .Stairs(8, 0.3f, 0.3f, 1f, RoomCorner + new Vec3(0.4f, 0.2f, 2.3f)).Material("stairs");
+
+        var meshes = Modeling.Meshes(room);
+        for (var slot = 0; slot < meshes.Length; slot++)
+        {
+            if (meshes[slot] == AssetHandle.None) continue;
+            Blocks.Shape(ecs, $"Room {room.Slots[slot]}", meshes[slot], Modeling.Prototype(room.Slots[slot]), Transform.Identity, ColliderShape.Mesh);
         }
     }
 

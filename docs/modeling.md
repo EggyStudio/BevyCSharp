@@ -247,6 +247,54 @@ A line that is not an operation is named in the error with its number. The words
 3DEngine's, so a recipe written in either engine makes the same mesh in the other, its faces
 numbered alike.
 
+## Booleans and openings
+
+A solid is added to another, taken away from it or kept where the two overlap, the faces where they
+meet cut and the pieces joined back into faces where they lie in one plane and one slot:
+
+| Call | Line | Does |
+|---|---|---|
+| `Union("models/tower.model", at)` | `union models/tower.model at 4 0 0` | Adds another model's solid, moved, the faces inside the two taken away |
+| `Subtract("models/arch.model", at)` | `subtract models/arch.model at 2 0 0` | Takes another model's solid away |
+| `Intersect("models/block.model", at)` | `intersect models/block.model` | Keeps what both hold |
+| `Cut("box 1 1 2 at 1.5 1 -0.5")` | `cut box 1 1 2 at 1.5 1 -0.5` | Takes away a solid primitive made where its line places it |
+| `Room(new Vec3(6f, 3f, 5f), 0.2f)` | `room 6 3 5 0.2` | Adds a box hollowed by walls, floor and ceiling two tenths thick |
+| `Window(1f, 1.2f, 2f, 0.9f)` | `cut window 1 1.2 2 0.9` | Cuts a window through the wall selected, its middle two meters along, its sill at 0.9 |
+| `Door(1f, 2.1f, 1.5f)` | `cut door 1 2.1 1.5` | Cuts a door from the wall's bottom, its middle a meter and a half along |
+| `Ramp(1f, 3f, 2f)` | `ramp 1 3 2` | Adds a ramp a meter high over three, two wide, in a flight of stairs' words |
+
+The faces the second solid left are selected after, so `material window` after a window
+gives its sides a slot of their own. A window and a door are cut through the wall whose face was
+selected first, measured from its left edge, seen from in front, and its bottom, over every selected
+face in its plane, so a wall a window cut into pieces is measured whole when its pieces are
+selected. Each is as deep as a ray from the face finds the wall's other side, so a room's front wall
+is cut through and its back wall is not:
+
+```csharp
+var room = new EditMesh()
+    .Room(new Vec3(6f, 3f, 5f), 0.2f)
+    .SelectFacing(-Vec3.UnitZ)                   // the front wall's outside first
+    .Door(1f, 2.1f, 1.5f)
+    .Material("door");
+```
+
+```text
+room 6 3 5 0.2
+select -z
+cut door 1 2.1 1.5
+material door
+```
+
+The booleans are csg.js's binary space partition, each solid split by the other's planes. Two faces
+in one plane are cut as the partition cuts them, a face of one solid lying in a face of the other
+kept or taken by the way it faces, which can leave a sliver or a face where one was not meant, so a
+solid cutting an opening goes a little past the faces it cuts through, as a window and a door go a
+centimeter past each face of the wall. A point is in a plane within the mesh's epsilon, a hundredth
+of a millimeter unless `Epsilon(distance)`, or `epsilon D`, says another, and both solids are
+closed, as a boolean needs. What it makes is closed too, its faces joined so a window through a
+wall leaves the wall's front in two faces round the hole, since a face of one loop cannot go round
+one.
+
 ## Grid prototyping
 
 A level blocked out reads by color and by a grid of a meter, as the prototype textures of the

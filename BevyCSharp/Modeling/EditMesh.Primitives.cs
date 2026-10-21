@@ -219,14 +219,24 @@ public sealed partial class EditMesh
     /// <param name="centered">Whether <paramref name="at"/> is its middle rather than its lowest corner.</param>
     private EditMesh Prism(Vec2[] outline, Axis axis, float length, Vec3 at, bool centered)
     {
+        var (first, firstFace) = AddPrism(outline, axis, 0f, length);
+        return Placed(first, firstFace, at, centered);
+    }
+
+    /// <summary>
+    /// Adds the solid an outline makes pushed along an axis from one distance to another, where it
+    /// stands, and says its first vertex and its first face, for a primitive of more than one.
+    /// </summary>
+    private (int FirstVertex, int FirstFace) AddPrism(Vec2[] outline, Axis axis, float from, float to)
+    {
         if (SignedArea(outline) < 0f) Array.Reverse(outline);
 
         var count = outline.Length;
         var first = _positions.Count;
         var firstFace = _faces.Count;
 
-        foreach (var point in outline) AddVertex(Lift(point, axis, 0f));
-        foreach (var point in outline) AddVertex(Lift(point, axis, length));
+        foreach (var point in outline) AddVertex(Lift(point, axis, from));
+        foreach (var point in outline) AddVertex(Lift(point, axis, to));
 
         // The near end faces back along the axis, so its corners run the outline backwards, the
         // far end runs it forwards, and each side runs up its edge, along the far end and back, which
@@ -240,7 +250,7 @@ public sealed partial class EditMesh
             AddFace([first + i, first + next, first + count + next, first + count + i]);
         }
 
-        return Placed(first, firstFace, at, centered);
+        return (first, firstFace);
     }
 
     /// <summary>

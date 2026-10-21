@@ -10,41 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a1babb72`, item 38's second half, and nothing else, carrying the review's file with
-its Shared line, which holds the numbering rules keeping a face's index alike in both engines after
-each operation and the build's texture directions: extrude by a distance with the selected faces as
-one region and the rim's corners meeting every region normal around them by least squares, and by a
-vector; inset face by face; delete of faces or of vertices with their faces, with a fill of each rim
-loop where asked; merge by a distance on a cell grid to the lowest index; flip, triangulate,
-duplicate, join by path with slots matched by name and a guard against a model joining itself, and
-shade smooth by an angle or flat; every operation writing its line in the Reply's words, the recipe,
-run, undo and redo by running the lines from an empty mesh, load reading `model 1` with comments and
-naming a wrong line, save under the asset root through a part file, a version moving on every
-change; ear clipping taking the first ear in order so the cut is the same in both engines; the build
-one mesh data a slot with flat or area-weighted smoothed normals within the face's angle and texture
-coordinates in meters by the nearest axis, the meshes made once and written in place when the
-version moved with tangents from `Render.GenerateTangents`, the collider a mesh shape over the edit
-mesh's own vertices; the guide's sections with each operation's line beside its call, 13 blocks
-building on a scratch package, the cheat sheet's type, the feature test's gallery row of the seven
-primitives north of the sphere wall, each built and solid, the drive's models view and the testers'
-sheet; 24 new tests, two on an engine, a ball resting on the built collider at 1.5 and the meshes
-made once and written in place with the same handles; the suite 1,608 passed and 3 skipped; the
-course passed whole on the row's first placement, and the row was then moved east with the plane
-lifted two centimeters so all seven show, and the course then run whole on the moved row shortly
-before 02:28, exit 0 with 21 captures and all seven primitives clear in the models view, so the
-commit stands. Read at 02:23 on 2026-10-21 and pushed at 02:39, its build run 39522613493 green at
-02:56, Linux in 13 minutes, the second of Verdict 41's three; the build run of `32c8467e` had ended
-green at 02:37, its Linux suite in 14 minutes, the first of Verdict 41's three. Next item 39, the
-grid image, the prototype materials and the box mapping, then the booleans and the openings, its
-lines in the Reply of its first commit; then 40 to 45.
+Reviewed up to `bfe1fc63`, item 39's first half, the grid image, the prototype materials and the box
+mapping, and nothing else, carrying the review's file with its Shared line, which gives the grid's
+measures, the levels' mean, the sampler and the seven prototype colors as sRGB numbers for
+3DEngine's item 60: the bridge's additive export making an image from a chain of levels laid one
+after another, refusing a zero size or more levels than the size halves to, with a Rust test of the
+chain's bytes and the ABI at 299; the chain made in C# in a file of its own under N 1.3, each level
+half the one above with each pixel the mean of four taken as light; the grid image at 16 to 4096
+pixels a meter with the meter's line and the tenth's scaled to it, repeating, filtered linearly
+across the levels with anisotropy 16; the seven prototype colors and the materials by name and by
+color, the grid tinted at roughness 0.85, one grid an app and one material a color keyed by the
+running app; the box mapping from item 38's build, no recipe line added since a slot's name picks
+the material; the modeling guide's grid prototyping section and the window guide's levels, 29 blocks
+building on a scratch package; the bridge checked clean across its features and cross-checked for
+Windows and macOS, its tests 105 and 180; the grid's lines at their pixels at two densities and a
+checker's levels at the light's mean; an engine run drawing a floor in the floor's prototype; the
+suite 1,613 passed and 3 skipped. Read at 03:06 on 2026-10-21 and pushed at 03:06, its build run
+39525327372 green at 03:23, Linux in 12 minutes, the third after Verdict 41's mend, which settles
+it; the build run of `a1babb72` had ended green at 02:56. Next the second half, the booleans by
+csg.js's partition ported to C# with its MIT notice in the file and in THIRD-PARTY-NOTICES, the
+merge back into faces with the vertices welded, the T-junctions mended and the coplanar pieces
+joined, and the lines fixed in that commit's Reply, union, subtract and intersect of a path placed,
+cut of a primitive's line, cut window and cut door through the first selected face as deep as the
+wall, room with a thickness and ramp, the cutter's faces selected after; then 40 to 45.
 
-Before it, `32c8467e` came, Verdict 41's mend, and nothing else, carrying the review's file, the
-animate test running the client the suite built and holding its process to a minute, the launchers
-building with node reuse off. Pushed at 02:19, its build run green, Linux in 14 minutes.
+Before it, `a1babb72` came, item 38's second half, the topology, the recipe, the build, the collider
+and the feature test's row, and nothing else, carrying the review's file with its Shared line.
+Pushed at 02:39, its build run green at 02:56.
 
-Before it, `27b3f8eb` came, item 46's second half, the client's record step, the animate script and
-the README's animation, and nothing else, carrying the review's file. Pushed at 01:38, its build run
-red on Linux, Verdict 41.
+Before it, `32c8467e` came, Verdict 41's mend, and nothing else, carrying the review's file. Pushed
+at 02:19, its build run green, Linux in 14 minutes.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1141,6 +1136,8 @@ from [SHARED.md](SHARED.md).
     face; the grid image's lines at the right pixels; the box mapping giving a two meter face
     coordinates spanning two; a capture of a room with a window and a door and stairs in it. Two
     commits, the grid image, the materials and the mapping, then the booleans and the openings.
+    First half done at `bfe1fc63` on 2026-10-21, the grid image with the bridge's levels, the
+    prototype materials and the box mapping, as the head says; the booleans and the openings follow.
 
 40. **The modeling commands, so a level is blocked out from the terminal, and a window in the game
     to shape by hand (Decision 46).** The owner asked that all of it be possible from the command
@@ -1529,7 +1526,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     Linux. Mended at `32c8467e` on 2026-10-21, the cause an MSBuild node of the client's build
     inside the test holding the script's pipe, as the head says. Settles on three green Linux suites
     after it. The first, the build run of `32c8467e` on 2026-10-21, green in 14 minutes. The second,
-    the build run of `a1babb72`, green in 13 minutes.
+    the build run of `a1babb72`, green in 13 minutes. Settled on the build run of `bfe1fc63` on
+    2026-10-21, the third green Linux suite in a row after the mend, in 12 minutes.
 
 ## Decisions
 
@@ -2098,3 +2096,38 @@ metal, any other name taking the grid's own gray, with `Modeling.Prototype(color
 one grid an app and one material a color. A slot's name picks its part's material where the model is
 drawn, so no line is added to the recipe. Item 39's world-aligned box mapping came with item 38's
 build, by the directions that commit's Reply gives.
+
+Shared: the booleans and the openings, in the commit carrying this line, item 39's second half, for
+the Modeling row of booleans, with their lines and what keeps a mesh after one the same in both
+engines.
+
+```
+union PATH [at X Y Z]        subtract PATH [at X Y Z]        intersect PATH [at X Y Z]
+cut <a solid primitive's line>        (box, cylinder, cone, wedge, stairs, arch, room or ramp)
+cut window WIDTH HEIGHT ALONG SILL                  cut door WIDTH HEIGHT ALONG
+room X Y Z THICKNESS [at X Y Z] [center]            ramp RISE RUN WIDTH [at X Y Z] [center]
+epsilon E
+```
+
+The partition is csg.js's, ported with its notice, in doubles, each face cut by the ear clipping
+into triangles before it, a point in a plane within the epsilon, 1e-5 unless `epsilon` says another,
+and its pieces kept in the order csg.js leaves them, a node's own polygons, then its front's, then
+its back's. What it leaves is made into faces again. The points are welded within ten times the
+epsilon, numbered in the order the pieces bring them. Each edge is cut at every welded point within
+the weld of it, so neighbors share whole edges. Pieces in one plane, their normals within 1e-6 of
+one another and their offsets within the weld, of one slot and one smoothing, are joined along an
+edge one runs and the other runs back, the first such pair in order joined and the search begun
+again, a joining refused where its loop would hold a vertex twice. A corner lying straight between
+its neighbors in every face it is in is then taken from all of them, the vertices no face uses go and
+the rest are numbered again in order, and the second solid's faces are selected. `cut` writes the
+primitive's own line after it. A room is the outside box's prism then the inside's, its walls the
+thickness in from every side, its faces wound back, sixteen vertices and twelve faces. A window or a
+door goes through the wall whose face is selected first, refused where that face is a floor or a
+ceiling, its normal more than 0.7 up or down. The wall is every selected face in that face's plane,
+its normal within 0.9999 and its offset within a millimeter, measured along right, the world's up
+crossed with the normal, from its least, for ALONG to the opening's middle, and along up, the normal
+crossed with right, from its least, for SILL to the opening's bottom. The box is a centimeter past
+each face, as deep as a ray from a centimeter outside the face, at the middle of the opening, finds
+the nearest other face it leaves the wall through, less that centimeter, or the mesh's diagonal
+where it finds none, and a door's box starts a centimeter below the wall's bottom. A ramp is a
+wedge's outline about X, (y, z) from (0, 0), (0, RUN), (RISE, RUN), as wide as WIDTH.
