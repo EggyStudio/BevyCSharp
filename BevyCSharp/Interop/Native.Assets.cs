@@ -456,6 +456,12 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_create_image(
         byte* pixels, uint width, uint height, int srgb);
 
+    /// <summary>Makes an image out of pixels the caller holds with its smaller levels laid after it, returning its key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_create_image_levels(
+        byte* pixels, uint width, uint height, int srgb, uint levels);
+
     /// <summary>Sets how a directional light divides its shadows across the distance.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

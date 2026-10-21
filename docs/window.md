@@ -119,6 +119,17 @@ var picture = Render.CreateImage(pixels, 640, 480, srgb: false);
 Render.SetMipGeneration(picture, true);
 ```
 
+A picture that does not change is given its levels once, made from it when the image is made,
+each pixel of a level the mean of the four above it, and the mean of sRGB colors taken as light, so a
+thin dark line fades into the tone round it in the distance as the eye sees it:
+
+<!-- compiled with:
+byte[] pixels = new byte[512 * 512 * 4];
+-->
+```csharp
+var pattern = Render.CreateImage(pixels, 512, 512, srgb: true, mipmaps: true);
+```
+
 ### The window
 
 The window can be changed while the app runs:

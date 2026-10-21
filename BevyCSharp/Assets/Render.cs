@@ -312,7 +312,7 @@ public static unsafe partial class Render
     /// <para>
     /// The texels are row after row from the top, each the image format's own bytes, four for the
     /// sRGB and linear eight-bit formats a picture loads as. An image loaded from a file keeps its
-    /// copy unless it was loaded for the GPU alone, and one made with <see cref="CreateImage"/> keeps
+    /// copy unless it was loaded for the GPU alone, and one made with <see cref="CreateImage(ReadOnlySpan{byte}, uint, uint, bool)"/> keeps
     /// its own. A compressed format, whose texels are blocks, is refused.
     /// </para>
     /// <para>

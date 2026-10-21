@@ -634,6 +634,88 @@ pub unsafe extern "C" fn bcs_render_create_image(
     })
 }
 
+/// Makes an image out of pixels the caller holds, with the smaller levels under it, its mipmaps,
+/// and returns its asset key.
+///
+/// As [`bcs_render_create_image`], with `levels` levels laid one after another in `pixels`, the
+/// first `width` by `height` and each after it half the one above, rounded down and never less
+/// than a pixel, so a texture worked out in code and drawn small or far away, such as a level's
+/// prototype grid, is drawn from a level its size rather than shimmering between the lines of the
+/// first. The levels are made by the caller, which knows how its picture should be made smaller,
+/// and the GPU is given them as they are, once.
+///
+/// Returns a negative where the size or the count of levels is zero, the count is more than the
+/// size halves to, the pointer is null, or there is no renderer.
+///
+/// # Safety
+/// `pixels` must point at the bytes of every level, four a pixel.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_create_image_levels(
+    pixels: *const u8,
+    width: u32,
+    height: u32,
+    srgb: i32,
+    levels: u32,
+) -> i32 {
+    crate::interop::guard_with(-1, || {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (pixels, width, height, srgb, levels);
+            -1
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::asset::RenderAssetUsages;
+            use bevy::image::Image;
+            use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
+
+            if pixels.is_null() || width == 0 || height == 0 || levels == 0 || levels > 32 - width.max(height).leading_zeros() {
+                return -1;
+            }
+
+            let count = level_bytes(width, height, levels);
+            let pixels = unsafe { core::slice::from_raw_parts(pixels, count) }.to_vec();
+
+            let mut image = Image::new_uninit(
+                Extent3d {
+                    width,
+                    height,
+                    depth_or_array_layers: 1,
+                },
+                TextureDimension::D2,
+                if srgb != 0 {
+                    TextureFormat::Rgba8UnormSrgb
+                } else {
+                    TextureFormat::Rgba8Unorm
+                },
+                RenderAssetUsages::default(),
+            );
+            image.texture_descriptor.mip_level_count = levels;
+            image.data = Some(pixels);
+
+            crate::state::with_world_opt(|world| {
+                let handle = world
+                    .get_resource_mut::<bevy::asset::Assets<Image>>()?
+                    .add(image);
+
+                Some(crate::assets::insert_handle(world, handle.untyped()))
+            })
+            .flatten()
+            .unwrap_or(-1)
+        }
+    })
+}
+
+/// The bytes of `levels` levels of an image of four bytes a pixel, each half the one above, rounded
+/// down and never less than a pixel.
+#[cfg_attr(not(feature = "render"), allow(dead_code))]
+fn level_bytes(width: u32, height: u32, levels: u32) -> usize {
+    (0..levels)
+        .map(|level| (width >> level).max(1) as usize * (height >> level).max(1) as usize * 4)
+        .sum()
+}
+
 /// Gives an image that exists the sampler `config` describes, how it repeats past its edges and how
 /// it is filtered.
 ///
@@ -680,4 +762,17 @@ pub unsafe extern "C" fn bcs_render_set_sampler(key: i32, config: *const crate::
             })
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A chain's bytes are its levels', each half the one above and a pixel at least, so a
+    /// texture four by one has three levels of four, two and one pixels.
+    #[test]
+    fn a_chain_of_levels_holds_each_level_halved() {
+        assert_eq!(level_bytes(4, 1, 3), (4 + 2 + 1) * 4);
+        assert_eq!(level_bytes(1024, 1024, 11), (0..11).map(|level| (1024usize >> level).pow(2) * 4).sum::<usize>());
+    }
 }

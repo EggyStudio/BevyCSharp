@@ -247,6 +247,44 @@ A line that is not an operation is named in the error with its number. The words
 3DEngine's, so a recipe written in either engine makes the same mesh in the other, its faces
 numbered alike.
 
+## Grid prototyping
+
+A level blocked out reads by color and by a grid of a meter, as the prototype textures of the
+engines of the 2000s read. `Images.Grid()` makes the image of one meter's cell, its edges a line and
+a finer line every tenth of a meter, 1024 pixels a meter with its smaller levels, repeating, and the
+texture coordinates of a built face are in meters, so the grid shows a meter on every face and runs
+on across faces. `Modeling.Prototype(name)` is the grid tinted by the color of a part of a level:
+
+| Name | Color |
+|---|---|
+| `floor` | Gray |
+| `wall` | A pale warm gray |
+| `ceiling` | A pale blue |
+| `stairs` | Orange |
+| `door` | Green |
+| `window` | Blue |
+| `hazard` | Red |
+
+Any other name takes the grid's own gray, and `Modeling.Prototype(color)` any color. A material
+slot named for a part is drawn with that part's material, so a room sorted into slots is drawn by
+color with one line a slot:
+
+<!-- compiled with:
+var room = new EditMesh();
+-->
+```csharp
+var meshes = Modeling.Meshes(room);
+for (var slot = 0; slot < meshes.Length; slot++)
+{
+    if (meshes[slot] == AssetHandle.None) continue;          // a slot no face is in
+
+    var part = ctx.Ecs.Spawn();
+    ctx.Ecs.Add(part, Transform.Identity);
+    Render.SetMesh(ctx.Ecs, part, meshes[slot]);
+    Render.SetMaterial(ctx.Ecs, part, Modeling.Prototype(room.Slots[slot]));
+}
+```
+
 ## Drawing and colliding
 
 `Modeling.Build(mesh)` builds the mesh into a `MeshData` for each material slot, each face cut into

@@ -111,6 +111,14 @@ public sealed class ModelingTests
     }
 
     [Fact]
+    public void ThePrototypeColorsNameEachPartOfALevelAndAMaterialIsMadeInsideAnApp()
+    {
+        Assert.Equal(new[] { "floor", "wall", "ceiling", "stairs", "door", "window", "hazard" }, Modeling.PrototypeColors.Keys);
+        Assert.Equal(7, Modeling.PrototypeColors.Values.Distinct().Count());
+        Assert.Throws<InvalidOperationException>(() => Modeling.Prototype("wall"));
+    }
+
+    [Fact]
     public void ABallDroppedOnABuiltFloorLandsOnIt()
     {
         var resting = float.NaN;

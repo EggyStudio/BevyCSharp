@@ -24,7 +24,7 @@ namespace Bevy;
 /// the faces right.
 /// </para>
 /// </remarks>
-public static class Modeling
+public static partial class Modeling
 {
     private static readonly ConditionalWeakTable<EditMesh, Drawn> Handles = new();
 

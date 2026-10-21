@@ -98,7 +98,7 @@ public partial struct SpriteAnimation
 /// </summary>
 /// <remarks>
 /// The sheet is drawn here rather than loaded, so the program carries no picture file for it and
-/// <see cref="Render.CreateImage"/> is shown doing what it is for. A real game loads a PNG an
+/// <see cref="Render.CreateImage(ReadOnlySpan{byte}, uint, uint, bool)"/> is shown doing what it is for. A real game loads a PNG an
 /// artist made and the rest of this is unchanged.
 /// </remarks>
 [Behavior]

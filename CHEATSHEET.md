@@ -972,6 +972,7 @@ static AssetHandle CreateTarget(uint width, uint height, TargetFormat format = T
 static void SetMipGeneration(AssetHandle image, bool on);       // Has the GPU make an image's mipmaps from its top level each frame, as Bevy's MipGenerationJobs does, or stop
 static void SetSampler(AssetHandle image, TextureSettings settings);  // Gives an image how it repeats past its edges and how it is filtered
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true);  // Makes an image out of pixels held here, and hands back a handle to it
+static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
 static void MakeCubemap(AssetHandle image);                     // Has an image of six square faces treated as a cubemap
 static AssetHandle CubemapFromFaces(AssetHandle positiveX, AssetHandle negativeX, AssetHandle positiveY, AssetHandle negativeY, AssetHandle positiveZ, AssetHandle negativeZ);  // Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is
 static void MakeTextureArray(AssetHandle image, int layers);    // Has an image of layers equal pictures stacked from top to bottom treated as an array of them
@@ -1131,6 +1132,16 @@ EditMesh Material(string slot);                                 // Puts the sele
 static MeshData[] Build(EditMesh mesh);                         // Builds the mesh into one mesh's data for each material slot, in the order of Slots
 static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
 static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots
+static AssetHandle Prototype(string name);                      // The prototype material of a part of a level, the grid tinted by its color
+static AssetHandle Prototype(Color color);                      // A prototype material of any color, the grid tinted by it
+```
+
+### `Images`
+
+```csharp
+static AssetHandle Grid();                                      // Makes the grid of a meter's cell, in its default colors and size
+static AssetHandle Grid(int pixelsPerMeter);                    // Makes the grid of a meter's cell, in its default colors, at a size
+static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
 ```
 
 ## Shaders

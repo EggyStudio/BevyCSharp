@@ -10,34 +10,41 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `32c8467e`, Verdict 41's mend, and nothing else, carrying the review's file. The
-cause, read in a scratch worktree under the runner's conditions: the workflow builds the suite in
-Release and the launcher looks for a Debug client, so the first engine row built the client from
-inside the test, and the MSBuild worker node that build started, idling to be reused, held the write
-end of the script's output pipe after the script had ended, so the test's read waited on the node;
-on the machine the script reused nodes already running and closed its pipes in 14 seconds, which is
-why it never hung here. The mend: the script runs the client a variable names where set, the test
-names the client the suite's own build made beside the test assembly and skips where none is built,
-so nothing is built inside a test, the script's process held to 60 seconds and killed with its tree
-past them with the test failing on what it printed, the streams read by events and their end waited
-5 seconds at most, the Pillow check bounded too, the Pillow rows run only where the import succeeds,
-and the launchers build with node reuse off with the reason said; each half clears the hang on its
-own, 6 passed in 4 seconds with Pillow and the engine rows passing without it. Read at 02:19 on
-2026-10-21 and pushed at 02:19, run 39520636599 started; the mended test runs in the Debug tree
-before item 38's commit. The pack run of `cf70c650` ended green at 02:16: its pack job pushed
-`0.5.178` at 01:31, listed at 02:16 after 45 minutes of the step's 90-minute wait, the games then
-built on their defaults, which is Verdict 40's step whole and settles it; the nuspec names
-`cf70c650` and three lines of notes, the feature test's move, the games' defaults and the joint's
-force. Next item 38's second half, topology, the recipe with undo, redo, save, load and join, the
-build, the collider and the feature test's gallery row, no bridge change; then items 39 to 45.
+Reviewed up to `a1babb72`, item 38's second half, and nothing else, carrying the review's file with
+its Shared line, which holds the numbering rules keeping a face's index alike in both engines after
+each operation and the build's texture directions: extrude by a distance with the selected faces as
+one region and the rim's corners meeting every region normal around them by least squares, and by a
+vector; inset face by face; delete of faces or of vertices with their faces, with a fill of each rim
+loop where asked; merge by a distance on a cell grid to the lowest index; flip, triangulate,
+duplicate, join by path with slots matched by name and a guard against a model joining itself, and
+shade smooth by an angle or flat; every operation writing its line in the Reply's words, the recipe,
+run, undo and redo by running the lines from an empty mesh, load reading `model 1` with comments and
+naming a wrong line, save under the asset root through a part file, a version moving on every
+change; ear clipping taking the first ear in order so the cut is the same in both engines; the build
+one mesh data a slot with flat or area-weighted smoothed normals within the face's angle and texture
+coordinates in meters by the nearest axis, the meshes made once and written in place when the
+version moved with tangents from `Render.GenerateTangents`, the collider a mesh shape over the edit
+mesh's own vertices; the guide's sections with each operation's line beside its call, 13 blocks
+building on a scratch package, the cheat sheet's type, the feature test's gallery row of the seven
+primitives north of the sphere wall, each built and solid, the drive's models view and the testers'
+sheet; 24 new tests, two on an engine, a ball resting on the built collider at 1.5 and the meshes
+made once and written in place with the same handles; the suite 1,608 passed and 3 skipped; the
+course passed whole on the row's first placement, and the row was then moved east with the plane
+lifted two centimeters so all seven show, and the course then run whole on the moved row shortly
+before 02:28, exit 0 with 21 captures and all seven primitives clear in the models view, so the
+commit stands. Read at 02:23 on 2026-10-21 and pushed at 02:39, its build run 39522613493 green at
+02:56, Linux in 13 minutes, the second of Verdict 41's three; the build run of `32c8467e` had ended
+green at 02:37, its Linux suite in 14 minutes, the first of Verdict 41's three. Next item 39, the
+grid image, the prototype materials and the box mapping, then the booleans and the openings, its
+lines in the Reply of its first commit; then 40 to 45.
+
+Before it, `32c8467e` came, Verdict 41's mend, and nothing else, carrying the review's file, the
+animate test running the client the suite built and holding its process to a minute, the launchers
+building with node reuse off. Pushed at 02:19, its build run green, Linux in 14 minutes.
 
 Before it, `27b3f8eb` came, item 46's second half, the client's record step, the animate script and
 the README's animation, and nothing else, carrying the review's file. Pushed at 01:38, its build run
 red on Linux, Verdict 41.
-
-Before it, `585497f1` came, item 46's first half, the recorder with its GIF and animated PNG
-writers, the calls and the command, and nothing else, carrying the review's file. Pushed at 01:12,
-its build run green in 17 minutes.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1104,9 +1111,10 @@ from [SHARED.md](SHARED.md).
     stairs the sum of its steps), and watertightness, every edge shared by two faces with opposite
     winding, and a recipe written and read back making the same counts; a capture of each primitive
     in the gallery row. Two commits, the mesh and the primitives with the selection and the
-    transforms, then the topology operations, the recipe, the build and the collider. First half
-    done at `08d03b4d` on 2026-10-21, the mesh, the primitives, the selection and the transforms
-    with the recipe's words in the Reply, as the head says; the second half follows item 46.
+    transforms, then the topology operations, the recipe, the build and the collider. Done at
+    `08d03b4d` and `a1babb72` on 2026-10-21, the mesh, the primitives, the selection and the
+    transforms with the recipe's words in the Reply, then the topology, the recipe, the build, the
+    collider and the feature test's row, as the heads say.
 
 39. **Grid prototyping: materials that show a meter, texture coordinates aligned to the world, and
     openings cut by booleans (Decision 46).** The owner's first use: blocking out a level with
@@ -1520,7 +1528,8 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     Pillow is found. One commit, before item 38's second half's commit, since the push is red on
     Linux. Mended at `32c8467e` on 2026-10-21, the cause an MSBuild node of the client's build
     inside the test holding the script's pipe, as the head says. Settles on three green Linux suites
-    after it.
+    after it. The first, the build run of `32c8467e` on 2026-10-21, green in 14 minutes. The second,
+    the build run of `a1babb72`, green in 13 minutes.
 
 ## Decisions
 
@@ -2069,3 +2078,23 @@ axis the face's normal is nearest, y first and then x where two are as near: +y 
 this engine has from `Render.GenerateTangents`, so the bridge is unchanged. The collider is the edit
 mesh's own vertices with the ear clipping's triangles. The feature test's gallery holds a row of the
 seven primitives north of its wall, solid as their triangles, and the drive takes it as `5-models`.
+
+Shared: the grid image, its mipmaps and the prototype materials, in the commit carrying this line,
+item 39's first half, for the second row of Modeling, with what keeps them the same in both engines.
+`Images.Grid(pixelsPerMeter = 1024, face, line, fine)` is the image of one meter's cell, from 16 to
+4096 pixels a side. A meter's line is max(2, ppm / 128) pixels wide, half on each edge so cells
+tiled make it whole, and a tenth's line max(1, ppm / 512) wide, starting at
+`round(t * ppm / 10 - width / 2)` with a half rounded up for t from 1 to 9, a pixel on a meter's
+line taking the line's color over a tenth's. The defaults are sRGB grays, 0.9 for the face, 0.35 for
+the meter's lines and 0.68 for the tenths'. It is made with its mipmaps, each level half the one
+above down to a pixel, each pixel the mean of the four above it taken as light, decoded from sRGB,
+averaged and encoded to the nearest byte, through a new export of the bridge for an image given its
+levels, which takes the ABI to 299; its sampler repeats, filters linearly between pixels and between
+levels, and takes sixteen samples along a slant. `Modeling.PrototypeColors` names the seven parts
+with sRGB colors, floor (0.52, 0.53, 0.55), wall (0.82, 0.79, 0.72), ceiling (0.70, 0.77, 0.86),
+stairs (0.92, 0.56, 0.22), door (0.38, 0.72, 0.38), window (0.36, 0.62, 0.92) and hazard (0.90,
+0.22, 0.16), and `Modeling.Prototype(name)` is the grid tinted by its color, rough at 0.85 and not
+metal, any other name taking the grid's own gray, with `Modeling.Prototype(color)` for any color,
+one grid an app and one material a color. A slot's name picks its part's material where the model is
+drawn, so no line is added to the recipe. Item 39's world-aligned box mapping came with item 38's
+build, by the directions that commit's Reply gives.

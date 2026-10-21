@@ -2671,6 +2671,14 @@ sealed class Bevy.ImagePixels : IEquatable<ImagePixels>
   uint Height { get; init; }
   uint Width { get; init; }
   void Deconstruct(out uint Width, out uint Height, out uint BytesPerTexel, out byte[] Data)
+static class Bevy.Images
+  const int DefaultPixelsPerMeter = 1024
+  static AssetHandle Grid()
+  static AssetHandle Grid(int pixelsPerMeter)
+  static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine)
+  static Color DefaultFace { get; }
+  static Color DefaultFine { get; }
+  static Color DefaultLine { get; }
 readonly struct Bevy.ImeCommit : IEquatable<ImeCommit>
   ImeCommit(string Text)
   bool Equals(ImeCommit other)
@@ -4364,7 +4372,10 @@ sealed class Bevy.MethodHints : IEquatable<MethodHints>
   string? Tooltip { get; init; }
   void Deconstruct(out string? Label, out string? Tooltip, out bool Hidden, out ButtonLine Line, out double Weight, out bool Space, out bool Separator, out string? Header, out string? Foldout, out bool FoldoutOpen, out string? Note, out NoteKind NoteKind, out int Order)
 static class Bevy.Modeling
+  static AssetHandle Prototype(Color color)
+  static AssetHandle Prototype(string name)
   static AssetHandle[] Meshes(EditMesh mesh)
+  static IReadOnlyDictionary<string, Color> PrototypeColors { get; }
   static MeshData[] Build(EditMesh mesh)
   static PhysicsShape Collider(EditMesh mesh)
 readonly struct Bevy.MonitorInfo : IEquatable<MonitorInfo>
@@ -12347,6 +12358,7 @@ static class Bevy.Render
   static AssetHandle CreateDecalMaterial(MaterialSettings settings, float depthFadeFactor = 1f, float depthBias = 0f)
   static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth)
   static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb = true)
+  static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps)
   static AssetHandle CreateMaterial((float, float, float, float) color)
   static AssetHandle CreateMaterial(MaterialSettings settings)
   static AssetHandle CreateMaterial(float red, float green, float blue, float alpha = 1f, float metallic = 0f, float roughness = 0.5f)

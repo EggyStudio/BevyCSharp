@@ -361,7 +361,7 @@ public static unsafe partial class Render
     /// image is taken as a column only.
     /// </para>
     /// <para>
-    /// Applied at once to an image whose pixels are here, as one from <see cref="CreateImage"/>
+    /// Applied at once to an image whose pixels are here, as one from <see cref="CreateImage(ReadOnlySpan{byte}, uint, uint, bool)"/>
     /// is, and to a file's when its pixels arrive, since the shape of a picture is not known until
     /// it has been decoded, so the handle can be passed on at once either way. An image of any
     /// other shape is left as it is, with a warning in the log.
