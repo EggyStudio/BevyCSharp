@@ -87,12 +87,6 @@ the row.
 Of Bevy's 438 examples, 373 are written in C# here and 0 more in part, 0 more can be with what is bridged, 3 wait on something the bridge lacks, 2 are declined and 60 are about Rust itself ([EXAMPLES.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/EXAMPLES.md)).
 <!-- /examples -->
 
-Swarm, one of the games under `games/`, built on the package as a game outside this repository is,
-in its third wave, recorded by `./bcs record` as the guide's
-[animated captures](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md#animated-captures) say:
-
-[![Swarm in its third wave](https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/.github/assets/swarm.gif)](https://github.com/EggyStudio/BevyCSharp/blob/main/games/Swarm/Program.cs)
-
 Blockout, a level blocked out from one recipe of the [modeling tools](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md),
 its hall, its stairs to the room over it and its lamp, under ray-traced lighting, walked in and
 reshaped from the modeling window while it is walked in:
