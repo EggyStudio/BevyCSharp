@@ -1727,10 +1727,13 @@ sealed class Bevy.EcsWorld
   void Unrelate<TRelation>(Entity source)
 sealed class Bevy.EditMesh
   (Vec3, Vec3) Bounds { get; }
+  EditMesh AddModifier(string modifier)
+  EditMesh ApplyModifier(int index)
   EditMesh Arch(float radius, float thickness, float depth, int sides, Vec3 at = default, bool centered = false)
   EditMesh Bevel(float width, int segments = 1)
   EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false)
   EditMesh Bridge()
+  EditMesh Built()
   EditMesh Clear()
   EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool centered = false)
   EditMesh Cut(string primitive)
@@ -1755,8 +1758,10 @@ sealed class Bevy.EditMesh
   EditMesh Merge(float distance)
   EditMesh Mirror(Vec3 axis, Vec3? at = null)
   EditMesh Move(Vec3 by)
+  EditMesh MoveModifier(int from, int to)
   EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false)
   EditMesh Ramp(float rise, float run, float width, Vec3 at = default, bool centered = false)
+  EditMesh RemoveModifier(int index)
   EditMesh Room(Vec3 size, float thickness, Vec3 at = default, bool centered = false)
   EditMesh Rotate(Vec3 axis, float degrees, Vec3? pivot = null)
   EditMesh Run(string line)
@@ -1805,6 +1810,7 @@ sealed class Bevy.EditMesh
   EditMesh Window(float width, float height, float along, float sill)
   EditMesh()
   IEnumerable<(int, int)> Edges()
+  IReadOnlyList<string> Modifiers { get; }
   IReadOnlyList<string> Recipe { get; }
   IReadOnlyList<string> Slots { get; }
   ReadOnlySpan<int> Corners(int face)
@@ -1827,7 +1833,9 @@ sealed class Bevy.EditMesh
   const float FinestGrid = 0.0625f
   const float MirrorMerge = 0.001f
   const float OpeningMargin = 0.01f
+  const int MostCopies = 1000
   const int MostCuts = 16
+  const int MostLevels = 6
   const int MostSegments = 64
   const int MostSteps = 256
   const string DefaultSlot = "default"

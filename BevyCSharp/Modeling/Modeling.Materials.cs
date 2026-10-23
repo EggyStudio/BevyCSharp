@@ -21,6 +21,7 @@ public static partial class Modeling
     public static AssetHandle[] Materials(EditMesh mesh)
     {
         ArgumentNullException.ThrowIfNull(mesh);
+        mesh = mesh.Evaluated();
 
         var materials = new AssetHandle[mesh.Slots.Count];
         for (var slot = 0; slot < materials.Length; slot++) materials[slot] = Material(mesh.Slots[slot], mesh.LookAt(slot));

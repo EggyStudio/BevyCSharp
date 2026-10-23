@@ -1103,6 +1103,11 @@ EditMesh Knife(Vec3 axis, Vec3? at = null);                     // Cuts the sele
 EditMesh Mirror(Vec3 axis, Vec3? at = null);                    // Copies the selected faces mirrored across a plane, the vertices on it shared by both halves
 EditMesh Spin(Vec3 axis, float degrees, int steps, Vec3? at = null);  // Sweeps the selected edges round an axis in steps, a face between each step and the next for each edge
 EditMesh Smooth(float factor, int repeat = 1);                  // Moves each selected vertex toward the mean of its neighbors along the edges, by a factor, as many times as asked
+EditMesh AddModifier(string modifier);                          // Adds a modifier at the end of the stack, applied to a copy of the mesh each time it is built
+EditMesh MoveModifier(int from, int to);                        // Moves a modifier to another place in the stack, the others closing up behind it
+EditMesh RemoveModifier(int index);                             // Takes a modifier out of the stack, leaving the base as it is
+EditMesh ApplyModifier(int index);                              // Bakes a modifier into the base, as though its operation were run on the whole mesh, and takes it out of the stack
+EditMesh Built();                                               // A copy of the mesh with its modifiers applied in order, what is drawn and collided with
 EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a box
 EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false);  // Adds a flat rectangle facing up
 EditMesh Cylinder(float radius, float height, int sides, Vec3 at = default, bool centered = false);  // Adds a cylinder standing along Y, its round side made of flat sides
@@ -1175,7 +1180,7 @@ EditMesh UvReset();                                             // Puts the sele
 ### `Modeling`
 
 ```csharp
-static MeshData[] Build(EditMesh mesh);                         // Builds the mesh into one mesh's data for each material slot, in the order of Slots
+static MeshData[] Build(EditMesh mesh);                         // Builds the mesh, its modifiers applied, into one mesh's data for each material slot, in the order of the slots
 static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
 static EditMesh? Source(AssetHandle mesh);                      // The edit mesh a mesh of Meshes was built from, or nothing for a mesh it did not build
 static PhysicsShape Collider(EditMesh mesh);                    // The mesh's triangles as a shape a static body collides as, its faces as one surface whatever their slots

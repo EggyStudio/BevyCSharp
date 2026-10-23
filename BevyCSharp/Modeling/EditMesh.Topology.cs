@@ -321,7 +321,8 @@ public sealed partial class EditMesh
     /// The other model's faces keep their slots by name, a slot this mesh has none of being made, so
     /// a pillar joined into a hall is drawn with the hall's material for the pillar's slot. The
     /// recipe keeps the file's path rather than what it held, so a change to the pillar's model
-    /// reaches every model that joins it the next time each is made.
+    /// reaches every model that joins it the next time each is made. The other model is taken as it
+    /// is built, its modifiers applied.
     /// </remarks>
     /// <exception cref="FileNotFoundException">There is no such model.</exception>
     /// <exception cref="InvalidOperationException">The model joins itself, through others or not.</exception>
@@ -330,7 +331,7 @@ public sealed partial class EditMesh
         ArgumentException.ThrowIfNullOrEmpty(path);
         if (path.Any(char.IsWhiteSpace)) throw new ArgumentException("A joined model's path is one word, with no space in it.", nameof(path));
 
-        var other = Nested(path);
+        var other = Nested(path).Evaluated();
         var offset = _positions.Count;
         _positions.AddRange(other._positions);
 

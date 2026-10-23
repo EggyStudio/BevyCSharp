@@ -40,12 +40,18 @@ public static partial class Modeling
         public int Version = -1;
     }
 
-    /// <summary>Builds the mesh into one mesh's data for each material slot, in the order of <see cref="EditMesh.Slots"/>.</summary>
+    /// <summary>Builds the mesh, its modifiers applied, into one mesh's data for each material slot, in the order of the slots.</summary>
     /// <param name="mesh">The mesh.</param>
     /// <returns>The data, one for each slot, with no positions for a slot no face is in.</returns>
+    /// <remarks>
+    /// The mesh as <see cref="EditMesh.Built"/> makes it, so its modifiers are drawn and its own
+    /// faces stay as they are, and the slots are those of <see cref="EditMesh.Slots"/> followed by
+    /// any a boolean modifier's model brought.
+    /// </remarks>
     public static MeshData[] Build(EditMesh mesh)
     {
         ArgumentNullException.ThrowIfNull(mesh);
+        mesh = mesh.Evaluated();
 
         var slots = mesh.Slots.Count;
         var positions = new List<Vec3>[slots];
@@ -130,7 +136,7 @@ public static partial class Modeling
         ArgumentNullException.ThrowIfNull(mesh);
 
         var drawn = Handles.GetOrCreateValue(mesh);
-        if (drawn.Version == mesh.Version && drawn.Meshes.Length == mesh.Slots.Count) return [.. drawn.Meshes];
+        if (drawn.Version == mesh.Version && drawn.Meshes.Length == mesh.Evaluated().Slots.Count) return [.. drawn.Meshes];
 
         var built = Build(mesh);
         var handles = new AssetHandle[built.Length];
@@ -177,7 +183,7 @@ public static partial class Modeling
     /// <param name="mesh">The mesh, with a face or more.</param>
     /// <returns>A mesh shape, which <see cref="PhysicsWorld.Add"/> gives a static body, such as a level's floors and walls.</returns>
     /// <remarks>
-    /// Its own vertices rather than the drawing's, which copies a vertex for each face it is a corner
+    /// The mesh with its modifiers applied, as it is drawn. Its own vertices rather than the drawing's, which copies a vertex for each face it is a corner
     /// of, so the surface is one piece. Bepu collides a moving body with a mesh from outside alone,
     /// so it is a static body's shape, and a body made of it again after an edit takes the change,
     /// the old one removed with <see cref="PhysicsWorld.Remove"/> first. A
@@ -187,6 +193,7 @@ public static partial class Modeling
     public static PhysicsShape Collider(EditMesh mesh)
     {
         ArgumentNullException.ThrowIfNull(mesh);
+        mesh = mesh.Evaluated();
         if (mesh.FaceCount == 0) throw new ArgumentException("A mesh with no faces has nothing to collide with.", nameof(mesh));
 
         var positions = new Vec3[mesh.VertexCount];

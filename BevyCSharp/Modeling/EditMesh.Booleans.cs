@@ -204,7 +204,8 @@ public sealed partial class EditMesh
 
         if (path.Any(char.IsWhiteSpace)) throw new ArgumentException("A model's path in a boolean is one word, with no space in it, or a solid primitive's line.", nameof(path));
 
-        var other = Nested(path);
+        // The other model as it is built, a copy of its own, so moving it moves nothing it shares.
+        var other = Nested(path).Built();
         for (var vertex = 0; vertex < other._positions.Count; vertex++) other._positions[vertex] += at;
 
         Apply(other, operation);

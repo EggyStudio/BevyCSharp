@@ -122,7 +122,7 @@ public static partial class Modeling
 
             Render.SetMesh(world, part, meshes[slot]);
             Render.SetMaterial(world, part, materials[slot]);
-            world.SetName(part, $"Model {named.Mesh.Slots[slot]}");
+            world.SetName(part, $"Model {named.Mesh.Evaluated().Slots[slot]}");
         }
 
         for (var slot = named.Parts.Count - 1; slot >= meshes.Length; slot--)

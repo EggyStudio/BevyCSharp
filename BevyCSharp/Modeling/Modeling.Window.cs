@@ -75,6 +75,10 @@ public static partial class Modeling
         ("Edges", "mirror", [new("axis", "x"), new("at", "0 0 0", "at")]),
         ("Edges", "spin", [new("axis degrees steps", "y 360 16"), new("at", "0 0 0", "at")]),
         ("Edges", "smooth", [new("factor repeat", "0.5 1")]),
+        ("Modifiers", "modifier add", [new("mirror x, array 3 2 0 0, bevel 0.1 2, subdivision 2, solidify 0.1, boolean ..., triangulate", "subdivision 1")]),
+        ("Modifiers", "modifier move", [new("from to", "1 0")]),
+        ("Modifiers", "modifier remove", [new("index", "0")]),
+        ("Modifiers", "modifier apply", [new("index", "0")]),
         ("Cut", "cut", [new("window w h along sill, door w h along, or a primitive", "window 1 1.2 2 0.9")]),
         ("Cut", "union", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
         ("Cut", "subtract", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
@@ -338,6 +342,7 @@ public static partial class Modeling
         {
             if (!ImGui.CollapsingHeader($"{group}##bcs-model-group", group == "Add" ? ImGuiTreeNodeFlags.DefaultOpen : ImGuiTreeNodeFlags.None)) continue;
             if (group == "Texture") Coordinates(ctx, mesh, state, camera, placed);
+            if (group == "Modifiers") Stack(mesh);
 
             foreach (var (_, verb, fields) in Offered.Where(offer => offer.Group == group))
             {
@@ -361,6 +366,20 @@ public static partial class Modeling
                 if (ImGui.Button($"{verb}##bcs-model-run")) Apply(mesh, state, string.Join(' ', words));
             }
         }
+    }
+
+    /// <summary>The modifiers in order, each with its place, and what the mesh is built as with them.</summary>
+    private static void Stack(EditMesh mesh)
+    {
+        if (mesh.Modifiers.Count == 0)
+        {
+            ImGui.TextDisabled("No modifiers. The mesh is built as it is.");
+            return;
+        }
+
+        for (var i = 0; i < mesh.Modifiers.Count; i++) ImGui.TextUnformatted($"{i}  {mesh.Modifiers[i]}");
+        var built = mesh.Built();
+        ImGui.TextDisabled($"built as {built.VertexCount} vertices, {built.EdgeCount} edges, {built.FaceCount} faces");
     }
 
     /// <summary>

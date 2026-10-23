@@ -171,6 +171,7 @@ public sealed partial class EditMesh
     /// <summary>Writes an operation's line to the recipe, once it has done what it says.</summary>
     private EditMesh Did(string line)
     {
+        if (_baking) return this;
         _recipe.Add(line);
         if (!_replaying) _undone.Clear();
         return this;
@@ -188,6 +189,7 @@ public sealed partial class EditMesh
         _selectedVertices.Clear();
         _selectedFaces.Clear();
         _recipe.Clear();
+        _modifiers.Clear();
         GridStep = 1f;
         BooleanEpsilon = DefaultEpsilon;
         Changed();
@@ -272,6 +274,7 @@ public sealed partial class EditMesh
                 case "mirror": mesh.Mirror(Axis(), Pivot()); break;
                 case "spin": mesh.Spin(Axis(), Number(), Count(), Pivot()); break;
                 case "smooth": mesh.Smooth(Number(), _at < words.Length ? Count() : 1); break;
+                case "modifier": ChangeModifiers(mesh); break;
                 default: throw new FormatException($"{words[0]} is not an operation of a model's recipe.");
             }
 
@@ -326,6 +329,148 @@ public sealed partial class EditMesh
         }
 
         private void Rotate(EditMesh mesh) => mesh.Rotate(Axis(), Number(), Pivot());
+
+        private void ChangeModifiers(EditMesh mesh)
+        {
+            switch (Word("add, move, remove or apply"))
+            {
+                case "add":
+                    if (_at >= words.Length) throw new FormatException("modifier add needs a modifier's line after it, such as subdivision 2.");
+                    mesh.AddModifier(string.Join(' ', words[_at..]));
+                    _at = words.Length;
+                    return;
+                case "move":
+                    mesh.MoveModifier(Count(), Count());
+                    return;
+                case "remove":
+                    mesh.RemoveModifier(Count());
+                    return;
+                case "apply":
+                    mesh.ApplyModifier(Count());
+                    return;
+                default:
+                    throw new FormatException("modifier takes add, move, remove or apply.");
+            }
+        }
+
+        /// <summary>A modifier's line read into its words as written back and what it does to a mesh, everything selected first.</summary>
+        public (string Line, Action<EditMesh> Apply) ReadModifier()
+        {
+            (string Line, Action<EditMesh> Apply) read;
+            switch (words[0])
+            {
+                case "mirror":
+                {
+                    var letters = new List<string>();
+                    var axes = new List<Vec3>();
+                    while (_at < words.Length && words[_at] is "x" or "y" or "z")
+                    {
+                        letters.Add(words[_at]);
+                        axes.Add(Axis());
+                    }
+
+                    if (axes.Count == 0) throw new FormatException("A mirror modifier takes an axis or more, x, y or z.");
+                    var at = Pivot();
+                    read = ($"mirror {string.Join(' ', letters)}{(at is { } point ? " at " + V(point) : "")}", mesh =>
+                    {
+                        foreach (var axis in axes)
+                        {
+                            mesh.SelectAllQuietly();
+                            mesh.Mirror(axis, at);
+                        }
+                    });
+                    break;
+                }
+
+                case "array":
+                {
+                    var count = Count();
+                    if (count < 1 || count > MostCopies) throw new ArgumentOutOfRangeException(nameof(count), count, $"An array makes from one to {MostCopies} copies.");
+
+                    if (Optional("along"))
+                    {
+                        var points = new List<Vec3>();
+                        while (_at < words.Length) points.Add(Vector());
+                        if (points.Count < 2) throw new FormatException("An array along a line takes two points or more.");
+                        Vec3[] line = [.. points];
+                        read = ($"array {count} along {string.Join(' ', line.Select(V))}", mesh => mesh.Copies(count, count < 2 ? _ => Vec3.Zero : Along(line, count)));
+                    }
+                    else
+                    {
+                        var by = Vector();
+                        read = ($"array {count} {V(by)}", mesh => mesh.Copies(count, copy => by * copy));
+                    }
+
+                    break;
+                }
+
+                case "bevel":
+                {
+                    var width = Number();
+                    var segments = _at < words.Length && words[_at] != "angle" ? Count() : 1;
+                    float? angle = Optional("angle") ? Number() : null;
+                    if (!(width > 0f)) throw new ArgumentOutOfRangeException(nameof(width), width, "A bevel's width is a finite number above zero.");
+                    if (segments < 1 || segments > MostSegments) throw new ArgumentOutOfRangeException(nameof(segments), segments, $"A bevel has from one to {MostSegments} segments.");
+                    if (angle is { } degrees && !(degrees >= 0f && degrees < 180f)) throw new ArgumentOutOfRangeException(nameof(angle), degrees, "A bevel's angle runs from zero up to 180 degrees.");
+
+                    read = ($"bevel {F(width)}{(segments == 1 ? "" : $" {segments}")}{(angle is { } given ? $" angle {F(given)}" : "")}",
+                        mesh => mesh.BevelEdges(mesh.EdgesPast(angle), width, segments, select: false));
+                    break;
+                }
+
+                case "subdivision":
+                {
+                    var levels = Count();
+                    if (levels < 1 || levels > MostLevels) throw new ArgumentOutOfRangeException(nameof(levels), levels, $"A subdivision has from one to {MostLevels} levels.");
+                    read = ($"subdivision {levels}", mesh =>
+                    {
+                        for (var level = 0; level < levels; level++) mesh.CatmullClark();
+                    });
+                    break;
+                }
+
+                case "solidify":
+                {
+                    var thickness = Number();
+                    if (thickness == 0f) throw new ArgumentOutOfRangeException(nameof(thickness), thickness, "A solidify's thickness is not zero, above it outward and below it inward.");
+                    read = ($"solidify {F(thickness)}", mesh => mesh.Solidify(thickness));
+                    break;
+                }
+
+                case "boolean":
+                {
+                    var kind = Word("union, subtract or intersect");
+                    if (kind is not ("union" or "subtract" or "intersect")) throw new FormatException($"A boolean modifier is a union, subtract or intersect, and {kind} is none.");
+                    var other = PathOrSolid();
+                    var at = Pivot() ?? Vec3.Zero;
+                    read = ($"boolean {kind} {other}{(at == Vec3.Zero ? "" : " at " + V(at))}", mesh =>
+                    {
+                        mesh.SelectAllQuietly();
+                        _ = kind switch
+                        {
+                            "union" => mesh.Union(other, at),
+                            "subtract" => mesh.Subtract(other, at),
+                            _ => mesh.Intersect(other, at),
+                        };
+                    });
+                    break;
+                }
+
+                case "triangulate":
+                    read = ("triangulate", mesh =>
+                    {
+                        mesh.SelectAllQuietly();
+                        mesh.Triangulate();
+                    });
+                    break;
+
+                default:
+                    throw new FormatException($"{words[0]} is no modifier, which are mirror, array, bevel, subdivision, solidify, boolean and triangulate.");
+            }
+
+            if (_at < words.Length) throw new FormatException($"{line.Trim()} has words after its modifier's, from {words[_at]}.");
+            return read;
+        }
 
         private void Uv(EditMesh mesh)
         {

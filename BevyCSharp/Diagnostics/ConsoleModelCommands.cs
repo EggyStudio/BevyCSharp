@@ -53,8 +53,8 @@ internal static class ConsoleModelCommands
         return names.Count == 0 ? "no models" : string.Join("\n", names.Select(name => Counts(name, Modeling.Find(name)!)));
     }
 
-    /// <summary>Says a model's counts, bounds, volume, open edges, slots, grid and recipe's length.</summary>
-    [Command("model.info", "Says a model's counts, bounds, volume, open edges and slots: model.info <name>")]
+    /// <summary>Says a model's counts, bounds, volume, open edges, slots, modifiers, grid and recipe's length.</summary>
+    [Command("model.info", "Says a model's counts, bounds, volume, open edges, slots and modifiers: model.info <name>")]
     internal static string Info(string name)
     {
         if (Modeling.Find(name) is not { } mesh) return Missing(name);
@@ -66,6 +66,7 @@ internal static class ConsoleModelCommands
             string.Create(culture, $"bounds ({low.X}, {low.Y}, {low.Z}) to ({high.X}, {high.Y}, {high.Z})"),
             string.Create(culture, $"volume {mesh.Volume} cubic meters, {mesh.OpenEdges} open edges, {(mesh.IsClosed ? "closed" : "open")}"),
             $"slots {string.Join(", ", mesh.Slots.Select(slot => Look(slot, mesh.LookOf(slot))))}",
+            Modifiers(mesh),
             string.Create(culture, $"grid {mesh.GridStep}, epsilon {mesh.BooleanEpsilon}, {mesh.Recipe.Count} lines of recipe"));
     }
 
@@ -258,6 +259,9 @@ internal static class ConsoleModelCommands
     [Command("model.smooth", "Moves the selected vertices toward their neighbors: model.smooth <name> <factor> [repeat]")]
     internal static string Smooth(string line) => Run("smooth", line);
 
+    [Command("model.modifier", "Changes the modifier stack: model.modifier <name> add mirror x..|array <n> <x y z>|array <n> along <x y z>...|bevel <w> [segments] [angle <a>]|subdivision <levels>|solidify <t>|boolean union|subtract|intersect <path> [at <x y z>]|triangulate, or move <from> <to>|remove <i>|apply <i>")]
+    internal static string Modifier(string line) => Run("modifier", line);
+
     [Command("model.union", "Adds another model's solid: model.union <name> <path> [at <x> <y> <z>]")]
     internal static string Union(string line) => Run("union", line, makes: true);
 
@@ -304,6 +308,14 @@ internal static class ConsoleModelCommands
         }
 
         return Counts(name, mesh);
+    }
+
+    /// <summary>A model's modifiers in order and what it is built as with them, or that it has none.</summary>
+    private static string Modifiers(EditMesh mesh)
+    {
+        if (mesh.Modifiers.Count == 0) return "no modifiers";
+        var built = mesh.Built();
+        return $"modifiers {string.Join(", ", mesh.Modifiers)}, built as {built.VertexCount} vertices and {built.FaceCount} faces";
     }
 
     /// <summary>A slot's name with what its look gives, in the recipe's words, or the name alone for a prototype.</summary>

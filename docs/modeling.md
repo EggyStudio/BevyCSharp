@@ -313,6 +313,44 @@ whole turn is a surface of revolution, a vertex on the axis staying where it is.
 along its edge the other way from the face the edge came from, so a profile's face facing the way
 it turns makes a surface facing in, which `Flip()` turns out.
 
+## Modifiers
+
+A modifier is an operation kept in a list and run in order on a copy of the mesh each time it is
+built, as Blender's modifier stack is, so what is drawn and collided with is the mesh with its
+modifiers applied while the mesh's own vertices and faces, the base, stay as they are and are shaped
+under them. Each runs on everything, whatever is selected:
+
+| Line | Does |
+|---|---|
+| `mirror x`, `mirror x z at 0 0 0` | Mirrors across each axis's plane, through the origin unless a point is given, the vertices on it shared |
+| `array 3 2 0 0` | Makes three copies, each two meters along X from the last |
+| `array 5 along 0 0 0 4 0 0 4 0 4` | Makes five copies spaced evenly along the line through the points, the first where the mesh is |
+| `bevel 0.1`, `bevel 0.1 2 angle 30` | Bevels every edge, or in two segments those whose faces meet at more than 30 degrees |
+| `subdivision 2` | Subdivides twice by Catmull and Clark's rules, rounding the mesh toward a smooth surface |
+| `solidify 0.1`, `solidify -0.1` | Gives the surface ten centimeters of thickness, outward or inward |
+| `boolean subtract models/hole.model at 1 0 0` | Takes another model away, or adds it with `union` or keeps what both hold with `intersect`, a solid primitive's line in the path's place |
+| `triangulate` | Cuts every face into triangles |
+
+`AddModifier(line)` adds one at the end, and `MoveModifier(from, to)`, `RemoveModifier(index)` and
+`ApplyModifier(index)` reorder the stack, take one out and bake one into the base, each a line of
+the recipe as `modifier add mirror x`, `modifier move 1 0`, `modifier remove 0` and `modifier apply
+0`. `Modifiers` lists the stack, and `Built()` answers a copy of the mesh with the stack applied:
+
+```csharp
+var tower = new EditMesh()
+    .Box(new Vec3(1f, 2f, 2f))
+    .AddModifier("mirror x")          // a whole box from the half
+    .AddModifier("subdivision 2");    // rounded
+var built = tower.Built();            // 98 vertices, the base still 8
+```
+
+A modifier is built once as it is added, so one that cannot run, a boolean with a model that is not
+there among them, is refused then. A model joined or used in a boolean is taken as it is built, its
+modifiers applied. A stack of a mirror, an array of four, a bevel in two segments and two levels of
+subdivision on a box, 5,760 faces, builds in 13 ms on four cores
+(`dotnet test --filter AStackOfFourBuildsWithinItsBudget`), the window building it again each time it
+changes the base.
+
 ## The recipe
 
 `Recipe` is the list of lines, `Undo()` takes the last back by making the mesh again from the lines
@@ -530,7 +568,8 @@ the distance shown beside the pointer and the face where it would go outlined in
 held it moves the selection as far instead. The face under the pointer is outlined in yellow and
 the selection in orange. A drag that comes back to where it began does nothing.
 
-The Edges group selects an edge by its two ends, and bevels, loop cuts, subdivides, bridges,
+The Modifiers group lists the stack with what it builds, and adds, moves, removes and applies
+modifiers. The Edges group selects an edge by its two ends, and bevels, loop cuts, subdivides, bridges,
 fills, dissolves, cuts with a plane, mirrors, spins and smooths with the measures typed beside each. The Texture group projects the selected faces' coordinates, along the view among the directions,
 moves, scales and turns them, and draws them over their slot's texture, repeated as far as they
 reach. The Slots group gives the slots their looks and adds, renames and takes away slots. The

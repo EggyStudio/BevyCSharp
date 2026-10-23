@@ -114,6 +114,27 @@ public sealed class ModelCommandTests : IDisposable
     }
 
     [Fact]
+    public void TheModifierStackIsChangedByTheCommandAndInfoSaysWhatItBuilds()
+    {
+        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.box stack9 2 2 2"));
+
+        // A modifier leaves the model's own counts, which each command answers, and info says
+        // the stack and what it builds.
+        Assert.StartsWith("stack9: 8 vertices, 12 edges, 6 faces", ConsoleCommands.Run("model.modifier stack9 add subdivision 1"));
+        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.modifier stack9 add array 2 3 0 0"));
+        Assert.Contains("modifiers subdivision 1, array 2 3 0 0, built as 52 vertices and 48 faces", ConsoleCommands.Run("model.info stack9"));
+
+        Assert.Contains("is no modifier", ConsoleCommands.Run("model.modifier stack9 add twist 90"));
+        Assert.Contains("There is no model at models/none.model", ConsoleCommands.Run("model.modifier stack9 add boolean union models/none.model"));
+
+        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.modifier stack9 remove 1"));
+        Assert.StartsWith("stack9: 26 vertices, 48 edges, 24 faces", ConsoleCommands.Run("model.modifier stack9 apply 0"));
+        Assert.Contains("no modifiers", ConsoleCommands.Run("model.info stack9"));
+        Assert.EndsWith("modifier add subdivision 1\nmodifier add array 2 3 0 0\nmodifier remove 1\nmodifier apply 0", ConsoleCommands.Run("model.recipe stack9"));
+        Assert.Equal("forgot stack9", ConsoleCommands.Run("model.free stack9"));
+    }
+
+    [Fact]
     public void ADensityTypedWithOneNumberTakesTheWidthOfItsSlotsTextureAndInfoSaysTheLooks()
     {
         Assert.StartsWith("uvs5: 8 vertices", ConsoleCommands.Run("model.box uvs5 2 2 2"));
