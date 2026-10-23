@@ -79,6 +79,7 @@ fn keep_layout(bindings: Option<bevy::ecs::system::Res<SceneBindings>>) {
 pub fn forget() {
     ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
     PATH_TRACER.store(false, std::sync::atomic::Ordering::Relaxed);
+    super::denoiser::forget();
     if let Ok(mut layout) = LAYOUT.lock() {
         *layout = None;
     }
@@ -107,6 +108,7 @@ pub fn install(app: &mut bevy::app::App, backends: Option<wgpu::Backends>, path_
     }
 
     app.add_plugins(bevy::solari::SolariPlugins);
+    super::denoiser::install(app);
     if path_tracer {
         app.add_plugins(bevy::solari::pathtracer::PathtracingPlugin);
         PATH_TRACER.store(true, std::sync::atomic::Ordering::Relaxed);

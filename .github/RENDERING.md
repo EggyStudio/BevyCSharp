@@ -321,6 +321,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `rayTrace` and `visible`, in a bridge built with `--solari` and an app running Solari |
 | An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `raySurfaceAt` shades a hit from. A package's own is a ray scene over a geometry pool (`Shaders.CreateRayScene`), traced with `rayTraceIn`, which needs no Solari |
+| A denoiser over the ray-traced lighting | Has, a node of the bridge's own in the `solari` profile, spatiotemporal variance-guided filtering over Solari's lit result, since Bevy's only denoiser for it is DLSS Ray Reconstruction, which the bridge does not build |
 
 The route runs around what each tool lacks. Slang writes ray queries only for SPIR-V, and naga's
 SPIR-V reader has no ray query instructions, so a shader of this kind never passes through naga.
@@ -330,6 +331,22 @@ the binary on the way, so its layout comes from Slang's reflection, which names 
 says whether the entry point uses it. The scene is Solari's `RaytracingSceneBindings`, whose layout
 the `bcs_ray` module declares in the same order, so the bind group Solari builds each frame is the
 one the dispatch binds.
+
+Solari writes its direct and indirect light into the view target as one color, with the surface's
+color and its emissive in it, and leaves the noise to a denoiser. The bridge's node,
+`render/denoiser`, runs in Bevy's `Core3d` schedule after the main opaque pass, which comes after
+Solari's own system, private to its crate, and before the transparent pass. It dispatches five
+stages of spatiotemporal variance-guided filtering over the view target, as `denoiser.wgsl` holds
+them. The light is demodulated, the G-buffer's emissive taken off and the rest
+divided by the base color. It is accumulated in time, reprojected by the motion vectors onto the
+previous frame's history and kept where the previous depth and G-buffer, which Solari double-buffers
+with ReSTIR on, agree with this frame's, with the first two moments of luminance beside it. The
+luminance's variance comes from the moments, or from a seven by seven neighborhood while the
+history is short. Five à-trous passes at steps 1 to 16 weigh each tap by its depth, normal and
+luminance, the first pass's light kept as the next frame's history. The result is remodulated into
+the view target. Each view keeps its history, the moments in two textures read and written by turns,
+and the passes' light and variance ping-ponged between two more. A pixel with no G-buffer texel, the
+sky or a forward material, is left as it was.
 
 A scene Solari does not keep, such as stand-ins or a lower level of detail for rays, is a ray
 scene over a geometry pool. The render world builds each pool mesh into a bottom-level structure
