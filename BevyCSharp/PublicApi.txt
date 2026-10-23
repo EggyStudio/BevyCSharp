@@ -1321,6 +1321,9 @@ sealed class Bevy.DataVersionAttribute : Attribute
 static class Bevy.Debug
   static Key? OverlayKey { get; set; }
   static bool OverlayShown { get; set; }
+  static bool ProfilerShown { get; set; }
+  static bool RemoveOverlaySection(string name)
+  static void AddOverlaySection(string name, Func<IEnumerable<string>> lines)
 sealed class Bevy.DefaultPlugins : IPluginGroup
   DefaultPlugins()
   IEnumerable<(IPlugin, int)> GetPlugins()

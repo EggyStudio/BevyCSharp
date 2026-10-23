@@ -331,6 +331,35 @@ where no other key was pressed while it was held, so F3 held with another key, a
 test's F3 and F4, is the program's. `Debug.OverlayShown` shows it from code and `Debug.OverlayKey`
 moves the key, or with `null` turns it off.
 
+Under the first two lines a strip draws the last 240 frames' times as the RivaTuner overlay draws
+its graph, a bar a frame with the newest at the right, green to 60 frames a second, yellow to 30
+and red past it, its top 50 milliseconds. Beside it are the last frame's time, the average and the
+one percent low, the rate of the slowest hundredth of the frames, and the GPU's time for a frame,
+its passes' times added. The passes are timed where the app asks for it with `Config.GpuTimings`,
+and the line says so where it did not. The strip keeps every frame's time while the overlay is
+hidden, so it opens on the last four seconds.
+
+Shift+F3 shows the overlay with the profiler's pass timings under its right column, the slowest
+first by the GPU's time, and hides them again, as Minecraft's opens its profiler's chart, and F3
+alone hides both. `Debug.ProfilerShown` shows them from code.
+
+A program adds sections of its own, its world's seed, the chunk it stands in or its enemies,
+drawn in the left column under the engine's lines in the order added, each after a gap and its
+name. The lines are asked four times a second while the overlay shows, and a section whose lines
+throw says why in their place:
+
+```csharp
+var seed = 42;
+var enemies = 0;
+Debug.AddOverlaySection("World", () => [$"seed {seed}", $"enemies {enemies}"]);
+Debug.RemoveOverlaySection("World");                  // as the level ends
+```
+
+A section added again under its name replaces the one there, and the sections last while the
+process does. The feature test adds what the program holds as the `memory` command says it. Bevy's
+FPS overlay (`DevTools.FpsOverlay`) stands at the same corner and says the same, so it is hidden
+while the engine's overlay shows and given back as the program had it.
+
 ## Screenshots
 
 F2 saves a picture of the frame being drawn into a folder named `screenshots` beside the program,

@@ -15,8 +15,16 @@ namespace Bevy;
 /// <para>
 /// F3 shows and hides it as the key is let go, where no other key was pressed while it was held,
 /// so a program's own chords on F3 stand and never open it, and nothing happens while a field of an
-/// ImGui window has the caret. Its lines are written again four times a second while it shows, and
-/// a run that never shows it pays nothing but a key's read a frame.
+/// ImGui window has the caret. Shift held with it shows the profiler's pass timings under the
+/// overlay, or hides them. Its lines are written again four times a second while it shows, the
+/// strip of frame times every frame, and a run that never shows it pays a key's read and a frame's
+/// time kept a frame.
+/// </para>
+/// <para>
+/// A program adds sections of its own with <see cref="AddOverlaySection"/>, a world generator's
+/// seed and its chunk, an enemy count, drawn in the left column under the engine's in the order
+/// added. Bevy's own FPS overlay (<see cref="DevTools.FpsOverlay"/>), which the overlay's lines and
+/// strip say again at the same corner, is hidden while the overlay shows and given back after.
 /// </para>
 /// </remarks>
 public static partial class Debug
@@ -30,4 +38,53 @@ public static partial class Debug
     /// another key is the program's alone.
     /// </remarks>
     public static Key? OverlayKey { get; set; } = Key.F3;
+
+    /// <summary>
+    /// Whether the profiler's pass timings show under the overlay, the slowest first, which Shift
+    /// with <see cref="OverlayKey"/> turns over, the overlay shown with them.
+    /// </summary>
+    /// <remarks>
+    /// The passes are those <see cref="Render.Timings"/> measures, so they need
+    /// <see cref="Config.GpuTimings"/> asked for when the app is made, and the overlay says so where
+    /// it was not.
+    /// </remarks>
+    public static bool ProfilerShown { get; set; }
+
+    /// <summary>
+    /// Adds a section of a program's own to the overlay's left column, under the engine's lines and
+    /// any section added before, in place of one of the same name.
+    /// </summary>
+    /// <param name="name">The section's heading, which it is taken away by.</param>
+    /// <param name="lines">What it says, asked four times a second while the overlay shows, from the engine's tick.</param>
+    /// <remarks>
+    /// A section whose lines throw says why in a line of its own rather than stopping the overlay.
+    /// The sections last while the process runs, across apps, as the keys do.
+    /// </remarks>
+    /// <example>
+    /// <code>
+    /// Debug.AddOverlaySection("World", () => [$"seed {seed}", $"chunk {chunk.X} {chunk.Z}"]);
+    /// </code>
+    /// </example>
+    public static void AddOverlaySection(string name, Func<IEnumerable<string>> lines)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentNullException.ThrowIfNull(lines);
+
+        lock (Sections)
+        {
+            var at = Sections.FindIndex(section => section.Name == name);
+            if (at >= 0) Sections[at] = (name, lines);
+            else Sections.Add((name, lines));
+        }
+    }
+
+    /// <summary>Takes a section of the overlay away by its name.</summary>
+    /// <param name="name">The heading it was added under.</param>
+    /// <returns>Whether there was one of that name.</returns>
+    public static bool RemoveOverlaySection(string name)
+    {
+        lock (Sections) return Sections.RemoveAll(section => section.Name == name) > 0;
+    }
+
+    private static readonly List<(string Name, Func<IEnumerable<string>> Lines)> Sections = [];
 }

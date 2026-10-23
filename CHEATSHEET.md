@@ -2118,6 +2118,13 @@ Vec3 SampleInterior(Random random);                             // A point insid
 Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
 ```
 
+### `Debug`
+
+```csharp
+static void AddOverlaySection(string name, Func<IEnumerable<string>> lines);  // Adds a section of a program's own to the overlay's left column, under the engine's lines and any section added before, in place of one of the same name
+static bool RemoveOverlaySection(string name);                  // Takes a section of the overlay away by its name
+```
+
 ### `GameTimer`
 
 ```csharp
