@@ -2,24 +2,21 @@
 
 Every public method of the library, a line each, grouped as the guide is, with the first sentence of
 what its documentation says. A line is a reminder, and the guide page each group links to is the
-explanation. `CheatsheetTests` holds this page to the library, so a method added without its line,
-or a line left for one that is gone, fails the suite.
+explanation. Each group is one block, a type's methods under a comment naming it. `build/cheatsheet`
+writes the page from the built library, and `CheatsheetTests` holds it to the library, so a method
+added without its line, or a line left for one that is gone, fails the suite.
 
 ## Running an app
 
 The guide's page is [running-a-game.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/running-a-game.md).
 
-### `BevyApp`
-
 ```csharp
+// BevyApp
 static int Run(Config? config = null);                          // Creates an app with DefaultPlugins, runs it, and disposes it
 static int Run(Action<App> configure, Config? config = null);   // Creates an app with DefaultPlugins, lets configure add to it, then runs it
 static App Build(Config? config = null);                        // Builds an app with DefaultPlugins without running it
-```
 
-### `App`
-
-```csharp
+// App
 App DetectAmbiguities(Stage stage, AmbiguityReport report = AmbiguityReport.Warn, Func<string, bool>? among = null);  // Reports, as the app starts, the systems of stage whose declared access conflicts and whose order nothing states, as Bevy's ambiguity_detection in a schedule's build settings does
 IReadOnlyList<SystemAmbiguity> AmbiguitiesIn(Stage stage, Func<string, bool>? among = null);  // The pairs of systems of stage whose declared access conflicts and whose order nothing states, in the order they were added, which DetectAmbiguities reports
 ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
@@ -61,19 +58,13 @@ App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
 int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
 IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
-```
 
-### `Config`
-
-```csharp
+// Config
 static Config HeadlessFor(uint frames);                         // A windowless configuration that runs frames ticks and exits
 static Config OffscreenFor(uint width = 1280, uint height = 720, uint frames = 0);  // A configuration that draws into an image of the given size instead of a window
 static Config Windowed(string title, uint width = 1280, uint height = 720, GraphicsBackend backend = GraphicsBackend.Automatic);  // A window of the given size, drawn with backend
-```
 
-### `World`
-
-```csharp
+// World
 bool IsChanged<T>();                                            // Whether the resource of type T was changed since the running system last ran, as Bevy's Res::is_changed answers, inserting it among the changes
 bool IsAdded<T>();                                              // Whether the resource of type T was inserted since the running system last ran, as Bevy's Res::is_added answers
 string? ChangedBy<T>();                                         // The file and line of the call that last changed the resource of type T, as Bevy's changed_by gives it, or null where TrackChangeLocations is off or the resource was never changed
@@ -91,50 +82,29 @@ T? TryResource<T>();                                            // Gets a resour
 bool TryGetResource<T>(out T value);                            // Gets a resource, reporting whether it was found
 void Clear();                                                   // Disposes every disposable resource and clears the world
 void Dispose();                                                 // Releases what it holds
-```
 
-### `IPlugin`
-
-```csharp
+// IPlugin
 void Build(App app);                                            // Registers this plugin's contributions on app
-```
 
-### `IPluginGroup`
-
-```csharp
+// IPluginGroup
 IEnumerable<(IPlugin, int)> GetPlugins();                       // The plugins in this group, with their relative ordering
-```
 
-### `DefaultPlugins`
-
-```csharp
+// DefaultPlugins
 IEnumerable<(IPlugin, int)> GetPlugins();                       // The plugins in this group, with their relative ordering
-```
 
-### `EnginePlugin`
-
-```csharp
+// EnginePlugin
 void Build(App app);                                            // Registers this plugin's contributions on app
-```
 
-### `BehaviorsPlugin`
-
-```csharp
+// BehaviorsPlugin
 void Build(App app);                                            // Registers this plugin's contributions on app
-```
 
-### `Time`
-
-```csharp
+// Time
 void Pause();                                                   // Stops the game's clock, from the next frame
 void Resume();                                                  // Starts the game's clock again, from the next frame
 void Step(int frames = 1);                                      // Runs the clock for a number of frames and stops it again, to watch a paused game move a frame at a time
 void SetSpeed(float speed);                                     // Sets how fast the game's clock runs against the wall's
-```
 
-### `FrameProfile`
-
-```csharp
+// FrameProfile
 static void Start();                                            // Starts measuring, from nothing
 static void Stop();                                             // Stops measuring
 static FrameCosts Take(EcsWorld world);                         // What was measured since Start or the last take, which starts the count over
@@ -144,9 +114,8 @@ static FrameCosts Take(EcsWorld world);                         // What was meas
 
 The guide's page is [behaviors.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/behaviors.md).
 
-### `BehaviorContext`
-
 ```csharp
+// BehaviorContext
 T Res<T>();                                                     // Gets a required resource
 bool TryRes<T>(out T value);                                    // Gets a resource, reporting whether it was found
 TState State<TState>();                                         // The current value of TState
@@ -156,11 +125,8 @@ ReadOnlySpan<TMessage> Read<TMessage>();                        // The messages 
 bool TryRunSchedule(ScheduleLabel schedule);                    // Runs the systems of a schedule of the game's own to their end, before this call returns, as Bevy's World::try_run_schedule does, and answers whether it ran
 void Exit();                                                    // Asks the engine to shut down after this frame
 void Exit(int code);                                            // Asks the engine to shut down after this frame, the run ending with code, as RequestExit does
-```
 
-### `BehaviorConditions`
-
-```csharp
+// BehaviorConditions
 static Func<World, bool> HasResource<T>();                      // Passes while a resource of type T exists
 static Func<World, bool> ResourceIs<T>(Func<T, bool> predicate);  // Passes while a resource exists and satisfies predicate
 static Func<World, bool> AnyWithComponent<T>();                 // Passes while at least one entity carries T
@@ -169,26 +135,17 @@ static Func<World, bool> RunOnce();                             // Passes only o
 static Func<World, bool> KeyToggle<TTag>(Key key, KeyModifier modifiers = KeyModifier.None, bool defaultEnabled = true);  // A keyboard toggle keyed by TTag, usually the behavior struct
 static Func<World, bool> KeyToggle(string systemId, Key key, KeyModifier modifiers = KeyModifier.None, bool defaultEnabled = true);  // A keyboard toggle keyed by an explicit id
 static bool ModifiersHeld(Input input, KeyModifier modifiers);  // True when every modifier set in modifiers is currently held
-```
 
-### `BehaviorRegistry`
-
-```csharp
+// BehaviorRegistry
 static void Add(Action<App> register);                          // Records a generated registration
 static IReadOnlyList<Action<App>> Snapshot();                   // A snapshot of the recorded registrations
-```
 
-### `BehaviorRunners`
-
-```csharp
+// BehaviorRunners
 static void Run<T>(World world, BehaviorRunner<T> body, ReadOnlySpan<int> with = default, ReadOnlySpan<int> without = default, ReadOnlySpan<int> changed = default, int parallelThreshold = 4096);  // Runs body for every entity carrying T
 static void Run<T, T1>(World world, BehaviorRunner<T, T1> body, ReadOnlySpan<int> with = default, ReadOnlySpan<int> without = default, ReadOnlySpan<int> changed = default, bool writesFirst = true, int parallelThreshold = 4096);  // Runs body for every entity carrying T and T1, handing it both by reference from the same storage
 static void Run<T, T1, T2>(World world, BehaviorRunner<T, T1, T2> body, ReadOnlySpan<int> with = default, ReadOnlySpan<int> without = default, ReadOnlySpan<int> changed = default, bool writesFirst = true, bool writesSecond = true, int parallelThreshold = 4096);  // Runs body for every entity carrying T, T1 and T2, handing it all three by reference from the same storage, as the two-component form does
-```
 
-### `SystemDescriptor`
-
-```csharp
+// SystemDescriptor
 SystemDescriptor RunIf(Func<World, bool> condition);            // Attaches a run condition
 SystemDescriptor After(string name);                            // Runs this system after every system in its stage named name
 SystemDescriptor Before(string name);                           // Runs this system before every system in its stage named name
@@ -197,33 +154,21 @@ SystemDescriptor Read<T>();                                     // Declares a re
 SystemDescriptor Write<T>();                                    // Declares a write of resource type T
 bool ConflictsWith(SystemDescriptor other);                     // True when this system's declared access overlaps other's in a way that would prevent the two running concurrently
 bool Invoke(World world);                                       // Runs the system, honoring RunCondition
-```
 
-### `StageOrder`
-
-```csharp
+// StageOrder
 static ReadOnlySpan<Stage> AllInOrder();                        // Every user-facing stage, in execution order
 static ReadOnlySpan<Stage> FrameStages();                       // The stages that run exactly once every frame, in execution order
 static bool IsInternal(Stage stage);                            // True for the two stages reserved for the engine itself
-```
 
-### `SystemToggleRegistry`
-
-```csharp
+// SystemToggleRegistry
 bool Get(string id, bool defaultEnabled = true);                // The state for id, or defaultEnabled if unset
 void Set(string id, bool enabled);                              // Sets the state for id
 void Flip(string id, bool defaultEnabled = true);               // Flips the state for id
-```
 
-### `SystemRegistrationSourceScope`
-
-```csharp
+// SystemRegistrationSourceScope
 void Dispose();                                                 // Releases what it holds
-```
 
-### `Stepping`
-
-```csharp
+// Stepping
 static void Add(Stage stage);                                   // Steps the systems of stage, from the next frame, while stepping is on
 static void Remove(Stage stage);                                // Runs stage whole again, and forgets what was set for its systems
 static void Enable();                                           // Turns stepping on, so the systems of the added stages wait for a step
@@ -235,11 +180,8 @@ static void NeverRun(Stage stage, string system);               // Runs the syst
 static void SetBreakpoint(Stage stage, string system);          // Stops a continued frame before the systems of stage called system, which the next step or continue then runs
 static void ClearBreakpoint(Stage stage, string system);        // Steps the systems of stage called system as the rest are stepped, clearing a breakpoint or AlwaysRun or NeverRun, as Bevy's clear_breakpoint clears whichever was set
 static string? Describe();                                      // Bevy's own account of the stepping, its action, stages, order and cursor, as Bevy's helper prints it, or null where nothing has asked for stepping
-```
 
-### `EcsWorld`
-
-```csharp
+// EcsWorld
 bool Added<T>(Entity entity);                                   // Whether an entity's component was added since the running system last ran, as Bevy's Ref::is_added answers
 bool SetIfNeq<T>(Entity entity, T component, string file = "", int line = 0);  // Overwrites a component's value only where it differs from the one held, as Bevy's set_if_neq does, so what watches for changes sees a change only when there is one, and answers whether it wrote
 string? ChangedBy<T>(Entity entity);                            // The file and line of the call that last changed an entity's component, as Bevy's changed_by gives it, or null where it is not known
@@ -315,11 +257,8 @@ Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spaw
 Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, as Bevy's default one is, a million lumens reaching twenty units and casting no shadow unless asked
 Entity SpawnCamera3d(Transform at, CameraSettings? settings = null);  // Spawns a 3D camera placed by a transform, with Bevy's defaults or the settings given
 IEnumerable<Entity> Descendants(Entity root);                   // Every entity under root, nearer ones first, as Bevy's iter_descendants walks them
-```
 
-### `EcsCommands`
-
-```csharp
+// EcsCommands
 EcsCommands Spawn(Action<Entity, EcsWorld> build);              // Queues an entity spawn, passing the new entity to build
 EcsCommands SpawnBatch(int count, Action<Entity, EcsWorld> build);  // Queues a spawn of count entities
 EcsCommands SpawnBatch<T>(int count, Func<int, T> factory);     // Queues a spawn of count entities each carrying a component
@@ -331,17 +270,11 @@ EcsCommands Delayed(float seconds);                             // A queue whose
 void Apply(EcsWorld world, double elapsedSeconds);              // Drains the queue against world at the app's time, landing the delayed queues whose time has come first and starting the delays queued since
 void Apply(EcsWorld world);                                     // Drains the queue against world
 void Clear();                                                   // Discards every queued command without applying it, delayed ones included
-```
 
-### `ChunkSet<T>`
-
-```csharp
+// ChunkSet<T>
 void Dispose();                                                 // Returns the pooled buffer
-```
 
-### `ReloadedComponents`
-
-```csharp
+// ReloadedComponents
 static IReadOnlyList<ComponentSchema> Before();                 // The schemas there are, taken before the new assembly registers its own over them
 static int Carry(EcsWorld world, IReadOnlyList<ComponentSchema> before);  // Moves every component of a type registered again since before onto the type registered in its place
 static int Revive(EcsWorld world);                              // Puts on their entities the components a scene held that no type described when it was loaded and one does now
@@ -351,9 +284,8 @@ static int Revive(EcsWorld world);                              // Puts on their
 
 The guide's page is [states.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/states.md).
 
-### `StateRegistry`
-
 ```csharp
+// StateRegistry
 static void Declare<TState>(TState initial);                    // Declares TState a state starting at initial, which an app that uses it adds as it starts to run
 static IReadOnlyList<string> Unentered();                       // The states declared on their enums that the running app has not added, by name
 static TState Current<TState>();                                // The current value of TState
@@ -365,9 +297,8 @@ static void Set<TState>(TState value);                          // Asks Bevy to 
 
 The guide's page is [messages-and-hierarchy.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/messages-and-hierarchy.md).
 
-### `MessageBus`
-
 ```csharp
+// MessageBus
 void Send<T>(T message);                                        // Sends a message, for every reader to see next frame
 void SendAll<T>(ReadOnlySpan<T> messages);                      // Sends several messages at once
 ReadOnlySpan<T> Read<T>();                                      // The messages of type T sent during the previous frame
@@ -375,23 +306,14 @@ int Count<T>();                                                 // How many mess
 bool IsEmpty<T>();                                              // True when nothing of type T arrived
 void Swap();                                                    // Makes this frame's messages readable and starts a new frame's queue
 void Clear();                                                   // Discards everything, sent and readable alike
-```
 
-### `MessageReader<T>`
-
-```csharp
+// MessageReader<T>
 T[] Read(BehaviorContext ctx);                                  // The messages this reader has not read yet, oldest first, and the reader moved past them
-```
 
-### `MessageMutator<T>`
-
-```csharp
+// MessageMutator<T>
 MessageMutator.Unread Read(BehaviorContext ctx);                // The messages this mutator has not read yet, oldest first, in place, and the mutator moved past them
-```
 
-### `On<TEvent>`
-
-```csharp
+// On<TEvent>
 void Propagate(bool propagate);                                 // Lets the event go on up to the parent, or, given false, stops it here
 ```
 
@@ -399,50 +321,34 @@ void Propagate(bool propagate);                                 // Lets the even
 
 The guide's page is [components.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/components.md).
 
-### `ComponentHooks`
-
 ```csharp
+// ComponentHooks
 static void OnRemove<T>(RemoveHook<T> hook);                    // Declares what runs when a T leaves an entity
 static void OnClone<T>(CloneHook<T> hook);                      // Declares what rewrites the copy of a T an entity clone receives
-```
 
-### `ComponentSchema`
-
-```csharp
+// ComponentSchema
 bool Add(EcsWorld world, Entity entity);                        // Puts a default one on an entity
 bool Remove(EcsWorld world, Entity entity);                     // Takes it off again
 ComponentField? Field(string name);                             // Finds a field by name, or null
 ComponentMethod? Method(string name);                           // Finds a method by name, or null
 object? Read(EcsWorld world, Entity entity, string field);      // Reads one field by name, or null when there is no such field
 bool Write(EcsWorld world, Entity entity, string field, object value);  // Writes one field by name, reporting whether it landed
-```
 
-### `ComponentSchemas`
-
-```csharp
+// ComponentSchemas
 static void Add(ComponentSchema schema);                        // Registers a schema, replacing any earlier one for the same type
 static ComponentSchema? For(int componentId);                   // The schema for a component id, or null when none describes it
 static ComponentSchema? For(string name);                       // The schema for a component's full name, or null
 static bool TryCoerce<TField>(object value, out TField coerced);  // Turns a boxed value from a tool into the field's own type, reporting whether it fits
-```
 
-### `ComponentField`
-
-```csharp
+// ComponentField
 object? Read(EcsWorld world, Entity entity);                    // Reads the field, or null when the entity does not carry it
 bool Write(EcsWorld world, Entity entity, object value);        // Writes the field, reporting whether it landed
-```
 
-### `ItemFields`
-
-```csharp
+// ItemFields
 object Create();                                                // An item at its defaults
 ItemFields.Bound Bind(object item);                             // The fields of a copy of an item, and the copy as the fields leave it
-```
 
-### `EcsList<T>`
-
-```csharp
+// EcsList<T>
 static EcsList<T> New();                                        // Makes an empty list now, rather than when its first item is added
 void Add(T item);                                               // Adds an item at the end, making the list if this is its first
 bool Remove(T item);                                            // Takes the first item equal to item out, reporting whether there was one
@@ -451,11 +357,8 @@ void Clear();                                                   // Empties the l
 bool Contains(T item);                                          // Whether it holds an item equal to item
 EcsList<T> Copy();                                              // A handle to a new list holding the same items, or a handle to nothing when this names none
 bool Free();                                                    // Frees the list, after which this handle and every copy of it name nothing
-```
 
-### `EcsMap<TKey, TValue>`
-
-```csharp
+// EcsMap<TKey, TValue>
 static EcsMap<TKey, TValue> New();                              // Makes an empty dictionary now, rather than when its first entry is written
 void Set(TKey key, TValue value);                               // Writes a value under a key, making the dictionary if this is its first entry
 bool TryGetValue(TKey key, out TValue value);                   // Reads the value under a key, reporting whether there was one
@@ -464,103 +367,73 @@ bool Remove(TKey key);                                          // Takes the ent
 void Clear();                                                   // Empties the dictionary, keeping it
 EcsMap<TKey, TValue> Copy();                                    // A handle to a new dictionary holding the same entries, or a handle to nothing when this names none
 bool Free();                                                    // Frees the dictionary, after which this handle and every copy of it name nothing
-```
 
-### `EcsText`
-
-```csharp
+// EcsText
 static EcsText New(string text);                                // Makes text holding text
 EcsText Copy();                                                 // A handle to new text the same as this, or a handle to nothing when this names none
 bool Free();                                                    // Frees the text, after which this handle and every copy of it name nothing
-```
 
-### `IInlineList<T>`
-
-```csharp
+// IInlineList<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Clear();                                                   // Empties the list
-```
 
-### `InlineList4<T>`
-
-```csharp
+// InlineList4<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 Span<T> AsSpan();                                               // The items, in order, to write through
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Add(T item);                                               // Adds an item at the end
 void RemoveAt(int index);                                       // Takes the item at a place out, moving the ones after it down
 void Clear();                                                   // Empties the list
-```
 
-### `InlineList8<T>`
-
-```csharp
+// InlineList8<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 Span<T> AsSpan();                                               // The items, in order, to write through
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Add(T item);                                               // Adds an item at the end
 void RemoveAt(int index);                                       // Takes the item at a place out, moving the ones after it down
 void Clear();                                                   // Empties the list
-```
 
-### `InlineList16<T>`
-
-```csharp
+// InlineList16<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 Span<T> AsSpan();                                               // The items, in order, to write through
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Add(T item);                                               // Adds an item at the end
 void RemoveAt(int index);                                       // Takes the item at a place out, moving the ones after it down
 void Clear();                                                   // Empties the list
-```
 
-### `InlineList32<T>`
-
-```csharp
+// InlineList32<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 Span<T> AsSpan();                                               // The items, in order, to write through
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Add(T item);                                               // Adds an item at the end
 void RemoveAt(int index);                                       // Takes the item at a place out, moving the ones after it down
 void Clear();                                                   // Empties the list
-```
 
-### `InlineList64<T>`
-
-```csharp
+// InlineList64<T>
 T ItemAt(int index);                                            // One item, by its place in the list, as a copy
 Span<T> AsSpan();                                               // The items, in order, to write through
 bool TryAdd(T item);                                            // Adds an item at the end, reporting whether there was room
 void Add(T item);                                               // Adds an item at the end
 void RemoveAt(int index);                                       // Takes the item at a place out, moving the ones after it down
 void Clear();                                                   // Empties the list
-```
 
-### `ListValue`
-
-```csharp
+// ListValue
 static ListValue From<T>(ReadOnlySpan<T> items);                // The items of a span, boxed, as a generated schema reads an inline list
 static ListValue From<T>(IReadOnlyList<T> items);               // The items of a list, boxed, as a generated schema reads a stored list
 ListValue With(int index, object? item);                        // The same items with the one at index replaced
 ListValue Adding(object? item);                                 // The same items with one more at the end
 ListValue Without(int index);                                   // The same items without the one at index
 ListValue Moving(int from, int to);                             // The same items with one moved from one place to another
-```
 
-### `MapValue`
-
-```csharp
+// MapValue
 static MapValue From<TKey, TValue>(IReadOnlyDictionary<TKey, TValue> entries);  // The entries of a dictionary, boxed, as a generated schema reads a stored map
 MapValue Rekeyed(int index, object key);                        // The same entries with the one at index given another key
 MapValue With(int index, object? value);                        // The same entries with the one at index holding another value
 MapValue Adding(object key, object? value);                     // The same entries with one more at the end
 MapValue Without(int index);                                    // The same entries without the one at index
-```
 
-### `IReflectedComponent<TSelf>`
-
-```csharp
+// IReflectedComponent<TSelf>
 TSelf Create(EcsWorld world, Entity entity);                    // Makes a wrapper over the component on entity
 ```
 
@@ -568,9 +441,8 @@ TSelf Create(EcsWorld world, Entity entity);                    // Makes a wrapp
 
 The guide's page is [scenes-and-saves.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/scenes-and-saves.md).
 
-### `DataAssets`
-
 ```csharp
+// DataAssets
 static void Register<T>(string name, Func<T> create, Func<DataBox<T>, IReadOnlyList<ComponentField>> fields, IReadOnlyList<string>? formerNames = null, int version = 0, Func<int, JsonObject, JsonObject>? migrate = null);  // Registers a data asset type
 static T Get<T>(DataRef<T> reference);                          // The value of the data asset a reference names, loaded once and shared
 static bool TryGet<T>(DataRef<T> reference, out T value);       // Reads the data asset a reference names, reporting whether there is one to read
@@ -586,11 +458,8 @@ static string? TypeOf(string path);                             // The full name
 static void Reload(ulong id);                                   // Forgets a loaded data asset, so the next read loads its file again
 static void ReloadAll();                                        // Forgets every loaded data asset
 static int SaveChanged();                                       // Writes every data asset changed through its fields since the last call
-```
 
-### `SceneFile`
-
-```csharp
+// SceneFile
 static bool IsComputed(string name);                            // Whether a component, by its full name, is one the engine works out for itself
 static int Save(EcsWorld world, string path, Func<Entity, bool>? include = null, bool giveIds = false);  // Writes entities to a scene file, and their children with them
 static int Write(EcsWorld world, Utf8JsonWriter json, Func<Entity, bool>? include = null, bool giveIds = false);  // Writes entities as a scene document
@@ -598,11 +467,8 @@ static bool CanDescribe(EcsWorld world, Entity entity);         // Whether a sce
 static string Resolve(string path);                             // The full path a scene path names, one under the asset root, with or without AssetsPrefix, one under the player's own directory after Prefix, or an absolute one as it is
 static SceneLoad Load(EcsWorld world, string path, Entity parent = default);  // Spawns everything a scene file holds
 static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default);  // Spawns everything a scene document holds
-```
 
-### `SceneInstances`
-
-```csharp
+// SceneInstances
 static Entity Spawn(EcsWorld world, string path);               // Places a scene asset in the world under a new entity, as an instance
 static bool IsSubscene(string path);                            // Whether a path names a scene file, placed as a subscene, rather than a glTF scene
 static bool IsInstance(EcsWorld world, Entity entity);          // Whether an entity is an instance's root
@@ -626,11 +492,8 @@ static bool Rename(EcsWorld world, Entity node, string name);   // Gives a node 
 static bool Delete(EcsWorld world, Entity node);                // Despawns a node of an instance and what is under it, and records it
 static IReadOnlyList<string> Apply(EcsWorld world, Entity root);  // Applies an instance's overrides to the scene spawned under it
 static bool IsFromModel(EcsWorld world, Entity entity);         // Whether an entity was spawned from the scene of an instance it is under, rather than added by the scene the instance is placed in
-```
 
-### `SceneReferences`
-
-```csharp
+// SceneReferences
 void Name(Entity entity, int id);                               // Numbers an entity that is being written, so a field referring to it can name it
 void Spawned(int id, Entity entity);                            // Says which entity a local id was spawned as, so a field naming it can be read
 bool WriteEntity(Utf8JsonWriter json, Entity entity);           // Writes a reference to an entity, reporting whether it could be named
@@ -639,72 +502,48 @@ bool WriteAsset(Utf8JsonWriter json, AssetHandle asset);        // Writes a refe
 object? ReadAsset(JsonElement json, string kind);               // Reads a reference to an asset by loading its file as the kind of asset given
 void WriteFile(Utf8JsonWriter json, string path);               // Writes a reference to a file under the asset root as its id and its path, or as its path alone when it has no id
 static string? ReadFile(JsonElement json);                      // The path a file reference names, where the file holding its id is now, with the label the reference gave, or the path it recorded when no file holds the id
-```
 
-### `SceneResources`
-
-```csharp
+// SceneResources
 static void Register<T>(string name, Func<T> create, Func<DataBox<T>, IReadOnlyList<ComponentField>> fields, IReadOnlyList<string>? formerNames = null, int version = 0, Func<int, JsonObject, JsonObject>? migrate = null);  // Registers a resource type a scene writes
-```
 
-### `SceneValue`
-
-```csharp
+// SceneValue
 static bool Write(Utf8JsonWriter json, ComponentField field, object value, SceneReferences? references = null);  // Writes one value as the JSON its kind takes
 static object? Read(JsonElement json, ComponentField field, SceneReferences? references = null);  // Reads one value of a field's kind, boxed as Write takes it, or null when the JSON is not that kind
 static JsonElement Migrated(JsonElement json, ComponentSchema schema);  // A component object brought up to its type's current version, or the object as it is when it is current or the type has no migration
 static int WriteComponent(Utf8JsonWriter json, ComponentSchema schema, EcsWorld world, Entity entity, SceneReferences? references = null, IReadOnlyList<KeyValuePair<string, string>>? kept = null);  // Writes every field of one component on an entity as an object, nesting the fields of a struct inside the struct's name
 static int ReadComponent(JsonElement json, ComponentSchema schema, EcsWorld world, Entity entity, SceneReferences? references = null);  // Writes every field a component object names onto an entity's component, leaving a field the object leaves out as it is
 static IReadOnlyList<KeyValuePair<string, string>> Unread(JsonElement json, ComponentSchema schema);  // The values a component object holds that no field of the schema reads, by dotted name with their JSON
-```
 
-### `SaveGame`
-
-```csharp
+// SaveGame
 static void Carry(IPersistentValue value);                      // Makes a persistent value part of every save, copied into the save and put back when the save is loaded
 static void Drop(IPersistentValue value);                       // Stops carrying a persistent value in saves
 static IReadOnlyList<Entity> Start(EcsWorld world, params string[] scenes);  // Starts a game from scenes, and remembers which saved entities they hold, so a save can tell what play changed
 static void Begin(EcsWorld world, params string[] scenes);      // Starts a game from scenes already loaded, remembering them and the saved entities they hold, as Start does after it loads them
 static int Save(EcsWorld world, string path = "user://saves/slot.save.json");  // Writes what play changed over the scenes the game started from
 static SceneLoad Load(EcsWorld world, string path = "user://saves/slot.save.json");  // Loads the scenes a save names and lays the save over them
-```
 
-### `SaveId`
-
-```csharp
+// SaveId
 static SaveId New();                                            // A random id, which two entities are as good as certain never to share
 static SaveId? Parse(string text);                              // An id written as sixteen hex digits, or nothing when the text is not one
-```
 
-### `Persistent<T>`
-
-```csharp
+// Persistent<T>
 void Set(T value);                                              // Replaces the value, without writing it
 void Update(Func<T, T> change);                                 // Changes the value through a function of the old one, without writing it
 void Persist();                                                 // Writes the value to its file
 void Revert();                                                  // Throws away changes not yet written, by reading the file again
 void Reset();                                                   // Puts the default back and writes it, as a settings screen's reset does
-```
 
-### `IPersistentValue`
-
-```csharp
+// IPersistentValue
 void Write(Utf8JsonWriter json);                                // Writes the value as JSON
 bool Read(JsonElement json);                                    // Replaces the value with the one JSON holds, reporting whether it could be read
-```
 
-### `ProjectSettings`
-
-```csharp
+// ProjectSettings
 static ProjectSettings Read();                                  // The settings in the assets an app reads, or every one at its default when there is no file or it does not read, which Problem says
 static ProjectSettings ReadFrom(string assets);                 // The settings in a folder of assets on disk, for a tool reading them before any app exists, or every one at its default when there is no file or it does not read, which Problem says
 static ProjectSettings Parse(string text);                      // Reads settings from the text of a project file
 void Write(string path);                                        // Writes the settings to a project file, leaving out the ones at their default
-```
 
-### `UserData`
-
-```csharp
+// UserData
 static string Resolve(string path);                             // The full path of a user:// path, or of a path relative to the directory
 static void WriteAtomically(string full, ReadOnlySpan<byte> bytes);  // Writes text to a file through a temporary one renamed over it
 ```
@@ -713,9 +552,8 @@ static void WriteAtomically(string full, ReadOnlySpan<byte> bytes);  // Writes t
 
 The guide's page is [assets-and-models.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/assets-and-models.md).
 
-### `AssetServer`
-
 ```csharp
+// AssetServer
 static AssetHandle LoadGltfMesh(string path, int mesh = 0, int primitive = 0);  // Starts loading one drawable piece of geometry out of a glTF file
 static AssetHandle LoadImage(string path, TextureSettings settings);  // Starts loading an image with the sampler it should be drawn with
 static AssetHandle LoadGltfMaterial(string path, int material = 0);  // Starts loading one material out of a glTF file, as the renderer's own material type
@@ -730,11 +568,8 @@ static AssetLoadState StateWithDependenciesOf(AssetHandle handle);  // How far a
 static bool IsAlive(AssetHandle handle);                        // True when the engine is still holding this handle
 static bool Release(AssetHandle handle);                        // Releases a handle
 static bool ReleaseWhenUnused(AssetHandle handle);              // Releases a handle once nothing else holds its asset, as a component drawing with it does until its entity is despawned
-```
 
-### `AssetFiles`
-
-```csharp
+// AssetFiles
 static void Use(Assembly? assembly);                            // Looks for the asset files in an assembly's resources, or in none, and in no pack
 static void Use(Assembly? assembly, AssetPack? pack);           // Looks for the asset files in a pack and an assembly's resources, either of which may be nothing
 static void Mount(string folder, AssetPack pack);               // Reads a pack's files under a folder of the asset root while an app runs, on both sides of the bridge, until Unmount or the next app, as a scene pack fetched for the player is read
@@ -745,11 +580,8 @@ static bool IsCarried(string path);                             // Whether a fil
 static string ReadAllText(string path);                         // A file's text, from disk or from what the game carries
 static byte[] ReadAllBytes(string path);                        // A file's bytes, from disk or from what the game carries
 static IReadOnlyList<string> Carried(string suffix);            // The paths under the asset root of every carried file ending in suffix, such as the id sidecars a shipped game carries
-```
 
-### `AssetIds`
-
-```csharp
+// AssetIds
 static ulong IdOf(string path, bool create = false);            // The id of an asset file, or zero when it has none and create is false
 static string? PathOf(ulong id);                                // Where the file with an id is now, or null when no sidecar under the root holds it
 static void Move(string from, string to);                       // Moves a file and its sidecar together, so references to it keep working by id
@@ -757,42 +589,27 @@ static void Reindex();                                          // Reads every s
 static bool IsSidecar(string path);                             // Whether a path is a sidecar, which a list of assets leaves out
 static int WriteIndex(string? path = null);                     // Writes every id under the root, with the path it names, to one index file, for a shipped game to carry instead of the sidecars
 static int IndexForShipping(string root);                       // Turns the sidecars under a folder into the one index a shipped game carries, writing IndexName at its root and deleting the sidecars
-```
 
-### `AssetPack`
-
-```csharp
+// AssetPack
 static bool TryOpen(string path, out AssetPack? pack, out string? problem);  // Opens a pack and reads its index, or says why it cannot, naming the file
 static AssetPack Open(string path);                             // Opens a pack and reads its index
 bool Contains(string path);                                     // Whether the pack holds a file
 Stream? OpenFile(string path);                                  // A file in the pack, opened for reading and seeking, or nothing when the pack lacks it
 static int Write(string folder, string pack, Func<string, bool>? include = null);  // Writes a pack of every file under a folder that include takes
 void Dispose();                                                 // Closes the pack
-```
 
-### `Streaming`
-
-```csharp
+// Streaming
 static StreamRead Read(string path, long offset = 0, int length = -1, int priority = 0);  // Starts reading length bytes at offset of a file on a worker thread, and answers the read at once
 static bool TryTake(StreamRead read, out byte[]? bytes);        // Takes what a read brought back, if it has finished, fits this frame's budget, and no finished read of higher priority is waiting
 static void Cancel(StreamRead read);                            // Stops a read, or forgets one that finished and was never taken
-```
 
-### `GltfContents`
-
-```csharp
+// GltfContents
 static IReadOnlyList<GltfPart>? Read(string path);              // The meshes, materials and textures a glTF file holds, or nothing when it cannot be read as one
-```
 
-### `GltfPart`
-
-```csharp
+// GltfPart
 string PathIn(string model);                                    // The asset path that loads this part of model
-```
 
-### `Animation`
-
-```csharp
+// Animation
 static bool TryClips(Entity scene, out IReadOnlyList<string> clips);  // The names of a model's clips, or false while it has not arrived
 static bool Play(Entity scene, string clip, AnimationSettings? settings = null);  // Plays one of a model's clips, fading out whatever played before
 static void Stop(Entity scene);                                 // Stops every clip on a model, leaving it in the pose it was in
@@ -826,11 +643,8 @@ static string? MachineStateOf(Entity scene);                    // The state a m
 static void SetParameter(Entity scene, string name, float value);  // Sets a number a model's machine compares, such as its speed
 static void SetParameter(Entity scene, string name, bool value);  // Sets a flag a model's machine reads, such as whether it stands on the ground
 static void Trigger(Entity scene, string name);                 // Fires a trigger a model's machine waits on, such as a jump, which stays until a transition takes it
-```
 
-### `AnimationCurve`
-
-```csharp
+// AnimationCurve
 AnimationCurve PingPong();                                      // The same eased curve going back to its start after reaching its end, as Bevy's ping_pong
 static AnimationCurve Translation(ReadOnlySpan<float> times, ReadOnlySpan<Vec3> values);  // A translation through values at times
 static AnimationCurve Translation(Vec3 from, Vec3 to, EaseFunction ease, float duration);  // A translation eased from one place to another
@@ -849,28 +663,19 @@ static AnimationCurve Field(string component, string path, Vec3 from, Vec3 to, E
 static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Vec4> values);  // A four-component vector in a field of a reflected component through values at times
 static AnimationCurve Field(string component, string path, ReadOnlySpan<float> times, ReadOnlySpan<Quat> values);  // A rotation in a field of a reflected component through values at times, along the shorter arc
 static AnimationCurve Field(string component, string path, Quat from, Quat to, EaseFunction ease, float duration);  // A rotation in a field of a reflected component eased from one turn to another
-```
 
-### `AnimationTarget`
-
-```csharp
+// AnimationTarget
 static AnimationTarget FromNames(ReadOnlySpan<string> names);   // The target at the end of a path of names, the first the topmost
-```
 
-### `MeshFiles`
-
-```csharp
+// MeshFiles
 static bool IsMeshFile(string path);                            // Whether a path names a mesh file
 static AssetHandle Load(string path);                           // The mesh a file holds, loaded the first time it is asked for and shared from then on
 static bool TryLoad(string path, out AssetHandle mesh, out string? problem);  // The mesh a file holds, or why it holds none, naming the file
 static string? PathOf(AssetHandle mesh);                        // The file a mesh was loaded from or saved to, or nothing for one that has none
 static void SaveAs(AssetHandle mesh, string path);              // Writes a mesh made in memory to a new file and makes the mesh that file's, so a scene refers to the file from then on
 static bool Save(AssetHandle mesh);                             // Writes a mesh loaded from a file back to that file, as it is now
-```
 
-### `MaterialFiles`
-
-```csharp
+// MaterialFiles
 static bool IsMaterialFile(string path);                        // Whether a path names a material file
 static AssetHandle Load(string path);                           // The material a file holds, loaded the first time it is asked for and shared from then on
 static bool TryLoad(string path, out AssetHandle material, out string? problem);  // The material a file holds, or why it holds none, naming the file
@@ -883,9 +688,8 @@ static bool Save(AssetHandle material);                         // Writes a mate
 
 The guide's page is [drawing.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/drawing.md).
 
-### `Render`
-
 ```csharp
+// Render
 static void SetFreeCamera(Entity camera, FreeCameraSettings settings);  // Puts Bevy's free camera on a camera, or changes the settings of the one there
 static FreeCameraSettings? FreeCameraOf(Entity camera);         // The free camera's settings on a camera, or null where it has none
 static void ClearFreeCamera(Entity camera);                     // Takes the free camera off a camera, which then stays where it is
@@ -1011,20 +815,14 @@ static string[]? MorphTargetNames(AssetHandle mesh);            // The names a m
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
-```
 
-### `MeshShape`
-
-```csharp
+// MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
 static string Ring(string outline, float thickness);            // A band along the inside of another flat shape's outline, as Ring, its width given here rather than as the third measure, which leaves that free for an Extrusion of the band to take as its depth
 static string Extrusion(string outline);                        // A flat shape pushed out into a solid along Z, sized by that shape's measures and, third, how deep it is, centered on its middle
 static string UvAngle(string arc);                              // A sector or a segment whose image is mapped at an angle, sized by its radius, the half angle it spans and, third, the angle in radians
-```
 
-### `Render2d`
-
-```csharp
+// Render2d
 static Entity SpawnCamera2d(int order = 0);                     // Spawns a 2D camera and returns it
 static AssetHandle CreateAtlas(uint tileWidth, uint tileHeight, uint columns, uint rows, (uint X, uint Y) padding = default, (uint X, uint Y) offset = default);  // Builds an atlas layout over a grid of equal tiles and returns it
 static PackedAtlas? PackAtlas(ReadOnlySpan<AssetHandle> images, (uint X, uint Y) padding = default);  // Packs images into one atlas as the app runs, as Bevy's TextureAtlasBuilder does, or answers null while any of them is still loading
@@ -1038,30 +836,18 @@ static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material);  /
 static void SetTilemap(EcsWorld world, Entity entity, TilemapChunk chunk, ReadOnlySpan<TileData?> tiles);  // Makes an entity a tilemap chunk with its tiles, Bevy's TilemapChunk and TilemapChunkTileData
 static void SetTiles(EcsWorld world, Entity entity, int start, ReadOnlySpan<TileData?> tiles);  // Writes tiles over a chunk's from start on, which Bevy draws from the next frame
 static TileData? TileAt(EcsWorld world, Entity entity, int index);  // A chunk's tile at index, or null for an empty cell
-```
 
-### `CapturedImage`
-
-```csharp
+// CapturedImage
 (byte R, byte G, byte B, byte A) At(uint x, uint y);            // The color at a point, as four bytes
 byte[] ToPng();                                                 // The picture as a PNG file's bytes, alpha included
-```
 
-### `CapturedTexels`
-
-```csharp
+// CapturedTexels
 Vector4 ColorAt(uint x, uint y);                                // The color at a point as four floats, linear for a float format and the stored value divided by 255 for an eight-bit one
-```
 
-### `EffectSettings`
-
-```csharp
+// EffectSettings
 EffectSettings Through(PhysicalLens lens);                      // Takes the depth of field's aperture and sensor from a lens, the one SetLens meters the same camera from
-```
 
-### `Picking`
-
-```csharp
+// Picking
 static Entity[] Drain();                                        // Takes the scene entities clicked since the last call, none where meshes are not picked
 static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal);  // The nearest mesh a ray meets, where, and which way the surface there faces
 static bool TryCast(Vec3 origin, Vec3 direction, out Entity entity, out Vec3 point, out Vec3 normal, out Vec2? uv);  // The nearest mesh a ray meets, as TryCast says, and where on its texture
@@ -1077,9 +863,8 @@ static void ReleaseCapture(PointerId pointer);                  // Releases what
 
 The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md).
 
-### `EditMesh`
-
 ```csharp
+// EditMesh
 EditMesh Bevel(float width, int segments = 1);                  // Cuts the selected edges off by a width, each a strip of faces across a round profile, the corners where they meet closed
 EditMesh Epsilon(float distance);                               // Sets how near a point is to a plane to lie in it, for the booleans
 EditMesh Union(string path, Vec3 at = default);                 // Adds another model's solid, made from its file and moved by an offset, or a solid primitive, joined into this one where they overlap
@@ -1180,11 +965,8 @@ EditMesh UvScale(float factor, bool each = false);              // Scales the se
 EditMesh UvRotate(float degrees, bool each = false);            // Turns the selected faces' coordinates about their middle
 EditMesh UvDensity(float pixelsPerMeter, int texturePixels);    // Scales the selected faces' coordinates about their middle so a texture of a size shows so many of its pixels a meter
 EditMesh UvReset();                                             // Puts the selected faces back on the world-aligned default
-```
 
-### `Modeling`
-
-```csharp
+// Modeling
 static MeshData[] Build(EditMesh mesh);                         // Builds the mesh, its modifiers applied, into one mesh's data for each material slot, in the order of the slots
 static AssetHandle[] Meshes(EditMesh mesh);                     // The meshes the mesh is drawn with, one for each material slot, made the first time and written again in place once it has changed, so an entity drawn with one follows the edits
 static EditMesh? Source(AssetHandle mesh);                      // The edit mesh a mesh of Meshes was built from, or nothing for a mesh it did not build
@@ -1197,11 +979,8 @@ static void Register(string name, EditMesh mesh);               // Gives a mesh 
 static EditMesh? Find(string name);                             // The model of a name, or nothing where none has it
 static void DrawWindow(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null);  // Draws the modeling window on a mesh, and takes the pointer in the 3D view, where a camera is given, to pick its faces and extrude or move them
 static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = default, Transform? placed = null);  // Draws the modeling window's contents where the program has begun a window or a panel of its own, as the editor's Model tab does, and takes the pointer in the 3D view as DrawWindow does
-```
 
-### `Images`
-
-```csharp
+// Images
 static AssetHandle Grid();                                      // Makes the grid of a meter's cell, in its default colors and size
 static AssetHandle Grid(int pixelsPerMeter);                    // Makes the grid of a meter's cell, in its default colors, at a size
 static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
@@ -1211,9 +990,8 @@ static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);
 
 The guide's page is [shaders.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/shaders.md).
 
-### `Shaders`
-
 ```csharp
+// Shaders
 static AssetHandle CreateBuffer(int size);                      // Makes a buffer of size bytes that shaders read and write, holding zeros
 static AssetHandle CreateBuffer<T>(ReadOnlySpan<T> items, int size = 0);  // Makes a buffer holding items, at least size bytes long
 static void WriteBuffer<T>(AssetHandle buffer, ReadOnlySpan<T> items);  // Replaces a buffer's contents with items, padded with zeros to its size
@@ -1255,11 +1033,8 @@ static void SetViewDispatches(Entity camera, params ViewDispatch[] dispatches); 
 static void Dispatch(ShaderInstance instance, uint x, uint y = 1, uint z = 1);  // Runs an instance's compute shader once, this frame, before any camera draws
 static void SetViewDraws(Entity camera, params ViewDraw[] draws);  // Replaces the geometry a camera draws every frame out of buffers, in order
 static void DispatchIndirect(ShaderInstance instance, AssetHandle buffer, uint offset = 0);  // Runs an instance's compute shader once, this frame, before any camera draws, with as many workgroups as the buffer says
-```
 
-### `ShaderValues`
-
-```csharp
+// ShaderValues
 static T Set<T>(T target, string name, float value);            // Sets a float
 static T Set<T>(T target, string name, int value);              // Sets a float
 static T Set<T>(T target, string name, uint value);             // Sets a float
@@ -1282,45 +1057,27 @@ static T Unset<T>(T target, string name);                       // Takes the val
 static float[] GetFloats<T>(T target, string name);             // The floats set under a name, or an empty array where nothing was
 static int[] GetInts<T>(T target, string name);                 // The signed integers set under a name
 static uint[] GetUInts<T>(T target, string name);               // The unsigned integers set under a name
-```
 
-### `ShaderMaterial`
-
-```csharp
+// ShaderMaterial
 ShaderMaterial Configure(AlphaMode alpha, float cutoff = 0.5f, CullMode cull = CullMode.Back, float depthBias = 0f);  // Changes what the renderer does where the material is not opaque, which faces it leaves undrawn and how far its depth is pushed toward the camera
-```
 
-### `ShaderProgram`
-
-```csharp
+// ShaderProgram
 void Reload();                                                  // Compiles every stage again now, whether a file changed or not
-```
 
-### `ShaderStage`
-
-```csharp
+// ShaderStage
 static ShaderStage Slang(string source, string? entry = null);  // A stage made from Slang handed over as text
-```
 
-### `ViewDispatch`
-
-```csharp
+// ViewDispatch
 static ViewDispatch PerPixel(ShaderInstance instance, FramePoint point, uint groupX = 8, uint groupY = 8, float scale = 1f);  // Enough workgroups of groupX by groupY pixels to cover scale of the picture, for a shader working a pixel at a time
 static ViewDispatch Fixed(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1);  // Exactly this many workgroups
 static ViewDispatch Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0);  // As many workgroups as three unsigned integers in a buffer say, when it runs
-```
 
-### `ViewDraw`
-
-```csharp
+// ViewDraw
 static ViewDraw Fixed(ShaderInstance instance, FramePoint point, uint vertices, uint instances = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // vertices vertices, instances times
 static ViewDraw Meshes(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // x by y by z workgroups of a program's task shader, or of its mesh shader where it has no task shader, for a program drawing with mesh shaders (DrawMesh)
 static ViewDraw Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0, DrawBlend blend = DrawBlend.Opaque, bool writesDepth = true);  // As many vertices and instances as four unsigned integers in a buffer say when it runs, vertices, instances, the first vertex and the first instance
-```
 
-### `ComponentArray<T>`
-
-```csharp
+// ComponentArray<T>
 int PlaceOf(Entity entity);                                     // Where an entity's entry is, its mesh tag, or -1 where it has none
 ```
 
@@ -1328,9 +1085,8 @@ int PlaceOf(Entity entity);                                     // Where an enti
 
 The guide's page is [gizmos.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/gizmos.md).
 
-### `Gizmos`
-
 ```csharp
+// Gizmos
 static void Fade(Vec3 start, Vec3 end, (float R, float G, float B, float A) from, (float R, float G, float B, float A) to, bool inFront = true);  // Draws a line that fades from one color to another along its length
 static void Line(Vec3 start, Vec3 end, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a line between two points
 static void Sphere(Vec3 center, float radius, (float R, float G, float B, float A) color, bool inFront = true, uint resolution = 0);  // Draws the outline of a sphere
@@ -1386,17 +1142,11 @@ static void Axes(Transform transform, float length = 1f, bool inFront = true);  
 static Gizmos.BatchScope Batch();                               // Gathers every shape drawn until the returned scope ends, and hands them over in one call
 static void Text(string text, Vec3 position, Quat rotation, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text in the world, in Bevy's stroke font, facing the way it is turned
 static void Text2d(string text, (float X, float Y) position, float angle, float size, (float X, float Y) anchor, (float R, float G, float B, float A) color, bool inFront = true);  // Draws a run of text, flat, for a 2D camera
-```
 
-### `Gizmos.BatchScope`
-
-```csharp
+// Gizmos.BatchScope
 void Dispose();                                                 // Hands the gathered shapes to the engine
-```
 
-### `GizmoSegment`
-
-```csharp
+// GizmoSegment
 static GizmoSegment Fading(Vec3 start, Vec3 end, (float R, float G, float B, float A) from, (float R, float G, float B, float A) to);  // A line that fades from one color to another
 ```
 
@@ -1404,9 +1154,8 @@ static GizmoSegment Fading(Vec3 start, Vec3 end, (float R, float G, float B, flo
 
 The guide's page is [ui.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/ui.md).
 
-### `Ui`
-
 ```csharp
+// Ui
 static Entity SpawnNode(UiSettings settings);                   // Spawns a rectangle and returns it
 static Entity SpawnText(string text, UiSettings settings, float fontSize = 20f);  // Spawns a run of text and returns it
 static Entity SpawnText(string text, UiSettings settings, UiTextSettings style);  // Spawns a run of text, set as style describes
@@ -1436,18 +1185,12 @@ static void EditText(Entity field, TextEdit edit);              // Queues one of
 static bool BeginHidden();                                      // Opens the hidden scope, answering whether what is drawn inside it is drawn this frame, false while Hidden holds
 static void EndHidden();                                        // Closes the hidden scope BeginHidden opened
 static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
-```
 
-### `UiGrid`
-
-```csharp
+// UiGrid
 static void Set(Entity node, GridSettings settings);            // Lays a node's children out on a grid
 static void Place(Entity node, GridPlacement placement);        // Places one child on its parent's grid
-```
 
-### `TextEdit`
-
-```csharp
+// TextEdit
 static TextEdit Insert(string text);                            // Puts text at the cursor, in place of the selection where there is one
 static TextEdit Left(bool select = false);                      // Moves the cursor a character left, extending the selection where asked
 static TextEdit Right(bool select = false);                     // Moves the cursor a character right, extending the selection where asked
@@ -1456,11 +1199,8 @@ static TextEdit Down(bool select = false);                      // Moves the cur
 static TextEdit LineStart(bool select = false);                 // Moves the cursor to the start of its line as laid out
 static TextEdit LineEnd(bool select = false);                   // Moves the cursor to the end of its line as laid out
 static TextEdit ScrollByLines(float lines);                     // Scrolls by lines lines as laid out, down where it is above zero
-```
 
-### `Feathers`
-
-```csharp
+// Feathers
 static Entity Button(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All);  // A button with its caption, Bevy's FeathersButton
 static Entity ToolButton(Entity parent, string caption, ButtonVariant variant = ButtonVariant.Normal, RoundedCorners corners = RoundedCorners.All);  // A square button for an icon or a symbol, Bevy's FeathersToolButton
 static Entity Checkbox(Entity parent, string caption);          // A checkbox with its caption beside it, Bevy's FeathersCheckbox
@@ -1521,54 +1261,36 @@ static void SetNumberUnits(Entity input, NumberUnits units);    // Has a number 
 static void SetTheme(ReadOnlySpan<(string, Color)> colors);     // Replaces the theme with one that colors each of the tokens given and nothing else, as Bevy's examples' basic theme does, Bevy's ThemeProps::new_non_contextual
 static void SetDarkTheme();                                     // Puts Bevy's dark theme back, the one the app begins with
 static void ThemeColor(Entity node, string token, ThemedPart part = ThemedPart.Background);  // Colors a node of the game's own from the theme, by one of FeathersToken's tokens, so it follows the theme as the controls do
-```
 
-### `Length`
-
-```csharp
+// Length
 static Length Px(float value);                                  // A distance in logical pixels
 static Length Percent(float value);                             // A share of the parent, where 100 is all of it
-```
 
-### `Sides`
-
-```csharp
+// Sides
 static Sides All(Length value);                                 // The same length on every side
 static Sides Horizontal(Length value);                          // Left and right, with nothing at the top and bottom
 static Sides Vertical(Length value);                            // Top and bottom, with nothing at the left and right
-```
 
-### `Corners`
-
-```csharp
+// Corners
 static Corners All(Length value);                               // The same radius on every corner
 static Corners Top(Length value);                               // Rounded along the top edge only, like a tab
 static Corners Bottom(Length value);                            // Rounded along the bottom edge only
-```
 
-### `Track`
-
-```csharp
+// Track
 static Track Px(float value);                                   // A fixed number of logical pixels
 static Track Percent(float value);                              // A percentage of the grid across that axis
 static Track Fr(float share);                                   // A share of whatever room is left after the fixed tracks have taken theirs
 static Track Flex(float share);                                 // A share of the room left over, as Fr is, that may also be narrower than what it holds
 Track Repeated(int count);                                      // The same track, stated count times over
 Track Filling(bool collapse = false);                           // The same track, repeated as many times as the grid has room for
-```
 
-### `ImGuiRuntime`
-
-```csharp
+// ImGuiRuntime
 static void Start(string? fonts = null, float size = 15f, params string[] faces);  // Creates the context and hands the engine the font atlas
 static ImFontPtr Face(string face);                             // One of the loaded faces, or whatever is in force when it was not loaded
 static void Begin(BehaviorContext ctx);                         // Starts a frame, how large the window is, what the pointer did, what was typed
 static void End();                                              // Ends the frame and hands the engine what came of it
-```
 
-### `ImGuiTextures`
-
-```csharp
+// ImGuiTextures
 static ulong Load(string path);                                 // What to call the picture at a path, loading it the first time it is asked for
 static ulong Of(AssetHandle image);                             // What to call a picture the caller already holds, such as one a camera is drawing into
 static (uint Width, uint Height) SizeOf(ulong picture);         // How large a picture is, in pixels, or zero by zero while it is still loading
@@ -1580,9 +1302,8 @@ static bool Button(string id, string path, float size, Vector4 tint);  // A butt
 
 The guide's page is [audio.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/audio.md).
 
-### `Audio`
-
 ```csharp
+// Audio
 static float BusVolume(string? bus);                            // A bus's volume, which is one for a bus nobody has set and for no bus at all
 static void SetBusVolume(string bus, float volume);             // Sets a bus's volume, which every sound on it is heard at times its own
 static AssetHandle CreatePitch(float frequency, TimeSpan duration);  // Makes a tone of one frequency, as Bevy's Pitch is, for Play to play as it plays a clip
@@ -1615,9 +1336,8 @@ static void SetGlobalVolume(float volume);                      // Scales every 
 
 The guide's page is [physics.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/physics.md).
 
-### `Physics.PhysicsWorld`
-
 ```csharp
+// Physics.PhysicsWorld
 bool IsCharacter(Entity entity);                                // Whether an entity's body is a character's
 void SetContinuous(Entity entity, bool continuous);             // Sweeps an entity's body over each step to find what it would meet within it, for a body fast enough to cross a thin wall in one step, as a shot or a ball struck hard is, or stops sweeping it
 bool IsContinuous(Entity entity);                               // Whether an entity's body is swept over each step
@@ -1649,17 +1369,11 @@ void SetLayersCollide(int a, int b, bool collide);              // Whether bodie
 bool LayersCollide(int a, int b);                               // Whether bodies on two layers collide
 JointHandle? JointOf(Entity entity);                            // The joint an entity's JointBetween made, for a game to drive its motor with SetMotor or SetDrive, or nothing while its bodies are still to come or where it could not be made
 void Sync(EcsWorld ecs);                                        // Makes, remakes and takes away the bodies of entities carrying a RigidBody and a Collider, so the simulation holds what the world says
-```
 
-### `Physics.PhysicsPlugin`
-
-```csharp
+// Physics.PhysicsPlugin
 void Build(App app);                                            // Registers this plugin's contributions on app
-```
 
-### `Physics.PhysicsShape`
-
-```csharp
+// Physics.PhysicsShape
 PhysicsShape Moved(Vec3 offset);                                // The same shape with its middle moved off the entity's origin
 static PhysicsShape Box(Vec3 size);                             // A box of the given full size along each axis
 static PhysicsShape Sphere(float radius);                       // A sphere of the given radius
@@ -1669,11 +1383,8 @@ static PhysicsShape Mesh(ReadOnlySpan<Vec3> positions, ReadOnlySpan<uint> indice
 static PhysicsShape Mesh(MeshData mesh);                        // The same, from a mesh read back with TryReadMesh
 static PhysicsShape Hull(ReadOnlySpan<Vec3> points);            // The smallest convex shape holding every point, as a rock or an odd crate tumbles
 static PhysicsShape Hull(MeshData mesh);                        // The same, around the vertices of a mesh read back with TryReadMesh
-```
 
-### `Physics.Joint`
-
-```csharp
+// Physics.Joint
 static Joint Ball(Vec3 anchorA, Vec3 anchorB);                  // A point on one body held to a point on the other, free to turn any way about it, such as a shoulder, a pendulum's pivot, a chain's links
 static Joint Hinge(Vec3 anchorA, Vec3 axisA, Vec3 anchorB, Vec3 axisB);  // The same, and turning only about one axis, such as a door, a wheel or an elbow
 static Joint Weld();                                            // The two held exactly as they are to each other when joined, as though glued, such as a sword in a hand, a part bolted onto a vehicle
@@ -1684,11 +1395,8 @@ Joint WithLimits(float lowestDegrees, float highestDegrees);    // A hinge that 
 Joint WithCone(Vec3 axisA, float swingDegrees, float twistDegrees);  // A ball joint kept within a cone, the second body swung no further than swingDegrees from the first's axisA and twisted about it no further than twistDegrees either way, as a shoulder or a link of a chain
 Joint WithTravel(float minimum, float maximum);                 // A slider that stops between minimum and maximum units along its axis from where it was joined, a drawer that stops out and in
 Joint WithDrive(float unitsPerSecond, float force);             // A slider that drives itself at unitsPerSecond along its axis, toward the axis's tip for a positive speed, pushing with no more than force, as a lift's winch does
-```
 
-### `Physics.Colliders`
-
-```csharp
+// Physics.Colliders
 static bool TryFit(EcsWorld world, Entity entity, out ColliderFit fit);  // What an entity's collider comes to, or false while a mesh it fits has not loaded or a hull or a mesh has none to fit
 static bool Draw(EcsWorld world, Entity entity, (float R, float G, float B, float A) color);  // Draws an entity's collider as a gizmo, where it collides
 ```
@@ -1697,9 +1405,8 @@ static bool Draw(EcsWorld world, Entity entity, (float R, float G, float B, floa
 
 The guide's page is [input.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/input.md).
 
-### `Input`
-
 ```csharp
+// Input
 bool KeyDown(Key key);                                          // True while key is held down
 bool KeyPressed(Key key);                                       // True on the single frame key went down
 bool KeyReleased(Key key);                                      // True on the single frame key went up
@@ -1717,30 +1424,21 @@ bool MousePressed(MouseButton button);                          // True on the s
 bool MouseReleased(MouseButton button);                         // True on the single frame button went up
 bool AnyMouseDown();                                            // True while any mouse button is held
 bool AnyMousePressed();                                         // True when any mouse button went down this frame
-```
 
-### `LogicalKey`
-
-```csharp
+// LogicalKey
 static LogicalKey Character(string text);                       // The key that types text
 static LogicalKey Named(string name);                           // The key Bevy names name, as Enter or ArrowLeft
 static LogicalKey Dead(string text);                            // A dead key, which changes the character the next key types
-```
 
-### `Gamepad`
-
-```csharp
+// Gamepad
 bool Down(GamepadButton button);                                // Whether a button is held
 bool Pressed(GamepadButton button);                             // Whether a button went down this frame
 bool Released(GamepadButton button);                            // Whether a button came up this frame
 float Axis(GamepadAxis axis);                                   // Where an axis stands, a stick from minus one to one and a trigger from zero to one
 void Rumble(float strong, float weak, float seconds);           // Rumbles the pad, its strong motor and its weak one each from zero to one, for some seconds
 void StopRumble();                                              // Stops every rumble the pad is playing
-```
 
-### `SyntheticInput`
-
-```csharp
+// SyntheticInput
 static void MoveTo(float x, float y);                           // Moves the pointer to a point in the window, in logical pixels
 static void Press(float x, float y, MouseButton button = MouseButton.Left);  // Presses a button where the pointer is put
 static void Release(float x, float y, MouseButton button = MouseButton.Left);  // Releases a button where the pointer is put
@@ -1759,11 +1457,8 @@ static void Type(string text);                                  // Types a run o
 static void Send(float x, float y, PointerAction action, MouseButton button = MouseButton.Left);  // Moves, presses or releases the pointer
 static void Forget();                                           // Gives the pointer back to the hand on the desk
 static bool TryTakeClickWithoutWindow(out float x, out float y);  // Takes the oldest left click given to a run with no window that nothing has answered yet
-```
 
-### `KeyTable`
-
-```csharp
+// KeyTable
 static bool IsMapped(Key key);                                  // True when key has a bit in the input bitsets
 ```
 
@@ -1771,9 +1466,8 @@ static bool IsMapped(Key key);                                  // True when key
 
 The guide's page is [window.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/window.md).
 
-### `Window`
-
 ```csharp
+// Window
 static void SetTitle(string title);                             // Sets the window's title
 static void SetSize(uint width, uint height);                   // Resizes the window, in logical pixels
 static (uint Width, uint Height) Size();                        // The window's current size, in logical pixels
@@ -1821,27 +1515,20 @@ static WindowPlace Place(Entity window);                        // Where a windo
 static void StartDragMove(Entity window);                       // Hands a window to the platform to be moved by the pointer, until the button held now is let go
 static void StartDragResize(Entity window, WindowEdge edge);    // Hands a window to the platform to be resized by the pointer from one edge or corner, until the button held now is let go
 static void SetVideoMode(Entity window, int monitor, int mode);  // Takes the screen over with a window in exclusive fullscreen at one of a monitor's own video modes
-```
 
-### `UpdateMode`
-
-```csharp
+// UpdateMode
 static UpdateMode Reactive(TimeSpan wait);                      // Updates after wait, or sooner for any event
 static UpdateMode ReactiveLowPower(TimeSpan wait);              // Updates after wait, or sooner for the window's events and the app's own, but not for the devices' own, as a mouse moved where the window is not
 ```
 
 ## Math
 
-### `Vec3`
-
 ```csharp
+// Vec3
 static float Dot(Vec3 a, Vec3 b);                               // The dot product
 static Vec3 Cross(Vec3 a, Vec3 b);                              // The cross product, perpendicular to both operands
-```
 
-### `Quat`
-
-```csharp
+// Quat
 static Quat FromAxisAngle(Vec3 axis, float radians);            // A rotation of radians about an arbitrary axis
 static Quat FromRotationX(float radians);                       // A rotation about the X axis
 static Quat FromRotationY(float radians);                       // A rotation about the Y axis
@@ -1851,11 +1538,8 @@ static Quat FromEuler(float x, float y, float z);               // The rotation 
 Vec3 ToEuler();                                                 // The turns about X, Y and Z this rotation is made of, in radians
 static Quat Slerp(Quat from, Quat to, float t);                 // The rotation a fraction of the way between two, turning at an even rate the shorter way round, as Bevy's Quat::slerp does
 static Quat Lerp(Quat from, Quat to, float t);                  // A straight blend of the two rotations, taken the shorter way round and made a rotation again, as Bevy's Quat::lerp does
-```
 
-### `Color`
-
-```csharp
+// Color
 static Color FromSrgb(float r, float g, float b, float a = 1f);  // A color from sRGB components between zero and one, as a color picker gives them
 static Color FromHex(string hex);                               // A color from an sRGB hex string such as #ff8800 or ff8800cc
 static Color FromSrgb8(byte r, byte g, byte b, byte a = 255);   // A color from sRGB bytes, as Bevy's Color::srgb_u8 and a hex code give them
@@ -1865,26 +1549,17 @@ Color WithAlpha(float alpha);                                   // The color wit
 static Color From(ColorSpace space, Vec4 components);           // A color from its four components in one of Bevy's color spaces, converted as Bevy converts it
 Vec4 In(ColorSpace space);                                      // The color's four components in one of Bevy's color spaces, converted as Bevy converts it, in the order From takes them
 string ToHex();                                                 // The color as sRGB hex, #RRGGBB, or #RRGGBBAA where it is not opaque, as Bevy's Srgba::to_hex writes it and FromHex reads it
-```
 
-### `Transform`
-
-```csharp
+// Transform
 static Transform At(float x, float y, float z);                 // A transform at x, y, z
 static Transform LookingAt(Vec3 eye, Vec3 target, Vec3 up);     // A transform at eye oriented so that its forward axis points at target
-```
 
-### `GlobalTransform`
-
-```csharp
+// GlobalTransform
 Transform ToTransform();                                        // The same transform expressed as a position, rotation and scale
 Vec3 TransformPoint(Vec3 point);                                // Maps a point in the entity's local space into world space
 Vec3 TransformDirection(Vec3 direction);                        // Maps a direction in the entity's local space into world space
-```
 
-### `EaseFunction`
-
-```csharp
+// EaseFunction
 static EaseFunction Steps(int count, JumpAt jump);              // A staircase of count steps rising where jump says, as Bevy's EaseFunction::Steps
 static EaseFunction Elastic(float omega);                       // A spring of angular frequency omega settling at one, as Bevy's EaseFunction::Elastic
 float Sample(float t);                                          // The value at t, from zero at its start to one at its end
@@ -1894,17 +1569,13 @@ float Sample(float t);                                          // The value at 
 
 The guide's page is [tools.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md).
 
-### `Capture`
-
 ```csharp
+// Capture
 static Task<string> StartRecording(string path, int intervalMs = 100, float scale = 1f);  // Starts recording what this run draws, a picture at each interval of its clock, until StopRecording, as an animated GIF or PNG
 static string Screenshot();                                     // Saves a picture of the frame being drawn into ScreenshotFolder, as the key does
 static Task<string>? StopRecording();                           // Stops a recording, whose file is written once the pictures it asked for have come back
-```
 
-### `ConsoleCommands`
-
-```csharp
+// ConsoleCommands
 static void Add(ConsoleCommand command);                        // Adds a command, replacing one of the same name
 static void Add(string name, string help, Func<string[], string> run);  // Adds a command written out in place
 static bool Remove(string name);                                // Takes one back out
@@ -1913,68 +1584,44 @@ static IReadOnlyList<ConsoleCommand> Starting(string prefix);   // The commands 
 static string? Run(string line);                                // Runs a line as it was typed, and answers with what to write back
 static string Unwrap(string line);                              // A line with one pair of enclosing quotes taken off, if it has them
 static string[] Split(string line);                             // A line of arguments as words, keeping quoted runs together
-```
 
-### `Diagnostics`
-
-```csharp
+// Diagnostics
 static void Register(string path, string suffix = "", int history = 0);  // Registers a diagnostic, so measurements of it are kept
 static bool Measure(string path, double value);                 // Adds a measurement to a diagnostic, taken now
 static bool TryRead(string path, out DiagnosticReading reading);  // What a diagnostic holds now
 static bool SetEnabled(string path, bool on);                   // Turns a diagnostic's measuring and its line in Bevy's log on or off, its history kept
 static IReadOnlyList<DiagnosticReading> All();                  // Every diagnostic in the store, by path
 static void SetLogFilter(IEnumerable<string>? paths);           // Has Bevy's log print only these diagnostics, or every one when given nothing
-```
 
-### `ConsoleHost`
-
-```csharp
+// ConsoleHost
 static void Fail(string code, string message);                  // Says the command failed, with a code a script can branch on
 static void Hold(ulong frame);                                  // Holds this command's answer until the clock's count of frames reaches frame
 static void Later(Func<string> poll);                           // Says this command's answer is not ready yet, and how to ask for it
 static ConsoleHost.Scope Lend(World world);                     // Lends the world to commands run inside the returned scope
-```
 
-### `ConsoleHost.Scope`
-
-```csharp
+// ConsoleHost.Scope
 void Dispose();                                                 // Ends it, putting back whatever was lent before
-```
 
-### `ConsoleLog`
-
-```csharp
+// ConsoleLog
 static void Start();                                            // Starts teeing the output and error streams into the ring
 static void Write(LogLevel level, string text);                 // Adds a line
 static void Write(string text);                                 // Adds a line at the ordinary level
 static LogLine[] All();                                         // The lines kept, oldest first
 static void Clear();                                            // Forgets everything
-```
 
-### `CliClient`
-
-```csharp
+// CliClient
 static string Send(CliSession session, string operation, string? line = null, double seconds = 30);  // Sends one request and reads the one answer
 static CliAnswer Run(CliSession session, string line, double seconds = 5);  // Runs a console command in a running app and reads what it answered
-```
 
-### `CliJson`
-
-```csharp
+// CliJson
 static string Envelope(string command, bool success, Action<Utf8JsonWriter>? data = null, IReadOnlyList<CliError>? errors = null, IReadOnlyList<string>? warnings = null, string? id = null);  // Writes an envelope, with whatever data writes as its payload
 static string Ok(string command, Action<Utf8JsonWriter>? data = null, string? id = null);  // An envelope that worked
 static string Fail(string command, string code, string message, string? id = null);  // An envelope that did not
-```
 
-### `CliPlugin`
-
-```csharp
+// CliPlugin
 void Build(App app);                                            // Registers this plugin's contributions on app
-```
 
-### `CliSessionFile`
-
-```csharp
+// CliSessionFile
 static string PathFor(int pid);                                 // Where the file for a given process is
 static void Write(CliSession session);                          // Writes one, replacing whatever was there
 static CliSession? Read(string path);                           // Reads one, or nothing when the file is missing or not one of these
@@ -1985,90 +1632,59 @@ static int Prune();                                             // Deletes the f
 
 ## Everything else
 
-### `Aabb2d`
-
 ```csharp
+// Aabb2d
 static Aabb2d FromCenter(Vec2 center, Vec2 halfSize);           // The box about a center, reaching half its size each way
 static Aabb2d FromPointCloud(Isometry2d isometry, ReadOnlySpan<Vec2> points);  // The box about points placed by an isometry
 Vec2 ClosestPoint(Vec2 point);                                  // The point of the box nearest a point, the point itself where the box holds it
 bool Intersects(Aabb2d other);                                  // Whether it overlaps another box, touching counting
 bool Intersects(BoundingCircle circle);                         // Whether it overlaps a circle, touching counting
-```
 
-### `AabbCast2d`
-
-```csharp
+// AabbCast2d
 float? AabbCollisionAt(Aabb2d other);                           // How far along the ray the swept box first touches another, or null
-```
 
-### `Arc2d`
-
-```csharp
+// Arc2d
 static Arc2d FromRadians(float radius, float angle);            // An arc spanning angle radians in all, Bevy's from_radians
 static Arc2d FromDegrees(float radius, float angle);            // An arc spanning angle degrees in all, Bevy's from_degrees
 static Arc2d FromTurns(float radius, float fraction);           // An arc spanning fraction of a whole turn, half a turn a semicircle, Bevy's from_turns
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `BoundingCircle`
-
-```csharp
+// BoundingCircle
 Vec2 ClosestPoint(Vec2 point);                                  // The point of the circle nearest a point, the point itself where the circle holds it
 bool Intersects(BoundingCircle other);                          // Whether it overlaps another circle, touching counting
 bool Intersects(Aabb2d box);                                    // Whether it overlaps a box, touching counting
-```
 
-### `BoundingCircleCast`
-
-```csharp
+// BoundingCircleCast
 float? CircleCollisionAt(BoundingCircle other);                 // How far along the ray the swept circle first touches another, or null
-```
 
-### `Capsule2d`
-
-```csharp
+// Capsule2d
 static Capsule2d FromLength(float radius, float length);        // A capsule of a radius whose straight middle is a length long, as Bevy's Capsule2d::new takes it
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `Circle`
-
-```csharp
+// Circle
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `CircularSector`
-
-```csharp
+// CircularSector
 static CircularSector FromRadians(float radius, float angle);   // A sector spanning angle radians in all
 static CircularSector FromDegrees(float radius, float angle);   // A sector spanning angle degrees in all
 static CircularSector FromTurns(float radius, float fraction);  // A sector spanning fraction of a whole turn, half a turn a half disc
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `CircularSegment`
-
-```csharp
+// CircularSegment
 static CircularSegment FromRadians(float radius, float angle);  // A segment whose arc spans angle radians in all
 static CircularSegment FromDegrees(float radius, float angle);  // A segment whose arc spans angle degrees in all
 static CircularSegment FromTurns(float radius, float fraction);  // A segment whose arc spans fraction of a whole turn, half a turn a half disc
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `CompassOctants`
-
-```csharp
+// CompassOctants
 static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
-```
 
-### `ConsoleView`
-
-```csharp
+// ConsoleView
 LogLine[] Lines();                                              // The lines worth showing, oldest first
 void Run(string line, World? world = null);                     // Runs a line, and writes both it and its answer into the log
 static void AnswerLater(World world);                           // Asks each command waiting on an answer for it, and writes any that arrive into the log
@@ -2077,114 +1693,69 @@ string Forward(string current);                                 // The other way
 string? Completion(string typed);                               // The command a half-typed name would become, or nothing
 string Hint(string typed);                                      // What it would complete to, or what it takes, said under the input
 static string Written(LogLine line);                            // How a line reads on screen, with its repeat count when it has one
-```
 
-### `CrashLog`
-
-```csharp
+// CrashLog
 static string? Write(string title, string what);                // Writes a crash to this run's crash file, made the first time, and says where on the log
-```
 
-### `CubicBezier<T>`
-
-```csharp
+// CubicBezier<T>
 CubicCurve<T>? ToCurve();                                       // The curve, or null where there is no segment
-```
 
-### `CubicBSpline<T>`
-
-```csharp
+// CubicBSpline<T>
 CubicCurve<T>? ToCurve();                                       // The curve, a segment for each four points in a row, or null with fewer than four
 CubicCurve<T>? ToCurveCyclic();                                 // The curve round its points and back, a segment starting at each point, or null with none
-```
 
-### `CubicCardinalSpline<T>`
-
-```csharp
+// CubicCardinalSpline<T>
 static CubicCardinalSpline<T> CatmullRom(IEnumerable<T> points);  // A Catmull-Rom spline, a cardinal spline of tension one half
 CubicCurve<T>? ToCurve();                                       // The curve from the first point to the last, or null with fewer than two
 CubicCurve<T>? ToCurveCyclic();                                 // The curve from the first point round through the last and back to the first, or null with fewer than two, its first segment the one from the first point to the second, as Bevy's is
-```
 
-### `CubicCurve<T>`
-
-```csharp
+// CubicCurve<T>
 T Position(float t);                                            // The point at t
 T Velocity(float t);                                            // How fast the point moves at t
 T Acceleration(float t);                                        // How fast that changes at t
 IEnumerable<T> IterPositions(int subdivisions);                 // Points along the whole curve at even steps of t, subdivisions of them and one more for the end, Bevy's iter_positions
-```
 
-### `CubicHermite<T>`
-
-```csharp
+// CubicHermite<T>
 CubicCurve<T>? ToCurve();                                       // The curve from the first point to the last, or null with fewer than two
 CubicCurve<T>? ToCurveCyclic();                                 // The curve from the first point round through the last and back to the first, or null with none
-```
 
-### `CubicSegment<T>`
-
-```csharp
+// CubicSegment<T>
 static CubicSegment<T> Coefficients(T p0, T p1, T p2, T p3, float[] matrix);  // The segment four control points make under a spline's characteristic matrix, row by row
 T Position(float t);                                            // The point at t, from zero at its start to one at its end
 T Velocity(float t);                                            // How fast the point moves at t, the first derivative
 T Acceleration(float t);                                        // How fast that changes at t, the second derivative
-```
 
-### `Cuboid`
-
-```csharp
+// Cuboid
 static Cuboid FromLength(float length);                         // A cube whose sides are each length long
 static Cuboid FromSize(Vec3 size);                              // A box of the size given along each axis
 Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other
 Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
-```
 
-### `Debug`
-
-```csharp
+// Debug
 static void AddOverlaySection(string name, Func<IEnumerable<string>> lines);  // Adds a section of a program's own to the overlay's left column, under the engine's lines and any section added before, in place of one of the same name
 static bool RemoveOverlaySection(string name);                  // Takes a section of the overlay away by its name
-```
 
-### `GameTimer`
-
-```csharp
+// GameTimer
 static GameTimer FromSeconds(float seconds, TimerMode mode);    // A timer of seconds that runs once or over and over, as Bevy's Timer::from_seconds
 GameTimer Tick(float delta);                                    // Runs it on by delta seconds, and answers it as it is after, so timer.Tick(delta).JustFinished reads as Bevy's timer.tick(delta).just_finished()
 void Pause();                                                   // Stops it where it is until Unpause
 void Unpause();                                                 // Lets it run again from where it was paused
 void Reset();                                                   // Starts it again from nothing, unfinished, its duration and mode kept
-```
 
-### `HookContext`
-
-```csharp
+// HookContext
 T Res<T>();                                                     // One of the app's managed resources
-```
 
-### `IBounded2d`
-
-```csharp
+// IBounded2d
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `ImGuiConsole`
-
-```csharp
+// ImGuiConsole
 static void Draw(BehaviorContext ctx);                          // Opens or closes it on its key, and draws it while it is open
-```
 
-### `Isometry2d`
-
-```csharp
+// Isometry2d
 static Isometry2d FromTransform(Transform transform);           // A placement where the shape is turned by its transform's rotation about Z and moved to its translation's X and Y, as Bevy's examples place theirs
-```
 
-### `Log`
-
-```csharp
+// Log
 static void Trace(string message);                              // Writes a line at the trace level, which Bevy leaves out unless asked for
 static void Debug(string message);                              // Writes a line at the debug level, which Bevy leaves out unless asked for
 static void Info(string message);                               // Writes a line at the info level, the quietest Bevy shows by default
@@ -2196,73 +1767,46 @@ static void InfoOnce(string message, string file = "", int line = 0);  // Writes
 static void WarnOnce(string message, string file = "", int line = 0);  // Writes a line at the warn level the first time this line of code runs, Bevy's warn_once!
 static void ErrorOnce(string message, string file = "", int line = 0);  // Writes a line at the error level the first time this line of code runs, Bevy's error_once!
 static void Once(Action work, string file = "", int line = 0);  // Runs work the first time this line of code runs and never again, Bevy's once!
-```
 
-### `MemoryGuard`
-
-```csharp
+// MemoryGuard
 static long ResidentBytes();                                    // How many bytes of the machine's memory the process holds now
 static void Watch(double gigabytes);                            // Holds the process to a cap from here on, starting the watch the first time, or with zero lifts the cap
 static double DefaultTheEnvironment();                          // Gives the environment the default cap where it names none, for a tool to call before it starts an app or makes one, so the app holds to it
-```
 
-### `MeshStream`
-
-```csharp
+// MeshStream
 static MeshStream From<T>(string name, MeshStreamFormat format, uint location, ReadOnlySpan<T> values);  // A stream from values laid out as the format's bytes, such as a uint a vertex for UInt or a Vector4 a vertex for Float4
 static int SizeOf(MeshStreamFormat format);                     // Bytes a vertex of format
-```
 
-### `Navigation`
-
-```csharp
+// Navigation
 static Entity? Move(CompassOctant direction);                   // Moves the input focus to the node beside the one holding it in a direction, and answers the node, or null where nothing lies that way, an edge blocks it or nothing holds the focus
 static void AddEdge(Entity from, Entity to, CompassOctant direction, bool bothWays = false);  // Draws an edge from one node to another in a direction, and back the opposite way where asked
 static void BlockEdge(Entity node, CompassOctant direction, Entity other = default);  // Blocks a direction a node would otherwise be left by, and the opposite one from another node where asked
 static void AddEdges(ReadOnlySpan<Entity> nodes, CompassOctant direction, bool looping = false);  // Draws edges between nodes in their order in a direction, each to the next and back, and around from the last where asked
 static void Forget(Entity node);                                // Takes a node's edges out, those from it and to it, as one taken off the screen needs
 static void Clear();                                            // Takes every edge out, leaving the nearest nodes on the screen
-```
 
-### `Ray2d`
-
-```csharp
+// Ray2d
 static Ray2d Toward(Vec2 origin, Vec2 direction);               // A ray from a point toward a direction of any length but zero, which is made length one
 Vec2 At(float distance);                                        // The point a distance along it
-```
 
-### `RayCast2d`
-
-```csharp
+// RayCast2d
 float? AabbIntersectionAt(Aabb2d box);                          // How far along the ray it meets a box, or null
 float? CircleIntersectionAt(BoundingCircle circle);             // How far along the ray it meets a circle, or null
-```
 
-### `Rectangle`
-
-```csharp
+// Rectangle
 static Rectangle FromSize(float width, float height);           // A rectangle of a width and a height
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `RegularPolygon`
-
-```csharp
+// RegularPolygon
 IEnumerable<Vec2> Vertices(float rotation);                     // Its corners, turned by an angle, the first up before turning
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `Rot2`
-
-```csharp
+// Rot2
 static Rot2 Radians(float radians);                             // A rotation by an angle, in radians, counterclockwise
-```
 
-### `ScenePacks`
-
-```csharp
+// ScenePacks
 static IReadOnlyList<ScenePack> List(string folder, out IReadOnlyList<string> problems);  // Reads every manifest in a folder, in the order of their names
 static bool TryRead(string file, out ScenePack? pack, out string? problem);  // Reads one manifest, or says why it cannot, naming the file
 static string PathOf(ScenePack pack);                           // Where a pack is kept once fetched
@@ -2270,47 +1814,29 @@ static bool IsFetched(ScenePack pack);                          // Whether a pac
 static Task<string> FetchAsync(ScenePack pack, IProgress<double>? progress = null, CancellationToken cancel = default);  // Fetches a pack into Folder, telling how far it has come, and keeps it where its SHA-256 is the manifest's
 static bool TryMount(ScenePack pack, out string? model, out string? problem);  // Mounts a fetched pack under packs/ and its name while an app runs, and answers the path its model is loaded by, or says why it cannot
 static bool Unmount(ScenePack pack);                            // Stops reading a mounted pack
-```
 
-### `Segment2d`
-
-```csharp
+// Segment2d
 static Segment2d FromDirectionAndLength(Vec2 direction, float length);  // A segment centered on the origin along a direction, a length long
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
-```
 
-### `Sphere`
-
-```csharp
+// Sphere
 Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other
 Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
-```
 
-### `TileData`
-
-```csharp
+// TileData
 static TileData FromTilesetIndex(ushort tilesetIndex);          // A tile drawn from a layer of the tileset, white, shown and upright, Bevy's from_tileset_index
-```
 
-### `TilemapChunk`
-
-```csharp
+// TilemapChunk
 int IndexOf(uint x, uint y);                                    // The place in the chunk's tiles of the tile x across and y up
 Transform TileTransform(uint x, uint y);                        // Where the tile x across and y up sits, its middle, in the chunk's own space, Bevy's calculate_tile_transform
-```
 
-### `Triangle2d`
-
-```csharp
+// Triangle2d
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
 (Vec2 Center, float Radius) Circumcircle();                     // The circle through its three corners, its center and its radius
-```
 
-### `Vec2`
-
-```csharp
+// Vec2
 static Vec2 FromAngle(float radians);                           // The vector of length one at radians counterclockwise from X, Bevy's from_angle
 float ToAngle();                                                // The angle from X to this vector in radians, between minus and plus a half turn, Bevy's to_angle
 static float Dot(Vec2 a, Vec2 b);                               // The dot product
@@ -2318,10 +1844,7 @@ static float PerpDot(Vec2 a, Vec2 b);                           // The dot produ
 static Vec2 Min(Vec2 a, Vec2 b);                                // The smaller of each component
 static Vec2 Max(Vec2 a, Vec2 b);                                // The larger of each component
 static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each component held between its bounds
-```
 
-### `Weather`
-
-```csharp
+// Weather
 static void SetPreset(WeatherPreset preset, bool immediately = false);  // Sets the weather to a preset, eased into over its transition, or at once
 ```

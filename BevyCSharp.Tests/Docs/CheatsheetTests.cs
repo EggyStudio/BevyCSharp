@@ -13,8 +13,9 @@ namespace Bevy.Tests;
 /// <para>
 /// A method is matched by its type, its name and its number of parameters, which tells overloads
 /// apart without spelling the cheatsheet's types the way reflection names them. A type is the
-/// heading its lines sit under, by its name in <c>Bevy</c>, with <c>Physics.</c> before one in
-/// <c>Bevy.Physics</c> and its outer type before a nested one.
+/// comment its lines sit under in its group's block, by its name in <c>Bevy</c>, with
+/// <c>Physics.</c> before one in <c>Bevy.Physics</c> and its outer type before a nested one. The
+/// page's form is 3DEngine's, a group a heading, its guide's link and one block.
 /// </para>
 /// <para>
 /// The page leaves out what a reader never calls by name, which is delegates, enums, the types the
@@ -40,21 +41,47 @@ public sealed partial class CheatsheetTests
             + "\nOn CHEATSHEET.md and not in the library: " + string.Join(", ", listed.Except(library).Order()));
     }
 
+    /// <summary>
+    /// The page is a heading and a paragraph, then a group a plain heading with one C# block, and
+    /// no heading a type, as 3DEngine's page is.
+    /// </summary>
+    [Fact]
+    public void EachGroupIsAHeadingAGuidesLinkAndOneBlock()
+    {
+        var lines = File.ReadAllLines(Path.Combine(RepositoryRoot(), "CHEATSHEET.md"));
+        Assert.DoesNotContain(lines, line => line.StartsWith("### ", StringComparison.Ordinal));
+
+        var groups = 0;
+        var blocks = 0;
+        foreach (var line in lines)
+        {
+            if (line.StartsWith("## ", StringComparison.Ordinal))
+            {
+                Assert.True(groups == 0 || blocks == 1, $"the group before {line} has {blocks} blocks");
+                (groups, blocks) = (groups + 1, 0);
+                Assert.DoesNotContain('`', line);
+            }
+            else if (line.StartsWith("```csharp", StringComparison.Ordinal)) blocks++;
+        }
+
+        Assert.True(groups > 10 && blocks == 1, $"{groups} groups, the last with {blocks} blocks");
+    }
+
     [Fact]
     public void ALineIsReadAsItsTypeItsNameAndItsNumberOfParameters()
     {
         string[] page =
         [
-            "### `Render`",
+            "## Drawing",
             "```csharp",
+            "// Render",
             "static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a mesh",
             "static void SetClearColor((float R, float G, float B, float A) color);  // A tuple is one",
             "T Get<T>(Dictionary<int, string> map, float x = 1f);      // Commas inside brackets",
             "IEnumerable<(IPlugin Plugin, int Order)> GetPlugins();  // A tuple inside what it returns",
             "static void Size();",
-            "```",
-            "### `Physics.PhysicsWorld`",
-            "```csharp",
+            "",
+            "// Physics.PhysicsWorld",
             "void Remove(Entity entity);",
             "```",
             "void Prose(int a);",
@@ -98,15 +125,15 @@ public sealed partial class CheatsheetTests
 
         foreach (var line in lines)
         {
-            if (Heading().Match(line) is { Success: true } heading)
-            {
-                type = heading.Groups["type"].Value;
-                continue;
-            }
-
             if (line.StartsWith("```", StringComparison.Ordinal))
             {
                 inCode = line.StartsWith("```csharp", StringComparison.Ordinal) && !inCode;
+                continue;
+            }
+
+            if (inCode && TypeLine().Match(line) is { Success: true } heading)
+            {
+                type = heading.Groups["type"].Value;
                 continue;
             }
 
@@ -131,9 +158,9 @@ public sealed partial class CheatsheetTests
         return count;
     }
 
-    // A heading naming a type, generic arguments dropped, ### `EcsList<T>` is EcsList.
-    [GeneratedRegex(@"^### `(?<type>[\w.]+)(?:<[^>]*>)?`")]
-    private static partial Regex Heading();
+    // The comment naming a type in a group's block, generic arguments dropped, // EcsList<T> is EcsList.
+    [GeneratedRegex(@"^// (?<type>[\w.]+)(?:<[^>]*>)?$")]
+    private static partial Regex TypeLine();
 
     // A declaration on a line of its own, what it returns, its name, its parameters and a comment.
     [GeneratedRegex(@"^(?:static )?\S.*?\s+(?<name>[A-Z]\w*)(?:<[^>]*>)?\((?<parameters>.*)\);\s*(?://.*)?$")]

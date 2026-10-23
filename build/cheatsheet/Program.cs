@@ -204,8 +204,9 @@ output.AppendLine("# Cheatsheet");
 output.AppendLine();
 output.AppendLine("Every public method of the library, a line each, grouped as the guide is, with the first sentence of");
 output.AppendLine("what its documentation says. A line is a reminder, and the guide page each group links to is the");
-output.AppendLine("explanation. `CheatsheetTests` holds this page to the library, so a method added without its line,");
-output.AppendLine("or a line left for one that is gone, fails the suite.");
+output.AppendLine("explanation. Each group is one block, a type's methods under a comment naming it. `build/cheatsheet`");
+output.AppendLine("writes the page from the built library, and `CheatsheetTests` holds it to the library, so a method");
+output.AppendLine("added without its line, or a line left for one that is gone, fails the suite.");
 
 void Write(string title, string page, IEnumerable<string> keys)
 {
@@ -217,13 +218,17 @@ void Write(string title, string page, IEnumerable<string> keys)
         output.AppendLine($"The guide's page is [{page}](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/{page}).");
     }
 
+    // One block a group, as 3DEngine's page has, each type's methods set apart by a blank line under
+    // a comment naming the type, since a group holds the methods of several.
+    output.AppendLine();
+    output.AppendLine("```csharp");
+    var first = true;
     foreach (var key in keys)
     {
         var type = all[key];
-        output.AppendLine();
-        output.AppendLine($"### `{Heading(type)}`");
-        output.AppendLine();
-        output.AppendLine("```csharp");
+        if (!first) output.AppendLine();
+        first = false;
+        output.AppendLine($"// {Heading(type)}");
         foreach (var m in Methods(type))
         {
             var generic = m.IsGenericMethod ? "<" + string.Join(", ", m.GetGenericArguments().Select(a => a.Name)) + ">" : "";
@@ -231,8 +236,8 @@ void Write(string title, string page, IEnumerable<string> keys)
             var summary = Summary(m);
             output.AppendLine(summary == "" ? declaration : declaration.PadRight(Math.Max(64, declaration.Length + 2)) + "// " + summary);
         }
-        output.AppendLine("```");
     }
+    output.AppendLine("```");
 }
 
 foreach (var (title, page, types) in groups) Write(title, page, types.Where(all.ContainsKey));

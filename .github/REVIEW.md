@@ -10,37 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `cc4245da`, item 50's first commit, the scene's distance field, after `cd05d9a2`, the
-captures of items 43 and 44 read from the device's pictures as tests, and nothing else, carrying the
-review's files, COMMITS.md's pushes, author and branch rules and the Shared line for 3DEngine: the
-field built on the GPU around the camera in up to eight cascades from the meshes that cast shadows,
-by 3DEngine's plan and kernels over a pool of triangles the bridge keeps, set by
-`Render.SetSceneField` and `field.set` and said by gi.state; departures taken, the kernels holding
-distances alone with the paint, faces, emission and lent light coming with item 51, 3DEngine's parts
-not taken so a moving or skinned mesh is stamped as its whole box, a box following its mesh a frame
-behind, a mesh drawn twice gathered once, a stage from source named by its path in the timings; on
-the RTX 4070 in the feature test 260 meshes, 7.1 MB, a cascade's build 0.55 ms, the tick 0.78 ms
-against 0.17 without in Debug; 1,720 passed and 3 skipped, Cargo's 107 and 186, the three profiles
-clean here and on Windows and macOS, the lock unchanged, NormTests clean. Pushed at 21:23 on
-2026-10-23, the build run of `135e43b5` having ended green; its own build run green on the three
-systems within seventeen minutes, read at 21:43. At 21:31 the owner asked why Slang here needs the
-`bcs_*::` prefix and said yes to dropping it, item 56 and Decision 56. Next item 50's second commit,
-the field's view, the slices window and the contact shadows, then 56, then 54's readings. At 19:35
-on 2026-10-23 the owner's cloud session on this engine took items 43, 44 and 45 on its branch,
-Decision 53, so the local coder goes from item 49 to 50 and 54, cherry-picking the branch as the
-first part of a batch when the reviewer says so. At 20:00 the cloud session's first commit of item
-43, `01b89b59` on its branch, was read and accepted, and at 20:10 its second, `c0e6c111`, both to be
-cherry-picked in order by the local coder as the first part of item 50's batch with their authors
-reset and the capture taken. At 20:43 the cloud session's item 45, `4659b331` on its branch
-`modeling-operations` under the owner's identity, was read and accepted, to be cherry-picked with
-item 50's batch, its first commit `ba8a5324` skipped as item 44's twin; the cloud session takes item
-54's node next.
+Reviewed up to `d2e6ef81`, item 50's second commit, the contact shadows, the slices window and the
+gallery capture, and nothing else, carrying the review's files and the Shared line: the shadows by
+route (a), `Render.SetSceneFieldShadows` with PastShadowMap, Everywhere and Off since Bevy's own
+screen-space shadows hold the contact name, the camera kept in floats while they are on since an
+8-bit picture clamps a taken-away light to nothing before the blend, Bevy's BRDF ported without
+clearcoat, anisotropy, the atmosphere, light textures and the DFG table, the engine's camera draws
+and prepass kept apart from a program's, the slice sampled between cells, the bridge's eye gaining
+the camera's entity at ABI 302; on the RTX 4070 a pillar's shadow under a low sun 1.2 levels from
+the map's on the pixels both darken with the field covering 73 percent of the map's shadow, the lit
+ground 0.4 levels off, the bounds 4 levels, 60 percent and 1.5; 1,724 passed and 3 skipped, Cargo's
+107 and 186, the three profiles clean here and on Windows and macOS, the lock unchanged, 7 blocks on
+a scratch package. Pushed at 22:20 on 2026-10-23, the build run of `cc4245da` having ended green;
+item 50 done. Next items 56 and 58, then 54's readings. At 19:35 on 2026-10-23 the owner's cloud
+session on this engine took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes
+from item 49 to 50 and 54, cherry-picking the branch as the first part of a batch when the reviewer
+says so. At 20:00 the cloud session's first commit of item 43, `01b89b59` on its branch, was read
+and accepted, and at 20:10 its second, `c0e6c111`, both to be cherry-picked in order by the local
+coder as the first part of item 50's batch with their authors reset and the capture taken. At 20:43
+the cloud session's item 45, `4659b331` on its branch `modeling-operations` under the owner's
+identity, was read and accepted, to be cherry-picked with item 50's batch, its first commit
+`ba8a5324` skipped as item 44's twin; the cloud session takes item 54's node next.
+
+Before it, `cc4245da` came, item 50's first commit, the field, after `cd05d9a2`, the captures of
+items 43 and 44, and nothing else. Pushed at 21:23 on 2026-10-23, their build run green.
 
 Before it, `135e43b5` came, item 55 after the cherry-picks of items 44 and 45, and nothing else.
 Pushed at 20:46 on 2026-10-23, their build run green.
-
-Before it, `4f80c464` came, item 43's two commits cherry-picked from the cloud session's branch, and
-nothing else. Pushed at 20:14 on 2026-10-23, their build run green.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -417,7 +413,8 @@ from [SHARED.md](SHARED.md).
     tested against the map's own darkening on the same pixels within its reach, a bound in levels in
     the commit, rather than a patch to Bevy's shader or a wait for item 51; the gallery holds the
     slices window drawn through ImGui, no engine-owned draw list for a view over the camera in this
-    item.
+    item. Second commit done at `d2e6ef81` on 2026-10-23, pushed at 22:20, the departures in the
+    head; item 50 done.
 
 51. **Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's surfaces through an
     additive pass (Decision 51).** The world's probes in cascades over the field as 3DEngine traces
