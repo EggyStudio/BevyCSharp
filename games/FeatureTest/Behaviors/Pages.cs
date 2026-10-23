@@ -107,6 +107,7 @@ internal static class Pages
             Bevy.Debug.ProfilerShown = value;
             if (value) Bevy.Debug.OverlayShown = true;
         }),
+        new ToggleRow("Scene field", () => Field.On, Field.Set),
         new ToggleRow("Colliders", () => S.Colliders, value => Settings.Change(s => s with { Colliders = value })),
         new ToggleRow("Gizmos", () => S.Gizmos, value => Settings.Change(s => s with { Gizmos = value })),
         new ToggleRow("Wireframe", () => S.Wireframe, value => Settings.Change(s => s with { Wireframe = value })),

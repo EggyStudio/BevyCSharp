@@ -2206,6 +2206,10 @@ enum Bevy.FieldKind : int
   Vec2 = 12
   Vec3 = 5
   Vec4 = 13
+enum Bevy.FieldShadows : int
+  Everywhere = 1
+  Off = 2
+  PastShadowMap = 0
 readonly struct Bevy.FileDropped : IEquatable<FileDropped>
   FileDropped(string Path)
   bool Equals(FileDropped other)
@@ -12498,6 +12502,7 @@ static class Bevy.Render
   static void ClearSkyLighting(Entity camera)
   static void CountDrawnMeshes(bool on)
   static void DollyZoom(Entity camera, CameraProjection projection)
+  static void DrawSceneFieldWindow()
   static void LookTo(Entity camera, Vec3 direction)
   static void MakeCubemap(AssetHandle image)
   static void MakeTextureArray(AssetHandle image, int layers)
@@ -12549,6 +12554,7 @@ static class Bevy.Render
   static void SetRoundedCorners(Entity camera, float radius, (float, float, float, float) fill = default)
   static void SetSampler(AssetHandle image, TextureSettings settings)
   static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1)
+  static void SetSceneFieldShadows(FieldShadows shadows)
   static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings)
   static void SetShadowCascades(Entity light, int cascades = 0, float minimum = 0f, float maximum = 0f, float firstBound = 0f, float overlap = 0f)
   static void SetShadowFiltering(Entity camera, ShadowFiltering filtering)

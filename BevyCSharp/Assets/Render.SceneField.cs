@@ -53,4 +53,62 @@ public static partial class Render
 
         SceneField.Ask(Math.Clamp(cascades, 0, 8), Math.Max(1e-3f, cellSize), Math.Max(1, budget));
     }
+
+    /// <summary>
+    /// Chooses where the scene's distance field darkens the light of each directional light it
+    /// closes a surface off from, past the light's shadow map's reach by default, everywhere, or
+    /// nowhere.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A surface is traced toward the light through the field from a cell and a half out, 32 of
+    /// the finest cells at most, and its light is darkened by how near a surface the trace passes
+    /// as a share of how far along it is, so a shadow is soft where what casts it is far and hard
+    /// where it meets what it falls on. Past the map's reach, beyond its last cascade, the ground
+    /// is still shadowed where the map draws nothing, and within it the map's shadows keep their
+    /// edges; everywhere, the two darken a surface together.
+    /// </para>
+    /// <para>
+    /// Bevy's lighting takes no share of a light from outside, so the light Bevy gave a surface is
+    /// worked out again from the camera's G-buffer as Bevy works it out, and taken back over the
+    /// camera's lit picture before anything transparent is drawn over it. That needs the
+    /// G-buffer, so the camera the field lies around draws Bevy's materials deferred while the
+    /// shadows are on, which turns on <see cref="SetDeferredRendering"/> for every camera with a
+    /// prepass. A material's clearcoat and anisotropy, Bevy's atmosphere and a light texture are not
+    /// worked out again, so where a surface has them the light taken back differs by as much.
+    /// </para>
+    /// </remarks>
+    /// <param name="shadows">Where the field darkens a directional light.</param>
+    /// <exception cref="InvalidOperationException">No app is running.</exception>
+    public static void SetSceneFieldShadows(FieldShadows shadows)
+    {
+        if (App.Running is null)
+            throw new InvalidOperationException("The scene's distance field belongs to an app, and none is running.");
+
+        SceneField.AskShadows(shadows);
+    }
+
+    /// <summary>
+    /// Draws the scene's distance field in an ImGui window of its own, what it is built from and
+    /// a slice across one of its cascades, with its settings to change while it is looked at.
+    /// Call it every frame the window is to be up, inside a system, with ImGui running
+    /// (<see cref="Config.Gui"/>).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The window says what <c>gi.state</c> says, sets the cascades, the finest's cells and the
+    /// budget as <see cref="SetSceneField"/> does and the contact shadows as
+    /// <see cref="SetSceneFieldShadows"/> does, and draws a slice across X, Y or Z of a cascade,
+    /// through the eye unless a cell is chosen, four pixels a cell, each pixel reading the field
+    /// between the cells around it. A point inside a mesh is red, the deeper the darker, one outside
+    /// is gray, lighter the farther it is, in bands a cell apart, and one within a sixth of a cell
+    /// of a surface is black, so the meshes' outlines read as lines and a gap the field closes shows
+    /// where it does.
+    /// </para>
+    /// <para>
+    /// Seen across Y the slice is from above, X to the right and Z down, so minus Z is up, and
+    /// across X or Z from the side, up being up.
+    /// </para>
+    /// </remarks>
+    public static void DrawSceneFieldWindow() => SceneField.DrawWindow();
 }

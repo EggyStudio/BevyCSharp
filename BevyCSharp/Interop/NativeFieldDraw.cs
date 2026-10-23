@@ -40,7 +40,7 @@ internal unsafe struct NativeFieldDraw
 }
 
 /// <summary>The bridge's <c>BcsFieldEye</c>, the camera the scene's distance field lies around.</summary>
-[StructLayout(LayoutKind.Explicit, Size = 32)]
+[StructLayout(LayoutKind.Explicit, Size = 40)]
 internal struct NativeFieldEye
 {
     /// <summary>Where it is, X.</summary>
@@ -63,4 +63,7 @@ internal struct NativeFieldEye
 
     /// <summary>The way it faces, Z.</summary>
     [FieldOffset(24)] public float ForwardZ;
+
+    /// <summary>The camera's entity, its bits, which the field's contact shadows are drawn on.</summary>
+    [FieldOffset(32)] public ulong Camera;
 }

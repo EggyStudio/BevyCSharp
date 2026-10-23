@@ -29,19 +29,29 @@ namespace Bevy;
 /// meanwhile, so no cascade is taken as built that was not.
 /// </para>
 /// </remarks>
-internal static unsafe class SceneField
+internal static unsafe partial class SceneField
 {
     /// <summary>The distance a cell holds before its cascade is built, which reads as nothing near, in world units.</summary>
     internal const float Far = 10000f;
 
+    /// <summary>How far toward a light a surface is traced for its contact shadows, in cells of the finest cascade, as 3DEngine traces it.</summary>
+    internal const int ContactCells = 32;
+
     // What the program asked for, and the app it asked in, so a new app starts with none.
-    private static App? _askedIn;
+    private static App? _askedIn, _shadowsAskedIn;
     private static (int Cascades, float CellSize, int Budget) _asked;
+    private static FieldShadows _shadowsAsked;
 
     // What the running app's field is made of, made again for a new app or new settings.
     private static App? _app;
     private static Built? _built;
-    private static ShaderInstance _splat, _resolve, _stamp;
+    private static ShaderInstance _splat, _resolve, _stamp, _shadows;
+    // The camera the contact shadows are drawn on and what they were drawn with, so they are set on
+    // a camera once and taken off it when they stop or the field turns to another.
+    private static Entity _shadowCamera = Entity.None;
+    private static (AssetHandle Field, FieldShadows Shadows, float Reach) _shadowsDrawn;
+    // Whether the shadows gave their camera Bevy's high dynamic range, which they take off it again.
+    private static bool _shadowsMadeHdr;
     private static NativeFieldDraw[] _draws = new NativeFieldDraw[256];
     private static readonly List<(SceneFieldPlan.Instance Instance, bool Skinned)> Drawn = [];
     private static readonly HashSet<SceneFieldPlan.Instance> Once = new(SceneFieldPlan.Comparer);
@@ -66,6 +76,17 @@ internal static unsafe class SceneField
         _asked = (cascades, cellSize, budget);
     }
 
+    /// <summary>Takes where the program asks the field to darken a directional light, for the running app.</summary>
+    internal static void AskShadows(FieldShadows shadows)
+    {
+        _shadowsAskedIn = App.Running;
+        _shadowsAsked = shadows;
+    }
+
+    /// <summary>Where the running app asked the field to darken a directional light, past the shadow map by default.</summary>
+    internal static FieldShadows Shadows =>
+        App.Running is { } running && ReferenceEquals(_shadowsAskedIn, running) ? _shadowsAsked : FieldShadows.PastShadowMap;
+
     /// <summary>The settings asked for in the running app, none where it asked for none.</summary>
     internal static (int Cascades, float CellSize, int Budget) Asked =>
         App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1);
@@ -78,6 +99,9 @@ internal static unsafe class SceneField
 
     /// <summary>The buffer holding one <c>bcs_field::Info</c>, where each cascade lies, or none where no field is built.</summary>
     internal static AssetHandle InfoBuffer => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Info : AssetHandle.None;
+
+    /// <summary>The camera the contact shadows are drawn on, or none.</summary>
+    internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
 
     /// <summary>How many cascades the last frame built.</summary>
     internal static int BuiltLastFrame => ReferenceEquals(_app, App.Running) ? _built?.BuiltThisFrame ?? 0 : 0;
@@ -116,13 +140,15 @@ internal static unsafe class SceneField
         if (!ReferenceEquals(App.Running, _app))
         {
             _app = App.Running;
-            (_built, _splat, _resolve, _stamp) = (null, default, default, default);
+            (_built, _splat, _resolve, _stamp, _shadows, _slice) = (null, default, default, default, default, default);
+            (_shadowCamera, _shadowsDrawn, _shadowsMadeHdr, _sliceImage) = (Entity.None, default, false, AssetHandle.None);
         }
 
+        var ecs = world.Resource<EcsWorld>();
         var asked = Asked;
         if (asked.Cascades <= 0)
         {
-            Release();
+            Release(ecs);
             return;
         }
 
@@ -132,6 +158,8 @@ internal static unsafe class SceneField
             _splat = Program("field_splat.slang");
             _resolve = Program("field_resolve.slang");
             _stamp = Program("field_stamp.slang");
+            _shadows = Draw("field_shadows.slang");
+            _slice = Program("field_slice.slang");
         }
 
         // Nothing is planned or built until the three have compiled.
@@ -141,7 +169,7 @@ internal static unsafe class SceneField
 
         if (_built is null || _built.Made != wanted)
         {
-            Release();
+            Release(ecs);
             _built = Make(wanted);
         }
 
@@ -157,16 +185,76 @@ internal static unsafe class SceneField
 
         if (plan.Builds.Count > 0) Build(built, plan);
         if (plan.Bricks.Count > 0) Stamp(built, plan);
+        DrawShadows(ecs, built, seen.Camera);
+    }
+
+    /// <summary>
+    /// Puts the contact shadows on the camera the field lies around, with the G-buffer they read
+    /// and a picture in high dynamic range, or takes them off the camera they were on, where they
+    /// stop or the field turns to another, changing the camera only when one of those changes.
+    /// </summary>
+    /// <remarks>
+    /// The light taken back is added as less than nothing, which a picture of eight bits a channel
+    /// clamps to nothing before it is added, so the camera draws in floats while the shadows are on
+    /// it, Bevy's <c>Hdr</c> given it where it had none and taken away again after.
+    /// </remarks>
+    private static void DrawShadows(EcsWorld ecs, Built? built, Entity camera)
+    {
+        var shadows = built is null ? FieldShadows.Off : Shadows;
+        if (_shadows.IsValid && _shadows.Program.State != ShaderProgramState.Ready) shadows = FieldShadows.Off;
+        var on = shadows != FieldShadows.Off && !camera.IsNone;
+        var wanted = on ? (built!.Field, shadows, ContactCells * built.Plan.CellSize) : default;
+        if (on && camera == _shadowCamera && wanted == _shadowsDrawn) return;
+
+        if (!_shadowCamera.IsNone && (!on || camera != _shadowCamera))
+        {
+            Shaders.SetEngineViewDraws(_shadowCamera);
+            Shaders.SetEnginePrepass(_shadowCamera, 0);
+            if (_shadowsMadeHdr && ecs.IsAlive(_shadowCamera)) ecs.RemoveReflected(_shadowCamera, Bevy.Reflected.HdrRef.TypePath);
+            (_shadowCamera, _shadowsMadeHdr) = (Entity.None, false);
+        }
+
+        _shadowsDrawn = wanted;
+        if (!on) return;
+
+        _shadows.SetTexture("scene_field", built!.Field).SetBuffer("scene_field_info", built.Info)
+            .SetSampler("scene_field_sampler", SamplerSettings.Clamped)
+            .Set("shadows", new Vector4(shadows == FieldShadows.Everywhere ? 1f : 0f, wanted.Item3, 0f, 0f));
+
+        // Depth and the G-buffer, which the light taken back is worked out from.
+        Shaders.SetEnginePrepass(camera, 1u | 8u);
+        if (camera != _shadowCamera && ecs.Get<Bevy.Reflected.HdrRef>(camera) is null)
+        {
+            ecs.Insert<Bevy.Reflected.HdrRef>(camera);
+            _shadowsMadeHdr = true;
+        }
+        Shaders.SetEngineViewDraws(camera, ViewDraw.Fixed(_shadows, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
+        _shadowCamera = camera;
     }
 
     /// <summary>An instance of one of the field's compute programs, compiled from the library's own copy.</summary>
-    private static ShaderInstance Program(string file)
+    // Named by its file, so its GPU time reads as shader field_splat and the like.
+    private static ShaderInstance Program(string file) =>
+        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) } }));
+
+    /// <summary>An instance of one of the field's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
+    private static ShaderInstance Draw(string file)
+    {
+        var source = Kernel(file);
+        return Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
+        {
+            DrawVertex = new ShaderStage(file, "vertex") { Source = source },
+            DrawFragment = new ShaderStage(file, "fragment") { Source = source },
+        }));
+    }
+
+    /// <summary>One of the field's Slang files, as the library carries it.</summary>
+    private static string Kernel(string file)
     {
         using var stream = typeof(SceneField).Assembly.GetManifestResourceStream("Bevy.Kernels." + file)
             ?? throw new InvalidOperationException($"The library carries no {file}, which the scene's distance field is built with.");
         using var reader = new StreamReader(stream);
-        // Named by its file, so its GPU time reads as shader field_splat and the like.
-        return Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = reader.ReadToEnd() } }));
+        return reader.ReadToEnd();
     }
 
     /// <summary>Makes the field's images and buffers for its settings, every cell far and every word cleared.</summary>
@@ -200,10 +288,11 @@ internal static unsafe class SceneField
         return built;
     }
 
-    /// <summary>Lets the field's images and buffers go, on a frame it is off or made again.</summary>
-    private static void Release()
+    /// <summary>Lets the field's images and buffers go, on a frame it is off or made again, and its shadows off their camera.</summary>
+    private static void Release(EcsWorld ecs)
     {
         if (_built is not { } built) return;
+        DrawShadows(ecs, null, Entity.None);
         foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Info, built.Cells, built.Behind, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
@@ -214,7 +303,7 @@ internal static unsafe class SceneField
     /// <paramref name="once"/> asks, and the camera the field lies around, or null where there is
     /// none.
     /// </summary>
-    private static (Vector3 Position, Vector3 Forward)? Gather(bool once)
+    private static (Vector3 Position, Vector3 Forward, Entity Camera)? Gather(bool once)
     {
         NativeFieldEye eye;
         int count;
@@ -246,7 +335,7 @@ internal static unsafe class SceneField
 
         if (eye.Found == 0) return null;
         var forward = new Vector3(eye.ForwardX, eye.ForwardY, eye.ForwardZ);
-        return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero);
+        return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero, new Entity(eye.Camera));
     }
 
     /// <summary>The bytes of one <c>bcs_field::Info</c>, a float4, eight cascades' float4 and the eye's.</summary>

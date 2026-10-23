@@ -33,7 +33,8 @@ public sealed class SceneFieldTests
         Assert.Equal(128, Marshal.SizeOf<NativeFieldDraw>());
         Assert.Equal(12, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.Found)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.ForwardX)).ToInt32());
-        Assert.Equal(32, Marshal.SizeOf<NativeFieldEye>());
+        Assert.Equal(32, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.Camera)).ToInt32());
+        Assert.Equal(40, Marshal.SizeOf<NativeFieldEye>());
     }
 
     [Fact]

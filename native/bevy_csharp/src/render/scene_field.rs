@@ -56,8 +56,10 @@ pub struct BcsFieldEye {
     pub found: u32,
     /// The way it faces, a length of one.
     pub forward: [f32; 3],
-    /// Nothing, so the struct is a whole number of sixteen bytes.
-    pub _end: u32,
+    /// Nothing, so the camera starts on eight bytes.
+    pub _pad: u32,
+    /// The camera's entity, its bits, which the field's contact shadows are drawn on.
+    pub camera: u64,
 }
 
 /// Writes the meshes drawn this frame that cast shadows to `out`, as many as `capacity` holds,
@@ -257,10 +259,11 @@ mod built {
         use bevy::transform::components::GlobalTransform;
 
         let mut eye = BcsFieldEye::default();
-        if let Some((_, place, forward, _)) = crate::render::scene_counts::view_camera(world) {
+        if let Some((camera, place, forward, _)) = crate::render::scene_counts::view_camera(world) {
             eye.position = place.to_array();
             eye.forward = forward.to_array();
             eye.found = 1;
+            eye.camera = camera.to_bits();
         }
 
         world.init_resource::<FieldMeshes>();
@@ -556,7 +559,8 @@ mod tests {
         assert_eq!(std::mem::size_of::<BcsFieldDraw>(), 128);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, found), 12);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, forward), 16);
-        assert_eq!(std::mem::size_of::<BcsFieldEye>(), 32);
+        assert_eq!(std::mem::offset_of!(BcsFieldEye, camera), 32);
+        assert_eq!(std::mem::size_of::<BcsFieldEye>(), 40);
     }
 
     /// A quad of two triangles is open at its four sides and closed along its diagonal, whether

@@ -198,6 +198,33 @@ a machine with `slangc` fills the shader cache a shipped game reads. The debug o
 lines say how many cascades are built and what it holds, and `./bcs command gi.state` says where
 each cascade lies, what the frame built and stamped, and the memory it takes.
 
+The field darkens the sun's light too, each directional light's, where it closes a surface off from
+the light, traced toward the light from a cell and a half out and softened by how near a surface the
+trace passes, so a shadow is soft where what casts it is far and hard at its foot:
+
+```csharp
+Render.SetSceneFieldShadows(FieldShadows.PastShadowMap);   // the default, or Everywhere or Off
+```
+
+Past the shadow map's reach alone, by default, the ground beyond the map's last cascade is still
+shadowed and the map's own shadows keep their edges, and everywhere the two darken a surface
+together. Bevy's lighting takes no share of a light from outside, so the light Bevy gave a surface
+is worked out again from the camera's G-buffer as Bevy works it out and taken back from the lit
+picture before anything transparent is drawn. That needs the G-buffer and a picture in high dynamic
+range, so while the shadows are on the camera the field lies around draws Bevy's materials deferred
+and keeps its picture in floats. A surface's clearcoat and anisotropy, Bevy's atmosphere and a
+light's texture are not worked out again, so where a surface has them the light taken back differs.
+
+`Render.DrawSceneFieldWindow()`, called each frame inside a system while ImGui runs, draws the field
+in a window of its own, with its settings, the contact shadows, a slice across X, Y or Z of a cascade
+through the eye or a chosen cell, and what `gi.state` says. In the slice a point inside a mesh is
+red, its surface black, and the open space gray in bands a cell apart, so a wall, a gap the field
+closes and a mesh left out all show. The feature test's debug page turns it on, here at its gallery
+seen from above in the second cascade, the Cornell box at the top and the wall of spheres beside
+it:
+
+![The scene field's window at the feature test's gallery](../.github/assets/scene-field.webp)
+
 ---
 
 Before this, [Reflections and the sky](sky-and-reflections.md).

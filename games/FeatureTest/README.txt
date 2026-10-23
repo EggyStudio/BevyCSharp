@@ -60,6 +60,7 @@ through what you typed before. A few to start with:
   day.hour 22              the hour of the day
   setting                  every setting's name, and "setting <name> <value>" changes one
   memory                   what the program holds
+  feature.field on         the scene's distance field and its window, as the debug page's row
 
 When something goes wrong
 -------------------------

@@ -133,12 +133,50 @@ public static unsafe partial class Shaders
         bool motion = false,
         bool deferred = false,
         bool previous = false,
-        bool pyramid = false) =>
+        bool pyramid = false)
+    {
+        ForgetOtherApps();
+        ProgramPrepasses[camera.Bits] = (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u) | (deferred ? 8u : 0u)
+            | (previous ? 16u : 0u) | (pyramid ? 32u : 0u);
+        SubmitPrepass(camera);
+    }
+
+    // What the program asked of each camera's prepass and its draws, and what the engine asks
+    // beside them, for the scene's distance field's contact shadows, by the camera's bits. The
+    // bridge takes a camera's whole prepass and whole list of draws at once, so the engine's are
+    // kept apart and handed over with the program's, and neither one's call takes the other's away.
+    private static App? _viewsApp;
+    private static readonly Dictionary<ulong, uint> ProgramPrepasses = [], EnginePrepasses = [];
+    private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [], EngineDraws = [];
+
+    // What a camera of an app before this one asked for, which names no camera of this one.
+    private static void ForgetOtherApps()
+    {
+        if (ReferenceEquals(_viewsApp, App.Running)) return;
+        _viewsApp = App.Running;
+        ProgramPrepasses.Clear();
+        EnginePrepasses.Clear();
+        ProgramDraws.Clear();
+        EngineDraws.Clear();
+    }
+
+    /// <summary>
+    /// Asks a camera for the parts of a prepass the engine needs beside what the program asked,
+    /// none taking the engine's away. Only valid inside a system.
+    /// </summary>
+    /// <param name="camera">The camera.</param>
+    /// <param name="flags">The bits <see cref="SetPrepass"/> makes of its parts, depth one, normals two, motion four and the G-buffer eight.</param>
+    internal static void SetEnginePrepass(Entity camera, uint flags)
+    {
+        ForgetOtherApps();
+        if (flags == 0) EnginePrepasses.Remove(camera.Bits);
+        else EnginePrepasses[camera.Bits] = flags;
+        SubmitPrepass(camera);
+    }
+
+    private static void SubmitPrepass(Entity camera) =>
         Native.Check(
-            Native.bcs_render_set_prepass(
-                camera.Bits,
-                (depth ? 1u : 0u) | (normals ? 2u : 0u) | (motion ? 4u : 0u) | (deferred ? 8u : 0u)
-                    | (previous ? 16u : 0u) | (pyramid ? 32u : 0u)),
+            Native.bcs_render_set_prepass(camera.Bits, ProgramPrepasses.GetValueOrDefault(camera.Bits) | EnginePrepasses.GetValueOrDefault(camera.Bits)),
             "asking a camera for a prepass");
 
     /// <summary>
@@ -518,6 +556,46 @@ public static unsafe partial class Shaders
     {
         ArgumentNullException.ThrowIfNull(draws);
 
+        // Refused before it is kept, so a list the bridge would refuse never stands in front of the
+        // engine's draws on the camera.
+        for (var i = 0; i < draws.Length; i++)
+        {
+            if (!draws[i].Instance.IsValid)
+            {
+                throw new ArgumentException(
+                    $"Draw {i} has no instance. Make one with Shaders.CreateInstance.",
+                    nameof(draws));
+            }
+
+            if (draws[i].Into is not null && draws[i].Targets is not null)
+            {
+                throw new ArgumentException(
+                    $"Draw {i} names both Into and Targets. Into is one image, Targets several.",
+                    nameof(draws));
+            }
+        }
+
+        ForgetOtherApps();
+        ProgramDraws[camera.Bits] = [.. draws];
+        SubmitDraws(camera);
+    }
+
+    /// <summary>
+    /// Replaces the draws the engine adds to a camera beside the program's own, which run first at
+    /// each frame point, none taking the program's away. Only valid inside a system.
+    /// </summary>
+    internal static void SetEngineViewDraws(Entity camera, params ViewDraw[] draws)
+    {
+        ForgetOtherApps();
+        if (draws.Length == 0) EngineDraws.Remove(camera.Bits);
+        else EngineDraws[camera.Bits] = draws;
+        SubmitDraws(camera);
+    }
+
+    // Hands the bridge a camera's draws, the engine's and then the program's.
+    private static void SubmitDraws(Entity camera)
+    {
+        ViewDraw[] draws = [.. EngineDraws.GetValueOrDefault(camera.Bits) ?? [], .. ProgramDraws.GetValueOrDefault(camera.Bits) ?? []];
         var native = new NativeViewDraw[draws.Length];
         var strings = new List<IntPtr>();
 
@@ -526,22 +604,7 @@ public static unsafe partial class Shaders
             for (var i = 0; i < draws.Length; i++)
             {
                 var draw = draws[i];
-
-                if (!draw.Instance.IsValid)
-                {
-                    throw new ArgumentException(
-                        $"Draw {i} has no instance. Make one with Shaders.CreateInstance.",
-                        nameof(draws));
-                }
-
                 var target = IntPtr.Zero;
-
-                if (draw.Into is not null && draw.Targets is not null)
-                {
-                    throw new ArgumentException(
-                        $"Draw {i} names both Into and Targets. Into is one image, Targets several.",
-                        nameof(draws));
-                }
 
                 // One name to a line, which is how the bridge reads several.
                 var names = draw.Targets is { } several ? string.Join('\n', several) : draw.Into;

@@ -41,6 +41,7 @@ public partial struct Interface
 
         ImGuiRuntime.Begin(ctx);
         Panel.Draw(ctx);
+        Field.Draw();
         if (Ui.BeginHidden()) Player.DrawMode(ctx);
         Ui.EndHidden();
         ImGuiConsole.Draw(ctx);

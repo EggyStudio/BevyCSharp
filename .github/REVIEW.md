@@ -10,29 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `135e43b5`, item 55, the README's Swarm capture gone, after `ba8111fb`, item 45
-cherry-picked from `4659b331` with its tree identical, and `33edc8a3`, item 44 cherry-picked from
-`1f79ec4a`, all with the owner's identity, and nothing else, the review's files uncommitted in the
-local coder's tree; a first form of the batch had carried the GIF's deletion inside item 44's commit
-and was taken apart before any push. Pushed at 20:46 on 2026-10-23, the build run of `4f80c464`
-having ended green; their own build run green on the three systems within twenty minutes, read at
-21:07. The local coder's batch goes on, the captures of items 43 and 44 in one commit, then item
-50's field, a NormTests failure on a new bridge entry point under mending there first. Next item 50,
-then 54's readings; items 51 and 52 wait as before. At 19:35 on 2026-10-23 the owner's cloud session
-on this engine took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes from
-item 49 to 50 and 54, cherry-picking the branch as the first part of a batch when the reviewer says
-so. At 20:00 the cloud session's first commit of item 43, `01b89b59` on its branch, was read and
-accepted, and at 20:10 its second, `c0e6c111`, both to be cherry-picked in order by the local coder
-as the first part of item 50's batch with their authors reset and the capture taken. At 20:43 the
-cloud session's item 45, `4659b331` on its branch `modeling-operations` under the owner's identity,
-was read and accepted, to be cherry-picked with item 50's batch, its first commit `ba8a5324` skipped
-as item 44's twin; the cloud session takes item 54's node next.
+Reviewed up to `cc4245da`, item 50's first commit, the scene's distance field, after `cd05d9a2`, the
+captures of items 43 and 44 read from the device's pictures as tests, and nothing else, carrying the
+review's files, COMMITS.md's pushes, author and branch rules and the Shared line for 3DEngine: the
+field built on the GPU around the camera in up to eight cascades from the meshes that cast shadows,
+by 3DEngine's plan and kernels over a pool of triangles the bridge keeps, set by
+`Render.SetSceneField` and `field.set` and said by gi.state; departures taken, the kernels holding
+distances alone with the paint, faces, emission and lent light coming with item 51, 3DEngine's parts
+not taken so a moving or skinned mesh is stamped as its whole box, a box following its mesh a frame
+behind, a mesh drawn twice gathered once, a stage from source named by its path in the timings; on
+the RTX 4070 in the feature test 260 meshes, 7.1 MB, a cascade's build 0.55 ms, the tick 0.78 ms
+against 0.17 without in Debug; 1,720 passed and 3 skipped, Cargo's 107 and 186, the three profiles
+clean here and on Windows and macOS, the lock unchanged, NormTests clean. Pushed at 21:23 on
+2026-10-23, the build run of `135e43b5` having ended green; its own build run green on the three
+systems within seventeen minutes, read at 21:43. At 21:31 the owner asked why Slang here needs the
+`bcs_*::` prefix and said yes to dropping it, item 56 and Decision 56. Next item 50's second commit,
+the field's view, the slices window and the contact shadows, then 56, then 54's readings. At 19:35
+on 2026-10-23 the owner's cloud session on this engine took items 43, 44 and 45 on its branch,
+Decision 53, so the local coder goes from item 49 to 50 and 54, cherry-picking the branch as the
+first part of a batch when the reviewer says so. At 20:00 the cloud session's first commit of item
+43, `01b89b59` on its branch, was read and accepted, and at 20:10 its second, `c0e6c111`, both to be
+cherry-picked in order by the local coder as the first part of item 50's batch with their authors
+reset and the capture taken. At 20:43 the cloud session's item 45, `4659b331` on its branch
+`modeling-operations` under the owner's identity, was read and accepted, to be cherry-picked with
+item 50's batch, its first commit `ba8a5324` skipped as item 44's twin; the cloud session takes item
+54's node next.
+
+Before it, `135e43b5` came, item 55 after the cherry-picks of items 44 and 45, and nothing else.
+Pushed at 20:46 on 2026-10-23, their build run green.
 
 Before it, `4f80c464` came, item 43's two commits cherry-picked from the cloud session's branch, and
 nothing else. Pushed at 20:14 on 2026-10-23, their build run green.
-
-Before it, `e1b08124` came, item 49's second half, and nothing else, carrying the review's files,
-the archive and the N 4.7 exemption. Read and pushed at 19:51 on 2026-10-23, its build run green.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -265,7 +273,7 @@ from [SHARED.md](SHARED.md).
     steps 34 and 48 closed; the headless suite 1,108 passed and 574 skipped, the strict build clean.
     The item's code is whole on the branch; the capture falls to the local coder at the cherry-pick.
     On main at `ae596af8` and `4f80c464`, pushed at 20:14; done but for the capture, which the local
-    coder's next commit carries.
+    coder's next commit carries. Capture done at `cd05d9a2`; item 43 done.
 
 44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The owner
     asked for Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the
@@ -292,7 +300,8 @@ from [SHARED.md](SHARED.md).
     skipped. The capture of a subdivided and beveled shape falls to the local coder at the
     cherry-pick. On main as `33edc8a3` at 20:28 on 2026-10-23, cherry-picked plain with the owner's
     identity before the branch's deletion, the capture with it in the local coder's batch of item
-    50. Pushed at 20:46; the capture follows in the local coder's batch.
+    50. Pushed at 20:46; the capture follows in the local coder's batch. Capture done at `cd05d9a2`;
+    item 44 done.
 
 45. **What is modeled is exported for Blender and imported from it (Decision 46).** The built mesh
     and its materials written as a glTF 2.0 file, a JSON with its buffer beside or embedded,
@@ -400,6 +409,15 @@ from [SHARED.md](SHARED.md).
     and the budget keeping a frame's builds to the cascades asked, with the feature test's gallery
     holding the field's view. Two commits, the field and its builds, then the contact shadows and
     the window. Placed after items 43 to 45, since the field has stood stable in 3DEngine for days.
+    First commit done at `cc4245da` on 2026-10-23, the field and its builds, pushed at 21:23; the
+    view, the slices window and the contact shadows follow. Settled at 21:24 for the second commit:
+    the contact shadows as a draw after the opaque pass blended Add into the HDR picture, taking
+    away the sun's direct light times the field's occlusion past the shadow map's reach by default
+    and everywhere as a setting, Bevy's directional BRDF ported to Slang from the G-buffer and
+    tested against the map's own darkening on the same pixels within its reach, a bound in levels in
+    the commit, rather than a patch to Bevy's shader or a wait for item 51; the gallery holds the
+    slices window drawn through ImGui, no engine-owned draw list for a view over the camera in this
+    item.
 
 51. **Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's surfaces through an
     additive pass (Decision 51).** The world's probes in cascades over the field as 3DEngine traces
@@ -473,6 +491,38 @@ from [SHARED.md](SHARED.md).
     references it; the showcase picture at the very top and Blockout's picture stay, the tools guide
     keeps its own words. One commit, small, with the local coder's next batch. Done at `135e43b5` on
     2026-10-23.
+
+56. **The bridge's Slang modules give their names plainly, as 3DEngine's do, with no `bcs_*::`
+    before them (Decision 56).** The owner asked at 21:31 on 2026-10-23 why a shader here cannot use
+    Slang as in 3DEngine, without the double colon, and said yes to the change. The cause:
+    `bcs_compute`, `bcs_scene`, `bcs_pass`, `bcs_field` and the bridge's other modules wrap their
+    contents in a `public namespace` of the module's name, so every use is qualified,
+    `bcs_compute::element`, `bcs_scene::Instance`, `bcs_pass::uv_of`, where 3DEngine's modules
+    declare their names at the top level and name each helper for what it is, `fieldDistance` rather
+    than `distance`; nothing in Slang or the WGSL it writes asks for the namespaces, and no document
+    records a reason beyond keeping generic names from colliding with a program's own. The mend: the
+    namespaces go, and each helper is named for its module and its work so no plain name collides,
+    `bufferCount`, `bufferElement` and `bufferStore` for the raw buffer's three, `passUv` and its
+    kin for the pass's, the types plain, `Instance`, `Material`, `PoolVertex`, `PoolMesh`,
+    `FieldInfo`, read against 3DEngine's names where the two engines hold the same thing so a shader
+    reads the same in both; the kernels of item 50, the feature test's shaders and every example's
+    shader change with it, the compute and ray tracing guides and docs/shaders.md follow; no
+    upgrading entry, the owner saying at 21:32 that none is needed since nobody uses the engine yet,
+    and this engine having no upgrading page. Tests: the existing shader and compute tests passing
+    with the plain names, and a test that no module declares a namespace. One commit, after item
+    50's second commit and before item 54's readings, by the local coder since the kernels of item
+    50 are in its hands.
+
+58. **The cheat sheet's headers are 3DEngine's, plain group headings and no sub-heading a type
+    (Decision 58).** The owner wrote at 21:39 on 2026-10-23 that the cheat sheets are to be
+    coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's section headers as
+    3DEngine's, plain words without the code styling. Here each group opens with a `##` heading and
+    a guide link, then a `###` sub-heading in code styling for every type, `BevyApp`, `App`,
+    `Config` and the rest, each with its own block, where 3DEngine's page has the group heading and
+    one block. The mend: the sub-headings go, each group one fenced block with its members in the
+    order the types came, a type's members set apart by a blank line inside the block where that
+    helps a reader, the heading words plain; `CheatsheetTests` holds the form as it holds the lines.
+    One commit, small, with the local coder's next batch.
 
 ## Verdicts
 
@@ -949,6 +999,29 @@ Verdicts 33 to 42 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 ar
     43, carry the owner's identity, as item 44's will. The cloud session was told to stop pushing,
     set the identity, rewrite the authors of every local commit not on main and push nothing until
     the owner confirms `modeling-operations` in that session.
+
+56. **Slang reads the same in both engines, plain names and no module prefix.** The owner asked at
+    21:31 on 2026-10-23 why the Slang in BevyCSharp cannot be used as in 3DEngine without `::` and,
+    told that the bridge's modules alone wrap their names in namespaces, said yes to dropping them;
+    so the bridge's modules give their names plainly, each helper named for its work as 3DEngine's
+    are, item 56, and a shader's words are the same in both engines where they hold the same thing.
+
+57. **Until a full release, both engines are used by nobody.** The owner wrote at 21:36 on
+    2026-10-23 that an upgrading entry is not needed since nobody uses the engine, said "Drop" to
+    the rule that every new public name has its line on 3DEngine's upgrading page, and added that
+    until a full release both engines are to be considered used by no one. So a change of the public
+    surface is made outright, with no entry for a name gained or lost, no deprecation and no path
+    kept for an older caller; the package's release notes written from the commit messages are the
+    record of what changed, and the upgrading page this engine never had stays absent, the Shared
+    row's upgrading guide not kept. The owner's word ends this at the full release.
+
+58. **The two cheat sheets have one form.** The owner wrote at 21:39 on 2026-10-23 that the cheat
+    sheets are to be coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's
+    section headers as 3DEngine's, plain words without the code styling. So both pages are a `#
+    Cheatsheet` heading, a paragraph saying what the page is and what writes it, then `## Group`
+    headings in plain words, each group a guide link line and one fenced block, and in the block one
+    line a member, the signature and then `//` and the first sentence of its documentation on the
+    same line however long, no continuation lines and no sub-heading a type.
 
 ## Replies
 
@@ -1443,3 +1516,31 @@ device: a box's distance at every cell within 0.01 and the band's beyond, a tunn
 cell apart clear along its middle, a box moved each frame stamped where it stopped and the cells it
 left at the band, and four cascades built one or two a frame as the budget says. The view of the
 field, the window of its slices and the contact shadows come in the second commit.
+
+Shared: the field's contact shadows and its window, in the commit carrying this line, item 50's
+second commit, for the row of 3DEngine's global illumination. `Render.SetSceneFieldShadows(
+FieldShadows)` takes `PastShadowMap`, the default, `Everywhere` or `Off`, where 3DEngine's
+`ContactShadows` defaults to on everywhere, and `Render.SetContactShadows` here is Bevy's own
+screen-space ones, so the name differs. Each directional light is traced from a cell and a half out
+along its way through the field, 32 finest cells at most, softened by eight times the nearest
+distance over the length run, faded across the field's last band, as ao.slang's `sunReaching`. The
+light it takes back is a draw over the camera at AfterOpaque blended by adding less than nothing,
+from the camera's G-buffer, Bevy's `directional_light` ported to Slang (Burley's diffuse, GGX with
+the correlated Smith visibility, Schlick's Fresnel with the f90 Bevy uses, the multiple scattering
+from the polynomial F_ab, since the DFG table is not bound to a draw), times the shadow map's own
+share, times the view's exposure. Past the map, the map holds a point by its last cascade's far bound
+and its overlap, and the field takes the rest. Clearcoat, anisotropy, the atmosphere and light
+textures are not ported. While the shadows are on, the camera the field lies around draws Bevy's
+materials deferred, its depth and G-buffer asked beside whatever the program asked, and keeps its
+picture in floats, Bevy's `Hdr` given it where it had none and taken off after, since a picture of
+eight bits clamps the light taken back to nothing before the blend. A program's own camera draws and
+prepass stay, the engine's kept apart and handed to the bridge with them. On the RTX 4070, a pillar's
+shadow on the ground under a low sun with no tone mapping differs from the map's own by 1.2 levels on
+average on the pixels both darken, the field covering 73% of the map's shadow, its tip softer than the
+map's, and the lit ground by 0.4; past the map, a picture the map shadows is the same with the field
+on. `Render.DrawSceneFieldWindow()` draws the field's settings, the contact shadows' choice, a slice
+across X, Y or Z of a cascade through the eye or a chosen cell, sampled between cells, red inside,
+black within a sixth of a cell of a surface and gray outside in bands a cell apart, and what
+`gi.state` says, through ImGui; the feature test's debug page and `feature.field on` show it, and
+the guide's capture is its slice at the gallery from above in the second cascade. The bridge's eye
+gains the camera's entity, ABI 302.
