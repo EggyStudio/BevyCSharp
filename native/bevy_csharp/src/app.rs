@@ -98,6 +98,12 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     #[cfg(not(feature = "render"))]
     let drawing = false;
 
+    // Ray-traced lighting and its denoiser said not running before this app decides, whether it
+    // draws or not, since an app with no renderer never reaches the options that add them and the
+    // flags an earlier app of the process left on would answer for it.
+    #[cfg(feature = "solari")]
+    crate::render::solari::forget();
+
     if drawing {
         #[cfg(feature = "render")]
         {

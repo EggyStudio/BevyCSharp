@@ -30,8 +30,12 @@
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
 
+use crate::interop::status;
+
 /// What the denoiser is told, the history's clamp and the widths of the three edge-stopping
-/// weights, at SVGF's defaults.
+/// weights, at SVGF's defaults. Laid out for C as the managed `NativeDenoiserSettings` reads it,
+/// four floats in this order.
+#[repr(C)]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct DenoiserSettings {
     /// How many frames the history holds at most, so new light still weighs a frame of that many.
@@ -43,6 +47,18 @@ pub struct DenoiserSettings {
     pub sigma_normal: f32,
     /// How far a tap's luminance may differ, against the root of the variance, the paper's sigma l.
     pub sigma_luminance: f32,
+}
+
+impl DenoiserSettings {
+    /// Whether every setting is one the filter can use, the history at least a frame and each
+    /// width a finite number above nought, since a width of nought divides a weight by nothing.
+    pub fn usable(&self) -> bool {
+        self.history_limit.is_finite()
+            && self.history_limit >= 1.0
+            && [self.sigma_depth, self.sigma_normal, self.sigma_luminance]
+                .iter()
+                .all(|width| width.is_finite() && *width > 0.0)
+    }
 }
 
 impl Default for DenoiserSettings {
@@ -123,6 +139,47 @@ pub fn forget() {
     set_settings(DenoiserSettings::default());
 }
 
+/// Turns the denoiser on or off, with `on` 1 or 0, and sets what it is told from the next frame,
+/// `settings` where it is given and SVGF's defaults where it is null.
+///
+/// Every setting is applied on every call, so a call without settings puts SVGF's back. The state
+/// is the app's rather than a camera's, as the node's place in the schedule is. Returns
+/// [`status::UNSUPPORTED`] where this app has no node, which a bridge without Solari, an app that
+/// did not ask for ray-traced lighting and an adapter that cannot trace rays never have, and
+/// [`status::NULL_ARG`] for an `on` other than 0 or 1 or settings that are not
+/// [`DenoiserSettings::usable`].
+///
+/// # Safety
+/// `settings` must be null or readable for a [`DenoiserSettings`].
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_set_ray_traced_denoiser(on: i32, settings: *const DenoiserSettings) -> i32 {
+    crate::interop::guard(|| {
+        if !present() {
+            return status::UNSUPPORTED;
+        }
+
+        let settings = if settings.is_null() {
+            DenoiserSettings::default()
+        } else {
+            unsafe { settings.read() }
+        };
+
+        if !(0..=1).contains(&on) || !settings.usable() {
+            return status::NULL_ARG;
+        }
+
+        set_settings(settings);
+        set_enabled(on == 1);
+        status::OK
+    })
+}
+
+/// Whether this app has the denoiser's node and it is on, `1` or `0`.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_ray_traced_denoiser_active() -> i32 {
+    crate::interop::guard(|| (present() && enabled()) as i32)
+}
+
 /// A tap's weight by its depth, normal and luminance differences from the middle's, as the shader's
 /// `weight` works it out.
 ///
@@ -196,6 +253,30 @@ mod tests {
     use super::*;
 
     const CLOSE: f32 = 1e-5;
+
+    #[test]
+    fn the_settings_lie_where_the_managed_side_writes_them() {
+        assert_eq!(std::mem::size_of::<DenoiserSettings>(), 16);
+        assert_eq!(std::mem::offset_of!(DenoiserSettings, sigma_depth), 4);
+        assert_eq!(std::mem::offset_of!(DenoiserSettings, sigma_normal), 8);
+        assert_eq!(std::mem::offset_of!(DenoiserSettings, sigma_luminance), 12);
+    }
+
+    #[test]
+    fn a_history_under_a_frame_or_a_width_of_nought_is_refused() {
+        assert!(DenoiserSettings::default().usable());
+        assert!(!DenoiserSettings { history_limit: 0.5, ..DenoiserSettings::default() }.usable());
+        assert!(!DenoiserSettings { sigma_depth: 0.0, ..DenoiserSettings::default() }.usable());
+        assert!(!DenoiserSettings { sigma_luminance: f32::NAN, ..DenoiserSettings::default() }.usable());
+        assert!(!DenoiserSettings { sigma_normal: f32::INFINITY, ..DenoiserSettings::default() }.usable());
+    }
+
+    #[test]
+    fn a_bridge_without_the_node_refuses_the_setting_and_reports_it_off() {
+        forget();
+        assert_eq!(unsafe { bcs_render_set_ray_traced_denoiser(1, std::ptr::null()) }, status::UNSUPPORTED);
+        assert_eq!(bcs_render_ray_traced_denoiser_active(), 0);
+    }
 
     #[test]
     fn a_tap_like_the_middle_weighs_one_and_one_round_a_corner_nothing() {

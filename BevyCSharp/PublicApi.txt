@@ -1327,6 +1327,12 @@ static class Bevy.Debug
 sealed class Bevy.DefaultPlugins : IPluginGroup
   DefaultPlugins()
   IEnumerable<(IPlugin, int)> GetPlugins()
+sealed class Bevy.DenoiserSettings
+  DenoiserSettings()
+  float DepthWidth { get; set; }
+  float LuminanceWidth { get; set; }
+  float NormalPower { get; set; }
+  int HistoryLimit { get; set; }
 enum Bevy.DepthOfFieldMode : int
   Bokeh = 2
   Gaussian = 1
@@ -12475,6 +12481,7 @@ static class Bevy.Render
   static bool IsDrawn(Entity entity)
   static bool MeshletsActive { get; }
   static bool PipelinesReady()
+  static bool RayTracedDenoiserActive { get; }
   static bool RayTracingActive { get; }
   static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f)
   static bool TryGetBounds(Entity entity, out Vec3 min, out Vec3 max)
@@ -12549,6 +12556,7 @@ static class Bevy.Render
   static void SetPostProcessing(Entity camera, PostSettings settings)
   static void SetProbeCapture(Entity probe, ProbeCaptureSettings? settings)
   static void SetRayTraced(Entity entity, AssetHandle mesh)
+  static void SetRayTracedDenoiser(bool on, DenoiserSettings? settings = null)
   static void SetRayTracedLighting(Entity camera, bool on)
   static void SetReflectionProbe(Entity probe, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Vec3? falloff = null)
   static void SetRoundedCorners(Entity camera, float radius, (float, float, float, float) fill = default)

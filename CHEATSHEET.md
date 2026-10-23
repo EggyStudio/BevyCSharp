@@ -796,6 +796,7 @@ static IReadOnlyList<PassTiming> Timings();                     // How long each
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
 static void SetPathTraced(Entity camera, bool on);              // Draws a camera's picture with Bevy's path tracer, or with on false the usual way again
+static void SetRayTracedDenoiser(bool on, DenoiserSettings? settings = null);  // Turns the bridge's denoiser over ray-traced lighting on or off, and sets what it filters by, the defaults of DenoiserSettings where settings is not given
 static void SetRayTraced(Entity entity, AssetHandle mesh);      // Makes an entity's mesh one the rays of ray-traced lighting meet
 static void CountDrawnMeshes(bool on);                          // Starts or stops reading back how many meshes the opaque pass draws, which DrawnMeshes then answers
 static DrawnMeshCount DrawnMeshes(out uint drawn);              // How many meshes the opaque pass drew in a recent frame, while CountDrawnMeshes is on

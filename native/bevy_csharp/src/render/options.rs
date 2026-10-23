@@ -28,10 +28,8 @@ pub(crate) fn install(
     }
 
     // Ray-traced lighting, likewise asked for and likewise kept out where the adapter
-    // cannot trace rays, since adding it makes every material deferred.
-    #[cfg(feature = "solari")]
-    crate::render::solari::forget();
-
+    // cannot trace rays, since adding it makes every material deferred. Its flags were cleared
+    // as the app began, for an app that does not draw as well as one that does.
     #[cfg(feature = "solari")]
     if config.ray_traced_lighting != 0 {
         let backends = backends.map(|backends| wgpu::Backends::from_bits_truncate(backends.bits()));

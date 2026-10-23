@@ -261,6 +261,16 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_ray_traced(ulong entity, int mesh);
 
+    /// <summary>Turns the bridge's denoiser over ray-traced lighting on or off, with what it filters by.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_ray_traced_denoiser(int on, NativeDenoiserSettings* settings);
+
+    /// <summary>Whether the bridge's denoiser is in this app and on.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_ray_traced_denoiser_active();
+
     /// <summary>Whether Bevy's meshlets are running in this app.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

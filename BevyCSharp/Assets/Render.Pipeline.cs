@@ -108,13 +108,14 @@ public static unsafe partial class Render
     /// rays do their work.
     /// </para>
     /// <para>
-    /// Bevy's ReSTIR is on, which reuses samples between pixels and frames. Bevy leaves it off for
-    /// a denoiser to clean the picture instead, and its denoiser is DLSS's, which the bridge does
-    /// not build, so without ReSTIR the picture stays grainy. On the development machine's laptop
-    /// GPU it halved the noise between frames of a Cornell box for 1.3 ms more of the GPU at 1280
-    /// by 720. Every setting Bevy gives the lighting, ReSTIR, the light samples, the bounces and
-    /// the world cache among them, is on the camera's <c>SolariLightingRef</c>, reached with
-    /// <c>ecs.Wrap&lt;SolariLightingRef&gt;(camera)</c> once this has turned it on.
+    /// The picture is filtered by the bridge's own denoiser, which <see cref="SetRayTracedDenoiser"/>
+    /// turns off and sets, since Bevy's denoiser is DLSS's, which the bridge does not build. Bevy's
+    /// ReSTIR, which reuses samples between pixels and frames, is on as well, where Bevy leaves it
+    /// off for a denoiser, since it leaves the denoiser less noise to take away. On the development
+    /// machine's laptop GPU it halved the noise between frames of a Cornell box for 1.3 ms more of
+    /// the GPU at 1280 by 720. Every setting Bevy gives the lighting, ReSTIR, the light samples,
+    /// the bounces and the world cache among them, is on the camera's <c>SolariLightingRef</c>,
+    /// reached with <c>ecs.Wrap&lt;SolariLightingRef&gt;(camera)</c> once this has turned it on.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">
@@ -152,6 +153,76 @@ public static unsafe partial class Render
         Native.Check(
             Native.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 2 : 0),
             $"setting the path tracer on {camera}");
+
+    /// <summary>
+    /// Whether the bridge's denoiser filters ray-traced lighting, meaning ray-traced lighting is
+    /// running (see <see cref="RayTracingActive"/>) and <see cref="SetRayTracedDenoiser"/> has not
+    /// turned the denoiser off.
+    /// </summary>
+    public static bool RayTracedDenoiserActive => Native.bcs_render_ray_traced_denoiser_active() != 0;
+
+    /// <summary>
+    /// Turns the bridge's denoiser over ray-traced lighting on or off, and sets what it filters by,
+    /// the defaults of <see cref="DenoiserSettings"/> where <paramref name="settings"/> is not given.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Solari leaves its noise to a denoiser, and Bevy's is DLSS Ray Reconstruction, which the
+    /// bridge does not build, so the bridge has one of its own, on wherever ray-traced lighting
+    /// runs. It is spatiotemporal variance-guided filtering. The surface's color and its glow are
+    /// taken off the light, each frame is added to the history the motion vectors carry the pixel
+    /// back to where the surface there is the same one, and what is left is filtered in five
+    /// passes that stop at edges, before the color and the glow are put back. A still view is
+    /// clean within a few frames, and a surface coming out from behind another starts its history
+    /// over rather than taking the other's.
+    /// </para>
+    /// <para>
+    /// It is the app's, for every camera lit by rays, rather than a camera's, and turning it off is
+    /// for a capture of Solari's own picture beside the denoised one. Every setting is applied on
+    /// every call, so a call without settings puts the defaults back. A camera drawn by the path
+    /// tracer is not filtered, since its picture clears up on its own. Valid once the app is made,
+    /// inside a system or out of one.
+    /// </para>
+    /// </remarks>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// The history is under one frame, or a width or the power is not a finite number above zero.
+    /// </exception>
+    /// <exception cref="BevyNativeException">
+    /// Ray-traced lighting is not running (see <see cref="RayTracingActive"/>), so there is no
+    /// denoiser.
+    /// </exception>
+    public static void SetRayTracedDenoiser(bool on, DenoiserSettings? settings = null)
+    {
+        settings ??= new DenoiserSettings();
+
+        // Caught here rather than on the far side, where the only answer the bridge can give is a
+        // status code. A width of nought would divide a weight by nothing.
+        ArgumentOutOfRangeException.ThrowIfLessThan(settings.HistoryLimit, 1, nameof(settings));
+        Positive(settings.DepthWidth, nameof(DenoiserSettings.DepthWidth));
+        Positive(settings.NormalPower, nameof(DenoiserSettings.NormalPower));
+        Positive(settings.LuminanceWidth, nameof(DenoiserSettings.LuminanceWidth));
+
+        var native = new NativeDenoiserSettings
+        {
+            HistoryLimit = settings.HistoryLimit,
+            SigmaDepth = settings.DepthWidth,
+            SigmaNormal = settings.NormalPower,
+            SigmaLuminance = settings.LuminanceWidth,
+        };
+
+        Native.Check(
+            Native.bcs_render_set_ray_traced_denoiser(on ? 1 : 0, &native),
+            on ? "turning the ray-traced denoiser on" : "turning the ray-traced denoiser off");
+
+        static void Positive(float value, string name)
+        {
+            if (!float.IsFinite(value) || value <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(settings), value, $"the denoiser's {name} is {value}, which is not a finite number above zero");
+            }
+        }
+    }
 
     /// <summary>
     /// Makes an entity's mesh one the rays of ray-traced lighting meet. Only valid inside a system.

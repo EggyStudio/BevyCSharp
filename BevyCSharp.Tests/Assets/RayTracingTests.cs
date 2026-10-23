@@ -33,7 +33,7 @@ public sealed class RayTracingTests
 
     /// <summary>
     /// A camera given ray-traced lighting has Bevy's ReSTIR on, which Bevy leaves off for a
-    /// denoiser the bridge does not build, so its picture is not left grainy.
+    /// denoiser, so the bridge's own denoiser is left less noise to take away.
     /// </summary>
     [SkippableFact]
     public void RayTracedLightingReusesItsSamples()
@@ -58,6 +58,72 @@ public sealed class RayTracingTests
         Needs.RayTracing(restir is not null);
 
         Assert.True(restir, "the camera traced rays with ReSTIR off");
+    }
+
+    /// <summary>
+    /// An app with no ray-traced lighting, which a headless bridge never has, has no denoiser, says
+    /// so, and refuses to have it turned on rather than pretending.
+    /// </summary>
+    [Fact]
+    public void AnAppWithoutRayTracedLightingHasNoDenoiser()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Update, _ =>
+        {
+            Assert.False(Render.RayTracedDenoiserActive);
+
+            var refused = Assert.Throws<BevyNativeException>(() => Render.SetRayTracedDenoiser(true));
+            Assert.Equal(NativeStatus.Unsupported, refused.Status);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>
+    /// Settings the filter cannot use, a history under a frame or a width of nought, are refused
+    /// before they reach the bridge, which needs no ray tracing to see.
+    /// </summary>
+    [Fact]
+    public void DenoiserSettingsItCannotUseAreRefused()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRayTracedDenoiser(true, new DenoiserSettings { HistoryLimit = 0 }));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRayTracedDenoiser(true, new DenoiserSettings { DepthWidth = 0f }));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRayTracedDenoiser(true, new DenoiserSettings { NormalPower = float.NaN }));
+        Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetRayTracedDenoiser(true, new DenoiserSettings { LuminanceWidth = -1f }));
+    }
+
+    /// <summary>
+    /// Where ray-traced lighting runs, the denoiser is on without being asked, and is turned off and
+    /// on again.
+    /// </summary>
+    [SkippableFact]
+    public void TheDenoiserIsOnWhereRaysAreTracedAndTurnsOff()
+    {
+        Needs.Renderer();
+
+        bool? first = null, off = null, on = null;
+        var run = new PictureRun
+        {
+            Configure = config => config.RayTracedLighting = true,
+            Scene = _ =>
+            {
+                if (!Render.RayTracingActive) return;
+
+                first = Render.RayTracedDenoiserActive;
+                Render.SetRayTracedDenoiser(false);
+                off = Render.RayTracedDenoiserActive;
+                Render.SetRayTracedDenoiser(true, new DenoiserSettings { HistoryLimit = 8 });
+                on = Render.RayTracedDenoiserActive;
+            },
+        };
+
+        run.Wait(2).Go();
+        Needs.RayTracing(first is not null);
+
+        Assert.True(first, "the denoiser was off before it was asked for anything");
+        Assert.False(off, "the denoiser was still on after it was turned off");
+        Assert.True(on, "the denoiser was off after it was turned on again");
     }
 
     /// <summary>

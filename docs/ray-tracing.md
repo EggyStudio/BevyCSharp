@@ -31,11 +31,35 @@ tangents where it has none, so the entity keeps drawing it as before and the ray
 triangles the picture shows. A mesh with no texture coordinates, as a model drawn in plain colors
 often is, is given coordinates of zero, so every mesh of a loaded model can be handed over.
 
-Bevy's ReSTIR, which reuses samples between pixels and frames, is on. Bevy leaves it off for a
-denoiser to clean the picture instead, and its denoiser is DLSS's, which the bridge does not build,
-so without ReSTIR the picture stays grainy. With it the noise between frames halves, for about a
-millisecond more of a laptop's GPU at 720p. Bevy's other settings for it, the light samples, the
-bounces and the world cache, are fields of the camera's `SolariLightingRef`:
+The rays leave the light grainy, a few samples a pixel each frame, and the bridge filters the grain
+away with a denoiser of its own, on wherever the lighting runs, since Bevy's denoiser is DLSS's,
+which the bridge does not build. It is spatiotemporal variance-guided filtering. Each frame is
+added to the pixel's history where the surface there is the same one, and what noise is left is
+filtered in five passes that stop at edges, the surface's color taken off first and put back after,
+so a texture stays sharp. A still view is clean within a few frames. Its four settings start at the
+defaults of the paper that describes it (Schied and others, 2017), the history's clamp in frames and
+how far a neighboring pixel may differ in depth, in the way it faces and in brightness before the
+filter stops taking from it:
+
+<!-- compiled with:
+-->
+```csharp
+Render.SetRayTracedDenoiser(true, new DenoiserSettings
+{
+    HistoryLimit = 16,                            // follows a changing light sooner, a little grainier
+    DepthWidth = 1f,
+    NormalPower = 128f,
+    LuminanceWidth = 4f,
+});
+Render.SetRayTracedDenoiser(false);               // Solari's own picture, for a capture beside
+```
+
+`Render.RayTracedDenoiserActive` says whether it is filtering. Bevy's ReSTIR, which reuses samples
+between pixels and frames, is on as well, where Bevy leaves it off for a denoiser, since it leaves
+the denoiser less noise to take away. Measured before the denoiser, it halved the noise between
+frames, for about a millisecond more of a laptop's GPU at 720p. Bevy's other settings for the
+lighting, the light samples, the bounces and the world cache, are fields of the camera's
+`SolariLightingRef`:
 
 <!-- compiled with:
 EcsWorld ecs = null!;
@@ -44,7 +68,7 @@ Entity camera = default;
 ```csharp
 var lighting = ecs.Wrap<SolariLightingRef>(camera);
 lighting.MaxBounces = 2;                          // fewer bounces, a cheaper frame
-lighting.Restir = false;                          // the grain back, for a quarter of the rays' time
+lighting.Restir = false;                          // more grain left, for a quarter of the rays' time
 ```
 
 Bevy's path tracer draws a camera's whole picture from rays, following each pixel's light to its

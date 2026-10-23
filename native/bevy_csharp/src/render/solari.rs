@@ -71,10 +71,10 @@ fn keep_layout(bindings: Option<bevy::ecs::system::Res<SceneBindings>>) {
     }
 }
 
-/// Says Solari is not running, before an app decides whether to add it.
+/// Says Solari and the denoiser over it are not running, before an app decides whether to add them.
 ///
-/// Called for every app a process builds, since a flag left on by an earlier app with it would
-/// otherwise answer for a later one without it.
+/// Called for every app a process builds, one with no renderer included, since a flag left on by an
+/// earlier app with it would otherwise answer for a later one without it.
 #[cfg(feature = "solari")]
 pub fn forget() {
     ACTIVE.store(false, std::sync::atomic::Ordering::Relaxed);
@@ -218,7 +218,8 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
 
                 // ReSTIR reuses samples between pixels and frames, and Bevy leaves it off for a
                 // denoiser to clean the picture instead. Bevy's denoiser is DLSS's, which the
-                // bridge does not build, and without one ReSTIR halved the noise between two
+                // bridge does not build, and the bridge's own in `denoiser` is left less noise to
+                // take away with it on. Before that denoiser, ReSTIR halved the noise between two
                 // frames of a Cornell box lit by a panel, for 1.3 ms more of the GPU at 1280 by
                 // 720 on the development machine's laptop GPU.
                 camera.insert((SolariLighting { restir: true, ..SolariLighting::default() }, usage));

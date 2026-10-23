@@ -321,7 +321,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 |---|---|
 | Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `rayTrace` and `visible`, in a bridge built with `--solari` and an app running Solari |
 | An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `raySurfaceAt` shades a hit from. A package's own is a ray scene over a geometry pool (`Shaders.CreateRayScene`), traced with `rayTraceIn`, which needs no Solari |
-| A denoiser over the ray-traced lighting | Has, a node of the bridge's own in the `solari` profile, spatiotemporal variance-guided filtering over Solari's lit result, since Bevy's only denoiser for it is DLSS Ray Reconstruction, which the bridge does not build |
+| A denoiser over the ray-traced lighting | Has, a node of the bridge's own in the `solari` profile, spatiotemporal variance-guided filtering over Solari's lit result, since Bevy's only denoiser for it is DLSS Ray Reconstruction, which the bridge does not build. On wherever the lighting runs, turned off and set by `Render.SetRayTracedDenoiser` |
 
 The route runs around what each tool lacks. Slang writes ray queries only for SPIR-V, and naga's
 SPIR-V reader has no ray query instructions, so a shader of this kind never passes through naga.
