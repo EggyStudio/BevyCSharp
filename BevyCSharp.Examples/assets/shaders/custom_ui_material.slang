@@ -11,7 +11,7 @@ SamplerState material_color_sampler;
 uniform float4 border_color;
 
 [shader("fragment")]
-float4 fragment(bcs_ui::VertexOutput node) : SV_Target
+float4 fragment(UiVertexOutput node) : SV_Target
 {
     let output_color = material_color_texture.Sample(material_color_sampler, node.uv) * color;
 

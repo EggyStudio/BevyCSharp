@@ -6,7 +6,7 @@
 import bcs;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return float4(float(RED), float(GREEN), float(BLUE), 1.0);
 }

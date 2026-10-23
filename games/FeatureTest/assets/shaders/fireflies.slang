@@ -45,15 +45,15 @@ struct Glow
 [shader("vertex")]
 Glow vertex(Corner corner)
 {
-    let fly = flies[bcs::vertex_number(corner.instance_index, corner.vertex_id) / 4];
+    let fly = flies[meshVertexNumber(corner.instance_index, corner.vertex_id) / 4];
 
     // The camera's own right and up, so the square always faces it.
-    let right = bcs::view.world_from_view[0].xyz;
-    let up = bcs::view.world_from_view[1].xyz;
+    let right = meshView.world_from_view[0].xyz;
+    let up = meshView.world_from_view[1].xyz;
     let world = fly.position + (right * corner.offset.x + up * corner.offset.y) * size;
 
     Glow output;
-    output.position = bcs::world_to_clip(world);
+    output.position = meshWorldToClip(world);
     output.uv = corner.uv;
     output.phase = fly.phase;
     return output;
@@ -62,7 +62,7 @@ Glow vertex(Corner corner)
 [shader("fragment")]
 float4 fragment(Glow input) : SV_Target
 {
-    let flicker = 0.6 + 0.4 * sin(bcs::globals.time * flicker_rate + input.phase * 13.0);
+    let flicker = 0.6 + 0.4 * sin(meshGlobals.time * flicker_rate + input.phase * 13.0);
     let strength = pow(saturate(1.0 - distance(input.uv, float2(0.5)) * 2.0), 2.0) * flicker;
 
     return float4(glow.rgb * glow.w * strength, strength);

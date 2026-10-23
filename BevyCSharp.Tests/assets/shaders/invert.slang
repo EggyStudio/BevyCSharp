@@ -5,8 +5,8 @@ import bcs_pass;
 uniform float amount;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let color = bcs_pass::sample(input.uv);
+    let color = passSample(input.uv);
     return float4(lerp(color.rgb, 1.0 - color.rgb, amount), 1.0);
 }

@@ -9,13 +9,13 @@ import bcs_pass;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let size = bcs_pass::picture_size();
+    let size = passPictureSize();
 
     if (id.x >= size.x || id.y >= size.y)
         return;
 
     let pixel = int2(id.xy);
-    let depth_value = bcs_pass::load_depth(pixel);
+    let depth_value = passLoadDepth(pixel);
 
     // Nothing drawn here, marked apart from both lit and shadowed.
     if (depth_value <= 0.0)
@@ -24,7 +24,7 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    let world = bcs_pass::world_position(bcs_pass::uv_of(pixel), depth_value);
-    let normal = bcs_pass::load_normal(pixel);
-    sunlit[pixel] = bcs_pass::directional_shadow(0, world, normal, bcs_pass::view_depth(world));
+    let world = passWorldPosition(passUv(pixel), depth_value);
+    let normal = passLoadNormal(pixel);
+    sunlit[pixel] = passDirectionalShadow(0, world, normal, passViewDepth(world));
 }

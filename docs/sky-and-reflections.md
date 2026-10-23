@@ -261,19 +261,19 @@ void main(uint3 point : SV_DispatchThreadID)
 {
     if (any(point >= grid)) return;
 
-    let world = box_center + bcs_scene::irradiance_point_in_box(point, grid) * box_size;
+    let world = box_center + irradiancePointInBox(point, grid) * box_size;
 
     for (uint side = 0; side < 6; side++)
     {
-        light.Store(bcs_scene::irradiance_texel(point, side, grid), trace(world, side));
+        light.Store(irradianceTexel(point, side, grid), trace(world, side));
     }
 }
 ```
 
 A grid `x` by `y` by `z` points is an image `x` wide, twice `y` high and three times `z` deep, one
-region for each sign of each axis, and `irradiance_texel` finds the texel for a point and a
+region for each sign of each axis, and `irradianceTexel` finds the texel for a point and a
 direction so a shader never deals with that packing. The sides are the way a surface faces, so
-`bcs_scene::POSITIVE_Y` lights a floor. Bevy samples the image filtered, which is why it is
+`IrradiancePositiveY` lights a floor. Bevy samples the image filtered, which is why it is
 `Rgba16Float`, and the shader says so with `[format("rgba16f")]`, since Slang would otherwise assume
 a wider format than the image has. A baked volume can come from a file instead. A camera is refused
 as a probe, since a camera is lit by `SetEnvironmentMap`, and `AssetHandle.None` takes either kind

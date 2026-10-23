@@ -10,33 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d2e6ef81`, item 50's second commit, the contact shadows, the slices window and the
-gallery capture, and nothing else, carrying the review's files and the Shared line: the shadows by
-route (a), `Render.SetSceneFieldShadows` with PastShadowMap, Everywhere and Off since Bevy's own
-screen-space shadows hold the contact name, the camera kept in floats while they are on since an
-8-bit picture clamps a taken-away light to nothing before the blend, Bevy's BRDF ported without
-clearcoat, anisotropy, the atmosphere, light textures and the DFG table, the engine's camera draws
-and prepass kept apart from a program's, the slice sampled between cells, the bridge's eye gaining
-the camera's entity at ABI 302; on the RTX 4070 a pillar's shadow under a low sun 1.2 levels from
-the map's on the pixels both darken with the field covering 73 percent of the map's shadow, the lit
-ground 0.4 levels off, the bounds 4 levels, 60 percent and 1.5; 1,724 passed and 3 skipped, Cargo's
-107 and 186, the three profiles clean here and on Windows and macOS, the lock unchanged, 7 blocks on
-a scratch package. Pushed at 22:20 on 2026-10-23, the build run of `cc4245da` having ended green;
-item 50 done. Next items 56 and 58, then 54's readings. At 19:35 on 2026-10-23 the owner's cloud
-session on this engine took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes
-from item 49 to 50 and 54, cherry-picking the branch as the first part of a batch when the reviewer
-says so. At 20:00 the cloud session's first commit of item 43, `01b89b59` on its branch, was read
-and accepted, and at 20:10 its second, `c0e6c111`, both to be cherry-picked in order by the local
-coder as the first part of item 50's batch with their authors reset and the capture taken. At 20:43
-the cloud session's item 45, `4659b331` on its branch `modeling-operations` under the owner's
-identity, was read and accepted, to be cherry-picked with item 50's batch, its first commit
-`ba8a5324` skipped as item 44's twin; the cloud session takes item 54's node next.
+Reviewed up to `66e2b067`, item 58, the cheat sheet in 3DEngine's form, and nothing else, carrying
+the review's files: a group a plain heading with its guide link and one block, the type sub-headings
+gone, each type's methods under a comment naming it inside the block as the departure, the writer
+and its tests holding the form. Pushed at 22:49 on 2026-10-23, the build run of `d2e6ef81` having
+ended green. Next item 56, then 54's readings. At 19:35 on 2026-10-23 the owner's cloud session on
+this engine took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes from item
+49 to 50 and 54, cherry-picking the branch as the first part of a batch when the reviewer says so.
+At 20:00 the cloud session's first commit of item 43, `01b89b59` on its branch, was read and
+accepted, and at 20:10 its second, `c0e6c111`, both to be cherry-picked in order by the local coder
+as the first part of item 50's batch with their authors reset and the capture taken. At 20:43 the
+cloud session's item 45, `4659b331` on its branch `modeling-operations` under the owner's identity,
+was read and accepted, to be cherry-picked with item 50's batch, its first commit `ba8a5324` skipped
+as item 44's twin; the cloud session takes item 54's node next.
+
+Before it, `d2e6ef81` came, item 50's second commit, the contact shadows and the slices window, and
+nothing else. Pushed at 22:20 on 2026-10-23, its build run green.
 
 Before it, `cc4245da` came, item 50's first commit, the field, after `cd05d9a2`, the captures of
 items 43 and 44, and nothing else. Pushed at 21:23 on 2026-10-23, their build run green.
-
-Before it, `135e43b5` came, item 55 after the cherry-picks of items 44 and 45, and nothing else.
-Pushed at 20:46 on 2026-10-23, their build run green.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -494,7 +486,7 @@ from [SHARED.md](SHARED.md).
     Slang as in 3DEngine, without the double colon, and said yes to the change. The cause:
     `bcs_compute`, `bcs_scene`, `bcs_pass`, `bcs_field` and the bridge's other modules wrap their
     contents in a `public namespace` of the module's name, so every use is qualified,
-    `bcs_compute::element`, `bcs_scene::Instance`, `bcs_pass::uv_of`, where 3DEngine's modules
+    `bufferElement`, `Instance`, `passUv`, where 3DEngine's modules
     declare their names at the top level and name each helper for what it is, `fieldDistance` rather
     than `distance`; nothing in Slang or the WGSL it writes asks for the namespaces, and no document
     records a reason beyond keeping generic names from colliding with a program's own. The mend: the
@@ -519,7 +511,8 @@ from [SHARED.md](SHARED.md).
     one block. The mend: the sub-headings go, each group one fenced block with its members in the
     order the types came, a type's members set apart by a blank line inside the block where that
     helps a reader, the heading words plain; `CheatsheetTests` holds the form as it holds the lines.
-    One commit, small, with the local coder's next batch.
+    One commit, small, with the local coder's next batch. Done at `66e2b067` on 2026-10-23, pushed
+    at 22:49, each type's methods under a comment naming it inside the block.
 
 ## Verdicts
 
@@ -1500,7 +1493,7 @@ meshes a frame's builds read in one buffer, sixteen bytes a corner with its colo
 made again with the meshes asked for where the rest would not fit. The field is built from the
 engine's tick at the frame's start, so a box follows its mesh a frame behind, and nothing is built
 until the three kernels have compiled. `bcs_field.slang`, a module of the bridge, holds the layout
-and 3DEngine's reads of it in this bridge's names, `bcs_field::distance`, `normal`, `hold` and the
+and 3DEngine's reads of it in this bridge's names, `fieldDistance`, `normal`, `hold` and the
 rest. `gi.state` says the lighting, the field's line, each cascade's corner and cell, what the frame
 built and stamped and the GPU memory, `field.set` sets it, and the overlay's renderer lines carry
 `Scene field 4 of 4 cascades built, cells 0.25 m, 128 m across, meshes 260, still 234, boxes 26`
@@ -1541,3 +1534,31 @@ black within a sixth of a cell of a surface and gray outside in bands a cell apa
 `gi.state` says, through ImGui; the feature test's debug page and `feature.field on` show it, and
 the guide's capture is its slice at the gallery from above in the second cascade. The bridge's eye
 gains the camera's entity, ABI 302.
+
+Shared: the Slang modules' plain names, in the commit carrying this line, item 56, for 3DEngine's
+row of the shader language. Every module of the bridge, bcs, bcs2d, bcs_ui, bcs_sprite,
+bcs_compute, bcs_scene, bcs_ray, bcs_field and bcs_pass with its deferred part, drops its public
+namespace, and a shader uses its names plainly after the import, functions in camelCase, types and
+constants in PascalCase and globals in camelCase, as 3DEngine's modules write theirs. Each helper is
+named for its module and its work, the 3D material's `meshView`, `meshGlobals`, `meshTransform`,
+`meshWorldToClip`, `meshLocalToWorld`, `meshStandardVertex`, `meshSurface`, `meshLight`,
+`meshFinish`, `meshLit`, `meshDeferred`, `meshDecals` and `meshIrradiance`, with the types
+`MeshView`, `MeshVertex`, `MeshVertexOutput`, `Surface`, `Deferred`, `Mesh` and `DecalMap`; the 2D
+material's `mesh2d` the same; the interface's `uiView`, `uiTransform`, `UiVertex`; the sprite's
+`spriteSampleFinalColor`, `spriteFinalColor`, `spriteImage` and the flags `SpriteFlipX` and the
+rest; compute's `computeGlobals` and the raw buffer's `bufferElement`, `bufferStore` and
+`bufferCount`; the scene's `Instance`, `Material`, `PoolVertex`, `PoolMesh`, `instanceToWorld`,
+`instancePosition`, `poolCorner`, `intersectTriangle`, `intersectBox`, `irradianceTexel` and
+`IrradiancePositiveX` and the rest; the ray scene's `rayTrace`, `rayVisible`, `RayHit`,
+`RaySurface`, `RayMaterial` and the bindings `rayTlas` and the rest; the pass's `passView`,
+`passGlobals`, `passPicture`, `passDepth`, `passLights`, `passUv`, `passSample`, `passLoadDepth`,
+`passDepthAt`, `passWorldPosition`, `passViewDepth`, `passDirectionalShadow`, `passPointShadow`,
+`passSurfaceOf`, `PassSurface`, `PassDeferred` and the rest, its types `DirectionalLight`,
+`PointLight`, `Lights` and `SceneInfo` plain; and where both engines hold the same thing 3DEngine's
+own names, `fullscreenTriangle` and `FullscreenOutput` for the triangle over the view, and for the
+distance field `FieldInfo` (3DEngine's `SceneFieldInfo`), `FieldCascade`, `fieldOn`, `fieldHold`,
+`bandHold`, `fieldCascade`, `fieldCoarsestBuilt`, `fieldDistance`, `fieldDistanceIn`, `fieldNormal`,
+`fieldCell`, `faceBits`, `faceWay`, `FieldBand` and `EyeClear`. No two modules declare one name,
+which a test holds beside the one that no module declares a namespace. The bridge binds every
+module global by its slot, so nothing on its side changed but the text it writes out, and the
+modules' hash with it, which makes every cache entry compile again once.

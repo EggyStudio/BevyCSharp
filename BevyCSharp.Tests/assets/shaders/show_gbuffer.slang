@@ -7,9 +7,9 @@ uniform uint show;
 Texture2D<uint4> gbuffer;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let surface = bcs_pass::surface_of(gbuffer.Load(int3(int2(input.position.xy), 0)));
+    let surface = passSurfaceOf(gbuffer.Load(int3(int2(input.position.xy), 0)));
 
     if (show == 1) return float4(surface.normal * 0.5 + 0.5, 1.0);
 

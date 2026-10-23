@@ -19,7 +19,7 @@ struct VertexOutput
 VertexOutput vertex(Vertex vertex)
 {
     VertexOutput output;
-    output.position = bcs::local_to_clip(vertex.instance_index, vertex.position);
+    output.position = meshLocalToClip(vertex.instance_index, vertex.position);
     let packed = vertex.packed;
     output.color = float4(float(packed & 0xff), float((packed >> 8) & 0xff), float((packed >> 16) & 0xff), float(packed >> 24)) / 255.0;
     return output;

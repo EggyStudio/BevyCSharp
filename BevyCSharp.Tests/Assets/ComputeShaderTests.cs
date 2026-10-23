@@ -361,7 +361,7 @@ public sealed class ComputeShaderTests
 
     /// <summary>
     /// A material buffer holds what each entity in it is made of, read from its standard material,
-    /// and a shader reads it through <c>bcs_scene::Material</c>.
+    /// and a shader reads it through <c>Material</c>.
     /// </summary>
     [SkippableFact]
     public void AMaterialBufferHoldsWhatEachEntityIsMadeOf()

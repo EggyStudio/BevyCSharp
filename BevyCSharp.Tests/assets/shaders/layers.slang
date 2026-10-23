@@ -8,7 +8,7 @@ SamplerState linear;
 uniform uint pick;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return layers[pick].Sample(linear, float2(0.5, 0.5));
 }

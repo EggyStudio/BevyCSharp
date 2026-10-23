@@ -13,17 +13,17 @@ uniform float strength;
 uniform float line_count;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     let from_middle = input.uv - 0.5;
     let shift = from_middle * dot(from_middle, from_middle) * 0.05 * strength;
 
     let color = float3(
-        bcs_pass::sample(input.uv + shift).r,
-        bcs_pass::sample(input.uv).g,
-        bcs_pass::sample(input.uv - shift).b);
+        passSample(input.uv + shift).r,
+        passSample(input.uv).g,
+        passSample(input.uv - shift).b);
 
-    let lines = line_count > 0.0 ? line_count : 1.0 / bcs_pass::pixel_size().y;
+    let lines = line_count > 0.0 ? line_count : 1.0 / passPixelSize().y;
     let dark = 1.0 - strength * 0.25 * (0.5 + 0.5 * sin(input.uv.y * lines * 3.14159));
 
     return float4(color * dark, 1.0);

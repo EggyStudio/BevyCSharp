@@ -998,7 +998,7 @@ static void WriteBuffer<T>(AssetHandle buffer, ReadOnlySpan<T> items);  // Repla
 static int GrowBuffer(AssetHandle buffer, int size);            // Makes a buffer at least size bytes, keeping what it holds, and answers its size
 static AssetHandle CreateInstanceBuffer(int capacity);          // Makes a buffer with capacity slots that the engine fills every frame with the transforms of the entities put in them, this frame's and the previous frame's
 static GeometryPool CreateGeometryPool();                       // Makes an empty geometry pool, buffers holding the vertices and triangles of every mesh added to it, which any shader reaches by a mesh's number and a triangle's
-static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh);  // Adds a mesh to a geometry pool and answers its number there, counted from zero, which is the index of its bcs_scene::PoolMesh
+static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh);  // Adds a mesh to a geometry pool and answers its number there, counted from zero, which is the index of its PoolMesh
 static RayScene CreateRayScene(GeometryPool pool, int capacity);  // Makes a scene rays are traced through, over the meshes of a geometry pool, with capacity slots for the entities in it
 static void SetRaySceneInstance(RayScene scene, int slot, Entity entity, int mesh);  // Puts an entity made of pool mesh mesh in a slot of a ray scene, where rays meet it at its transform every frame, or empties the slot with None
 static void RebuildRayScene(RayScene scene, int? mesh = null);  // Builds a ray scene's pool mesh again from what the pool's buffers hold now, or every mesh with null

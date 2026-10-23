@@ -47,7 +47,7 @@ public readonly record struct ViewDraw
     /// <remarks>
     /// Drawn again for each shadow view, depth alone, after Bevy has drawn its own casters there,
     /// each of the camera's directional cascades, each spot light, and each face of each point
-    /// light's cube. Its vertex shader runs with that view in <c>bcs_pass::view</c>, so placing
+    /// light's cube. Its vertex shader runs with that view in <c>passView</c>, so placing
     /// geometry from the view as it always does places it as the light sees it, and its fragment
     /// shader does not run. A program with a <see cref="ShaderProgramSettings.DrawShadow"/> stage
     /// runs that there instead, which writes the depth itself, for geometry its fragment shader
@@ -93,7 +93,7 @@ public readonly record struct ViewDraw
     /// where it draws them, and on a camera drawing deferred, the G-buffer as <c>gbuffer</c> and
     /// which lighting pass lights each pixel as <c>lighting_pass</c>. A draw into those two runs
     /// at <see cref="FramePoint.InPrepass"/>, and Bevy's deferred lighting then lights what it
-    /// wrote as it lights a standard material. <c>bcs_pass::deferred</c> returns both and the
+    /// wrote as it lights a standard material. <c>passDeferred</c> returns both and the
     /// depth, packed as Bevy packs its own.
     /// </para>
     /// </remarks>

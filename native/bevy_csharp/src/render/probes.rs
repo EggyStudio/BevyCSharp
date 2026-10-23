@@ -164,7 +164,7 @@ pub unsafe extern "C" fn bcs_render_set_reflection_probe(
 ///
 /// The image holds a grid of `x` by `y` by `z` points as a texture `x` wide, `2y` high and `3z`
 /// deep, holding the light a surface facing each axis direction receives at each point, in a layout
-/// `bcs_scene::irradiance_texel` addresses. Bevy samples it filtered, so its format has to be one
+/// `irradianceTexel` addresses. Bevy samples it filtered, so its format has to be one
 /// that filters, which among the formats a compute shader writes is `Rgba16Float`. It can come
 /// from a file or be made by `bcs_shader_image_create` and written every frame.
 ///

@@ -8,7 +8,7 @@ import bcs2d;
 const float LEVELS = 4.0;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput input) : SV_Target
+float4 fragment(Mesh2dVertexOutput input) : SV_Target
 {
     // The UV across, cut into LEVELS steps, so exactly LEVELS colors show.
     let t = floor(input.uv.x * LEVELS) / LEVELS;

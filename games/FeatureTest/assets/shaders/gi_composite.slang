@@ -30,12 +30,12 @@ Corner vertex(uint vertex_id : SV_VertexID)
 float4 fragment(Corner corner) : SV_Target
 {
     let pixel = int2(corner.position.xy);
-    let surface = bcs_pass::surface_of(gbuffer.Load(int3(pixel, 0)));
+    let surface = passSurfaceOf(gbuffer.Load(int3(pixel, 0)));
 
     // A metal reflects rather than scatters, so it takes none of this diffuse light.
     let color = surface.base_color * (1.0 - surface.metallic);
-    let uv = corner.position.xy / float2(bcs_pass::picture_size());
-    let light = gi.SampleLevel(bcs_pass::picture_sampler, uv, 0.0).rgb;
+    let uv = corner.position.xy / float2(passPictureSize());
+    let light = gi.SampleLevel(passPictureSampler, uv, 0.0).rgb;
 
     return float4(color * light * strength, 0.0);
 }

@@ -6,7 +6,7 @@ Texture2D texture;
 SamplerState texture_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    return texture.Sample(texture_sampler, bcs::screen_uv(mesh.position));
+    return texture.Sample(texture_sampler, meshScreenUv(mesh.position));
 }

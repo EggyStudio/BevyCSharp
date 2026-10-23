@@ -1,9 +1,10 @@
 // What a BevyCSharp material shader sees of Bevy, the view, time, the mesh's transforms, and the
 // structs Bevy's own vertex shader hands a fragment shader.
 //
-// A shader reaches it with `import bcs;`, and everything in it is under the `bcs` namespace. The
-// bridge writes this file out before every compile, so it always describes the bridge the shader
-// is about to run against rather than whichever one was installed last.
+// A shader reaches it with `import bcs;` and uses its names plainly, each helper named `mesh` and
+// then its work, as 3DEngine's modules name theirs, so none meets a name of the shader's own. The
+// bridge writes this file out before every compile, so it always describes the bridge the shader is
+// about to run against rather than whichever one was installed last.
 //
 // What the material itself carries is not here, because it is whatever the shader declares. Every
 // global a shader declares without a binding of its own (numbers, arrays, structs, textures and
@@ -18,10 +19,10 @@
 //
 // A vertex stream of the game's own, a `MeshStream` in C#, is read at the location the mesh gives
 // it, 8 to 15, declared in the shader's own vertex struct at that location's `TEXCOORDn` beside the
-// attributes `Vertex` declares at theirs, and handed on to the fragment shader at an output of the
-// shader's own, 0 to 2 and 6 being `VertexOutput`'s. The Slang type's class is the stream's, a
-// `uint` or `uint2` for a stream of integers and a float type for the rest, or wgpu refuses the
-// pipeline and nothing is drawn.
+// attributes `MeshVertex` declares at theirs, and handed on to the fragment shader at an output of
+// the shader's own, 0 to 2 and 6 being `MeshVertexOutput`'s. The Slang type's class is the
+// stream's, a `uint` or `uint2` for a stream of integers and a float type for the rest, or wgpu
+// refuses the pipeline and nothing is drawn.
 //
 // Bevy's matrices are declared as arrays of columns and multiplied out by hand. Which way Slang
 // lays a matrix out depends on the target and on flags, and an array of `float4` has one layout
@@ -29,17 +30,14 @@
 
 module bcs;
 
-public namespace bcs
-{
 
-// -- The view, in Bevy's group zero
 
 /// The part of Bevy's view uniform a shader usually reads, in the order Bevy declares it.
 ///
 /// Only a prefix, because the uniform goes on to hold the color grading, which a shader has no
 /// business redoing. A prefix is enough, since binding a buffer larger than what is declared is
 /// allowed.
-public struct View
+public struct MeshView
 {
     public float4 clip_from_world[4];
     public float4 unjittered_clip_from_world[4];
@@ -55,10 +53,10 @@ public struct View
     public float4 main_pass_viewport;
 };
 
-[[vk::binding(0, 100)]] public ConstantBuffer<View> view;
+[[vk::binding(0, 100)]] public ConstantBuffer<MeshView> meshView;
 
 /// Time, in the layout Bevy's `Globals` has.
-public struct Globals
+public struct MeshGlobals
 {
     /// Seconds since startup, wrapping to zero after an hour.
     public float time;
@@ -72,36 +70,35 @@ public struct Globals
 /// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
 /// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
 /// that reads more of a buffer than its layout promises.
-[[vk::binding(11, 100)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
+[[vk::binding(11, 100)]] public ConstantBuffer<MeshGlobals, ScalarDataLayout> meshGlobals;
 
 /// Time, as the prepass binds it, which is at a different binding because the prepass binds less.
-[[vk::binding(1, 100)]] public ConstantBuffer<Globals, ScalarDataLayout> prepass_globals;
+[[vk::binding(1, 100)]] public ConstantBuffer<MeshGlobals, ScalarDataLayout> meshPrepassGlobals;
 
 /// Multiplies a column-major matrix, held as four columns, by a vector.
-public float4 transform(float4 columns[4], float4 v)
+public float4 meshTransform(float4 columns[4], float4 v)
 {
     return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z + columns[3] * v.w;
 }
 
 /// Where a point in the world lands in clip space.
-public float4 world_to_clip(float3 position)
+public float4 meshWorldToClip(float3 position)
 {
-    return transform(view.clip_from_world, float4(position, 1.0));
+    return meshTransform(meshView.clip_from_world, float4(position, 1.0));
 }
 
 /// Where the camera is.
-public float3 camera_position()
+public float3 meshCameraPosition()
 {
-    return view.world_position;
+    return meshView.world_position;
 }
 
 /// Where a fragment is on the view, from zero to one, given its `SV_Position`.
-public float2 screen_uv(float4 frag_position)
+public float2 meshScreenUv(float4 frag_position)
 {
-    return (frag_position.xy - view.viewport.xy) / view.viewport.zw;
+    return (frag_position.xy - meshView.viewport.xy) / meshView.viewport.zw;
 }
 
-// -- The mesh, in Bevy's group two
 
 /// One mesh's transforms, in the layout Bevy keeps them in.
 ///
@@ -122,12 +119,12 @@ public struct Mesh
     public uint morph_descriptor_index;
 };
 
-[[vk::binding(0, 102)]] public StructuredBuffer<Mesh> meshes;
+[[vk::binding(0, 102)]] public StructuredBuffer<Mesh> meshUniforms;
 
 /// Where a point on the mesh drawn as `instance` is in the world.
-public float3 local_to_world(uint instance, float3 position)
+public float3 meshLocalToWorld(uint instance, float3 position)
 {
-    let rows = meshes[instance].world_from_local;
+    let rows = meshUniforms[instance].world_from_local;
     let p = float4(position, 1.0);
     return float3(dot(rows[0], p), dot(rows[1], p), dot(rows[2], p));
 }
@@ -135,24 +132,24 @@ public float3 local_to_world(uint instance, float3 position)
 /// The number an entity's `MeshTag` gives the mesh drawn as `instance`, zero without one, for a
 /// shader to tell apart meshes that share a material, such as which layer of an array texture,
 /// which color of a buffer or which pixel of a picture each one shows.
-public uint tag(uint instance)
+public uint meshTag(uint instance)
 {
-    return meshes[instance].tag;
+    return meshUniforms[instance].tag;
 }
 
 /// Where the same point was in the world on the previous frame, for motion vectors.
-public float3 previous_local_to_world(uint instance, float3 position)
+public float3 meshPreviousLocalToWorld(uint instance, float3 position)
 {
-    let rows = meshes[instance].previous_world_from_local;
+    let rows = meshUniforms[instance].previous_world_from_local;
     let p = float4(position, 1.0);
     return float3(dot(rows[0], p), dot(rows[1], p), dot(rows[2], p));
 }
 
 /// Which way a normal on the mesh faces in the world.
-public float3 normal_local_to_world(uint instance, float3 normal)
+public float3 meshNormalLocalToWorld(uint instance, float3 normal)
 {
-    let a = meshes[instance].local_from_world_transpose_a;
-    let b = meshes[instance].local_from_world_transpose_b;
+    let a = meshUniforms[instance].local_from_world_transpose_a;
+    let b = meshUniforms[instance].local_from_world_transpose_b;
 
     // The same unpacking as Bevy's `mat2x4_f32_to_mat3x3_unpack`, as three columns.
     let c0 = a[0].xyz;
@@ -165,9 +162,9 @@ public float3 normal_local_to_world(uint instance, float3 normal)
 }
 
 /// Where a point on the mesh lands in clip space.
-public float4 local_to_clip(uint instance, float3 position)
+public float4 meshLocalToClip(uint instance, float3 position)
 {
-    return world_to_clip(local_to_world(instance, position));
+    return meshWorldToClip(meshLocalToWorld(instance, position));
 }
 
 /// Which of the mesh's own vertices `vertex_id` is, counting from zero.
@@ -175,16 +172,15 @@ public float4 local_to_clip(uint instance, float3 position)
 /// `SV_VertexID` counts from where the mesh begins in the buffer Bevy packs every mesh into, which
 /// is not zero, so a shader that numbers its vertices, to find the element of a buffer that places
 /// each quad for instance, subtracts where the mesh begins.
-public uint vertex_number(uint instance, uint vertex_id)
+public uint meshVertexNumber(uint instance, uint vertex_id)
 {
-    return vertex_id - meshes[instance].first_vertex_index;
+    return vertex_id - meshUniforms[instance].first_vertex_index;
 }
 
-// -- What passes between stages in the main pass
 
 /// A vertex of a mesh with positions, normals and one set of UVs, which every mesh Bevy builds
 /// has.
-public struct Vertex
+public struct MeshVertex
 {
     public float3 position : TEXCOORD0;
     public float3 normal : TEXCOORD1;
@@ -196,33 +192,32 @@ public struct Vertex
 ///
 /// A fragment shader taking this works with Bevy's vertex shader as well as with one written here,
 /// which is why a material may name a fragment shader alone.
-public struct VertexOutput
+public struct MeshVertexOutput
 {
     public float4 position : SV_Position;
     public float4 world_position : TEXCOORD0;
     public float3 world_normal : TEXCOORD1;
     public float2 uv : TEXCOORD2;
     /// Which of the meshes drawn together this one is, which Bevy's vertex shader always hands on,
-    /// for `tag` and anything else read per mesh in the fragment shader. Not marked
+    /// for `meshTag` and anything else read per mesh in the fragment shader. Not marked
     /// `nointerpolation`, because Slang copies the mark onto the struct a shader copies its inputs
     /// into, where WGSL refuses it, and an integer passed between stages is never interpolated.
     public uint instance_index : TEXCOORD6;
 };
 
 /// Does what Bevy's own vertex shader does, for a shader that starts from it.
-public VertexOutput standard_vertex(Vertex vertex)
+public MeshVertexOutput meshStandardVertex(MeshVertex vertex)
 {
-    VertexOutput output;
-    let world = local_to_world(vertex.instance_index, vertex.position);
+    MeshVertexOutput output;
+    let world = meshLocalToWorld(vertex.instance_index, vertex.position);
     output.world_position = float4(world, 1.0);
-    output.position = world_to_clip(world);
-    output.world_normal = normal_local_to_world(vertex.instance_index, vertex.normal);
+    output.position = meshWorldToClip(world);
+    output.world_normal = meshNormalLocalToWorld(vertex.instance_index, vertex.normal);
     output.uv = vertex.uv;
     output.instance_index = vertex.instance_index;
     return output;
 }
 
-// -- What passes between stages in the prepass
 //
 // The prepass draws depth for shadows, and normals and motion for the effects that read them. Its
 // vertex locations differ from the main pass, which is why it has structs of its own.
@@ -232,7 +227,7 @@ public VertexOutput standard_vertex(Vertex vertex)
 /// The bridge hands a prepass vertex shader of a material's own every attribute the mesh has at
 /// these locations, whichever prepass it is drawing for, so the normal is there for a shader that
 /// moves the mesh along it.
-public struct PrepassVertex
+public struct MeshPrepassVertex
 {
     public float3 position : TEXCOORD0;
     public float2 uv : TEXCOORD1;
@@ -245,7 +240,7 @@ public struct PrepassVertex
 /// Bevy's fragment shader for the prepass reads a different subset depending on what the camera
 /// asked for, and a vertex shader that leaves out one it reads is a pipeline that fails to build.
 /// Writing all of them costs nothing where they are not read.
-public struct PrepassVertexOutput
+public struct MeshPrepassVertexOutput
 {
     public float4 position : SV_Position;
     public float2 uv : TEXCOORD0;
@@ -254,8 +249,8 @@ public struct PrepassVertexOutput
     public float4 world_tangent : TEXCOORD3;
     public float4 world_position : TEXCOORD4;
     public float4 previous_world_position : TEXCOORD5;
-    /// Not marked `nointerpolation`, as `VertexOutput`'s is not, since a deferred stage reads this
-    /// struct and Slang copies the mark onto the struct its inputs are copied into, where WGSL
+    /// Not marked `nointerpolation`, as `MeshVertexOutput`'s is not, since a deferred stage reads
+    /// this struct and Slang copies the mark onto the struct its inputs are copied into, where WGSL
     /// refuses it, and an integer passed between stages is never interpolated.
     public uint instance_index : TEXCOORD7;
 };
@@ -264,14 +259,14 @@ public struct PrepassVertexOutput
 ///
 /// `position` and `normal` are on the mesh, before its transform, so a shader that moves a vertex
 /// moves it here and passes the result.
-public PrepassVertexOutput prepass_output(uint instance, float3 position, float3 normal, float2 uv)
+public MeshPrepassVertexOutput meshPrepassOutput(uint instance, float3 position, float3 normal, float2 uv)
 {
-    PrepassVertexOutput output;
-    let world = local_to_world(instance, position);
+    MeshPrepassVertexOutput output;
+    let world = meshLocalToWorld(instance, position);
     output.world_position = float4(world, 1.0);
-    output.previous_world_position = float4(previous_local_to_world(instance, position), 1.0);
-    output.position = world_to_clip(world);
-    output.world_normal = normal_local_to_world(instance, normal);
+    output.previous_world_position = float4(meshPreviousLocalToWorld(instance, position), 1.0);
+    output.position = meshWorldToClip(world);
+    output.world_normal = meshNormalLocalToWorld(instance, normal);
     output.world_tangent = float4(0.0);
     output.uv = uv;
     output.uv_b = uv;
@@ -280,14 +275,14 @@ public PrepassVertexOutput prepass_output(uint instance, float3 position, float3
 }
 
 
-// -- Bevy's lighting
 //
 // A material drawn by a fragment shader here is lit by nothing unless it lights itself, and Bevy's
 // lighting is thousands of lines of WGSL over bindings that change with every feature a camera
-// turns on. So it is not written again in Slang. `light` and `finish` call WGSL functions by fixed
-// names, which the bridge puts in front of any compiled shader that calls them, written over Bevy's
-// own `apply_pbr_lighting` and `main_pass_post_lighting_processing`, and which take only numbers
-// and vectors, so nothing here depends on the names Slang gives its structs in the WGSL it writes.
+// turns on. So it is not written again in Slang. `meshLight` and `meshFinish` call WGSL functions
+// by fixed names, which the bridge puts in front of any compiled shader that calls them, written
+// over Bevy's own `apply_pbr_lighting` and `main_pass_post_lighting_processing`, and which take
+// only numbers and vectors, so nothing here depends on the names Slang gives its structs in the
+// WGSL it writes.
 
 /// What a lit surface is, as Bevy's standard material describes one, its color, the light it gives
 /// off, how metal and how rough it is, how much light it reflects head on, how much ambient light
@@ -311,7 +306,7 @@ public struct Surface
 
 /// A surface as Bevy's default standard material describes the mesh at this point, white, rough
 /// by half, not metal, facing the way the mesh does.
-public Surface surface(VertexOutput mesh)
+public Surface meshSurface(MeshVertexOutput mesh)
 {
     Surface output;
     output.base_color = float4(1.0);
@@ -352,8 +347,8 @@ float4 pbr_finish(float4 color, float4 frag_coord, float4 world_position)
 
 /// The surface lit by every light, shadow and environment map Bevy has for the view, before fog
 /// and before the tonemapping a camera that does not draw in high dynamic range does in the shader,
-/// for a shader that changes the lit color before `finish`.
-public float4 light(Surface surface, VertexOutput mesh)
+/// for a shader that changes the lit color before `meshFinish`.
+public float4 meshLight(Surface surface, MeshVertexOutput mesh)
 {
     return pbr_light(
         surface.base_color, surface.emissive, surface.metallic, surface.roughness,
@@ -361,28 +356,27 @@ public float4 light(Surface surface, VertexOutput mesh)
         mesh.world_normal, surface.normal);
 }
 
-/// What Bevy does to a lit color in the shader, fog, and tonemapping and debanding for a camera that
-/// does not draw in high dynamic range. Effects over the whole picture, such as bloom, come after,
-/// outside the shader.
-public float4 finish(float4 color, VertexOutput mesh)
+/// What Bevy does to a lit color in the shader, fog, and tonemapping and debanding for a camera
+/// that does not draw in high dynamic range. Effects over the whole picture, such as bloom, come
+/// after, outside the shader.
+public float4 meshFinish(float4 color, MeshVertexOutput mesh)
 {
     return pbr_finish(color, mesh.position, mesh.world_position);
 }
 
 /// The surface lit and finished, the color Bevy's standard material draws with the same values.
-public float4 lit(Surface surface, VertexOutput mesh)
+public float4 meshLit(Surface surface, MeshVertexOutput mesh)
 {
-    return finish(light(surface, mesh), mesh);
+    return meshFinish(meshLight(surface, mesh), mesh);
 }
 
 
-// -- Bevy's deferred buffers
 //
 // On a camera that draws deferred, a material whose program has a deferred stage writes its
 // surface into Bevy's deferred buffers rather than a color, and Bevy's deferred lighting pass
 // lights it with the rest, as it lights a standard material drawn deferred. Screen-space
 // reflections read those buffers. The surface is packed by WGSL the bridge puts in front of the
-// compiled shader, over Bevy's own deferred functions, as `light` is.
+// compiled shader, over Bevy's own deferred functions, as `meshLight` is.
 
 /// What a deferred stage writes, the normal and the motion where the camera draws them, Bevy's
 /// packed surface and the lighting pass that lights it, at the locations Bevy's deferred prepass
@@ -398,7 +392,7 @@ public struct Deferred
 
 /// A surface as Bevy's default standard material describes the mesh at this point of the prepass,
 /// for a deferred stage to start from.
-public Surface surface(PrepassVertexOutput mesh)
+public Surface meshSurface(MeshPrepassVertexOutput mesh)
 {
     Surface output;
     output.base_color = float4(1.0);
@@ -447,9 +441,9 @@ float2 deferred_motion(float4 world_position, float4 previous_world_position)
 }
 
 /// The surface as Bevy's deferred buffers hold it, for a deferred stage to return. The surface's
-/// normal is the one lit, which a stage bumps with a normal map of its own as it would for `light`,
-/// and the normal buffer keeps the mesh's, as Bevy's deferred stage writes it.
-public Deferred deferred(Surface surface, PrepassVertexOutput mesh)
+/// normal is the one lit, which a stage bumps with a normal map of its own as it would for
+/// `meshLight`, and the normal buffer keeps the mesh's, as Bevy's deferred stage writes it.
+public Deferred meshDeferred(Surface surface, MeshPrepassVertexOutput mesh)
 {
     Deferred output;
     output.normal = float4(normalize(mesh.world_normal) * 0.5 + 0.5, 1.0);
@@ -463,11 +457,10 @@ public Deferred deferred(Surface surface, PrepassVertexOutput mesh)
 }
 
 
-// -- Bevy's clustered decals
 //
 // Bevy projects a clustered decal onto whatever lies inside its box, and its standard material
 // lays the decal's textures over its own surface. A material drawn here lays them on with
-// `decals`, or walks the decals over a point itself, as Bevy's `ClusteredDecalIterator` walks
+// `meshDecals`, or walks the decals over a point itself, as Bevy's `ClusteredDecalIterator` walks
 // them, to do something of its own with each, such as tinting it by its tag. These call WGSL the
 // bridge puts in front of the compiled shader, over Bevy's own iterator and the textures Bevy
 // holds for the decals, and a device that cannot have clustered decals has none over any point.
@@ -541,27 +534,27 @@ float3 pbr_decal_normal(float4 frag_coord, float4 world_position, uint index, fl
 }
 
 /// How many clustered decals lie over this point of the mesh.
-public uint decal_count(VertexOutput mesh)
+public uint meshDecalCount(MeshVertexOutput mesh)
 {
     return pbr_decal_count(mesh.position, mesh.world_position);
 }
 
 /// The tag of the decal at `index` over this point, a number of the game's own that Bevy hands
 /// over and does nothing with, or zero where there is no such decal.
-public uint decal_tag(VertexOutput mesh, uint index)
+public uint meshDecalTag(MeshVertexOutput mesh, uint index)
 {
     return pbr_decal_tag(mesh.position, mesh.world_position, index);
 }
 
 /// Whether the decal at `index` over this point has the texture `map`.
-public bool decal_has(VertexOutput mesh, uint index, DecalMap map)
+public bool meshDecalHas(MeshVertexOutput mesh, uint index, DecalMap map)
 {
     return pbr_decal_has(mesh.position, mesh.world_position, index, uint(map));
 }
 
 /// The texture `map` of the decal at `index` over this point, read where the decal's box puts this
 /// point on it, or zero where it has no such texture.
-public float4 decal_sample(VertexOutput mesh, uint index, DecalMap map)
+public float4 meshDecalSample(MeshVertexOutput mesh, uint index, DecalMap map)
 {
     return pbr_decal_sample(mesh.position, mesh.world_position, index, uint(map));
 }
@@ -570,20 +563,20 @@ public float4 decal_sample(VertexOutput mesh, uint index, DecalMap map)
 /// each decal's color over the surface's by its alpha, how metal and rough it is mixed in by the
 /// same alpha where it says, its normal map bending the normal on a mesh with tangents, and its
 /// emissive light added.
-public Surface decals(Surface surface, VertexOutput mesh)
+public Surface meshDecals(Surface surface, MeshVertexOutput mesh)
 {
     var output = surface;
-    let count = decal_count(mesh);
+    let count = meshDecalCount(mesh);
 
     for (uint index = 0; index < count; index++)
     {
-        if (decal_has(mesh, index, DecalMap.Color))
+        if (meshDecalHas(mesh, index, DecalMap.Color))
         {
-            let color = decal_sample(mesh, index, DecalMap.Color);
+            let color = meshDecalSample(mesh, index, DecalMap.Color);
 
-            if (decal_has(mesh, index, DecalMap.MetallicRoughness))
+            if (meshDecalHas(mesh, index, DecalMap.MetallicRoughness))
             {
-                let metallic_roughness = decal_sample(mesh, index, DecalMap.MetallicRoughness);
+                let metallic_roughness = meshDecalSample(mesh, index, DecalMap.MetallicRoughness);
                 output.metallic = lerp(output.metallic * output.base_color.a, metallic_roughness.b, color.a);
                 output.roughness = lerp(output.roughness * output.base_color.a, metallic_roughness.g, color.a);
             }
@@ -595,7 +588,7 @@ public Surface decals(Surface surface, VertexOutput mesh)
         }
 
         output.normal = pbr_decal_normal(mesh.position, mesh.world_position, index, output.normal);
-        output.emissive += float4(decal_sample(mesh, index, DecalMap.Emissive).rgb, 0.0);
+        output.emissive += float4(meshDecalSample(mesh, index, DecalMap.Emissive).rgb, 0.0);
     }
 
     output.normal = normalize(output.normal);
@@ -603,7 +596,6 @@ public Surface decals(Surface surface, VertexOutput mesh)
 }
 
 
-// -- Bevy's irradiance volumes
 
 float3 pbr_irradiance(float4 frag_coord, float4 world_position, float3 normal)
 {
@@ -618,11 +610,9 @@ float3 pbr_irradiance(float4 frag_coord, float4 world_position, float3 normal)
 
 /// The diffuse light the irradiance volumes over this point of the mesh give a surface facing
 /// `normal`, at each volume's intensity, as Bevy's `irradiance_volume_light` works it out for its
-/// standard material, or nothing where no volume is over it. `light` already takes it into account,
-/// so this is for a shader that shows the volume's light itself, such as one drawing its voxels.
-public float3 irradiance(VertexOutput mesh, float3 normal)
+/// standard material, or nothing where no volume is over it. `meshLight` takes it into account, so
+/// this is for a shader that shows the volume's light on its own, such as one drawing its voxels.
+public float3 meshIrradiance(MeshVertexOutput mesh, float3 normal)
 {
     return pbr_irradiance(mesh.position, mesh.world_position, normal);
-}
-
 }

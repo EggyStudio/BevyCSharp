@@ -9,7 +9,7 @@ struct Tint
 StructuredBuffer<Tint> tints;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
-    return tints[bcs2d::tag(mesh.instance_index)].color;
+    return tints[mesh2dTag(mesh.instance_index)].color;
 }

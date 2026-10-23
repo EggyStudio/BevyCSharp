@@ -5,7 +5,7 @@
 //! itself each need every instance's transform in a buffer, and the previous frame's beside it. The
 //! engine knows both, so a buffer is made with room for some number of instances, entities are put
 //! in its slots, and every frame after transforms are propagated the slots are written again. A
-//! shader reads it as a `StructuredBuffer<bcs_scene::Instance>`, whose layout `bcs_scene` declares,
+//! shader reads it as a `StructuredBuffer<Instance>`, whose layout `bcs_scene` declares,
 //! two matrices a slot, each four columns, which is 128 bytes.
 //!
 //! The previous transform is the one the slot held last frame, so an entity put in a slot starts
@@ -14,7 +14,7 @@
 //!
 //! A material buffer is the same thing for what an entity is made of. Each slot holds its standard
 //! material's base color, emissive color, roughness, metallic, reflectance and whether it is unlit,
-//! as `bcs_scene::Material`, 48 bytes. A ray that hits something in world-space GI has to know its
+//! as `Material`, 48 bytes. A ray that hits something in world-space GI has to know its
 //! color for the indirect light it passes on, and an engine can read it from the material where a
 //! package guessing from property names cannot. Put the same entity in the same slot of both
 //! buffers and a shader has transform and material by one index. Textures are not in it, since a

@@ -21,8 +21,8 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
 
     let uv = (float2(id.xy) + 0.5) / float2(width, height);
-    let pixel = int2(uv * float2(bcs_pass::picture_size()));
-    let before = bcs_pass::previous_uv(uv, bcs_pass::load_motion(pixel));
+    let pixel = int2(uv * float2(passPictureSize()));
+    let before = passPreviousUv(uv, passLoadMotion(pixel));
     let fresh = gathered.Load(int3(id.xy, 0));
 
     if (any(before < 0.0) || any(before > 1.0))
@@ -31,6 +31,6 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    let history = gi_previous.SampleLevel(bcs_pass::picture_sampler, before, 0.0);
+    let history = gi_previous.SampleLevel(passPictureSampler, before, 0.0);
     gi.Store(id.xy, lerp(history, fresh, blend));
 }

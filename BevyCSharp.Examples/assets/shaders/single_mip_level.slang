@@ -6,7 +6,7 @@ Texture2D base_color_texture;
 SamplerState base_color_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     return base_color_texture.SampleLevel(base_color_sampler, mesh.uv, float(mip_level));
 }

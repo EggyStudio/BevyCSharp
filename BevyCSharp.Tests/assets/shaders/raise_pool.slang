@@ -3,7 +3,7 @@
 import bcs_compute;
 import bcs_scene;
 
-RWStructuredBuffer<bcs_scene::PoolVertex> vertices;
+RWStructuredBuffer<PoolVertex> vertices;
 uniform float by;
 
 [shader("compute")]

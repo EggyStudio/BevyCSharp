@@ -36,7 +36,7 @@ Texture3D<float> still_field;
 
 [format("r16f")] RWTexture3D<float> field;
 
-StructuredBuffer<bcs_field::Info> info;
+StructuredBuffer<FieldInfo> info;
 
 // x: how many bricks. y: how many boxes. zw: unused.
 uniform uint4 stamp_counts;
@@ -50,7 +50,7 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
         return;
     uint4 brick = bricks[index];
     uint cascade = brick.x;
-    bcs_field::Info field_info = info[0];
+    FieldInfo field_info = info[0];
     uint size = uint(field_info.counts.y);
     uint3 place = uint3(brick.y & 0xFFu, (brick.y >> 8) & 0xFFu, (brick.y >> 16) & 0xFFu);
     uint3 cell = place * 4u + local;

@@ -4,10 +4,10 @@
 import bcs_pass;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let far = bcs_pass::world_position(input.uv, 1e-6);
-    let direction = normalize(far - bcs_pass::view.world_position);
-    let light = bcs_pass::environment_specular(direction, 0.0) * bcs_pass::view.exposure;
+    let far = passWorldPosition(input.uv, 1e-6);
+    let direction = normalize(far - passView.world_position);
+    let light = passEnvironmentSpecular(direction, 0.0) * passView.exposure;
     return float4(light, 1.0);
 }

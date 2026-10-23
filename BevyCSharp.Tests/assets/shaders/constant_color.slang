@@ -6,7 +6,7 @@ import bcs2d;
 const float RED = 0.0;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     return float4(RED, 1.0 - RED, 0.0, 1.0);
 }

@@ -36,7 +36,7 @@ float3 ripples(float2 uv, float time)
 }
 
 /// Black and as smooth as the example's standard material base is.
-bcs::Surface water(bcs::Surface surface, float2 uv, float time)
+Surface water(Surface surface, float2 uv, float time)
 {
     surface.base_color = float4(0.0, 0.0, 0.0, 1.0);
     surface.roughness = roughness;
@@ -45,13 +45,13 @@ bcs::Surface water(bcs::Surface surface, float2 uv, float time)
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex vertex)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex vertex)
 {
-    return bcs::prepass_output(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
+    return meshPrepassOutput(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
 }
 
 [shader("fragment")]
-bcs::Deferred deferred(bcs::PrepassVertexOutput mesh)
+Deferred deferred(MeshPrepassVertexOutput mesh)
 {
-    return bcs::deferred(water(bcs::surface(mesh), mesh.uv, bcs::prepass_globals.time), mesh);
+    return meshDeferred(water(meshSurface(mesh), mesh.uv, meshPrepassGlobals.time), mesh);
 }

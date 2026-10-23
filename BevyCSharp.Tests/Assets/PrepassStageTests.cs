@@ -8,9 +8,9 @@ namespace Bevy.Tests;
 /// pipeline it is drawn with builds, where the prepass draws a shadow.
 /// </summary>
 /// <remarks>
-/// The guide's example of a stage moving with the time read <c>bcs::globals</c> in its prepass,
+/// The guide's example of a stage moving with the time read <c>meshGlobals</c> in its prepass,
 /// which the prepass does not bind, and the feature test's grass, written from it, ended the app at
-/// the first shadow drawn. <c>bcs::prepass_globals</c> is the binding the prepass gives.
+/// the first shadow drawn. <c>meshPrepassGlobals</c> is the binding the prepass gives.
 /// </remarks>
 [Collection("engine")]
 public sealed class PrepassStageTests

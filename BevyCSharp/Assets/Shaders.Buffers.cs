@@ -114,7 +114,7 @@ public static unsafe partial class Shaders
     /// something moved.
     /// </para>
     /// <para>
-    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Instance&gt;</c> after
+    /// A shader reads it as a <c>StructuredBuffer&lt;Instance&gt;</c> after
     /// <c>import bcs_scene;</c>, with <c>to_world</c>, <c>to_previous_world</c> and
     /// <c>position</c> to read a slot. It is bound by name like any other buffer.
     /// </para>
@@ -137,10 +137,10 @@ public static unsafe partial class Shaders
     /// A ray traced in a compute shader, or a scene voxelized by one, meets triangles of whatever
     /// mesh is there, so every mesh it might meet has to be in buffers it can index rather than in
     /// the vertex buffers only a draw of that mesh binds. A shader reads
-    /// <see cref="GeometryPool.Vertices"/> as a <c>StructuredBuffer&lt;bcs_scene::PoolVertex&gt;</c>,
+    /// <see cref="GeometryPool.Vertices"/> as a <c>StructuredBuffer&lt;PoolVertex&gt;</c>,
     /// <see cref="GeometryPool.Indices"/> as a <c>StructuredBuffer&lt;uint&gt;</c> and
-    /// <see cref="GeometryPool.Meshes"/> as a <c>StructuredBuffer&lt;bcs_scene::PoolMesh&gt;</c>, and
-    /// <c>bcs_scene::pool_corner</c>, <c>intersect_triangle</c> and <c>intersect_box</c> do the rest.
+    /// <see cref="GeometryPool.Meshes"/> as a <c>StructuredBuffer&lt;PoolMesh&gt;</c>, and
+    /// <c>poolCorner</c>, <c>intersect_triangle</c> and <c>intersect_box</c> do the rest.
     /// </para>
     /// <para>
     /// Put an entity's mesh in a pool, and the entity in the same slot of an instance buffer and a
@@ -157,7 +157,7 @@ public static unsafe partial class Shaders
 
     /// <summary>
     /// Adds a mesh to a geometry pool and answers its number there, counted from zero, which is the
-    /// index of its <c>bcs_scene::PoolMesh</c>. Only valid inside a system.
+    /// index of its <c>PoolMesh</c>. Only valid inside a system.
     /// </summary>
     /// <remarks>
     /// The mesh has to be triangles and has to have loaded; one still loading is refused rather than
@@ -192,7 +192,7 @@ public static unsafe partial class Shaders
     /// <para>
     /// A compute shader compiled to SPIR-V (<see cref="ShaderProgramSettings.ComputeTarget"/>)
     /// declares a <c>RaytracingAccelerationStructure</c>, is handed the scene by name with
-    /// <c>SetRayScene</c>, and traces it with <c>bcs_ray::trace_in</c> and <c>visible_in</c>. It is
+    /// <c>SetRayScene</c>, and traces it with <c>rayTraceIn</c> and <c>visible_in</c>. It is
     /// independent of the scene Solari keeps, so it runs without ray-traced lighting, and it can
     /// hold whatever a technique needs its rays to meet, such as simpler stand-ins for what is
     /// drawn, a coarser level of detail, or only what should cast a shadow.
@@ -203,7 +203,7 @@ public static unsafe partial class Shaders
     /// moving an entity moves what rays meet with nothing else to do. A hit's
     /// <c>instance</c> is the slot, which an instance buffer or a material buffer with the same
     /// entities in the same slots describes, and its <c>mesh</c> is the pool mesh, whose triangle
-    /// <c>bcs_scene::pool_corner</c> reads.
+    /// <c>poolCorner</c> reads.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">
@@ -268,7 +268,7 @@ public static unsafe partial class Shaders
     /// material by one index.
     /// </para>
     /// <para>
-    /// A shader reads it as a <c>StructuredBuffer&lt;bcs_scene::Material&gt;</c>. Textures are not
+    /// A shader reads it as a <c>StructuredBuffer&lt;Material&gt;</c>. Textures are not
     /// in it, since the base color is the factor the material multiplies its texture by, and an
     /// entity drawn by a shader program, or with no material, holds zeros.
     /// </para>

@@ -164,15 +164,15 @@ public sealed class SceneFieldShadowTests
         import bcs_pass;
 
         [shader("vertex")]
-        bcs_pass::Input vertex(uint index : SV_VertexID)
+        FullscreenOutput vertex(uint index : SV_VertexID)
         {
-            var corner = bcs_pass::full_screen(index);
+            var corner = fullscreenTriangle(index);
             corner.position.z = 1.0;
             return corner;
         }
 
         [shader("fragment")]
-        float4 fragment(bcs_pass::Input input) : SV_Target
+        float4 fragment(FullscreenOutput input) : SV_Target
         {
             return float4(0.0, 0.5, 0.0, 0.0);
         }

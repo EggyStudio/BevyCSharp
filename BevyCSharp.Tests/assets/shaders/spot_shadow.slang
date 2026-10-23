@@ -9,21 +9,21 @@ import bcs_pass;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let size = bcs_pass::picture_size();
+    let size = passPictureSize();
 
     if (id.x >= size.x || id.y >= size.y)
         return;
 
     let pixel = int2(id.xy);
-    let depth_value = bcs_pass::load_depth(pixel);
-    let world = bcs_pass::world_position(bcs_pass::uv_of(pixel), depth_value);
+    let depth_value = passLoadDepth(pixel);
+    let world = passWorldPosition(passUv(pixel), depth_value);
 
     // Nothing drawn, or outside the cone, marked apart from both lit and shadowed.
-    if (depth_value <= 0.0 || bcs_pass::point_light_count() == 0 || all(bcs_pass::point_light_radiance(0, world) <= 0.0))
+    if (depth_value <= 0.0 || passPointLightCount() == 0 || all(passPointLightRadiance(0, world) <= 0.0))
     {
         sunlit[pixel] = -1.0;
         return;
     }
 
-    sunlit[pixel] = bcs_pass::point_shadow(0, world, bcs_pass::load_normal(pixel));
+    sunlit[pixel] = passPointShadow(0, world, passLoadNormal(pixel));
 }

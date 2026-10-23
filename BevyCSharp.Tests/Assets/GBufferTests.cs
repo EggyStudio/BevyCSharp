@@ -12,7 +12,7 @@ public sealed class GBufferTests
 {
     /// <summary>
     /// Two cubes of different materials come out of the G-buffer with their own base color,
-    /// metallic and roughness, as <c>bcs_pass::surface_of</c> unpacks them.
+    /// metallic and roughness, as <c>passSurfaceOf</c> unpacks them.
     /// </summary>
     [SkippableFact]
     public void APassReadsEachSurfacesMaterial()

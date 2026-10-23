@@ -2,15 +2,17 @@
 // previous frame's, and the depth, normals and motion the camera's prepass drew.
 //
 // A full-screen pass, a compute shader dispatched on a camera and geometry a camera draws all reach
-// it with `import bcs_pass;`, and everything in it is under the `bcs_pass` namespace. The shader
-// itself carries whatever it declares. Every global without a binding of its own belongs to it and
-// is set from C# by its name, and an image the camera owns is bound by the name the camera gave
-// it. The inputs below are in space 101, which the bridge moves to group one after the compile, so
-// the shader's own globals keep group zero to themselves whatever they are.
+// it with `import bcs_pass;` and use its names plainly, each helper named `pass` and then its work,
+// as 3DEngine's modules name theirs, so none meets a name of the shader's own. The shader itself
+// carries whatever it declares. Every global without a binding of its own belongs to it and is set
+// from C# by its name, and an image the camera owns is bound by the name the camera gave it. The
+// inputs below are in space 101, which the bridge moves to group one after the compile, so the
+// shader's own globals keep group zero to themselves whatever they are.
 //
-// A pass's entry point is a fragment shader taking `bcs_pass::Input`, which Bevy's full-screen
+// A pass's entry point is a fragment shader taking `FullscreenOutput`, which Bevy's full-screen
 // triangle writes, and returning the pixel. A compute shader works in pixels, and the helpers
-// taking an `int2` are for it. A draw over the whole view places its triangle with `full_screen`.
+// taking an `int2` are for it. A draw over the whole view places its triangle with
+// `fullscreenTriangle`.
 
 module bcs_pass;
 
@@ -18,11 +20,9 @@ module bcs_pass;
 // stage returns, a part of this module kept in a file of its own.
 __include bcs_pass_deferred;
 
-public namespace bcs_pass
-{
 
 /// Time, in the layout Bevy's `Globals` has.
-public struct Globals
+public struct PassGlobals
 {
     /// Seconds since startup, wrapping to zero after an hour.
     public float time;
@@ -31,10 +31,10 @@ public struct Globals
     public uint frame_count;
 };
 
-/// The part of Bevy's view uniform a shader usually reads, the same prefix `bcs::View` is.
+/// The part of Bevy's view uniform a shader usually reads, the same prefix `MeshView` is.
 ///
-/// Matrices are arrays of four columns, which `transform` multiplies out.
-public struct View
+/// Matrices are arrays of four columns, which `passTransform` multiplies out.
+public struct PassView
 {
     public float4 clip_from_world[4];
     public float4 unjittered_clip_from_world[4];
@@ -50,7 +50,7 @@ public struct View
 };
 
 /// The view as it was on the previous frame, for a shader reprojecting last frame's results.
-public struct PreviousView
+public struct PassPreviousView
 {
     public float4 view_from_world[4];
     public float4 clip_from_world[4];
@@ -60,37 +60,36 @@ public struct PreviousView
 };
 
 /// The picture so far, and the sampler it is read with, which is linear and clamped at the edges.
-[[vk::binding(0, 101)]] public Texture2D picture;
-[[vk::binding(1, 101)]] public SamplerState picture_sampler;
+[[vk::binding(0, 101)]] public Texture2D passPicture;
+[[vk::binding(1, 101)]] public SamplerState passPictureSampler;
 
 /// Time.
 ///
 /// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
 /// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
 /// that reads more of a buffer than its layout promises.
-[[vk::binding(2, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
-[[vk::binding(3, 101)]] public ConstantBuffer<View> view;
+[[vk::binding(2, 101)]] public ConstantBuffer<PassGlobals, ScalarDataLayout> passGlobals;
+[[vk::binding(3, 101)]] public ConstantBuffer<PassView> passView;
 
 /// The camera's depth, from its prepass, or zero, which is the far plane, where it draws none.
 ///
 /// Bevy's depth runs backwards, from one at the near plane to zero infinitely far away, so a
 /// larger number is nearer. `Shaders.SetPrepass` asks a camera for it.
-[[vk::binding(4, 101)]] public DepthTexture2D depth;
+[[vk::binding(4, 101)]] public DepthTexture2D passDepth;
 
 /// The camera's normals, from its prepass, each packed from minus one to one into zero to one, or
 /// white where it draws none.
-[[vk::binding(5, 101)]] public Texture2D normals;
+[[vk::binding(5, 101)]] public Texture2D passNormals;
 
 /// The camera's motion vectors, from its prepass, or zero where it draws none.
 ///
 /// How far each pixel moved since the previous frame, in UV units, so the same surface was at
 /// `uv - motion` on the previous frame. Both the camera's movement and the object's are in it.
-[[vk::binding(6, 101)]] public Texture2D<float2> motion;
+[[vk::binding(6, 101)]] public Texture2D<float2> passMotion;
 
 /// The previous frame's view, or zeros on a camera that keeps none, which is every 2D camera.
-[[vk::binding(7, 101)]] public ConstantBuffer<PreviousView> previous_view;
+[[vk::binding(7, 101)]] public ConstantBuffer<PassPreviousView> passPreviousView;
 
-// -- The scene's lights, laid out as Bevy lays them out
 
 /// One cascade of a directional light's shadow, what projects the world onto its layer of the
 /// shadow map, and how far from the camera it reaches.
@@ -157,12 +156,12 @@ public struct PointLight
 };
 
 /// What the bridge adds about the scene to Bevy's own light data, how many point and spot lights
-/// `point_lights` holds, and the camera's environment map.
+/// `passPointLights` holds, and the camera's environment map.
 public struct SceneInfo
 {
     public uint point_lights;
     /// How many mip levels the environment's specular cube has, and zero for a camera lit by no
-    /// environment map, which is how `has_environment` tells.
+    /// environment map, which is how `passHasEnvironment` tells.
     public uint environment_mips;
     /// What the environment's cubes are multiplied by, in candelas per square meter.
     public float environment_intensity;
@@ -173,49 +172,49 @@ public struct SceneInfo
 };
 
 /// A point light casts shadows.
-public static const uint POINT_LIGHT_SHADOWS = 1u << 0u;
+public static const uint PointLightShadows = 1u << 0u;
 /// A spot light points down negative y, since only its direction's x and z are kept.
-public static const uint POINT_LIGHT_SPOT_Y_NEGATIVE = 1u << 1u;
+public static const uint PointLightSpotYNegative = 1u << 1u;
 /// A point light is a spot light.
-public static const uint POINT_LIGHT_SPOT = 1u << 5u;
+public static const uint PointLightSpot = 1u << 5u;
 /// A directional light casts shadows.
-public static const uint DIRECTIONAL_LIGHT_SHADOWS = 1u << 0u;
+public static const uint DirectionalLightShadows = 1u << 0u;
 
-[[vk::binding(8, 101)]] public ConstantBuffer<Lights> lights;
-[[vk::binding(9, 101)]] public StructuredBuffer<PointLight> point_lights;
-[[vk::binding(10, 101)]] public DepthTexture2DArray directional_shadow_maps;
-[[vk::binding(11, 101)]] public DepthTextureCubeArray point_shadow_maps;
-[[vk::binding(12, 101)]] public SamplerComparisonState shadow_sampler;
-[[vk::binding(13, 101)]] public ConstantBuffer<SceneInfo> scene_info;
+[[vk::binding(8, 101)]] public ConstantBuffer<Lights> passLights;
+[[vk::binding(9, 101)]] public StructuredBuffer<PointLight> passPointLights;
+[[vk::binding(10, 101)]] public DepthTexture2DArray passDirectionalShadowMaps;
+[[vk::binding(11, 101)]] public DepthTextureCubeArray passPointShadowMaps;
+[[vk::binding(12, 101)]] public SamplerComparisonState passShadowSampler;
+[[vk::binding(13, 101)]] public ConstantBuffer<SceneInfo> passSceneInfo;
 /// The camera's environment map, blurred for what a rough surface or a diffuse bounce sees.
-[[vk::binding(14, 101)]] public TextureCube environment_diffuse_map;
+[[vk::binding(14, 101)]] public TextureCube passEnvironmentDiffuseMap;
 /// The same, sharp in its first level and rougher in each after it.
-[[vk::binding(15, 101)]] public TextureCube environment_specular_map;
+[[vk::binding(15, 101)]] public TextureCube passEnvironmentSpecularMap;
 /// Bevy's spatio-temporal blue noise, layers of noise whose values are spread evenly both across a
 /// layer and from one layer to the next. Gray until it arrives.
-[[vk::binding(16, 101)]] public Texture2DArray blue_noise_layers;
+[[vk::binding(16, 101)]] public Texture2DArray passBlueNoiseLayers;
 
 /// How many directional lights the camera sees.
-public uint directional_light_count()
+public uint passDirectionalLightCount()
 {
-    return lights.n_directional_lights;
+    return passLights.n_directional_lights;
 }
 
 /// How many point and spot lights there are.
-public uint point_light_count()
+public uint passPointLightCount()
 {
-    return scene_info.point_lights;
+    return passSceneInfo.point_lights;
 }
 
 /// How much of a directional light reaches a point in the world, from nothing in full shadow to one
 /// in full light, the way Bevy's own materials work it out with its hardware filtering.
 ///
 /// `view_depth` is how far in front of the camera the point is, which picks the cascade.
-public float directional_shadow(uint light_index, float3 world, float3 normal, float view_depth)
+public float passDirectionalShadow(uint light_index, float3 world, float3 normal, float view_depth)
 {
-    let light = lights.directional_lights[light_index];
+    let light = passLights.directional_lights[light_index];
 
-    if ((light.flags & DIRECTIONAL_LIGHT_SHADOWS) == 0u)
+    if ((light.flags & DirectionalLightShadows) == 0u)
         return 1.0;
 
     var cascade = light.num_cascades;
@@ -235,7 +234,7 @@ public float directional_shadow(uint light_index, float3 world, float3 normal, f
     let depth_offset = light.shadow_depth_bias * light.direction_to_light;
     let offset = float4(world + normal_offset + depth_offset, 1.0);
 
-    let clip = transform(light.cascades[cascade].clip_from_world, offset);
+    let clip = passTransform(light.cascades[cascade].clip_from_world, offset);
     if (clip.w <= 0.0)
         return 1.0;
 
@@ -245,16 +244,16 @@ public float directional_shadow(uint light_index, float3 world, float3 normal, f
 
     let uv = ndc.xy * float2(0.5, -0.5) + 0.5;
     let layer = float(light.depth_texture_base_index + cascade);
-    return directional_shadow_maps.SampleCmpLevelZero(shadow_sampler, float3(uv, layer), ndc.z);
+    return passDirectionalShadowMaps.SampleCmpLevelZero(passShadowSampler, float3(uv, layer), ndc.z);
 }
 
 /// Which way a spot light points, rebuilt from the x and z Bevy keeps and the sign of y it flags.
-public float3 spot_direction(PointLight light)
+public float3 passSpotDirection(PointLight light)
 {
     var direction = float3(light.light_custom_data.x, 0.0, light.light_custom_data.y);
     direction.y = sqrt(max(0.0, 1.0 - direction.x * direction.x - direction.z * direction.z));
 
-    if ((light.flags & POINT_LIGHT_SPOT_Y_NEGATIVE) != 0u)
+    if ((light.flags & PointLightSpotYNegative) != 0u)
         direction.y = -direction.y;
 
     return direction;
@@ -265,7 +264,7 @@ public float3 spot_direction(PointLight light)
 float spot_shadow(uint light_index, PointLight light, float3 world, float3 normal)
 {
     let surface_to_light = light.position_radius.xyz - world;
-    let forward = -spot_direction(light);
+    let forward = -passSpotDirection(light);
     let distance_to_light = dot(forward, surface_to_light);
 
     let offset = -surface_to_light
@@ -291,20 +290,20 @@ float spot_shadow(uint light_index, PointLight light, float3 world, float3 norma
         return 1.0;
 
     let depth_value = light.shadow_map_near_z / -projected.z;
-    let layer = float(int(light_index) + lights.spot_light_shadowmap_offset);
-    return directional_shadow_maps.SampleCmpLevelZero(shadow_sampler, float3(uv, layer), depth_value);
+    let layer = float(int(light_index) + passLights.spot_light_shadowmap_offset);
+    return passDirectionalShadowMaps.SampleCmpLevelZero(passShadowSampler, float3(uv, layer), depth_value);
 }
 
 /// How much of a point or spot light reaches a point in the world, from nothing in full shadow to
 /// one in full light, the way Bevy's own materials work it out with its hardware filtering.
-public float point_shadow(uint light_index, float3 world, float3 normal)
+public float passPointShadow(uint light_index, float3 world, float3 normal)
 {
-    let light = point_lights[light_index];
+    let light = passPointLights[light_index];
 
-    if ((light.flags & POINT_LIGHT_SHADOWS) == 0u)
+    if ((light.flags & PointLightShadows) == 0u)
         return 1.0;
 
-    if ((light.flags & POINT_LIGHT_SPOT) != 0u)
+    if ((light.flags & PointLightSpot) != 0u)
         return spot_shadow(light_index, light, world, normal);
 
     let surface_to_light = light.position_radius.xyz - world;
@@ -322,8 +321,8 @@ public float point_shadow(uint light_index, float3 world, float3 normal)
     let zw = -major * light.light_custom_data.xy + light.light_custom_data.zw;
     let depth_value = zw.x / zw.y;
 
-    return point_shadow_maps.SampleCmpLevelZero(
-        shadow_sampler,
+    return passPointShadowMaps.SampleCmpLevelZero(
+        passShadowSampler,
         float4(local * float3(1.0, 1.0, -1.0), float(light_index)),
         depth_value);
 }
@@ -331,18 +330,18 @@ public float point_shadow(uint light_index, float3 world, float3 normal)
 /// How much light a point or spot light sends to a point in the world before shadow, which is its
 /// color falling off with distance the way Bevy's does, inside its range, and for a spot light
 /// inside its cone.
-public float3 point_light_radiance(uint light_index, float3 world)
+public float3 passPointLightRadiance(uint light_index, float3 world)
 {
-    let light = point_lights[light_index];
+    let light = passPointLights[light_index];
     let to_light = light.position_radius.xyz - world;
     let distance_squared = dot(to_light, to_light);
     let factor = distance_squared * light.color_inverse_square_range.w;
     let window = saturate(1.0 - factor * factor);
     var attenuation = window * window / max(distance_squared, 0.0001);
 
-    if ((light.flags & POINT_LIGHT_SPOT) != 0u)
+    if ((light.flags & PointLightSpot) != 0u)
     {
-        let along = dot(-spot_direction(light), normalize(to_light));
+        let along = dot(-passSpotDirection(light), normalize(to_light));
         let cone = saturate(along * light.light_custom_data.z + light.light_custom_data.w);
         attenuation *= cone * cone;
     }
@@ -351,7 +350,7 @@ public float3 point_light_radiance(uint light_index, float3 world)
 }
 
 /// What Bevy's full-screen triangle hands the fragment shader.
-public struct Input
+public struct FullscreenOutput
 {
     public float4 position : SV_Position;
     /// Where the pixel is on the picture, from zero at the top left to one at the bottom right.
@@ -359,84 +358,86 @@ public struct Input
 };
 
 /// Multiplies a matrix held as four columns by a vector.
-public float4 transform(float4 columns[4], float4 v)
+public float4 passTransform(float4 columns[4], float4 v)
 {
     return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z + columns[3] * v.w;
 }
 
 /// The picture so far at a point, from zero to one across it.
-public float4 sample(float2 uv)
+public float4 passSample(float2 uv)
 {
-    return picture.Sample(picture_sampler, uv);
+    return passPicture.Sample(passPictureSampler, uv);
 }
 
 /// How large the picture is, in pixels.
 ///
 /// A draw on a camera draws into the picture, so it cannot read it, and a texel stands in for it;
-/// there the size is the view's, so `uv_of` and `pixel_size` mean the same in a draw as in a pass.
-public uint2 picture_size()
+/// there the size is the view's, so `passUv` and `passPixelSize` mean the same in a draw as in a
+/// pass.
+public uint2 passPictureSize()
 {
     uint width;
     uint height;
-    picture.GetDimensions(width, height);
+    passPicture.GetDimensions(width, height);
 
     if (width <= 1 && height <= 1)
-        return uint2(view.viewport.zw);
+        return uint2(passView.viewport.zw);
 
     return uint2(width, height);
 }
 
 /// How far apart two neighboring pixels are in `uv`, which a blur steps by.
-public float2 pixel_size()
+public float2 passPixelSize()
 {
-    return 1.0 / float2(picture_size());
+    return 1.0 / float2(passPictureSize());
 }
 
-/// The middle of a pixel in `uv`, which is where a compute shader working a pixel at a time samples.
-public float2 uv_of(int2 pixel)
+/// The middle of a pixel in `uv`, which is where a compute shader working a pixel at a time
+/// samples.
+public float2 passUv(int2 pixel)
 {
-    return (float2(pixel) + 0.5) * pixel_size();
+    return (float2(pixel) + 0.5) * passPixelSize();
 }
 
 /// The depth at a pixel.
-public float load_depth(int2 pixel)
+public float passLoadDepth(int2 pixel)
 {
-    return depth.Load(int3(pixel, 0));
+    return passDepth.Load(int3(pixel, 0));
 }
 
 /// The world-space normal at a pixel.
-public float3 load_normal(int2 pixel)
+public float3 passLoadNormal(int2 pixel)
 {
-    return normals.Load(int3(pixel, 0)).xyz * 2.0 - 1.0;
+    return passNormals.Load(int3(pixel, 0)).xyz * 2.0 - 1.0;
 }
 
 /// How far a pixel moved since the previous frame, in UV units.
-public float2 load_motion(int2 pixel)
+public float2 passLoadMotion(int2 pixel)
 {
-    return motion.Load(int3(pixel, 0));
+    return passMotion.Load(int3(pixel, 0));
 }
 
 /// The depth at a pixel, given the pixel's `SV_Position`.
-public float depth_at(float4 position)
+public float passDepthAt(float4 position)
 {
-    return load_depth(int2(position.xy));
+    return passLoadDepth(int2(position.xy));
 }
 
 /// The world-space normal of the surface at a pixel, given its `SV_Position`.
-public float3 normal_at(float4 position)
+public float3 passNormalAt(float4 position)
 {
-    return load_normal(int2(position.xy));
+    return passLoadNormal(int2(position.xy));
 }
 
 /// How far the surface at a pixel moved since the previous frame, in UV units, given its
 /// `SV_Position`.
-public float2 motion_at(float4 position)
+public float2 passMotionAt(float4 position)
 {
-    return load_motion(int2(position.xy));
+    return passLoadMotion(int2(position.xy));
 }
 
 /// Where the surface at `uv` was on the previous frame's picture.
-public float2 previous_uv(float2 uv, float2 moved)
+public float2 passPreviousUv(float2 uv, float2 moved)
 {
     return uv - moved;
 }
@@ -445,38 +446,38 @@ public float2 previous_uv(float2 uv, float2 moved)
 ///
 /// Worked out the way Bevy's own `depth_ndc_to_view_z` does for a perspective camera. Infinitely
 /// far where nothing was drawn.
-public float distance_from_depth(float depth_value)
+public float passDistanceFromDepth(float depth_value)
 {
-    let near = view.clip_from_view[3][2];
+    let near = passView.clip_from_view[3][2];
     return near / max(depth_value, 1e-7);
 }
 
 /// How far in front of the camera the surface at a pixel is, in world units, given its
 /// `SV_Position`.
-public float distance_at(float4 position)
+public float passDistanceAt(float4 position)
 {
-    return distance_from_depth(depth_at(position));
+    return passDistanceFromDepth(passDepthAt(position));
 }
 
 /// Where in the world the surface at `uv` with `depth_value` is.
-public float3 world_position(float2 uv, float depth_value)
+public float3 passWorldPosition(float2 uv, float depth_value)
 {
     let ndc = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, depth_value, 1.0);
-    let world = transform(view.world_from_clip, ndc);
+    let world = passTransform(passView.world_from_clip, ndc);
     return world.xyz / world.w;
 }
 
 /// How far in front of the camera a point in the world is, along the way it looks, which picks a
 /// directional light's shadow cascade.
-public float view_depth(float3 world)
+public float passViewDepth(float3 world)
 {
-    return -transform(view.view_from_world, float4(world, 1.0)).z;
+    return -passTransform(passView.view_from_world, float4(world, 1.0)).z;
 }
 
 /// Where a point in the world was on the previous frame's picture, in `uv`.
-public float2 previous_uv_of(float3 world)
+public float2 passPreviousUvOf(float3 world)
 {
-    let clip = transform(previous_view.clip_from_world, float4(world, 1.0));
+    let clip = passTransform(passPreviousView.clip_from_world, float4(world, 1.0));
     let ndc = clip.xy / clip.w;
     return float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
 }
@@ -484,43 +485,43 @@ public float2 previous_uv_of(float3 world)
 /// The depth Bevy keeps for a point in the world as the view sees it, which a draw that finds its
 /// own surface returns through `SV_Depth`, and which is the shadow map's where the view is a
 /// light's.
-public float depth_of(float3 world)
+public float passDepthOf(float3 world)
 {
-    let clip = transform(view.clip_from_world, float4(world, 1.0));
+    let clip = passTransform(passView.clip_from_world, float4(world, 1.0));
     return clip.z / clip.w;
 }
 
 /// Whether the view is orthographic, as a directional light's shadow cascades are.
-public bool orthographic()
+public bool passOrthographic()
 {
-    return view.clip_from_view[3].w == 1.0;
+    return passView.clip_from_view[3].w == 1.0;
 }
 
 /// Where the ray through the pixel at `uv` starts, at the camera for a perspective view, and on
 /// the near plane for an orthographic one.
-public float3 ray_origin(float2 uv)
+public float3 passRayOrigin(float2 uv)
 {
-    if (orthographic())
-        return world_position(uv, 1.0);
+    if (passOrthographic())
+        return passWorldPosition(uv, 1.0);
 
-    return view.world_position;
+    return passView.world_position;
 }
 
-/// Which way the ray through the pixel at `uv` goes from `ray_origin`, for a shader that finds a
+/// Which way the ray through the pixel at `uv` goes from `passRayOrigin`, for a shader that finds a
 /// surface by marching along it.
-public float3 ray_direction(float2 uv)
+public float3 passRayDirection(float2 uv)
 {
-    if (orthographic())
-        return normalize(-view.world_from_view[2].xyz);
+    if (passOrthographic())
+        return normalize(-passView.world_from_view[2].xyz);
 
-    return normalize(world_position(uv, 1.0) - view.world_position);
+    return normalize(passWorldPosition(uv, 1.0) - passView.world_position);
 }
 
 /// A corner of one triangle covering the whole view, for a draw over every pixel of it with three
 /// vertices, the triangle Bevy draws a pass with.
-public Input full_screen(uint vertex)
+public FullscreenOutput fullscreenTriangle(uint vertex)
 {
-    Input output;
+    FullscreenOutput output;
     output.uv = float2(float(vertex >> 1), float(vertex & 1)) * 2.0;
     output.position = float4(output.uv * float2(2.0, -2.0) + float2(-1.0, 1.0), 0.0, 1.0);
     return output;
@@ -528,16 +529,16 @@ public Input full_screen(uint vertex)
 
 /// Whether the camera is lit by an environment map, which `SetSkyLighting`, `SetImageLighting` and
 /// `SetEnvironmentMap` all give it.
-public bool has_environment()
+public bool passHasEnvironment()
 {
-    return scene_info.environment_mips > 0;
+    return passSceneInfo.environment_mips > 0;
 }
 
 /// A world direction turned the way the environment's cubes are sampled, rotated as the
 /// environment was, and with z negated, since cube maps are left-handed and Bevy's world is not.
 float3 environment_direction(float3 direction)
 {
-    let q = scene_info.environment_rotation;
+    let q = passSceneInfo.environment_rotation;
     let t = 2.0 * cross(q.xyz, direction);
     var turned = direction + q.w * t + cross(q.xyz, t);
     turned.z = -turned.z;
@@ -546,26 +547,26 @@ float3 environment_direction(float3 direction)
 
 /// The light the environment sends a surface facing `normal`, from all of the half of the sky in
 /// front of it, as a diffuse bounce off the sky gathers. Black without an environment.
-public float3 environment_diffuse(float3 normal)
+public float3 passEnvironmentDiffuse(float3 normal)
 {
-    if (!has_environment())
+    if (!passHasEnvironment())
         return float3(0.0);
 
-    let sample = environment_diffuse_map.SampleLevel(picture_sampler, environment_direction(normal), 0.0);
-    return sample.rgb * scene_info.environment_intensity;
+    let sample = passEnvironmentDiffuseMap.SampleLevel(passPictureSampler, environment_direction(normal), 0.0);
+    return sample.rgb * passSceneInfo.environment_intensity;
 }
 
 /// The light the environment sends along `direction`, blurred as much as a surface of
 /// `perceptual_roughness` blurs it, as a ray that left the scene sees. Zero roughness is the sky as
 /// it is. Black without an environment.
-public float3 environment_specular(float3 direction, float perceptual_roughness)
+public float3 passEnvironmentSpecular(float3 direction, float perceptual_roughness)
 {
-    if (!has_environment())
+    if (!passHasEnvironment())
         return float3(0.0);
 
-    let level = perceptual_roughness * float(scene_info.environment_mips - 1);
-    let sample = environment_specular_map.SampleLevel(picture_sampler, environment_direction(direction), level);
-    return sample.rgb * scene_info.environment_intensity;
+    let level = perceptual_roughness * float(passSceneInfo.environment_mips - 1);
+    let sample = passEnvironmentSpecularMap.SampleLevel(passPictureSampler, environment_direction(direction), level);
+    return sample.rgb * passSceneInfo.environment_intensity;
 }
 
 /// Blue noise at a pixel for this frame, four numbers from zero to one.
@@ -575,14 +576,12 @@ public float3 environment_specular(float3 direction, float perceptual_roughness)
 /// grain a blur removes rather than blotches, and each frame takes the next layer, so an
 /// accumulation over frames sees values spread evenly in time as well. The pattern repeats every
 /// hundred and twenty eight pixels and every thirty two frames.
-public float4 blue_noise(int2 pixel)
+public float4 passBlueNoise(int2 pixel)
 {
     uint width, height, layers;
-    blue_noise_layers.GetDimensions(width, height, layers);
+    passBlueNoiseLayers.GetDimensions(width, height, layers);
 
     let at = int2(uint2(pixel) % uint2(width, height));
-    let layer = int(globals.frame_count % layers);
-    return blue_noise_layers.Load(int4(at, layer, 0));
-}
-
+    let layer = int(passGlobals.frame_count % layers);
+    return passBlueNoiseLayers.Load(int4(at, layer, 0));
 }

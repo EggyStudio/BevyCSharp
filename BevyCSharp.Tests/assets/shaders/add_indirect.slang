@@ -26,6 +26,6 @@ Corner vertex(uint vertex_id : SV_VertexID)
 [shader("fragment")]
 float4 fragment(Corner corner) : SV_Target
 {
-    let surface = bcs_pass::surface_of(gbuffer.Load(int3(int2(corner.position.xy), 0)));
+    let surface = passSurfaceOf(gbuffer.Load(int3(int2(corner.position.xy), 0)));
     return float4(surface.base_color * light.rgb, 0.0);
 }

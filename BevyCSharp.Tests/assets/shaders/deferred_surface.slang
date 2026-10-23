@@ -8,7 +8,7 @@ uniform float4 color;
 uniform float metallic;
 uniform float roughness;
 
-bcs::Surface given(bcs::Surface surface)
+Surface given(Surface surface)
 {
     surface.base_color = color;
     surface.metallic = metallic;
@@ -17,13 +17,13 @@ bcs::Surface given(bcs::Surface surface)
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex vertex)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex vertex)
 {
-    return bcs::prepass_output(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
+    return meshPrepassOutput(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
 }
 
 [shader("fragment")]
-bcs::Deferred deferred(bcs::PrepassVertexOutput mesh)
+Deferred deferred(MeshPrepassVertexOutput mesh)
 {
-    return bcs::deferred(given(bcs::surface(mesh)), mesh);
+    return meshDeferred(given(meshSurface(mesh)), mesh);
 }

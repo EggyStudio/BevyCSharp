@@ -18,6 +18,6 @@ void main(uint3 id : SV_DispatchThreadID)
 
     for (uint side = 0; side < 6; side++)
     {
-        volume.Store(bcs_scene::irradiance_texel(id, side, grid), light[side]);
+        volume.Store(irradianceTexel(id, side, grid), light[side]);
     }
 }

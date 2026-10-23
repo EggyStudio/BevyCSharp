@@ -12,7 +12,7 @@ namespace BevyCSharp.Examples.Shading;
 //
 // Bevy extends its StandardMaterial with a type of the game's own. Here the shader, in Slang,
 // describes the surface the standard material would and hands it to Bevy's lighting through
-// bcs::light and bcs::finish, so the steps between them are the shader's.
+// meshLight and meshFinish, so the steps between them are the shader's.
 internal static class ExtendedMaterial
 {
     public static void Build(App app)

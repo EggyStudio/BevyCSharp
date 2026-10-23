@@ -26,7 +26,7 @@ using Bevy.Interop;
 /// SamplerState linear;
 ///
 /// [shader("fragment")]
-/// float4 fragment(bcs::VertexOutput input) : SV_Target
+/// float4 fragment(MeshVertexOutput input) : SV_Target
 /// {
 ///     return tint * layers[7].Sample(linear, input.uv) * weights[999];
 /// }
@@ -196,7 +196,7 @@ public static unsafe partial class Shaders
         {
             throw new ArgumentException(
                 "A deferred stage needs a prepass vertex shader of the program's own as well, which "
-                + "writes everything the deferred stage reads of the prepass (bcs::prepass_output), "
+                + "writes everything the deferred stage reads of the prepass (meshPrepassOutput), "
                 + "whatever the mesh carries.",
                 nameof(settings));
         }

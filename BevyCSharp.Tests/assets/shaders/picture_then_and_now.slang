@@ -6,9 +6,9 @@ import bcs_pass;
 Texture2D lit_previous;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let now = bcs_pass::sample(input.uv);
+    let now = passSample(input.uv);
     let then = lit_previous.Load(int3(int2(input.position.xy * 0.5), 0));
 
     return float4(

@@ -10,21 +10,21 @@ uniform float swell;
 uniform float4 color;
 
 [shader("vertex")]
-bcs::VertexOutput vertex(bcs::Vertex vertex)
+MeshVertexOutput vertex(MeshVertex vertex)
 {
     vertex.position += vertex.normal * swell;
-    return bcs::standard_vertex(vertex);
+    return meshStandardVertex(vertex);
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return color;
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex vertex)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex vertex)
 {
     let moved = vertex.position + vertex.normal * swell;
-    return bcs::prepass_output(vertex.instance_index, moved, vertex.normal, vertex.uv);
+    return meshPrepassOutput(vertex.instance_index, moved, vertex.normal, vertex.uv);
 }

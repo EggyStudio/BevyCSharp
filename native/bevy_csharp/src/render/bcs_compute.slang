@@ -1,25 +1,23 @@
 // What a Slang compute shader sees from the bridge, which is time and a few helpers.
 //
-// A shader reaches it with `import bcs_compute;`, and everything in it is under the `bcs_compute`
-// namespace. A dispatch carries whatever the shader declares, numbers, buffers read and written,
-// images read and written, samplers, in any number, each set from C# by its name. Time is in space
-// 101, which the bridge moves to group one after the compile, so the shader's own globals keep
-// group zero to themselves. It is at binding two, which is where a dispatch run on a camera finds
-// it as well, so a shader importing this runs either way. One that needs the camera's depth, motion
-// or view imports `bcs_pass` instead, and runs only on a camera.
+// A shader reaches it with `import bcs_compute;` and uses its names plainly, the raw buffer's
+// helpers named `buffer` and their work. A dispatch carries whatever the shader declares, numbers,
+// buffers read and written, images read and written, samplers, in any number, each set from C# by
+// its name. Time is in space 101, which the bridge moves to group one after the compile, so the
+// shader's own globals keep group zero to themselves. It is at binding two, which is where a
+// dispatch run on a camera finds it as well, so a shader importing this runs either way. One that
+// needs the camera's depth, motion or view imports `bcs_pass` instead, and runs only on a camera.
 //
 // A raw buffer (`RWByteAddressBuffer`) is packed the way C packs a struct, which is the way a C#
-// struct with sequential layout is packed, so `element` and `store` read and write the same bytes
-// `Shaders.CreateBuffer` and `Shaders.ReadBuffer` hand across. A `RWStructuredBuffer<T>` is laid
-// out as WGSL lays out an array, where a `float3` takes sixteen bytes.
+// struct with sequential layout is packed, so `bufferElement` and `bufferStore` read and write the
+// same bytes `Shaders.CreateBuffer` and `Shaders.ReadBuffer` hand across. A `RWStructuredBuffer<T>`
+// is laid out as WGSL lays out an array, where a `float3` takes sixteen bytes.
 
 module bcs_compute;
 
-public namespace bcs_compute
-{
 
 /// Time, in the layout Bevy's `Globals` has.
-public struct Globals
+public struct ComputeGlobals
 {
     /// Seconds since startup, wrapping to zero after an hour.
     public float time;
@@ -33,26 +31,24 @@ public struct Globals
 /// Laid out as C lays it out (`ScalarDataLayout`), which is twelve bytes and what Bevy binds. The
 /// usual constant buffer rules round the struct up to sixteen, and a pipeline refuses a shader
 /// that reads more of a buffer than its layout promises.
-[[vk::binding(2, 101)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
+[[vk::binding(2, 101)]] public ConstantBuffer<ComputeGlobals, ScalarDataLayout> computeGlobals;
 
 /// The element at `index` of a raw buffer, read as an array of `T`.
-public T element<T>(RWByteAddressBuffer buffer, uint index)
+public T bufferElement<T>(RWByteAddressBuffer buffer, uint index)
 {
     return buffer.Load<T>(index * sizeof(T));
 }
 
 /// Writes `value` as the element at `index` of a raw buffer, treated as an array of `T`.
-public void store<T>(RWByteAddressBuffer buffer, uint index, T value)
+public void bufferStore<T>(RWByteAddressBuffer buffer, uint index, T value)
 {
     buffer.Store<T>(index * sizeof(T), value);
 }
 
 /// How many elements of `T` a raw buffer holds.
-public uint count<T>(RWByteAddressBuffer buffer)
+public uint bufferCount<T>(RWByteAddressBuffer buffer)
 {
     uint size;
     buffer.GetDimensions(size);
     return size / sizeof(T);
-}
-
 }

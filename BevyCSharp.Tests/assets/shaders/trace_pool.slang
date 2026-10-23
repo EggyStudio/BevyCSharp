@@ -5,9 +5,9 @@
 import bcs_compute;
 import bcs_scene;
 
-StructuredBuffer<bcs_scene::PoolVertex> vertices;
+StructuredBuffer<PoolVertex> vertices;
 StructuredBuffer<uint> indices;
-StructuredBuffer<bcs_scene::PoolMesh> meshes;
+StructuredBuffer<PoolMesh> meshes;
 RWStructuredBuffer<float4> into;
 
 [shader("compute")]
@@ -21,12 +21,12 @@ void main()
     var nearest = 1e30;
     var normal = float3(0.0);
 
-    for (uint triangle = 0; triangle < bcs_scene::triangle_count(mesh); triangle++)
+    for (uint triangle = 0; triangle < poolTriangleCount(mesh); triangle++)
     {
-        let a = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 0);
-        let b = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 1);
-        let c = bcs_scene::pool_corner(vertices, indices, mesh, triangle, 2);
-        let hit = bcs_scene::intersect_triangle(origin, direction, a.position.xyz, b.position.xyz, c.position.xyz);
+        let a = poolCorner(vertices, indices, mesh, triangle, 0);
+        let b = poolCorner(vertices, indices, mesh, triangle, 1);
+        let c = poolCorner(vertices, indices, mesh, triangle, 2);
+        let hit = intersectTriangle(origin, direction, a.position.xyz, b.position.xyz, c.position.xyz);
 
         if (hit.w > 0.0 && hit.x < nearest)
         {
@@ -36,6 +36,6 @@ void main()
     }
 
     into[0] = float4(nearest, normal);
-    into[1] = float4(bcs_scene::intersect_box(origin, direction, mesh.bounds_min.xyz, mesh.bounds_max.xyz), 0.0, 0.0, 0.0);
-    into[2] = float4(float(bcs_scene::triangle_count(meshes[0])), float(bcs_scene::triangle_count(meshes[1])), float(meshes[1].first_vertex), 0.0);
+    into[1] = float4(intersectBox(origin, direction, mesh.bounds_min.xyz, mesh.bounds_max.xyz), 0.0, 0.0, 0.0);
+    into[2] = float4(float(poolTriangleCount(meshes[0])), float(poolTriangleCount(meshes[1])), float(meshes[1].first_vertex), 0.0);
 }

@@ -41,7 +41,7 @@ VertexOutput vertex(uint vertex_id : SV_VertexID, uint instance_id : SV_Instance
     let position = corners[triangles[vertex_id % 36]] * instance.position_scale.w + instance.position_scale.xyz;
 
     VertexOutput output;
-    output.clip_position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(position, 1.0));
+    output.clip_position = passTransform(passView.clip_from_world, float4(position, 1.0));
     output.color = instance.color;
     return output;
 }

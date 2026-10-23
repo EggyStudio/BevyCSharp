@@ -8,7 +8,7 @@ RWStructuredBuffer<float> into;
 [numthreads(1, 1, 1)]
 void main()
 {
-    into[0] = bcs_compute::globals.time;
-    into[1] = bcs_compute::globals.delta_time;
-    into[2] = float(bcs_compute::globals.frame_count);
+    into[0] = computeGlobals.time;
+    into[1] = computeGlobals.delta_time;
+    into[2] = float(computeGlobals.frame_count);
 }

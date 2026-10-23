@@ -22,9 +22,9 @@ struct VertexOutput
 VertexOutput vertex(Vertex vertex)
 {
     VertexOutput output;
-    let tag = bcs::tag(vertex.instance_index);
-    output.world_position = float4(bcs::local_to_world(vertex.instance_index, vertex.position), 1.0);
-    output.clip_position = bcs::world_to_clip(output.world_position.xyz);
+    let tag = meshTag(vertex.instance_index);
+    output.world_position = float4(meshLocalToWorld(vertex.instance_index, vertex.position), 1.0);
+    output.clip_position = meshWorldToClip(output.world_position.xyz);
 
     uint width, height;
     texture.GetDimensions(width, height);

@@ -7,8 +7,8 @@ uniform float nearest;
 uniform float farthest;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let away = bcs_pass::distance_at(input.position);
+    let away = passDistanceAt(input.position);
     return away > nearest && away < farthest ? float4(0.0, 1.0, 0.0, 1.0) : float4(1.0, 0.0, 0.0, 1.0);
 }

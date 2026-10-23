@@ -14,10 +14,10 @@ Texture2D color_texture;
 SamplerState color_texture_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     // The tag is the entry's place in the array, which the array moves as cubes go.
-    let color = material_data[bcs::tag(mesh.instance_index)].color;
+    let color = material_data[meshTag(mesh.instance_index)].color;
     let texture_color = color_texture.Sample(color_texture_sampler, mesh.uv).rgb;
     return float4(color * texture_color, 1.0);
 }

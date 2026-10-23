@@ -4,7 +4,7 @@
 import bcs;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    return bcs::globals.time > 0.0 && bcs::globals.frame_count > 0 ? float4(0.0, 1.0, 0.0, 1.0) : float4(1.0, 0.0, 0.0, 1.0);
+    return meshGlobals.time > 0.0 && meshGlobals.frame_count > 0 ? float4(0.0, 1.0, 0.0, 1.0) : float4(1.0, 0.0, 0.0, 1.0);
 }

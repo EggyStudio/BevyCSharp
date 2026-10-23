@@ -22,7 +22,7 @@ TextureCube skies[16];
 SamplerState linear;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let sky = skies[3].Sample(linear, mesh.world_normal);
     return tint * layers[7].Sample(linear, mesh.uv) * weights[999] + sky;
@@ -82,8 +82,8 @@ var grass = Shaders.CreateProgram(new ShaderProgramSettings
 ```
 
 `import bcs;` gives a shader Bevy's view, time and mesh transforms, and vertex structs that line up
-with Bevy's own, so a fragment shader works after Bevy's vertex shader, and `bcs::standard_vertex`
-does what Bevy's does for a vertex shader that starts from it. `bcs::tag(mesh.instance_index)` reads
+with Bevy's own, so a fragment shader works after Bevy's vertex shader, and `meshStandardVertex`
+does what Bevy's does for a vertex shader that starts from it. `meshTag(mesh.instance_index)` reads
 the number an entity's `MeshTag` gives it, set with `ecs.Insert<MeshTagRef>(entity).Value`, so
 meshes sharing one material are told apart in the shader, each picking its layer of an array
 texture (loaded with `TextureSettings.Layers`) or its entry of a buffer:
@@ -94,23 +94,23 @@ import bcs;
 uniform float height;
 
 [shader("vertex")]
-bcs::VertexOutput vertex(bcs::Vertex v)
+MeshVertexOutput vertex(MeshVertex v)
 {
-    v.position.y += sin(bcs::globals.time * 3.0 + v.position.x * 4.0) * height;
-    return bcs::standard_vertex(v);
+    v.position.y += sin(meshGlobals.time * 3.0 + v.position.x * 4.0) * height;
+    return meshStandardVertex(v);
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex v)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex v)
 {
-    v.position.y += sin(bcs::prepass_globals.time * 3.0 + v.position.x * 4.0) * height;
-    return bcs::prepass_output(v.instance_index, v.position, v.normal, v.uv);
+    v.position.y += sin(meshPrepassGlobals.time * 3.0 + v.position.x * 4.0) * height;
+    return meshPrepassOutput(v.instance_index, v.position, v.normal, v.uv);
 }
 ```
 
 The prepass draws depth for shadows, and normals and motion for the effects that read them. It binds
-less than the main pass and its time elsewhere, so a prepass stage reads `bcs::prepass_globals`
-where the main pass reads `bcs::globals`, and a pipeline given the other refuses to build. A
+less than the main pass and its time elsewhere, so a prepass stage reads `meshPrepassGlobals`
+where the main pass reads `meshGlobals`, and a pipeline given the other refuses to build. A
 material that moves its vertices needs a prepass vertex shader moving them the same way, or it casts
 the shadow of the mesh it started from, and one that discards pixels needs a prepass fragment shader
 discarding the same ones. Both read the material's values like the main stages do. A vertex stage
@@ -160,7 +160,7 @@ struct Shaded
 Shaded vertex(Vertex v)
 {
     Shaded output;
-    output.position = bcs::local_to_clip(v.instance_index, v.position);
+    output.position = meshLocalToClip(v.instance_index, v.position);
     output.color = float4(v.packed & 0xff, (v.packed >> 8) & 0xff, (v.packed >> 16) & 0xff, 255) / 255.0;
     return output;
 }
@@ -200,7 +200,7 @@ import bcs2d;
 const float LEVELS = 4.0;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     let t = floor(mesh.uv.x * LEVELS) / LEVELS;
     return float4(t, t * 0.4, 1.0 - t, 1.0);
@@ -261,21 +261,21 @@ struct Tint
 StructuredBuffer<Tint> tints;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    return tints[bcs::tag(mesh.instance_index)].color;
+    return tints[meshTag(mesh.instance_index)].color;
 }
 ```
 
 The component crosses as C# lays it out, and a structured buffer gives a `float3` sixteen bytes, so
 a struct shared with one spells its padding out. The tag is the array's, so an entity in it has no
-tag of its own to give, and `bcs2d::tag` reads it the same way on a 2D mesh.
+tag of its own to give, and `mesh2dTag` reads it the same way on a 2D mesh.
 
 ### On a 2D mesh
 
 A program draws a 2D mesh with its 2D stages, and a 2D camera draws the material as Bevy draws a
 `Material2d`. Its fragment shader imports `bcs2d`, Bevy's 2D view and mesh, and takes the
-`bcs2d::VertexOutput` Bevy's own 2D vertex shader hands on, which puts its values elsewhere than
+`Mesh2dVertexOutput` Bevy's own 2D vertex shader hands on, which puts its values elsewhere than
 the 3D one does. Its own values are declared and set by name as a 3D material's are, and a 2D
 vertex shader of the program's own places the mesh where Bevy's would leave it:
 
@@ -300,7 +300,7 @@ Texture2D picture;
 SamplerState picture_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     return tint * picture.Sample(picture_sampler, mesh.uv);
 }
@@ -318,8 +318,8 @@ A 2D material given to a sprite draws the sprite, as Bevy's `SpriteMaterial` doe
 sprite as a quad it sizes to the image and moves by the anchor, and the sprite keeps that quad, so
 the program brings a 2D fragment shader and no vertex shader. The fragment shader imports
 `bcs_sprite` beside `bcs2d` for what the sprite says, its image, color, flipping, tiling, slicing
-and atlas, with Bevy's own functions for them. `sample_final_color` draws the sprite as Bevy would,
-and `sample_sprite_texture` and `get_final_color` are its two halves, the image where the sprite
+and atlas, with Bevy's own functions for them. `spriteSampleFinalColor` draws the sprite as Bevy would,
+and `spriteSampleTexture` and `spriteFinalColor` are its two halves, the image where the sprite
 puts it and then the sprite's color and alpha mode:
 
 <!-- compiled with:
@@ -339,15 +339,15 @@ import bcs_sprite;
 uniform float amount;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput input) : SV_Target
+float4 fragment(Mesh2dVertexOutput input) : SV_Target
 {
-    let color = bcs_sprite::sample_sprite_texture(input.uv);
-    return bcs_sprite::get_final_color(float4(color.rgb, color.a * (1.0 - amount)));
+    let color = spriteSampleTexture(input.uv);
+    return spriteFinalColor(float4(color.rgb, color.a * (1.0 - amount)));
 }
 ```
 
 A material made without an alpha mode draws the sprite as the sprite's own alpha mode says, as a
-Bevy sprite material naming none does, and one made with one draws by it, `get_final_color` applying
+Bevy sprite material naming none does, and one made with one draws by it, `spriteFinalColor` applying
 its mask cutoff. Sprites with the same image and settings share one copy of the material, which
 keeps them in one batch, and a value set on the material reaches them in the next frame, as it does
 in Bevy. A program reading `bcs_sprite` draws only sprites, and one with a 2D vertex shader of its
@@ -357,7 +357,7 @@ own draws none.
 
 A program draws an interface node with its interface stages, and the interface draws the material as
 Bevy draws a `UiMaterial`, across the whole node over its background, border and image and under
-its text. Its fragment shader imports `bcs_ui` and takes the `bcs_ui::VertexOutput` Bevy's own
+its text. Its fragment shader imports `bcs_ui` and takes the `UiVertexOutput` Bevy's own
 vertex shader hands on, where on the node the fragment is, the node's size in pixels, its border
 widths and how far its corners are rounded, enough to draw a border or a rounded edge of its own.
 Its own values are declared and set by name as a 3D material's are:
@@ -382,7 +382,7 @@ Texture2D picture;
 SamplerState picture_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs_ui::VertexOutput node) : SV_Target
+float4 fragment(UiVertexOutput node) : SV_Target
 {
     let color = picture.Sample(picture_sampler, node.uv);
     return node.uv.x < filled ? color : float4(0.0);
@@ -391,14 +391,14 @@ float4 fragment(bcs_ui::VertexOutput node) : SV_Target
 
 An interface material is blended by its alpha with what is behind, as everything an interface draws
 is, and a node drawn with one is laid out, clipped and stacked as any node is and takes an outline
-or a shadow the same way. An interface vertex shader of the program's own, taking `bcs_ui::Vertex`,
+or a shadow the same way. An interface vertex shader of the program's own, taking `UiVertex`,
 places the node's quad where Bevy's would leave it.
 
 ### Lit by Bevy
 
 A material's fragment shader writes the color drawn, and is lit by nothing unless it lights itself.
-`bcs::lit` lights it as Bevy lights its standard material, with every light, shadow, environment
-map and fog of the view, from a `bcs::Surface` the shader fills in, as Bevy's own `ExtendedMaterial`
+`meshLit` lights it as Bevy lights its standard material, with every light, shadow, environment
+map and fog of the view, from a `Surface` the shader fills in, as Bevy's own `ExtendedMaterial`
 does:
 
 ```slang
@@ -409,25 +409,25 @@ Texture2D rust;
 SamplerState linear;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);              // Bevy's default standard material here
+    var surface = meshSurface(mesh);              // Bevy's default standard material here
     surface.base_color = tint * rust.Sample(linear, mesh.uv);
     surface.roughness = 0.8;
-    return bcs::lit(surface, mesh);
+    return meshLit(surface, mesh);
 }
 ```
 
 A surface holds what a standard material does, its color, its emissive light, how metal and
 rough it is, its reflectance, how much ambient light reaches it, and the normal it is lit by, which
-a normal map bends. `bcs::lit` is two steps, `bcs::light` and then `bcs::finish`, and a shader that
+a normal map bends. `meshLit` is two steps, `meshLight` and then `meshFinish`, and a shader that
 changes the lit color, cutting it into steps or tinting it, calls them apart and changes it between,
 before the fog and the tonemapping a camera without high dynamic range does in the shader:
 
 ```slang
-var color = bcs::light(surface, mesh);
+var color = meshLight(surface, mesh);
 color = floor(color * 4.0) / 4.0;
-return bcs::finish(color, mesh);
+return meshFinish(color, mesh);
 ```
 
 Bevy's lighting is its own WESL over bindings that change with every feature a camera turns on, so
@@ -444,7 +444,7 @@ A material whose program has a deferred stage writes its surface into Bevy's def
 Bevy's deferred lighting pass lights it with the rest of the scene. Screen-space reflections read
 those buffers, so water that reflects what stands around it is drawn this way. Like Bevy's own
 deferred materials it is drawn by a camera that draws deferred and by no other. The stage returns
-`bcs::deferred(surface, mesh)` from the prepass's vertex output, which a prepass vertex shader of
+`meshDeferred(surface, mesh)` from the prepass's vertex output, which a prepass vertex shader of
 the program's own writes whole:
 
 ```csharp
@@ -457,18 +457,18 @@ var water = Shaders.CreateMaterial(Shaders.CreateProgram(new ShaderProgramSettin
 
 ```slang
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex v)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex v)
 {
-    return bcs::prepass_output(v.instance_index, v.position, v.normal, v.uv);
+    return meshPrepassOutput(v.instance_index, v.position, v.normal, v.uv);
 }
 
 [shader("fragment")]
-bcs::Deferred deferred(bcs::PrepassVertexOutput mesh)
+Deferred deferred(MeshPrepassVertexOutput mesh)
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.roughness = 0.05;
     surface.normal = ripples(mesh);                     // a normal of the shader's own
-    return bcs::deferred(surface, mesh);
+    return meshDeferred(surface, mesh);
 }
 ```
 
@@ -483,23 +483,23 @@ buffers under [Compute on a camera](compute.md#compute-on-a-camera)).
 ### Clustered decals
 
 Bevy projects a clustered decal onto whatever lies inside its box, and its standard material lays
-the decal's textures on. A surface here has them laid on with `bcs::decals` before it is lit, the
+the decal's textures on. A surface here has them laid on with `meshDecals` before it is lit, the
 color over the surface's by its alpha, how metal and rough it is, its normal map and its emissive
 light, as the standard material lays them. A shader that does something of its own with each
-decal walks them itself, by `bcs::decal_count`, the tag a game gave each, which Bevy hands over and
+decal walks them itself, by `meshDecalCount`, the tag a game gave each, which Bevy hands over and
 does nothing with, and each of its textures, as Bevy's clustered_decals example tints its decals by
 their tags:
 
 ```slang
-var surface = bcs::decals(bcs::surface(mesh), mesh);
+var surface = meshDecals(meshSurface(mesh), mesh);
 
-for (uint index = 0; index < bcs::decal_count(mesh); index++)
+for (uint index = 0; index < meshDecalCount(mesh); index++)
 {
-    if (bcs::decal_tag(mesh, index) == 1)
-        surface.emissive += bcs::decal_sample(mesh, index, bcs::DecalMap.Color);
+    if (meshDecalTag(mesh, index) == 1)
+        surface.emissive += meshDecalSample(mesh, index, DecalMap.Color);
 }
 
-return bcs::lit(surface, mesh);
+return meshLit(surface, mesh);
 ```
 
 They reach Bevy's own walk through the decals over a point, its `ClusteredDecalIterator`, by WESL
@@ -509,8 +509,8 @@ over any point.
 
 ### Irradiance volumes
 
-`bcs::light` takes the irradiance volumes over a surface into account as the standard material
-does. `bcs::irradiance(mesh, normal)` is the light they give a surface facing `normal` there, by
+`meshLight` takes the irradiance volumes over a surface into account as the standard material
+does. `meshIrradiance(mesh, normal)` is the light they give a surface facing `normal` there, by
 Bevy's own `irradiance_volume_light`, at each volume's intensity, for a shader that shows that light
 itself, as Bevy's irradiance_volumes example draws each voxel of its volume as a cube in the light
 it holds.
@@ -567,13 +567,13 @@ Texture2D grain;
 SamplerState grain_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let shift = bcs_pass::pixel_size() * strength * 4.0;
+    let shift = passPixelSize() * strength * 4.0;
     let color = float3(
-        bcs_pass::sample(input.uv + shift).r,
-        bcs_pass::sample(input.uv).g,
-        bcs_pass::sample(input.uv - shift).b);
+        passSample(input.uv + shift).r,
+        passSample(input.uv).g,
+        passSample(input.uv - shift).b);
     let lines = 0.85 + 0.15 * sin(input.position.y * 3.14159);
     return float4(color * lines * grain.Sample(grain_sampler, input.uv).r, 1.0);
 }
@@ -583,8 +583,8 @@ float4 fragment(bcs_pass::Input input) : SV_Target
 camera's depth, normals and motion vectors, which the bridge binds itself. Everything else a pass
 declares is its own. Depth, normals and motion come from a prepass the camera draws when asked, with
 `Shaders.SetPrepass(camera, depth: true, normals: true, motion: true)`, and an outline, a fog or
-anything reusing the previous frame is built from them. `bcs_pass::distance_at` turns depth into
-world units, `world_position` turns a pixel back into a point in the world, and `previous_uv_of`
+anything reusing the previous frame is built from them. `passDistanceAt` turns depth into
+world units, `passWorldPosition` turns a pixel back into a point in the world, and `passPreviousUvOf`
 finds where a point was on the previous frame. A camera that draws none of them binds the far plane,
 white normals and no motion, and so does a multisampled one, whose prepass a pass cannot bind. A
 pass before tonemapping sees the linear picture, which may be brighter than white, and suits

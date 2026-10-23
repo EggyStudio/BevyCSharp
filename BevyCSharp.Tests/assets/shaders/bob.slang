@@ -2,28 +2,28 @@
 // binding its pass gives it, and paints it `color`.
 //
 // The prepass binds less than the main pass, its time among what moves, so a prepass stage
-// reading `bcs::globals` is a pipeline that refuses to build and ends the app.
+// reading `meshGlobals` is a pipeline that refuses to build and ends the app.
 
 import bcs;
 
 uniform float4 color;
 
 [shader("vertex")]
-bcs::VertexOutput vertex(bcs::Vertex vertex)
+MeshVertexOutput vertex(MeshVertex vertex)
 {
-    vertex.position.y += sin(bcs::globals.time * 4.0) * 0.1;
-    return bcs::standard_vertex(vertex);
+    vertex.position.y += sin(meshGlobals.time * 4.0) * 0.1;
+    return meshStandardVertex(vertex);
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return color;
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(bcs::PrepassVertex vertex)
+MeshPrepassVertexOutput prepass_vertex(MeshPrepassVertex vertex)
 {
-    vertex.position.y += sin(bcs::prepass_globals.time * 4.0) * 0.1;
-    return bcs::prepass_output(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
+    vertex.position.y += sin(meshPrepassGlobals.time * 4.0) * 0.1;
+    return meshPrepassOutput(vertex.instance_index, vertex.position, vertex.normal, vertex.uv);
 }

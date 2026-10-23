@@ -106,19 +106,19 @@ uniform float3 toward_sun;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let size = bcs_pass::picture_size();
+    let size = passPictureSize();
     if (id.x >= size.x || id.y >= size.y) return;
 
-    let depth = bcs_pass::load_depth(int2(id.xy));
+    let depth = passLoadDepth(int2(id.xy));
     if (depth <= 0.0) { lit[id.xy] = 1.0; return; }
 
     let uv = (float2(id.xy) + 0.5) / float2(size);
-    let from = bcs_pass::world_position(uv, depth) + bcs_pass::load_normal(int2(id.xy)) * 0.01;
-    lit[id.xy] = bcs_ray::visible(from, from + normalize(toward_sun) * 100.0) ? 1.0 : 0.0;
+    let from = passWorldPosition(uv, depth) + passLoadNormal(int2(id.xy)) * 0.01;
+    lit[id.xy] = rayVisible(from, from + normalize(toward_sun) * 100.0) ? 1.0 : 0.0;
 }
 ```
 
-`bcs_ray::trace` answers the nearest triangle a ray meets, and `bcs_ray::surface_at` unpacks it the
+`rayTrace` answers the nearest triangle a ray meets, and `raySurfaceAt` unpacks it the
 way Solari does, the position this frame and the last, the normal with the normal map applied,
 texture coordinates, and the material's color, emission, roughness and metalness with its textures
 read. The acceleration structure, vertices, transforms, materials and lights are Solari's, declared
@@ -147,9 +147,9 @@ occlusion.SetRayScene("scene", scene);
 ```
 
 The shader declares `RaytracingAccelerationStructure scene;` and traces it with
-`bcs_ray::trace_in(scene, ...)` or `visible_in`. A hit's `instance` is the slot and its `mesh` is
+`rayTraceIn(scene, ...)` or `rayVisibleIn`. A hit's `instance` is the slot and its `mesh` is
 the pool mesh, so an instance buffer or a material buffer with the same entities in the same slots
-describes what was hit, and `bcs_scene::pool_corner` reads the triangle. A mesh a compute shader
+describes what was hit, and `poolCorner` reads the triangle. A mesh a compute shader
 deforms in the pool is traced as it was until `Shaders.RebuildRayScene(scene, mesh)` builds it
 again. `Shaders.SupportsRayQueries`
 says whether the device can build one, which takes ray tracing hardware on Vulkan.

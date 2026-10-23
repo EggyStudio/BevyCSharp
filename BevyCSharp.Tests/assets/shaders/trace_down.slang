@@ -20,7 +20,7 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
 
     let x = (float(id.x) - float(count - 1) * 0.5) * spacing;
-    let hit = bcs_ray::trace(float3(x, height, 0.0), float3(0.0, -1.0, 0.0), 0.001, 1000.0);
+    let hit = rayTrace(float3(x, height, 0.0), float3(0.0, -1.0, 0.0), 0.001, 1000.0);
 
     if (!hit.hit)
     {
@@ -28,6 +28,6 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    let surface = bcs_ray::surface_at(hit);
+    let surface = raySurfaceAt(hit);
     hits[id.x] = float4(surface.base_color, hit.t);
 }

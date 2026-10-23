@@ -97,7 +97,7 @@ internal static unsafe partial class SceneField
     /// <summary>The image the shaders read, every cascade along z, or none where no field is built.</summary>
     internal static AssetHandle Image => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Field : AssetHandle.None;
 
-    /// <summary>The buffer holding one <c>bcs_field::Info</c>, where each cascade lies, or none where no field is built.</summary>
+    /// <summary>The buffer holding one <c>FieldInfo</c>, where each cascade lies, or none where no field is built.</summary>
     internal static AssetHandle InfoBuffer => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Info : AssetHandle.None;
 
     /// <summary>The camera the contact shadows are drawn on, or none.</summary>
@@ -338,13 +338,13 @@ internal static unsafe partial class SceneField
         return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero, new Entity(eye.Camera));
     }
 
-    /// <summary>The bytes of one <c>bcs_field::Info</c>, a float4, eight cascades' float4 and the eye's.</summary>
+    /// <summary>The bytes of one <c>FieldInfo</c>, a float4, eight cascades' float4 and the eye's.</summary>
     internal const int InfoBytes = (1 + 8 + 1) * 16;
 
     // Bytes of an instance as field_splat.slang reads it, a shape as field_stamp.slang reads it.
     private const int InstanceBytes = 96, ShapeBytes = 96;
 
-    /// <summary>Where each cascade lies as it was last built, as <c>bcs_field::Info</c>.</summary>
+    /// <summary>Where each cascade lies as it was last built, as <c>FieldInfo</c>.</summary>
     internal static float[] InfoValues(SceneFieldPlan plan)
     {
         var values = new float[InfoBytes / 4];

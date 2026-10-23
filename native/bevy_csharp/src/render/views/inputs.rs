@@ -436,7 +436,7 @@ pub struct ViewInputSources<'a> {
 }
 
 /// The size of what binding thirteen holds, counts of the scene's lights, and the environment's
-/// intensity, rotation and mip count, which `bcs_pass::SceneInfo` mirrors.
+/// intensity, rotation and mip count, which `SceneInfo` mirrors.
 const SCENE_INFO_BYTES: u64 = 32;
 
 impl<'a> ViewInputSources<'a> {

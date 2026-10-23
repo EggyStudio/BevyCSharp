@@ -55,9 +55,9 @@ public sealed class MeshTagTests
                     SamplerState nearest;
 
                     [shader("fragment")]
-                    float4 fragment(bcs::VertexOutput mesh) : SV_Target
+                    float4 fragment(MeshVertexOutput mesh) : SV_Target
                     {
-                        return layers.Sample(nearest, float3(0.5, 0.5, float(bcs::tag(mesh.instance_index))));
+                        return layers.Sample(nearest, float3(0.5, 0.5, float(meshTag(mesh.instance_index))));
                     }
                     """));
                 var material = Shaders.CreateMaterial(program).SetTexture("layers", layers).SetSampler("nearest", SamplerSettings.Nearest);

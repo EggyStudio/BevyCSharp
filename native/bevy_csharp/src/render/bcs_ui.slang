@@ -2,27 +2,24 @@
 // own interface material vertex shader hands a fragment shader, the node's place on it, its size,
 // its borders and its corners.
 //
-// A shader drawing an interface node reaches it with `import bcs_ui;`, and everything in it is under
-// the `bcs_ui` namespace. What the material carries is whatever the shader declares, as for a 3D
-// material, and is set from C# by name. Bevy's interface material pipeline binds the view in group
-// zero and the material in group one, and the bindings below are in space 100, which the bridge
-// moves to group zero after the compile, so they never share a binding with the material's.
+// A shader drawing an interface node reaches it with `import bcs_ui;` and uses its names plainly,
+// each named `ui` and its work. What the material carries is whatever the shader declares, as for a
+// 3D material, and is set from C# by name. Bevy's interface material pipeline binds the view in
+// group zero and the material in group one, and the bindings below are in space 100, which the
+// bridge moves to group zero after the compile, so they never share a binding with the material's.
 //
 // Locations are `TEXCOORDn` semantics, as in `bcs`, the index being the location, and the structs
 // below line up with the ones Bevy's own interface material WGSL declares.
 
 module bcs_ui;
 
-public namespace bcs_ui
-{
 
-// -- The view, in Bevy's group zero
 
 /// The part of Bevy's view uniform a shader usually reads, in the order Bevy declares it.
 ///
-/// Matrices are arrays of four columns, which `transform` multiplies out. An interface camera's
+/// Matrices are arrays of four columns, which `uiTransform` multiplies out. An interface camera's
 /// world is its window in pixels, so `clip_from_world` takes a point on the window to clip space.
-public struct View
+public struct UiView
 {
     public float4 clip_from_world[4];
     public float4 unjittered_clip_from_world[4];
@@ -38,10 +35,10 @@ public struct View
     public float4 main_pass_viewport;
 };
 
-[[vk::binding(0, 100)]] public ConstantBuffer<View> view;
+[[vk::binding(0, 100)]] public ConstantBuffer<UiView> uiView;
 
 /// Time, in the layout Bevy's `Globals` has.
-public struct Globals
+public struct UiGlobals
 {
     /// Seconds since startup, wrapping to zero after an hour.
     public float time;
@@ -51,18 +48,17 @@ public struct Globals
 };
 
 /// Time, laid out as C lays it out (`ScalarDataLayout`) in the twelve bytes Bevy binds.
-[[vk::binding(1, 100)]] public ConstantBuffer<Globals, ScalarDataLayout> globals;
+[[vk::binding(1, 100)]] public ConstantBuffer<UiGlobals, ScalarDataLayout> uiGlobals;
 
 /// Multiplies a column-major matrix, held as four columns, by a vector.
-public float4 transform(float4 columns[4], float4 v)
+public float4 uiTransform(float4 columns[4], float4 v)
 {
     return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z + columns[3] * v.w;
 }
 
-// -- What passes between stages
 
 /// A corner of the node's quad, as Bevy's interface material pipeline hands it to a vertex shader.
-public struct Vertex
+public struct UiVertex
 {
     /// Where the corner is on the window, in pixels.
     public float3 position : TEXCOORD0;
@@ -82,7 +78,7 @@ public struct Vertex
 ///
 /// A fragment shader taking this works with Bevy's vertex shader as well as with one written here,
 /// which is why an interface material may name a fragment shader alone.
-public struct VertexOutput
+public struct UiVertexOutput
 {
     /// Where on the node the fragment is, from the top left at zero to the bottom right at one.
     public float2 uv : TEXCOORD0;
@@ -99,16 +95,14 @@ public struct VertexOutput
 };
 
 /// Does what Bevy's own interface material vertex shader does, for a shader that starts from it.
-public VertexOutput standard_vertex(Vertex vertex)
+public UiVertexOutput uiStandardVertex(UiVertex vertex)
 {
-    VertexOutput output;
+    UiVertexOutput output;
     output.uv = vertex.uv;
-    output.position = transform(view.clip_from_world, float4(vertex.position, 1.0));
+    output.position = uiTransform(uiView.clip_from_world, float4(vertex.position, 1.0));
     output.size = vertex.size;
     output.border_widths = vertex.border_widths;
     output.border_radius_x = vertex.border_radius_x;
     output.border_radius_y = vertex.border_radius_y;
     return output;
-}
-
 }

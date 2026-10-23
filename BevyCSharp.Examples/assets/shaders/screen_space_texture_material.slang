@@ -6,14 +6,14 @@ import bcs;
 Texture2D emissive_texture;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.base_color = float4(0.0, 0.0, 0.0, 1.0);
     surface.metallic = 1.0;
     surface.roughness = 0.0;
 
     // An alpha of zero keeps the view's exposure from scaling it, as Bevy's does.
     surface.emissive = float4(emissive_texture.Load(int3(int2(floor(mesh.position.xy)), 0)).rgb, 0.0);
-    return bcs::lit(surface, mesh);
+    return meshLit(surface, mesh);
 }

@@ -6,7 +6,7 @@ Texture2D picture;
 SamplerState picture_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     return picture.SampleLevel(picture_sampler, mesh.uv, float(level));
 }

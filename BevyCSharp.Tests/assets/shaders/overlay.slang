@@ -8,7 +8,7 @@ SamplerState stamp_sampler;
 StructuredBuffer<float4> tints;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     uint count;
     uint stride;

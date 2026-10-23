@@ -4,7 +4,7 @@
 import bcs_compute;
 import bcs_scene;
 
-StructuredBuffer<bcs_scene::Material> materials;
+StructuredBuffer<Material> materials;
 RWStructuredBuffer<float4> into;
 
 [shader("compute")]

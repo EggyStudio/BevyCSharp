@@ -46,7 +46,7 @@ float3 continuous_hue(float2 uv)
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     var uv = mesh.uv;
     var result = float3(0.0);

@@ -6,7 +6,7 @@ Texture2D textures[16];
 SamplerState nearest_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let coords = clamp(uint2(mesh.uv * 4.0), uint2(0), uint2(3));
     let index = coords.y * 4 + coords.x;

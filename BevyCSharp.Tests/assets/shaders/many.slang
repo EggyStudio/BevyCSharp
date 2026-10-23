@@ -9,7 +9,7 @@ uniform float weights[1000];
 uniform float4 color;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return float4(color.rgb * weights[999], 1.0);
 }

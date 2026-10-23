@@ -16,10 +16,10 @@ uniform float step;
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    if (id.x >= bcs_compute::count<Particle>(particles))
+    if (id.x >= bufferCount<Particle>(particles))
         return;
 
-    var particle = bcs_compute::element<Particle>(particles, id.x);
+    var particle = bufferElement<Particle>(particles, id.x);
     particle.position += particle.velocity * step;
-    bcs_compute::store(particles, id.x, particle);
+    bufferStore(particles, id.x, particle);
 }

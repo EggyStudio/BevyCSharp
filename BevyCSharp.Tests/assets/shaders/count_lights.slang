@@ -9,6 +9,6 @@ RWStructuredBuffer<uint> counts;
 [numthreads(1, 1, 1)]
 void main()
 {
-    counts[0] = bcs_pass::directional_light_count();
-    counts[1] = bcs_pass::point_light_count();
+    counts[0] = passDirectionalLightCount();
+    counts[1] = passPointLightCount();
 }

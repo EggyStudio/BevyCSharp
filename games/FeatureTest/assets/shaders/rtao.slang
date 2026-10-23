@@ -43,9 +43,9 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
 
     // The occlusion image can be smaller than the picture, so each texel reads the depth under it.
-    let picture = bcs_pass::picture_size();
+    let picture = passPictureSize();
     let pixel = int2(float2(id.xy) * float2(picture) / float2(width, height));
-    let depth = bcs_pass::load_depth(pixel);
+    let depth = passLoadDepth(pixel);
 
     if (depth <= 0.0)
     {
@@ -54,9 +54,9 @@ void main(uint3 id : SV_DispatchThreadID)
     }
 
     let uv = (float2(pixel) + 0.5) / float2(picture);
-    let normal = normalize(bcs_pass::load_normal(pixel));
-    let from = bcs_pass::world_position(uv, depth) + normal * 0.02;
-    let noise = bcs_pass::blue_noise(pixel);
+    let normal = normalize(passLoadNormal(pixel));
+    let from = passWorldPosition(uv, depth) + normal * 0.02;
+    let noise = passBlueNoise(pixel);
 
     float occlusion = 0.0;
 
@@ -64,7 +64,7 @@ void main(uint3 id : SV_DispatchThreadID)
     {
         // Each ray takes the noise turned a different way, so four rays are four directions.
         let u = frac(noise.xy + float2(ray * 0.618034, ray * 0.414214));
-        let hit = bcs_ray::trace_in(scene, from, cosine_direction(normal, u), 0.001, radius);
+        let hit = rayTraceIn(scene, from, cosine_direction(normal, u), 0.001, radius);
 
         if (hit.hit)
         {

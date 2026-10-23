@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Covers a Slang material lit by Bevy's lighting through <c>bcs::lit</c>, which a standard material
+/// Covers a Slang material lit by Bevy's lighting through <c>meshLit</c>, which a standard material
 /// extended by a shader of its own is drawn with in Bevy.
 /// </summary>
 [Collection("engine")]
@@ -17,16 +17,16 @@ public sealed class LitShaderTests
         uniform float4 color;
 
         [shader("fragment")]
-        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        float4 fragment(MeshVertexOutput mesh) : SV_Target
         {
-            var surface = bcs::surface(mesh);
+            var surface = meshSurface(mesh);
             surface.base_color = color;
-            return bcs::lit(surface, mesh);
+            return meshLit(surface, mesh);
         }
         """;
 
     /// <summary>
-    /// A sphere drawn by a Slang shader that calls <c>bcs::lit</c> is bright where the sun falls on
+    /// A sphere drawn by a Slang shader that calls <c>meshLit</c> is bright where the sun falls on
     /// it and dark where it does not, and comes out as the same sphere drawn with Bevy's standard
     /// material in the same color beside it.
     /// </summary>
@@ -75,10 +75,10 @@ public sealed class LitShaderTests
         import bcs;
 
         [shader("fragment")]
-        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        float4 fragment(MeshVertexOutput mesh) : SV_Target
         {
-            if (bcs::decal_count(mesh) == 0) return float4(0.0, 0.5, 0.0, 1.0);
-            return bcs::decal_tag(mesh, 0) == 1 ? float4(0.5, 0.0, 0.0, 1.0) : float4(0.0, 0.0, 0.5, 1.0);
+            if (meshDecalCount(mesh) == 0) return float4(0.0, 0.5, 0.0, 1.0);
+            return meshDecalTag(mesh, 0) == 1 ? float4(0.5, 0.0, 0.0, 1.0) : float4(0.0, 0.0, 0.5, 1.0);
         }
         """;
 
@@ -89,11 +89,11 @@ public sealed class LitShaderTests
         uniform float4 color;
 
         [shader("fragment")]
-        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        float4 fragment(MeshVertexOutput mesh) : SV_Target
         {
-            var surface = bcs::surface(mesh);
+            var surface = meshSurface(mesh);
             surface.base_color = color;
-            return bcs::lit(bcs::decals(surface, mesh), mesh);
+            return meshLit(meshDecals(surface, mesh), mesh);
         }
         """;
 
@@ -142,7 +142,7 @@ public sealed class LitShaderTests
     }
 
     /// <summary>
-    /// A half transparent decal laid on by <c>bcs::decals</c> before the surface is lit comes out as
+    /// A half transparent decal laid on by <c>meshDecals</c> before the surface is lit comes out as
     /// the same decal does on Bevy's standard material beside it.
     /// </summary>
     [SkippableFact]

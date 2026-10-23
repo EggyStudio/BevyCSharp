@@ -6,7 +6,7 @@ import bcs_pass;
 Texture2D<uint> visibility;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     let id = visibility.Load(int3(int2(input.position.xy), 0));
 

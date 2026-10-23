@@ -19,7 +19,7 @@ struct Lighting
 ConstantBuffer<Lighting> lighting;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let light = lighting.lights[lighting.count - 1];
     return float4(lighting.ambient.rgb + light.color * light.power, 1.0);

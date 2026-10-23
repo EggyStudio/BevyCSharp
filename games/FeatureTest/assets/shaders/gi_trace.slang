@@ -41,9 +41,9 @@ void main(uint3 id : SV_DispatchThreadID)
     if (id.x >= width || id.y >= height)
         return;
 
-    let picture = bcs_pass::picture_size();
+    let picture = passPictureSize();
     let pixel = int2(id.xy * 2);
-    let depth = bcs_pass::load_depth(pixel);
+    let depth = passLoadDepth(pixel);
 
     if (depth <= 0.0)
     {
@@ -51,20 +51,20 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    let surface = bcs_pass::surface_of(gbuffer.Load(int3(pixel, 0)));
-    let world = bcs_pass::world_position(bcs_pass::uv_of(pixel), depth);
-    let noise = bcs_pass::blue_noise(int2(id.xy));
+    let surface = passSurfaceOf(gbuffer.Load(int3(pixel, 0)));
+    let world = passWorldPosition(passUv(pixel), depth);
+    let noise = passBlueNoise(int2(id.xy));
     let direction = cosine_direction(surface.normal, noise.xy);
 
     // The sky's light, in the picture's own units, unless something on screen is met first.
-    var light = bcs_pass::environment_diffuse(direction) * bcs_pass::view.exposure;
+    var light = passEnvironmentDiffuse(direction) * passView.exposure;
     let start = world + surface.normal * 0.02;
 
     for (uint index = 0; index < steps; index++)
     {
         let along = reach * (float(index) + noise.z) / float(steps);
         let probe = start + direction * along;
-        let clip = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(probe, 1.0));
+        let clip = passTransform(passView.clip_from_world, float4(probe, 1.0));
 
         if (clip.w <= 0.0)
             break;
@@ -76,19 +76,19 @@ void main(uint3 id : SV_DispatchThreadID)
             break;
 
         let hit_pixel = int2(uv * float2(picture));
-        let scene = bcs_pass::load_depth(hit_pixel);
+        let scene = passLoadDepth(hit_pixel);
 
         if (scene <= 0.0)
             continue;
 
         // Behind what the picture shows there, by less than a surface is thick, is a hit.
-        let behind = bcs_pass::view_depth(probe) - bcs_pass::distance_from_depth(scene);
+        let behind = passViewDepth(probe) - passDistanceFromDepth(scene);
 
         if (behind > 0.0 && behind < thickness)
         {
-            let hit = bcs_pass::world_position(uv, scene);
-            let before = bcs_pass::previous_uv_of(hit);
-            light = lit_previous.SampleLevel(bcs_pass::picture_sampler, before, 0.0).rgb;
+            let hit = passWorldPosition(uv, scene);
+            let before = passPreviousUvOf(hit);
+            light = lit_previous.SampleLevel(passPictureSampler, before, 0.0).rgb;
             break;
         }
     }

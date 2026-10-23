@@ -5,18 +5,17 @@
 // far each cell's middle is from the nearest surface of the meshes that cast shadows, below zero
 // inside a mesh with an inside, exact within a few cells of a surface and held at that many beyond.
 // They lie one after another along z in one 3D image of half floats, so a shader binds the field
-// once, with a buffer holding one `Info` that says where each cascade lies, and a cascade not yet
-// built has a cell width of zero and is passed over (see `Render.SetSceneField`).
+// once, with a buffer holding one `FieldInfo` that says where each cascade lies, and a cascade not
+// yet built has a cell width of zero and is passed over (see `Render.SetSceneField`).
 //
-// Taken from 3DEngine's `scenefield.slang`, its names written as this bridge's modules write theirs.
+// Taken from 3DEngine's `scenefield.slang`, its names written as this bridge's modules write
+// theirs.
 
 module bcs_field;
 
-public namespace bcs_field
-{
 
 /// A cascade, where it lies.
-public struct Cascade
+public struct FieldCascade
 {
     /// xyz: the world position of the cascade's corner, its first cell's least corner. w: the
     /// width of a cell, or zero for a cascade not yet built.
@@ -24,42 +23,42 @@ public struct Cascade
 };
 
 /// Where the field's cascades lie this frame.
-public struct Info
+public struct FieldInfo
 {
     /// x: how many cascades the image holds, zero where the field is off. y: the cells along each
     /// side of a cascade. z: how many cells from a surface the distances are exact. w: unused.
     public float4 counts;
-    public Cascade cascades[8];
+    public FieldCascade cascades[8];
     /// xyz: the eye the cascades lie around this frame, which their outer bands keep clear of
-    /// (`band_hold`). w: unused.
+    /// (`bandHold`). w: unused.
     public float4 eye;
 };
 
 /// Whether the field holds anything to read.
-public bool on(Info info)
+public bool fieldOn(FieldInfo info)
 {
     return info.counts.x > 0.5;
 }
 
 /// The cells of the field's last cascade's outer band, across which a shader that reads the
-/// field's distances fades to what it gives where the field holds nothing (`hold`).
-public static const float BAND = 8.0;
+/// field's distances fades to what it gives where the field holds nothing (`fieldHold`).
+public static const float FieldBand = 8.0;
 
-/// The cells an outer band ends short of the eye on a side the eye stands near (`band_hold`).
-public static const float EYE_CLEAR = 6.0;
+/// The cells an outer band ends short of the eye on a side the eye stands near (`bandHold`).
+public static const float EyeClear = 6.0;
 
 /// How far into cascade `c`'s outer band a point `cell` lies, in its cells, as a share of the band,
 /// one at the band's inner edge and beyond and zero at the side, `margin` cells off each side. A
-/// cascade lies 0.35 of its width ahead of the eye, so the eye stands 1.6 to 9.6 cells from the side
-/// behind it, inside a band of eight; on a side the eye is that near the band ends `EYE_CLEAR` cells
-/// short of it, or is none and the value steps at the side, behind the eye where no surface it
-/// sees lies.
-public float band_hold(Info info, int c, float3 cell, float band, float margin)
+/// cascade lies 0.35 of its width ahead of the eye, so the eye stands 1.6 to 9.6 cells from the
+/// side behind it, inside a band of eight; on a side the eye is that near the band ends `EyeClear`
+/// cells short of it, or is none and the value steps at the side, behind the eye where no surface
+/// it sees lies.
+public float bandHold(FieldInfo info, int c, float3 cell, float band, float margin)
 {
     float4 oc = info.cascades[c].origin_and_cell;
     float3 eye = (info.eye.xyz - oc.xyz) / oc.w;
-    float3 low = clamp(eye - margin - EYE_CLEAR, 0.0, band);
-    float3 high = clamp(info.counts.y - eye - margin - EYE_CLEAR, 0.0, band);
+    float3 low = clamp(eye - margin - EyeClear, 0.0, band);
+    float3 high = clamp(info.counts.y - eye - margin - EyeClear, 0.0, band);
     float3 held = saturate(min((cell - margin) / max(low, 1e-3), (info.counts.y - cell - margin) / max(high, 1e-3)));
     return min(min(held.x, held.y), held.z);
 }
@@ -67,7 +66,7 @@ public float band_hold(Info info, int c, float3 cell, float band, float margin)
 /// The coarsest built cascade no coarser than `up_to`, or -1 where none is built, as in an app's
 /// first frames, where the field builds its cascades finest first as many a frame as its budget
 /// allows.
-public int coarsest_built(Info info, int up_to)
+public int fieldCoarsestBuilt(FieldInfo info, int up_to)
 {
     [loop]
     for (int i = min(up_to, int(info.counts.x) - 1); i >= 0; i--)
@@ -77,20 +76,20 @@ public int coarsest_built(Info info, int up_to)
 }
 
 /// How much of what the field holds at `p` a shader takes, all of it inside the field's cascades,
-/// falling to none across the outer band (`BAND`) of the coarsest one built, kept clear of the eye
-/// (`band_hold`), and none past it, so a shader that reads the field to its edge fades there rather
-/// than stepping.
-public float hold(Info info, float3 p)
+/// falling to none across the outer band (`FieldBand`) of the coarsest one built, kept clear of the
+/// eye (`bandHold`), and none past it, so a shader that reads the field to its edge fades there
+/// rather than stepping.
+public float fieldHold(FieldInfo info, float3 p)
 {
-    int c = coarsest_built(info, int(info.counts.x) - 1);
+    int c = fieldCoarsestBuilt(info, int(info.counts.x) - 1);
     if (c < 0)
         return 0.0;
     float4 oc = info.cascades[c].origin_and_cell;
-    return band_hold(info, c, (p - oc.xyz) / oc.w, BAND, 1.0);
+    return bandHold(info, c, (p - oc.xyz) / oc.w, FieldBand, 1.0);
 }
 
 /// The finest built cascade `p` lies in, at least `margin` cells inside its sides, or -1 for none.
-public int cascade_of(Info info, float3 p, float margin)
+public int fieldCascade(FieldInfo info, float3 p, float margin)
 {
     int count = int(info.counts.x);
     float size = info.counts.y;
@@ -109,7 +108,7 @@ public int cascade_of(Info info, float3 p, float margin)
 /// The distance from `p` to the nearest surface in cascade `i`, in world units, blended between
 /// the eight cells around it by a linear sampler, each read no nearer a side than half a cell, so
 /// cascades stacked in the image do not bleed into each other.
-public float distance_in(Texture3D<float> field, SamplerState linear, Info info, int i, float3 p)
+public float fieldDistanceIn(Texture3D<float> field, SamplerState linear, FieldInfo info, int i, float3 p)
 {
     float4 oc = info.cascades[i].origin_and_cell;
     float size = info.counts.y;
@@ -120,39 +119,39 @@ public float distance_in(Texture3D<float> field, SamplerState linear, Info info,
 
 /// The distance from `p` to the nearest surface, from the finest cascade around it, or far where
 /// none holds it.
-public float distance(Texture3D<float> field, SamplerState linear, Info info, float3 p)
+public float fieldDistance(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 p)
 {
-    int i = cascade_of(info, p, 1.0);
-    return i < 0 ? 1e6 : distance_in(field, linear, info, i, p);
+    int i = fieldCascade(info, p, 1.0);
+    return i < 0 ? 1e6 : fieldDistanceIn(field, linear, info, i, p);
 }
 
 /// The way out from the nearest surface at `p`, the field's slope across half a cell, or up where
 /// the field is flat or holds nothing there.
-public float3 normal(Texture3D<float> field, SamplerState linear, Info info, float3 p)
+public float3 fieldNormal(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 p)
 {
-    int i = cascade_of(info, p, 1.5);
+    int i = fieldCascade(info, p, 1.5);
     if (i < 0)
         return float3(0, 1, 0);
     float e = info.cascades[i].origin_and_cell.w * 0.5;
     float3 g = float3(
-        distance_in(field, linear, info, i, p + float3(e, 0, 0)) - distance_in(field, linear, info, i, p - float3(e, 0, 0)),
-        distance_in(field, linear, info, i, p + float3(0, e, 0)) - distance_in(field, linear, info, i, p - float3(0, e, 0)),
-        distance_in(field, linear, info, i, p + float3(0, 0, e)) - distance_in(field, linear, info, i, p - float3(0, 0, e)));
+        fieldDistanceIn(field, linear, info, i, p + float3(e, 0, 0)) - fieldDistanceIn(field, linear, info, i, p - float3(e, 0, 0)),
+        fieldDistanceIn(field, linear, info, i, p + float3(0, e, 0)) - fieldDistanceIn(field, linear, info, i, p - float3(0, e, 0)),
+        fieldDistanceIn(field, linear, info, i, p + float3(0, 0, e)) - fieldDistanceIn(field, linear, info, i, p - float3(0, 0, e)));
     float length2 = dot(g, g);
     return length2 > 1e-12 ? g * rsqrt(length2) : float3(0, 1, 0);
 }
 
 /// The width of a cell of the finest built cascade around `p`, or zero where none holds it.
-public float cell(Info info, float3 p)
+public float fieldCell(FieldInfo info, float3 p)
 {
-    int i = cascade_of(info, p, 1.0);
+    int i = fieldCascade(info, p, 1.0);
     return i < 0 ? 0.0 : info.cascades[i].origin_and_cell.w;
 }
 
 /// The way a face looks in eight bits, four along each side of the octahedron the sphere is folded
 /// onto, as the field's build keeps it in each cell's word, enough to tell faces that look apart
 /// from faces that meet square.
-public uint face_bits(float3 n)
+public uint faceBits(float3 n)
 {
     n /= abs(n.x) + abs(n.y) + abs(n.z);
     float2 o = n.z >= 0.0 ? n.xy : (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
@@ -160,14 +159,12 @@ public uint face_bits(float3 n)
     return q.x | (q.y << 4);
 }
 
-/// The way back from the eight bits `face_bits` keeps.
-public float3 face_way(uint bits)
+/// The way back from the eight bits `faceBits` keeps.
+public float3 faceWay(uint bits)
 {
     float2 o = (float2(float(bits & 15u), float((bits >> 4) & 15u)) + 0.5) / 16.0 * 2.0 - 1.0;
     float3 n = float3(o, 1.0 - abs(o.x) - abs(o.y));
     if (n.z < 0.0)
         n.xy = (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
     return normalize(n);
-}
-
 }

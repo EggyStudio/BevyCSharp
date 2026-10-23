@@ -6,13 +6,13 @@ import bcs_pass;
 Texture2D<float> ambient_occlusion;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     uint width;
     uint height;
     ambient_occlusion.GetDimensions(width, height);
 
-    let picture = bcs_pass::picture_size();
+    let picture = passPictureSize();
     let texel = int2(input.position.xy * float2(width, height) / float2(picture));
     let open = ambient_occlusion.Load(int3(texel, 0));
     return float4(open, open, open, 1.0);

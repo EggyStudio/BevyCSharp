@@ -10,7 +10,7 @@ Texture2D<float> frames_previous;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let size = bcs_pass::picture_size();
+    let size = passPictureSize();
 
     if (id.x >= size.x || id.y >= size.y)
         return;

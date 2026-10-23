@@ -3,8 +3,8 @@
 import bcs_pass;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let color = bcs_pass::sample(input.uv);
+    let color = passSample(input.uv);
     return float4(color.g, color.b, color.r, 1.0);
 }

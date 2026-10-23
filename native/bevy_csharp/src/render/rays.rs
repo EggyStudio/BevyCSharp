@@ -9,7 +9,7 @@
 //! with the pool mesh it is made of, placed where their transforms are every frame.
 //!
 //! A shader declares a `RaytracingAccelerationStructure` and is handed a scene by name, like any
-//! other value, and traces it with `bcs_ray::trace_in`. A hit's instance is the slot, so an
+//! other value, and traces it with `rayTraceIn`. A hit's instance is the slot, so an
 //! instance buffer or a material buffer with the same entities in the same slots describes it, and
 //! its instance ID is the pool mesh, which `bcs_scene` reads the triangle's corners from.
 //!

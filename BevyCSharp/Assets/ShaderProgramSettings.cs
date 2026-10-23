@@ -35,7 +35,7 @@ public sealed class ShaderProgramSettings
     /// </summary>
     /// <remarks>
     /// <para>
-    /// It writes the surface rather than a color, through <c>bcs::deferred(surface, mesh)</c>, and
+    /// It writes the surface rather than a color, through <c>meshDeferred(surface, mesh)</c>, and
     /// Bevy's deferred lighting pass lights it with every light, shadow and environment map the
     /// view has, as it lights a standard material drawn deferred. Screen-space reflections read
     /// those buffers, so a material that reflects the scene, as water does, is drawn this way.
@@ -44,7 +44,7 @@ public sealed class ShaderProgramSettings
     /// A program with one is a deferred material, drawn by a camera that draws deferred and by no
     /// other, as Bevy's own deferred materials are, so <see cref="Fragment"/> goes unused for it.
     /// It needs <see cref="PrepassVertex"/>, which writes all of what the deferred stage reads of
-    /// the prepass (<c>bcs::prepass_output</c>), whatever the mesh carries.
+    /// the prepass (<c>meshPrepassOutput</c>), whatever the mesh carries.
     /// </para>
     /// </remarks>
     public ShaderStage Deferred { get; init; }
@@ -134,12 +134,12 @@ public sealed class ShaderProgramSettings
     /// there, which is how geometry its vertex shader does not place casts a shadow, such as a
     /// surface a fragment shader finds by marching a ray from each pixel of a triangle covering the
     /// whole view, as Bevy's deferred_raymarch example draws one. It runs once for each shadow view
-    /// with that view in <c>bcs_pass::view</c>, so the ray from a pixel
-    /// (<c>bcs_pass::ray_origin</c>, <c>bcs_pass::ray_direction</c>) is the light's, and
-    /// <c>bcs_pass::shadow_depth</c> returns the depth the shadow map holds for a point.
+    /// with that view in <c>passView</c>, so the ray from a pixel
+    /// (<c>passRayOrigin</c>, <c>passRayDirection</c>) is the light's, and
+    /// <c>passShadowDepth</c> returns the depth the shadow map holds for a point.
     /// </para>
     /// <para>
-    /// The depth goes in a struct member marked <c>SV_Depth</c>, as <c>bcs_pass::ShadowDepth</c>
+    /// The depth goes in a struct member marked <c>SV_Depth</c>, as <c>PassShadowDepth</c>
     /// holds it. Given as the function's own return (<c>float shadow(...) : SV_Depth</c>) slangc
     /// writes it as a color, which the shadow map has no target for, and the triangle's own depth
     /// is kept instead.
@@ -154,7 +154,7 @@ public sealed class ShaderProgramSettings
     /// </summary>
     /// <remarks>
     /// It reaches Bevy's 2D view and mesh through <c>import bcs2d;</c> and takes the
-    /// <c>bcs2d::VertexOutput</c> Bevy's own 2D vertex shader hands on, which differs from the 3D
+    /// <c>Mesh2dVertexOutput</c> Bevy's own 2D vertex shader hands on, which differs from the 3D
     /// one in where it puts each value. The material's own values are declared and set by name as
     /// a 3D material's are. A program may have 2D stages and 3D stages both, and draws a 3D
     /// material or a 2D one with each.
@@ -173,7 +173,7 @@ public sealed class ShaderProgramSettings
     /// it is named.
     /// </summary>
     /// <remarks>
-    /// It reaches Bevy's view through <c>import bcs_ui;</c> and takes the <c>bcs_ui::VertexOutput</c>
+    /// It reaches Bevy's view through <c>import bcs_ui;</c> and takes the <c>UiVertexOutput</c>
     /// Bevy's own interface material vertex shader hands on, where on the node the fragment is, the
     /// node's size in pixels, its borders and how its corners are rounded, which is enough to draw
     /// a border or a rounded edge of the material's own. The material's own values are declared and

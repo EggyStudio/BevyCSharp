@@ -17,7 +17,7 @@ struct Generated
 
 Generated generated(uint instance, uint vertex_id)
 {
-    let start = index_data[bcs::vertex_number(instance, vertex_id)] * 8;
+    let start = index_data[meshVertexNumber(instance, vertex_id)] * 8;
     Generated vertex;
     vertex.position = float3(vertex_data[start], vertex_data[start + 1], vertex_data[start + 2]);
     vertex.normal = float3(vertex_data[start + 3], vertex_data[start + 4], vertex_data[start + 5]);
@@ -26,28 +26,28 @@ Generated generated(uint instance, uint vertex_id)
 }
 
 [shader("vertex")]
-bcs::VertexOutput vertex(uint vertex_id : SV_VertexID, uint instance_index : SV_InstanceID)
+MeshVertexOutput vertex(uint vertex_id : SV_VertexID, uint instance_index : SV_InstanceID)
 {
     let made = generated(instance_index, vertex_id);
-    bcs::Vertex vertex;
+    MeshVertex vertex;
     vertex.position = made.position;
     vertex.normal = made.normal;
     vertex.uv = made.uv;
     vertex.instance_index = instance_index;
-    return bcs::standard_vertex(vertex);
+    return meshStandardVertex(vertex);
 }
 
 [shader("vertex")]
-bcs::PrepassVertexOutput prepass_vertex(uint vertex_id : SV_VertexID, uint instance_index : SV_InstanceID)
+MeshPrepassVertexOutput prepass_vertex(uint vertex_id : SV_VertexID, uint instance_index : SV_InstanceID)
 {
     let made = generated(instance_index, vertex_id);
-    return bcs::prepass_output(instance_index, made.position, made.normal, made.uv);
+    return meshPrepassOutput(instance_index, made.position, made.normal, made.uv);
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.base_color = color;
-    return bcs::lit(surface, mesh);
+    return meshLit(surface, mesh);
 }

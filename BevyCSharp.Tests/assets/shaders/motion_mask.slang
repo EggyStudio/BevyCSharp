@@ -4,8 +4,8 @@
 import bcs_pass;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let moved = length(bcs_pass::motion_at(input.position)) > 1e-4;
+    let moved = length(passMotionAt(input.position)) > 1e-4;
     return moved ? float4(0.0, 1.0, 0.0, 1.0) : float4(1.0, 0.0, 0.0, 1.0);
 }

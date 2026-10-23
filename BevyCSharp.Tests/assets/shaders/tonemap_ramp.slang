@@ -11,7 +11,7 @@
 import bcs;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let column = floor(mesh.position.x);
     let row = uint(mesh.position.y);

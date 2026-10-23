@@ -32,7 +32,7 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
 
     var fly = flies[id.x];
-    let t = bcs_compute::globals.time * fly.speed + fly.phase;
+    let t = computeGlobals.time * fly.speed + fly.phase;
 
     fly.position = fly.home + float3(sin(t) * reach, sin(t * 1.7) * reach * 0.5, cos(t * 1.3) * reach);
     flies[id.x] = fly;

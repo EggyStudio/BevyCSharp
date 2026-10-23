@@ -15,7 +15,7 @@ struct Particle
 ByteAddressBuffer particles;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let particle = particles.Load<Particle>(2 * sizeof(Particle));
     return float4(particle.color * particle.size, 1.0);

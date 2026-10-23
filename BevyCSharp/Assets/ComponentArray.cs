@@ -18,7 +18,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A material binds it by name with <see cref="Buffer"/>, and its shader reads it as a
-/// <c>StructuredBuffer</c> at <c>bcs::tag(mesh.instance_index)</c>, or <c>bcs2d::tag</c> on a 2D
+/// <c>StructuredBuffer</c> at <c>meshTag(mesh.instance_index)</c>, or <c>mesh2dTag</c> on a 2D
 /// mesh. A structured buffer is laid out with the storage rules, where a <c>float3</c> takes sixteen
 /// bytes, so a struct shared with one spells its padding out. Every material drawing the entities
 /// can share the one buffer, as Bevy's example shares it between two, and an entity drawn by any of

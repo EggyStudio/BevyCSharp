@@ -46,7 +46,7 @@ public sealed class TextureSettings
     /// <remarks>
     /// Several pictures of one size stacked in one file, a tile set or the frames of a terrain's
     /// blend, read by a shader as a <c>Texture2DArray</c> and picked by layer, often by
-    /// <c>bcs::tag</c>. The file's height has to divide into this many equal rows, or the load
+    /// <c>meshTag</c>. The file's height has to divide into this many equal rows, or the load
     /// fails and says so on the log.
     /// </remarks>
     public uint Layers { get; set; }

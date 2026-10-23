@@ -32,7 +32,7 @@ public sealed class ShaderImportTests
             import tint;
 
             [shader("fragment")]
-            float4 fragment(bcs::VertexOutput mesh) : SV_Target
+            float4 fragment(MeshVertexOutput mesh) : SV_Target
             {
                 return tint();
             }
@@ -97,7 +97,7 @@ public sealed class ShaderImportTests
             import gather;
 
             [shader("fragment")]
-            float4 fragment(bcs::VertexOutput mesh) : SV_Target
+            float4 fragment(MeshVertexOutput mesh) : SV_Target
             {
                 return tint();
             }

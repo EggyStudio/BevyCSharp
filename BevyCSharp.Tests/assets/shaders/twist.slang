@@ -6,7 +6,7 @@ import bcs;
 uniform float4x4 twist;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return float4(mul(twist, float4(1.0, 0.0, 0.0, 0.0)).xyz, 1.0);
 }

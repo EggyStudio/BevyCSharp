@@ -5,7 +5,7 @@ import bcs_pass;
 const float STRENGTH = 1.0;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     return float4(STRENGTH, 0.0, 0.0, 1.0);
 }

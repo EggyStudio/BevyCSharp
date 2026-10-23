@@ -14,21 +14,21 @@ struct ShowPrepassSettings
 uniform ShowPrepassSettings settings;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
     if (settings.show_depth == 1u)
     {
-        let depth = bcs_pass::depth_at(input.position);
+        let depth = passDepthAt(input.position);
         return float4(depth, depth, depth, 1.0);
     }
     else if (settings.show_normals == 1u)
     {
-        return float4(bcs_pass::normal_at(input.position), 1.0);
+        return float4(passNormalAt(input.position), 1.0);
     }
     else if (settings.show_motion_vectors == 1u)
     {
-        return float4(bcs_pass::motion_at(input.position) / bcs_pass::globals.delta_time, 0.0, 1.0);
+        return float4(passMotionAt(input.position) / passGlobals.delta_time, 0.0, 1.0);
     }
 
-    return bcs_pass::sample(input.uv);
+    return passSample(input.uv);
 }

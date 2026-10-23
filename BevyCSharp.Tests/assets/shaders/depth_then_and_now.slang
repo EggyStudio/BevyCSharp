@@ -6,9 +6,9 @@ import bcs_pass;
 Texture2D<float> depth_previous;
 
 [shader("fragment")]
-float4 fragment(bcs_pass::Input input) : SV_Target
+float4 fragment(FullscreenOutput input) : SV_Target
 {
-    let now = bcs_pass::depth_at(input.position) > 0.0;
+    let now = passDepthAt(input.position) > 0.0;
     let then = depth_previous.Load(int3(int2(input.position.xy), 0)) > 0.0;
     return float4(now ? 1.0 : 0.0, then ? 1.0 : 0.0, 0.0, 1.0);
 }

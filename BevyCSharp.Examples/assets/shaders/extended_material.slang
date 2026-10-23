@@ -6,9 +6,9 @@ uniform float4 base_color;
 uniform uint quantize_steps;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.base_color = base_color;
 
     // The surface can be changed before it is lit.
@@ -16,9 +16,9 @@ float4 fragment(bcs::VertexOutput mesh) : SV_Target
 
     // And the lit color before fog and the shader's own tonemapping, here cut into as many steps as
     // the material says.
-    var color = bcs::light(surface, mesh);
+    var color = meshLight(surface, mesh);
     color = float4(uint4(color * float(quantize_steps))) / float(quantize_steps);
-    color = bcs::finish(color, mesh);
+    color = meshFinish(color, mesh);
 
     // And the finished color.
     return color * 2.0;

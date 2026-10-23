@@ -1,20 +1,18 @@
 // The deferred buffers as a pass reads them and a draw writes them, and the depth a draw's shadow
-// stage returns, part of the `bcs_pass` module, which includes this file, and under its namespace,
-// so a shader reaches them as `bcs_pass::surface_of` and the rest whichever file holds them.
+// stage returns, part of the `bcs_pass` module, which includes this file, so a shader reaches them
+// as `passSurfaceOf` and the rest whichever file holds them.
 
 implementing bcs_pass;
 
-public namespace bcs_pass
-{
 
 /// What Bevy's G-buffer says about the surface at a pixel.
 ///
 /// Only there on a camera drawing deferred (`Render.SetDeferredRendering`), where a shader reads it
 /// by declaring `Texture2D<uint4> gbuffer;` and loading a texel, since the texture holds packed
-/// bits rather than anything a sampler can blend. `surface_of` unpacks one the way Bevy's lighting
-/// does, so a technique needing albedo and roughness per pixel need not draw the scene again to get
-/// them.
-public struct Surface
+/// bits rather than anything a sampler can blend. `passSurfaceOf` unpacks one the way Bevy's
+/// lighting does, so a technique needing albedo and roughness per pixel need not draw the scene
+/// again to get them.
+public struct PassSurface
 {
     /// The surface's color, linear. Black for an unlit material, whose color is its `emissive`.
     public float3 base_color;
@@ -59,9 +57,9 @@ float3 octahedral_decode(float2 encoded)
 
 /// Unpacks a texel of Bevy's G-buffer, laid out as Bevy's `deferred_gbuffer_from_pbr_input` writes
 /// it outside WebGL: base color and roughness, emissive, material properties, normal and flags.
-public Surface surface_of(uint4 texel)
+public PassSurface passSurfaceOf(uint4 texel)
 {
-    Surface surface;
+    PassSurface surface;
 
     let flags = (texel.w >> 24) & 0xFF;
     surface.unlit = (flags & 1) != 0;
@@ -88,7 +86,6 @@ public Surface surface_of(uint4 texel)
     return surface;
 }
 
-// -- Drawing into the deferred buffers
 //
 // A draw at `FramePoint.InPrepass` with `Targets = ["gbuffer", "lighting_pass"]` writes a surface
 // of its own into a camera's deferred buffers, which Bevy's deferred lighting then lights as it
@@ -98,13 +95,13 @@ public Surface surface_of(uint4 texel)
 
 /// The deferred lighting pass Bevy lights a standard material with, which `lighting_pass` holds
 /// for each pixel it lights.
-public static const uint STANDARD_LIGHTING = 1u;
+public static const uint PassStandardLighting = 1u;
 
 /// A surface as Bevy's default standard material describes one facing `normal`, white, rough by
 /// half, not metal, reflecting half the light head on, receiving shadows and covered by fog.
-public Surface surface(float3 normal)
+public PassSurface passSurface(float3 normal)
 {
-    Surface output;
+    PassSurface output;
     output.base_color = float3(1.0);
     output.perceptual_roughness = 0.5;
     output.metallic = 0.0;
@@ -154,16 +151,16 @@ float2 octahedral_encode(float3 v)
 }
 
 /// Packs a surface into a texel of Bevy's G-buffer, as Bevy's `deferred_gbuffer_from_pbr_input`
-/// packs a standard material's outside WebGL, which `surface_of` unpacks again.
+/// packs a standard material's outside WebGL, which `passSurfaceOf` unpacks again.
 ///
-/// An unlit surface's color is its `emissive`, as `surface_of` gives it back, and its `base_color`
-/// is not kept. A standard material's clearcoat and a lightmap's light are not written, so a
-/// surface drawn this way has neither.
+/// An unlit surface's color is its `emissive`, as `passSurfaceOf` gives it back, and its
+/// `base_color` is not kept. A standard material's clearcoat and a lightmap's light are not
+/// written, so a surface drawn this way has neither.
 ///
 /// Written here rather than reached through Bevy's own function as a material's deferred stage
 /// reaches it, since Bevy's reads the view's uniform in group zero for the lightmap's light, and
 /// group zero is where a draw on a camera keeps its own values.
-public uint4 gbuffer_of(Surface surface)
+public uint4 passGbufferOf(PassSurface surface)
 {
     var flags = 0u;
     if (surface.unlit)
@@ -173,7 +170,7 @@ public uint4 gbuffer_of(Surface surface)
     if (surface.shadow_receiver)
         flags |= 4u;
 
-    // Kept as a gamma of 2.2 for precision in eight bits, which `surface_of` and Bevy's lighting
+    // Kept as a gamma of 2.2 for precision in eight bits, which `passSurfaceOf` and Bevy's lighting
     // undo.
     let base_color = surface.unlit ? float3(0.0) : pow(max(surface.base_color, float3(0.0)), float3(1.0 / 2.2));
     let normal = octahedral_encode(normalize(surface.normal));
@@ -190,7 +187,7 @@ public uint4 gbuffer_of(Surface surface)
 /// What a draw writes into the deferred buffers, the packed surface, the lighting pass that
 /// lights it, and its depth, which tests it against Bevy's geometry and hides it behind what is
 /// nearer.
-public struct Deferred
+public struct PassDeferred
 {
     public uint4 gbuffer : SV_Target0;
     public uint lighting_pass : SV_Target1;
@@ -199,12 +196,12 @@ public struct Deferred
 
 /// A surface at a point in the world as the deferred buffers hold it, lit by Bevy's lighting for
 /// a standard material.
-public Deferred deferred(Surface surface, float3 world)
+public PassDeferred passDeferred(PassSurface surface, float3 world)
 {
-    Deferred output;
-    output.gbuffer = gbuffer_of(surface);
-    output.lighting_pass = STANDARD_LIGHTING;
-    output.depth = depth_of(world);
+    PassDeferred output;
+    output.gbuffer = passGbufferOf(surface);
+    output.lighting_pass = PassStandardLighting;
+    output.depth = passDepthOf(world);
     return output;
 }
 
@@ -214,17 +211,15 @@ public Deferred deferred(Surface surface, float3 world)
 /// A struct, because slangc writes a depth given as a function's own return (`float shadow(...)
 /// : SV_Depth`) as a color when it writes WGSL, which the shadow map has no target for, so the
 /// triangle's own depth would be kept instead. A member marked `SV_Depth` is written as the depth.
-public struct ShadowDepth
+public struct PassShadowDepth
 {
     public float depth : SV_Depth;
 };
 
 /// The depth of a point in the world, for a shadow stage to return.
-public ShadowDepth shadow_depth(float3 world)
+public PassShadowDepth passShadowDepth(float3 world)
 {
-    ShadowDepth output;
-    output.depth = depth_of(world);
+    PassShadowDepth output;
+    output.depth = passDepthOf(world);
     return output;
-}
-
 }

@@ -23,7 +23,7 @@ Corner vertex(uint vertex_id : SV_VertexID, uint instance_id : SV_InstanceID)
     let world = centers[instance_id].xyz + float3(corner2.x, 0.0, corner2.y);
 
     Corner corner;
-    corner.position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(world, 1.0));
+    corner.position = passTransform(passView.clip_from_world, float4(world, 1.0));
     return corner;
 }
 

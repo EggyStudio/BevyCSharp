@@ -19,7 +19,7 @@ static const float GYROID_SCALE = 5.0;
 
 float gyroid_field(float3 p)
 {
-    let q = p * GYROID_SCALE + bcs_pass::globals.time * 0.6;
+    let q = p * GYROID_SCALE + passGlobals.time * 0.6;
     return dot(sin(q), cos(q.yzx));
 }
 
@@ -58,16 +58,16 @@ float raymarch(float3 origin, float3 direction)
 }
 
 [shader("vertex")]
-bcs_pass::Input vertex(uint index : SV_VertexID)
+FullscreenOutput vertex(uint index : SV_VertexID)
 {
-    return bcs_pass::full_screen(index);
+    return fullscreenTriangle(index);
 }
 
 [shader("fragment")]
-bcs_pass::Deferred fragment(bcs_pass::Input input)
+PassDeferred fragment(FullscreenOutput input)
 {
-    let origin = bcs_pass::ray_origin(input.uv);
-    let direction = bcs_pass::ray_direction(input.uv);
+    let origin = passRayOrigin(input.uv);
+    let direction = passRayDirection(input.uv);
     let t = raymarch(origin, direction);
 
     // Discarded where the ray misses, which leaves what Bevy's geometry wrote there.
@@ -76,25 +76,25 @@ bcs_pass::Deferred fragment(bcs_pass::Input input)
 
     let world = origin + direction * t;
 
-    var surface = bcs_pass::surface(sdf_normal(world));
+    var surface = passSurface(sdf_normal(world));
     let field = gyroid_field(world);
-    surface.base_color = 0.5 + 0.5 * cos(6.2831 * (field * 0.4 + bcs_pass::globals.time * 0.05) + float3(0.0, 0.8, 1.6));
+    surface.base_color = 0.5 + 0.5 * cos(6.2831 * (field * 0.4 + passGlobals.time * 0.05) + float3(0.0, 0.8, 1.6));
     surface.metallic = 0.7;
     surface.perceptual_roughness = 0.25;
     // Bevy's packs an opaque standard material with nothing more set, which fog leaves alone.
     surface.fog = false;
-    return bcs_pass::deferred(surface, world);
+    return passDeferred(surface, world);
 }
 
 // Into a light's shadow map only the depth is needed.
 [shader("fragment")]
-bcs_pass::ShadowDepth shadow(bcs_pass::Input input)
+PassShadowDepth shadow(FullscreenOutput input)
 {
-    let origin = bcs_pass::ray_origin(input.uv);
-    let direction = bcs_pass::ray_direction(input.uv);
+    let origin = passRayOrigin(input.uv);
+    let direction = passRayDirection(input.uv);
     let t = raymarch(origin, direction);
     if (t >= FAR)
         discard;
 
-    return bcs_pass::shadow_depth(origin + direction * t);
+    return passShadowDepth(origin + direction * t);
 }

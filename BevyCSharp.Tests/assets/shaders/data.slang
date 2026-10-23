@@ -7,7 +7,7 @@ import bcs;
 StructuredBuffer<float4> colors;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     uint count;
     uint stride;

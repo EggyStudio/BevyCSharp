@@ -37,15 +37,15 @@ uniform float delta;
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    if (id.x >= bcs_compute::count<Boid>(boids)) return;
+    if (id.x >= bufferCount<Boid>(boids)) return;
 
-    var boid = bcs_compute::element<Boid>(boids, id.x);
+    var boid = bufferElement<Boid>(boids, id.x);
     boid.position += boid.velocity * delta;
-    bcs_compute::store(boids, id.x, boid);
+    bufferStore(boids, id.x, boid);
 }
 ```
 
-A raw buffer read with `bcs_compute::element` packs a struct the way a C# struct with sequential
+A raw buffer read with `bufferElement` packs a struct the way a C# struct with sequential
 layout does, so the same struct declared on both sides agrees on every offset. A
 `StructuredBuffer<T>` is laid out with the storage rules instead, where a `float3` takes sixteen
 bytes, so a struct shared with one spells its padding out.
@@ -88,11 +88,11 @@ new one, so a list that outgrows its buffer does not have to be handed out again
 `Shaders.CreateInstanceBuffer(capacity)` makes a buffer the engine fills every frame with entities'
 transforms, this frame's and the previous frame's, once transforms have been worked out.
 `Shaders.SetInstance(buffer, slot, entity)` puts an entity in a slot. A shader reads it as a
-`StructuredBuffer<bcs_scene::Instance>` after `import bcs_scene;`, and culling instances on the GPU,
+`StructuredBuffer<Instance>` after `import bcs_scene;`, and culling instances on the GPU,
 voxelizing a scene, or giving geometry a shader placed its motion all build on it.
 `Shaders.CreateMaterialBuffer(capacity)` does the same for what entities are made of. Each slot
 holds the base color, emissive color, roughness, metallic and reflectance of the entity's standard
-material, as `bcs_scene::Material`, written when they change. Put an entity in the same slot of both
+material, as `Material`, written when they change. Put an entity in the same slot of both
 and a shader reaching it by index has where it is and what color the indirect light it passes on
 takes, and a GI ray shades its hit with that. Textures are not in it, and the base color is the
 factor the material multiplies them by.
@@ -111,11 +111,11 @@ var rock = Shaders.AddToGeometryPool(pool, rockMesh);            // 0, its numbe
 trace.SetBuffer("vertices", pool.Vertices).SetBuffer("indices", pool.Indices).SetBuffer("meshes", pool.Meshes);
 ```
 
-Every mesh added is appended to the same three buffers, its vertices as `bcs_scene::PoolVertex`,
-its triangles' vertex numbers, and an entry in the mesh table, `bcs_scene::PoolMesh`, with where
-they start, how many there are, and its bounds. `bcs_scene::pool_corner` reads a triangle's corner,
-`intersect_triangle` finds where a ray meets it with the weights that interpolate the corners'
-normals and texture coordinates, and `intersect_box` skips a mesh whose bounds the ray misses.
+Every mesh added is appended to the same three buffers, its vertices as `PoolVertex`,
+its triangles' vertex numbers, and an entry in the mesh table, `PoolMesh`, with where
+they start, how many there are, and its bounds. `poolCorner` reads a triangle's corner,
+`intersectTriangle` finds where a ray meets it with the weights that interpolate the corners'
+normals and texture coordinates, and `intersectBox` skips a mesh whose bounds the ray misses.
 With the mesh's number in the same slot as the entity's transform and material, a hit has
 everything shading it takes.
 
@@ -163,8 +163,8 @@ SamplerState linear;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let uv = bcs_pass::uv_of(int2(id.xy));
-    let before = bcs_pass::previous_uv(uv, bcs_pass::load_motion(int2(id.xy)));
+    let uv = passUv(int2(id.xy));
+    let before = passPreviousUv(uv, passLoadMotion(int2(id.xy)));
     let history = accumulated_previous.SampleLevel(linear, before, 0.0);
     accumulated[id.xy] = lerp(history, occlusion.SampleLevel(linear, uv, 0.0), 0.1);
 }
@@ -194,17 +194,17 @@ screen-space GI ray that hits something on screen picks up, and what a temporal 
 toward, without a pass written only to copy it.
 
 A shader on a camera also sees the scene's lights the way Bevy's own materials do. It has
-`bcs_pass::directional_light_count()` and `lights.directional_lights[i]` with each light's color,
-direction and shadow cascades, `point_light_count()` and `point_lights[i]` for point and spot
-lights, while `directional_shadow` and `point_shadow` read Bevy's shadow maps with its filtering,
-from zero in full shadow to one in full light, a spot light's included. `point_light_radiance` is
+`passDirectionalLightCount()` and `passLights.directional_lights[i]` with each light's color,
+direction and shadow cascades, `passPointLightCount()` and `passPointLights[i]` for point and spot
+lights, while `passDirectionalShadow` and `passPointShadow` read Bevy's shadow maps with its filtering,
+from zero in full shadow to one in full light, a spot light's included. `passPointLightRadiance` is
 the light a point or spot light sends to a point before shadow, falling off with distance and, for a
 spot, with the angle from its axis. A traced ray's hit is shaded with these, without drawing the
-scene's lights a second time. The sky is there too. `environment_specular(direction, roughness)` is
+scene's lights a second time. The sky is there too. `passEnvironmentSpecular(direction, roughness)` is
 the light the camera's environment map sends along a direction, blurred as a surface of that
-roughness blurs it, and `environment_diffuse(normal)` what it sends a surface facing a way, both
-black when `has_environment()` is false. A ray that leaves the scene picks up that light, turned and
-scaled exactly as Bevy's own sky and lighting use the same map. And `blue_noise(pixel)` is Bevy's
+roughness blurs it, and `passEnvironmentDiffuse(normal)` what it sends a surface facing a way, both
+black when `passHasEnvironment()` is false. A ray that leaves the scene picks up that light, turned and
+scaled exactly as Bevy's own sky and lighting use the same map. And `passBlueNoise(pixel)` is Bevy's
 spatio-temporal blue noise for this frame, four numbers from zero to one whose values are spread
 evenly across the picture and from frame to frame. A technique taking a few random samples a pixel
 picks them with it, so its noise blurs away rather than blotching.
@@ -212,7 +212,7 @@ picks them with it, so its noise blurs away rather than blotching.
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a
 shader on it declares `Texture2D<uint4> gbuffer;` and unpacks a texel with
-`bcs_pass::surface_of`, which gives the base color, roughness, metallic, reflectance, emissive and
+`passSurfaceOf`, which gives the base color, roughness, metallic, reflectance, emissive and
 normal the way Bevy's own lighting reads them. That is the albedo a GI result is multiplied by and
 the roughness a reflection trace chooses its rays from, without drawing the scene again to get
 them. Only Bevy's materials are in it; one drawn by a Slang program is drawn forward and leaves its
@@ -295,7 +295,7 @@ nothing reads and writes the same texture in one pass.
 `CastsShadows = true` draws it into the shadow maps as well, depth alone, after Bevy's own casters:
 the camera's directional cascades, every spot light's map and every face of every point light's
 cube, so it shadows Bevy's geometry and its own. Its vertex shader runs once for each of those views
-with that view in `bcs_pass::view`, so a shader placing geometry from the view places it as the
+with that view in `passView`, so a shader placing geometry from the view places it as the
 light sees it without knowing it is drawing a shadow.
 
 **With mesh shaders.** A program with a `DrawMesh` stage in place of `DrawVertex` draws with mesh
@@ -337,9 +337,9 @@ void mesh(uint3 group : SV_GroupID, out vertices Corner corners[3], out indices 
     SetMeshOutputCounts(3, 1);
 
     let at = float3(group);
-    corners[0].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at, 1.0));
-    corners[1].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at + float3(1, 0, 0), 1.0));
-    corners[2].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(at + float3(0, 1, 0), 1.0));
+    corners[0].position = passTransform(passView.clip_from_world, float4(at, 1.0));
+    corners[1].position = passTransform(passView.clip_from_world, float4(at + float3(1, 0, 0), 1.0));
+    corners[2].position = passTransform(passView.clip_from_world, float4(at + float3(0, 1, 0), 1.0));
 
     for (uint i = 0; i < 3; i++)
         corners[i].color = float4(float3(group) / 8.0, 1.0);
@@ -360,8 +360,8 @@ them, so everything after it sees what it drew as it sees Bevy's own geometry. I
 targets, since the main pass clears the picture after it. On a camera drawing deferred,
 `Targets = ["gbuffer", "lighting_pass"]` writes a surface of its own into Bevy's G-buffer, and
 Bevy's deferred lighting lights it as it lights a standard material, with shadows, ambient
-occlusion and screen-space reflections. `bcs_pass::deferred(surface, world)` returns what both
-targets hold and the depth, packed as Bevy packs its own, from a `bcs_pass::surface(normal)` set as
+occlusion and screen-space reflections. `passDeferred(surface, world)` returns what both
+targets hold and the depth, packed as Bevy packs its own, from a `passSurface(normal)` set as
 a standard material is set. The camera's depth is copied into the prepass's once the draws there
 are done, so the lighting finds each pixel where the draw put it, and the G-buffer can be drawn
 into at no other point, since by the next one the lighting has taken which pixels to light.
@@ -394,43 +394,43 @@ Shaders.SetViewDraws(camera, ViewDraw.Fixed(field, FramePoint.InPrepass, vertice
 import bcs_pass;
 
 [shader("vertex")]
-bcs_pass::Input vertex(uint index : SV_VertexID)
+FullscreenOutput vertex(uint index : SV_VertexID)
 {
-    return bcs_pass::full_screen(index);
+    return fullscreenTriangle(index);
 }
 
 [shader("fragment")]
-bcs_pass::Deferred fragment(bcs_pass::Input input)
+PassDeferred fragment(FullscreenOutput input)
 {
-    let origin = bcs_pass::ray_origin(input.uv);
-    let direction = bcs_pass::ray_direction(input.uv);
+    let origin = passRayOrigin(input.uv);
+    let direction = passRayDirection(input.uv);
     let distance = march(origin, direction);          // the field's own, below zero for a miss
     if (distance < 0.0)
         discard;                                      // what Bevy drew there stays
 
     let world = origin + direction * distance;
-    var surface = bcs_pass::surface(normal_at(world));
+    var surface = passSurface(normal_at(world));
     surface.base_color = float3(0.8, 0.3, 0.2);
-    return bcs_pass::deferred(surface, world);
+    return passDeferred(surface, world);
 }
 
 [shader("fragment")]
-bcs_pass::ShadowDepth shadow(bcs_pass::Input input)
+PassShadowDepth shadow(FullscreenOutput input)
 {
-    let origin = bcs_pass::ray_origin(input.uv);
-    let direction = bcs_pass::ray_direction(input.uv);
+    let origin = passRayOrigin(input.uv);
+    let direction = passRayDirection(input.uv);
     let distance = march(origin, direction);
     if (distance < 0.0)
         discard;
 
-    return bcs_pass::shadow_depth(origin + direction * distance);
+    return passShadowDepth(origin + direction * distance);
 }
 ```
 
 The ray through a pixel starts at the camera, or on the near plane of an orthographic view, which
-a directional light's shadow cascades are, and `bcs_pass::depth_of` gives the depth the view keeps
+a directional light's shadow cascades are, and `passDepthOf` gives the depth the view keeps
 for a point, the shadow map's in a light's view. A shadow stage returns its depth in a struct
-member marked `SV_Depth`, as `bcs_pass::ShadowDepth` holds it, since slangc writes a depth given as
+member marked `SV_Depth`, as `PassShadowDepth` holds it, since slangc writes a depth given as
 the function's own return as a color, and the shadow map would keep the triangle's depth instead.
 
 **Watching what a camera keeps.** The images a chain writes live on the GPU in formats a picture

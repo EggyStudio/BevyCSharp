@@ -249,25 +249,25 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Depth and normals for passes | Has, single-sampled cameras only |
-| Motion vectors for passes | Has (`Shaders.SetPrepass(camera, motion: true)`, `bcs_pass::motion_at`) |
-| Albedo, roughness and metallic per pixel | Has, from Bevy's G-buffer on a camera drawing deferred (`gbuffer`, `bcs_pass::surface_of`) |
+| Motion vectors for passes | Has (`Shaders.SetPrepass(camera, motion: true)`, `passMotionAt`) |
+| Albedo, roughness and metallic per pixel | Has, from Bevy's G-buffer on a camera drawing deferred (`gbuffer`, `passSurfaceOf`) |
 | Last frame's depth and G-buffer | Has (`Shaders.SetPrepass(..., previous: true)`, `depth_previous`, `gbuffer_previous`) |
-| Previous view matrices for passes and compute | Has, on 3D cameras (`bcs_pass::previous_view`) |
+| Previous view matrices for passes and compute | Has, on 3D cameras (`passPreviousView`) |
 | Last frame's lit color | Has (`ViewImage(..., History: true, CopyAt: FramePoint.BeforeTonemapping)`, read as `name_previous`), scaled to the image and point sampled |
 | History images owned by the camera | Has (`Shaders.SetViewImages`, `History: true`) |
 | The view uniform in compute | Has, for compute on a camera |
 | A depth pyramid | Has, Bevy's farthest-depth pyramid for culling (`Shaders.SetPrepass(..., pyramid: true)`, `depth_pyramid`). A nearest-depth one for tracing is built by the package, since a camera's images have mip levels reachable one at a time |
-| Blue noise | Has, Bevy's spatio-temporal blue noise, for shaders on a camera (`bcs_pass::blue_noise`) |
+| Blue noise | Has, Bevy's spatio-temporal blue noise, for shaders on a camera (`passBlueNoise`) |
 
 ### Scene data on the GPU
 
 | need | status |
 |---|---|
-| Transforms per instance, current and previous | Has (`Shaders.CreateInstanceBuffer`, `bcs_scene::Instance`) for the entities put in its slots |
-| Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`bcs_pass::lights`, `point_lights`, `directional_shadow`, `point_shadow` for point and spot lights, `point_light_radiance`) |
-| The sky as a cube map or spherical harmonics | Has, as the camera's environment map, for compute and passes on a camera (`bcs_pass::environment_specular`, `environment_diffuse`) |
-| Material data by object | Has, as constants from each entity's standard material (`Shaders.CreateMaterialBuffer`, `bcs_scene::Material`). Textures and per-triangle data are missing |
-| Geometry and material pools addressable at a ray hit | Has (`Shaders.CreateGeometryPool`, `AddToGeometryPool`, `bcs_scene::PoolVertex`, `intersect_triangle`), with material constants by slot. An acceleration structure over the pool is left to the package, in compute |
+| Transforms per instance, current and previous | Has (`Shaders.CreateInstanceBuffer`, `Instance`) for the entities put in its slots |
+| Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`passLights`, `passPointLights`, `passDirectionalShadow`, `passPointShadow` for point and spot lights, `passPointLightRadiance`) |
+| The sky as a cube map or spherical harmonics | Has, as the camera's environment map, for compute and passes on a camera (`passEnvironmentSpecular`, `passEnvironmentDiffuse`) |
+| Material data by object | Has, as constants from each entity's standard material (`Shaders.CreateMaterialBuffer`, `Material`). Textures and per-triangle data are missing |
+| Geometry and material pools addressable at a ray hit | Has (`Shaders.CreateGeometryPool`, `AddToGeometryPool`, `PoolVertex`, `intersectTriangle`), with material constants by slot. An acceleration structure over the pool is left to the package, in compute |
 
 ### GPU-driven work
 
@@ -288,10 +288,10 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | need | status |
 |---|---|
 | Ambient occlusion applied by the renderer | Has (`Render.SetAmbientOcclusion`), and replaceable by a package's own through the `ambient_occlusion` texture a compute shader on the camera writes |
-| Indirect diffuse and specular inputs | In part. A world-space technique answers into an irradiance volume a compute shader writes (`Render.SetIrradianceVolume`, `bcs_scene::irradiance_texel`), which Bevy's materials read as their diffuse light. A per-pixel result is added after opaque geometry by an additive draw weighted by the G-buffer's albedo, before transparency and tonemapping, which is right for diffuse. What that cannot do is feed Bevy's specular term or the materials a Slang program draws, which is a change to Bevy's lighting or a fork point |
+| Indirect diffuse and specular inputs | In part. A world-space technique answers into an irradiance volume a compute shader writes (`Render.SetIrradianceVolume`, `irradianceTexel`), which Bevy's materials read as their diffuse light. A per-pixel result is added after opaque geometry by an additive draw weighted by the G-buffer's albedo, before transparency and tonemapping, which is right for diffuse. What that cannot do is feed Bevy's specular term or the materials a Slang program draws, which is a change to Bevy's lighting or a fork point |
 | Screen-space reflections | Has (`Render.SetScreenSpaceReflections`), Bevy's, over its G-buffer |
 | Light probes and irradiance volumes | Has (`Render.SetReflectionProbe`, `Render.SetIrradianceVolume`, and `Render.SetProbeCapture` for a reflection probe that renders itself), with the volume an ordinary 3D image a compute shader can write every frame |
-| Deferred rendering and a G-buffer | Has for Bevy's materials (`Render.SetDeferredRendering`), and readable by a camera's passes and compute as `gbuffer`, unpacked by `bcs_pass::surface_of` (`Shaders.SetPrepass(..., deferred: true)`). Materials a Slang program draws are forward and leave it empty |
+| Deferred rendering and a G-buffer | Has for Bevy's materials (`Render.SetDeferredRendering`), and readable by a camera's passes and compute as `gbuffer`, unpacked by `passSurfaceOf` (`Shaders.SetPrepass(..., deferred: true)`). Materials a Slang program draws are forward and leave it empty |
 | Ray-traced lighting | Has, Bevy's Solari, in a bridge built with `--solari` and an app that sets `Config.RayTracedLighting` (`Render.SetRayTracedLighting`, `SetRayTraced`). A package's own shaders tracing rays is the ray query row above |
 
 ### Resources and formats
@@ -319,8 +319,8 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 
 | need | status |
 |---|---|
-| Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `bcs_ray::trace` and `visible`, in a bridge built with `--solari` and an app running Solari |
-| An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `bcs_ray::surface_at` shades a hit from. A package's own is a ray scene over a geometry pool (`Shaders.CreateRayScene`), traced with `bcs_ray::trace_in`, which needs no Solari |
+| Ray queries in shaders | Has, in compute shaders compiled to SPIR-V (`ShaderTarget.SpirV`), through `rayTrace` and `visible`, in a bridge built with `--solari` and an app running Solari |
+| An acceleration structure kept current with the scene | Has, Solari's, over the meshes given to `SetRayTraced`, with their vertices, transforms, materials and lights, which `bcs_ray` declares as group two of a dispatch and `raySurfaceAt` shades a hit from. A package's own is a ray scene over a geometry pool (`Shaders.CreateRayScene`), traced with `rayTraceIn`, which needs no Solari |
 
 The route runs around what each tool lacks. Slang writes ray queries only for SPIR-V, and naga's
 SPIR-V reader has no ray query instructions, so a shader of this kind never passes through naga.

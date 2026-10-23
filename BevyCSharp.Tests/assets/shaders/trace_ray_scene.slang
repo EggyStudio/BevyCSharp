@@ -21,7 +21,7 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
 
     let x = (float(id.x) - float(count - 1) * 0.5) * spacing;
-    let hit = bcs_ray::trace_in(scene, float3(x, height, 0.0), float3(0.0, -1.0, 0.0), 0.001, 1000.0);
+    let hit = rayTraceIn(scene, float3(x, height, 0.0), float3(0.0, -1.0, 0.0), 0.001, 1000.0);
 
     hits[id.x] = hit.hit ? float4(float(hit.instance), float(hit.mesh), hit.t, 1.0) : float4(-1.0);
 }

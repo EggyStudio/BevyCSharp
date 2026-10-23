@@ -16,20 +16,20 @@ struct Corner
 };
 
 [shader("vertex")]
-bcs::VertexOutput vertex(Corner corner)
+MeshVertexOutput vertex(Corner corner)
 {
-    let world = centers[bcs::vertex_number(corner.instance_index, corner.vertex_id) / 4].xyz + corner.offset;
+    let world = centers[meshVertexNumber(corner.instance_index, corner.vertex_id) / 4].xyz + corner.offset;
 
-    bcs::VertexOutput output;
+    MeshVertexOutput output;
     output.world_position = float4(world, 1.0);
-    output.position = bcs::world_to_clip(world);
+    output.position = meshWorldToClip(world);
     output.world_normal = float3(0.0, 0.0, 1.0);
     output.uv = float2(0.0);
     return output;
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     return float4(0.0, 1.0, 0.0, 1.0);
 }

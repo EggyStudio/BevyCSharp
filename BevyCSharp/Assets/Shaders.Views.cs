@@ -75,7 +75,7 @@ public static unsafe partial class Shaders
     /// </summary>
     /// <remarks>
     /// <para>
-    /// A pass reads them with <c>bcs_pass::depth_at</c>, <c>normal_at</c> and <c>motion_at</c>, and
+    /// A pass reads them with <c>passDepthAt</c>, <c>normal_at</c> and <c>motion_at</c>, and
     /// a compute shader on the camera with <c>load_depth</c>, <c>load_normal</c> and
     /// <c>load_motion</c>. An outline, a fog or ambient occlusion is built from depth and normals,
     /// and anything reusing the previous frame needs motion to find where a surface was. A camera
@@ -103,7 +103,7 @@ public static unsafe partial class Shaders
     /// </param>
     /// <param name="deferred">
     /// Whether to draw Bevy's G-buffer, the base color, roughness, metallic and normal of every
-    /// pixel, which a shader reads as <c>gbuffer</c> and unpacks with <c>bcs_pass::surface_of</c>.
+    /// pixel, which a shader reads as <c>gbuffer</c> and unpacks with <c>passSurfaceOf</c>.
     /// It turns on <see cref="Render.SetDeferredRendering"/>, which stays on after the camera stops
     /// asking, since other cameras may read it, and brings depth with it. Bevy's own materials are
     /// in it, and a Slang program's where it has a deferred stage
@@ -288,7 +288,7 @@ public static unsafe partial class Shaders
     /// The prepass's depth, normals and motion, where the camera draws them, Bevy's ambient
     /// occlusion, where it is on, and Bevy's G-buffer, where the camera draws deferred. The G-buffer
     /// is packed bits, which a shader declares as <c>Texture2D&lt;uint4&gt; gbuffer</c> and unpacks
-    /// with <c>bcs_pass::surface_of</c>. Last frame's depth and G-buffer are there as
+    /// with <c>passSurfaceOf</c>. Last frame's depth and G-buffer are there as
     /// <c>depth_previous</c> and <c>gbuffer_previous</c> where the camera keeps them, and Bevy's
     /// hierarchical depth as <c>depth_pyramid</c> where the camera builds it. A watch reads the
     /// prepass's by these names too. Which of them a camera has is

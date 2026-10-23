@@ -61,14 +61,14 @@ public sealed class LightProbeTests
         import bcs;
 
         [shader("fragment")]
-        float4 fragment(bcs::VertexOutput mesh) : SV_Target
+        float4 fragment(MeshVertexOutput mesh) : SV_Target
         {
-            return float4(bcs::irradiance(mesh, mesh.world_normal) / 1000.0, 1.0);
+            return float4(meshIrradiance(mesh, mesh.world_normal) / 1000.0, 1.0);
         }
         """;
 
     /// <summary>
-    /// A shader shows the light the volume gives each face through <c>bcs::irradiance</c>, green
+    /// A shader shows the light the volume gives each face through <c>meshIrradiance</c>, green
     /// on top and red in front as the standard material is lit, and the volume's image reads as
     /// the size it was made.
     /// </summary>

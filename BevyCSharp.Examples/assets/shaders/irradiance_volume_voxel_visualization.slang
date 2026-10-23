@@ -10,7 +10,7 @@ import bcs;
 uniform float intensity;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    return float4(bcs::irradiance(mesh, mesh.world_normal) / intensity, 1.0);
+    return float4(meshIrradiance(mesh, mesh.world_normal) / intensity, 1.0);
 }

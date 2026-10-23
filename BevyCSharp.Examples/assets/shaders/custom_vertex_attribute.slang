@@ -26,7 +26,7 @@ struct VertexOutput
 VertexOutput vertex(Vertex vertex)
 {
     VertexOutput output;
-    output.clip_position = bcs::local_to_clip(vertex.instance_index, vertex.position);
+    output.clip_position = meshLocalToClip(vertex.instance_index, vertex.position);
     output.blend_color = vertex.blend_color;
     return output;
 }

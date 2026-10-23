@@ -6,21 +6,21 @@ import bcs;
 uniform float4 base_color;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.base_color = base_color;
 
     // The decals laid on as the standard material lays them.
-    surface = bcs::decals(surface, mesh);
+    surface = meshDecals(surface, mesh);
 
     // And each laid on again, its color tinted by its tag.
-    let count = bcs::decal_count(mesh);
+    let count = meshDecalCount(mesh);
     for (uint index = 0; index < count; index++)
     {
-        var color = bcs::decal_sample(mesh, index, bcs::DecalMap.Color);
+        var color = meshDecalSample(mesh, index, DecalMap.Color);
 
-        switch (bcs::decal_tag(mesh, index))
+        switch (meshDecalTag(mesh, index))
         {
         case 1:
             color = float4(lerp(surface.base_color.rgb, float3(1.0, 0.0, 0.0), 0.5), color.a);
@@ -37,5 +37,5 @@ float4 fragment(bcs::VertexOutput mesh) : SV_Target
             surface.base_color.a + color.a);
     }
 
-    return bcs::lit(surface, mesh);
+    return meshLit(surface, mesh);
 }

@@ -22,7 +22,7 @@ void task()
 
     // How many workgroups run grows with time until it passes what the GPU allows, when every
     // cube disappears, which shows what choosing too many does.
-    let count = uint(bcs_pass::globals.time);
+    let count = uint(passGlobals.time);
     payload.groups = uint3(count);
     DispatchMesh(count, count, count, payload);
 }
@@ -120,14 +120,14 @@ void mesh(
     for (uint i = 0; i < 24; i++)
     {
         let corner = CUBE[i];
-        corners[i].position = bcs_pass::transform(bcs_pass::view.clip_from_world, float4(corner.position + offset, 1.0));
+        corners[i].position = passTransform(passView.clip_from_world, float4(corner.position + offset, 1.0));
         corners[i].normal = corner.normal;
         corners[i].uv = corner.uv;
         corners[i].color_mask = color;
     }
 
     // Culled in a wave that moves with time, offset by where the cube is.
-    let culled_now = sin(bcs_pass::globals.time * 10.0 + offset.x + offset.y + offset.z) > 0.8;
+    let culled_now = sin(passGlobals.time * 10.0 + offset.x + offset.y + offset.z) > 0.8;
 
     for (uint i = 0; i < 12; i++)
     {

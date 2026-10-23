@@ -8,9 +8,9 @@ Texture2D modulate_texture;
 SamplerState modulate_sampler;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
-    var surface = bcs::surface(mesh);
+    var surface = meshSurface(mesh);
     surface.base_color = base_color * modulate_texture.Sample(modulate_sampler, mesh.uv) * modulate_color;
-    return bcs::lit(surface, mesh);
+    return meshLit(surface, mesh);
 }

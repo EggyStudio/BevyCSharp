@@ -7,13 +7,11 @@
 
 module bcs_scene;
 
-public namespace bcs_scene
-{
 
 /// One slot of an instance buffer, an entity's transform this frame and on the previous one.
 ///
-/// Matrices are four columns, which `transform` multiplies out. A slot with no entity in it holds
-/// zeros, which transform everything to the origin.
+/// Matrices are four columns, which `sceneTransform` multiplies out. A slot with no entity in it
+/// holds zeros, which transform everything to the origin.
 public struct Instance
 {
     public float4 world_from_local[4];
@@ -39,51 +37,51 @@ public struct Material
 };
 
 /// Multiplies a matrix held as four columns by a vector.
-public float4 transform(float4 columns[4], float4 v)
+public float4 sceneTransform(float4 columns[4], float4 v)
 {
     return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z + columns[3] * v.w;
 }
 
 /// Where a point on an instance is in the world this frame.
-public float3 to_world(Instance instance, float3 local)
+public float3 instanceToWorld(Instance instance, float3 local)
 {
-    return transform(instance.world_from_local, float4(local, 1.0)).xyz;
+    return sceneTransform(instance.world_from_local, float4(local, 1.0)).xyz;
 }
 
 /// Where the same point was on the previous frame, for motion and reprojection.
-public float3 to_previous_world(Instance instance, float3 local)
+public float3 instanceToPreviousWorld(Instance instance, float3 local)
 {
-    return transform(instance.previous_world_from_local, float4(local, 1.0)).xyz;
+    return sceneTransform(instance.previous_world_from_local, float4(local, 1.0)).xyz;
 }
 
 /// Where an instance's origin is this frame.
-public float3 position(Instance instance)
+public float3 instancePosition(Instance instance)
 {
     return instance.world_from_local[3].xyz;
 }
 
 /// Where an instance's origin was on the previous frame.
-public float3 previous_position(Instance instance)
+public float3 instancePreviousPosition(Instance instance)
 {
     return instance.previous_world_from_local[3].xyz;
 }
 
-/// The six directions an irradiance volume keeps light for, as `irradiance_texel` takes them.
+/// The six directions an irradiance volume keeps light for, as `irradianceTexel` takes them.
 ///
-/// Each is the way a surface faces, and it keeps the light that surface receives, so `POSITIVE_Y`
-/// lights a floor.
-public static const uint POSITIVE_X = 0;
-public static const uint NEGATIVE_X = 1;
-public static const uint POSITIVE_Y = 2;
-public static const uint NEGATIVE_Y = 3;
-public static const uint POSITIVE_Z = 4;
-public static const uint NEGATIVE_Z = 5;
+/// Each is the way a surface faces, and it keeps the light that surface receives, so
+/// `IrradiancePositiveY` lights a floor.
+public static const uint IrradiancePositiveX = 0;
+public static const uint IrradianceNegativeX = 1;
+public static const uint IrradiancePositiveY = 2;
+public static const uint IrradianceNegativeY = 3;
+public static const uint IrradiancePositiveZ = 4;
+public static const uint IrradianceNegativeZ = 5;
 
 /// How large the image of an irradiance volume `grid` points across has to be.
 ///
 /// Twice as high for the two signs of an axis and three times as deep for the three axes, which is
 /// the packing Bevy samples.
-public uint3 irradiance_image_size(uint3 grid)
+public uint3 irradianceImageSize(uint3 grid)
 {
     return uint3(grid.x, grid.y * 2, grid.z * 3);
 }
@@ -94,7 +92,7 @@ public uint3 irradiance_image_size(uint3 grid)
 /// Point zero is the corner of the probe's box at its negative end on every axis. The positive
 /// half of each axis is the first `grid.y` rows and the negative half the next, which is the way
 /// Bevy's shader reads it; its documentation of the layout has the halves the other way round.
-public uint3 irradiance_texel(uint3 point, uint side, uint3 grid)
+public uint3 irradianceTexel(uint3 point, uint side, uint3 grid)
 {
     uint axis = side / 2;
     uint negative = side % 2;
@@ -106,7 +104,7 @@ public uint3 irradiance_texel(uint3 point, uint side, uint3 grid)
 ///
 /// The points are the centers of the cells the box is cut into, which is where Bevy's filtering
 /// puts each one at full weight. The probe's `world_from_local` turns this into a world position.
-public float3 irradiance_point_in_box(uint3 point, uint3 grid)
+public float3 irradiancePointInBox(uint3 point, uint3 grid)
 {
     return (float3(point) + 0.5) / float3(grid) - 0.5;
 }
@@ -135,13 +133,13 @@ public struct PoolMesh
 };
 
 /// How many triangles a pool's mesh has.
-public uint triangle_count(PoolMesh mesh)
+public uint poolTriangleCount(PoolMesh mesh)
 {
     return mesh.index_count / 3;
 }
 
 /// Corner `corner`, from zero to two, of triangle `triangle` of a pool's mesh.
-public PoolVertex pool_corner(
+public PoolVertex poolCorner(
     StructuredBuffer<PoolVertex> vertices,
     StructuredBuffer<uint> indices,
     PoolMesh mesh,
@@ -159,7 +157,7 @@ public PoolVertex pool_corner(
 /// Both faces count, since a ray gathering light should see a thin wall from either side. The
 /// weights interpolate anything the corners carry, so the normal at the hit is
 /// `a * (1 - y - z) + b * y + c * z`.
-public float4 intersect_triangle(float3 origin, float3 direction, float3 a, float3 b, float3 c)
+public float4 intersectTriangle(float3 origin, float3 direction, float3 a, float3 b, float3 c)
 {
     let edge1 = b - a;
     let edge2 = c - a;
@@ -188,7 +186,7 @@ public float4 intersect_triangle(float3 origin, float3 direction, float3 a, floa
 
 /// Where a ray from `origin` along `direction` enters a box, as the distance along it, or a
 /// negative number where it misses, which skips a mesh whose bounds a ray does not reach.
-public float intersect_box(float3 origin, float3 direction, float3 low, float3 high)
+public float intersectBox(float3 origin, float3 direction, float3 low, float3 high)
 {
     // A ray along an axis has zeros in its direction, and WGSL leaves one over zero undefined
     // rather than infinite, so a zero is made tiny and the slab it would divide is effectively
@@ -204,6 +202,4 @@ public float intersect_box(float3 origin, float3 direction, float3 low, float3 h
     let enter = max(max(min(near.x, far.x), min(near.y, far.y)), min(near.z, far.z));
     let leave = min(min(max(near.x, far.x), max(near.y, far.y)), max(near.z, far.z));
     return leave >= max(enter, 0.0) ? max(enter, 0.0) : -1.0;
-}
-
 }

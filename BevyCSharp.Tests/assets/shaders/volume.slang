@@ -8,7 +8,7 @@ Texture2DArray stack;
 SamplerState nearest;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let back = fog.Sample(nearest, float3(0.5, 0.5, 0.9));
     let second = stack.Sample(nearest, float3(0.5, 0.5, 1.0));

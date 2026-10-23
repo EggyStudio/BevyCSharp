@@ -10,7 +10,7 @@ import bcs_field;
 Texture3D<float> field;
 SamplerState field_sampler;
 
-StructuredBuffer<bcs_field::Info> info;
+StructuredBuffer<FieldInfo> info;
 
 [format("rgba8")] RWTexture2D<float4> slice;
 
@@ -22,7 +22,7 @@ uniform uint4 choice;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    bcs_field::Info field_info = info[0];
+    FieldInfo field_info = info[0];
     uint size = uint(field_info.counts.y);
     uint2 pixels;
     slice.GetDimensions(pixels.x, pixels.y);
@@ -44,7 +44,7 @@ void main(uint3 id : SV_DispatchThreadID)
     float3 at = choice.y == 1u ? float3(cell.x, along, cell.y)
         : choice.y == 0u ? float3(along, up, cell.x)
         : float3(cell.x, up, along);
-    float d = bcs_field::distance_in(field, field_sampler, field_info, int(choice.x), oc.xyz + at * oc.w) / oc.w;
+    float d = fieldDistanceIn(field, field_sampler, field_info, int(choice.x), oc.xyz + at * oc.w) / oc.w;
 
     float3 color;
     if (abs(d) < 0.17)

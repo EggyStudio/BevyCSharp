@@ -5,7 +5,7 @@ import bcs_sprite;
 uniform float4 tint;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput input) : SV_Target
+float4 fragment(Mesh2dVertexOutput input) : SV_Target
 {
-    return bcs_sprite::sample_final_color(input.uv) * tint;
+    return spriteSampleFinalColor(input.uv) * tint;
 }

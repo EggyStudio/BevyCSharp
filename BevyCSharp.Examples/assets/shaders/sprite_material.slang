@@ -11,7 +11,7 @@ uniform float amount;
 uniform float burn_edge;
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput input) : SV_Target
+float4 fragment(Mesh2dVertexOutput input) : SV_Target
 {
     // The noise at twice the UVs, which makes it denser, from burn_edge to one less burn_edge, so
     // no edge shows on a sprite that is whole or gone.
@@ -20,7 +20,7 @@ float4 fragment(bcs2d::VertexOutput input) : SV_Target
 
     // Below zero the pixel is gone, up to burn_edge it is burning, and past that it is whole.
     let difference = noise - amount;
-    let sprite_color = bcs_sprite::sample_sprite_texture(input.uv);
+    let sprite_color = spriteSampleTexture(input.uv);
 
     var color = float4(0.0);
     if (difference >= 0.0 && difference < burn_edge)
@@ -34,7 +34,7 @@ float4 fragment(bcs2d::VertexOutput input) : SV_Target
     }
 
     // The sprite's tint and alpha mode, as Bevy draws a sprite.
-    return bcs_sprite::get_final_color(color);
+    return spriteFinalColor(color);
 }
 
 /// Simplex noise, from zero to one, after the one in the noisy_bevy crate. Sampling a texture of it

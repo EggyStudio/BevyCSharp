@@ -12,13 +12,13 @@ uniform float3 toward_sun;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    let size = bcs_pass::picture_size();
+    let size = passPictureSize();
 
     if (id.x >= size.x || id.y >= size.y)
         return;
 
     let uv = (float2(id.xy) + 0.5) / float2(size);
-    let depth = bcs_pass::load_depth(int2(id.xy));
+    let depth = passLoadDepth(int2(id.xy));
 
     if (depth <= 0.0)
     {
@@ -26,10 +26,10 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    let world = bcs_pass::world_position(uv, depth);
-    let normal = bcs_pass::load_normal(int2(id.xy));
+    let world = passWorldPosition(uv, depth);
+    let normal = passLoadNormal(int2(id.xy));
 
     // Lifted off the surface along its normal, so the ray does not meet the triangle it left.
     let from = world + normal * 0.01;
-    lit[id.xy] = bcs_ray::visible(from, from + normalize(toward_sun) * 100.0) ? 1.0 : 0.0;
+    lit[id.xy] = rayVisible(from, from + normalize(toward_sun) * 100.0) ? 1.0 : 0.0;
 }

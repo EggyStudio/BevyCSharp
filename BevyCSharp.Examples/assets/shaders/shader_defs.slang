@@ -10,7 +10,7 @@ struct CustomMaterial
 uniform CustomMaterial material;
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
 #ifdef IS_RED
     return float4(1.0, 0.0, 0.0, 1.0);

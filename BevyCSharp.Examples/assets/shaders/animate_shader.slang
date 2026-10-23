@@ -23,13 +23,13 @@ float3 oklab_to_linear_srgb(float3 c)
 }
 
 [shader("fragment")]
-float4 fragment(bcs::VertexOutput mesh) : SV_Target
+float4 fragment(MeshVertexOutput mesh) : SV_Target
 {
     let speed = 2.0;
 
     // Time since startup, in seconds, from Bevy's globals.
-    let t_1 = sin(bcs::globals.time * speed) * 0.5 + 0.5;
-    let t_2 = cos(bcs::globals.time * speed);
+    let t_1 = sin(meshGlobals.time * speed) * 0.5 + 0.5;
+    let t_2 = cos(meshGlobals.time * speed);
 
     let distance_to_center = distance(mesh.uv, float2(0.5)) * 1.4;
 

@@ -2,7 +2,7 @@
 // the image is cut, flipped, tiled and sliced over the quad, with Bevy's functions for each.
 //
 // A fragment shader drawing a sprite reaches it with `import bcs_sprite;` beside `import bcs2d;`,
-// and everything in it is under the `bcs_sprite` namespace. Bevy draws a sprite as a quad mesh,
+// and uses its names plainly, each named `sprite` and its work. Bevy draws a sprite as a quad mesh,
 // and the bridge binds what the sprite says in the material's group at bindings 100 to 102, past
 // the program's own, so a shader names its own values as it would on any 2D mesh. A shader that
 // imports this draws only on a sprite, since only a sprite has these to bind.
@@ -12,8 +12,6 @@
 
 module bcs_sprite;
 
-public namespace bcs_sprite
-{
 
 /// How the sprite is drawn, in the layout of Bevy's `SpriteMeshMaterialUniform`, which Bevy works
 /// out from the sprite and its image.
@@ -30,7 +28,8 @@ public struct Sprite
     public float2 vertex_scale;
     /// Where the quad's center is moved to, from the sprite's anchor.
     public float2 vertex_offset;
-    /// From the quad's UVs to the image's, for an atlas, a rect or a scaling mode, as three columns.
+    /// From the quad's UVs to the image's, for an atlas, a rect or a scaling mode, as three
+    /// columns.
     public float4 uv_transform[3];
     /// Where a tiled image repeats, as a share of the quad.
     public float2 tile_stretch_value;
@@ -43,83 +42,82 @@ public struct Sprite
 };
 
 /// The image is flipped across its vertical axis.
-public static const uint FLIP_X = 1u;
+public static const uint SpriteFlipX = 1u;
 /// The image is flipped across its horizontal axis.
-public static const uint FLIP_Y = 2u;
+public static const uint SpriteFlipY = 2u;
 /// The image repeats across the quad.
-public static const uint TILE_X = 4u;
+public static const uint SpriteTileX = 4u;
 /// The image repeats down the quad.
-public static const uint TILE_Y = 8u;
+public static const uint SpriteTileY = 8u;
 /// The bits that say how the sprite blends.
-public static const uint ALPHA_MODE_BITS = 3u << 30;
-public static const uint ALPHA_MODE_OPAQUE = 0u;
-public static const uint ALPHA_MODE_MASK = 1u << 30;
-public static const uint ALPHA_MODE_BLEND = 2u << 30;
+public static const uint SpriteAlphaModeBits = 3u << 30;
+public static const uint SpriteAlphaOpaque = 0u;
+public static const uint SpriteAlphaMask = 1u << 30;
+public static const uint SpriteAlphaBlend = 2u << 30;
 
 [[vk::binding(100, 102)]] public ConstantBuffer<Sprite> sprite;
 /// The sprite's image, the whole of it, an atlas included.
-[[vk::binding(101, 102)]] public Texture2D image;
-[[vk::binding(102, 102)]] public SamplerState image_sampler;
+[[vk::binding(101, 102)]] public Texture2D spriteImage;
+[[vk::binding(102, 102)]] public SamplerState spriteImageSampler;
 
-// -- Bevy's functions
 
 /// The sprite's image at `uv` with its color applied and a masked sprite's alpha cut off, which is
 /// how Bevy draws a sprite.
-public float4 sample_final_color(float2 uv)
+public float4 spriteSampleFinalColor(float2 uv)
 {
-    return get_final_color(sample_sprite_texture(uv));
+    return spriteFinalColor(spriteSampleTexture(uv));
 }
 
 /// The sprite's image at `uv`, a point on the quad from zero to one, read where the sprite's
 /// flipping, tiling, slicing and atlas put it, without its color.
-public float4 sample_sprite_texture(float2 uv)
+public float4 spriteSampleTexture(float2 uv)
 {
-    return image.Sample(image_sampler, final_uv(uv));
+    return spriteImage.Sample(spriteImageSampler, spriteFinalUv(uv));
 }
 
-/// A color with the sprite's color applied and its alpha mode, which leaves an opaque sprite's alpha
-/// at one and does not draw a masked sprite's fragment below the cutoff.
-public float4 get_final_color(float4 sprite_color)
+/// A color with the sprite's color applied and its alpha mode, which leaves an opaque sprite's
+/// alpha at one and does not draw a masked sprite's fragment below the cutoff.
+public float4 spriteFinalColor(float4 sprite_color)
 {
-    return alpha_discard(apply_tint(sprite_color));
+    return spriteAlphaDiscard(spriteApplyTint(sprite_color));
 }
 
 /// Where on the image a point on the quad reads, from zero to one.
-public float2 final_uv(float2 uv)
+public float2 spriteFinalUv(float2 uv)
 {
     var out = uv;
-    out = apply_flip(out);
-    out = apply_tiling(out);
-    out = apply_slicing(out);
-    out = apply_uv_transform(out);
+    out = spriteApplyFlip(out);
+    out = spriteApplyTiling(out);
+    out = spriteApplySlicing(out);
+    out = spriteApplyUvTransform(out);
     return out;
 }
 
 /// Flips `uv` as the sprite's `flip_x` and `flip_y` say.
-public float2 apply_flip(float2 uv)
+public float2 spriteApplyFlip(float2 uv)
 {
     var out = uv;
-    if ((sprite.flags & FLIP_X) != 0u)
+    if ((sprite.flags & SpriteFlipX) != 0u)
         out.x = 1.0 - out.x;
-    if ((sprite.flags & FLIP_Y) != 0u)
+    if ((sprite.flags & SpriteFlipY) != 0u)
         out.y = 1.0 - out.y;
     return out;
 }
 
 /// Repeats `uv` where the sprite's image mode tiles it.
-public float2 apply_tiling(float2 uv)
+public float2 spriteApplyTiling(float2 uv)
 {
     let stretch = sprite.tile_stretch_value;
     var out = uv;
-    if ((sprite.flags & TILE_X) != 0u)
+    if ((sprite.flags & SpriteTileX) != 0u)
         out.x = (out.x - stretch.x * floor(out.x / stretch.x)) / stretch.x;
-    if ((sprite.flags & TILE_Y) != 0u)
+    if ((sprite.flags & SpriteTileY) != 0u)
         out.y = (out.y - stretch.y * floor(out.y / stretch.y)) / stretch.y;
     return out;
 }
 
 /// Moves `uv` onto the part of the image an atlas, a rect or a scaling mode picks.
-public float2 apply_uv_transform(float2 uv)
+public float2 spriteApplyUvTransform(float2 uv)
 {
     let columns = sprite.uv_transform;
     return columns[0].xy * uv.x + columns[1].xy * uv.y + columns[2].xy;
@@ -127,7 +125,7 @@ public float2 apply_uv_transform(float2 uv)
 
 /// Moves `uv` onto the image's corners, edges and center where the sprite is sliced, so the
 /// corners keep their size as the quad grows.
-public float2 apply_slicing(float2 uv)
+public float2 spriteApplySlicing(float2 uv)
 {
     let scale = sprite.scale;
     let min_inset = sprite.min_inset;
@@ -174,23 +172,23 @@ public float2 apply_slicing(float2 uv)
 }
 
 /// A color multiplied by the sprite's.
-public float4 apply_tint(float4 sprite_color)
+public float4 spriteApplyTint(float4 sprite_color)
 {
     return sprite_color * sprite.color;
 }
 
 /// A color with the sprite's alpha mode applied, which sets an opaque sprite's alpha to one, sets a
 /// masked sprite's to one at or above the cutoff and draws nothing of it below.
-public float4 alpha_discard(float4 color)
+public float4 spriteAlphaDiscard(float4 color)
 {
     var out = color;
-    let mode = sprite.flags & ALPHA_MODE_BITS;
+    let mode = sprite.flags & SpriteAlphaModeBits;
 
-    if (mode == ALPHA_MODE_OPAQUE)
+    if (mode == SpriteAlphaOpaque)
     {
         out.a = 1.0;
     }
-    else if (mode == ALPHA_MODE_MASK)
+    else if (mode == SpriteAlphaMask)
     {
         if (out.a < sprite.alpha_cutoff)
             discard;
@@ -209,6 +207,4 @@ float tile_or_stretch(float p, float a, float b, float c, float d, float stretch
     let value = (p - a) / (b - a);
     let tile = (value - stretch * floor(value / stretch)) / stretch;
     return tile * (d - c) + c;
-}
-
 }

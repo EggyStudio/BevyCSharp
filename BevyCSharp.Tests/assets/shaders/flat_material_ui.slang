@@ -7,14 +7,14 @@ uniform float4 border_color;
 uniform float2 offset;
 
 [shader("vertex")]
-bcs_ui::VertexOutput vertex(bcs_ui::Vertex v)
+UiVertexOutput vertex(UiVertex v)
 {
     v.position.xy += offset;
-    return bcs_ui::standard_vertex(v);
+    return uiStandardVertex(v);
 }
 
 [shader("fragment")]
-float4 fragment(bcs_ui::VertexOutput node) : SV_Target
+float4 fragment(UiVertexOutput node) : SV_Target
 {
     let p = node.uv * node.size;
     let b = node.border_widths;

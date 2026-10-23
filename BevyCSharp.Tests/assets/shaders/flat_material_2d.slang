@@ -6,16 +6,16 @@ uniform float4 color;
 uniform float2 offset;
 
 [shader("vertex")]
-bcs2d::VertexOutput vertex(bcs2d::Vertex v)
+Mesh2dVertexOutput vertex(Mesh2dVertex v)
 {
-    var output = bcs2d::standard_vertex(v);
+    var output = mesh2dStandardVertex(v);
     output.world_position.xy += offset;
-    output.position = bcs2d::world_to_clip(output.world_position.xyz);
+    output.position = mesh2dWorldToClip(output.world_position.xyz);
     return output;
 }
 
 [shader("fragment")]
-float4 fragment(bcs2d::VertexOutput mesh) : SV_Target
+float4 fragment(Mesh2dVertexOutput mesh) : SV_Target
 {
     return color;
 }

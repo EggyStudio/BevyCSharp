@@ -4,13 +4,13 @@
 import bcs_compute;
 import bcs_scene;
 
-StructuredBuffer<bcs_scene::Instance> instances;
+StructuredBuffer<Instance> instances;
 RWStructuredBuffer<float4> into;
 
 [shader("compute")]
 [numthreads(1, 1, 1)]
 void main()
 {
-    into[0] = float4(bcs_scene::position(instances[0]), 1.0);
-    into[1] = float4(bcs_scene::previous_position(instances[0]), 1.0);
+    into[0] = float4(instancePosition(instances[0]), 1.0);
+    into[1] = float4(instancePreviousPosition(instances[0]), 1.0);
 }
