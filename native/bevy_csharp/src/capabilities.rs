@@ -103,9 +103,11 @@ pub unsafe extern "C" fn bcs_render_adapter(out: *mut u8, capacity: i32) -> i32 
                     return status::UNSUPPORTED;
                 };
 
+                // The driver's version last, so a reader taking the first fields by place reads
+                // what it read before.
                 let text = format!(
-                    "{:?} | {} | {:?} | {}",
-                    info.backend, info.name, info.device_type, info.driver
+                    "{:?} | {} | {:?} | {} | {}",
+                    info.backend, info.name, info.device_type, info.driver, info.driver_info
                 );
 
                 // SAFETY: the caller's contract for `out` and `capacity` is the one

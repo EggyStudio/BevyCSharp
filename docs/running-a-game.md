@@ -23,7 +23,7 @@ dotnet run --project games/FeatureTest -- --offscreen --frames 120
 ```
 
 The feature test opens a window by default on a hub with a signpost to each zone of its map, and a
-lit cube turning in the middle. F1 opens its admin panel, a list steered by the arrows or a pad,
+lit cube turning in the middle. F4 opens its admin panel, a list steered by the arrows or a pad,
 with pages for the graphics, the audio, the weather, the controls, the debug draws, teleports to the
 zones, things to spawn and the time, each setting kept in the player's folder for the next run. A
 day passes over the map, an hour a minute unless the Time page sets another speed, the hour or the

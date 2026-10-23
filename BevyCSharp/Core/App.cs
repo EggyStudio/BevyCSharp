@@ -425,6 +425,13 @@ public sealed unsafe partial class App : IDisposable
                 // program to read as well, in a run that draws.
                 if (Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
                     Capture.Screenshot();
+
+                // F1's hidden scope and F3's debug overlay, in a run that draws.
+                if (!world.Resource<Config>().Headless)
+                {
+                    Ui.TickHidden(world.Resource<EcsWorld>(), world.Resource<Input>());
+                    Debug.TickOverlay(world);
+                }
             }
 
             DataAssets.PostChanges(world.Resource<MessageBus>());

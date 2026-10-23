@@ -101,7 +101,7 @@ internal static class Pages
 
     private static Page Debug() => new("Debug",
     [
-        new ToggleRow("Overlay (F3)", () => S.Overlay, value => Settings.Change(s => s with { Overlay = value })),
+        new ToggleRow("Overlay (F3)", () => Bevy.Debug.OverlayShown, value => Bevy.Debug.OverlayShown = value),
         new ToggleRow("Colliders", () => S.Colliders, value => Settings.Change(s => s with { Colliders = value })),
         new ToggleRow("Gizmos", () => S.Gizmos, value => Settings.Change(s => s with { Gizmos = value })),
         new ToggleRow("Wireframe", () => S.Wireframe, value => Settings.Change(s => s with { Wireframe = value })),

@@ -27,8 +27,10 @@ internal static class DebugPicking
             _count = 0;
             (_cube, _blue) = (Render.CreateMesh(MeshShape.Cuboid, 0.5f, 0.5f, 0.5f), Render.CreateMaterial(Color.FromSrgb8(124, 144, 255)));
 
-            // Bevy's starts in its normal mode, the overlay without the noisy events.
+            // Bevy's starts in its normal mode, the overlay without the noisy events, and its F3 is
+            // the picking's alone, the engine's debug overlay given no key here.
             Picking.DebugMode = PickingDebugMode.Normal;
+            Debug.OverlayKey = null;
 
             var text = Ui.SpawnText("Click Me to get a box\nDrag cubes to rotate\nPress F3 to cycle between picking debug levels",
                 new UiSettings { Absolute = true, Top = Length.Percent(12f), Left = Length.Percent(12f) });

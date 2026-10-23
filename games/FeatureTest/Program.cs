@@ -3,9 +3,9 @@ using BevyCSharp.FeatureTest;
 using BevyCSharp.FeatureTest.Behaviors;
 
 // The feature test, every feature of the engine on one map, a hub with signposts to its zones, a
-// free camera, an admin panel (F1), a debug overlay (F3) and a console (the key under Escape),
-// for a tester to try a build with and for the workflow to run. Set this to false, or pass
-// --headless, to run the same behavior scripts with no window and no GPU.
+// free camera, an admin panel (F4), the engine's debug overlay (F3) and a console (the key under
+// Escape), for a tester to try a build with and for the workflow to run. Set this to false, or
+// pass --headless, to run the same behavior scripts with no window and no GPU.
 //
 // A window needs a native bridge built with the render feature:
 //     build/build-native.sh --render

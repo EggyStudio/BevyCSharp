@@ -33,6 +33,7 @@ pub mod constants;
 pub mod instances;
 pub mod layers;
 pub mod light_counts;
+pub mod scene_counts;
 pub mod lights;
 pub mod material;
 pub mod material2d;

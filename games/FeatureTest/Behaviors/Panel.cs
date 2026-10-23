@@ -96,7 +96,7 @@ internal sealed record Page(string Title, IReadOnlyList<Row> Rows);
 /// </summary>
 /// <remarks>
 /// <para>
-/// F1 or the pad's start button opens and closes it. The arrows or the pad's cross move through
+/// F4 or the pad's start button opens and closes it, F4 held with F3 being the mode's chord. The arrows or the pad's cross move through
 /// the rows, Enter, the right arrow or the pad's south button opens a page or steps a value on,
 /// the left arrow steps it back, and Escape, Backspace or the pad's east button goes back a page,
 /// closing the panel from the first. The pointer works too, a click being Enter.
@@ -134,7 +134,7 @@ public static class Panel
         ArgumentNullException.ThrowIfNull(ctx);
         var input = ctx.Input;
 
-        if (input.KeyPressed(Key.F1) || Pad(ctx, GamepadButton.Start))
+        if ((input.KeyPressed(Key.F4) && !input.KeyDown(Key.F3)) || Pad(ctx, GamepadButton.Start))
         {
             IsOpen = !IsOpen;
             Trail.Clear();
@@ -182,7 +182,7 @@ public static class Panel
 
             ImGui.Separator();
             ImGui.TextDisabled("Arrows or the pad move, Enter steps on,");
-            ImGui.TextDisabled("Esc goes back and F1 closes.");
+            ImGui.TextDisabled("Esc goes back and F4 closes.");
         }
 
         ImGui.End();

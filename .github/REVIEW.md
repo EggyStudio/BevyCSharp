@@ -10,43 +10,51 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `45526e4b`, item 53, ImGui's pass in the render profile, after `722cb062`, Verdict
-42's mend, and nothing else, the first of them carrying the review's file and the SHARED.md edits.
-The mend: the floor's rule takes its base as the greater of the twentieth and thirtieth readings
-against the least from the seventieth on, and the test writes the census's growth on a pass; read
-with dotnet-gcdump and the test alone, the heap flat at 16.77 MB from the twentieth app to the
-hundredth, the parameter and method infos, the event source's table and the strings grown from the
-twentieth app to the sixtieth and not from the sixtieth to the hundredth, so made once by the
-census's own diagnostics session, whose event source builds its manifest by reflection, no app
-making them and nothing of the three commits involved, macOS's rise of 6 MB the old rule reading the
-trough at the fortieth app as its base, the new rule reading those figures as a fall of 6.49, a leak
-of an eighth of a megabyte an app still failing over the forty apps from the thirtieth to the
-seventieth; the remarks name the run and the command, the description the numbers. Item 53: the
-imgui module's fifteen gates and the install in app.rs move from editor to render,
-`ImGuiRuntime.Start` asks `HasRenderer`, the docs of `Config.Gui`, `App.HasEditor` and the
-capability follow, BUILDING.md's table says three profiles over its three rows, the console and
-render target tests need a renderer and the build-without-interface test needs none, Needs.Editor
-and NoEditor gone as unused; the three profiles checked in the container without warnings and on
-Windows and macOS, Cargo's 105 and 183 tests passing, the lock file unchanged, 1,643 passed and 3
-skipped on the editor bridge. Read at 08:20 on 2026-10-21 and pushed at 08:20; the build run of
-`5f051299` had ended red on macOS at 07:21, Verdict 42, and the build run 39554837971 of this push
-ended green at 08:42, the macOS suite 1,167 passed and 584 skipped in 5 minutes, Linux and Windows
-green, so Verdict 42 is settled. Item 42 is under way: the level's recipe of 43 lines, closed, 95
-faces, 258 ms to build, a window cut later in 55 ms with no open edge, the game, its play script and
-the soak written and run on a local pack, with a small engine change coming in its commit, `union`,
-`subtract` and `intersect` taking a solid primitive's line as `cut` does, since stairs added as a
-second solid touching the floor and wall had their welded edges counted open by a later boolean, a
-union making them one solid from the one recipe file; a Shared line goes with it. Next item 42, then
-item 49, the F1 and F3 keys, then 43 to 45, then 50, the field; items 51 and 52 wait on the owner's
-word of 07:28 until 3DEngine's cascades settle.
+Reviewed up to `09fc95dd`, item 42, Blockout, and nothing else, carrying the review's files and the
+Shared line: a game under `games/` on the package, defaulting to 0.5.178 until a publish carries the
+modeling tools, its level `assets/levels/blockout.model` of 48 lines in the shared recipe words
+carved from one block, a hall, a room over it open to the sky, a corridor, a second room, two doors,
+a window, a stairwell, an emissive lamp panel and the stairs, closed, 100 faces, built in 337 ms; a
+capsule walker on the character controller, first person, Tab opening the modeling window on the
+level and F5 saving the recipe, the parts and the static collider made again when the mesh's version
+moves; Solari where ray tracing is active and the sun with shadows, the sky's ambient, SSAO and a
+point lamp on lavapipe, the status command saying which; `blockout.status` and `blockout.autopilot`.
+Engine changes: `union`, `subtract` and `intersect` take a solid primitive's line as `cut` does, a
+primitive made for a boolean taking the mesh's first slot; the modeling window opens without focus
+on appearing, since the Tab that opened it reached ImGui in the same frame and focused its first
+field, swallowing the game's Tab and F5, and Blockout's keys ask `ImGuiRuntime.Typing`; two boolean
+tests, a flight joined by its line staying closed through a later window where one added with
+`stairs` leaves open edges, and the first slot, the lines read back and an `at` with a line refused.
+The play script waits 240 frames, since frames 30 and 60 drew the sky alone while pipelines were
+made, walks upstairs and reads 3.3 to 3.6 m, cuts a window and reads the faces, the selection and
+the collider, takes its picture, opens and closes the window, saves on F5 and finds the window's
+line in the file, then walks down, its exit trap putting the level file back; the tour left out, 583
+s with it on lavapipe at four cores against 270 without, 25 s on the GPU. The games job builds and
+plays Blockout, the soak runs `soaks.sh 600 courtyard stress swarm blockout` with Blockout's round
+of a 2 m walk, a cut undone and the window opened and closed, measured on lavapipe at four cores
+with 7, 8, 8 and 6 readings in 784 s and nothing climbing where a 15 m loop gave 5 readings, both in
+the workflow's comments; BUILDING.md, the running guide, the modeling guide's primitive-line row,
+the stairs paragraph, the no-focus sentence and the Blockout paragraph, the README's picture under
+Solari beside Swarm's, the cheat sheet. Checks: 1,645 passed and 3 skipped on the editor bridge,
+check-docs, 22 blocks on a scratch package, the play on a package in 25 s. Read at 10:02 on
+2026-10-21 and pushed at 10:02, no run in flight, its build run 39566353299 green on the three
+systems within fourteen minutes, read at 10:17; a pack run with publish on started at 10:02 on this
+head, since the modeling tools of items 38 to 41, the F2 key, the recorder, Blockout and the
+booleans' line are unpublished and Blockout's default version follows the publish; Read at 19:05 on
+2026-10-23, the sessions having stood idle since 2026-10-21: the pack run pushed BevyCSharp 0.5.193,
+fifteen notes lines from Blockout to the edit mesh, listed on the feed, and then failed its defaults
+step, since Blockout names 0.5.178 and does not build on it, EditMesh being absent there, Verdict
+43, the one-line raise the coder foresaw. Next item 49, the F1 and F3 keys, then 43 to 45, then 50,
+the field, then 54, the denoiser; items 51 and 52 wait on the owner's word of 07:28 until 3DEngine's
+cascades settle.
+
+Before it, `45526e4b` came, item 53, ImGui's pass in the render profile, after `722cb062`, Verdict
+42's mend, and nothing else, the first carrying the review's file and the SHARED.md edits. Pushed at
+08:20, its build run green, Verdict 42 settled.
 
 Before it, `5f051299` came, item 48, the recovery test's bound, and nothing else, carrying the
 review's file. Pushed at 07:04, its build run ended at 07:21 with Linux and Windows green and macOS
 red on the app leak test, Verdict 42.
-
-Before it, `fc63b7ba` came, item 41, the texture coordinates and the materials by slot, and nothing
-else, carrying the review's file with its Shared line. Pushed at 06:34, its build run green at
-06:52.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
@@ -1208,7 +1216,8 @@ from [SHARED.md](SHARED.md).
     the games job's build, play and soak lists, the defaults script taking it by its glob. With the
     radiance cascades coming as items 50 to 52, Blockout keeps the lighting read at 07:05 and
     switches to the cascades once item 51 exists, a line in its item then. Item 53 first, ImGui's
-    pass in the render profile, so the window opens on the package.
+    pass in the render profile, so the window opens on the package. Done at `09fc95dd` on
+    2026-10-21, as the head says, the booleans' line and the window's focus with it.
 
 43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The owner's later
     wave: selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
@@ -1343,7 +1352,23 @@ from [SHARED.md](SHARED.md).
     and the ImGui windows and keeping the overlay, read from the frame's pixels on the device; F3's
     release alone toggling and a chord not; a section's lines in the overlay's text; the graph's
     strip holding the last 240 times. Two commits, F1 and the overlay's columns, then the graph, the
-    profiler and the sections' registration. After item 42, before 43.
+    profiler and the sections' registration. After item 42, before 43. The scope's shape, settled
+    with BevyCSharp's coder at 10:05 for both engines: ImGui's public API cannot leave out windows
+    begun between two calls, alpha zero leaves windows that take the pointer, and a second context
+    doubles the runtime, so the opening call answers whether the scope draws this frame, false while
+    hidden, and a program writes its interface inside an `if` on it as it writes `if
+    (ImGui.Begin(...))`; what the engine itself draws or holds inside the scope is dropped or hidden
+    by the engine whatever the program does, its 2D draws here and its interface nodes in
+    BevyCSharp, and a program's ImGui windows are left to the `if`, so a hidden interface costs
+    nothing. So here `bool Ui.BeginHidden()` and `Ui.EndHidden()`, the interface nodes spawned
+    inside recorded and their visibility set hidden and given back while `Ui.Hidden` holds,
+    `Ui.Hidden` settable and `Ui.HiddenKey` F1 or null; the tests reading the frame's pixels with a
+    node and an ImGui window inside the scope and a second window outside, F1 pressed and pressed
+    again. The feature test: the engine's overlay replaces its Overlay.cs in the first commit and
+    its memory lines become its section in the second; its admin panel, a screen outside the scope,
+    moves from F1 to F4 with its help line, its README's key list and the drive, since a drive
+    opening it with F1 would hide the HUD instead; its HUD lines, the help text and the clock, go
+    inside the scope.
 
 50. **The scene's distance field, 3DEngine's first phase of its global illumination, through the
     bridge (Decision 51).** The owner wrote to the coder shortly before 07:15 on 2026-10-21 that
@@ -1728,6 +1753,17 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     Mended at `722cb062`, the floor's rule, the infos read as the census's own; settled on the build
     run 39554837971 of `45526e4b`, read at 08:42 on 2026-10-21, the macOS suite green with 1,167
     passed in 5 minutes and the two other systems green.
+
+43. **The pack run of `09fc95dd` fails its defaults step after pushing 0.5.193, Blockout naming
+    0.5.178, which has no EditMesh.** On the pack run 39566353797 on 2026-10-21 every job passed,
+    the pack job pushed BevyCSharp 0.5.193 to the feed, and its defaults step then failed: Blockout
+    names 0.5.178 in its BevyCSharpVersion and does not build on it, `EditMesh` not found at
+    Blockout.cs line 25, the step saying to raise each game to 0.5.193, the version the run pushed.
+    The coder foresaw it under item 42, BUILDING.md allowing a game's default to lag until a publish
+    carries what it needs, and the step not allowing it; the step runs after the push since a game
+    cannot name a version before it exists. The mend: Blockout's BevyCSharpVersion raised to
+    0.5.193, and the check's words or BUILDING.md's agreeing on what a new game may name before its
+    first publish, under N 3.5. One commit, small, with the coder's next batch. Mended at `?`.
 
 ## Decisions
 
@@ -2504,8 +2540,8 @@ hall's ceiling. The stairs, 16 steps of 0.2 by 0.3 and 1.2 wide, are joined by `
 0.3 1.2 at 0.2 0.2 1.4`, since `union`, `subtract` and `intersect` take a solid primitive's line as
 `cut` does, made where its own words place it, refused with an `at` of the boolean's own, and its
 faces put in the mesh's first slot. A flight added with `stairs` touches the floor and the wall as a
-second solid, and a later cut welds their edges, four faces along each, all of them counted open. The
-walker is a capsule 0.7 wide and 1.8 tall at an offset of 0.9, of 70 kg, with the character
+second solid, and a later cut welds their edges, four faces along each, all of them counted open.
+The walker is a capsule 0.7 wide and 1.8 tall at an offset of 0.9, of 70 kg, with the character
 controller, walking at 4 m/s along the view, jumping at 4.5 when grounded, its eyes 1.6 up, starting
 at (5, 0.2, 4) looking along -Z. The right button held turns the view 0.004 radians a pixel and the
 arrows 2 radians a second, its pitch held within 1.4, and no key acts while a field has the caret,
@@ -2513,8 +2549,8 @@ which `ImGuiRuntime.Typing` says. The camera has a field of view of 70, the clea
 0.9) and one sample a pixel. The sun gives 10,000 lux with shadows from (-6, 30, -24) toward (11, 0,
 4), the sky's light is (0.75, 0.82, 1) at 400 with ambient occlusion at the medium quality, and a
 point lamp of 400,000 lumens and a range of 16 hangs at (5, 2.9, 4). Where ray-traced lighting comes
-on, the parts are handed to it and the sky's light and the occlusion go off. Tab opens and closes the
-modeling window, which opens without taking focus so the opening key moves into no field, and F5
+on, the parts are handed to it and the sky's light and the occlusion go off. Tab opens and closes
+the modeling window, which opens without taking focus so the opening key moves into no field, and F5
 saves the recipe to its file with `[blockout] saved the level to <path>` in the log. The level
 answers the model commands as `level`, a model loaded under that name becomes the level, and its
 parts and its collider, a static body of `Modeling.Collider` removed and added again, are made again
@@ -2522,14 +2558,50 @@ when its version moves. `blockout.status` answers five lines, `at x y z, on the 
 air`, `on the ground floor` or `upper floor` above 3 m; `lighting ray traced` or `the sun, the sky's
 light and ambient occlusion`; `modeling window open` or `closed`; `autopilot off`, `<route> at point
 n of m`, `<route> done` or `<route> stuck before point n of m`; and `level V vertices, E edges, F
-faces, collider made N times`. `blockout.autopilot upstairs|downstairs|loop|tour|off` walks routes of
-points on the floors, each reached within 0.3 m along the ground, stuck after three seconds no
+faces, collider made N times`. `blockout.autopilot upstairs|downstairs|loop|tour|off` walks routes
+of points on the floors, each reached within 0.3 m along the ground, stuck after three seconds no
 nearer by a centimeter. Upstairs is (2.5, 1), (0.8, 1), (0.8, 6.8), (5, 6.8) and (5, 4.5),
-downstairs the same back to (5, 4), the loop (7, 4) and (5, 4), and the tour goes
-through both doors to (19, 1.5) by the window and back, then up and down. The play script waits 240 frames at a sixtieth of a
-second each, walks upstairs and reads 3.3 to 3.6 m, cuts `cut window 1.4 1.2 4 1` through the upper
-room's north wall after `select box 0.2 3.4 7.8 9.8 6.6 7.8`, reads more faces, its four sides
-selected and the collider made once more, turns 94 frames to take the window's picture, opens and
-closes the window on Tab, saves on F5 and finds the window's line in the file, walks downstairs and
-the tour, and puts the level's file back. The soak's round walks the loop, cuts that window and takes
-it and the selection back, and opens and closes the window.
+downstairs the same back to (5, 4), the loop (7, 4) and (5, 4), and the tour goes through both doors
+to (19, 1.5) by the window and back, then up and down. The play script waits 240 frames at a
+sixtieth of a second each, walks upstairs and reads 3.3 to 3.6 m, cuts `cut window 1.4 1.2 4 1`
+through the upper room's north wall after `select box 0.2 3.4 7.8 9.8 6.6 7.8`, reads more faces,
+its four sides selected and the collider made once more, turns 94 frames to take the window's
+picture, opens and closes the window on Tab, saves on F5 and finds the window's line in the file,
+walks downstairs and the tour, and puts the level's file back. The soak's round walks the loop, cuts
+that window and takes it and the selection back, and opens and closes the window.
+
+Shared: F1's hidden scope and F3's overlay, in the commit carrying this line, item 49's first half,
+for item 78. `bool Ui.BeginHidden()` opens the scope and answers whether it draws this frame, false
+while `Ui.Hidden`, and `Ui.EndHidden()` closes it, refused where none is open, the scope counted a
+thread. A program's own ImGui windows go inside an `if` on the answer. The interface nodes made
+inside it with `Ui.SpawnNode` and `Ui.SpawnText` are recorded and hidden by the engine while
+`Ui.Hidden` holds, given back the visibility they had after, and what is made under them follows
+them. `Ui.Hidden` is settable, and `Ui.HiddenKey` is F1, `null` for none, turned over on a press
+while no ImGui field has the caret, the press left for the program. `Debug.OverlayShown` is
+settable, and `Debug.OverlayKey` is F3, `null` for none, turned over as it is let go where no other
+key went down while it was held, and not while a field has the caret. The overlay is the engine's
+own interface nodes over everything else (a global z-index of 1,000,000), the pointer passing
+through. It is two columns with a gap of 2 pixels at the window's edges, each line light gray (0.88)
+text of 15 pixels on black at half, padded 3 pixels at the sides and 1 above, an empty line a gap of
+a line's height, and its words are written again four times a second while it shows. The left column
+says `BevyCSharp <version> (<editor|render|headless> bridge, ABI <n>)`, `<fps> fps, <ms> ms a frame,
+frame <n>`, a gap, `XYZ <x> / <y> / <z>` to three places, `Facing <north|northeast|...> (towards
+<positive|negative> <X|Z>), heading <deg>, pitch <deg>` (north is -Z and the heading turns toward
++X), `Field of view <deg> degrees` in words since the engine's font has no degree sign, or `Field of
+view none, the projection is orthographic`, or `No camera`, then a gap, `Entities <n>` and `Meshes
+<n>, materials <n>, images <n>, sounds <n>`. The right column says `.NET <version>, <architecture>`,
+`<OS> (<kernel>)`, `CPU <model>, <physical cores> cores, <threads> threads`, `Memory <process MB> MB
+of <installed>, managed <MB> MB`, a gap, `GPU <name> (<device type in words>), <backend>`, `Driver
+<name> <version>`, `GPU memory <allocated> MB of <reserved> MB reserved` or `GPU memory not reported
+by its backend`, `Display <w> x <h>, scale <s>` or `Display offscreen, <w> x <h>`, a gap, `Meshes in
+view <n>, triangles <n>`, `Lights <n> directional, <n> point, <n> spot, <n> with shadow maps`,
+`Lighting ray traced, its global illumination Solari's` or `Lighting rasterized, no global
+illumination`, and `Meshlets on` where they are. The camera is the active one of the highest order,
+a 3D one first. The OS, kernel, CPU, cores and installed memory are read once a process through
+sysinfo, and the bridge's adapter description gains the driver's version as its fifth field. A mesh
+whose data went to the render world counts with no triangles. The editor turns the engine's F1 off,
+since its F1 opens its menu and its panels are screens, and Bevy's `debug_picking` example turns the
+overlay's key off for its own F3. The feature test's panel moves to F4, not while F3 is held, F3
+with F4 staying its mode's chord, its overlay gives way to the engine's, and its HUD, the readout
+and the mode's label, goes inside the scope. This engine has no upgrading page, its release notes
+being the commits.

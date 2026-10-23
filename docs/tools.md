@@ -289,6 +289,48 @@ game built on BevyCSharp is drivable exactly the way the editor is. The editor a
 registers `eval`, which compiles a fragment of C# and runs it against the live world through the
 same script host that reloads behavior scripts.
 
+## Debug keys
+
+F1 hides the program's interface as Minecraft hides its HUD, what is drawn inside the hidden scope
+and nothing outside it, so a pause menu or an inventory drawn outside the scope stays whatever F1
+says, and the debug overlay stays too. `Ui.BeginHidden()` opens the scope and answers whether it
+draws this frame, false while hidden, so a program's own ImGui windows go inside an `if` on it as
+they go inside one on `ImGui.Begin`, and `Ui.EndHidden()` closes it. The interface nodes made
+inside the scope with `Ui.SpawnNode` and `Ui.SpawnText`, and what is made under them, are hidden by
+the engine and given back the visibility they had:
+
+<!-- compiled with:
+using ImGuiNET;
+-->
+```csharp
+Ui.BeginHidden();                                     // a HUD made as the game starts
+var health = Ui.SpawnText("health 100", new UiSettings { Absolute = true, Left = Length.Px(16f), Top = Length.Px(16f) });
+Ui.EndHidden();
+
+if (Ui.BeginHidden())                                 // an ImGui window each frame
+{
+    ImGui.Begin("hud");
+    ImGui.TextUnformatted("health 100");
+    ImGui.End();
+}
+Ui.EndHidden();
+```
+
+`Ui.Hidden` says whether the scope is hidden and sets it, and `Ui.HiddenKey` moves the key, or with
+`null` turns it off.
+
+F3 shows the engine's debug overlay as the newest Minecraft's shows, the engine's own text in two
+columns, a line on a dark half-clear backing, with no window, over the program's interface and
+outside the hidden scope. The left column says the engine's version, its bridge's profile and ABI,
+the frames a second and a frame's time, the camera's place, facing and field of view, and the
+entities, meshes, materials, images and sounds. The right says .NET and the architecture, the OS
+and its kernel, the CPU and its cores, the memory in use of what is installed and the managed heap,
+the GPU, its driver and its memory, the display, the meshes in view and their triangles, the
+lights by kind and those casting shadow maps, and the lighting. It shows and hides as F3 is let go
+where no other key was pressed while it was held, so F3 held with another key, as the feature
+test's F3 and F4, is the program's. `Debug.OverlayShown` shows it from code and `Debug.OverlayKey`
+moves the key, or with `null` turns it off.
+
 ## Screenshots
 
 F2 saves a picture of the frame being drawn into a folder named `screenshots` beside the program,

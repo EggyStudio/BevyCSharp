@@ -13,12 +13,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!--
-          The newest version published on nuget.org, which this game builds on once a version
-          carrying the modeling tools is published and the default raised to it (BUILDING.md). Until
-          then it is built on a pack of the checkout, named with -p:BevyCSharpVersion, as continuous
+          The newest version published on nuget.org this game builds on, raised in a commit after a
+          publish (BUILDING.md). A build names another with -p:BevyCSharpVersion, as continuous
           integration does with the package it packs for the run.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.178</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.193</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>

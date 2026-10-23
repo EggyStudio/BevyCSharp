@@ -374,7 +374,10 @@ a commit of one line a game. A default is a version the feed has, since one it n
 the next one up with NuGet's warning NU1603, which a build without warnings fails on, as Swarm's
 0.5.0 did once 0.5.174 was published. A game that calls what no published version carries is built
 on a pack of the checkout until a version carrying it is published, under a version of its own, new
-for each pack, since NuGet keeps the first package it restored under a version:
+for each pack, since NuGet keeps the first package it restored under a version. Its default names
+the newest published version meanwhile, so the first publishing run after it fails its defaults step
+on that game alone, naming the version the run pushed, and the raise to it is a line of the next
+batch, as Blockout's from 0.5.178 to 0.5.193 was after the pack run of `09fc95dd`:
 
 ```bash
 build/build-native.sh --render

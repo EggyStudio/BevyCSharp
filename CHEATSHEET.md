@@ -1411,6 +1411,8 @@ static void ScrollText(Entity field, Vec2 offset);              // Scrolls a tex
 static void SetVisibleLines(Entity field, float lines);         // Sets how many lines tall a text field is, its text and cursor left as they are
 static void SetEditableValue(Entity node, string text);         // Replaces what a text field holds, its cursor put at the end
 static void EditText(Entity field, TextEdit edit);              // Queues one of Bevy's text edits on a field, applied with those the keyboard makes in the frame, so a button or a virtual key types into a field as a key would
+static bool BeginHidden();                                      // Opens the hidden scope, answering whether what is drawn inside it is drawn this frame, false while Hidden holds
+static void EndHidden();                                        // Closes the hidden scope BeginHidden opened
 static void SelfUpdate(Entity widget, UiWidgetKind kind);       // Makes one of Bevy's widgets keep its own state as the player works it
 ```
 

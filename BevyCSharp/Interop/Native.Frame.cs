@@ -157,6 +157,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_memory_describe(byte* buffer, int capacity);
 
+    /// <summary>Writes the OS, the kernel, the CPU, its cores and the memory installed, a line each, read once for the process.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_system_describe(byte* buffer, int capacity);
+
 
     // -- Frame state
 

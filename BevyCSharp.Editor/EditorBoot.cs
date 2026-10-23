@@ -25,6 +25,10 @@ public partial struct EditorBoot
         // Before anything else says anything, so the console panel has the startup lines in it.
         ConsoleLog.Start();
 
+        // F1 is the editor's, opening its menu, and every panel is a screen F1 would leave, so the
+        // engine's key for hiding a HUD is turned off rather than hiding nothing.
+        Ui.HiddenKey = null;
+
         var camera = Scene(ctx);
 
         EditorSelection.Camera = camera;

@@ -1318,6 +1318,9 @@ readonly struct Bevy.DataRef<T> : IDataRef, IEquatable<DataRef<T>>
 sealed class Bevy.DataVersionAttribute : Attribute
   DataVersionAttribute(int version)
   int Version { get; }
+static class Bevy.Debug
+  static Key? OverlayKey { get; set; }
+  static bool OverlayShown { get; set; }
 sealed class Bevy.DefaultPlugins : IPluginGroup
   DefaultPlugins()
   IEnumerable<(IPlugin, int)> GetPlugins()
@@ -13667,11 +13670,15 @@ static class Bevy.Ui
   static Entity SpawnTextSpan(Entity parent, string text, UiTextSettings style, (float, float, float, float) color)
   static Entity? Navigate(NavAction action)
   static IReadOnlyList<FontAtlasPicture> FontAtlasPictures()
+  static Key? HiddenKey { get; set; }
   static TextViewport? TextViewportOf(Entity field)
   static UiInteraction InteractionOf(Entity entity)
+  static bool BeginHidden()
+  static bool Hidden { get; set; }
   static string? EditableTextOf(Entity node)
   static void ClearFontAtlases()
   static void EditText(Entity field, TextEdit edit)
+  static void EndHidden()
   static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
   static void ScrollText(Entity field, Vec2 offset)
   static void SelfUpdate(Entity widget, UiWidgetKind kind)

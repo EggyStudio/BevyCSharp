@@ -368,3 +368,24 @@ mod tests {
         assert_eq!(size_of::<BcsDiagnostic>(), 32);
     }
 }
+
+/// Writes the system's name and parts as the debug overlay shows them, a line each, the OS and its
+/// version, the kernel, the CPU's model, its physical cores and the memory installed.
+///
+/// Read once for the process through sysinfo, as Bevy's `SystemInfo` reads them, whether or not an
+/// app asked for the system's measures, and kept, since none of them changes while a program runs.
+///
+/// # Safety
+/// `out` must be writable for `capacity` bytes, or null when `capacity` is zero.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_system_describe(out: *mut u8, capacity: i32) -> i32 {
+    crate::interop::guard(|| {
+        static TEXT: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+        let text = TEXT.get_or_init(|| {
+            let info = bevy::diagnostic::SystemInfo::default();
+            format!("{}\n{}\n{}\n{}\n{}", info.os, info.kernel, info.cpu, info.core_count, info.memory)
+        });
+
+        unsafe { crate::interop::write_text(text, out, capacity) }
+    })
+}

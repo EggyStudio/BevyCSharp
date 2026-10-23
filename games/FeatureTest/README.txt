@@ -28,9 +28,10 @@ Keys
   F3 held with F4  step through walking, creative mode and spectator mode
   F5               step the view, from the eyes, from behind and from in front
   F11              fullscreen
-  F1               the panel
+  F4               the panel
+  F1               hide the HUD, the engine's key, the panel and the console staying
   F2               a screenshot, into the screenshots folder beside the program
-  F3               the overlay, the frame time, where you stand and what the program holds
+  F3               the engine's overlay, the frame, where you stand, the system and the renderer
   Key under Esc    the console
 
 In spectator mode the right button held looks and flies with W A S D, Q and E, the middle button
@@ -39,7 +40,7 @@ slides, the wheel moves along the view, Alt with the left button orbits and F fr
 The panel
 ---------
 
-F1 opens it, a list steered with the arrow keys or a pad. Its pages set the graphics, the effects,
+F4 opens it, a list steered with the arrow keys or a pad. Its pages set the graphics, the effects,
 the weather, the audio and the controls, turn on the debug draws, teleport you to each zone, fetch
 and stand the scenes, spawn things and set the time of day. A setting marked "from the next start"
 needs the program started again. Every setting is kept for the next run in feature-test.json, in

@@ -155,9 +155,10 @@ public partial struct Scene
 
         Parts = (ground, cube, lamp);
 
-        // A HUD: a panel pinned to a corner with a line of text inside it, below, where the admin
+        // A HUD, a panel pinned to a corner with a line of text inside it, below, where the admin
         // panel and the overlay leave room. Nesting is ordinary parenting, so the text moves with
-        // the panel.
+        // the panel. Made inside the hidden scope, so the engine's F1 hides it.
+        Ui.BeginHidden();
         var panel = Ui.SpawnNode(new UiSettings
         {
             Absolute = true,
@@ -168,6 +169,7 @@ public partial struct Scene
         });
 
         var readout = Ui.SpawnText("frame 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
+        Ui.EndHidden();
         ctx.Ecs.SetParent(readout, panel);
         ctx.Ecs.Add(readout, new Hud());
 

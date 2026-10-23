@@ -450,6 +450,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_point_lights_drawn(uint* counts);
 
+    /// <summary>Writes the meshes in view and their triangles, the lights by kind and the camera the view is drawn by.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_scene_counts(NativeSceneCounts* counts);
+
     /// <summary>Makes an image out of pixels the caller holds, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

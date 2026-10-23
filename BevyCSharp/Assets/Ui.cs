@@ -41,7 +41,7 @@ public static unsafe partial class Ui
         var bits = Native.bcs_ui_spawn_node(&native);
         if (bits == 0) throw NoUi("Spawning a UI node");
 
-        return new Entity(bits);
+        return InScope(new Entity(bits));
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public static unsafe partial class Ui
         var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);
         if (bits == 0) throw NoUi("Spawning UI text");
 
-        return new Entity(bits);
+        return InScope(new Entity(bits));
     }
 
     /// <summary>

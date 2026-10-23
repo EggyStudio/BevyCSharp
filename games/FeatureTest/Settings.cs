@@ -151,11 +151,6 @@ public sealed record FeatureSettings
     /// <summary>Whether moving the mouse up looks down.</summary>
     public bool InvertY { get; init; }
 
-    /// <summary>
-    /// Whether the frame time, the place and what the program holds are shown (F3).
-    /// </summary>
-    public bool Overlay { get; init; }
-
     /// <summary>Whether each collider is drawn as lines.</summary>
     public bool Colliders { get; init; }
 

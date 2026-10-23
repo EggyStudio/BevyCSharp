@@ -119,8 +119,9 @@ public sealed unsafe partial class App : IDisposable
     /// <remarks>
     /// This is how you confirm which backend you really got. Asking for
     /// <see cref="GraphicsBackend.Vulkan"/> and reading "Vulkan | ..." back is the difference
-    /// between believing and knowing. Only valid from inside a system, once the renderer has
-    /// initialized, so <see cref="Stage.Startup"/> at the earliest.
+    /// between believing and knowing. The fields are the backend, the device's name, its type, the
+    /// driver and the driver's version, apart by bars. Only valid from inside a system, once the
+    /// renderer has initialized, so <see cref="Stage.Startup"/> at the earliest.
     /// </remarks>
     public static string? DescribeAdapter()
     {
