@@ -1728,6 +1728,7 @@ sealed class Bevy.EcsWorld
 sealed class Bevy.EditMesh
   (Vec3, Vec3) Bounds { get; }
   EditMesh Arch(float radius, float thickness, float depth, int sides, Vec3 at = default, bool centered = false)
+  EditMesh Bevel(float width, int segments = 1)
   EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false)
   EditMesh Clear()
   EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool centered = false)
@@ -1744,6 +1745,7 @@ sealed class Bevy.EditMesh
   EditMesh Inset(float distance)
   EditMesh Intersect(string path, Vec3 at = default)
   EditMesh Join(string path)
+  EditMesh LoopCut(float fraction)
   EditMesh Material(string slot)
   EditMesh Merge(float distance)
   EditMesh Move(Vec3 by)
@@ -1755,6 +1757,7 @@ sealed class Bevy.EditMesh
   EditMesh Scale(Vec3 factor, Vec3? pivot = null)
   EditMesh Scale(float factor, Vec3? pivot = null)
   EditMesh SelectAll()
+  EditMesh SelectEdges(IEnumerable<(int, int)> edges, SelectionMode mode = SelectionMode.Replace)
   EditMesh SelectFaces(IEnumerable<int> faces, SelectionMode mode = SelectionMode.Replace)
   EditMesh SelectFacing(Vec3 direction, SelectionMode mode = SelectionMode.Replace)
   EditMesh SelectInside(Vec3 corner, Vec3 opposite, SelectionMode mode = SelectionMode.Replace)
@@ -1776,6 +1779,7 @@ sealed class Bevy.EditMesh
   EditMesh SlotTexture(string slot, string? path)
   EditMesh Snap()
   EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false)
+  EditMesh Subdivide(int cuts = 1)
   EditMesh Subtract(string path, Vec3 at = default)
   EditMesh Triangulate()
   EditMesh Union(string path, Vec3 at = default)
@@ -1814,6 +1818,8 @@ sealed class Bevy.EditMesh
   const float DefaultSmoothAngle = 30f
   const float FinestGrid = 0.0625f
   const float OpeningMargin = 0.01f
+  const int MostCuts = 16
+  const int MostSegments = 64
   const string DefaultSlot = "default"
   const string Extension = ".model"
   const string Header = "model 1"

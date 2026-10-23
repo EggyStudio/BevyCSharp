@@ -119,6 +119,7 @@ both its ends are.
 | `SelectAll()`, `SelectNone()` | `select all`, `select none` | Everything, or nothing |
 | `SelectInvert()` | `select invert` | What was not selected, faces with their corners |
 | `SelectFaces([0, 3])` | `select face 0 3` | Faces by their indices |
+| `SelectEdges([(0, 4)])` | `select edge 0 4` | Edges by their two ends, which selects the ends |
 | `SelectFacing(Vec3.UnitY)` | `select +y` | The faces facing nearest a way along an axis, here up |
 | `SelectInside(corner, opposite)` | `select box 0 0 0 4 3 4` | The vertices inside a box, and the faces all of whose corners are |
 | `SelectSlot("wall")` | `select slot wall` | The faces in a material slot |
@@ -240,6 +241,44 @@ var wall = new EditMesh()
 `Shade(true, 45f)`, or `shade smooth 45`, draws the selected faces smoothed into the faces beside
 them that meet them at under 45 degrees, thirty where no angle is given, so a cylinder's sides are
 round and its ends flat, and `shade flat` draws them flat again.
+
+## Bevels and cuts
+
+These cut along edges, as Blender's bevel, loop cut and subdivide do. An edge is selected where both
+its ends are, so selecting a face selects its edges and `select edge 0 4` selects one edge alone:
+
+| Call | Line | Does |
+|---|---|---|
+| `Bevel(0.1f)`, `Bevel(0.1f, 4)` | `bevel 0.1`, `bevel 0.1 4` | Cuts the selected edges off ten centimeters into each face beside them, flat or round in four segments |
+| `LoopCut(0.5f)` | `loopcut 0.5` | Cuts the ring of four sided faces across the selected edge in two, halfway along the edges it crosses |
+| `Subdivide()`, `Subdivide(2)` | `subdivide`, `subdivide 2` | Cuts each edge of the selected faces in two, or three, and each face into a grid through the cuts |
+
+A bevel moves each edge of a face beside a beveled edge in along the face by the width, and fills
+the strip between with faces across a round profile, a quarter circle where the faces meet square.
+A corner where three beveled edges meet is closed by a patch, a triangle at one segment, and where
+two meet the strips turn the corner into each other, so the top's four edges of a box beveled run
+round it as one band. The strips and the patches are selected after. A cube of two meters with its
+twelve edges beveled a quarter meter in two segments is 54 faces on 56 vertices, closed, and holds
+less than the cube and more than the same cube beveled flat:
+
+```csharp
+var cube = new EditMesh()
+    .Box(new Vec3(2f))
+    .SelectAll()
+    .Bevel(0.25f, 2);
+```
+
+A loop cut runs from the selected edge through each four sided face to the edge across it, both
+ways, until it comes round, reaches a face of another count, which takes the new point as a corner,
+or reaches a hole. The fraction is measured from the selected edge's end of the lower index, and the
+loop's vertices are selected after. A box's upright edge cut at half makes a loop round its four
+sides.
+
+A subdivision cuts a four sided face into a grid, a triangle into triangles and a face of more
+corners into a face for each corner round its middle. A box's six faces subdivided once are 24 faces
+on 26 vertices. Neither the loop cut nor the subdivision changes the shape, and a face beside one
+that was cut takes the new points along their shared edge, so the mesh stays closed. A face's own
+texture coordinates are cut with it.
 
 ## The recipe
 
@@ -458,7 +497,8 @@ the distance shown beside the pointer and the face where it would go outlined in
 held it moves the selection as far instead. The face under the pointer is outlined in yellow and
 the selection in orange. A drag that comes back to where it began does nothing.
 
-The Texture group projects the selected faces' coordinates, along the view among the directions,
+The Edges group selects an edge by its two ends and bevels, loop cuts and subdivides with the
+measures typed beside each. The Texture group projects the selected faces' coordinates, along the view among the directions,
 moves, scales and turns them, and draws them over their slot's texture, repeated as far as they
 reach. The Slots group gives the slots their looks and adds, renames and takes away slots. The
 window takes no focus as it appears, so the key that opened it moves into none of its fields, and

@@ -73,6 +73,24 @@ public sealed class ModelCommandTests : IDisposable
     }
 
     [Fact]
+    public void AnEdgeIsSelectedByItsEndsAndBeveledLoopCutAndSubdividedByTheCommands()
+    {
+        Assert.StartsWith("cube6: 8 vertices", ConsoleCommands.Run("model.box cube6 2 2 2"));
+        Assert.Equal("cube6: 8 vertices, 12 edges, 6 faces, 0 faces and 2 vertices selected", ConsoleCommands.Run("model.select cube6 edge 0 4"));
+        Assert.Equal("cube6: 12 vertices, 20 edges, 10 faces, 0 faces and 4 vertices selected", ConsoleCommands.Run("model.loopcut cube6 0.5"));
+        Assert.StartsWith("cube6: 12 vertices", ConsoleCommands.Run("model.select cube6 +y"));
+        Assert.Equal("cube6: 24 vertices, 40 edges, 18 faces, 9 faces and 16 vertices selected", ConsoleCommands.Run("model.subdivide cube6 2"));
+        Assert.StartsWith("cube6: ", ConsoleCommands.Run("model.select cube6 all"));
+        Assert.StartsWith("cube6: ", ConsoleCommands.Run("model.bevel cube6 0.1 2"));
+        Assert.True(Modeling.Find("cube6")!.IsClosed);
+
+        Assert.Contains("No face runs from vertex 0 to vertex 99", ConsoleCommands.Run("model.select cube6 edge 0 99"));
+        Assert.Contains("is not a whole number", ConsoleCommands.Run("model.bevel cube6 0.1 two"));
+        Assert.EndsWith("select edge 0 4\nloopcut 0.5\nselect +y\nsubdivide 2\nselect all\nbevel 0.1 2", ConsoleCommands.Run("model.recipe cube6"));
+        Assert.Equal("forgot cube6", ConsoleCommands.Run("model.free cube6"));
+    }
+
+    [Fact]
     public void ADensityTypedWithOneNumberTakesTheWidthOfItsSlotsTextureAndInfoSaysTheLooks()
     {
         Assert.StartsWith("uvs5: 8 vertices", ConsoleCommands.Run("model.box uvs5 2 2 2"));

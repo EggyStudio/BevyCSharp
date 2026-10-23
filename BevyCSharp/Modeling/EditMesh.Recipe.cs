@@ -261,6 +261,9 @@ public sealed partial class EditMesh
                 case "epsilon": mesh.Epsilon(Number()); break;
                 case "uv": Uv(mesh); break;
                 case "slot": Slot(mesh); break;
+                case "bevel": mesh.Bevel(Number(), _at < words.Length ? Count() : 1); break;
+                case "loopcut": mesh.LoopCut(Number()); break;
+                case "subdivide": mesh.Subdivide(_at < words.Length ? Count() : 1); break;
                 default: throw new FormatException($"{words[0]} is not an operation of a model's recipe.");
             }
 
@@ -286,6 +289,12 @@ public sealed partial class EditMesh
 
             switch (what)
             {
+                case "edge":
+                    var edges = new List<(int, int)>();
+                    while (_at < words.Length) edges.Add((Count(), Count()));
+                    if (edges.Count == 0) throw new FormatException("select edge takes the two ends of an edge or more.");
+                    mesh.SelectEdges(edges, mode);
+                    return;
                 case "face":
                     var faces = new List<int>();
                     while (_at < words.Length) faces.Add(Count());
@@ -304,7 +313,7 @@ public sealed partial class EditMesh
                     mesh.SelectFacing(new Vec3(axis == 0 ? sign : 0f, axis == 1 ? sign : 0f, axis == 2 ? sign : 0f), mode);
                     return;
                 default:
-                    throw new FormatException($"select {what} is none of all, none, invert, face, box, slot or a way along an axis such as +y.");
+                    throw new FormatException($"select {what} is none of all, none, invert, face, edge, box, slot or a way along an axis such as +y.");
             }
         }
 

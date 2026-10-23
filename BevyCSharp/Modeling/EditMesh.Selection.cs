@@ -75,6 +75,48 @@ public sealed partial class EditMesh
         return Did($"select {Mode(mode)}face {string.Join(' ', picked)}");
     }
 
+    /// <summary>Selects edges by their two ends, which selects the ends.</summary>
+    /// <param name="edges">The edges, each a pair of vertices that follow one another round a face.</param>
+    /// <param name="mode">Whether they are all that is selected, are added, or are taken away.</param>
+    /// <returns>This mesh, for the next operation.</returns>
+    /// <remarks>
+    /// An edge is selected where both its ends are, so selecting one selects its ends and no face,
+    /// and the edges between ends selected before are selected with it. Taking one away takes away
+    /// its ends and every face with a corner among them, as <see cref="SelectInside"/> does. What
+    /// <see cref="Bevel"/> and <see cref="LoopCut"/> act on.
+    /// </remarks>
+    /// <exception cref="ArgumentException">A pair is not an edge of the mesh.</exception>
+    public EditMesh SelectEdges(IEnumerable<(int A, int B)> edges, SelectionMode mode = SelectionMode.Replace)
+    {
+        ArgumentNullException.ThrowIfNull(edges);
+        var picked = edges.ToArray();
+
+        var known = EdgeUses();
+        foreach (var (a, b) in picked)
+        {
+            if (!known.ContainsKey(a < b ? (a, b) : (b, a))) throw new ArgumentException($"No face runs from vertex {a} to vertex {b}, so they are no edge.", nameof(edges));
+        }
+
+        var ends = picked.SelectMany(edge => (int[])[edge.A, edge.B]).ToHashSet();
+        switch (mode)
+        {
+            case SelectionMode.Replace:
+                _selectedVertices.Clear();
+                _selectedFaces.Clear();
+                _selectedVertices.UnionWith(ends);
+                break;
+            case SelectionMode.Add:
+                _selectedVertices.UnionWith(ends);
+                break;
+            default:
+                _selectedVertices.ExceptWith(ends);
+                _selectedFaces.RemoveWhere(face => _faces[face].Corners.Any(ends.Contains));
+                break;
+        }
+
+        return Did($"select {Mode(mode)}edge {string.Join(' ', picked.Select(edge => $"{edge.A} {edge.B}"))}");
+    }
+
     /// <summary>Selects the faces that face nearest one way along an axis, such as up.</summary>
     /// <param name="direction">
     /// The way, taken as the direction along an axis nearest it, so <see cref="Vec3.UnitY"/> picks

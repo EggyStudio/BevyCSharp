@@ -1077,6 +1077,7 @@ The guide's page is [modeling.md](https://github.com/EggyStudio/BevyCSharp/blob/
 ### `EditMesh`
 
 ```csharp
+EditMesh Bevel(float width, int segments = 1);                  // Cuts the selected edges off by a width, each a strip of faces across a round profile, the corners where they meet closed
 EditMesh Epsilon(float distance);                               // Sets how near a point is to a plane to lie in it, for the booleans
 EditMesh Union(string path, Vec3 at = default);                 // Adds another model's solid, made from its file and moved by an offset, or a solid primitive, joined into this one where they overlap
 EditMesh Subtract(string path, Vec3 at = default);              // Takes another model's solid, made from its file and moved by an offset, or a solid primitive, away from this one
@@ -1113,6 +1114,7 @@ EditMesh SelectAll();                                           // Selects every
 EditMesh SelectNone();                                          // Selects nothing
 EditMesh SelectInvert();                                        // Selects what was not selected, and leaves what was
 EditMesh SelectFaces(IEnumerable<int> faces, SelectionMode mode = SelectionMode.Replace);  // Selects faces by their indices
+EditMesh SelectEdges(IEnumerable<(int, int)> edges, SelectionMode mode = SelectionMode.Replace);  // Selects edges by their two ends, which selects the ends
 EditMesh SelectFacing(Vec3 direction, SelectionMode mode = SelectionMode.Replace);  // Selects the faces that face nearest one way along an axis, such as up
 EditMesh SelectInside(Vec3 corner, Vec3 opposite, SelectionMode mode = SelectionMode.Replace);  // Selects the vertices inside a box, the faces all of whose corners are inside it, and the edges between
 EditMesh SelectSlot(string slot, SelectionMode mode = SelectionMode.Replace);  // Selects the faces in a material slot
@@ -1129,6 +1131,8 @@ EditMesh SlotEmissive(string slot, float red, float green, float blue);  // Give
 EditMesh SlotEmissiveMap(string slot, string? path);            // Gives a slot an emissive map, or takes it away
 EditMesh SlotMetallic(string slot, float metallic);             // Sets how metal a slot's faces are
 EditMesh SlotRoughness(string slot, float roughness);           // Sets how rough a slot's faces are
+EditMesh LoopCut(float fraction);                               // Cuts the ring of four sided faces across the selected edge in two, along a loop through each of them
+EditMesh Subdivide(int cuts = 1);                               // Cuts each edge of the selected faces into equal parts and each face into smaller ones through the cuts
 EditMesh Extrude(float distance);                               // Pushes the selected faces out along their normals, the sides between them and what they left filled
 EditMesh Extrude(Vec3 by);                                      // Pushes the selected faces out by one vector, the sides between them and what they left filled
 EditMesh Inset(float distance);                                 // Makes each selected face a smaller face inside it, with a band of faces round it

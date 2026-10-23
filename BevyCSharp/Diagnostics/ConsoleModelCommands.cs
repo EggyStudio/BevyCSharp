@@ -177,7 +177,7 @@ internal static class ConsoleModelCommands
     [Command("model.ramp", "Adds a ramp: model.ramp <name> <rise> <run> <width> [at <x> <y> <z>] [center]")]
     internal static string Ramp(string line) => Run("ramp", line, makes: true);
 
-    [Command("model.select", "Selects: model.select <name> all|none|invert|[add|remove] face <i>...|+x..-z|box <x0 y0 z0 x1 y1 z1>|slot <name>")]
+    [Command("model.select", "Selects: model.select <name> all|none|invert|[add|remove] face <i>...|edge <a> <b>...|+x..-z|box <x0 y0 z0 x1 y1 z1>|slot <name>")]
     internal static string Select(string line) => Run("select", line);
 
     [Command("model.move", "Moves the selection: model.move <name> <x> <y> <z>")]
@@ -227,6 +227,15 @@ internal static class ConsoleModelCommands
 
     [Command("model.shade", "Draws the selected faces smoothed or flat: model.shade <name> smooth [degrees]|flat")]
     internal static string Shade(string line) => Run("shade", line);
+
+    [Command("model.bevel", "Bevels the selected edges: model.bevel <name> <width> [segments]")]
+    internal static string Bevel(string line) => Run("bevel", line);
+
+    [Command("model.loopcut", "Cuts the ring of faces across the selected edge: model.loopcut <name> <fraction>")]
+    internal static string LoopCut(string line) => Run("loopcut", line);
+
+    [Command("model.subdivide", "Cuts the selected faces into smaller ones: model.subdivide <name> [cuts]")]
+    internal static string Subdivide(string line) => Run("subdivide", line);
 
     [Command("model.union", "Adds another model's solid: model.union <name> <path> [at <x> <y> <z>]")]
     internal static string Union(string line) => Run("union", line, makes: true);
