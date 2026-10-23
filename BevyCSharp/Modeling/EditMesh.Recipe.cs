@@ -253,6 +253,7 @@ public sealed partial class EditMesh
                 case "triangulate": mesh.Triangulate(); break;
                 case "duplicate": mesh.Duplicate(); break;
                 case "join": mesh.Join(Word("a model's path")); break;
+                case "import": mesh.Import(Word("a glTF file's path")); break;
                 case "shade": Shade(mesh); break;
                 case "union": mesh.Union(PathOrSolid(), Pivot() ?? Vec3.Zero); break;
                 case "subtract": mesh.Subtract(PathOrSolid(), Pivot() ?? Vec3.Zero); break;

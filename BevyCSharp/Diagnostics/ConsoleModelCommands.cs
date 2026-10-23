@@ -132,6 +132,29 @@ internal static class ConsoleModelCommands
         }
     }
 
+    /// <summary>Writes a model, built with its modifiers, as a glTF file, its buffer beside it unless embedded is said.</summary>
+    [Command("model.export", "Writes a model as a glTF file under the asset root: model.export <name> <path> [embedded]")]
+    internal static string Export(string line)
+    {
+        var (name, rest) = NameAndRest(line);
+        var words = rest.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (words.Length is 0 or > 2 || (words.Length == 2 && words[1] != "embedded"))
+            return Refuse("BAD_ARGUMENT", "model.export takes a model's name, a path to write it to, and embedded where the buffer goes inside the file.");
+        if (Modeling.Find(name) is not { } mesh) return Missing(name);
+
+        try
+        {
+            return $"wrote {name} to {mesh.Export(words[0], embedded: words.Length == 2)}";
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            return Refuse("NOT_WRITTEN", $"{name} was not written to {words[0]}: {error.Message}");
+        }
+    }
+
+    [Command("model.import", "Adds a glTF file's meshes to a model, made where there is none: model.import <name> <path>")]
+    internal static string Import(string line) => Run("import", line, makes: true);
+
     /// <summary>Draws a model in its slots' materials where a point says, and keeps drawing it as it changes.</summary>
     [Command("model.show", "Draws a model where a point says, following its edits: model.show <name> <x> <y> <z>")]
     internal static string Show(string line)

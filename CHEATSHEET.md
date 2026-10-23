@@ -1099,6 +1099,8 @@ EditMesh Bridge();                                              // Takes away th
 EditMesh Fill();                                                // Closes each hole whose rim's edges are selected with one face
 EditMesh DissolveFaces();                                       // Joins each region of selected faces into one face, its rim its corners, the vertices inside it taken away
 EditMesh DissolveEdges();                                       // Takes away the selected edges, each two faces either side joined into one
+string Export(string path, bool embedded = false);              // Writes the mesh, built with its modifiers, and its slots' materials as a glTF 2.0 file
+EditMesh Import(string path);                                   // Adds the meshes of a glTF file, read in the engine's managed reader, to this mesh as faces, and selects them
 EditMesh Knife(Vec3 axis, Vec3? at = null);                     // Cuts the selected faces in two where a plane crosses them
 EditMesh Mirror(Vec3 axis, Vec3? at = null);                    // Copies the selected faces mirrored across a plane, the vertices on it shared by both halves
 EditMesh Spin(Vec3 axis, float degrees, int steps, Vec3? at = null);  // Sweeps the selected edges round an axis in steps, a face between each step and the next for each edge

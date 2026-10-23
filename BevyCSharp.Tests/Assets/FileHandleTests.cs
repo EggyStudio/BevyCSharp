@@ -51,7 +51,7 @@ public sealed class FileHandleTests : IDisposable
     {
         "image by the asset server", "model by the asset server", "sound by the asset server",
         "scene file", "mesh file", "material file", "data asset", "asset id", "project settings",
-        "persistent value", "streamed read", "pack, once disposed", "script", "shader program",
+        "persistent value", "streamed read", "pack, once disposed", "script", "shader program", "edit mesh's glTF",
     };
 
     [SkippableTheory]
@@ -122,6 +122,11 @@ public sealed class FileHandleTests : IDisposable
             }),
             "script" => Script(),
             "shader program" => Shader(),
+            "edit mesh's glTF" => Read(() =>
+            {
+                new EditMesh().Box(new Vec3(1f)).Export(_folder.File("crate.gltf"));
+                Assert.Equal(6, new EditMesh().Import(_folder.File("crate.gltf")).FaceCount);
+            }),
             _ => throw new ArgumentOutOfRangeException(nameof(loader)),
         };
 

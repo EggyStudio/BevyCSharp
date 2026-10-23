@@ -1749,6 +1749,7 @@ sealed class Bevy.EditMesh
   EditMesh Fill()
   EditMesh Flip()
   EditMesh Grid(float step)
+  EditMesh Import(string path)
   EditMesh Inset(float distance)
   EditMesh Intersect(string path, Vec3 at = default)
   EditMesh Join(string path)
@@ -1855,6 +1856,7 @@ sealed class Bevy.EditMesh
   int VertexCount { get; }
   static EditMesh FromRecipe(string text, string name = "the recipe")
   static EditMesh Load(string path)
+  string Export(string path, bool embedded = false)
   string RecipeText { get; }
   string Save(string path)
   string SlotOf(int face)

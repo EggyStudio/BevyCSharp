@@ -84,6 +84,7 @@ public static partial class Modeling
         ("Cut", "subtract", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
         ("Cut", "intersect", [new("path", "models/part.model"), new("at", "0 0 0", "at")]),
         ("Cut", "join", [new("path", "models/part.model")]),
+        ("Cut", "import", [new("path", "models/part.gltf")]),
         ("Texture", "uv planar", [new("+x to -z, or x y z", "+y")]),
         ("Texture", "uv cylinder", [new("x, y, z, or x y z", "y")]),
         ("Texture", "uv move", [new("u v", "0.5 0")]),

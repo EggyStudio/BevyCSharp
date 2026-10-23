@@ -382,6 +382,38 @@ A line that is not an operation is named in the error with its number. The words
 3DEngine's, so a recipe written in either engine makes the same mesh in the other, its faces
 numbered alike.
 
+## glTF, for Blender and back
+
+`Export(path)` writes the mesh, built with its modifiers, as a glTF 2.0 file, the JSON with a
+`.bin` of the same name beside it, or with the buffer inside it where `embedded: true` is given. It
+holds one primitive for each slot with faces, of positions, normals, texture coordinates and
+indices as the engine draws them, and a material for each slot with its color, metalness, roughness
+and emissive color, its textures named by their paths from the file's folder, so Blender opens a
+level blocked out in the game with its textures. The writer is the engine's own, in managed code.
+
+`Import(path)` adds a `.gltf` or `.glb` file's meshes to the mesh and selects them, read by the
+engine's managed reader in the file's scene, each node placed as the file places it. Corners in one
+place become one vertex, and two triangles that share an edge, lie in one plane, are in one material
+and meet with the same texture coordinates are joined into one face, so a box from Blender is six
+faces of four corners again and is cut and extruded as one made here. Each material becomes a slot
+of its name with its look, and a face keeps its texture coordinates as its own. The import is a
+line of the recipe, `import models/crate.gltf`, so the file is read again each time the recipe runs:
+
+```csharp
+var level = EditMesh.Load("levels/blockout.model");
+level.Export("levels/blockout.gltf");                  // opened and finished in Blender
+
+var crate = new EditMesh().Import("models/crate.gltf") // a model from Blender, cut in the game
+    .SelectFacing(Vec3.UnitY)
+    .Inset(0.1f)
+    .Extrude(-0.05f);
+```
+
+A slot drawn with the prototype grid is written as its prototype's color, since the grid is a
+picture the engine makes. A face that is not flat, as a subdivision's are, comes back as the
+triangles it was drawn as, and an image held inside a file, which has no path for a slot to name,
+is left out of the slot's look.
+
 ## Booleans and openings
 
 A solid is added to another, taken away from it or kept where the two overlap, the faces where they
@@ -535,12 +567,13 @@ the width of the slot's texture once it has loaded:
 ./bcs command model.uv hall density 512
 ```
 
-A primitive, a join or a union makes the model where there is none of its name, and any other
-operation on a name no model has is refused, so a mistyped name makes no model. `model.new`,
+A primitive, a join, an import or a union makes the model where there is none of its name, and any
+other operation on a name no model has is refused, so a mistyped name makes no model. `model.new`,
 `model.free`, `model.list`, `model.recipe`, `model.undo`, `model.redo` and `model.load` do what
-their names say, and `model.show` draws a model where a point says and keeps drawing it as the
-commands change it. A game's own mesh answers to the commands once `Modeling.Register("level",
-mesh)` names it, so a drive cuts a window in a level by a command and reads the counts.
+their names say, `model.export` writes a model as glTF and `model.import` adds a glTF file to one,
+and `model.show` draws a model where a point says and keeps drawing it as the commands change it. A
+game's own mesh answers to the commands once `Modeling.Register("level", mesh)` names it, so a
+scripted run cuts a window in a level by a command and reads the counts.
 
 ## The window
 
