@@ -83,6 +83,12 @@
       compilation emits nothing for it. The list of the components that moved beside it gives a
       reflected component the paths a scene written before the move names.
     -->
+    <!-- The scene's distance field's compute shaders, read as Slang source when the field is first
+         built, so the library carries them as it carries everything else it runs. -->
+    <ItemGroup>
+        <EmbeddedResource Include="Assets/Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
+    </ItemGroup>
+
     <ItemGroup>
         <AdditionalFiles Include="Generated/bevy-components.tsv"/>
         <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>

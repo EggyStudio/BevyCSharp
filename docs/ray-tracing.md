@@ -167,6 +167,37 @@ answer is written into the occlusion Bevy's own lighting reads. Its panel's grap
 on, and `./bcs command feature.rtao show` on a running one paints the occlusion in place of the
 picture.
 
+### The scene's distance field
+
+A distance field of the scene around the camera holds, for each cell of a grid, how far its middle
+is from the nearest surface of the meshes that cast shadows, below zero inside a mesh that culls its
+back faces. A ray steps through it by the distance each point holds, never past a surface, on any
+GPU, which is how 3DEngine's global illumination traces its rays, and the field is the first of that
+illumination's three parts:
+
+```csharp
+Render.SetSceneField(4, cellSize: 0.25f, budget: 1);  // four cascades, a quarter meter the finest
+```
+
+It lies in cascades of 64 cells a side around the camera the view is drawn by, each twice as coarse
+and as wide as the one before, so four cascades of a quarter meter reach 16 meters across in the
+finest and 128 in the fourth, each cascade 1 MB of the GPU's memory twice over. A distance is exact
+within four cells of a surface and held at four beyond. The cascades sit a third of their width
+ahead of the camera and move a few of their cells at a time as it moves.
+
+A mesh drawn in the same place for eight frames is built into the cascades around it from its
+triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around
+it, a frame behind it. A cascade is built again where the camera has gone past it or a mesh came
+or went, as many a frame as the budget allows, the finest first, so a scene that changes a lot takes
+a larger budget and a slow GPU a smaller one. A closed wall thinner than a cell, or a mesh drawn
+with both its faces, is held half a cell thick on either side of its middle, so a ray between the
+cells on either side of it still meets it, and a tunnel one cell wide stays open along its middle.
+
+The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
+a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer
+lines say how many cascades are built and what it holds, and `./bcs command gi.state` says where
+each cascade lies, what the frame built and stamped, and the memory it takes.
+
 ---
 
 Before this, [Reflections and the sky](sky-and-reflections.md).

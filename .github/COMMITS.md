@@ -5,8 +5,18 @@ How work is committed in this repository, by hand or by an agent working through
 ## When
 
 Each logical batch of work is committed on its own once it is finished, its tests pass and its
-documentation says what it does. Commits are made on `main` and are never pushed, since pushing is
-the owner's to do.
+documentation says what it does. Commits are made on `main`, and the session that writes REVIEW.md
+pushes them once the build run of the push before has ended, so a session doing the work never
+pushes.
+
+Every commit's author and committer are the repository's own identity, on every branch, whoever
+made it. Work stays on `main`. A branch exists only while a second session writes to the repository
+at the same time, named for its work, as `modeling-operations` would be, and never under `claude/`
+or as a string of random characters. Its commits come onto `main` by a plain `git cherry-pick`,
+never with `-x`, since that adds a trailer, each followed by
+`git commit --amend --reset-author --no-edit`, and `git log --format='%an <%ae>' -1` after each
+shows the repository's identity. The session that writes REVIEW.md deletes the branch once its
+commits are on `main`.
 
 A batch is one thing somebody would want to read, revert or cherry-pick alone, such as a fix, a
 feature with its tests and its docs, or a refactor. Work that is still half done stays uncommitted

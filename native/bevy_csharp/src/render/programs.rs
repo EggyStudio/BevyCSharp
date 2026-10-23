@@ -191,16 +191,18 @@ impl Define {
 pub enum StageFile {
     /// A `.slang` file under the asset root.
     Path(String),
-    /// Slang source, handed over as text.
-    Source(String),
+    /// Slang source, handed over as text, with the name the caller gave it, where it gave one.
+    Source(String, Option<String>),
 }
 
 impl StageFile {
-    /// What messages call it, the path, or a name made from the text's hash.
+    /// What messages and timings call it, the path, the name given with a source, or a name made
+    /// from the text's hash.
     fn describe(&self) -> String {
         match self {
             StageFile::Path(path) => path.clone(),
-            StageFile::Source(source) => {
+            StageFile::Source(_, Some(name)) => name.clone(),
+            StageFile::Source(source, None) => {
                 format!("inline Slang {:08x}", slang::fnv(source.as_bytes()) as u32)
             }
         }
@@ -399,7 +401,7 @@ fn create_in(programs: &mut ShaderPrograms, description: ProgramDescription) -> 
             StageFile::Path(path) => programs.root.join(path),
             // Written out, because slangc compiles files, and compiled like any other file from
             // there. Its imports are looked for under the asset root, as a file's are.
-            StageFile::Source(text) => match slang::inline_file(text) {
+            StageFile::Source(text, _) => match slang::inline_file(text) {
                 Ok(path) => path,
                 Err(message) => {
                     bevy::log::error!("{message}");

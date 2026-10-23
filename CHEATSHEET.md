@@ -1004,6 +1004,7 @@ static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an e
 static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
 static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
 static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth);  // Builds a convex polygon pushed out into a solid depth deep along Z, centered on its middle, from its corners in order around it
+static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most, or turns it off with none, which it is by default
 static string[]? MorphTargetNames(AssetHandle mesh);            // The names a mesh gives its morph targets, in their order, empty where it names none, or null while it loads
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with

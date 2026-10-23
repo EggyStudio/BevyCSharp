@@ -10,44 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `42abf357`, item 49's first half, the hidden scope and the debug overlay, with
-Verdict 43's mend, and nothing else, carrying the review's files and the Shared line for 3DEngine's
-item 78: the scope in Ui.Hidden.cs in the settled shape, its count thread-static since systems run
-on several threads, an EndHidden with none open refused; the overlay the engine's own nodes over
-everything with the pointer through, two columns in Minecraft's look rewritten four times a second,
-the left the version, fps and frame, place, facing, field of view, entities and asset counts, the
-right .NET, OS and kernel, CPU, memory, GPU, driver and its memory, display, meshes in view and
-triangles, lights and shadow maps and lighting, F3 toggling on release alone and not while a field
-has the caret; the bridge at ABI 300 with the scene counts and the system's description read once a
-process, the adapter text gaining the driver's version; a finding on the feature test, Bevy 0.20
-meshes whose data went to the render world keeping husks whose indices panic, read through the
-trying accessors so a husk counts with no triangles, the feature test then showing 14,262 meshes in
-view and 151,864 triangles; the editor turning the hidden key off since its F1 opens its menu, the
-picking example turning the overlay's key off for its own F3; the feature test's panel on F4 and not
-while F3 is held, its Overlay.cs gone, its HUD inside the scope; HiddenScopeTests and
-DebugOverlayTests reading pixels, offsets, the keys and the lines of a known scene; the tools
-guide's debug keys section with a compiled example, no upgrading page here as the Shared line says.
-Verdict 43's mend: Blockout's BevyCSharpVersion 0.5.193, built from nuget.org alone as the defaults
-step builds, BUILDING.md saying a new game names the newest published version meanwhile and the
-first publishing run after it fails its defaults step on that game alone, the raise a line of the
-next batch. Checks: the three profiles clean in the container and on Windows and macOS, Cargo's 106
-and 184 tests, the lock unchanged, 1,650 passed and 3 skipped on the editor bridge, 36 blocks on a
-scratch package, NormTests. Read and pushed at 19:15 on 2026-10-23, the pack run of `09fc95dd`
-having ended; its build run green on the three systems within seventeen minutes, read at 19:32. Next
-item 49's second half, the 240-frame strip with the current, average, one percent low and GPU time,
-Shift+F3's pass timings, the sections' registration and the feature test's memory lines as its
-section, then 43 to 45, 50, 54; items 51 and 52 wait on the owner's word of 07:28 on 2026-10-21
-until 3DEngine's cascades settle. At 19:35 on 2026-10-23 the owner's cloud session on this engine
-took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes from item 49 to 50 and
-54, cherry-picking the branch as the first part of a batch when the reviewer says so.
+Reviewed up to `135e43b5`, item 55, the README's Swarm capture gone, after `ba8111fb`, item 45
+cherry-picked from `4659b331` with its tree identical, and `33edc8a3`, item 44 cherry-picked from
+`1f79ec4a`, all with the owner's identity, and nothing else, the review's files uncommitted in the
+local coder's tree; a first form of the batch had carried the GIF's deletion inside item 44's commit
+and was taken apart before any push. Pushed at 20:46 on 2026-10-23, the build run of `4f80c464`
+having ended green; their own build run green on the three systems within twenty minutes, read at
+21:07. The local coder's batch goes on, the captures of items 43 and 44 in one commit, then item
+50's field, a NormTests failure on a new bridge entry point under mending there first. Next item 50,
+then 54's readings; items 51 and 52 wait as before. At 19:35 on 2026-10-23 the owner's cloud session
+on this engine took items 43, 44 and 45 on its branch, Decision 53, so the local coder goes from
+item 49 to 50 and 54, cherry-picking the branch as the first part of a batch when the reviewer says
+so. At 20:00 the cloud session's first commit of item 43, `01b89b59` on its branch, was read and
+accepted, and at 20:10 its second, `c0e6c111`, both to be cherry-picked in order by the local coder
+as the first part of item 50's batch with their authors reset and the capture taken. At 20:43 the
+cloud session's item 45, `4659b331` on its branch `modeling-operations` under the owner's identity,
+was read and accepted, to be cherry-picked with item 50's batch, its first commit `ba8a5324` skipped
+as item 44's twin; the cloud session takes item 54's node next.
 
-Before it, `09fc95dd` came, item 42, Blockout, and nothing else, carrying the review's files and the
-Shared line. Read and pushed at 10:02 on 2026-10-21, its build run green, its pack run with publish
-on publishing 0.5.193 and failing its defaults step on Blockout's version, Verdict 43.
+Before it, `4f80c464` came, item 43's two commits cherry-picked from the cloud session's branch, and
+nothing else. Pushed at 20:14 on 2026-10-23, their build run green.
 
-Before it, `45526e4b` came, item 53, ImGui's pass in the render profile, after `722cb062`, Verdict
-42's mend, and nothing else, the first carrying the review's file and the SHARED.md edits. Pushed at
-08:20, its build run green, Verdict 42 settled.
+Before it, `e1b08124` came, item 49's second half, and nothing else, carrying the review's files,
+the archive and the N 4.7 exemption. Read and pushed at 19:51 on 2026-10-23, its build run green.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -259,7 +244,28 @@ from [SHARED.md](SHARED.md).
     commits, the bevel, the loop cut and the subdivision, then the rest. Taken at 19:35 on
     2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 49 of the local
     coder; the captures and the device tests fall to the local coder when it cherry-picks the
-    branch.
+    branch. First commit `01b89b59` on the branch, read at 20:00 on 2026-10-23: the bevel by a width
+    in one to 64 segments across a round profile, the loop cut round a ring of four-sided faces, the
+    subdivision, and `select edge a b` since no edge could be selected alone, each a recipe line, a
+    model command and a button of the window's new Edges group; departures taken, a bevel skipping
+    open edges and a hole's rim and refused when none is left, a loop cut refusing edges on two
+    rings, a face of more than four corners subdividing into a fan; a cube with two segments 56
+    vertices and 54 faces closed, a loop cut 12 and 10, a subdivision 26 and 24 then 98 and 96; the
+    strict build clean, the headless suite 1,095 passed and 574 skipped. The message is COMMITS.md's
+    form; the author is the cloud environment's identity, reset at the cherry-pick; the capture
+    falls to the local coder. The second commit, the rest of the operations, follows. The session
+    notes Bevy 0.20 needs rustc 1.97.1, 1.97.0 refusing to build the bridge. Second commit
+    `c0e6c111` on the branch, read at 20:10: bridge, fill, dissolve, knife, mirror, spin and smooth
+    in the recipe, the commands and the window's Edges group; departures taken, a bridge of two
+    regions each with one rim of the same count and refused otherwise, dissolved edges taking the
+    straight corners with them so a dissolved loop gives the box back, the knife cutting a face
+    crossed twice and only marking a concave face crossed more, a mirror merging within a millimeter
+    and dropping faces in the plane, a spin's faces taking the profile's facing; two boxes bridged
+    16 vertices and 14 faces closed, a half box mirrored 12 and 10, a square spun a whole turn in 16
+    steps 34 and 48 closed; the headless suite 1,108 passed and 574 skipped, the strict build clean.
+    The item's code is whole on the branch; the capture falls to the local coder at the cherry-pick.
+    On main at `ae596af8` and `4f80c464`, pushed at 20:14; done but for the capture, which the local
+    coder's next commit carries.
 
 44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The owner
     asked for Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the
@@ -273,7 +279,20 @@ from [SHARED.md](SHARED.md).
     a box to level one giving 26 vertices and level two 98, a solidified plane watertight, and a
     capture of a subdivided and beveled shape. One commit. Taken at 19:35 on 2026-10-23 by the
     owner's cloud session on its branch (Decision 53), after item 43; the captures and the device
-    tests fall to the local coder when it cherry-picks the branch.
+    tests fall to the local coder when it cherry-picks the branch. Commit `1f79ec4a` on the cloud
+    session's branch, read at 20:22: the stack of mirror, array, bevel, Catmull-Clark subdivision to
+    level 6, solidify, boolean and triangulate, each added, moved, removed and applied by a recipe
+    line, the model.modifier command and the window's Modifiers group, the build, materials,
+    collider and drawn parts using the built mesh; departures taken, a mirrored half box tested as a
+    whole box with a middle loop, a boolean placed by at alone, an array along points translating
+    without turning, a modifier built once as it is added so a missing file is refused then, apply
+    running on the base as Blender does; the stack of mirror, array of 4, bevel and subdivision 2
+    making 5,760 faces in 13 ms warm against a budget of 200; the budget test's Stopwatch on the N
+    3.3 list as a cost rather than motion, accepted; the headless suite 1,119 passed and 574
+    skipped. The capture of a subdivided and beveled shape falls to the local coder at the
+    cherry-pick. On main as `33edc8a3` at 20:28 on 2026-10-23, cherry-picked plain with the owner's
+    identity before the branch's deletion, the capture with it in the local coder's batch of item
+    50. Pushed at 20:46; the capture follows in the local coder's batch.
 
 45. **What is modeled is exported for Blender and imported from it (Decision 46).** The built mesh
     and its materials written as a glTF 2.0 file, a JSON with its buffer beside or embedded,
@@ -286,7 +305,25 @@ from [SHARED.md](SHARED.md).
     and read back with the engine's own reader having the same counts, a file validated against the
     glTF schema's required fields, and a known glTF's import counted. One commit. Taken at 19:35 on
     2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 44; the captures
-    and the device tests fall to the local coder when it cherry-picks the branch.
+    and the device tests fall to the local coder when it cherry-picks the branch. Commit `4659b331`
+    on the cloud session's branch `modeling-operations`, read at 20:43 on 2026-10-23, the owner's
+    identity as author and committer: `EditMesh.Export(path, embedded)` writing glTF 2.0 with a
+    writer of the engine's own, a primitive and a material a slot with linear factors, emissive
+    strength past 1 by its extension and textures by relative URI, and `EditMesh.Import(path)`
+    reading .gltf and .glb through a new managed `GltfReader` along the scene's node transforms,
+    welding corners within 0.01 mm and joining coplanar triangles of one slot with matching texture
+    coordinates into faces, materials as slots and smooth normals as smoothed faces, the recipe
+    line, the two commands and the window's import; departures taken, faces that are not flat coming
+    back as triangles, a prototype slot written as its color, embedded images not taken into a slot,
+    the import throwing as Load does with no BadFileTests row; a box out and back 8 vertices, 12
+    edges and 6 faces closed at volume 8, the schema's required fields checked, Bevy's own loader
+    reading the exported box as 24 corners and 36 indices on a render bridge; the headless suite
+    1,130 passed and 579 skipped, the render suite reported when it ends. The branch's first commit
+    `ba8a5324` repeats item 44 under the owner's identity and is skipped at the cherry-pick,
+    `33edc8a3` standing on main. On main as `ba8111fb`, pushed at 20:46. The cloud's render suite on
+    lavapipe gave 1,542 passed, 163 skipped and 4 failed, the four the container's own, three Slang
+    shaders uncompiled without slangc and a readback of red as 0 on llvmpipe, every modeling, glTF
+    and command test passing; the local build run of `135e43b5` is the proof.
 
 49. **F1 hides the interface, F3 shows a debug overlay like the newest Minecraft's with sections a
     program adds, and Shift+F3 the profiler with it (Decision 50).** The owner asked shortly before
@@ -343,7 +380,8 @@ from [SHARED.md](SHARED.md).
     moves from F1 to F4 with its help line, its README's key list and the drive, since a drive
     opening it with F1 would hide the HUD instead; its HUD lines, the help text and the clock, go
     inside the scope. First half done at `42abf357` on 2026-10-23, the scope and the overlay's
-    columns, as the head says; the strip, the profiler and the sections follow.
+    columns, as the head says; the strip, the profiler and the sections follow. Second half done at
+    `e1b08124` on 2026-10-23, the departures in the head; item 49 done.
 
 50. **The scene's distance field, 3DEngine's first phase of its global illumination, through the
     bridge (Decision 51).** The owner wrote to the coder shortly before 07:15 on 2026-10-21 that
@@ -422,6 +460,19 @@ from [SHARED.md](SHARED.md).
     grainy sentence changed and RENDERING.md's node added. H-Trace's denoiser is read for its stage
     order and constants, nothing of its code taken (Decision 52). Two commits, the node with its
     stages, then the setting, the guide and the readings. After item 50 and before items 51 and 52.
+    Given at 20:43 on 2026-10-23 to the cloud session on `modeling-operations` for the node, its
+    stages and the Cargo tests of the math, compiled and checked across the profiles there; the
+    readings on a machine with ray queries and the guide's figures fall to the local coder at the
+    cherry-pick, after item 50.
+
+55. **The README's animated capture of Swarm goes.** The owner wrote at 20:22 on 2026-10-23 that the
+    small section at the top of both engines' READMEs showing that they capture GIFs, BevyCSharp's
+    of a game and 3DEngine's of Ore, is not necessary information and is to be removed. The mend:
+    the Swarm picture and the paragraph under the Examples heading saying it was recorded by `./bcs
+    record` go from the README, and `.github/assets/swarm.gif` is deleted since nothing else
+    references it; the showcase picture at the very top and Blockout's picture stay, the tools guide
+    keeps its own words. One commit, small, with the local coder's next batch. Done at `135e43b5` on
+    2026-10-23.
 
 ## Verdicts
 
@@ -880,6 +931,25 @@ Verdicts 33 to 42 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 ar
     taking the captures and the device tests the cloud cannot, so main keeps one writer and the
     pushes stay the reviewer's.
 
+54. **Branches are named for their work, never claude/ or a random string, and work stays on main
+    where one session writes.** The owner wrote at 20:16 on 2026-10-23 not to create branches named
+    claude or the like and not to name them with random characters, but to work on main, or, where
+    several sessions on one repository make a branch necessary, on a branch with a descriptive name
+    and no claude/ prefix. So the cloud session's work moves to a branch named modeling-operations,
+    and its claude/ branch is deleted once its commits are on main; a branch exists only while a
+    second writer needs one.
+
+55. **Every commit carries the owner's identity, and the cloud session's branch was deleted for not
+    carrying it.** At 20:25 on 2026-10-23 the owner saw that the commits on the cloud sessions'
+    branches named Claude as their sole contributor, said no to it and asked for the branches to be
+    deleted and gone for good; the reviewer deleted `claude/festive-faraday-r9drnv` and its workflow
+    runs. N 7.6 holds the rule: every commit's author and committer are the owner's identity on
+    every branch, a session setting it before its first commit, a commit with another identity
+    pushed nowhere and rewritten first. The cherry-picks on main, `ae596af8` and `4f80c464` for item
+    43, carry the owner's identity, as item 44's will. The cloud session was told to stop pushing,
+    set the identity, rewrite the authors of every local commit not on main and push nothing until
+    the owner confirms `modeling-operations` in that session.
+
 ## Replies
 
 Shared: a set clock held still while an asset the app asked for is loading and between the commands
@@ -1334,3 +1404,42 @@ never written, and in this commit a line's first writing sets its backing either
 is a line high. The feature test adds its `memory` command's names and numbers as
 a section named `What the program holds`, a few pairs to a line of about sixty letters, and its
 debug page gains `Profiler (Shift+F3)`.
+
+Shared: the scene's distance field, in the commit carrying this line, item 50's first half, for the
+row of 3DEngine's global illumination. `Render.SetSceneField(cascades, cellSize = 0.25f, budget =
+1)` takes 3DEngine's settings, cascades clamped to 8 and 0 for none, the setting the running app's.
+The plan is 3DEngine's `SceneFieldPlan` with its constants, 64 cells, a band of 4, settling after 8
+frames or 1,024 after a move, 256 boxes, bricks of 4, a corner on 8 cells, a lead of 0.35, and its
+tests on the CPU, a mesh being the number the bridge gives it and a generation that moves on when
+Bevy says its data changed or it went, where 3DEngine's is its array of vertices. Its parts are not
+taken, so a moving or skinned mesh is stamped as the box around all of it. A frame that drew a mesh
+twice in one place, the same mesh, matrix and material, is told (`DrewTwice`), and the field then
+gathers each mesh once, so the frames after are read by place: one such pair among the feature
+test's 261 meshes read every frame whole, 0.68 ms of the plan's in a build that is not optimized,
+and 0.18 ms read by place. The kernels are 3DEngine's field_splat, field_resolve and field_stamp,
+their distances alone, the paint, faces, emission and lent light coming with the cascades of probes
+that read them, changed where the bridge's bindings ask: named values for push constants,
+`Atomic<uint>` and `.min` for `InterlockedMin`, the still field read as a texture in the stamp since
+an image of half floats is written and not read and written, the info a structured buffer, and the
+resolve clearing each word it reads for the next build where 3DEngine fills the buffer before it.
+The images start at 10,000 as 3DEngine's are cleared. The bridge gathers the meshes drawn, each
+entity visible down its hierarchy whatever a view's frustum leaves, without NotShadowCaster, with
+its matrix, its standard material's base color and emission, whether it culls no back faces, and
+Bevy's bounds or the mesh's own, and the camera the overlay names, and pools the triangles of the
+meshes a frame's builds read in one buffer, sixteen bytes a corner with its color and open edge,
+made again with the meshes asked for where the rest would not fit. The field is built from the
+engine's tick at the frame's start, so a box follows its mesh a frame behind, and nothing is built
+until the three kernels have compiled. `bcs_field.slang`, a module of the bridge, holds the layout
+and 3DEngine's reads of it in this bridge's names, `bcs_field::distance`, `normal`, `hold` and the
+rest. `gi.state` says the lighting, the field's line, each cascade's corner and cell, what the frame
+built and stamped and the GPU memory, `field.set` sets it, and the overlay's renderer lines carry
+`Scene field 4 of 4 cascades built, cells 0.25 m, 128 m across, meshes 260, still 234, boxes 26`
+or `Scene field off`. A stage handed as source with a path beside it is named by the path, so the
+kernels' GPU times read `shader field_splat`, `field_resolve` and `field_stamp`. In the feature
+test on the RTX 4070 a build of a cascade of 234 meshes took 0.55 ms of the GPU, a resolve 0.03 and
+a stamp of 26 boxes in 418 bricks 0.013, and the engine's tick 0.78 ms of the CPU with the field
+where 0.17 without it, in a build that is not optimized. The tests read the field back on the
+device: a box's distance at every cell within 0.01 and the band's beyond, a tunnel between walls a
+cell apart clear along its middle, a box moved each frame stamped where it stopped and the cells it
+left at the band, and four cascades built one or two a frame as the budget says. The view of the
+field, the window of its slices and the contact shadows come in the second commit.

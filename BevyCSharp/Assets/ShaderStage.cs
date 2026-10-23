@@ -10,6 +10,11 @@ namespace Bevy;
 public readonly record struct ShaderStage(string? Path, string? Entry = null)
 {
     /// <summary>The Slang itself, where it was handed over as text rather than named by a path.</summary>
+    /// <remarks>
+    /// With a <see cref="Path"/> beside it, the text is compiled and the path names the stage in
+    /// messages and in the GPU's timings, as <c>shader</c> and the path's file name, where text alone
+    /// is named by its hash.
+    /// </remarks>
     public string? Source { get; init; }
 
     /// <summary>A stage whose entry point has the usual name.</summary>
@@ -37,5 +42,5 @@ public readonly record struct ShaderStage(string? Path, string? Entry = null)
     public bool IsSet => Path is { Length: > 0 } || Source is { Length: > 0 };
 
     /// <summary>What messages call it.</summary>
-    internal string Describe() => Source is { Length: > 0 } ? "inline Slang" : Path ?? "nothing";
+    internal string Describe() => Source is { Length: > 0 } && Path is not { Length: > 0 } ? "inline Slang" : Path ?? "nothing";
 }

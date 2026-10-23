@@ -164,14 +164,16 @@ pub unsafe extern "C" fn bcs_shader_program_create(config: *const BcsShaderProgr
             let stage = |stage: BcsShaderStage| {
                 let entry = unsafe { crate::interop::cstr_to_string(stage.entry) };
 
+                let path = unsafe { crate::interop::cstr_to_string(stage.path) }.filter(|path| !path.is_empty());
+
+                // Source with a path beside it is named by the path in messages and timings.
                 if let Some(source) = unsafe { crate::interop::cstr_to_string(stage.source) }
                     && !source.is_empty()
                 {
-                    return Some((StageFile::Source(source), entry));
+                    return Some((StageFile::Source(source, path), entry));
                 }
 
-                let path = unsafe { crate::interop::cstr_to_string(stage.path) }?;
-                (!path.is_empty()).then_some((StageFile::Path(path), entry))
+                path.map(|path| (StageFile::Path(path), entry))
             };
 
             let mut description = ProgramDescription {

@@ -95,6 +95,10 @@ pub(crate) fn install(
     // The point lights the render world drew, two numbers a frame, which a stress test reads.
     crate::render::light_counts::install(app);
 
+    // The meshes' numbers and generations the scene's distance field reads them by, which costs a
+    // read of the meshes' changes a frame until a game turns the field on.
+    crate::render::scene_field::install(app);
+
     // Drawing a mesh as its edges, which an editor offers as a way to outline what is
     // selected, and the same for a 2D mesh, which Bevy draws through its own pipeline and
     // so outlines with its own plugin. Only where the app asked, since each plugin looks at

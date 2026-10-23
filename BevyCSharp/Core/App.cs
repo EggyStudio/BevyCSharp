@@ -426,9 +426,11 @@ public sealed unsafe partial class App : IDisposable
                 if (Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
                     Capture.Screenshot();
 
-                // F1's hidden scope and F3's debug overlay, in a run that draws.
+                // F1's hidden scope and F3's debug overlay, in a run that draws, and the scene's
+                // distance field, which the overlay says.
                 if (!world.Resource<Config>().Headless)
                 {
+                    SceneField.Tick(world);
                     Ui.TickHidden(world.Resource<EcsWorld>(), world.Resource<Input>());
                     Debug.TickOverlay(world);
                 }

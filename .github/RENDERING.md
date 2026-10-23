@@ -192,10 +192,20 @@ own result can be written into, which Bevy's lighting does not have yet.
 
 ### Radiance cascades
 
-Probes at several scales, each tracing short intervals, merged coarse to fine. In three dimensions
-it is still being made fast enough, and it is deliberately left until then. What it will need is
-already on this list, 3D and array textures with storage access, compute over them every frame, a
-voxel or distance representation to trace against, and an indirect diffuse input to lighting.
+Probes at several scales, each tracing short intervals, merged coarse to fine. 3DEngine built them
+first, in three parts, a distance field of the scene to trace through, the cascades of probes over
+it, and the light they gather given to the surfaces, and they come here in the same three. What
+they need is on this list, 3D and array textures with storage access, compute over them every
+frame, a distance representation to trace against, and an indirect diffuse input to lighting.
+
+The distance field is the first (`Render.SetSceneField`). Its plan is 3DEngine's, worked out on the
+managed side each frame from the meshes the bridge gathers, each a number and a generation the
+bridge gives a mesh and moves on when Bevy says its data changed, and its three kernels are
+3DEngine's Slang, the splat, the resolve and the stamp, changed only where the bridge's bindings
+ask: named values for push constants, `Atomic<uint>` for WGSL's atomics, and the still field read
+as a texture. The bridge pools the meshes' triangles in one buffer, since a buffer is written
+whole, and `bcs_field.slang` holds the layout a shader reads the field through. The colors, faces
+and lent light 3DEngine paints into the field come with the cascades of probes, which read them.
 
 ## What Unity made them work around, and the hook that replaces each
 

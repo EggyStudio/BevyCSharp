@@ -455,6 +455,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_scene_counts(NativeSceneCounts* counts);
 
+    /// <summary>Writes the meshes drawn that cast shadows, as many as there is room for, how many there are, and the camera the scene's distance field lies around.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_scene_field_gather(NativeFieldDraw* draws, int capacity, NativeFieldEye* eye, int* count);
+
+    /// <summary>Pools the meshes named, a number and a generation each, writing where each one's triangles start and how many, and answers the pool's buffer key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_scene_field_pool(uint* meshes, int count, uint* placed);
+
+    /// <summary>Writes the bytes of the scene's distance field's pool of triangles.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_scene_field_pool_bytes(long* bytes);
+
     /// <summary>Makes an image out of pixels the caller holds, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

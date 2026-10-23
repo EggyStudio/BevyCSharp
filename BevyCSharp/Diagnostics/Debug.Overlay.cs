@@ -292,6 +292,7 @@ public static unsafe partial class Debug
         }
 
         right.Add(Render.RayTracingActive ? "Lighting ray traced, its global illumination Solari's" : "Lighting rasterized, no global illumination");
+        right.Add(SceneField.Said());
         if (Render.MeshletsActive) right.Add("Meshlets on");
         if (ProfilerShown) AddPasses(right, timings);
 

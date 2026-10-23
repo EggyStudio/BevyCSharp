@@ -1,0 +1,195 @@
+// Writes the distances from each cell of one cascade of the scene's distance field to the
+// triangles of the meshes it is built from, a workgroup a triangle. The triangle is put in the
+// world by its instance's matrix, and every cell within the band of cells around it, a box the
+// triangle's bounds grown by the band, takes its distance to the triangle, the least of those any
+// triangle gives kept by an atomic minimum of a word that holds the distance in 1024ths of a cell
+// above a bit set where the triangle is double-sided, a bit set where the cell lies in front of the
+// triangle's face, and the way the face looks in eight bits. Of two triangles as near to that
+// 1024th, as where a crate stands on the ground, one behind whose face the cell lies wins, the cell
+// being inside some mesh. A double-sided triangle has no inside, and the resolve takes half a cell
+// off its distance, so a sheet thinner than a cell, as a wall or a floor of a mesh imported
+// double-sided, crosses zero between the cells on either side wherever it lies between them and
+// stops a ray traced through the field. A cell is behind a triangle only where the way from the
+// triangle's nearest point to it lies within 60 degrees of straight back from the face, so where an
+// edge or a corner is nearest, as above a pillar's rim or level with a wall's side above the wall, a
+// face the way runs along does not put the cell inside, and a cell whose nearest point lies on an
+// edge no other triangle shares, as a ground plane's rim, is in front, so an open mesh puts no wedge
+// below its rim inside. The nearest face a cell lies straight behind is kept apart, for a wall
+// thinner than a cell, which may have no cell's middle inside it. A cell no triangle comes within the
+// band of keeps the word it was cleared to, the band's distance in front.
+//
+// Taken from 3DEngine's field_splat.slang, its distances alone, the dispatches that paint each cell
+// its surface's color and lend an emitter's light coming with global illumination. Its values are
+// named globals where 3DEngine pushes constants, and the words are kept through Slang's Atomic<uint>,
+// which compiles to WGSL's atomics where InterlockedMin does not.
+
+struct FieldInstance
+{
+    // The rows of the instance's world matrix, a 3x4.
+    float4 row0;
+    float4 row1;
+    float4 row2;
+    // x: its mesh's first triangle in the pool. y: how many it has. z: 1 when the mesh has no
+    // inside, as a double-sided one, whose cells are all in front. w: the first of its triangles
+    // counted over every instance of the build before it.
+    uint4 triangles;
+    // rgb: the surface's color, linear. w: unused.
+    float4 color;
+    // rgb: the surface's emission, linear. w: unused.
+    float4 emission;
+};
+
+// Each triangle of every mesh the field is built from, three corners in the mesh's own space, each
+// its place's bits and in w its vertex's color, three sRGB bytes, with the bit above them set where
+// the edge from it to the triangle's next corner is open.
+StructuredBuffer<uint4> corners;
+
+// Every build's instances this frame, one build after another.
+StructuredBuffer<FieldInstance> instances;
+
+// A word a cell of the cascade, as the distance's code.
+RWStructuredBuffer<Atomic<uint>> cells;
+
+// The nearest face each cell lies behind, in 1024ths of a cell, which field_resolve.slang reads for
+// a wall thinner than a cell.
+RWStructuredBuffer<Atomic<uint>> behind;
+
+// xyz: the cascade's corner. w: the width of a cell.
+uniform float4 origin_and_cell;
+// x: the cells along each side. y: how many instances the build has. z: how many triangles in all.
+// w: the band in cells.
+uniform uint4 counts;
+// x: how many workgroups the dispatch has along x, which the triangle's number is read across.
+// y: the build's first instance in the buffer.
+uniform uint4 groups;
+
+// The point of the triangle abc nearest p, as Ericson's Real-Time Collision Detection finds it by
+// the region of the triangle's plane p falls in, and in open whether that point lies on an edge the
+// triangle shares with no other, as edges says of ab, bc and ca, or on a corner of one.
+float3 nearest(float3 p, float3 a, float3 b, float3 c, bool3 edges, out bool open)
+{
+    float3 ab = b - a, ac = c - a, ap = p - a;
+    float d1 = dot(ab, ap), d2 = dot(ac, ap);
+    open = edges.x || edges.z;
+    if (d1 <= 0.0 && d2 <= 0.0)
+        return a;
+    float3 bp = p - b;
+    float d3 = dot(ab, bp), d4 = dot(ac, bp);
+    open = edges.x || edges.y;
+    if (d3 >= 0.0 && d4 <= d3)
+        return b;
+    float vc = d1 * d4 - d3 * d2;
+    open = edges.x;
+    if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0)
+        return a + ab * (d1 / (d1 - d3));
+    float3 cp = p - c;
+    float d5 = dot(ab, cp), d6 = dot(ac, cp);
+    open = edges.y || edges.z;
+    if (d6 >= 0.0 && d5 <= d6)
+        return c;
+    float vb = d5 * d2 - d1 * d6;
+    open = edges.z;
+    if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0)
+        return a + ac * (d2 / (d2 - d6));
+    float va = d3 * d6 - d5 * d4;
+    open = edges.y;
+    if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0)
+        return b + (c - b) * ((d4 - d3) / ((d4 - d3) + (d5 - d6)));
+    open = false;
+    float denominator = 1.0 / (va + vb + vc);
+    return a + ab * (vb * denominator) + ac * (vc * denominator);
+}
+
+float3 place(FieldInstance instance, float3 p)
+{
+    float4 h = float4(p, 1.0);
+    return float3(dot(instance.row0, h), dot(instance.row1, h), dot(instance.row2, h));
+}
+
+// A face's way in eight bits, four along each side of the octahedron the sphere is folded onto,
+// enough to tell faces that look apart from faces that meet square.
+uint way8(float3 n)
+{
+    n /= abs(n.x) + abs(n.y) + abs(n.z);
+    float2 o = n.z >= 0.0 ? n.xy : (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
+    uint2 q = min(uint2((o * 0.5 + 0.5) * 16.0), uint2(15u));
+    return q.x | (q.y << 4);
+}
+
+groupshared uint triangleInstance;
+
+[shader("compute")]
+[numthreads(64, 1, 1)]
+void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
+{
+    uint t = group.y * groups.x + group.x;
+    if (t >= counts.z)
+        return;
+
+    // The instance the triangle is of, the last whose first triangle is at or before it.
+    if (lane == 0)
+    {
+        uint lo = 0, hi = counts.y - 1;
+        while (lo < hi)
+        {
+            uint mid = (lo + hi + 1) / 2;
+            if (instances[groups.y + mid].triangles.w <= t)
+                lo = mid;
+            else
+                hi = mid - 1;
+        }
+        triangleInstance = lo;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    FieldInstance instance = instances[groups.y + triangleInstance];
+    uint corner = (instance.triangles.x + t - instance.triangles.w) * 3;
+    uint4 ca = corners[corner], cb = corners[corner + 1], cc = corners[corner + 2];
+    float3 a = place(instance, asfloat(ca.xyz));
+    float3 b = place(instance, asfloat(cb.xyz));
+    float3 c = place(instance, asfloat(cc.xyz));
+    bool3 edges = bool3(((ca.w >> 24) & 1u) != 0u, ((cb.w >> 24) & 1u) != 0u, ((cc.w >> 24) & 1u) != 0u);
+    float3 face = cross(b - a, c - a);
+    // A triangle of next to no area beside its longest side, as a sphere's last row has at a pole
+    // whose corners the rounding of sin(pi) leaves apart, has a face turned whichever way that
+    // rounding took it, which, at a distance the triangles around it share, said cells outside lay
+    // behind it and turned them inside. It holds no surface its neighbors do not, and is passed
+    // over.
+    float longest = max(dot(b - a, b - a), max(dot(c - b, c - b), dot(a - c, a - c)));
+    if (dot(face, face) <= 1e-8 * longest * longest)
+        return;
+    bool sided = instance.triangles.z == 0u && dot(face, face) > 1e-20;
+    uint way = dot(face, face) > 1e-20 ? way8(face) : 0u;
+    float faceLength = length(face);
+
+    float cell = origin_and_cell.w;
+    float band = float(counts.w);
+    float reach = band * cell;
+    int size = int(counts.x);
+    float3 low = (min(a, min(b, c)) - origin_and_cell.xyz) / cell - band;
+    float3 high = (max(a, max(b, c)) - origin_and_cell.xyz) / cell + band;
+    int3 first = max(int3(floor(low)), int3(0));
+    int3 last = min(int3(ceil(high)), int3(size - 1));
+    if (any(last < first))
+        return;
+    int3 span = last - first + 1;
+    uint count = uint(span.x * span.y * span.z);
+
+    for (uint k = lane; k < count; k += 64u)
+    {
+        int3 at = first + int3(int(k % uint(span.x)), int((k / uint(span.x)) % uint(span.y)), int(k / uint(span.x * span.y)));
+        float3 p = origin_and_cell.xyz + (float3(at) + 0.5) * cell;
+        bool open;
+        float3 q = nearest(p, a, b, c, edges, open);
+        float d = length(p - q);
+        if (d >= reach)
+            continue;
+        uint front = sided && !open && dot(p - q, face) < -0.5 * d * faceLength ? 0u : 1u;
+        uint code = (uint(d / cell * 1024.0) << 10) | (sided ? 0u : 512u) | (front << 8) | way;
+        uint index = (at.z * size + at.y) * size + at.x;
+        cells[index].min(code);
+        // Straight behind, within 25 degrees, as a wall's far face lies behind a cell by its near
+        // one, where a cell beside a box's edge lies 45 degrees behind the face round it.
+        if (front == 0u && dot(p - q, face) < -0.9 * d * faceLength)
+            behind[index].min((uint(d / cell * 1024.0) << 8) | way);
+    }
+}

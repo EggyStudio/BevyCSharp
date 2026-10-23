@@ -121,6 +121,7 @@ public sealed class DebugOverlayTests : IDisposable
         Assert.Contains("Display offscreen, 96 x 64", right);
         Assert.Contains("Meshes in view 1, triangles 12", right);
         Assert.Contains("Lights 1 directional, 1 point, 0 spot, 1 with shadow maps", right);
+        Assert.Contains("Scene field off", right);
     }
 
     [SkippableFact]

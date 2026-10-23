@@ -72,10 +72,8 @@ pub unsafe extern "C" fn bcs_render_scene_counts(out: *mut BcsSceneCounts) -> i3
 fn count(world: &mut bevy::ecs::world::World) -> BcsSceneCounts {
     use bevy::asset::Assets;
     use bevy::camera::visibility::ViewVisibility;
-    use bevy::camera::{Camera, Camera3d, Projection};
     use bevy::light::{DirectionalLight, PointLight, SpotLight};
     use bevy::mesh::{Mesh, Mesh3d, PrimitiveTopology};
-    use bevy::transform::components::GlobalTransform;
 
     let mut counts = BcsSceneCounts::default();
 
@@ -126,25 +124,42 @@ fn count(world: &mut bevy::ecs::world::World) -> BcsSceneCounts {
         counts.shadowed += u32::from(light.shadow_maps_enabled);
     }
 
-    // The active camera of the highest order, a 3D one first, as a window shows the last drawn on
-    // top and a game's interface camera, a 2D one, draws over its world's.
-    let mut cameras = world.query::<(bevy::ecs::entity::Entity, &Camera, Option<&Camera3d>, &GlobalTransform, Option<&Projection>)>();
-    let chosen = cameras
-        .iter(world)
-        .filter(|(_, camera, ..)| camera.is_active)
-        .max_by_key(|(_, camera, three, ..)| (three.is_some(), camera.order));
-
-    if let Some((entity, _, _, place, projection)) = chosen {
+    if let Some((entity, place, forward, fov)) = view_camera(world) {
         counts.camera = entity.to_bits();
-        counts.position = place.translation().to_array();
-        counts.forward = place.forward().as_vec3().to_array();
-        counts.fov = match projection {
-            Some(Projection::Perspective(perspective)) => perspective.fov,
-            _ => 0.0,
-        };
+        counts.position = place.to_array();
+        counts.forward = forward.to_array();
+        counts.fov = fov;
     }
 
     counts
+}
+
+/// The camera the view is drawn by, its entity, where it is, the way it faces and its vertical
+/// field of view in radians, zero for a projection that has none, or none where no camera is
+/// active.
+///
+/// The active camera of the highest order, a 3D one first, as a window shows the last drawn on top
+/// and a game's interface camera, a 2D one, draws over its world's. The scene's distance field lies
+/// around the same camera.
+#[cfg(feature = "render")]
+pub(crate) fn view_camera(
+    world: &mut bevy::ecs::world::World,
+) -> Option<(bevy::ecs::entity::Entity, bevy::math::Vec3, bevy::math::Vec3, f32)> {
+    use bevy::camera::{Camera, Camera3d, Projection};
+    use bevy::transform::components::GlobalTransform;
+
+    let mut cameras = world.query::<(bevy::ecs::entity::Entity, &Camera, Option<&Camera3d>, &GlobalTransform, Option<&Projection>)>();
+    let (entity, _, _, place, projection) = cameras
+        .iter(world)
+        .filter(|(_, camera, ..)| camera.is_active)
+        .max_by_key(|(_, camera, three, ..)| (three.is_some(), camera.order))?;
+
+    let fov = match projection {
+        Some(Projection::Perspective(perspective)) => perspective.fov,
+        _ => 0.0,
+    };
+
+    Some((entity, place.translation(), place.forward().as_vec3(), fov))
 }
 
 #[cfg(test)]
