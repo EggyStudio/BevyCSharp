@@ -245,7 +245,7 @@ render = [
     "bevy/tonemapping_luts",
     # Spatio-temporal blue noise, a hundred and twenty eight pixels square and thirty two frames
     # deep, which every stochastic screen-space technique samples its rays with, and which a shader
-    # on a camera reads through `bcs_pass::blue_noise`. A megabyte and a half, embedded.
+    # on a camera reads through `passBlueNoise`. A megabyte and a half, embedded.
     "bevy/bluenoise_texture",
     # The tables a rectangular area light is shaded with, 46 kilobytes, embedded. Without them Bevy
     # draws no light from a RectLight and says so once.

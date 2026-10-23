@@ -49,7 +49,7 @@ mesh_ray_cast	can
 lightmaps	can	through Bevy's reflected Lightmap and a material's LightmapExposure
 reflection_probes	can
 visibility_range	can
-ssr	can	the water a Slang shader writing its surface into the deferred buffers through bcs::deferred
+ssr	can	the water a Slang shader writing its surface into the deferred buffers through meshDeferred
 camera_sub_view	can
 color_grading	can
 clearcoat	can
@@ -66,7 +66,7 @@ specular_tint	can
 clustered_decals	can
 light_textures	can
 clustered_decal_maps	can
-mirror	can	the mirror a Slang shader lighting its surface through bcs::lit, and the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
+mirror	can	the mirror a Slang shader lighting its surface through meshLit, and the mirror camera's oblique near plane written as JSON, since the projection holds it in a variant beside its scaling mode
 pccm	can
 light_probe_blending	can
 2d_shapes	can
@@ -279,7 +279,7 @@ bsn	n/a	writes a scene in BSN, a Rust macro, which Bevy 0.20 loads from no file
 fullscreen_material	can	as a pass the camera runs
 manual_material	n/a	writes a material with Rust's mid-level render API
 animate_shader	can
-array_texture	can	its layers cut by TextureSettings.Layers and picked by bcs::tag
+array_texture	can	its layers cut by TextureSettings.Layers and picked by meshTag
 automatic_instancing	can
 compute_mesh	can	the compute shader writing buffers the material reads its vertices from, where Bevy's writes into the mesh's own buffers, which the bridge does not hand a compute shader
 compute_shader_game_of_life	can
@@ -287,8 +287,8 @@ custom_phase_item	n/a	enqueues Rust draw commands in a render phase
 custom_post_processing	can	as a pass the camera runs
 custom_render_phase	n/a	builds a render phase in Rust
 custom_shader_instancing	can	as a draw on the camera, its cube's corners worked out from the vertex number, since such a draw reads buffers rather than a mesh
-extended_material	can	the extension a Slang shader lighting its surface through bcs::light and bcs::finish
-extended_material_bindless	can	the extension a Slang shader lighting its surface through bcs::lit, with bindings of its own rather than Bevy's bindless arrays
+extended_material	can	the extension a Slang shader lighting its surface through meshLight and meshFinish
+extended_material_bindless	can	the extension a Slang shader lighting its surface through meshLit, with bindings of its own rather than Bevy's bindless arrays
 gpu_readback	can	the buffer read whole and its range taken from it, and each read asked for again as it arrives
 render_depth_to_texture	can	the depth camera's prepass shown through Shaders.Watch's image on an unlit material, where Bevy's copies it into a depth texture its own material reads
 shader_defs	can	a program compiled with the define and one without, where Bevy's material sets it as its pipeline is specialized
