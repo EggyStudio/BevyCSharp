@@ -242,16 +242,25 @@ var wall = new EditMesh()
 them that meet them at under 45 degrees, thirty where no angle is given, so a cylinder's sides are
 round and its ends flat, and `shade flat` draws them flat again.
 
-## Bevels and cuts
+## Edges, cuts and mirrors
 
-These cut along edges, as Blender's bevel, loop cut and subdivide do. An edge is selected where both
-its ends are, so selecting a face selects its edges and `select edge 0 4` selects one edge alone:
+These act along edges and across planes, as Blender's bevel, loop cut, subdivide, bridge, fill,
+dissolve, bisect, mirror, spin and smooth do. An edge is selected where both its ends are, so
+selecting a face selects its edges and `select edge 0 4` selects one edge alone:
 
 | Call | Line | Does |
 |---|---|---|
 | `Bevel(0.1f)`, `Bevel(0.1f, 4)` | `bevel 0.1`, `bevel 0.1 4` | Cuts the selected edges off ten centimeters into each face beside them, flat or round in four segments |
 | `LoopCut(0.5f)` | `loopcut 0.5` | Cuts the ring of four sided faces across the selected edge in two, halfway along the edges it crosses |
 | `Subdivide()`, `Subdivide(2)` | `subdivide`, `subdivide 2` | Cuts each edge of the selected faces in two, or three, and each face into a grid through the cuts |
+| `Bridge()` | `bridge` | Takes away two selected faces, or two regions of them, and joins their rims with a band of faces |
+| `Fill()` | `fill` | Closes each hole whose edges are selected with one face |
+| `DissolveFaces()` | `dissolve` | Joins each region of selected faces into one face, its rim its corners |
+| `DissolveEdges()` | `dissolve edges` | Takes away the selected edges, the faces either side joined |
+| `Knife(Vec3.UnitY, at)` | `knife y at 0 1 0` | Cuts the selected faces in two where the plane through a point square to Y crosses them |
+| `Mirror(Vec3.UnitX)` | `mirror x` | Copies the selected faces mirrored across the plane at X of zero, the vertices on it shared |
+| `Spin(Vec3.UnitY, 360f, 16)` | `spin y 360 16` | Sweeps the selected edges a whole turn round the Y axis in sixteen steps |
+| `Smooth(0.5f, 2)` | `smooth 0.5 2` | Moves each selected vertex halfway toward the mean of its neighbors, twice |
 
 A bevel moves each edge of a face beside a beveled edge in along the face by the width, and fills
 the strip between with faces across a round profile, a quarter circle where the faces meet square.
@@ -279,6 +288,30 @@ corners into a face for each corner round its middle. A box's six faces subdivid
 on 26 vertices. Neither the loop cut nor the subdivision changes the shape, and a face beside one
 that was cut takes the new points along their shared edge, so the mesh stays closed. A face's own
 texture coordinates are cut with it.
+
+A bridge pairs the corners of the two rims so the band is shortest, and runs each face of it along
+its rim the way the face it replaced did, so two boxes bridged top to bottom are one closed solid.
+A dissolved region keeps its rim's corners where they are, and dissolving edges also takes away a
+corner left between two edges in a straight line, so a loop cut's loop selected and dissolved puts
+the box back. The knife cuts each selected face between the two points where the plane crosses its
+outline, and a face beside it takes the point on their shared edge.
+
+A mirror puts each selected vertex within a millimeter of the plane on it, shared by both halves,
+and takes away a face lying in the plane, which would lie inside the whole, so half a model built
+from the plane out is made whole, with no vertex twice:
+
+```csharp
+var block = new EditMesh()
+    .Box(new Vec3(1f, 2f, 2f))        // the half from X of zero to one
+    .SelectAll()
+    .Mirror(Vec3.UnitX);              // the whole, from minus one to one
+```
+
+A spin turns the selected edges round an axis through the origin, or through the point after `at`,
+and joins each step to the next with a face for each edge, so a profile beside the Y axis spun a
+whole turn is a surface of revolution, a vertex on the axis staying where it is. Each face runs
+along its edge the other way from the face the edge came from, so a profile's face facing the way
+it turns makes a surface facing in, which `Flip()` turns out.
 
 ## The recipe
 
@@ -497,8 +530,8 @@ the distance shown beside the pointer and the face where it would go outlined in
 held it moves the selection as far instead. The face under the pointer is outlined in yellow and
 the selection in orange. A drag that comes back to where it began does nothing.
 
-The Edges group selects an edge by its two ends and bevels, loop cuts and subdivides with the
-measures typed beside each. The Texture group projects the selected faces' coordinates, along the view among the directions,
+The Edges group selects an edge by its two ends, and bevels, loop cuts, subdivides, bridges,
+fills, dissolves, cuts with a plane, mirrors, spins and smooths with the measures typed beside each. The Texture group projects the selected faces' coordinates, along the view among the directions,
 moves, scales and turns them, and draws them over their slot's texture, repeated as far as they
 reach. The Slots group gives the slots their looks and adds, renames and takes away slots. The
 window takes no focus as it appears, so the key that opened it moves into none of its fields, and

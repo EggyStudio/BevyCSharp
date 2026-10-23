@@ -1095,6 +1095,14 @@ Vec3 Normal(int face);                                          // The way a fac
 Vec3 Center(int face);                                          // The middle of a face, the mean of its corners
 IEnumerable<(int, int)> Edges();                                // The edges, each once, its ends in the order of their indices
 EditMesh Clear();                                               // Takes away every vertex, face and slot but the first, and the selection with them
+EditMesh Bridge();                                              // Takes away the two selected faces, or two regions of them, and joins their rims with a band of four sided faces
+EditMesh Fill();                                                // Closes each hole whose rim's edges are selected with one face
+EditMesh DissolveFaces();                                       // Joins each region of selected faces into one face, its rim its corners, the vertices inside it taken away
+EditMesh DissolveEdges();                                       // Takes away the selected edges, each two faces either side joined into one
+EditMesh Knife(Vec3 axis, Vec3? at = null);                     // Cuts the selected faces in two where a plane crosses them
+EditMesh Mirror(Vec3 axis, Vec3? at = null);                    // Copies the selected faces mirrored across a plane, the vertices on it shared by both halves
+EditMesh Spin(Vec3 axis, float degrees, int steps, Vec3? at = null);  // Sweeps the selected edges round an axis in steps, a face between each step and the next for each edge
+EditMesh Smooth(float factor, int repeat = 1);                  // Moves each selected vertex toward the mean of its neighbors along the edges, by a factor, as many times as asked
 EditMesh Box(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a box
 EditMesh Plane(float width, float depth, Vec3 at = default, bool centered = false);  // Adds a flat rectangle facing up
 EditMesh Cylinder(float radius, float height, int sides, Vec3 at = default, bool centered = false);  // Adds a cylinder standing along Y, its round side made of flat sides

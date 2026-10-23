@@ -264,6 +264,14 @@ public sealed partial class EditMesh
                 case "bevel": mesh.Bevel(Number(), _at < words.Length ? Count() : 1); break;
                 case "loopcut": mesh.LoopCut(Number()); break;
                 case "subdivide": mesh.Subdivide(_at < words.Length ? Count() : 1); break;
+                case "bridge": mesh.Bridge(); break;
+                case "fill": mesh.Fill(); break;
+                case "dissolve" when Optional("edges"): mesh.DissolveEdges(); break;
+                case "dissolve": mesh.DissolveFaces(); break;
+                case "knife": mesh.Knife(Axis(), Pivot()); break;
+                case "mirror": mesh.Mirror(Axis(), Pivot()); break;
+                case "spin": mesh.Spin(Axis(), Number(), Count(), Pivot()); break;
+                case "smooth": mesh.Smooth(Number(), _at < words.Length ? Count() : 1); break;
                 default: throw new FormatException($"{words[0]} is not an operation of a model's recipe.");
             }
 

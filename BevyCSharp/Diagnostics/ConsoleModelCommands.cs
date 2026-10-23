@@ -237,6 +237,27 @@ internal static class ConsoleModelCommands
     [Command("model.subdivide", "Cuts the selected faces into smaller ones: model.subdivide <name> [cuts]")]
     internal static string Subdivide(string line) => Run("subdivide", line);
 
+    [Command("model.bridge", "Joins the rims of two selected regions with a band of faces: model.bridge <name>")]
+    internal static string Bridge(string line) => Run("bridge", line);
+
+    [Command("model.fill", "Closes each hole whose edges are selected with a face: model.fill <name>")]
+    internal static string Fill(string line) => Run("fill", line);
+
+    [Command("model.dissolve", "Joins the selected faces into one, or the faces either side of the selected edges: model.dissolve <name> [edges]")]
+    internal static string Dissolve(string line) => Run("dissolve", line);
+
+    [Command("model.knife", "Cuts the selected faces by a plane: model.knife <name> x|y|z|<nx ny nz> [at <x> <y> <z>]")]
+    internal static string Knife(string line) => Run("knife", line);
+
+    [Command("model.mirror", "Copies the selected faces mirrored across a plane: model.mirror <name> x|y|z|<nx ny nz> [at <x> <y> <z>]")]
+    internal static string Mirror(string line) => Run("mirror", line);
+
+    [Command("model.spin", "Sweeps the selected edges round an axis: model.spin <name> x|y|z|<ax ay az> <degrees> <steps> [at <x> <y> <z>]")]
+    internal static string Spin(string line) => Run("spin", line);
+
+    [Command("model.smooth", "Moves the selected vertices toward their neighbors: model.smooth <name> <factor> [repeat]")]
+    internal static string Smooth(string line) => Run("smooth", line);
+
     [Command("model.union", "Adds another model's solid: model.union <name> <path> [at <x> <y> <z>]")]
     internal static string Union(string line) => Run("union", line, makes: true);
 

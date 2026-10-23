@@ -91,6 +91,29 @@ public sealed class ModelCommandTests : IDisposable
     }
 
     [Fact]
+    public void AHalfIsMirroredCutFilledAndSmoothedByTheCommands()
+    {
+        Assert.StartsWith("half7: 8 vertices", ConsoleCommands.Run("model.box half7 1 2 2"));
+        Assert.Equal("half7: 12 vertices, 20 edges, 10 faces, 10 faces and 12 vertices selected", ConsoleCommands.Run("model.mirror half7 x"));
+
+        // The front, the back and both ends crossed at a meter up, six faces cut and six points made.
+        Assert.Equal("half7: 18 vertices, 32 edges, 16 faces, 16 faces and 18 vertices selected", ConsoleCommands.Run("model.knife half7 y at 0 1 0"));
+        Assert.StartsWith("half7: 18 vertices, 32 edges, 16 faces, 2 faces", ConsoleCommands.Run("model.select half7 +y"));
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleCommands.Run("model.dissolve half7"));
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 14 faces, 0 faces", ConsoleCommands.Run("model.delete half7"));
+        Assert.StartsWith("half7: ", ConsoleCommands.Run("model.select half7 all"));
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleCommands.Run("model.fill half7"));
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces", ConsoleCommands.Run("model.smooth half7 0.1 2"));
+        Assert.True(Modeling.Find("half7")!.IsClosed);
+
+        Assert.StartsWith("half7: ", ConsoleCommands.Run("model.select half7 none"));
+        Assert.Contains("no edge is selected", ConsoleCommands.Run("model.spin half7 y 90 4"));
+        Assert.Contains("two regions", ConsoleCommands.Run("model.bridge half7"));
+        Assert.EndsWith("mirror x\nknife y at 0 1 0\nselect +y\ndissolve\ndelete\nselect all\nfill\nsmooth 0.1 2\nselect none", ConsoleCommands.Run("model.recipe half7"));
+        Assert.Equal("forgot half7", ConsoleCommands.Run("model.free half7"));
+    }
+
+    [Fact]
     public void ADensityTypedWithOneNumberTakesTheWidthOfItsSlotsTextureAndInfoSaysTheLooks()
     {
         Assert.StartsWith("uvs5: 8 vertices", ConsoleCommands.Run("model.box uvs5 2 2 2"));
