@@ -281,8 +281,11 @@ meets a surface brings back the color the field painted the cell with times the 
 sixteen nearest point and spot lights' and the light that reached it the frame before, so every
 frame adds a bounce, and a ray that meets nothing brings back the camera's ambient light, or the
 world's. `Low` traces two cascades, `Medium` three and `High` four, finer in direction after the
-first, and where the program asked for no field one is built at four cascades of a quarter meter.
-Nothing is baked, so lights and meshes move freely.
+first, and where the program asked for no field one is built at four cascades of a quarter meter. An
+emissive surface lights the scene as well, its light brought back by the rays that meet it, and a
+small emitter, as a lamp's panel or a glowing block, is carried as a light of its own, its light
+reaching each surface from its box and shadowed through the field. Nothing is baked, so lights and
+meshes move freely.
 
 Bevy's lighting takes no indirect light from outside, so a pass of the library's own after the
 opaque surfaces takes back the diffuse share of the ambient light Bevy gave each surface and adds
@@ -295,9 +298,10 @@ screen-space ambient occlusion and an environment map's light are left as Bevy g
 camera with an environment map has its light on top of the probes'.
 
 In a Cornell box on an RTX 4070 Laptop GPU the probes take about 0.9 ms at `Low`, 1.2 at `Medium`
-and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median.
-`./bcs command gi.state` says what the probes hold, `gi.set` changes the quality on a running app,
-and the feature test's graphics page has a row for it.
+and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median, or 1.3 ms
+with a small emitter's light over the whole view. `./bcs command gi.state` says what the probes
+hold, `gi.set` changes the quality on a running app, and the feature test's graphics page has a row
+for it.
 
 `./bcs command gi.reference shots/reference.png 256` path traces the camera's picture through the
 GPU's rays where it has them, and `gi.compare shots/reference.png` says how far the picture lies

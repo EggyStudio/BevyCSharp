@@ -1,15 +1,14 @@
 // Turns the codes field_splat.slang left in one cascade's cells into distances in world units,
 // below zero behind a face and within half a cell of a double-sided one or a wall thinner than a
 // cell, and writes them into the cascade's place in the field the meshes alone make and in the field
-// the shaders read, with the color it painted and the way the cell's nearest face looks, a thread a
-// cell, clearing each cell's words behind it for the next build.
+// the shaders read, with the color and the emission it painted and the way the cell's nearest face
+// looks, a thread a cell, clearing each cell's codes behind it for the next build.
 //
-// Taken from 3DEngine's field_resolve.slang, the emission and the light emitters thinner than a cell
-// lend coming with the emitters. 3DEngine clears the words before each build with a fill of the
-// buffer, which a dispatch here has no call for, so the resolve that reads a word clears it, and the
-// buffers start cleared.
+// Taken from 3DEngine's field_resolve.slang. 3DEngine clears the codes before each build with a
+// fill of the buffer, which a dispatch here has no call for, so the resolve that reads a code clears
+// it, and the buffers start cleared.
 
-// The words of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
+// The codes of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
 // lies behind, in 1024ths of a cell.
 RWStructuredBuffer<uint> cells;
 RWStructuredBuffer<uint> behind;
@@ -29,6 +28,13 @@ RWStructuredBuffer<uint> albedo;
 // face painted (surfaceAlbedoFacing).
 [format("r32ui")] RWTexture3D<uint> face_field;
 [format("r32ui")] RWTexture3D<uint> still_faces;
+
+// The light each cell's nearest surface emits, as field_splat.slang painted it, what the emitters
+// thinner than a cell lend it, the most light any emits in 256ths and the area of their faces near
+// the cell seen along x, y and z in 1024ths of a cell's face, and the image both go into.
+RWStructuredBuffer<float4> glow;
+RWStructuredBuffer<uint> emitted;
+[format("rgba16f")] WTexture3D<float4> glow_field;
 
 // x: the cascade. y: the cells along each side. z: the width of a cell. w: the band in cells.
 uniform float4 cascade;
@@ -79,8 +85,25 @@ void main(uint3 id : SV_DispatchThreadID)
     still_faces[at] = code & 255u;
     face_field[at] = code & 255u;
 
-    // Cleared for the next build, the band's distance in front, no face behind and no color.
+    // The lent light times the share of the cell's face the emitters cover along the axis they cover
+    // most of, a whole face at most, as the faces of a strip along a wall lend a cell beside it what
+    // it shows from the front and from above alike, where summed they would lend it twice that. The
+    // larger of that and the cell's own, since an emitter that painted the cell its own gives it its
+    // whole light, as an emissive panel under a ceiling does.
+    uint e = index * 6u;
+    float3 light = float3(float(emitted[e]), float(emitted[e + 1u]), float(emitted[e + 2u])) / 256.0;
+    float3 seen = float3(float(emitted[e + 3u]), float(emitted[e + 4u]), float(emitted[e + 5u])) / 1024.0;
+    float3 lent = light * min(max(seen.x, max(seen.y, seen.z)), 1.0);
+    // Alpha 1 where the light is a carried emitter's, which a probe's ray leaves out.
+    float4 painted = glow[index];
+    glow_field.Store(at, float4(max(painted.rgb, lent), any(lent > painted.rgb) ? 0.0 : painted.a));
+
+    // Cleared for the next build, the band's distance in front, no face behind, no color and no
+    // light.
     cells[index] = (uint(cascade.w) * 1024u << 10) | (1u << 8);
     behind[index] = 0xFFFFFFFFu;
     albedo[index] = 0u;
+    glow[index] = float4(0.0);
+    for (uint i = 0u; i < 6u; i++)
+        emitted[e + i] = 0u;
 }

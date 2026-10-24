@@ -17,6 +17,7 @@
 import bcs_pass;
 import bcs_field;
 import bcs_gi;
+import bcs_glow;
 
 Texture2D<uint4> gbuffer;
 Texture3D<float> scene_field;
@@ -27,8 +28,10 @@ StructuredBuffer<FieldInfo> scene_field_info;
 Texture3D<float4> probe_cubes;
 Texture3D<float> probe_reach;
 
-// The lights the probes are lit by, for the light from all around.
+// The lights the probes are lit by, for the light from all around, and the small emissive surfaces
+// carried as lights of their own, as many as the lights' fourth count says.
 StructuredBuffer<GiLights> gi_lights;
+StructuredBuffer<GlowLight> glow_lights;
 
 // x: the probes along each side of a cascade. y: their spacing in cells. z: how many cascades of
 // probes. w: unused.
@@ -118,6 +121,16 @@ float4 fragment(FullscreenOutput input) : SV_Target
     }
 
     float3 added = diffuse * (bounced * held + distant * (1.0 - held)) * occlusion;
+
+    // The glow lights' light straight to the surface, the four brightest within reach shadowed by a
+    // march through the field to the middle of each, the probes' rays leaving a carried emitter's
+    // light to them. 3DEngine's pixels where no screen probe stands near march to the halves of each
+    // face a light shows, which in the bounce rooms read as the middle does, the Cornell box's floor
+    // 13.4% over its reference against 13.2%, and took the pass from 1.3 ms to 2.0 to 3.5 at 1280 by
+    // 720 with one light over the whole view of a Cornell box on the development machine's GPU,
+    // where without the glow lights it takes 0.19.
+    if (lights.counts.w > 0.5)
+        added += diffuse * glowLightsAt(scene_field, scene_field_sampler, info, glow_lights, uint(lights.counts.w), world, n, 4, false, float3(0.0)) / Pi;
 
     // The diffuse share of the light from all around Bevy's lighting gave the surface, taken back.
     float2 F_ab = F_AB(1.0, NdotV);

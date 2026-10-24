@@ -70,7 +70,8 @@ internal static unsafe partial class SceneField
     {
         public readonly (int Cascades, float CellSize, int Budget, float FarCell) Made = made;
         public readonly SceneFieldPlan Plan = plan;
-        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Info, Cells, Behind, Paint, Instances, Shapes, Bricks, Pool = AssetHandle.None;
+        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, Emission, Lent, Instances, Shapes, Bricks,
+            Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
     }
 
@@ -120,6 +121,12 @@ internal static unsafe partial class SceneField
     internal static AssetHandle Albedo => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Albedo : AssetHandle.None;
 
     /// <summary>
+    /// The light each cell's nearest surface emits, or an emitter thinner than a cell lends it, in four
+    /// half floats laid out as the field, or none where no field is built.
+    /// </summary>
+    internal static AssetHandle Glow => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Glow : AssetHandle.None;
+
+    /// <summary>
     /// The way each cell's nearest face looks, eight bits as <c>bcs_field</c>'s <c>faceWay</c> reads
     /// them laid out as the field, or none where no field is built.
     /// </summary>
@@ -127,6 +134,10 @@ internal static unsafe partial class SceneField
 
     /// <summary>The camera the contact shadows and global illumination's light are drawn on, or none.</summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
+
+    /// <summary>The meshes the field gathered this frame, which global illumination's glow lights are found among.</summary>
+    internal static IReadOnlyList<(SceneFieldPlan.Instance Instance, bool Skinned)> DrawnThisFrame =>
+        ReferenceEquals(_app, App.Running) ? Drawn : [];
 
     /// <summary>The camera the field lies around this frame, or none where it lies around none.</summary>
     internal static Entity ViewCamera => ReferenceEquals(_app, App.Running) ? _drawFor.Camera : Entity.None;
@@ -151,8 +162,9 @@ internal static unsafe partial class SceneField
 
     /// <summary>
     /// The bytes of GPU memory the field holds, its two images of half floats, its two of colors and
-    /// two of faces, four bytes a cell each, the words of a cascade's cells, its faces behind and its
-    /// colors, and the pool of triangles.
+    /// two of faces, four bytes a cell each, its image of light in four half floats, a cascade's
+    /// cells' codes, faces behind and colors, four bytes a cell each, their light in four floats and
+    /// what thin emitters lend them in six codes, and the pool of triangles.
     /// </summary>
     internal static long Bytes()
     {
@@ -160,7 +172,7 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(Native.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return (2 * 2 + 4 * 4) * cells * plan.Cascades + 3 * cells * 4 + pool;
+        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (3 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
     /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
@@ -334,6 +346,7 @@ internal static unsafe partial class SceneField
         built.StillPaint = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
         built.Faces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
         built.StillFaces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
+        built.Glow = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, depth);
 
         // A cell's word cleared to the band's distance in front, and its face behind to none, as the
         // resolve leaves them after each build.
@@ -344,17 +357,21 @@ internal static unsafe partial class SceneField
         built.Behind = Shaders.CreateBuffer<uint>(cleared);
         Array.Clear(cleared);
         built.Paint = Shaders.CreateBuffer<uint>(cleared);
+        built.Emission = Shaders.CreateBuffer(size * size * size * 16);
+        built.Lent = Shaders.CreateBuffer(size * size * size * 6 * sizeof(uint));
 
         built.Info = Shaders.CreateBuffer(InfoBytes);
         built.Instances = Shaders.CreateBuffer(InstanceBytes * 64);
         built.Shapes = Shaders.CreateBuffer(ShapeBytes * 16);
         built.Bricks = Shaders.CreateBuffer(16 * 64);
 
-        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("instances", built.Instances);
+        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("instances", built.Instances)
+            .SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent);
         _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint)
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
             .SetTexture("albedo_field", built.Albedo).SetTexture("still_paint", built.StillPaint)
-            .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces);
+            .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces)
+            .SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent).SetTexture("glow_field", built.Glow);
         _stamp.SetBuffer("bricks", built.Bricks).SetBuffer("shapes", built.Shapes).SetBuffer("info", built.Info)
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
             .SetTexture("still_paint", built.StillPaint).SetTexture("still_faces", built.StillFaces)
@@ -368,8 +385,8 @@ internal static unsafe partial class SceneField
         if (_built is not { } built) return;
         _drawFor = (null, Entity.None);
         DrawEngine(ecs, null, Entity.None);
-        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Info,
-                     built.Cells, built.Behind, built.Paint, built.Instances, built.Shapes, built.Bricks])
+        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Glow,
+                     built.Info, built.Cells, built.Behind, built.Paint, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
     }
@@ -481,7 +498,8 @@ internal static unsafe partial class SceneField
                 records.AddRange([w.M11, w.M21, w.M31, w.M41, w.M12, w.M22, w.M32, w.M42, w.M13, w.M23, w.M33, w.M43]);
                 records.AddRange([BitConverter.UInt32BitsToSingle(start), BitConverter.UInt32BitsToSingle(many),
                     BitConverter.UInt32BitsToSingle(instance.DoubleSided ? 1u : 0u), BitConverter.UInt32BitsToSingle((uint)triangles)]);
-                records.AddRange([instance.Color.X, instance.Color.Y, instance.Color.Z, 0, instance.Emission.X, instance.Emission.Y, instance.Emission.Z, 0]);
+                records.AddRange([instance.Color.X, instance.Color.Y, instance.Color.Z, Carried(instance, plan.CellSize) ? 2 : 1,
+                    instance.Emission.X, instance.Emission.Y, instance.Emission.Z, instance.Emission == Vector3.Zero ? 0 : Thinnest(instance)]);
                 triangles += (int)many;
                 count++;
             }
@@ -506,10 +524,19 @@ internal static unsafe partial class SceneField
                 Shaders.Dispatch(_splat, across, down);
 
                 // Again over the same triangles once every cell holds its nearest, each cell painted
-                // the color of the triangle whose code it kept.
+                // the color and the emission of the triangle whose code it kept.
                 ReadOnlySpan<uint> painting = [across, (uint)first, 1, 0];
                 _splat.SetNumbers("groups", 4, painting);
                 Shaders.Dispatch(_splat, across, down);
+
+                // And once more where the build holds an emitter thinner than its cells, which lends
+                // the cells near it its light, as it paints none its own.
+                if (build.Instances.Any(i => i.Emission != Vector3.Zero && Thinnest(i) < build.Cell && !Carried(i, plan.CellSize)))
+                {
+                    ReadOnlySpan<uint> lending = [across, (uint)first, 2, 0];
+                    _splat.SetNumbers("groups", 4, lending);
+                    Shaders.Dispatch(_splat, across, down);
+                }
             }
 
             _resolve.Set("cascade", new Vector4(build.Cascade, size, build.Cell, SceneFieldPlan.Band));
@@ -518,6 +545,33 @@ internal static unsafe partial class SceneField
 
         built.BuiltThisFrame = plan.Builds.Count;
         built.BuildsDone += plan.Builds.Count;
+    }
+
+    /// <summary>
+    /// Whether global illumination carries an instance's emission as a glow light, as 3DEngine's
+    /// GlowLights carries one, an emitter whose bounds' longest side in the world is no more than
+    /// twice the first cascade's probes' spacing, given its first cascade's cell.
+    /// </summary>
+    internal static bool Carried(in SceneFieldPlan.Instance instance, float firstCell)
+    {
+        if (instance.Emission is { X: <= 0, Y: <= 0, Z: <= 0 }) return false;
+        var size = instance.Bounds.Max - instance.Bounds.Min;
+        var w = instance.World;
+        var longest = MathF.Max(size.X * new Vector3(w.M11, w.M12, w.M13).Length(),
+            MathF.Max(size.Y * new Vector3(w.M21, w.M22, w.M23).Length(), size.Z * new Vector3(w.M31, w.M32, w.M33).Length()));
+        return longest <= 2 * WorldProbes.ProbeSpacing * firstCell;
+    }
+
+    /// <summary>
+    /// How thin an instance is, the least of its mesh's bounds along each of its own axes scaled into
+    /// the world, which says whether an emitter is thinner than a cell.
+    /// </summary>
+    private static float Thinnest(in SceneFieldPlan.Instance instance)
+    {
+        var size = instance.Bounds.Max - instance.Bounds.Min;
+        var w = instance.World;
+        return MathF.Min(size.X * new Vector3(w.M11, w.M12, w.M13).Length(),
+            MathF.Min(size.Y * new Vector3(w.M21, w.M22, w.M23).Length(), size.Z * new Vector3(w.M31, w.M32, w.M33).Length()));
     }
 
     /// <summary>Writes the frame's boxes and bricks and asks for the stamp over the bricks.</summary>

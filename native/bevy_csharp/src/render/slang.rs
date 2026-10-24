@@ -81,8 +81,12 @@ pub const FIELD_PRELUDE: &str = include_str!("bcs_field.slang");
 /// octahedron of directions, rays through the field and the light the world's probes hold.
 pub const GI_PRELUDE: &str = include_str!("bcs_gi.slang");
 
+/// What any Slang shader can import as `bcs_glow`, the small emissive surfaces global illumination
+/// carries as lights of their own, their light in closed form and the marches that shadow it.
+pub const GLOW_PRELUDE: &str = include_str!("bcs_glow.slang");
+
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 11] = [
+const MODULES: [(&str, &str); 12] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
@@ -94,6 +98,7 @@ const MODULES: [(&str, &str); 11] = [
     ("bcs_ray.slang", RAY_PRELUDE),
     ("bcs_field.slang", FIELD_PRELUDE),
     ("bcs_gi.slang", GI_PRELUDE),
+    ("bcs_glow.slang", GLOW_PRELUDE),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are

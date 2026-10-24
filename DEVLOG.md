@@ -1,10 +1,31 @@
 # BevyCSharp devlog
 
-What landed in BevyCSharp, by day and newest first, with the pictures taken on the way: the captures
+What landed in BevyCSharp, by day and newest first, with the pictures taken on the way, the captures
 the repository keeps under `.github/assets`. A line under Done names the item of .github/REVIEW.md
 or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 ## 2026-10-24
+
+![](.github/assets/denoiser.webp)
+![](.github/assets/readings/2026-10-20-hub-particles.webp)
+![](.github/assets/readings/2026-10-21-edit-mesh-primitives.webp)
+![](.github/assets/readings/2026-10-21-grid-room.webp)
+![](.github/assets/readings/2026-10-21-modeling-window.webp)
+![](.github/assets/readings/2026-10-21-overlay-f3.webp)
+![](.github/assets/readings/2026-10-21-swarm-waves.webp)
+![](.github/assets/readings/2026-10-21-terminal-room.webp)
+![](.github/assets/readings/2026-10-21-texture-coordinates.webp)
+![](.github/assets/readings/2026-10-21-textured-cube-editor.webp)
+![](.github/assets/readings/2026-10-23-field-pair.webp)
+![](.github/assets/readings/2026-10-23-field-window.webp)
+![](.github/assets/readings/2026-10-24-denoiser-checker-crops.webp)
+Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
+opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
+diffuse color times the probes' light, with a sky over a ground past the last cascade, the probes'
+sky at the 0.45 of an ambient light that Bevy's ambient term returns, Render.SetGlobalIllumination
+public, a row on the feature test's graphics page, tests of a red wall tinting a white block's side
+and an open floor reading as Bevy's ambient light leaves it, the costs read in a Cornell box, and
+the denoiser's picture in the ray tracing guide beside the review's readings. (`07863068`)
 
 ![](.github/assets/denoiser.webp)
 The feature test's Cornell box under Solari's ray-traced lighting, one grainy frame on the left and
@@ -15,7 +36,7 @@ The checkered ground far off in three crops, the reference mean, the denoiser's 
 one, the reading that moved the demodulation to the diffuse color plus the specular reflectance
 (item 54).
 
-Done:
+Done that day
 
 - Item 54 at `97440a1d`. A denoiser over Solari's lit result, so the ray-traced tier's picture is
   clean (Decision 52).
@@ -36,7 +57,7 @@ The scene's distance field read as a pair, a box's field mapped and traced (item
 ![](.github/assets/readings/2026-10-23-field-window.webp)
 The field's window in the feature test, the cascades' cells over the room (item 50).
 
-Done:
+Done that day
 
 - Item 43 at `cd05d9a2`. Modeling operations on faces and edges, Blender's kinds (Decision 46).
 - Item 44 at `cd05d9a2`. Modifiers, a stack applied at the build and never baked until asked
@@ -84,11 +105,11 @@ A textured cube in the modeling window after the texture coordinates landed (ite
 ![](.github/assets/readings/2026-10-21-overlay-f3.webp)
 The F3 overlay over the feature test, the frame's strip and its sections (item 49).
 
-Done:
+Done that day
 
 - Item 38 at `08d03b4d`. An edit mesh a program shapes by operations, with a recipe that rebuilds
   it, built into what the engine draws and collides with (Decision 46).
-- Item 39 at `bfe1fc63`. Grid prototyping: materials that show a meter, texture coordinates aligned
+- Item 39 at `bfe1fc63`. Grid prototyping, materials that show a meter, texture coordinates aligned
   to the world, and openings cut by booleans (Decision 46).
 - Item 40 at `bee54e98`. The modeling commands, so a level is blocked out from the terminal, and a
   window in the game to shape by hand (Decision 46).
@@ -108,7 +129,7 @@ Done:
 ![](.github/assets/readings/2026-10-20-hub-particles.webp)
 The feature test's hub under its particles, driven offscreen for the readings.
 
-Done:
+Done that day
 
 - Item 2 at `5e9235ce`. The norm's lists are paid down.
 - Item 29 at `0f8e89b4`. What was mended for the time being is mended for good (Decision 38), after
@@ -161,7 +182,7 @@ Bevy's free, pan and pan-orbit camera controllers are bridged with their five ex
 gaining bevy_camera_controller alone, and Bevy's free camera takes the place of the examples' own in
 the sixteen that flew one. (`670ecf2c`)
 
-Done:
+Done that day
 
 - Item 4 at `142dc131`. The gaps, by how many rows each holds.
 - Item 31 at `8fe38f60`. The README's centered parts are markdown inside one centering block
@@ -173,7 +194,7 @@ Done:
 
 ## 2026-10-18
 
-Done:
+Done that day
 
 - Item 22 at `5e750133`. Swarm builds on the package version its project names.
 - Item 26 at `c3bd5349`. The reflected variants holding a tuple, an instant or a graph's index get
@@ -185,13 +206,13 @@ Done:
 
 ## 2026-10-17
 
-Done:
+Done that day
 
 - Item 23 at `b178ae3f`. Two workflows an engine, `build.yml` on a push and `pack.yml` by hand
   (Decision 34).
 - Item 24 at `1d246e9f`. The docs job leaves the build workflow (Decision 36); the repository's own
   links are a test of the suite.
-- Item 25 at `b4d45938`. The register: STYLE.md's rule and the sweep (Decision 37).
+- Item 25 at `b4d45938`. The register, STYLE.md's rule and the sweep (Decision 37).
 
 ## 2026-10-12
 
@@ -225,10 +246,10 @@ decodable example is written with it. (`2aaaef58`)
 A tone of one frequency is made and played as a clip is, as Bevy's pitch example plays one, and a
 mesh may be left without the normals a shader of its own never reads. (`7f42cf40`)
 
-Done:
+Done that day
 
 - Item 16 at `4e6eab36`. An offscreen click lands only where the pointer has been.
-- Item 19 at `c9b8728f`. A world a scene file saves whole: a component's text, a field left out and
+- Item 19 at `c9b8728f`. A world a scene file saves whole, a component's text, a field left out and
   a resource of the game's own, Bevy's `world_serialization` reached from C#.
 - Item 20 at `7f42cf40`. A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32).
 - Item 21 at `c8849d71`. A behavior's `[Changed]` filter on its own type fires every frame.
@@ -313,7 +334,7 @@ Gizmos draw Bevy's planes, endless lines and flat primitives as its primitive_2d
 draw them, the round solids take a resolution and a cylinder its half height as named, so
 render_primitives is written. (`b3ac2a0e`)
 
-Done:
+Done that day
 
 - Item 11 at `c3aaacac`. The CLI server writes an answered request before it closes.
 - Item 12 at `e1a32283`. A resource inserted from nothing replaced the plugin's with a zeroed one.
@@ -387,7 +408,7 @@ A draw on a camera writes Bevy's G-buffer from a new point inside the prepass an
 a shadow stage of its own, so a surface a shader finds by marching a ray is lit and shadowed by Bevy
 as a standard material is, and deferred_raymarch is written with it. (`7849ecf6`)
 
-Done:
+Done that day
 
 - Item 5 at `f12a5879`. Every method native code calls catches every exception.
 - Item 6 at `fef6bbeb`. A template package, so `dotnet new` starts a game.

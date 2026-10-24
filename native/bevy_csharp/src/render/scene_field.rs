@@ -39,7 +39,8 @@ pub struct BcsFieldDraw {
     pub rows: [f32; 12],
     /// The material's base color in linear light, white for a material the bridge cannot read.
     pub color: [f32; 4],
-    /// The material's emission in linear light.
+    /// The material's emission in linear light, in the units of the camera's picture as Bevy shows
+    /// it, times the camera's exposure by the share of it the emission's alpha sets.
     pub emission: [f32; 4],
     /// The mesh's bounds in its own space, the least corner, then the greatest.
     pub low: [f32; 4],
@@ -260,7 +261,9 @@ mod built {
         use bevy::transform::components::GlobalTransform;
 
         let mut eye = BcsFieldEye::default();
+        let mut exposure = bevy::camera::Exposure::default().exposure();
         if let Some((camera, place, forward, _)) = crate::render::scene_counts::view_camera(world) {
+            exposure = world.get::<bevy::camera::Exposure>(camera).copied().unwrap_or_default().exposure();
             eye.position = place.to_array();
             eye.forward = forward.to_array();
             eye.found = 1;
@@ -316,7 +319,13 @@ mod built {
 
                 let standard = material.and_then(|material| materials.and_then(|materials| materials.get(&material.0)));
                 let color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
-                let emission = standard.map_or([0.0; 4], |standard| standard.emissive.to_f32_array());
+                // Bevy shows an emission times the exposure by the share of it its alpha sets
+                // (pbr_functions' emissive_light), so global illumination carries it so.
+                let emission = standard.map_or([0.0; 4], |standard| {
+                    let [r, g, b, a] = standard.emissive.to_f32_array();
+                    let shown = 1.0 + (exposure - 1.0) * a;
+                    [r * shown, g * shown, b * shown, 0.0]
+                });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
 
                 *draw = BcsFieldDraw {

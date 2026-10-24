@@ -25,6 +25,18 @@ public static partial class Render
     /// and each probe gathers what reached it into the six faces of a cube.
     /// </para>
     /// <para>
+    /// A surface's emissive light is painted into the field beside its color, as Bevy shows it, the
+    /// camera's exposure taken by the share of it the emission's alpha sets, and a ray that meets
+    /// it brings it back. A small emitter, one whose box's longest side is no more than twice the
+    /// first cascade's probe spacing, as a lamp's panel or a glowing block, is carried as a light
+    /// of its own, its light reaching a surface from its box in closed form and shadowed by a march
+    /// through the field, at each pixel and at each probe's ray's hit, since the probes' rays meet
+    /// a small emitter seldom. Touching emitters square to the axes with the same light are one
+    /// light, the 64 nearest the camera are lit, and each is taken as its box with every face
+    /// emitting, so a round emitter is carried brighter than it is. An emitter thinner than a cell
+    /// and too long to be carried lends its light to the cells beside it.
+    /// </para>
+    /// <para>
     /// <see cref="GlobalIllumination.Low"/> traces two cascades of 64 directions a probe,
     /// <see cref="GlobalIllumination.Medium"/> adds a third of 256, and
     /// <see cref="GlobalIllumination.High"/> traces 64 then 256 in four, no more cascades than the

@@ -169,7 +169,7 @@ float3 trace(GiLights given, float3 origin, float3 way, inout uint state)
             break;
         }
 
-        // Emissive light, times the exposure by as much as its alpha asks, as Bevy shows it.
+        // Emissive light, times the exposure by the share of it its alpha sets, as Bevy shows it.
         bool first = bounce == 0u;
         float3 emitted = material.emissive.rgb * lerp(1.0, passView.exposure, material.emissive.a);
         light += throughput * (emitted + direct(given, p, n, -way, first, color, material));

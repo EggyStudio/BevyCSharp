@@ -2,7 +2,7 @@
 // triangles of the meshes it is built from, a workgroup a triangle. The triangle is put in the
 // world by its instance's matrix, and every cell within the band of cells around it, a box the
 // triangle's bounds grown by the band, takes its distance to the triangle, the least of those any
-// triangle gives kept by an atomic minimum of a word that holds the distance in 1024ths of a cell
+// triangle gives kept by an atomic minimum of a uint that holds the distance in 1024ths of a cell
 // above a bit set where the triangle is double-sided, a bit set where the cell lies in front of the
 // triangle's face, and the way the face looks in eight bits. Of two triangles as near to that
 // 1024th, as where a crate stands on the ground, one behind whose face the cell lies wins, the cell
@@ -16,15 +16,17 @@
 // edge no other triangle shares, as a ground plane's rim, is in front, so an open mesh puts no wedge
 // below its rim inside. The nearest face a cell lies straight behind is kept apart, for a wall
 // thinner than a cell, which may have no cell's middle inside it. A cell no triangle comes within the
-// band of keeps the word it was cleared to, the band's distance in front. A second dispatch over the
-// same triangles paints each cell the color of a triangle whose code is the one the cell kept, its
-// nearest surface, which global illumination is read from, its instance's color times its
-// vertices' colors blended at the cell's nearest point, as a material blends them across a face.
+// band of keeps the code it was cleared to, the band's distance in front. A second dispatch over the
+// same triangles paints each cell the color and the emission of a triangle whose code is the one the
+// cell kept, its nearest surface, which global illumination is read from, its instance's color times
+// its vertices' colors blended at the cell's nearest point, as a material blends them across a face.
+// A third lends the light of an emitter thinner than a cell to the cells near it.
 //
-// Taken from 3DEngine's field_splat.slang, the dispatches that lend an emitter's light and paint
-// again the cells of a mesh whose colors were written coming with the emitters. Its values are
-// named globals where 3DEngine pushes constants, and the words are kept through Slang's Atomic<uint>,
-// which compiles to WGSL's atomics where InterlockedMin does not.
+// Taken from 3DEngine's field_splat.slang, the dispatch that paints again the cells of a mesh whose
+// colors were written left out. Its values are named globals where 3DEngine pushes constants, the
+// codes are kept through Slang's Atomic<uint>, which compiles to WGSL's atomics where InterlockedMin
+// does not, and the emission is kept as four floats a cell where 3DEngine packs it in halves, by an
+// instruction of SPIR-V's alone.
 
 struct FieldInstance
 {
@@ -36,9 +38,12 @@ struct FieldInstance
     // inside, as a double-sided one, whose cells are all in front. w: the first of its triangles
     // counted over every instance of the build before it.
     uint4 triangles;
-    // rgb: the surface's color, linear. w: unused.
+    // rgb: the surface's color, linear. w: 2 where global illumination carries its emission as a glow
+    // light, 1 elsewhere.
     float4 color;
-    // rgb: the surface's emission, linear. w: unused.
+    // rgb: the surface's emission, linear, in the picture's units. w: where it is emissive, its
+    // thinnest extent in world units, its mesh's bounds along each of its own axes scaled into the
+    // world.
     float4 emission;
 };
 
@@ -50,7 +55,7 @@ StructuredBuffer<uint4> corners;
 // Every build's instances this frame, one build after another.
 StructuredBuffer<FieldInstance> instances;
 
-// A word a cell of the cascade, as the distance's code.
+// A code a cell of the cascade, the distance's.
 RWStructuredBuffer<Atomic<uint>> cells;
 
 // The nearest face each cell lies behind, in 1024ths of a cell, which field_resolve.slang reads for
@@ -61,6 +66,16 @@ RWStructuredBuffer<Atomic<uint>> behind;
 // dispatch writes and field_resolve.slang reads.
 RWStructuredBuffer<uint> albedo;
 
+// The light a cell's nearest surface emits, in the picture's units, its alpha 1 where global
+// illumination carries the emitter as a glow light, which the painting dispatch writes and
+// field_resolve.slang reads.
+RWStructuredBuffer<float4> glow;
+
+// What the emitters thinner than a cell lend each cell they lie near, six codes a cell, the most
+// light any of them emits, red, green and blue in 256ths, and the area of their faces near the cell
+// seen along x, y and z, in 1024ths of a cell's face, which field_resolve.slang reads.
+RWStructuredBuffer<Atomic<uint>> emitted;
+
 // xyz: the cascade's corner. w: the width of a cell.
 uniform float4 origin_and_cell;
 // x: the cells along each side. y: how many instances the build has. z: how many triangles in all.
@@ -68,7 +83,8 @@ uniform float4 origin_and_cell;
 uniform uint4 counts;
 // x: how many workgroups the dispatch has along x, which the triangle's number is read across.
 // y: the build's first instance in the buffer. z: 0 for the dispatch that finds the distances, 1 for
-// the one that paints.
+// the one that paints, 2 for the one that lends an emitter thinner than a cell's light to the cells
+// near it.
 uniform uint4 groups;
 
 // The point of the triangle abc nearest p, as Ericson's Real-Time Collision Detection finds it by
@@ -146,6 +162,51 @@ float3 barycentric(float3 p, float3 a, float3 b, float3 c)
     return weights / max(weights.x + weights.y + weights.z, 1e-6);
 }
 
+// The area of the triangle a b c, given in coordinates of its own plane, within the square of half
+// side h about the plane's origin, the triangle cut by each of the square's sides in turn
+// (Sutherland and Hodgman), seven corners at most.
+float areaWithin(float2 a, float2 b, float2 c, float h)
+{
+    float2 lo = min(a, min(b, c)), hi = max(a, max(b, c));
+    if (all(lo >= -h) && all(hi <= h))
+        return abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x)) * 0.5;
+    if (any(lo > h) || any(hi < -h))
+        return 0.0;
+    float2 corners[8];
+    float2 cut[8];
+    corners[0] = a;
+    corners[1] = b;
+    corners[2] = c;
+    uint count = 3u;
+    for (uint side = 0u; side < 4u; side++)
+    {
+        float sign = (side & 1u) == 0u ? 1.0 : -1.0;
+        uint axis = side >> 1;
+        uint kept = 0u;
+        for (uint i = 0u; i < count; i++)
+        {
+            float2 p = corners[i], q = corners[(i + 1u) % count];
+            float dp = sign * p[axis] - h, dq = sign * q[axis] - h;
+            if (dp <= 0.0 && kept < 8u)
+                cut[kept++] = p;
+            if ((dp <= 0.0) != (dq <= 0.0) && kept < 8u)
+                cut[kept++] = lerp(p, q, dp / (dp - dq));
+        }
+        count = kept;
+        for (uint i = 0u; i < count; i++)
+            corners[i] = cut[i];
+        if (count < 3u)
+            return 0.0;
+    }
+    float twice = 0.0;
+    for (uint i = 0u; i < count; i++)
+    {
+        float2 p = corners[i], q = corners[(i + 1u) % count];
+        twice += p.x * q.y - q.x * p.y;
+    }
+    return abs(twice) * 0.5;
+}
+
 groupshared uint triangleInstance;
 
 [shader("compute")]
@@ -172,6 +233,17 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
     }
     GroupMemoryBarrierWithGroupSync();
     FieldInstance instance = instances[groups.y + triangleInstance];
+    // An emitter thinner than a cell paints no cell its own where a surface behind it is nearer the
+    // cells' middles, as a bright strip on a wall, so its light was in the field nowhere. It lends
+    // the cells within a cell of it its light, with the area of its faces near each, which the
+    // resolve turns into the share of a cell's face it covers, so a strip 0.06 wide lends cells of
+    // 0.15 two fifths of its light and a sheet as thin lends its whole light. An emitter global
+    // illumination carries as a glow light lends nothing, its light reaching the cells' surfaces as
+    // a light's does.
+    float thickness = instance.emission.w;
+    bool carried = instance.color.w > 1.5;
+    if (groups.z == 2u && (carried || !(thickness > 0.0 && thickness < origin_and_cell.w && any(instance.emission.rgb > 0.0))))
+        return;
     uint corner = (instance.triangles.x + t - instance.triangles.w) * 3;
     uint4 ca = corners[corner], cb = corners[corner + 1], cc = corners[corner + 2];
     float3 a = place(instance, asfloat(ca.xyz));
@@ -204,6 +276,58 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
     int3 span = last - first + 1;
     uint count = uint(span.x * span.y * span.z);
 
+    if (groups.z == 2u)
+    {
+        if (faceLength <= 1e-10)
+            return;
+        // The cells within a cell of the triangle, which lie within its bounds grown by one, every
+        // cell a point on it is blended from where the field is read there.
+        first = max(int3(floor((min(a, min(b, c)) - origin_and_cell.xyz) / cell - 1.0)), int3(0));
+        last = min(int3(ceil((max(a, max(b, c)) - origin_and_cell.xyz) / cell + 1.0)), int3(size - 1));
+        if (any(last < first))
+            return;
+        span = last - first + 1;
+        count = uint(span.x * span.y * span.z);
+        uint3 light = uint3(max(instance.emission.rgb, 0.0) * 256.0);
+        // The face's way and two ways along it, square to the axes where the face is, so a cell's
+        // square lies along an upright wall's rows of cells.
+        float3 n = face / faceLength;
+        float3 across = abs(n.x) < abs(n.y) ? (abs(n.x) < abs(n.z) ? float3(1, 0, 0) : float3(0, 0, 1)) : (abs(n.y) < abs(n.z) ? float3(0, 1, 0) : float3(0, 0, 1));
+        float3 u = normalize(cross(n, across));
+        float3 v = cross(n, u);
+        // The share of a cell's face it covers seen along each axis, 1024 a whole face.
+        float3 seen = abs(n) * (1024.0 / (cell * cell));
+        for (uint k = lane; k < count; k += 64u)
+        {
+            int3 at = first + int3(int(k % uint(span.x)), int((k / uint(span.x)) % uint(span.y)), int(k / uint(span.x * span.y)));
+            float3 p = origin_and_cell.xyz + (float3(at) + 0.5) * cell;
+            bool open;
+            if (length(p - nearest(p, a, b, c, edges, open)) >= cell)
+                continue;
+            // A face of a closed mesh counts where the cell lies before it, as a sheet's top face
+            // for a cell above it and its bottom face for one below, so the two faces of a sheet
+            // are not counted twice; a mesh with no inside counts every face.
+            float off = dot(p - a, n);
+            if (sided && off <= 0.0)
+                continue;
+            // The face's area within a cell's square about the cell's middle laid on its plane.
+            float3 q = p - n * off;
+            float area = areaWithin(float2(dot(a - q, u), dot(a - q, v)), float2(dot(b - q, u), dot(b - q, v)),
+                float2(dot(c - q, u), dot(c - q, v)), cell * 0.5);
+            if (area <= 0.0)
+                continue;
+            uint3 share = uint3(area * seen + 0.5);
+            uint index = (at.z * size + at.y) * size + at.x;
+            emitted[index * 6u].max(light.r);
+            emitted[index * 6u + 1u].max(light.g);
+            emitted[index * 6u + 2u].max(light.b);
+            emitted[index * 6u + 3u].add(share.x);
+            emitted[index * 6u + 4u].add(share.y);
+            emitted[index * 6u + 5u].add(share.z);
+        }
+        return;
+    }
+
     for (uint k = lane; k < count; k += 64u)
     {
         int3 at = first + int3(int(k % uint(span.x)), int((k / uint(span.x)) % uint(span.y)), int(k / uint(span.x * span.y)));
@@ -230,6 +354,10 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
             float3 painted = instance.color.rgb * (weights.x * cornerColor(ca.w) + weights.y * cornerColor(cb.w) + weights.z * cornerColor(cc.w));
             uint3 bytes = uint3(saturate(painted) * 255.0 + 0.5);
             albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (255u << 24);
+            // Alpha 1 where global illumination carries the emitter as a glow light, which a probe's
+            // ray that meets it leaves out (surfaceGlowUncarried).
+            float3 e = max(instance.emission.rgb, 0.0);
+            glow[index] = float4(e, carried && any(e > 0.0) ? 1.0 : 0.0);
         }
     }
 }

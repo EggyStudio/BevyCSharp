@@ -59,10 +59,11 @@ internal static unsafe class WorldProbes
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
         public AssetHandle[] Radiance = [], Merged = [], Distances = [], MergedSky = [];
-        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, NoSky = AssetHandle.None;
+        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, NoSky = AssetHandle.None;
         public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
         public (float Start, float End)[] Intervals = [];
         public readonly byte[] LightBytes = new byte[LightsBytes];
+        public readonly byte[] GlowBytes = new byte[GlowLights.Most * GlowLights.Bytes];
 
         public int Cascades => Texels.Length;
     }
@@ -226,6 +227,7 @@ internal static unsafe class WorldProbes
         Array.Fill(open, Half.One);
         made.Skies = Shaders.CreateImage<Half>(6 * p, p, ShaderImageFormat.R16Float, open, p * cascades);
         made.Lights = Shaders.CreateBuffer(LightsBytes);
+        made.Glows = Shaders.CreateBuffer(GlowLights.Most * GlowLights.Bytes);
 
         // The last cascade's merge reads no cascade above, and an image of nothing stands in for the
         // share of the sky above it, its own being the one it writes.
@@ -238,7 +240,7 @@ internal static unsafe class WorldProbes
     {
         if (_made is not { } made) return;
         foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.MergedSky)
-                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.NoSky]))
+                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.NoSky]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -276,6 +278,11 @@ internal static unsafe class WorldProbes
             Native.Check(Native.bcs_gi_lights((NativeGiLights*)lights), "reading the lights global illumination is lit by");
         var floats = MemoryMarshal.Cast<byte, float>(bytes);
         (floats[13], floats[14]) = (_frame, 1);
+
+        // The small emitters carried as lights of their own, the nearest the eye, counted in the
+        // lights' fourth count.
+        floats[15] = GlowLights.Write(made.GlowBytes, SceneField.DrawnThisFrame, plan.Eye, plan.CellSize);
+        Shaders.WriteBuffer<byte>(made.Glows, made.GlowBytes);
         var corners = MemoryMarshal.Cast<byte, Vector4>(bytes[NativeGiLights.Bytes..]);
         var origins = new Vector3?[cascades];
         var lying = new bool[cascades];
@@ -290,7 +297,7 @@ internal static unsafe class WorldProbes
         _origins = origins;
         Shaders.WriteBuffer<byte>(made.Lights, bytes);
 
-        var (field, info, albedo, faces) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces);
+        var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
         var parity = (uint)(_frame & 1);
         for (var c = 0; c < cascades; c++)
         {
@@ -298,7 +305,8 @@ internal static unsafe class WorldProbes
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 1u : 0u];
             ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, 0];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", info)
-                .SetTexture("albedo", albedo).SetTexture("faces", faces).SetBuffer("lights", made.Lights)
+                .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
+                .SetBuffer("glow_lights", made.Glows)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("distances", made.Distances[c])
                 .SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))
@@ -334,6 +342,7 @@ internal static unsafe class WorldProbes
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
         _light.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
+            .SetBuffer("glow_lights", made.Glows)
             .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0));
     }
 }

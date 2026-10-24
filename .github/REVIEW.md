@@ -10,25 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `07863068`, item 51's second commit, the pass, and nothing else, carrying the
-denoiser's picture, the twelve readings, DEVLOG.md, the review's files and a Shared line:
-gi_light.slang after the opaque geometry taking back Bevy's ambient diffuse from the G-buffer and
-adding the diffuse times the probes' light times the occlusion, with the sky over a ground past the
-last cascade, Render.SetGlobalIllumination public with the feature test's row; the departure the
-probes' sky at the ambient light times 0.45, the share Bevy's ambient term returns; the white
-block's side 237, 136, 132 with the pass and 75 gray without, the open floor 92 both ways, eight GI
-tests; the probes 0.9 ms at Low to 1.4 at High in a Cornell box at 1280 by 720 on the 4070, the pass
-0.23 ms least and 1.1 median, timed in a scene of its own since the feature test spends Bevy's 256
-timestamps. The suite 1,739 passed. Read at 09:24 on 2026-10-24 and pushed at once, the run of
-`0f0be8f0` having ended green; its own run green on the three systems at 09:42. Next the reference,
-gi.reference and gi.compare over a geometry pool and a ray scene of the drawn meshes with the bounce
-rooms, in a commit of its own, then item 51's third, the glossy term and the emitters.
+Reviewed up to `8cb6cbaa`, item 51's reference in a commit of its own, and nothing else, carrying
+the review's files and a Shared line: gi_reference.slang tracing a ray scene of the drawn meshes
+from a geometry pool with instance and material buffers as an engine dispatch on the camera,
+gi.reference writing the picture, the PFM and the regions and gi.compare the difference before
+tonemapping; departures, a texture counting as its base color, vertex colors left out, the sky the
+ambient light, a point light's shadow starting a tenth from the light as Bevy's maps do, the sun's
+shadow flag in the color's fourth value at the same ABI; the bounce rooms' 27 cases with bounds of
+the reading plus 15 percent, 0.02 to 1.00 by view, the strip's and the glowing blocks' views waiting
+on the emitters, the references 80 by 45 PFMs under the tests traced again with
+BCS_WRITE_REFERENCES, the Cornell box's floor at High 2.5 percent under its reference against a
+bound of 3; the suite 1,767 passed. A fault found and left as item 60: Bevy's deferred G-buffer
+drops the emissive alpha, so a camera made deferred shows an exposed emissive unexposed, the lamp
+panel 40,053 against a reference of 49, since item 50's deferred switch. Read at 10:22 on 2026-10-24
+and pushed at once, the run of `07863068` having ended green; its own run green on the three systems
+at 10:40. Next item 51's third commit, the glossy term as 3DEngine's present one and the emitters,
+then 61, the colons out of the documents, then item 60.
+
+Before it, `07863068` came, item 51's pass, pushed at 09:24 on 2026-10-24, its run green on the
+three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
-
-Before it, `750c9cbc` came, item 59, pushed at 07:18 on 2026-10-24, its run green on the three
-systems.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -249,7 +252,10 @@ from [SHARED.md](SHARED.md).
     item starts at 07:2x with its first commit, the probes and their tracing. The first commit at
     `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the head. The pass at `07863068`,
     pushed at 09:24, the sky's share departure in the head; the reference in a commit of its own
-    next.
+    next. The reference at `8cb6cbaa`, pushed at 10:22; the third commit takes 3DEngine's present
+    glossy term, the reflection traced through the depth and the field under a roughness of 0.5 and
+    the sky's specular scaled by the share of sky the probes see along the mirror direction, with
+    the emitters.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -261,6 +267,26 @@ from [SHARED.md](SHARED.md).
     edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
+
+60. **The deferred G-buffer keeps the emissive's exposure.** Found by item 51's reference on
+    2026-10-24: Bevy's deferred G-buffer drops the emissive color's alpha, which carries whether the
+    emissive is exposed, so on a camera that the field's shadows or the global illumination make
+    deferred an exposed emissive is shown unexposed, the feature test's lamp panel reading 40,053
+    against a reference of 49, since item 50's deferred switch. The mend: the exposure carried
+    through the deferred path, in the G-buffer's spare bits or a flag the lighting pass reads, so a
+    deferred camera shows the emissive as the forward one does; a test reading the lamp panel on a
+    deferred camera within the bound of its reference, failing without the mend. One commit, after
+    item 51.
+
+61. **No running sentence holds a colon, across the documents, the comments and the scripts.** The
+    owner wrote at about 10:34 on 2026-10-24 that some documents join sentences with a colon and
+    that STYLE.md forbids it. STYLE.md's own check lists the hits, the awk over the Markdown files
+    outside their code and the grep over the comments and scripts, and each is read and recast as
+    STYLE.md says, a sentence of its own or the same sentence recast, a label at a line's end or in
+    a table left as it is, over the guides under docs, RENDERING.md, BUILDING.md, AGENTS.md's line,
+    CHEATSHEET.md's comment lines, ASKS.md and the comments of the code and the scripts; the
+    review's files are the reviewing session's own and are not touched. One commit, docs and
+    comments only, after item 51's third commit and before item 60.
 
 ## Verdicts
 
@@ -1414,3 +1440,21 @@ until the emitters come, and the Cornell box's floor 2.5% under its reference at
 deferred lighting shows a material's emissive light unexposed, its alpha lost in the G-buffer, so
 the feature test's lamp panel reads 40,053 where its reference reads 49 on a camera the field's
 shadows or global illumination make deferred, which is this engine's alone.
+
+Shared: global illumination's emitters, in the commit carrying this line, the first part of item
+51's third. 3DEngine's emission painted into the field beside the colors, its lending for an emitter
+thinner than a cell and its glow lights (`GlowLights`, `bcs_glow.slang`), touching boxes joined, the
+carried cells marked so a probe's ray leaves them, the four brightest at each pixel of the pass and
+the two brightest at a probe's hit. The gather gives the emission in the picture's units as Bevy
+shows it, the exposure taken by the share the emissive alpha sets. The departures are that an
+emitter is its box whole with every face emitting, since the field's gather hands over no vertices,
+and that the pass marches to a light's middle, where 3DEngine's pixels with no screen probe near
+march to the halves of its faces, since the halves read alike in the bounce rooms and cost 2.0 to
+3.5 ms against 1.3 at 1280 by 720. The square's closed form clips a face an edge at a time with its
+loops unrolled, since with small arrays indexed as rolled loops ran it cost 2.7 ms of the pass
+alone, which 3DEngine may meet where its model pass reads glow lights. In the bounce rooms the
+strip's view reads 0.18 to 0.19 where it read 1.00 (3DEngine 0.22), the glowing blocks' 0.05 where
+0.30 (3DEngine 0.05 to 0.06), the Cornell box's 0.10 to 0.11 where 0.11, the rest unchanged. The
+Cornell box's floor reads 13.2% over its reference, 15.5% with the panel dark in both, so the
+probes' indirect light is over there, which the previous commit's 2.5% under hid behind the panel's
+missing light; its bound moves from 3% to 16%. The environment map's sky and the glossy term follow.

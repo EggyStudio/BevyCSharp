@@ -205,6 +205,23 @@ public float3 surfaceAlbedo(Texture3D<float4> albedo, SamplerState linear, Field
     return painted.a > 0.05 ? painted.rgb / painted.a : float3(0.5);
 }
 
+/// The light the field's surfaces emit at `p`, blended as their colors are, the glow's light over
+/// the share of the cells around `p` a surface painted, or none where no surface painted any. The
+/// glow holds a cell's nearest surface's emission, or the light an emitter thinner than a cell lends
+/// it where that is more, as field_resolve.slang writes it.
+public float3 surfaceGlow(Texture3D<float4> glow, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p)
+{
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0)
+        return float3(0.0);
+    float4 oc = info.cascades[c].origin_and_cell;
+    float size = info.counts.y;
+    float3 cell = clamp((p - oc.xyz) / oc.w, 0.5, size - 0.5);
+    float3 uvw = float3(cell.xy / size, (cell.z + float(c) * size) / (size * info.counts.x));
+    float coverage = albedo.SampleLevel(linear, uvw, 0.0).a;
+    return coverage > 0.05 ? glow.SampleLevel(linear, uvw, 0.0).rgb / coverage : float3(0.0);
+}
+
 /// A color of the field at `p` on a surface facing `n`, the eight cells around `p` blended by hand,
 /// each kept only where the face whose color it holds, as `faces` keeps its way (`faceWay`), looks
 /// the hit's way, within 60 degrees of `n`, or `surfaceAlbedo`'s blend where none of them does, as

@@ -185,6 +185,133 @@ public sealed class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// A probe in the middle of a closed room lit by nothing but an emissive panel under its ceiling
+    /// gathers the panel's light on its face toward it, the light the field holds beside each cell's
+    /// color, where a probe of the same room with the panel dark gathers none. A panel four times
+    /// white 1.35 units above gave the face 3.06 on the development machine's GPU.
+    /// </summary>
+    [SkippableFact]
+    public void AnEmissivePanelLightsTheProbesOfAClosedRoom()
+    {
+        Needs.Shaders();
+        var lit = InARoom(4f, new Vec3(0f, 2.85f, 0f), new Vec3(1.6f, 0.3f, 1.6f))[2];
+        var dark = InARoom(0f, new Vec3(0f, 2.85f, 0f), new Vec3(1.6f, 0.3f, 1.6f))[2];
+        Assert.True(lit.X > 1f, $"the face toward the panel gathers {lit}");
+        Assert.True(dark.X < 0.01f, $"with the panel dark the face toward it gathers {dark}");
+    }
+
+    /// <summary>
+    /// A strip on a closed room's wall thinner than a cell of the field, emissive and too long to be
+    /// carried as a glow light, lends its light to the cells beside it, so a probe facing the wall
+    /// gathers its light though no cell's nearest surface is the strip's, where with the strip dark it
+    /// gathers none.
+    /// </summary>
+    [SkippableFact]
+    public void AStripThinnerThanACellLendsItsLightToTheCellsBesideIt()
+    {
+        Needs.Shaders();
+        var lit = InARoom(30f, new Vec3(0f, 1.5f, -2.97f), new Vec3(5f, 0.06f, 0.06f))[5];
+        var dark = InARoom(0f, new Vec3(0f, 1.5f, -2.97f), new Vec3(5f, 0.06f, 0.06f))[5];
+        Assert.True(lit.X > 1f, $"the face toward the strip gathers {lit}");
+        Assert.True(dark.X < 0.005f, $"with the strip dark the face toward it gathers {dark}");
+    }
+
+    /// <summary>
+    /// Four glowing blocks a unit wide stacked two by two, square to the axes and touching, are one
+    /// glow light two units wide, its share of its box's surface what the four leave uncovered, a
+    /// block too long to be carried is no light, and a dark block none.
+    /// </summary>
+    [Fact]
+    public void TouchingGlowingBlocksAreOneGlowLight()
+    {
+        var unit = new SceneFieldPlan.Box(new Vector3(-0.5f), new Vector3(0.5f));
+        var glow = new Vector3(4f, 3f, 2f);
+        SceneFieldPlan.Instance Block(float x, float y, Vector3 emission, float length = 1f) =>
+            new(0, 0, Matrix4x4.CreateScale(length, 1f, 1f) * Matrix4x4.CreateTranslation(x, y, 0f), false, unit, Vector3.One, emission);
+
+        var lights = GlowLights.Gather(
+        [
+            (Block(0f, 0f, glow), false), (Block(1f, 0f, glow), false), (Block(0f, 1f, glow), false), (Block(1f, 1f, glow), false),
+            (Block(10f, 0f, glow, length: 5f), false), (Block(20f, 0f, Vector3.Zero), false),
+        ], firstCell: 0.25f);
+
+        var light = Assert.Single(lights);
+        Assert.Equal(new Vector3(0.5f, 0.5f, 0f), light.Middle);
+        Assert.Equal(new Vector3(1f, 1f, 0.5f), new Vector3(light.X.X, light.Y.Y, light.Z.Z));
+        Assert.Equal(glow, light.Glow);
+        // Each block's six faces, less the eight faces pressed together, over the box's own.
+        Assert.Equal((4 * 6 - 8) / 16f, light.Share, 4);
+    }
+
+    /// <summary>
+    /// A glowing block on a floor lit by nothing else lights the floor beside it on the camera's
+    /// picture with global illumination on, its light carried as a glow light to each pixel, where
+    /// with it off the floor is dark.
+    /// </summary>
+    [SkippableFact]
+    public void AGlowingBlockLightsTheFloorBesideIt()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(off.R < 5, $"with global illumination off the floor beside the block reads {off}");
+        Assert.True(on.R > off.R + 30, $"with global illumination on the floor beside the block reads {on}, off {off}");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                Floor(ecs, (0.8f, 0.8f, 0.8f));
+                var block = ecs.Spawn();
+                Render.SetMesh(ecs, block, Render.CreateMesh(MeshShape.Cuboid, 0.6f, 0.6f, 0.6f));
+                Render.SetMaterial(ecs, block, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (1f, 1f, 1f, 1f),
+                    Roughness = 1f,
+                    Emissive = (4f, 3f, 2f, 0f),
+                }));
+                ecs.Add(block, Transform.At(0f, 0.3f, 0f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 2,
+            eye: new Vec3(1.2f, 2.5f, 1.5f),
+            at: new Vec3(1.2f, 0f, 0f),
+            ambient: 0f,
+            traced: quality != GlobalIllumination.Off);
+    }
+
+    /// <summary>
+    /// The faces of the probe nearest the middle of a closed white room six units a side and three
+    /// high, lit by nothing but a block at <paramref name="at"/> of <paramref name="size"/> emitting
+    /// <paramref name="emission"/> times white.
+    /// </summary>
+    private static Vector4[] InARoom(float emission, Vec3 at, Vec3 size) => Probe(
+        ecs =>
+        {
+            const float T = 0.3f;
+            var white = (0.8f, 0.8f, 0.8f);
+            Block(ecs, white, new Vec3(0f, -T / 2f, 0f), new Vec3(6f + 2f * T, T, 6f + 2f * T));
+            Block(ecs, white, new Vec3(0f, 3f + T / 2f, 0f), new Vec3(6f + 2f * T, T, 6f + 2f * T));
+            Block(ecs, white, new Vec3(0f, 1.5f, -3f - T / 2f), new Vec3(6f + 2f * T, 3f, T));
+            Block(ecs, white, new Vec3(0f, 1.5f, 3f + T / 2f), new Vec3(6f + 2f * T, 3f, T));
+            Block(ecs, white, new Vec3(-3f - T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+            Block(ecs, white, new Vec3(3f + T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+            var glowing = ecs.Spawn();
+            Render.SetMesh(ecs, glowing, Render.CreateMesh(MeshShape.Cuboid, size.X, size.Y, size.Z));
+            Render.SetMaterial(ecs, glowing, Render.CreateMaterial(new MaterialSettings
+            {
+                BaseColor = (1f, 1f, 1f, 1f),
+                Roughness = 1f,
+                Emissive = (emission, emission, emission, 0f),
+            }));
+            ecs.Add(glowing, Transform.At(at.X, at.Y, at.Z));
+            Render.SetSceneField(2, 0.25f);
+            Render.SetGlobalIllumination(GlobalIllumination.Low);
+        },
+        stills: 7,
+        new Vector3(0f, 1.5f, 0f));
+
+    /// <summary>
     /// A white block's side toward a sunlit red wall, turned from the sun, takes the wall's red on the
     /// camera's picture with global illumination on, the light the probes hold added in place of
     /// Bevy's light from all around, and reads as gray as that light leaves it with it off.

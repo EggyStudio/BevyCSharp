@@ -18,6 +18,7 @@
 module bcs_gi;
 
 import bcs_field;
+import bcs_glow;
 
 public static const float Pi = 3.14159265358979;
 
@@ -113,7 +114,7 @@ public struct GiLights
     /// rgb: the light from all around where a ray reaches nothing.
     public float4 sky;
     /// x: how many lights. y: the frame's number. z: how strongly the indirect light of the frame
-    /// before is added. w: unused.
+    /// before is added. w: how many glow lights (`bcs_glow`) the frame carries.
     public float4 counts;
     public GiLight lights[16];
     /// xyz: the corner each cascade of probes lay at the frame before, where the faces the probes'
@@ -471,30 +472,38 @@ public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, Field
 /// where the field stands between, so a lamp's light is not reflected off the far side of a wall,
 /// and its color over pi times the indirect light reaching it from the probes it sees
 /// (`bouncedSeenAt`), at `kept`'s share of it, from the faces where `gathered` says the probes
-/// stood. `own` holds the light the surface sends on of what reaches it straight from the sun and
-/// the lights, which a probe weighs the frame before's light by. The sun and the lights are given as
+/// stood, with the light it emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`),
+/// and the light of the two brightest glow lights, the ray along `way`. `own` holds the light the
+/// surface sends on of what reaches it straight from the sun, the lights and the glow lights, with
+/// its emission, which a probe weighs the frame before's light by. The sun and the lights are given as
 /// the light a white surface facing one returns, and the probes hold the light reaching a face, so
 /// the indirect light is taken over pi.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
-    GiLights lights, Texture3D<float4> cubes, float3 p, float probes, float spacing, float cascades, float3 kept, out float3 own)
+    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, float3 p, float3 way, float probes, float spacing,
+    float cascades, float3 kept, out float3 own)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 color = surfaceAlbedoFacing(faces, albedo, linear, info, p, n);
     float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, p, n, probes, spacing, cascades);
-    own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n));
+    own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
+            + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi)
+        + surfaceGlowUncarried(glow, albedo, linear, info, p);
     return own + color / Pi * bounced * (lights.counts.z * kept);
 }
 
 /// The light a surface the field holds at `p` sends back along a ray that met it, its color over pi
 /// times the light reaching it, the sun's and the lights' times pi, the lamps that cast shadows
 /// hidden where the field stands between, and the indirect light that reached it the frame before,
-/// read between the probes around it (`bouncedAt`).
-public float3 shadeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> albedo, Texture3D<uint> faces, GiLights lights,
-    Texture3D<float4> cubes, Texture3D<float> reach, float3 p, float probes, float spacing, float cascades)
+/// read between the probes around it (`bouncedAt`), and the two brightest glow lights', with the
+/// light it emits.
+public float3 shadeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> albedo, Texture3D<uint> faces,
+    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float> reach, float3 p, float probes,
+    float spacing, float cascades)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 color = surfaceAlbedoFacing(faces, albedo, linear, info, p, n);
     float3 arrived = (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)) * Pi
-        + bouncedAt(cubes, reach, info, p, n, probes, spacing, cascades) * lights.counts.z;
-    return color / Pi * arrived;
+        + bouncedAt(cubes, reach, info, p, n, probes, spacing, cascades) * lights.counts.z
+        + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, float3(0.0));
+    return color / Pi * arrived + surfaceGlowUncarried(glow, albedo, linear, info, p);
 }

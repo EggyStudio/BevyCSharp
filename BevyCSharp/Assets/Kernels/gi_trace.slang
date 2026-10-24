@@ -30,13 +30,18 @@
 // barrier is reached by every invocation alike or by none.
 import bcs_field;
 import bcs_gi;
+import bcs_glow;
 
 Texture3D<float> field;
 SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 Texture3D<float4> albedo;
 Texture3D<uint> faces;
+// The light each cell's surfaces emit, as field_resolve.slang writes it beside the colors.
+Texture3D<float4> glow;
 StructuredBuffer<GiLights> lights;
+// The small emissive surfaces carried as lights of their own, as many as the lights' fourth count says.
+StructuredBuffer<GlowLight> glow_lights;
 
 // What each texel's rays brought back, rgb the light of those that met a surface or the sky over how
 // many it sends, and a what most of them met (texelMark). A texel a direction, each probe a tile of
@@ -232,8 +237,8 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         if (t >= 0.0)
         {
             float3 hit = origin + way * t;
-            light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, lit, bounced, hit,
-                float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
+            light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
+                bounced, hit, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
             // A ray that came on a face from behind it stops half a cell or more behind the face,
             // having stepped from a cell no face comes within the band of, which the field holds as
             // the open, straight into the cells behind it, where a ray from in front, slowing as it
