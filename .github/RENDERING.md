@@ -204,8 +204,41 @@ bridge gives a mesh and moves on when Bevy says its data changed, and its three 
 3DEngine's Slang, the splat, the resolve and the stamp, changed only where the bridge's bindings
 ask: named values for push constants, `Atomic<uint>` for WGSL's atomics, and the still field read
 as a texture. The bridge pools the meshes' triangles in one buffer, since a buffer is written
-whole, and `bcs_field.slang` holds the layout a shader reads the field through. The colors, faces
-and lent light 3DEngine paints into the field come with the cascades of probes, which read them.
+whole, and `bcs_field.slang` holds the layout a shader reads the field through. A second splat over
+the same triangles paints each cell the color of the triangle whose code it kept, the material's
+base color times the vertices' colors at its nearest point, and the resolve writes that color and
+the way the face looks into images laid out as the field, with the still meshes' own beside them
+for the stamp, which paints a box's cells its color and its face. The light emitters thinner than a
+cell lend the cells comes with the emitters. After the counted cascades the program may ask for a
+far cascade (`farCascade`), its cells as wide as reaching that distance ahead of the camera takes,
+held to the camera's far plane, which the bridge's gather reads from its projection.
+
+The cascades of probes are the second (`WorldProbes`, `bcs_gi.slang` and the kernels
+`gi_trace.slang`, `gi_merge.slang` and `gi_ambient.slang`), 3DEngine's world probes with their mends
+to date: probes moved off a surface and passed over inside a mesh, rays from the middle of each
+quarter of a texel of 8 a side, the merge's parallax toward where the probe above met a surface, the
+light past the first bounce read from the probes a hit sees where the probes lay the frame before,
+and each probe's share of that light following its own light where that fell or rose by much. A
+cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the far
+cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun,
+the camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,
+each given as the light a white surface facing it returns, a directional light's illuminance over
+pi and a lamp's luminous power over four pi over pi again, times the camera's exposure, so the probes
+hold the light in the units of the picture they are added to and a bright sun stays inside a half
+float. A spot light falls off from its inner cone to its outer as Bevy's lighting has it. Three
+things differ from 3DEngine's code for the bindings: a probe's held light and the partial sums are
+storage buffers, since an image of half floats is not read and written in one WGSL dispatch; the
+images the kernels only write are Slang's `WTexture3D`, which Slang refuses to declare read-write
+in half floats; and the trace takes the sum of the 27 probes around one in every workgroup and keeps
+it where the probe's share asks for it, since a barrier is reached by every invocation alike. On
+the RTX 4070 Laptop GPU in the feature test's Cornell box, a cascade's trace takes 0.33 to 0.36 ms,
+its merge 0.04 to 0.10 and its gather 0.03, each the mean of a frame's dispatches of the program as
+`render.timings` gives it, so `Low`'s two cascades take about 0.9 ms and `High`'s four about 1.8,
+the sixteen lamps' marches from each hit among it. The light from all around a ray of the last
+cascade brings back is the ambient light's color, where 3DEngine reads its environment map, and the
+glow lights and the emissive surfaces' light come with the emitters. The third part, the light
+given to Bevy's surfaces through the bridge's pass, follows, with `Render.SetGlobalIllumination`
+made public then.
 
 ## What Unity made them work around, and the hook that replaces each
 

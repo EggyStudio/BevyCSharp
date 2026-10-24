@@ -56,8 +56,9 @@ pub struct BcsFieldEye {
     pub found: u32,
     /// The way it faces, a length of one.
     pub forward: [f32; 3],
-    /// Nothing, so the camera starts on eight bytes.
-    pub _pad: u32,
+    /// How far its far plane lies, which the field's far cascade reaches no further than, or
+    /// infinity where its projection has none.
+    pub far: f32,
     /// The camera's entity, its bits, which the field's contact shadows are drawn on.
     pub camera: u64,
 }
@@ -264,6 +265,11 @@ mod built {
             eye.forward = forward.to_array();
             eye.found = 1;
             eye.camera = camera.to_bits();
+            eye.far = match world.get::<bevy::camera::Projection>(camera) {
+                Some(bevy::camera::Projection::Perspective(perspective)) => perspective.far,
+                Some(bevy::camera::Projection::Orthographic(orthographic)) => orthographic.far,
+                _ => f32::INFINITY,
+            };
         }
 
         world.init_resource::<FieldMeshes>();
@@ -559,6 +565,7 @@ mod tests {
         assert_eq!(std::mem::size_of::<BcsFieldDraw>(), 128);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, found), 12);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, forward), 16);
+        assert_eq!(std::mem::offset_of!(BcsFieldEye, far), 28);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, camera), 32);
         assert_eq!(std::mem::size_of::<BcsFieldEye>(), 40);
     }

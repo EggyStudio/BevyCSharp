@@ -10,25 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c770351f`, item 54's readings, and nothing else, carrying the review's files and a
-Shared line: build/denoiser-readings.py reads each feature test view's filtered and grainy frames
-against the mean of 256 grainy ones, every view nearer with the denoiser, 0.9 to 4.9 levels against
-5.8 to 14.3, the strafe past the Cornell box's block leaving no trail, 13 against 31 over the pixels
-the block left; departures, a fault the readings found and mended, the light divided by the diffuse
-color plus the specular reflectance at the angle seen rather than the base color alone, since the
-dark checkered ground at a slant ran high and spread along its edges, the node's cost 3.6 ms at
-1080p in the Solari scene and 5.7 with every pixel filtered, about Solari's lighting, held within 7
-ms by a test and taken as item 59, and feature.denoiser and glide added to the feature test since
-the fly camera moves with the right button alone; the suite 1,731 passed, the Cargo tests, the three
-profiles and the cross checks clean. Read at 03:47 on 2026-10-24 and pushed at once, the run of
-`16614918` having ended green; its run green on the three systems at 04:10. Next item 59 by its
-stages; items 51 and 52 wait on 3DEngine's 71, 72 and 74.
+Reviewed up to `750c9cbc`, item 59, the denoiser's node from 3.6 to 1.9 ms at 1080p, and nothing
+else, carrying the devlog, AGENTS.md's row for it on the owner's word, Decision 59, the review's
+files and a Shared line: the stages timed one by one as spans under the node's, each costing what
+moving the picture through memory costs; an eight-byte guide of distance and packed normal every tap
+reads in place of the depth and the sixteen-byte G-buffer texel, half-float light, moments and
+history, the variance folded into the temporal stage that holds the moments rather than the first
+à-trous pass, the remodulation into the last, seven dispatches where nine; departures, the moments
+kept as a mean and a variance about it since plain half-float moments left the vegetation view at
+4.13 against 2.45, group-shared taps and a power of two for the weight tried and dropped as slower
+or no gain, and a tile skip where a workgroup's variance is under one percent of its light giving
+little; item 54's seven views and the strafe within a level of before, the budget test at 3.2 ms on
+the least of 600 frames; a further cut, fewer fetches a pixel, left for an item if the owner asks.
+The suite 1,731 passed, the Cargo tests, the three profiles and the cross checks clean. Read at
+07:18 on 2026-10-24 and pushed at once, no run of main in flight; its run green on the three systems
+at 07:36. Next item 51, radiance cascades over the field, whose wait on 3DEngine's items 71, 72 and
+74 ends with those mended and on main today and the voxel game's pictures retaken, the reviewer's
+reading of the owner's condition of 2026-10-21, the owner's to overrule; item 52 after it. The
+branch `modeling-operations` was deleted at 07:22 with item 54 on main, N 7.5; the cloud session
+stands by.
+
+Before it, `c770351f` came, item 54's readings, pushed at 03:47 on 2026-10-24, its run green on the
+three systems.
 
 Before it, `16614918` and `97440a1d` came, item 54's two cherry-picks, pushed at 01:57 on
 2026-10-24, their run green in fifteen minutes.
-
-Before it, `a2c8348e` came, Verdict 44's mend, with `fda2f62e`, item 56, pushed at 23:31 on
-2026-10-23, its build run green, Verdict 44 settled.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -243,7 +249,10 @@ from [SHARED.md](SHARED.md).
     reference, then the glossy term and the emitters. Waits: the method is still moving in 3DEngine,
     its items 71, 72 and 74 open, and the owner said shortly before 07:28 on 2026-10-21 that if it
     is not yet ready BevyCSharp waits, so this item starts only once those are mended and the voxel
-    game's captures say the light holds, the port carrying the mends in.
+    game's captures say the light holds, the port carrying the mends in. 3DEngine's items 71, 72 and
+    74 are mended and on its main on 2026-10-24 and the voxel game's pictures retaken that day, so
+    the wait ends by the reviewer's reading of the owner's condition, the owner's to overrule; the
+    item starts at 07:2x with its first commit, the probes and their tracing.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -255,18 +264,6 @@ from [SHARED.md](SHARED.md).
     edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
-
-59. **The denoiser's node comes down from 3.6 ms at 1080p, read stage by stage first.** Item 54's
-    readings put the node at 3.6 ms in Bevy's Solari scene and 5.7 with every pixel filtered on the
-    development machine's GPU, about what Solari's lighting takes, where an SVGF of five à-trous
-    passes is usually a third of that; so the stages are timed one by one through render.timings,
-    the demodulation, the reprojection, the variance, each à-trous pass and the remodulation, and
-    the costly ones mended by the usual means where the readings keep: the variance estimate folded
-    into the first à-trous pass, the history and the moments in 16-bit storage, the taps read
-    through group-shared memory, and an à-trous pass skipped where a tile's variance lies under a
-    threshold; item 54's seven still means and the strafe read again, none further from its mean by
-    more than a level, the budget test tightened to the result with a margin, the guide's figures
-    changed. One or two commits, by stage. After item 54, while items 51 and 52 wait.
 
 ## Verdicts
 
@@ -767,6 +764,15 @@ mended at `42abf357`.
     headings in plain words, each group a guide link line and one fenced block, and in the block one
     line a member, the signature and then `//` and the first sentence of its documentation on the
     same line however long, no continuation lines and no sub-heading a type.
+
+59. **A devlog under `.github/devlog`, with AGENTS.md's row for it.** The owner asked at about 04:35
+    on 2026-10-24 that the pictures the sessions made be saved with a text in a folder under
+    .github; `.github/devlog/README.md` holds what landed by day, newest first, with the
+    repository's captures and the items closed, written by the reviewing session and carried by the
+    coder's commits like REVIEW.md, and the owner gave this repository's session the word for
+    AGENTS.md's row at about 04:50. At about 07:56 the owner asked that the devlog be `DEVLOG.md` at
+    the repository's root, with no `.github/devlog` folder, the engine's pictures being its
+    committed captures; `.github/devlog/README.md` goes and AGENTS.md's row names `DEVLOG.md`.
 
 ## Replies
 
@@ -1358,3 +1364,25 @@ three quarters of the rate the GPU's texture units fetch at, so a further cut is
 the guide and the light read as one or through buffers, rather than in fewer bytes. The budget test
 takes the least of 600 frames' own measurements, since a pass's time counts another program's work
 on the GPU and read 8 ms smoothed beside a game.
+
+Shared: the field's colors and far cascade and global illumination's world probes, in the commit
+carrying this line, item 51's first part, for 3DEngine's rows of the field and of global
+illumination. The splat paints each cell the color of the triangle whose code it kept and the
+resolve writes it and the face's way into images laid out as the field, with the still meshes' own
+for the stamp; `SetSceneField`'s `farCascade` adds 3DEngine's far cascade, its cell from
+`FarCellFor`, held to the far plane the bridge reads from the camera's projection, `FieldInfo`
+taking nine cascades and the far one's place. The probes are 3DEngine's trace, merge and gather
+with their mends to date, the glow lights, the emissive surfaces' light and the environment map's
+sky left for the emitters' part; what differs lies in the bindings, a probe's held light and the
+partial sums storage buffers, since WGSL reads and writes an image of half floats in one dispatch only
+where the adapter allows it; the images written alone are Slang's `WTexture3D`; and the trace's sum
+of the 27 probes around one is taken by every workgroup and kept where the probe's share asks for
+it, so every barrier is reached in uniform control flow. The bridge gathers the lights in Bevy's
+units times the camera's exposure, the sixteen lamps nearest the camera, a spot light's cone as
+Bevy's falloff from its inner to its outer, and the sky as the camera's ambient light or the
+world's. Read on the RTX 4070 Laptop GPU, a first-cascade probe toward a black wall 200 wide forty
+units ahead holds 1.12 of a sky of pi with the far cascade and 3.14 without, where 3DEngine's read
+1.14 and 3.14; a probe a meter before a sunlit red wall gathers 6.77, 1.17, 1.17 on its face toward
+it; in the feature test's Cornell box a cascade's trace takes 0.33 to 0.36 ms, its merge 0.04 to
+0.10 and its gather 0.03, the means of the program's dispatches, so `Low` about 0.9 ms and `High`
+about 1.8 with sixteen lamps marched from each hit.

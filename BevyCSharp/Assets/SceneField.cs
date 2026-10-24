@@ -14,10 +14,12 @@ namespace Bevy;
 /// Each frame, from the engine's tick in a run that draws, it reads the meshes drawn from the bridge,
 /// works out the frame's builds and boxes, has the bridge pool the triangles of the meshes those
 /// builds read, and asks for the dispatches, for each cascade built the splat over its meshes'
-/// triangles and the resolve over its cells, then the stamp over the bricks the boxes come within.
-/// The cascades lie one after another along z in one image of half floats, the field the shaders
-/// read, beside one the still meshes alone make, which a brick goes back to once a box has left it,
-/// and a buffer holds where each cascade lies.
+/// triangles, the paint over them and the resolve over its cells, then the stamp over the bricks
+/// the boxes come within. The cascades lie one after another along z in one image of half floats,
+/// the field the shaders read, beside one the still meshes alone make, which a brick goes back to
+/// once a box has left it, with the color each cell's nearest surface paints it and the way that
+/// surface's face looks laid out the same way, the still meshes' own beside them, and a buffer holds
+/// where each cascade lies.
 /// </para>
 /// <para>
 /// The meshes are those of last frame's transforms, since the engine's tick runs before the
@@ -39,7 +41,7 @@ internal static unsafe partial class SceneField
 
     // What the program asked for, and the app it asked in, so a new app starts with none.
     private static App? _askedIn, _shadowsAskedIn;
-    private static (int Cascades, float CellSize, int Budget) _asked;
+    private static (int Cascades, float CellSize, int Budget, float FarCascade) _asked;
     private static FieldShadows _shadowsAsked;
 
     // What the running app's field is made of, made again for a new app or new settings.
@@ -61,19 +63,19 @@ internal static unsafe partial class SceneField
     private static uint[] _words = [];
 
     /// <summary>The field's images and buffers and its plan, for the settings they were made for.</summary>
-    private sealed class Built((int Cascades, float CellSize, int Budget) made, SceneFieldPlan plan)
+    private sealed class Built((int Cascades, float CellSize, int Budget, float FarCell) made, SceneFieldPlan plan)
     {
-        public readonly (int Cascades, float CellSize, int Budget) Made = made;
+        public readonly (int Cascades, float CellSize, int Budget, float FarCell) Made = made;
         public readonly SceneFieldPlan Plan = plan;
-        public AssetHandle Field, Still, Info, Cells, Behind, Instances, Shapes, Bricks, Pool = AssetHandle.None;
+        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Info, Cells, Behind, Paint, Instances, Shapes, Bricks, Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
     }
 
     /// <summary>Takes the program's settings for the running app.</summary>
-    internal static void Ask(int cascades, float cellSize, int budget)
+    internal static void Ask(int cascades, float cellSize, int budget, float farCascade)
     {
         _askedIn = App.Running;
-        _asked = (cascades, cellSize, budget);
+        _asked = (cascades, cellSize, budget, farCascade);
     }
 
     /// <summary>Takes where the program asks the field to darken a directional light, for the running app.</summary>
@@ -88,8 +90,16 @@ internal static unsafe partial class SceneField
         App.Running is { } running && ReferenceEquals(_shadowsAskedIn, running) ? _shadowsAsked : FieldShadows.PastShadowMap;
 
     /// <summary>The settings asked for in the running app, none where it asked for none.</summary>
-    internal static (int Cascades, float CellSize, int Budget) Asked =>
-        App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1);
+    internal static (int Cascades, float CellSize, int Budget, float FarCascade) Asked =>
+        App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1, 0f);
+
+    /// <summary>
+    /// The field the running app's settings build, those it asked for, or where it asked for none and
+    /// global illumination is on, four cascades of a quarter of a unit, which the probes are traced
+    /// through, as 3DEngine turns its field on.
+    /// </summary>
+    private static (int Cascades, float CellSize, int Budget, float FarCascade) Wanted =>
+        Asked.Cascades > 0 || WorldProbes.Asked == GlobalIllumination.Off ? Asked : (4, 0.25f, 1, 0f);
 
     /// <summary>The plan of the field being built, or null where none is.</summary>
     internal static SceneFieldPlan? Plan => ReferenceEquals(_app, App.Running) ? _built?.Plan : null;
@@ -99,6 +109,18 @@ internal static unsafe partial class SceneField
 
     /// <summary>The buffer holding one <c>FieldInfo</c>, where each cascade lies, or none where no field is built.</summary>
     internal static AssetHandle InfoBuffer => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Info : AssetHandle.None;
+
+    /// <summary>
+    /// The color each cell's nearest surface paints it, eight bits a channel laid out as the field,
+    /// alpha 1 where a surface painted the cell, or none where no field is built.
+    /// </summary>
+    internal static AssetHandle Albedo => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Albedo : AssetHandle.None;
+
+    /// <summary>
+    /// The way each cell's nearest face looks, eight bits as <c>bcs_field</c>'s <c>faceWay</c> reads
+    /// them laid out as the field, or none where no field is built.
+    /// </summary>
+    internal static AssetHandle Faces => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Faces : AssetHandle.None;
 
     /// <summary>The camera the contact shadows are drawn on, or none.</summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
@@ -116,13 +138,15 @@ internal static unsafe partial class SceneField
 
         var cascades = Enumerable.Range(0, plan.Cascades).Count(c => plan.BuiltOrigin(c) is not null);
         var reach = SceneFieldPlan.Resolution * plan.CellOf(plan.Cascades - 1);
+        var far = plan.HasFar ? FormattableString.Invariant($" with a far one of {plan.FarCell:0.###} m cells") : "";
         return FormattableString.Invariant(
-            $"Scene field {cascades} of {plan.Cascades} cascades built, cells {plan.CellSize:0.###} m, {reach:0.#} m across, meshes {built.Draws}, still {plan.StillCount}, boxes {plan.Shapes.Count}");
+            $"Scene field {cascades} of {plan.Cascades} cascades built{far}, cells {plan.CellSize:0.###} m, {reach:0.#} m across, meshes {built.Draws}, still {plan.StillCount}, boxes {plan.Shapes.Count}");
     }
 
     /// <summary>
-    /// The bytes of GPU memory the field holds, its two images of half floats, the words of a
-    /// cascade's cells and faces behind, and the pool of triangles.
+    /// The bytes of GPU memory the field holds, its two images of half floats, its two of colors and
+    /// two of faces, four bytes a cell each, the words of a cascade's cells, its faces behind and its
+    /// colors, and the pool of triangles.
     /// </summary>
     internal static long Bytes()
     {
@@ -130,7 +154,7 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(Native.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return 2 * cells * plan.Cascades * 2 + 2 * cells * 4 + pool;
+        return (2 * 2 + 4 * 4) * cells * plan.Cascades + 3 * cells * 4 + pool;
     }
 
     /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
@@ -145,14 +169,13 @@ internal static unsafe partial class SceneField
         }
 
         var ecs = world.Resource<EcsWorld>();
-        var asked = Asked;
+        var asked = Wanted;
         if (asked.Cascades <= 0)
         {
             Release(ecs);
             return;
         }
 
-        var wanted = (Math.Clamp(asked.Cascades, 1, 8), Math.Max(1e-3f, asked.CellSize), Math.Max(1, asked.Budget));
         if (!_splat.IsValid)
         {
             _splat = Program("field_splat.slang");
@@ -167,6 +190,14 @@ internal static unsafe partial class SceneField
             || _stamp.Program.State != ShaderProgramState.Ready)
             return;
 
+        // The far cascade's cells from its reach, held to the camera's far plane, and kept as they were
+        // in a frame with no camera to read the plane from.
+        var eye = Gather(_built?.Plan.DrewTwice ?? false);
+        var (counted, cell) = (Math.Clamp(asked.Cascades, 1, 8), Math.Max(1e-3f, asked.CellSize));
+        var farCell = asked.FarCascade <= 0 ? 0
+            : eye is { } at ? SceneFieldPlan.FarCellFor(MathF.Min(asked.FarCascade, at.Far), counted, cell)
+            : _built?.Made.FarCell ?? 0;
+        var wanted = (counted, cell, Math.Max(1, asked.Budget), farCell);
         if (_built is null || _built.Made != wanted)
         {
             Release(ecs);
@@ -174,7 +205,6 @@ internal static unsafe partial class SceneField
         }
 
         var built = _built;
-        var eye = Gather(built.Plan.DrewTwice);
         built.Draws = Drawn.Count;
         built.BuiltThisFrame = 0;
         if (eye is not { } seen) return;
@@ -233,9 +263,15 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>An instance of one of the field's compute programs, compiled from the library's own copy.</summary>
+    private static ShaderInstance Program(string file) => Shaders.CreateInstance(KernelProgram(file));
+
+    /// <summary>
+    /// One of the library's compute programs, compiled from its own copy of the kernel, which the field
+    /// and global illumination's probes are built and traced with.
+    /// </summary>
     // Named by its file, so its GPU time reads as shader field_splat and the like.
-    private static ShaderInstance Program(string file) =>
-        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) } }));
+    internal static ShaderProgram KernelProgram(string file) =>
+        Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) } });
 
     /// <summary>An instance of one of the field's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
     private static ShaderInstance Draw(string file)
@@ -257,16 +293,21 @@ internal static unsafe partial class SceneField
         return reader.ReadToEnd();
     }
 
-    /// <summary>Makes the field's images and buffers for its settings, every cell far and every word cleared.</summary>
-    private static Built Make((int Cascades, float CellSize, int Budget) made)
+    /// <summary>Makes the field's images and buffers for its settings, every cell far and unpainted and every word cleared.</summary>
+    private static Built Make((int Cascades, float CellSize, int Budget, float FarCell) made)
     {
         const int size = SceneFieldPlan.Resolution;
-        var built = new Built(made, new SceneFieldPlan(made.Cascades, made.CellSize, made.Budget));
+        var built = new Built(made, new SceneFieldPlan(made.Cascades, made.CellSize, made.Budget, made.FarCell));
+        var depth = (uint)(size * built.Plan.Cascades);
 
-        var far = new Half[size * size * size * made.Cascades];
+        var far = new Half[size * size * size * built.Plan.Cascades];
         Array.Fill(far, (Half)Far);
-        built.Field = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, (uint)(size * made.Cascades));
-        built.Still = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, (uint)(size * made.Cascades));
+        built.Field = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, depth);
+        built.Still = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, depth);
+        built.Albedo = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
+        built.StillPaint = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
+        built.Faces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
+        built.StillFaces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
 
         // A cell's word cleared to the band's distance in front, and its face behind to none, as the
         // resolve leaves them after each build.
@@ -275,16 +316,23 @@ internal static unsafe partial class SceneField
         built.Cells = Shaders.CreateBuffer<uint>(cleared);
         Array.Fill(cleared, uint.MaxValue);
         built.Behind = Shaders.CreateBuffer<uint>(cleared);
+        Array.Clear(cleared);
+        built.Paint = Shaders.CreateBuffer<uint>(cleared);
 
         built.Info = Shaders.CreateBuffer(InfoBytes);
         built.Instances = Shaders.CreateBuffer(InstanceBytes * 64);
         built.Shapes = Shaders.CreateBuffer(ShapeBytes * 16);
         built.Bricks = Shaders.CreateBuffer(16 * 64);
 
-        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("instances", built.Instances);
-        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetTexture("still_field", built.Still).SetTexture("field", built.Field);
+        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("instances", built.Instances);
+        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint)
+            .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
+            .SetTexture("albedo_field", built.Albedo).SetTexture("still_paint", built.StillPaint)
+            .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces);
         _stamp.SetBuffer("bricks", built.Bricks).SetBuffer("shapes", built.Shapes).SetBuffer("info", built.Info)
-            .SetTexture("still_field", built.Still).SetTexture("field", built.Field);
+            .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
+            .SetTexture("still_paint", built.StillPaint).SetTexture("still_faces", built.StillFaces)
+            .SetTexture("albedo_field", built.Albedo).SetTexture("face_field", built.Faces);
         return built;
     }
 
@@ -293,17 +341,18 @@ internal static unsafe partial class SceneField
     {
         if (_built is not { } built) return;
         DrawShadows(ecs, null, Entity.None);
-        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Info, built.Cells, built.Behind, built.Instances, built.Shapes, built.Bricks])
+        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Info,
+                     built.Cells, built.Behind, built.Paint, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
     }
 
     /// <summary>
     /// The meshes drawn this frame that cast shadows, into <see cref="Drawn"/>, each once where
-    /// <paramref name="once"/> asks, and the camera the field lies around, or null where there is
-    /// none.
+    /// <paramref name="once"/> asks, and the camera the field lies around with how far its far plane
+    /// lies, or null where there is none.
     /// </summary>
-    private static (Vector3 Position, Vector3 Forward, Entity Camera)? Gather(bool once)
+    private static (Vector3 Position, Vector3 Forward, Entity Camera, float Far)? Gather(bool once)
     {
         NativeFieldEye eye;
         int count;
@@ -335,11 +384,14 @@ internal static unsafe partial class SceneField
 
         if (eye.Found == 0) return null;
         var forward = new Vector3(eye.ForwardX, eye.ForwardY, eye.ForwardZ);
-        return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero, new Entity(eye.Camera));
+        return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero, new Entity(eye.Camera), eye.Far);
     }
 
-    /// <summary>The bytes of one <c>FieldInfo</c>, a float4, eight cascades' float4 and the eye's.</summary>
-    internal const int InfoBytes = (1 + 8 + 1) * 16;
+    /// <summary>The most cascades a <c>FieldInfo</c> holds, eight counted and the far one.</summary>
+    internal const int MostCascades = 9;
+
+    /// <summary>The bytes of one <c>FieldInfo</c>, a float4, nine cascades' float4 and the eye's.</summary>
+    internal const int InfoBytes = (1 + MostCascades + 1) * 16;
 
     // Bytes of an instance as field_splat.slang reads it, a shape as field_stamp.slang reads it.
     private const int InstanceBytes = 96, ShapeBytes = 96;
@@ -348,11 +400,13 @@ internal static unsafe partial class SceneField
     internal static float[] InfoValues(SceneFieldPlan plan)
     {
         var values = new float[InfoBytes / 4];
-        (values[0], values[1], values[2]) = (plan.Cascades, SceneFieldPlan.Resolution, SceneFieldPlan.Band);
+        // w: the far cascade's place, the last, or 0 where there is none.
+        (values[0], values[1], values[2], values[3]) = (plan.Cascades, SceneFieldPlan.Resolution, SceneFieldPlan.Band, plan.HasFar ? plan.Cascades - 1 : 0);
         for (var c = 0; c < plan.Cascades; c++)
             if (plan.BuiltOrigin(c) is { } origin)
                 (values[4 + c * 4], values[5 + c * 4], values[6 + c * 4], values[7 + c * 4]) = (origin.X, origin.Y, origin.Z, plan.CellOf(c));
-        (values[36], values[37], values[38]) = (plan.Eye.X, plan.Eye.Y, plan.Eye.Z);
+        const int eyeAt = 4 + MostCascades * 4;
+        (values[eyeAt], values[eyeAt + 1], values[eyeAt + 2]) = (plan.Eye.X, plan.Eye.Y, plan.Eye.Z);
         return values;
     }
 
@@ -422,6 +476,12 @@ internal static unsafe partial class SceneField
                 ReadOnlySpan<uint> counts = [size, (uint)count, (uint)triangles, SceneFieldPlan.Band];
                 ReadOnlySpan<uint> groups = [across, (uint)first, 0, 0];
                 _splat.Set("origin_and_cell", new Vector4(build.Origin, build.Cell)).SetNumbers("counts", 4, counts).SetNumbers("groups", 4, groups);
+                Shaders.Dispatch(_splat, across, down);
+
+                // Again over the same triangles once every cell holds its nearest, each cell painted
+                // the color of the triangle whose code it kept.
+                ReadOnlySpan<uint> painting = [across, (uint)first, 1, 0];
+                _splat.SetNumbers("groups", 4, painting);
                 Shaders.Dispatch(_splat, across, down);
             }
 

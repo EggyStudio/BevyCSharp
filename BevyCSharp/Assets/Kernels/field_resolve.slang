@@ -1,12 +1,13 @@
 // Turns the codes field_splat.slang left in one cascade's cells into distances in world units,
 // below zero behind a face and within half a cell of a double-sided one or a wall thinner than a
 // cell, and writes them into the cascade's place in the field the meshes alone make and in the field
-// the shaders read, a thread a cell, clearing each cell's words behind it for the next build.
+// the shaders read, with the color it painted and the way the cell's nearest face looks, a thread a
+// cell, clearing each cell's words behind it for the next build.
 //
-// Taken from 3DEngine's field_resolve.slang, its distances alone, the colors, the faces and the
-// lent light coming with global illumination. 3DEngine clears the words before each build with a
-// fill of the buffer, which a dispatch here has no call for, so the resolve that reads a word clears
-// it, and the buffers start cleared.
+// Taken from 3DEngine's field_resolve.slang, the emission and the light emitters thinner than a cell
+// lend coming with the emitters. 3DEngine clears the words before each build with a fill of the
+// buffer, which a dispatch here has no call for, so the resolve that reads a word clears it, and the
+// buffers start cleared.
 
 // The words of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
 // lies behind, in 1024ths of a cell.
@@ -15,6 +16,19 @@ RWStructuredBuffer<uint> behind;
 
 [format("r16f")] RWTexture3D<float> still_field;
 [format("r16f")] RWTexture3D<float> field;
+
+// The color of each cell's nearest surface, as field_splat.slang painted it, and the images it goes
+// into, the passes' and the still meshes' own for field_stamp.slang to start its bricks from, alpha
+// 1 where a surface painted the cell and 0 where none did, so a read blending cells divides by it.
+RWStructuredBuffer<uint> albedo;
+[format("rgba8")] RWTexture3D<float4> albedo_field;
+[format("rgba8")] RWTexture3D<float4> still_paint;
+
+// The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, into the
+// image the passes read and the still meshes' own, so a ray's hit takes its color from cells its own
+// face painted (surfaceAlbedoFacing).
+[format("r32ui")] RWTexture3D<uint> face_field;
+[format("r32ui")] RWTexture3D<uint> still_faces;
 
 // x: the cascade. y: the cells along each side. z: the width of a cell. w: the band in cells.
 uniform float4 cascade;
@@ -58,8 +72,15 @@ void main(uint3 id : SV_DispatchThreadID)
     uint3 at = uint3(id.xy, id.z + uint(cascade.x) * size);
     still_field[at] = d;
     field[at] = d;
+    uint color = albedo[index];
+    float4 paint = float4(float(color & 255u), float((color >> 8) & 255u), float((color >> 16) & 255u), float(color >> 24)) / 255.0;
+    still_paint[at] = paint;
+    albedo_field[at] = paint;
+    still_faces[at] = code & 255u;
+    face_field[at] = code & 255u;
 
-    // Cleared for the next build, the band's distance in front and no face behind.
+    // Cleared for the next build, the band's distance in front, no face behind and no color.
     cells[index] = (uint(cascade.w) * 1024u << 10) | (1u << 8);
     behind[index] = 0xFFFFFFFFu;
+    albedo[index] = 0u;
 }

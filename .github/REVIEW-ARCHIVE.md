@@ -1331,6 +1331,19 @@ a batch.
     One commit, small, with the local coder's next batch. Done at `66e2b067` on 2026-10-23, pushed
     at 23:09 under `fda2f62e`, each type's methods under a comment naming it inside the block.
 
+59. **The denoiser's node comes down from 3.6 ms at 1080p, read stage by stage first.** Item 54's
+    readings put the node at 3.6 ms in Bevy's Solari scene and 5.7 with every pixel filtered on the
+    development machine's GPU, about what Solari's lighting takes, where an SVGF of five à-trous
+    passes is usually a third of that; so the stages are timed one by one through render.timings,
+    the demodulation, the reprojection, the variance, each à-trous pass and the remodulation, and
+    the costly ones mended by the usual means where the readings keep: the variance estimate folded
+    into the first à-trous pass, the history and the moments in 16-bit storage, the taps read
+    through group-shared memory, and an à-trous pass skipped where a tile's variance lies under a
+    threshold; item 54's seven still means and the strafe read again, none further from its mean by
+    more than a level, the budget test tightened to the result with a margin, the guide's figures
+    changed. One or two commits, by stage. After item 54, while items 51 and 52 wait. Done at
+    `750c9cbc` on 2026-10-24, 3.6 to 1.87 ms, the departures in the head.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

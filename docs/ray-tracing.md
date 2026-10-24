@@ -208,13 +208,19 @@ illumination's three parts:
 
 ```csharp
 Render.SetSceneField(4, cellSize: 0.25f, budget: 1);  // four cascades, a quarter meter the finest
+Render.SetSceneField(4, farCascade: 400f);            // and a far one reaching 400 meters ahead
 ```
 
 It lies in cascades of 64 cells a side around the camera the view is drawn by, each twice as coarse
 and as wide as the one before, so four cascades of a quarter meter reach 16 meters across in the
-finest and 128 in the fourth, each cascade 1 MB of the GPU's memory twice over. A distance is exact
-within four cells of a surface and held at four beyond. The cascades sit a third of their width
-ahead of the camera and move a few of their cells at a time as it moves.
+finest and 128 in the fourth. A distance is exact within four cells of a surface and held at four
+beyond. Each cell is painted the color of its nearest surface, its material's base color times its
+vertices' colors, with the way that surface faces, which global illumination reads a ray's hit by,
+so a cascade takes 5 MB of the GPU's memory. The cascades sit a third of their width ahead of the
+camera and move a few of their cells at a time as it moves. A far cascade after them, where asked,
+has cells as wide as reaching its distance ahead of the camera takes, at least twice the last
+counted cascade's, held to the camera's far plane, so a ray or a contact shadow that leaves the
+counted cascades meets what lies far off.
 
 A mesh drawn in the same place for eight frames is built into the cascades around it from its
 triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around

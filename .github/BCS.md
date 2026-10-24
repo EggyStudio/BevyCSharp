@@ -47,7 +47,7 @@ What is usually there:
 | `frames.wait <n>` | Answers after n more frames of the clock, so act, settle and look is one call |
 | `app.frametime [seconds\|off]`, `app.hold [loads\|commands\|off]` | Each frame a set length to the game, and that clock held still while a load runs or between commands |
 | `frame.profile [frames]` | What a frame spends on managed systems by name, calls into the bridge, Bevy's schedule and the render's phases |
-| `field.set <cascades> [cell] [budget]`, `gi.state` | Build the scene's distance field, or 0 to turn it off, and say how the scene is lit and where each of the field's cascades lies (docs/ray-tracing.md) |
+| `field.set <cascades> [cell] [budget] [far]`, `gi.set <off\|low\|medium\|high>`, `gi.state` | Build the scene's distance field with a far cascade reaching `far` ahead, or 0 to turn it off, trace global illumination's probes through it at a quality, and say how the scene is lit, what each cascade of probes traces and where each of the field's cascades lies (docs/ray-tracing.md) |
 | `shot <path>` | Capture the window (use `./bcs shot`, which waits for the file) |
 | `model.<operation> <name> <words>`, as `model.box room 8 3 6` or `model.cut room window 1 1 2 0.9` | Shape a model a line of its recipe at a time, each answering the model's counts; `model.new`, `free`, `list`, `info`, `recipe`, `undo`, `redo`, `save`, `load` and `show` besides (docs/modeling.md) |
 | `record <path> <length> [every <step>] [scale <s>] [play <time>]`, `record.stop`, `record.status` | Record the window as an animated GIF or PNG, for `5s`, `120f` or a count of pictures, one every `250ms`, `1s` or `15f` (use `./bcs record`, which waits for the file) |

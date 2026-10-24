@@ -4,8 +4,8 @@ public static partial class Render
 {
     /// <summary>
     /// Builds a distance field of the scene around the camera, in one to eight cascades, the
-    /// finest's cells a given width and a given number built a frame at most, or turns it off with
-    /// none, which it is by default.
+    /// finest's cells a given width and a given number built a frame at most, with a far cascade
+    /// after them where asked, or turns it off with none, which it is by default.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -14,11 +14,21 @@ public static partial class Render
     /// first of the three parts 3DEngine's global illumination is built from, and what a shader
     /// tracing a ray through the scene steps through. Each cascade is 64 cells a side, twice as
     /// coarse and as wide as the one before, so the default cells of a quarter of a unit reach 16
-    /// units across in the first and 128 in the fourth, and each cascade takes 1 MB of the GPU's
-    /// memory, twice over, beside the pool of the meshes' triangles. A distance is exact within four
-    /// cells of a surface and held at four beyond. A closed wall thinner than a cell is held half a
-    /// cell thick on either side of its middle, as a mesh drawn with both its faces is, so a ray
-    /// between the cells on either side of it still meets it.
+    /// units across in the first and 128 in the fourth. A distance is exact within four cells of a
+    /// surface and held at four beyond. A closed wall thinner than a cell is held half a cell thick
+    /// on either side of its middle, as a mesh drawn with both its faces is, so a ray between the
+    /// cells on either side of it still meets it. Each cell is painted the color of its nearest
+    /// surface, its material's base color times its vertices' colors, with the way that surface's
+    /// face looks, which global illumination reads a ray's hit by. A cascade takes 5 MB of the GPU's
+    /// memory, its distances, its colors and its faces with the still meshes' own beside them, apart
+    /// from the pool of the meshes' triangles.
+    /// </para>
+    /// <para>
+    /// With <paramref name="farCascade"/> above nought a far cascade follows the counted ones, its
+    /// cells as wide as reaching that distance ahead of the camera takes, at least twice the last
+    /// counted cascade's, held to the camera's far plane and built under the budget as the others
+    /// are, so a ray that leaves the counted cascades, as global illumination's last cascade of
+    /// probes, which stands in it, meets what lies far off before the sky.
     /// </para>
     /// <para>
     /// The cascades lie around the camera the view is drawn by, a third of their width ahead of it,
@@ -40,18 +50,20 @@ public static partial class Render
     /// <param name="cascades">How many cascades, 1 to 8, or 0 for none.</param>
     /// <param name="cellSize">The width of a cell of the finest cascade, in world units.</param>
     /// <param name="budget">How many cascades are built again in one frame at most.</param>
+    /// <param name="farCascade">How far ahead of the camera the far cascade reaches, in world units, or 0 for none.</param>
     /// <exception cref="InvalidOperationException">No app is running.</exception>
     /// <example>
     /// <code>
     /// Render.SetSceneField(4, cellSize: 0.25f, budget: 1);
+    /// Render.SetSceneField(4, farCascade: 400f);    // and a far cascade 400 units ahead
     /// </code>
     /// </example>
-    public static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1)
+    public static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0)
     {
         if (App.Running is null)
             throw new InvalidOperationException("The scene's distance field belongs to an app, and none is running.");
 
-        SceneField.Ask(Math.Clamp(cascades, 0, 8), Math.Max(1e-3f, cellSize), Math.Max(1, budget));
+        SceneField.Ask(Math.Clamp(cascades, 0, 8), Math.Max(1e-3f, cellSize), Math.Max(1, budget), float.IsFinite(farCascade) ? Math.Max(0, farCascade) : 0);
     }
 
     /// <summary>

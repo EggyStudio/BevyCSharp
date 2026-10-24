@@ -22,9 +22,11 @@ namespace Bevy;
 /// one before's, and lies around a point ahead of the eye, by <see cref="Lead"/> of its width the
 /// way the eye looks, so more of it holds what the camera sees, with its corner on a grid of
 /// <see cref="SnapCells"/> of its cells, so it moves only when that point has gone that far and the
-/// cells it keeps stay where they were. A cascade that moves, or that a still mesh came into or
-/// left, is built again, the finest first, as many a frame as the budget says, and until then keeps
-/// the place and the meshes it was built with, which the info the shaders read says.
+/// cells it keeps stay where they were. After them, where the program asks for one, the far cascade
+/// lies the same way, its cells as wide as reaching a distance ahead of the eye takes
+/// (<see cref="FarCellFor"/>). A cascade that moves, or that a still mesh came into or left, is
+/// built again, the finest first, as many a frame as the budget says, and until then keeps the place
+/// and the meshes it was built with, which the info the shaders read says.
 /// </para>
 /// <para>
 /// A mesh drawn the same, by its mesh, its matrix and its sides, for <see cref="SettleFrames"/>
@@ -175,12 +177,15 @@ internal sealed class SceneFieldPlan
     private int _rebuildFrames;
 
     /// <summary>A plan of <paramref name="cascades"/> cascades, the first's cells <paramref name="cellSize"/> wide, building <paramref name="budget"/> a frame at most.</summary>
-    /// <param name="cascades">How many cascades.</param>
+    /// <param name="cascades">How many cascades, each twice as coarse as the one before.</param>
     /// <param name="cellSize">The width of a cell of the finest.</param>
     /// <param name="budget">How many cascades are built a frame at most.</param>
-    public SceneFieldPlan(int cascades, float cellSize, int budget)
+    /// <param name="farCell">The width of a cell of the far cascade after the others, or 0 for none.</param>
+    public SceneFieldPlan(int cascades, float cellSize, int budget, float farCell = 0)
     {
-        Cascades = Math.Clamp(cascades, 1, 8);
+        Counted = Math.Clamp(cascades, 1, 8);
+        FarCell = farCell > 0 ? farCell : 0;
+        Cascades = Counted + (FarCell > 0 ? 1 : 0);
         CellSize = cellSize;
         Budget = Math.Max(1, budget);
         _built = new Vector3?[Cascades];
@@ -189,8 +194,17 @@ internal sealed class SceneFieldPlan
         _changed = new Box?[Cascades];
     }
 
-    /// <summary>How many cascades.</summary>
+    /// <summary>How many cascades, the far one among them where there is one.</summary>
     public int Cascades { get; }
+
+    /// <summary>How many cascades there are but the far one, each twice as coarse as the one before.</summary>
+    public int Counted { get; }
+
+    /// <summary>The width of a cell of the far cascade, the last, or 0 where there is none.</summary>
+    public float FarCell { get; }
+
+    /// <summary>Whether the last cascade is a far one, its cells <see cref="FarCell"/> wide.</summary>
+    public bool HasFar => FarCell > 0;
 
     /// <summary>The width of a cell of the finest cascade.</summary>
     public float CellSize { get; }
@@ -240,8 +254,34 @@ internal sealed class SceneFieldPlan
     /// <summary>Tells meshes apart as the plan does, by everything they are drawn with.</summary>
     internal static IEqualityComparer<Instance> Comparer => Keys.Shared;
 
+    /// <summary>
+    /// The cascade the probes of cascade <paramref name="probes"/> of <paramref name="cascades"/>
+    /// stand in, its own number but for the last, which stands in the far cascade where there is one,
+    /// as <c>bcs_field</c>'s <c>probesOf</c> has it.
+    /// </summary>
+    public int CascadeOfProbes(int probes, int cascades) => HasFar && probes == cascades - 1 ? Cascades - 1 : probes;
+
     /// <summary>The width of a cell of a cascade.</summary>
-    public float CellOf(int cascade) => CellSize * (1 << cascade);
+    public float CellOf(int cascade) => cascade >= Counted && HasFar ? FarCell : CellSize * (1 << cascade);
+
+    /// <summary>
+    /// The width of a cell of a far cascade reaching <paramref name="reach"/> ahead of the eye from
+    /// its middle's lead, so its side ahead lies there, and at least twice as wide as the last
+    /// counted cascade's of <paramref name="cascades"/> from <paramref name="cellSize"/>, or 0 for a
+    /// reach of none or past every finite distance.
+    /// </summary>
+    /// <remarks>
+    /// It is rounded up to a sixteenth of twice the last's cell, so a reach read from a camera's far
+    /// plane, which rounding moves a little from frame to frame, gives the same cell and the field is
+    /// not made again.
+    /// </remarks>
+    public static float FarCellFor(float reach, int cascades, float cellSize)
+    {
+        if (!(reach > 0) || !float.IsFinite(reach)) return 0;
+        var doubled = cellSize * (1 << Math.Clamp(cascades, 1, 8));
+        var step = doubled / 16;
+        return Math.Max(doubled, MathF.Ceiling(reach / ((0.5f + Lead) * Resolution) / step) * step);
+    }
 
     /// <summary>The eye the cascades lie around this frame, as <see cref="Update"/> was last given it.</summary>
     public Vector3 Eye { get; private set; }

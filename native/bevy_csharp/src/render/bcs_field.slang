@@ -1,7 +1,8 @@
 // The scene's distance field as a shader that reads it sees it, which any shader can reach with
 // `import bcs_field;`.
 //
-// Cascades of cells around the camera, each twice as coarse and as wide as the one before, hold how
+// Cascades of cells around the camera, each twice as coarse and as wide as the one before, and after
+// them the far cascade where the program asks for one, its cells as wide as its reach takes, hold how
 // far each cell's middle is from the nearest surface of the meshes that cast shadows, below zero
 // inside a mesh with an inside, exact within a few cells of a surface and held at that many beyond.
 // They lie one after another along z in one 3D image of half floats, so a shader binds the field
@@ -26,9 +27,10 @@ public struct FieldCascade
 public struct FieldInfo
 {
     /// x: how many cascades the image holds, zero where the field is off. y: the cells along each
-    /// side of a cascade. z: how many cells from a surface the distances are exact. w: unused.
+    /// side of a cascade. z: how many cells from a surface the distances are exact. w: the far
+    /// cascade's place, the last, or zero where there is none.
     public float4 counts;
-    public FieldCascade cascades[8];
+    public FieldCascade cascades[9];
     /// xyz: the eye the cascades lie around this frame, which their outer bands keep clear of
     /// (`bandHold`). w: unused.
     public float4 eye;
@@ -38,6 +40,23 @@ public struct FieldInfo
 public bool fieldOn(FieldInfo info)
 {
     return info.counts.x > 0.5;
+}
+
+/// The field's cascades the world's `probes` cascades of light probes stand in, the field's own in
+/// order but for the last, which stands in the far cascade where the field has one, so a cascade of
+/// probes lies where its cascade does and the probes holding a point are found as the field's
+/// cascades holding it are. The probes are read through it and the field's distances through the
+/// field's own info, since past the cascades of probes it holds neither the field's count nor its
+/// places in the image.
+public FieldInfo probesOf(FieldInfo info, int probes)
+{
+    FieldInfo probed = info;
+    int far = int(info.counts.w);
+    if (far > 0 && probes > 0)
+        probed.cascades[probes - 1] = info.cascades[far];
+    probed.counts.x = float(min(probes, int(info.counts.x)));
+    probed.counts.w = 0.0;
+    return probed;
 }
 
 /// The cells of the field's last cascade's outer band, across which a shader that reads the
@@ -167,4 +186,51 @@ public float3 faceWay(uint bits)
     if (n.z < 0.0)
         n.xy = (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
     return normalize(n);
+}
+
+/// A color of the field at `p`, the cells' colors blended and divided by how much of them a surface
+/// painted, so a cell no surface painted lends nothing, or gray where none around `p` is painted.
+/// The colors lie as the distances do, `albedo` an image of eight bits a channel whose alpha is one
+/// where a surface painted the cell.
+public float3 surfaceAlbedo(Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p)
+{
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0)
+        return float3(0.5);
+    float4 oc = info.cascades[c].origin_and_cell;
+    float size = info.counts.y;
+    float3 cell = clamp((p - oc.xyz) / oc.w, 0.5, size - 0.5);
+    float3 uvw = float3(cell.xy / size, (cell.z + float(c) * size) / (size * info.counts.x));
+    float4 painted = albedo.SampleLevel(linear, uvw, 0.0);
+    return painted.a > 0.05 ? painted.rgb / painted.a : float3(0.5);
+}
+
+/// A color of the field at `p` on a surface facing `n`, the eight cells around `p` blended by hand,
+/// each kept only where the face whose color it holds, as `faces` keeps its way (`faceWay`), looks
+/// the hit's way, within 60 degrees of `n`, or `surfaceAlbedo`'s blend where none of them does, as
+/// at a thin edge, so the hit is not left dark. A cell on a corner's diagonal lies as far from
+/// either wall and holds whichever painted it, so in 3DEngine a red wall's hit within a cell of the
+/// white wall it meets blended the white in and sent on twice the light a path-traced reference
+/// reads.
+public float3 surfaceAlbedoFacing(Texture3D<uint> faces, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p, float3 n)
+{
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0)
+        return float3(0.5);
+    float4 oc = info.cascades[c].origin_and_cell;
+    int size = int(info.counts.y);
+    float3 q = clamp((p - oc.xyz) / oc.w, 0.5, float(size) - 0.5) - 0.5;
+    int3 base = int3(floor(q));
+    float3 f = q - float3(base);
+    float4 sum = float4(0.0);
+    for (int corner = 0; corner < 8; corner++)
+    {
+        int3 offset = int3(corner & 1, (corner >> 1) & 1, corner >> 2);
+        int3 at = min(base + offset, int3(size - 1));
+        int3 texel = int3(at.xy, at.z + c * size);
+        float3 lerps = lerp(1.0 - f, f, float3(offset));
+        float facing = dot(faceWay(faces.Load(int4(texel, 0))), n) >= 0.5 ? 1.0 : 0.0;
+        sum += albedo.Load(int4(texel, 0)) * (lerps.x * lerps.y * lerps.z * facing);
+    }
+    return sum.a > 0.01 ? sum.rgb / sum.a : surfaceAlbedo(albedo, linear, info, p);
 }

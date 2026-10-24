@@ -64,6 +64,9 @@ internal struct NativeFieldEye
     /// <summary>The way it faces, Z.</summary>
     [FieldOffset(24)] public float ForwardZ;
 
+    /// <summary>How far its far plane lies, which the field's far cascade reaches no further than, or infinity for none.</summary>
+    [FieldOffset(28)] public float Far;
+
     /// <summary>The camera's entity, its bits, which the field's contact shadows are drawn on.</summary>
     [FieldOffset(32)] public ulong Camera;
 }

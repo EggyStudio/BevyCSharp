@@ -16,10 +16,13 @@
 // edge no other triangle shares, as a ground plane's rim, is in front, so an open mesh puts no wedge
 // below its rim inside. The nearest face a cell lies straight behind is kept apart, for a wall
 // thinner than a cell, which may have no cell's middle inside it. A cell no triangle comes within the
-// band of keeps the word it was cleared to, the band's distance in front.
+// band of keeps the word it was cleared to, the band's distance in front. A second dispatch over the
+// same triangles paints each cell the color of a triangle whose code is the one the cell kept, its
+// nearest surface, which global illumination is read from, its instance's color times its
+// vertices' colors blended at the cell's nearest point, as a material blends them across a face.
 //
-// Taken from 3DEngine's field_splat.slang, its distances alone, the dispatches that paint each cell
-// its surface's color and lend an emitter's light coming with global illumination. Its values are
+// Taken from 3DEngine's field_splat.slang, the dispatches that lend an emitter's light and paint
+// again the cells of a mesh whose colors were written coming with the emitters. Its values are
 // named globals where 3DEngine pushes constants, and the words are kept through Slang's Atomic<uint>,
 // which compiles to WGSL's atomics where InterlockedMin does not.
 
@@ -54,13 +57,18 @@ RWStructuredBuffer<Atomic<uint>> cells;
 // a wall thinner than a cell.
 RWStructuredBuffer<Atomic<uint>> behind;
 
+// The color a cell's nearest surface paints it, sRGB bytes with 255 above them, which the painting
+// dispatch writes and field_resolve.slang reads.
+RWStructuredBuffer<uint> albedo;
+
 // xyz: the cascade's corner. w: the width of a cell.
 uniform float4 origin_and_cell;
 // x: the cells along each side. y: how many instances the build has. z: how many triangles in all.
 // w: the band in cells.
 uniform uint4 counts;
 // x: how many workgroups the dispatch has along x, which the triangle's number is read across.
-// y: the build's first instance in the buffer.
+// y: the build's first instance in the buffer. z: 0 for the dispatch that finds the distances, 1 for
+// the one that paints.
 uniform uint4 groups;
 
 // The point of the triangle abc nearest p, as Ericson's Real-Time Collision Detection finds it by
@@ -114,6 +122,28 @@ uint way8(float3 n)
     float2 o = n.z >= 0.0 ? n.xy : (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
     uint2 q = min(uint2((o * 0.5 + 0.5) * 16.0), uint2(15u));
     return q.x | (q.y << 4);
+}
+
+// A corner's color, the three sRGB bytes the pool keeps in its fourth uint, in linear light by
+// sRGB's own transfer function.
+float3 cornerColor(uint packed)
+{
+    float3 c = float3(float(packed & 255u), float((packed >> 8) & 255u), float((packed >> 16) & 255u)) / 255.0;
+    return select(c <= 0.04045, c / 12.92, pow((max(c, 0.0) + 0.055) / 1.055, 2.4));
+}
+
+// How much of each of a triangle's corners a point on it is made of.
+float3 barycentric(float3 p, float3 a, float3 b, float3 c)
+{
+    float3 ab = b - a, ac = c - a, ap = p - a;
+    float d00 = dot(ab, ab), d01 = dot(ab, ac), d11 = dot(ac, ac), d20 = dot(ap, ab), d21 = dot(ap, ac);
+    float denominator = d00 * d11 - d01 * d01;
+    if (denominator <= 1e-20)
+        return float3(1.0, 0.0, 0.0);
+    float v = saturate((d11 * d20 - d01 * d21) / denominator);
+    float w = saturate((d00 * d21 - d01 * d20) / denominator);
+    float3 weights = float3(max(1.0 - v - w, 0.0), v, w);
+    return weights / max(weights.x + weights.y + weights.z, 1e-6);
 }
 
 groupshared uint triangleInstance;
@@ -186,10 +216,20 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
         uint front = sided && !open && dot(p - q, face) < -0.5 * d * faceLength ? 0u : 1u;
         uint code = (uint(d / cell * 1024.0) << 10) | (sided ? 0u : 512u) | (front << 8) | way;
         uint index = (at.z * size + at.y) * size + at.x;
-        cells[index].min(code);
-        // Straight behind, within 25 degrees, as a wall's far face lies behind a cell by its near
-        // one, where a cell beside a box's edge lies 45 degrees behind the face round it.
-        if (front == 0u && dot(p - q, face) < -0.9 * d * faceLength)
-            behind[index].min((uint(d / cell * 1024.0) << 8) | way);
+        if (groups.z == 0u)
+        {
+            cells[index].min(code);
+            // Straight behind, within 25 degrees, as a wall's far face lies behind a cell by its
+            // near one, where a cell beside a box's edge lies 45 degrees behind the face round it.
+            if (front == 0u && dot(p - q, face) < -0.9 * d * faceLength)
+                behind[index].min((uint(d / cell * 1024.0) << 8) | way);
+        }
+        else if (cells[index].load() == code)
+        {
+            float3 weights = barycentric(q, a, b, c);
+            float3 painted = instance.color.rgb * (weights.x * cornerColor(ca.w) + weights.y * cornerColor(cb.w) + weights.z * cornerColor(cc.w));
+            uint3 bytes = uint3(saturate(painted) * 255.0 + 0.5);
+            albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (255u << 24);
+        }
     }
 }

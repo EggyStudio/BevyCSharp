@@ -470,6 +470,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_scene_field_pool_bytes(long* bytes);
 
+    /// <summary>Writes the sun, the light from all around and the point and spot lights nearest the camera, which global illumination's probes are lit by.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_gi_lights(NativeGiLights* lights);
+
     /// <summary>Makes an image out of pixels the caller holds, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
