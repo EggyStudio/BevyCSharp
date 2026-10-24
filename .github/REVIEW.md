@@ -10,20 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `30362cf2`, item 63, the clean HUD, pushed at 21:06 on 2026-10-24 after the run of
-`f0ae14ec` went green; its own run green on the three systems at 21:23, carrying the review's files
-and SHARED.md. The loading orb was the feature test's AnimatedBadge, an eight-frame throbber sprite
-at the top left, which the coder had called the sun and corrected in the picture sent; its 2D
-overlay camera redrew the world's gizmos a unit a pixel about the window's middle, the stray marks;
-the badge and the camera are gone with Animation.cs, docs/2d.md and TODO.md pointing at the
-sprite_animation example, the bottom-left frame readout is gone, Bevy's FPS overlay stands green at
-the top left at size 18 with no graph and the F3 overlay folds it; Render2d.SpawnCamera2d's remarks
-give the trap and the remedy, a layer of its own, with a test reading more than 20 red pixels in the
-middle on the gizmos' layer and 0 on its own; the hub before and after saved with its caption. 1,814
+Reviewed up to `0ce0069d`, item 64's first part, the atmosphere's media, pushed at 21:56 on
+2026-10-24 after the run of `30362cf2` went green; its own run green on the three systems at 22:11,
+carrying the review's files and two pictures with captions. ScatteringTerm.Earth and EarthArc stand,
+ARC's numbers worked out again from ARPC's data, Rayleigh 6.605, 12.345 and 29.413 and ozone 2.291,
+1.540 and 0 at e-6, Bevy's falloffs kept so the two airs differ in the six amounts alone,
+TentCenter's doc corrected to Bevy's convention; the lookup textures read against the raymarch at
+30, 8, 2 and minus 2 degrees within 0.61 to 0.97 levels for Earth and 0.63 to 1.02 for ARC, and at
+minus 2 degrees Bruneton's sky 199, 181, 180 over a band of 224, 166, 127 against ARC's 178, 187,
+187 over 207, 177, 131, six tests holding these; the feature test takes ARC's air, the weather off
+by default with its cloud cover held at 0 when on, and under the atmosphere the day cycle gives the
+sun at 12,500 lux and white with no horizon fade where its curve had faded the sun to nothing and
+the sky went black at 18:00, its keyframes kept for the dusk backdrop; the guide's sky page has the
+two airs and the sun-above-the-air rule, CHEATSHEET and PublicApi updated. Departure, the sun disc
+needed no change, Bevy's default being the earth's disc, the blob having been item 63's badge. 1,820
 passed, 3 skipped.
 
-Before it, `f0ae14ec` came, item 52's second part, pushed at 20:24 on 2026-10-24, its run green on
-the three systems.
+Before it, `30362cf2` came, item 63, pushed at 21:05 on 2026-10-24, its run green on the three
+systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -241,7 +245,10 @@ from [SHARED.md](SHARED.md).
     grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
     from space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's
     grading keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
-    suggestion the owner heard.
+    suggestion the owner heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with their
+    readings; the second next, the distant geometry and the band below the horizon fading to the
+    sky's horizon color by view direction, read from the camera's sky-lit environment map in a pass
+    of the engine's own.
 
 69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
     leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
@@ -1627,3 +1634,12 @@ and 3 mended, as with the edge closed. The probes take 1.4 ms at `Low` and 1.6 a
 box at 1280 by 720 with one glow light, their blend 0.02 and the glow texels 0.12, the pass 0.54 at
 its median where 0.73 to 0.83 with them left out. The stepped edges need no mend, the pass marching
 to a light's middle.
+
+Shared: the sky below the horizon in the fog's color, in the commit carrying this line, item 64's
+second part, the row 3DEngine has at `bfaa056b`. The fog is the engine's own draw over the picture
+before tonemapping, a layer over the ground thinning by e every so high, its color along each way
+the sky's a few degrees above the horizon read nearly sharp from the camera's sky-lit environment
+map, and below the horizon that color darkening to a share of it over a span of degrees, where
+3DEngine blends the fog's color over a few degrees above the horizon and takes a horizon color a
+program asks for. The scene's light is the environment map's as before, lit by the atmosphere alone,
+and a camera drawing several samples a pixel draws no fog, its depth unread.

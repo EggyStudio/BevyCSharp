@@ -818,6 +818,8 @@ static string[]? MorphTargetNames(AssetHandle mesh);            // The names a m
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
+static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog over a camera's picture in the color the sky has at the horizon along each way, replacing any it had, so distant geometry fades into the sky behind it and the sky below the horizon takes the horizon's color
+static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is

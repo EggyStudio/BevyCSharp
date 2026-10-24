@@ -48,6 +48,9 @@ internal static unsafe partial class SceneField
     private static App? _app;
     private static Built? _built;
     private static ShaderInstance _splat, _resolve, _stamp, _shadows;
+
+    /// <summary>The name the field's draws and its prepass are kept under on a camera beside the engine's other parts.</summary>
+    private const string DrawsOwner = "field";
     // The camera the contact shadows are drawn on and what they were drawn with, so they are set on
     // a camera once and taken off it when they stop or the field turns to another.
     private static Entity _shadowCamera = Entity.None;
@@ -275,8 +278,8 @@ internal static unsafe partial class SceneField
 
         if (!_shadowCamera.IsNone && (!on || camera != _shadowCamera))
         {
-            Shaders.SetEngineViewDraws(_shadowCamera);
-            Shaders.SetEnginePrepass(_shadowCamera, 0);
+            Shaders.SetEngineViewDraws(_shadowCamera, DrawsOwner);
+            Shaders.SetEnginePrepass(_shadowCamera, DrawsOwner, 0);
             if (_shadowsMadeHdr && ecs.IsAlive(_shadowCamera)) ecs.RemoveReflected(_shadowCamera, Bevy.Reflected.HdrRef.TypePath);
             (_shadowCamera, _shadowsMadeHdr) = (Entity.None, false);
         }
@@ -292,7 +295,7 @@ internal static unsafe partial class SceneField
         }
 
         // Depth and the G-buffer, which the light taken back is worked out from.
-        Shaders.SetEnginePrepass(camera, 1u | 8u);
+        Shaders.SetEnginePrepass(camera, DrawsOwner, 1u | 8u);
         if (camera != _shadowCamera && ecs.Get<Bevy.Reflected.HdrRef>(camera) is null)
         {
             ecs.Insert<Bevy.Reflected.HdrRef>(camera);
@@ -302,7 +305,7 @@ internal static unsafe partial class SceneField
         var draws = new List<ViewDraw>(2);
         if (shadowsOn) draws.Add(ViewDraw.Fixed(_shadows, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
         if (light.IsValid) draws.Add(ViewDraw.Fixed(light, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
-        Shaders.SetEngineViewDraws(camera, [.. draws]);
+        Shaders.SetEngineViewDraws(camera, DrawsOwner, [.. draws]);
         _shadowCamera = camera;
     }
 

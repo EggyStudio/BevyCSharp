@@ -165,7 +165,9 @@ public struct SceneInfo
     public uint environment_mips;
     /// What the environment's cubes are multiplied by, in candelas per square meter.
     public float environment_intensity;
-    public uint unused;
+    /// Which of the prepass's textures are the camera's own rather than stand-ins, depth one,
+    /// normals two and motion four, which is how `passHasDepth` and the two beside it tell.
+    public uint own_inputs;
     /// The environment's rotation undone, as a quaternion, which turns a world direction into the
     /// one to sample the cubes by.
     public float4 environment_rotation;
@@ -532,6 +534,27 @@ public FullscreenOutput fullscreenTriangle(uint vertex)
 public bool passHasEnvironment()
 {
     return passSceneInfo.environment_mips > 0;
+}
+
+/// Whether the depth a shader reads is the camera's own. A camera asked for no depth, or drawing
+/// several samples a pixel (`PostSettings.Msaa` above one), is read zeros instead, which is the
+/// depth of nothing in front of it, so a shader that treats an empty pixel differently tells the
+/// two apart here.
+public bool passHasDepth()
+{
+    return (passSceneInfo.own_inputs & 1u) != 0u;
+}
+
+/// Whether the normals a shader reads are the camera's own rather than a stand-in.
+public bool passHasNormals()
+{
+    return (passSceneInfo.own_inputs & 2u) != 0u;
+}
+
+/// Whether the motion a shader reads is the camera's own rather than none at all.
+public bool passHasMotion()
+{
+    return (passSceneInfo.own_inputs & 4u) != 0u;
 }
 
 /// A world direction turned the way the environment's cubes are sampled, rotated as the

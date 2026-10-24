@@ -170,6 +170,11 @@ void main(uint3 id : SV_DispatchThreadID)
 }
 ```
 
+The depth, normals and motion a shader reads are the prepass's when the camera asked for them and
+draws once a pixel, and stand-ins otherwise. Depth stands in as zeros, the depth of a pixel with
+nothing in front of it, so a shader that treats an empty pixel as sky asks `passHasDepth()` first,
+and `passHasNormals()` and `passHasMotion()` tell the same of the other two.
+
 An image a camera owns is made at a fraction of its picture, made again when the picture changes
 size (starting over from zeros), and bound wherever a shader on that camera declares its name, as a
 texture to read or a storage image to write. One made with `History: true` is two images that trade

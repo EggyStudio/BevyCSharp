@@ -198,10 +198,14 @@ pub fn install(app: &mut App) {
                     .after(main_opaque_pass_3d)
                     .before(main_transparent_pass_3d)
                     .in_set(Core3dSystems::MainPass),
+                // Once everything is drawn and before any of Bevy's passes over the picture, where
+                // Bevy draws its own volumetric fog. Antialiasing, motion blur, depth of field,
+                // bloom and the effect stack each take the picture into a fresh texture, and one of
+                // them unordered against what draws here would carry the picture on without it.
                 run_view_dispatches::<2>
-                    .before(tonemapping)
-                    .before(super::passes::BeforeTonemappingPasses)
-                    .in_set(Core3dSystems::PostProcess),
+                    .after(Core3dSystems::MainPass)
+                    .before(Core3dSystems::EarlyPostProcess)
+                    .before(super::passes::BeforeTonemappingPasses),
                 run_view_dispatches::<3>
                     .after(tonemapping)
                     .before(super::passes::AfterTonemappingPasses)
@@ -215,9 +219,8 @@ pub fn install(app: &mut App) {
                     .in_set(Core3dSystems::MainPass),
                 copy_pictures::<2>
                     .before(run_view_dispatches::<2>)
-                    .before(tonemapping)
-                    .before(super::passes::BeforeTonemappingPasses)
-                    .in_set(Core3dSystems::PostProcess),
+                    .after(Core3dSystems::MainPass)
+                    .before(Core3dSystems::EarlyPostProcess),
                 copy_pictures::<3>
                     .before(run_view_dispatches::<3>)
                     .after(tonemapping)
@@ -237,9 +240,9 @@ pub fn install(app: &mut App) {
                     .in_set(Core3dSystems::MainPass),
                 run_view_draws::<2>
                     .after(run_view_dispatches::<2>)
-                    .before(tonemapping)
-                    .before(super::passes::BeforeTonemappingPasses)
-                    .in_set(Core3dSystems::PostProcess),
+                    .after(Core3dSystems::MainPass)
+                    .before(Core3dSystems::EarlyPostProcess)
+                    .before(super::passes::BeforeTonemappingPasses),
                 run_view_draws::<3>
                     .after(run_view_dispatches::<3>)
                     .after(tonemapping)
@@ -259,10 +262,11 @@ pub fn install(app: &mut App) {
                 run_view_dispatches::<1>
                     .after(Core2dSystems::MainPass)
                     .before(Core2dSystems::EarlyPostProcess),
+                // Before Bevy's bloom and effect stack, as in 3D.
                 run_view_dispatches::<2>
-                    .before(tonemapping)
-                    .before(super::passes::BeforeTonemappingPasses)
-                    .in_set(Core2dSystems::PostProcess),
+                    .after(Core2dSystems::EarlyPostProcess)
+                    .before(Core2dSystems::PostProcess)
+                    .before(super::passes::BeforeTonemappingPasses),
                 run_view_dispatches::<3>
                     .after(tonemapping)
                     .before(super::passes::AfterTonemappingPasses)

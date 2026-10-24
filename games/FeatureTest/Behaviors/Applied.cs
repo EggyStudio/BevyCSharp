@@ -165,6 +165,7 @@ public partial struct Applied
                 if (!_dusk.IsValid) _dusk = Dusk();
                 Render.ClearSkyLighting(camera);
                 Render.ClearAtmosphere(camera);
+                Render.ClearSkyFog(camera);
                 Render.SetSkybox(camera, _dusk, brightness: 600f);
             }
             else
@@ -173,6 +174,10 @@ public partial struct Applied
                 Render.SetSkybox(camera, DayNight.Stars(), brightness: 0f);
                 Render.SetAtmosphere(camera, Applied.Sky());
                 Render.SetSkyLighting(camera);
+
+                // The far ground and the zones' far walls faded into the sky behind them, and the
+                // sky below the horizon the horizon's color rather than the planet's even gray.
+                Render.SetSkyFog(camera, Fog);
             }
 
             _backdrop = backdrop;
@@ -185,6 +190,12 @@ public partial struct Applied
     /// orange under purple.
     /// </summary>
     internal static AtmosphereSettings Sky() => new() { Medium = ScatteringTerm.EarthArc() };
+
+    /// <summary>
+    /// The fog over the map, thick enough that the ground's far edge, a few hundred meters off, is
+    /// gone into the horizon, and thinning upward so the zones' tops stand clear.
+    /// </summary>
+    private static readonly SkyFogSettings Fog = new() { Visibility = 700f, Height = 40f };
 
     /// <summary>
     /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the

@@ -143,12 +143,15 @@ public static unsafe partial class Shaders
 
     // What the program asked of each camera's prepass, its draws and its dispatches, and what the
     // engine asks beside them, for the scene's distance field's contact shadows, global
-    // illumination's light and its reference, by the camera's bits. The bridge takes a camera's
-    // whole prepass and whole lists at once, so the engine's are kept apart and handed over with the
-    // program's, and neither one's call takes the other's away.
+    // illumination's light and its reference, the sky's fog and the rest, by the camera's bits, the
+    // engine's by the name of the part that asked. The bridge takes a camera's whole prepass and
+    // whole lists at once, so the engine's are kept apart and handed over with the program's, and
+    // neither one's call takes the other's away, nor one engine part's another's.
     private static App? _viewsApp;
-    private static readonly Dictionary<ulong, uint> ProgramPrepasses = [], EnginePrepasses = [];
-    private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [], EngineDraws = [];
+    private static readonly Dictionary<ulong, uint> ProgramPrepasses = [];
+    private static readonly Dictionary<ulong, SortedDictionary<string, uint>> EnginePrepasses = [];
+    private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [];
+    private static readonly Dictionary<ulong, SortedDictionary<string, ViewDraw[]>> EngineDraws = [];
     private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [];
     private static readonly Dictionary<ulong, SortedDictionary<string, ViewDispatch[]>> EngineDispatches = [];
     private static readonly Dictionary<ulong, ViewImage[]> ProgramImages = [];
@@ -174,19 +177,25 @@ public static unsafe partial class Shaders
     /// none taking the engine's away. Only valid inside a system.
     /// </summary>
     /// <param name="camera">The camera.</param>
+    /// <param name="owner">The engine's part that asks, whose flags these replace beside the other parts'.</param>
     /// <param name="flags">The bits <see cref="SetPrepass"/> makes of its parts, depth one, normals two, motion four and the G-buffer eight.</param>
-    internal static void SetEnginePrepass(Entity camera, uint flags)
+    internal static void SetEnginePrepass(Entity camera, string owner, uint flags)
     {
         ForgetOtherApps();
-        if (flags == 0) EnginePrepasses.Remove(camera.Bits);
-        else EnginePrepasses[camera.Bits] = flags;
+        if (!EnginePrepasses.TryGetValue(camera.Bits, out var owned)) EnginePrepasses[camera.Bits] = owned = new SortedDictionary<string, uint>(StringComparer.Ordinal);
+        if (flags == 0) owned.Remove(owner);
+        else owned[owner] = flags;
+        if (owned.Count == 0) EnginePrepasses.Remove(camera.Bits);
         SubmitPrepass(camera);
     }
 
-    private static void SubmitPrepass(Entity camera) =>
-        Native.Check(
-            Native.bcs_render_set_prepass(camera.Bits, ProgramPrepasses.GetValueOrDefault(camera.Bits) | EnginePrepasses.GetValueOrDefault(camera.Bits)),
-            "asking a camera for a prepass");
+    // Hands the bridge a camera's prepass, every part of it the program or an engine part asked for.
+    private static void SubmitPrepass(Entity camera)
+    {
+        var flags = ProgramPrepasses.GetValueOrDefault(camera.Bits);
+        foreach (var part in EnginePrepasses.GetValueOrDefault(camera.Bits)?.Values ?? Enumerable.Empty<uint>()) flags |= part;
+        Native.Check(Native.bcs_render_set_prepass(camera.Bits, flags), "asking a camera for a prepass");
+    }
 
     /// <summary>
     /// Gives a camera images that its passes and compute shaders keep from frame to frame,
@@ -648,21 +657,25 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// Replaces the draws the engine adds to a camera beside the program's own, which run first at
-    /// each frame point, none taking the program's away. Only valid inside a system.
+    /// Replaces the draws an engine part adds to a camera beside the program's own and the other
+    /// parts', which run first at each frame point, the parts in the order of their names, none
+    /// taking the program's away. Only valid inside a system.
     /// </summary>
-    internal static void SetEngineViewDraws(Entity camera, params ViewDraw[] draws)
+    internal static void SetEngineViewDraws(Entity camera, string owner, params ViewDraw[] draws)
     {
         ForgetOtherApps();
-        if (draws.Length == 0) EngineDraws.Remove(camera.Bits);
-        else EngineDraws[camera.Bits] = draws;
+        if (!EngineDraws.TryGetValue(camera.Bits, out var owned)) EngineDraws[camera.Bits] = owned = new SortedDictionary<string, ViewDraw[]>(StringComparer.Ordinal);
+        if (draws.Length == 0) owned.Remove(owner);
+        else owned[owner] = draws;
+        if (owned.Count == 0) EngineDraws.Remove(camera.Bits);
         SubmitDraws(camera);
     }
 
-    // Hands the bridge a camera's draws, the engine's and then the program's.
+    // Hands the bridge a camera's draws, the engine's, a part at a time by its name, and then the
+    // program's.
     private static void SubmitDraws(Entity camera)
     {
-        ViewDraw[] draws = [.. EngineDraws.GetValueOrDefault(camera.Bits) ?? [], .. ProgramDraws.GetValueOrDefault(camera.Bits) ?? []];
+        ViewDraw[] draws = [.. EngineDraws.GetValueOrDefault(camera.Bits)?.Values.SelectMany(d => d) ?? [], .. ProgramDraws.GetValueOrDefault(camera.Bits) ?? []];
         var native = new NativeViewDraw[draws.Length];
         var strings = new List<IntPtr>();
 

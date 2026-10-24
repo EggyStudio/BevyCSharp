@@ -617,16 +617,19 @@ pub(super) fn run_view_draws<const POINT: u8>(
             depth: sources.depth.clone(),
             normals: sources.normals.clone(),
             motion: sources.motion.clone(),
+            own: sources.own,
             previous: sources.previous,
             environment: sources.environment,
         };
 
         if writes_prepass & 1 != 0 {
             sources.normals = fallback.d2.texture_view.clone();
+            sources.own &= !2;
         }
 
         if writes_prepass & 2 != 0 {
             sources.motion = inputs.empty_motion.clone();
+            sources.own &= !4;
         }
 
         sources.bind(

@@ -431,12 +431,17 @@ pub struct ViewInputSources<'a> {
     pub depth: TextureView,
     pub normals: TextureView,
     pub motion: TextureView,
+    /// Which of the three are the camera's own rather than stand-ins, depth one, normals two and
+    /// motion four, which a shader reads to tell a camera with nothing in front of it from one
+    /// whose depth it cannot read.
+    pub own: u32,
     pub previous: Option<(&'a PreviousViewUniforms, u32)>,
     pub environment: Option<&'a ViewEnvironmentTextures>,
 }
 
-/// The size of what binding thirteen holds, counts of the scene's lights, and the environment's
-/// intensity, rotation and mip count, which `SceneInfo` mirrors.
+/// The size of what binding thirteen holds, counts of the scene's lights, the environment's
+/// intensity, rotation and mip count, and which prepass textures are the camera's own, which
+/// `SceneInfo` mirrors.
 const SCENE_INFO_BYTES: u64 = 32;
 
 impl<'a> ViewInputSources<'a> {
@@ -456,25 +461,25 @@ impl<'a> ViewInputSources<'a> {
         let depth = prepass
             .and_then(|prepass| prepass.depth.as_ref())
             .filter(|depth| single(&depth.texture.texture))
-            .map(|depth| depth.texture.default_view.clone())
-            .unwrap_or_else(|| inputs.empty_depth.clone());
+            .map(|depth| depth.texture.default_view.clone());
 
         let normals = prepass
             .and_then(|prepass| prepass.normal.as_ref())
             .filter(|normal| single(&normal.texture.texture))
-            .map(|normal| normal.texture.default_view.clone())
-            .unwrap_or_else(|| fallback.d2.texture_view.clone());
+            .map(|normal| normal.texture.default_view.clone());
 
         let motion = prepass
             .and_then(|prepass| prepass.motion_vectors.as_ref())
             .filter(|motion| single(&motion.texture.texture))
-            .map(|motion| motion.texture.default_view.clone())
-            .unwrap_or_else(|| inputs.empty_motion.clone());
+            .map(|motion| motion.texture.default_view.clone());
+
+        let own = u32::from(depth.is_some()) | u32::from(normals.is_some()) << 1 | u32::from(motion.is_some()) << 2;
 
         Self {
-            depth,
-            normals,
-            motion,
+            depth: depth.unwrap_or_else(|| inputs.empty_depth.clone()),
+            normals: normals.unwrap_or_else(|| fallback.d2.texture_view.clone()),
+            motion: motion.unwrap_or_else(|| inputs.empty_motion.clone()),
+            own,
             previous: previous.map(|(uniforms, offset)| (uniforms, offset.offset)),
             environment,
         }
@@ -535,6 +540,7 @@ impl<'a> ViewInputSources<'a> {
         info[0] = point_lights;
         info[1] = mips;
         info[2] = intensity.to_bits();
+        info[3] = self.own;
         info[4..8].copy_from_slice(&rotation.to_array().map(f32::to_bits));
 
         let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {

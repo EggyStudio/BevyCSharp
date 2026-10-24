@@ -145,10 +145,13 @@ pub fn install(app: &mut App) {
         .add_systems(
             Core3d,
             (
+                // After Bevy's antialiasing and before its motion blur, depth of field, bloom and
+                // effect stack, each of which takes the picture into a fresh texture and, unordered
+                // against a pass, could carry the picture on from before it.
                 run_passes::<0>
-                    .before(tonemapping)
-                    .in_set(BeforeTonemappingPasses)
-                    .in_set(Core3dSystems::PostProcess),
+                    .after(Core3dSystems::EarlyPostProcess)
+                    .before(Core3dSystems::PostProcess)
+                    .in_set(BeforeTonemappingPasses),
                 run_passes::<1>
                     .after(tonemapping)
                     .in_set(AfterTonemappingPasses)
@@ -166,9 +169,9 @@ pub fn install(app: &mut App) {
             Core2d,
             (
                 run_passes::<0>
-                    .before(tonemapping)
-                    .in_set(BeforeTonemappingPasses)
-                    .in_set(Core2dSystems::PostProcess),
+                    .after(Core2dSystems::EarlyPostProcess)
+                    .before(Core2dSystems::PostProcess)
+                    .in_set(BeforeTonemappingPasses),
                 run_passes::<1>
                     .after(tonemapping)
                     .in_set(AfterTonemappingPasses)

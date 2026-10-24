@@ -12511,6 +12511,7 @@ static class Bevy.Render
   static void ClearAtmosphere(Entity camera)
   static void ClearFreeCamera(Entity camera)
   static void ClearPanCamera(Entity camera)
+  static void ClearSkyFog(Entity camera)
   static void ClearSkyLighting(Entity camera)
   static void CountDrawnMeshes(bool on)
   static void DollyZoom(Entity camera, CameraProjection projection)
@@ -12575,6 +12576,7 @@ static class Bevy.Render
   static void SetShadowFiltering(Entity camera, ShadowFiltering filtering)
   static void SetShadowMapSize(uint directional = 0u, uint point = 0u)
   static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints)
+  static void SetSkyFog(Entity camera, SkyFogSettings settings)
   static void SetSkyLighting(Entity camera, float intensity = 1f, uint size = 512u)
   static void SetSkybox(Entity camera, AssetHandle cubemap, float brightness = 1000f, Quat? rotation = null)
   static void SetSoftShadows(Entity light, float size)
@@ -13170,6 +13172,17 @@ readonly struct Bevy.Sides : IEquatable<Sides>
   static bool op_Equality(Sides left, Sides right)
   static bool op_Inequality(Sides left, Sides right)
   void Deconstruct(out Length Left, out Length Top, out Length Right, out Length Bottom)
+sealed class Bevy.SkyFogSettings
+  (float, float, float)? Color { get; set; }
+  SkyFogSettings()
+  float BandDegrees { get; set; }
+  float Base { get; set; }
+  float Brightness { get; set; }
+  float GroundShade { get; set; }
+  float Height { get; set; }
+  float HorizonDegrees { get; set; }
+  float Start { get; set; }
+  float Visibility { get; set; }
 enum Bevy.SkyMethod : int
   LookupTexture = 0
   Raymarched = 1

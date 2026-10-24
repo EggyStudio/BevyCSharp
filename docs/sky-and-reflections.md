@@ -137,6 +137,28 @@ the color of what is around it rather than only what a lamp points at it, and th
 sun without anything being animated. The size it generates is a square cubemap resolution and has to
 be a power of two. `ClearSkyLighting` takes it off.
 
+The distance fades into the sky with fog drawn in the sky's own color:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetSkyLighting(camera);
+Render.SetSkyFog(camera, new SkyFogSettings { Visibility = 700f, Height = 40f });
+```
+
+An atmosphere's haze is earth's, too faint at a few hundred meters to blend a level's far ground
+into the horizon, so games draw fog of their own over it. This fog is a layer over the ground,
+densest at `Base` and thinning by e every `Height` above it, which takes away 95% of a point's light
+`Visibility` away at its base, so a hill's top stands clear of a valley's haze. Its color along each
+way is the sky's a few degrees above the horizon there, read from the environment map
+`SetSkyLighting` makes, warm toward the sun, blue away from it, and following the hour. Below the
+horizon, where an atmosphere draws the planet's ground as an even gray, it draws the horizon's
+color, darkening downward over `BandDegrees` to `GroundShade` of it. `Color` gives it a color of its
+own in place of the sky's, which a camera with no environment map needs. It reads the camera's
+depth, so it needs a camera drawn once a pixel, and `ClearSkyFog` takes it off. The console's
+`sky.fog` sets it while the app runs.
+
 A painted sky is a cubemap instead:
 
 <!-- compiled with:

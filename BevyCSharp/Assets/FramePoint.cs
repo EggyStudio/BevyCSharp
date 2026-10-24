@@ -9,7 +9,15 @@ public enum FramePoint
     /// <summary>Once opaque geometry is drawn, before transparent geometry.</summary>
     AfterOpaque = 1,
 
-    /// <summary>On the linear picture, before the passes that run before tonemapping.</summary>
+    /// <summary>
+    /// On the linear picture once everything is drawn, before Bevy's antialiasing, bloom and
+    /// effects and before the passes that run before tonemapping.
+    /// </summary>
+    /// <remarks>
+    /// Where Bevy draws its own volumetric fog. Each of Bevy's passes over the picture takes it into
+    /// a fresh texture, so what is drawn here goes through them as Bevy's geometry does, and temporal
+    /// antialiasing smooths its edges with the rest.
+    /// </remarks>
     BeforeTonemapping = 2,
 
     /// <summary>On the picture as the screen will show it, before the passes that run after it.</summary>
