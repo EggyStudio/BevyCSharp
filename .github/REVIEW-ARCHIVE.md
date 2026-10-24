@@ -1236,6 +1236,59 @@ a batch.
     Blockout on the package opens its window on Tab. Done at `45526e4b` on 2026-10-21, as the head
     says.
 
+54. **A denoiser over Solari's lit result, so the ray-traced tier's picture is clean (Decision
+    52).** Solari writes the direct and indirect light it resampled into the view target as one
+    color, the surface's color already in it, and leaves the noise to DLSS Ray Reconstruction, which
+    the bridge does not build, so the picture is grainy wherever it runs. A node of the bridge's own
+    in the `solari` profile, after Solari's node and before Bevy's post-processing, in five stages.
+    First the color is demodulated, the deferred prepass's emissive taken off and the rest divided
+    by its base color above a floor. Then it is accumulated in time, reprojected by the motion
+    vectors onto the previous frame's accumulation and kept where the previous depth, which Solari
+    double-buffers, and the normal agree within a plane distance and a normal threshold, the history
+    clamped at 32 frames, the first and second moments of luminance accumulated beside it. Then the
+    variance, from the moments where the history holds four frames or more, else from a 7 by 7
+    neighborhood. Then an à-trous filter of five passes at steps 1, 2, 4, 8 and 16, each tap
+    weighted by its depth, normal and luminance differences, the luminance's against the root of the
+    blurred variance, the variance filtered along, and the first pass's result fed back as the next
+    frame's history, as SVGF does. Last the color is remodulated, times the base color plus the
+    emissive, into the view target. `Render.SetRayTracedDenoiser(on)` turns it off for a capture
+    beside, on wherever ray tracing is active, and the history's clamp and the three weights' widths
+    are a settings struct with SVGF's defaults, the guide naming them. The reading, on a machine
+    with ray queries since the runners have none, the local command named under N 3.6: the mean of
+    256 frames of Solari standing still as the reference of each of the feature test's reference
+    views, the denoised single frame nearer it than the noisy one at every view, the camera strafing
+    past a pillar for thirty frames leaving no trail, read as the disoccluded pixels no further from
+    the reference than the noisy frame's, and the node's time at 1080p from Bevy's diagnostics, the
+    budget set from the first reading. Cargo tests of the weights and the reprojection as pure
+    functions, a headless test that a bridge without `solari` has no node, the ray tracing guide's
+    grainy sentence changed and RENDERING.md's node added. H-Trace's denoiser is read for its stage
+    order and constants, nothing of its code taken (Decision 52). Two commits, the node with its
+    stages, then the setting, the guide and the readings. After item 50 and before items 51 and 52.
+    Given at 20:43 on 2026-10-23 to the cloud session on `modeling-operations` for the node, its
+    stages and the Cargo tests of the math, compiled and checked across the profiles there; the
+    readings on a machine with ray queries and the guide's figures fall to the local coder at the
+    cherry-pick, after item 50. Its first commit, `fc749b2e` on `modeling-operations` at 00:30 on
+    2026-10-24, is the node with its stages, the shader and the Cargo tests of the weights, the
+    reprojection and the shader, 6 files and 1,171 lines under the owner's identity, the branch's
+    build run green; the setting, the guide and the readings follow as the second commit with the C
+    entry points, ABI 300 to 301, and the local cherry-pick after item 50. Reported at 01:2x; its
+    departures the node's place after the main opaque pass and before the transparent one, Solari's
+    system and the transmissive pass being private to their crates, sky and forward-material texels
+    neither filtered nor taps, non-finite light taken as none and a zero-weight tap unread, and the
+    à-trous depth gradient read from surface neighbors alone after sky taps spread a NaN to a black
+    floor; 8 Cargo tests, the check clean across the profiles on three systems, the six ray tracing
+    tests passing on lavapipe with the node on. Its second, `62136e08` at 01:47 on 2026-10-24 under
+    the owner's identity, 15 files, 376 lines, is Render.SetRayTracedDenoiser with DenoiserSettings,
+    a sealed class of the history's clamp and the three widths at SVGF's defaults,
+    Render.RayTracedDenoiserActive, the two C entry points at ABI 303 since main holds 302, every
+    app clearing the ray tracing flags as it begins, a fault found there, the guide's passage
+    rewritten with a compiled block; 1,132 passed headless, the 9 ray tracing tests on lavapipe, 11
+    Cargo tests, the checks clean on three systems. The item is whole on the branch; the local coder
+    cherry-picks both, the ABI line the one conflict, and takes the still means, the strafe and the
+    node's time at 1080p with its budget. On main as `97440a1d` and `16614918`, pushed at 01:57 on
+    2026-10-24; the readings to come. The readings at `c770351f` on 2026-10-24, pushed at 03:47, the
+    demodulation mended there and the cost taken as item 59; item 54 done.
+
 55. **The README's animated capture of Swarm goes.** The owner wrote at 20:22 on 2026-10-23 that the
     small section at the top of both engines' READMEs showing that they capture GIFs, BevyCSharp's
     of a game and 3DEngine's of Ore, is not necessary information and is to be removed. The mend:

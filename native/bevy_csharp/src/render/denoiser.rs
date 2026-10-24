@@ -13,20 +13,27 @@
 //! 2. Temporal accumulation. The light is reprojected by Bevy's motion vectors onto the previous
 //!    frame's history, four texels weighed bilinearly, each kept where the previous depth, which
 //!    Solari double-buffers, and the previous normal agree with this frame's ([`agrees`]), and the
-//!    history and the first two moments of luminance accumulated beside it, up to
+//!    history accumulated with the mean of its luminance and the variance about it beside it, up to
 //!    [`DenoiserSettings::history_limit`] frames.
-//! 3. The variance of luminance, from the moments where the history holds [`VARIANCE_FRAMES`] or
-//!    more, and from a seven by seven neighborhood of this frame's light where it holds fewer.
+//! 3. The variance of luminance, from the history's where it holds [`VARIANCE_FRAMES`] or
+//!    more, and from a seven by seven neighborhood of this frame's light where it holds fewer,
+//!    worked out in the temporal stage's dispatch, which holds the moments.
 //! 4. Five à-trous passes at steps 1, 2, 4, 8 and 16, each tap of a five by five B3 spline kernel
 //!    weighted by its depth, normal and luminance differences ([`weight`]), the luminance's against
 //!    the root of the variance blurred over three by three, the variance filtered along with the
-//!    squares of the weights, and the first pass's light kept as the next frame's history.
+//!    squares of the weights, and the first pass's light kept as the next frame's history. A
+//!    workgroup whose pixels' light all varies by under a hundredth is passed through as it is,
+//!    since the luminance's weight would leave it within a level.
 //! 5. Remodulation, the filtered light times the same share, plus the emissive, into the view
-//!    target.
+//!    target, by the last à-trous pass.
 //!
-//! The stage order and the defaults are SVGF's. The shader is `denoiser.wgsl`, with no imports so a
-//! test validates it as it is, and the functions here that it mirrors, the weights and the
-//! reprojection, are tested as pure functions.
+//! The node's time goes to moving the whole picture through memory at each stage. The demodulation
+//! writes each pixel's distance and packed normal in eight bytes, which every tap reads in place of
+//! the depth and the G-buffer's sixteen, and the light, its moments and the history are half
+//! floats, the variance kept as its root and about the mean rather than as the mean of the square,
+//! which a half float loses. The stage order and the defaults are SVGF's. The shader is
+//! `denoiser.wgsl`, with no imports so a test validates it as it is, and the functions here that it
+//! mirrors, the weights and the reprojection, are tested as pure functions.
 
 use std::sync::Mutex;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -379,13 +386,13 @@ mod tests {
     /// The shader parses and validates as it is, every stage an entry point.
     #[cfg(feature = "render")]
     #[test]
-    fn the_shader_validates_with_its_five_stages() {
+    fn the_shader_validates_with_its_three_entry_points() {
         let module = naga::front::wgsl::parse_str(include_str!("denoiser.wgsl")).expect("the denoiser's shader parses");
         naga::valid::Validator::new(naga::valid::ValidationFlags::all(), naga::valid::Capabilities::default())
             .validate(&module)
             .expect("the denoiser's shader validates");
 
         let entries: Vec<_> = module.entry_points.iter().map(|entry| entry.name.as_str()).collect();
-        assert_eq!(entries, ["demodulate", "temporal", "variance", "atrous", "remodulate"]);
+        assert_eq!(entries, ["demodulate", "temporal", "atrous"]);
     }
 }

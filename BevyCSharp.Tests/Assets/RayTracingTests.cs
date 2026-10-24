@@ -129,20 +129,29 @@ public sealed class RayTracingTests
     /// <summary>
     /// The denoiser's five stages over a picture of 1920 by 1080 with a floor and a glowing wall
     /// filling it, every pixel filtered, take no more of the GPU than their budget, as Bevy's
-    /// diagnostics measure them and <c>render.timings</c> says.
+    /// diagnostics measure them, the least of 600 frames' measurements.
     /// </summary>
+    /// <remarks>
+    /// A pass's time on the GPU counts the time the GPU spent on another program's work between
+    /// its two timestamps, and the suite once read 8 ms here, smoothed over frames as
+    /// <c>render.timings</c> gives it, beside a game drawing on the same GPU. A frame's own
+    /// measurement taken between the other program's is the node's alone, so the test takes the
+    /// least of many.
+    /// </remarks>
     [SkippableFact]
     public void TheDenoiserKeepsToItsBudgetAt1080p()
     {
         Needs.Renderer();
 
-        // It took 5.6 to 5.8 ms of the development machine's RTX 4070 Laptop GPU here in three runs,
-        // and 3.6 ms in Bevy's own Solari scene at the same size, whose sky it passes over. The
-        // budget is the first reading with a quarter more, so a change that makes it slower fails.
-        const double Budget = 7.0;
+        // It took 2.5 ms of the development machine's RTX 4070 Laptop GPU here in six runs, the
+        // least of each run's frames, and 1.9 ms in Bevy's own Solari scene at the same size, whose
+        // sky it passes over, smoothed, down from 5.7 and 3.6 before its stages moved fewer bytes.
+        // The budget is the reading with a quarter more, so a change that makes it slower fails.
+        const double Budget = 3.2;
 
         var active = false;
-        double? taken = null;
+        double? least = null;
+        var frames = 0;
         new PictureRun
         {
             Width = 1920,
@@ -173,13 +182,18 @@ public sealed class RayTracingTests
             },
         }
             .Wait(ShaderMaterialTests.Settled + 90)
-            .Do("reading the timings", _ => taken = Render.Timings().FirstOrDefault(timing => timing.Name == "bcs_denoiser").GpuMilliseconds)
+            .Until("reading the timings over 600 frames", _ =>
+            {
+                if (Diagnostics.TryRead("render/bcs_denoiser/elapsed_gpu", out var reading) && reading.Value is { } taken)
+                    least = Math.Min(least ?? taken, taken);
+                return ++frames >= 600;
+            })
             .Go();
 
         Needs.RayTracing(active);
 
-        Assert.True(taken is not null, "the denoiser was not timed");
-        Assert.InRange(taken.Value, 0, Budget);
+        Assert.True(least is not null, "the denoiser was not timed");
+        Assert.InRange(least.Value, 0, Budget);
     }
 
     /// <summary>

@@ -1,0 +1,852 @@
+# BevyCSharp devlog
+
+What landed in BevyCSharp, by day and newest first, with the pictures taken on the way: the captures
+the repository keeps under `.github/assets`, and the pictures made while an item was built, kept
+here as WebP files named by their day. A line under Done names the item of REVIEW.md or
+REVIEW-ARCHIVE.md and the commit that closed it.
+
+## 2026-10-24
+
+Done:
+
+- Item 54 at `97440a1d`. A denoiser over Solari's lit result, so the ray-traced tier's picture is
+  clean (Decision 52).
+
+## 2026-10-23
+
+![](../assets/scene-field.webp)
+The scene's distance field darkens each directional light where it closes a surface off, past the
+shadow map by default, by taking back the light Bevy gave from the camera's G-buffer in a picture of
+floats, and draws its settings and a slice across a cascade in a window of its own, which the
+feature test shows at its gallery. (`d2e6ef81`)
+
+Done:
+
+- Item 43 at `cd05d9a2`. Modeling operations on faces and edges, Blender's kinds (Decision 46).
+- Item 44 at `cd05d9a2`. Modifiers, a stack applied at the build and never baked until asked
+  (Decision 46).
+- Item 45 at `ba8111fb`. What is modeled is exported for Blender and imported from it (Decision 46).
+- Item 49 at `e1b08124`. F1 hides the interface, F3 shows a debug overlay like the newest
+  Minecraft's with sections a program adds, and Shift+F3 the profiler with it (Decision 50).
+- Item 50 at `d2e6ef81`. The scene's distance field, 3DEngine's first phase of its global
+  illumination, through the bridge (Decision 51).
+- Item 55 at `135e43b5`. The README's animated capture of Swarm goes.
+- Item 56 at `fda2f62e`. The bridge's Slang modules give their names plainly, as 3DEngine's do, with
+  no `bcs_*::` before them (Decision 56).
+- Item 58 at `66e2b067`. The cheat sheet's headers are 3DEngine's, plain group headings and no sub-
+  heading a type (Decision 58).
+
+## 2026-10-21
+
+![](../assets/blockout.webp)
+Blockout, a level of three rooms, a corridor and stairs between two floors blocked out from one
+recipe, is walked through the character controller and reshaped from the modeling window on Tab, and
+the booleans take a solid primitive's line as the cut does. (`09fc95dd`)
+
+Done:
+
+- Item 38 at `08d03b4d`. An edit mesh a program shapes by operations, with a recipe that rebuilds
+  it, built into what the engine draws and collides with (Decision 46).
+- Item 39 at `bfe1fc63`. Grid prototyping: materials that show a meter, texture coordinates aligned
+  to the world, and openings cut by booleans (Decision 46).
+- Item 40 at `bee54e98`. The modeling commands, so a level is blocked out from the terminal, and a
+  window in the game to shape by hand (Decision 46).
+- Item 41 at `fc63b7ba`. Texture coordinates shaped and textures given to faces (Decision 46).
+- Item 42 at `09fc95dd`. A game that is a level blocked out with the tools, Blockout (Decision 46).
+- Item 46 at `585497f1`. An animated capture of a run, frames taken at an interval and written as
+  one file, and one made from captures on disk (Decision 48).
+- Item 47 at `3d045110`. F2 takes a screenshot in every program, to a screenshots folder beside it
+  (Decision 49).
+- Item 48 at `5f051299`. The render recovery test reads its error count until it is one or a bound
+  of frames.
+- Item 53 at `45526e4b`. ImGui's pass moves from the editor profile to the render profile, so a game
+  on the package draws ImGui.
+
+## 2026-10-20
+
+Done:
+
+- Item 2 at `5e9235ce`. The norm's lists are paid down.
+- Item 29 at `0f8e89b4`. What was mended for the time being is mended for good (Decision 38), after
+  item 4.
+- Item 34 at `20f3d5c0`. A behavior's write after a call that moves its entity's table row lands in
+  another entity's row.
+- Item 35 at `41ebc700`. The build workflow's jobs are named as 3DEngine's are, by their ids, with
+  no expression in a name.
+- Item 36 at `d56e7cb7`. A program reads the force a joint held its bodies with over the last step,
+  from 3DEngine's `GetPhysicsJointForce`.
+- Item 37 at `cf70c650`. The feature test moves into the games folder, as 3DEngine's lives (Decision
+  45).
+
+## 2026-10-19
+
+![](../assets/examples/monitor_info.webp)
+monitor_info is captured on four virtual monitors of sway in a container by build/capture-monitor-
+info.sh, so it is written whole and opens no window on a machine's own screens, and the keyboard
+bitset's size is named in ulongs. (`142dc131`)
+
+![](../assets/examples/debug_picking.webp)
+![](../assets/examples/fps_overlay.webp)
+![](../assets/examples/infinite_grid.webp)
+![](../assets/examples/scene_viewer.webp)
+Bevy's dev tools come in, the FPS overlay, the infinite grid and picking's debug overlay asked for
+through Config.DevTools with the gizmos' frusta and skinned bounds beside them, and fps_overlay,
+infinite_grid, debug_picking and scene_viewer are written. (`64c1b25d`)
+
+![](../assets/examples/feathers_gallery.webp)
+Feathers' menus, selects, list views, color controls, text input, panes, groups and dialogs come in
+with feathers_gallery written on them, and a Color crosses each of Bevy's color spaces as Bevy
+converts it. (`1e8c4750`)
+
+![](../assets/examples/feathers_number_input.webp)
+![](../assets/examples/virtual_keyboard.webp)
+Feathers' number input and virtual keyboard come in with feathers_number_input and virtual_keyboard
+written on them, and Ui.EditText queues any of Bevy's text edits on a field. (`5452a595`)
+
+![](../assets/examples/feathers_counter.webp)
+Feathers comes in with Bevy's dark theme, its buttons, checkboxes, radio buttons, toggle switches,
+sliders and labels spawned from C# and feathers_counter written on them, the lock gaining
+bevy_feathers alone. (`edee9686`)
+
+![](../assets/examples/free_camera_controller.webp)
+![](../assets/examples/pan_camera_controller.webp)
+![](../assets/examples/pan_orbit_camera_cad.webp)
+![](../assets/examples/pan_orbit_camera_minimal.webp)
+![](../assets/examples/pan_orbit_camera_ortho.webp)
+Bevy's free, pan and pan-orbit camera controllers are bridged with their five examples, the lock
+gaining bevy_camera_controller alone, and Bevy's free camera takes the place of the examples' own in
+the sixteen that flew one. (`670ecf2c`)
+
+Done:
+
+- Item 4 at `142dc131`. The gaps, by how many rows each holds.
+- Item 31 at `8fe38f60`. The README's centered parts are markdown inside one centering block
+  (Decision 40), and nuget.org draws them.
+- Item 32 at `d482caa3`. A package's release notes are the commits since the package last published
+  (Decision 41).
+- Item 33 at `e1f516fa`. The pack run publishes through nuget.org's trusted publishing and no stored
+  key (Decision 42).
+
+## 2026-10-18
+
+Done:
+
+- Item 22 at `5e750133`. Swarm builds on the package version its project names.
+- Item 26 at `c3bd5349`. The reflected variants holding a tuple, an instant or a graph's index get
+  typed properties, TODO.md's open line under the components through reflection, item 4's remainder.
+- Item 27 at `1a6c5d22`. Byte mirrors for the components that are plain data, COMPONENTS.md's third
+  tier, TODO.md's next open line, in steps.
+- Item 28 at `c5f19669`. An atmosphere takes a medium of the game's own, TODO.md's rendering line,
+  one commit.
+
+## 2026-10-17
+
+Done:
+
+- Item 23 at `b178ae3f`. Two workflows an engine, `build.yml` on a push and `pack.yml` by hand
+  (Decision 34).
+- Item 24 at `1d246e9f`. The docs job leaves the build workflow (Decision 36); the repository's own
+  links are a test of the suite.
+- Item 25 at `b4d45938`. The register: STYLE.md's rule and the sweep (Decision 37).
+
+## 2026-10-12
+
+![](../assets/examples/font_atlas_debug.webp)
+Bevy's font_atlas_debug example is written in C#, the pictures of the font atlases read through a
+call that answers each with the size of the font drawn into it. (`75024f77`)
+
+![](../assets/examples/solari_reflections.webp)
+Bevy's solari_reflections example is written in C#, a room of mirrors and a test material whose
+roughness a slider sets, drawn by Solari's realtime lighting or by the reference path tracer at a
+key. (`b326b127`)
+
+![](../assets/examples/render_recovery.webp)
+Bevy's render_recovery example is written in C#, with a policy for what a render error does, a count
+of the errors and a call that causes each kind, and an app that closes while its pipelines compile
+no longer aborts on its way out. (`0da017e7`)
+
+![](../assets/examples/atmosphere.webp)
+Bevy's atmosphere example is written in C#, with Mars's air, the choice of how the sky is worked
+out, and the disk of the sun a light stands for. (`a76577ac`)
+
+![](../assets/examples/world_serialization.webp)
+Bevy's world_serialization is written in C#, with text a component holds, a field a scene file
+leaves out, and the game's own resources saved and loaded beside a scene's entities. (`c9b8728f`)
+
+![](../assets/examples/decodable.webp)
+A game plays samples it writes as it plays, a stream that plays silence when it runs out, and Bevy's
+decodable example is written with it. (`2aaaef58`)
+
+![](../assets/examples/pitch.webp)
+A tone of one frequency is made and played as a clip is, as Bevy's pitch example plays one, and a
+mesh may be left without the normals a shader of its own never reads. (`7f42cf40`)
+
+Done:
+
+- Item 16 at `4e6eab36`. An offscreen click lands only where the pointer has been.
+- Item 19 at `c9b8728f`. A world a scene file saves whole: a component's text, a field left out and
+  a resource of the game's own, Bevy's `world_serialization` reached from C#.
+- Item 20 at `7f42cf40`. A mesh without normals on purpose, `MeshData.ComputeNormals` (Decision 32).
+- Item 21 at `c8849d71`. A behavior's `[Changed]` filter on its own type fires every frame.
+
+## 2026-10-11
+
+![](../assets/examples/transform_gizmo.webp)
+An app may ask for Bevy's interactive transform gizmo, and Bevy's transform_gizmo example is written
+with it. (`a612ab27`)
+
+![](../assets/examples/occlusion_culling.webp)
+The meshes the GPU drew in the opaque pass are read back on request, as Bevy's occlusion_culling
+example reads them, and that example is written with it. (`7bc0af69`)
+
+![](../assets/examples/custom_vertex_attribute.webp)
+A mesh carries vertex streams of the game's own that a vertex shader of the program's own reads at
+their locations, and Bevy's custom_vertex_attribute example is written with them. (`32ae29fb`)
+
+![](../assets/examples/dynamic_mip_generation.webp)
+The GPU makes an image's mipmaps from its top level each frame on request, as Bevy's
+MipGenerationJobs does, and Bevy's dynamic_mip_generation example is written with it. (`6c491f7c`)
+
+![](../assets/examples/ui_material.webp)
+An interface node can be drawn by a Slang program of the game's own, as Bevy draws a UiMaterial, and
+Bevy's ui_material example is written with it. (`2fbd2860`)
+
+![](../assets/examples/render_depth_to_texture.webp)
+Bevy's render_depth_to_texture is written with a camera drawing its depth alone into no target and a
+watch of that depth shown on a plane, which the engine reached already, so its triage line was
+stale. (`b134dd4d`)
+
+![](../assets/examples/custom_projection.webp)
+Render.SetAdjustedPerspective gives a camera Bevy's perspective with entries of its matrix written
+over it, a projection of the game's own the bridge declares since C# cannot, and Bevy's
+custom_projection is written with it. (`6e28c3cc`)
+
+![](../assets/examples/error_handling.webp)
+Bevy's error_handling is written, its points sampled over the sphere from its triangles read back
+and its errors met as a C# system meets them, logged by the engine or caught by the system, and the
+guide says how that answers to Bevy's error handlers. (`6641dbcc`)
+
+![](../assets/examples/load_gltf_extras.webp)
+Bevy's load_gltf_extras is written through the extras wrappers glTF's four kinds of extras already
+had, so its triage line was stale, and the guide says where a model's extras arrive. (`7a6cbf16`)
+
+![](../assets/examples/decal.webp)
+Render.CreateDecalMaterial makes Bevy's forward decal material and Render.SetForwardDecal makes an
+entity a decal drawn with it, Bevy's decal is written with them, and the bridge's comment on the
+path tracer names the development machine's GPU in plain words. (`c16f67e5`)
+
+![](../assets/examples/ghost_nodes.webp)
+Bevy's ghost_nodes feature is built in, adding no crate, so GhostNodeRef puts a node the layout
+passes through on an entity, and Bevy's ghost_nodes is written with it. (`d91665d9`)
+
+![](../assets/examples/asset_settings.webp)
+Bevy's asset_settings is written, its sampler asked for by a .meta file beside one image and where
+another is loaded, with its images fetched from beside Bevy's source, since the loader settings it
+needs were reached already. (`4ea63186`)
+
+![](../assets/examples/low_power.webp)
+Window.SetUpdateSettings sets winit's update modes, focused and not, from Bevy's presets or a mode
+of a game's own, Window.RequestRedraw and Window.WakeUp ask for one more update, and Bevy's
+low_power is written with them. (`ea5e1532`)
+
+![](../assets/examples/custom_cursor_image.webp)
+Window.SetCursorAtlas cuts the pointer's image to a frame of an atlas with that frame's hotspot, a
+wrapper writing an enum switches its variant only where it holds another so a field the record
+cannot type is kept, and Bevy's custom_cursor_image is written with both. (`69fca4bb`)
+
+![](../assets/examples/image_node_resizing.webp)
+image_node_resizing is written with Bevy's outlines of interface nodes, which the bridge always
+built and which are turned on through the resource a plugin made, since one inserted from nothing
+has a line width of zero, as InsertResource's remarks say. (`68aa5dd5`)
+
+![](../assets/examples/texture_atlas.webp)
+Render2d.PackAtlas packs loaded images into one atlas as the app runs, as Bevy's TextureAtlasBuilder
+does, with the padding between them, so texture_atlas packs Bevy's folder of sprites four ways and
+its rpg folder is fetched whole. (`c11c63d4`)
+
+![](../assets/examples/render_primitives.webp)
+Gizmos draw Bevy's planes, endless lines and flat primitives as its primitive_2d and primitive_3d
+draw them, the round solids take a resolution and a cylinder its half height as named, so
+render_primitives is written. (`b3ac2a0e`)
+
+Done:
+
+- Item 11 at `c3aaacac`. The CLI server writes an answered request before it closes.
+- Item 12 at `e1a32283`. A resource inserted from nothing replaced the plugin's with a zeroed one.
+- Item 13 at `83b371cc`. The README's gallery as one scrolling row of pictures a group, done through
+  `83b371cc` (Decision 27).
+- Item 14 at `53fd0c3f`. The bcs skill left the `.claude` folder.
+- Item 15 at `c447a370`. The development machine's GPU is named nowhere a user reads.
+- Item 17 at `02598971`. The examples' counts under the Examples heading, and a count on each
+  group's heading.
+- Item 18 at `32ae29fb`. A vertex stream of the game's own on a mesh, Bevy's
+  `custom_vertex_attribute` reached from C# (Decision 31).
+
+## 2026-10-10
+
+![](../assets/examples/log_diagnostics.webp)
+Bevy's diagnostics store is reached from C#, a game's own measures registered, measured, read and
+turned off beside Bevy's frame, entity and render ones, and custom_diagnostic,
+enabling_disabling_diagnostic and log_diagnostics are written with it. (`90075005`)
+
+![](../assets/examples/deferred_rendering.webp)
+![](../assets/examples/parallax_mapping.webp)
+![](../assets/examples/specular_tint.webp)
+The standard material takes a depth map for parallax mapping, a specular tint with its two maps, and
+whether it is drawn forward or deferred apart from the rest, and parallax_mapping, specular_tint and
+deferred_rendering are written with them. (`e09a2ed8`)
+
+![](../assets/examples/many_meshlet_materials.webp)
+![](../assets/examples/mines.webp)
+![](../assets/examples/overflow_transform.webp)
+![](../assets/examples/test_meshlet.webp)
+The four examples that could be written with what is bridged are written, the meshlet test, the
+meshlet materials stress test, transformed overflow and the minesweeper game. (`af4242ae`)
+
+![](../assets/examples/mesh_shader_intro.webp)
+A program draws on a camera with Slang task and mesh shaders compiled to SPIR-V, counted in
+workgroups, where the device has them, and mesh_shader_intro is written with it. (`e9a8508e`)
+
+![](../assets/examples/gpu_component_array_buffer.webp)
+App.AddComponentArray keeps every entity's component in one buffer a shader reads at the entity's
+mesh tag, as Bevy's GpuComponentArrayBuffer does, and gpu_component_array_buffer is written with it.
+(`2359425d`)
+
+![](../assets/examples/pipeline_constants.webp)
+A Slang pipeline constant is set on a material by name as any value is and compiled into pipelines
+of its own for each set of values, and pipeline_constants is written with it. (`4e3dd60a`)
+
+![](../assets/examples/fixed_node.webp)
+![](../assets/examples/inline_image.webp)
+inline_image and fixed_node are written through Bevy's reflected InlineImage and FixedNode, each
+drawing as Bevy's does and the fixed node's parent turning red under the pointer. (`095bccd7`)
+
+![](../assets/examples/shader_material_2d_bindless.webp)
+![](../assets/examples/sprite_material.webp)
+A 2D shader material given to a sprite draws it as Bevy's SpriteMaterial does, its fragment shader
+reading the sprite through bcs_sprite, and sprite_material and shader_material_2d_bindless are
+written with it. (`855c4b7e`)
+
+![](../assets/examples/shader_material_2d.webp)
+A Slang program draws a 2D mesh through 2D stages of its own as Bevy draws a Material2d, its values
+set by name as a 3D material's are, and shader_material_2d is written with it. (`467efee0`)
+
+![](../assets/examples/character_creation.webp)
+![](../assets/examples/draggable_slider.webp)
+![](../assets/examples/headless_tabs.webp)
+A tab list's choice is observed as Bevy's ValueChange of an optional entity and kept by
+Ui.SelfUpdate, an entity holds a pointer through a drag with Picking.CapturePointer, and
+headless_tabs, draggable_slider and character_creation are written with them. (`01b5ac3e`)
+
+![](../assets/examples/deferred_raymarch.webp)
+A draw on a camera writes Bevy's G-buffer from a new point inside the prepass and casts shadows from
+a shadow stage of its own, so a surface a shader finds by marching a ray is lit and shadowed by Bevy
+as a standard material is, and deferred_raymarch is written with it. (`7849ecf6`)
+
+Done:
+
+- Item 5 at `f12a5879`. Every method native code calls catches every exception.
+- Item 6 at `fef6bbeb`. A template package, so `dotnet new` starts a game.
+- Item 7 at `7a2a99ac`. The entities that lost a component since a system last ran.
+- Item 8 at `5d955562`. Every example compiles on the package alone.
+- Item 9 at `8f02d976`. A script that more than one system runs is read for the forms only GNU's
+  tools or a later bash read.
+- Item 10 at `d328fdc3`. Fixes for the generator's diagnostics offered in an editor.
+
+## 2026-10-09
+
+![](../assets/examples/ssr.webp)
+A shader program can draw its material into the deferred buffers through a deferred stage, lit by
+the deferred lighting pass and read by screen-space reflections, and the ssr example is written with
+its water in Slang. (`2ed99011`)
+
+## 2026-10-07
+
+![](../assets/first-game/01.webp)
+![](../assets/first-game/02.webp)
+![](../assets/first-game/03.webp)
+![](../assets/first-game/04.webp)
+![](../assets/first-game/05.webp)
+![](../assets/first-game/06.webp)
+![](../assets/first-game/07.webp)
+![](../assets/first-game/08.webp)
+![](../assets/first-game/09.webp)
+![](../assets/first-game/10.webp)
+![](../assets/first-game/11.webp)
+![](../assets/first-game/12.webp)
+A first game is told from an empty folder in twelve steps, each a whole program the pack workflow
+builds and runs and the page is held to line for line. (`7072511d`)
+
+![](../assets/examples/delayed_commands.webp)
+Commands can be queued to land after a delay, as Bevy's delayed commands do, and delayed_commands is
+written. (`7f92ed03`)
+
+![](../assets/examples/audio_control.webp)
+![](../assets/examples/window_fallthrough.webp)
+A playing sound's speed and mute are bridged with a way to ask for its sink, and audio_control and
+window_fallthrough are written. (`1b8b2823`)
+
+![](../assets/examples/logs.webp)
+C# writes into Bevy's log at its levels and once a line of code, a run ends with a failure code, and
+Bevy's logs example is written. (`ee229278`)
+
+![](../assets/examples/tilemap_chunk.webp)
+![](../assets/examples/tilemap_chunk_orientation.webp)
+A tilemap chunk is made with its tiles and has them written and read from C#, and both of Bevy's
+tilemap chunk examples are written. (`6bdfd85e`)
+
+![](../assets/examples/mesh2d_arcs.webp)
+Bevy's arc, sector and segment are in the math with their bounds, a sector or a segment mesh maps
+its image at an angle, and mesh2d_arcs is written. (`ad9cc846`)
+
+![](../assets/examples/multi_window_text.webp)
+![](../assets/examples/multiple_windows.webp)
+A camera is aimed at a window the game spawned, an offscreen run draws each such window into an
+image of its own at its scale, and two of Bevy's window examples are written. (`0c50c042`)
+
+![](../assets/examples/computed_states.webp)
+![](../assets/examples/custom_transitions.webp)
+![](../assets/examples/state_scoped.webp)
+A state's transitions reach C# as Bevy's messages, an entity goes as a state is entered or by a rule
+over the transition, a joint reads a computed state, and three of Bevy's state examples are written.
+(`ea00b975`)
+
+![](../assets/examples/cubic_splines.webp)
+Hermite, cardinal, B-spline and Bezier splines are made into cubic curves sampled along as Bevy
+makes them, and cubic_splines is written with them. (`9f5537a3`)
+
+![](../assets/examples/bounding_2d.webp)
+Shapes in the plane give boxes and circles about them as Bevy bounds them, rays and swept volumes
+meet those as Bevy casts them, and bounding_2d is written with them. (`cbe9a1f6`)
+
+## 2026-10-06
+
+![](../assets/examples/random_sampling.webp)
+A box and a ball are shapes as values that points are sampled in and on as Bevy samples them, and
+random_sampling is written with them. (`a31e3b32`)
+
+![](../assets/examples/directional_navigation.webp)
+![](../assets/examples/directional_navigation_overrides.webp)
+The input focus moves between interface nodes by direction with edges a game draws before the
+nearest node, and directional_navigation and directional_navigation_overrides are written with it.
+(`f127b1f9`)
+
+![](../assets/examples/custom_skinned_mesh.webp)
+A mesh made in code is skinned to joint entities with its joints and weights and a skin of inverse
+bindposes, and custom_skinned_mesh is written with it. (`3208c707`)
+
+![](../assets/examples/animation_graph.webp)
+![](../assets/examples/animation_masks.webp)
+An animation graph is built in code from blends and clips, played several nodes at once at their
+weights and masked by groups of bones, and animation_graph and animation_masks are written with it.
+(`5d5a982d`)
+
+![](../assets/examples/animated_mesh_events.webp)
+![](../assets/examples/animation_events.webp)
+A game places its own events on an animation clip, made in code or loaded from a model, heard at the
+player or at a target as the clip reaches them, and animation_events and animated_mesh_events are
+written with them. (`2158ee21`)
+
+![](../assets/examples/animated_transform.webp)
+![](../assets/examples/animated_ui.webp)
+An animation clip is built in code from curves sampled or eased, aimed at entities by name and
+played from a graph, and animated_transform, animated_ui and the whole of eased_motion are written
+with it. (`421d4e15`)
+
+![](../assets/examples/font_query.webp)
+![](../assets/examples/font_variations.webp)
+![](../assets/examples/font_weights.webp)
+![](../assets/examples/strikethrough_and_underline.webp)
+![](../assets/examples/text.webp)
+![](../assets/examples/text_background_colors.webp)
+Text is drawn with a line under or through it and with a font's OpenType features and variable axes
+from C#, and eight of Bevy's text examples are written or made whole with them. (`f0be6dab`)
+
+![](../assets/examples/multiline_text_input.webp)
+![](../assets/examples/multiple_text_inputs.webp)
+A key reaching the focused entity is observed as Bevy's FocusedInput, an offscreen run's fields take
+keys, the focus is given and moved from C#, and the two text input examples are written with them.
+(`f46edecf`)
+
+![](../assets/examples/standard_widgets_observers.webp)
+A game observes Bevy's own components coming and going through their wrappers as it does its own,
+and standard_widgets_observers is written on them. (`569ea59a`)
+
+![](../assets/examples/standard_widgets.webp)
+What Bevy's widgets report reaches C# as their own Activate, ValueChange and MenuEvent, and
+standard_widgets is written on them. (`2597c127`)
+
+![](../assets/examples/scroll.webp)
+The pretend wheel is written into Bevy as a real wheel is, so a game, the interface and picking all
+see it, and scroll is written with its own event carried up from picking's scroll. (`a683c3ee`)
+
+![](../assets/examples/render_ui_to_texture.webp)
+A game spawns pointers of its own and puts them on an image an interface is drawn into, a ray cast
+answers the texture coordinate it met, and render_ui_to_texture is written with them. (`d59365fa`)
+
+![](../assets/examples/drag_to_scroll.webp)
+![](../assets/examples/viewport_node.webp)
+drag_to_scroll and viewport_node are written on the pointer's events, a board scrolled by a drag and
+a cube picked through the widget that shows it. (`4034f919`)
+
+![](../assets/examples/dragdrop_picking.webp)
+![](../assets/examples/entity_disabling.webp)
+![](../assets/examples/sprite_picking.webp)
+![](../assets/examples/ui_drag_and_drop.webp)
+A game observes what a pointer does to an entity as Bevy's Pointer events, picking moves into the
+render profile at 3 seconds and 0.6 percent more for a clean build, an offscreen run is pointed at
+through its image, and four of Bevy's picking examples are written with it. (`b548987d`)
+
+![](../assets/examples/irradiance_volumes.webp)
+A Slang material reads the light an irradiance volume gives through Bevy's own function, an image
+says how large it is, and irradiance_volumes and the whole of tonemapping are written with them.
+(`1a4b8211`)
+
+![](../assets/examples/clustered_decals.webp)
+A Slang material reaches the clustered decals over it through Bevy's own iterator, laying them on as
+the standard material does or reading each one's tag and textures, and clustered_decals is written
+with it. (`4bbcec08`)
+
+![](../assets/examples/bevymark.webp)
+![](../assets/examples/bevymark_3d.webp)
+![](../assets/examples/many_buttons.webp)
+![](../assets/examples/many_cubes.webp)
+![](../assets/examples/many_foxes.webp)
+![](../assets/examples/many_morph_targets.webp)
+![](../assets/examples/transform_hierarchy.webp)
+The last seven of Bevy's stress tests are written and measured beside Bevy's programs, which empties
+the column of examples that can be written. (`d71ff6a3`)
+
+## 2026-10-05
+
+![](../assets/examples/many_animated_sprites.webp)
+![](../assets/examples/many_cameras_lights.webp)
+![](../assets/examples/many_gizmos.webp)
+![](../assets/examples/many_glyphs.webp)
+![](../assets/examples/many_gradients.webp)
+![](../assets/examples/many_lights.webp)
+![](../assets/examples/many_materials.webp)
+![](../assets/examples/many_sprites.webp)
+![](../assets/examples/many_text.webp)
+![](../assets/examples/many_text2d.webp)
+![](../assets/examples/text_pipeline.webp)
+Thirteen of Bevy's stress tests are written and measured beside Bevy's own programs run offscreen
+through the bridge's harness, with what measuring found named in PERFORMANCE.md and two of its finds
+fixed. (`1fc9c9c4`)
+
+![](../assets/examples/gamepad_viewer.webp)
+![](../assets/examples/hotpatching_systems.webp)
+gamepad_viewer and hotpatching_systems are written, and log_diagnostics, world_serialization and
+scene_viewer become rows of what is missing, which leaves the stress tests as the only rows that can
+be written. (`687af0a6`)
+
+![](../assets/examples/physics_in_fixed_timestep.webp)
+physics_in_fixed_timestep is written with its player as a behavior, and Time.FixedOverstep says how
+far the fixed clock has run past its last step. (`3e694f06`)
+
+![](../assets/examples/clear_color.webp)
+![](../assets/examples/minimizing.webp)
+![](../assets/examples/persisting_window_settings.webp)
+![](../assets/examples/resizing.webp)
+![](../assets/examples/scale_factor_override.webp)
+![](../assets/examples/screenshot.webp)
+![](../assets/examples/transparent_window.webp)
+![](../assets/examples/window_drag_move.webp)
+![](../assets/examples/window_resizing.webp)
+![](../assets/examples/window_settings.webp)
+The window examples and Bevy's two window tests are written with wait and progress cursors added,
+and three window rows are marked missing. (`13eb5211`)
+
+![](../assets/examples/edit_material_on_gltf.webp)
+![](../assets/examples/gltf_skinned_mesh.webp)
+![](../assets/examples/load_gltf.webp)
+![](../assets/examples/query_gltf_primitives.webp)
+![](../assets/examples/update_gltf_scene.webp)
+The five glTF examples and hello_world are written, and fps_overlay is marked missing for want of
+Bevy's dev tools. (`bb440b9a`)
+
+![](../assets/examples/context_menu.webp)
+![](../assets/examples/cooldown.webp)
+![](../assets/examples/debug_frustum_culling.webp)
+![](../assets/examples/headless_renderer.webp)
+![](../assets/examples/mesh_picking.webp)
+![](../assets/examples/simple_picking.webp)
+The application, usage and picking examples are written, with flat shapes extruded into solids and
+the extrusion row of 3d_shapes. (`6b94ca28`)
+
+![](../assets/examples/compute_mesh.webp)
+![](../assets/examples/compute_shader_game_of_life.webp)
+![](../assets/examples/custom_post_processing.webp)
+![](../assets/examples/custom_shader_instancing.webp)
+![](../assets/examples/fullscreen_material.webp)
+![](../assets/examples/gpu_readback.webp)
+![](../assets/examples/shader_prepass.webp)
+The last seven shader examples are written, compute, passes and a draw on the camera among them,
+with an image read back from the GPU. (`966f607c`)
+
+![](../assets/examples/animate_shader.webp)
+![](../assets/examples/array_texture.webp)
+![](../assets/examples/automatic_instancing.webp)
+![](../assets/examples/shader_defs.webp)
+![](../assets/examples/shader_material.webp)
+![](../assets/examples/shader_material_bindless.webp)
+![](../assets/examples/shader_material_screenspace_texture.webp)
+![](../assets/examples/storage_buffer.webp)
+![](../assets/examples/texture_binding_array.webp)
+Nine of the shader examples are written in Slang, with a mesh tag read through the instance index
+Bevy hands a fragment shader and images loaded as array textures. (`e454755e`)
+
+![](../assets/examples/2d_gizmos.webp)
+![](../assets/examples/3d_gizmos.webp)
+![](../assets/examples/axes.webp)
+![](../assets/examples/light_gizmos.webp)
+The four gizmo examples are written, with retained gizmos, depth bias and line style by group,
+Bevy's light and bounding box gizmos, and the ellipses, rounded shapes and arrow options they draw.
+(`75bf3eec`)
+
+![](../assets/examples/alien_cake_addict.webp)
+![](../assets/examples/breakout.webp)
+![](../assets/examples/contributors.webp)
+![](../assets/examples/desk_toy.webp)
+![](../assets/examples/game_menu.webp)
+![](../assets/examples/loading_screen.webp)
+The six games of Bevy are written, with the primary window entity, a load state that counts
+dependencies and pipeline readiness bridged for them, and an offscreen camera spawned after startup
+now drawing. (`1ad2179c`)
+
+![](../assets/examples/animated_mesh.webp)
+![](../assets/examples/animated_mesh_control.webp)
+![](../assets/examples/color_animation.webp)
+![](../assets/examples/eased_motion.webp)
+![](../assets/examples/easing_functions.webp)
+![](../assets/examples/morph_targets.webp)
+Writes the six animation examples, with a clip played a number of times and that number changed as
+it plays. (`7b1e48f7`)
+
+![](../assets/examples/alter_mesh.webp)
+![](../assets/examples/alter_sprite.webp)
+![](../assets/examples/asset_loading.webp)
+![](../assets/examples/embedded_asset.webp)
+![](../assets/examples/extra_asset_source.webp)
+![](../assets/examples/generated_assets.webp)
+![](../assets/examples/hot_asset_reloading.webp)
+![](../assets/examples/multi_asset_sync.webp)
+![](../assets/examples/repeated_texture.webp)
+Writes the ten asset examples, with meshes and images changed in place from C#. (`fbc50452`)
+
+![](../assets/examples/scrollbars.webp)
+![](../assets/examples/vertical_slider.webp)
+Reaches Bevy's widgets through wrappers and keeps their own state, writes immutable components by
+reinserting them, and writes vertical_slider and scrollbars. (`bb508d9f`)
+
+![](../assets/examples/editable_text_filter.webp)
+![](../assets/examples/tab_navigation.webp)
+![](../assets/examples/text_input.webp)
+Builds Bevy's widgets and interface picking into the render profile, makes a node a text field from
+C#, and writes editable_text_filter, text_input and tab_navigation. (`327f86a0`)
+
+![](../assets/examples/2d_text_gizmos.webp)
+![](../assets/examples/3d_text_gizmos.webp)
+![](../assets/examples/anchored_text_gizmos.webp)
+![](../assets/examples/text_gizmos_font.webp)
+Draws text as gizmos in Bevy's stroke font, and writes the four text gizmo examples with it.
+(`862d8e86`)
+
+![](../assets/examples/mirror.webp)
+Writes mirror with a lit Slang shader, culling the other face of a shader material under a camera
+that inverts culling. (`f75836af`)
+
+![](../assets/examples/extended_material.webp)
+![](../assets/examples/extended_material_bindless.webp)
+Lights a Slang shader with Bevy's own lighting through bcs::light and bcs::finish, and writes
+extended_material and its bindless twin with it. (`6e036913`)
+
+![](../assets/examples/meshlet.webp)
+![](../assets/examples/solari.webp)
+Writes meshlet and solari against a bridge built with them, adding the material that colors each
+cluster and tracing rays against a mesh with no texture coordinates. (`7abb7ab9`)
+
+![](../assets/examples/ui_scaling.webp)
+![](../assets/examples/ui_texture_slice_flip_and_tile.webp)
+Reaches Bevy's resources through the wrappers its components have, and writes ui_scaling and
+ui_texture_slice_flip_and_tile, button's input focus and the 2D wireframe examples' global setting
+with them. (`6a2e78aa`)
+
+![](../assets/examples/2d_screen_shake.webp)
+![](../assets/examples/2d_top_down_camera.webp)
+![](../assets/examples/pixel_grid_snap.webp)
+![](../assets/examples/spatial_audio_2d.webp)
+Writes pixel_grid_snap, 2d_screen_shake, 2d_top_down_camera and spatial_audio_2d on the 2D meshes.
+(`d1cfbdad`)
+
+![](../assets/examples/2d_shapes.webp)
+![](../assets/examples/2d_viewport_to_world.webp)
+![](../assets/examples/bloom_2d.webp)
+![](../assets/examples/mesh2d.webp)
+![](../assets/examples/mesh2d_alpha_mode.webp)
+![](../assets/examples/mesh2d_repeated_texture.webp)
+![](../assets/examples/mesh2d_vertex_color_texture.webp)
+![](../assets/examples/wireframe_2d.webp)
+Draws 2D meshes with Bevy's color materials, rings and wireframes, writes eight of Bevy's 2D
+examples with them, and gives an offscreen run its size from the first startup system. (`8e64d042`)
+
+![](../assets/examples/tonemapping.webp)
+Bevy's tonemapping example is written in C#, its test pattern shader in Slang. (`6766c94f`)
+
+![](../assets/examples/anti_aliasing.webp)
+Bevy's anti_aliasing example is written in C#. (`a72991c5`)
+
+![](../assets/examples/light_probe_blending.webp)
+Bevy's light_probe_blending example is written in C#. (`43037d16`)
+
+![](../assets/examples/clustered_decal_maps.webp)
+Bevy's clustered_decal_maps example is written in C#. (`39d40a4a`)
+
+![](../assets/examples/light_textures.webp)
+![](../assets/examples/reflection_probes.webp)
+Light textures are drawn now that the bridge builds them, and Bevy's light_textures and
+reflection_probes examples are written in C#. (`7618f24e`)
+
+## 2026-10-04
+
+![](../assets/examples/transmission.webp)
+Bevy's transmission example is written in C#. (`0d30866e`)
+
+![](../assets/examples/contact_shadows.webp)
+Bevy's contact_shadows example is written in C#, its model spun by a press found under the cursor
+with a ray. (`10978a66`)
+
+![](../assets/examples/anisotropy.webp)
+Bevy's anisotropy example is written in C#. (`5b74efe3`)
+
+![](../assets/examples/color_grading.webp)
+Bevy's color_grading example is written in C#. (`60ce9835`)
+
+![](../assets/examples/camera_sub_view.webp)
+Bevy's camera_sub_view example is written in C#, and atmosphere and deferred_rendering are marked as
+waiting on what the bridge lacks. (`99fecf46`)
+
+![](../assets/examples/blend_modes.webp)
+Bevy's blend_modes example is written in C#. (`d9bb9ed1`)
+
+![](../assets/examples/pccm.webp)
+Bevy's pccm example is written in C#, with the files it loads from Bevy's asset_files repository
+fetched beside the others. (`9508f00b`)
+
+![](../assets/examples/visibility_range.webp)
+A component holding a range of numbers can be written from C#, and Bevy's visibility_range example
+is written with it. (`d951f507`)
+
+![](../assets/examples/mesh_ray_cast.webp)
+![](../assets/examples/shadow_biases.webp)
+Bevy's mesh_ray_cast and shadow_biases examples are written in C#. (`f54a2848`)
+
+![](../assets/examples/2d_on_ui.webp)
+![](../assets/examples/3d_rotation.webp)
+![](../assets/examples/3d_scene.webp)
+![](../assets/examples/3d_shapes.webp)
+![](../assets/examples/3d_viewport_to_world.webp)
+![](../assets/examples/align.webp)
+![](../assets/examples/anchor_layout.webp)
+![](../assets/examples/animated_material.webp)
+![](../assets/examples/async_channel_pattern.webp)
+![](../assets/examples/async_compute.webp)
+![](../assets/examples/atmospheric_fog.webp)
+![](../assets/examples/audio.webp)
+![](../assets/examples/auto_exposure.webp)
+![](../assets/examples/bloom_3d.webp)
+![](../assets/examples/borders.webp)
+![](../assets/examples/box_shadow.webp)
+![](../assets/examples/button.webp)
+![](../assets/examples/camera_orbit.webp)
+![](../assets/examples/clearcoat.webp)
+![](../assets/examples/cpu_draw.webp)
+![](../assets/examples/depth_of_field.webp)
+![](../assets/examples/display_and_visibility.webp)
+![](../assets/examples/drag_and_drop.webp)
+![](../assets/examples/empty_defaults.webp)
+![](../assets/examples/external_source_external_thread.webp)
+![](../assets/examples/first_person_view_model.webp)
+![](../assets/examples/flex_layout.webp)
+![](../assets/examples/fog.webp)
+![](../assets/examples/fog_volumes.webp)
+![](../assets/examples/generate_custom_mesh.webp)
+![](../assets/examples/gradients.webp)
+![](../assets/examples/grid.webp)
+![](../assets/examples/hierarchy.webp)
+![](../assets/examples/image_node.webp)
+![](../assets/examples/iter_combinations.webp)
+![](../assets/examples/letter_spacing.webp)
+![](../assets/examples/lighting.webp)
+![](../assets/examples/lightmaps.webp)
+![](../assets/examples/lines.webp)
+![](../assets/examples/mixed_lighting.webp)
+![](../assets/examples/motion_blur.webp)
+![](../assets/examples/mouse_grab.webp)
+![](../assets/examples/move_sprite.webp)
+![](../assets/examples/observers.webp)
+![](../assets/examples/one_shot_systems.webp)
+![](../assets/examples/order_independent_transparency.webp)
+![](../assets/examples/orthographic.webp)
+![](../assets/examples/overflow.webp)
+![](../assets/examples/overflow_clip_margin.webp)
+![](../assets/examples/overflow_debug.webp)
+![](../assets/examples/parallel_query.webp)
+![](../assets/examples/parenting.webp)
+![](../assets/examples/pbr.webp)
+![](../assets/examples/pcss.webp)
+![](../assets/examples/play_sound_effect.webp)
+![](../assets/examples/post_processing.webp)
+![](../assets/examples/projection_zoom.webp)
+![](../assets/examples/rect_light.webp)
+![](../assets/examples/relative_cursor_position.webp)
+![](../assets/examples/removal_detection.webp)
+![](../assets/examples/render_to_texture.webp)
+![](../assets/examples/rotate_environment_map.webp)
+![](../assets/examples/rotate_to_cursor.webp)
+![](../assets/examples/rotation.webp)
+![](../assets/examples/scale.webp)
+![](../assets/examples/scrolling_fog.webp)
+![](../assets/examples/settings.webp)
+![](../assets/examples/shadow_caster_receiver.webp)
+![](../assets/examples/size_constraints.webp)
+![](../assets/examples/skybox.webp)
+![](../assets/examples/smooth_follow.webp)
+![](../assets/examples/soundtrack.webp)
+![](../assets/examples/spatial_audio_3d.webp)
+![](../assets/examples/spherical_area_lights.webp)
+![](../assets/examples/split_screen.webp)
+![](../assets/examples/spotlight.webp)
+![](../assets/examples/sprite.webp)
+![](../assets/examples/sprite_animation.webp)
+![](../assets/examples/sprite_flipping.webp)
+![](../assets/examples/sprite_scale.webp)
+![](../assets/examples/sprite_sheet.webp)
+![](../assets/examples/sprite_slice.webp)
+![](../assets/examples/sprite_tile.webp)
+![](../assets/examples/ssao.webp)
+![](../assets/examples/stacked_gradients.webp)
+![](../assets/examples/states.webp)
+![](../assets/examples/sub_states.webp)
+![](../assets/examples/text2d.webp)
+![](../assets/examples/text_debug.webp)
+![](../assets/examples/text_wrap_debug.webp)
+![](../assets/examples/texture.webp)
+![](../assets/examples/transform.webp)
+![](../assets/examples/translation.webp)
+![](../assets/examples/transparency_2d.webp)
+![](../assets/examples/transparency_3d.webp)
+![](../assets/examples/transparency_ui.webp)
+![](../assets/examples/two_passes.webp)
+![](../assets/examples/ui_target_camera.webp)
+![](../assets/examples/ui_texture_atlas.webp)
+![](../assets/examples/ui_texture_atlas_slice.webp)
+![](../assets/examples/ui_texture_slice.webp)
+![](../assets/examples/ui_transform.webp)
+![](../assets/examples/vertex_colors.webp)
+![](../assets/examples/virtual_time.webp)
+![](../assets/examples/volumetric_fog.webp)
+![](../assets/examples/wireframe.webp)
+![](../assets/examples/z_index.webp)
+Every example is captured at the size Bevy draws it and kept as WebP, lossless for flat examples and
+lossy for 3D ones. (`9f798158`)

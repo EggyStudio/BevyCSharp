@@ -1,5 +1,6 @@
 //! The denoiser's node in the render world, with the textures each view keeps between frames, the
-//! pipelines of the five stages, and the system that dispatches them after the main opaque pass.
+//! pipelines of the shader's three entry points, which run the five stages, and the system that
+//! dispatches them after the main opaque pass.
 //!
 //! Solari's own system is private to its crate, so the node is ordered after the main opaque pass,
 //! which comes after Solari, and before the transparent pass, which draws over the lit picture. The
@@ -45,15 +46,14 @@ use super::{ALBEDO_FLOOR, NORMAL_THRESHOLD, PLANE_DISTANCE, PRESENT, STEPS, VARI
 #[derive(Resource, Clone)]
 struct DenoiserShader(Handle<Shader>);
 
-/// The layouts of the frame's group and of each stage's, and the stages' pipelines.
+/// The layouts of the frame's group and of each stage's, and the stages' pipelines, the variance
+/// estimated in the temporal stage and the remodulation done by the last à-trous pass.
 #[derive(Resource)]
 struct DenoiserPipelines {
     frame: BindGroupLayoutDescriptor,
     demodulate: (BindGroupLayoutDescriptor, CachedComputePipelineId),
     temporal: (BindGroupLayoutDescriptor, CachedComputePipelineId),
-    variance: (BindGroupLayoutDescriptor, CachedComputePipelineId),
     atrous: (BindGroupLayoutDescriptor, CachedComputePipelineId),
-    remodulate: (BindGroupLayoutDescriptor, CachedComputePipelineId),
 }
 
 /// A texture the stages write and read, with the view they bind.
@@ -63,17 +63,19 @@ struct Plane {
 }
 
 /// What a view keeps between frames, the history and its moments, and what a frame writes on its
-/// way through the stages, all the size of the view.
+/// way through the stages, all the size of the view and in half floats but for the guide.
 #[derive(Component)]
 struct DenoiserTextures {
     size: UVec2,
     demodulated: Plane,
-    accumulated: Plane,
+    // Each pixel's distance and normal, eight bytes a tap reads in place of the depth and the
+    // G-buffer's sixteen.
+    guide: Plane,
     history: Plane,
     // Written and read by turns, since the temporal stage reads the previous frame's while it
     // writes this frame's, wherever the motion vectors take it.
     moments: [Plane; 2],
-    // The à-trous passes' light and variance, ping-ponged.
+    // The light and its variance, which the temporal stage writes and the à-trous passes ping-pong.
     filtered: [Plane; 2],
     // How many frames the node has run for the view, whose parity says which moments are this
     // frame's, and the frame it last ran in, which a frame after a gap does not take history from.
@@ -150,28 +152,27 @@ fn init_pipelines(mut commands: Commands, cache: Res<PipelineCache>, shader: Res
         ),
     );
 
+    let guide = || texture_2d(TextureSampleType::Uint);
+
     let demodulate = BindGroupLayoutDescriptor::new(
         "bcs_denoiser_demodulate",
-        &BindGroupLayoutEntries::with_indices(ShaderStages::COMPUTE, ((0, float()), (1, write(TextureFormat::Rgba16Float)))),
+        &BindGroupLayoutEntries::with_indices(
+            ShaderStages::COMPUTE,
+            ((0, float()), (1, write(TextureFormat::Rgba16Float)), (2, write(TextureFormat::Rg32Uint))),
+        ),
     );
     let temporal = BindGroupLayoutDescriptor::new(
         "bcs_denoiser_temporal",
         &BindGroupLayoutEntries::with_indices(
             ShaderStages::COMPUTE,
             (
+                (5, guide()),
                 (10, float()),
                 (11, float()),
                 (12, float()),
                 (13, write(TextureFormat::Rgba16Float)),
-                (14, write(TextureFormat::Rgba32Float)),
+                (14, write(TextureFormat::Rgba16Float)),
             ),
-        ),
-    );
-    let variance = BindGroupLayoutDescriptor::new(
-        "bcs_denoiser_variance",
-        &BindGroupLayoutEntries::with_indices(
-            ShaderStages::COMPUTE,
-            ((20, float()), (21, float()), (22, float()), (23, write(TextureFormat::Rgba32Float))),
         ),
     );
     let atrous = BindGroupLayoutDescriptor::new(
@@ -179,16 +180,14 @@ fn init_pipelines(mut commands: Commands, cache: Res<PipelineCache>, shader: Res
         &BindGroupLayoutEntries::with_indices(
             ShaderStages::COMPUTE,
             (
+                (5, guide()),
                 (30, float()),
-                (31, write(TextureFormat::Rgba32Float)),
+                (31, write(TextureFormat::Rgba16Float)),
                 (32, write(TextureFormat::Rgba16Float)),
                 (33, uniform_buffer_sized(false, None)),
+                (34, write(TextureFormat::Rgba16Float)),
             ),
         ),
-    );
-    let remodulate = BindGroupLayoutDescriptor::new(
-        "bcs_denoiser_remodulate",
-        &BindGroupLayoutEntries::with_indices(ShaderStages::COMPUTE, ((40, float()), (41, write(TextureFormat::Rgba16Float)))),
     );
 
     let queue = |stage: &'static str, layout: &BindGroupLayoutDescriptor| {
@@ -207,9 +206,7 @@ fn init_pipelines(mut commands: Commands, cache: Res<PipelineCache>, shader: Res
     let pipelines = DenoiserPipelines {
         demodulate: (demodulate.clone(), queue("demodulate", &demodulate)),
         temporal: (temporal.clone(), queue("temporal", &temporal)),
-        variance: (variance.clone(), queue("variance", &variance)),
         atrous: (atrous.clone(), queue("atrous", &atrous)),
-        remodulate: (remodulate.clone(), queue("remodulate", &remodulate)),
         frame,
     };
 
@@ -246,17 +243,17 @@ fn prepare_textures(
         commands.entity(entity).insert(DenoiserTextures {
             size,
             demodulated: plane("bcs_denoiser_demodulated", TextureFormat::Rgba16Float),
-            accumulated: plane("bcs_denoiser_accumulated", TextureFormat::Rgba16Float),
+            guide: plane("bcs_denoiser_guide", TextureFormat::Rg32Uint),
             history: plane("bcs_denoiser_history", TextureFormat::Rgba16Float),
-            moments: [plane("bcs_denoiser_moments_a", TextureFormat::Rgba32Float), plane("bcs_denoiser_moments_b", TextureFormat::Rgba32Float)],
-            filtered: [plane("bcs_denoiser_filtered_a", TextureFormat::Rgba32Float), plane("bcs_denoiser_filtered_b", TextureFormat::Rgba32Float)],
+            moments: [plane("bcs_denoiser_moments_a", TextureFormat::Rgba16Float), plane("bcs_denoiser_moments_b", TextureFormat::Rgba16Float)],
+            filtered: [plane("bcs_denoiser_filtered_a", TextureFormat::Rgba16Float), plane("bcs_denoiser_filtered_b", TextureFormat::Rgba16Float)],
             runs: AtomicU32::new(0),
             last_frame: AtomicU32::new(u32::MAX),
         });
     }
 }
 
-/// Runs the five stages over a view Solari lit, where the denoiser is on.
+/// Runs the five stages over a view Solari lit, where the denoiser is on, in seven dispatches.
 #[allow(clippy::too_many_arguments)]
 fn denoise(
     view: ViewQuery<
@@ -287,9 +284,7 @@ fn denoise(
     let (
         Some(demodulate),
         Some(temporal),
-        Some(variance),
         Some(atrous),
-        Some(remodulate),
         Some(gbuffer),
         Some(depth),
         Some(motion),
@@ -297,9 +292,7 @@ fn denoise(
     ) = (
         cache.get_compute_pipeline(pipelines.demodulate.1),
         cache.get_compute_pipeline(pipelines.temporal.1),
-        cache.get_compute_pipeline(pipelines.variance.1),
         cache.get_compute_pipeline(pipelines.atrous.1),
-        cache.get_compute_pipeline(pipelines.remodulate.1),
         prepass.deferred_view(),
         prepass.depth_only_view(),
         prepass.motion_vectors_view(),
@@ -355,7 +348,10 @@ fn denoise(
     let steps: Vec<_> = STEPS
         .iter()
         .enumerate()
-        .map(|(pass, step)| uniform("bcs_denoiser_step", bytemuck::cast_slice(&[*step, u32::from(pass == 0), 0, 0])))
+        .map(|(pass, step)| {
+            let (first, last) = (u32::from(pass == 0), u32::from(pass == STEPS.len() - 1));
+            uniform("bcs_denoiser_step", bytemuck::cast_slice(&[*step, first, last, 0]))
+        })
         .collect();
 
     let layout = |descriptor: &BindGroupLayoutDescriptor| cache.get_bind_group_layout(descriptor);
@@ -376,32 +372,27 @@ fn denoise(
     let demodulate_group = device.create_bind_group(
         "bcs_denoiser_demodulate",
         &layout(&pipelines.demodulate.0),
-        &BindGroupEntries::with_indices(((0, target.main_texture_view()), (1, &textures.demodulated.view))),
+        &BindGroupEntries::with_indices((
+            (0, target.main_texture_view()),
+            (1, &textures.demodulated.view),
+            (2, &textures.guide.view),
+        )),
     );
     let temporal_group = device.create_bind_group(
         "bcs_denoiser_temporal",
         &layout(&pipelines.temporal.0),
         &BindGroupEntries::with_indices((
+            (5, &textures.guide.view),
             (10, &textures.demodulated.view),
             (11, &textures.history.view),
             (12, &moments_before.view),
-            (13, &textures.accumulated.view),
+            (13, &textures.filtered[0].view),
             (14, &moments_now.view),
-        )),
-    );
-    let variance_group = device.create_bind_group(
-        "bcs_denoiser_variance",
-        &layout(&pipelines.variance.0),
-        &BindGroupEntries::with_indices((
-            (20, &textures.accumulated.view),
-            (21, &moments_now.view),
-            (22, &textures.demodulated.view),
-            (23, &textures.filtered[0].view),
         )),
     );
 
     // Pass after pass from one filtered texture into the other, the first starting where the
-    // variance stage wrote, so the fifth ends in the second.
+    // temporal stage wrote, and the last into the view target.
     let atrous_groups: Vec<_> = steps
         .iter()
         .enumerate()
@@ -410,19 +401,16 @@ fn denoise(
                 "bcs_denoiser_atrous",
                 &layout(&pipelines.atrous.0),
                 &BindGroupEntries::with_indices((
+                    (5, &textures.guide.view),
                     (30, &textures.filtered[pass % 2].view),
                     (31, &textures.filtered[(pass + 1) % 2].view),
                     (32, &textures.history.view),
                     (33, step.as_entire_binding()),
+                    (34, target.main_texture_view()),
                 )),
             )
         })
         .collect();
-    let remodulate_group = device.create_bind_group(
-        "bcs_denoiser_remodulate",
-        &layout(&pipelines.remodulate.0),
-        &BindGroupEntries::with_indices(((40, &textures.filtered[STEPS.len() % 2].view), (41, target.main_texture_view()))),
-    );
 
     let diagnostics = ctx.diagnostic_recorder();
     let diagnostics = diagnostics.as_deref();
@@ -435,21 +423,23 @@ fn denoise(
     let (x, y) = (size.x.div_ceil(8), size.y.div_ceil(8));
     pass.set_bind_group(0, &frame_group, &[previous_offset.offset]);
 
-    for (pipeline, group) in [(demodulate, &demodulate_group), (temporal, &temporal_group), (variance, &variance_group)] {
+    // Each stage timed in its own span under the node's, `bcs_denoiser/temporal` and the rest, so
+    // render.timings says which of them the node's time goes to.
+    for (name, pipeline, group) in [("demodulate", demodulate, &demodulate_group), ("temporal", temporal, &temporal_group)] {
+        let stage = diagnostics.time_span(&mut pass, name);
         pass.set_pipeline(pipeline);
         pass.set_bind_group(1, group, &[]);
         pass.dispatch_workgroups(x, y, 1);
+        stage.end(&mut pass);
     }
 
     pass.set_pipeline(atrous);
-    for group in &atrous_groups {
+    for (index, group) in atrous_groups.iter().enumerate() {
+        let stage = diagnostics.time_span(&mut pass, format!("atrous {}", index + 1));
         pass.set_bind_group(1, group, &[]);
         pass.dispatch_workgroups(x, y, 1);
+        stage.end(&mut pass);
     }
-
-    pass.set_pipeline(remodulate);
-    pass.set_bind_group(1, &remodulate_group, &[]);
-    pass.dispatch_workgroups(x, y, 1);
 
     span.end(&mut pass);
 }

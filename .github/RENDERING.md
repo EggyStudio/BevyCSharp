@@ -337,19 +337,23 @@ color and its emissive in it, and leaves the noise to a denoiser. The bridge's n
 `render/denoiser`, runs in Bevy's `Core3d` schedule after the main opaque pass, which comes after
 Solari's own system, private to its crate, and before the transparent pass. It dispatches five
 stages of spatiotemporal variance-guided filtering over the view target, as `denoiser.wgsl` holds
-them. The light is demodulated, the G-buffer's emissive taken off and the rest divided by the
-share the surface sends back, its diffuse color and what its specular reflection returns at the
-angle it is seen at, since a dark surface seen at a slant sends back more by the second, and
-divided by its color alone its light stood above its lighter neighbors' and the filter spread it
-among them. It is accumulated in time, reprojected by the motion vectors onto the
-previous frame's history and kept where the previous depth and G-buffer, which Solari double-buffers
-with ReSTIR on, agree with this frame's, with the first two moments of luminance beside it. The
-luminance's variance comes from the moments, or from a seven by seven neighborhood while the
-history is short. Five à-trous passes at steps 1 to 16 weigh each tap by its depth, normal and
-luminance, the first pass's light kept as the next frame's history. The result is remodulated into
-the view target. Each view keeps its history, the moments in two textures read and written by turns,
-and the passes' light and variance ping-ponged between two more. A pixel with no G-buffer texel, the
-sky or a forward material, is left as it was.
+them. The light is demodulated, the G-buffer's emissive taken off and the rest divided by the share
+the surface sends back, its diffuse color and what its specular reflection returns at the angle it
+is seen at, since a dark surface seen at a slant sends back more by the second, and divided by its
+color alone its light stood above its lighter neighbors' and the filter spread it among them. It is
+accumulated in time, reprojected by the motion vectors onto the previous frame's history and kept
+where the previous depth and G-buffer, which Solari double-buffers with ReSTIR on, agree with this
+frame's, with the mean of its luminance and the variance about it beside it. The luminance's
+variance comes from those, or from a seven by seven neighborhood while the history is short, worked
+out in the same dispatch. Five à-trous passes at steps 1 to 16 weigh each tap by its depth, normal
+and luminance, the first pass's light kept as the next frame's history, and the last remodulates
+into the view target. A workgroup of eight by eight whose light all varies by under a hundredth is
+passed through, since its taps would move it by under a level. Each view keeps its history, the
+moments in two textures read and written by turns, and the passes' light and variance ping-ponged
+between two more, all half floats, and each pixel's distance and packed normal in eight bytes, which
+a tap reads in place of the depth and the G-buffer's sixteen, since the stages' time goes to moving
+the picture through memory. A pixel with no G-buffer texel, the sky or a forward material, is left
+as it was.
 
 A scene Solari does not keep, such as stand-ins or a lower level of detail for rays, is a ray
 scene over a geometry pool. The render world builds each pool mesh into a bottom-level structure

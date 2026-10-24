@@ -10,20 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `16614918`, item 54's second commit cherry-picked from `modeling-operations`, after
-`97440a1d`, its first, and nothing else, the review's files uncommitted in the local coder's tree:
-the two match the branch's `fc749b2e` and `62136e08` but for the plain Slang names in RENDERING.md's
-context and the ABI line, 302 to 303, read against the branch rather than reported, the author and
-committer the owner's. Pushed at 01:57 on 2026-10-24 after the build run of `a2c8348e` ended green;
-its own run green on the three systems in fifteen minutes, read at 02:16. Next item 54's readings on
-the device in one commit with the guide's figures, the still means, the strafe and the node's time
-at 1080p with its budget; items 51 and 52 wait on 3DEngine's 71, 72 and 74.
+Reviewed up to `c770351f`, item 54's readings, and nothing else, carrying the review's files and a
+Shared line: build/denoiser-readings.py reads each feature test view's filtered and grainy frames
+against the mean of 256 grainy ones, every view nearer with the denoiser, 0.9 to 4.9 levels against
+5.8 to 14.3, the strafe past the Cornell box's block leaving no trail, 13 against 31 over the pixels
+the block left; departures, a fault the readings found and mended, the light divided by the diffuse
+color plus the specular reflectance at the angle seen rather than the base color alone, since the
+dark checkered ground at a slant ran high and spread along its edges, the node's cost 3.6 ms at
+1080p in the Solari scene and 5.7 with every pixel filtered, about Solari's lighting, held within 7
+ms by a test and taken as item 59, and feature.denoiser and glide added to the feature test since
+the fly camera moves with the right button alone; the suite 1,731 passed, the Cargo tests, the three
+profiles and the cross checks clean. Read at 03:47 on 2026-10-24 and pushed at once, the run of
+`16614918` having ended green; its run green on the three systems at 04:10. Next item 59 by its
+stages; items 51 and 52 wait on 3DEngine's 71, 72 and 74.
+
+Before it, `16614918` and `97440a1d` came, item 54's two cherry-picks, pushed at 01:57 on
+2026-10-24, their run green in fifteen minutes.
 
 Before it, `a2c8348e` came, Verdict 44's mend, with `fda2f62e`, item 56, pushed at 23:31 on
 2026-10-23, its build run green, Verdict 44 settled.
-
-Before it, `fda2f62e` came, item 56, the bridge's Slang modules with plain names, and nothing else.
-Pushed at 23:09 on 2026-10-23, its build run Linux red on the examples table's check, Verdict 44.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -251,57 +256,17 @@ from [SHARED.md](SHARED.md).
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
 
-54. **A denoiser over Solari's lit result, so the ray-traced tier's picture is clean (Decision
-    52).** Solari writes the direct and indirect light it resampled into the view target as one
-    color, the surface's color already in it, and leaves the noise to DLSS Ray Reconstruction, which
-    the bridge does not build, so the picture is grainy wherever it runs. A node of the bridge's own
-    in the `solari` profile, after Solari's node and before Bevy's post-processing, in five stages.
-    First the color is demodulated, the deferred prepass's emissive taken off and the rest divided
-    by its base color above a floor. Then it is accumulated in time, reprojected by the motion
-    vectors onto the previous frame's accumulation and kept where the previous depth, which Solari
-    double-buffers, and the normal agree within a plane distance and a normal threshold, the history
-    clamped at 32 frames, the first and second moments of luminance accumulated beside it. Then the
-    variance, from the moments where the history holds four frames or more, else from a 7 by 7
-    neighborhood. Then an à-trous filter of five passes at steps 1, 2, 4, 8 and 16, each tap
-    weighted by its depth, normal and luminance differences, the luminance's against the root of the
-    blurred variance, the variance filtered along, and the first pass's result fed back as the next
-    frame's history, as SVGF does. Last the color is remodulated, times the base color plus the
-    emissive, into the view target. `Render.SetRayTracedDenoiser(on)` turns it off for a capture
-    beside, on wherever ray tracing is active, and the history's clamp and the three weights' widths
-    are a settings struct with SVGF's defaults, the guide naming them. The reading, on a machine
-    with ray queries since the runners have none, the local command named under N 3.6: the mean of
-    256 frames of Solari standing still as the reference of each of the feature test's reference
-    views, the denoised single frame nearer it than the noisy one at every view, the camera strafing
-    past a pillar for thirty frames leaving no trail, read as the disoccluded pixels no further from
-    the reference than the noisy frame's, and the node's time at 1080p from Bevy's diagnostics, the
-    budget set from the first reading. Cargo tests of the weights and the reprojection as pure
-    functions, a headless test that a bridge without `solari` has no node, the ray tracing guide's
-    grainy sentence changed and RENDERING.md's node added. H-Trace's denoiser is read for its stage
-    order and constants, nothing of its code taken (Decision 52). Two commits, the node with its
-    stages, then the setting, the guide and the readings. After item 50 and before items 51 and 52.
-    Given at 20:43 on 2026-10-23 to the cloud session on `modeling-operations` for the node, its
-    stages and the Cargo tests of the math, compiled and checked across the profiles there; the
-    readings on a machine with ray queries and the guide's figures fall to the local coder at the
-    cherry-pick, after item 50. Its first commit, `fc749b2e` on `modeling-operations` at 00:30 on
-    2026-10-24, is the node with its stages, the shader and the Cargo tests of the weights, the
-    reprojection and the shader, 6 files and 1,171 lines under the owner's identity, the branch's
-    build run green; the setting, the guide and the readings follow as the second commit with the C
-    entry points, ABI 300 to 301, and the local cherry-pick after item 50. Reported at 01:2x; its
-    departures the node's place after the main opaque pass and before the transparent one, Solari's
-    system and the transmissive pass being private to their crates, sky and forward-material texels
-    neither filtered nor taps, non-finite light taken as none and a zero-weight tap unread, and the
-    à-trous depth gradient read from surface neighbors alone after sky taps spread a NaN to a black
-    floor; 8 Cargo tests, the check clean across the profiles on three systems, the six ray tracing
-    tests passing on lavapipe with the node on. Its second, `62136e08` at 01:47 on 2026-10-24 under
-    the owner's identity, 15 files, 376 lines, is Render.SetRayTracedDenoiser with DenoiserSettings,
-    a sealed class of the history's clamp and the three widths at SVGF's defaults,
-    Render.RayTracedDenoiserActive, the two C entry points at ABI 303 since main holds 302, every
-    app clearing the ray tracing flags as it begins, a fault found there, the guide's passage
-    rewritten with a compiled block; 1,132 passed headless, the 9 ray tracing tests on lavapipe, 11
-    Cargo tests, the checks clean on three systems. The item is whole on the branch; the local coder
-    cherry-picks both, the ABI line the one conflict, and takes the still means, the strafe and the
-    node's time at 1080p with its budget. On main as `97440a1d` and `16614918`, pushed at 01:57 on
-    2026-10-24; the readings to come.
+59. **The denoiser's node comes down from 3.6 ms at 1080p, read stage by stage first.** Item 54's
+    readings put the node at 3.6 ms in Bevy's Solari scene and 5.7 with every pixel filtered on the
+    development machine's GPU, about what Solari's lighting takes, where an SVGF of five à-trous
+    passes is usually a third of that; so the stages are timed one by one through render.timings,
+    the demodulation, the reprojection, the variance, each à-trous pass and the remodulation, and
+    the costly ones mended by the usual means where the readings keep: the variance estimate folded
+    into the first à-trous pass, the history and the moments in 16-bit storage, the taps read
+    through group-shared memory, and an à-trous pass skipped where a tile's variance lies under a
+    threshold; item 54's seven still means and the strafe read again, none further from its mean by
+    more than a level, the budget test tightened to the result with a margin, the guide's figures
+    changed. One or two commits, by stage. After item 54, while items 51 and 52 wait.
 
 ## Verdicts
 
@@ -1369,3 +1334,27 @@ from Bevy's polynomial, every view is nearer, 0.9 to 4.9 against 5.8 to 14.3, an
 pixels 13 against 31. The node takes 3.6 ms at 1920 by 1080 in Bevy's Solari scene and 5.7 ms with
 every pixel filtered on an RTX 4070 Laptop GPU, about what Solari's lighting takes, held within 7 ms
 by a test.
+
+Shared: the denoiser's stages timed one by one and brought down from 3.6 to 1.9 ms at 1920 by 1080,
+in the commit carrying this line, item 59, for 3DEngine's denoiser over its ray-traced pass. Each
+stage is a span of its own under the node's, so render.timings gives the demodulation, the
+temporal stage and each à-trous pass, and every stage proved to cost about what moving the picture
+through memory costs, the five à-trous passes half a millisecond each at 25 taps of the depth, the
+G-buffer's sixteen bytes and a 32-bit light. The demodulation writes each pixel's distance and
+packed normal in eight bytes, which every tap reads instead, the light, the moments and the history
+are half floats, the variance is estimated in the temporal stage and the last à-trous pass
+remodulates, seven dispatches where there were nine, each pass 0.25 to 0.29 ms. A half float loses
+the mean of the square less the square of the mean wherever the light varies by under a few
+hundredths, which left a view of grass 1.7 levels further from its mean, so the moments are kept as
+the mean and the variance about it, updated as (1 - a) v + a (1 - a) (x - m)^2, and the filtered
+light carries the root of its variance, which the passes take down a tenth at a time. A workgroup
+whose light all varies by under a hundredth skips the pass, which gained a few hundredths of a
+millisecond in the later passes. Taps read through workgroup memory for the steps of one and two
+were slower, 2.6 ms, the eight kilobytes lowering every pass's occupancy where the texture cache
+held the overlap without them, and the weight's three factors as one power of two gained nothing,
+so neither is kept. The seven views and the strafe read within a level of before. With every
+pixel filtered the node takes 2.5 ms, each early pass 0.55 ms at about 65 texture fetches a pixel,
+three quarters of the rate the GPU's texture units fetch at, so a further cut is in fewer fetches,
+the guide and the light read as one or through buffers, rather than in fewer bytes. The budget test
+takes the least of 600 frames' own measurements, since a pass's time counts another program's work
+on the GPU and read 8 ms smoothed beside a game.
