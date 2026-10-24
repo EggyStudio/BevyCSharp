@@ -143,6 +143,12 @@ public partial struct Applied
     private static void Camera(Entity camera, FeatureSettings settings)
     {
         Render.SetPostProcessing(camera, Picture(settings));
+        Render.SetLook(camera, settings.Look switch
+        {
+            Look.Engine => new LookSettings(),
+            Look.Vivid => LookSettings.Vivid(),
+            _ => null,
+        });
         Render.SetEffects(camera, Lens(settings));
 
         if (!RayTracedOcclusion.Tracing)
@@ -192,8 +198,8 @@ public partial struct Applied
     internal static AtmosphereSettings Sky() => new() { Medium = ScatteringTerm.EarthArc() };
 
     /// <summary>
-    /// The fog over the map, thick enough that the ground's far edge, a few hundred meters off, is
-    /// gone into the horizon, and thinning upward so the zones' tops stand clear.
+    /// The fog over the map, thick enough that the ground's far edge, a few hundred meters off,
+    /// fades toward the horizon, and thinning upward so the zones' tops stand clear.
     /// </summary>
     private static readonly SkyFogSettings Fog = new() { Visibility = 700f, Height = 40f };
 

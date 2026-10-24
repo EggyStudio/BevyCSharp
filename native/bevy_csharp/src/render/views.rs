@@ -81,6 +81,9 @@ use bevy::app::App;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems};
 use bevy::core_pipeline::core_3d::{main_opaque_pass_3d, main_transparent_pass_3d};
 use bevy::core_pipeline::deferred::node::late_deferred_prepass;
+use bevy::anti_alias::contrast_adaptive_sharpening::cas;
+use bevy::anti_alias::fxaa::fxaa;
+use bevy::anti_alias::smaa::smaa;
 use bevy::core_pipeline::tonemapping::tonemapping;
 use bevy::ecs::schedule::IntoScheduleConfigs;
 use bevy::pbr::deferred::deferred_lighting;
@@ -206,8 +209,15 @@ pub fn install(app: &mut App) {
                     .after(Core3dSystems::MainPass)
                     .before(Core3dSystems::EarlyPostProcess)
                     .before(super::passes::BeforeTonemappingPasses),
+                // After the look and Bevy's antialiasing, each pass of which takes the picture into
+                // a fresh texture and, unordered against what draws here, could carry the picture
+                // on without it.
                 run_view_dispatches::<3>
                     .after(tonemapping)
+                    .after(super::passes::LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 // The picture copied in before each point's dispatches, so they read it as the
@@ -224,6 +234,10 @@ pub fn install(app: &mut App) {
                 copy_pictures::<3>
                     .before(run_view_dispatches::<3>)
                     .after(tonemapping)
+                    .after(super::passes::LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 // Each point's draws after its dispatches, so what a dispatch wrote (the counts
@@ -246,6 +260,10 @@ pub fn install(app: &mut App) {
                 run_view_draws::<3>
                     .after(run_view_dispatches::<3>)
                     .after(tonemapping)
+                    .after(super::passes::LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
             ),
@@ -269,6 +287,10 @@ pub fn install(app: &mut App) {
                     .before(super::passes::BeforeTonemappingPasses),
                 run_view_dispatches::<3>
                     .after(tonemapping)
+                    .after(super::passes::LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .before(super::passes::AfterTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
             ),

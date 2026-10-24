@@ -23,7 +23,10 @@ use bevy::camera::Camera;
 use bevy::core_pipeline::prepass::{
     PreviousViewUniformOffset, PreviousViewUniforms, ViewPrepassTextures,
 };
-use bevy::core_pipeline::tonemapping::tonemapping;
+use bevy::anti_alias::contrast_adaptive_sharpening::cas;
+use bevy::anti_alias::fxaa::fxaa;
+use bevy::anti_alias::smaa::smaa;
+use bevy::core_pipeline::tonemapping::{Tonemapping, tonemapping};
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems, FullscreenShader};
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
@@ -63,6 +66,10 @@ pub struct AfterTonemappingPasses;
 #[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct AfterOpaquePasses;
 
+/// Where a look runs in the tonemapper's place, first after it and before Bevy's antialiasing.
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct LookPasses;
+
 /// Where in a camera's frame a pass runs.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PassPlace {
@@ -72,6 +79,10 @@ pub enum PassPlace {
     AfterTonemapping = 1,
     /// On the lit opaque geometry, before transparent geometry is drawn over it.
     AfterOpaque = 2,
+    /// In the tonemapper's place, on the linear picture once everything Bevy does to it before
+    /// tonemapping is done, turning it into the one the screen shows, which the library's look
+    /// is. Bevy's tonemapper is left out on a camera with one.
+    Look = 3,
 }
 
 impl PassPlace {
@@ -80,6 +91,7 @@ impl PassPlace {
             0 => Self::BeforeTonemapping,
             1 => Self::AfterTonemapping,
             2 => Self::AfterOpaque,
+            3 => Self::Look,
             _ => return None,
         })
     }
@@ -142,6 +154,9 @@ pub fn install(app: &mut App) {
             Render,
             (prepare_passes, forget_passes).in_set(RenderSystems::PrepareBindGroups),
         )
+        // Before the tonemapper's pipeline is prepared for the view, which the view's tonemapper,
+        // extracted again every frame, decides.
+        .add_systems(Render, leave_out_tonemapper.in_set(RenderSystems::CreateViews))
         .add_systems(
             Core3d,
             (
@@ -152,8 +167,23 @@ pub fn install(app: &mut App) {
                     .after(Core3dSystems::EarlyPostProcess)
                     .before(Core3dSystems::PostProcess)
                     .in_set(BeforeTonemappingPasses),
+                // Bevy's tonemapper does nothing on a camera with a look, which runs here in its
+                // place, before Bevy's antialiasing, which smooths the picture as the screen shows it.
+                run_passes::<3>
+                    .after(tonemapping)
+                    .before(fxaa)
+                    .before(smaa)
+                    .before(cas)
+                    .in_set(LookPasses)
+                    .in_set(Core3dSystems::PostProcess),
+                // After the antialiasing, each pass of which takes the picture into a fresh texture
+                // and, unordered against a pass, could carry the picture on from before it.
                 run_passes::<1>
                     .after(tonemapping)
+                    .after(LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .in_set(AfterTonemappingPasses)
                     .in_set(Core3dSystems::PostProcess),
                 // Between opaque and transparent geometry, so glass is drawn over what a pass did to
@@ -172,8 +202,19 @@ pub fn install(app: &mut App) {
                     .after(Core2dSystems::EarlyPostProcess)
                     .before(Core2dSystems::PostProcess)
                     .in_set(BeforeTonemappingPasses),
+                run_passes::<3>
+                    .after(tonemapping)
+                    .before(fxaa)
+                    .before(smaa)
+                    .before(cas)
+                    .in_set(LookPasses)
+                    .in_set(Core2dSystems::PostProcess),
                 run_passes::<1>
                     .after(tonemapping)
+                    .after(LookPasses)
+                    .after(fxaa)
+                    .after(smaa)
+                    .after(cas)
                     .in_set(AfterTonemappingPasses)
                     .in_set(Core2dSystems::PostProcess),
             ),
@@ -344,6 +385,22 @@ fn prepare_passes(
     }
 }
 
+/// Leaves Bevy's tonemapper out of a view with a look, which takes its place, setting the view's
+/// extracted tonemapper to none for the frame, which leaves the tonemapper's system doing nothing.
+///
+/// The view's own setting is the camera's, extracted again every frame, so the tonemapper it names
+/// comes back the frame the look goes. A view drawing without a high dynamic range keeps Bevy's,
+/// which its materials apply as they draw.
+fn leave_out_tonemapper(
+    mut views: Query<(&BcsShaderPasses, &bevy::render::camera::ExtractedCamera, &mut Tonemapping)>,
+) {
+    for (passes, camera, mut tonemapper) in &mut views {
+        if camera.hdr && passes.passes.iter().any(|pass| pass.place == PassPlace::Look) {
+            *tonemapper = Tonemapping::None;
+        }
+    }
+}
+
 /// Drops what a view kept for passes its camera no longer has.
 fn forget_passes(
     mut commands: Commands,
@@ -393,6 +450,17 @@ fn run_passes<const PLACE: u8>(
         super::material::say_once(
             "A camera drawing several samples a pixel runs passes after opaque geometry, which \
              needs one sample a pixel (PostSettings.Msaa of one), so they do not run."
+                .to_string(),
+        );
+        return;
+    }
+
+    // A camera drawing to a picture of eight bits a channel tonemaps in its materials' shaders, so
+    // there is no linear picture past white left for a look to bring under it.
+    if PLACE == PassPlace::Look as u8 && target.main_texture_format().is_srgb() {
+        super::material::say_once(
+            "A camera drawing without a high dynamic range has a look, which needs one \
+             (PostSettings.Hdr), so Bevy's tonemapper runs in its place."
                 .to_string(),
         );
         return;

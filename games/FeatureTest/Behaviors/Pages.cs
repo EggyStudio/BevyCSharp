@@ -56,6 +56,7 @@ internal static class Pages
 
     private static Page Effects() => new("Effects",
     [
+        new ChoiceRow<Look>("Look", () => S.Look, value => Settings.Change(s => s with { Look = value })),
         new ChoiceRow<Tonemapper>("Tonemapper", () => S.Tonemapper, value => Settings.Change(s => s with { Tonemapper = value })),
         new ToggleRow("Ambient occlusion", () => S.AmbientOcclusion, value => Settings.Change(s => s with { AmbientOcclusion = value })),
         new ToggleRow("Screen-space reflections", () => S.Reflections, value => Settings.Change(s => s with { Reflections = value })),

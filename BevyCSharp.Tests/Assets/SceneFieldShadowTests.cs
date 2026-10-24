@@ -160,7 +160,7 @@ public sealed class SceneFieldShadowTests
         Assert.Equal(new[] { true, false }, floats);
     }
 
-    private const string Tint = """
+    internal const string Tint = """
         import bcs_pass;
 
         [shader("vertex")]

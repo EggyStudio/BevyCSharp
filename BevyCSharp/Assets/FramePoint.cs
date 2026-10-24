@@ -20,7 +20,10 @@ public enum FramePoint
     /// </remarks>
     BeforeTonemapping = 2,
 
-    /// <summary>On the picture as the screen will show it, before the passes that run after it.</summary>
+    /// <summary>
+    /// On the picture as the screen will show it, after Bevy's antialiasing and before the passes
+    /// that run after tonemapping.
+    /// </summary>
     AfterTonemapping = 3,
 
     /// <summary>

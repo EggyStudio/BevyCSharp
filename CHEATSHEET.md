@@ -791,6 +791,7 @@ static bool TryGetBounds(Entity entity, out Vec3 min, out Vec3 max);  // The box
 static void SetWireframe(Entity entity, bool on, (float R, float G, float B, float A) color = default);  // Draws an entity's mesh as its own edges in an app that asked for wireframes with Wireframes, or stops drawing them
 static void SetShadowMapSize(uint directional = 0, uint point = 0);  // Sets how large a shadow map each kind of light gets, in pixels on a side
 static void SetLayers(EcsWorld world, Entity entity, uint layers);  // Puts an entity on a set of render layers, as a bit per layer
+static void SetLook(Entity camera, LookSettings? look);         // Gives a camera a look, which turns its linear picture into the one the screen shows in place of Bevy's tonemapper, replacing any it had, or with null takes it off and gives the picture back to the tonemapper
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
 static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
@@ -1772,6 +1773,9 @@ static void InfoOnce(string message, string file = "", int line = 0);  // Writes
 static void WarnOnce(string message, string file = "", int line = 0);  // Writes a line at the warn level the first time this line of code runs, Bevy's warn_once!
 static void ErrorOnce(string message, string file = "", int line = 0);  // Writes a line at the error level the first time this line of code runs, Bevy's error_once!
 static void Once(Action work, string file = "", int line = 0);  // Runs work the first time this line of code runs and never again, Bevy's once!
+
+// LookSettings
+static LookSettings Vivid();                                    // A vivid look, Numbered at an exposure of 0.9, a white of 1.3 and powers of 1.05 and 1, the light raised by 1.6 before it, a saturation of 1.4 and a contrast of 1.12
 
 // MemoryGuard
 static long ResidentBytes();                                    // How many bytes of the machine's memory the process holds now

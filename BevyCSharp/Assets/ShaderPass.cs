@@ -6,7 +6,8 @@ namespace Bevy;
 /// Whether the pass runs on the picture as the screen will show it rather than on the linear one.
 /// Before is right for anything about light, such as a glow or an exposure, because the numbers
 /// are still proportional to it. After is right for anything about the picture as a picture, such
-/// as scan lines, a palette or dithering.
+/// as scan lines, a palette or dithering, and runs after Bevy's antialiasing, so the edges it draws
+/// stay crisp.
 /// </param>
 /// <param name="At">
 /// A point of the frame to run at instead, which is <see cref="FramePoint.AfterOpaque"/>, on the lit
@@ -18,8 +19,14 @@ namespace Bevy;
 /// </param>
 public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTonemapping = false, FramePoint? At = null)
 {
+    /// <summary>
+    /// A place of the frame only the engine's own passes run at, the look's in the tonemapper's
+    /// place, numbered as the bridge reads it, or none to run the pass by <see cref="At"/>.
+    /// </summary>
+    internal int? EnginePlace { get; init; }
+
     /// <summary>Where the bridge runs it, as the number it reads.</summary>
-    internal int Place => At switch
+    internal int Place => EnginePlace ?? At switch
     {
         null => AfterTonemapping ? 1 : 0,
         FramePoint.BeforeTonemapping => 0,

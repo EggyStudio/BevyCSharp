@@ -10,24 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `0ce0069d`, item 64's first part, the atmosphere's media, pushed at 21:56 on
-2026-10-24 after the run of `30362cf2` went green; its own run green on the three systems at 22:11,
-carrying the review's files and two pictures with captions. ScatteringTerm.Earth and EarthArc stand,
-ARC's numbers worked out again from ARPC's data, Rayleigh 6.605, 12.345 and 29.413 and ozone 2.291,
-1.540 and 0 at e-6, Bevy's falloffs kept so the two airs differ in the six amounts alone,
-TentCenter's doc corrected to Bevy's convention; the lookup textures read against the raymarch at
-30, 8, 2 and minus 2 degrees within 0.61 to 0.97 levels for Earth and 0.63 to 1.02 for ARC, and at
-minus 2 degrees Bruneton's sky 199, 181, 180 over a band of 224, 166, 127 against ARC's 178, 187,
-187 over 207, 177, 131, six tests holding these; the feature test takes ARC's air, the weather off
-by default with its cloud cover held at 0 when on, and under the atmosphere the day cycle gives the
-sun at 12,500 lux and white with no horizon fade where its curve had faded the sun to nothing and
-the sky went black at 18:00, its keyframes kept for the dusk backdrop; the guide's sky page has the
-two airs and the sun-above-the-air rule, CHEATSHEET and PublicApi updated. Departure, the sun disc
-needed no change, Bevy's default being the earth's disc, the blob having been item 63's badge. 1,820
-passed, 3 skipped.
+Reviewed up to `53583307`, item 64's second part, the sky's fog and the band below the horizon,
+pushed at 23:20 on 2026-10-24 after the run of `0ce0069d` went green; its own run green on the three
+systems at 23:33, carrying two pictures with captions, a Shared line and the review's files.
+Render.SetSkyFog and ClearSkyFog with SkyFogSettings are the engine's own draw in sky_fog.slang, a
+layer over the ground 95 percent gone at the visibility at its base and thinning by e every height,
+its color along each way read from the sky-lit environment map at the way's height held between 0
+and 3 degrees at roughness 0.08, since a read at 0.5 took in the dark ground and left the sunset
+band blue gray, and below the horizon the band darkening to the ground's shade over its degrees,
+with sky.fog on the console and the feature test at 700 and 40 m. Departures in the native,
+FramePoint.BeforeTonemapping sat unordered against TAA, motion blur, depth of field, bloom and the
+effect stack so a vignette dropped the fog, and stands after the main pass and before the early
+post-process where Bevy draws its volumetric fog, the ShaderPass before tonemapping after it and
+before the post-process, the 2D point and passes alike, no ABI change; and SceneInfo's unused uint
+names what a pass has, depth, normals and motion, so a multisampled camera draws no fog rather than
+the band over the ground. The same race stands after tonemapping against FXAA, SMAA and CAS, whose
+systems sit in private modules, item 71. SkyFogTests holds nine, the fade with distance, the
+thinning upward, the band, the fog kept under vignette, bloom and TAA, none under MSAA, the console
+off and on, and settings refused, the levels within a few of the worked ones; the step at the
+level's ground edge waits on item 68's distant geometry. 1,829 passed, 3 skipped, the bridge's
+checks clean, Cargo 118, 199 and 11.
 
-Before it, `30362cf2` came, item 63, pushed at 21:05 on 2026-10-24, its run green on the three
-systems.
+Before it, `0ce0069d` came, item 64's first part, pushed at 21:55 on 2026-10-24, its run green on
+the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -39,7 +44,6 @@ full.
 
 The norm has 44 rules, and this engine stands at 31 checked, 4 with places listed, none to take and
 9 by review.
-
 
 ## Now
 
@@ -248,7 +252,17 @@ from [SHARED.md](SHARED.md).
     suggestion the owner heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with their
     readings; the second next, the distant geometry and the band below the horizon fading to the
     sky's horizon color by view direction, read from the camera's sky-lit environment map in a pass
-    of the engine's own.
+    of the engine's own. The second phase at `53583307` on 2026-10-24, the fog and the band with the
+    frame points ordered; the third next, the grading keyed by the sun's height. The third phase's
+    plan at 23:30, since 3DEngine's look, the voxel game's BSL curve at exposure 1.6, saturation 1.4
+    in linear light after the curve, contrast 1.12 about the middle once encoded and the engine's
+    knee as the default curve, cannot be said in Bevy's tonemappers, is an engine pass in the
+    tonemapper's place, the view's Tonemapping set to None in the render world while a look is on,
+    the look pass after tonemapping and before the anti-aliasing and the passes after tonemapping,
+    Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and its knee,
+    tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then, as a second
+    commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's height,
+    3DEngine keying no grading by the hour.
 
 69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
     leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
@@ -333,6 +347,20 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
+
+71. **A frame point after tonemapping is ordered against FXAA, SMAA and CAS.** Found by item 64's
+    second part on 2026-10-24, read at 23:20: FramePoint.AfterTonemapping and the passes after
+    tonemapping run unordered against Bevy's FXAA, SMAA and CAS, whose systems sit in
+    bevy_anti_alias's private node modules the bridge cannot name, so an effect drawn there can be
+    dropped by a fresh texture as the fog was by the vignette. The bridge orders the point by the
+    graph's labels where the nodes are public, or by a node of its own placed after the
+    anti-aliasing nodes in the camera's graph, or an upstream change asked of Bevy with the bridge's
+    patch meanwhile, whichever the reading finds; a test drawing a mark after tonemapping under
+    FXAA, SMAA and CAS each and reading it kept. One commit, small, after item 64. The coder's
+    correction at 23:30, the systems are nameable, bevy_anti_alias re-exporting fxaa and cas and
+    smaa a public function, so the point and the passes order after the three directly in Core3d and
+    Core2d, no label, node or upstream ask; taken inside item 64's third commit with its test under
+    each.
 
 ## Verdicts
 
@@ -1643,3 +1671,15 @@ map, and below the horizon that color darkening to a share of it over a span of 
 3DEngine blends the fog's color over a few degrees above the horizon and takes a horizon color a
 program asks for. The scene's light is the environment map's as before, lit by the atmosphere alone,
 and a camera drawing several samples a pixel draws no fog, its depth unread.
+
+Shared: the look in the tonemapper's place, in the commit carrying this line, item 64's third part.
+The frame is 3DEngine's as its composite runs it, an exposure, the engine's curve with the knee of
+`8ae947ee` by default or the BSL curve with its four numbers, saturation and a tint in linear light,
+and contrast about the middle once encoded, held within two levels of a model over SHARED.md's ramp,
+and the model held to TonemapCurveTests' seven figures within a thousandth; the vivid preset is the
+block game's 0.9, 1.3, 1.05 and 1 at an exposure of 1.6, saturation 1.4 and contrast 1.12. The
+departures are Bevy's bloom added before the look, not divided by a count of levels; Bevy's vignette
+before the look where 3DEngine darkens the corners after the contrast; Bevy's dither of half a level,
+which 3DEngine has none of, on by default and off in the tests; and Bevy's auto exposure, which its
+tonemapper applies and a look leaves out. The ramp through a look could be a reference picture kept
+in both engines, as the eight tonemappers' are.

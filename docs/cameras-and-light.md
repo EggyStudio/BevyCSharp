@@ -287,6 +287,29 @@ each of the three sections has to work on. The terms inside a section are the st
 so a grade written for a film pipeline carries across unchanged. Passing `null` puts the camera back
 to the engine's own grading.
 
+A look takes the tonemapper's place:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetLook(camera, LookSettings.Vivid());
+```
+
+`SetLook` turns the linear picture into the one the screen shows by the engine's own steps, in the
+order 3DEngine runs them, so a look written with the same numbers shows the same picture in both
+engines. The light is multiplied by `Exposure`, brought under white by `Curve`, saturated by
+`Saturation` and tinted in linear light, then pushed from the middle by `Contrast` once encoded.
+`LookCurve.Knee`, the default, shows everything under its knee as it was drawn and keeps a bright
+color's hue, and lets each channel past `Knee` go toward white on its own by `KneeStrength`, so a
+light bright in all three goes to white as film takes it. `LookCurve.Numbered` is the curve the BSL
+shaders tonemap Minecraft by, set by the same four numbers, and `LookSettings.Vivid` is the look
+3DEngine's block game is graded by on it, the shadows darker and the colors deeper. The look runs
+after bloom and the effects and before the antialiasing, and needs `Hdr`. While it is on, the
+tonemapper and what Bevy applies as it tonemaps, the grade above, its dithering and its auto
+exposure, are left out, and `null` gives them back. The console's `camera.look` sets it while the
+app runs.
+
 ### The lens
 
 The lens is a second call, because it is decided at a different time. A settings screen owns the

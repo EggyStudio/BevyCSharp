@@ -4194,6 +4194,24 @@ enum Bevy.LogicalKeyKind : int
   Character = 1
   Dead = 2
   Named = 0
+enum Bevy.LookCurve : int
+  Knee = 0
+  Numbered = 1
+sealed class Bevy.LookSettings
+  (float, float, float) Tint { get; set; }
+  LookCurve Curve { get; set; }
+  LookSettings()
+  bool Dither { get; set; }
+  float Contrast { get; set; }
+  float CurveExposure { get; set; }
+  float CurveLower { get; set; }
+  float CurveUpper { get; set; }
+  float CurveWhite { get; set; }
+  float Exposure { get; set; }
+  float Knee { get; set; }
+  float KneeStrength { get; set; }
+  float Saturation { get; set; }
+  static LookSettings Vivid()
 sealed class Bevy.MainThreadAttribute : Attribute
   MainThreadAttribute()
 sealed class Bevy.MapValue : IEnumerable, IEnumerable<KeyValuePair<object, object>>, IEquatable<MapValue>, IReadOnlyCollection<KeyValuePair<object, object>>, IReadOnlyList<KeyValuePair<object, object>>
@@ -12552,6 +12570,7 @@ static class Bevy.Render
   static void SetLens(Entity camera, PhysicalLens lens)
   static void SetLensExposure(Entity camera, float aperture = 0f, float shutter = 0f, float sensitivity = 0f)
   static void SetLightCookie(Entity light, AssetHandle cookie)
+  static void SetLook(Entity camera, LookSettings? look)
   static void SetMaterial(EcsWorld world, Entity entity, AssetHandle material)
   static void SetMesh(EcsWorld world, Entity entity, AssetHandle mesh)
   static void SetMeshFlags(EcsWorld world, Entity entity, MeshFlags flags)

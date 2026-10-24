@@ -37,6 +37,19 @@ public enum Backdrop
     Dusk,
 }
 
+/// <summary>How the picture's light becomes what the screen shows, as the graphics page offers it.</summary>
+public enum Look
+{
+    /// <summary>The tonemapper the graphics page names.</summary>
+    Tonemapper,
+
+    /// <summary>The engine's curve in the tonemapper's place, everything under its knee as drawn.</summary>
+    Engine,
+
+    /// <summary>The vivid look, the shadows darkened and the colors deepened.</summary>
+    Vivid,
+}
+
 /// <summary>A tier the graphics page sets several settings from at once.</summary>
 public enum Quality
 {
@@ -94,8 +107,11 @@ public sealed record FeatureSettings
     /// <summary>The tier last chosen, which set the four above.</summary>
     public Quality Quality { get; init; } = Quality.High;
 
-    /// <summary>How the picture's light is brought into what a screen can show.</summary>
+    /// <summary>How the picture's light is brought into what a screen can show, where the look leaves it to a tonemapper.</summary>
     public Tonemapper Tonemapper { get; init; } = Tonemapper.TonyMcMapface;
+
+    /// <summary>The look the picture is shown with in the tonemapper's place, or the tonemapper.</summary>
+    public Look Look { get; init; } = Look.Vivid;
 
     /// <summary>
     /// Whether corners and creases are darkened where ambient light reaches less, which needs the

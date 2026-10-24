@@ -44,9 +44,6 @@ public static unsafe partial class Shaders
     {
         ArgumentNullException.ThrowIfNull(passes);
 
-        var ids = new int[passes.Length];
-        var after = new int[passes.Length];
-
         for (var i = 0; i < passes.Length; i++)
         {
             if (!passes[i].Instance.IsValid)
@@ -55,7 +52,40 @@ public static unsafe partial class Shaders
                     $"Pass {i} has no instance. Make one with Shaders.CreateInstance.",
                     nameof(passes));
             }
+        }
 
+        ForgetOtherApps();
+        ProgramPasses[camera.Bits] = [.. passes];
+        SubmitPasses(camera);
+    }
+
+    /// <summary>
+    /// Gives a camera the passes one of the engine's own parts runs, beside the program's and the
+    /// other parts', replacing the ones that part gave it before. Only valid inside a system.
+    /// </summary>
+    /// <param name="camera">The camera.</param>
+    /// <param name="owner">The engine's part that runs them, whose passes these replace beside the others'.</param>
+    /// <param name="passes">The passes, or none to take that part's away.</param>
+    internal static void SetEnginePasses(Entity camera, string owner, params ShaderPass[] passes)
+    {
+        ForgetOtherApps();
+        if (!EnginePasses.TryGetValue(camera.Bits, out var owned)) EnginePasses[camera.Bits] = owned = new SortedDictionary<string, ShaderPass[]>(StringComparer.Ordinal);
+        if (passes.Length == 0) owned.Remove(owner);
+        else owned[owner] = [.. passes];
+        if (owned.Count == 0) EnginePasses.Remove(camera.Bits);
+        SubmitPasses(camera);
+    }
+
+    // Hands the bridge a camera's passes, the engine's parts' first in their owners' order, then the
+    // program's, each place of the frame running its own in that order.
+    private static void SubmitPasses(Entity camera)
+    {
+        ShaderPass[] passes = [.. EnginePasses.GetValueOrDefault(camera.Bits)?.Values.SelectMany(p => p) ?? [], .. ProgramPasses.GetValueOrDefault(camera.Bits) ?? []];
+        var ids = new int[passes.Length];
+        var after = new int[passes.Length];
+
+        for (var i = 0; i < passes.Length; i++)
+        {
             ids[i] = passes[i].Instance.Id;
             after[i] = passes[i].Place;
         }
@@ -150,6 +180,8 @@ public static unsafe partial class Shaders
     private static App? _viewsApp;
     private static readonly Dictionary<ulong, uint> ProgramPrepasses = [];
     private static readonly Dictionary<ulong, SortedDictionary<string, uint>> EnginePrepasses = [];
+    private static readonly Dictionary<ulong, ShaderPass[]> ProgramPasses = [];
+    private static readonly Dictionary<ulong, SortedDictionary<string, ShaderPass[]>> EnginePasses = [];
     private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [];
     private static readonly Dictionary<ulong, SortedDictionary<string, ViewDraw[]>> EngineDraws = [];
     private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [];
@@ -164,6 +196,8 @@ public static unsafe partial class Shaders
         _viewsApp = App.Running;
         ProgramPrepasses.Clear();
         EnginePrepasses.Clear();
+        ProgramPasses.Clear();
+        EnginePasses.Clear();
         ProgramDraws.Clear();
         EngineDraws.Clear();
         ProgramDispatches.Clear();

@@ -331,6 +331,10 @@ internal static unsafe partial class SceneField
         }));
     }
 
+    /// <summary>An instance of one of the library's programs that runs over a camera's picture as a full-screen pass.</summary>
+    internal static ShaderInstance Pass(string file) =>
+        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = new ShaderStage(file) { Source = Kernel(file) } }));
+
     /// <summary>One of the field's Slang files, as the library carries it.</summary>
     private static string Kernel(string file)
     {

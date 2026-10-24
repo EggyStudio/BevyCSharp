@@ -417,7 +417,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Full-screen passes over a camera's picture, before or after tonemapping | Has (`render/passes.rs`) |
 | Compute before any camera draws | Has (`render/compute.rs`) |
 | Compute per camera, with the view, at a chosen point in the frame | Has (`render/views.rs`, `Shaders.SetViewDispatches`) |
-| Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute and draws (`FramePoint`), and for passes at every point with a picture (`ShaderPass.At`). The point before tonemapping is ahead of Bevy's antialiasing, bloom and effects, where Bevy draws its volumetric fog, and the passes there follow its antialiasing |
+| Points after the prepass, between opaque and transparent geometry, and before and after tonemapping | Has, for compute and draws (`FramePoint`), and for passes at every point with a picture (`ShaderPass.At`). The point before tonemapping is ahead of Bevy's antialiasing, bloom and effects, where Bevy draws its volumetric fog, and the passes there follow its antialiasing. The point after tonemapping and its passes follow Bevy's antialiasing, and a look (`Render.SetLook`) runs between the tonemapper's place and it |
 | Passes writing several targets, or depth | Has, for draws on a camera, the picture or any number of the camera's images at once (`ViewDraw.Targets`), with depth. A full-screen pass writes the picture alone, and a draw of one triangle over the picture into several images does the rest |
 | Async compute | Missing. wgpu has one queue per device, so this waits on wgpu |
 
