@@ -4,8 +4,8 @@ namespace Bevy.Interop;
 
 /// <summary>
 /// The bridge's <c>BcsFieldDraw</c>, a mesh drawn that casts shadows as the scene's distance field
-/// reads it, its mesh's number and generation, its sides, its matrix, its material's color and
-/// emission, and its bounds in its own space.
+/// reads it, its mesh's number and generation, its sides, its triangles, its matrix, its material's
+/// color and emission, and its bounds in its own space.
 /// </summary>
 /// <remarks>
 /// The offsets are the bridge's, written out, so a field reordered on one side cannot read another
@@ -22,6 +22,9 @@ internal unsafe struct NativeFieldDraw
 
     /// <summary>Bit 0 where the mesh has no inside, its back faces drawn, bit 1 where it is skinned.</summary>
     [FieldOffset(8)] public uint Flags;
+
+    /// <summary>How many triangles the pool takes from the mesh, which the field's triangle budget weighs it by.</summary>
+    [FieldOffset(12)] public uint Triangles;
 
     /// <summary>The rows of the matrix from the mesh's own space to the world's, three of four.</summary>
     [FieldOffset(16)] public fixed float Rows[12];

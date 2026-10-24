@@ -4,8 +4,9 @@ public static partial class Render
 {
     /// <summary>
     /// Builds a distance field of the scene around the camera, in one to eight cascades, the
-    /// finest's cells a given width and a given number built a frame at most, with a far cascade
-    /// after them where asked, or turns it off with none, which it is by default.
+    /// finest's cells a given width and a given number built a frame at most from a given number of
+    /// triangles at most, with a far cascade after them where asked, or turns it off with none, which
+    /// it is by default.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -38,7 +39,11 @@ public static partial class Render
     /// meshes before the program's systems move them. A skinned mesh is always stamped. A cascade is
     /// built again where the camera has gone past it or a mesh came or went, <paramref name="budget"/>
     /// a frame at most, the finest first, so a game sets a larger budget for a scene that changes and
-    /// a smaller one for a slow GPU.
+    /// a smaller one for a slow GPU. A frame splats <paramref name="triangleBudget"/> triangles at
+    /// most, a mesh at least, the nearest the camera first, and a cascade of more goes on over the
+    /// frames after, read as it was last built until it is done, its meshes not yet built in stamped
+    /// as their boxes meanwhile, so a game streaming in hundreds of meshes at once has no frame that
+    /// builds them all.
     /// </para>
     /// <para>
     /// It is built with compute shaders the library carries and compiles as it does a game's, so the
@@ -51,19 +56,26 @@ public static partial class Render
     /// <param name="cellSize">The width of a cell of the finest cascade, in world units.</param>
     /// <param name="budget">How many cascades are built again in one frame at most.</param>
     /// <param name="farCascade">How far ahead of the camera the far cascade reaches, in world units, or 0 for none.</param>
+    /// <param name="triangleBudget">
+    /// How many triangles the builds splat a frame at most, a mesh at least, 32,768 by default, the
+    /// least power of two above the most 3DEngine's voxel game splats in a frame.
+    /// </param>
     /// <exception cref="InvalidOperationException">No app is running.</exception>
     /// <example>
     /// <code>
     /// Render.SetSceneField(4, cellSize: 0.25f, budget: 1);
     /// Render.SetSceneField(4, farCascade: 400f);    // and a far cascade 400 units ahead
+    /// Render.SetSceneField(4, triangleBudget: 65_536);    // twice the triangles a frame
     /// </code>
     /// </example>
-    public static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0)
+    public static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0,
+        int triangleBudget = SceneFieldPlan.DefaultTriangleBudget)
     {
         if (App.Running is null)
             throw new InvalidOperationException("The scene's distance field belongs to an app, and none is running.");
 
-        SceneField.Ask(Math.Clamp(cascades, 0, 8), Math.Max(1e-3f, cellSize), Math.Max(1, budget), float.IsFinite(farCascade) ? Math.Max(0, farCascade) : 0);
+        SceneField.Ask(Math.Clamp(cascades, 0, 8), Math.Max(1e-3f, cellSize), Math.Max(1, budget), float.IsFinite(farCascade) ? Math.Max(0, farCascade) : 0,
+            Math.Max(1, triangleBudget));
     }
 
     /// <summary>

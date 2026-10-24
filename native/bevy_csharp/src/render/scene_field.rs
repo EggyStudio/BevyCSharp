@@ -33,8 +33,9 @@ pub struct BcsFieldDraw {
     /// Bit 0 where the material has no back faces to cull, so the mesh has no inside, bit 1 where
     /// the mesh is skinned, so its shape moves whatever its matrix does.
     pub flags: u32,
-    /// Nothing, so the rows start on sixteen bytes.
-    pub _pad: u32,
+    /// How many triangles the pool takes from the mesh's data, counted once a generation without
+    /// reading them, so the field's triangle budget weighs a mesh before it is pooled.
+    pub triangles: u32,
     /// The rows of the matrix from the mesh's own space to the world's, three of four.
     pub rows: [f32; 12],
     /// The material's base color in linear light, white for a material the bridge cannot read.
@@ -198,6 +199,7 @@ mod built {
         ids: Vec<AssetId<Mesh>>,
         generations: Vec<u32>,
         bounds: Vec<Option<[f32; 6]>>,
+        triangles: Vec<Option<u32>>,
     }
 
     impl FieldMeshes {
@@ -212,6 +214,7 @@ mod built {
             self.ids.push(id);
             self.generations.push(0);
             self.bounds.push(None);
+            self.triangles.push(None);
             number
         }
     }
@@ -245,6 +248,7 @@ mod built {
             if let Some(&number) = meshes.numbers.get(id) {
                 meshes.generations[number as usize] = meshes.generations[number as usize].wrapping_add(1);
                 meshes.bounds[number as usize] = None;
+                meshes.triangles[number as usize] = None;
             }
         }
     }
@@ -315,6 +319,9 @@ mod built {
                     }
                 };
 
+                let triangles = *meshes.triangles[number as usize]
+                    .get_or_insert_with(|| data.and_then(|data| data.get(&mesh.0)).map_or(0, triangles_of));
+
                 let affine = place.affine();
                 let (x, y, z, t) = (affine.matrix3.x_axis, affine.matrix3.y_axis, affine.matrix3.z_axis, affine.translation);
 
@@ -334,7 +341,7 @@ mod built {
                     mesh: number,
                     generation: meshes.generations[number as usize],
                     flags: u32::from(open) | (u32::from(skinned) << 1),
-                    _pad: 0,
+                    triangles,
                     rows: [x.x, y.x, z.x, t.x, x.y, y.y, z.y, t.y, x.z, y.z, z.z, t.z],
                     color: [color[0], color[1], color[2], 1.0],
                     emission: [emission[0], emission[1], emission[2], 0.0],
@@ -489,6 +496,26 @@ mod built {
         (!positions.is_empty()).then_some(b)
     }
 
+    /// How many triangles [`corners_of`] reads from a mesh, counted from its indices or its
+    /// vertices alone. An index past the vertices, which leaves a mesh out of the pool, is not
+    /// looked for, so such a mesh is weighed by the triangles it would have had.
+    pub fn triangles_of(mesh: &Mesh) -> u32 {
+        if mesh.primitive_topology() != PrimitiveTopology::TriangleList {
+            return 0;
+        }
+
+        let Ok(Some(VertexAttributeValues::Float32x3(positions))) = mesh.try_attribute_option(Mesh::ATTRIBUTE_POSITION) else {
+            return 0;
+        };
+
+        let corners = match mesh.try_indices_option() {
+            Ok(Some(indices)) => indices.len(),
+            Ok(None) => positions.len(),
+            Err(_) => 0,
+        };
+        (corners / 3) as u32
+    }
+
     /// A mesh's triangles as the pool's corners, or none for a mesh of no triangles the bridge can
     /// read. The reads that answer rather than panic, since a mesh whose data went to the render
     /// world keeps a husk here.
@@ -568,6 +595,7 @@ mod tests {
     #[test]
     fn a_draw_lies_where_the_managed_side_reads_it() {
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, flags), 8);
+        assert_eq!(std::mem::offset_of!(BcsFieldDraw, triangles), 12);
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, rows), 16);
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, color), 64);
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, emission), 80);
@@ -589,5 +617,19 @@ mod tests {
         let at = |x: f32, z: f32| [x.to_bits(), 0f32.to_bits(), z.to_bits()];
         let quad = [at(0.0, 0.0), at(1.0, 0.0), at(1.0, 1.0), at(0.0, 0.0), at(1.0, 1.0), at(0.0, 1.0)];
         assert_eq!(super::open_edges(&quad), [true, true, false, false, true, true]);
+    }
+
+    /// A mesh is weighed by as many triangles as the pool reads from it, with indices or without.
+    #[cfg(feature = "render")]
+    #[test]
+    fn a_mesh_weighs_the_triangles_the_pool_reads() {
+        use bevy::shape::{Cuboid, Sphere};
+        use bevy::mesh::Mesh;
+
+        for mesh in [Mesh::from(Cuboid::default()), Mesh::from(Sphere::default()), Mesh::from(Cuboid::default()).with_duplicated_vertices()] {
+            let read = super::corners_of(&mesh).map_or(0, |corners| corners.len() / 3);
+            assert!(read > 0);
+            assert_eq!(super::triangles_of(&mesh) as usize, read);
+        }
     }
 }

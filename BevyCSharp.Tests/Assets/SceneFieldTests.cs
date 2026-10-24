@@ -13,7 +13,7 @@ namespace Bevy.Tests;
 /// and the budget a frame keeps to.
 /// </summary>
 [Collection("engine")]
-public sealed class SceneFieldTests
+public sealed partial class SceneFieldTests
 {
     private static readonly SceneFieldPlan.Box CubeBounds = new(new Vector3(-1), new Vector3(1));
 
@@ -25,6 +25,7 @@ public sealed class SceneFieldTests
     public void ADrawLiesWhereTheBridgeWritesIt()
     {
         Assert.Equal(8, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Flags)).ToInt32());
+        Assert.Equal(12, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Triangles)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Rows)).ToInt32());
         Assert.Equal(64, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Color)).ToInt32());
         Assert.Equal(80, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Emission)).ToInt32());

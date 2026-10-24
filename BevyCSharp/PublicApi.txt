@@ -12567,7 +12567,7 @@ static class Bevy.Render
   static void SetReflectionProbe(Entity probe, AssetHandle diffuse, AssetHandle specular, float intensity = 1000f, Vec3? falloff = null)
   static void SetRoundedCorners(Entity camera, float radius, (float, float, float, float) fill = default)
   static void SetSampler(AssetHandle image, TextureSettings settings)
-  static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f)
+  static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768)
   static void SetSceneFieldShadows(FieldShadows shadows)
   static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings)
   static void SetShadowCascades(Entity light, int cascades = 0, float minimum = 0f, float maximum = 0f, float firstBound = 0f, float overlap = 0f)

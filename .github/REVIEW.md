@@ -10,22 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `36d783bf`, item 60 on its first choice, pushed at 16:42 on 2026-10-24, the run
-watched. The bridge sets emissive_exposure_weight from the emissive's alpha and reads the weight
-back into the material read-back, the material buffer, the gather and bcs_scene's
-Material.emissive.w, MaterialSettings.Emissive defaulting to alpha 0; the callers relying on the
-unexposed look pass 0, Bevy's ported examples, Swarm, Courtyard's scene, the editor script, the
-console glow, the modeling slots and the tests, the editor's color field keeping the weight, while
-the feature test's emitters of thousands of nits keep 1 and are exposed, the Cornell panel about 40,
-its look going toward what its numbers meant; mended.rs mends deferred/functions.wesl under bits 2
-and 3 of bcs_render_shader_mends and Render.EmissiveExposureMended. DeferredEmissiveTests reads
-deferred within 2 percent of forward and of the reference, 38,165 against 38.2 unmended; STYLE.md's
-checks take `>` with no new hit. 1,777 passed, 3 skipped, NormTests 18, the bridge checks clean; one
-flake in the first run, the open floor test under an ambient light reading black with global
-illumination off, passing in three reruns and the full rerun, taken as item 62.
+Reviewed up to `ce186327`, item 62, test-only, read at 16:58 on 2026-10-24, carrying the review's
+files. The field's draws, the contact shadows and the global illumination pass where traced, go on
+the camera once their programs compile and turn it deferred and HDR, which asks for new pipelines,
+and in the suite the shadows' program waits behind other compiles and can land after Capture's three
+ready frames, the frame read then drawing nothing with its pipelines still compiling; alone it did
+not reproduce in 20 runs, the shader cache answering at once. The mend is a shared wait,
+GlobalIlluminationTests.EngineDrawsOn, holding until the shadows' draw is on the camera and the
+light pass where traced, used by Looking before Capture and by BounceRoomsTests.Measure before its
+three ready frames; the open floor test 20 times in a row green, the global illumination and room
+tests 44, NormTests 18. Pushed at 17:00 on 2026-10-24 after the run of `36d783bf` went green; its
+own run green on the three systems at 17:16.
 
-Before it, `eca6e651` came, item 61, the colons, pushed at 14:52 on 2026-10-24, its run green on the
-three systems.
+Before it, `36d783bf` came, item 60, pushed at 16:42 on 2026-10-24, its run green on the three
+systems at 16:59.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -235,14 +233,6 @@ from [SHARED.md](SHARED.md).
     edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
-
-62. **The open floor test reads the same light every run.** From item 60's suite on 2026-10-24, read
-    at 16:42: the open floor test under an ambient light read black once with global illumination
-    off and passed in three reruns and the full rerun, so a frame was read before the floor was lit,
-    the pipelines or the ambient not yet in place, as the room test's read was before it waited
-    three frames of ready pipelines. The cause read, the test waiting for what it reads to be ready
-    as the room test does, the wait shared by the global illumination tests where they read a first
-    frame; the test run twenty times in a row green. One commit, small, before item 52.
 
 ## Verdicts
 
@@ -1464,3 +1454,18 @@ nits, keep 1 and are exposed, the Cornell box's panel at about 40. `render/mende
 Bevy's text moves, and `DeferredEmissiveTests` holds an exposed panel deferred against forward and
 within 2% of its reference, 38,165 against 38.2 unmended. STYLE.md's two checks take `>` in their
 class, and they find no hit beyond the ones item 61 recast.
+
+Shared: the field's budget in triangles a frame, 3DEngine's item 74, in the commit carrying this
+line, the first part of item 52. The plan's builds and the tests are 3DEngine's, the still meshes
+within a cascade splatted nearest the eye first up to the budget, a mesh at least, a build of more
+going on over the frames after with its cascade read as it was last built and its meshes not yet
+built in stamped as boxes, a mesh that settles taken in and a splatted one that leaves starting the
+build again, and a finer cascade coming first. The departures are that the bridge counts each mesh's
+triangles into the gather's record once a generation, so the budget weighs a mesh before it is
+pooled, and that the resolve clears the codes it reads, so a build's first part clears them only
+after a build left unfinished, by a dispatch of the resolve that clears alone. Five hundred sections
+of 1,024 triangles drawn from the first frame splatted 855,040 triangles in one frame without a
+budget, the slowest splat dispatch 9.3 ms, and under the default of 32,768 over 27 frames, the
+slowest 1.4 ms, the field the same to the cell. `SetSceneField` takes `triangleBudget`, `field.set`
+a fifth word, and `gi.state` says what the frame splatted and what waits. The screen's probes and
+the glow-only pass follow.

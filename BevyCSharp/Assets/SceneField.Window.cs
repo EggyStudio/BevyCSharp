@@ -56,12 +56,13 @@ internal static partial class SceneField
     private static void DrawPanel()
     {
         // The settings, which take effect on the next frame, as the calls they stand for do.
-        var (cascades, cell, budget, far) = Asked;
+        var (cascades, cell, budget, far, triangles) = Asked;
         var changed = ImGui.SliderInt("Cascades", ref cascades, 0, 8);
         changed |= ImGui.DragFloat("Finest cell", ref cell, 0.01f, 0.05f, 4f, "%.2f m");
         changed |= ImGui.SliderInt("Built a frame", ref budget, 1, 8);
         changed |= ImGui.DragFloat("Far cascade", ref far, 5f, 0f, 2000f, far > 0 ? "%.0f m" : "none");
-        if (changed) Render.SetSceneField(cascades, cell, budget, far);
+        changed |= ImGui.DragInt("Triangles a frame", ref triangles, 256f, 1, 1 << 20);
+        if (changed) Render.SetSceneField(cascades, cell, budget, far, triangles);
 
         string[] places = ["Past the shadow map", "Everywhere", "Off"];
         var shadows = (int)Shadows;

@@ -211,6 +211,7 @@ illumination's three parts:
 ```csharp
 Render.SetSceneField(4, cellSize: 0.25f, budget: 1);  // four cascades, a quarter meter the finest
 Render.SetSceneField(4, farCascade: 400f);            // and a far one reaching 400 meters ahead
+Render.SetSceneField(4, triangleBudget: 65_536);      // splatting twice the triangles a frame
 ```
 
 It lies in cascades of 64 cells a side around the camera the view is drawn by, each twice as coarse
@@ -225,17 +226,23 @@ counted cascade's, held to the camera's far plane, so a ray or a contact shadow 
 counted cascades meets what lies far off.
 
 A mesh drawn in the same place for eight frames is built into the cascades around it from its
-triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around
-it, a frame behind it. A cascade is built again where the camera has gone past it or a mesh came
-or went, as many a frame as the budget allows, the finest first, so a scene that changes a lot takes
-a larger budget and a slow GPU a smaller one. A closed wall thinner than a cell, or a mesh drawn
-with both its faces, is held half a cell thick on either side of its middle, so a ray between the
-cells on either side of it still meets it, and a tunnel one cell wide stays open along its middle.
+triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around it,
+a frame behind it. A cascade is built again where the camera has gone past it or a mesh came or
+went, as many a frame as the budget allows, the finest first, so a scene that changes a lot takes a
+larger budget and a slow GPU a smaller one. A frame's builds splat 32,768 triangles at most unless
+`triangleBudget` says otherwise, the meshes within a cascade nearest the camera first, a mesh at
+least. A build of more goes on over the frames after, its cascade read as it was last built until
+the build ends and the meshes not yet built in stamped as their boxes meanwhile, so hundreds of
+meshes streamed in at once, on a teleport or a first load, are built over several frames rather than
+stalling one. A closed wall thinner than a cell, or a mesh drawn with both its faces, is held half a
+cell thick on either side of its middle, so a ray between the cells on either side of it still meets
+it, and a tunnel one cell wide stays open along its middle.
 
 The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
 a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer
 lines say how many cascades are built and what it holds, and `./bcs command gi.state` says where
-each cascade lies, what the frame built and stamped, and the memory it takes.
+each cascade lies, what the frame built, splatted and stamped, the triangles left for the frames
+after, and the memory it takes.
 
 The field darkens the sun's light too, each directional light's, where it closes a surface off from
 the light, traced toward the light from a cell and a half out and softened by how near a surface the

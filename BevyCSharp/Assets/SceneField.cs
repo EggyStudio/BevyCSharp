@@ -41,7 +41,7 @@ internal static unsafe partial class SceneField
 
     // What the program asked for, and the app it asked in, so a new app starts with none.
     private static App? _askedIn, _shadowsAskedIn;
-    private static (int Cascades, float CellSize, int Budget, float FarCascade) _asked;
+    private static (int Cascades, float CellSize, int Budget, float FarCascade, int Triangles) _asked;
     private static FieldShadows _shadowsAsked;
 
     // What the running app's field is made of, made again for a new app or new settings.
@@ -60,26 +60,32 @@ internal static unsafe partial class SceneField
     private static NativeFieldDraw[] _draws = new NativeFieldDraw[256];
     private static readonly List<(SceneFieldPlan.Instance Instance, bool Skinned)> Drawn = [];
     private static readonly HashSet<SceneFieldPlan.Instance> Once = new(SceneFieldPlan.Comparer);
+    // How many triangles each mesh drawn this frame has as the pool takes them, by its number and
+    // generation, which the plan's triangle budget weighs it by before it is pooled.
+    private static readonly Dictionary<(uint Mesh, uint Generation), int> Weights = [];
     // The frame's boxes and bricks as the stamp reads them, kept from frame to frame and made
     // larger as a frame needs, since a frame with a mesh moving writes both.
     private static float[] _shapes = [];
     private static uint[] _words = [];
 
     /// <summary>The field's images and buffers and its plan, for the settings they were made for.</summary>
-    private sealed class Built((int Cascades, float CellSize, int Budget, float FarCell) made, SceneFieldPlan plan)
+    private sealed class Built((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made, SceneFieldPlan plan)
     {
-        public readonly (int Cascades, float CellSize, int Budget, float FarCell) Made = made;
+        public readonly (int Cascades, float CellSize, int Budget, float FarCell, int Triangles) Made = made;
         public readonly SceneFieldPlan Plan = plan;
         public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, Emission, Lent, Instances, Shapes, Bricks,
             Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
+        // Whether a build's parts were splatted into the buffers and no resolve has read and cleared
+        // them since, which the next build's first part clears where that build was left unfinished.
+        public bool Splatted;
     }
 
     /// <summary>Takes the program's settings for the running app.</summary>
-    internal static void Ask(int cascades, float cellSize, int budget, float farCascade)
+    internal static void Ask(int cascades, float cellSize, int budget, float farCascade, int triangles)
     {
         _askedIn = App.Running;
-        _asked = (cascades, cellSize, budget, farCascade);
+        _asked = (cascades, cellSize, budget, farCascade, triangles);
     }
 
     /// <summary>Takes where the program asks the field to darken a directional light, for the running app.</summary>
@@ -94,16 +100,16 @@ internal static unsafe partial class SceneField
         App.Running is { } running && ReferenceEquals(_shadowsAskedIn, running) ? _shadowsAsked : FieldShadows.PastShadowMap;
 
     /// <summary>The settings asked for in the running app, none where it asked for none.</summary>
-    internal static (int Cascades, float CellSize, int Budget, float FarCascade) Asked =>
-        App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1, 0f);
+    internal static (int Cascades, float CellSize, int Budget, float FarCascade, int Triangles) Asked =>
+        App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1, 0f, SceneFieldPlan.DefaultTriangleBudget);
 
     /// <summary>
     /// The field the running app's settings build, those it asked for, or where it asked for none and
     /// global illumination is on, four cascades of a quarter of a unit, which the probes are traced
     /// through, as 3DEngine turns its field on.
     /// </summary>
-    private static (int Cascades, float CellSize, int Budget, float FarCascade) Wanted =>
-        Asked.Cascades > 0 || WorldProbes.Asked == GlobalIllumination.Off ? Asked : (4, 0.25f, 1, 0f);
+    private static (int Cascades, float CellSize, int Budget, float FarCascade, int Triangles) Wanted =>
+        Asked.Cascades > 0 || WorldProbes.Asked == GlobalIllumination.Off ? Asked : (4, 0.25f, 1, 0f, SceneFieldPlan.DefaultTriangleBudget);
 
     /// <summary>The plan of the field being built, or null where none is.</summary>
     internal static SceneFieldPlan? Plan => ReferenceEquals(_app, App.Running) ? _built?.Plan : null;
@@ -142,7 +148,7 @@ internal static unsafe partial class SceneField
     /// <summary>The camera the field lies around this frame, or none where it lies around none.</summary>
     internal static Entity ViewCamera => ReferenceEquals(_app, App.Running) ? _drawFor.Camera : Entity.None;
 
-    /// <summary>How many cascades the last frame built.</summary>
+    /// <summary>How many cascades the last frame built whole, a build in parts counted on its last.</summary>
     internal static int BuiltLastFrame => ReferenceEquals(_app, App.Running) ? _built?.BuiltThisFrame ?? 0 : 0;
 
     /// <summary>
@@ -215,7 +221,7 @@ internal static unsafe partial class SceneField
         var farCell = asked.FarCascade <= 0 ? 0
             : eye is { } at ? SceneFieldPlan.FarCellFor(MathF.Min(asked.FarCascade, at.Far), counted, cell)
             : _built?.Made.FarCell ?? 0;
-        var wanted = (counted, cell, Math.Max(1, asked.Budget), farCell);
+        var wanted = (counted, cell, Math.Max(1, asked.Budget), farCell, Math.Max(1, asked.Triangles));
         if (_built is null || _built.Made != wanted)
         {
             Release(ecs);
@@ -332,10 +338,10 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>Makes the field's images and buffers for its settings, every cell far and unpainted and every word cleared.</summary>
-    private static Built Make((int Cascades, float CellSize, int Budget, float FarCell) made)
+    private static Built Make((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made)
     {
         const int size = SceneFieldPlan.Resolution;
-        var built = new Built(made, new SceneFieldPlan(made.Cascades, made.CellSize, made.Budget, made.FarCell));
+        var built = new Built(made, new SceneFieldPlan(made.Cascades, made.CellSize, made.Budget, made.FarCell, made.Triangles, TrianglesOf));
         var depth = (uint)(size * built.Plan.Cascades);
 
         var far = new Half[size * size * size * built.Plan.Cascades];
@@ -409,9 +415,11 @@ internal static unsafe partial class SceneField
         }
 
         Drawn.Clear();
+        Weights.Clear();
         for (var i = 0; i < count; i++)
         {
             ref var draw = ref _draws[i];
+            Weights[(draw.Mesh, draw.Generation)] = (int)draw.Triangles;
             var world = new Matrix4x4(
                 draw.Rows[0], draw.Rows[4], draw.Rows[8], 0,
                 draw.Rows[1], draw.Rows[5], draw.Rows[9], 0,
@@ -456,10 +464,20 @@ internal static unsafe partial class SceneField
 
     private static void WriteInfo(Built built, SceneFieldPlan plan) => Shaders.WriteBuffer<float>(built.Info, InfoValues(plan));
 
+    // How many triangles a mesh drawn this frame has, which the plan's triangle budget weighs it by.
+    private static int TrianglesOf(SceneFieldPlan.Instance instance) => Weights.GetValueOrDefault((instance.Mesh, instance.Generation));
+
     /// <summary>
     /// Pools the meshes the frame's builds read, writes every build's instances one build after
-    /// another, and asks for each build's splat and resolve, the finest cascade first.
+    /// another, and asks for each build's splat, the finest cascade first, and the resolve of each
+    /// build whose last part this frame splats.
     /// </summary>
+    /// <remarks>
+    /// A build's parts splat into the same buffers frame after frame, which the resolve of its last
+    /// part reads and clears. A build left unfinished, a finer cascade coming first or a mesh it
+    /// splatted leaving, leaves its codes in them, so the first part of the next build clears them
+    /// first where nothing has since.
+    /// </remarks>
     private static void Build(Built built, SceneFieldPlan plan)
     {
         // Each mesh the builds read once, with where its triangles start in the pool.
@@ -513,6 +531,12 @@ internal static unsafe partial class SceneField
         {
             var build = plan.Builds[b];
             var (first, count, triangles) = spans[b];
+            if (build.First && built.Splatted)
+            {
+                _resolve.Set("cascade", new Vector4(build.Cascade, size, build.Cell, SceneFieldPlan.Band)).SetNumbers("clearing", 4, [1u, 0u, 0u, 0u]);
+                Shaders.Dispatch(_resolve, size / 4, size / 4, size / 4);
+            }
+            built.Splatted = true;
             if (triangles > 0)
             {
                 // A workgroup a triangle, past 65,535 along x laid along y as well.
@@ -539,12 +563,14 @@ internal static unsafe partial class SceneField
                 }
             }
 
-            _resolve.Set("cascade", new Vector4(build.Cascade, size, build.Cell, SceneFieldPlan.Band));
+            if (!build.Last) continue;
+            _resolve.Set("cascade", new Vector4(build.Cascade, size, build.Cell, SceneFieldPlan.Band)).SetNumbers("clearing", 4, [0u, 0u, 0u, 0u]);
             Shaders.Dispatch(_resolve, size / 4, size / 4, size / 4);
+            built.Splatted = false;
         }
 
-        built.BuiltThisFrame = plan.Builds.Count;
-        built.BuildsDone += plan.Builds.Count;
+        built.BuiltThisFrame = plan.Builds.Count(build => build.Last);
+        built.BuildsDone += built.BuiltThisFrame;
     }
 
     /// <summary>

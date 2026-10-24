@@ -42,6 +42,8 @@ internal static class ConsoleFieldCommands
 
             lines.Add(string.Create(CultureInfo.InvariantCulture,
                 $"this frame built {SceneField.BuiltLastFrame} cascades of a budget of {plan.Budget}, and stamped {plan.Shapes.Count} boxes in {plan.Bricks.Count} bricks"));
+            lines.Add(string.Create(CultureInfo.InvariantCulture,
+                $"this frame splatted {plan.Splatted} triangles of a budget of {plan.TriangleBudget}, with {plan.Waiting} waiting for the frames after"));
             lines.Add(string.Create(CultureInfo.InvariantCulture, $"GPU memory {SceneField.Bytes() / 1048576.0:0.0} MB"));
         }
 
@@ -80,13 +82,14 @@ internal static class ConsoleFieldCommands
         return $"reading the camera's light to compare with {Path.GetFullPath(path)}";
     }
 
-    [Command("field.set", "Builds the scene's distance field in this many cascades, the finest's cells this wide, at most this many built a frame, with a far cascade reaching this far ahead, or turns it off with 0: field.set <cascades> [cell] [budget] [far]")]
-    internal static string Set(int cascades, float cell = 0.25f, int budget = 1, float far = 0f)
+    [Command("field.set", "Builds the scene's distance field in this many cascades, the finest's cells this wide, at most this many built a frame, with a far cascade reaching this far ahead, splatting at most this many triangles a frame, or turns it off with 0: field.set <cascades> [cell] [budget] [far] [triangles]")]
+    internal static string Set(int cascades, float cell = 0.25f, int budget = 1, float far = 0f, int triangles = SceneFieldPlan.DefaultTriangleBudget)
     {
-        Render.SetSceneField(cascades, cell, budget, far);
+        Render.SetSceneField(cascades, cell, budget, far, triangles);
         var reaching = far > 0 ? string.Create(CultureInfo.InvariantCulture, $" and a far one reaching {far:0.#} m") : "";
         return cascades <= 0
             ? "the scene's distance field is off"
-            : string.Create(CultureInfo.InvariantCulture, $"building the scene's distance field in {Math.Min(cascades, 8)} cascades of cells {Math.Max(1e-3f, cell):0.###} m{reaching}, {Math.Max(1, budget)} a frame");
+            : string.Create(CultureInfo.InvariantCulture,
+                $"building the scene's distance field in {Math.Min(cascades, 8)} cascades of cells {Math.Max(1e-3f, cell):0.###} m{reaching}, {Math.Max(1, budget)} a frame of {Math.Max(1, triangles)} triangles at most");
     }
 }

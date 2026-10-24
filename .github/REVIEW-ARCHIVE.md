@@ -1407,6 +1407,15 @@ a batch.
     the weight; the item's test holds the deferred path for an exposed emitter. Done at `36d783bf`
     on 2026-10-24 on the first choice, the alpha the exposure's weight with 0 the default.
 
+62. **The open floor test reads the same light every run.** From item 60's suite on 2026-10-24, read
+    at 16:42: the open floor test under an ambient light read black once with global illumination
+    off and passed in three reruns and the full rerun, so a frame was read before the floor was lit,
+    the pipelines or the ambient not yet in place, as the room test's read was before it waited
+    three frames of ready pipelines. The cause read, the test waiting for what it reads to be ready
+    as the room test does, the wait shared by the global illumination tests where they read a first
+    frame; the test run twenty times in a row green. One commit, small, before item 52. Done at
+    `ce186327` on 2026-10-24, the tests waiting for the field's draws to be on the camera.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
