@@ -10,20 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ce186327`, item 62, test-only, read at 16:58 on 2026-10-24, carrying the review's
-files. The field's draws, the contact shadows and the global illumination pass where traced, go on
-the camera once their programs compile and turn it deferred and HDR, which asks for new pipelines,
-and in the suite the shadows' program waits behind other compiles and can land after Capture's three
-ready frames, the frame read then drawing nothing with its pipelines still compiling; alone it did
-not reproduce in 20 runs, the shader cache answering at once. The mend is a shared wait,
-GlobalIlluminationTests.EngineDrawsOn, holding until the shadows' draw is on the camera and the
-light pass where traced, used by Looking before Capture and by BounceRoomsTests.Measure before its
-three ready frames; the open floor test 20 times in a row green, the global illumination and room
-tests 44, NormTests 18. Pushed at 17:00 on 2026-10-24 after the run of `36d783bf` went green; its
-own run green on the three systems at 17:16.
+Reviewed up to `8911be4c`, item 52's first part, the field's budget in triangles a frame as
+3DEngine's item 74, pushed at 17:51 on 2026-10-24 after the run of `ce186327` went green; its own
+run green on the three systems at 18:07, carrying the review's files and a Shared line under
+Replies. Departures from 3DEngine, the bridge counts each mesh's triangles into the gather's record
+at the old pad at offset 12 once a generation, ABI 305, and the resolve clears what it reads, a
+build's first part clearing only after a build was left unfinished, a clear-only mode of
+field_resolve. 500 sections of 1,024 triangles splat in one frame of 855,040 triangles with the
+slowest dispatch 9.3 ms without a budget, and under 32,768 over 27 frames with the slowest 1.4, the
+field the same to the cell. 1,781 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and
+11.
 
-Before it, `36d783bf` came, item 60, pushed at 16:42 on 2026-10-24, its run green on the three
-systems at 16:59.
+Before it, `ce186327` came, item 62, pushed at 17:00 on 2026-10-24, its run green on the three
+systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -232,7 +231,10 @@ from [SHARED.md](SHARED.md).
     3DEngine's item 69, and the field's budget in triangles a frame, its item 74; the blotches, the
     edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
-    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
+    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51. The first
+    part at `8911be4c` on 2026-10-24, the triangle budget, its two departures in the head; the
+    screen probes with the glow-only pass next, and the field's read of compute-written buffers
+    waiting until the engine draws such a mesh.
 
 ## Verdicts
 
@@ -742,6 +744,16 @@ mended at `42abf357`.
     AGENTS.md's row at about 04:50. At about 07:56 the owner asked that the devlog be `DEVLOG.md` at
     the repository's root, with no `.github/devlog` folder, the engine's pictures being its
     committed captures; `.github/devlog/README.md` goes and AGENTS.md's row names `DEVLOG.md`.
+
+60. **A session saves the pictures of its work in the repository, N 4.8.** The owner wrote at about
+    18:5x on 2026-10-24 that this session had kept none of the day's radiance cascade captures, item
+    51's readings and pairs, which they would have loved to see, the session answering that no
+    document said the pictures in progress should be saved, and asked for the rule written where the
+    sessions read it and the same in the three repositories. N 4.8 says it, one text in both
+    engines' NORM.md and the voxel game's, the engines' pictures under .github/assets/readings/ and
+    the game's under .github/devlog/, each a WebP named by the date and the item in the commit of
+    its work with the commit's sentence as its caption, DEVLOG.md generated from them; the day's
+    captures still in this session's scratch space go in with the next commit.
 
 ## Replies
 

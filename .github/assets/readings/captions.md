@@ -1,0 +1,17 @@
+# Captions
+
+The caption DEVLOG.md gives each picture in this folder, a line a picture, the file's name, a bar
+and one sentence (NORM.md, N 4.8).
+
+2026-10-24-item-51-gi-off-high.webp | The feature test's Cornell box with global illumination off on the left and at High on the right, the walls' red and green carried onto the blocks and the floor by item 51's pass.
+2026-10-24-item-51-field-and-qualities.webp | The same box in four captures taken for item 51's pass, the field's contact shadows with global illumination off at the top left and then Low, Medium and High.
+2026-10-24-item-51-bounce-first-reading.webp | The nine bounce rooms at 160 by 90, each path-traced reference on the left and global illumination at High on the right as item 51's reference first read them, the strip's and the glowing blocks' rooms dark before their emitters were carried and the carried lamp's reference dark before its bulb stopped blocking the shadow rays.
+2026-10-24-item-51-strip-and-lamp-rooms.webp | The strip's room with global illumination off and at High and the carried lamp's room at High, at 480 by 270, read for item 51's reference while the strip's light was not yet carried.
+2026-10-24-item-51-cornell-reference.webp | The feature test's Cornell box at High beside the picture gi.reference traced of it at 256 paths a pixel and gi.compare's difference, blue where the box reads under the reference and red where over, the first reading of item 51's reference in a room of the feature test.
+2026-10-24-item-51-bounce-before-glossy.webp | The nine bounce rooms at High beside their references once the environment's sky had come in and before the glossy term, the readings item 51's last commit was measured against.
+2026-10-24-item-60-cornell-reading.webp | The feature test's Cornell box at High, its path-traced reference and the difference, the reading whose lamp panel read 40,053 against the reference's 49, which item 60 traced to the emissive's exposure weight the bridge never set.
+2026-10-24-item-54-cornell-shots.webp | Six shots of the feature test's Cornell box under Solari's ray-traced lighting taken with item 54's denoiser and without it, the grain on the walls and the floor the frames without.
+2026-10-24-item-54-strafe-masks.webp | A strafe of the feature test's camera read for item 54's denoiser, its first and last frames above, and below the last frame with the pixels the strafe uncovered within its last 30 frames in red and within its last 8 in blue, the masks the history's recovery was measured in.
+2026-10-24-item-54-difference-maps.webp | Item 54's denoiser read in three scenes against each scene's reference, each row the difference of the denoised frame on the left and of a grainy frame on the right.
+2026-10-24-item-52-screen-probes-low.webp | Six bounce rooms at Low at 160 by 90, the reference, global illumination with the screen probes off and with them on, the probes taking away the seams of the thin walls' room and bringing blotches the size of their tiles of sixteen pixels to the window's, the strip's and the carried lamp's rooms.
+2026-10-24-item-52-screen-probes-high.webp | The same six rooms at High, the screen probes' tiles eight pixels a side, the Cornell box's floor reading 3.5% over its reference with them where 12.8% without.
