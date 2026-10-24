@@ -263,7 +263,7 @@ wall's light tints a white block's side. The pass takes 0.23 ms at its least and
 over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take 0.9 ms at
 `Low`, 1.2 at `Medium` and 1.4 at `High`. In the feature test the pass's span reads no GPU time,
 where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
-`Render.SetGlobalIllumination` is public with it, and the glossy term follows.
+`Render.SetGlobalIllumination` is public with it.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
@@ -315,6 +315,26 @@ took the pass from 0.19 ms to 2.9 there. With one glow light over the whole view
 ms, and a cascade's trace 0.18 ms at `High`. In the bounce rooms the strip's view reads 0.18 to 0.19
 from its reference where it read 1.00 with no emitter carried, the glowing blocks' 0.05 where 0.30
 and the Cornell box's 0.10 to 0.11 where 0.11, no view wider.
+
+The glossy term is 3DEngine's present one. The pass takes back the light from all around Bevy's
+lighting reflected, its ambient term's and its environment map's along the mirror way, and gives it
+again as 3DEngine's model pass does. Below a roughness of 0.5 the reflection is traced through the
+picture's depth in steps that lengthen as they go, 12 over 8 units at `Low`, 16 over 12 at `Medium`
+and 24 over 16 at `High`, and past the picture through the field, a surface met on the picture
+reflecting the light the frame before's picture showed where it was, which the camera keeps copied
+before tonemapping as an image of its own, and one past it the light the probes shade a hit with,
+fading to Bevy's reflection from a quarter of the roughness to a half. What is not traced is Bevy's
+reflection times the share of the sky the probes around the surface see along the mirror way
+(`skyAt`), so a room sealed from the sky reflects none of it. Two things depart from 3DEngine's.
+Whether the frame before's picture showed the surface the reflection met is not asked, which needs
+the frame before's depth, so a reflection of a surface the moving camera uncovered takes what stood
+there before. And the picture is read at its own size, where 3DEngine blurs it down its mips as the
+surface is rough. A metal floor polished to a mirror shows a sunlit red wall standing on it at 244,
+115, 107 with global illumination on and 2, 2, 2 off, and a rough metal floor in a closed room under
+an environment map reflects 0, 0, 14 on where 78, 58, 119 off. In the Cornell box at 1280 by 720
+with one glow light the pass takes 1.5 ms with a metal floor polished to a mirror where it takes 1.3
+with every surface rough, as before the glossy term. The bounce rooms read as they did, their
+surfaces at a roughness of 0.5 and lit by no sky.
 
 ## What Unity made them work around, and the hook that replaces each
 

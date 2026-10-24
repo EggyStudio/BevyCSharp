@@ -151,6 +151,8 @@ public static unsafe partial class Shaders
     private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [], EngineDraws = [];
     private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [];
     private static readonly Dictionary<ulong, SortedDictionary<string, ViewDispatch[]>> EngineDispatches = [];
+    private static readonly Dictionary<ulong, ViewImage[]> ProgramImages = [];
+    private static readonly Dictionary<ulong, SortedDictionary<string, ViewImage[]>> EngineImages = [];
 
     // What a camera of an app before this one asked for, which names no camera of this one.
     private static void ForgetOtherApps()
@@ -163,6 +165,8 @@ public static unsafe partial class Shaders
         EngineDraws.Clear();
         ProgramDispatches.Clear();
         EngineDispatches.Clear();
+        ProgramImages.Clear();
+        EngineImages.Clear();
     }
 
     /// <summary>
@@ -220,7 +224,31 @@ public static unsafe partial class Shaders
     public static void SetViewImages(Entity camera, params ViewImage[] images)
     {
         ArgumentNullException.ThrowIfNull(images);
+        Validate(images);
+        ForgetOtherApps();
+        ProgramImages[camera.Bits] = [.. images];
+        SubmitImages(camera);
+    }
 
+    /// <summary>
+    /// Replaces the images one part of the engine, <paramref name="owner"/>, gives a camera beside
+    /// the program's own and the other parts', none taking another's away. Only valid inside a
+    /// system. Each part names its images apart from a program's, as <c>gi_picture</c> is.
+    /// </summary>
+    internal static void SetEngineViewImages(Entity camera, string owner, params ViewImage[] images)
+    {
+        Validate(images);
+        ForgetOtherApps();
+        if (!EngineImages.TryGetValue(camera.Bits, out var owned)) EngineImages[camera.Bits] = owned = new SortedDictionary<string, ViewImage[]>(StringComparer.Ordinal);
+        if (images.Length == 0) owned.Remove(owner);
+        else owned[owner] = images;
+        if (owned.Count == 0) EngineImages.Remove(camera.Bits);
+        SubmitImages(camera);
+    }
+
+    // Refuses images a camera cannot own, two of one name or of a scale out of reach.
+    private static void Validate(ViewImage[] images)
+    {
         var names = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var image in images)
@@ -239,7 +267,13 @@ public static unsafe partial class Shaders
                     nameof(images));
             }
         }
+    }
 
+    // Hands the bridge a camera's images, the engine's, a part at a time by its name, and then the
+    // program's.
+    private static void SubmitImages(Entity camera)
+    {
+        ViewImage[] images = [.. EngineImages.GetValueOrDefault(camera.Bits)?.Values.SelectMany(i => i) ?? [], .. ProgramImages.GetValueOrDefault(camera.Bits) ?? []];
         var native = new NativeViewImage[images.Length];
         var strings = new List<IntPtr>();
 

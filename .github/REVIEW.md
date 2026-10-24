@@ -10,26 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ccc0f000`, item 51's emitters, the first part of its third commit, pushed at 12:41
-on 2026-10-24, its run green on the three systems at 12:58, carrying the review's files, a Shared
-row and the devlog. Emission is painted into the field beside the colors in the picture's units,
-emissive times mix(1, exposure, alpha), thin emitters that are not carried lending their light to
-the cells beside them, small emitters carried as glow lights of bcs_glow.slang (MODULES 12, the same
-ABI), their light reaching each pixel and each probe's hit from the box in closed form shadowed
-through the field, touching boxes joined, carried cells marked, the pass taking the four brightest a
-pixel and a probe's hit two. Departures, an emitter is its box whole with every face emitting since
-the gather hands over no vertices; the pass marches to a light's middle and not to its faces'
-halves, the readings alike and the halves 2.0 to 3.5 ms against 1.3 at 1280 by 720; the closed form
-clips edge by edge with its loops unrolled, rolled loops over small arrays costing 2.7 ms. The
-bounce rooms' strip view reads 0.18 to 0.19 where 1.00 stood (3DEngine 0.22), the glowing blocks
-0.049 where 0.30, the Cornell box 0.10 to 0.11, the rest unchanged and no view widened; the floor
-bound moves from 3 to 16 percent, the Cornell floor 13.2 percent over and 15.5 with the panel dark,
-so the excess is the probes' indirect light; the feature test's Cornell walls read minus 5 to plus
-17 percent against the reference where minus 26 to minus 45 stood. Costs at 1280 by 720 with one
-glow light over the view, the pass 1.3 ms (0.19 without), a cascade's trace 0.18 ms at High. 1,771
-passed, 3 skipped, NormTests 18, the bridge checks clean, Cargo 118, 198 and 11.
+Reviewed up to `6e69cfa1`, item 51's environment map sky, the second part of its third commit,
+pushed at 13:21 on 2026-10-24, its run green on the three systems at 13:38. A dispatch on the
+camera, gi_sky.slang, copies the map onto a 64-texel octahedron times the exposure at a quarter
+roughness's blur, and the last cascade's misses read it beside the ambient light a frame behind; the
+pass takes back Bevy's diffuse environment map light and adds the map's light from above to the sky
+over a ground, the reference's misses taking the map along their way; the engine's dispatches on a
+camera are kept by owner. Under the tests' cubemap filtered through SetImageLighting an open floor
+reads 70, 71, 116 with global illumination on against 67, 67, 115 off, and a closed room's floor 4,
+3, 13 against 67, 67, 115. 1,773 passed, 3 skipped, NormTests 18, no bridge change.
 
-Before it, `8cb6cbaa` came, item 51's reference, pushed at 10:22 on 2026-10-24, its run green on the
+Before it, `ccc0f000` came, item 51's emitters, pushed at 12:41 on 2026-10-24, its run green on the
 three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -259,7 +250,7 @@ from [SHARED.md](SHARED.md).
     field under a roughness of 0.5 and the sky's specular scaled by the share of sky the probes see
     along the mirror direction, and the emitters. The emitters at `ccc0f000`, pushed at 12:41, the
     departures in the head, the glowing blocks' and the strip's views narrowed; the environment
-    map's sky and the glossy term (b) follow, each in a commit of its own.
+    map's sky at `6e69cfa1`, pushed at 13:21; the glossy term (b) follows in a commit of its own.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -1475,3 +1466,19 @@ the tests' cubemap filtered by Bevy an open floor reads 70, 71, 116 with global 
 67, 67, 115 off, and a closed room's floor 4, 3, 13 on and 67, 67, 115 off, Bevy's own lighting
 lighting it through the walls. The engine's dispatches on a camera are kept by owner, so the
 reference and the sky's copy share a camera. The glossy term follows.
+
+Shared: the glossy term, in the commit carrying this line, the last part of item 51's third.
+3DEngine's present one in the pass, Bevy's reflection of its ambient term and environment map taken
+back and given again, traced below a roughness of 0.5 through the picture's depth in 3DEngine's
+steps and reaches and past it through the field, a hit on the picture taking the frame before's
+picture, which the camera keeps copied before tonemapping as an engine image with history, and a hit
+past it shadeHit's light, fading to Bevy's reflection from a quarter of the roughness to a half, and
+Bevy's reflection times skyAt's share of the sky along the mirror way. The departures are that the
+frame before's depth is not read to ask whether the frame before showed the surface the reflection
+met, and the frame before's picture is read at its own size where 3DEngine blurs it down its mips by
+the roughness. A mirror floor shows a sunlit red wall at 244, 115, 107 on and 2, 2, 2 off, and a
+closed room's rough metal floor under an environment map reflects 0, 0, 14 on where 78, 58, 119 off.
+The pass takes 1.5 ms with the mirror floor and 1.3 with every surface rough at 1280 by 720, and the
+bounce rooms read as before, their surfaces at a roughness of 0.5. The rooms' test waits three
+frames of ready pipelines before it reads the picture, since the larger pass's pipeline came after
+the probes' ninety frames in some runs and those read no pass at all.

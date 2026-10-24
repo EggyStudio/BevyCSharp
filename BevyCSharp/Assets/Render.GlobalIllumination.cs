@@ -62,9 +62,12 @@ public static partial class Render
     /// The ambient light is taken as what Bevy's lighting returns from a white surface under it, so
     /// an open floor reads as it does without global illumination. The diffuse light an environment
     /// map gave each surface is taken back as the ambient light's is, so a closed room under a
-    /// bright sky is dark inside where Bevy's lighting lights it through the walls. Bevy's
-    /// screen-space ambient occlusion and an environment map's reflections are left as Bevy gives
-    /// them.
+    /// bright sky is dark inside where Bevy's lighting lights it through the walls. A glossy
+    /// surface's reflection of the light from all around is given again as 3DEngine gives it,
+    /// traced through the picture's depth and the field below a roughness of a half, using the
+    /// frame before's picture, and Bevy's own reflection above it times the share of the sky the
+    /// probes see along the mirror way, so a room sealed from the sky reflects none of it. Bevy's
+    /// screen-space ambient occlusion is left as Bevy gives it.
     /// </para>
     /// <para>
     /// The probes and the pass are compute and draw shaders the library carries, which compile as the

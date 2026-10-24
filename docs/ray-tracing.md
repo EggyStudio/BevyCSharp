@@ -296,8 +296,10 @@ it does without global illumination. As the contact shadows above do, the pass n
 and a picture in floats, so the camera draws Bevy's materials deferred while it is on. An
 environment map lights the probes too, its light along each ray that leaves the scene, and its
 diffuse light is taken back as the ambient light's is, so a closed room under a bright sky is dark
-inside where Bevy's own lighting would light it through the walls. Bevy's screen-space ambient
-occlusion and an environment map's reflections are left as Bevy gives them.
+inside where Bevy's own lighting would light it through the walls. A glossy surface reflects what is
+around it, traced through the picture and the field below a roughness of a half, and reflects the
+sky only as far as the probes see it, so a closed room's polished floor shows no sky. Bevy's
+screen-space ambient occlusion is left as Bevy gives it.
 
 In a Cornell box on an RTX 4070 Laptop GPU the probes take about 0.9 ms at `Low`, 1.2 at `Medium`
 and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median, or 1.3 ms

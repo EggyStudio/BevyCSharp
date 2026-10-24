@@ -58,6 +58,20 @@ internal static unsafe class WorldProbes
 
     /// <summary>The name the copy's dispatch on a camera is kept under beside the engine's others.</summary>
     private const string SkyOwner = "gi.sky";
+
+    /// <summary>The name the frame before's picture a glossy surface's reflection reads is kept under on a camera.</summary>
+    private const string PictureOwner = "gi.reflection";
+
+    /// <summary>
+    /// The steps a glossy surface's reflection is traced through the picture's depth in, and how far
+    /// in world units, at a quality, as 3DEngine's ReflectionStepsAt.
+    /// </summary>
+    internal static (int Steps, float Reach) ReflectionStepsAt(GlobalIllumination quality) => quality switch
+    {
+        GlobalIllumination.Low => (12, 8),
+        GlobalIllumination.Medium => (16, 12),
+        _ => (24, 16),
+    };
     // The pass that adds the probes' light to the picture of the camera the field lies around.
     private static ShaderInstance _light;
     private static long _frame;
@@ -207,8 +221,19 @@ internal static unsafe class WorldProbes
         _sky.SetTexture("sky_map", _made.SkyMap);
         if (camera != _skyCamera)
         {
-            if (!_skyCamera.IsNone) Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
-            if (!camera.IsNone) Shaders.SetEngineViewDispatches(camera, SkyOwner, ViewDispatch.Fixed(_sky, FramePoint.AfterPrepass, SkySize / 8, SkySize / 8));
+            if (!_skyCamera.IsNone)
+            {
+                Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
+                Shaders.SetEngineViewImages(_skyCamera, PictureOwner);
+            }
+            if (!camera.IsNone)
+            {
+                Shaders.SetEngineViewDispatches(camera, SkyOwner, ViewDispatch.Fixed(_sky, FramePoint.AfterPrepass, SkySize / 8, SkySize / 8));
+                // The lit picture copied before tonemapping each frame, the frame before's read as
+                // gi_picture_previous by the reflections the pass traces.
+                Shaders.SetEngineViewImages(camera, PictureOwner,
+                    new ViewImage("gi_picture", ShaderImageFormat.Rgba16Float, History: true, CopyAt: FramePoint.BeforeTonemapping));
+            }
             _skyCamera = camera;
         }
 
@@ -265,6 +290,7 @@ internal static unsafe class WorldProbes
         if (!_skyCamera.IsNone)
         {
             Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
+            Shaders.SetEngineViewImages(_skyCamera, PictureOwner);
             _skyCamera = Entity.None;
         }
         if (_made is not { } made) return;
@@ -371,7 +397,9 @@ internal static unsafe class WorldProbes
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
         _light.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
-            .SetBuffer("glow_lights", made.Glows)
-            .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0));
+            .SetBuffer("glow_lights", made.Glows).SetTexture("probe_skies", made.Skies)
+            .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
+            .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0))
+            .Set("reflection", new Vector4(ReflectionStepsAt(made.Quality).Steps, ReflectionStepsAt(made.Quality).Reach, 1, 0));
     }
 }

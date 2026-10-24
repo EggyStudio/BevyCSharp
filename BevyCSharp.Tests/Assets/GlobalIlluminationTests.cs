@@ -440,6 +440,88 @@ public sealed class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// A metal floor polished nearly to a mirror reflects a sunlit red wall standing on it with
+    /// global illumination on, the reflection traced through the picture's depth and the field,
+    /// where with it off Bevy's lighting gives the floor no reflection of the wall.
+    /// </summary>
+    [SkippableFact]
+    public void AMirrorFloorReflectsARedWallStandingOnIt()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(on.R > off.R + 30, $"with global illumination on the floor reads {on}, off {off}");
+        Assert.True(on.R > on.G + 30, $"with global illumination on the floor reads {on}, not red");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 20f, 0.2f, 20f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0.9f, 0.9f, 0.9f, 1f),
+                    Metallic = 1f,
+                    Roughness = 0.1f,
+                }));
+                ecs.Add(floor, Transform.At(0f, -0.1f, 0f));
+                Block(ecs, (0.8f, 0.05f, 0.05f), new Vec3(0f, 1.5f, -2f), new Vec3(6f, 3f, 0.4f));
+                Sun(ecs, new Vec3(1f, 6f, 6f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 2,
+            eye: new Vec3(0f, 1.2f, 4f),
+            at: new Vec3(0f, 0f, 0f),
+            ambient: 0f,
+            traced: quality != GlobalIllumination.Off);
+    }
+
+    /// <summary>
+    /// A rough metal floor in a closed room under an environment map reflects the sky with global
+    /// illumination off, Bevy's lighting reflecting the map through the walls, and next to none of
+    /// it with global illumination on, its probes seeing no sky along the floor's mirror way.
+    /// </summary>
+    [SkippableFact]
+    public void AClosedRoomReflectsNoSky()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(off.R + off.G + off.B > 60, $"with global illumination off the floor inside reads {off}");
+        Assert.True(on.R + on.G + on.B < (off.R + off.G + off.B) / 4, $"with global illumination on the floor inside reads {on}, off {off}");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                const float T = 0.3f;
+                var white = (0.8f, 0.8f, 0.8f);
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 6f + 2f * T, T, 6f + 2f * T));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0.9f, 0.9f, 0.9f, 1f),
+                    Metallic = 1f,
+                    Roughness = 0.7f,
+                }));
+                ecs.Add(floor, Transform.At(0f, -T / 2f, 0f));
+                Block(ecs, white, new Vec3(0f, 3f + T / 2f, 0f), new Vec3(6f + 2f * T, T, 6f + 2f * T));
+                Block(ecs, white, new Vec3(0f, 1.5f, -3f - T / 2f), new Vec3(6f + 2f * T, 3f, T));
+                Block(ecs, white, new Vec3(0f, 1.5f, 3f + T / 2f), new Vec3(6f + 2f * T, 3f, T));
+                Block(ecs, white, new Vec3(-3f - T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+                Block(ecs, white, new Vec3(3f + T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 6,
+            eye: new Vec3(0f, 2.5f, 2f),
+            at: new Vec3(0f, 0f, -0.5f),
+            ambient: 0f,
+            traced: quality != GlobalIllumination.Off,
+            lit: Lit);
+    }
+
+    /// <summary>
     /// The tests' cubemap as a camera's environment map, filtered by Bevy into its diffuse and
     /// specular halves, at a brightness that reads as a fair share of white.
     /// </summary>

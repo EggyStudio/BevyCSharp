@@ -139,6 +139,7 @@ public sealed class BounceRoomsTests
     {
         var supported = false;
         var (begun, read) = (false, false);
+        var ready = 0;
         new PictureRun
         {
             Width = Width,
@@ -155,6 +156,10 @@ public sealed class BounceRoomsTests
             .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
                 && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
             .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 90)
+            // Every pipeline ready for three frames running, as PictureRun.Capture waits, since the
+            // pass that adds the probes' light compiles its pipeline after its program and a picture
+            // read before it holds none of that light.
+            .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3)
             .Until("referenced", world =>
             {
                 if (!supported || samples == 0) return true;
