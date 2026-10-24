@@ -1388,6 +1388,25 @@ a batch.
     comments only, after item 51's third commit and before item 60. Done at `eca6e651` on
     2026-10-24, 36 joints recast, the labels and the shaders' component labels kept.
 
+60. **The deferred G-buffer keeps the emissive's exposure.** Found by item 51's reference on
+    2026-10-24: Bevy's deferred G-buffer drops the emissive color's alpha, which carries whether the
+    emissive is exposed, so on a camera that the field's shadows or the global illumination make
+    deferred an exposed emissive is shown unexposed, the feature test's lamp panel reading 40,053
+    against a reference of 49, since item 50's deferred switch. The mend is the exposure carried
+    through the deferred path, in the G-buffer's spare bits or a flag the lighting pass reads, so a
+    deferred camera shows the emissive as the forward one does; a test reading the lamp panel on a
+    deferred camera within the bound of its reference, failing without the mend. One commit, after
+    item 51. The coder's reading at 15:13 on 2026-10-24 found the premise wrong, an exposed panel of
+    40,000 nits reading 38,124 forward and 38,165 deferred, since Bevy 0.20's material uniform puts
+    emissive_exposure_weight, 0 by default, in emissive.w and ignores the color's alpha, and the
+    bridge never sets that weight, so the documented alpha meant nothing and only the gather of
+    `ccc0f000` and the reference read it, exposing an emitter Bevy draws unexposed. The choice is
+    the first of the coder's two, the bridge setting the weight from the alpha, the default alpha 0
+    as Bevy's default so nothing changes unasked, the callers passing 1 for today's unexposed look
+    moved to 0, the deferred mend kept for weights above 0, and the gather and the reference reading
+    the weight; the item's test holds the deferred path for an exposed emitter. Done at `36d783bf`
+    on 2026-10-24 on the first choice, the alpha the exposure's weight with 0 the default.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -10,17 +10,22 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `eca6e651`, item 61, the colons out of the documents and the comments, pushed at
-14:52 on 2026-10-24, its run green on the three systems at 15:09, carrying the review's files. 36
-joints recast, RENDERING.md 3, docs/components.md 1, AGENTS.md 3 on the owner's word in the coder's
-session, 9 code comments from STYLE.md's grep and 20 XML summaries where the colon follows a tag,
-the cheat sheet written again from the summaries; labels, named arguments, quoted strings and the
-shaders' component labels left as they are, ASKS.md's two hits left to the owner's word. STYLE.md's
-grep misses a colon after a closing tag, which a `>` in its class finds, taken into item 60's
-commit. NormTests and the docs and cheat sheet tests 24 of 24, no bridge change.
+Reviewed up to `36d783bf`, item 60 on its first choice, pushed at 16:42 on 2026-10-24, the run
+watched. The bridge sets emissive_exposure_weight from the emissive's alpha and reads the weight
+back into the material read-back, the material buffer, the gather and bcs_scene's
+Material.emissive.w, MaterialSettings.Emissive defaulting to alpha 0; the callers relying on the
+unexposed look pass 0, Bevy's ported examples, Swarm, Courtyard's scene, the editor script, the
+console glow, the modeling slots and the tests, the editor's color field keeping the weight, while
+the feature test's emitters of thousands of nits keep 1 and are exposed, the Cornell panel about 40,
+its look going toward what its numbers meant; mended.rs mends deferred/functions.wesl under bits 2
+and 3 of bcs_render_shader_mends and Render.EmissiveExposureMended. DeferredEmissiveTests reads
+deferred within 2 percent of forward and of the reference, 38,165 against 38.2 unmended; STYLE.md's
+checks take `>` with no new hit. 1,777 passed, 3 skipped, NormTests 18, the bridge checks clean; one
+flake in the first run, the open floor test under an ambient light reading black with global
+illumination off, passing in three reruns and the full rerun, taken as item 62.
 
-Before it, `c230300b` came, item 51's glossy term, pushed at 14:21 on 2026-10-24, its run green on
-the three systems.
+Before it, `eca6e651` came, item 61, the colons, pushed at 14:52 on 2026-10-24, its run green on the
+three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -231,23 +236,13 @@ from [SHARED.md](SHARED.md).
     it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51.
 
-60. **The deferred G-buffer keeps the emissive's exposure.** Found by item 51's reference on
-    2026-10-24: Bevy's deferred G-buffer drops the emissive color's alpha, which carries whether the
-    emissive is exposed, so on a camera that the field's shadows or the global illumination make
-    deferred an exposed emissive is shown unexposed, the feature test's lamp panel reading 40,053
-    against a reference of 49, since item 50's deferred switch. The mend is the exposure carried
-    through the deferred path, in the G-buffer's spare bits or a flag the lighting pass reads, so a
-    deferred camera shows the emissive as the forward one does; a test reading the lamp panel on a
-    deferred camera within the bound of its reference, failing without the mend. One commit, after
-    item 51. The coder's reading at 15:13 on 2026-10-24 found the premise wrong, an exposed panel of
-    40,000 nits reading 38,124 forward and 38,165 deferred, since Bevy 0.20's material uniform puts
-    emissive_exposure_weight, 0 by default, in emissive.w and ignores the color's alpha, and the
-    bridge never sets that weight, so the documented alpha meant nothing and only the gather of
-    `ccc0f000` and the reference read it, exposing an emitter Bevy draws unexposed. The choice is
-    the first of the coder's two, the bridge setting the weight from the alpha, the default alpha 0
-    as Bevy's default so nothing changes unasked, the callers passing 1 for today's unexposed look
-    moved to 0, the deferred mend kept for weights above 0, and the gather and the reference reading
-    the weight; the item's test holds the deferred path for an exposed emitter.
+62. **The open floor test reads the same light every run.** From item 60's suite on 2026-10-24, read
+    at 16:42: the open floor test under an ambient light read black once with global illumination
+    off and passed in three reruns and the full rerun, so a frame was read before the floor was lit,
+    the pipelines or the ambient not yet in place, as the room test's read was before it waited
+    three frames of ready pipelines. The cause read, the test waiting for what it reads to be ready
+    as the room test does, the wait shared by the global illumination tests where they read a first
+    frame; the test run twenty times in a row green. One commit, small, before item 52.
 
 ## Verdicts
 

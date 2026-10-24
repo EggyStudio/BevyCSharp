@@ -554,6 +554,7 @@ public sealed class GlobalIlluminationTests
         }
             .Until("settled", _ => Settled(stills))
             .Until("traced", _ => !traced || WorldProbes.TracedFrames >= 60)
+            .Until("drawn", _ => EngineDrawsOn(traced))
             .Capture("seen");
         run.Go();
 
@@ -644,6 +645,22 @@ public sealed class GlobalIlluminationTests
         Assert.NotNull(texels);
         return texels!;
     }
+
+    /// <summary>
+    /// Whether the field's draws are on the camera, its contact shadows' draw and, where
+    /// <paramref name="traced"/>, the pass that adds the probes' light, which a test reading the
+    /// picture waits for before the pipelines it then waits on.
+    /// </summary>
+    /// <remarks>
+    /// The field puts its draws on the camera once their programs have compiled, and turns the camera
+    /// deferred and to high dynamic range with them, which asks for pipelines of its own. Where that
+    /// came after a capture had seen three frames of ready pipelines, as the shadows' program waited
+    /// behind the suite's other compiles, the picture was a frame whose new pipelines were still
+    /// compiling, and the open floor read black with global illumination off once in a run of the
+    /// whole suite, never alone.
+    /// </remarks>
+    internal static bool EngineDrawsOn(bool traced) =>
+        !SceneField.ShadowCamera.IsNone && (!traced || WorldProbes.LightPass.IsValid);
 
     /// <summary>Whether the field holds <paramref name="stills"/> still meshes and every cascade is built.</summary>
     private static bool Settled(int stills) =>
