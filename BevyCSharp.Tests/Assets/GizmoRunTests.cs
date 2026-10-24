@@ -48,6 +48,51 @@ public sealed class GizmoRunTests
     }
 
     /// <summary>
+    /// A 2D camera laid over a 3D scene draws the world's gizmos a unit a pixel about the window's
+    /// middle, a line through the world's middle as a mark across the picture's, and put on a layer
+    /// of its own with <see cref="Render.SetLayers"/> draws none of them, as
+    /// <see cref="Render2d.SpawnCamera2d"/> says, the feature test's sprite overlay having left such
+    /// marks at the middle of its window.
+    /// </summary>
+    [SkippableFact]
+    public void A2dCameraOverA3dSceneDrawsNoGizmoOnALayerOfItsOwn()
+    {
+        Needs.Renderer();
+        var (shared, own) = (RedInTheMiddle(ownLayer: false), RedInTheMiddle(ownLayer: true));
+        Assert.True(shared > 20, $"the overlay on the gizmos' layer drew {shared} red pixels in the middle");
+        Assert.Equal(0, own);
+    }
+
+    // How many red pixels lie within a few rows of the picture's middle, where a 2D camera over a
+    // 3D one that looks away from the world's middle draws a red line through it, on the gizmos'
+    // layer or on one of its own.
+    private static int RedInTheMiddle(bool ownLayer)
+    {
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs, new Vec3(0f, 0f, 6f));
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), new Vec3(0f, 0f, 12f), Vec3.UnitY));
+                var overlay = Render2d.SpawnCamera2d(order: 1);
+                if (ownLayer) Render.SetLayers(ecs, overlay, 1u << 1);
+            },
+            EachFrame = _ => Gizmos.Line(new Vec3(-20f, 0f, 0f), new Vec3(20f, 0f, 0f), (1f, 0f, 0f, 1f)),
+        };
+
+        run.Wait(10).Capture("overlay").Go();
+        var picture = run.Picture("overlay");
+        var red = 0;
+        for (var y = picture.Height / 2 - 4; y < picture.Height / 2 + 4; y++)
+            for (var x = 0u; x < picture.Width; x++)
+            {
+                var (r, g, b, _) = picture.At(x, y);
+                if (r > 120 && g < 90 && b < 90) red++;
+            }
+        return red;
+    }
+
+    /// <summary>
     /// A line crosses as the bridge reads it, each field where the bridge asserts it is, since a
     /// mirror the right size with one field out of place draws every line from its neighbor's
     /// numbers.

@@ -10,19 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `9f65bbcc`, the day's captures under N 4.8, pushed at 19:02 on 2026-10-24 after the
-run of `8911be4c` went green, no run of its own since it touches .github alone, carrying NORM.md and
-REVIEW.md. Twelve WebP files under .github/assets/readings with a captions.md line each, item 51's
-five commits, item 60's panel reading, item 54's denoiser shots, masks and difference maps, and item
-52's bounce sheets; NormTests 18. Item 52's second part, the screen probes and the glow-only pass,
-is written and not committed, its four tests from 3DEngine passing three runs in a row; the bounce
-rooms with the probes on read the Cornell floor plus 3.5 percent where plus 12.8 stood, v2 0.08
-where 0.115, the thin walls' seam leaks gone, and v4 0.150 to 0.181 where 0.115, v6 at Low 0.238
-where 0.195, v7 at Low 0.062 where 0.051 and v8 0.074 to 0.106 where 0.061, blotches the size of a
-tile at 160 by 90, all inside 3DEngine's own bounds at that size; the choice is under item 52.
+Reviewed up to `f0ae14ec`, item 52's second part, which closes it, pushed at 20:24 on 2026-10-24,
+its run green on the three systems at 20:41, carrying the review's files and two pictures with their
+captions lines. The screen probes and the glow-only pass come in through
+Render.SetGlobalIlluminationScreenProbes and the gi.screen command, and 3DEngine's edge leak mend
+with its Walled test, the resolve's clear a dispatch of its own since a pinched cell reads its
+neighbors, 15 levels unmended and 3 mended, the same as closed. Departures, the rooms' guard reads
+the probes traced but unread, since left out they are the glow-only pass in every view, and the
+on-test bound a view is the larger of 3DEngine's and this engine's own, which only the corridor
+needs at 0.25 either way. Costs at 1280 by 720 with one glow light, 1.4 ms at Low and 1.6 at High,
+the pass 0.54; the Cornell box on and off shows streaks a tile wide on its back wall, the blotches
+term. 1,813 passed, 3 skipped, NormTests 18, the bridge checks and tests clean. The phases the coder
+proposed for items 64, 65 and 67 stand under them.
 
-Before it, `8911be4c` came, item 52's first part, pushed at 17:51 on 2026-10-24, its run green on
-the three systems.
+Before it, `9f65bbcc` came, the day's captures, pushed at 19:02 on 2026-10-24, no run of its own.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -222,27 +223,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
-    mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
-    few pixels beside the cascades with the filter and the history as 3DEngine's,
-    `Render.SetGlobalIlluminationScreenProbes` leaving them out with the glow-only pass of
-    3DEngine's item 71 so a world of small emitters pays no per-pixel march, the glow lights of
-    small emitters, the field's read of a mesh a compute shader wrote with its count read back,
-    3DEngine's item 69, and the field's budget in triangles a frame, its item 74; the blotches, the
-    edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
-    it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
-    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51. The first
-    part at `8911be4c` on 2026-10-24, the triangle budget, its two departures in the head; the
-    screen probes with the glow-only pass next, and the field's read of compute-written buffers
-    waiting until the engine draws such a mesh. The second part's choice at 19:04 is the coder's
-    second of three, the screen probes on by default as in 3DEngine, the bounce rooms measured with
-    them off as the method's own guard so no view's bound moves, and a separate test with them on
-    holding each view within 3DEngine's reading at the same size plus 15 percent, the blotches at
-    160 by 90 being the tile's size and not the method's; the edge-leak mend's port with its Walled
-    test in the same part. The coder's correction, the screen probes left out stand for the glow
-    lights alone wherever one is lit, so the rooms' guard measures the probes traced and left
-    unread, the old path exactly, and no bound moves.
-
 63. **The feature test's HUD is clean, a green frame rate in a corner and nothing else over the
     view.** The owner wrote to this session at about 19:30 on 2026-10-24, Decision 61, to remove the
     "frame N fps" text at the bottom left and the stray pixels in the screen's middle and to add a
@@ -259,7 +239,14 @@ from [SHARED.md](SHARED.md).
     vibrance kept with its tone curve and grading, and the volumetric clouds removed; readings of
     the sky's luminance and color against Bruneton's at four sun heights, and captures at dawn,
     noon, dusk and night. The coder proposes the phases under this item when item 52 is in; the
-    first lands before item 65.
+    first lands before item 65. The coder's phases, each a commit with the suite green, are the
+    medium exposed with Earth, Bruneton and ARC presets, Bevy 0.20's atmosphere being Hillaire's
+    with a replaceable medium, the sun a crisp disc, the volumetric clouds out, and a per-pixel
+    reference raymarch the LUT sky is read against at four sun heights with Bruneton and ARC
+    pictures; then the lower hemisphere and the distance fog taking the horizon's color from the
+    atmosphere so the far ground meets the sky with no gray band; then 3DEngine's tone curve and
+    grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
+    from space with per-pixel transmittance as Bennett's.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -269,7 +256,11 @@ from [SHARED.md](SHARED.md).
     world-aligned meter grid as Source's dev textures have, with rounded doorways among the brush
     shapes; a test loading a small level and reading its brushes and entities, and the feature
     test's rooms rebuilt from such a file as the first level. Phases proposed by the coder; after
-    item 64's first phase.
+    item 64's first phase. The coder's phases are the format and the loader, convex brushes as
+    planes as .map and .vmf have them, built through EditMesh with a material and alignment a face,
+    entities with class, keys and outputs, round-trip tests and colliders; then the prototype
+    material, a world-aligned meter grid in Unreal's palette with Source's marks; then the feature
+    test's hub from a file, the other rooms under item 68.
 
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
@@ -284,7 +275,10 @@ from [SHARED.md](SHARED.md).
     draws brushes with a block tool, moves their faces and vertices, applies textures with the
     world-aligned mapping, places entities and edits their keyvalues, and holds the connections of
     item 66 in a panel of outputs, targets, inputs, parameters, delays and fire once; it saves the
-    file the engine loads. Phases proposed by the coder; after item 66.
+    file the engine loads. Phases proposed by the coder; after item 66. The coder's phases are four
+    panes or one view, switchable, with a power-of-two grid; the block tool, select, move and resize
+    with snapping, undo and saving; the clip tool, vertex editing kept convex and face texturing;
+    entities, their properties and item 66's connections panel.
 
 68. **The feature test's level is remade in the new tools and looks as the owner asked.** From
     Decision 61, the owner finding the level ugly. The level is rebuilt as a file of item 65 in the

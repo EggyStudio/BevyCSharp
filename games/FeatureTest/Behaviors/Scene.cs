@@ -155,23 +155,16 @@ public partial struct Scene
 
         Parts = (ground, cube, lamp);
 
-        // A HUD, a panel pinned to a corner with a line of text inside it, below, where the admin
-        // panel and the overlay leave room. Nesting is ordinary parenting, so the text moves with
-        // the panel. Made inside the hidden scope, so the engine's F1 hides it.
-        Ui.BeginHidden();
-        var panel = Ui.SpawnNode(new UiSettings
+        // The frame's rate, Bevy's FPS overlay at the window's top left, its number green as a
+        // game's counter is drawn and its graph left out, which the engine's F3 overlay stands in
+        // for while it shows.
+        if (ctx.Ecs.Resource<FpsOverlayConfigRef>() is { } fps)
         {
-            Absolute = true,
-            Left = Length.Px(16f),
-            Bottom = Length.Px(16f),
-            Padding = Length.Px(10f),
-            Color = (0f, 0f, 0f, 0.45f),
-        });
-
-        var readout = Ui.SpawnText("frame 0", new UiSettings { Color = (0.9f, 0.95f, 1f, 1f) }, 18f);
-        Ui.EndHidden();
-        ctx.Ecs.SetParent(readout, panel);
-        ctx.Ecs.Add(readout, new Hud());
+            fps.TextColor = Color.FromSrgb(0.3f, 1f, 0.3f);
+            fps.TextConfigFontSize = new FontSize.Px(18f);
+            fps.Enabled = true;
+            fps.FrameTimeGraphConfigEnabled = false;
+        }
 
         Console.WriteLine(
             "[Scene] the hub, with a signpost to each zone. F11 toggles fullscreen and Tab locks the cursor.");
@@ -201,20 +194,6 @@ public partial struct Scene
         // makes no sun of its own.
         if (Weather.Active) ecs.Insert<SunLightRef>(_sun);
         _shadows = shadows;
-    }
-
-    /// <summary>Keeps the HUD's readout current.</summary>
-    /// <remarks>
-    /// The text is rewritten in place. Respawning it every frame would work and would churn an
-    /// entity sixty times a second for a string that changes.
-    /// </remarks>
-    [OnUpdate]
-    public static void UpdateHud(BehaviorContext ctx)
-    {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
-
-        foreach (var row in ctx.Ecs.Query<Hud>(markChanged: false))
-            Ui.SetText(row.Entity, $"frame {ctx.Time.FrameCount}   {ctx.Time.SmoothedFps:F0} fps");
     }
 
     [OnUpdate]

@@ -25,8 +25,16 @@ public static unsafe partial class Render2d
     /// Spawns a 2D camera and returns it.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// One world unit is one pixel, and the origin is the middle of the window, so a sprite at
     /// <c>(100, 50)</c> sits a hundred pixels right and fifty up from the center.
+    /// </para>
+    /// <para>
+    /// A 2D camera draws the world's gizmos too, a world unit a pixel, so one laid over a 3D scene
+    /// that draws gizmos shows each of them within a few units of the world's middle as a mark a
+    /// few pixels wide at the middle of the window. Such a camera is put on a layer of its own with
+    /// <see cref="Render.SetLayers"/>, its sprites with it, where no gizmo is drawn.
+    /// </para>
     /// </remarks>
     /// <param name="order">
     /// Draw order. Leave at zero for a 2D-only game. Above a 3D camera's order it draws over the

@@ -1416,6 +1416,54 @@ a batch.
     frame; the test run twenty times in a row green. One commit, small, before item 52. Done at
     `ce186327` on 2026-10-24, the tests waiting for the field's draws to be on the camera.
 
+52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
+    mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
+    few pixels beside the cascades with the filter and the history as 3DEngine's,
+    `Render.SetGlobalIlluminationScreenProbes` leaving them out with the glow-only pass of
+    3DEngine's item 71 so a world of small emitters pays no per-pixel march, the glow lights of
+    small emitters, the field's read of a mesh a compute shader wrote with its count read back,
+    3DEngine's item 69, and the field's budget in triangles a frame, its item 74; the blotches, the
+    edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
+    it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
+    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51. The first
+    part at `8911be4c` on 2026-10-24, the triangle budget, its two departures in the head; the
+    screen probes with the glow-only pass next, and the field's read of compute-written buffers
+    waiting until the engine draws such a mesh. The second part's choice at 19:04 is the coder's
+    second of three, the screen probes on by default as in 3DEngine, the bounce rooms measured with
+    them off as the method's own guard so no view's bound moves, and a separate test with them on
+    holding each view within 3DEngine's reading at the same size plus 15 percent, the blotches at
+    160 by 90 being the tile's size and not the method's; the edge-leak mend's port with its Walled
+    test in the same part. The coder's correction, the screen probes left out stand for the glow
+    lights alone wherever one is lit, so the rooms' guard measures the probes traced and left
+    unread, the old path exactly, and no bound moves. Done at `f0ae14ec` on 2026-10-24 in two parts,
+    the triangle budget, then the screen probes with the glow-only pass and the edge leak's mend;
+    3DEngine's item 69, the field reading a mesh a compute shader wrote, waits until this engine
+    draws such a mesh, and its two departures stand in the head.
+
+52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
+    mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
+    few pixels beside the cascades with the filter and the history as 3DEngine's,
+    `Render.SetGlobalIlluminationScreenProbes` leaving them out with the glow-only pass of
+    3DEngine's item 71 so a world of small emitters pays no per-pixel march, the glow lights of
+    small emitters, the field's read of a mesh a compute shader wrote with its count read back,
+    3DEngine's item 69, and the field's budget in triangles a frame, its item 74; the blotches, the
+    edge leak and the stepped edges read against 3DEngine's findings so this engine takes the mends
+    it makes. Tests as 3DEngine's for each, and a capture of the feature test's room with the probes
+    on and off. Two or three commits by part. After items 43 to 45. Waits with item 51. The first
+    part at `8911be4c` on 2026-10-24, the triangle budget, its two departures in the head; the
+    screen probes with the glow-only pass next, and the field's read of compute-written buffers
+    waiting until the engine draws such a mesh. The second part's choice at 19:04 is the coder's
+    second of three, the screen probes on by default as in 3DEngine, the bounce rooms measured with
+    them off as the method's own guard so no view's bound moves, and a separate test with them on
+    holding each view within 3DEngine's reading at the same size plus 15 percent, the blotches at
+    160 by 90 being the tile's size and not the method's; the edge-leak mend's port with its Walled
+    test in the same part. The coder's correction, the screen probes left out stand for the glow
+    lights alone wherever one is lit, so the rooms' guard measures the probes traced and left
+    unread, the old path exactly, and no bound moves. Done at `f0ae14ec` on 2026-10-24 in two parts,
+    the triangle budget, then the screen probes with the glow-only pass and the edge leak's mend;
+    3DEngine's item 69, the field reading a mesh a compute shader wrote, waits until this engine
+    draws such a mesh, and its two departures stand in the head.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

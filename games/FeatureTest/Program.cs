@@ -84,6 +84,9 @@ if (offscreen && args.Contains("--timings")) config.HeadlessFps = 1000;
 // compiled in ignores this and they are not drawn.
 config.Gui = windowed || offscreen;
 
+// Bevy's FPS overlay, the frame's rate in a top corner, which the hub sets green.
+if (windowed || offscreen) config.DevTools |= DevTools.FpsOverlay;
+
 // The plugins that draw a mesh as its edges, which the panel's debug page turns on.
 config.Wireframes = windowed || offscreen;
 
