@@ -61,6 +61,8 @@ Render.SetRayTracedDenoiser(true, new DenoiserSettings
 Render.SetRayTracedDenoiser(false);               // Solari's own picture, for a capture beside
 ```
 
+![A grainy frame of the Cornell box beside the denoiser's](../.github/assets/denoiser.webp)
+
 `Render.RayTracedDenoiserActive` says whether it is filtering. Bevy's ReSTIR, which reuses samples
 between pixels and frames, is on as well, where Bevy leaves it off for a denoiser, since it leaves
 the denoiser less noise to take away. Measured before the denoiser, it halved the noise between
@@ -261,6 +263,41 @@ seen from above in the second cascade, the Cornell box at the top and the wall o
 it:
 
 ![The scene field's window at the feature test's gallery](../.github/assets/scene-field.webp)
+
+### Global illumination
+
+Global illumination lights each surface with the light the others reflect onto it, a red wall's
+color on the side of a white block beside it, traced each frame through the scene's distance field
+on any GPU, as 3DEngine's radiance cascades trace it:
+
+```csharp
+Render.SetGlobalIllumination(GlobalIllumination.Medium);   // Off, the default, Low, Medium or High
+```
+
+Probes stand in cascades around the camera, eight a side in each of the field's cascades, each
+tracing an octahedron of directions over a stretch of distance, the near light by many close probes
+and the far light by fewer wide ones, and the cascades are merged from the last down. A ray that
+meets a surface brings back the color the field painted the cell with times the sun's light, the
+sixteen nearest point and spot lights' and the light that reached it the frame before, so every
+frame adds a bounce, and a ray that meets nothing brings back the camera's ambient light, or the
+world's. `Low` traces two cascades, `Medium` three and `High` four, finer in direction after the
+first, and where the program asked for no field one is built at four cascades of a quarter meter.
+Nothing is baked, so lights and meshes move freely.
+
+Bevy's lighting takes no indirect light from outside, so a pass of the library's own after the
+opaque surfaces takes back the diffuse share of the ambient light Bevy gave each surface and adds
+the surface's diffuse color times the light the probes around it hold. Past the last cascade the
+light from all around is the ambient light over a ground lit by the sun. The ambient light reaches
+the probes as Bevy's lighting returns it from a surface facing the view, so an open floor reads as
+it does without global illumination. As the contact shadows above do, the pass needs the G-buffer
+and a picture in floats, so the camera draws Bevy's materials deferred while it is on. Bevy's
+screen-space ambient occlusion and an environment map's light are left as Bevy gives them, so a
+camera with an environment map has its light on top of the probes'.
+
+In a Cornell box on an RTX 4070 Laptop GPU the probes take about 0.9 ms at `Low`, 1.2 at `Medium`
+and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median.
+`./bcs command gi.state` says what the probes hold, `gi.set` changes the quality on a running app,
+and the feature test's graphics page has a row for it.
 
 ---
 

@@ -2,8 +2,9 @@
 //! writes into the buffer the probes' compute shaders read as `bcs_gi`'s `GiLights`.
 //!
 //! Each light is given as the light a white surface facing it returns, as 3DEngine's renderer gives
-//! the probes a light, which in Bevy's units is a directional light's illuminance over pi, and a
-//! point or spot light's intensity, Bevy's luminous power over four pi, over pi again, times the
+//! the probes a light, which in Bevy's units is a directional light's illuminance over pi, a point or
+//! spot light's intensity, Bevy's luminous power over four pi, over pi again, and an ambient light's
+//! brightness times the share Bevy's ambient term returns ([`AMBIENT_RETURNED`]), each times the
 //! camera's exposure, as Bevy's lighting applies it before the picture's half floats. The probes'
 //! light then lies in the units of the picture they are added to, where a sun of a hundred thousand
 //! lux taken unexposed would pass the largest half float.
@@ -12,6 +13,13 @@ use crate::interop::status;
 
 /// The most point and spot lights the probes are lit by, the nearest the camera.
 pub const MOST_LIGHTS: usize = 16;
+
+/// The share of an ambient light's brightness Bevy's lighting returns from a white surface, its
+/// diffuse share as its ambient term works it out, `EnvBRDFApprox` at a perceptual roughness of one,
+/// 0.4524 of the light less 0.0024. The light from all around is given as that, as the sun and the
+/// lamps are given as what a white surface facing them returns, so a floor under an open sky reads
+/// with global illumination as it reads under Bevy's ambient light alone.
+pub const AMBIENT_RETURNED: f32 = 0.45;
 
 /// A point or spot light, as `bcs_gi`'s `GiLight` lays it out.
 #[repr(C)]
@@ -100,13 +108,13 @@ fn gather(world: &mut bevy::ecs::world::World) -> BcsGiLights {
         lights.sun_color = color.extend(0.0).to_array();
     }
 
-    // The camera's ambient light, or the world's, which Bevy's lighting returns from a white surface
-    // as it is, the light from all around in the same units.
+    // The camera's ambient light, or the world's, as much of it as Bevy's lighting returns from a
+    // white surface, the light from all around in the same units.
     let ambient = view.and_then(|(camera, ..)| world.get::<AmbientLight>(camera).map(|light| (light.color, light.brightness)));
     let (color, brightness) = ambient
         .or_else(|| world.get_resource::<GlobalAmbientLight>().map(|light| (light.color, light.brightness)))
         .unwrap_or((bevy::color::Color::BLACK, 0.0));
-    lights.sky = (color.to_linear().to_vec3() * (brightness * exposure)).extend(0.0).to_array();
+    lights.sky = (color.to_linear().to_vec3() * (brightness * AMBIENT_RETURNED * exposure)).extend(0.0).to_array();
 
     // The point and spot lights, the nearest the camera first, as Bevy gives them its lighting.
     let mut found: Vec<(f32, BcsGiLight)> = Vec::new();

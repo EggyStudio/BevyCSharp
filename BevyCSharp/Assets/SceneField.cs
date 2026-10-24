@@ -51,7 +51,10 @@ internal static unsafe partial class SceneField
     // The camera the contact shadows are drawn on and what they were drawn with, so they are set on
     // a camera once and taken off it when they stop or the field turns to another.
     private static Entity _shadowCamera = Entity.None;
-    private static (AssetHandle Field, FieldShadows Shadows, float Reach) _shadowsDrawn;
+    private static (AssetHandle Field, FieldShadows Shadows, float Reach, ShaderInstance Light) _engineDrawn;
+    // The field and the camera this frame's engine draws are for, which DrawEngine puts on the camera
+    // once global illumination's probes have been traced.
+    private static (Built? Built, Entity Camera) _drawFor = (null, Entity.None);
     // Whether the shadows gave their camera Bevy's high dynamic range, which they take off it again.
     private static bool _shadowsMadeHdr;
     private static NativeFieldDraw[] _draws = new NativeFieldDraw[256];
@@ -122,7 +125,7 @@ internal static unsafe partial class SceneField
     /// </summary>
     internal static AssetHandle Faces => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Faces : AssetHandle.None;
 
-    /// <summary>The camera the contact shadows are drawn on, or none.</summary>
+    /// <summary>The camera the contact shadows and global illumination's light are drawn on, or none.</summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
 
     /// <summary>How many cascades the last frame built.</summary>
@@ -165,7 +168,7 @@ internal static unsafe partial class SceneField
         {
             _app = App.Running;
             (_built, _splat, _resolve, _stamp, _shadows, _slice) = (null, default, default, default, default, default);
-            (_shadowCamera, _shadowsDrawn, _shadowsMadeHdr, _sliceImage) = (Entity.None, default, false, AssetHandle.None);
+            (_shadowCamera, _engineDrawn, _shadowsMadeHdr, _sliceImage, _drawFor) = (Entity.None, default, false, AssetHandle.None, (null, Entity.None));
         }
 
         var ecs = world.Resource<EcsWorld>();
@@ -215,26 +218,39 @@ internal static unsafe partial class SceneField
 
         if (plan.Builds.Count > 0) Build(built, plan);
         if (plan.Bricks.Count > 0) Stamp(built, plan);
-        DrawShadows(ecs, built, seen.Camera);
+        _drawFor = (built, seen.Camera);
     }
 
     /// <summary>
-    /// Puts the contact shadows on the camera the field lies around, with the G-buffer they read
-    /// and a picture in high dynamic range, or takes them off the camera they were on, where they
-    /// stop or the field turns to another, changing the camera only when one of those changes.
+    /// Puts the engine's draws on the camera the field lies around, once a frame after global
+    /// illumination's probes are traced.
+    /// </summary>
+    internal static void DrawEngine(World world)
+    {
+        if (!ReferenceEquals(App.Running, _app)) return;
+        DrawEngine(world.Resource<EcsWorld>(), _drawFor.Built, _drawFor.Camera);
+    }
+
+    /// <summary>
+    /// Puts the contact shadows and global illumination's light on the camera the field lies around,
+    /// with the G-buffer they read and a picture in high dynamic range, or takes them off the camera
+    /// they were on, where both stop or the field turns to another, changing the camera only when one
+    /// of those changes.
     /// </summary>
     /// <remarks>
     /// The light taken back is added as less than nothing, which a picture of eight bits a channel
-    /// clamps to nothing before it is added, so the camera draws in floats while the shadows are on
-    /// it, Bevy's <c>Hdr</c> given it where it had none and taken away again after.
+    /// clamps to nothing before it is added, so the camera draws in floats while either is on it,
+    /// Bevy's <c>Hdr</c> given it where it had none and taken away again after.
     /// </remarks>
-    private static void DrawShadows(EcsWorld ecs, Built? built, Entity camera)
+    private static void DrawEngine(EcsWorld ecs, Built? built, Entity camera)
     {
         var shadows = built is null ? FieldShadows.Off : Shadows;
         if (_shadows.IsValid && _shadows.Program.State != ShaderProgramState.Ready) shadows = FieldShadows.Off;
-        var on = shadows != FieldShadows.Off && !camera.IsNone;
-        var wanted = on ? (built!.Field, shadows, ContactCells * built.Plan.CellSize) : default;
-        if (on && camera == _shadowCamera && wanted == _shadowsDrawn) return;
+        var light = built is null ? default : WorldProbes.LightPass;
+        var shadowsOn = shadows != FieldShadows.Off;
+        var on = (shadowsOn || light.IsValid) && !camera.IsNone;
+        var wanted = on ? (built!.Field, shadows, ContactCells * built.Plan.CellSize, light) : default;
+        if (on && camera == _shadowCamera && wanted == _engineDrawn) return;
 
         if (!_shadowCamera.IsNone && (!on || camera != _shadowCamera))
         {
@@ -244,12 +260,15 @@ internal static unsafe partial class SceneField
             (_shadowCamera, _shadowsMadeHdr) = (Entity.None, false);
         }
 
-        _shadowsDrawn = wanted;
+        _engineDrawn = wanted;
         if (!on) return;
 
-        _shadows.SetTexture("scene_field", built!.Field).SetBuffer("scene_field_info", built.Info)
-            .SetSampler("scene_field_sampler", SamplerSettings.Clamped)
-            .Set("shadows", new Vector4(shadows == FieldShadows.Everywhere ? 1f : 0f, wanted.Item3, 0f, 0f));
+        if (shadowsOn)
+        {
+            _shadows.SetTexture("scene_field", built!.Field).SetBuffer("scene_field_info", built.Info)
+                .SetSampler("scene_field_sampler", SamplerSettings.Clamped)
+                .Set("shadows", new Vector4(shadows == FieldShadows.Everywhere ? 1f : 0f, wanted.Item3, 0f, 0f));
+        }
 
         // Depth and the G-buffer, which the light taken back is worked out from.
         Shaders.SetEnginePrepass(camera, 1u | 8u);
@@ -258,7 +277,11 @@ internal static unsafe partial class SceneField
             ecs.Insert<Bevy.Reflected.HdrRef>(camera);
             _shadowsMadeHdr = true;
         }
-        Shaders.SetEngineViewDraws(camera, ViewDraw.Fixed(_shadows, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
+
+        var draws = new List<ViewDraw>(2);
+        if (shadowsOn) draws.Add(ViewDraw.Fixed(_shadows, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
+        if (light.IsValid) draws.Add(ViewDraw.Fixed(light, FramePoint.AfterOpaque, 3, 1, DrawBlend.Add, writesDepth: false));
+        Shaders.SetEngineViewDraws(camera, [.. draws]);
         _shadowCamera = camera;
     }
 
@@ -273,8 +296,8 @@ internal static unsafe partial class SceneField
     internal static ShaderProgram KernelProgram(string file) =>
         Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) } });
 
-    /// <summary>An instance of one of the field's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
-    private static ShaderInstance Draw(string file)
+    /// <summary>An instance of one of the library's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
+    internal static ShaderInstance Draw(string file)
     {
         var source = Kernel(file);
         return Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
@@ -340,7 +363,8 @@ internal static unsafe partial class SceneField
     private static void Release(EcsWorld ecs)
     {
         if (_built is not { } built) return;
-        DrawShadows(ecs, null, Entity.None);
+        _drawFor = (null, Entity.None);
+        DrawEngine(ecs, null, Entity.None);
         foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Info,
                      built.Cells, built.Behind, built.Paint, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);

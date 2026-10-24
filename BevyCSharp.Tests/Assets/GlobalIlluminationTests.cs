@@ -185,6 +185,105 @@ public sealed class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// A white block's side toward a sunlit red wall, turned from the sun, takes the wall's red on the
+    /// camera's picture with global illumination on, the light the probes hold added in place of
+    /// Bevy's light from all around, and reads as gray as that light leaves it with it off.
+    /// </summary>
+    [SkippableFact]
+    public void ARedWallTintsAWhiteBlocksSideTowardIt()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.High);
+        Assert.True(Math.Abs(off.R - off.G) < 8, $"with global illumination off the block's side reads {off}");
+        Assert.True(on.R > off.R + 20, $"with global illumination on the block's side reads {on}, off {off}");
+        Assert.True(on.R > on.G + 20, $"with global illumination on the block's side reads {on}, not red");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                Floor(ecs, (0.8f, 0.8f, 0.8f));
+                Block(ecs, (0.8f, 0.05f, 0.05f), new Vec3(-2.2f, 2f, 0f), new Vec3(0.4f, 4f, 8f));
+                Block(ecs, (0.9f, 0.9f, 0.9f), new Vec3(0.5f, 0.5f, 0f), new Vec3(1f, 1f, 1f));
+                Sun(ecs, new Vec3(4f, 6f, 1f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 3,
+            eye: new Vec3(-1.9f, 0.6f, 1.5f),
+            at: new Vec3(0f, 0.5f, 0f),
+            ambient: 200f,
+            traced: quality != GlobalIllumination.Off);
+    }
+
+    /// <summary>
+    /// An open floor under an ambient light alone, nothing beside it and no other light, reads within
+    /// a few levels of 255 with global illumination on as with it off, since the probes' sky holds the
+    /// share of the ambient light Bevy's ambient term gives a surface facing the view, and the light
+    /// the pass adds is the light it takes back.
+    /// </summary>
+    [SkippableFact]
+    public void AnOpenFloorReadsAsBevysAmbientLightGivesIt()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(off.R > 40, $"with global illumination off the floor reads {off}");
+        Assert.True(Math.Abs(on.R - off.R) <= 4 && Math.Abs(on.G - off.G) <= 4 && Math.Abs(on.B - off.B) <= 4,
+            $"with global illumination on the floor reads {on}, off {off}");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                Floor(ecs, (0.8f, 0.8f, 0.8f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 1,
+            eye: new Vec3(0f, 3f, 0.5f),
+            at: Vec3.Zero,
+            ambient: 400f,
+            traced: quality != GlobalIllumination.Off);
+    }
+
+    /// <summary>
+    /// The mean color of the middle of the camera's picture, five pixels a side, looking from
+    /// <paramref name="eye"/> at <paramref name="at"/> under a white ambient light of
+    /// <paramref name="ambient"/>, once the field holds the scene's still meshes and, where
+    /// <paramref name="traced"/>, the probes have traced for a while.
+    /// </summary>
+    private static (int R, int G, int B) Looking(Action<EcsWorld> scene, int stills, Vec3 eye, Vec3 at, float ambient, bool traced)
+    {
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs, eye);
+                ecs.Add(camera, Transform.LookingAt(eye, at, Vec3.UnitY));
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), ambient);
+                scene(ecs);
+            },
+        }
+            .Until("settled", _ => Settled(stills))
+            .Until("traced", _ => !traced || WorldProbes.TracedFrames >= 60)
+            .Capture("seen");
+        run.Go();
+
+        var picture = run.Picture("seen");
+        var (r, g, b) = (0, 0, 0);
+        for (var y = -2; y <= 2; y++)
+        for (var x = -2; x <= 2; x++)
+        {
+            var at4 = (((int)picture.Height / 2 + y) * (int)picture.Width + (int)picture.Width / 2 + x) * 4;
+            (r, g, b) = (r + picture.Pixels[at4], g + picture.Pixels[at4 + 1], b + picture.Pixels[at4 + 2]);
+        }
+
+        return (r / 25, g / 25, b / 25);
+    }
+
+    /// <summary>
     /// The six faces of the first cascade's probes nearest each of <paramref name="points"/>, +x, -x,
     /// +y, -y, +z and -z in turn, the light in rgb and the probe's place in alpha, once the field holds
     /// the scene's still meshes and the probes have traced for a while.
@@ -201,8 +300,9 @@ public sealed class GlobalIlluminationTests
             ecs =>
             {
                 var camera = PictureRun.Camera(ecs, new Vec3(0f, 2f, 6f));
-                // A white sky of a light of one where it is asked for, at the camera's exposure.
-                Render.SetAmbientLight(camera, (1f, 1f, 1f), sky ? 1f / Exposure : 0f);
+                // A white sky of a light of one where it is asked for, at the camera's exposure, the
+                // probes taking the share of an ambient light's brightness Bevy's ambient term returns.
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), sky ? 1f / (Exposure * AmbientReturned) : 0f);
                 scene(ecs);
             },
             stills,
@@ -235,6 +335,9 @@ public sealed class GlobalIlluminationTests
     /// <summary>A camera's exposure as Bevy works it out at its default of 9.7 EV, the light that reads as one on its picture.</summary>
     private static readonly float Exposure = 1f / (1.2f * MathF.Pow(2f, 9.7f));
 
+    /// <summary>The share of an ambient light's brightness the probes' sky holds, as the bridge's gi_lights.rs gives it.</summary>
+    private const float AmbientReturned = 0.45f;
+
     /// <summary>
     /// The texels of the image <paramref name="image"/> names, read back once the field holds
     /// <paramref name="stills"/> still meshes and every cascade is built, and once
@@ -245,8 +348,7 @@ public sealed class GlobalIlluminationTests
         var read = default(BufferRead);
         byte[]? texels = null;
         new PictureRun { Width = 32, Height = 32, Scene = scene }
-            .Until("settled", _ => SceneField.Plan is { } plan && plan.StillCount == stills && plan.Shapes.Count == 0
-                && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
+            .Until("settled", _ => Settled(stills))
             .Until("ready", _ => ready?.Invoke() ?? true)
             .Wait(3)
             .Do("asking for the image", _ => read = Shaders.BeginImageRead(image()))
@@ -256,6 +358,11 @@ public sealed class GlobalIlluminationTests
         Assert.NotNull(texels);
         return texels!;
     }
+
+    /// <summary>Whether the field holds <paramref name="stills"/> still meshes and every cascade is built.</summary>
+    private static bool Settled(int stills) =>
+        SceneField.Plan is { } plan && plan.StillCount == stills && plan.Shapes.Count == 0
+        && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null);
 
     private static void Floor(EcsWorld ecs, (float R, float G, float B) color) =>
         Block(ecs, color, new Vec3(0f, -0.1f, 0f), new Vec3(20f, 0.2f, 20f));

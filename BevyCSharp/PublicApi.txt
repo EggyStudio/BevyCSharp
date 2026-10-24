@@ -2592,6 +2592,11 @@ static class Bevy.Gizmos
   static void Triangle(Vec3 a, Vec3 b, Vec3 c, (float, float, float, float) color, bool inFront = false)
 readonly struct Bevy.Gizmos.BatchScope : IDisposable
   void Dispose()
+enum Bevy.GlobalIllumination : int
+  High = 3
+  Low = 1
+  Medium = 2
+  Off = 0
 struct Bevy.GlobalTransform : IMirroredLayout, INativeComponent
   GlobalTransform(Vec3 xAxis, Vec3 yAxis, Vec3 zAxis, Vec3 translation)
   Quat Rotation { get; }
@@ -12538,6 +12543,7 @@ static class Bevy.Render
   static void SetForwardDecal(Entity entity, AssetHandle material)
   static void SetFreeCamera(Entity camera, FreeCameraSettings settings)
   static void SetFreeCameraState(Entity camera, FreeCameraState state)
+  static void SetGlobalIllumination(GlobalIllumination quality)
   static void SetImageLighting(Entity camera, AssetHandle cubemap, float intensity = 1000f, Quat? rotation = null)
   static void SetIrradianceVolume(Entity probe, AssetHandle voxels, float intensity = 1000f, Vec3? falloff = null)
   static void SetLayers(EcsWorld world, Entity entity, uint layers)

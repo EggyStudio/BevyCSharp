@@ -433,6 +433,7 @@ public sealed unsafe partial class App : IDisposable
                 {
                     SceneField.Tick(world);
                     WorldProbes.Tick(world);
+                    SceneField.DrawEngine(world);
                     Ui.TickHidden(world.Resource<EcsWorld>(), world.Resource<Input>());
                     Debug.TickOverlay(world);
                 }

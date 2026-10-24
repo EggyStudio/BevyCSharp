@@ -10,7 +10,9 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </summary>
 /// <remarks>
 /// The field darkens the sun past its shadow map's reach, the engine's default, so the ground far
-/// off keeps the shadows of the walls and trees beyond the map's last cascade.
+/// off keeps the shadows of the walls and trees beyond the map's last cascade. Global illumination,
+/// from the panel's graphics page, traces its probes through the field, which it turns on where the
+/// debug page left it off.
 /// </remarks>
 [Behavior]
 public partial struct Field
@@ -23,6 +25,16 @@ public partial struct Field
     {
         On = on;
         Render.SetSceneField(on ? 4 : 0, 0.25f, 1);
+    }
+
+    /// <summary>The quality global illumination traces at, from the panel's graphics page.</summary>
+    internal static GlobalIllumination Quality { get; private set; }
+
+    /// <summary>Traces global illumination at a quality, or none.</summary>
+    internal static void SetQuality(GlobalIllumination quality)
+    {
+        Quality = quality;
+        Render.SetGlobalIllumination(quality);
     }
 
     /// <summary>Draws the field's window while it is on, inside the interface's frame.</summary>

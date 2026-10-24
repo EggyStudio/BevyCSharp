@@ -3,9 +3,9 @@ namespace Bevy;
 public static partial class Render
 {
     /// <summary>
-    /// Traces the light each surface reflects onto the others through the scene's distance field each
-    /// frame, as cascades of probes around the camera, at a quality, or none with
-    /// <see cref="GlobalIllumination.Off"/>, which it is by default.
+    /// Lights the camera's picture with the light each surface reflects onto the others, traced
+    /// through the scene's distance field each frame as cascades of probes around the camera, at a
+    /// quality, or none with <see cref="GlobalIllumination.Off"/>, which it is by default.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -35,8 +35,23 @@ public static partial class Render
     /// after.
     /// </para>
     /// <para>
-    /// The probes are traced with compute shaders the library carries, which compile as the field's
-    /// do, and the setting lasts while the app runs.
+    /// Bevy's lighting takes no indirect light from outside, so the probes' light is added to the
+    /// picture of the camera the field lies around by a pass of the library's own after its opaque
+    /// surfaces are lit, which takes back the diffuse share of the light from all around Bevy's
+    /// lighting gave each surface and adds in its place the surface's diffuse color times the light
+    /// the probes around it hold, times its material's occlusion. Past the probes' last cascade, faded
+    /// in across its outer band, the light from all around is a sky over a ground, the ambient light
+    /// from above and below the horizon the light the ground sends back, its color taken as the
+    /// surface's own, with each directional light's share of the ground's light through its shadow
+    /// map, so the field's edge shows as no line. The pass reads the camera's G-buffer and draws its
+    /// picture in floats while it is on, as the field's contact shadows do. The ambient light is
+    /// taken as what Bevy's lighting returns from a white surface under it, so an open floor reads as
+    /// it does without global illumination. Bevy's screen-space ambient occlusion and an environment
+    /// map's light are left as Bevy gives them.
+    /// </para>
+    /// <para>
+    /// The probes and the pass are compute and draw shaders the library carries, which compile as the
+    /// field's do, and the setting lasts while the app runs.
     /// </para>
     /// </remarks>
     /// <param name="quality">How many cascades and directions, or none.</param>
@@ -46,7 +61,7 @@ public static partial class Render
     /// Render.SetGlobalIllumination(GlobalIllumination.High);
     /// </code>
     /// </example>
-    internal static void SetGlobalIllumination(GlobalIllumination quality)
+    public static void SetGlobalIllumination(GlobalIllumination quality)
     {
         if (App.Running is null)
             throw new InvalidOperationException("Global illumination belongs to an app, and none is running.");

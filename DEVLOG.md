@@ -6,6 +6,15 @@ or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 ## 2026-10-24
 
+![](.github/assets/denoiser.webp)
+The feature test's Cornell box under Solari's ray-traced lighting, one grainy frame on the left and
+the denoiser's frame on the right, item 54's node over the same frame.
+
+![](.github/assets/readings/2026-10-24-denoiser-checker-crops.webp)
+The checkered ground far off in three crops, the reference mean, the denoiser's frame and a grainy
+one, the reading that moved the demodulation to the diffuse color plus the specular reflectance
+(item 54).
+
 Done:
 
 - Item 54 at `97440a1d`. A denoiser over Solari's lit result, so the ray-traced tier's picture is
@@ -20,6 +29,12 @@ The scene's distance field darkens each directional light where it closes a surf
 shadow map by default, by taking back the light Bevy gave from the camera's G-buffer in a picture of
 floats, and draws its settings and a slice across a cascade in a window of its own, which the
 feature test shows at its gallery. (`d2e6ef81`)
+
+![](.github/assets/readings/2026-10-23-field-pair.webp)
+The scene's distance field read as a pair, a box's field mapped and traced (item 50).
+
+![](.github/assets/readings/2026-10-23-field-window.webp)
+The field's window in the feature test, the cascades' cells over the room (item 50).
 
 Done:
 
@@ -44,6 +59,31 @@ Blockout, a level of three rooms, a corridor and stairs between two floors block
 recipe, is walked through the character controller and reshaped from the modeling window on Tab, and
 the booleans take a solid primitive's line as the cut does. (`09fc95dd`)
 
+![](.github/assets/readings/2026-10-21-swarm-waves.webp)
+Swarm's arena across three waves, the game played by its script.
+
+![](.github/assets/readings/2026-10-21-edit-mesh-primitives.webp)
+The edit mesh's primitives in the drive, a box, a sphere, a cylinder, a cone, a wedge and an arch
+(item 38).
+
+![](.github/assets/readings/2026-10-21-grid-room.webp)
+A room blocked out in the prototype materials with the grid image of a meter's cell (item 39).
+
+![](.github/assets/readings/2026-10-21-terminal-room.webp)
+The room built through the model commands from the terminal alone (item 40).
+
+![](.github/assets/readings/2026-10-21-modeling-window.webp)
+The modeling window in the editor with its picking, its drag and the Model tab (item 40).
+
+![](.github/assets/readings/2026-10-21-texture-coordinates.webp)
+Texture coordinates by projection on a checker and a wood grain (item 41).
+
+![](.github/assets/readings/2026-10-21-textured-cube-editor.webp)
+A textured cube in the modeling window after the texture coordinates landed (item 41).
+
+![](.github/assets/readings/2026-10-21-overlay-f3.webp)
+The F3 overlay over the feature test, the frame's strip and its sections (item 49).
+
 Done:
 
 - Item 38 at `08d03b4d`. An edit mesh a program shapes by operations, with a recipe that rebuilds
@@ -64,6 +104,9 @@ Done:
   on the package draws ImGui.
 
 ## 2026-10-20
+
+![](.github/assets/readings/2026-10-20-hub-particles.webp)
+The feature test's hub under its particles, driven offscreen for the readings.
 
 Done:
 

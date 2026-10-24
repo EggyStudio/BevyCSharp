@@ -4,7 +4,7 @@ namespace Bevy;
 /// How much global illumination is worked out, from none to the full set of cascades of probes, as
 /// 3DEngine's levels are (<see cref="Render.SetGlobalIllumination"/>).
 /// </summary>
-internal enum GlobalIllumination
+public enum GlobalIllumination
 {
     /// <summary>None, the light Bevy's lighting gives alone.</summary>
     Off,

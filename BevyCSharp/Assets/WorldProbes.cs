@@ -48,6 +48,8 @@ internal static unsafe class WorldProbes
     private static App? _app;
     private static Made? _made;
     private static ShaderProgram _traceProgram, _mergeProgram, _ambientProgram;
+    // The pass that adds the probes' light to the picture of the camera the field lies around.
+    private static ShaderInstance _light;
     private static long _frame;
     private static Vector3?[] _origins = [];
 
@@ -105,6 +107,14 @@ internal static unsafe class WorldProbes
     /// </summary>
     internal static AssetHandle Cubes => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Cubes : AssetHandle.None;
 
+    /// <summary>
+    /// The pass that adds the probes' light to the picture of the camera the field lies around, bound
+    /// to this frame's probes, or none where none are traced or it has not compiled
+    /// (<c>gi_light.slang</c>).
+    /// </summary>
+    internal static ShaderInstance LightPass =>
+        ReferenceEquals(_app, App.Running) && _made is not null && _light.IsValid && _light.Program.State == ShaderProgramState.Ready ? _light : default;
+
     /// <summary>How many frames the running app's probes have been traced in, for a test to wait on.</summary>
     internal static long TracedFrames => ReferenceEquals(_app, App.Running) && _made is not null ? _frame : 0;
 
@@ -149,7 +159,7 @@ internal static unsafe class WorldProbes
         if (!ReferenceEquals(App.Running, _app))
         {
             _app = App.Running;
-            (_made, _traceProgram, _mergeProgram, _ambientProgram, _frame, _origins) = (null, default, default, default, 0, []);
+            (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
         }
 
         var quality = Asked;
@@ -164,6 +174,7 @@ internal static unsafe class WorldProbes
             _traceProgram = SceneField.KernelProgram("gi_trace.slang");
             _mergeProgram = SceneField.KernelProgram("gi_merge.slang");
             _ambientProgram = SceneField.KernelProgram("gi_ambient.slang");
+            _light = SceneField.Draw("gi_light.slang");
         }
 
         if (_traceProgram.State != ShaderProgramState.Ready || _mergeProgram.State != ShaderProgramState.Ready
@@ -319,5 +330,10 @@ internal static unsafe class WorldProbes
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, 0, 0, 0));
             Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
         }
+
+        // The pass that adds the light, which reads the faces the gathers wrote this frame.
+        _light.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
+            .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
+            .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0));
     }
 }

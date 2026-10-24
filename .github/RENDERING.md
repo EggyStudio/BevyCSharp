@@ -236,9 +236,24 @@ its merge 0.04 to 0.10 and its gather 0.03, each the mean of a frame's dispatche
 `render.timings` gives it, so `Low`'s two cascades take about 0.9 ms and `High`'s four about 1.8,
 the sixteen lamps' marches from each hit among it. The light from all around a ray of the last
 cascade brings back is the ambient light's color, where 3DEngine reads its environment map, and the
-glow lights and the emissive surfaces' light come with the emitters. The third part, the light
-given to Bevy's surfaces through the bridge's pass, follows, with `Render.SetGlobalIllumination`
-made public then.
+glow lights and the emissive surfaces' light come with the emitters.
+
+The light given to Bevy's surfaces is the third part (`gi_light.slang`), an engine draw after the
+opaque surfaces blended by adding beside the contact shadows' draw, which reads the deferred
+prepass's G-buffer, works out the diffuse share of the ambient light Bevy's lighting gave the
+surface as Bevy works it out, from `F_AB` at a perceptual roughness of one, and adds in its place
+the surface's diffuse color times the light read between the probes around it, times its occlusion.
+3DEngine's model pass reads the probes inside its own lighting, and taking Bevy's term back stands
+in for that until the indirect input of the table below exists. Past the last cascade the light from
+all around is 3DEngine's sky over a ground, each directional light's share of the ground's light
+read through its shadow map a coarsest cell along the normal. The ambient light reaches the probes
+times 0.45, the share Bevy's ambient term returns from a white surface facing the view (`F_AB(1, 1)`
+is 0.4524 and -0.0024), so an open floor reads as Bevy's own lighting leaves it, which a test holds,
+and a red wall's light tints a white block's side. The pass takes 0.23 ms at its least and 1.1 at
+its median over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take
+0.9 ms at `Low`, 1.2 at `Medium` and 1.4 at `High`. In the feature test the pass's span reads no GPU
+time, where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its
+own. `Render.SetGlobalIllumination` is public with it, and the glossy term and the emitters follow.
 
 ## What Unity made them work around, and the hook that replaces each
 

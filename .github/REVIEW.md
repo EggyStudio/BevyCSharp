@@ -10,31 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `750c9cbc`, item 59, the denoiser's node from 3.6 to 1.9 ms at 1080p, and nothing
-else, carrying the devlog, AGENTS.md's row for it on the owner's word, Decision 59, the review's
-files and a Shared line: the stages timed one by one as spans under the node's, each costing what
-moving the picture through memory costs; an eight-byte guide of distance and packed normal every tap
-reads in place of the depth and the sixteen-byte G-buffer texel, half-float light, moments and
-history, the variance folded into the temporal stage that holds the moments rather than the first
-à-trous pass, the remodulation into the last, seven dispatches where nine; departures, the moments
-kept as a mean and a variance about it since plain half-float moments left the vegetation view at
-4.13 against 2.45, group-shared taps and a power of two for the weight tried and dropped as slower
-or no gain, and a tile skip where a workgroup's variance is under one percent of its light giving
-little; item 54's seven views and the strafe within a level of before, the budget test at 3.2 ms on
-the least of 600 frames; a further cut, fewer fetches a pixel, left for an item if the owner asks.
-The suite 1,731 passed, the Cargo tests, the three profiles and the cross checks clean. Read at
-07:18 on 2026-10-24 and pushed at once, no run of main in flight; its run green on the three systems
-at 07:36. Next item 51, radiance cascades over the field, whose wait on 3DEngine's items 71, 72 and
-74 ends with those mended and on main today and the voxel game's pictures retaken, the reviewer's
-reading of the owner's condition of 2026-10-21, the owner's to overrule; item 52 after it. The
-branch `modeling-operations` was deleted at 07:22 with item 54 on main, N 7.5; the cloud session
-stands by.
+Reviewed up to `0f0be8f0`, item 51's first commit, the world's probes and their tracing, with the
+devlog's move to DEVLOG.md at the root and AGENTS.md's row on the owner's word, Decision 59, and
+nothing else, carrying the review's files, ABI 304: the field's splat painting each cell its nearest
+triangle's color and the resolve and stamp writing the color and the face's way, SetSceneField's far
+cascade as 3DEngine's held to the camera's far plane, nine cascades in the info; bcs_gi.slang a
+bridge module with the trace, merge and gather kernels as 3DEngine's with the mends to date, run by
+WorldProbes, driven and said by gi.set and gi.state, the lights gathered as the sun, the ambient
+light and the sixteen lamps nearest the camera in Bevy's units times the exposure; departures, the
+probes' light and partial sums in storage buffers since a half-float image is not read and written
+in one dispatch and the trace's sum of 27 probes in uniform control flow, the spot's cone Bevy's
+falloff and the lamps the nearest sixteen, the sky the ambient light's color until the third commit
+brings the environment map, the glow lights and the emissive surfaces, Render.SetGlobalIllumination
+internal until the second commit's pass makes the light visible, and the distant ambient a per-pixel
+term coming with that pass; six tests, a probe toward a black wall holding 1.12 of a sky of pi with
+the far cascade where 3DEngine read 1.14; a cascade's trace 0.33 to 0.36 ms on the 4070, Low about
+0.9 ms and High 1.8. The suite 1,737 passed, the Cargo tests, the three profiles and the cross
+checks clean. Read at 08:19 on 2026-10-24 and pushed at once, no run of main in flight; its run
+green on the three systems at 08:44. Next the pass and the reference, item 51's second commit, then
+its third.
+
+Before it, `750c9cbc` came, item 59, pushed at 07:18 on 2026-10-24, its run green on the three
+systems.
 
 Before it, `c770351f` came, item 54's readings, pushed at 03:47 on 2026-10-24, its run green on the
 three systems.
-
-Before it, `16614918` and `97440a1d` came, item 54's two cherry-picks, pushed at 01:57 on
-2026-10-24, their run green in fifteen minutes.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -252,7 +252,8 @@ from [SHARED.md](SHARED.md).
     game's captures say the light holds, the port carrying the mends in. 3DEngine's items 71, 72 and
     74 are mended and on its main on 2026-10-24 and the voxel game's pictures retaken that day, so
     the wait ends by the reviewer's reading of the owner's condition, the owner's to overrule; the
-    item starts at 07:2x with its first commit, the probes and their tracing.
+    item starts at 07:2x with its first commit, the probes and their tracing. The first commit at
+    `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the head.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -1386,3 +1387,17 @@ units ahead holds 1.12 of a sky of pi with the far cascade and 3.14 without, whe
 it; in the feature test's Cornell box a cascade's trace takes 0.33 to 0.36 ms, its merge 0.04 to
 0.10 and its gather 0.03, the means of the program's dispatches, so `Low` about 0.9 ms and `High`
 about 1.8 with sixteen lamps marched from each hit.
+
+Shared: global illumination's light on Bevy's surfaces, in the commit carrying this line, item 51's
+second. A pass after the opaque surfaces takes back the diffuse share of Bevy's ambient term, worked
+out from the G-buffer with `F_AB` at a perceptual roughness of one, and adds the surface's diffuse
+color times the light between the probes around it times its occlusion, with 3DEngine's sky over a
+ground past the last cascade and each directional light's share of the ground's light through its
+shadow map. The probes' sky is the ambient light's brightness times 0.45, the share Bevy's ambient
+term returns from a white surface facing the view, so an open floor reads 92 of 255 with the pass
+and 92 without, and a white block's side by a sunlit red wall reads 237, 136, 132 with it and 75,
+75, 75 without, both held by tests. On the RTX 4070 Laptop GPU in a Cornell box at 1280 by 720 the
+probes take 0.9 ms at `Low`, 1.2 at `Medium` and 1.4 at `High`, and the pass 0.23 ms at its least
+and 1.1 at its median over 600 frames; in the feature test the pass's span reads no GPU time, where
+Bevy keeps no more than 256 timestamps a frame. The path-traced reference with `gi.reference` and
+`gi.compare` follows in a commit of its own.
