@@ -10,10 +10,11 @@
 // as 3DEngine's model pass takes it (distantAround), each directional light adding its share of the
 // ground's light through its shadow map at the ground the surface looks at. The picture before
 // tonemapping holds light as floats, so adding less than nothing takes it away. The probes' light is
-// in the picture's units, the camera's exposure applied, and Bevy's ambient term is taken back times
-// the exposure as Bevy applies it. Bevy's screen-space ambient occlusion and an environment map's
-// light are Bevy's and left as they are, so where a camera has them the light taken back differs
-// from the light Bevy gave by as much.
+// in the picture's units, the camera's exposure applied, and Bevy's ambient term and its diffuse
+// light from an environment map are taken back times the exposure as Bevy applies it. Bevy's
+// screen-space ambient occlusion and an environment map's specular light are Bevy's and left as they
+// are, so where a camera has occlusion the light taken back differs from the light Bevy gave by as
+// much.
 import bcs_pass;
 import bcs_field;
 import bcs_gi;
@@ -68,6 +69,31 @@ float2 F_AB(float perceptual_roughness, float NdotV)
     return float2(-1.04, 1.04) * a004 + r.zw;
 }
 
+// The diffuse share of the light an environment map gave a surface, as Bevy's environment_map_light
+// works it out, the dielectric's and the metal's multiple scattering mixed by the metalness and the
+// diffuse color times what the dielectric's single and multiple scattering leave, times the map's
+// irradiance facing n, or none where the camera has no environment map.
+float3 environmentGiven(PassSurface surface, float3 n, float NdotV, float3 diffuse)
+{
+    if (!passHasEnvironment())
+        return float3(0.0);
+    float2 F_ab = F_AB(surface.perceptual_roughness, NdotV);
+    float Ems = 1.0 - (F_ab.x + F_ab.y);
+    float3 F0[2] = { float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color };
+    float3 scattered[2];
+    float3 left = float3(0.0);
+    [unroll]
+    for (int i = 0; i < 2; i++)
+    {
+        float3 FssEss = F0[i] * F_ab.x + F_ab.y;
+        float3 Favg = F0[i] + (1.0 - F0[i]) / 21.0;
+        scattered[i] = FssEss * Favg / (1.0 - Ems * Favg) * Ems;
+        if (i == 0)
+            left = 1.0 - (FssEss + scattered[i]);
+    }
+    return (lerp(scattered[0], scattered[1], surface.metallic) + diffuse * left) * passEnvironmentDiffuse(n);
+}
+
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
@@ -102,7 +128,9 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 distant = float3(0.0);
     if (held < 1.0)
     {
-        distant = distantAround(lights.sky.rgb, n, diffuse);
+        // The environment map's light from above with the ambient light, as 3DEngine's sky over a
+        // ground reads its environment's irradiance facing up.
+        distant = distantAround(lights.sky.rgb + passEnvironmentDiffuse(float3(0.0, 1.0, 0.0)) * passView.exposure, n, diffuse);
         float below = saturate(0.5 - n.y * 0.5);
         if (below > 0.0)
         {
@@ -132,9 +160,11 @@ float4 fragment(FullscreenOutput input) : SV_Target
     if (lights.counts.w > 0.5)
         added += diffuse * glowLightsAt(scene_field, scene_field_sampler, info, glow_lights, uint(lights.counts.w), world, n, 4, false, float3(0.0)) / Pi;
 
-    // The diffuse share of the light from all around Bevy's lighting gave the surface, taken back.
+    // The diffuse share of the light from all around Bevy's lighting gave the surface, its ambient
+    // term's and its environment map's, taken back.
     float2 F_ab = F_AB(1.0, NdotV);
-    float3 given = (diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb * occlusion * passView.exposure;
+    float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + environmentGiven(surface, n, NdotV, diffuse))
+        * occlusion * passView.exposure;
 
     return float4(added - given, 0.0);
 }

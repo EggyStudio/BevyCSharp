@@ -13,16 +13,18 @@ public static partial class Render
     /// is turned on at four cascades of a quarter of a unit where the program asked for none. A
     /// cascade of the world's probes stands every eight cells of the field's cascade of the same
     /// number, eight a side, and each probe traces an octahedron of directions across an interval,
-    /// the first cascade's from the probe to four times the probes' spacing and each after's from its
-    /// spacing to four times that, the last's on to the field's edge, so the far light, which changes
-    /// slowly from point to point, is gathered by few probes and the near light by many. The last
-    /// cascade of probes stands in the field's far cascade where it has one. A ray that meets a
-    /// surface brings back its color, which the field paints, times the sun's light where the field
-    /// lets it through, each point and spot light's, those that cast shadows where the field lets them
-    /// through too, and the indirect light that reached the surface the frame before, so each frame
-    /// adds a bounce. A ray of the last cascade that meets nothing brings back the light from all
-    /// around, the camera's ambient light or the world's. The cascades are merged from the last down,
-    /// and each probe gathers what reached it into the six faces of a cube.
+    /// the first cascade's from the probe to four times the probes' spacing and each after's from
+    /// its spacing to four times that, the last's on to the field's edge, so the far light, which
+    /// changes slowly from point to point, is gathered by few probes and the near light by many.
+    /// The last cascade of probes stands in the field's far cascade where it has one. A ray that
+    /// meets a surface brings back its color, which the field paints, times the sun's light where
+    /// the field lets it through, each point and spot light's, those that cast shadows where the
+    /// field lets them through too, and the indirect light that reached the surface the frame
+    /// before, so each frame adds a bounce. A ray of the last cascade that meets nothing brings
+    /// back the light from all around, the camera's ambient light or the world's, and the light of
+    /// the camera's environment map along its way, which a dispatch on the camera copies for the
+    /// probes each frame. The cascades are merged from the last down, and each probe gathers what
+    /// reached it into the six faces of a cube.
     /// </para>
     /// <para>
     /// A surface's emissive light is painted into the field beside its color, as Bevy shows it, the
@@ -51,15 +53,18 @@ public static partial class Render
     /// picture of the camera the field lies around by a pass of the library's own after its opaque
     /// surfaces are lit, which takes back the diffuse share of the light from all around Bevy's
     /// lighting gave each surface and adds in its place the surface's diffuse color times the light
-    /// the probes around it hold, times its material's occlusion. Past the probes' last cascade, faded
-    /// in across its outer band, the light from all around is a sky over a ground, the ambient light
-    /// from above and below the horizon the light the ground sends back, its color taken as the
-    /// surface's own, with each directional light's share of the ground's light through its shadow
-    /// map, so the field's edge shows as no line. The pass reads the camera's G-buffer and draws its
-    /// picture in floats while it is on, as the field's contact shadows do. The ambient light is
-    /// taken as what Bevy's lighting returns from a white surface under it, so an open floor reads as
-    /// it does without global illumination. Bevy's screen-space ambient occlusion and an environment
-    /// map's light are left as Bevy gives them.
+    /// the probes around it hold, times its material's occlusion. Past the probes' last cascade,
+    /// faded in across its outer band, the light from all around is a sky over a ground, the
+    /// ambient light from above and below the horizon the light the ground sends back, its color
+    /// taken as the surface's own, with each directional light's share of the ground's light
+    /// through its shadow map, so the field's edge shows as no line. The pass reads the camera's
+    /// G-buffer and draws its picture in floats while it is on, as the field's contact shadows do.
+    /// The ambient light is taken as what Bevy's lighting returns from a white surface under it, so
+    /// an open floor reads as it does without global illumination. The diffuse light an environment
+    /// map gave each surface is taken back as the ambient light's is, so a closed room under a
+    /// bright sky is dark inside where Bevy's lighting lights it through the walls. Bevy's
+    /// screen-space ambient occlusion and an environment map's reflections are left as Bevy gives
+    /// them.
     /// </para>
     /// <para>
     /// The probes and the pass are compute and draw shaders the library carries, which compile as the

@@ -51,6 +51,9 @@ internal static unsafe class GiReference
 
     private static readonly string[] Axes = ["+x", "-x", "+y", "-y", "+z", "-z"];
 
+    /// <summary>The name the reference's dispatches on a camera are kept under beside the engine's others.</summary>
+    private const string Owner = "gi.reference";
+
     /// <summary>A reference as traced, its light in rows from the top, three floats a pixel, what each pixel shows, and the names of those regions.</summary>
     internal sealed record Traced(int Width, int Height, float[] Light, uint[] Regions, int Samples, IReadOnlyDictionary<uint, string> Names);
 
@@ -263,7 +266,7 @@ internal static unsafe class GiReference
         job.Size = Shaders.CreateBuffer(sizeof(uint) * 2);
         job.Picture = Shaders.CreateImage(1, 1, ShaderImageFormat.Rgba32Float);
         rays.Copy.SetTexture("frame", job.Picture).SetBuffer("size", job.Size);
-        Shaders.SetEngineViewDispatches(job.Camera, ViewDispatch.PerPixel(rays.Copy, FramePoint.BeforeTonemapping));
+        Shaders.SetEngineViewDispatches(job.Camera, Owner, ViewDispatch.PerPixel(rays.Copy, FramePoint.BeforeTonemapping));
         job.Stage = Stage.Sizing;
     }
 
@@ -295,7 +298,7 @@ internal static unsafe class GiReference
             rays.Trace.SetRayScene("scene", rays.Scene).SetBuffer("vertices", rays.Pool.Vertices).SetBuffer("indices", rays.Pool.Indices)
                 .SetBuffer("meshes", rays.Pool.Meshes).SetBuffer("instances", rays.Instances).SetBuffer("materials", rays.Materials)
                 .SetBuffer("lights", rays.Lights).SetTexture("sums", job.Sums).SetTexture("regions", job.Regions);
-            Shaders.SetEngineViewDispatches(job.Camera, ViewDispatch.PerPixel(rays.Trace, FramePoint.BeforeTonemapping));
+            Shaders.SetEngineViewDispatches(job.Camera, Owner, ViewDispatch.PerPixel(rays.Trace, FramePoint.BeforeTonemapping));
             job.Stage = Stage.Tracing;
         }
         else
@@ -314,7 +317,7 @@ internal static unsafe class GiReference
     {
         if (job.Added >= job.Samples)
         {
-            Shaders.SetEngineViewDispatches(job.Camera);
+            Shaders.SetEngineViewDispatches(job.Camera, Owner);
             (job.Stage, job.Frames) = (Stage.Reading, 0);
             return;
         }
@@ -386,7 +389,7 @@ internal static unsafe class GiReference
     // reference was named, compares the two.
     private static string? Copied(Job job)
     {
-        if (job.Frames == 3) Shaders.SetEngineViewDispatches(job.Camera);
+        if (job.Frames == 3) Shaders.SetEngineViewDispatches(job.Camera, Owner);
         if (job.Frames == 5) job.PictureRead = Shaders.BeginImageRead(job.Picture);
         if (job.PictureRead is not { } read || !Shaders.TryReadBuffer(read, out var bytes) || bytes is null) return null;
 
@@ -409,7 +412,7 @@ internal static unsafe class GiReference
     // Takes whatever the job put on its camera off it and lets its images go.
     private static void Finish(Job job)
     {
-        if (job.Stage != Stage.Reading) Shaders.SetEngineViewDispatches(job.Camera);
+        if (job.Stage != Stage.Reading) Shaders.SetEngineViewDispatches(job.Camera, Owner);
         foreach (var handle in new[] { job.Size, job.Picture, job.Sums, job.Regions })
             if (handle.IsValid) AssetServer.Release(handle);
         _job = null;

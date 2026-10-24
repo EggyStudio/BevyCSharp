@@ -238,8 +238,11 @@ RTX 4070 Laptop GPU in the feature test's Cornell box, a cascade's trace takes 0
 merge 0.04 to 0.10 and its gather 0.03, each the mean of a frame's dispatches of the program as
 `render.timings` gives it, so `Low`'s two cascades take about 0.9 ms and `High`'s four about 1.8,
 the sixteen lamps' marches from each hit among it. The light from all around a ray of the last
-cascade brings back is the ambient light's color, where 3DEngine reads its environment map, which
-follows.
+cascade brings back is the ambient light's color and, where the camera has an environment map, the
+map's light along the ray's way, as 3DEngine reads its environment map. The probes are traced before
+the cameras draw, and the map is the camera's, so a dispatch on the camera copies it each frame onto
+an octahedron of 64 texels a side, blurred as a surface of a quarter roughness blurs it, times the
+exposure (`gi_sky.slang`), and the probes read the frame before's.
 
 The light given to Bevy's surfaces is the third part (`gi_light.slang`), an engine draw after the
 opaque surfaces blended by adding beside the contact shadows' draw, which reads the deferred
@@ -247,16 +250,20 @@ prepass's G-buffer, works out the diffuse share of the ambient light Bevy's ligh
 surface as Bevy works it out, from `F_AB` at a perceptual roughness of one, and adds in its place
 the surface's diffuse color times the light read between the probes around it, times its occlusion.
 3DEngine's model pass reads the probes inside its own lighting, and taking Bevy's term back stands
-in for that until the indirect input of the table below exists. Past the last cascade the light from
-all around is 3DEngine's sky over a ground, each directional light's share of the ground's light
-read through its shadow map a coarsest cell along the normal. The ambient light reaches the probes
-times 0.45, the share Bevy's ambient term returns from a white surface facing the view (`F_AB(1, 1)`
-is 0.4524 and -0.0024), so an open floor reads as Bevy's own lighting leaves it, which a test holds,
-and a red wall's light tints a white block's side. The pass takes 0.23 ms at its least and 1.1 at
-its median over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take
-0.9 ms at `Low`, 1.2 at `Medium` and 1.4 at `High`. In the feature test the pass's span reads no GPU
-time, where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its
-own. `Render.SetGlobalIllumination` is public with it, and the glossy term follows.
+in for that until the indirect input of the table below exists. The diffuse light an environment map
+gave the surface is taken back with the ambient term, as Bevy's environment_map_light works it out,
+the multiple scattering and the diffuse color times what the dielectric's scattering leaves, times
+the map's irradiance, and the probes' light stands in for it as for the ambient. Past the last
+cascade the light from all around is 3DEngine's sky over a ground, the environment map's light from
+above with the ambient light, each directional light's share of the ground's light read through its
+shadow map a coarsest cell along the normal. The ambient light reaches the probes times 0.45, the
+share Bevy's ambient term returns from a white surface facing the view (`F_AB(1, 1)` is 0.4524 and
+-0.0024), so an open floor reads as Bevy's own lighting leaves it, which a test holds, and a red
+wall's light tints a white block's side. The pass takes 0.23 ms at its least and 1.1 at its median
+over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take 0.9 ms at
+`Low`, 1.2 at `Medium` and 1.4 at `High`. In the feature test the pass's span reads no GPU time,
+where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
+`Render.SetGlobalIllumination` is public with it, and the glossy term follows.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
@@ -271,21 +278,22 @@ it with its linear light, its regions and their names, and `gi.compare <png>` re
 light before tonemapping and says how far the view lies from it, the pixels' differences summed over
 the reference's light, with each region's mean light against the reference's and a picture of the
 difference. A texture counts as its material's base color and a mesh's vertices' colors are left
-out, and the sky is the light from all around rather than an environment map's, so a textured ground
-or a drawn sky reads apart from its reference. The bounce rooms are a test (`BounceRoomsTests`), the
-nine views at each quality held within 15% over what they read, 0.10 to 0.11 in the Cornell box,
-0.12 in the thin room, 0.25 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls,
-0.05 to 0.07 on the grazing floor and 0.06 in the carried lamp's, where 3DEngine's read 0.12 to
-0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12, the strip's 0.18 to
-0.19 where 3DEngine's read 0.22, and the glowing blocks' 0.05 where 0.05 to 0.06. A mend that widens
-no view keeps every bound, 3DEngine's rule. The Cornell box's floor reads 13.2% over its reference
-at `High`, and 15.5% over with its lamp panel dark in both, so the excess is the probes' indirect
-light. In the feature test's Cornell box at 1280 by 720, 256 paths a pixel take 3.5 s through 14,260
-meshes, and the walls read from 5% under to 17% over the reference, the lamp panel's light carried
-as a glow light. That reading also found Bevy's deferred lighting showing a material's emissive
-light unexposed, the alpha that applies the camera's exposure lost in the G-buffer, so the panel
-reads 40,053 where its reference reads 49, on every camera the field's shadows or global
-illumination make deferred.
+out, and a path that meets nothing brings back the ambient light as the probes have it and the
+camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
+to light the scene, reads apart from its reference. The bounce rooms are a test
+(`BounceRoomsTests`), the nine views at each quality held within 15% over what they read, 0.10 to
+0.11 in the Cornell box, 0.12 in the thin room, 0.25 in the corridor, 0.11 to 0.12 in the window's,
+0.02 among the red walls, 0.05 to 0.07 on the grazing floor and 0.06 in the carried lamp's, where
+3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12,
+the strip's 0.18 to 0.19 where 3DEngine's read 0.22, and the glowing blocks' 0.05 where 0.05 to
+0.06. A mend that widens no view keeps every bound, 3DEngine's rule. The Cornell box's floor reads
+13.2% over its reference at `High`, and 15.5% over with its lamp panel dark in both, so the excess
+is the probes' indirect light. In the feature test's Cornell box at 1280 by 720, 256 paths a pixel
+take 3.5 s through 14,260 meshes, and the walls read from 5% under to 17% over the reference, the
+lamp panel's light carried as a glow light. That reading also found Bevy's deferred lighting showing
+a material's emissive light unexposed, the alpha that applies the camera's exposure lost in the
+G-buffer, so the panel reads 40,053 where its reference reads 49, on every camera the field's
+shadows or global illumination make deferred.
 
 The emitters are 3DEngine's. The gather gives each mesh's emission in the picture's units as Bevy
 shows it, times the camera's exposure by the share of it the emission's alpha sets, the field paints

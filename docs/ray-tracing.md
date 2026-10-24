@@ -293,9 +293,11 @@ the surface's diffuse color times the light the probes around it hold. Past the 
 light from all around is the ambient light over a ground lit by the sun. The ambient light reaches
 the probes as Bevy's lighting returns it from a surface facing the view, so an open floor reads as
 it does without global illumination. As the contact shadows above do, the pass needs the G-buffer
-and a picture in floats, so the camera draws Bevy's materials deferred while it is on. Bevy's
-screen-space ambient occlusion and an environment map's light are left as Bevy gives them, so a
-camera with an environment map has its light on top of the probes'.
+and a picture in floats, so the camera draws Bevy's materials deferred while it is on. An
+environment map lights the probes too, its light along each ray that leaves the scene, and its
+diffuse light is taken back as the ambient light's is, so a closed room under a bright sky is dark
+inside where Bevy's own lighting would light it through the walls. Bevy's screen-space ambient
+occlusion and an environment map's reflections are left as Bevy gives them.
 
 In a Cornell box on an RTX 4070 Laptop GPU the probes take about 0.9 ms at `Low`, 1.2 at `Medium`
 and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median, or 1.3 ms

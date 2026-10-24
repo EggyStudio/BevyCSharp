@@ -48,6 +48,16 @@ internal static unsafe class WorldProbes
     private static App? _app;
     private static Made? _made;
     private static ShaderProgram _traceProgram, _mergeProgram, _ambientProgram;
+    // The copy of the camera's environment map the probes' rays read where they meet nothing, and
+    // the camera it runs on.
+    private static ShaderInstance _sky;
+    private static Entity _skyCamera = Entity.None;
+
+    /// <summary>The texels along each side of the octahedron the camera's environment map is copied onto.</summary>
+    private const uint SkySize = 64;
+
+    /// <summary>The name the copy's dispatch on a camera is kept under beside the engine's others.</summary>
+    private const string SkyOwner = "gi.sky";
     // The pass that adds the probes' light to the picture of the camera the field lies around.
     private static ShaderInstance _light;
     private static long _frame;
@@ -59,7 +69,7 @@ internal static unsafe class WorldProbes
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
         public AssetHandle[] Radiance = [], Merged = [], Distances = [], MergedSky = [];
-        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, NoSky = AssetHandle.None;
+        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, SkyMap, NoSky = AssetHandle.None;
         public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
         public (float Start, float End)[] Intervals = [];
         public readonly byte[] LightBytes = new byte[LightsBytes];
@@ -161,6 +171,7 @@ internal static unsafe class WorldProbes
         {
             _app = App.Running;
             (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
+            (_sky, _skyCamera) = (default, Entity.None);
         }
 
         var quality = Asked;
@@ -176,6 +187,7 @@ internal static unsafe class WorldProbes
             _mergeProgram = SceneField.KernelProgram("gi_merge.slang");
             _ambientProgram = SceneField.KernelProgram("gi_ambient.slang");
             _light = SceneField.Draw("gi_light.slang");
+            _sky = Shaders.CreateInstance(SceneField.KernelProgram("gi_sky.slang"));
         }
 
         if (_traceProgram.State != ShaderProgramState.Ready || _mergeProgram.State != ShaderProgramState.Ready
@@ -187,6 +199,17 @@ internal static unsafe class WorldProbes
         {
             Release();
             _made = Make(quality, texels);
+        }
+
+        // The camera's environment map copied for the rays by a dispatch on the camera the field lies
+        // around, which the rays read the frame after.
+        var camera = SceneField.ViewCamera;
+        _sky.SetTexture("sky_map", _made.SkyMap);
+        if (camera != _skyCamera)
+        {
+            if (!_skyCamera.IsNone) Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
+            if (!camera.IsNone) Shaders.SetEngineViewDispatches(camera, SkyOwner, ViewDispatch.Fixed(_sky, FramePoint.AfterPrepass, SkySize / 8, SkySize / 8));
+            _skyCamera = camera;
         }
 
         _frame++;
@@ -228,6 +251,7 @@ internal static unsafe class WorldProbes
         made.Skies = Shaders.CreateImage<Half>(6 * p, p, ShaderImageFormat.R16Float, open, p * cascades);
         made.Lights = Shaders.CreateBuffer(LightsBytes);
         made.Glows = Shaders.CreateBuffer(GlowLights.Most * GlowLights.Bytes);
+        made.SkyMap = Shaders.CreateImage(SkySize, SkySize, ShaderImageFormat.Rgba16Float);
 
         // The last cascade's merge reads no cascade above, and an image of nothing stands in for the
         // share of the sky above it, its own being the one it writes.
@@ -238,9 +262,14 @@ internal static unsafe class WorldProbes
     /// <summary>Lets the probes' images and buffers go, on a frame they are off or made again.</summary>
     private static void Release()
     {
+        if (!_skyCamera.IsNone)
+        {
+            Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
+            _skyCamera = Entity.None;
+        }
         if (_made is not { } made) return;
         foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.MergedSky)
-                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.NoSky]))
+                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.NoSky]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -306,7 +335,7 @@ internal static unsafe class WorldProbes
             ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, 0];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", info)
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
-                .SetBuffer("glow_lights", made.Glows)
+                .SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("distances", made.Distances[c])
                 .SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))

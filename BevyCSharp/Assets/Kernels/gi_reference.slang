@@ -8,8 +8,8 @@
 // after it as global illumination's probes light one, its color times what arrives. A light that
 // casts shadows reaches a face only where a ray toward it gets through. A path goes on in a
 // direction drawn by the cosine about the face's normal, ends at what Russian roulette draws after
-// its third bounce, and brings back the light from all around, as the probes have it, where it
-// meets nothing. The lights are the probes' own (bcs_gi_lights), the light a white surface facing
+// its third bounce, and brings back the light from all around where it meets nothing, the ambient
+// light as the probes have it and the camera's environment map's along its way. The lights are the probes' own (bcs_gi_lights), the light a white surface facing
 // one returns times the camera's exposure, so a face's diffuse light is its color times what
 // arrives, with no pi, in the units of the picture before tonemapping.
 //
@@ -154,7 +154,7 @@ float3 trace(GiLights given, float3 origin, float3 way, inout uint state)
         RayHit hit = rayTraceIn(scene, origin, way, 0.0, 1e5);
         if (!hit.hit)
         {
-            light += throughput * given.sky.rgb;
+            light += throughput * (given.sky.rgb + passEnvironmentSpecular(way, 0.0) * passView.exposure);
             break;
         }
 

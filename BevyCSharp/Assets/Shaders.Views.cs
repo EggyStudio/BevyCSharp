@@ -149,7 +149,8 @@ public static unsafe partial class Shaders
     private static App? _viewsApp;
     private static readonly Dictionary<ulong, uint> ProgramPrepasses = [], EnginePrepasses = [];
     private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [], EngineDraws = [];
-    private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [], EngineDispatches = [];
+    private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [];
+    private static readonly Dictionary<ulong, SortedDictionary<string, ViewDispatch[]>> EngineDispatches = [];
 
     // What a camera of an app before this one asked for, which names no camera of this one.
     private static void ForgetOtherApps()
@@ -456,21 +457,25 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// Replaces the compute shaders the engine runs on a camera beside the program's own, which run
-    /// first at each frame point, none taking the program's away. Only valid inside a system.
+    /// Replaces the compute shaders one part of the engine, <paramref name="owner"/>, runs on a
+    /// camera beside the program's own and the other parts', which run first at each frame point,
+    /// none taking another's away. Only valid inside a system.
     /// </summary>
-    internal static void SetEngineViewDispatches(Entity camera, params ViewDispatch[] dispatches)
+    internal static void SetEngineViewDispatches(Entity camera, string owner, params ViewDispatch[] dispatches)
     {
         ForgetOtherApps();
-        if (dispatches.Length == 0) EngineDispatches.Remove(camera.Bits);
-        else EngineDispatches[camera.Bits] = dispatches;
+        if (!EngineDispatches.TryGetValue(camera.Bits, out var owned)) EngineDispatches[camera.Bits] = owned = new SortedDictionary<string, ViewDispatch[]>(StringComparer.Ordinal);
+        if (dispatches.Length == 0) owned.Remove(owner);
+        else owned[owner] = dispatches;
+        if (owned.Count == 0) EngineDispatches.Remove(camera.Bits);
         SubmitDispatches(camera);
     }
 
-    // Hands the bridge a camera's dispatches, the engine's and then the program's.
+    // Hands the bridge a camera's dispatches, the engine's, a part at a time by its name, and then
+    // the program's.
     private static void SubmitDispatches(Entity camera)
     {
-        ViewDispatch[] dispatches = [.. EngineDispatches.GetValueOrDefault(camera.Bits) ?? [], .. ProgramDispatches.GetValueOrDefault(camera.Bits) ?? []];
+        ViewDispatch[] dispatches = [.. EngineDispatches.GetValueOrDefault(camera.Bits)?.Values.SelectMany(d => d) ?? [], .. ProgramDispatches.GetValueOrDefault(camera.Bits) ?? []];
         var native = new NativeViewDispatch[dispatches.Length];
 
         for (var i = 0; i < dispatches.Length; i++)

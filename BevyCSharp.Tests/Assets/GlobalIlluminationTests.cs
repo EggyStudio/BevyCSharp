@@ -374,12 +374,86 @@ public sealed class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// An open floor under an environment map alone reads within a few levels of 255 with global
+    /// illumination on as with it off, the probes' rays that meet nothing taking the map's light
+    /// along their way and the pass taking back the diffuse light Bevy's lighting gave from the map.
+    /// </summary>
+    [SkippableFact]
+    public void AnOpenFloorReadsAsAnEnvironmentMapLightsIt()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(off.R + off.G + off.B > 60, $"with global illumination off the floor reads {off}");
+        Assert.True(Math.Abs(on.R - off.R) <= 6 && Math.Abs(on.G - off.G) <= 6 && Math.Abs(on.B - off.B) <= 6,
+            $"with global illumination on the floor reads {on}, off {off}");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                Floor(ecs, (0.8f, 0.8f, 0.8f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 1,
+            eye: new Vec3(0f, 3f, 0.5f),
+            at: Vec3.Zero,
+            ambient: 0f,
+            traced: quality != GlobalIllumination.Off,
+            lit: Lit);
+    }
+
+    /// <summary>
+    /// The floor of a closed room under an environment map alone is dark with global illumination
+    /// on, its probes seeing no sky through the walls, where Bevy's own lighting lights it from the
+    /// map as though the walls were not there.
+    /// </summary>
+    [SkippableFact]
+    public void AClosedRoomUnderAnEnvironmentMapIsDarkInside()
+    {
+        Needs.Shaders();
+        var off = Seen(GlobalIllumination.Off);
+        var on = Seen(GlobalIllumination.Low);
+        Assert.True(off.R + off.G + off.B > 60, $"with global illumination off the floor inside reads {off}");
+        Assert.True(on.R + on.G + on.B < (off.R + off.G + off.B) / 4, $"with global illumination on the floor inside reads {on}, off {off}");
+
+        static (int R, int G, int B) Seen(GlobalIllumination quality) => Looking(
+            ecs =>
+            {
+                const float T = 0.3f;
+                var white = (0.8f, 0.8f, 0.8f);
+                Block(ecs, white, new Vec3(0f, -T / 2f, 0f), new Vec3(6f + 2f * T, T, 6f + 2f * T));
+                Block(ecs, white, new Vec3(0f, 3f + T / 2f, 0f), new Vec3(6f + 2f * T, T, 6f + 2f * T));
+                Block(ecs, white, new Vec3(0f, 1.5f, -3f - T / 2f), new Vec3(6f + 2f * T, 3f, T));
+                Block(ecs, white, new Vec3(0f, 1.5f, 3f + T / 2f), new Vec3(6f + 2f * T, 3f, T));
+                Block(ecs, white, new Vec3(-3f - T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+                Block(ecs, white, new Vec3(3f + T / 2f, 1.5f, 0f), new Vec3(T, 3f, 6f));
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(quality);
+            },
+            stills: 6,
+            eye: new Vec3(0f, 2.5f, 2f),
+            at: new Vec3(0f, 0f, -0.5f),
+            ambient: 0f,
+            traced: quality != GlobalIllumination.Off,
+            lit: Lit);
+    }
+
+    /// <summary>
+    /// The tests' cubemap as a camera's environment map, filtered by Bevy into its diffuse and
+    /// specular halves, at a brightness that reads as a fair share of white.
+    /// </summary>
+    private static void Lit(Entity camera) =>
+        Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "textures/cubemap.png"), intensity: 400f);
+
+    /// <summary>
     /// The mean color of the middle of the camera's picture, five pixels a side, looking from
     /// <paramref name="eye"/> at <paramref name="at"/> under a white ambient light of
     /// <paramref name="ambient"/>, once the field holds the scene's still meshes and, where
     /// <paramref name="traced"/>, the probes have traced for a while.
     /// </summary>
-    private static (int R, int G, int B) Looking(Action<EcsWorld> scene, int stills, Vec3 eye, Vec3 at, float ambient, bool traced)
+    private static (int R, int G, int B) Looking(Action<EcsWorld> scene, int stills, Vec3 eye, Vec3 at, float ambient, bool traced,
+        Action<Entity>? lit = null)
     {
         var run = new PictureRun
         {
@@ -390,6 +464,7 @@ public sealed class GlobalIlluminationTests
                 var camera = PictureRun.Camera(ecs, eye);
                 ecs.Add(camera, Transform.LookingAt(eye, at, Vec3.UnitY));
                 Render.SetAmbientLight(camera, (1f, 1f, 1f), ambient);
+                lit?.Invoke(camera);
                 scene(ecs);
             },
         }

@@ -43,6 +43,18 @@ StructuredBuffer<GiLights> lights;
 // The small emissive surfaces carried as lights of their own, as many as the lights' fourth count says.
 StructuredBuffer<GlowLight> glow_lights;
 
+// The camera's environment map's light along each way folded onto an octahedron, the frame before's,
+// alpha 1 where the camera has one (gi_sky.slang).
+Texture2D<float4> sky_map;
+
+// The light from all around along `way` where a ray meets nothing, the ambient light's and the
+// environment map's where the camera has one.
+float3 skyAlong(GiLights lit, float3 way)
+{
+    float4 environment = sky_map.SampleLevel(field_sampler, octahedron(way), 0.0);
+    return lit.sky.rgb + (environment.a > 0.5 ? environment.rgb : float3(0.0));
+}
+
 // What each texel's rays brought back, rgb the light of those that met a surface or the sky over how
 // many it sends, and a what most of them met (texelMark). A texel a direction, each probe a tile of
 // the octahedron's texels.
@@ -247,8 +259,9 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         }
         else if (cascade.w != 0u)
         {
-            light = float4(lit.sky.rgb, 0.25);
-            own = lit.sky.rgb;
+            float3 sky = skyAlong(lit, way);
+            light = float4(sky, 0.25);
+            own = sky;
         }
     }
     if (walledIn != 0u)

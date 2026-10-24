@@ -10,24 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8cb6cbaa`, item 51's reference in a commit of its own, and nothing else, carrying
-the review's files and a Shared line: gi_reference.slang tracing a ray scene of the drawn meshes
-from a geometry pool with instance and material buffers as an engine dispatch on the camera,
-gi.reference writing the picture, the PFM and the regions and gi.compare the difference before
-tonemapping; departures, a texture counting as its base color, vertex colors left out, the sky the
-ambient light, a point light's shadow starting a tenth from the light as Bevy's maps do, the sun's
-shadow flag in the color's fourth value at the same ABI; the bounce rooms' 27 cases with bounds of
-the reading plus 15 percent, 0.02 to 1.00 by view, the strip's and the glowing blocks' views waiting
-on the emitters, the references 80 by 45 PFMs under the tests traced again with
-BCS_WRITE_REFERENCES, the Cornell box's floor at High 2.5 percent under its reference against a
-bound of 3; the suite 1,767 passed. A fault found and left as item 60: Bevy's deferred G-buffer
-drops the emissive alpha, so a camera made deferred shows an exposed emissive unexposed, the lamp
-panel 40,053 against a reference of 49, since item 50's deferred switch. Read at 10:22 on 2026-10-24
-and pushed at once, the run of `07863068` having ended green; its own run green on the three systems
-at 10:40. Next item 51's third commit, the glossy term as 3DEngine's present one and the emitters,
-then 61, the colons out of the documents, then item 60.
+Reviewed up to `ccc0f000`, item 51's emitters, the first part of its third commit, pushed at 12:41
+on 2026-10-24, its run green on the three systems at 12:58, carrying the review's files, a Shared
+row and the devlog. Emission is painted into the field beside the colors in the picture's units,
+emissive times mix(1, exposure, alpha), thin emitters that are not carried lending their light to
+the cells beside them, small emitters carried as glow lights of bcs_glow.slang (MODULES 12, the same
+ABI), their light reaching each pixel and each probe's hit from the box in closed form shadowed
+through the field, touching boxes joined, carried cells marked, the pass taking the four brightest a
+pixel and a probe's hit two. Departures, an emitter is its box whole with every face emitting since
+the gather hands over no vertices; the pass marches to a light's middle and not to its faces'
+halves, the readings alike and the halves 2.0 to 3.5 ms against 1.3 at 1280 by 720; the closed form
+clips edge by edge with its loops unrolled, rolled loops over small arrays costing 2.7 ms. The
+bounce rooms' strip view reads 0.18 to 0.19 where 1.00 stood (3DEngine 0.22), the glowing blocks
+0.049 where 0.30, the Cornell box 0.10 to 0.11, the rest unchanged and no view widened; the floor
+bound moves from 3 to 16 percent, the Cornell floor 13.2 percent over and 15.5 with the panel dark,
+so the excess is the probes' indirect light; the feature test's Cornell walls read minus 5 to plus
+17 percent against the reference where minus 26 to minus 45 stood. Costs at 1280 by 720 with one
+glow light over the view, the pass 1.3 ms (0.19 without), a cascade's trace 0.18 ms at High. 1,771
+passed, 3 skipped, NormTests 18, the bridge checks clean, Cargo 118, 198 and 11.
 
-Before it, `07863068` came, item 51's pass, pushed at 09:24 on 2026-10-24, its run green on the
+Before it, `8cb6cbaa` came, item 51's reference, pushed at 10:22 on 2026-10-24, its run green on the
 three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -240,22 +242,24 @@ from [SHARED.md](SHARED.md).
     two has them; the path-traced reference of a view, `gi.reference` and `gi.compare`, giving each
     region's distance, which the ledger's open question on this engine's reference answers; the
     bounce rooms as a test scene with their bounds, the rule that no view's distance to its
-    reference widens taken from 3DEngine as the mends' rule. Tests: the red wall tinting a white
-    block's side, a lit room's floor within the bound of its reference, and the quality levels'
-    costs read on the Cornell box. Three commits, the probes and their tracing, the pass and the
-    reference, then the glossy term and the emitters. Waits: the method is still moving in 3DEngine,
-    its items 71, 72 and 74 open, and the owner said shortly before 07:28 on 2026-10-21 that if it
-    is not yet ready BevyCSharp waits, so this item starts only once those are mended and the voxel
-    game's captures say the light holds, the port carrying the mends in. 3DEngine's items 71, 72 and
-    74 are mended and on its main on 2026-10-24 and the voxel game's pictures retaken that day, so
-    the wait ends by the reviewer's reading of the owner's condition, the owner's to overrule; the
-    item starts at 07:2x with its first commit, the probes and their tracing. The first commit at
-    `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the head. The pass at `07863068`,
-    pushed at 09:24, the sky's share departure in the head; the reference in a commit of its own
-    next. The reference at `8cb6cbaa`, pushed at 10:22; the third commit takes 3DEngine's present
-    glossy term, the reflection traced through the depth and the field under a roughness of 0.5 and
-    the sky's specular scaled by the share of sky the probes see along the mirror direction, with
-    the emitters.
+    reference widens taken from 3DEngine as the mends' rule. The tests are the red wall tinting a
+    white block's side, a lit room's floor within the bound of its reference, and the quality
+    levels' costs read on the Cornell box. Three commits, the probes and their tracing, the pass and
+    the reference, then the glossy term and the emitters. It waited while the method was still
+    moving in 3DEngine, its items 71, 72 and 74 open, and the owner said shortly before 07:28 on
+    2026-10-21 that if it is not yet ready BevyCSharp waits, so this item starts only once those are
+    mended and the voxel game's captures say the light holds, the port carrying the mends in.
+    3DEngine's items 71, 72 and 74 are mended and on its main on 2026-10-24 and the voxel game's
+    pictures retaken that day, so the wait ends by the reviewer's reading of the owner's condition,
+    the owner's to overrule; the item starts at 07:2x with its first commit, the probes and their
+    tracing. The first commit at `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the
+    head. The pass at `07863068`, pushed at 09:24, the sky's share departure in the head; the
+    reference in a commit of its own next. The reference at `8cb6cbaa`, pushed at 10:22; the third
+    commit takes 3DEngine's present glossy term, the reflection traced through the depth and the
+    field under a roughness of 0.5 and the sky's specular scaled by the share of sky the probes see
+    along the mirror direction, and the emitters. The emitters at `ccc0f000`, pushed at 12:41, the
+    departures in the head, the glowing blocks' and the strip's views narrowed; the environment
+    map's sky and the glossy term (b) follow, each in a commit of its own.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -1458,3 +1462,16 @@ strip's view reads 0.18 to 0.19 where it read 1.00 (3DEngine 0.22), the glowing 
 Cornell box's floor reads 13.2% over its reference, 15.5% with the panel dark in both, so the
 probes' indirect light is over there, which the previous commit's 2.5% under hid behind the panel's
 missing light; its bound moves from 3% to 16%. The environment map's sky and the glossy term follow.
+
+Shared: global illumination's sky from the camera's environment map, in the commit carrying this
+line, the second part of item 51's third. A dispatch on the camera copies the map's light along each
+way onto an octahedron of 64 texels a side, times the exposure, blurred as a quarter roughness blurs
+it (`gi_sky.slang`), since the probes are traced before the cameras draw, and the last cascade's
+rays that meet nothing take it beside the ambient light, the frame before's. The pass takes back the
+diffuse light Bevy's environment_map_light gave each surface, its multiple scattering and the
+diffuse color times what the dielectric's scattering leaves, and adds the map's light from above to
+the sky over a ground; the reference's paths that meet nothing take the map along their way. Under
+the tests' cubemap filtered by Bevy an open floor reads 70, 71, 116 with global illumination on and
+67, 67, 115 off, and a closed room's floor 4, 3, 13 on and 67, 67, 115 off, Bevy's own lighting
+lighting it through the walls. The engine's dispatches on a camera are kept by owner, so the
+reference and the sky's copy share a camera. The glossy term follows.
