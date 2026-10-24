@@ -768,6 +768,7 @@ static void SetContactShadows(Entity camera, ContactShadowSettings? settings);  
 static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings);  // Turns Bevy's screen-space reflections on for a camera, or with null off
 static void CauseError(RenderErrorCause cause);                 // Causes an error on the GPU, for a game to see what its ErrorPolicy does with one, as Bevy's render_recovery example causes them
 static void SetGlobalIllumination(GlobalIllumination quality);  // Lights the camera's picture with the light each surface reflects onto the others, traced through the scene's distance field each frame as cascades of probes around the camera, at a quality, or none with Off, which it is by default
+static void SetGlobalIlluminationScreenProbes(bool on);         // Leaves global illumination's screen probes out, or puts them back, which they are by default, so every surface reads the world's probes' light alone where they are out
 static Capture BeginCapture(AssetHandle target);                // Asks for a picture to be read back into memory rather than written to a file
 static Capture BeginCapture();                                  // Asks for a picture of whatever this run is drawing into
 static bool TryReadCapture(Capture capture, out CapturedImage? picture);  // Reads a capture once it has arrived, and forgets it

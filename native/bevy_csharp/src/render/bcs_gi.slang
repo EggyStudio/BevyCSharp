@@ -22,6 +22,17 @@ import bcs_glow;
 
 public static const float Pi = 3.14159265358979;
 
+/// A surface's normal from the cross of its ways along two axes of a camera's depth, or facing the
+/// eye along `toEye` where the cross has no length or none a float holds. Far from the world's
+/// origin a far texel's neighbor read back from the depth falls on the same point, and in 3DEngine
+/// the normal made from the two was a value that is not a number, which the screen's probes carried
+/// and their history spread over the land.
+public float3 surfaceNormal(float3 crossed, float3 toEye)
+{
+    float length2 = dot(crossed, crossed);
+    return length2 > 1e-20 && length2 < 1e30 ? crossed * rsqrt(length2) : normalize(toEye);
+}
+
 /// A unit direction as a point of the square from 0 to 1, the octahedron folded flat, which lays
 /// every direction on a square with texels of nearly even solid angle.
 public float2 octahedron(float3 d)
@@ -133,6 +144,26 @@ public float traceField(Texture3D<float> field, SamplerState linear, FieldInfo i
         float3 p = origin + way * t;
         int c = fieldCascade(info, p, 1.0);
         if (c < 0)
+            return -1.0;
+        float cell = info.cascades[c].origin_and_cell.w;
+        float d = fieldDistanceIn(field, linear, info, c, p);
+        if (d < cell * 0.1)
+            return t;
+        t += max(d, cell * 0.25);
+    }
+    return -1.0;
+}
+
+/// The same, stopping where the ray leaves cascade `most` and every finer one, as -1, since a wall
+/// thinner than a coarser cascade's cell may let it through.
+public float traceFieldWithin(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float tMin, float tMax, int most)
+{
+    float t = tMin;
+    for (int i = 0; i < 64 && t < tMax; i++)
+    {
+        float3 p = origin + way * t;
+        int c = fieldCascade(info, p, 1.0);
+        if (c < 0 || c > most)
             return -1.0;
         float cell = info.cascades[c].origin_and_cell.w;
         float d = fieldDistanceIn(field, linear, info, c, p);

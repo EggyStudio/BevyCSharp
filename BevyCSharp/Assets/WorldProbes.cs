@@ -25,7 +25,7 @@ namespace Bevy;
 /// and nothing is traced before the three programs have compiled.
 /// </para>
 /// </remarks>
-internal static unsafe class WorldProbes
+internal static unsafe partial class WorldProbes
 {
     /// <summary>How many cells of their field cascade the probes lie apart.</summary>
     internal const int ProbeSpacing = 8;
@@ -186,6 +186,8 @@ internal static unsafe class WorldProbes
             _app = App.Running;
             (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
             (_sky, _skyCamera) = (default, Entity.None);
+            (_screenTrace, _screenFilter, _screenGlow, _screenCamera, _screenImages, _screenDispatches) = (default, default, default, Entity.None, null, null);
+            Places.Forget();
         }
 
         var quality = Asked;
@@ -287,6 +289,7 @@ internal static unsafe class WorldProbes
     /// <summary>Lets the probes' images and buffers go, on a frame they are off or made again.</summary>
     private static void Release()
     {
+        ReleaseScreen();
         if (!_skyCamera.IsNone)
         {
             Shaders.SetEngineViewDispatches(_skyCamera, SkyOwner);
@@ -336,7 +339,9 @@ internal static unsafe class WorldProbes
 
         // The small emitters carried as lights of their own, the nearest the eye, counted in the
         // lights' fourth count.
-        floats[15] = GlowLights.Write(made.GlowBytes, SceneField.DrawnThisFrame, plan.Eye, plan.CellSize);
+        floats[15] = GlowLights.Write(made.GlowBytes, SceneField.DrawnThisFrame, plan.Eye, plan.CellSize, Places);
+        if (floats[15] == 0) Places.Forget();
+        var glows = (int)floats[15];
         Shaders.WriteBuffer<byte>(made.Glows, made.GlowBytes);
         var corners = MemoryMarshal.Cast<byte, Vector4>(bytes[NativeGiLights.Bytes..]);
         var origins = new Vector3?[cascades];
@@ -394,8 +399,13 @@ internal static unsafe class WorldProbes
             Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
         }
 
+        // The screen's probes on the camera, which read the faces and the merged light this frame's
+        // probes left.
+        NoteRebuilt(plan);
+        var screen = Screen(made, plan, SceneField.ViewCamera, glows);
+
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
-        _light.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
+        _light.Set("screen", screen).SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
             .SetBuffer("glow_lights", made.Glows).SetTexture("probe_skies", made.Skies)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)

@@ -236,7 +236,9 @@ the build ends and the meshes not yet built in stamped as their boxes meanwhile,
 meshes streamed in at once, on a teleport or a first load, are built over several frames rather than
 stalling one. A closed wall thinner than a cell, or a mesh drawn with both its faces, is held half a
 cell thick on either side of its middle, so a ray between the cells on either side of it still meets
-it, and a tunnel one cell wide stays open along its middle.
+it, and a tunnel one cell wide stays open along its middle. Two blocks that meet along an edge
+alone, as a wall's halves stepped a block apart, hold the cells about the edge inside, so no light
+passes between them.
 
 The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
 a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer
@@ -307,6 +309,28 @@ inside where Bevy's own lighting would light it through the walls. A glossy surf
 around it, traced through the picture and the field below a roughness of a half, and reflects the
 sky only as far as the probes see it, so a closed room's polished floor shows no sky. Bevy's
 screen-space ambient occlusion is left as Bevy gives it.
+
+Beside the probes in cascades stands a probe for every few pixels of the picture, every 16 at `Low`,
+12 at `Medium` and 8 at `High`, on the surface the camera's depth shows there. Each sends sixteen
+rays through the depth and the field as far as twice the first cascade's probes are apart and takes
+the cascades' light past that, so the light under a table, in a corner or where a wall meets the
+floor is seen at the size the picture draws it. Their light is blended with the probes around on
+like surfaces and with the frame before's, and a pixel blends the probes around it that stand on a
+surface like its own. In the bounce rooms of the tests the Cornell box's floor reads 3.5% over its
+path-traced reference with them where 12.8% without, and the thin walls' seams, which the cascades
+lit, go dark, though on a plain wall their light lies in streaks a tile wide. In a Cornell box at
+1280 by 720 with one small emitter they take 1.4 ms of an RTX 4070 Laptop GPU at `Low` and 1.6 at
+`High`, and the pass reads them in 0.54 ms at its median. A small emitter's light on the picture is
+read from what the probes around each point see of it, so a pixel pays the same however many are
+lit. A game whose art shows their tiles, or that has no time for them, leaves them out:
+
+```csharp
+Render.SetGlobalIlluminationScreenProbes(false);   // the cascades' light alone
+```
+
+Every surface then reads the cascades' light alone, smoother and coarser, and where a small emitter
+is carried the probes stand for the glow lights alone, marching to them once a tile and tracing no
+ray. `./bcs command gi.screen off` does the same on a running app.
 
 In a Cornell box on an RTX 4070 Laptop GPU the probes take about 0.9 ms at `Low`, 1.2 at `Medium`
 and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at its median, or 1.3 ms

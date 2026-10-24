@@ -287,15 +287,15 @@ to light the scene, reads apart from its reference. The bounce rooms are a test
 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12,
 the strip's 0.18 to 0.19 where 3DEngine's read 0.22, and the glowing blocks' 0.05 where 0.05 to
 0.06. A mend that widens no view keeps every bound, 3DEngine's rule. The Cornell box's floor reads
-13.2% over its reference at `High`, and 15.5% over with its lamp panel dark in both, so the excess
-is the probes' indirect light. In the feature test's Cornell box at 1280 by 720, 256 paths a pixel
-take 3.5 s through 14,260 meshes, and the walls read from 5% under to 17% over the reference, the
-lamp panel's light carried as a glow light. A material's emissive alpha is Bevy's
-`emissive_exposure_weight`, the share of the camera's exposure its light takes, 0 by default as in
-Bevy, which the bridge gives Bevy's own field, since Bevy reads the weight there and not from the
-color's alpha, and which the field's gather and the reference take as Bevy shows it. Bevy's deferred
-G-buffer keeps the emissive color and not the weight, so a camera the field's shadows or global
-illumination make deferred showed an exposed emissive unexposed. The bridge mends Bevy's
+13.2% over its reference at `High` without the screen probes, and 15.5% over with its lamp panel
+dark in both, so the excess is the probes' indirect light. In the feature test's Cornell box at 1280
+by 720, 256 paths a pixel take 3.5 s through 14,260 meshes, and the walls read from 5% under to 17%
+over the reference, the lamp panel's light carried as a glow light. A material's emissive alpha is
+Bevy's `emissive_exposure_weight`, the share of the camera's exposure its light takes, 0 by default
+as in Bevy, which the bridge gives Bevy's own field, since Bevy reads the weight there and not from
+the color's alpha, and which the field's gather and the reference take as Bevy shows it. Bevy's
+deferred G-buffer keeps the emissive color and not the weight, so a camera the field's shadows or
+global illumination make deferred showed an exposed emissive unexposed. The bridge mends Bevy's
 `deferred/functions.wesl` in the text Bevy ships (`render/mended.rs`), applying the exposure as the
 G-buffer is written, as the anisotropy mend does in `pbr_fragment.wesl`, and `DeferredEmissiveTests`
 holds an exposed panel drawn deferred to what forward shows and within 2% of its reference, where
@@ -341,6 +341,48 @@ an environment map reflects 0, 0, 14 on where 78, 58, 119 off. In the Cornell bo
 with one glow light the pass takes 1.5 ms with a metal floor polished to a mirror where it takes 1.3
 with every surface rough, as before the glossy term. The bounce rooms read as they did, their
 surfaces at a roughness of 0.5 and lit by no sky.
+
+The screen probes are 3DEngine's (`WorldProbes.Screen.cs` and the kernels `gi_screen.slang`,
+`gi_screen_filter.slang` and `gi_screen_glow.slang`), dispatches on the camera after its prepass
+that write the camera's images, a texel a probe, its light, its surface and what it sees of each
+glow light, then its light blended with the probes around and with the frame before's, which the
+camera keeps with its history, then the glow lights' light on images half the picture's size. The
+pass blends the four probes around a pixel that stand on a surface like its own, fading to the
+world's probes across the second cascade's outer band, and reads the glow lights' texels around it
+where some are lit. Five things depart from 3DEngine's. The camera's depth is read whole, where
+3DEngine reads a depth half the window's size, each probe on the texel under its tile's middle. What
+a probe sees of each glow light is four images of four codes a texel and an image of the fainter
+lights' light, where 3DEngine keeps a buffer of twenty codes a probe, since the camera's images take
+the picture's size. The march through the depth finds a face's way from the depth, since a dispatch
+reads no G-buffer. The pass finds how the surface moves from pixel to pixel from its nearer
+neighbors in the depth, since a pass over the whole view has no derivative of a mesh's position. And
+3DEngine's command that reads one probe's rays is not taken. In the bounce rooms the Cornell box's
+floor reads 3.5% over its reference with them where 12.8% without, and the thin walls' seams, which
+the world's probes lit, go dark. At 160 by 90 their tiles are few, ten across at `Low`, and their
+light lies in blotches a tile wide, which widen the window's, the strip's and the carried lamp's
+views, all within 3DEngine's own bounds at the same size, so the rooms keep their bounds with the
+probes traced and left unread, the old path, and a second test holds them on within 3DEngine's. Left
+out, the probes stand for the glow lights alone wherever one is lit, which at 160 by 90 reads the
+glowing blocks' room 0.06 to 0.07 from its reference where each pixel's march reads 0.05. In a
+Cornell box at 1280 by 720 with one glow light on the RTX 4070 Laptop GPU, shared with two other
+programs drawing, the probes take 1.4 ms at `Low` and 1.6 at `High`, their blend 0.02 and the glow
+lights' texels 0.12, and the pass 0.54 ms at its median, where left out the probes standing for the
+glow light take 0.1 ms and the pass 0.73 to 0.83. In the feature test's Cornell box their light lies
+in streaks a tile wide on the back wall at `High`, the blotches' term at the size of a tile.
+
+The faults 3DEngine read in its screen probes were read here against its findings. The blotches are
+its term, a small emitter's near field or a bright patch narrower than a probe's texel read by a few
+fixed rays, and its one mend that held, a hit within a cell of a glow light taking the light's mean
+over a cell's square about it, is `glowLightsAt`'s here too. The edge leak is its mend. Two blocks
+that meet along an edge alone leave the field's cells about the edge inside on one diagonal and
+outside on the other, the distance never below zero along it, and a glow light's march passed
+through, the floor about the foot of a stone wall's halves 15 sRGB levels at its brightest past the
+edge where 3 with the edge closed. The resolve holds such a pinched cell inside, which reads its
+neighbors' codes, so the codes are cleared by a dispatch of their own after each resolve, where the
+resolve had cleared each cell's as it read it, and the floor reads 3 either way. The stepped edges
+3DEngine found were a lamp's shadow stepping where each pixel marches to the glow light's halves,
+which the glow lights' texels read smooth, and need no mend here, where each pixel marches to the
+light's middle.
 
 ## What Unity made them work around, and the hook that replaces each
 

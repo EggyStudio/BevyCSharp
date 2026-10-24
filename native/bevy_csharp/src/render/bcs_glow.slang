@@ -6,8 +6,7 @@
 // Taken from 3DEngine's glow.slang and the glow lights' sum of its gi.slang, the field read
 // through a texture and a sampler where 3DEngine reads it through a volume, and the lights in a
 // buffer of their own, counted in the fourth of `GiLights.counts`, where 3DEngine keeps them in its
-// lights' buffer. The rough light the screen's probes' texels are scaled by comes with the screen's
-// probes. 3DEngine keeps its loops from unrolling, since unrolled, with each caller's copies
+// lights' buffer. 3DEngine keeps its loops from unrolling, since unrolled, with each caller's copies
 // inlined apart, they made its model pass compile four times as long on lavapipe. Here a loop over a
 // small array is unrolled, so the array is indexed by constants, and a square is clipped an edge at
 // a time with no array of corners, since with the arrays indexed as the loops ran the closed form
@@ -21,6 +20,13 @@ import bcs_field;
 /// How many of the small emissive surfaces global illumination carries as lights at most, the
 /// nearest the eye.
 public static const int MostGlowLights = 64;
+
+/// What a texel of the glow lights' light on a camera's picture says in its normal's alpha, in
+/// 255ths, beside the light whose share it holds counted from 2 (`gi_screen_glow.slang`): it lies on
+/// a glow light's own surface, which takes no other's light, or no screen probe around it stands on
+/// a surface like its own, so the pixels on it march to the lights themselves.
+public static const int GlowOnLight = 254;
+public static const int GlowAsk = 255;
 
 /// A small emissive surface, carried through global illumination as a light of its own rather than
 /// by the rays that meet it, since few of a probe's rays meet a small one and those that do take it
@@ -188,6 +194,55 @@ public float3 glowLightIrradiance(GlowLight light, float3 x, float3 n, float mar
         }
     }
     return light.glowAndShare.rgb * (sum * glowShare(light));
+}
+
+/// The light a glow light sends a surface at p facing n, irradiance, unhidden and rough, which a
+/// texel of the window's glow light holds its share of and a pixel scales back up by its own, so the
+/// light falls away from the lamp at each pixel as it does. Its faces that emit taken as one patch
+/// of their surface at the box's distance from p, past which the light falls as the square, softened
+/// by the box's thinnest side, and by how far p's plane rises over the box. A strip of six hundredths
+/// of a block thick read 3.4 to 4% further from its reference in 3DEngine with each pixel's own light
+/// in place of this, softened by the box's whole size 3.4 to 3.5%, and with this 1.7 to 2%. None
+/// where p lies on the light's own surface, as glowLightIrradiance gives.
+public float3 glowLightRough(GlowLight light, float3 p, float3 n, float margin)
+{
+    if (glowLightOn(light, p, n, margin))
+        return float3(0.0);
+    float3 offset = p - light.middleAndReach.xyz;
+    float4 halves[3] = { light.halfX, light.halfY, light.halfZ };
+    float3 beyond = float3(0.0);
+    float thin = 1e6, size2 = 0.0;
+    [unroll]
+    for (int k = 0; k < 3; k++)
+    {
+        float side = halves[k].w;
+        float3 axis = halves[k].xyz / max(side, 1e-6);
+        float along = dot(offset, axis);
+        beyond += axis * (along - clamp(along, -side, side));
+        thin = min(thin, side);
+        size2 += side * side;
+    }
+    float distance2 = dot(beyond, beyond) + 4.0 * thin * thin;
+    float rise = saturate((sqrt(size2) - dot(offset, n)) * rsqrt(dot(offset, offset) + size2));
+    // Half the surface of the faces that emit, each face two half sides by two.
+    uint faces = glowFaces(light);
+    float surface = 0.0;
+    [unroll]
+    for (int k = 0; k < 3; k++)
+        surface += 2.0 * halves[(k + 1) % 3].w * halves[(k + 2) % 3].w * float(((faces >> uint(2 * k)) & 1u) + ((faces >> uint(2 * k + 1)) & 1u));
+    return light.glowAndShare.rgb * (glowShare(light) * surface * rise / distance2);
+}
+
+/// How near p lies to a glow light for its light to be drawn at each pixel, 1 within its box's half
+/// diagonal of the box, none past twice that, falling off between, the same at a texel of the
+/// window's glow light as at a pixel (`gi_screen_glow.slang`, `gi_light.slang`).
+public float glowLightNear(GlowLight light, float3 p)
+{
+    float diagonal = max(length(float3(light.halfX.w, light.halfY.w, light.halfZ.w)), 1e-6);
+    float3 toward = p - light.middleAndReach.xyz;
+    if (dot(toward, toward) >= 9.0 * diagonal * diagonal)
+        return 0.0;
+    return saturate(2.0 - glowLightDistance(light, p) / diagonal);
 }
 
 /// How far along the way from `from` its line enters a glow light's box, 0 where it starts inside.

@@ -14,7 +14,7 @@ namespace Bevy.Tests;
 /// the environment map's sky and a glossy surface's reflection.
 /// </summary>
 [Collection("engine")]
-public sealed class GlobalIlluminationTests
+public sealed partial class GlobalIlluminationTests
 {
     /// <summary>Each quality traces 3DEngine's cascades and directions, no more than the field's counted cascades, and one more in its far cascade.</summary>
     [Fact]

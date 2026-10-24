@@ -32,9 +32,13 @@ public sealed class BounceRoomsTests
     private const int Down = 2;
 
     /// <summary>
-    /// Each view at each quality, bound 15% over what it read on the development machine's GPU, as
-    /// 3DEngine bounds its own, so a mend that widens no view keeps every bound and one that narrows
-    /// a view is held to it by measuring again.
+    /// Each view at each quality with the screen probes traced and left unread, the world's probes
+    /// and each pixel's march to the glow lights alone as before the screen probes came, the method's
+    /// own guard, bound 15% over what it read on the development machine's GPU, as 3DEngine bounds its
+    /// own, so a mend that widens no view keeps every bound and one that narrows a view is held to it
+    /// by measuring again. Left out, the probes stand for the glow lights alone where any is lit, as
+    /// in every view here, whose texels half the picture's size are two pixels wide at 160 by 90 and
+    /// read the glowing blocks' room 0.06 to 0.07 from its reference where marched at each pixel 0.05.
     /// </summary>
     /// <remarks>
     /// The views read 0.10 to 0.11 of their light from their references in the Cornell box, 0.12 in
@@ -79,7 +83,7 @@ public sealed class BounceRoomsTests
         Needs.Shaders();
         var path = Path.Combine(References(), $"view-{view}.pfm");
         var trace = !File.Exists(path) || Environment.GetEnvironmentVariable("BCS_WRITE_REFERENCES") == "1";
-        var (supported, picture) = Measure(view, quality, trace ? 4096 : 0);
+        var (supported, picture) = Measure(view, quality, trace ? 4096 : 0, screen: false);
         Needs.RayQueries(supported);
 
         if (trace)
@@ -95,19 +99,74 @@ public sealed class BounceRoomsTests
     }
 
     /// <summary>
+    /// Each view at each quality with the screen probes traced, as they are by default, within
+    /// 3DEngine's own bound at the same size, its reading with its screen probes and 15% over, or
+    /// the bound the view holds without them where that is wider, as in the corridor, whose world
+    /// probes read it 0.25 from its reference with the screen probes or without.
+    /// </summary>
+    /// <remarks>
+    /// The screen probes stand a tile apart, 16 pixels at Low, 12 at Medium and 8 at High, so at
+    /// 160 by 90 the window's room at Low is 10 probes across and 6 down, and their light lies in
+    /// blotches a tile wide that the views' distances read, where the size of the picture rather
+    /// than the method sets them. With them the views read 0.10 in the Cornell box, 0.08 in the thin
+    /// room, whose walls' seams the world's probes lit, 0.25 in the corridor, 0.15 to 0.18 in the
+    /// window's, 0.02 among the red walls, 0.20 to 0.24 in the strip's, 0.06 to 0.08 on the grazing
+    /// floor, 0.07 to 0.11 in the carried lamp's and 0.05 to 0.07 around the glowing blocks.
+    /// </remarks>
+    [SkippableTheory]
+    [InlineData(1, GlobalIllumination.Low, 0.17)]
+    [InlineData(1, GlobalIllumination.Medium, 0.16)]
+    [InlineData(1, GlobalIllumination.High, 0.15)]
+    [InlineData(2, GlobalIllumination.Low, 0.14)]
+    [InlineData(2, GlobalIllumination.Medium, 0.14)]
+    [InlineData(2, GlobalIllumination.High, 0.14)]
+    [InlineData(3, GlobalIllumination.Low, 0.29)]
+    [InlineData(3, GlobalIllumination.Medium, 0.30)]
+    [InlineData(3, GlobalIllumination.High, 0.30)]
+    [InlineData(4, GlobalIllumination.Low, 0.35)]
+    [InlineData(4, GlobalIllumination.Medium, 0.34)]
+    [InlineData(4, GlobalIllumination.High, 0.32)]
+    [InlineData(5, GlobalIllumination.Low, 0.03)]
+    [InlineData(5, GlobalIllumination.Medium, 0.03)]
+    [InlineData(5, GlobalIllumination.High, 0.03)]
+    [InlineData(6, GlobalIllumination.Low, 0.27)]
+    [InlineData(6, GlobalIllumination.Medium, 0.28)]
+    [InlineData(6, GlobalIllumination.High, 0.28)]
+    [InlineData(7, GlobalIllumination.Low, 0.09)]
+    [InlineData(7, GlobalIllumination.Medium, 0.09)]
+    [InlineData(7, GlobalIllumination.High, 0.10)]
+    [InlineData(8, GlobalIllumination.Low, 0.15)]
+    [InlineData(8, GlobalIllumination.Medium, 0.13)]
+    [InlineData(8, GlobalIllumination.High, 0.14)]
+    [InlineData(9, GlobalIllumination.Low, 0.07)]
+    [InlineData(9, GlobalIllumination.Medium, 0.07)]
+    [InlineData(9, GlobalIllumination.High, 0.06)]
+    public void WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(int view, GlobalIllumination quality, double bound)
+    {
+        Needs.Shaders();
+        var (supported, picture) = Measure(view, quality, 0, screen: true);
+        Needs.RayQueries(supported);
+
+        var (_, _, reference) = GiReference.ReadPfm(Path.Combine(References(), $"view-{view}.pfm"));
+        var distance = GiReference.Distance(GiReference.Averaged(picture, (int)Width, (int)Height, Down), reference);
+        Assert.True(distance < bound, $"view {view} at {quality} with the screen probes lies {distance:0.000} of its light from its reference, bound {bound}");
+    }
+
+    /// <summary>
     /// The Cornell box's floor, lit by the lamp under its ceiling and the light its walls send back,
     /// reads at <see cref="GlobalIllumination.High"/> within 16% of a reference of 1024 paths a pixel
-    /// traced in the same run, its light summed over the floor's pixels, where it read 13.2% over on
-    /// the development machine's GPU. With the lamp panel dark in both it reads 15.5% over, so the
-    /// excess is the probes' indirect light, and the panel's light, carried as a glow light, is about
-    /// what the reference gives; before that light was carried the floor read 2.5% under, the excess
-    /// less the panel's missing light.
+    /// traced in the same run, its light summed over the floor's pixels, where it read 3.5% over on
+    /// the development machine's GPU with the screen probes and 12.8% over without them, the world's
+    /// probes alone. Without them, with the lamp panel dark in both, it read 15.5% over, so the excess
+    /// is the probes' indirect light, and the panel's light, carried as a glow light, is about what
+    /// the reference gives; before that light was carried the floor read 2.5% under, the excess less
+    /// the panel's missing light.
     /// </summary>
     [SkippableFact]
     public void ALitRoomsFloorLiesWithinTheBoundOfItsReference()
     {
         Needs.Shaders();
-        var (supported, picture) = Measure(1, GlobalIllumination.High, 1024);
+        var (supported, picture) = Measure(1, GlobalIllumination.High, 1024, screen: true);
         Needs.RayQueries(supported);
 
         var traced = GiReference.Last!;
@@ -133,60 +192,70 @@ public sealed class BounceRoomsTests
     /// <summary>
     /// The light of a view at a quality once the field has settled and the probes have traced for a
     /// while, three floats a pixel before tonemapping, with whether the GPU traces rays, and a
-    /// reference of <paramref name="samples"/> paths a pixel traced first where any are asked for.
+    /// reference of <paramref name="samples"/> paths a pixel traced first where any are asked for,
+    /// with the screen probes read or, where <paramref name="screen"/> is false, traced and left
+    /// unread.
     /// </summary>
-    private static (bool Supported, float[] Picture) Measure(int view, GlobalIllumination quality, int samples)
+    private static (bool Supported, float[] Picture) Measure(int view, GlobalIllumination quality, int samples, bool screen)
     {
         var supported = false;
         var (begun, read) = (false, false);
         var ready = 0;
-        new PictureRun
+        try
         {
-            Width = Width,
-            Height = Height,
-            Frames = 6000,
-            Scene = ecs =>
+            new PictureRun
             {
-                Rooms.Build(ecs, view);
-                Render.SetSceneField(3, 0.15f, 2);
-                Render.SetGlobalIllumination(quality);
-            },
+                Width = Width,
+                Height = Height,
+                Frames = 6000,
+                Scene = ecs =>
+                {
+                    Rooms.Build(ecs, view);
+                    Render.SetSceneField(3, 0.15f, 2);
+                    Render.SetGlobalIllumination(quality);
+                    WorldProbes.ScreenUnread = !screen;
+                },
+            }
+                .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+                .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
+                    && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
+                .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 90)
+                // The field's draws on the camera, and then every pipeline ready for three frames running,
+                // as PictureRun.Capture waits, since the pass that adds the probes' light compiles its
+                // pipeline after its program and a picture read before it holds none of that light
+                // (GlobalIlluminationTests.EngineDrawsOn).
+                .Until("drawn", _ => !supported || GlobalIlluminationTests.EngineDrawsOn(traced: true))
+                .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3)
+                .Until("referenced", world =>
+                {
+                    if (!supported || samples == 0) return true;
+                    var ecs = world.Resource<EcsWorld>();
+                    if (!begun)
+                    {
+                        begun = true;
+                        Assert.Null(GiReference.BeginReference(ecs, null, samples));
+                        return false;
+                    }
+                    return GiReference.Step(ecs) is not null;
+                })
+                .Until("read", world =>
+                {
+                    if (!supported) return true;
+                    var ecs = world.Resource<EcsWorld>();
+                    if (!read)
+                    {
+                        read = true;
+                        Assert.Null(GiReference.BeginPicture(ecs, null));
+                        return false;
+                    }
+                    return GiReference.Step(ecs) is not null;
+                })
+                .Go();
         }
-            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
-            .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
-                && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
-            .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 90)
-            // The field's draws on the camera, and then every pipeline ready for three frames running,
-            // as PictureRun.Capture waits, since the pass that adds the probes' light compiles its
-            // pipeline after its program and a picture read before it holds none of that light
-            // (GlobalIlluminationTests.EngineDrawsOn).
-            .Until("drawn", _ => !supported || GlobalIlluminationTests.EngineDrawsOn(traced: true))
-            .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3)
-            .Until("referenced", world =>
-            {
-                if (!supported || samples == 0) return true;
-                var ecs = world.Resource<EcsWorld>();
-                if (!begun)
-                {
-                    begun = true;
-                    Assert.Null(GiReference.BeginReference(ecs, null, samples));
-                    return false;
-                }
-                return GiReference.Step(ecs) is not null;
-            })
-            .Until("read", world =>
-            {
-                if (!supported) return true;
-                var ecs = world.Resource<EcsWorld>();
-                if (!read)
-                {
-                    read = true;
-                    Assert.Null(GiReference.BeginPicture(ecs, null));
-                    return false;
-                }
-                return GiReference.Step(ecs) is not null;
-            })
-            .Go();
+        finally
+        {
+            WorldProbes.ScreenUnread = false;
+        }
 
         return (supported, supported ? GiReference.LastPicture!.Value.Light : []);
     }

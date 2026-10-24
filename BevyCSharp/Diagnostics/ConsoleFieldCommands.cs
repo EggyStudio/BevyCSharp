@@ -22,6 +22,7 @@ internal static class ConsoleFieldCommands
             Render.RayTracingActive ? "Lighting ray traced, its global illumination Solari's" : "Lighting rasterized",
             WorldProbes.Said(),
         };
+        if (WorldProbes.Asked != GlobalIllumination.Off) lines.Add(WorldProbes.ScreenSaid());
 
         // Each cascade of probes, its directions and the interval its rays cover.
         var (texels, intervals) = (WorldProbes.Texels, WorldProbes.Intervals);
@@ -48,6 +49,19 @@ internal static class ConsoleFieldCommands
         }
 
         return string.Join("\n", lines);
+    }
+
+    [Command("gi.screen", "Traces global illumination's screen probes, a probe every few pixels of the picture beside the world's, or leaves them out: gi.screen <on|off>")]
+    internal static string Screen(string on)
+    {
+        var word = on.Trim().ToLowerInvariant();
+        if (word is not ("on" or "off"))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{on.Trim()}' is not on or off.");
+            return "gi.screen <on|off>";
+        }
+        Render.SetGlobalIlluminationScreenProbes(word == "on");
+        return word == "on" ? "tracing global illumination's screen probes" : "leaving global illumination's screen probes out";
     }
 
     [Command("gi.set", "Traces global illumination through the scene's distance field at a quality, or turns it off: gi.set <off|low|medium|high>")]

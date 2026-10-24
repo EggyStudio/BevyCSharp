@@ -57,6 +57,25 @@ Texture2D<float4> gi_picture_previous;
 // the frame before's picture is kept. w: unused.
 uniform float4 reflection;
 
+// The light arriving at each screen probe's surface blended with the probes around and the frame
+// before's, its alpha below a half where the probe holds none, and each probe's surface's normal and
+// distance from the eye, -1 for one on no surface, as gi_screen_filter.slang and gi_screen.slang
+// left them, the camera's images where its screen probes are traced.
+Texture2D<float4> gi_screen_blended;
+Texture2D<float4> gi_screen_surfaces;
+
+// The glow lights' light on the picture's surfaces at half its size, the share of the near light's
+// rough light, the far lights' light and each texel's normal and what it says, as
+// gi_screen_glow.slang left them.
+Texture2D<float4> gi_glow_light;
+Texture2D<float4> gi_glow_far;
+Texture2D<float4> gi_glow_normal;
+
+// x: a screen probe's tile's pixels along each side. y: 1 where the screen probes' light is read. z: 1
+// where the glow lights' light is read from gi_glow_light, as it is where the screen probes are
+// traced or stand for the glow lights alone. w: unused.
+uniform float4 screen;
+
 // The roughness from which a surface traces no reflection, the probes and the environment reflecting
 // alone, its traced reflection fading out from half of it, as 3DEngine's GlossyRoughness.
 static const float GlossyRoughness = 0.5;
@@ -295,6 +314,195 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
     return float4(lerp(shaded, seen, edge), 1.0);
 }
 
+// The step toward a pixel's neighbor a pixel on or back along an axis, the one whose point lies
+// nearer p, so a pixel at a thing's edge takes its neighbor on its own surface, which says how the
+// surface's point moves from pixel to pixel.
+float3 nearerStep(int2 pixel, int2 step, float3 p)
+{
+    int2 size = int2(passPictureSize());
+    int2 ahead = min(pixel + step, size - 1), behind = max(pixel - step, int2(0));
+    float aheadDepth = passLoadDepth(ahead), behindDepth = passLoadDepth(behind);
+    float3 forward = aheadDepth > 0.0 ? passWorldPosition(passUv(ahead), aheadDepth) - p : float3(1e10);
+    float3 back = behindDepth > 0.0 ? p - passWorldPosition(passUv(behind), behindDepth) : float3(1e10);
+    float3 nearer = dot(forward, forward) < dot(back, back) ? forward : back;
+    return dot(nearer, nearer) < 1e18 ? nearer : float3(0.0);
+}
+
+// The four screen probes around a pixel, where each is, how much each counts for the light that
+// bounces, 0 for one that holds no light or stands on no surface like the pixel's, and how much by
+// how near it is alone, 0 for one on no surface.
+struct ScreenProbes
+{
+    int2 at[4];
+    float bounced[4];
+    float near[4];
+};
+
+// Each probe weighed by how near it is, how alike its normal is to the surface's, and how near its
+// distance from the eye is to the distance the surface's own plane lies at under the probe, found from
+// how the surface's point moves from pixel to pixel, so a floor seen at a slant takes the probes up
+// and down its slope as well as those beside it, as 3DEngine's model pass weighs them.
+ScreenProbes screenProbesHere(float2 position, float3 toEye, float3 facing, float3 acrossOne, float3 downOne)
+{
+    ScreenProbes probes;
+    [unroll]
+    for (int none = 0; none < 4; none++)
+    {
+        probes.at[none] = int2(0);
+        probes.bounced[none] = 0.0;
+        probes.near[none] = 0.0;
+    }
+    if (screen.y < 0.5)
+        return probes;
+    uint across, down;
+    gi_screen_blended.GetDimensions(across, down);
+    float2 g = position / screen.x - 0.5;
+    int2 base = int2(floor(g));
+    float2 f = g - float2(base);
+    float distance = length(toEye);
+    [unroll]
+    for (int corner = 0; corner < 4; corner++)
+    {
+        int2 offset = int2(corner & 1, corner >> 1);
+        probes.at[corner] = clamp(base + offset, int2(0), int2(int(across) - 1, int(down) - 1));
+        float4 surface = gi_screen_surfaces.Load(int3(probes.at[corner], 0));
+        if (surface.w < 0.0)
+            continue;
+        float2 lerps = lerp(1.0 - f, f, float2(offset));
+        probes.near[corner] = lerps.x * lerps.y;
+        float2 toProbe = (float2(probes.at[corner]) + 0.5) * screen.x - position;
+        float expected = length(toEye - acrossOne * toProbe.x - downOne * toProbe.y);
+        float like = probes.near[corner] * pow(saturate(dot(facing, surface.xyz)), 8.0) * exp(-abs(surface.w - expected) / (0.02 * distance + 0.05));
+        probes.bounced[corner] = gi_screen_blended.Load(int3(probes.at[corner], 0)).a < 0.5 ? 0.0 : like;
+    }
+    return probes;
+}
+
+// The indirect light reaching a pixel, irradiance over pi, blended between the four screen probes
+// around it that stand on a surface like its own, or -1 where none does.
+float3 screenBounced(ScreenProbes probes)
+{
+    float4 sum = float4(0.0);
+    [unroll]
+    for (int corner = 0; corner < 4; corner++)
+        if (probes.bounced[corner] > 0.0)
+            sum += float4(gi_screen_blended.Load(int3(probes.at[corner], 0)).rgb, 1.0) * probes.bounced[corner];
+    return sum.w > 1e-3 ? sum.rgb / sum.w / Pi : float3(-1.0);
+}
+
+// The indirect light reaching a surface at p facing n, irradiance over pi, from those of the world's
+// probes around it it sees with nothing the field holds between, faded to the next cascade across
+// this one's outer band, or -1 where it sees none, which the caller reads from them all as bouncedAt
+// reads them, since read here as well bouncedAt's code was in the pass twice. A pixel no
+// screen probe on a surface like its own stands near, as where two walls meet, reads it, since a
+// probe beyond a wall thinner than the probes' spacing is seen by bouncedAt's reach where the point
+// it judges from lies in the other wall's cells, and in 3DEngine lent a thin room's corner the
+// lamp's light outside, 3.25 times the wall beside it where its reference reads 1.10, and 1.02 so.
+float3 bouncedSeen(FieldInfo field, float3 p, float3 n)
+{
+    int cascades = int(probes.z);
+    FieldInfo info = probesOf(field, cascades);
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0 || c >= cascades)
+        return float3(0.0);
+    float own = c + 1 < cascades && info.cascades[c + 1].origin_and_cell.w > 0.0 ? cascadeHold(info, c, p) : 1.0;
+    float3 light = float3(0.0);
+    [loop]
+    for (int k = 0; k < 2; k++)
+    {
+        float share = k == 0 ? own : 1.0 - own;
+        if (share <= 0.0)
+            continue;
+        float4 seen = bouncedSeenSum(scene_field, scene_field_sampler, field, info, probe_cubes, p, n, probes.x, probes.y, c + k);
+        if (seen.w <= 1e-5)
+            return float3(-1.0);
+        light += seen.rgb / seen.w * share;
+    }
+    return light / Pi;
+}
+
+// The light the glow lights send a pixel straight, irradiance over pi, as gi_screen_glow.slang left it
+// on the two by two texels of its half-sized images around the pixel, the share each texel takes of
+// the rough light of the glow light that gives it the most of it near it (glowLightRough,
+// glowLightNear), worked out here at the pixel with the pixel's own normal, and the other lights'
+// light as it is. Each texel weighed by how near it is, how alike its normal is to the surface's, and
+// how near its point's distance from the eye is to the distance the surface's own plane lies at
+// there, as the screen probes are weighed. A pixel whose like texels no probe around holds marches to
+// the lights' middles itself, which this asks for with -1, the march's code in the pass once, and one
+// no texel around holds a point like its own, as along a thin
+// mesh, takes the texels around on any surface by how near each is, since marching from those few
+// pixels cost 3DEngine's model pass 1.1 ms in a room of 64 lamps at 1280 by 720, each group of pixels
+// the GPU runs together waiting on its slowest.
+float3 glowLightsHere(FieldInfo info, float2 position, float3 p, float3 n, float3 toEye, float3 facing, float3 acrossOne, float3 downOne)
+{
+    int count = min(int(gi_lights[0].counts.w), MostGlowLights);
+    if (count == 0)
+        return float3(0.0);
+    uint width, height;
+    gi_glow_light.GetDimensions(width, height);
+    float2 g = position * 0.5 - 0.5;
+    int2 base = int2(floor(g));
+    float2 f = g - float2(base);
+    float distance = length(toEye);
+    float margin = max(fieldCell(info, p), 0.0) * 0.5;
+    float3 alike = float3(0.0), anywhere = float3(0.0);
+    float alikeWeight = 0.0, anywhereWeight = 0.0, askWeight = 0.0;
+    bool onLight = false;
+    // The rough light of the last light a texel named, so texels that name the same light work it out
+    // once.
+    int named = -1;
+    float3 rough = float3(0.0);
+    [unroll]
+    for (int corner = 0; corner < 4; corner++)
+    {
+        int2 offset = int2(corner & 1, corner >> 1);
+        int3 texel = int3(clamp(base + offset, int2(0), int2(int(width) - 1, int(height) - 1)), 0);
+        float4 held = gi_glow_light.Load(texel);
+        float4 normal = gi_glow_normal.Load(texel);
+        int kind = int(normal.w * 255.0 + 0.5);
+        if (kind == 0)
+            continue;
+        float2 lerps = lerp(1.0 - f, f, float2(offset));
+        float near = lerps.x * lerps.y;
+        float2 toTexel = (float2(base + offset) + 0.5) * 2.0 - position;
+        float expected = length(toEye - acrossOne * toTexel.x - downOne * toTexel.y);
+        float weight = near * pow(saturate(dot(facing, normal.xyz * 2.0 - 1.0)), 8.0) * exp(-abs(held.a - expected) / (0.02 * distance + 0.05));
+        onLight = onLight || kind == GlowOnLight;
+        if (kind == GlowAsk)
+            askWeight += weight;
+        if (kind >= GlowOnLight)
+            continue;
+        int dominant = kind - 2;
+        if (dominant >= 0 && dominant != named)
+        {
+            GlowLight light = glow_lights[min(dominant, count - 1)];
+            float faded = glowLightFade(light, p, n);
+            rough = faded > 0.0 ? glowLightRough(light, p, n, margin) * (faded * glowLightNear(light, p)) : float3(0.0);
+            named = dominant;
+        }
+        float3 lit = (dominant >= 0 ? held.rgb * rough : float3(0.0)) + gi_glow_far.Load(texel).rgb;
+        alike += lit * weight;
+        alikeWeight += weight;
+        anywhere += lit * near;
+        anywhereWeight += near;
+    }
+    // A pixel whose texels around lie on a glow light's own surface alone takes no other's.
+    if (alikeWeight > 1e-3)
+        return alike / (alikeWeight * Pi);
+    if (anywhereWeight > 1e-3 && askWeight <= 1e-3)
+        return anywhere / (anywhereWeight * Pi);
+    if (onLight && askWeight <= 1e-3)
+        return float3(0.0);
+    // A pixel on a lamp's own side, whose half-sized texels lie across its edge, takes no other light's
+    // either, where marched the sides of a room of sixteen lamps cost 3DEngine's model pass 0.9 ms at
+    // 1280 by 720.
+    [loop]
+    for (int i = 0; i < count; i++)
+        if (glowLightNear(glow_lights[i], p) > 0.0 && glowLightOn(glow_lights[i], p, n, margin))
+            return float3(0.0);
+    return float3(-1.0);
+}
+
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
@@ -317,10 +525,36 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float occlusion = surface.diffuse_occlusion;
     GiLights lights = gi_lights[0];
 
+    // How the surface's point moves from pixel to pixel, and the way it faces as the depth gives it,
+    // which weigh the screen probes and the glow lights' texels around the pixel.
+    float3 toEye = passView.world_position - world;
+    float3 acrossOne = nearerStep(pixel, int2(1, 0), world), downOne = nearerStep(pixel, int2(0, 1), world);
+    float3 facing = surfaceNormal(cross(acrossOne, downOne), toEye);
+    if (dot(facing, toEye) < 0.0)
+        facing = -facing;
+
     // How much of the light from all around the probes give, all of it inside the last cascade and
-    // none past its outer band, and the light they hold here, irradiance over pi.
+    // none past its outer band, and the light they hold here, irradiance over pi, the screen's probes'
+    // within the world's second cascade, fading to the world's across its outer band, since switched
+    // there a canyon's floor stepped by 14% in 3DEngine. A pixel the screen's probes stand around on
+    // no surface like its own, as at a corner, reads the world's probes it sees through the field.
     float held = bouncedHold(info, world, n, probes.y, probes.z);
-    float3 bounced = held > 0.0 ? bouncedAt(probe_cubes, probe_reach, info, world, n, probes.x, probes.y, probes.z) / Pi : float3(0.0);
+    float3 bounced = float3(0.0);
+    if (held > 0.0)
+    {
+        ScreenProbes around = screenProbesHere(input.position.xy, toEye, facing, acrossOne, downOne);
+        float3 near = screenBounced(around);
+        float screened = near.x >= 0.0 ? probesHold(probesOf(info, int(probes.z)), world, n, probes.y, min(1, int(probes.z) - 1)) : 0.0;
+        bounced = screened > 0.0 ? near : float3(0.0);
+        if (screened < 1.0)
+        {
+            bool edge = screen.y > 0.5 && near.x < 0.0 && around.near[0] + around.near[1] + around.near[2] + around.near[3] > 0.0;
+            float3 far = edge ? bouncedSeen(info, world, n) : float3(-1.0);
+            if (far.x < 0.0)
+                far = bouncedAt(probe_cubes, probe_reach, info, world, n, probes.x, probes.y, probes.z) / Pi;
+            bounced = lerp(far, bounced, screened);
+        }
+    }
 
     // Past the probes, the sky over a ground and each directional light's share of the ground's
     // light, read through its shadow map where the ground the surface looks at lies, a cell of the
@@ -358,8 +592,15 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // 13.4% over its reference against 13.2%, and took the pass from 1.3 ms to 2.0 to 3.5 at 1280 by
     // 720 with one light over the whole view of a Cornell box on the development machine's GPU,
     // where without the glow lights it takes 0.19.
+    // Where the screen's probes are traced, or stand for the glow lights alone, a pixel reads their
+    // texels instead, at a cost the lights do not change (glowLightsHere).
     if (lights.counts.w > 0.5)
-        added += diffuse * glowLightsAt(scene_field, scene_field_sampler, info, glow_lights, uint(lights.counts.w), world, n, 4, false, float3(0.0)) / Pi;
+    {
+        float3 glowing = screen.z > 0.5 ? glowLightsHere(info, input.position.xy, world, n, toEye, facing, acrossOne, downOne) : float3(-1.0);
+        if (glowing.x < 0.0)
+            glowing = glowLightsAt(scene_field, scene_field_sampler, info, glow_lights, uint(lights.counts.w), world, n, 4, false, float3(0.0)) / Pi;
+        added += diffuse * glowing;
+    }
 
     // The diffuse share of the light from all around Bevy's lighting gave the surface, its ambient
     // term's and its environment map's, taken back.

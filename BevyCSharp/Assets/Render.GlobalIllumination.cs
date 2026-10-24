@@ -70,6 +70,21 @@ public static partial class Render
     /// screen-space ambient occlusion is left as Bevy gives it.
     /// </para>
     /// <para>
+    /// Beside the world's probes stands a probe for every few pixels of the picture, every 16 at
+    /// <see cref="GlobalIllumination.Low"/>, 12 at <see cref="GlobalIllumination.Medium"/> and 8 at
+    /// <see cref="GlobalIllumination.High"/>, on the surface the camera's depth shows there. Each
+    /// traces the near light through the depth first and the field past it, as far as twice the first
+    /// cascade's probes' spacing, and takes the world's probes' light past that, so the light under a
+    /// table, in a corner or where a wall meets the floor is seen at the size the picture draws it and
+    /// not at the probes' spacing. Their light is blended with the probes around on like surfaces and
+    /// with the frame before's where the surface is the same one, held within the spread of this
+    /// frame's light, so it holds still as the camera moves and follows a light that changed at once,
+    /// and a pixel blends the probes around it that stand on a surface like its own. The glow lights'
+    /// light on the picture is read from what the probes around each point see of each, blended over
+    /// the frames, so a pixel reads it at a cost the lights do not change.
+    /// <see cref="SetGlobalIlluminationScreenProbes"/> leaves them out.
+    /// </para>
+    /// <para>
     /// The probes and the pass are compute and draw shaders the library carries, which compile as the
     /// field's do, and the setting lasts while the app runs.
     /// </para>
@@ -87,5 +102,41 @@ public static partial class Render
             throw new InvalidOperationException("Global illumination belongs to an app, and none is running.");
 
         WorldProbes.Ask(quality);
+    }
+
+    /// <summary>
+    /// Leaves global illumination's screen probes out, or puts them back, which they are by default,
+    /// so every surface reads the world's probes' light alone where they are out.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A game leaves them out where its art shows their tiles, as a world of blocks does, or where it
+    /// has no time for them. They are then neither made nor traced, and every surface reads the
+    /// cascades' light alone, smoother and coarser, with nothing of the light under a table that is
+    /// smaller than the world's probes' spacing.
+    /// </para>
+    /// <para>
+    /// Where a small emitter is carried as a glow light, probes stand for the glow lights alone while
+    /// they are out, marching to them once a tile and tracing nothing else, so a pixel reads their
+    /// light at a cost the lights do not change, where each pixel marching to the four brightest itself
+    /// took 3DEngine's model pass from 0.31 to 1.01 ms on a Cornell box's four small emitters at 800 by
+    /// 450. A frame with none of them pays nothing for them. The setting lasts while the app runs, and
+    /// <c>gi.state</c> says what the probes are.
+    /// </para>
+    /// </remarks>
+    /// <param name="on">Whether the screen's probes are traced.</param>
+    /// <exception cref="InvalidOperationException">No app is running.</exception>
+    /// <example>
+    /// <code>
+    /// Render.SetGlobalIllumination(GlobalIllumination.Low);
+    /// Render.SetGlobalIlluminationScreenProbes(false);
+    /// </code>
+    /// </example>
+    public static void SetGlobalIlluminationScreenProbes(bool on)
+    {
+        if (App.Running is null)
+            throw new InvalidOperationException("Global illumination belongs to an app, and none is running.");
+
+        WorldProbes.AskScreen(on);
     }
 }

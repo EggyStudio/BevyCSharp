@@ -474,9 +474,10 @@ internal static unsafe partial class SceneField
     /// </summary>
     /// <remarks>
     /// A build's parts splat into the same buffers frame after frame, which the resolve of its last
-    /// part reads and clears. A build left unfinished, a finer cascade coming first or a mesh it
-    /// splatted leaving, leaves its codes in them, so the first part of the next build clears them
-    /// first where nothing has since.
+    /// part reads and a dispatch of the resolve's that clears alone clears after it, since a cell's
+    /// resolve reads its neighbors' codes. A build left unfinished, a finer cascade coming first or a
+    /// mesh it splatted leaving, leaves its codes in them, so the first part of the next build clears
+    /// them first where nothing has since.
     /// </remarks>
     private static void Build(Built built, SceneFieldPlan plan)
     {
@@ -565,6 +566,8 @@ internal static unsafe partial class SceneField
 
             if (!build.Last) continue;
             _resolve.Set("cascade", new Vector4(build.Cascade, size, build.Cell, SceneFieldPlan.Band)).SetNumbers("clearing", 4, [0u, 0u, 0u, 0u]);
+            Shaders.Dispatch(_resolve, size / 4, size / 4, size / 4);
+            _resolve.SetNumbers("clearing", 4, [1u, 0u, 0u, 0u]);
             Shaders.Dispatch(_resolve, size / 4, size / 4, size / 4);
             built.Splatted = false;
         }

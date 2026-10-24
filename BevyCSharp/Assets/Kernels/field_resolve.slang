@@ -2,12 +2,11 @@
 // below zero behind a face and within half a cell of a double-sided one or a wall thinner than a
 // cell, and writes them into the cascade's place in the field the meshes alone make and in the field
 // the shaders read, with the color and the emission it painted and the way the cell's nearest face
-// looks, a thread a cell, clearing each cell's codes behind it for the next build, or clears them
-// alone.
+// looks, a thread a cell, or clears the codes for the next build.
 //
 // Taken from 3DEngine's field_resolve.slang. 3DEngine clears the codes before each build with a
-// fill of the buffer, which a dispatch here has no call for, so the resolve that reads a code clears
-// it, and the buffers start cleared.
+// fill of the buffer, which a dispatch here has no call for, so a dispatch of this that clears alone
+// follows each resolve, which reads its neighbors' codes, and the buffers start cleared.
 
 // The codes of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
 // lies behind, in 1024ths of a cell.
@@ -40,8 +39,9 @@ RWStructuredBuffer<uint> emitted;
 // x: the cascade. y: the cells along each side. z: the width of a cell. w: the band in cells.
 uniform float4 cascade;
 
-// x: 1 where the dispatch clears the cells alone, writing nothing into the images, as the first part
-// of a build does after a build left unfinished splatted into them, 0 where it resolves them.
+// x: 1 where the dispatch clears the cells alone, writing nothing into the images, as it does after
+// each resolve and before the first part of a build where a build left unfinished splatted into
+// them, 0 where it resolves them and leaves them as they are.
 uniform uint4 clearing;
 
 // A face's way from its eight bits, as field_splat.slang folded it.
@@ -64,7 +64,10 @@ void main(uint3 id : SV_DispatchThreadID)
     uint index = (id.z * size + id.y) * size + id.x;
     uint e = index * 6u;
     if (clearing.x == 0u)
+    {
         resolve(id, index, e);
+        return;
+    }
 
     // Cleared for the next build, the band's distance in front, no face behind, no color and no
     // light.
@@ -76,11 +79,10 @@ void main(uint3 id : SV_DispatchThreadID)
         emitted[e + i] = 0u;
 }
 
-// The cell's codes turned into its distance, color, face and light in the cascade's place in the
-// images, given its place in the buffers and in the lent light.
-void resolve(uint3 id, uint index, uint e)
+// The distance a cell holds, from the code field_splat.slang left it and the face it lies behind.
+float resolvedAt(uint3 c, uint size)
 {
-    uint size = uint(cascade.y);
+    uint index = (c.z * size + c.y) * size + c.x;
     uint code = cells[index];
     float d = min(float(code >> 10) / 1024.0, cascade.w) * cascade.z;
     // A cell in front of one face and straight behind another that looks the other way, less than
@@ -98,6 +100,47 @@ void resolve(uint3 id, uint index, uint e)
     else if (thin)
         d = (d + beyond) * 0.5 - cascade.z * 0.5;
     else if ((code & 0x100u) == 0u)
+        d = -d;
+    return d;
+}
+
+// Whether a cell outside every surface lies between two cells beside it along two axes that lie
+// inside one while the cell across the diagonal from it lies outside, the pattern two blocks that
+// meet along an edge leave in the cells about it, which no single face makes.
+bool pinched(uint3 c, uint size)
+{
+    int3 axes[3] = { int3(1, 0, 0), int3(0, 1, 0), int3(0, 0, 1) };
+    [loop]
+    for (int a = 0; a < 3; a++)
+        [loop]
+        for (int b = a + 1; b < 3; b++)
+            [loop]
+            for (int signs = 0; signs < 4; signs++)
+            {
+                int3 one = int3(c) + axes[a] * ((signs & 1) != 0 ? 1 : -1);
+                int3 other = int3(c) + axes[b] * ((signs & 2) != 0 ? 1 : -1);
+                int3 across = one + other - int3(c);
+                if (any(min(min(one, other), across) < 0) || any(max(max(one, other), across) >= int(size)))
+                    continue;
+                if (resolvedAt(uint3(one), size) < 0.0 && resolvedAt(uint3(other), size) < 0.0 && resolvedAt(uint3(across), size) > 0.0)
+                    return true;
+            }
+    return false;
+}
+
+// The cell's codes turned into its distance, color, face and light in the cascade's place in the
+// images, given its place in the buffers and in the lent light.
+void resolve(uint3 id, uint index, uint e)
+{
+    uint size = uint(cascade.y);
+    uint code = cells[index];
+    // A cell pinched between two blocks that meet along an edge is held inside at its distance, so a
+    // march through the edge meets the field there, where between the four cells about the edge the
+    // distance never fell below zero, and in 3DEngine a march from the floor east of a wall whose
+    // halves met along one edge saw half of a glowstone west of it, the floor about the edge 21 sRGB
+    // levels where its reference reads none.
+    float d = resolvedAt(id, size);
+    if (d > 0.0 && pinched(id, size))
         d = -d;
     uint3 at = uint3(id.xy, id.z + uint(cascade.x) * size);
     still_field[at] = d;

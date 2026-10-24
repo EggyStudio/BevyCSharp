@@ -10,19 +10,19 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8911be4c`, item 52's first part, the field's budget in triangles a frame as
-3DEngine's item 74, pushed at 17:51 on 2026-10-24 after the run of `ce186327` went green; its own
-run green on the three systems at 18:07, carrying the review's files and a Shared line under
-Replies. Departures from 3DEngine, the bridge counts each mesh's triangles into the gather's record
-at the old pad at offset 12 once a generation, ABI 305, and the resolve clears what it reads, a
-build's first part clearing only after a build was left unfinished, a clear-only mode of
-field_resolve. 500 sections of 1,024 triangles splat in one frame of 855,040 triangles with the
-slowest dispatch 9.3 ms without a budget, and under 32,768 over 27 frames with the slowest 1.4, the
-field the same to the cell. 1,781 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and
-11.
+Reviewed up to `9f65bbcc`, the day's captures under N 4.8, pushed at 19:02 on 2026-10-24 after the
+run of `8911be4c` went green, no run of its own since it touches .github alone, carrying NORM.md and
+REVIEW.md. Twelve WebP files under .github/assets/readings with a captions.md line each, item 51's
+five commits, item 60's panel reading, item 54's denoiser shots, masks and difference maps, and item
+52's bounce sheets; NormTests 18. Item 52's second part, the screen probes and the glow-only pass,
+is written and not committed, its four tests from 3DEngine passing three runs in a row; the bounce
+rooms with the probes on read the Cornell floor plus 3.5 percent where plus 12.8 stood, v2 0.08
+where 0.115, the thin walls' seam leaks gone, and v4 0.150 to 0.181 where 0.115, v6 at Low 0.238
+where 0.195, v7 at Low 0.062 where 0.051 and v8 0.074 to 0.106 where 0.061, blotches the size of a
+tile at 160 by 90, all inside 3DEngine's own bounds at that size; the choice is under item 52.
 
-Before it, `ce186327` came, item 62, pushed at 17:00 on 2026-10-24, its run green on the three
-systems.
+Before it, `8911be4c` came, item 52's first part, pushed at 17:51 on 2026-10-24, its run green on
+the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -234,7 +234,63 @@ from [SHARED.md](SHARED.md).
     on and off. Two or three commits by part. After items 43 to 45. Waits with item 51. The first
     part at `8911be4c` on 2026-10-24, the triangle budget, its two departures in the head; the
     screen probes with the glow-only pass next, and the field's read of compute-written buffers
-    waiting until the engine draws such a mesh.
+    waiting until the engine draws such a mesh. The second part's choice at 19:04 is the coder's
+    second of three, the screen probes on by default as in 3DEngine, the bounce rooms measured with
+    them off as the method's own guard so no view's bound moves, and a separate test with them on
+    holding each view within 3DEngine's reading at the same size plus 15 percent, the blotches at
+    160 by 90 being the tile's size and not the method's; the edge-leak mend's port with its Walled
+    test in the same part. The coder's correction, the screen probes left out stand for the glow
+    lights alone wherever one is lit, so the rooms' guard measures the probes traced and left
+    unread, the old path exactly, and no bound moves.
+
+63. **The feature test's HUD is clean, a green frame rate in a corner and nothing else over the
+    view.** The owner wrote to this session at about 19:30 on 2026-10-24, Decision 61, to remove the
+    "frame N fps" text at the bottom left and the stray pixels in the screen's middle and to add a
+    green FPS number in a top corner. The text goes, the number stands in a top corner in green, and
+    the stray pixels are read first for what draws them, the cursor, a debug draw or a pass's seam,
+    and mended at the cause; a capture before and after. One commit, small, after item 52.
+
+64. **The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's vibrance.** From
+    Decision 61. The sky and the aerial perspective follow Production Ready Atmosphere Rendering
+    (Hillaire 2020), the transmittance, the multiple scattering and the sky-view LUTs and the aerial
+    perspective volume, with Cody Bennett's post as the reference for the sky-view LUT and the
+    aerial perspective against Bruneton's coefficients; the sun a disc with no blurred dot, the
+    lower hemisphere taking the fog's and the horizon's color as the feature test's does, 3DEngine's
+    vibrance kept with its tone curve and grading, and the volumetric clouds removed; readings of
+    the sky's luminance and color against Bruneton's at four sun heights, and captures at dawn,
+    noon, dusk and night. The coder proposes the phases under this item when item 52 is in; the
+    first lands before item 65.
+
+65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
+    palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
+    world-aligned mapping a face, and entities with a class, keyvalues and the connections of item
+    66; the engine loads it into a scene, the brushes meshed with their collision, the entities
+    spawned by class; the palette is Unreal's level prototyping look, orange and gray with a
+    world-aligned meter grid as Source's dev textures have, with rounded doorways among the brush
+    shapes; a test loading a small level and reading its brushes and entities, and the feature
+    test's rooms rebuilt from such a file as the first level. Phases proposed by the coder; after
+    item 64's first phase.
+
+66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
+    An entity's output names a target entity, an input on it, a parameter, a delay and whether it
+    fires once, the engine firing them at run time in order with their delays, the level file
+    carrying the connections, and the classes of the feature test's level, a door, a button, a
+    trigger, a light and a sound, holding their inputs and outputs; a test of a button opening a
+    door after a delay and once. After item 65.
+
+67. **The level editor edits the file in Hammer's four panes or Unreal's single view, switchable.**
+    From Decision 61, level editing for artists who do not program. The editor opens a level file,
+    shows it in four panes, the view and the top, front and side, or in one view, switched by a key,
+    draws brushes with a block tool, moves their faces and vertices, applies textures with the
+    world-aligned mapping, places entities and edits their keyvalues, and holds the connections of
+    item 66 in a panel of outputs, targets, inputs, parameters, delays and fire once; it saves the
+    file the engine loads. Phases proposed by the coder; after item 66.
+
+68. **The feature test's level is remade in the new tools and looks as the owner asked.** From
+    Decision 61, the owner finding the level ugly. The level is rebuilt as a file of item 65 in the
+    prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
+    kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
+    the captures of the feature test retaken and the owner shown the result. After item 67.
 
 ## Verdicts
 
@@ -754,6 +810,21 @@ mended at `42abf357`.
     the game's under .github/devlog/, each a WebP named by the date and the item in the commit of
     its work with the commit's sentence as its caption, DEVLOG.md generated from them; the day's
     captures still in this session's scratch space go in with the next commit.
+
+61. **The feature test's level is redone, the look, the sky, the file, the entities' connections and
+    an editor.** The owner wrote to this session at about 19:30 on 2026-10-24 that they hate the
+    feature test level, it looks ugly, and set its remaking as the work after item 52, ahead of the
+    Now list. The look is Unreal's level prototyping style, orange and gray blockout with rounded
+    doorways, with the best of Source and Hammer, level editing for artists who do not program; the
+    sky photoreal after Hillaire 2020 with Cody Bennett's post as the reference, keeping 3DEngine's
+    vibrance, a lower hemisphere taking the fog's and the horizon's color, and its tone curve and
+    grading; the volumetric clouds, the blurred sun dot, the frame text at the bottom left and the
+    stray pixels in the screen's middle removed, a green FPS number in a top corner added. The
+    owner's answers, the map a level file of brushes and entities the editor opens and edits, built
+    in phases; Source's entity I/O as an engine feature with an editor panel, output, target, input,
+    parameter, delay and fire once; Hammer's four panes and Unreal's single view, switchable;
+    Unreal's palette with a world-aligned meter grid as Source's dev textures have; item 52 first.
+    Items 63 to 68 hold it, the coder proposing the phases when 52 is in.
 
 ## Replies
 
@@ -1481,3 +1552,25 @@ budget, the slowest splat dispatch 9.3 ms, and under the default of 32,768 over 
 slowest 1.4 ms, the field the same to the cell. `SetSceneField` takes `triangleBudget`, `field.set`
 a fifth word, and `gi.state` says what the frame splatted and what waits. The screen's probes and
 the glow-only pass follow.
+
+Shared: the screen probes, the glow-only pass and the edge leak's mend, in the commit carrying this
+line, the second part of item 52. The probes are 3DEngine's, dispatches on the camera after its
+prepass writing the camera's images with their history, the trace, the blend with the probes around
+and the frame before's, and the glow lights' light on images half the picture's size, which the
+pass reads beside the world's probes; `Render.SetGlobalIlluminationScreenProbes` and `gi.screen`
+leave them out, when they stand for the glow lights alone where one is lit. The departures are the
+camera's depth read whole, what a probe sees of each glow light in four images of codes where
+3DEngine keeps a buffer, a face's way in the depth's march found from the depth, the pass's plane
+from the depth's nearer neighbors, and no command reading one probe's rays. The bounce rooms keep
+their bounds read with the probes traced and left unread, the old path, since left out they stand
+for the glow lights in every view and read the glowing blocks' room 0.06 to 0.07 where 0.049; with
+them on the Cornell floor reads 3.5% over where 12.8% and every view lies within 3DEngine's bound at
+160 by 90 or this engine's own where that is wider, the corridor's 0.25 either way. The blotches are
+3DEngine's term, its mend of a hit's mean over a cell in `glowLightsAt` here too, and in the feature
+test's Cornell box at High the probes leave streaks a tile wide on the back wall, saved beside the
+box without them. The edge leak's mend holds a pinched cell inside in the resolve, its clear a
+dispatch of its own after it, the floor past a wall's two halves 15 levels at its brightest unmended
+and 3 mended, as with the edge closed. The probes take 1.4 ms at `Low` and 1.6 at `High` in a Cornell
+box at 1280 by 720 with one glow light, their blend 0.02 and the glow texels 0.12, the pass 0.54 at
+its median where 0.73 to 0.83 with them left out. The stepped edges need no mend, the pass marching
+to a light's middle.
