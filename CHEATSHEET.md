@@ -1774,7 +1774,13 @@ static void WarnOnce(string message, string file = "", int line = 0);  // Writes
 static void ErrorOnce(string message, string file = "", int line = 0);  // Writes a line at the error level the first time this line of code runs, Bevy's error_once!
 static void Once(Action work, string file = "", int line = 0);  // Runs work the first time this line of code runs and never again, Bevy's once!
 
+// LookCycle
+LookCycle Add(float degrees, LookSettings look);                // Keeps a look at a height of the sun, replacing one kept there
+LookSettings At(float degrees);                                 // The look at a height of the sun, between the two kept about it
+static LookCycle Day();                                         // A day's cycle on Vivid, the vivid look by day, warmer and deeper as the sun goes down to the horizon, bluer and calmer through the twilight, and cool at night
+
 // LookSettings
+static LookSettings Lerp(LookSettings from, LookSettings to, float share);  // A look part of the way from one to another, each number that far between the two, for a look that changes as a day goes (LookCycle)
 static LookSettings Vivid();                                    // A vivid look, Numbered at an exposure of 0.9, a white of 1.3 and powers of 1.05 and 1, the light raised by 1.6 before it, a saturation of 1.4 and a contrast of 1.12
 
 // MemoryGuard

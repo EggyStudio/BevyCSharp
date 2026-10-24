@@ -10,28 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `53583307`, item 64's second part, the sky's fog and the band below the horizon,
-pushed at 23:20 on 2026-10-24 after the run of `0ce0069d` went green; its own run green on the three
-systems at 23:33, carrying two pictures with captions, a Shared line and the review's files.
-Render.SetSkyFog and ClearSkyFog with SkyFogSettings are the engine's own draw in sky_fog.slang, a
-layer over the ground 95 percent gone at the visibility at its base and thinning by e every height,
-its color along each way read from the sky-lit environment map at the way's height held between 0
-and 3 degrees at roughness 0.08, since a read at 0.5 took in the dark ground and left the sunset
-band blue gray, and below the horizon the band darkening to the ground's shade over its degrees,
-with sky.fog on the console and the feature test at 700 and 40 m. Departures in the native,
-FramePoint.BeforeTonemapping sat unordered against TAA, motion blur, depth of field, bloom and the
-effect stack so a vignette dropped the fog, and stands after the main pass and before the early
-post-process where Bevy draws its volumetric fog, the ShaderPass before tonemapping after it and
-before the post-process, the 2D point and passes alike, no ABI change; and SceneInfo's unused uint
-names what a pass has, depth, normals and motion, so a multisampled camera draws no fog rather than
-the band over the ground. The same race stands after tonemapping against FXAA, SMAA and CAS, whose
-systems sit in private modules, item 71. SkyFogTests holds nine, the fade with distance, the
-thinning upward, the band, the fog kept under vignette, bloom and TAA, none under MSAA, the console
-off and on, and settings refused, the levels within a few of the worked ones; the step at the
-level's ground edge waits on item 68's distant geometry. 1,829 passed, 3 skipped, the bridge's
-checks clean, Cargo 118, 199 and 11.
+Reviewed up to `d8ecd271`, item 64's third part with item 71 folded in, pushed at 00:33 on
+2026-10-25 after the run of `53583307` went green; its own run green on the three systems at 00:48,
+carrying a picture with its caption, a Shared line and the review's files, ABI 306.
+Render.SetLook(camera, LookSettings) runs the library's look.slang as an engine pass at a new
+PassPlace of Look after tonemapping and before the anti-aliasing in Core3d and Core2d, a
+render-world system setting the view's extracted Tonemapping to None while a look is on, Bevy
+re-extracting the camera's own each frame so it returns when the look goes, an 8-bit camera keeping
+Bevy's tonemapper with a word said once; the chain is 3DEngine's composite at `8ae947ee`, exposure,
+curve, saturation and tint in linear light, contrast about the middle once encoded, the knee curve
+the default and the numbered curve BSL. Departure, Vivid keeps BSL with no knee as 3DEngine's
+numbered curve takes none, 0.9, 1.3, 1.05 and 1 at exposure 1.6, saturation 1.4 and contrast 1.12
+with Bevy's half-level dither by default, so it reads against 3DEngine's figures; engine passes are
+kept apart from the program's so a look never displaces Shaders.SetPasses; camera.look on the
+console and a Look row on the feature test's graphics page, Vivid by default. Item 71, the point and
+the passes after tonemapping run after the look, fxaa, smaa and cas in 3D and 2D,
+AfterAntialiasingTests holding a green draw under each. LookTests holds the model to
+TonemapCurveTests' seven figures within 0.001 and the ramp through knee, held, vivid and graded
+within 2 levels of the model at every pixel, an 8-bit camera keeping Tony, the look off giving Tony
+back and a not-a-number refused; the Shared line names the departures, Bevy's bloom undivided before
+the look, its vignette before it rather than after the contrast, the dither, and auto exposure
+dropped under a look. 1,847 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and 11.
 
-Before it, `0ce0069d` came, item 64's first part, pushed at 21:55 on 2026-10-24, its run green on
+Before it, `53583307` came, item 64's second part, pushed at 23:20 on 2026-10-24, its run green on
 the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -262,7 +263,9 @@ from [SHARED.md](SHARED.md).
     Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and its knee,
     tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then, as a second
     commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's height,
-    3DEngine keying no grading by the hour.
+    3DEngine keying no grading by the hour. The third phase at `d8ecd271` on 2026-10-25, the look
+    pass with the Vivid preset, item 71 inside it; its second commit next, the look keyed by the
+    sun's height; the fourth, the view from space, on the owner's word.
 
 69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
     leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
@@ -347,20 +350,6 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
-
-71. **A frame point after tonemapping is ordered against FXAA, SMAA and CAS.** Found by item 64's
-    second part on 2026-10-24, read at 23:20: FramePoint.AfterTonemapping and the passes after
-    tonemapping run unordered against Bevy's FXAA, SMAA and CAS, whose systems sit in
-    bevy_anti_alias's private node modules the bridge cannot name, so an effect drawn there can be
-    dropped by a fresh texture as the fog was by the vignette. The bridge orders the point by the
-    graph's labels where the nodes are public, or by a node of its own placed after the
-    anti-aliasing nodes in the camera's graph, or an upstream change asked of Bevy with the bridge's
-    patch meanwhile, whichever the reading finds; a test drawing a mark after tonemapping under
-    FXAA, SMAA and CAS each and reading it kept. One commit, small, after item 64. The coder's
-    correction at 23:30, the systems are nameable, bevy_anti_alias re-exporting fxaa and cas and
-    smaa a public function, so the point and the passes order after the three directly in Core3d and
-    Core2d, no label, node or upstream ask; taken inside item 64's third commit with its test under
-    each.
 
 ## Verdicts
 
@@ -1683,3 +1672,13 @@ before the look where 3DEngine darkens the corners after the contrast; Bevy's di
 which 3DEngine has none of, on by default and off in the tests; and Bevy's auto exposure, which its
 tonemapper applies and a look leaves out. The ramp through a look could be a reference picture kept
 in both engines, as the eight tonemappers' are.
+
+Shared: the look keyed by the sun's height, in the commit carrying this line, item 64's third part
+second commit, this engine's own, which 3DEngine may take beside its look. `LookCycle` keeps looks at
+heights of the sun in degrees, the look between two keys each number moved evenly with the height
+and the curve and dither the nearer key's, the lowest and highest held past the ends; `Day()` is
+the vivid look at 30 degrees and above, saturation 1.48 and 1.55, contrast 1.14 and 1.16 and a warm
+tint at 8 and 2, saturation 1.2 and a blue tint at minus 6, and saturation 1 and a cool tint at minus
+18, every key on the vivid curve and exposure. A look given again to a camera that has one changes
+its numbers alone, so a program gives it every frame. The feature test's Look row has Day, its
+default.

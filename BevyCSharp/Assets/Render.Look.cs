@@ -22,7 +22,8 @@ public static partial class Render
     /// on and comes back when it goes, and with it the parts Bevy applies as it tonemaps, its grade
     /// (<see cref="SetColorGrading"/>), its dithering and its auto exposure, which do nothing under
     /// a look. The look dithers by itself where <see cref="LookSettings.Dither"/> asks. The setting
-    /// lasts while the app runs.
+    /// lasts while the app runs, and a look given again to a camera that has one changes its numbers
+    /// alone, so one that follows the day (<see cref="LookCycle"/>) can be given every frame.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
@@ -52,7 +53,9 @@ public static partial class Render
             throw new ArgumentOutOfRangeException(nameof(look), "A setting of the look is not a number.");
 
         // Held where the curves are defined, as 3DEngine holds them, the curve's own numbers off
-        // zero so its powers and its white stay finite.
+        // zero so its powers and its white stay finite. A camera whose look is on keeps its pass,
+        // and only the numbers move, so a look changed every frame costs the values alone.
+        var on = Looks.IsOn(camera);
         var pass = Looks.PassFor(camera, look);
         pass.Set("curve", new Vector4(look.Curve == LookCurve.Numbered ? 1f : 0f, Math.Max(0f, look.Exposure),
                 Math.Clamp(look.Knee, 0f, 1f), Math.Clamp(look.KneeStrength, 0f, 1f)))
@@ -60,7 +63,7 @@ public static partial class Render
                 Math.Max(0.01f, look.CurveLower), Math.Max(0.01f, look.CurveUpper)))
             .Set("grade", new Vector4(Math.Max(0f, look.Contrast), Math.Max(0f, look.Saturation), look.Dither ? 1f : 0f, 0f))
             .Set("tint", new Vector4(Math.Max(0f, look.Tint.R), Math.Max(0f, look.Tint.G), Math.Max(0f, look.Tint.B), 1f));
-        Shaders.SetEnginePasses(camera, Looks.Owner, new ShaderPass(pass) { EnginePlace = Looks.Place });
+        if (!on) Shaders.SetEnginePasses(camera, Looks.Owner, new ShaderPass(pass) { EnginePlace = Looks.Place });
     }
 }
 
@@ -86,6 +89,13 @@ internal static class Looks
         var pass = Kept.TryGetValue(camera.Bits, out var look) ? look.Pass : SceneField.Pass("look.slang");
         Kept[camera.Bits] = (pass, settings, true);
         return pass;
+    }
+
+    /// <summary>Whether a camera's look is on in the running app.</summary>
+    internal static bool IsOn(Entity camera)
+    {
+        ForgetOtherApps();
+        return Kept.TryGetValue(camera.Bits, out var look) && look.On;
     }
 
     /// <summary>Marks a camera's look taken off, keeping its pass and settings for <see cref="Off"/>.</summary>

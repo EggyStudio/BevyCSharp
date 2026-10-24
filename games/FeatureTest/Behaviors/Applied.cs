@@ -147,6 +147,7 @@ public partial struct Applied
         {
             Look.Engine => new LookSettings(),
             Look.Vivid => LookSettings.Vivid(),
+            Look.Day => DayNight.LookNow(settings),
             _ => null,
         });
         Render.SetEffects(camera, Lens(settings));

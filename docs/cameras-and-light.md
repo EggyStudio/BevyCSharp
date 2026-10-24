@@ -310,6 +310,23 @@ tonemapper and what Bevy applies as it tonemaps, the grade above, its dithering 
 exposure, are left out, and `null` gives them back. The console's `camera.look` sets it while the
 app runs.
 
+A look can follow the sun through the day, a timecycle keyed by the sun's height:
+
+<!-- compiled with:
+Entity camera = default;
+float sunDegrees = default;
+-->
+```csharp
+var cycle = LookCycle.Day();                    // or new LookCycle().Add(degrees, look)...
+Render.SetLook(camera, cycle.At(sunDegrees));   // every frame, as the day turns
+```
+
+`LookCycle` keeps looks at heights of the sun and works out the look between the two about any
+height, so it serves any latitude and season and the golden hour falls wherever the sun is low.
+`LookCycle.Day` is the vivid look by day, warmer and deeper as the sun nears the horizon, bluer
+through the twilight and cool at night. A look given again to a camera that has one changes its
+numbers alone, so it costs nothing to give every frame.
+
 ### The lens
 
 The lens is a second call, because it is decided at a different time. A settings screen owns the

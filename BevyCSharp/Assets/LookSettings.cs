@@ -64,6 +64,42 @@ public sealed class LookSettings
     public bool Dither { get; set; } = true;
 
     /// <summary>
+    /// A look part of the way from one to another, each number that far between the two, for a look
+    /// that changes as a day goes (<see cref="LookCycle"/>).
+    /// </summary>
+    /// <remarks>
+    /// The curve and the dither are not numbers between two, and are the first look's under half
+    /// way and the second's from there, so two looks a cycle moves between share a curve, or the
+    /// picture changes at once half way.
+    /// </remarks>
+    /// <param name="from">The look at none of the way.</param>
+    /// <param name="to">The look at all of it.</param>
+    /// <param name="share">How far from one to the other, from 0 to 1, held there.</param>
+    public static LookSettings Lerp(LookSettings from, LookSettings to, float share)
+    {
+        ArgumentNullException.ThrowIfNull(from);
+        ArgumentNullException.ThrowIfNull(to);
+        var t = Math.Clamp(share, 0f, 1f);
+        float Mix(float a, float b) => a + ((b - a) * t);
+        var nearer = t < 0.5f ? from : to;
+        return new LookSettings
+        {
+            Curve = nearer.Curve,
+            Dither = nearer.Dither,
+            Exposure = Mix(from.Exposure, to.Exposure),
+            Knee = Mix(from.Knee, to.Knee),
+            KneeStrength = Mix(from.KneeStrength, to.KneeStrength),
+            CurveExposure = Mix(from.CurveExposure, to.CurveExposure),
+            CurveWhite = Mix(from.CurveWhite, to.CurveWhite),
+            CurveLower = Mix(from.CurveLower, to.CurveLower),
+            CurveUpper = Mix(from.CurveUpper, to.CurveUpper),
+            Saturation = Mix(from.Saturation, to.Saturation),
+            Tint = (Mix(from.Tint.R, to.Tint.R), Mix(from.Tint.G, to.Tint.G), Mix(from.Tint.B, to.Tint.B)),
+            Contrast = Mix(from.Contrast, to.Contrast),
+        };
+    }
+
+    /// <summary>
     /// A vivid look, <see cref="LookCurve.Numbered"/> at an exposure of 0.9, a white of 1.3 and
     /// powers of 1.05 and 1, the light raised by 1.6 before it, a saturation of 1.4 and a contrast
     /// of 1.12.

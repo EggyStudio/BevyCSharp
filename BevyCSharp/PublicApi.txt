@@ -4197,6 +4197,12 @@ enum Bevy.LogicalKeyKind : int
 enum Bevy.LookCurve : int
   Knee = 0
   Numbered = 1
+sealed class Bevy.LookCycle
+  IReadOnlyList<(float, LookSettings)> Keys { get; }
+  LookCycle Add(float degrees, LookSettings look)
+  LookCycle()
+  LookSettings At(float degrees)
+  static LookCycle Day()
 sealed class Bevy.LookSettings
   (float, float, float) Tint { get; set; }
   LookCurve Curve { get; set; }
@@ -4211,6 +4217,7 @@ sealed class Bevy.LookSettings
   float Knee { get; set; }
   float KneeStrength { get; set; }
   float Saturation { get; set; }
+  static LookSettings Lerp(LookSettings from, LookSettings to, float share)
   static LookSettings Vivid()
 sealed class Bevy.MainThreadAttribute : Attribute
   MainThreadAttribute()

@@ -134,7 +134,7 @@ public sealed class LookTests
         return run.Picture("ramp");
     }
 
-    private static PictureRun RampRun(LookSettings look, bool hdr, Action<Entity>? spawned = null) => new()
+    internal static PictureRun RampRun(LookSettings look, bool hdr, Action<Entity>? spawned = null) => new()
     {
         Width = 1024,
         Height = 8,

@@ -1473,6 +1473,21 @@ a batch.
     `30362cf2` on 2026-10-24, the orb a throbber sprite and the stray marks its camera's gizmos,
     both gone, the frame rate green at the top left.
 
+71. **A frame point after tonemapping is ordered against FXAA, SMAA and CAS.** Found by item 64's
+    second part on 2026-10-24, read at 23:20: FramePoint.AfterTonemapping and the passes after
+    tonemapping run unordered against Bevy's FXAA, SMAA and CAS, whose systems sit in
+    bevy_anti_alias's private node modules the bridge cannot name, so an effect drawn there can be
+    dropped by a fresh texture as the fog was by the vignette. The bridge orders the point by the
+    graph's labels where the nodes are public, or by a node of its own placed after the
+    anti-aliasing nodes in the camera's graph, or an upstream change asked of Bevy with the bridge's
+    patch meanwhile, whichever the reading finds; a test drawing a mark after tonemapping under
+    FXAA, SMAA and CAS each and reading it kept. One commit, small, after item 64. The coder's
+    correction at 23:30, the systems are nameable, bevy_anti_alias re-exporting fxaa and cas and
+    smaa a public function, so the point and the passes order after the three directly in Core3d and
+    Core2d, no label, node or upstream ask; taken inside item 64's third commit with its test under
+    each. Done at `d8ecd271` on 2026-10-25 inside item 64's third part, the point and the passes
+    after the anti-aliasing with the test under each.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

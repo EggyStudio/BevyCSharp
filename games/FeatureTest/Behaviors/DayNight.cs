@@ -186,7 +186,17 @@ public partial struct DayNight
         }
 
         TurnStars(ctx.Ecs, settings.Latitude);
+
+        // The look follows the sun's height, its numbers alone changing on the camera.
+        if (settings.Look == Look.Day && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
+            Render.SetLook(camera, Cycle.At(Elevation(sun)));
     }
+
+    /// <summary>The day's look, keyed by the sun's height, which the camera follows while the graphics page asks for it.</summary>
+    private static readonly LookCycle Cycle = LookCycle.Day();
+
+    /// <summary>The day's look at the hour now.</summary>
+    internal static LookSettings LookNow(FeatureSettings settings) => Cycle.At(Elevation(Toward(_hour, settings.Latitude, 0f)));
 
     /// <summary>
     /// Sets the weather's clock to this hour and latitude, held still between frames.

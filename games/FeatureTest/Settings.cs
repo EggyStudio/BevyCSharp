@@ -48,6 +48,9 @@ public enum Look
 
     /// <summary>The vivid look, the shadows darkened and the colors deepened.</summary>
     Vivid,
+
+    /// <summary>The vivid look by day, warmer toward sunset, bluer through the twilight and cool at night.</summary>
+    Day,
 }
 
 /// <summary>A tier the graphics page sets several settings from at once.</summary>
@@ -111,7 +114,7 @@ public sealed record FeatureSettings
     public Tonemapper Tonemapper { get; init; } = Tonemapper.TonyMcMapface;
 
     /// <summary>The look the picture is shown with in the tonemapper's place, or the tonemapper.</summary>
-    public Look Look { get; init; } = Look.Vivid;
+    public Look Look { get; init; } = Look.Day;
 
     /// <summary>
     /// Whether corners and creases are darkened where ambient light reaches less, which needs the
