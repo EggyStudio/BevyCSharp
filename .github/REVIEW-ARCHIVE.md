@@ -1344,6 +1344,39 @@ a batch.
     changed. One or two commits, by stage. After item 54, while items 51 and 52 wait. Done at
     `750c9cbc` on 2026-10-24, 3.6 to 1.87 ms, the departures in the head.
 
+51. **Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's surfaces through an
+    additive pass (Decision 51).** The world's probes in cascades over the field as 3DEngine traces
+    them, each cascade's rays marching the field, merged upward, the last cascade's rays reaching
+    the field's edge and the sky, the sun's and the lamps' light gathered at the hits with the
+    materials' colors from the meshes' vertex colors and base colors as 3DEngine's are; the light
+    read per pixel in the bridge's pass after the opaque geometry, added as indirect diffuse times
+    the surface's base color and occlusion from the deferred prepass, since Bevy's lighting takes no
+    indirect input of its own, with `Render.SetGlobalIllumination(quality)` at off, low, medium and
+    high as 3DEngine's levels; the glossy term and the emissive blocks' light as 3DEngine's phase
+    two has them; the path-traced reference of a view, `gi.reference` and `gi.compare`, giving each
+    region's distance, which the ledger's open question on this engine's reference answers; the
+    bounce rooms as a test scene with their bounds, the rule that no view's distance to its
+    reference widens taken from 3DEngine as the mends' rule. The tests are the red wall tinting a
+    white block's side, a lit room's floor within the bound of its reference, and the quality
+    levels' costs read on the Cornell box. Three commits, the probes and their tracing, the pass and
+    the reference, then the glossy term and the emitters. It waited while the method was still
+    moving in 3DEngine, its items 71, 72 and 74 open, and the owner said shortly before 07:28 on
+    2026-10-21 that if it is not yet ready BevyCSharp waits, so this item starts only once those are
+    mended and the voxel game's captures say the light holds, the port carrying the mends in.
+    3DEngine's items 71, 72 and 74 are mended and on its main on 2026-10-24 and the voxel game's
+    pictures retaken that day, so the wait ends by the reviewer's reading of the owner's condition,
+    the owner's to overrule; the item starts at 07:2x with its first commit, the probes and their
+    tracing. The first commit at `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the
+    head. The pass at `07863068`, pushed at 09:24, the sky's share departure in the head; the
+    reference in a commit of its own next. The reference at `8cb6cbaa`, pushed at 10:22; the third
+    commit takes 3DEngine's present glossy term, the reflection traced through the depth and the
+    field under a roughness of 0.5 and the sky's specular scaled by the share of sky the probes see
+    along the mirror direction, and the emitters. The emitters at `ccc0f000`, pushed at 12:41, the
+    departures in the head, the glowing blocks' and the strip's views narrowed; the environment
+    map's sky at `6e69cfa1`, pushed at 13:21; the glossy term at `c230300b`, pushed at 14:21. Done
+    at `c230300b` on 2026-10-24 in five commits, the probes, the pass, the reference, the emitters,
+    the sky and the glossy term, the departures in the heads of their records and in RENDERING.md.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

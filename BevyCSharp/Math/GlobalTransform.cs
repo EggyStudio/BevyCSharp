@@ -19,7 +19,7 @@ namespace Bevy;
 /// during <see cref="Stage.PostUpdate"/> or later, which is when propagation has already run.
 /// </para>
 /// <para>
-/// The layout mirrors glam's <c>Affine3A</c>: three basis columns and a translation, each a
+/// The layout mirrors glam's <c>Affine3A</c>, three basis columns and a translation, each a
 /// sixteen-byte-aligned <c>Vec3A</c> occupying four floats rather than three.
 /// <see cref="NativeComponents"/> checks every offset against the engine the first time the
 /// component is resolved, because packing them tightly would read three of the four from the

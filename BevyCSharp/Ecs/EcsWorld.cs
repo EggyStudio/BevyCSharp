@@ -694,7 +694,7 @@ public sealed unsafe partial class EcsWorld
     /// Collects the storage runs for an explicitly named component.
     /// </summary>
     /// <remarks>
-    /// The same thing, for a component whose id did not come from <typeparamref name="T"/>: an id
+    /// The same thing, for a component whose id did not come from <typeparamref name="T"/>, an id
     /// resolved at runtime, or a component read through a type that is not its own. A type
     /// implementing <see cref="INativeComponent"/> needs none of this, because
     /// <see cref="Chunks{T}(ReadOnlySpan{int}, ReadOnlySpan{int}, bool)"/> already resolves it to

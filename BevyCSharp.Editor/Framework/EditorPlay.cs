@@ -27,7 +27,7 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// Export turns the project into a folder a player is given (<see cref="Export"/>), as a chain of
 /// processes run one after another, each writing to the tab as the game does. The rest of the plan
-/// is in <c>.github/PLAY.md</c>: a player that loads the scene being edited rather than the game's
+/// is in <c>.github/PLAY.md</c>, a player that loads the scene being edited rather than the game's
 /// own, and a live view of the running game's world.
 /// </para>
 /// </remarks>

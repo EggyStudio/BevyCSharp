@@ -2,7 +2,7 @@
 //! managed side holds its byte mirrors to.
 //!
 //! A mirror reads and writes a component's bytes in place, so it has to agree with Rust's layout
-//! byte for byte, and Rust promises none for its default representation: it reorders fields, as
+//! byte for byte, and Rust promises none for its default representation. It reorders fields, as
 //! `Transform`'s rotation is moved ahead of its translation, and a Bevy release may move them
 //! again. `offset_of!` would say where each field is, but only for a field the bridge can name,
 //! which a private one and one inside an enum's variant are not. A reflected field is a reference

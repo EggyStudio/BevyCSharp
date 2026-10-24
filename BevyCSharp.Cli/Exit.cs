@@ -4,7 +4,7 @@ namespace BevyCSharp.Cli;
 /// What the process exits with.
 /// </summary>
 /// <remarks>
-/// The split that matters is <see cref="Failed"/> against <see cref="TestsFailed"/>: a run that
+/// The split that matters is <see cref="Failed"/> against <see cref="TestsFailed"/>, a run that
 /// produced a verdict and the verdict was bad, against a run that never produced one. Retrying the
 /// second is worth doing and retrying the first never is, and a caller can only tell them apart if
 /// they are different numbers.

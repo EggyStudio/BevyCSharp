@@ -165,7 +165,7 @@ public sealed class TestScriptTests : IDisposable
     /// <remarks>
     /// Windows gives an orphan to no other parent and uses an id again, so a test host left from an
     /// earlier run can name an id a process of the tree was given since. The table is given here,
-    /// since no system makes one on request: 10 is the process watched, made at 500; 11 its child,
+    /// since no system makes one on request. In it 10 is the process watched, made at 500; 11 its child,
     /// made after it; 12 a host of 900 MB made at 100, before 10, under the id 10 took after its
     /// parent's; 13 a child of 12; and 20 a child of 10 with no creation time, as on Linux and macOS.
     /// </remarks>

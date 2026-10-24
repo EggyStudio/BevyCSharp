@@ -9,7 +9,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Everything here is ordinary engine calls apart from <see cref="PhysicsWorld"/>: a crate is a mesh
+/// Everything here is ordinary engine calls apart from <see cref="PhysicsWorld"/>. A crate is a mesh
 /// and a material on an entity, and the simulation moves it by writing its <see cref="Transform"/>
 /// once a fixed step. The ground is a static box under the scene's own plane, and the turning cube
 /// is a kinematic one, so a crate landing on it is knocked aside by it. Each body goes through

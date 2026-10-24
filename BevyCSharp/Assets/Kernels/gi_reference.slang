@@ -69,7 +69,7 @@ float3 schlick(float3 f0, float f90, float cosine)
 }
 
 // What a light along l sends toward v off a face facing n, over the light a white surface facing
-// it returns, as Bevy's point_light works it out: Burley's diffuse term times pi and the specular
+// it returns, as Bevy's point_light works it out, Burley's diffuse term times pi and the specular
 // lobe times pi, the lights being given over pi.
 float3 bevyReflected(float3 n, float3 v, float3 l, float3 diffuse, float3 f0, float roughness)
 {

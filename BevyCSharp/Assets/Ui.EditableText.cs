@@ -7,7 +7,7 @@ public static unsafe partial class Ui
     /// <summary>Makes a node a text field the player types into.</summary>
     /// <remarks>
     /// <para>
-    /// Bevy's own <c>EditableText</c>: a cursor moved by the arrow keys and the pointer, a selection,
+    /// Bevy's own <c>EditableText</c>, a cursor moved by the arrow keys and the pointer, a selection,
     /// copy, cut and paste, and the text laid out in the node's <c>TextFont</c>, with Bevy's cursor
     /// style. Typing reaches the field that has the input focus, which a click on it gives it, as
     /// does Tab within a <c>TabGroup</c> by each field's <c>TabIndex</c>, and Bevy's <c>AutoFocus</c>

@@ -77,7 +77,7 @@ public static partial class MemoryGuard
     /// answer.
     /// </para>
     /// <para>
-    /// On macOS, the physical footprint, which Activity Monitor shows as a process's memory: its
+    /// On macOS, the physical footprint, which Activity Monitor shows as a process's memory, its
     /// resident pages and those the system's memory compressor holds for it compressed. Short of
     /// memory, macOS compresses pages a process has not touched lately, which stay the process's
     /// and leave its resident size, so a resident size read 189 megabytes more for a quarter of a

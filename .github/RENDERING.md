@@ -202,13 +202,13 @@ The distance field is the first (`Render.SetSceneField`). Its plan is 3DEngine's
 managed side each frame from the meshes the bridge gathers, each a number and a generation the
 bridge gives a mesh and moves on when Bevy says its data changed, and its three kernels are
 3DEngine's Slang, the splat, the resolve and the stamp, changed only where the bridge's bindings
-ask: named values for push constants, `Atomic<uint>` for WGSL's atomics, and the still field read as
-a texture. The bridge pools the meshes' triangles in one buffer, since a buffer is written whole,
-and `bcs_field.slang` holds the layout a shader reads the field through. A second splat over the
-same triangles paints each cell the color of the triangle whose code it kept, the material's base
-color times the vertices' colors at its nearest point, and the resolve writes that color and the way
-the face looks into images laid out as the field, with the still meshes' own beside them for the
-stamp, which paints a box's cells its color and its face. The paint dispatch writes each cell's
+differ, with named values for push constants, `Atomic<uint>` for WGSL's atomics, and the still field
+read as a texture. The bridge pools the meshes' triangles in one buffer, since a buffer is written
+whole, and `bcs_field.slang` holds the layout a shader reads the field through. A second splat over
+the same triangles paints each cell the color of the triangle whose code it kept, the material's
+base color times the vertices' colors at its nearest point, and the resolve writes that color and
+the way the face looks into images laid out as the field, with the still meshes' own beside them for
+the stamp, which paints a box's cells its color and its face. The paint dispatch writes each cell's
 emission beside its color, and a third dispatch over the triangles lends the light of an emitter
 thinner than a cell to the cells within a cell of it, times the share of a cell's face it covers,
 which the resolve writes into an image of light laid out as the field, as 3DEngine's do. After the
@@ -218,21 +218,21 @@ reads from its projection.
 
 The cascades of probes are the second (`WorldProbes`, `bcs_gi.slang` and the kernels
 `gi_trace.slang`, `gi_merge.slang` and `gi_ambient.slang`), 3DEngine's world probes with their mends
-to date: probes moved off a surface and passed over inside a mesh, rays from the middle of each
-quarter of a texel of 8 a side, the merge's parallax toward where the probe above met a surface, the
-light past the first bounce read from the probes a hit sees where the probes lay the frame before,
-and each probe's share of that light following its own light where that fell or rose by much. A
-cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the far
-cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun, the
-camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,
+to date. A probe is moved off a surface and passed over inside a mesh, a texel of 8 a side sends a
+ray from the middle of each of its quarters, the merge leans toward where the probe above met a
+surface, the light past the first bounce is read from the probes a hit sees where the probes lay the
+frame before, and each probe's share of that light follows its own light where that fell or rose by
+much. A cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the
+far cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun,
+the camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,
 each given as the light a white surface facing it returns, a directional light's illuminance over pi
 and a lamp's luminous power over four pi over pi again, times the camera's exposure, so the probes
 hold the light in the units of the picture they are added to and a bright sun stays inside a half
 float. A spot light falls off from its inner cone to its outer as Bevy's lighting has it. Three
-things differ from 3DEngine's code for the bindings: a probe's held light and the partial sums are
-storage buffers, since an image of half floats is not read and written in one WGSL dispatch; the
+things differ from 3DEngine's code for the bindings. A probe's held light and the partial sums are
+storage buffers, since an image of half floats is not read and written in one WGSL dispatch. The
 images the kernels only write are Slang's `WTexture3D`, which Slang refuses to declare read-write in
-half floats; and the trace takes the sum of the 27 probes around one in every workgroup and keeps it
+half floats. And the trace takes the sum of the 27 probes around one in every workgroup and keeps it
 where the probe's share asks for it, since a barrier is reached by every invocation alike. On the
 RTX 4070 Laptop GPU in the feature test's Cornell box, a cascade's trace takes 0.33 to 0.36 ms, its
 merge 0.04 to 0.10 and its gather 0.03, each the mean of a frame's dispatches of the program as

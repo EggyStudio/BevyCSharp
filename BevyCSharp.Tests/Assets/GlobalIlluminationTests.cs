@@ -6,10 +6,12 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Global illumination's world probes, traced through the scene's distance field: the qualities'
-/// cascades and the far cascade's cells, the colors the field paints a ray's hit by, the light a
-/// probe gathers on each face read back from the GPU, a probe inside a mesh passed over, and a far
-/// cascade holding a wall the counted ones do not reach.
+/// Global illumination's world probes, traced through the scene's distance field, and the pass that
+/// adds their light to the picture, held to the qualities' cascades and the far cascade's cells, the
+/// colors the field paints a ray's hit by, the light a probe gathers on each face read back from the
+/// GPU, a probe inside a mesh passed over, a far cascade holding a wall the counted ones do not
+/// reach, the light taken back and given again on the picture, the emitters and the glow lights,
+/// the environment map's sky and a glossy surface's reflection.
 /// </summary>
 [Collection("engine")]
 public sealed class GlobalIlluminationTests

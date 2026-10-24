@@ -3,7 +3,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// A 2D mesh's material, Bevy's <c>ColorMaterial</c>: a color, an image the color multiplies, how
+/// A 2D mesh's material, Bevy's <c>ColorMaterial</c>, a color, an image the color multiplies, how
 /// alpha is read, and where on the mesh the image falls.
 /// </summary>
 /// <remarks>

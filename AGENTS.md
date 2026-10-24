@@ -1,6 +1,6 @@
 # BevyCSharp
 
-A C# binding over the Rust Bevy engine: a managed library (`BevyCSharp`), a source generator that
+A C# binding over the Rust Bevy engine, made of a managed library (`BevyCSharp`), a source generator that
 turns `[Behavior]` structs into systems, an ImGui editor that is itself an ordinary BevyCSharp app,
 and a native bridge (`native/bevy_csharp`, a Rust cdylib) that the managed side calls through a C
 ABI.
@@ -35,7 +35,7 @@ dotnet build                      # this moves the .so where apps will find it
 
 `./bcs build --editor` does both in that order, and [.github/BUILDING.md](.github/BUILDING.md) has
 the rest. `--meshlet` and `--solari` add Bevy's meshlets and ray-traced lighting to any profile; without
-them their tests are skipped, and a run's summary counts them. The three profiles are cumulative: `headless` < `render` (window, audio) < `editor`
+them their tests are skipped, and a run's summary counts them. Each profile holds the one before it, `headless`, then `render` (window, audio), then `editor`
 (asset watcher, picking). `App.HasRenderer` and `App.HasEditor`
 report which one is loaded; `Native.ExpectedAbiVersion` must match what the bridge reports, and a
 mismatch means the bridge needs rebuilding.
@@ -74,7 +74,7 @@ Stop any serving session before running the suite.
 | `BevyCSharp/Interop` | `Native` (the `bcs_*` entry points), the loader and the ABI check |
 | `BevyCSharp/Physics` | Rigid bodies over BepuPhysics, simulated on the managed side |
 | `BevyCSharp/Diagnostics` | The console log ring and the `[Command]` catalog |
-| `BevyCSharp/Cli` | The server side of `./bcs`: session file, socket, request queue |
+| `BevyCSharp/Cli` | The server side of `./bcs`, its session file, socket and request queue |
 | `BevyCSharp.Generator` | Behavior, schema and command generators |
 | `BevyCSharp.CodeFixes` | The fixes an editor offers for the generators' diagnostics, carried beside them in the package |
 | `BevyCSharp.Editor/Framework` | The editor's panels, history and theming |

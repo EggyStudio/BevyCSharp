@@ -9,7 +9,7 @@ namespace Bevy;
 /// as scan lines, a palette or dithering.
 /// </param>
 /// <param name="At">
-/// A point of the frame to run at instead, which is <see cref="FramePoint.AfterOpaque"/>: on the lit
+/// A point of the frame to run at instead, which is <see cref="FramePoint.AfterOpaque"/>, on the lit
 /// opaque geometry, before transparent geometry is drawn over it, which is where something about
 /// the lit surfaces goes (a screen-space reflection or GI composite, a fog glass should not be
 /// under). It needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), since a

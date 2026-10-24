@@ -183,7 +183,7 @@ pub unsafe extern "C" fn bcs_component_id_of(name: *const core::ffi::c_char) -> 
 ///
 /// A mirror the description holds the layout of is checked field by field against
 /// `bcs_reflect_layout`. One a game writes for itself, with no such layout, is checked by its size
-/// here, which catches the commonest way such a mirror goes wrong: `Quat` is SIMD-backed and
+/// here, which catches the commonest way such a mirror goes wrong. `Quat` is SIMD-backed and
 /// sixteen-byte aligned on most targets, which pads a struct holding one past the size its fields
 /// suggest, and reading a mirror of the wrong size returns plausible nonsense rather than failing.
 ///

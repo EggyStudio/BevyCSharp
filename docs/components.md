@@ -25,10 +25,10 @@ That is Bevy's real `Transform`, not a copy kept in sync, so propagation and ren
 write. A struct becomes one of these by implementing `INativeComponent`, which names the engine
 type. `ComponentType<T>` then resolves that name instead of registering a fresh component, and
 everything downstream already works in ids, so queries, `[With]` filters, change detection and
-`ctx.Cmd` reach it with no separate API: there is one `Add`, and it does not care which kind of
-component it was handed. `NativeComponents` exposes the raw ids for the handful of entry points
-that take one rather than a type (`HasById`, `CountById`, `RemoveById`, `ChangedById`, and the
-`Chunks` overload that iterates a named component).
+`ctx.Cmd` reach it with no separate API. There is one `Add`, which takes either kind of component it
+is handed. `NativeComponents` exposes the raw ids for the handful of entry points that take one
+rather than a type (`HasById`, `CountById`, `RemoveById`, `ChangedById`, and the `Chunks` overload
+that iterates a named component).
 
 ```csharp
 public struct Transform : INativeComponent

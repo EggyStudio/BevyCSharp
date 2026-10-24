@@ -53,9 +53,9 @@ pub struct BcsGiLights {
     pub lights: [BcsGiLight; MOST_LIGHTS],
 }
 
-/// Writes the lights the probes are lit by to `out`: the sun, a directional light that casts
-/// shadows before one that does not; the camera the field lies around's ambient light, or the
-/// world's where the camera has none; and the point and spot lights nearest that camera.
+/// Writes the lights the probes are lit by to `out`, the sun, a directional light that casts
+/// shadows before one that does not, the ambient light of the camera the field lies around, or
+/// the world's where the camera has none, and the point and spot lights nearest that camera.
 ///
 /// # Safety
 /// `out` must be writable for a [`BcsGiLights`].

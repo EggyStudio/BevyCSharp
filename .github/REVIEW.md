@@ -10,18 +10,23 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6e69cfa1`, item 51's environment map sky, the second part of its third commit,
-pushed at 13:21 on 2026-10-24, its run green on the three systems at 13:38. A dispatch on the
-camera, gi_sky.slang, copies the map onto a 64-texel octahedron times the exposure at a quarter
-roughness's blur, and the last cascade's misses read it beside the ambient light a frame behind; the
-pass takes back Bevy's diffuse environment map light and adds the map's light from above to the sky
-over a ground, the reference's misses taking the map along their way; the engine's dispatches on a
-camera are kept by owner. Under the tests' cubemap filtered through SetImageLighting an open floor
-reads 70, 71, 116 with global illumination on against 67, 67, 115 off, and a closed room's floor 4,
-3, 13 against 67, 67, 115. 1,773 passed, 3 skipped, NormTests 18, no bridge change.
+Reviewed up to `c230300b`, item 51's glossy term, the last part of its third commit, pushed at 14:21
+on 2026-10-24, its run green on the three systems at 14:36; item 51 done. The pass takes back Bevy's
+reflection of its ambient term and environment map and gives it again, below roughness 0.5 tracing
+through the depth in 3DEngine's steps and reaches and then the field, a hit on the picture taking
+the frame before's picture (the engine image gi_picture kept with history and copied before
+tonemapping) and a hit past it shadeHit, fading from 0.25 to 0.5, Bevy's reflection scaled by skyAt,
+the engine's camera images kept by owner. Departures, no check against the frame before's depth that
+the surface was shown, and no mip blur of the frame before's picture. A mirror floor shows a sunlit
+red wall at 244, 115, 107 with global illumination on against 2, 2, 2 off, and a closed room's rough
+metal floor reflects 0, 0, 14 against 78, 58, 119; the bounce rooms unchanged in every view, the
+floor 13.2 percent over; the room test waits three frames of ready pipelines before reading, since
+the larger pass's pipeline came after the probes' 90 frames in some runs. Costs at 1280 by 720 with
+one glow light, the pass 1.3 ms with every surface rough and 1.5 with a mirror floor. 1,775 passed,
+3 skipped, NormTests 18 after an N 4.7 hit in the coder's summary was reworded, no bridge change.
 
-Before it, `ccc0f000` came, item 51's emitters, pushed at 12:41 on 2026-10-24, its run green on the
-three systems.
+Before it, `6e69cfa1` came, item 51's environment map sky, pushed at 13:21 on 2026-10-24, its run
+green on the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -220,37 +225,6 @@ from [SHARED.md](SHARED.md).
 
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
-
-51. **Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's surfaces through an
-    additive pass (Decision 51).** The world's probes in cascades over the field as 3DEngine traces
-    them, each cascade's rays marching the field, merged upward, the last cascade's rays reaching
-    the field's edge and the sky, the sun's and the lamps' light gathered at the hits with the
-    materials' colors from the meshes' vertex colors and base colors as 3DEngine's are; the light
-    read per pixel in the bridge's pass after the opaque geometry, added as indirect diffuse times
-    the surface's base color and occlusion from the deferred prepass, since Bevy's lighting takes no
-    indirect input of its own, with `Render.SetGlobalIllumination(quality)` at off, low, medium and
-    high as 3DEngine's levels; the glossy term and the emissive blocks' light as 3DEngine's phase
-    two has them; the path-traced reference of a view, `gi.reference` and `gi.compare`, giving each
-    region's distance, which the ledger's open question on this engine's reference answers; the
-    bounce rooms as a test scene with their bounds, the rule that no view's distance to its
-    reference widens taken from 3DEngine as the mends' rule. The tests are the red wall tinting a
-    white block's side, a lit room's floor within the bound of its reference, and the quality
-    levels' costs read on the Cornell box. Three commits, the probes and their tracing, the pass and
-    the reference, then the glossy term and the emitters. It waited while the method was still
-    moving in 3DEngine, its items 71, 72 and 74 open, and the owner said shortly before 07:28 on
-    2026-10-21 that if it is not yet ready BevyCSharp waits, so this item starts only once those are
-    mended and the voxel game's captures say the light holds, the port carrying the mends in.
-    3DEngine's items 71, 72 and 74 are mended and on its main on 2026-10-24 and the voxel game's
-    pictures retaken that day, so the wait ends by the reviewer's reading of the owner's condition,
-    the owner's to overrule; the item starts at 07:2x with its first commit, the probes and their
-    tracing. The first commit at `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the
-    head. The pass at `07863068`, pushed at 09:24, the sky's share departure in the head; the
-    reference in a commit of its own next. The reference at `8cb6cbaa`, pushed at 10:22; the third
-    commit takes 3DEngine's present glossy term, the reflection traced through the depth and the
-    field under a roughness of 0.5 and the sky's specular scaled by the share of sky the probes see
-    along the mirror direction, and the emitters. The emitters at `ccc0f000`, pushed at 12:41, the
-    departures in the head, the glowing blocks' and the strip's views narrowed; the environment
-    map's sky at `6e69cfa1`, pushed at 13:21; the glossy term (b) follows in a commit of its own.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -1482,3 +1456,12 @@ The pass takes 1.5 ms with the mirror floor and 1.3 with every surface rough at 
 bounce rooms read as before, their surfaces at a roughness of 0.5. The rooms' test waits three
 frames of ready pipelines before it reads the picture, since the larger pass's pipeline came after
 the probes' ninety frames in some runs and those read no pass at all.
+
+Item 61's colons, in the commit carrying this line. Each hit of STYLE.md's two checks was read, the
+labels, the named arguments, the quoted strings and the component labels of the shaders' comments
+left, and 36 joints recast, in RENDERING.md, docs/components.md, AGENTS.md's three on the owner's
+word typed in this session, the cheat sheet's three through the summaries it is written from, and
+the comments of the code, the scripts holding none. ASKS.md's two hits are left to the reviewing
+session, since AGENTS.md has this session write nothing there. STYLE.md's grep misses a colon after
+a closing tag, `</c>:` or `/>:`, which twenty XML summaries held, and `[a-z)\`>]` in its class finds
+them.

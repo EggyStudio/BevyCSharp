@@ -4,7 +4,7 @@ public static partial class Gizmos
 {
     /// <summary>
     /// Draws a plane, flat, for a 2D camera, as Bevy's <c>primitive_2d</c> draws its
-    /// <c>Plane2d</c>: a line through <paramref name="point"/> and an arrow for the side it faces.
+    /// <c>Plane2d</c>, a line through <paramref name="point"/> and an arrow for the side it faces.
     /// </summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>
     /// <param name="point">A point the plane passes through, on the XY plane.</param>
@@ -29,7 +29,7 @@ public static partial class Gizmos
 
     /// <summary>
     /// Draws a line with no ends, flat, for a 2D camera, as Bevy's <c>primitive_2d</c> draws its
-    /// <c>Line2d</c>: a line far out both ways through <paramref name="point"/> and an arrow along
+    /// <c>Line2d</c>, a line far out both ways through <paramref name="point"/> and an arrow along
     /// it.
     /// </summary>
     /// <inheritdoc cref="Rect2d" path="/remarks"/>

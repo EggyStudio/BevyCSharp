@@ -9,7 +9,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A model file is many assets, and a path alone names none of them. Bevy names each by a label
-/// after the path's <c>#</c>: every primitive of every mesh (<c>Mesh0/Primitive0</c>), since the
+/// after the path's <c>#</c>, every primitive of every mesh (<c>Mesh0/Primitive0</c>), since the
 /// renderer draws primitives, every material translated into one the renderer draws with
 /// (<c>Material0/std</c>), and every texture held inside the file (<c>Texture0</c>). This lists
 /// those labels with the names the file gives, so a tool can offer a part of a model rather than

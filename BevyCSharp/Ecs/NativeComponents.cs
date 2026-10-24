@@ -27,12 +27,12 @@ public static class NativeComponents
     private static readonly Dictionary<string, int> Cache = [];
     private static int _generation = -1;
 
-    /// <summary>Bevy's <c>Transform</c>: local position, rotation and scale.</summary>
+    /// <summary>Bevy's <c>Transform</c>, its local position, rotation and scale.</summary>
     /// <remarks>The id behind <see cref="Bevy.Transform"/>, which the generic API resolves for you.</remarks>
     public static int Transform => ComponentType<Bevy.Transform>.Id;
 
     /// <summary>
-    /// Bevy's <c>GlobalTransform</c>: the world-space result of propagation.
+    /// Bevy's <c>GlobalTransform</c>, the world-space result of propagation.
     /// </summary>
     /// <remarks>
     /// The id behind <see cref="Bevy.GlobalTransform"/>. Read it and write
@@ -50,39 +50,39 @@ public static class NativeComponents
     /// <summary>Bevy's <c>Children</c> list, for filtering on "has children".</summary>
     public static int Children => ComponentType<Bevy.Children>.Id;
 
-    /// <summary>Bevy's <c>Visibility</c>: whether an entity asks to be drawn.</summary>
+    /// <summary>Bevy's <c>Visibility</c>, whether an entity asks to be drawn.</summary>
     /// <remarks>
     /// The id behind <see cref="Bevy.Visibility"/>. Every build has the component, a headless
     /// one through Bevy's world serialization, which brings it, and a render build draws by it.
     /// </remarks>
     public static int Visibility => ComponentType<Bevy.Visibility>.Id;
 
-    /// <summary>Bevy's <c>InheritedVisibility</c>: the propagated answer.</summary>
+    /// <summary>Bevy's <c>InheritedVisibility</c>, the propagated answer.</summary>
     /// <remarks>
     /// The id behind <see cref="Bevy.InheritedVisibility"/>. Every build has the component, a
     /// headless one through Bevy's world serialization, which brings it.
     /// </remarks>
     public static int InheritedVisibility => ComponentType<Bevy.InheritedVisibility>.Id;
 
-    /// <summary>Bevy's <c>ViewVisibility</c>: whether a camera actually saw the entity.</summary>
+    /// <summary>Bevy's <c>ViewVisibility</c>, whether a camera saw the entity.</summary>
     /// <remarks>
     /// The id behind <see cref="Bevy.ViewVisibility"/>. Every build has the component, a headless one
     /// through Bevy's world serialization, which brings it.
     /// </remarks>
     public static int ViewVisibility => ComponentType<Bevy.ViewVisibility>.Id;
 
-    /// <summary>Bevy's <c>WorldInstance</c>: present once a scene has been spawned.</summary>
+    /// <summary>Bevy's <c>WorldInstance</c>, present once a scene has been spawned.</summary>
     /// <remarks>The id behind <see cref="Bevy.WorldInstance"/>.</remarks>
     public static int WorldInstance => ComponentType<Bevy.WorldInstance>.Id;
 
-    /// <summary>Bevy's <c>Atmosphere</c>: the planet whose air a sky is scattered through.</summary>
+    /// <summary>Bevy's <c>Atmosphere</c>, the planet whose air a sky is scattered through.</summary>
     /// <remarks>
     /// Render builds only. The id behind <see cref="Bevy.Atmosphere"/>, which is how the planet
     /// <see cref="Render.SetAtmosphere"/> keeps is found or counted.
     /// </remarks>
     public static int Atmosphere => ComponentType<Bevy.Atmosphere>.Id;
 
-    /// <summary>Bevy's <c>Interaction</c>: how the pointer stands on a UI node.</summary>
+    /// <summary>Bevy's <c>Interaction</c>, how the pointer stands on a UI node.</summary>
     /// <remarks>
     /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which a <c>[With]</c>
     /// filter needs to find the nodes that react. Its value comes from

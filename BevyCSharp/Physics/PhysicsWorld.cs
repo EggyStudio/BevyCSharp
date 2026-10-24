@@ -386,7 +386,7 @@ public sealed partial class PhysicsWorld : IDisposable
     }
 
     /// <summary>
-    /// Advances the simulation by <paramref name="seconds"/>: kinematic bodies follow their
+    /// Advances the simulation by <paramref name="seconds"/>. Kinematic bodies follow their
     /// entities, everything is stepped, and dynamic bodies are written back.
     /// </summary>
     /// <remarks>

@@ -92,7 +92,7 @@ internal static class Recorder
     }
 
     /// <summary>
-    /// How the recording stands, as <c>record.status</c> says it: recording or finishing with the
+    /// How the recording stands, as <c>record.status</c> says it, recording or finishing with the
     /// pictures taken, writing its file, or, once none is, what the last one wrote or why it wrote
     /// nothing.
     /// </summary>
