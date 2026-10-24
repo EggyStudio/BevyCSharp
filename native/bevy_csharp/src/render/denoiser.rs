@@ -7,8 +7,9 @@
 //! after Solari has lit it and before Bevy's post-processing:
 //!
 //! 1. Demodulation. The deferred G-buffer's emissive, times the exposure as Solari applies it, is
-//!    taken off, and the rest divided by the base color, above [`ALBEDO_FLOOR`], so the filter
-//!    blurs light rather than the texture the light falls on.
+//!    taken off, and the rest divided by the share of the light the surface sends back, its diffuse
+//!    color and its specular reflection at the angle it is seen at, above [`ALBEDO_FLOOR`], so the
+//!    filter blurs light rather than the texture the light falls on.
 //! 2. Temporal accumulation. The light is reprojected by Bevy's motion vectors onto the previous
 //!    frame's history, four texels weighed bilinearly, each kept where the previous depth, which
 //!    Solari double-buffers, and the previous normal agree with this frame's ([`agrees`]), and the
@@ -20,7 +21,7 @@
 //!    weighted by its depth, normal and luminance differences ([`weight`]), the luminance's against
 //!    the root of the variance blurred over three by three, the variance filtered along with the
 //!    squares of the weights, and the first pass's light kept as the next frame's history.
-//! 5. Remodulation, the filtered light times the base color, plus the emissive, into the view
+//! 5. Remodulation, the filtered light times the same share, plus the emissive, into the view
 //!    target.
 //!
 //! The stage order and the defaults are SVGF's. The shader is `denoiser.wgsl`, with no imports so a
@@ -72,8 +73,8 @@ impl Default for DenoiserSettings {
     }
 }
 
-/// The least base color the light is divided by and multiplied back by, so a black surface keeps
-/// its light rather than dividing by nothing.
+/// The least share the light is divided by and multiplied back by, so a black surface keeps its
+/// light rather than dividing by nothing.
 pub const ALBEDO_FLOOR: f32 = 0.01;
 
 /// How far a previous surface's plane may lie from the current point, as a fraction of its

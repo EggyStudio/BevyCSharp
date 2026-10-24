@@ -980,6 +980,104 @@ a batch.
     pass in the render profile, so the window opens on the package. Done at `09fc95dd` on
     2026-10-21, as the head says, the booleans' line and the window's focus with it.
 
+43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The owner's later
+    wave: selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
+    selected edges by a width with a count of segments, the profile round; loop cut, a cut around a
+    ring of faces at a fraction; subdivide the selected faces by a count; bridge two selected face
+    loops of the same count; fill a hole of selected edges with one face; dissolve the selected
+    faces into one, or the selected edges, keeping the shape; knife, a cut of the selected faces by
+    a plane; mirror of the selection across an axis through a pivot, merging on the plane; spin of
+    the selected edges about an axis by an angle in steps; and smooth, the vertices moved toward
+    their neighbors' mean by a factor. Each in the recipe and the commands, in the window with its
+    measures. Tests: each operation's counts on a box, a bevel of a box's twelve edges with two
+    segments watertight and the volume between the box's and its inscribed one, a mirror of a half
+    giving a whole with no doubled vertices; a capture of a beveled, inset and loop-cut box. Two
+    commits, the bevel, the loop cut and the subdivision, then the rest. Taken at 19:35 on
+    2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 49 of the local
+    coder; the captures and the device tests fall to the local coder when it cherry-picks the
+    branch. First commit `01b89b59` on the branch, read at 20:00 on 2026-10-23: the bevel by a width
+    in one to 64 segments across a round profile, the loop cut round a ring of four-sided faces, the
+    subdivision, and `select edge a b` since no edge could be selected alone, each a recipe line, a
+    model command and a button of the window's new Edges group; departures taken, a bevel skipping
+    open edges and a hole's rim and refused when none is left, a loop cut refusing edges on two
+    rings, a face of more than four corners subdividing into a fan; a cube with two segments 56
+    vertices and 54 faces closed, a loop cut 12 and 10, a subdivision 26 and 24 then 98 and 96; the
+    strict build clean, the headless suite 1,095 passed and 574 skipped. The message is COMMITS.md's
+    form; the author is the cloud environment's identity, reset at the cherry-pick; the capture
+    falls to the local coder. The second commit, the rest of the operations, follows. The session
+    notes Bevy 0.20 needs rustc 1.97.1, 1.97.0 refusing to build the bridge. Second commit
+    `c0e6c111` on the branch, read at 20:10: bridge, fill, dissolve, knife, mirror, spin and smooth
+    in the recipe, the commands and the window's Edges group; departures taken, a bridge of two
+    regions each with one rim of the same count and refused otherwise, dissolved edges taking the
+    straight corners with them so a dissolved loop gives the box back, the knife cutting a face
+    crossed twice and only marking a concave face crossed more, a mirror merging within a millimeter
+    and dropping faces in the plane, a spin's faces taking the profile's facing; two boxes bridged
+    16 vertices and 14 faces closed, a half box mirrored 12 and 10, a square spun a whole turn in 16
+    steps 34 and 48 closed; the headless suite 1,108 passed and 574 skipped, the strict build clean.
+    The item's code is whole on the branch; the capture falls to the local coder at the cherry-pick.
+    On main at `ae596af8` and `4f80c464`, pushed at 20:14; done but for the capture, which the local
+    coder's next commit carries. Capture done at `cd05d9a2`; item 43 done.
+
+44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The owner
+    asked for Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the
+    build over the base, which stays editable: mirror across axes, array by a count and an offset or
+    along a curve of positions, bevel as item 43's over every edge or the edges past an angle,
+    subdivision by Catmull-Clark to a level, solidify by a thickness inward or outward, boolean with
+    another edit mesh placed by a transform, and triangulate; each added, reordered, removed and
+    applied, applying baking its result into the base and dropping it; in the recipe as `modifier`
+    lines and in the commands and the window, the build's time for a stack read in a test against a
+    budget. Tests: a mirror on a half box giving a box's counts, an array of three, a subdivision of
+    a box to level one giving 26 vertices and level two 98, a solidified plane watertight, and a
+    capture of a subdivided and beveled shape. One commit. Taken at 19:35 on 2026-10-23 by the
+    owner's cloud session on its branch (Decision 53), after item 43; the captures and the device
+    tests fall to the local coder when it cherry-picks the branch. Commit `1f79ec4a` on the cloud
+    session's branch, read at 20:22: the stack of mirror, array, bevel, Catmull-Clark subdivision to
+    level 6, solidify, boolean and triangulate, each added, moved, removed and applied by a recipe
+    line, the model.modifier command and the window's Modifiers group, the build, materials,
+    collider and drawn parts using the built mesh; departures taken, a mirrored half box tested as a
+    whole box with a middle loop, a boolean placed by at alone, an array along points translating
+    without turning, a modifier built once as it is added so a missing file is refused then, apply
+    running on the base as Blender does; the stack of mirror, array of 4, bevel and subdivision 2
+    making 5,760 faces in 13 ms warm against a budget of 200; the budget test's Stopwatch on the N
+    3.3 list as a cost rather than motion, accepted; the headless suite 1,119 passed and 574
+    skipped. The capture of a subdivided and beveled shape falls to the local coder at the
+    cherry-pick. On main as `33edc8a3` at 20:28 on 2026-10-23, cherry-picked plain with the owner's
+    identity before the branch's deletion, the capture with it in the local coder's batch of item
+    50. Pushed at 20:46; the capture follows in the local coder's batch. Capture done at `cd05d9a2`;
+    item 44 done.
+
+45. **What is modeled is exported for Blender and imported from it (Decision 46).** The built mesh
+    and its materials written as a glTF 2.0 file, a JSON with its buffer beside or embedded,
+    positions, normals, texture coordinates, indices, one primitive a material slot with the slot's
+    color and its texture referenced by path, by a writer of the engine's own in managed code, so a
+    level blocked out in the game is opened and finished in Blender; and a model file read into an
+    edit mesh through the engine's glTF reader, `Read`, triangles merged back into faces where
+    coplanar and sharing edges, materials into slots, so a model from Blender is cut and shaped in
+    the game. `model.export` and `model.import` beside the save and the load. Tests: a box exported
+    and read back with the engine's own reader having the same counts, a file validated against the
+    glTF schema's required fields, and a known glTF's import counted. One commit. Taken at 19:35 on
+    2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 44; the captures
+    and the device tests fall to the local coder when it cherry-picks the branch. Commit `4659b331`
+    on the cloud session's branch `modeling-operations`, read at 20:43 on 2026-10-23, the owner's
+    identity as author and committer: `EditMesh.Export(path, embedded)` writing glTF 2.0 with a
+    writer of the engine's own, a primitive and a material a slot with linear factors, emissive
+    strength past 1 by its extension and textures by relative URI, and `EditMesh.Import(path)`
+    reading .gltf and .glb through a new managed `GltfReader` along the scene's node transforms,
+    welding corners within 0.01 mm and joining coplanar triangles of one slot with matching texture
+    coordinates into faces, materials as slots and smooth normals as smoothed faces, the recipe
+    line, the two commands and the window's import; departures taken, faces that are not flat coming
+    back as triangles, a prototype slot written as its color, embedded images not taken into a slot,
+    the import throwing as Load does with no BadFileTests row; a box out and back 8 vertices, 12
+    edges and 6 faces closed at volume 8, the schema's required fields checked, Bevy's own loader
+    reading the exported box as 24 corners and 36 indices on a render bridge; the headless suite
+    1,130 passed and 579 skipped, the render suite reported when it ends. The branch's first commit
+    `ba8a5324` repeats item 44 under the owner's identity and is skipped at the cherry-pick,
+    `33edc8a3` standing on main. On main as `ba8111fb`, pushed at 20:46. The cloud's render suite on
+    lavapipe gave 1,542 passed, 163 skipped and 4 failed, the four the container's own, three Slang
+    shaders uncompiled without slangc and a readback of red as 0 on llvmpipe, every modeling, glTF
+    and command test passing; the local build run of `135e43b5` is the proof. The run of `a2c8348e`,
+    carrying it, green on the three systems; item 45 done.
+
 46. **An animated capture of a run, frames taken at an interval and written as one file, and one
     made from captures on disk (Decision 48).** The owner asked at about 00:29 on 2026-10-21 for
     captures made into animations from several pictures with a time between them, a second or 250
@@ -1038,6 +1136,92 @@ a batch.
     commit, small, after item 41's first commit. Done at `5f051299` on 2026-10-21, as the head says,
     the device's reporting measured idle and under load.
 
+49. **F1 hides the interface, F3 shows a debug overlay like the newest Minecraft's with sections a
+    program adds, and Shift+F3 the profiler with it (Decision 50).** The owner asked shortly before
+    07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine feature, F2 the
+    screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts logically with
+    modules a game adds, world generation among them, showing the system, the camera and the
+    renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
+    BevyCSharp and 3DEngine, F1 hiding the interface and ImGui but not the F3 overlay so everything
+    hides but the overlay over the renderer, and Shift+F3 showing the frame debugger too; and
+    answered the reviewer's questions shortly before 07:06: the interface hidden by a scope, F3 the
+    overlay's on its release alone with any chord left to the program, the look Minecraft's with no
+    header, window styling or border, text on a transparent backing, and the order as the reviewer
+    sees fit. The keys, engine-wide by default: F1 hides what the program draws inside the scope,
+    its HUD and any ImGui window submitted inside it, and nothing outside it, so a pause screen, a
+    menu or an inventory drawn outside the scope stays whatever F1 says, as Minecraft hides its HUD
+    and never its screens, the engine's overlay staying, the world drawing on; F3 on its release
+    with no other key pressed during its hold toggles the overlay, so a program's own F3 chords
+    stand and the overlay never opens on one; Shift+F3 toggles the overlay with the profiler's pass
+    timings under it. The overlay is the engine's own text and lines, never an ImGui window, in
+    Minecraft's look, two columns of lines in the engine's font on a dark half-clear backing a line,
+    no header, no border, no window: the left column the engine's version and build, the fps and the
+    frametime with a strip of the last 240 frames' times under it as the RivaTuner overlay draws it,
+    the current, the average and the one percent low beside it and the GPU time as a second line,
+    the camera's position, facing and field of view, the entities and the world's counts, then the
+    program's sections; the right column the system, OS, CPU and its cores, memory in use and the
+    managed heap, GPU, driver and its memory in use, the display mode, then the renderer, passes,
+    draw calls, triangles, lights, shadows, global illumination's state and the frame's GPU time,
+    the frame's times and the passes' GPU times from Bevy's diagnostics. The calls: `Ui.BeginHidden`
+    and `Ui.EndHidden` around a program's own interface nodes and ImGui drawing of its interface,
+    hidden while asked, `Ui.Hidden`, `Ui.HiddenKey` and `Debug.OverlayKey` moving the keys or
+    turning them off, and `Debug.AddOverlaySection(string name, Func<IEnumerable<string>> lines)`
+    with a remove, the sections drawn in the left column under the engine's own in the order added;
+    the diagnostics overlay folded into it where one overlaps. The same keys, layout, words and
+    registration in both engines. The guides' section on the debug keys, the cheat sheet lines
+    through the script, the surface listing and the upgrading entry; the feature test adding a
+    section and the voxel game its own when the package comes. Tests: F1 dropping the scope's draws
+    and the ImGui windows and keeping the overlay, read from the frame's pixels on the device; F3's
+    release alone toggling and a chord not; a section's lines in the overlay's text; the graph's
+    strip holding the last 240 times. Two commits, F1 and the overlay's columns, then the graph, the
+    profiler and the sections' registration. After item 42, before 43. The scope's shape, settled
+    with BevyCSharp's coder at 10:05 for both engines: ImGui's public API cannot leave out windows
+    begun between two calls, alpha zero leaves windows that take the pointer, and a second context
+    doubles the runtime, so the opening call answers whether the scope draws this frame, false while
+    hidden, and a program writes its interface inside an `if` on it as it writes `if
+    (ImGui.Begin(...))`; what the engine itself draws or holds inside the scope is dropped or hidden
+    by the engine whatever the program does, its 2D draws here and its interface nodes in
+    BevyCSharp, and a program's ImGui windows are left to the `if`, so a hidden interface costs
+    nothing. So here `bool Ui.BeginHidden()` and `Ui.EndHidden()`, the interface nodes spawned
+    inside recorded and their visibility set hidden and given back while `Ui.Hidden` holds,
+    `Ui.Hidden` settable and `Ui.HiddenKey` F1 or null; the tests reading the frame's pixels with a
+    node and an ImGui window inside the scope and a second window outside, F1 pressed and pressed
+    again. The feature test: the engine's overlay replaces its Overlay.cs in the first commit and
+    its memory lines become its section in the second; its admin panel, a screen outside the scope,
+    moves from F1 to F4 with its help line, its README's key list and the drive, since a drive
+    opening it with F1 would hide the HUD instead; its HUD lines, the help text and the clock, go
+    inside the scope. First half done at `42abf357` on 2026-10-23, the scope and the overlay's
+    columns, as the head says; the strip, the profiler and the sections follow. Second half done at
+    `e1b08124` on 2026-10-23, the departures in the head; item 49 done.
+
+50. **The scene's distance field, 3DEngine's first phase of its global illumination, through the
+    bridge (Decision 51).** The owner wrote to the coder shortly before 07:15 on 2026-10-21 that
+    3DEngine's radiance cascades were always meant for this engine too, built there first, and can
+    be done here. The three phases come as 3DEngine's did, each read from its code and RENDERING.md
+    as the model and its Slang kernels taken through the bridge's compute chain, plain Slang the
+    bridge compiles, changed only where the bridge's bindings ask. First the scene's distance field:
+    the meshes the renderer draws, pooled by their triangles as 3DEngine pools them, splatted into a
+    cascaded distance field around the camera, cascades from one to eight with the finest's cell a
+    given size, rebuilt under a budget of cascades a frame, moving meshes stamped as their boxes,
+    with `Render.SetSceneField(cascades, cellSize, budget)` and the field's state in the `gi.state`
+    command and the debug overlay's renderer section; a window drawing the field's slices as
+    3DEngine's bounce window does, through ImGui; the contact shadows of the sun through the field
+    where the shadow map does not reach, as a setting. Tests on the device: a box's distance read at
+    known points, a tunnel one cell wide clear in its middle, a moving mesh's stamp following it,
+    and the budget keeping a frame's builds to the cascades asked, with the feature test's gallery
+    holding the field's view. Two commits, the field and its builds, then the contact shadows and
+    the window. Placed after items 43 to 45, since the field has stood stable in 3DEngine for days.
+    First commit done at `cc4245da` on 2026-10-23, the field and its builds, pushed at 21:23; the
+    view, the slices window and the contact shadows follow. Settled at 21:24 for the second commit:
+    the contact shadows as a draw after the opaque pass blended Add into the HDR picture, taking
+    away the sun's direct light times the field's occlusion past the shadow map's reach by default
+    and everywhere as a setting, Bevy's directional BRDF ported to Slang from the G-buffer and
+    tested against the map's own darkening on the same pixels within its reach, a bound in levels in
+    the commit, rather than a patch to Bevy's shader or a wait for item 51; the gallery holds the
+    slices window drawn through ImGui, no engine-owned draw list for a view over the camera in this
+    item. Second commit done at `d2e6ef81` on 2026-10-23, pushed at 22:20, the departures in the
+    head; item 50 done.
+
 53. **ImGui's pass moves from the editor profile to the render profile, so a game on the package
     draws ImGui.** Found by item 42 on 2026-10-21 at 07:16: the bridge's ImGui pass, the render pass
     rasterizing ImGui's draw lists, is built under the editor feature alone, the package's bridges
@@ -1051,6 +1235,48 @@ a batch.
     cargo checks and the cross-target checks run. One commit, small, before item 42's commit, so
     Blockout on the package opens its window on Tab. Done at `45526e4b` on 2026-10-21, as the head
     says.
+
+55. **The README's animated capture of Swarm goes.** The owner wrote at 20:22 on 2026-10-23 that the
+    small section at the top of both engines' READMEs showing that they capture GIFs, BevyCSharp's
+    of a game and 3DEngine's of Ore, is not necessary information and is to be removed. The mend:
+    the Swarm picture and the paragraph under the Examples heading saying it was recorded by `./bcs
+    record` go from the README, and `.github/assets/swarm.gif` is deleted since nothing else
+    references it; the showcase picture at the very top and Blockout's picture stay, the tools guide
+    keeps its own words. One commit, small, with the local coder's next batch. Done at `135e43b5` on
+    2026-10-23.
+
+56. **The bridge's Slang modules give their names plainly, as 3DEngine's do, with no `bcs_*::`
+    before them (Decision 56).** The owner asked at 21:31 on 2026-10-23 why a shader here cannot use
+    Slang as in 3DEngine, without the double colon, and said yes to the change. The cause:
+    `bcs_compute`, `bcs_scene`, `bcs_pass`, `bcs_field` and the bridge's other modules wrap their
+    contents in a `public namespace` of the module's name, so every use is qualified,
+    `bufferElement`, `Instance`, `passUv`, where 3DEngine's modules declare their names at the top
+    level and name each helper for what it is, `fieldDistance` rather than `distance`; nothing in
+    Slang or the WGSL it writes asks for the namespaces, and no document records a reason beyond
+    keeping generic names from colliding with a program's own. The mend: the namespaces go, and each
+    helper is named for its module and its work so no plain name collides, `bufferCount`,
+    `bufferElement` and `bufferStore` for the raw buffer's three, `passUv` and its kin for the
+    pass's, the types plain, `Instance`, `Material`, `PoolVertex`, `PoolMesh`, `FieldInfo`, read
+    against 3DEngine's names where the two engines hold the same thing so a shader reads the same in
+    both; the kernels of item 50, the feature test's shaders and every example's shader change with
+    it, the compute and ray tracing guides and docs/shaders.md follow; no upgrading entry, the owner
+    saying at 21:32 that none is needed since nobody uses the engine yet, and this engine having no
+    upgrading page. Tests: the existing shader and compute tests passing with the plain names, and a
+    test that no module declares a namespace. One commit, after item 50's second commit and before
+    item 54's readings, by the local coder since the kernels of item 50 are in its hands. Done at
+    `fda2f62e` on 2026-10-23, the scheme and the second test in the head.
+
+58. **The cheat sheet's headers are 3DEngine's, plain group headings and no sub-heading a type
+    (Decision 58).** The owner wrote at 21:39 on 2026-10-23 that the cheat sheets are to be
+    coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's section headers as
+    3DEngine's, plain words without the code styling. Here each group opens with a `##` heading and
+    a guide link, then a `###` sub-heading in code styling for every type, `BevyApp`, `App`,
+    `Config` and the rest, each with its own block, where 3DEngine's page has the group heading and
+    one block. The mend: the sub-headings go, each group one fenced block with its members in the
+    order the types came, a type's members set apart by a blank line inside the block where that
+    helps a reader, the heading words plain; `CheatsheetTests` holds the form as it holds the lines.
+    One commit, small, with the local coder's next batch. Done at `66e2b067` on 2026-10-23, pushed
+    at 23:09 under `fda2f62e`, each type's methods under a comment naming it inside the block.
 
 ## Verdicts settled
 
@@ -1330,3 +1556,14 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     Mended at `722cb062`, the floor's rule, the infos read as the census's own; settled on the build
     run 39554837971 of `45526e4b`, read at 08:42 on 2026-10-21, the macOS suite green with 1,167
     passed in 5 minutes and the two other systems green.
+
+44. **The Linux suite of the push of `fda2f62e` fails the examples table's check, EXAMPLES.md out of
+    date.** On the build run 40024690045 on 2026-10-23 the Linux job stopped at
+    `build/examples-table.py --check` after six minutes, saying `.github/EXAMPLES.md` is out of date
+    and to run the script, while Windows and macOS passed their suites; the cause, read by the
+    coder, is the triage, BevyCSharp.Examples/triage.tsv, which item 56's rename passed over as a
+    .tsv file, so it kept bcs::lit, bcs::deferred and three more and the script wrote the table back
+    to the old names. Mended at `a2c8348e` on 2026-10-23, the triage and one comment of the bridge's
+    manifest renamed, EXAMPLES.md standing as committed, pushed at 23:31; settles on the Linux suite
+    of that push. Settled on the Linux suite of the build run 40027448850 of `a2c8348e`, green on
+    the three systems, read at 23:50 on 2026-10-23.

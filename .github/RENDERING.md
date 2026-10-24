@@ -337,8 +337,11 @@ color and its emissive in it, and leaves the noise to a denoiser. The bridge's n
 `render/denoiser`, runs in Bevy's `Core3d` schedule after the main opaque pass, which comes after
 Solari's own system, private to its crate, and before the transparent pass. It dispatches five
 stages of spatiotemporal variance-guided filtering over the view target, as `denoiser.wgsl` holds
-them. The light is demodulated, the G-buffer's emissive taken off and the rest
-divided by the base color. It is accumulated in time, reprojected by the motion vectors onto the
+them. The light is demodulated, the G-buffer's emissive taken off and the rest divided by the
+share the surface sends back, its diffuse color and what its specular reflection returns at the
+angle it is seen at, since a dark surface seen at a slant sends back more by the second, and
+divided by its color alone its light stood above its lighter neighbors' and the filter spread it
+among them. It is accumulated in time, reprojected by the motion vectors onto the
 previous frame's history and kept where the previous depth and G-buffer, which Solari double-buffers
 with ReSTIR on, agree with this frame's, with the first two moments of luminance beside it. The
 luminance's variance comes from the moments, or from a seven by seven neighborhood while the

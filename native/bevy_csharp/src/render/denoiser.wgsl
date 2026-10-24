@@ -102,11 +102,34 @@ fn normal_of(gpixel: vec4<u32>) -> vec3<f32> {
     return normalize(n);
 }
 
-// The base color the light is divided by, kept above the floor so a black surface divides by
-// something, and multiplied back by the same so a pixel the filter leaves alone comes back as it was.
-fn albedo_of(gpixel: vec4<u32>) -> vec3<f32> {
-    let base = pow(unpack4x8unorm(gpixel.r).rgb, vec3<f32>(2.2));
-    return max(base, vec3<f32>(params.albedo_floor));
+// The share of the light reaching a surface that it sends back, which the light is divided by, its
+// diffuse color and what its specular reflection returns at the angle it is seen at, as Bevy's
+// lighting takes it from the polynomial `F_AB` where it reads no table. Solari's light holds both,
+// and a dark surface seen at a slant, the feature test's ground far off, sends back more by its
+// specular than by its color, so divided by its color alone it stood far above the light of the
+// lighter squares beside it, and the filter spread it among them until the picture's checker was
+// further from its mean than a grainy frame (build/denoiser-readings.py). Kept above the floor so
+// a black surface divides by something, and multiplied back by the same so a pixel the filter
+// leaves alone comes back as it was.
+fn albedo_of(gpixel: vec4<u32>, pixel: vec2<i32>, depth: f32) -> vec3<f32> {
+    let color = unpack4x8unorm(gpixel.r);
+    let base = pow(color.rgb, vec3<f32>(2.2));
+    let props = unpack4x8unorm(gpixel.b);
+    let metallic = props.g;
+
+    // The way to the eye, from the surface to the same pixel at the near plane.
+    let surface = world_position(pixel, depth, params.world_from_clip);
+    let toward = normalize(world_position(pixel, 1.0, params.world_from_clip) - surface);
+    let n_dot_v = max(dot(normal_of(gpixel), toward), 1e-4);
+
+    let c0 = vec4<f32>(-1.0, -0.0275, -0.572, 0.022);
+    let c1 = vec4<f32>(1.0, 0.0425, 1.04, -0.04);
+    let r = color.a * c0 + c1;
+    let a004 = min(r.x * r.x, exp2(-9.28 * n_dot_v)) * r.x + r.y;
+    let f_ab = max(vec2<f32>(-1.04, 1.04) * a004 + r.zw, vec2<f32>(0.0));
+
+    let f0 = mix(vec3<f32>(0.16 * props.r * props.r), base, metallic);
+    return max(base * (1.0 - metallic) + f0 * f_ab.x + f_ab.y, vec3<f32>(params.albedo_floor));
 }
 
 // The emissive color, rgb9e5 in the texel's second word, which Solari adds before the exposure.
@@ -179,7 +202,7 @@ fn demodulate(@builtin(global_invocation_id) id: vec3<u32>) {
     }
 
     let light = finite(textureLoad(lit, pixel, 0).rgb) - emissive_of(gpixel) * params.exposure;
-    textureStore(demodulated_out, pixel, vec4<f32>(max(light, vec3<f32>(0.0)) / albedo_of(gpixel), 1.0));
+    textureStore(demodulated_out, pixel, vec4<f32>(max(light, vec3<f32>(0.0)) / albedo_of(gpixel, pixel, depth), 1.0));
 }
 
 // The second stage, the light added to the previous frame's where the motion vectors carry the
@@ -382,6 +405,6 @@ fn remodulate(@builtin(global_invocation_id) id: vec3<u32>) {
     let gpixel = textureLoad(gbuffer, pixel, 0);
     if depth == 0.0 || !deferred(gpixel) { return; }
 
-    let light = textureLoad(filtered_final, pixel, 0).rgb * albedo_of(gpixel) + emissive_of(gpixel) * params.exposure;
+    let light = textureLoad(filtered_final, pixel, 0).rgb * albedo_of(gpixel, pixel, depth) + emissive_of(gpixel) * params.exposure;
     textureStore(view_out, pixel, vec4<f32>(light, 1.0));
 }

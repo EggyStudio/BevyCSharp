@@ -61,6 +61,7 @@ through what you typed before. A few to start with:
   setting                  every setting's name, and "setting <name> <value>" changes one
   memory                   what the program holds
   feature.field on         the scene's distance field and its window, as the debug page's row
+  feature.denoiser off     the ray-traced lighting's grain, unfiltered, as the graphics page's row
 
 When something goes wrong
 -------------------------

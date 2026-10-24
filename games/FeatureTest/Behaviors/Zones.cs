@@ -122,6 +122,56 @@ public partial struct Zones
         return $"looking from ({x:0.##}, {y:0.##}, {z:0.##}) toward ({towardX:0.##}, {towardY:0.##}, {towardZ:0.##})";
     }
 
+    /// <summary>
+    /// Moves the spectator camera by the same step in each frame of the clock for a number of
+    /// frames, still facing the way it did, and answers once it stops, for a reading of what a
+    /// moving view draws, as build/denoiser-readings.py strafes it past a pillar.
+    /// </summary>
+    /// <remarks>
+    /// The free camera flies only while the right button is held, which an offscreen run's pointer
+    /// never reaches. Counted in the frames the clock moves in, so on a set clock held between
+    /// commands the camera moves in each frame it draws and a shot of the frame it stops on finds
+    /// it there.
+    /// </remarks>
+    [Command("glide", "Moves the spectator camera a step each frame for some frames, facing as it did: glide <x> <y> <z> <frames>")]
+    internal static string Glide(float x, float y, float z, int frames)
+    {
+        const string Usage = "glide <x> <y> <z> <frames>";
+        if (Player.Mode != PlayerMode.Spectator)
+        {
+            ConsoleHost.Fail("NOT_SPECTATING", "The camera follows the player outside spectator mode. Run mode spectator first.");
+            return Usage;
+        }
+
+        if (frames < 1 || (ulong)frames >= ConsoleHost.LaterFrames)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENTS", $"A glide takes from 1 to {ConsoleHost.LaterFrames - 1} frames.");
+            return Usage;
+        }
+
+        var ecs = ConsoleHost.Ecs;
+        if (Scene.Camera is not { } camera || !ecs.IsAlive(camera)) return "there is no camera to move";
+
+        // A frame the clock moved in is one with a time of its own, which a held clock's are not.
+        var step = new Vec3(x, y, z);
+        var moved = 0;
+
+        ConsoleHost.Later(() =>
+        {
+            ref var transform = ref ConsoleHost.Ecs.GetRef<Transform>(camera);
+            if (ConsoleHost.Time.Delta > 0f)
+            {
+                transform.Translation += step;
+                moved++;
+            }
+
+            var at = transform.Translation;
+            return moved < frames ? null : $"glided {frames} frames to ({at.X:0.###}, {at.Y:0.###}, {at.Z:0.###})";
+        });
+
+        return $"gliding for {frames} frames";
+    }
+
     /// <summary>Where a zone's signpost stands, at the hub's edge on the road to it.</summary>
     internal static Vec3 SignOf(Zone zone)
     {

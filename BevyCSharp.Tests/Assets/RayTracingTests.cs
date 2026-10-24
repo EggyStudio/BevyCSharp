@@ -127,6 +127,62 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
+    /// The denoiser's five stages over a picture of 1920 by 1080 with a floor and a glowing wall
+    /// filling it, every pixel filtered, take no more of the GPU than their budget, as Bevy's
+    /// diagnostics measure them and <c>render.timings</c> says.
+    /// </summary>
+    [SkippableFact]
+    public void TheDenoiserKeepsToItsBudgetAt1080p()
+    {
+        Needs.Renderer();
+
+        // It took 5.6 to 5.8 ms of the development machine's RTX 4070 Laptop GPU here in three runs,
+        // and 3.6 ms in Bevy's own Solari scene at the same size, whose sky it passes over. The
+        // budget is the first reading with a quarter more, so a change that makes it slower fails.
+        const double Budget = 7.0;
+
+        var active = false;
+        double? taken = null;
+        new PictureRun
+        {
+            Width = 1920,
+            Height = 1080,
+            Configure = config => (config.RayTracedLighting, config.GpuTimings) = (true, true),
+            Scene = ecs =>
+            {
+                active = Render.RayTracingActive;
+                if (!active) return;
+
+                // Looking down at the floor, which fills the picture to its top edge.
+                var camera = PictureRun.Camera(ecs, new Vec3(0f, 4f, 2f));
+                Render.SetRayTracedLighting(camera, true);
+
+                var floorMesh = Render.CreateMesh(MeshShape.Cuboid, 40f, 0.1f, 40f);
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, floorMesh);
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f }));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+                Render.SetRayTraced(floor, floorMesh);
+
+                var wallMesh = Render.CreateMesh(MeshShape.Cuboid, 0.2f, 3f, 4f);
+                var wall = ecs.Spawn();
+                Render.SetMesh(ecs, wall, wallMesh);
+                Render.SetMaterial(ecs, wall, Render.CreateMaterial(new MaterialSettings { BaseColor = (0f, 0f, 0f, 1f), Emissive = (4000f, 0f, 0f, 1f) }));
+                ecs.Add(wall, Transform.At(-1.5f, 1.5f, 0f));
+                Render.SetRayTraced(wall, wallMesh);
+            },
+        }
+            .Wait(ShaderMaterialTests.Settled + 90)
+            .Do("reading the timings", _ => taken = Render.Timings().FirstOrDefault(timing => timing.Name == "bcs_denoiser").GpuMilliseconds)
+            .Go();
+
+        Needs.RayTracing(active);
+
+        Assert.True(taken is not null, "the denoiser was not timed");
+        Assert.InRange(taken.Value, 0, Budget);
+    }
+
+    /// <summary>
     /// An emissive wall made of a mesh with no texture coordinates, as a model drawn in plain
     /// colors often is, is given coordinates of zero rather than refused, and lights the floor as
     /// one with coordinates does.

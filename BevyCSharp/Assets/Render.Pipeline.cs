@@ -169,12 +169,12 @@ public static unsafe partial class Render
     /// <para>
     /// Solari leaves its noise to a denoiser, and Bevy's is DLSS Ray Reconstruction, which the
     /// bridge does not build, so the bridge has one of its own, on wherever ray-traced lighting
-    /// runs. It is spatiotemporal variance-guided filtering. The surface's color and its glow are
-    /// taken off the light, each frame is added to the history the motion vectors carry the pixel
-    /// back to where the surface there is the same one, and what is left is filtered in five
-    /// passes that stop at edges, before the color and the glow are put back. A still view is
-    /// clean within a few frames, and a surface coming out from behind another starts its history
-    /// over rather than taking the other's.
+    /// runs. It is spatiotemporal variance-guided filtering. What the surface sends back by its
+    /// color and its shine, and its glow, are taken off the light, each frame is added to the
+    /// history the motion vectors carry the pixel back to where the surface there is the same one,
+    /// and what is left is filtered in five passes that stop at edges, before both are put back. A
+    /// still view is clean within a few frames, and a surface coming out from behind another starts
+    /// its history over rather than taking the other's.
     /// </para>
     /// <para>
     /// It is the app's, for every camera lit by rays, rather than a camera's, and turning it off is
