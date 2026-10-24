@@ -34,9 +34,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// Where the weather runs, the sky is the weather's and the backdrop is left alone. Its tier and
 /// whether the forecast sets it go on its resources, and with the forecast off, the kind of
-/// weather is set as a preset, eased into, with the cloud cover over it. A kind chosen on the panel
-/// brings its own cover, which the panel then shows, and the cover saved with the settings is the
-/// one a run starts with.
+/// weather is set as a preset, eased into. Its clouds' cover is held at none whatever the kind or
+/// the forecast gives, so its rain, snow and fog come without them.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -49,9 +48,9 @@ public partial struct Applied
     private static AssetHandle _dusk = AssetHandle.None;
 
     /// <summary>
-    /// The kind of weather and the cloud cover last given the weather, or nothing yet.
+    /// The kind of weather last given the weather, or nothing yet.
     /// </summary>
-    private static (WeatherPreset Kind, float Cover)? _weather;
+    private static WeatherPreset? _weather;
 
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
     private static float _focus = 10f;
@@ -172,7 +171,7 @@ public partial struct Applied
             {
                 // The stars behind the atmosphere, dark until DayNight brightens them at dusk.
                 Render.SetSkybox(camera, DayNight.Stars(), brightness: 0f);
-                Render.SetAtmosphere(camera, new AtmosphereSettings());
+                Render.SetAtmosphere(camera, Applied.Sky());
                 Render.SetSkyLighting(camera);
             }
 
@@ -180,37 +179,42 @@ public partial struct Applied
         }
     }
 
+    /// <summary>
+    /// The sky over the map, earth's air with the amounts the Atmosphere Rendering Parameter
+    /// Calculator weighs over the spectrum, whose sunset is gold under a gray green rather than
+    /// orange under purple.
+    /// </summary>
+    internal static AtmosphereSettings Sky() => new() { Medium = ScatteringTerm.EarthArc() };
+
+    /// <summary>
+    /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the
+    /// weather's, which <see cref="DayNight"/> gives the sun its strength above the air for.
+    /// </summary>
+    internal static bool AtmosphereDrawn => !Weather.Active && _backdrop == Backdrop.Atmosphere;
+
     /// <summary>Puts the weather's settings on the weather.</summary>
     private static void Skies(EcsWorld ecs, FeatureSettings settings)
     {
         if (ecs.Resource<WeatherConfigRef>() is { } config && config.Quality != settings.WeatherTier) config.Quality = settings.WeatherTier;
         if (ecs.Resource<ProceduralWeatherRef>() is { } forecast && forecast.Enabled != settings.Procedural) forecast.Enabled = settings.Procedural;
-        if (settings.Procedural || ecs.Resource<WeatherRef>() is not { } weather)
+        if (ecs.Resource<WeatherRef>() is not { } weather)
         {
             _weather = null;
             return;
         }
 
-        if (_weather?.Kind != settings.WeatherKind)
+        // At once as the run starts, and eased into after, where the forecast leaves the kind to
+        // the panel.
+        if (!settings.Procedural && _weather != settings.WeatherKind)
         {
-            // At once as the run starts, and eased into after.
             Weather.SetPreset(settings.WeatherKind, immediately: _weather is null);
-
-            // A kind chosen on the panel brings its own cover, which the panel then shows.
-            if (_weather is not null)
-            {
-                var cover = weather.TargetCloudCoverage;
-                _weather = (settings.WeatherKind, cover);
-                Settings.Change(s => s with { CloudCover = cover });
-                return;
-            }
+            _weather = settings.WeatherKind;
         }
+        if (settings.Procedural) _weather = null;
 
-        if (_weather is not { } given || given.Cover != settings.CloudCover || given.Kind != settings.WeatherKind)
-        {
-            weather.TargetCloudCoverage = settings.CloudCover;
-            _weather = (settings.WeatherKind, settings.CloudCover);
-        }
+        // No clouds over the map, whatever the kind or the forecast brings, since the weather's
+        // volumetric clouds looked poor over it, and its rain, snow and fog stay.
+        if (weather.TargetCloudCoverage != 0f) weather.TargetCloudCoverage = 0f;
     }
 
     /// <summary>What the camera does with the picture, from the settings.</summary>

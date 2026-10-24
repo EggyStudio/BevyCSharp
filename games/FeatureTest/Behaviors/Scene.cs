@@ -84,7 +84,7 @@ public partial struct Scene
         // dusk sky there in its place. Where the weather runs, it brings the atmosphere, and the
         // camera is marked to see the weather drawn around it.
         if (Weather.Active) ctx.Ecs.Insert<WeatherCameraRef>(camera);
-        else if (!Render.MeshletsActive) Render.SetAtmosphere(camera, new AtmosphereSettings());
+        else if (!Render.MeshletsActive) Render.SetAtmosphere(camera, Applied.Sky());
 
         // What the camera does with the picture once the scene is drawn, from the panel's
         // settings. The high dynamic range target makes the rest worth having. Without it nothing

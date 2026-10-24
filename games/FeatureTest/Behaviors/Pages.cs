@@ -69,8 +69,8 @@ internal static class Pages
     ]);
 
     /// <summary>
-    /// The weather's page, its switch and, where it runs, the kind of weather, the cloud cover, the
-    /// tier and whether the forecast sets it.
+    /// The weather's page, its switch and, where it runs, the kind of weather, the tier and whether
+    /// the forecast sets it.
     /// </summary>
     private static Page Skies() => new("Weather",
     [
@@ -80,7 +80,6 @@ internal static class Pages
             ? (Row[])
             [
                 new ChoiceRow<WeatherPreset>("Kind", () => S.WeatherKind, value => Settings.Change(s => s with { WeatherKind = value })),
-                new SliderRow("Cloud cover", () => S.CloudCover, value => Settings.Change(s => s with { CloudCover = value }), 0f, 1f, 0.05f),
                 new ChoiceRow<WeatherConfigRef.QualityVariant>("Tier", () => S.WeatherTier, value => Settings.Change(s => s with { WeatherTier = value })),
                 new ToggleRow("Forecast", () => S.Procedural, value => Settings.Change(s => s with { Procedural = value })),
             ]

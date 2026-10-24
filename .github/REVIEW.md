@@ -10,20 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f0ae14ec`, item 52's second part, which closes it, pushed at 20:24 on 2026-10-24,
-its run green on the three systems at 20:41, carrying the review's files and two pictures with their
-captions lines. The screen probes and the glow-only pass come in through
-Render.SetGlobalIlluminationScreenProbes and the gi.screen command, and 3DEngine's edge leak mend
-with its Walled test, the resolve's clear a dispatch of its own since a pinched cell reads its
-neighbors, 15 levels unmended and 3 mended, the same as closed. Departures, the rooms' guard reads
-the probes traced but unread, since left out they are the glow-only pass in every view, and the
-on-test bound a view is the larger of 3DEngine's and this engine's own, which only the corridor
-needs at 0.25 either way. Costs at 1280 by 720 with one glow light, 1.4 ms at Low and 1.6 at High,
-the pass 0.54; the Cornell box on and off shows streaks a tile wide on its back wall, the blotches
-term. 1,813 passed, 3 skipped, NormTests 18, the bridge checks and tests clean. The phases the coder
-proposed for items 64, 65 and 67 stand under them.
+Reviewed up to `30362cf2`, item 63, the clean HUD, pushed at 21:06 on 2026-10-24 after the run of
+`f0ae14ec` went green; its own run green on the three systems at 21:23, carrying the review's files
+and SHARED.md. The loading orb was the feature test's AnimatedBadge, an eight-frame throbber sprite
+at the top left, which the coder had called the sun and corrected in the picture sent; its 2D
+overlay camera redrew the world's gizmos a unit a pixel about the window's middle, the stray marks;
+the badge and the camera are gone with Animation.cs, docs/2d.md and TODO.md pointing at the
+sprite_animation example, the bottom-left frame readout is gone, Bevy's FPS overlay stands green at
+the top left at size 18 with no graph and the F3 overlay folds it; Render2d.SpawnCamera2d's remarks
+give the trap and the remedy, a layer of its own, with a test reading more than 20 red pixels in the
+middle on the gizmos' layer and 0 on its own; the hub before and after saved with its caption. 1,814
+passed, 3 skipped.
 
-Before it, `9f65bbcc` came, the day's captures, pushed at 19:02 on 2026-10-24, no run of its own.
+Before it, `f0ae14ec` came, item 52's second part, pushed at 20:24 on 2026-10-24, its run green on
+the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -223,13 +223,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-63. **The feature test's HUD is clean, a green frame rate in a corner and nothing else over the
-    view.** The owner wrote to this session at about 19:30 on 2026-10-24, Decision 61, to remove the
-    "frame N fps" text at the bottom left and the stray pixels in the screen's middle and to add a
-    green FPS number in a top corner. The text goes, the number stands in a top corner in green, and
-    the stray pixels are read first for what draws them, the cursor, a debug draw or a pass's seam,
-    and mended at the cause; a capture before and after. One commit, small, after item 52.
-
 64. **The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's vibrance.** From
     Decision 61. The sky and the aerial perspective follow Production Ready Atmosphere Rendering
     (Hillaire 2020), the transmittance, the multiple scattering and the sky-view LUTs and the aerial
@@ -246,7 +239,55 @@ from [SHARED.md](SHARED.md).
     pictures; then the lower hemisphere and the distance fog taking the horizon's color from the
     atmosphere so the far ground meets the sky with no gray band; then 3DEngine's tone curve and
     grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
-    from space with per-pixel transmittance as Bennett's.
+    from space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's
+    grading keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
+    suggestion the owner heard.
+
+69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
+    leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
+    volumetric clouds are written in the engine and lit by Bevy's Hillaire atmosphere as RDR2 lights
+    its froxel fog and raymarched clouds together under its sky; rain, snow, thunder, wind, and the
+    stars and the moon are written in the engine as well; the vendored native/bevy_weather, 0.2.0 at
+    about 9,800 lines, leaves the workspace once those stand, nothing of it kept. Phases proposed by
+    the coder, each a commit with the suite green, the fog and the clouds first, read against the
+    crate's look and the feature test's captures; after item 64 and before 65.
+
+70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
+    with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
+    choice of the hybrid, grown method at about 21:5x. Weber and Penn's species parameters of 1995,
+    the crown's envelope, the branch angles, the taper and the leaves' arrangement, stay the
+    controls an artist sets, and within them the branch structure grows from a seed by space
+    colonization after Runions, Lane and Prusinkiewicz (2007) with light competition through a
+    shadow grid after Palubicki and others (2009), so crowns fill naturally and react to neighbors
+    and walls; the branches are smooth tapered generalized cylinders with joints through the
+    modeling's EditMesh with a bark material, the leaves small geometry clusters where meshlets run
+    and alpha-cut cards elsewhere with Bevy's diffuse transmission, octahedral impostors at distance
+    with instancing for forests, and the wind from a per-vertex branch hierarchy as SpeedTree's and
+    Pivot Painter's, which item 69's wind moves; the same seed grows the same tree bit for bit. The
+    paper's four presets, the quaking aspen, the black tupelo, the weeping willow and the California
+    black oak, with bushes and ferns beside them, are the library's first entries; a tree entity
+    placed by preset and seed in the level file of item 65 and the editor of item 67, an example and
+    a guide page showing the parameters; tests of determinism by seed, each preset's height and
+    spread within the paper's values and the triangle counts within bounds, and captures of the four
+    presets held against the paper's figures for their overall shape. Phases proposed by the coder,
+    the growth and the branches first, then the leaves and the presets, then the entity, the
+    impostors and the editor; the wind with item 69. After item 69 and before 65. The reviewer's
+    additions at 21:35, each its own small part. A species grows a handful of variants by seed,
+    eight or so, and a forest instances the variants with a yaw and a scale a tree, as SpeedTree
+    does, rather than growing each tree; the growth runs on a worker at the level's load and the
+    grown skeleton, nodes with parent, place and radius, may be kept in the level file beside the
+    seed so a tree is the same on every machine whatever the floating point of the growth. The bark
+    and the leaves' pictures are generated too, small noise-made textures and leaf masks, so no
+    texture set becomes the large file the owner ruled out. Each tree gets its colliders, a capsule
+    for the trunk and the thick branches. The levels of detail cross-fade by dither so no tree pops,
+    the cylinders' segments falling first, then the clusters to cards, then the impostor. The leaves
+    are written into the scene field as cells that pass a share of light, as 3DEngine's item 100
+    gives its field, so the global illumination under a canopy is a shade and not a cave, the share
+    shared with 3DEngine through SHARED.md. The paper's parameters that name a growth map to the
+    growth's own terms, the envelope to the attractors' placement, the down and rotate angles and
+    the curve to the tropisms, the splits to the branching's chance, said in the guide so an
+    artist's expectations hold. A leaf color per preset with a seasonal tint is cheap and goes in
+    with the presets.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -819,6 +860,24 @@ mended at `42abf357`.
     parameter, delay and fire once; Hammer's four panes and Unreal's single view, switchable;
     Unreal's palette with a world-aligned meter grid as Source's dev textures have; item 52 first.
     Items 63 to 68 hold it, the coder proposing the phases when 52 is in.
+
+62. **The fog, the clouds and the rest of the weather are written in the engine, and the weather
+    crate goes.** The owner wrote to this session at about 21:3x on 2026-10-24 to implement fog and
+    clouds natively rather than through the crate, using Bevy's sky, and then the other things of
+    the weather crate natively too; asked how GTA does it, the coder said GTA V keys an artist
+    timecycle hourly for sky, fog, light, exposure and grading, RDR2 lights a physical atmosphere
+    with lookup textures, raymarched clouds and froxel fog together under timecycle art direction,
+    and GTA VI's is unpublished. Item 69 holds it after item 64, the volumetric fog and clouds lit
+    by the atmosphere first, then rain, snow, thunder, wind, the stars and the moon, and the
+    vendored crate removed when they stand.
+
+63. **Trees and foliage are grown, not loaded.** The owner wrote at 21:26 on 2026-10-24 that
+    BevyCSharp should have trees, and rather than relying on assets and large files a way to use and
+    expand the modeling to create a wide variety of trees and foliage as SpeedTree does, with the
+    Weber and Penn algorithm. Asked by the coder at about 21:5x whether the paper's own branching or
+    a grown one, the owner chose the hybrid, grown method, the paper's parameters as the controls
+    and the branches grown inside them by space colonization with light competition. Item 70 holds
+    it after the weather and before the level file.
 
 ## Replies
 

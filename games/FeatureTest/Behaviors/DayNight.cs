@@ -48,7 +48,10 @@ public partial struct DayNight
     /// <summary>A light's strength and color at an hour, one key of a curve.</summary>
     private readonly record struct Key(float Hour, float Light, float R, float G, float B);
 
-    /// <summary>The sun's illuminance in lux and its color, by the hour.</summary>
+    /// <summary>The sun above the air, the curve's noon strength in lux and white, which the atmosphere dims.</summary>
+    private static readonly (float Light, Color Color) RawSun = (12_500f, new Color(1f, 0.98f, 0.95f));
+
+    /// <summary>The sun's illuminance in lux and its color, by the hour, where no atmosphere dims it.</summary>
     private static readonly Key[] Sunlight =
     [
         new(0f, 0f, 1f, 0.6f, 0.4f),
@@ -167,7 +170,12 @@ public partial struct DayNight
         var moon = Toward(_hour + 12.5f, settings.Latitude, -0.08f);
         var shadows = settings.Shadows && !Render.RayTracingActive;
 
-        Shine(ctx.Ecs, Scene.Sun, sun, At(Sunlight, _hour), shadows && sun.Y > 0f);
+        // Under the atmosphere the sun shines as it does above the air, its noon strength and white,
+        // and Bevy's lighting dims and reddens it through the air the atmosphere describes, setting
+        // it behind the planet, so the curve's reddening and its fade at the horizon, which would
+        // count the air twice and leave the sunset no light to scatter, are kept for the dusk sky.
+        var raw = Applied.AtmosphereDrawn;
+        Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, _hour), shadows && sun.Y > 0f, fade: !raw);
         Shine(ctx.Ecs, _moon, moon, At(Moonlight, _hour), shadows && sun.Y <= 0f && moon.Y > 0f);
 
         var (light, color) = At(Ambient, _hour);
@@ -257,7 +265,7 @@ public partial struct DayNight
     /// Points a light from a direction and gives it its strength and color, brought to nothing at
     /// the horizon, writing each only where it changed.
     /// </summary>
-    private static void Shine(EcsWorld ecs, Entity light, Vec3 toward, (float Light, Color Color) given, bool shadows)
+    private static void Shine(EcsWorld ecs, Entity light, Vec3 toward, (float Light, Color Color) given, bool shadows, bool fade = true)
     {
         if (light == Entity.None || !ecs.IsAlive(light)) return;
 
@@ -265,7 +273,7 @@ public partial struct DayNight
         var up = MathF.Abs(toward.Y) > 0.99f ? Vec3.UnitZ : Vec3.UnitY;
         ecs.Set(light, Transform.LookingAt(toward, Vec3.Zero, up));
 
-        var strength = given.Light * Math.Clamp(toward.Y / 0.05f, 0f, 1f);
+        var strength = fade ? given.Light * Math.Clamp(toward.Y / 0.05f, 0f, 1f) : given.Light;
         if (Given.TryGetValue(light, out var was)
             && MathF.Abs(was.Light - strength) <= MathF.Max(0.5f, strength * 0.002f)
             && was.Color == given.Color

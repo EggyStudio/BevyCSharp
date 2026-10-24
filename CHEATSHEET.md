@@ -1809,6 +1809,10 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 // Rot2
 static Rot2 Radians(float radians);                             // A rotation by an angle, in radians, counterclockwise
 
+// ScatteringTerm
+static ScatteringTerm[] Earth();                                // Earth's air as Bevy describes it, the gas, the dust and the ozone of Earth, a new list a game may change before it sets it
+static ScatteringTerm[] EarthArc();                             // Earth's air with the gas's and the ozone's amounts weighed over the whole visible spectrum rather than read at one wavelength a color, as the Atmosphere Rendering Parameter Calculator works them out, its falloffs and its dust as Earth's
+
 // ScenePacks
 static IReadOnlyList<ScenePack> List(string folder, out IReadOnlyList<string> problems);  // Reads every manifest in a folder, in the order of their names
 static bool TryRead(string file, out ScenePack? pack, out string? problem);  // Reads one manifest, or says why it cannot, naming the file

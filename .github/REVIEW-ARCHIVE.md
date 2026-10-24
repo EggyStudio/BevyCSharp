@@ -1464,6 +1464,15 @@ a batch.
     3DEngine's item 69, the field reading a mesh a compute shader wrote, waits until this engine
     draws such a mesh, and its two departures stand in the head.
 
+63. **The feature test's HUD is clean, a green frame rate in a corner and nothing else over the
+    view.** The owner wrote to this session at about 19:30 on 2026-10-24, Decision 61, to remove the
+    "frame N fps" text at the bottom left and the stray pixels in the screen's middle and to add a
+    green FPS number in a top corner. The text goes, the number stands in a top corner in green, and
+    the stray pixels are read first for what draws them, the cursor, a debug draw or a pass's seam,
+    and mended at the cause; a capture before and after. One commit, small, after item 52. Done at
+    `30362cf2` on 2026-10-24, the orb a throbber sprite and the stray marks its camera's gizmos,
+    both gone, the frame rate green at the top left.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

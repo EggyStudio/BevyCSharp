@@ -184,16 +184,10 @@ public sealed record FeatureSettings
     /// Whether the app asks for the weather, which takes effect at the next start, since its
     /// plugin is added as the app is made.
     /// </summary>
-    public bool Weather { get; init; } = true;
+    public bool Weather { get; init; }
 
     /// <summary>The weather's conditions while the forecast is off.</summary>
-    public WeatherPreset WeatherKind { get; init; } = WeatherPreset.PartlyCloudy;
-
-    /// <summary>
-    /// How much of the sky the clouds cover while the forecast is off, from none to all, over what
-    /// <see cref="WeatherKind"/> gives.
-    /// </summary>
-    public float CloudCover { get; init; } = 0.45f;
+    public WeatherPreset WeatherKind { get; init; } = WeatherPreset.Clear;
 
     /// <summary>
     /// How finely the weather's clouds, fog and rain are drawn, against what they cost.
@@ -202,7 +196,7 @@ public sealed record FeatureSettings
 
     /// <summary>
     /// Whether the weather comes from the forecast the clock advances, rather than from
-    /// <see cref="WeatherKind"/> and <see cref="CloudCover"/>.
+    /// <see cref="WeatherKind"/>.
     /// </summary>
     public bool Procedural { get; init; }
 

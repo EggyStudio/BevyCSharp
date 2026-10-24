@@ -12730,6 +12730,8 @@ sealed class Bevy.ScatteringTerm
   float FalloffScale { get; set; }
   float TentCenter { get; set; }
   float TentWidth { get; set; }
+  static ScatteringTerm[] Earth()
+  static ScatteringTerm[] EarthArc()
 static class Bevy.SceneFile
   const string AssetsPrefix = "assets://"
   const string Format = "bevycsharp.scene.2"

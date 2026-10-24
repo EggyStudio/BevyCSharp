@@ -112,6 +112,26 @@ Render.SetAtmosphere(camera, new AtmosphereSettings
 });
 ```
 
+`ScatteringTerm.Earth()` writes earth's air out as such a list, Bruneton's amounts as Hillaire's sky
+takes them, each color read at one wavelength, for a game that bends it a little, and
+`ScatteringTerm.EarthArc()` is the same air with the gas's and the ozone's amounts weighed over the
+whole visible spectrum, as the Atmosphere Rendering Parameter Calculator works them out. The two
+read alike by day, and at sunset Bruneton's is orange under purple where the calculator's is gold
+under a gray green, as a spectral reference of the sky is. The sky worked out from lookup textures
+lies within a level of the one raymarched for every pixel at every height of the sun.
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = ScatteringTerm.EarthArc() });
+```
+
+Bevy dims and reddens a directional light through the air the atmosphere describes as it lights the
+scene, and sets it behind the planet, so a sun under an atmosphere is given as it shines above the
+air, at its noon strength and white, and a day's cycle moves it alone. A curve that dims it toward
+the horizon as well counts the air twice and leaves the sunset no light to scatter.
+
 `SetSkyLighting` derives an environment map from that atmosphere each frame, so a surface picks up
 the color of what is around it rather than only what a lamp points at it, and the light follows the
 sun without anything being animated. The size it generates is a square cubemap resolution and has to

@@ -242,4 +242,121 @@ public sealed class AtmosphereTests
 
         harness.Run();
     }
+
+    /// <summary>
+    /// Earth's air written out as <see cref="ScatteringTerm.Earth"/> draws the sky the planet's own
+    /// air draws, within half a level, so a game bending it starts from the same sky.
+    /// </summary>
+    [SkippableFact]
+    public void EarthsAirWrittenOutDrawsThePlanetsOwnSky()
+    {
+        Needs.Renderer();
+        var (own, written) = (Toward(8f, 12f, null, SkyMethod.LookupTexture), Toward(8f, 12f, ScatteringTerm.Earth(), SkyMethod.LookupTexture));
+        var apart = Apart(own, written, rows: (int)own.Height * 6 / 10);
+        Assert.True(apart < 0.5, $"the sky of earth's air written out lies {apart:0.00} levels from the planet's own");
+    }
+
+    /// <summary>
+    /// The sky drawn from Bevy's lookup textures lies within two levels of the sky raymarched for
+    /// every pixel, Hillaire's reference, above the horizon at four heights of the sun, through
+    /// earth's air and through <see cref="ScatteringTerm.EarthArc"/>'s, where 0.6 to 1.0 were read
+    /// on the development machine's GPU.
+    /// </summary>
+    [SkippableTheory]
+    [InlineData(30f, 13f)]
+    [InlineData(8f, 12f)]
+    [InlineData(2f, 11f)]
+    [InlineData(-2f, 9f)]
+    public void TheLookupTexturesSkyLiesWithinTwoLevelsOfTheRaymarchedOne(float height, float ev)
+    {
+        Needs.Renderer();
+        foreach (var air in new[] { ScatteringTerm.Earth(), ScatteringTerm.EarthArc() })
+        {
+            var (lut, marched) = (Toward(height, ev, air, SkyMethod.LookupTexture), Toward(height, ev, air, SkyMethod.Raymarched));
+            var apart = Apart(lut, marched, rows: (int)lut.Height * 6 / 10);
+            Assert.True(apart < 2.0, $"with the sun {height} degrees up the lookup textures' sky lies {apart:0.00} levels from the raymarched one");
+        }
+    }
+
+    /// <summary>
+    /// With the sun two degrees below the horizon, earth's air with Bruneton's amounts draws a sky
+    /// redder than it is green over an orange band, and with the amounts the Atmosphere Rendering
+    /// Parameter Calculator weighs over the spectrum a sky greener than it is red over a gold one,
+    /// the band's green against its red higher by a tenth or more, as the spectral reference the
+    /// calculator was held to draws it. Read at 199, 181, 180 over a band of 224, 166, 127 and at
+    /// 178, 187, 187 over 207, 177, 131.
+    /// </summary>
+    [SkippableFact]
+    public void TheArcAirTurnsTheSunsetFromPurpleToGold()
+    {
+        Needs.Renderer();
+        var bruneton = Toward(-2f, 9f, ScatteringTerm.Earth(), SkyMethod.LookupTexture);
+        var arc = Toward(-2f, 9f, ScatteringTerm.EarthArc(), SkyMethod.LookupTexture);
+        var (brunetonSky, brunetonBand) = SkyAndBand(bruneton);
+        var (arcSky, arcBand) = SkyAndBand(arc);
+        Assert.True(brunetonSky.R > brunetonSky.G, $"Bruneton's sky reads {brunetonSky}");
+        Assert.True(arcSky.G > arcSky.R, $"the calculator's sky reads {arcSky}");
+        Assert.True(arcBand.G / arcBand.R > brunetonBand.G / brunetonBand.R + 0.1, $"the band reads {arcBand} against {brunetonBand}");
+    }
+
+    // The sky toward the sun from 1.7 above the ground, the view tilted 8 degrees up, the sun a given
+    // height above the horizon with its disk earth's, at a given exposure, through an air.
+    private static CapturedImage Toward(float height, float ev, IReadOnlyList<ScatteringTerm>? air, SkyMethod method)
+    {
+        var run = new PictureRun
+        {
+            Width = 240,
+            Height = 135,
+            Frames = 600,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                var pitch = 8f * MathF.PI / 180f;
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1.7f, 0f), new Vec3(0f, 1.7f + MathF.Sin(pitch), -MathF.Cos(pitch)), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true });
+                Render.SetExposure(camera, ev);
+                Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = air, Method = method });
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 130_000f });
+                var up = height * MathF.PI / 180f;
+                ecs.Add(sun, Transform.LookingAt(new Vec3(0f, MathF.Sin(up), -MathF.Cos(up)), Vec3.Zero, Vec3.UnitY));
+                Render.SetSunDisk(sun, SunDisk.Earth);
+            },
+        };
+        run.Wait(30).Capture("sky").Go();
+        return run.Picture("sky");
+    }
+
+    // The mean of the levels two pictures differ by over their top rows, each channel alike.
+    private static double Apart(CapturedImage a, CapturedImage b, int rows)
+    {
+        double sum = 0;
+        for (uint y = 0; y < rows; y++)
+            for (uint x = 0; x < a.Width; x++)
+            {
+                var (p, q) = (a.At(x, y), b.At(x, y));
+                sum += (Math.Abs(p.R - q.R) + Math.Abs(p.G - q.G) + Math.Abs(p.B - q.B)) / 3.0;
+            }
+        return sum / (rows * a.Width);
+    }
+
+    // The mean color of the sky above the band over the horizon, and of the band, the horizon at 62%
+    // of the picture's height with the view tilted 8 degrees up, the band its last 4% above it.
+    private static ((double R, double G, double B) Sky, (double R, double G, double B) Band) SkyAndBand(CapturedImage picture)
+    {
+        (double R, double G, double B) Mean(int from, int to)
+        {
+            double r = 0, g = 0, b = 0;
+            for (var y = from; y < to; y++)
+                for (uint x = 0; x < picture.Width; x++)
+                {
+                    var p = picture.At(x, (uint)y);
+                    (r, g, b) = (r + p.R, g + p.G, b + p.B);
+                }
+            var n = (to - from) * (double)picture.Width;
+            return (r / n, g / n, b / n);
+        }
+        var horizon = (int)(picture.Height * 0.62);
+        var band = (int)(picture.Height * 0.04);
+        return (Mean(0, horizon - band), Mean(horizon - band, horizon));
+    }
 }
