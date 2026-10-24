@@ -193,7 +193,7 @@ public partial struct Bullet
         if (!_mesh.IsValid)
         {
             _mesh = Render.CreateMesh(MeshShape.Sphere, 0.15f);
-            _material = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0.9f, 0.3f, 1f), Emissive = (4f, 3f, 0.5f, 1f) });
+            _material = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0.9f, 0.3f, 1f), Emissive = (4f, 3f, 0.5f, 0f) });
         }
 
         var shot = ctx.Ecs.Spawn();

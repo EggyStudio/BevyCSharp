@@ -10,23 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c230300b`, item 51's glossy term, the last part of its third commit, pushed at 14:21
-on 2026-10-24, its run green on the three systems at 14:36; item 51 done. The pass takes back Bevy's
-reflection of its ambient term and environment map and gives it again, below roughness 0.5 tracing
-through the depth in 3DEngine's steps and reaches and then the field, a hit on the picture taking
-the frame before's picture (the engine image gi_picture kept with history and copied before
-tonemapping) and a hit past it shadeHit, fading from 0.25 to 0.5, Bevy's reflection scaled by skyAt,
-the engine's camera images kept by owner. Departures, no check against the frame before's depth that
-the surface was shown, and no mip blur of the frame before's picture. A mirror floor shows a sunlit
-red wall at 244, 115, 107 with global illumination on against 2, 2, 2 off, and a closed room's rough
-metal floor reflects 0, 0, 14 against 78, 58, 119; the bounce rooms unchanged in every view, the
-floor 13.2 percent over; the room test waits three frames of ready pipelines before reading, since
-the larger pass's pipeline came after the probes' 90 frames in some runs. Costs at 1280 by 720 with
-one glow light, the pass 1.3 ms with every surface rough and 1.5 with a mirror floor. 1,775 passed,
-3 skipped, NormTests 18 after an N 4.7 hit in the coder's summary was reworded, no bridge change.
+Reviewed up to `eca6e651`, item 61, the colons out of the documents and the comments, pushed at
+14:52 on 2026-10-24, its run green on the three systems at 15:09, carrying the review's files. 36
+joints recast, RENDERING.md 3, docs/components.md 1, AGENTS.md 3 on the owner's word in the coder's
+session, 9 code comments from STYLE.md's grep and 20 XML summaries where the colon follows a tag,
+the cheat sheet written again from the summaries; labels, named arguments, quoted strings and the
+shaders' component labels left as they are, ASKS.md's two hits left to the owner's word. STYLE.md's
+grep misses a colon after a closing tag, which a `>` in its class finds, taken into item 60's
+commit. NormTests and the docs and cheat sheet tests 24 of 24, no bridge change.
 
-Before it, `6e69cfa1` came, item 51's environment map sky, pushed at 13:21 on 2026-10-24, its run
-green on the three systems.
+Before it, `c230300b` came, item 51's glossy term, pushed at 14:21 on 2026-10-24, its run green on
+the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -241,21 +235,19 @@ from [SHARED.md](SHARED.md).
     2026-10-24: Bevy's deferred G-buffer drops the emissive color's alpha, which carries whether the
     emissive is exposed, so on a camera that the field's shadows or the global illumination make
     deferred an exposed emissive is shown unexposed, the feature test's lamp panel reading 40,053
-    against a reference of 49, since item 50's deferred switch. The mend: the exposure carried
+    against a reference of 49, since item 50's deferred switch. The mend is the exposure carried
     through the deferred path, in the G-buffer's spare bits or a flag the lighting pass reads, so a
     deferred camera shows the emissive as the forward one does; a test reading the lamp panel on a
     deferred camera within the bound of its reference, failing without the mend. One commit, after
-    item 51.
-
-61. **No running sentence holds a colon, across the documents, the comments and the scripts.** The
-    owner wrote at about 10:34 on 2026-10-24 that some documents join sentences with a colon and
-    that STYLE.md forbids it. STYLE.md's own check lists the hits, the awk over the Markdown files
-    outside their code and the grep over the comments and scripts, and each is read and recast as
-    STYLE.md says, a sentence of its own or the same sentence recast, a label at a line's end or in
-    a table left as it is, over the guides under docs, RENDERING.md, BUILDING.md, AGENTS.md's line,
-    CHEATSHEET.md's comment lines, ASKS.md and the comments of the code and the scripts; the
-    review's files are the reviewing session's own and are not touched. One commit, docs and
-    comments only, after item 51's third commit and before item 60.
+    item 51. The coder's reading at 15:13 on 2026-10-24 found the premise wrong, an exposed panel of
+    40,000 nits reading 38,124 forward and 38,165 deferred, since Bevy 0.20's material uniform puts
+    emissive_exposure_weight, 0 by default, in emissive.w and ignores the color's alpha, and the
+    bridge never sets that weight, so the documented alpha meant nothing and only the gather of
+    `ccc0f000` and the reference read it, exposing an emitter Bevy draws unexposed. The choice is
+    the first of the coder's two, the bridge setting the weight from the alpha, the default alpha 0
+    as Bevy's default so nothing changes unasked, the callers passing 1 for today's unexposed look
+    moved to 0, the deferred mend kept for weights above 0, and the gather and the reference reading
+    the weight; the item's test holds the deferred path for an exposed emitter.
 
 ## Verdicts
 
@@ -1465,3 +1457,15 @@ the comments of the code, the scripts holding none. ASKS.md's two hits are left 
 session, since AGENTS.md has this session write nothing there. STYLE.md's grep misses a colon after
 a closing tag, `</c>:` or `/>:`, which twenty XML summaries held, and `[a-z)\`>]` in its class finds
 them.
+
+Item 60 in the commit carrying this line, on choice (A). The bridge gives Bevy's
+`emissive_exposure_weight` the emissive's alpha, which `MaterialSettings.Emissive` defaults to 0 as
+Bevy does, and reads it back, into the material buffer and into the field's gather from that field;
+the callers that relied on the unexposed look, the examples ported from Bevy, Swarm, Courtyard's
+scene, the editor's script, the console's glow, the modeling slots and the tests, pass 0, and the
+editor's emissive color leaves the weight as it was. The feature test's emitters, of thousands of
+nits, keep 1 and are exposed, the Cornell box's panel at about 40. `render/mended.rs` mends Bevy's
+`deferred/functions.wesl` to apply the weight as the G-buffer is written, refused and said where
+Bevy's text moves, and `DeferredEmissiveTests` holds an exposed panel deferred against forward and
+within 2% of its reference, 38,165 against 38.2 unmended. STYLE.md's two checks take `>` in their
+class, and they find no hit beyond the ones item 61 recast.

@@ -63,13 +63,13 @@ internal static class Lighting
         // A red point light, a green spot light and a blue point light, each with a small emissive
         // shape of its color where it is.
         var red = Light(ecs, LightKind.Point, (1f, 0f, 0f), Transform.At(1f, 2f, 0f));
-        Bulb(ecs, red, Render.CreateMesh(MeshShape.Sphere, 0.1f), (1f, 0f, 0f, 1f), (4f, 0f, 0f, 1f), Transform.Identity);
+        Bulb(ecs, red, Render.CreateMesh(MeshShape.Sphere, 0.1f), (1f, 0f, 0f, 1f), (4f, 0f, 0f, 0f), Transform.Identity);
 
         var green = Light(ecs, LightKind.Spot, (0f, 1f, 0f), Transform.LookingAt(new Vec3(-1f, 2f, 0f), new Vec3(-1f, 0f, 0f), Vec3.UnitZ));
-        Bulb(ecs, green, Render.CreateMesh(MeshShape.Capsule, 0.1f, 0.25f), (0f, 1f, 0f, 1f), (0f, 4f, 0f, 1f), new Transform(Vec3.Zero, Quat.FromRotationX(MathF.PI / 2f), Vec3.One));
+        Bulb(ecs, green, Render.CreateMesh(MeshShape.Capsule, 0.1f, 0.25f), (0f, 1f, 0f, 1f), (0f, 4f, 0f, 0f), new Transform(Vec3.Zero, Quat.FromRotationX(MathF.PI / 2f), Vec3.One));
 
         var blue = Light(ecs, LightKind.Point, (0f, 0f, 1f), Transform.At(0f, 4f, 0f));
-        Bulb(ecs, blue, Render.CreateMesh(MeshShape.Sphere, 0.1f), (0f, 0f, 1f, 1f), (0f, 0f, 713f, 1f), Transform.Identity);
+        Bulb(ecs, blue, Render.CreateMesh(MeshShape.Sphere, 0.1f), (0f, 0f, 1f, 1f), (0f, 0f, 713f, 0f), Transform.Identity);
 
         // The sun, an overcast day's thousand lux, with its cascades drawn in to this small scene.
         var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 1000f, Shadows = true });

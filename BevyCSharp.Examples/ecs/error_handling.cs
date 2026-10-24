@@ -44,7 +44,7 @@ internal static class ErrorHandling
             throw new InvalidOperationException("The sphere's triangles could not be read back.");
 
         var pointMesh = Render.CreateMesh(MeshShape.IcoSphere, 0.01f, 3f);
-        var pointMaterial = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f), Emissive = (1f, 0f, 0f, 1f) });
+        var pointMaterial = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f), Emissive = (1f, 0f, 0f, 0f) });
         foreach (var point in SampleSurface(triangles, random).Take(10_000))
             ecs.SetParent(ecs.SpawnMesh(pointMesh, pointMaterial, Transform.At(point.X, point.Y, point.Z)), sphere);
 

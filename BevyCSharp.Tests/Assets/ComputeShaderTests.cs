@@ -391,7 +391,7 @@ public sealed class ComputeShaderTests
                 Render.SetMaterial(ecs, shiny, Render.CreateMaterial(new MaterialSettings
                 {
                     BaseColor = (0f, 0f, 1f, 1f),
-                    Emissive = (0f, 2f, 0f, 1f),
+                    Emissive = (0f, 2f, 0f, 0f),
                     Roughness = 0.75f,
                     Metallic = 1f,
                 }));

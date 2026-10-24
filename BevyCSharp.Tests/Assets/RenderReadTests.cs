@@ -131,7 +131,7 @@ public sealed class RenderReadTests
                 BaseColor = (0.25f, 0.5f, 0.75f, 1f),
                 Metallic = 0.8f,
                 Roughness = 0.3f,
-                Emissive = (2f, 1f, 0f, 1f),
+                Emissive = (2f, 1f, 0f, 0f),
                 AlphaMode = AlphaMode.Mask,
                 AlphaCutoff = 0.4f,
                 DoubleSided = true,

@@ -31,7 +31,7 @@ public partial struct Spin
         Render.SetMaterial(ctx.Ecs, cube, Render.CreateMaterial(new MaterialSettings
         {
             BaseColor = (1f, 0.6f, 0.2f, 1f),
-            Emissive = (6f, 2.5f, 0.5f, 1f),
+            Emissive = (6f, 2.5f, 0.5f, 0f),
         }));
 
         Console.WriteLine("[script] Spin is running");

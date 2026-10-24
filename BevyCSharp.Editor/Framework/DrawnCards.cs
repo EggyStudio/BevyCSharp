@@ -348,7 +348,7 @@ internal static class DrawnCards
             Field("Emissive", FieldKind.Color, settings => Linear(settings.Emissive), (settings, value) =>
             {
                 if (value is not Color color) return false;
-                settings.Emissive = (color.R, color.G, color.B, color.A);
+                settings.Emissive = (color.R, color.G, color.B, settings.Emissive.A);
                 return true;
             }),
             Field("Alpha", FieldKind.Enum, settings => settings.AlphaMode.ToString(), (settings, value) =>

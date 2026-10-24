@@ -83,6 +83,29 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Whether the bridge mended Bevy's deferred G-buffer to keep an exposed emissive's exposure,
+    /// true once mended, false where Bevy's shader is not the text the mend was written for, and
+    /// null before the shader has loaded or where nothing is drawn.
+    /// </summary>
+    /// <remarks>
+    /// Bevy 0.20's G-buffer keeps an emissive's color and not its alpha, which says how much of the
+    /// camera's exposure it takes, so a camera drawn deferred, as the field's shadows and global
+    /// illumination draw one, showed an exposed emissive unexposed. The bridge applies the exposure as
+    /// the G-buffer is written (<c>render/mended.rs</c>), and a release whose text moved refuses the
+    /// mend, which a test holds.
+    /// </remarks>
+    internal static bool? EmissiveExposureMended
+    {
+        get
+        {
+            if (!App.HasRenderer) return null;
+            uint mends;
+            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.EmissiveExposureMended");
+            return (mends & 4) != 0 ? true : (mends & 8) != 0 ? false : null;
+        }
+    }
+
+    /// <summary>
     /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.

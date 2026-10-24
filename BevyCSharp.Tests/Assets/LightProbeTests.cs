@@ -293,10 +293,10 @@ public sealed class LightProbeTests
                     ecs.Add(block, Transform.At(at.X, at.Y, at.Z));
                 }
 
-                Glow(new Vec3(5f, 0f, 0f), new Vec3(1f, 8f, 8f), (4f, 0f, 0f, 1f));
-                Glow(new Vec3(-5f, 0f, 0f), new Vec3(1f, 8f, 8f), (0f, 4f, 0f, 1f));
-                Glow(new Vec3(0f, 5f, 0f), new Vec3(8f, 1f, 8f), (0f, 0f, 4f, 1f));
-                Glow(new Vec3(0f, 0f, 9f), new Vec3(8f, 8f, 1f), (4f, 4f, 0f, 1f));
+                Glow(new Vec3(5f, 0f, 0f), new Vec3(1f, 8f, 8f), (4f, 0f, 0f, 0f));
+                Glow(new Vec3(-5f, 0f, 0f), new Vec3(1f, 8f, 8f), (0f, 4f, 0f, 0f));
+                Glow(new Vec3(0f, 5f, 0f), new Vec3(8f, 1f, 8f), (0f, 0f, 4f, 0f));
+                Glow(new Vec3(0f, 0f, 9f), new Vec3(8f, 8f, 1f), (4f, 4f, 0f, 0f));
             },
         };
 

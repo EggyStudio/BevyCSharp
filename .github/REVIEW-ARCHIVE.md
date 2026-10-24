@@ -1377,6 +1377,17 @@ a batch.
     at `c230300b` on 2026-10-24 in five commits, the probes, the pass, the reference, the emitters,
     the sky and the glossy term, the departures in the heads of their records and in RENDERING.md.
 
+61. **No running sentence holds a colon, across the documents, the comments and the scripts.** The
+    owner wrote at about 10:34 on 2026-10-24 that some documents join sentences with a colon and
+    that STYLE.md forbids it. STYLE.md's own check lists the hits, the awk over the Markdown files
+    outside their code and the grep over the comments and scripts, and each is read and recast as
+    STYLE.md says, a sentence of its own or the same sentence recast, a label at a line's end or in
+    a table left as it is, over the guides under docs, RENDERING.md, BUILDING.md, AGENTS.md's line,
+    CHEATSHEET.md's comment lines, ASKS.md and the comments of the code and the scripts; the
+    review's files are the reviewing session's own and are not touched. One commit, docs and
+    comments only, after item 51's third commit and before item 60. Done at `eca6e651` on
+    2026-10-24, 36 joints recast, the labels and the shaders' component labels kept.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -542,7 +542,7 @@ internal static partial class ConsoleWorldCommands
                     break;
                 case "emissive":
                     var glow = Color.FromHex(value);
-                    settings.Emissive = (glow.R, glow.G, glow.B, 1f);
+                    settings.Emissive = (glow.R, glow.G, glow.B, 0f);
                     break;
                 case "metallic":
                     settings.Metallic = float.Parse(value, System.Globalization.CultureInfo.InvariantCulture);

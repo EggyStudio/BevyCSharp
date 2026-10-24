@@ -200,7 +200,9 @@ pub fn write_materials(
                         emissive.red,
                         emissive.green,
                         emissive.blue,
-                        emissive.alpha,
+                        // The share of the camera's exposure the emission takes, as Bevy's
+                        // shaders read it in the emission's fourth.
+                        material.emissive_exposure_weight,
                         material.perceptual_roughness,
                         material.metallic,
                         reflectance,

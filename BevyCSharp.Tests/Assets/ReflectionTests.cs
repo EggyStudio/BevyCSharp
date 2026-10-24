@@ -58,7 +58,7 @@ public sealed class ReflectionTests
                 Render.SetMaterial(ecs, cube, Render.CreateMaterial(new MaterialSettings
                 {
                     BaseColor = (0f, 0f, 0f, 1f),
-                    Emissive = (0f, 6f, 0f, 1f),
+                    Emissive = (0f, 6f, 0f, 0f),
                 }));
                 ecs.Add(cube, Transform.At(0f, 0.9f, 0f));
             },

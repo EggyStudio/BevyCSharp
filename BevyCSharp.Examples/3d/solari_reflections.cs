@@ -192,7 +192,7 @@ internal static class SolariReflections
 
         SpawnTraced(ecs, Plane(10.5f, 10.5f), neutral, new Transform(new Vec3(0f, 8f, 1.5f), FacingDown, Vec3.One));
 
-        var lamp = Render.CreateMaterial(new MaterialSettings { Emissive = (40_000f, 38_000f, 34_000f, 1f) });
+        var lamp = Render.CreateMaterial(new MaterialSettings { Emissive = (40_000f, 38_000f, 34_000f, 0f) });
         SpawnTraced(ecs, Plane(1.75f, 1.75f), lamp, new Transform(new Vec3(0f, 7.8f, 0.5f), FacingDown, Vec3.One));
     }
 

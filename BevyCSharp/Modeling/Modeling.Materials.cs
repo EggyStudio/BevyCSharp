@@ -72,7 +72,7 @@ public static partial class Modeling
                 OcclusionTexture = look.OcclusionMap is { } occlusion ? SlotImage(app, occlusion, data: true) : AssetHandle.None,
                 MetallicRoughnessTexture = look.MetallicRoughnessMap is { } metal ? SlotImage(app, metal, data: true) : AssetHandle.None,
                 EmissiveTexture = look.EmissiveMap is { } glow ? SlotImage(app, glow, data: false) : AssetHandle.None,
-                Emissive = (emissive.X, emissive.Y, emissive.Z, 1f),
+                Emissive = (emissive.X, emissive.Y, emissive.Z, 0f),
                 Metallic = look.Metallic ?? 0f,
                 Roughness = look.Roughness ?? (look.Texture is null ? 0.85f : 0.5f),
                 AlphaMode = color.A < 1f ? AlphaMode.Blend : AlphaMode.Opaque,

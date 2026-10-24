@@ -134,7 +134,7 @@ internal static class Solari
         {
             for (var y = -10; y <= 10; y++)
             {
-                var glow = (random.NextSingle() * 60000f, random.NextSingle() * 60000f, random.NextSingle() * 60000f, 1f);
+                var glow = (random.NextSingle() * 60000f, random.NextSingle() * 60000f, random.NextSingle() * 60000f, 0f);
                 var material = Render.CreateMaterial(new MaterialSettings { Emissive = glow });
                 SpawnTraced(ecs, sphere, material, new Transform(new Vec3(x * 20f, 7f, y * 20f), Quat.Identity, Vec3.One));
             }
@@ -226,7 +226,7 @@ internal static class Solari
                 switch (name)
                 {
                     case "material":
-                        settings!.Emissive = (0f, 0f, 0f, 1f);
+                        settings!.Emissive = (0f, 0f, 0f, 0f);
                         break;
                     case "Lights":
                         (settings!.Emissive, settings.AlphaMode, settings.Transmission) = (RobotLight, AlphaMode.Opaque, 0f);
@@ -268,7 +268,7 @@ internal static class Solari
 
         if (input.KeyPressed(Key.Digit2) && Render.TryReadMaterial(_robotLight, out var settings))
         {
-            settings!.Emissive = RobotLightOn(settings) ? (0f, 0f, 0f, 1f) : RobotLight;
+            settings!.Emissive = RobotLightOn(settings) ? (0f, 0f, 0f, 0f) : RobotLight;
             Render.WriteMaterial(_robotLight, settings);
         }
     }
@@ -330,7 +330,7 @@ internal static class Solari
 
     private static bool RobotLightOn(MaterialSettings settings) => settings.Emissive is not (0f, 0f, 0f, _);
 
-    private static (float R, float G, float B, float A) Scaled(Color color, float by) => (color.R * by, color.G * by, color.B * by, 1f);
+    private static (float R, float G, float B, float A) Scaled(Color color, float by) => (color.R * by, color.G * by, color.B * by, 0f);
 }
 
 /// <summary>

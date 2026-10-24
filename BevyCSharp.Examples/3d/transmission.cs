@@ -69,7 +69,7 @@ internal static class Transmission
 
         // The flame, white hot with an orange edge, which casts no shadow of its own.
         var (white, orange) = (Color.FromSrgb(0.98f, 0.92f, 0.84f), Color.FromSrgb(1f, 0.27f, 0f));
-        var emissive = (white.R * 20f + orange.R * 4f, white.G * 20f + orange.G * 4f, white.B * 20f + orange.B * 4f, 1f);
+        var emissive = (white.R * 20f + orange.R * 4f, white.G * 20f + orange.G * 4f, white.B * 20f + orange.B * 4f, 0f);
         var flame = ecs.SpawnMesh(sphere, Render.CreateMaterial(new MaterialSettings { Emissive = emissive, DiffuseTransmission = 1f }),
             new Transform(new Vec3(-1f, 1.15f, 0f), Quat.Identity, new Vec3(0.1f, 0.2f, 0.1f)));
         Render.SetMeshFlags(ecs, flame, MeshFlags.NoShadowCasting);

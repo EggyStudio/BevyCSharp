@@ -38,7 +38,7 @@ internal static class IterCombinations
         }
 
         var orangeRed = Color.FromSrgb8(255, 69, 0);
-        var star = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 1f) }), Transform.Identity);
+        var star = ecs.SpawnMesh(mesh, Render.CreateMaterial(new MaterialSettings { BaseColor = orangeRed, Emissive = (orangeRed.R * 2f, orangeRed.G * 2f, orangeRed.B * 2f, 0f) }), Transform.Identity);
         ecs.Add(star, new Mass { Value = 500f });
         ecs.Add(star, new Acceleration());
         ecs.Add(star, new LastPos());

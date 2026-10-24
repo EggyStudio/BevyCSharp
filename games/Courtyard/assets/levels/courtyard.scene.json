@@ -623,7 +623,7 @@
           0.0056053917,
           0.09084173,
           0.015996292,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -664,7 +664,7 @@
           0.13286833,
           0.057805434,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -705,7 +705,7 @@
           0.13286833,
           0.057805434,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -746,7 +746,7 @@
           0.13286833,
           0.057805434,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -787,7 +787,7 @@
           0,
           0,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -828,7 +828,7 @@
           0,
           0,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -869,7 +869,7 @@
           0,
           0,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -910,7 +910,7 @@
           0,
           0,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,
@@ -951,7 +951,7 @@
           0,
           0,
           0,
-          1
+          0
         ],
         "alphaMode": "Opaque",
         "alphaCutoff": 0.5,

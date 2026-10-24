@@ -108,7 +108,7 @@ internal static unsafe class GiReference
     /// </summary>
     internal static string? BeginReference(EcsWorld ecs, string? path, int samples, int bounces = -1)
     {
-        if (Refused(ecs) is { } why) return why;
+        if (Refused(ecs, rays: true) is { } why) return why;
         var rays = _rays!;
         var (slots, skipped) = Fill(ecs, rays);
         if (slots.Length == 0) return "the camera draws no meshes for the rays to meet";
@@ -134,7 +134,7 @@ internal static unsafe class GiReference
     /// </summary>
     internal static string? BeginPicture(EcsWorld ecs, string? path)
     {
-        if (Refused(ecs) is { } why) return why;
+        if (Refused(ecs, rays: false) is { } why) return why;
         _job = new Job { Reference = false, Camera = CameraOf(ecs), Path = path, Started = Stopwatch.GetTimestamp() };
         AskSize(_job, _rays!);
         return null;
@@ -168,20 +168,22 @@ internal static unsafe class GiReference
         }
     }
 
-    // Why nothing can start, or nothing, with the app's ray scene made.
-    private static string? Refused(EcsWorld ecs)
+    // Why nothing can start, or nothing, with the app's programs made, the tracer and its ray scene
+    // where `rays` is set for the reference, which a GPU that traces no rays cannot trace, though it
+    // reads its picture.
+    private static string? Refused(EcsWorld ecs, bool rays)
     {
         if (!App.HasRenderer) return "there is no renderer to trace with";
         if (Busy) return "a reference is being traced or the picture read, and Step moves it on";
-        if (!Shaders.SupportsRayQueries) return "the GPU traces no rays, which the reference is traced through";
+        if (rays && !Shaders.SupportsRayQueries) return "the GPU traces no rays, which the reference is traced through";
         if (CameraOf(ecs).IsNone) return "there is no 3D camera to trace the picture of";
 
-        if (_rays is null)
+        _rays ??= new Rays { Copy = Shaders.CreateInstance(SceneField.KernelProgram("gi_frame.slang")) };
+        if (rays && !_rays.Trace.IsValid)
         {
-            var rays = new Rays { Pool = Shaders.CreateGeometryPool(), Lights = Shaders.CreateBuffer(WorldProbes.LightsBytes) };
-            rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV));
-            rays.Copy = Shaders.CreateInstance(SceneField.KernelProgram("gi_frame.slang"));
-            _rays = rays;
+            _rays.Pool = Shaders.CreateGeometryPool();
+            _rays.Lights = Shaders.CreateBuffer(WorldProbes.LightsBytes);
+            _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV));
         }
         return null;
     }

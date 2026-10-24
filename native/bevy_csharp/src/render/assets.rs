@@ -202,12 +202,11 @@ fn standard_material(
         ),
         metallic: config.metallic,
         perceptual_roughness: config.roughness,
-        emissive: LinearRgba::new(
-            config.emissive[0],
-            config.emissive[1],
-            config.emissive[2],
-            config.emissive[3],
-        ),
+        emissive: LinearRgba::rgb(config.emissive[0], config.emissive[1], config.emissive[2]),
+        // Bevy reads the share of the exposure an emission takes from its own field, which it
+        // writes into the fourth of the emission it hands its shaders, and not from the color's
+        // alpha, so the fourth given here goes there.
+        emissive_exposure_weight: config.emissive[3],
         alpha_mode,
         double_sided: config.double_sided != 0,
         // A double-sided material still culls unless the back faces are kept, which
@@ -409,7 +408,7 @@ pub unsafe extern "C" fn bcs_render_material_read(handle: i32, out: *mut BcsMate
                         material.emissive.red,
                         material.emissive.green,
                         material.emissive.blue,
-                        material.emissive.alpha,
+                        material.emissive_exposure_weight,
                     ],
                     alpha_mode,
                     alpha_cutoff,

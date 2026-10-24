@@ -245,8 +245,8 @@ grep -rn "^\s*\(///\|//\|//!\) .* - \|\"[^\"]* - [^\"]*\"" --include=*.cs --incl
 
 # Colons inside a running sentence, in comments and scripts and in the prose of the Markdown files
 # outside their code. A label is correct, so the hits are read rather than counted.
-grep -rn "^\s*\(///\|//\|//!\|#\) .*[a-z)\`]: " --include=*.cs --include=*.rs --include=*.sh --include=*.py --include=*.yml .
-awk 'FNR == 1 { code = 0 } /^ *```/ { code = !code; next } !code && /[a-z)`]: /' README.md CHEATSHEET.md docs/*.md templates/README.md AGENTS.md .github/*.md
+grep -rn "^\s*\(///\|//\|//!\|#\) .*[a-z)\`>]: " --include=*.cs --include=*.rs --include=*.sh --include=*.py --include=*.yml .
+awk 'FNR == 1 { code = 0 } /^ *```/ { code = !code; next } !code && /[a-z)`>]: /' README.md CHEATSHEET.md docs/*.md templates/README.md AGENTS.md .github/*.md
 
 # The casual paraphrases the register replaces. A word in its technical sense, and a name, are
 # left, so each hit is read.

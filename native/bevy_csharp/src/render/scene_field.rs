@@ -40,7 +40,8 @@ pub struct BcsFieldDraw {
     /// The material's base color in linear light, white for a material the bridge cannot read.
     pub color: [f32; 4],
     /// The material's emission in linear light, in the units of the camera's picture as Bevy shows
-    /// it, times the camera's exposure by the share of it the emission's alpha sets.
+    /// it, times the camera's exposure by the share of it the material's `emissive_exposure_weight`
+    /// sets.
     pub emission: [f32; 4],
     /// The mesh's bounds in its own space, the least corner, then the greatest.
     pub low: [f32; 4],
@@ -319,11 +320,12 @@ mod built {
 
                 let standard = material.and_then(|material| materials.and_then(|materials| materials.get(&material.0)));
                 let color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
-                // Bevy shows an emission times the exposure by the share of it its alpha sets
-                // (pbr_functions' emissive_light), so global illumination carries it so.
+                // Bevy shows an emission times the exposure by the share of it the material's
+                // emissive_exposure_weight sets (pbr_functions' emissive_light), so global
+                // illumination carries it so.
                 let emission = standard.map_or([0.0; 4], |standard| {
-                    let [r, g, b, a] = standard.emissive.to_f32_array();
-                    let shown = 1.0 + (exposure - 1.0) * a;
+                    let [r, g, b, _] = standard.emissive.to_f32_array();
+                    let shown = 1.0 + (exposure - 1.0) * standard.emissive_exposure_weight;
                     [r * shown, g * shown, b * shown, 0.0]
                 });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());

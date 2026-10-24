@@ -47,9 +47,9 @@ internal static class Bloom3d
             WriteRest(ctx.Ecs);
 
             // Something bright in a dark place, to see the bloom.
-            var blue = Render.CreateMaterial(new MaterialSettings { Emissive = (0f, 0f, 150f, 1f) });
-            var white = Render.CreateMaterial(new MaterialSettings { Emissive = (1000f, 1000f, 1000f, 1f) });
-            var red = Render.CreateMaterial(new MaterialSettings { Emissive = (50f, 0f, 0f, 1f) });
+            var blue = Render.CreateMaterial(new MaterialSettings { Emissive = (0f, 0f, 150f, 0f) });
+            var white = Render.CreateMaterial(new MaterialSettings { Emissive = (1000f, 1000f, 1000f, 0f) });
+            var red = Render.CreateMaterial(new MaterialSettings { Emissive = (50f, 0f, 0f, 0f) });
             var black = Render.CreateMaterial(new MaterialSettings { BaseColor = (0f, 0f, 0f, 1f) });
 
             var mesh = Render.CreateMesh(MeshShape.Sphere, 0.4f);

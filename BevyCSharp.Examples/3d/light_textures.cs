@@ -92,7 +92,7 @@ internal static class LightTextures
 
         var ball = ecs.SpawnMesh(
             Render.CreateMesh(MeshShape.Sphere, 1f),
-            Render.CreateMaterial(new MaterialSettings { Emissive = Color.FromSrgb(0f, 0f, 300f) }),
+            Render.CreateMaterial(new MaterialSettings { Emissive = Color.FromSrgb(0f, 0f, 300f, 0f) }),
             Transform.Identity);
         ecs.SetParent(ball, pointParent);
 

@@ -176,7 +176,7 @@ public sealed class RayTracingTests
                 var wallMesh = Render.CreateMesh(MeshShape.Cuboid, 0.2f, 3f, 4f);
                 var wall = ecs.Spawn();
                 Render.SetMesh(ecs, wall, wallMesh);
-                Render.SetMaterial(ecs, wall, Render.CreateMaterial(new MaterialSettings { BaseColor = (0f, 0f, 0f, 1f), Emissive = (4000f, 0f, 0f, 1f) }));
+                Render.SetMaterial(ecs, wall, Render.CreateMaterial(new MaterialSettings { BaseColor = (0f, 0f, 0f, 1f), Emissive = (4000f, 0f, 0f, 0f) }));
                 ecs.Add(wall, Transform.At(-1.5f, 1.5f, 0f));
                 Render.SetRayTraced(wall, wallMesh);
             },
@@ -324,7 +324,7 @@ public sealed class RayTracingTests
                 Render.SetMaterial(ecs, wall, Render.CreateMaterial(new MaterialSettings
                 {
                     BaseColor = (0f, 0f, 0f, 1f),
-                    Emissive = (4000f, 0f, 0f, 1f),
+                    Emissive = (4000f, 0f, 0f, 0f),
                 }));
                 ecs.Add(wall, Transform.At(-1.5f, 1.5f, 0f));
 

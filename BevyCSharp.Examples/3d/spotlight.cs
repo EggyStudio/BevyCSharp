@@ -38,8 +38,8 @@ internal static class Spotlight
 
         var dot = Render.CreateMesh(MeshShape.Sphere, 0.05f);
         var pointer = Render.CreateMesh(MeshShape.Sphere, 0.1f);
-        var red = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f), Emissive = (1f, 0f, 0f, 1f) });
-        var maroon = Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb8(128, 0, 0), Emissive = (0.369f, 0f, 0f, 1f) });
+        var red = Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0f, 0f, 1f), Emissive = (1f, 0f, 0f, 0f) });
+        var maroon = Render.CreateMaterial(new MaterialSettings { BaseColor = Color.FromSrgb8(128, 0, 0), Emissive = (0.369f, 0f, 0f, 0f) });
 
         for (var x = 0; x < 4; x++)
         {

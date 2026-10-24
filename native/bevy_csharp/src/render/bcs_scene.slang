@@ -26,7 +26,8 @@ public struct Material
 {
     /// Linear, with alpha.
     public float4 base_color;
-    /// Linear, in the material's own units.
+    /// Linear nits, and in `w` the share of the camera's exposure the light takes, Bevy's
+    /// `emissive_exposure_weight`, 0 where it is shown as written and 1 where it is exposed.
     public float4 emissive;
     public float perceptual_roughness;
     public float metallic;

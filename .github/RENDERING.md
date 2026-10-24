@@ -290,10 +290,16 @@ the strip's 0.18 to 0.19 where 3DEngine's read 0.22, and the glowing blocks' 0.0
 13.2% over its reference at `High`, and 15.5% over with its lamp panel dark in both, so the excess
 is the probes' indirect light. In the feature test's Cornell box at 1280 by 720, 256 paths a pixel
 take 3.5 s through 14,260 meshes, and the walls read from 5% under to 17% over the reference, the
-lamp panel's light carried as a glow light. That reading also found Bevy's deferred lighting showing
-a material's emissive light unexposed, the alpha that applies the camera's exposure lost in the
-G-buffer, so the panel reads 40,053 where its reference reads 49, on every camera the field's
-shadows or global illumination make deferred.
+lamp panel's light carried as a glow light. A material's emissive alpha is Bevy's
+`emissive_exposure_weight`, the share of the camera's exposure its light takes, 0 by default as in
+Bevy, which the bridge gives Bevy's own field, since Bevy reads the weight there and not from the
+color's alpha, and which the field's gather and the reference take as Bevy shows it. Bevy's deferred
+G-buffer keeps the emissive color and not the weight, so a camera the field's shadows or global
+illumination make deferred showed an exposed emissive unexposed. The bridge mends Bevy's
+`deferred/functions.wesl` in the text Bevy ships (`render/mended.rs`), applying the exposure as the
+G-buffer is written, as the anisotropy mend does in `pbr_fragment.wesl`, and `DeferredEmissiveTests`
+holds an exposed panel drawn deferred to what forward shows and within 2% of its reference, where
+unmended it read 38,165 against 38.2.
 
 The emitters are 3DEngine's. The gather gives each mesh's emission in the picture's units as Bevy
 shows it, times the camera's exposure by the share of it the emission's alpha sets, the field paints

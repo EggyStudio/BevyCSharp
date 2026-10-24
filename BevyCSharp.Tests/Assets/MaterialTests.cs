@@ -185,7 +185,7 @@ public sealed class MaterialTests
             var sign = Render.CreateMaterial(new MaterialSettings
             {
                 Unlit = true,
-                Emissive = (2f, 0.5f, 0f, 1f),
+                Emissive = (2f, 0.5f, 0f, 0f),
                 AlphaMode = AlphaMode.Add,
             });
 

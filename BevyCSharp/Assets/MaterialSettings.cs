@@ -34,26 +34,27 @@ public sealed class MaterialSettings
     public float Roughness { get; set; } = 0.5f;
 
     /// <summary>
-    /// The surface's emissive light, which no lamp affects. Black by default.
+    /// The surface's emissive light, which no lamp affects, and in the alpha the share of the
+    /// camera's exposure it takes. Black and unexposed by default.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The three color channels are a luminance in nits, not a fraction of white, so the numbers
-    /// that read as bright are far larger than one. The alpha decides whether the camera's exposure
-    /// is applied to them, and at 1 it is. A camera left at Bevy's own exposure divides by about a
-    /// thousand, so 12 nits arrives as a hundredth of white and 12000 arrives as twelve times it.
-    /// It takes that much to blow out to white and to give bloom something to scatter.
-    /// </para>
-    /// <para>
-    /// Set the alpha to 0 to opt out of that scaling and have the numbers mean multiples of white
-    /// directly, which suits an effect tuned by eye rather than in physical units.
+    /// The alpha is Bevy's <c>emissive_exposure_weight</c>. At 0, Bevy's default and this one's,
+    /// the three color channels are the light as written, multiples of white, so 2 is twice white
+    /// and gives bloom something to scatter, which suits an effect tuned by eye and every emissive
+    /// of Bevy's own examples. At 1 they are a luminance in nits and the camera's exposure applies
+    /// to them as to every lamp, so the numbers that read as bright are far larger than one. A
+    /// camera left at Bevy's own exposure divides by about a thousand, so 12 nits arrives as a
+    /// hundredth of white and 12000 as twelve times it, and a lamp's panel of 40000 nits sits
+    /// beside a lamp of a few hundred thousand lumens as it would in the world. Values between take
+    /// that share of the exposure.
     /// </para>
     /// <para>
     /// Nothing here is drawn on a material that is also <see cref="Unlit"/>, because Bevy adds
     /// the emission as part of the lighting that flag skips.
     /// </para>
     /// </remarks>
-    public (float R, float G, float B, float A) Emissive { get; set; } = (0f, 0f, 0f, 1f);
+    public (float R, float G, float B, float A) Emissive { get; set; } = (0f, 0f, 0f, 0f);
 
     /// <summary>What to do where the material is not fully opaque.</summary>
     public AlphaMode AlphaMode { get; set; } = AlphaMode.Opaque;
