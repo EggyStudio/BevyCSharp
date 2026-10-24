@@ -299,6 +299,10 @@ and 1.4 at `High`, and the pass 0.23 ms at its least at 1280 by 720 and 1.1 at i
 `./bcs command gi.state` says what the probes hold, `gi.set` changes the quality on a running app,
 and the feature test's graphics page has a row for it.
 
+`./bcs command gi.reference shots/reference.png 256` path traces the camera's picture through the
+GPU's rays where it has them, and `gi.compare shots/reference.png` says how far the picture lies
+from it, region by region, with a picture of the difference beside it.
+
 ---
 
 Before this, [Reflections and the sky](sky-and-reflections.md).

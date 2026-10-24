@@ -10,31 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `0f0be8f0`, item 51's first commit, the world's probes and their tracing, with the
-devlog's move to DEVLOG.md at the root and AGENTS.md's row on the owner's word, Decision 59, and
-nothing else, carrying the review's files, ABI 304: the field's splat painting each cell its nearest
-triangle's color and the resolve and stamp writing the color and the face's way, SetSceneField's far
-cascade as 3DEngine's held to the camera's far plane, nine cascades in the info; bcs_gi.slang a
-bridge module with the trace, merge and gather kernels as 3DEngine's with the mends to date, run by
-WorldProbes, driven and said by gi.set and gi.state, the lights gathered as the sun, the ambient
-light and the sixteen lamps nearest the camera in Bevy's units times the exposure; departures, the
-probes' light and partial sums in storage buffers since a half-float image is not read and written
-in one dispatch and the trace's sum of 27 probes in uniform control flow, the spot's cone Bevy's
-falloff and the lamps the nearest sixteen, the sky the ambient light's color until the third commit
-brings the environment map, the glow lights and the emissive surfaces, Render.SetGlobalIllumination
-internal until the second commit's pass makes the light visible, and the distant ambient a per-pixel
-term coming with that pass; six tests, a probe toward a black wall holding 1.12 of a sky of pi with
-the far cascade where 3DEngine read 1.14; a cascade's trace 0.33 to 0.36 ms on the 4070, Low about
-0.9 ms and High 1.8. The suite 1,737 passed, the Cargo tests, the three profiles and the cross
-checks clean. Read at 08:19 on 2026-10-24 and pushed at once, no run of main in flight; its run
-green on the three systems at 08:44. Next the pass and the reference, item 51's second commit, then
-its third.
+Reviewed up to `07863068`, item 51's second commit, the pass, and nothing else, carrying the
+denoiser's picture, the twelve readings, DEVLOG.md, the review's files and a Shared line:
+gi_light.slang after the opaque geometry taking back Bevy's ambient diffuse from the G-buffer and
+adding the diffuse times the probes' light times the occlusion, with the sky over a ground past the
+last cascade, Render.SetGlobalIllumination public with the feature test's row; the departure the
+probes' sky at the ambient light times 0.45, the share Bevy's ambient term returns; the white
+block's side 237, 136, 132 with the pass and 75 gray without, the open floor 92 both ways, eight GI
+tests; the probes 0.9 ms at Low to 1.4 at High in a Cornell box at 1280 by 720 on the 4070, the pass
+0.23 ms least and 1.1 median, timed in a scene of its own since the feature test spends Bevy's 256
+timestamps. The suite 1,739 passed. Read at 09:24 on 2026-10-24 and pushed at once, the run of
+`0f0be8f0` having ended green; its own run green on the three systems at 09:42. Next the reference,
+gi.reference and gi.compare over a geometry pool and a ray scene of the drawn meshes with the bounce
+rooms, in a commit of its own, then item 51's third, the glossy term and the emitters.
+
+Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
+2026-10-24, its run green on the three systems.
 
 Before it, `750c9cbc` came, item 59, pushed at 07:18 on 2026-10-24, its run green on the three
 systems.
-
-Before it, `c770351f` came, item 54's readings, pushed at 03:47 on 2026-10-24, its run green on the
-three systems.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -253,7 +247,9 @@ from [SHARED.md](SHARED.md).
     74 are mended and on its main on 2026-10-24 and the voxel game's pictures retaken that day, so
     the wait ends by the reviewer's reading of the owner's condition, the owner's to overrule; the
     item starts at 07:2x with its first commit, the probes and their tracing. The first commit at
-    `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the head.
+    `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the head. The pass at `07863068`,
+    pushed at 09:24, the sky's share departure in the head; the reference in a commit of its own
+    next.
 
 52. **The screen's probes, the glow lights and the counted meshes, 3DEngine's third phase and its
     mends of 2026-10-21 (Decision 51).** The screen's probes standing on the window's surfaces every
@@ -1401,3 +1397,20 @@ probes take 0.9 ms at `Low`, 1.2 at `Medium` and 1.4 at `High`, and the pass 0.2
 and 1.1 at its median over 600 frames; in the feature test the pass's span reads no GPU time, where
 Bevy keeps no more than 256 timestamps a frame. The path-traced reference with `gi.reference` and
 `gi.compare` follows in a commit of its own.
+
+Shared: global illumination's path-traced reference, in the commit carrying this line, item 51's
+second part's reference in a commit of its own. 3DEngine's gi_reference over a ray scene of the
+meshes the camera draws, built on the geometry pool with the engine's instance and material buffers,
+run as an engine dispatch on the camera in SPIR-V, the first face lit as Bevy lights it and every
+face after as the probes do, `gi.reference` and `gi.compare` as 3DEngine's with the camera's light
+before tonemapping read through a copy that also reads the picture's size. The departures are that a
+texture counts as its base color, a mesh's vertices' colors are left out, the sky is the light from
+all around, and a point light's shadow starts a tenth of a unit from it as Bevy's maps do, since the
+carried lamp's bulb would otherwise shadow its whole room. The bounce rooms are `BounceRoomsTests`
+with 3DEngine's rule, the views 0.11, 0.12, 0.25, 0.11 to 0.12, 0.02, 1.00, 0.05 to 0.07, 0.06 and
+0.30 from their references, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30,
+0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06, the strip's and the glowing blocks' wide
+until the emitters come, and the Cornell box's floor 2.5% under its reference at `High`. Bevy's
+deferred lighting shows a material's emissive light unexposed, its alpha lost in the G-buffer, so
+the feature test's lamp panel reads 40,053 where its reference reads 49 on a camera the field's
+shadows or global illumination make deferred, which is this engine's alone.

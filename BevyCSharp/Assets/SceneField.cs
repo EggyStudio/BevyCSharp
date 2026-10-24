@@ -128,6 +128,9 @@ internal static unsafe partial class SceneField
     /// <summary>The camera the contact shadows and global illumination's light are drawn on, or none.</summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
 
+    /// <summary>The camera the field lies around this frame, or none where it lies around none.</summary>
+    internal static Entity ViewCamera => ReferenceEquals(_app, App.Running) ? _drawFor.Camera : Entity.None;
+
     /// <summary>How many cascades the last frame built.</summary>
     internal static int BuiltLastFrame => ReferenceEquals(_app, App.Running) ? _built?.BuiltThisFrame ?? 0 : 0;
 
@@ -293,8 +296,8 @@ internal static unsafe partial class SceneField
     /// and global illumination's probes are built and traced with.
     /// </summary>
     // Named by its file, so its GPU time reads as shader field_splat and the like.
-    internal static ShaderProgram KernelProgram(string file) =>
-        Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) } });
+    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl) =>
+        Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) }, ComputeTarget = target });
 
     /// <summary>An instance of one of the library's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
     internal static ShaderInstance Draw(string file)

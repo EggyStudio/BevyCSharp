@@ -255,6 +255,34 @@ its median over 600 frames at 1280 by 720 in a Cornell box on the same GPU, wher
 time, where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its
 own. `Render.SetGlobalIllumination` is public with it, and the glossy term and the emitters follow.
 
+The reference global illumination is measured against is 3DEngine's (`GiReference`,
+`gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
+a geometry pool with the engine's instance and material buffers. It lights the first face a path
+meets as Bevy's lighting does, Burley's diffuse term and the specular lobe by the material's
+roughness, metallic and reflectance, and every face after as the probes do, with the probes' own
+lights and the light from all around where a path meets nothing, and a point light's shadow starts a
+tenth of a unit from it as Bevy's shadow maps do. It runs as a dispatch on the camera, compiled to
+SPIR-V for its ray queries, a share of the paths each frame, and the engine's dispatches on a camera
+are kept apart from the program's as its draws are. `gi.reference <png> <samples> [bounces]` writes
+it with its linear light, its regions and their names, and `gi.compare <png>` reads the camera's
+light before tonemapping and says how far the view lies from it, the pixels' differences summed over
+the reference's light, with each region's mean light against the reference's and a picture of the
+difference. A texture counts as its material's base color and a mesh's vertices' colors are left
+out, and the sky is the light from all around rather than an environment map's, so a textured ground
+or a drawn sky reads apart from its reference. The bounce rooms are a test (`BounceRoomsTests`), the
+nine views at each quality held within 15% over what they read, 0.11 in the Cornell box, 0.12 in the
+thin room, 0.25 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls, 0.05 to
+0.07 on the grazing floor and 0.06 in the carried lamp's, where 3DEngine's read 0.12 to 0.14, 0.09,
+0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12, and the strip's and the glowing
+blocks' at 1.00 and 0.30 until the emitters come. A mend that widens no view keeps every bound,
+3DEngine's rule. The Cornell box's floor reads 2.5% under its reference at `High`. In the feature
+test's Cornell box at 1280 by 720, 256 paths a pixel take 3.5 s through 14,260 meshes, and the walls
+read 26 to 45% under the reference, which takes in the lamp panel's emissive light the probes do not
+carry yet. That reading also found Bevy's deferred lighting showing a material's emissive light
+unexposed, the alpha that applies the camera's exposure lost in the G-buffer, so the panel reads
+40,053 where its reference reads 49, on every camera the field's shadows or global illumination make
+deferred.
+
 ## What Unity made them work around, and the hook that replaces each
 
 | built around | supported here as |

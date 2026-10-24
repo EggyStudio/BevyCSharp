@@ -141,13 +141,15 @@ public static unsafe partial class Shaders
         SubmitPrepass(camera);
     }
 
-    // What the program asked of each camera's prepass and its draws, and what the engine asks
-    // beside them, for the scene's distance field's contact shadows, by the camera's bits. The
-    // bridge takes a camera's whole prepass and whole list of draws at once, so the engine's are
-    // kept apart and handed over with the program's, and neither one's call takes the other's away.
+    // What the program asked of each camera's prepass, its draws and its dispatches, and what the
+    // engine asks beside them, for the scene's distance field's contact shadows, global
+    // illumination's light and its reference, by the camera's bits. The bridge takes a camera's
+    // whole prepass and whole lists at once, so the engine's are kept apart and handed over with the
+    // program's, and neither one's call takes the other's away.
     private static App? _viewsApp;
     private static readonly Dictionary<ulong, uint> ProgramPrepasses = [], EnginePrepasses = [];
     private static readonly Dictionary<ulong, ViewDraw[]> ProgramDraws = [], EngineDraws = [];
+    private static readonly Dictionary<ulong, ViewDispatch[]> ProgramDispatches = [], EngineDispatches = [];
 
     // What a camera of an app before this one asked for, which names no camera of this one.
     private static void ForgetOtherApps()
@@ -158,6 +160,8 @@ public static unsafe partial class Shaders
         EnginePrepasses.Clear();
         ProgramDraws.Clear();
         EngineDraws.Clear();
+        ProgramDispatches.Clear();
+        EngineDispatches.Clear();
     }
 
     /// <summary>
@@ -436,18 +440,42 @@ public static unsafe partial class Shaders
     {
         ArgumentNullException.ThrowIfNull(dispatches);
 
-        var native = new NativeViewDispatch[dispatches.Length];
-
         for (var i = 0; i < dispatches.Length; i++)
         {
-            var dispatch = dispatches[i];
-
-            if (!dispatch.Instance.IsValid)
+            if (!dispatches[i].Instance.IsValid)
             {
                 throw new ArgumentException(
                     $"Dispatch {i} has no instance. Make one with Shaders.CreateInstance.",
                     nameof(dispatches));
             }
+        }
+
+        ForgetOtherApps();
+        ProgramDispatches[camera.Bits] = [.. dispatches];
+        SubmitDispatches(camera);
+    }
+
+    /// <summary>
+    /// Replaces the compute shaders the engine runs on a camera beside the program's own, which run
+    /// first at each frame point, none taking the program's away. Only valid inside a system.
+    /// </summary>
+    internal static void SetEngineViewDispatches(Entity camera, params ViewDispatch[] dispatches)
+    {
+        ForgetOtherApps();
+        if (dispatches.Length == 0) EngineDispatches.Remove(camera.Bits);
+        else EngineDispatches[camera.Bits] = dispatches;
+        SubmitDispatches(camera);
+    }
+
+    // Hands the bridge a camera's dispatches, the engine's and then the program's.
+    private static void SubmitDispatches(Entity camera)
+    {
+        ViewDispatch[] dispatches = [.. EngineDispatches.GetValueOrDefault(camera.Bits) ?? [], .. ProgramDispatches.GetValueOrDefault(camera.Bits) ?? []];
+        var native = new NativeViewDispatch[dispatches.Length];
+
+        for (var i = 0; i < dispatches.Length; i++)
+        {
+            var dispatch = dispatches[i];
 
             ref var entry = ref native[i];
             entry.Instance = dispatch.Instance.Id;

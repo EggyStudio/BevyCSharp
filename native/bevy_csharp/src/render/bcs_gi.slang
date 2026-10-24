@@ -108,7 +108,7 @@ public struct GiLights
 {
     /// xyz: the way toward the sun. w: 1 where there is a sun.
     public float4 sunDirection;
-    /// rgb: the light a white surface facing the sun returns.
+    /// rgb: the light a white surface facing the sun returns. w: 1 where it casts shadows.
     public float4 sunColor;
     /// rgb: the light from all around where a ray reaches nothing.
     public float4 sky;
@@ -144,7 +144,7 @@ public float traceField(Texture3D<float> field, SamplerState linear, FieldInfo i
 
 /// How much of a spot light's light reaches a point the way `l` from it points, as Bevy's lighting
 /// falls off from the inner cone to the outer, and all of a point light's.
-float spotShare(GiLight light, float3 l)
+public float spotShare(GiLight light, float3 l)
 {
     if (int(light.positionAndKind.w) != 2)
         return 1.0;
@@ -154,7 +154,7 @@ float spotShare(GiLight light, float3 l)
 
 /// The light a point or spot light sends a surface at `p` facing `n`, falling off with distance and
 /// toward its range as Bevy's lighting has it, unshadowed.
-float lampLight(GiLight light, float3 p, float3 n)
+public float lampLight(GiLight light, float3 p, float3 n)
 {
     float3 toLight = light.positionAndKind.xyz - p;
     float distance2 = max(dot(toLight, toLight), 1e-4);

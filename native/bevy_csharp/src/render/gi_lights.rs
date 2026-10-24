@@ -44,7 +44,7 @@ pub struct BcsGiLight {
 pub struct BcsGiLights {
     /// xyz: the way toward the sun. w: 1 where there is a sun.
     pub sun_direction: [f32; 4],
-    /// rgb: the light a white surface facing the sun returns, exposed.
+    /// rgb: the light a white surface facing the sun returns, exposed. w: 1 where it casts shadows.
     pub sun_color: [f32; 4],
     /// rgb: the light from all around, which a ray meeting nothing brings back, exposed.
     pub sky: [f32; 4],
@@ -105,7 +105,7 @@ fn gather(world: &mut bevy::ecs::world::World) -> BcsGiLights {
     {
         let color = sun.color.to_linear().to_vec3() * (sun.illuminance / PI * exposure);
         lights.sun_direction = place.back().as_vec3().extend(1.0).to_array();
-        lights.sun_color = color.extend(0.0).to_array();
+        lights.sun_color = color.extend(if sun.shadow_maps_enabled { 1.0 } else { 0.0 }).to_array();
     }
 
     // The camera's ambient light, or the world's, as much of it as Bevy's lighting returns from a
