@@ -91,8 +91,7 @@ def metadata():
         ["cargo", "metadata", "--format-version", "1", "--locked", "--all-features", "--manifest-path", MANIFEST],
         check=True, capture_output=True, text=True)
     meta = json.loads(answer.stdout)
-    # The bridge alone, and not every member, since the weather is vendored into the workspace and
-    # stays its authors' under its own license.
+    # The bridge left out, which is this repository's own under its license.
     return [package for package in meta["packages"] if package["name"] != "bevy_csharp"]
 
 

@@ -10,33 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4cc89851`, item 69's sixth phase, the thunder, pushed at 08:51 on 2026-10-25 after
-the run of `6795478f` went green, its own run green at 09:13, carrying the review's files, two
-pictures with captions and a Shared line, no native change. Render.SetThunder and
-Render.StrikeLightning with ThunderSettings and a LightningStrike record, Struck a callback with the
-strike's place, distance, thunder delay and whether it went to the ground, SetWeather taking the
-weather's thunder rate, a sky.strike command with its BCS.md row and sky.weather saying the strikes
-a minute. The strikes are a Poisson process, area-uniform between Nearest and Farthest, two in three
-to the ground, the flicker the crate's envelope; the flash moves a point light set through the
-reflected PointLightRef when its intensity changes, a glow in the clouds' march, a bell 600 m wide
-at the base plus 300 m with the march's history off while it flashes, and a bolt of 128
-midpoint-displaced segments and three to six branches drawn added at AfterTemporalAntialiasing and
-fading into the cloud base, 0.02 ms of the GPU while it flashes; the thunder is synthesized into
-pooled sample streams a sixth of a second ahead and falls silent where the app has no audio. One
-departure, the bolt's program made when the storm is set rather than at the first strike, since the
-night scratch showed no bolt while it compiled. ThunderTests, 6, read the flash's envelope, the
-Poisson mean of the gaps at 10 s for six a minute, the bolt's channel and branches, far thunder
-longer, quieter and lower than near by its zero crossings, a night strike lighting the ground and
-drawing its bolt with Struck giving the distance and the delay, and refused settings,
-SkyWeatherTests reading the storm's rate. Seen once and not in two more runs, four of the feature
-test's own shaders reported unreadable at frame 194 in a run after a build, the files untouched
-here. 1,903 passed, 3 skipped, 1,906 the listing plus 11.
+Reviewed up to `5a8c6251`, item 69's seventh phase, the sky and the clouds in the environment map,
+pushed at 10:10 on 2026-10-25 after the run of `4cc89851` went green, its own run green at 10:28 as
+the whole suite's check of the rewrite, carrying the review's files, a captioned picture and a
+Shared line, ABI 309. Bevy's atmosphere draws the sky into the cube its lighting is filtered from
+after the prepass, the next frame filtering it, and where the camera is lit by the sky the clouds
+add dispatches after the prepass, sky_copy copying the cube since a pass cannot read and write it at
+once, the picture's march reading its clear sky from the copy, sky_clouds marching a 64-texel cube
+of six 3D slices twice a texel at jitters 0.25 and 0.75 averaged, and sky_merge writing the clouds
+plus the transmittance times the clear sky back into the cube; the native's sky_lighting_cube gives
+the generated map's key where the atmosphere's map light is on the camera alone, never a program's
+own image, and values.rs binds a cube image as a 2D-array storage view through level_of taking an
+optional dimension; a strike's flash goes into the cube's march too. 0.18 ms of the GPU, the cube's
+march 0.10, the copy and the merge 0.04 each, the froxels 0.15 with the averaged horizon. CloudTests
+reads a wall facing away from the sun at 0.059 blue under the clear sky and -0.04 under a full deck.
+Two departures. The clouds lit by the clouded map turned brown, lit by their own undersides, so both
+marches read the clear sky from the copy made before them; and vertical stripes across the overcast,
+traced by switching each suspect off to the fog's horizon color, the froxels' and sky_fog's skyAlong
+reading the map nearly sharp at the horizon by azimuth where the map holds the deck's structure,
+averaging five reads over 15 degrees of azimuth either side at the same height, rougher reads
+bringing back the seam from the ground of item 64's second part. values.rs reached 808 lines on the
+first suite, failing N 1.3, and was brought to 800 by routing the view through level_of, nothing
+added to build/norm; the first full suite 1,903 passed, 3 skipped and that one failure, 1,907 the
+listing plus 11, and after the rewrite the norm, cloud, fog, weather, compute, view-draw and
+shader-material tests, 89, so the run is the whole suite's check of the rewrite; the bridge's checks
+clean on every profile, Cargo 118, 199 and 11 before and after.
+
+Before it, `4cc89851` came, item 69's sixth phase, the thunder, pushed at 08:51 on 2026-10-25, its
+run green at 09:13.
 
 Before it, `6795478f` came, item 72, the feature test's sample behaviors deleted, pushed at 08:27 on
 2026-10-25, its run green at 08:44.
-
-Before it, `4ac3871a` came, item 69's fourth phase, the weather state, pushed at 06:30 on
-2026-10-25, its run green at 06:53.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -280,7 +284,10 @@ from [SHARED.md](SHARED.md).
     proposed, the sky and the clouds rendered into the environment map's cube so an overcast grays
     the ground and the falling drops rather than darkening their blue, then the crate's removal. The
     sixth phase at `4cc89851` on 2026-10-25, the thunder, the bolt's program made with the storm as
-    its departure; the seventh next, the sky and the clouds into the environment map's cube.
+    its departure; the seventh next, the sky and the clouds into the environment map's cube. The
+    seventh phase at `5a8c6251` on 2026-10-25, the sky and the clouds in the environment map's cube
+    so an overcast grays the ground, two departures in the head; the eighth next, the crate's
+    removal.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -356,6 +363,28 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
+
+73. **A capture shard's container reaps its children, and the four idle shards go.** From the
+    question of 2026-10-25 at about 10:24 whether headless instances pile up over days. They do not;
+    no game or engine runs headless on the machine beyond the suite running at the moment. But four
+    podman containers named shard1 to shard4, started at about 00:00 on 2026-10-20 for the examples'
+    captures, stand with sleep infinity as their first process, which reaps nothing, so about six
+    hundred finished children, 408 shells, 183 BevyCSharp.Examples and 4 dotnet, all from 01:08 to
+    01:39 that night, stand as defunct entries in the process table to this day, holding no memory
+    and no GPU. The four containers are removed once nothing uses them, and the script that starts a
+    shard gives it an init, podman's --init or a shell that waits on its children, so a shard's
+    children are reaped; a line in the script says why. One commit, with or before item 69's eighth
+    phase. Read at 10:34, the shards are not in use; they were started by hand on 2026-10-20 at
+    01:07 with podman run and sleep infinity, a work script run in each by podman exec, and no
+    script in the repository starts a shard, capture-in-fedora.sh running podman with --rm and
+    ending with its work, so no repository line takes an init. Each shard holds an idle dotnet and
+    VBCSCompiler from that night beside the defunct entries. The coder's removal was refused by its
+    session's permission check and the owner is asked to remove them or allow it; the rule, a work
+    container started with --init and removed as its work ends, goes into BUILDING.md's local
+    recipes in one sentence, with the crate's removal. Removed at 10:37 on 2026-10-25 by the owner's
+    leave, podman killing sleep after ten seconds since it ignores the term signal, the defunct
+    entries gone with them and three unrelated ones left; the sentence stands in BUILDING.md's
+    caches section and goes with the crate's removal, which closes this item.
 
 ## Verdicts
 
@@ -1815,3 +1844,21 @@ gives a cube image for a storage binding at ABI 309, with `bcs_render_sky_lighti
 managed side the atmosphere's cube alone. The fog's horizon color is read sharp at five ways over
 thirty degrees and averaged, since the clouds along the horizon otherwise stood up the picture as
 stripes through the froxels. Some 0.18 ms of the GPU at 1280 by 720.
+
+Item 73: the four shards were started by a command typed on 2026-10-20 at 01:07, `podman run -d
+--name shardN --memory 16g -v ~/.cache/bevycsharp/shard-N:/work:z fedora:44 sleep infinity` and a
+`podman exec` of a work script kept in each shard's own folder, and no script of the repository
+starts a shard, so there is no line to give an init. Nothing uses them; each holds the idle dotnet
+and VBCSCompiler of that night beside the defunct. `podman rm -f` of the four was refused by this
+run's permissions until the owner allowed it, and the four were removed at 10:37 on 2026-10-25,
+their defunct entries with them. A container started for work from here is started with `--init`
+and removed as its work ends, as BUILDING.md's caches section says.
+
+Shared: the weather crate's removal, in the commit carrying this line, item 69's last phase.
+native/bevy_weather leaves the workspace with its lock entry, and the bridge loses its render
+profile's dependency, `render::weather` with `bcs_weather_active` and `bcs_weather_set_preset`, and
+`BcsConfig.weather`, at ABI 310. `Config.Weather` and the `Weather` facade leave the managed side,
+`WeatherPreset` staying as the engine's presets. The component list, written again from an editor
+build, loses the crate's 284 lines, and `Bevy.Reflected` the 530 lines of its wrappers. The feature
+test's weather is the engine's alone, its tier gone from the page, the settings and the drive, and
+the guide's section on the weather is the engine's.

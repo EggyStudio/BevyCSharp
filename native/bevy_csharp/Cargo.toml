@@ -124,11 +124,6 @@ render = [
     # wgpu's counts of the GPU's buffers, textures, pipelines and memory, which the memory command
     # says beside the bridge's own, at the cost of a count kept as each is made and dropped.
     "wgpu/counters",
-    # Weather and a sky around Bevy's atmosphere, clouds, fog, rain, snow and thunder, with stars
-    # and a moon, which an app asks for with `Config.Weather`. Its thunder plays through Bevy's
-    # audio, which this profile carries.
-    "dep:bevy_weather",
-    "bevy_weather/audio",
     # Reading the WGSL a Slang shader compiles to, to check its bindings before a pipeline is
     # built with them. Bevy already depends on this version with this feature, so it adds nothing
     # to the build.
@@ -287,8 +282,6 @@ serde_json = "1"
 # re-exports the reflect serializers but not the trait their seed implements.
 serde = "1"
 wgpu = { version = "30", default-features = false, optional = true }
-# The weather behind `Config.Weather`, vendored as a member of the workspace.
-bevy_weather = { path = "../bevy_weather", default-features = false, optional = true }
 # Named directly for two things Bevy does not reach, on every platform, a window's icon, which
 # winit sets on its own window (`Icon`, `set_window_icon`) and Bevy's `Window` carries none of,
 # and on Linux and the BSDs Wayland loaded at runtime. Bevy's `wayland` feature switches on

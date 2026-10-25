@@ -243,6 +243,56 @@ lit from the sun's way, so its phase is the clock's. The clouds and the fog lie 
 they are lit by whichever directional light gets most through the air, so at night the moon lights
 them.
 
+A painted sky is a cubemap instead:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightness: 1500f);
+```
+
+The file is six square faces, in a column, which is the layout most cubemap textures ship in, in a
+row, or in a horizontal or vertical cross, as cubemaps exported from a painting tool often are. The
+shape says which, and it is turned into a cube once it has decoded. A cubemap shipped as six files
+is put together with `Render.CubemapFromFaces(px, nx, py, ny, pz, nz)`, whose handle can be given
+to the skybox at once. `brightness` is in candelas per square meter like the rest
+of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
+night sky and comes out black. A skybox is seen behind the scene and does not light it.
+
+The same file can light it, though, for a scene lit from a photograph of a real place:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), intensity: 3000f);
+```
+
+The cubemap is filtered on the GPU into the blurred versions a surface reflects, so a rough material
+picks up the average color around it and a polished one picks up a recognizable reflection, with no
+bake step and no second file. `rotation` turns the environment without touching the scene. Each face
+has to be square and a power of two, and the light waits for the image to decode before it is
+applied, so a handle asked for in the same frame the camera is spawned works.
+
+`Render.SetEnvironmentMap` is the other end of that, taking the two maps a baking tool already
+produced rather than filtering one at startup:
+
+<!-- compiled with:
+Entity camera = default;
+AssetHandle diffuse = default, specular = default;
+-->
+```csharp
+Render.SetEnvironmentMap(camera, diffuse, specular, intensity: 3000f);
+```
+
+The first is the blurred map a rough surface reflects and the second the sharp one a polished
+surface reflects. It costs nothing at startup, which suits a shipped game and an environment too
+large to filter again. Passing `AssetHandle.None` for either takes the lighting off, since a baked
+map is the pair and half of one is not a weaker version of it.
+
+### The weather
+
 Rain and snow fall about the camera:
 
 <!-- compiled with:
@@ -324,90 +374,7 @@ clouds take the cover, the deck, the base, the top, the density and the wind, th
 some eighty meters as the weather's fog thickens, and its froxels drift on the same wind, and it
 rains and snows as hard as the weather does, on the gusting wind, and lightning strikes as often as
 its `Thunder` says. Any set of settings can be none, and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
-the forecast, while the app runs.
-
-A painted sky is a cubemap instead:
-
-<!-- compiled with:
-Entity camera = default;
--->
-```csharp
-Render.SetSkybox(camera, AssetServer.Load(AssetKind.Image, "sky.png"), brightness: 1500f);
-```
-
-The file is six square faces, in a column, which is the layout most cubemap textures ship in, in a
-row, or in a horizontal or vertical cross, as cubemaps exported from a painting tool often are. The
-shape says which, and it is turned into a cube once it has decoded. A cubemap shipped as six files
-is put together with `Render.CubemapFromFaces(px, nx, py, ny, pz, nz)`, whose handle can be given
-to the skybox at once. `brightness` is in candelas per square meter like the rest
-of the lighting, so the useful numbers are in the hundreds or thousands; a brightness of one is a
-night sky and comes out black. A skybox is seen behind the scene and does not light it.
-
-The same file can light it, though, for a scene lit from a photograph of a real place:
-
-<!-- compiled with:
-Entity camera = default;
--->
-```csharp
-Render.SetImageLighting(camera, AssetServer.Load(AssetKind.Image, "sky.png"), intensity: 3000f);
-```
-
-The cubemap is filtered on the GPU into the blurred versions a surface reflects, so a rough material
-picks up the average color around it and a polished one picks up a recognizable reflection, with no
-bake step and no second file. `rotation` turns the environment without touching the scene. Each face
-has to be square and a power of two, and the light waits for the image to decode before it is
-applied, so a handle asked for in the same frame the camera is spawned works.
-
-`Render.SetEnvironmentMap` is the other end of that, taking the two maps a baking tool already
-produced rather than filtering one at startup:
-
-<!-- compiled with:
-Entity camera = default;
-AssetHandle diffuse = default, specular = default;
--->
-```csharp
-Render.SetEnvironmentMap(camera, diffuse, specular, intensity: 3000f);
-```
-
-The first is the blurred map a rough surface reflects and the second the sharp one a polished
-surface reflects. It costs nothing at startup, which suits a shipped game and an environment too
-large to filter again. Passing `AssetHandle.None` for either takes the lighting off, since a baked
-map is the pair and half of one is not a weaker version of it.
-
-### The weather
-
-The weather is a sky around Bevy's atmosphere, with clouds marched through a shell over the planet
-and their shadows on the ground, fog, rain, snow and thunder, stars, a galaxy and a moon with its
-phase, from the `bevy_weather` crate the bridge's render profile carries, kept in the bridge's own
-source. `Config.Weather` asks for it, and a camera sees it once it carries `WeatherCameraRef`:
-
-<!-- compiled with:
-Entity camera = default;
--->
-```csharp
-ctx.Ecs.Insert<WeatherCameraRef>(camera);
-var clock = ctx.Ecs.Resource<WeatherTimeRef>()!.Value;
-clock.Latitude = 52f;
-clock.TimeOfDay = 0.75f;                                        // six in the evening
-var forecast = ctx.Ecs.Resource<ProceduralWeatherRef>()!.Value;
-forecast.Enabled = false;                                       // so a preset holds
-Weather.SetPreset(WeatherPreset.Rain);                          // eased into
-```
-
-The weather brings a planet with its atmosphere, so a weather camera needs no `SetAtmosphere`, and a
-sun and a moon, made where the app has marked none of its own lights with `SunLightRef` or
-`MoonLightRef`. A light marked so is steered across the sky from then on. The clock runs a day in
-`DayLengthSecs` unless it is `Paused`, `TimeOfDay` running from midnight at zero through noon at a
-half, and the forecast writes the conditions from it while `ProceduralWeatherRef.Enabled` is on, so
-the same clock gives the same sky on every machine. With the forecast off, a preset or the
-conditions themselves (`WeatherRef.TargetCloudCoverage` and the rest) say what the weather eases
-toward. `WeatherConfigRef.Quality` is one tier, from `Potato` to `Ultra`, over the clouds' samples,
-the fog and the particles, with a switch for each part beside it.
-
-The weather puts on each weather camera the exposure its sky is calibrated for, and leaves the
-tonemapper and the bloom to `SetPostProcessing`. A headless app has no weather, and an app where
-meshlets run has none either, since a camera under its atmosphere would end the app there, which
-`Weather.Active` reports. What it costs is in [Compared with Bevy](compared-with-bevy.md).
+the forecast, while the app runs. What it costs is in [Compared with Bevy](compared-with-bevy.md).
 
 ### Light probes
 

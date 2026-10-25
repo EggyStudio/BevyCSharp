@@ -136,10 +136,8 @@ public partial struct DayNight
         });
         ctx.Ecs.SetName(_moon, "Moon");
 
-        // The weather's moon where it runs, which it steers from then on, so it makes none of its
-        // own, and elsewhere a light with no disc, the night sky drawing the moon's.
-        if (Weather.Active) ctx.Ecs.Insert<MoonLightRef>(_moon);
-        else Render.SetSunDisk(_moon, SunDisk.Off);
+        // A light with no disc, the night sky drawing the moon's.
+        Render.SetSunDisk(_moon, SunDisk.Off);
         Turn(ctx);
     }
 
@@ -153,12 +151,6 @@ public partial struct DayNight
         Sky.Latitude = settings.Latitude;
         Sky.Advance(settings.DaySpeed * ctx.Time.Delta / 60f);
         var hour = Sky.Hour;
-
-        if (Weather.Active)
-        {
-            Hand(ctx.Ecs, settings.Latitude);
-            return;
-        }
 
         var sun = Sky.SunDirection;
         var moon = Sky.MoonDirection;
@@ -193,20 +185,6 @@ public partial struct DayNight
     {
         Sky.Latitude = settings.Latitude;
         return Cycle.At(Sky.SunAltitude);
-    }
-
-    /// <summary>
-    /// Sets the weather's clock to this hour and latitude, held still between frames.
-    /// </summary>
-    private static void Hand(EcsWorld ecs, float latitude)
-    {
-        if (ecs.Resource<WeatherTimeRef>() is not { } clock) return;
-
-        var day = Sky.Hour / 24f;
-        if (!clock.Paused) clock.Paused = true;
-        if (MathF.Abs(clock.TimeOfDay - day) > 1e-6f) clock.TimeOfDay = day;
-        if (clock.Latitude != latitude) clock.Latitude = latitude;
-        if (clock.AxialTilt != 0f) clock.AxialTilt = 0f;
     }
 
     /// <summary>

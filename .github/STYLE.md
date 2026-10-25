@@ -253,8 +253,8 @@ awk 'FNR == 1 { code = 0 } /^ *```/ { code = !code; next } !code && /[a-z)`>]: /
 git grep -n -i -E "light that bounces|the bounce|bounc(e|es|ing) (no )?light|give[sn]? off|gave off|glowing|\bdriv(e|en|es|ing)\b" -- ':!.github/REVIEW.md'
 
 # The likenesses and idioms the register replaces. A word in its literal sense is left, so each hit
-# is read, and the vendored weather crate and the third-party notices are their authors' text.
-git grep -n -i -E "in the manner of|ground floor|out of the box|under the hood|at a glance|a handful of|a great deal of|in the wild|\bknobs?\b|plumbing|wiring|wired up|escape hatch|for free|a long way" -- ':!.github/REVIEW.md' ':!native/bevy_weather' ':!THIRD-PARTY-NOTICES.md'
+# is read, and the third-party notices are their authors' text.
+git grep -n -i -E "in the manner of|ground floor|out of the box|under the hood|at a glance|a handful of|a great deal of|in the wild|\bknobs?\b|plumbing|wiring|wired up|escape hatch|for free|a long way" -- ':!.github/REVIEW.md' ':!THIRD-PARTY-NOTICES.md'
 
 # Padded section banners.
 grep -rn "// -- .*--" --include=*.cs --include=*.rs .

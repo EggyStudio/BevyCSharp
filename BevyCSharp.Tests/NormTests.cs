@@ -195,11 +195,10 @@ public sealed partial class NormTests
     public void N_4_1()
     {
         string[] prose = [".md", ".cs", ".rs", ".slang", ".py", ".sh", ".yml", ".toml"];
-        // Bevy's assets and the vendored weather carry their authors' own words, as the rule's
-        // leaving out of the followed engine's has it.
+        // Bevy's assets carry their authors' own words, as the rule's leaving out of the followed
+        // engine's has it.
         var found = Sources("", prose)
             .Where(file => !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
-            .Where(file => !file.StartsWith("native/bevy_weather/", StringComparison.Ordinal))
             .Where(file => Text(file).Any(c => c is '\u2014' or '\u2013'));
         Hold("4.1", found, "a file with a dash STYLE.md forbids");
     }
@@ -269,7 +268,7 @@ public sealed partial class NormTests
         string[] whole = [".md", ".py", ".sh", ".ps1", ".toml", ".yml", ".yaml", ".props", ".targets", ".csproj"];
         var rest = Files()
             .Where(file => !sessions.Contains(file))
-            .Where(file => !file.StartsWith("native/bevy_weather/", StringComparison.Ordinal) && !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
+            .Where(file => !file.StartsWith("BevyCSharp.Examples/bevy-assets/", StringComparison.Ordinal))
             .Where(file => commented.Concat(whole).Any(ending => file.EndsWith(ending, StringComparison.Ordinal)))
             .SelectMany(file =>
             {

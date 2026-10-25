@@ -6,9 +6,9 @@ namespace Bevy;
 /// <see cref="Render.SetWeather"/> gives a camera's clouds and fog.
 /// </summary>
 /// <remarks>
-/// Each preset (<see cref="Of"/>) is a set of these as the weather crate's presets set them, the
-/// clouds' base and top from its altitude and thickness and the share of a flat deck from its
-/// overcast and rain, so a game moving to the engine's weather keeps its skies.
+/// Each preset (<see cref="Of"/>) is a set of these, the clouds' base and top from a height and a
+/// thickness for the kind of cloud it is, and the share of a flat deck from how overcast and how
+/// rainy it is.
 /// </remarks>
 public sealed class WeatherConditions
 {

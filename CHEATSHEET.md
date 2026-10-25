@@ -1874,9 +1874,6 @@ static Vec2 Min(Vec2 a, Vec2 b);                                // The smaller o
 static Vec2 Max(Vec2 a, Vec2 b);                                // The larger of each component
 static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each component held between its bounds
 
-// Weather
-static void SetPreset(WeatherPreset preset, bool immediately = false);  // Sets the weather to a preset, eased into over its transition, or at once
-
 // WeatherConditions
 WeatherConditions Copy();                                       // A copy, to change without changing these
 static WeatherConditions Lerp(WeatherConditions from, WeatherConditions to, float share);  // The weather part of the way from one set of conditions to another, each number that far between the two

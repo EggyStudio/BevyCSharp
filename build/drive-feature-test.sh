@@ -76,14 +76,12 @@ day_hour=$(c setting Hour | sed -n 's/^Hour = //p')
 quiet setting "DaySpeed 0"
 quiet day.hour 8
 
-# The weather, where it runs, held to a few clouds at its lowest tier with the forecast off, so a
-# software renderer marches the clouds in time and each run captures the same sky, and put back as
-# it was at the end with the day.
+# The weather held to a partly cloudy sky with the forecast off, so each run captures the same sky,
+# and put back as it was at the end with the day.
 weather_was=()
-for name in WeatherTier WeatherKind Procedural; do
+for name in WeatherKind Procedural; do
   weather_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
 done
-quiet setting "WeatherTier Potato"
 quiet setting "WeatherKind PartlyCloudy"
 quiet setting "Procedural false"
 
@@ -99,7 +97,7 @@ frame_time() {
   c frame.profile 30 | tail -n 1 | sed -n 's/.*frame_ms=\([0-9.]*\).*/\1/p' \
     | awk -v name="$1" '{ printf "%s %.1f ms\n", name, $1 }' >> "$shots/frame-times.txt"
 }
-frame_time "1-hub, the weather at its lowest tier"
+frame_time "1-hub, under a partly cloudy sky"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
 read -r _ y z < <(where)

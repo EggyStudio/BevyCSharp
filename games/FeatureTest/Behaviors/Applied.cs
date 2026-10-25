@@ -47,11 +47,6 @@ public partial struct Applied
     private static Backdrop? _backdrop;
     private static AssetHandle _dusk = AssetHandle.None;
 
-    /// <summary>
-    /// The kind of weather last given the weather, or nothing yet.
-    /// </summary>
-    private static WeatherPreset? _weather;
-
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
     private static float _focus = 10f;
 
@@ -71,7 +66,6 @@ public partial struct Applied
         // the scene was made with.
         _backdrop = null;
         _dusk = AssetHandle.None;
-        _weather = null;
         _kind = null;
         MapWeatherOn = false;
         _focus = 10f;
@@ -102,7 +96,6 @@ public partial struct Applied
 
         if (!ctx.Res<Config>().Offscreen) Window.SetMode(settings.Window);
         if (Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera)) Camera(camera, settings);
-        if (Weather.Active) Skies(ctx.Ecs, settings);
         Scene.Light(ctx.Ecs, settings.Shadows);
         if (!settings.Wireframe) Wire(ctx.Ecs, false);
     }
@@ -164,10 +157,9 @@ public partial struct Applied
             _reflections = settings.Reflections;
         }
 
-        // The dusk sky where meshlets run, which an atmosphere would end the app under, and the
-        // weather's own where it runs.
+        // The dusk sky where meshlets run, which an atmosphere would end the app under.
         var backdrop = Render.MeshletsActive ? Backdrop.Dusk : settings.Backdrop;
-        if (!Weather.Active && backdrop != _backdrop)
+        if (backdrop != _backdrop)
         {
             if (backdrop == Backdrop.Dusk)
             {
@@ -192,12 +184,12 @@ public partial struct Applied
             _backdrop = backdrop;
         }
 
-        // The engine's weather over the atmosphere's sky, where the crate's does not run, its kind
-        // from the panel or its forecast from the day's clock, giving the clouds, their shadows over
+        // The engine's weather over the atmosphere's sky, its kind from the panel or its forecast
+        // from the day's clock, giving the clouds, their shadows over
         // the map in the sun, the fog, which fades the far ground and the zones' far walls into the
         // sky behind them and gives the sky below the horizon the horizon's color, the rain and the
         // snow, and the lightning and its thunder.
-        if (!Weather.Active && backdrop == Backdrop.Atmosphere)
+        if (backdrop == Backdrop.Atmosphere)
         {
             MapWeather.Clock = DayNight.Clock;
             MapWeather.Forecast = settings.Procedural;
@@ -212,13 +204,10 @@ public partial struct Applied
         }
         else
         {
-            if (!Weather.Active)
-            {
-                Render.SetWeather(camera, null);
-                Render.SetClouds(camera, null);
-                Render.SetPrecipitation(camera, null);
-                Render.SetThunder(camera, null);
-            }
+            Render.SetWeather(camera, null);
+            Render.SetClouds(camera, null);
+            Render.SetPrecipitation(camera, null);
+            Render.SetThunder(camera, null);
             MapWeatherOn = false;
         }
     }
@@ -250,32 +239,7 @@ public partial struct Applied
     /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the
     /// weather's, which <see cref="DayNight"/> gives the sun its strength above the air for.
     /// </summary>
-    internal static bool AtmosphereDrawn => !Weather.Active && _backdrop == Backdrop.Atmosphere;
-
-    /// <summary>Puts the weather's settings on the weather.</summary>
-    private static void Skies(EcsWorld ecs, FeatureSettings settings)
-    {
-        if (ecs.Resource<WeatherConfigRef>() is { } config && config.Quality != settings.WeatherTier) config.Quality = settings.WeatherTier;
-        if (ecs.Resource<ProceduralWeatherRef>() is { } forecast && forecast.Enabled != settings.Procedural) forecast.Enabled = settings.Procedural;
-        if (ecs.Resource<WeatherRef>() is not { } weather)
-        {
-            _weather = null;
-            return;
-        }
-
-        // At once as the run starts, and eased into after, where the forecast leaves the kind to
-        // the panel.
-        if (!settings.Procedural && _weather != settings.WeatherKind)
-        {
-            Weather.SetPreset(settings.WeatherKind, immediately: _weather is null);
-            _weather = settings.WeatherKind;
-        }
-        if (settings.Procedural) _weather = null;
-
-        // No clouds over the map, whatever the kind or the forecast brings, since the weather's
-        // volumetric clouds looked poor over it, and its rain, snow and fog stay.
-        if (weather.TargetCloudCoverage != 0f) weather.TargetCloudCoverage = 0f;
-    }
+    internal static bool AtmosphereDrawn => _backdrop == Backdrop.Atmosphere;
 
     /// <summary>What the camera does with the picture, from the settings.</summary>
     internal static PostSettings Picture(FeatureSettings settings) => new()

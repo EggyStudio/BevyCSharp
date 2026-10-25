@@ -19,7 +19,7 @@ there to each earlier eye by the block.
 The feature test runs on a set clock held between commands, so a view stands still while it is read,
 as many frames drawn as the machine draws in that time, and `glide` moves the camera the same
 distance in each frame of the strafe. Its settings are kept in a folder of their own for the run,
-ray-traced lighting on, the weather, bloom and the anti-aliasing off, which would filter the grain
+ray-traced lighting on, a clear sky, bloom and the anti-aliasing off, which would filter the grain
 as well, and the sun stopped, and its HUD, whose count of frames changes in every frame, is hidden.
 A bridge built with --solari, a feature test built on it, and ImageMagick are needed, and a session
 serving before it starts is refused rather than stopped. --keep keeps the frames.
@@ -323,7 +323,7 @@ def main(arguments):
     folder = os.path.join(data, "BevyCSharp Feature Test")
     os.makedirs(folder)
     with open(os.path.join(folder, "feature-test.json"), "w", encoding="utf-8") as settings:
-        json.dump({"RayTraced": True, "Weather": False, "Bloom": False, "Smoothing": "None", "DaySpeed": 0}, settings)
+        json.dump({"RayTraced": True, "WeatherKind": "Clear", "Bloom": False, "Smoothing": "None", "DaySpeed": 0}, settings)
 
     # The session is written under the same folder, where every bcs after this one looks for it.
     os.environ["XDG_DATA_HOME"] = data

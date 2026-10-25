@@ -751,7 +751,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_camera_controller",
- "bevy_weather",
  "bytemuck",
  "naga",
  "nonmax",
@@ -1992,13 +1991,6 @@ dependencies = [
  "disqualified",
  "indexmap",
  "thread_local",
-]
-
-[[package]]
-name = "bevy_weather"
-version = "0.2.0"
-dependencies = [
- "bevy",
 ]
 
 [[package]]

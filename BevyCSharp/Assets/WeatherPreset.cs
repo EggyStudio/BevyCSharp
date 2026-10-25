@@ -1,8 +1,8 @@
 namespace Bevy;
 
 /// <summary>
-/// A set of conditions the weather eases into (<see cref="Weather.SetPreset"/>), in the order the
-/// <c>bevy_weather</c> crate declares them.
+/// A set of conditions the weather eases into (<see cref="WeatherState.Set(WeatherPreset, bool)"/>),
+/// each as <see cref="WeatherConditions.Of"/> gives it.
 /// </summary>
 public enum WeatherPreset
 {

@@ -29,10 +29,10 @@ zones, things to spawn and the time, each setting kept in the player's folder fo
 day passes over the map, an hour a minute unless the Time page sets another speed, the hour or the
 latitude, the sun and a full moon carried across Bevy's atmosphere as two directional lights whose
 strength and color follow the hour, the scene lit from the sky as it changes and the stars out at
-night, and `./bcs command day.hour 22` sets the hour from a terminal. The weather runs over it
-where meshlets do not, clouds, fog, rain, snow and thunder from the kind of weather, the cloud
-cover and the tier its page sets, or from a forecast, the day handing it the sun, the moon and the
-hour. F3
+night, and `./bcs command day.hour 22` sets the hour from a terminal. The engine's weather runs
+over it where meshlets do not, clouds, fog, rain, snow and thunder from the kind of weather its page
+sets, or from a forecast by the day's clock, and `./bcs command sky.weather Storm now` sets it from
+a terminal. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
 holds, and the key under Escape opens the console. The player is a capsule on a
 `CharacterController`, walked with WASD or a pad's stick, jumping with Space, sprinting with Shift

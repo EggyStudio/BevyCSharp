@@ -1,7 +1,7 @@
 //! The parts of drawing an app asks for, each added only where it asked, and kept out where the
 //! bridge was built without it or the adapter cannot run it.
 
-/// Adds what `config` asks for of meshlets, ray-traced lighting, the weather, GPU timings, a
+/// Adds what `config` asks for of meshlets, ray-traced lighting, GPU timings, a
 /// see-through window and wireframes, with auto exposure, the render schedule's clock and the count
 /// of the lights drawn, which every app that draws has.
 #[cfg(feature = "render")]
@@ -50,13 +50,6 @@ pub(crate) fn install(
             "Meshlets were asked for, but this bridge was built without them. Build it \
              with --meshlet."
         );
-    }
-
-    // The weather, where the app asked for it, after the meshlets, which keep it out.
-    crate::render::weather::forget();
-
-    if config.weather != 0 {
-        crate::render::weather::install(app);
     }
 
     // What the app before this one drew, which would otherwise answer for a camera of

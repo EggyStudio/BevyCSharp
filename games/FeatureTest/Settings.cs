@@ -200,19 +200,8 @@ public sealed record FeatureSettings
     /// </summary>
     public float Latitude { get; init; } = 45f;
 
-    /// <summary>
-    /// Whether the app asks for the weather, which takes effect at the next start, since its
-    /// plugin is added as the app is made.
-    /// </summary>
-    public bool Weather { get; init; }
-
-    /// <summary>The weather's conditions while the forecast is off, the engine's where the crate's does not run.</summary>
+    /// <summary>The weather's conditions while the forecast is off.</summary>
     public WeatherPreset WeatherKind { get; init; } = WeatherPreset.PartlyCloudy;
-
-    /// <summary>
-    /// How finely the weather's clouds, fog and rain are drawn, against what they cost.
-    /// </summary>
-    public WeatherConfigRef.QualityVariant WeatherTier { get; init; } = WeatherConfigRef.QualityVariant.Low;
 
     /// <summary>
     /// Whether the weather comes from the forecast the clock advances, rather than from

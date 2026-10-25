@@ -69,29 +69,15 @@ internal static class Pages
         new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
     ]);
 
-    /// <summary>
-    /// The weather's page, the crate's switch and, where the crate runs, its kind of weather, its tier
-    /// and whether its forecast sets it, and otherwise the engine's kind and forecast.
-    /// </summary>
+    /// <summary>The weather's page, its kind of weather and whether the forecast sets it.</summary>
     private static Page Skies() => new("Weather",
-    [
-        new ToggleRow(Weather.Active ? "Weather, running" : "Weather, from the next start",
-            () => S.Weather, value => Settings.Change(s => s with { Weather = value })),
-        .. Weather.Active
-            ? (Row[])
+        Render.MeshletsActive
+            ? [new TextRow("Meshlets keep the weather out.")]
+            :
             [
                 new ChoiceRow<WeatherPreset>("Kind", () => S.WeatherKind, value => Settings.Change(s => s with { WeatherKind = value })),
-                new ChoiceRow<WeatherConfigRef.QualityVariant>("Tier", () => S.WeatherTier, value => Settings.Change(s => s with { WeatherTier = value })),
                 new ToggleRow("Forecast", () => S.Procedural, value => Settings.Change(s => s with { Procedural = value })),
-            ]
-            : Render.MeshletsActive
-                ? [new TextRow("Meshlets keep the weather out.")]
-                :
-                [
-                    new ChoiceRow<WeatherPreset>("Kind", () => S.WeatherKind, value => Settings.Change(s => s with { WeatherKind = value })),
-                    new ToggleRow("Forecast", () => S.Procedural, value => Settings.Change(s => s with { Procedural = value })),
-                ],
-    ]);
+            ]);
 
     private static Page Audio() => new("Audio",
     [

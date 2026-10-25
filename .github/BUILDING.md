@@ -265,6 +265,11 @@ enough. Everything it removes comes back on the next build, which only takes lon
 `cargo check` and `cargo test` are run by hand, so `native/target` grows between two native builds
 as well, and after a long run of them the script is worth running by hand too.
 
+A container started by hand to share work across the machine, as the examples' captures can be
+shared over four, is started with podman's `--init` and removed as its work ends, since one kept
+alive by `sleep infinity` reaps none of the processes `podman exec` leaves in it, which stand as
+defunct entries until it goes.
+
 ## Packing
 
 ```bash
@@ -322,8 +327,8 @@ loads the fixes brings its own Roslyn.
 |---|---|
 | `Microsoft.CodeAnalysis.CSharp.Workspaces` | Roslyn's workspace layer, through which a fix for a generator's diagnostic changes the game's code in an editor. |
 
-The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy and the weather are in the tree
-through Bevy already, at the version it builds, so naming them adds nothing to the build.
+The bridge's, in `native/bevy_csharp/Cargo.toml`. All but Bevy are in the tree through Bevy
+already, at the version it builds, so naming them adds nothing to the build.
 
 | Crate | Used for |
 |---|---|
@@ -335,7 +340,6 @@ through Bevy already, at the version it builds, so naming them adds nothing to t
 | `serde` | The trait a reflected value is deserialized through, which Bevy does not re-export. |
 | `wgpu` | Asking a window's surface and the GPU what they support before Bevy is given something they do not (render). |
 | `bevy_camera_controller` | The reflection of Bevy's camera controllers, named for its `bevy_reflect` feature, which Bevy builds the crate without, so the pan-orbit camera is written from C# as Bevy's other components are (render). |
-| `bevy_weather` | The weather of `Config.Weather`, a sky around Bevy's atmosphere with clouds, fog, rain, snow and thunder, stars and a moon (render). Vendored at 0.2.0 in `native/bevy_weather`, a member of the workspace, under its own license. |
 | `winit` | Loading Wayland when the program runs rather than linking it, on Linux and the BSDs (render). |
 
 ## Publishing

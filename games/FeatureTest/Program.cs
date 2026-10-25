@@ -66,10 +66,6 @@ config.RayTracedLighting = saved.RayTraced && (windowed || offscreen);
 // texture atomics leaves them off.
 config.MeshletClusters = saved.Meshlets && (windowed || offscreen) ? 1u << 22 : 0;
 
-// The weather where the panel asked for it, its sky, clouds, fog, rain and snow around Bevy's
-// atmosphere, which the bridge keeps out where meshlets run.
-config.Weather = saved.Weather && (windowed || offscreen);
-
 // The GPU's time for each pass, with the meshlets, so Sponza's page compares the GPU's work with
 // meshlets and without rather than frame times a display or the offscreen pace holds alike, and
 // wherever --timings asks, as a measurement of the weather's cost does.
