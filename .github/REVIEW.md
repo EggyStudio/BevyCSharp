@@ -10,37 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ddf51f5a`, item 70's third phase's dither levels, pushed at 20:20 on 2026-10-25
-after the run of `d0da9cf8` went green, its run red within two minutes on the runners' dotnet
-install, Verdict 45, green on the third attempt at 21:43 once the feed settled, carrying REVIEW.md,
-DEVLOG.md, a captioned picture with its note and a Shared line. TreeDetail of Full and Reduced with
-Trees.Build and Trees.BuildLeaves overloads taking it, the public listing gaining five lines; the
-reduced tree has half the tube sides with three at fewest, stems thinner at their start than a
-twenty-fifth of the trunk left out and every other leaf of the full level scaled root two about its
-stalk so the dither shows the same leaves, a fern's fronds kept whole, the stems 4,408 of the
-aspen's 12,482, 3,564 of the tupelo's 12,106 and 8,948 of the oak's 51,236; a planted tree carries
-the full stems on its body with the leaves, the reduced stems and the reduced leaves as children,
-VisibilityRange crossing between 2.5 and 3 heights of the variant times the seed's size. The test
-reads each preset at 2.5 heights from the side and above, the whole tree within a tenth and the
-leaves within a sixth. One departure into the native, a fault of Bevy 0.20 worked around, a
-directional light's cascades measured for the levels from their camera looked up among the
-render-world views by its main entity, which never matches, so Bevy fell back to the shadow origin
-of the lowest camera of all, offscreen a light probe's face, and near trees cast no shadow, the full
-level dithered out by the probe's distance and the reduced not a caster near the camera;
-render/shadow_origin.rs gives each Camera3d drawing to the primary window or the offscreen image the
-shadow's origin, giving way where a game gives the component, a test failing on the old bridge. In
-the feature test from above the shadows fall from 1.89 to 3.16 ms to 0.76 to 0.84 and the opaque
-pass from 0.41 to 0.15 to 0.20, the forest's opaque from 0.68 to 0.32 with the shadows 3.0 to 2.6 to
-2.8, the meadow worse at 2.3 to 2.8 to 3.0 to 3.5 for the shadows and 0.6 to 1.0 to 1.5 for the
-prepass, the ring standing in its bands where both levels draw, a tree in its band showing the
-dither as a darker speckle under SMAA. 1,948 passed, 3 skipped, 1,951 the listing plus 11, the three
-profiles, cargo test and the Windows and macOS checks clean.
+Reviewed up to `6b2503ff`, item 76's first part, the crown's depth, pushed at 21:57 on 2026-10-25
+after the run of `ddf51f5a` went green, its own run green at 22:14, carrying the review's files,
+DEVLOG.md, a captioned pair with its note and a Shared line. Trees.Volume.cs takes the cards' leaf
+area, the card's area times a fill of 0.6, into a grid of 24 voxels across the crown's longest side
+and reads the sky a leaf sees by Beer and Lambert along the zenith and a ring of eight ways 30
+degrees below it, cosine-weighted, half the leaf area facing a ray, from a voxel off the leaf,
+written as the cards' vertex gray at 0.5 plus half the sky so the deepest leaf stands at half and
+never darker, the cards keeping their own normals with Bevy turning them; no public listing change,
+SameNormalBothSides dropped and the bridge back to HEAD and rebuilt before the suite, DoubleSided's
+remark and docs/materials.md corrected to say the back face is lit by the normal turned round to
+face the eye. The tests read a leaf deep in a crown taking less of the sky than one on its rim
+across the five presets, every shade 0.5 to 1 and the deep mean at least 0.12 under the upper rim's,
+measured 0.55 to 0.79 against 0.87 to 0.96, and a crown shaded by the sky darkening its middle more
+than its edge, the aspen and the tupelo keeping 0.93 and 0.95 of the middle's brightness and 0.97 at
+the edge; the rendered change is gentle, the note saying so and why the bend waits. 1,950 passed, 3
+skipped, 1,953 the listing plus 11.
+
+Before it, `ddf51f5a` came, item 70's third phase's dither levels, pushed at 20:20 on 2026-10-25,
+its run red twice on the runners' dotnet install and green on the third attempt at 21:43, Verdict
+45.
 
 Before it, `d0da9cf8` came, item 70's third phase's first reading, the leaves' thinning settled,
 pushed at 18:42 on 2026-10-25, its run green at 18:59.
-
-Before it, `1bd18a6c` came, item 70's third phase's planting and forest, pushed at 17:54 on
-2026-10-25, its run green at 18:16.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -421,7 +413,9 @@ from [SHARED.md](SHARED.md).
     The owner, shown the grazing-sun pair at about 21:34, the aspen and the oak flat on the left and
     with the normal bent half way out of the crown on the right, wrote that it looks great, so the
     right-hand look is the target the bend's commit gives without the sheen from below, its side-lit
-    picture held against this one.
+    picture held against this one. The first part at `6b2503ff` on 2026-10-25, the depth as a vertex
+    gray from the sky each leaf sees, the deepest at half; the bend next as its own commit through
+    the leaf material, the owner's liked pair its target.
 
 ## Verdicts
 
@@ -1987,3 +1981,11 @@ ring of eight ways, written as its vertex gray from the whole of its color to ha
 ambient, indirect and transmitted light. A normal bent out of the crown and baked into a
 double-sided card mirrors the sky from below, so the bend waits for a material lighting the diffuse
 term by it alone.
+
+Shared: a crown's diffuse light by normals bent out of it, in the commit carrying this line, item
+76's second part. Each leaf carries the way out of the crown, the way its grid's smoothed leaf area
+falls fastest, in its second texture coordinates, and the leaf material lights each pixel twice
+from the engine's own lighting, the diffuse light by the leaf's normal bent half way toward it and
+the specular and the light let through by its own, so the crown's sun side stands out more than
+three times as far and a crown seen from below mirrors no sky, at 7.5 ms of a 1080p forest's opaque
+pass against 5.2 lit once.

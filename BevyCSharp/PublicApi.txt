@@ -3510,6 +3510,7 @@ struct Bevy.Interop.NativeMeshData
   float* Colors
   float* Normals
   float* Positions
+  float* SecondUvs
   float* Uvs
   int IndexCount
   int StreamCount
@@ -4401,6 +4402,7 @@ sealed class Bevy.MeshData
   Vec3[]? Normals { get; set; }
   bool ComputeNormals { get; set; }
   float[]? Colors { get; set; }
+  float[]? SecondUvs { get; set; }
   float[]? Uvs { get; set; }
   uint[]? Indices { get; set; }
 static class Bevy.MeshFiles

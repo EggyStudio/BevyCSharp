@@ -71,6 +71,9 @@ public static unsafe partial class Render
         if (mesh.Uvs is { } uvs && uvs.Length != count * 2)
             throw new ArgumentException($"{uvs.Length} UV floats for {count} vertices, which is two each.", nameof(mesh));
 
+        if (mesh.SecondUvs is { } second && second.Length != count * 2)
+            throw new ArgumentException($"{second.Length} second UV floats for {count} vertices, which is two each.", nameof(mesh));
+
         if (mesh.Colors is { } colors && colors.Length != count * 4)
             throw new ArgumentException($"{colors.Length} color floats for {count} vertices, which is four each.", nameof(mesh));
 
@@ -107,6 +110,7 @@ public static unsafe partial class Render
             fixed (Vec3* positions = mesh.Positions)
             fixed (Vec3* normalsAt = mesh.Normals)
             fixed (float* uvsAt = mesh.Uvs)
+            fixed (float* secondUvsAt = mesh.SecondUvs)
             fixed (float* colorsAt = mesh.Colors)
             fixed (uint* indicesAt = mesh.Indices)
             fixed (NativeMeshStream* streamsAt = described)
@@ -124,6 +128,7 @@ public static unsafe partial class Render
                     Streams = streams.Length > 0 ? streamsAt : null,
                     StreamCount = streams.Length,
                     Flags = mesh.ComputeNormals ? 0u : 1u,
+                    SecondUvs = secondUvsAt,
                 };
 
                 var status = into == AssetHandle.None
@@ -229,6 +234,7 @@ public static unsafe partial class Render
             Positions = [.. mesh.Positions],
             Normals = mesh.Normals is { } n ? [.. n] : null,
             Uvs = mesh.Uvs is { } u ? [.. u] : null,
+            SecondUvs = mesh.SecondUvs is { } u2 ? [.. u2] : null,
             Colors = mesh.Colors is { } c ? [.. c] : null,
             Indices = mesh.Indices is { } i ? [.. i] : null,
             Topology = mesh.Topology,

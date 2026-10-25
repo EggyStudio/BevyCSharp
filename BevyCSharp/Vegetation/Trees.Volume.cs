@@ -1,7 +1,7 @@
 namespace Bevy;
 
 // The crown as a volume, the leaf area its cards hold in each voxel of a grid over it, from which
-// each leaf takes how much of the sky reaches it through the leaves round it.
+// each leaf takes how much of the sky reaches it through the leaves round it and which way is out.
 public static partial class Trees
 {
     // The grid's voxels across the crown's longest side, fine enough to tell a crown's middle from
@@ -36,22 +36,26 @@ public static partial class Trees
     }
 
     /// <summary>
-    /// How much of the sky each leaf sees through the crown, from 0 to 1, for leaves at the given
-    /// places of the given areas.
+    /// How much of the sky each leaf sees through the crown, from 0 to 1, and which way is out of the
+    /// crown at it, for leaves at the given places of the given areas.
     /// </summary>
     /// <remarks>
     /// The leaves' area is gathered into a grid of voxels over the crown, a leaf area density, and
     /// the sky a leaf sees is the light let through along each of <see cref="SkyWays"/> by Beer and
     /// Lambert's law, the leaf area density times the share facing the ray summed along it, from a
-    /// voxel past the leaf's own so a leaf does not shade itself.
+    /// voxel past the leaf's own so a leaf does not shade itself. The way out is the way the density,
+    /// smoothed over a voxel each side, falls fastest, leaning a quarter of the way toward the way
+    /// from the crown's middle, which it is wholly where the density is even, deep in a crown of one
+    /// density.
     /// </remarks>
-    internal static float[] CrownSky(IReadOnlyList<Vec3> places, IReadOnlyList<float> areas)
+    internal static (float[] Sky, Vec3[] Out) CrownVolume(IReadOnlyList<Vec3> places, IReadOnlyList<float> areas)
     {
         var count = places.Count;
-        if (count == 0) return [];
+        if (count == 0) return ([], []);
 
         var low = places.Aggregate((a, b) => new Vec3(MathF.Min(a.X, b.X), MathF.Min(a.Y, b.Y), MathF.Min(a.Z, b.Z)));
         var high = places.Aggregate((a, b) => new Vec3(MathF.Max(a.X, b.X), MathF.Max(a.Y, b.Y), MathF.Max(a.Z, b.Z)));
+        var middle = (low + high) * 0.5f;
         var size = MathF.Max(MathF.Max(high.X - low.X, high.Y - low.Y), MathF.Max(high.Z - low.Z, 1e-3f)) / VolumeVoxels;
         low -= new Vec3(size);
         var (width, height, depth) = ((int)((high.X - low.X) / size) + 2, (int)((high.Y - low.Y) / size) + 2, (int)((high.Z - low.Z) / size) + 2);
@@ -67,7 +71,25 @@ public static partial class Trees
             density[Index(x, y, z)] += areas[i] * LeafFill / (size * size * size);
         }
 
+        // Smoothed over a voxel each side for the way out, which a single voxel's count is too
+        // uneven to give.
+        var smooth = new float[density.Length];
+        for (var z = 0; z < depth; z++)
+        for (var y = 0; y < height; y++)
+        for (var x = 0; x < width; x++)
+        {
+            var sum = 0f;
+            for (var k = -1; k <= 1; k++)
+            for (var j = -1; j <= 1; j++)
+            for (var i = -1; i <= 1; i++)
+                if (Inside(x + i, y + j, z + k)) sum += density[Index(x + i, y + j, z + k)];
+            smooth[Index(x, y, z)] = sum / 27f;
+        }
+
+        float Smooth(int x, int y, int z) => Inside(x, y, z) ? smooth[Index(x, y, z)] : 0f;
+
         var sky = new float[count];
+        var outward = new Vec3[count];
         for (var i = 0; i < count; i++)
         {
             var place = places[i];
@@ -87,8 +109,14 @@ public static partial class Trees
             }
 
             sky[i] = seen;
+
+            var (vx, vy, vz) = Voxel(place);
+            var slope = new Vec3(Smooth(vx - 1, vy, vz) - Smooth(vx + 1, vy, vz), Smooth(vx, vy - 1, vz) - Smooth(vx, vy + 1, vz), Smooth(vx, vy, vz - 1) - Smooth(vx, vy, vz + 1));
+            var away = place - middle;
+            var from = away.LengthSquared > 1e-6f ? away.Normalized : Vec3.UnitY;
+            outward[i] = slope.LengthSquared > 1e-6f ? (slope.Normalized + from * 0.25f).Normalized : from;
         }
 
-        return sky;
+        return (sky, outward);
     }
 }

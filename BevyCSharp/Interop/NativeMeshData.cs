@@ -37,4 +37,7 @@ public unsafe struct NativeMeshData
 
     /// <summary>How the mesh is made, four bytes of bits, where 1 leaves a triangle mesh without worked-out normals.</summary>
     public uint Flags;
+
+    /// <summary>Two floats a vertex, Bevy's second texture coordinates, or null.</summary>
+    public float* SecondUvs;
 }

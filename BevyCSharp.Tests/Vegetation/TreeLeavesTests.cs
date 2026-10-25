@@ -52,7 +52,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     }
 
     [Fact]
-    public void ALeafDeepInACrownTakesLessOfTheSkyThanOneOnItsRim()
+    public void ALeafDeepInACrownTakesLessOfTheSkyThanOneOnItsRimAndCarriesTheWayOut()
     {
         foreach (var species in new[] { Aspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
         {
@@ -76,7 +76,11 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
             Assert.All(shades, shade => Assert.InRange(shade, 0.5f, 1f));
             var (deepShade, rimShade) = (deep.Average(card => shades[card]), upperRim.Average(card => shades[card]));
             Assert.True(rimShade - deepShade >= 0.12f, $"{species.LeafSet}'s deep leaves are {deepShade:F2} and its upper rim's {rimShade:F2}");
-            output.WriteLine($"{species.LeafSet}, shades {shades.Min():F2} to {shades.Max():F2}, {deep.Length} deep leaves at {deepShade:F2} and {upperRim.Length} on the upper rim at {rimShade:F2}");
+            // The way out of the crown each card carries, unfolded as the leaf material unfolds it,
+            // points out of the crown on its rim.
+            var outward = rim.Count(card => Vec3.Dot(Unfolded(leaves.SecondUvs![card * 8], leaves.SecondUvs[card * 8 + 1]), middles[card] - middle) > 0f);
+            Assert.True(outward >= rim.Length * 85 / 100, $"{outward} of {species.LeafSet}'s {rim.Length} rim leaves carry a way out of the crown");
+            output.WriteLine($"{species.LeafSet}, shades {shades.Min():F2} to {shades.Max():F2}, {deep.Length} deep leaves at {deepShade:F2} and {upperRim.Length} on the upper rim at {rimShade:F2}, {outward} of the rim's {rim.Length} with a way out of the crown");
         }
 
         static float Square(float value) => value * value;
@@ -545,5 +549,214 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
             output.WriteLine($"{crowns[c].Species.LeafSet}, the middle keeps {middle:F2} of its brightness with the sky's shade and the edge {edge:F2}");
             Assert.True(middle <= edge - 0.01f, $"{crowns[c].Species.LeafSet}'s middle keeps {middle:F2} and its edge {edge:F2}");
         }
+    }
+    /// <summary>A way unfolded from the square it was folded onto octahedrally, as the leaf material's shader unfolds it.</summary>
+    private static Vec3 Unfolded(float u, float v)
+    {
+        var (x, z) = (u * 2f - 1f, v * 2f - 1f);
+        var y = 1f - MathF.Abs(x) - MathF.Abs(z);
+        var t = MathF.Max(-y, 0f);
+        x += x >= 0f ? -t : t;
+        z += z >= 0f ? -t : t;
+        return new Vec3(x, y, z).Normalized;
+    }
+
+    [SkippableFact]
+    public void ACrownsDiffuseLightBentOutOfItShowsTheSunsSideAndMirrorsNoSky()
+    {
+        Needs.Renderer();
+
+        // Each crown drawn with the leaf material from cards that carry the way out of the crown,
+        // and from the same cards without it, which the material lights by their own normals
+        // throughout, as the standard material does. In a grazing sun from the side, the side
+        // toward the sun stands out further from the far side with the way out. From below under a
+        // high sun, the leaves' color stays the same, the specular kept on the leaves' own normals
+        // so the crown mirrors no sky.
+        TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.CaliforniaBlackOak];
+        var crowns = presets.Select(species =>
+        {
+            var skeleton = Trees.Grow(species, 2);
+            var bent = Trees.BuildLeaves(skeleton, species, 2);
+            var own = new MeshData { Positions = bent.Positions, Normals = bent.Normals, Uvs = bent.Uvs, Colors = bent.Colors, Indices = bent.Indices };
+            var (low, high) = skeleton.Bounds;
+            var size = MathF.Max(high.Y, MathF.Max(high.X - low.X, high.Z - low.Z));
+            return (Species: species, Skeleton: skeleton, Own: own, Bent: bent, Middle: new Vec3(0f, high.Y * 0.6f, 0f), Distance: 1.3f * size, Height: high.Y);
+        }).ToArray();
+
+        // The leaves' mean brightness over the third of the crown toward the sun and the third away,
+        // and their mean color.
+        static (float Far, float Near, (float R, float G, float B) Color) Read(CapturedImage picture)
+        {
+            var sky = picture.At(0, 0);
+            var leaves = new List<(uint X, byte R, byte G, byte B)>();
+            for (var y = 0u; y < picture.Height; y++)
+            for (var x = 0u; x < picture.Width; x++)
+            {
+                var (r, g, b, _) = picture.At(x, y);
+                if (Math.Abs(r - sky.R) + Math.Abs(g - sky.G) + Math.Abs(b - sky.B) > 40 && g > r) leaves.Add((x, r, g, b));
+            }
+
+            static float Brightness((uint X, byte R, byte G, byte B) leaf) => 0.2126f * leaf.R + 0.7152f * leaf.G + 0.0722f * leaf.B;
+            var (left, right) = (leaves.Min(leaf => leaf.X), leaves.Max(leaf => leaf.X));
+            var third = (right - left) / 3f;
+            return (leaves.Where(leaf => leaf.X < left + third).Average(Brightness), leaves.Where(leaf => leaf.X > right - third).Average(Brightness),
+                ((float)leaves.Average(leaf => leaf.R), (float)leaves.Average(leaf => leaf.G), (float)leaves.Average(leaf => leaf.B)));
+        }
+
+        // In a grazing sun from the right, each crown from the side, and under a high sun the aspen
+        // from below its crown.
+        var side = Pictures(crowns.Select(crown => (crown.Species, crown.Skeleton, crown.Own, crown.Bent, Eye: crown.Middle + new Vec3(0f, 0.15f, 1f).Normalized * crown.Distance, At: crown.Middle)).ToArray(), new Vec3(10f, 2.2f, 0f), 900f);
+        var aspen = crowns[0];
+        var below = Pictures([(aspen.Species, aspen.Skeleton, aspen.Own, aspen.Bent, Eye: new Vec3(0f, 1.6f, 9f), At: new Vec3(0f, aspen.Height * 0.7f, 0f))], new Vec3(-3f, 10f, -4f), 1500f);
+
+        for (var c = 0; c < crowns.Length; c++)
+        {
+            var (own, bent) = (Read(side[c].Own), Read(side[c].Bent));
+            output.WriteLine($"{crowns[c].Species.LeafSet} from the side, by its own normals {own.Far:F1} far and {own.Near:F1} toward the sun, bent out of the crown {bent.Far:F1} and {bent.Near:F1}");
+            Assert.True(bent.Near - bent.Far >= (c == 0 ? 1.3f : 1f) * (own.Near - own.Far), $"{crowns[c].Species.LeafSet}'s crown bent stands {bent.Near - bent.Far:F1} brighter toward the sun, by its own normals {own.Near - own.Far:F1}");
+        }
+
+        var (ownBelow, bentBelow) = (Read(below[0].Own).Color, Read(below[0].Bent).Color);
+        output.WriteLine($"the aspen from below, by its own normals {ownBelow.R:F0} {ownBelow.G:F0} {ownBelow.B:F0}, bent out of the crown {bentBelow.R:F0} {bentBelow.G:F0} {bentBelow.B:F0}");
+        Assert.True(Math.Abs(bentBelow.B - ownBelow.B) <= 8f && bentBelow.G - bentBelow.B >= ownBelow.G - ownBelow.B - 8f, "the aspen from below takes a cast of the sky");
+    }
+
+    /// <summary>Each crown drawn with the leaf material by its own normals and bent, from an eye, in a sun from a way under a sky of a brightness.</summary>
+    private static (CapturedImage Own, CapturedImage Bent)[] Pictures((TreeSpecies Species, TreeSkeleton Skeleton, MeshData Own, MeshData Bent, Vec3 Eye, Vec3 At)[] crowns, Vec3 sunFrom, float sky)
+    {
+        Entity camera = default;
+        var shown = new List<Entity[]>();
+        var albedos = new List<AssetHandle>();
+        var run = new PictureRun
+        {
+            Width = 480,
+            Height = 480,
+            Frames = 3000,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 50f });
+                ecs.Add(camera, Transform.Identity);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetClearColor((0.55f, 0.68f, 0.85f, 1f));
+                Render.SetAmbientLight((0.55f, 0.68f, 0.85f), sky);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 40_000f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(sunFrom, Vec3.Zero, Vec3.UnitY));
+                foreach (var crown in crowns)
+                    foreach (var leaves in new[] { crown.Own, crown.Bent })
+                    {
+                        var stems = ecs.Spawn();
+                        Render.SetMesh(ecs, stems, Modeling.Meshes(Trees.Build(crown.Skeleton))[0]);
+                        Render.SetMaterial(ecs, stems, Trees.BarkMaterial(crown.Species));
+                        var cards = ecs.Spawn();
+                        var mesh = Render.CreateMesh(leaves);
+                        Render.GenerateTangents(mesh);
+                        Render.SetMesh(ecs, cards, mesh);
+                        Render.SetMaterial(ecs, cards, Trees.LeafMaterial(crown.Species));
+                        foreach (var part in new[] { stems, cards })
+                        {
+                            ecs.Add(part, Transform.Identity);
+                            ecs.Add(part, Visibility.Hidden);
+                        }
+
+                        shown.Add([stems, cards]);
+                        albedos.Add(TreeTextures.Find(crown.Species.LeafSet!)!.Load().Albedo);
+                    }
+            },
+        };
+
+        run.Wait(10).Until("ready", _ => Render.PipelinesReady())
+            .Until("loaded", _ => albedos.All(image => AssetServer.StateOf(image) is AssetLoadState.Loaded or AssetLoadState.Failed));
+        for (var k = 0; k < crowns.Length * 2; k++)
+        {
+            var (index, crown) = (k, crowns[k / 2]);
+            run.Do($"show {k}", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                for (var other = 0; other < shown.Count; other++)
+                    foreach (var part in shown[other])
+                        ecs.GetRef<Visibility>(part) = other == index ? Visibility.Inherited : Visibility.Hidden;
+                ecs.GetRef<Transform>(camera) = Transform.LookingAt(crown.Eye, crown.At, Vec3.UnitY);
+            }).Wait(30).Capture($"{k}");
+        }
+
+        run.Go();
+        return [.. Enumerable.Range(0, crowns.Length).Select(c => (run.Picture($"{2 * c}"), run.Picture($"{2 * c + 1}")))];
+    }
+    [SkippableFact]
+    public void TheLeavesLitAsACrownCostIsReadInAForest()
+    {
+        Needs.Shaders();
+        var standard = LeavesOpaquePass(crown: false);
+        var crown = LeavesOpaquePass(crown: true);
+        Skip.If(standard is null || crown is null, "needs a GPU whose passes the app can time");
+        output.WriteLine($"24 black tupelos at 1920 by 1080, the opaque pass {standard:0.00} ms with the leaves lit by the standard material and {crown:0.00} ms lit as a crown");
+    }
+
+    /// <summary>
+    /// The opaque pass's time, smoothed over the frames before, drawing a forest of tupelos at 1080p
+    /// with their leaves lit by the standard material, once a pixel, or by the leaf material as a
+    /// crown, twice.
+    /// </summary>
+    private static double? LeavesOpaquePass(bool crown)
+    {
+        var species = TreeSpecies.BlackTupelo;
+        var skeletons = new[] { Trees.Grow(species, 1), Trees.Grow(species, 2), Trees.Grow(species, 3) };
+        IReadOnlyList<PassTiming> timings = [];
+        var run = new PictureRun
+        {
+            Width = 1920,
+            Height = 1080,
+            Frames = 900,
+            Configure = config => config.GpuTimings = true,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f, Far = 5_000f });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1.7f, 12f), new Vec3(0f, 4f, -20f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAtmosphere(camera, new AtmosphereSettings());
+                Render.SetSkyLighting(camera);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 12_500f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(-3f, 5f, 2f), Vec3.Zero, Vec3.UnitY));
+
+                // The standard material made as the leaf material is, from the same leaf set.
+                var leaves = Trees.LeafMaterial(species);
+                if (!crown)
+                {
+                    var (albedo, normal, surface) = TreeTextures.Find(species.LeafSet!)!.Load();
+                    leaves = Render.CreateMaterial(new MaterialSettings
+                    {
+                        BaseColorTexture = albedo,
+                        NormalMap = normal,
+                        OcclusionTexture = surface,
+                        MetallicRoughnessTexture = surface,
+                        DiffuseTransmissionTexture = surface,
+                        DiffuseTransmission = 1f,
+                        Roughness = 1f,
+                        Metallic = 1f,
+                        AlphaMode = AlphaMode.Mask,
+                        DoubleSided = true,
+                    });
+                }
+
+                var bark = Trees.BarkMaterial(species);
+                var stems = skeletons.Select(skeleton => Modeling.Meshes(Trees.Build(skeleton))[0]).ToArray();
+                var crowns = skeletons.Select((skeleton, i) => Render.CreateMesh(Trees.BuildLeaves(skeleton, species, (uint)(i + 1)))).ToArray();
+
+                // Six trees a row in four rows going away, each a third of the three trees grown.
+                for (var i = 0; i < 24; i++)
+                {
+                    var at = Transform.At((i % 6 - 2.5f) * 7f + i / 6 % 2 * 3f, 0f, -(i / 6) * 9f);
+                    foreach (var (mesh, material) in new[] { (stems[i % 3], bark), (crowns[i % 3], leaves) })
+                    {
+                        var entity = ecs.Spawn();
+                        Render.SetMesh(ecs, entity, mesh);
+                        Render.SetMaterial(ecs, entity, material);
+                        ecs.Add(entity, at);
+                    }
+                }
+            },
+        };
+        run.Wait(10).Until("ready", _ => Render.PipelinesReady()).Wait(240).Do("timings", _ => timings = Render.Timings()).Go();
+        return timings.FirstOrDefault(timing => timing.Name == "main_opaque_pass_3d").GpuMilliseconds;
     }
 }

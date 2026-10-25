@@ -545,6 +545,27 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Builds the material a tree's leaves are drawn with, a standard material lit twice a pixel,
+    /// its diffuse light by the way out of the crown each vertex carries in its second texture
+    /// coordinates and the rest by the leaf's own normal.
+    /// </summary>
+    /// <remarks>
+    /// Internal to the trees, which build the meshes it reads, and drawn forward whatever the
+    /// camera, as <c>native/bevy_csharp/src/render/leaves.rs</c> says.
+    /// </remarks>
+    internal static AssetHandle CreateLeafMaterial(MaterialSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = Config(settings);
+        var key = Native.bcs_material_create_leaf(&native);
+        if (key == NativeStatus.Unsupported) throw NoRenderer("Building a leaf material");
+
+        Native.Check(key, "building a leaf material");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
     /// Writes settings over a standard material in place, so everything drawn with it changes.
     /// </summary>
     /// <remarks>

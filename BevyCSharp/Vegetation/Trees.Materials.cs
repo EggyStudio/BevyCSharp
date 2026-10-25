@@ -76,6 +76,15 @@ public static partial class Trees
     /// has one, so a crown lit from behind lets the light through at its edges.
     /// </para>
     /// <para>
+    /// The crown is lit as a volume. Each leaf's diffuse light is taken by its normal bent half way
+    /// toward the way out of the crown, which its cards carry, so the side of the crown toward the
+    /// sun is bright and the far side dark as the crown's shape decides, and its specular and the
+    /// light let through it by its own normal, so a crown seen from below does not mirror the sky.
+    /// Lit so twice a pixel, a leaf costs about twice what the standard material's lighting does,
+    /// and is drawn forward whatever the camera. Built by hand, cards without the way out are lit
+    /// by their own normals throughout, as the standard material lights them.
+    /// </para>
+    /// <para>
     /// A leaf set's pictures are tinted so their mean color becomes the fall color as the share
     /// reaches one, and the generated leaves are drawn in the species' leaf color turning to its fall
     /// color. The share is kept to a hundredth, so a game easing it over a season makes a hundred
@@ -98,7 +107,7 @@ public static partial class Trees
                 var (albedo, normal, surface) = set.Load();
                 var mean = set.MeanColor;
                 (float, float, float, float) tint = (Toward(1f, species.FallColor.R / MathF.Max(mean.R, 1e-3f), fall), Toward(1f, species.FallColor.G / MathF.Max(mean.G, 1e-3f), fall), Toward(1f, species.FallColor.B / MathF.Max(mean.B, 1e-3f), fall), 1f);
-                return Render.CreateMaterial(new MaterialSettings
+                return Render.CreateLeafMaterial(new MaterialSettings
                 {
                     BaseColor = tint,
                     BaseColorTexture = albedo,
@@ -116,7 +125,7 @@ public static partial class Trees
 
             var atlas = Generated($"leaf pictures {species.LeafShape} {species.LeafScaleX}", () => Image(TreeLooks.Leaves(species.LeafShape, species.LeafScaleX), TreeLooks.LeafSize, TreeLooks.LeafSize, srgb: true));
             var (summer, autumn) = (species.LeafColor, species.FallColor);
-            return Render.CreateMaterial(new MaterialSettings
+            return Render.CreateLeafMaterial(new MaterialSettings
             {
                 BaseColor = (Toward(summer.R, autumn.R, fall), Toward(summer.G, autumn.G, fall), Toward(summer.B, autumn.B, fall), 1f),
                 BaseColorTexture = atlas,

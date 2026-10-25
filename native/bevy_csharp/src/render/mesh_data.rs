@@ -6,7 +6,8 @@ use crate::interop::status;
 /// A mesh described vertex by vertex.
 ///
 /// Every array but `positions` may be null. Positions and normals are three floats a vertex, UVs
-/// two and colors four, in linear RGBA.
+/// two and colors four, in linear RGBA. The second UVs are Bevy's `UV_1`, which a lightmap reads
+/// and a material of the bridge's own may carry its numbers in, two floats a vertex.
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub struct BcsMeshData {
@@ -25,6 +26,7 @@ pub struct BcsMeshData {
     pub stream_count: i32,
     /// How the mesh is made, four bytes of bits, [`LEAVE_NORMALS_OUT`].
     pub flags: u32,
+    pub second_uvs: *const f32,
 }
 
 /// A triangle mesh given no normals is left without them rather than given worked-out ones, for a
@@ -124,6 +126,11 @@ unsafe fn mesh_from(data: *const BcsMeshData) -> Result<bevy::mesh::Mesh, i32> {
     if let Some(uvs) = floats(data.uvs, 2) {
         let uvs: Vec<[f32; 2]> = uvs.chunks_exact(2).map(|t| [t[0], t[1]]).collect();
         mesh.insert_attribute(Mesh::ATTRIBUTE_UV_0, uvs);
+    }
+
+    if let Some(uvs) = floats(data.second_uvs, 2) {
+        let uvs: Vec<[f32; 2]> = uvs.chunks_exact(2).map(|t| [t[0], t[1]]).collect();
+        mesh.insert_attribute(Mesh::ATTRIBUTE_UV_1, uvs);
     }
 
     if let Some(colors) = floats(data.colors, 4) {
@@ -292,7 +299,8 @@ mod tests {
         assert_eq!(offset_of!(BcsMeshData, streams), 56);
         assert_eq!(offset_of!(BcsMeshData, stream_count), 64);
         assert_eq!(offset_of!(BcsMeshData, flags), 68);
-        assert_eq!(size_of::<BcsMeshData>(), 72);
+        assert_eq!(offset_of!(BcsMeshData, second_uvs), 72);
+        assert_eq!(size_of::<BcsMeshData>(), 80);
         assert_eq!(offset_of!(BcsMeshStream, format), 12);
         assert_eq!(offset_of!(BcsMeshStream, location), 16);
         assert_eq!(offset_of!(BcsMeshStream, data), 24);
@@ -328,6 +336,7 @@ mod tests {
             streams: stream,
             stream_count: 1,
             flags: 0,
+            second_uvs: core::ptr::null(),
         };
 
         let uint = stream(Format::UInt.code());
@@ -361,6 +370,7 @@ mod tests {
             streams: core::ptr::null(),
             stream_count: 0,
             flags,
+            second_uvs: core::ptr::null(),
         };
 
         let worked_out = unsafe { mesh_from(&data(0)) }.expect("a plain mesh is made");

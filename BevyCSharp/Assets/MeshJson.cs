@@ -66,6 +66,7 @@ internal static class MeshJson
         }
 
         Numbers(json, "uvs", geometry.Uvs);
+        Numbers(json, "secondUvs", geometry.SecondUvs);
         Numbers(json, "colors", geometry.Colors);
 
         if (geometry.Indices is { } indices)
@@ -116,6 +117,7 @@ internal static class MeshJson
             Positions = Vectors(positions),
             Normals = json.TryGetProperty("normals", out var normals) ? Vectors(normals) : null,
             Uvs = json.TryGetProperty("uvs", out var uvs) ? [.. uvs.EnumerateArray().Select(value => value.GetSingle())] : null,
+            SecondUvs = json.TryGetProperty("secondUvs", out var secondUvs) ? [.. secondUvs.EnumerateArray().Select(value => value.GetSingle())] : null,
             Colors = json.TryGetProperty("colors", out var colors) ? [.. colors.EnumerateArray().Select(value => value.GetSingle())] : null,
             Indices = json.TryGetProperty("indices", out var indices) ? [.. indices.EnumerateArray().Select(value => value.GetUInt32())] : null,
             Streams = json.TryGetProperty("streams", out var streams) && streams.ValueKind == JsonValueKind.Array

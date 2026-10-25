@@ -44,7 +44,9 @@ var ramp = Render.CreateMesh(new MeshData
 ```
 
 A triangle mesh given no normals has them worked out, smooth where it is indexed and flat where it
-is not. `Topology` also takes lines, points and strips. A mesh whose vertices a shader moves far
+is not. `Colors` gives a linear color a vertex, which the standard material multiplies its color by,
+and `SecondUvs` a second set of texture coordinates, Bevy's `UV_1`, which a lightmap is read by.
+`Topology` also takes lines, points and strips. A mesh whose vertices a shader moves far
 from where they were built, such as ten thousand squares a vertex shader places from a buffer, needs
 `Render.SetMeshFlags(ctx.Ecs, entity, MeshFlags.NoFrustumCulling)`, because Bevy culls by the bounds
 it worked out from the mesh and those say nothing about where the shader put it. The same flags turn

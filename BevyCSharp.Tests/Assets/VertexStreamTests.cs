@@ -99,7 +99,8 @@ public sealed class VertexStreamTests
         Assert.Equal(56, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.Streams)).ToInt32());
         Assert.Equal(64, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.StreamCount)).ToInt32());
         Assert.Equal(68, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.Flags)).ToInt32());
-        Assert.Equal(72, Marshal.SizeOf<NativeMeshData>());
+        Assert.Equal(72, Marshal.OffsetOf<NativeMeshData>(nameof(NativeMeshData.SecondUvs)).ToInt32());
+        Assert.Equal(80, Marshal.SizeOf<NativeMeshData>());
         Assert.Equal(12, Marshal.OffsetOf<NativeMeshStream>(nameof(NativeMeshStream.Format)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeMeshStream>(nameof(NativeMeshStream.Location)).ToInt32());
         Assert.Equal(24, Marshal.OffsetOf<NativeMeshStream>(nameof(NativeMeshStream.Data)).ToInt32());

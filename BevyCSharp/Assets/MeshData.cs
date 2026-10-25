@@ -26,6 +26,16 @@ public sealed class MeshData
     /// <summary>Texture coordinates, two floats a vertex, or null.</summary>
     public float[]? Uvs { get; set; }
 
+    /// <summary>
+    /// A second set of texture coordinates, two floats a vertex, or null.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's <c>UV_1</c>, which a lightmap is read by and a material of the library's own may
+    /// carry two numbers a vertex in, as a tree's leaf material carries the way out of its crown.
+    /// A standard material reads no texture by it unless told to.
+    /// </remarks>
+    public float[]? SecondUvs { get; set; }
+
     /// <summary>Linear RGBA, four floats a vertex, or null.</summary>
     public float[]? Colors { get; set; }
 

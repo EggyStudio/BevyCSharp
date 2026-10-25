@@ -62,6 +62,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create_forward_decal(NativeMaterialConfig* config, float depthFadeFactor, float depthBias);
 
+    /// <summary>Builds the bridge's leaf material over a standard one and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_create_leaf(NativeMaterialConfig* config);
+
     /// <summary>Makes an entity a forward decal drawn with a forward decal material.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

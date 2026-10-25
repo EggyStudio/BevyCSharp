@@ -303,6 +303,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // Bevy otherwise takes from a light probe's camera in an offscreen run.
             crate::render::shadow_origin::install(&mut app);
 
+            // The material a tree's leaves are lit by, the standard material lit as a crown.
+            crate::render::leaves::install(&mut app);
+
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();

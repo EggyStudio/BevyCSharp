@@ -32,6 +32,7 @@ pub mod compute;
 pub mod constants;
 pub mod instances;
 pub mod layers;
+pub mod leaves;
 pub mod light_counts;
 pub mod scene_counts;
 pub mod scene_field;

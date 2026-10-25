@@ -114,7 +114,7 @@ pub unsafe extern "C" fn bcs_material_create_forward_decal(
 /// A standard material built from the settings a material is made with, its textures resolved
 /// from the keys the program holds, or the status a key that names no image gives.
 #[cfg(feature = "render")]
-fn standard_material(
+pub(crate) fn standard_material(
     world: &mut bevy::ecs::world::World,
     config: &BcsMaterialConfig,
 ) -> Result<bevy::pbr::StandardMaterial, i32> {
