@@ -129,7 +129,7 @@ internal static class ConsoleSkyCommands
         if (asked.Length == 0)
         {
             return string.Join("\n", weathers.Select(w => string.Create(CultureInfo.InvariantCulture,
-                $"{w.Camera}: cloud {w.Weather.Current.CloudCover:0.##} ({w.Weather.Current.Stratus:0.##} a deck), rain {w.Weather.Current.Rain:0.##}, snow {w.Weather.Current.Snow:0.##}, fog {w.Weather.Current.Fog:0.##}, wind {w.Weather.Wind.Length:0.#} m/s, {w.Weather.Current.Temperature:0.#} C, the ground {w.Weather.Wetness:0.##} wet and {w.Weather.SnowCover:0.##} under snow{(w.Weather.Forecast ? ", by the forecast" : "")}")));
+                $"{w.Camera}: cloud {w.Weather.Current.CloudCover:0.##} ({w.Weather.Current.Stratus:0.##} a deck), rain {w.Weather.Current.Rain:0.##}, snow {w.Weather.Current.Snow:0.##}, fog {w.Weather.Current.Fog:0.##}, {w.Weather.Current.Thunder:0.#} strikes a minute, wind {w.Weather.Wind.Length:0.#} m/s, {w.Weather.Current.Temperature:0.#} C, the ground {w.Weather.Wetness:0.##} wet and {w.Weather.SnowCover:0.##} under snow{(w.Weather.Forecast ? ", by the forecast" : "")}")));
         }
 
         if (asked.Equals("forecast", StringComparison.OrdinalIgnoreCase) || asked.Equals("still", StringComparison.OrdinalIgnoreCase))
@@ -152,6 +152,33 @@ internal static class ConsoleSkyCommands
             weather.Set(preset, now);
         }
         return now ? $"the weather is {preset}" : $"the weather eases into {preset}";
+    }
+
+    [Command("sky.strike", "Strikes lightning at once about the cameras with a storm, where the storm chooses or on the ground at a place: sky.strike [x z]")]
+    internal static string StrikeCommand(string x = "", string z = "")
+    {
+        var storms = SkyThunder.All().ToList();
+        if (storms.Count == 0)
+        {
+            ConsoleHost.Fail("NO_STORM", "No camera has a storm. Give one a storm with Render.SetThunder, or a weather with thunder.");
+            return "sky.strike [x z]";
+        }
+
+        Vec3? at = null;
+        if (x.Trim().Length > 0 || z.Trim().Length > 0)
+        {
+            if (!float.TryParse(x, NumberStyles.Float, CultureInfo.InvariantCulture, out var across) || !float.TryParse(z, NumberStyles.Float, CultureInfo.InvariantCulture, out var along))
+            {
+                ConsoleHost.Fail("BAD_ARGUMENT", $"'{x} {z}' is not a place on the ground, two numbers.");
+                return "sky.strike [x z]";
+            }
+            // On the ground at the camera's height less two meters, which the strike works out.
+            at = new Vec3(across, float.NaN, along);
+        }
+
+        return string.Join("\n", storms.Select(s => Render.StrikeLightning(s.Camera, at) is { } strike
+            ? string.Create(CultureInfo.InvariantCulture, $"{s.Camera}: struck {strike.Distance:0} m off, its thunder heard in {strike.ThunderDelay:0.0} s")
+            : $"{s.Camera}: no storm"));
     }
 
     [Command("sky.froxels", "Works the sky's fog out in froxels near the cameras drawing it, as far as given, where shadows cut it into shafts and lamps glow in it, or in closed form alone: sky.froxels <off|low|medium|high> [distance]")]

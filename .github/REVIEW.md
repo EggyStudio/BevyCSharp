@@ -10,33 +10,46 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `a2646e71`, item 69's fifth phase, the rain and the snow, pushed at 08:03 on
-2026-10-25 after the run of `4ac3871a` went green, the run watched, carrying SHARED.md, two pictures
-with captions and a Shared line, ABI 308. Render.SetPrecipitation with PrecipitationSettings and a
-PrecipitationQuality of 16, 32 or 64 thousand particles falling in two boxes held in the world, each
-particle's kind following from its number and the rain's share every frame, the drops and the flakes
-counted with an atomic into an indirect draw and each one's light worked out once from the brightest
-light through the air with its shadow and the clouds' shadow, the environment map and the lamps, the
-splashes in a ring of 4,096, the roofs map from an orthographic camera looking down over 96 m at 256
-texels a side, switched on through the reflected CameraRef.IsActive for a few frames once the camera
-has moved 12 m; SetWeather gains a precipitation parameter and the feature test rains. One
-departure, a new FramePoint.AfterTemporalAntialiasing, the bridge's point 5, since TAA's history
-kept a moving speck at a tenth of its strength and the feature test's snow vanished under it, a test
-drawing a speck at a hashed place each frame under TAA and reading above 230 after the point and
-below 170 before, the point before motion blur, bloom and depth of field since Bevy's effect stack
-is crate-private and a point after depth of field could not be ordered, view images copying at it
-and a pass at it running where BeforeTonemapping passes do. Two faults found and fixed, the drops
-becoming flakes at the top of the box alone after rain so the air stayed empty for tens of seconds,
-the kind worked out per frame; and far drops held at 1.5 px drawing lines across a storm's sky, the
-drops fading from 0.4 of the reach with opacity as the width ratio to the power 0.6, streaks capped
-at 25 cm and the near fade over 0.4 to 1.8 m. The environment map's gap read, SetSkyLighting's
-intensity letting the cover dim the map from managed code when the cover changes, but darkening the
-blue rather than graying it, the drops and the flakes taking the same blue, so the overcast's gray
-needs the sky and the clouds rendered into a cube the GPU filters as SetImageLighting does, a phase
-of its own proposed after the thunder and before the crate's removal. 0.05 ms of the GPU at 1280 by
-720, moving 0.022, drawing 0.011 and clearing 0.011, the roofs map 0.017 on the frames it is drawn.
-1,897 passed, 3 skipped, 1,900 the listing plus 11, the bridge's checks clean on every profile,
-Cargo 118, 199 and 11.
+Reviewed up to `6795478f`, item 72, the feature test's sample behaviors deleted, read at 08:26 on
+2026-10-25, carrying the review's files and SHARED.md, pushed at 08:27 on 2026-10-25 once the run of
+`a2646e71` went green, its own run green at 08:44. Diagnostics with its SampleReport, the shutdown
+final state and Trace, the progress printer under RunIf; Movement with its five moving entities and
+Gravity; Orbit with the planet and the moon, their gizmos and the transforms list; Spinner with
+Lifetime; the feature test's Components.cs with Position, Velocity, Falls and Grounded, which those
+alone used; and Program.cs's verbose flag and its option line, which Trace alone read. Every other
+behavior is a zone, a page or a check, FlyCamera the spectator camera six behaviors use, Capture a
+check, Renderer kept as the item says. The drive, the tests, the docs, the READMEs, the workflow and
+build/norm read first and found relying on none of them, the library's BehaviorAttribute example
+naming a Spinner and a Gravity of its own. An offscreen run of 300 frames exits 0 with no final
+state or transforms list, the startup notes and Bevy's info and warn lines left as the item leaves
+them. The 18 norm tests pass; the full suite runs on the tree with the thunder, which commits next,
+so this commit's suite is the next commit's and the run's. After `a2646e71`, item 69's fifth phase,
+the rain and the snow, pushed at 08:03 on 2026-10-25 after the run of `4ac3871a` went green, its own
+run green at 08:26, carrying SHARED.md, two pictures with captions and a Shared line, ABI 308.
+Render.SetPrecipitation with PrecipitationSettings and a PrecipitationQuality of 16, 32 or 64
+thousand particles falling in two boxes held in the world, each particle's kind following from its
+number and the rain's share every frame, the drops and the flakes counted with an atomic into an
+indirect draw and each one's light worked out once from the brightest light through the air with its
+shadow and the clouds' shadow, the environment map and the lamps, the splashes in a ring of 4,096,
+the roofs map from an orthographic camera looking down over 96 m at 256 texels a side, switched on
+through the reflected CameraRef.IsActive for a few frames once the camera has moved 12 m; SetWeather
+gains a precipitation parameter and the feature test rains. One departure, a new
+FramePoint.AfterTemporalAntialiasing, the bridge's point 5, since TAA's history kept a moving speck
+at a tenth of its strength and the feature test's snow vanished under it, a test drawing a speck at
+a hashed place each frame under TAA and reading above 230 after the point and below 170 before, the
+point before motion blur, bloom and depth of field since Bevy's effect stack is crate-private and a
+point after depth of field could not be ordered, view images copying at it and a pass at it running
+where BeforeTonemapping passes do. Two faults found and fixed, the drops becoming flakes at the top
+of the box alone after rain so the air stayed empty for tens of seconds, the kind worked out per
+frame; and far drops held at 1.5 px drawing lines across a storm's sky, the drops fading from 0.4 of
+the reach with opacity as the width ratio to the power 0.6, streaks capped at 25 cm and the near
+fade over 0.4 to 1.8 m. The environment map's gap read, SetSkyLighting's intensity letting the cover
+dim the map from managed code when the cover changes, but darkening the blue rather than graying it,
+the drops and the flakes taking the same blue, so the overcast's gray needs the sky and the clouds
+rendered into a cube the GPU filters as SetImageLighting does, a phase of its own proposed after the
+thunder and before the crate's removal. 0.05 ms of the GPU at 1280 by 720, moving 0.022, drawing
+0.011 and clearing 0.011, the roofs map 0.017 on the frames it is drawn. 1,897 passed, 3 skipped,
+1,900 the listing plus 11, the bridge's checks clean on every profile, Cargo 118, 199 and 11.
 
 Before it, `4ac3871a` came, item 69's fourth phase, the weather state, pushed at 06:30 on
 2026-10-25, its run green at 06:53.
@@ -360,19 +373,6 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
-
-72. **The feature test's sample behaviors go from the source.** From the word of 2026-10-25 at
-    08:18, with the console of the feature test run from games/FeatureTest on the desktop and closed
-    by its window, that its final state and transforms lists are residue not to be in the builds,
-    and at 08:22 that the sample behaviors themselves are to be deleted, the tests and the docs
-    holding what they showed. Diagnostics, which counts spinners, lifetimes and grounded entities
-    and reports them at shutdown, Movement, which spawns five moving entities and integrates them,
-    Orbit, which moves entities by Bevy's Transform and parents one to another, and Spinner, a
-    behavior that is its own component, are demonstrations from the program's first days and not
-    zones, pages or checks of the feature test; they go with the entities they spawned and their
-    console reports, and any other behavior that demonstrates alone goes with them, the coder naming
-    each. The drive script, the tests and the docs are read first for a line, a count or a reference
-    that relied on them and moved to what remains. One commit, with or before item 69's sixth phase.
 
 ## Verdicts
 
@@ -1801,3 +1801,20 @@ meters, and a particle ends below that height, splashing into a ring of 4,096 wh
 15 meters. The bridge gains a frame point after temporal antialiasing and before motion blur, bloom
 and depth of field, at ABI 308, since the antialiasing's history kept a speck moving with no motion
 of its own at a tenth of its strength. Some 0.05 ms of the GPU at 1280 by 720.
+
+Shared: the thunder, in the commit carrying this line, item 69's sixth phase. Strikes are a Poisson
+process at the weather's rate a minute, the gap from an exponential spread, landing between a nearest
+and a farthest distance as evenly over the ground as rings of it grow, two in three to the ground.
+Each flickers over 0.55 seconds as the crate's envelope does, a fast rise, a fall and two or three
+return strokes at seeded times, and drives a point light of 4 billion lumens at its peak through
+Bevy's reflected light only where its intensity changes, a glow in the clouds' march, a light
+scattered evenly about a point 300 meters into the base and falling off as a bell 600 meters wide,
+with the clouds' history off while it flashes, and a bolt drawn added after temporal antialiasing, a
+channel of 128 segments by midpoint displacement seven times over at a quarter of each length, with
+three to six branches split five times, the core a pixel and a half wide at least and dimmer as the
+channel is narrower, a glow ten times as wide, fading into the clouds' base, at 0.02 ms. The thunder
+is made on the CPU into a stream of samples a sixth of a second ahead, noise through two one-pole
+low-passes whose cutoff falls from 3,000 hertz near or 250 far to 110, lifted by the square root of
+the band it lets through, three to six rolls at seeded times, a crack for a strike within two
+kilometers, softly clipped, heard after the distance over 343 meters a second, its streams kept for
+the next clap. The crate drew no bolt and played a clip the game gave it.

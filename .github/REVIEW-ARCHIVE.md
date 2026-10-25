@@ -1525,6 +1525,21 @@ a batch.
     2026-10-25 in four commits, the media, the fog and the band, the look pass and the look cycle;
     the view from space on the owner's word as a new item.
 
+72. **The feature test's sample behaviors go from the source.** From the word of 2026-10-25 at
+    08:18, with the console of the feature test run from games/FeatureTest on the desktop and closed
+    by its window, that its final state and transforms lists are residue not to be in the builds,
+    and at 08:22 that the sample behaviors themselves are to be deleted, the tests and the docs
+    holding what they showed. Diagnostics, which counts spinners, lifetimes and grounded entities
+    and reports them at shutdown, Movement, which spawns five moving entities and integrates them,
+    Orbit, which moves entities by Bevy's Transform and parents one to another, and Spinner, a
+    behavior that is its own component, are demonstrations from the program's first days and not
+    zones, pages or checks of the feature test; they go with the entities they spawned and their
+    console reports, and any other behavior that demonstrates alone goes with them, the coder naming
+    each. The drive script, the tests and the docs are read first for a line, a count or a reference
+    that relied on them and moved to what remains. One commit, with or before item 69's sixth phase.
+    Done at `6795478f` on 2026-10-25, the four sample behaviors deleted with their components and
+    the verbose flag, nothing found relying on them.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

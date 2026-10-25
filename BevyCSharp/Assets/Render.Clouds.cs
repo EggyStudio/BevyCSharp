@@ -147,7 +147,7 @@ internal static class Clouds
         Feed(clouds, clouds.March, noise);
         if (clouds.Shadow.IsValid) Feed(clouds, clouds.Shadow, noise);
         clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
-        Turn(clouds, 0f);
+        Turn(camera, clouds, 0f);
         if (standing) return;
 
         Shaders.SetEngineViewImages(camera, Owner, new ViewImage("clouds", ShaderImageFormat.Rgba16Float, Scale: 0.5f, History: true));
@@ -221,7 +221,7 @@ internal static class Clouds
         var ecs = world.Resource<EcsWorld>();
         foreach (var (camera, clouds) in Cameras)
         {
-            Turn(clouds, delta);
+            Turn(new Entity(camera), clouds, delta);
             Cookie(ecs, new Entity(camera), clouds);
         }
     }
@@ -271,11 +271,17 @@ internal static class Clouds
         clouds.Shadowed = Entity.None;
     }
 
-    private static void Turn(Camera clouds, float delta)
+    // Carries the clouds on a frame and hands the march its steps, last frame's clouds where they
+    // may be read, and the glow of a strike flashing in them, which last frame's would smear, so
+    // none is read while it flashes.
+    private static void Turn(Entity camera, Camera clouds, float delta)
     {
         clouds.Frames++;
         clouds.Carried += clouds.Settings.Wind * delta;
         var settings = clouds.Settings;
+        var glow = SkyThunder.GlowFor(camera);
+        clouds.March.Set("flash", glow is { } lit ? new Vector4(lit.Middle.X, lit.Middle.Y, lit.Middle.Z, lit.Light) : Vector4.Zero)
+            .Set("flash_color", glow is { } tint ? new Vector4(tint.Color, tint.Radius) : Vector4.Zero);
 
         // The steps along a way and toward the sun.
         var (steps, toward) = settings.Quality switch
@@ -284,7 +290,7 @@ internal static class Clouds
             CloudQuality.High => (128f, 6f),
             _ => (72f, 6f),
         };
-        var history = clouds.Frames > 2 && (_noise?.Made ?? false) ? 1f : 0f;
+        var history = clouds.Frames > 2 && (_noise?.Made ?? false) && glow is null ? 1f : 0f;
         foreach (var instance in clouds.Shadow.IsValid ? [clouds.March, clouds.Shadow] : new[] { clouds.March })
         {
             instance.Set("layer", new Vector4(settings.Bottom, settings.Top, EarthRadius, settings.Distance))

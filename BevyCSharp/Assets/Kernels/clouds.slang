@@ -53,6 +53,13 @@ uniform float4 lobes;
 // x: the share of the cover that is a flat deck of stratus rather than heaps. yzw: unused.
 uniform float4 stratus;
 
+// A strike of lightning's glow inside the clouds (Render.SetThunder), a light scattered evenly about
+// a point, dying away as a bell from it. xyz: the point. w: the light there, in candelas a square
+// meter of a cloud lit evenly by it, before the exposure, 0 where nothing strikes. The glow's color
+// in rgb, and in w how far from the point the glow has fallen to some three fifths, in meters.
+uniform float4 flash;
+uniform float4 flash_color;
+
 // The share of the sun's light the clouds let through to the ground over a square about the
 // camera, in the red, which `shadows` writes and Bevy lays over the sun's light as its picture.
 [format("rgba8")] WTexture2D<float4> cloud_shadow;
@@ -281,7 +288,13 @@ void main(uint3 id : SV_DispatchThreadID)
                 // cloud's top and the dimmer light from below at its base.
                 float h = within(planet);
                 float3 ambient = lerp(skyBelow * 0.5, skyAbove, h) * lobes.w;
-                float3 source = thick * (sunHere * scattered + ambient);
+                float3 glow = 0.0;
+                if (flash.w > 0.0)
+                {
+                    float3 apart = world - flash.xyz;
+                    glow = flash_color.rgb * flash.w * passView.exposure * exp(-dot(apart, apart) / (2.0 * flash_color.w * flash_color.w));
+                }
+                float3 source = thick * (sunHere * scattered + ambient + glow);
 
                 float passed = exp(-thick * stride);
                 light += through * (source - source * passed) / thick;

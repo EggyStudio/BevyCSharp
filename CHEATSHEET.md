@@ -824,7 +824,9 @@ static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Mak
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
 static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog over a camera's picture in the color the sky has at the horizon along each way, replacing any it had, so distant geometry fades into the sky behind it and the sky below the horizon takes the horizon's color
 static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
-static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
+static void SetThunder(Entity camera, ThunderSettings? settings);  // Brings a thunderstorm about a camera, lightning striking as settings says, or with null ends it
+static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null);  // Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or somewhere between its storm's nearest and farthest
+static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null, ThunderSettings? thunder = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is

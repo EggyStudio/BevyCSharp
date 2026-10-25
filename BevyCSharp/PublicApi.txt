@@ -4172,6 +4172,19 @@ sealed class Bevy.LightSettings
   float Range { get; set; }
   float ShadowDepthBias { get; set; }
   float ShadowNormalBias { get; set; }
+readonly struct Bevy.LightningStrike : IEquatable<LightningStrike>
+  LightningStrike(Vec3 Position, float Distance, float ThunderDelay, bool ToGround)
+  Vec3 Position { get; init; }
+  bool Equals(LightningStrike other)
+  bool ToGround { get; init; }
+  float Distance { get; init; }
+  float ThunderDelay { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(LightningStrike left, LightningStrike right)
+  static bool op_Inequality(LightningStrike left, LightningStrike right)
+  void Deconstruct(out Vec3 Position, out float Distance, out float ThunderDelay, out bool ToGround)
 sealed class Bevy.ListValue : IEnumerable, IEnumerable<object>, IEquatable<ListValue>, IReadOnlyCollection<object>, IReadOnlyList<object>
   IEnumerator<object?> GetEnumerator()
   ListValue Adding(object? item)
@@ -12581,6 +12594,7 @@ static class Bevy.Render
   static FreeCameraSettings? FreeCameraOf(Entity camera)
   static FreeCameraState? FreeCameraStateOf(Entity camera)
   static IReadOnlyList<PassTiming> Timings()
+  static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null)
   static MeshData? DataOf(AssetHandle mesh)
   static MeshRecipe? RecipeOf(AssetHandle mesh)
   static PanCameraSettings? PanCameraOf(Entity camera)
@@ -12690,8 +12704,9 @@ static class Bevy.Render
   static void SetSoftShadows(Entity light, float size)
   static void SetSortedTransparency(Entity camera, bool on = true, uint layers = 0u, float average = 0f, float threshold = 0f)
   static void SetSunDisk(Entity light, SunDisk disk)
+  static void SetThunder(Entity camera, ThunderSettings? settings)
   static void SetViewport(Entity camera, uint x, uint y, uint width, uint height)
-  static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null)
+  static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null, ThunderSettings? thunder = null)
   static void SetWireframe(Entity entity, bool on, (float, float, float, float) color = default)
   static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels)
   static void WriteMesh(AssetHandle mesh, MeshData data)
@@ -13691,6 +13706,19 @@ enum Bevy.ThemedPart : int
   Border = 1
   OwnText = 3
   Text = 2
+sealed class Bevy.ThunderSettings
+  Action<LightningStrike>? Struck { get; set; }
+  ThunderSettings()
+  bool Bolts { get; set; }
+  bool Light { get; set; }
+  bool Sound { get; set; }
+  float Brightness { get; set; }
+  float Farthest { get; set; }
+  float Nearest { get; set; }
+  float Rate { get; set; }
+  float Volume { get; set; }
+  string? Bus { get; set; }
+  uint Seed { get; set; }
 readonly struct Bevy.TileData : IEquatable<TileData>
   Color Color { get; init; }
   TileData(ushort TilesetIndex, Color Color, bool Visible, TileOrientation Orientation)

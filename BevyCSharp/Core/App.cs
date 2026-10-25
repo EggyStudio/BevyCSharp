@@ -428,15 +428,17 @@ public sealed unsafe partial class App : IDisposable
 
                 // F1's hidden scope and F3's debug overlay, in a run that draws, the scene's
                 // distance field, which the overlay says, the probes global illumination traces
-                // through it, the weather, which gives the clouds, the fog and the rain their
-                // numbers, the clouds, carried on by the wind, the fog's froxels, whose images trade
-                // places every frame and which read the clouds' shadow this frame, the rain, which
-                // reads it too, and the night sky, which reads its clock.
+                // through it, the weather, which gives the clouds, the fog, the rain and the storm
+                // their numbers, the storm, whose flash the clouds glow with, the clouds, carried on
+                // by the wind, the fog's froxels, whose images trade places every frame and which
+                // read the clouds' shadow this frame, the rain, which reads it too, and the night
+                // sky, which reads its clock.
                 if (!world.Resource<Config>().Headless)
                 {
                     SceneField.Tick(world);
                     WorldProbes.Tick(world);
                     SkyWeather.Tick(world);
+                    SkyThunder.Tick(world);
                     Clouds.Tick(world);
                     SkyFog.Tick(world);
                     Precipitation.Tick(world);

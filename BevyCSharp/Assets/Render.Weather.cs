@@ -13,14 +13,14 @@ public static partial class Render
     /// and its conditions are laid over the settings given here. The clouds take its cover, its
     /// share of a flat deck, its base, top and density, and its wind, which the fog's froxels
     /// drift on too. The fog's visibility thins toward some eighty meters as its fog thickens. The
-    /// rain and the snow fall as hard as it rains and snows, on the gusting wind. Any set of settings
-    /// can be none, and that part is left to the program.
+    /// rain and the snow fall as hard as it rains and snows, on the gusting wind, and lightning
+    /// strikes as often as the weather's thunder says. Any set of settings can be none, and that part
+    /// is left to the program.
     /// </para>
     /// <para>
     /// The settings given are kept as the weather's starting point and not changed, and the camera
-    /// is given new ones every frame, which change its clouds', fog's and rain's numbers alone.
-    /// Thunder strikes once the engine draws it, and the ground's wetness and snow cover are the
-    /// state's for a program's materials to read.
+    /// is given new ones every frame, which change its clouds', fog's, rain's and storm's numbers
+    /// alone. The ground's wetness and snow cover are the state's for a program's materials to read.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
@@ -28,6 +28,7 @@ public static partial class Render
     /// <param name="clouds">The clouds the weather starts from, or none to leave the camera's clouds alone.</param>
     /// <param name="fog">The fog the weather starts from, or none to leave the camera's fog alone.</param>
     /// <param name="precipitation">The rain and snow the weather starts from, or none to leave the camera's alone.</param>
+    /// <param name="thunder">The storm the weather starts from, or none to leave the camera's alone.</param>
     /// <example>
     /// <code>
     /// var weather = new WeatherState { Forecast = true, Clock = clock };
@@ -35,7 +36,13 @@ public static partial class Render
     /// weather.Set(WeatherPreset.Rain);   // eases into rain over a minute or so
     /// </code>
     /// </example>
-    public static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null)
+    public static void SetWeather(
+        Entity camera,
+        WeatherState? weather,
+        CloudSettings? clouds = null,
+        SkyFogSettings? fog = null,
+        PrecipitationSettings? precipitation = null,
+        ThunderSettings? thunder = null)
     {
         if (weather is null)
         {
@@ -43,8 +50,9 @@ public static partial class Render
             return;
         }
 
-        SkyWeather.Set(camera, weather, clouds, fog, precipitation);
-        SkyWeather.Apply(camera, weather, clouds, fog, precipitation);
+        var parts = new SkyWeather.Parts(clouds, fog, precipitation, thunder);
+        SkyWeather.Set(camera, weather, parts);
+        SkyWeather.Apply(camera, weather, parts);
     }
 }
 
@@ -52,12 +60,15 @@ public static partial class Render
 internal static class SkyWeather
 {
     private static App? _app;
-    private static readonly Dictionary<ulong, (WeatherState Weather, CloudSettings? Clouds, SkyFogSettings? Fog, PrecipitationSettings? Precipitation)> Weathers = [];
+    private static readonly Dictionary<ulong, (WeatherState Weather, Parts Parts)> Weathers = [];
 
-    internal static void Set(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog, PrecipitationSettings? precipitation)
+    /// <summary>The settings a weather starts each part of a camera's sky from, any of them none.</summary>
+    internal readonly record struct Parts(CloudSettings? Clouds, SkyFogSettings? Fog, PrecipitationSettings? Precipitation, ThunderSettings? Thunder);
+
+    internal static void Set(Entity camera, WeatherState weather, Parts parts)
     {
         ForgetOtherApps();
-        Weathers[camera.Bits] = (weather, clouds, fog, precipitation);
+        Weathers[camera.Bits] = (weather, parts);
     }
 
     internal static void Clear(Entity camera)
@@ -79,16 +90,17 @@ internal static class SkyWeather
         ForgetOtherApps();
         if (Weathers.Count == 0) return;
         var delta = world.Resource<Time>().Delta;
-        foreach (var (camera, (weather, clouds, fog, precipitation)) in Weathers)
+        foreach (var (camera, (weather, parts)) in Weathers)
         {
             weather.Advance(delta);
-            Apply(new Entity(camera), weather, clouds, fog, precipitation);
+            Apply(new Entity(camera), weather, parts);
         }
     }
 
-    /// <summary>The camera's clouds, fog and rain under the weather's conditions now, laid over the settings it starts from.</summary>
-    internal static void Apply(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog, PrecipitationSettings? precipitation)
+    /// <summary>The camera's clouds, fog, rain and storm under the weather's conditions now, laid over the settings it starts from.</summary>
+    internal static void Apply(Entity camera, WeatherState weather, Parts parts)
     {
+        var (clouds, fog, precipitation, thunder) = parts;
         var now = weather.Current;
         if (clouds is not null)
         {
@@ -137,6 +149,24 @@ internal static class SkyWeather
                 Roofs = precipitation.Roofs,
                 RoofLayers = precipitation.RoofLayers,
                 Splashes = precipitation.Splashes,
+            });
+        }
+
+        if (thunder is not null)
+        {
+            Render.SetThunder(camera, new ThunderSettings
+            {
+                Rate = Math.Max(0f, now.Thunder),
+                Nearest = thunder.Nearest,
+                Farthest = thunder.Farthest,
+                Brightness = thunder.Brightness,
+                Light = thunder.Light,
+                Bolts = thunder.Bolts,
+                Sound = thunder.Sound,
+                Volume = thunder.Volume,
+                Bus = thunder.Bus,
+                Seed = thunder.Seed,
+                Struck = thunder.Struck,
             });
         }
     }

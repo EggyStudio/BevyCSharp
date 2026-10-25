@@ -16,6 +16,7 @@ public sealed class SkyWeatherTests
         CloudSettings? given = null;
         SkyFogSettings? fog = null;
         PrecipitationSettings? rained = null;
+        ThunderSettings? stormed = null;
         var run = new PictureRun
         {
             Width = 320,
@@ -33,7 +34,7 @@ public sealed class SkyWeatherTests
                 ecs.Add(sun, Transform.LookingAt(new Vec3(-0.5f, 0.8f, -0.3f), Vec3.Zero, Vec3.UnitY));
                 // The clouds shadowing the sun, so the shadow's dispatch takes the weather's numbers
                 // every frame beside the march.
-                Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 2000f }, new PrecipitationSettings { Roofs = false });
+                Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 2000f }, new PrecipitationSettings { Roofs = false }, new ThunderSettings { Sound = false });
             },
         };
         run.Wait(10)
@@ -41,7 +42,7 @@ public sealed class SkyWeatherTests
             .Until("ready", _ => Render.PipelinesReady())
             .Wait(60)
             .Capture("sky")
-            .Do("reading", _ => (given, fog, rained) = (Clouds.All().Single().Settings, SkyFog.All().Single().Settings, Precipitation.All().Single().Settings))
+            .Do("reading", _ => (given, fog, rained, stormed) = (Clouds.All().Single().Settings, SkyFog.All().Single().Settings, Precipitation.All().Single().Settings, SkyThunder.All().Single().Settings))
             .Go();
 
         var rain = WeatherConditions.Of(WeatherPreset.Rain);
@@ -49,6 +50,7 @@ public sealed class SkyWeatherTests
         Assert.True(fog!.Visibility < 1500f, $"the rain's haze leaves the fog seen to {fog.Visibility}");
         Assert.Equal(rain.Rain, rained!.Rain, 3);
         Assert.True(rained.Wind.Length > 3f, $"the rain drifts on a wind of {rained.Wind.Length} meters a second");
+        Assert.Equal(rain.Thunder, stormed!.Rate);
 
         // The sky above the horizon a gray deck, little of its blue left.
         var picture = run.Picture("sky");

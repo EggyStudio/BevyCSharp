@@ -265,7 +265,30 @@ a game puts what moves on a layer of its own and leaves it out of `RoofLayers`. 
 rain takes some 0.05 ms of the GPU at `Medium`, and the map some 0.02 ms on the frames it is drawn,
 beside the scene drawn again from above.
 
-A weather moves the clouds, the fog and the rain together:
+Lightning strikes in a storm about the camera:
+
+<!-- compiled with:
+Entity camera = default;
+LightningStrike? last = null;
+-->
+```csharp
+Render.SetThunder(camera, new ThunderSettings { Rate = 4f, Struck = strike => last = strike });
+```
+
+Strikes come at random, `Rate` a minute on average with no beat to them, between `Nearest` and
+`Farthest`, two in three as a branching bolt from the clouds' base to the ground and the rest inside
+the cloud. Each flickers for half a second, as a real strike's return strokes come down its channel
+one after another, and while it does, a point light at the bolt lights the scene and the fog in
+froxels, the camera's clouds glow from within about it, and the bolt is added to the picture after
+temporal antialiasing, a jagged channel split seven times over with a few dimmer branches, fading
+into the clouds' base. The thunder is made as it plays from noise, a crack and a rumble rolling for
+seconds, sharper and louder from a near strike and lower and longer from a far one, and is heard
+once sound at 343 meters a second has come from the strike. `Struck` is told of each strike with its
+place, its distance and the thunder's delay, `Render.StrikeLightning` strikes at once, at a place or
+where the storm chooses, and the console's `sky.strike` does the same while the app runs. A bolt
+costs some 0.02 ms of the GPU while it flashes.
+
+A weather moves the clouds, the fog, the rain and the lightning together:
 
 <!-- compiled with:
 Entity camera = default, sun = default;
@@ -273,7 +296,7 @@ SkyClock clock = new();
 -->
 ```csharp
 var weather = new WeatherState { Clock = clock, Forecast = true, Climate = WeatherClimate.Maritime };
-Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings());
+Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings(), new ThunderSettings());
 
 weather.Forecast = false;
 weather.Set(WeatherPreset.Storm);                  // eased into over a minute or so
@@ -290,12 +313,13 @@ at night, the rain falling as snow below a degree and a mist lying on calm morni
 the same `Seed` on every machine. `Wind` is the wind of the moment, gusting by the conditions'
 `Gusts`, and `Wetness` and `SnowCover` say how wet the ground is and how much of it lies under snow,
 for a program's materials to darken and whiten by. `Render.SetWeather` moves the state on every
-frame by the game's clock and lays its conditions over the cloud, fog and rain settings given beside
-it, which take the place of the camera's own `SetClouds`, `SetSkyFog` and `SetPrecipitation`. The
+frame by the game's clock and lays its conditions over the cloud, fog, rain and storm settings given
+beside it, which take the place of the camera's own `SetClouds`, `SetSkyFog`, `SetPrecipitation` and
+`SetThunder`. The
 clouds take the cover, the deck, the base, the top, the density and the wind, the fog thins toward
 some eighty meters as the weather's fog thickens, and its froxels drift on the same wind, and it
-rains and snows as hard as the weather does, on the gusting wind. Any set of settings can be none,
-and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
+rains and snows as hard as the weather does, on the gusting wind, and lightning strikes as often as
+its `Thunder` says. Any set of settings can be none, and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
 the forecast, while the app runs.
 
 A painted sky is a cubemap instead:

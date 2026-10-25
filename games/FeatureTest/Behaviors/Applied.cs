@@ -195,8 +195,8 @@ public partial struct Applied
         // The engine's weather over the atmosphere's sky, where the crate's does not run, its kind
         // from the panel or its forecast from the day's clock, giving the clouds, their shadows over
         // the map in the sun, the fog, which fades the far ground and the zones' far walls into the
-        // sky behind them and gives the sky below the horizon the horizon's color, and the rain and
-        // the snow.
+        // sky behind them and gives the sky below the horizon the horizon's color, the rain and the
+        // snow, and the lightning and its thunder.
         if (!Weather.Active && backdrop == Backdrop.Atmosphere)
         {
             MapWeather.Clock = DayNight.Clock;
@@ -207,7 +207,7 @@ public partial struct Applied
                 _kind = settings.WeatherKind;
             }
             if (settings.Procedural) _kind = null;
-            Render.SetWeather(camera, MapWeather, new CloudSettings { ShadowLight = Scene.Sun }, Fog, new PrecipitationSettings());
+            Render.SetWeather(camera, MapWeather, new CloudSettings { ShadowLight = Scene.Sun }, Fog, new PrecipitationSettings(), new ThunderSettings());
             MapWeatherOn = true;
         }
         else
@@ -217,6 +217,7 @@ public partial struct Applied
                 Render.SetWeather(camera, null);
                 Render.SetClouds(camera, null);
                 Render.SetPrecipitation(camera, null);
+                Render.SetThunder(camera, null);
             }
             MapWeatherOn = false;
         }
