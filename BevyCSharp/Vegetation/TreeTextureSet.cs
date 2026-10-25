@@ -4,7 +4,7 @@ namespace Bevy;
 /// A set of the vegetation's texture collection, its three files under the asset root, found by
 /// name in <see cref="TreeTextures"/>.
 /// </summary>
-/// <param name="Name">Its name, which a species gives as its <see cref="TreeSpecies.Bark"/> or <see cref="TreeSpecies.Leaves"/>.</param>
+/// <param name="Name">Its name, which a species gives as its <see cref="TreeSpecies.BarkSet"/> or <see cref="TreeSpecies.LeafSet"/>.</param>
 /// <param name="Kind">Whether it is a bark or an atlas of leaves.</param>
 /// <param name="Albedo">The color in RGB and the opacity in A, BC7 in sRGB.</param>
 /// <param name="Normal">The tangent-space normal's X and Y, BC5, which Bevy's material reads as a two-channel normal map.</param>
@@ -25,6 +25,19 @@ namespace Bevy;
 /// </remarks>
 public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Albedo, string Normal, string Surface)
 {
+    /// <summary>The albedo's width and height in texels, the normal and the surface being half of each, or nothing where the set's manifest does not say.</summary>
+    public (int Width, int Height)? Size { get; init; }
+
+    /// <summary>
+    /// Where each leaf of a leaf set's atlas is, as the share of the atlas's width and height from its
+    /// left and top and the share it spans, its stalk at the bottom, or the whole atlas as one leaf
+    /// where the manifest gives none.
+    /// </summary>
+    public IReadOnlyList<(float U, float V, float Width, float Height)> LeafBoxes { get; init; } = [(0f, 0f, 1f, 1f)];
+
+    /// <summary>The mean color of the albedo's opaque texels, the summer color a fall tint is worked out against, or white where the manifest does not say.</summary>
+    public Color MeanColor { get; init; } = Color.White;
+
     /// <summary>
     /// Starts loading the set's three images, tiling and filtered between texels and between
     /// levels with eight anisotropic samples, the albedo as color and the other two as data. Only

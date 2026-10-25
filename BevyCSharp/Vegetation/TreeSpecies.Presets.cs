@@ -16,8 +16,14 @@ public sealed partial record TreeSpecies
         Ratio = 0.015f,
         Flare = 0.6f,
         AttractionUp = 0.5f,
-        Bark = "silver-birch-bark",
-        Leaves = "silver-birch-leaves",
+        BarkSet = "silver-birch-bark",
+        LeafSet = "silver-birch-leaves",
+        BarkColor = Color.FromSrgb(0.80f, 0.79f, 0.74f),
+        Leaves = 25,
+        LeafScale = 0.17f,
+        LeafLevel = new TreeLevel { DownAngle = 45f, DownAngleVariation = 10f, Rotate = 77f },
+        LeafColor = Color.FromSrgb(0.33f, 0.48f, 0.18f),
+        FallColor = Color.FromSrgb(0.95f, 0.78f, 0.20f),
         Levels =
         [
             new TreeLevel { CurveVariation = 20f },
@@ -36,8 +42,15 @@ public sealed partial record TreeSpecies
         Ratio = 0.015f,
         Flare = 1f,
         AttractionUp = 0.5f,
-        Bark = "broadleaf-bark",
-        Leaves = "red-alder-leaves",
+        BarkSet = "broadleaf-bark",
+        LeafSet = "red-alder-leaves",
+        BarkColor = Color.FromSrgb(0.36f, 0.33f, 0.30f),
+        Leaves = 6,
+        LeafScale = 0.3f,
+        LeafScaleX = 0.5f,
+        LeafLevel = new TreeLevel { DownAngle = 45f, DownAngleVariation = 10f, Rotate = 140f },
+        LeafColor = Color.FromSrgb(0.22f, 0.38f, 0.12f),
+        FallColor = Color.FromSrgb(0.75f, 0.15f, 0.08f),
         Levels =
         [
             new TreeLevel { Taper = 1.1f, CurveVariation = 40f },
@@ -67,8 +80,15 @@ public sealed partial record TreeSpecies
         PruneWidthPeak = 0.6f,
         PrunePowerLow = 0.001f,
         PrunePowerHigh = 0.5f,
-        Bark = "weeping-willow-bark",
-        Leaves = "weeping-willow-leaves",
+        BarkSet = "weeping-willow-bark",
+        LeafSet = "weeping-willow-leaves",
+        BarkColor = Color.FromSrgb(0.40f, 0.35f, 0.29f),
+        Leaves = 15,
+        LeafScale = 0.12f,
+        LeafScaleX = 0.2f,
+        LeafLevel = new TreeLevel { DownAngle = 20f, DownAngleVariation = 10f, Rotate = 140f },
+        LeafColor = Color.FromSrgb(0.45f, 0.55f, 0.25f),
+        FallColor = Color.FromSrgb(0.85f, 0.78f, 0.30f),
         Levels =
         [
             new TreeLevel { Length = 0.8f, Splits = 0.8f, SplitAngle = 3f, CurveBack = 20f, CurveVariation = 120f },
@@ -92,8 +112,15 @@ public sealed partial record TreeSpecies
         Ratio = 0.018f,
         Flare = 1.2f,
         AttractionUp = 0.8f,
-        Bark = "broadleaf-bark",
-        Leaves = "shingle-oak-leaves",
+        BarkSet = "broadleaf-bark",
+        LeafSet = "shingle-oak-leaves",
+        BarkColor = Color.FromSrgb(0.30f, 0.27f, 0.24f),
+        Leaves = 25,
+        LeafScale = 0.12f,
+        LeafScaleX = 0.66f,
+        LeafLevel = new TreeLevel { DownAngle = 45f, DownAngleVariation = 10f, Rotate = 140f },
+        LeafColor = Color.FromSrgb(0.28f, 0.40f, 0.14f),
+        FallColor = Color.FromSrgb(0.65f, 0.38f, 0.12f),
         Levels =
         [
             new TreeLevel { Taper = 0.95f, Splits = 3.2f, SplitAngle = 10f, CurveVariation = 90f },
@@ -112,8 +139,15 @@ public sealed partial record TreeSpecies
         BaseSplits = 6,
         Ratio = 0.02f,
         AttractionUp = 0.4f,
-        Bark = "hornbeam-bark",
-        Leaves = "hornbeam-leaves",
+        BarkSet = "hornbeam-bark",
+        LeafSet = "hornbeam-leaves",
+        BarkColor = Color.FromSrgb(0.42f, 0.40f, 0.33f),
+        Leaves = 12,
+        LeafScale = 0.07f,
+        LeafScaleX = 0.6f,
+        LeafLevel = new TreeLevel { DownAngle = 50f, DownAngleVariation = 15f, Rotate = 137.5f },
+        LeafColor = Color.FromSrgb(0.30f, 0.45f, 0.14f),
+        FallColor = Color.FromSrgb(0.80f, 0.62f, 0.20f),
         Levels =
         [
             new TreeLevel { SplitAngle = 18f, SplitAngleVariation = 6f, CurveVariation = 30f },
@@ -122,10 +156,7 @@ public sealed partial record TreeSpecies
         ],
     };
 
-    /// <summary>
-    /// A fern, a short stock with fronds of a meter arching out from it all round, each frond carrying
-    /// its leaflets on two sides.
-    /// </summary>
+    /// <summary>A fern, a short stock with fronds of a meter arching out from it all round, each drawn as a frond along its stem.</summary>
     public static TreeSpecies Fern { get; } = new()
     {
         Shape = TreeShape.Cylindrical,
@@ -133,12 +164,16 @@ public sealed partial record TreeSpecies
         ScaleVariation = 0.2f,
         BaseSize = 0f,
         Ratio = 0.1f,
-        Leaves = "fern-leaves",
+        LeafSet = "fern-leaves",
+        BarkColor = Color.FromSrgb(0.32f, 0.40f, 0.20f),
+        Leaves = -1,
+        LeafScale = 0.3f,
+        LeafColor = Color.FromSrgb(0.25f, 0.42f, 0.15f),
+        FallColor = Color.FromSrgb(0.55f, 0.40f, 0.20f),
         Levels =
         [
             new TreeLevel { Length = 0.1f },
             new TreeLevel { DownAngle = 25f, DownAngleVariation = -15f, Rotate = 137.5f, Branches = 14, Length = 10f, LengthVariation = 1.5f, Curve = 60f, CurveVariation = 15f },
-            new TreeLevel { DownAngle = 70f, DownAngleVariation = 5f, Rotate = -1f, Branches = 40, Length = 0.15f, LengthVariation = 0.02f, Curve = 20f },
         ],
     };
 }

@@ -76,7 +76,7 @@ public sealed class TreeTexturesTests
         Assert.True(total <= 32L << 20, $"the collection is {total} bytes");
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush, TreeSpecies.Fern })
         {
-            var size = sizes.GetValueOrDefault(species.Bark ?? "") + sizes.GetValueOrDefault(species.Leaves ?? "");
+            var size = sizes.GetValueOrDefault(species.BarkSet ?? "") + sizes.GetValueOrDefault(species.LeafSet ?? "");
             Assert.True(size <= 3L << 20, $"a species' sets are {size} bytes");
         }
     }
@@ -86,12 +86,12 @@ public sealed class TreeTexturesTests
     {
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
         {
-            Assert.Equal(TreeTextureKind.Bark, TreeTextures.Find(species.Bark!)?.Kind);
-            Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(species.Leaves!)?.Kind);
+            Assert.Equal(TreeTextureKind.Bark, TreeTextures.Find(species.BarkSet!)?.Kind);
+            Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(species.LeafSet!)?.Kind);
         }
 
-        Assert.Null(TreeSpecies.Fern.Bark);
-        Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(TreeSpecies.Fern.Leaves!)?.Kind);
+        Assert.Null(TreeSpecies.Fern.BarkSet);
+        Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(TreeSpecies.Fern.LeafSet!)?.Kind);
     }
 
     [Fact]

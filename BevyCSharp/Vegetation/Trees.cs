@@ -27,7 +27,7 @@ namespace Bevy;
 /// the skeleton rather than the seed avoids.
 /// </para>
 /// </remarks>
-public static class Trees
+public static partial class Trees
 {
     /// <summary>The material slot of the bark, which every face <see cref="Build"/> makes is in.</summary>
     public const string BarkSlot = "bark";
@@ -176,6 +176,16 @@ public static class Trees
         }
 
         if (!(levels[0].LengthVariation < levels[0].Length)) throw new ArgumentOutOfRangeException(nameof(species), levels[0].LengthVariation, "The trunk's length is above zero and its variation below it.");
+
+        if (!Enum.IsDefined(species.LeafShape)) throw new ArgumentOutOfRangeException(nameof(species), species.LeafShape, "A species' leaf shape is one of TreeLeafShape's.");
+        Finite(species.LeafScale, nameof(species.LeafScale), above: 0f);
+        Finite(species.LeafScaleX, nameof(species.LeafScaleX), above: 0f);
+        if (!(species.LeafBend is >= 0f and <= 1f)) throw new ArgumentOutOfRangeException(nameof(species), species.LeafBend, "A species' leaf bend is from zero to one.");
+        var leaf = species.LeafLevel ?? throw new ArgumentOutOfRangeException(nameof(species), "A species has its leaf level.");
+        foreach (var (value, name) in (ReadOnlySpan<(float, string)>)[(leaf.DownAngle, nameof(leaf.DownAngle)), (leaf.DownAngleVariation, nameof(leaf.DownAngleVariation)), (leaf.Rotate, nameof(leaf.Rotate)), (leaf.RotateVariation, nameof(leaf.RotateVariation))])
+        {
+            Finite(value, $"leaf level's {name}");
+        }
     }
 
     private static void Finite(float value, string name, float? above = null, bool orEqual = false)

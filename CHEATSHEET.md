@@ -997,11 +997,20 @@ static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = defaul
 static AssetHandle Grid();                                      // Makes the grid of a meter's cell, in its default colors and size
 static AssetHandle Grid(int pixelsPerMeter);                    // Makes the grid of a meter's cell, in its default colors, at a size
 static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
+```
 
+## Trees
+
+The guide's page is [trees.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/trees.md).
+
+```csharp
 // Trees
 static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
 static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers);  // Grows a tree of a species from a seed, round boxes it does not grow into and that shade it
 static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
+static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed);  // Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds
+static AssetHandle BarkMaterial(TreeSpecies species);           // The material a species' bark is drawn with
+static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f);  // The material a species' leaves are drawn with, turned toward its fall color by a share
 
 // TreeTextures
 static TreeTextureSet? Find(string name);                       // The set of a name, or nothing where the collection has none

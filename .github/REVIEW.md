@@ -10,28 +10,30 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `70f92473`, item 74's pipeline, pushed at 14:47 on 2026-10-25 after the run of
-`c7e65c23` went green, its own run green at 15:05, carrying ASSETS.md, the review's files and
-DEVLOG.md. build/textures.py encodes BC7 mode 6 with endpoints along the principal axis refit by
-least squares for the albedo and the surface and BC5 as two BC4 blocks for the normal, writes KTX2
-with a data format descriptor and levels down to a texel each under zstd at level 19, keeps the
-alpha's coverage in the mips with transparent texels taking the nearest opaque color and resizes the
-channels one at a time since Pillow premultiplies, encode being the one place a format is chosen;
-the out and sample options write textures.json beside the sets, sets marked waiting going to the
-ignored waiting folder. The library gains TreeTextures with Find, All and Add and
-TreeTextureSet.Load with repeat, linear filtering and eight anisotropic samples, the embedded sets
-mounted under bevycsharp/vegetation through a new internal resource mount in AssetFiles once an app,
-and TreeSpecies gains Bark and Leaves, the willow naming willow-bark until the entries' commit
-renames it; .gitignore takes .vegetation and the waiting folder. The sample set under the tests'
-references is held byte for byte against the sample option, its headers checked, loaded through Bevy
-at 64, 32 and 32 in BC7 and BC5, and the bounds checked. No set ships. 1,927 passed, 3 skipped,
-1,930 the listing plus 11.
+Reviewed up to `d151e0cc`, item 74's entries, pushed at 15:21 on 2026-10-25 after the run of
+`70f92473` went green, its own run green at 15:39, carrying REVIEW.md, a captioned picture and a
+note. Ten sets imported from the sorted folder by its preset map, 3.3 MB of the 32, a species from
+549 KB for the oak to 749 for the willow. The barks, the silver birch at 512 square, the broadleaf
+for the tupelo and the oak and the weeping willow at 256 by 1024, the hornbeam at 256 by 512; the
+leaves, the birch's twelve at 512, the willow's five with its green top row cropped at 1024 by 256,
+the hornbeam's twenty at 512, the shingle oak's two at 512 by 256, the red alder's fronts and backs
+of three scans in a grid of six at 512, and the fern's five fronds with a scrap of stalk at 512.
+Roughness is one minus gloss where gloss exists and constant otherwise, occlusion comes from ao,
+translucency from subsurface or from the albedo's luminance at 0.8 where there is none. The import
+writes each leaf's box in its atlas into the manifest, opaque regions traced texel by texel with a
+region under a tenth of the largest dropped, ordered in rows from the top, for the dressing's cards.
+Everything else in the sorted folder stayed out. The tests read every preset finding its sets with
+the right kinds, the leaf boxes inside their atlases, the shingle oak leaves importing byte for byte
+as the collection holds them where the folder exists, and the bounds over real sets. The picture
+shows each bark on its preset's trunk and the six atlases on cut-out cards, the leaves on the trees
+coming with the dressing's cards; the note holds the sizes and the errors. 1,930 passed, 3 skipped,
+1,933 the listing plus 11.
+
+Before it, `70f92473` came, item 74's pipeline, pushed at 14:47 on 2026-10-25, its run green at
+15:05.
 
 Before it, `c7e65c23` came, item 70's second phase's growth, pushed at 13:12 on 2026-10-25, its run
 green at 13:30.
-
-Before it, `70212d49` came, item 70's first phase, the growth and the branches, pushed at 12:15 on
-2026-10-25, its run green at 12:38.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -299,7 +301,9 @@ from [SHARED.md](SHARED.md).
     four presets pictured in leaf. The paper's plates stay out of the repository, the note saying
     how each preset's outline compares. The second phase's growth at `c7e65c23` on 2026-10-25, the
     shadow grid, the pruning envelope, the six presets bare against the paper's figures in the note,
-    three departures in the head; item 74's pipeline next, then the dressing.
+    three departures in the head; item 74's pipeline next, then the dressing. At 15:21 the dressing
+    comes next, on item 74's sets, the leaf cards cut by the manifest's boxes, and item 75's depth
+    goes onto its bark material after.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -339,71 +343,6 @@ from [SHARED.md](SHARED.md).
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
 
-74. **A texture collection for the vegetation, imported from free sources, small on disk and on the
-    GPU.** From Decision 66, the owner's word of 2026-10-25 at about 13:00. The collection is
-    assets/textures in the library, built by build/textures.py from a manifest naming each source
-    under .ref and the recipe applied to it, the crop, the resize, the channel packing and any color
-    change, so the import is repeatable and the sources stay out of the repository; an entry is
-    three KTX2 files with mipmaps and Basis Universal supercompression, albedo.ktx2 with the color
-    in RGB and the opacity in A, ETC1S or UASTC where the alpha has edges, normal.ktx2 with the
-    tangent-space normal in RG as UASTC, and surface.ktx2 with roughness in R, translucency in G and
-    occlusion in B as ETC1S, Bevy's loader transcoding them to the GPU's block format on load, the
-    bridge gaining the basis-universal feature beside its ktx2 and zstd ones if the transcoder's
-    size and load time allow, KTX2 with BC7 and BC5 under zstd otherwise, the coder reading both; a
-    bark set tileable and at most 1024 square, a strip 512 by 1024, a leaf set one atlas of up to
-    eight leaves with alpha at most 1024 square, its translucency from the source's subsurface color
-    or derived from the albedo; a species at most 3 MB on disk and the collection at most 32 MB, a
-    test holding both; a manifest textures.json with each entry's name, kind, size, source folder
-    and recipe; a lookup in the library by name that a TreeSpecies names for its bark and its
-    leaves, the generated bark and leaf masks of item 70's dressing standing where no entry is
-    named. The first entries are the sorted folder's, bark for birch, grey willow, hornbeam, silver
-    maple, Scots pine, Monterey cypress, acacia, linden and red maple, leaves for birch, hornbeam,
-    silver maple, the three maples in fall, pine and cypress needles, and atlases cut from the
-    alder, sycamore and fall leaf scans, the aspen preset taking the birch, the tupelo the alder
-    leaves, the oak the sycamore leaves until an oak comes, the bush the hornbeam; the models stay
-    reference and are not imported. ASSETS.md is the review's request list for what the presets
-    still lack. An AGENTS.md row for ASSETS.md. The tests read the import of one source reproducible
-    byte for byte, the bounds, a loaded entry's size and format, and a tree built with a named bark
-    and leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so
-    the dressing takes the collection where it has an entry. Two commits, the pipeline and the
-    format, then the entries. The owner added at 13:08 that branch cards or leaf clusters batched
-    from the leaves are the review's call and that questions are welcome; so the import may also
-    bake branch cards, a twig with several leaves of an atlas drawn into one card with its own
-    normal and translucency, for the middle level of detail where item 70's third phase goes from
-    clusters to cards, the coder choosing per species whether a card is baked or built from the
-    atlas at load, said in the record. The coder's reading at 13:10, taken. Basis Universal is out,
-    its crate among those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2
-    holding BC7 and BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing
-    added; build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the
-    normals in plain Python with PIL reading, cropping, resizing and packing and Python's own zstd,
-    no numpy, the import taking minutes for the collection, the mips keeping the alpha's coverage so
-    leaves do not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or
-    512 square and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size,
-    about 1 MB a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built
-    at load from the atlas in item 70's third phase and not baked at import, so the collection stays
-    small. Changed at 13:40 under Decision 66 as amended. The entries come from the hidden folder
-    .vegetation, where the review sorted the usable sources by kind, bark, leaves, branches and
-    scans, a set a folder with its files named albedo, opacity, normal, gloss or specular,
-    subsurface, ao and height as the source had them and a README saying what each gives and what is
-    needed; the folder stays out of the repository, the import reads it by path, and the manifest
-    names each entry's folder as its source. The entries ship in the second commit; nothing waits.
-    The coder's three points, taken. The surface file follows Bevy's channels, occlusion in R,
-    roughness in G, metallic in B left at zero and the diffuse transmission in A, so one file binds
-    as the occlusion, the metallic-roughness and the transmission textures with no shader of the
-    library's, and Bevy reads BC5 as a two-channel normal by itself; the collection lives in
-    BevyCSharp/Vegetation/Textures, since a folder named assets would collide with BevyCSharp/Assets
-    on a case-insensitive file system, the KTX2 files and textures.json embedded in the library and
-    mounted under bevycsharp/vegetation in the asset root so Bevy's own loader reads them by path,
-    waiting entries imported to Textures/waiting under .gitignore and not embedded, TreeTextures.Add
-    mounting a folder for a local reading or a game's own; the AGENTS.md row for ASSETS.md is the
-    owner's to say, .github being hidden from N 1.5, and the coder asks. At 14:22 the owner told the
-    coder to ship the sorted folder as it is and to say nothing more of it in any document, so the
-    pipeline commit ships no set and adds nothing to the notices, a set ships unless the manifest
-    marks it waiting, the tests run on a 64-square sample kept under the tests' references, and the
-    entries' commit imports the sorted folder by its README's preset map. The pipeline at `70f92473`
-    on 2026-10-25, the encoder, the KTX2 writer, the mount and the lookup, no set shipped; the
-    entries next, the six presets' sets alone.
-
 75. **Bark has depth by parallax occlusion, its height map taken from the source or derived from the
     normal.** From the owner's question of 2026-10-25 at about 15:00 whether the tree textures could
     take parallax occlusion mapping for depth, and the word yes at {now}. About a third of the
@@ -415,7 +354,8 @@ from [SHARED.md](SHARED.md).
     takes it; the tree material sets the parallax depth scale and the occlusion method with a layer
     count of 8 to 16 on bark alone, the leaf cards taking none. The cost is read in the feature
     test's forest at 1080p and written into the record and the guide, and a picture pair shows a
-    trunk flat and with depth at reading distance. After item 74's entries. One commit.
+    trunk flat and with depth at reading distance. After item 70's dressing, whose bark material
+    carries the depth, placed so at 15:21. One commit.
 
 ## Verdicts
 
@@ -1935,3 +1875,19 @@ light, and `Trees.Grow` an overload taking boxes that no stem enters and that ta
 their side. `TreeSpecies` gains the paper's base splits, curve back, flare and pruning envelope, and
 carries the appendix's four species with its values and a bush and a fern, which a model file of
 3DEngine's could read as data.
+
+The public listing loses two lines and gains their renames in the commit carrying this line, item
+70's phase (b2), as N 2.4 asks. `TreeSpecies.Bark` and `TreeSpecies.Leaves`, the names of a
+species' texture sets since `70f92473`, become `BarkSet` and `LeafSet`, since the paper's own
+`Leaves` is its count of leaves a stem, which the species gains under that name with `LeafShape`,
+`LeafScale`, `LeafScaleX`, `LeafLevel`, `LeafBend` and the bark, leaf and fall colors.
+
+Shared: a grown tree's leaves and materials, in the commit carrying this line, item 70's phase (b2).
+`Trees.BuildLeaves` shares the paper's count of leaves, its leaves a stem times the stems its levels'
+branches make, among the twigs a grown tree has, at most 30,000 cards, each drawn larger up to 1.6
+times where the count is cut, set off its twig by up to one and a half of its lengths, turned to face
+up and out, and cut from a leaf set's atlas by the boxes the import finds, or a frond strip along
+each last stem where the species' leaves are below zero. `Trees.BarkMaterial` and
+`Trees.LeafMaterial` bind a set's surface as occlusion, metallic-roughness and diffuse transmission
+at once, with generated noise bark and leaf masks where a species names no set, and a fall share
+tinting the leaves' mean color to the species' fall color.

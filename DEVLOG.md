@@ -121,6 +121,13 @@ The library's six species grown bare by seed 2 under the shadow grid, each frame
 above the quaking aspen, the black tupelo and the weeping willow of the paper's appendix, and below
 its California black oak, the bush and the fern.
 
+![](.github/assets/readings/2026-10-25-item-74-sets.webp)
+The collection's first sets drawn through Bevy's loader from their BC7 and BC5 files, above each
+bark on its preset's trunk, the quaking aspen's silver birch, the black tupelo's broadleaf, the
+weeping willow's own, the oak's broadleaf and the bush's hornbeam, and below the six leaf atlases on
+cards cut out by their opacity, the silver birch, the alder, the willow, the shingle oak, the
+hornbeam and the fern.
+
 Six trees grown from controls near the paper's quaking aspen, its leaves left out, by seeds 1 to 6,
 as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter AnAspenKeepsWithinItsTriangles
 --logger "console;verbosity=detailed"` prints them. The height is the species' 13 meters with three
@@ -173,6 +180,36 @@ finest level grows only where it finds light and room. The willow's limbs arch o
 plate 7 (b)'s pruned willow's do, its long whips stopped at the envelope. The oak parts low into
 crooked limbs and a crown as broad as it is tall, a little broader than plate 1 (b)'s.
 
+The collection's first sets, the six presets' barks and leaves, as `build/textures.py` imports them
+from `.vegetation/` and writes their sizes and errors into `textures.json`. A set's size is its
+albedo's, the normal and the surface being half of it either way, its bytes on disk are its three
+files', and each error is the top level's against what it was encoded from.
+
+| Set | Kind | Albedo | On disk | Albedo error | Normal error | Surface error |
+|---|---|---|---|---|---|---|
+| silver-birch-bark | bark | 512 by 512 | 443 KB | 44.7 dB | 42.3 dB | 45.1 dB |
+| broadleaf-bark | bark | 256 by 1024 | 396 KB | 42.3 dB | 38.9 dB | 51.1 dB |
+| weeping-willow-bark | bark | 256 by 1024 | 421 KB | 45.5 dB | 40.0 dB | 48.6 dB |
+| hornbeam-bark | bark | 256 by 512 | 220 KB | 43.6 dB | 45.9 dB | 47.9 dB |
+| silver-birch-leaves | 12 leaves | 512 by 512 | 298 KB | 46.1 dB | 52.2 dB | 44.3 dB |
+| weeping-willow-leaves | 5 leaves | 1024 by 256 | 328 KB | 31.7 dB | 50.1 dB | 45.5 dB |
+| hornbeam-leaves | 20 leaves | 512 by 512 | 391 KB | 31.3 dB | 42.9 dB | 38.8 dB |
+| shingle-oak-leaves | 2 leaves | 512 by 256 | 153 KB | 32.2 dB | 48.9 dB | 45.6 dB |
+| red-alder-leaves | 6 leaves | 512 by 512 | 306 KB | 35.7 dB | none | 42.2 dB |
+| fern-leaves | 6 leaves | 512 by 512 | 390 KB | 30.3 dB | 48.5 dB | 39.9 dB |
+
+The collection is 3.3 MB of its 32, and a species' bark and leaves are 549 KB for the oak to 749 KB
+for the willow. The quaking aspen takes the silver birch's, the black tupelo the broadleaf bark
+with six alder leaves, their fronts and backs, the weeping willow its own bark with the green row
+of its sheet, the oak the broadleaf bark with the shingle oak's two leaves, the bush the hornbeam's
+and the fern its five fronds, beside which its atlas gives a sixth box for a scrap of a stalk. Every
+set holds 512 by 512 texels or fewer, the willow's leaves 1024 by 256 to keep their row whole.
+
+Everything else under `.vegetation/` stayed out, the other trees' barks and leaves, the branch and
+cap cards, the alder's two old leaves and the other scans, the grass, the ground, the ivy and the
+flowers. The leaf albedos' error is the largest, since a block that holds a leaf's edge holds both
+its color and the background's under one line of endpoints.
+
 Done that day
 
 - Item 64 at `5041dda3`. The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's
@@ -183,6 +220,8 @@ Done that day
 - Item 72 at `6795478f`. The feature test's sample behaviors go from the source.
 - Item 73 at `ff5fa5e9`. A capture shard's container reaps its children, and the four idle shards
   go.
+- Item 74 at `d151e0cc`. A texture collection for the vegetation, imported from free sources, small
+  on disk and on the GPU.
 
 ## 2026-10-24
 

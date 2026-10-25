@@ -1620,6 +1620,73 @@ a batch.
     2026-10-25, the sentence under BUILDING.md's caches, the shards removed at 10:37 by the owner's
     leave.
 
+74. **A texture collection for the vegetation, imported from free sources, small on disk and on the
+    GPU.** From Decision 66, the owner's word of 2026-10-25 at about 13:00. The collection is
+    assets/textures in the library, built by build/textures.py from a manifest naming each source
+    under .ref and the recipe applied to it, the crop, the resize, the channel packing and any color
+    change, so the import is repeatable and the sources stay out of the repository; an entry is
+    three KTX2 files with mipmaps and Basis Universal supercompression, albedo.ktx2 with the color
+    in RGB and the opacity in A, ETC1S or UASTC where the alpha has edges, normal.ktx2 with the
+    tangent-space normal in RG as UASTC, and surface.ktx2 with roughness in R, translucency in G and
+    occlusion in B as ETC1S, Bevy's loader transcoding them to the GPU's block format on load, the
+    bridge gaining the basis-universal feature beside its ktx2 and zstd ones if the transcoder's
+    size and load time allow, KTX2 with BC7 and BC5 under zstd otherwise, the coder reading both; a
+    bark set tileable and at most 1024 square, a strip 512 by 1024, a leaf set one atlas of up to
+    eight leaves with alpha at most 1024 square, its translucency from the source's subsurface color
+    or derived from the albedo; a species at most 3 MB on disk and the collection at most 32 MB, a
+    test holding both; a manifest textures.json with each entry's name, kind, size, source folder
+    and recipe; a lookup in the library by name that a TreeSpecies names for its bark and its
+    leaves, the generated bark and leaf masks of item 70's dressing standing where no entry is
+    named. The first entries are the sorted folder's, bark for birch, grey willow, hornbeam, silver
+    maple, Scots pine, Monterey cypress, acacia, linden and red maple, leaves for birch, hornbeam,
+    silver maple, the three maples in fall, pine and cypress needles, and atlases cut from the
+    alder, sycamore and fall leaf scans, the aspen preset taking the birch, the tupelo the alder
+    leaves, the oak the sycamore leaves until an oak comes, the bush the hornbeam; the models stay
+    reference and are not imported. ASSETS.md is the review's request list for what the presets
+    still lack. An AGENTS.md row for ASSETS.md. The tests read the import of one source reproducible
+    byte for byte, the bounds, a loaded entry's size and format, and a tree built with a named bark
+    and leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so
+    the dressing takes the collection where it has an entry. Two commits, the pipeline and the
+    format, then the entries. The owner added at 13:08 that branch cards or leaf clusters batched
+    from the leaves are the review's call and that questions are welcome; so the import may also
+    bake branch cards, a twig with several leaves of an atlas drawn into one card with its own
+    normal and translucency, for the middle level of detail where item 70's third phase goes from
+    clusters to cards, the coder choosing per species whether a card is baked or built from the
+    atlas at load, said in the record. The coder's reading at 13:10, taken. Basis Universal is out,
+    its crate among those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2
+    holding BC7 and BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing
+    added; build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the
+    normals in plain Python with PIL reading, cropping, resizing and packing and Python's own zstd,
+    no numpy, the import taking minutes for the collection, the mips keeping the alpha's coverage so
+    leaves do not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or
+    512 square and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size,
+    about 1 MB a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built
+    at load from the atlas in item 70's third phase and not baked at import, so the collection stays
+    small. Changed at 13:40 under Decision 66 as amended. The entries come from the hidden folder
+    .vegetation, where the review sorted the usable sources by kind, bark, leaves, branches and
+    scans, a set a folder with its files named albedo, opacity, normal, gloss or specular,
+    subsurface, ao and height as the source had them and a README saying what each gives and what is
+    needed; the folder stays out of the repository, the import reads it by path, and the manifest
+    names each entry's folder as its source. The entries ship in the second commit; nothing waits.
+    The coder's three points, taken. The surface file follows Bevy's channels, occlusion in R,
+    roughness in G, metallic in B left at zero and the diffuse transmission in A, so one file binds
+    as the occlusion, the metallic-roughness and the transmission textures with no shader of the
+    library's, and Bevy reads BC5 as a two-channel normal by itself; the collection lives in
+    BevyCSharp/Vegetation/Textures, since a folder named assets would collide with BevyCSharp/Assets
+    on a case-insensitive file system, the KTX2 files and textures.json embedded in the library and
+    mounted under bevycsharp/vegetation in the asset root so Bevy's own loader reads them by path,
+    waiting entries imported to Textures/waiting under .gitignore and not embedded, TreeTextures.Add
+    mounting a folder for a local reading or a game's own; the AGENTS.md row for ASSETS.md is the
+    owner's to say, .github being hidden from N 1.5, and the coder asks. At 14:22 the owner told the
+    coder to ship the sorted folder as it is and to say nothing more of it in any document, so the
+    pipeline commit ships no set and adds nothing to the notices, a set ships unless the manifest
+    marks it waiting, the tests run on a 64-square sample kept under the tests' references, and the
+    entries' commit imports the sorted folder by its README's preset map. The pipeline at `70f92473`
+    on 2026-10-25, the encoder, the KTX2 writer, the mount and the lookup, no set shipped; the
+    entries next, the six presets' sets alone. Done at `d151e0cc` on 2026-10-25 with the entries,
+    ten sets for the six presets at 3.3 MB, the rest of the sorted folder waiting for an item that
+    asks.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

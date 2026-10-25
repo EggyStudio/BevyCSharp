@@ -13345,6 +13345,13 @@ enum Bevy.TransitionStep : int
   Enter = 2
   Exit = 0
   Transition = 1
+enum Bevy.TreeLeafShape : int
+  FiveLobeMaple = 4
+  Oval = 0
+  ThreeLeaflets = 5
+  ThreeLobeMaple = 3
+  ThreeLobeOak = 2
+  Triangle = 1
 sealed class Bevy.TreeLevel : IEquatable<TreeLevel>
   TreeLevel()
   bool Equals(TreeLevel? other)
@@ -13400,13 +13407,21 @@ sealed class Bevy.TreeSkeleton : IEquatable<TreeSkeleton>
   static bool op_Equality(TreeSkeleton? left, TreeSkeleton? right)
   static bool op_Inequality(TreeSkeleton? left, TreeSkeleton? right)
 sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
+  Color BarkColor { get; init; }
+  Color FallColor { get; init; }
+  Color LeafColor { get; init; }
   IReadOnlyList<TreeLevel> Levels { get; init; }
+  TreeLeafShape LeafShape { get; init; }
+  TreeLevel LeafLevel { get; init; }
   TreeShape Shape { get; init; }
   TreeSpecies()
   bool Equals(TreeSpecies? other)
   float AttractionUp { get; init; }
   float BaseSize { get; init; }
   float Flare { get; init; }
+  float LeafBend { get; init; }
+  float LeafScale { get; init; }
+  float LeafScaleX { get; init; }
   float PrunePowerHigh { get; init; }
   float PrunePowerLow { get; init; }
   float PruneRatio { get; init; }
@@ -13416,6 +13431,7 @@ sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
   float Scale { get; init; }
   float ScaleVariation { get; init; }
   int BaseSplits { get; init; }
+  int Leaves { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
@@ -13427,13 +13443,16 @@ sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
   static TreeSpecies WeepingWillow { get; }
   static bool op_Equality(TreeSpecies? left, TreeSpecies? right)
   static bool op_Inequality(TreeSpecies? left, TreeSpecies? right)
-  string? Bark { get; init; }
-  string? Leaves { get; init; }
+  string? BarkSet { get; init; }
+  string? LeafSet { get; init; }
 enum Bevy.TreeTextureKind : int
   Bark = 0
   Leaves = 1
 sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
   (AssetHandle, AssetHandle, AssetHandle) Load()
+  (int, int)? Size { get; init; }
+  Color MeanColor { get; init; }
+  IReadOnlyList<(float, float, float, float)> LeafBoxes { get; init; }
   TreeTextureKind Kind { get; init; }
   TreeTextureSet(string Name, TreeTextureKind Kind, string Albedo, string Normal, string Surface)
   bool Equals(TreeTextureSet? other)
@@ -13454,7 +13473,10 @@ static class Bevy.TreeTextures
   static TreeTextureSet? Find(string name)
 static class Bevy.Trees
   const string BarkSlot = "bark"
+  static AssetHandle BarkMaterial(TreeSpecies species)
+  static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)
   static EditMesh Build(TreeSkeleton skeleton)
+  static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers)
 readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>

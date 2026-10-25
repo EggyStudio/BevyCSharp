@@ -129,7 +129,15 @@ public static class TreeTextures
             if (present == 0 && under == Folder) continue;
             if (present < files.Length) throw new InvalidDataException($"{what} names the set {name}, and {files.Length - present} of its three files are not there.");
 
-            sets.Add(new TreeTextureSet(name, kind, $"{under}/{name}/albedo.ktx2", $"{under}/{name}/normal.ktx2", $"{under}/{name}/surface.ktx2"));
+            var set = new TreeTextureSet(name, kind, $"{under}/{name}/albedo.ktx2", $"{under}/{name}/normal.ktx2", $"{under}/{name}/surface.ktx2");
+            if (entry.TryGetProperty("size", out var size)) set = set with { Size = (size[0].GetInt32(), size[1].GetInt32()) };
+            if (entry.TryGetProperty("color", out var color)) set = set with { MeanColor = Color.FromSrgb(color[0].GetSingle(), color[1].GetSingle(), color[2].GetSingle()) };
+            if (entry.TryGetProperty("leaves", out var leaves) && leaves.GetArrayLength() > 0)
+            {
+                set = set with { LeafBoxes = [.. leaves.EnumerateArray().Select(box => (box[0].GetSingle(), box[1].GetSingle(), box[2].GetSingle(), box[3].GetSingle()))] };
+            }
+
+            sets.Add(set);
         }
 
         return sets;

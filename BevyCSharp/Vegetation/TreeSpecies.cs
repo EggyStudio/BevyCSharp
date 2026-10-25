@@ -83,10 +83,50 @@ public sealed partial record TreeSpecies
     /// the bark the generator makes, nothing unless set.
     /// </summary>
     /// <remarks>A name the collection does not carry draws the generated bark too, so a species may name a set a game adds later.</remarks>
-    public string? Bark { get; init; }
+    public string? BarkSet { get; init; }
 
     /// <summary>The name of the leaf set of <see cref="TreeTextures"/> the tree's leaves are cut from, or nothing for the generated leaves, nothing unless set.</summary>
-    public string? Leaves { get; init; }
+    public string? LeafSet { get; init; }
+
+    /// <summary>The bark's color where the generator makes it, a gray brown unless set.</summary>
+    public Color BarkColor { get; init; } = Color.FromSrgb(0.42f, 0.36f, 0.30f);
+
+    /// <summary>
+    /// How many leaves each stem of the last level carries, as the paper's leaves, 0 unless set, so
+    /// a species without them is bare. Below zero, each stem of the last level is itself a leaf
+    /// that many times over, a frond drawn along its length, as a fern's or a palm's is.
+    /// </summary>
+    /// <remarks>
+    /// The leaves sit along the twigs, the stems that carry no others, more of them toward each
+    /// twig's tip as the paper places them, so a crown is leafy at its outside, and a twig shorter
+    /// than most carries fewer.
+    /// </remarks>
+    public int Leaves { get; init; }
+
+    /// <summary>The outline of the leaves the generator makes where no leaf set is named, <see cref="TreeLeafShape.Oval"/> unless set.</summary>
+    public TreeLeafShape LeafShape { get; init; } = TreeLeafShape.Oval;
+
+    /// <summary>How long a leaf is in meters, or how wide a frond is, 0.17 unless set.</summary>
+    public float LeafScale { get; init; } = 0.17f;
+
+    /// <summary>How wide a generated leaf is against its length, 1 unless set. A leaf cut from a set takes its picture's proportions.</summary>
+    public float LeafScaleX { get; init; } = 1f;
+
+    /// <summary>
+    /// The angles the leaves leave their twig at, the down angle from the twig and the turn round it
+    /// from one leaf to the next, as the paper gives its leaves the angles of the level past the last
+    /// stems. Its other controls are not read.
+    /// </summary>
+    public TreeLevel LeafLevel { get; init; } = new() { DownAngle = 45f, DownAngleVariation = 10f, Rotate = 137.5f };
+
+    /// <summary>How far each leaf turns to face up and outward from the tree, from 0 to 1, 0.5 unless set, as the paper's leaves turn toward the light.</summary>
+    public float LeafBend { get; init; } = 0.5f;
+
+    /// <summary>The leaves' color in summer, which tints the generated leaves, a mid green unless set.</summary>
+    public Color LeafColor { get; init; } = Color.FromSrgb(0.30f, 0.45f, 0.15f);
+
+    /// <summary>The leaves' color in the fall, toward which <see cref="Trees.LeafMaterial"/> turns them, a yellow brown unless set.</summary>
+    public Color FallColor { get; init; } = Color.FromSrgb(0.80f, 0.55f, 0.15f);
 
     /// <summary>The pruning envelope's widest radius as a share of the scale, 0.5 unless set.</summary>
     public float PruneWidth { get; init; } = 0.5f;
@@ -121,7 +161,9 @@ public sealed partial record TreeSpecies
         && BaseSize.Equals(other.BaseSize) && BaseSplits == other.BaseSplits && Ratio.Equals(other.Ratio) && Flare.Equals(other.Flare)
         && AttractionUp.Equals(other.AttractionUp) && PruneRatio.Equals(other.PruneRatio) && PruneWidth.Equals(other.PruneWidth)
         && PruneWidthPeak.Equals(other.PruneWidthPeak) && PrunePowerLow.Equals(other.PrunePowerLow) && PrunePowerHigh.Equals(other.PrunePowerHigh)
-        && Bark == other.Bark && Leaves == other.Leaves
+        && BarkSet == other.BarkSet && LeafSet == other.LeafSet && BarkColor.Equals(other.BarkColor) && Leaves == other.Leaves
+        && LeafShape == other.LeafShape && LeafScale.Equals(other.LeafScale) && LeafScaleX.Equals(other.LeafScaleX)
+        && Equals(LeafLevel, other.LeafLevel) && LeafBend.Equals(other.LeafBend) && LeafColor.Equals(other.LeafColor) && FallColor.Equals(other.FallColor)
         && (ReferenceEquals(Levels, other.Levels) || (Levels is not null && other.Levels is not null && Levels.SequenceEqual(other.Levels)));
 
     /// <inheritdoc/>

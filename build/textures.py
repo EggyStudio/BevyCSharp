@@ -112,6 +112,7 @@ def main():
         if not arguments.out:
             entry["files"] = {file: size for file, (size, _) in report.items()}
             entry["error"] = {file: round(error, 1) for file, (_, error) in report.items()}
+            entry["color"] = mean_color(maps["albedo"])
             if entry["kind"] == "leaves":
                 entry["leaves"] = leaf_boxes(maps["albedo"])
 
@@ -272,6 +273,20 @@ def sample_maps():
             normal.putpixel((x, y), (int(128 + 60 * math.cos(x * 0.8)), int(128 + 60 * math.sin(y * 0.4)), 255))
             surface.putpixel((x, y), (255, 200, 0, 8 * x))
     return {"albedo": albedo, "normal": normal, "surface": surface}
+
+
+def mean_color(albedo):
+    """
+    The mean of the albedo's opaque texels as sRGB from zero to one, the leaves' summer color a
+    fall tint is worked out against.
+    """
+    alpha = albedo.getchannel("A").point(lambda value: 255 if value > 127 else 0)
+    color = albedo.convert("RGB")
+    count = alpha.histogram()[255]
+    if count == 0:
+        return [0.0, 0.0, 0.0]
+    sums = [sum(value * n for value, n in enumerate(Image.composite(band, Image.new("L", band.size), alpha).histogram())) for band in color.split()]
+    return [round(total / count / 255, 4) for total in sums]
 
 
 def leaf_boxes(albedo):
