@@ -52,6 +52,8 @@ pub struct ViewInputs {
     /// until then.
     blue_noise: Option<TextureView>,
     empty_blue_noise: TextureView,
+    /// Bound where a camera has no atmosphere, which a shader tells by `passHasAtmosphere`.
+    empty_transmittance: TextureView,
 }
 
 /// Finds Bevy's blue noise on the GPU once, for every shader on a camera to read.
@@ -282,6 +284,15 @@ pub(super) fn init_inputs(
                 multisampled: false,
             },
         ),
+        // The atmosphere's transmittance lookup texture, a stand-in where the camera has none.
+        entry(
+            17,
+            BindingType::Texture {
+                sample_type: TextureSampleType::Float { filterable: true },
+                view_dimension: TextureViewDimension::D2,
+                multisampled: false,
+            },
+        ),
     ];
 
     let texture = |label: &'static str, format: TextureFormat| {
@@ -393,6 +404,7 @@ pub(super) fn init_inputs(
         blue_noise: None,
         // Gray, a half everywhere, the average of noise, so a shader running before the real one
         // arrives gets no pattern rather than a wrong one.
+        empty_transmittance: texture("bcs_view_empty_transmittance", TextureFormat::Rgba16Float),
         empty_blue_noise: {
             let texture = render_device.create_texture_with_data(
                 &bevy::render::renderer::RenderQueue::clone(&queue),
@@ -437,12 +449,40 @@ pub struct ViewInputSources<'a> {
     pub own: u32,
     pub previous: Option<(&'a PreviousViewUniforms, u32)>,
     pub environment: Option<&'a ViewEnvironmentTextures>,
+    pub atmosphere: Option<ViewAtmosphere<'a>>,
+}
+
+/// What a camera under one of Bevy's atmospheres hands its shaders of it, the planet's radius and
+/// the atmosphere's, the turn from the world into the atmosphere's space, in meters about the
+/// planet's middle, and the lookup texture of how much light the air lets through.
+#[derive(Clone, Copy)]
+pub struct ViewAtmosphere<'a> {
+    inner_radius: f32,
+    outer_radius: f32,
+    world_to_atmosphere: bevy::math::Mat4,
+    transmittance: &'a TextureView,
+}
+
+impl<'a> ViewAtmosphere<'a> {
+    /// A view's atmosphere where it has one, out of what Bevy keeps on the view for its own sky.
+    pub fn of(
+        atmosphere: Option<&'a bevy::pbr::resources::GpuAtmosphere>,
+        textures: Option<&'a bevy::pbr::resources::AtmosphereTextures>,
+    ) -> Option<Self> {
+        let (atmosphere, textures) = atmosphere.zip(textures)?;
+        Some(Self {
+            inner_radius: atmosphere.inner_radius,
+            outer_radius: atmosphere.outer_radius,
+            world_to_atmosphere: atmosphere.world_to_atmosphere,
+            transmittance: &textures.transmittance_lut.default_view,
+        })
+    }
 }
 
 /// The size of what binding thirteen holds, counts of the scene's lights, the environment's
-/// intensity, rotation and mip count, and which prepass textures are the camera's own, which
-/// `SceneInfo` mirrors.
-const SCENE_INFO_BYTES: u64 = 32;
+/// intensity, rotation and mip count, which prepass textures are the camera's own, and the planet's
+/// and the atmosphere's radii and the turn into the atmosphere's space, which `SceneInfo` mirrors.
+const SCENE_INFO_BYTES: u64 = 112;
 
 impl<'a> ViewInputSources<'a> {
     /// Collects a view's prepass textures, with a stand-in for each it does not have.
@@ -452,6 +492,7 @@ impl<'a> ViewInputSources<'a> {
         prepass: Option<&ViewPrepassTextures>,
         previous: Option<(&'a PreviousViewUniforms, &PreviousViewUniformOffset)>,
         environment: Option<&'a ViewEnvironmentTextures>,
+        atmosphere: Option<ViewAtmosphere<'a>>,
     ) -> Self {
         // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled
         // camera's prepass draws several samples a pixel, and it is left out rather than failing
@@ -482,6 +523,7 @@ impl<'a> ViewInputSources<'a> {
             own,
             previous: previous.map(|(uniforms, offset)| (uniforms, offset.offset)),
             environment,
+            atmosphere,
         }
     }
 
@@ -536,12 +578,20 @@ impl<'a> ViewInputSources<'a> {
             (environment.mips, environment.intensity, environment.inverse_rotation)
         });
 
-        let mut info = [0u32; 8];
+        let mut info = [0u32; 28];
         info[0] = point_lights;
         info[1] = mips;
         info[2] = intensity.to_bits();
         info[3] = self.own;
         info[4..8].copy_from_slice(&rotation.to_array().map(f32::to_bits));
+        // The planet's radius, the atmosphere's and whether there is one, then the turn into its
+        // space a column at a time.
+        if let Some(atmosphere) = &self.atmosphere {
+            info[8] = atmosphere.inner_radius.to_bits();
+            info[9] = atmosphere.outer_radius.to_bits();
+            info[10] = 1.0f32.to_bits();
+            info[12..28].copy_from_slice(&atmosphere.world_to_atmosphere.to_cols_array().map(f32::to_bits));
+        }
 
         let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {
             label: Some("bcs_view_scene_info"),
@@ -639,6 +689,12 @@ impl<'a> ViewInputSources<'a> {
                     binding: 16,
                     resource: BindingResource::TextureView(
                         inputs.blue_noise.as_ref().unwrap_or(&inputs.empty_blue_noise),
+                    ),
+                },
+                BindGroupEntry {
+                    binding: 17,
+                    resource: BindingResource::TextureView(
+                        self.atmosphere.as_ref().map_or(&inputs.empty_transmittance, |atmosphere| atmosphere.transmittance),
                     ),
                 },
             ],

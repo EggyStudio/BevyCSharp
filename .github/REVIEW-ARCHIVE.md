@@ -1488,6 +1488,43 @@ a batch.
     each. Done at `d8ecd271` on 2026-10-25 inside item 64's third part, the point and the passes
     after the anti-aliasing with the test under each.
 
+64. **The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's vibrance.** From
+    Decision 61. The sky and the aerial perspective follow Production Ready Atmosphere Rendering
+    (Hillaire 2020), the transmittance, the multiple scattering and the sky-view LUTs and the aerial
+    perspective volume, with Cody Bennett's post as the reference for the sky-view LUT and the
+    aerial perspective against Bruneton's coefficients; the sun a disc with no blurred dot, the
+    lower hemisphere taking the fog's and the horizon's color as the feature test's does, 3DEngine's
+    vibrance kept with its tone curve and grading, and the volumetric clouds removed; readings of
+    the sky's luminance and color against Bruneton's at four sun heights, and captures at dawn,
+    noon, dusk and night. The coder proposes the phases under this item when item 52 is in; the
+    first lands before item 65. The coder's phases, each a commit with the suite green, are the
+    medium exposed with Earth, Bruneton and ARC presets, Bevy 0.20's atmosphere being Hillaire's
+    with a replaceable medium, the sun a crisp disc, the volumetric clouds out, and a per-pixel
+    reference raymarch the LUT sky is read against at four sun heights with Bruneton and ARC
+    pictures; then the lower hemisphere and the distance fog taking the horizon's color from the
+    atmosphere so the far ground meets the sky with no gray band; then 3DEngine's tone curve and
+    grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
+    from space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's
+    grading keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
+    suggestion the owner heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with their
+    readings; the second next, the distant geometry and the band below the horizon fading to the
+    sky's horizon color by view direction, read from the camera's sky-lit environment map in a pass
+    of the engine's own. The second phase at `53583307` on 2026-10-24, the fog and the band with the
+    frame points ordered; the third next, the grading keyed by the sun's height. The third phase's
+    plan at 23:30, since 3DEngine's look, the voxel game's BSL curve at exposure 1.6, saturation 1.4
+    in linear light after the curve, contrast 1.12 about the middle once encoded and the engine's
+    knee as the default curve, cannot be said in Bevy's tonemappers, is an engine pass in the
+    tonemapper's place, the view's Tonemapping set to None in the render world while a look is on,
+    the look pass after tonemapping and before the anti-aliasing and the passes after tonemapping,
+    Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and its knee,
+    tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then, as a second
+    commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's height,
+    3DEngine keying no grading by the hour. The third phase at `d8ecd271` on 2026-10-25, the look
+    pass with the Vivid preset, item 71 inside it; its second commit next, the look keyed by the
+    sun's height; the fourth, the view from space, on the owner's word. Done at `5041dda3` on
+    2026-10-25 in four commits, the media, the fog and the band, the look pass and the look cycle;
+    the view from space on the owner's word as a new item.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -2268,6 +2268,19 @@ readonly struct Bevy.FocusedInput<TInput> : IEntityEvent, IEquatable<FocusedInpu
   static bool op_Equality(FocusedInput<TInput> left, FocusedInput<TInput> right)
   static bool op_Inequality(FocusedInput<TInput> left, FocusedInput<TInput> right)
   void Deconstruct(out Entity FocusedEntity, out TInput Input)
+readonly struct Bevy.FogBox : IEquatable<FogBox>
+  FogBox(Vec3 Center, Vec3 Size, float Visibility, float Edge = 2f)
+  Vec3 Center { get; init; }
+  Vec3 Size { get; init; }
+  bool Equals(FogBox other)
+  float Edge { get; init; }
+  float Visibility { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(FogBox left, FogBox right)
+  static bool op_Inequality(FogBox left, FogBox right)
+  void Deconstruct(out Vec3 Center, out Vec3 Size, out float Visibility, out float Edge)
 sealed class Bevy.FoldoutAttribute : Attribute
   FoldoutAttribute(string path)
   bool Open { get; init; }
@@ -2350,6 +2363,19 @@ struct Bevy.FreeCameraState
   float Pitch { get; set; }
   float SpeedMultiplier { get; set; }
   float Yaw { get; set; }
+sealed class Bevy.FroxelFogSettings
+  FroxelFogSettings()
+  FroxelQuality Quality { get; set; }
+  IReadOnlyList<FogBox> Boxes { get; set; }
+  Vec3 Wind { get; set; }
+  float Distance { get; set; }
+  float LumpSize { get; set; }
+  float Lumps { get; set; }
+  int Lights { get; set; }
+enum Bevy.FroxelQuality : int
+  High = 2
+  Low = 0
+  Medium = 1
 struct Bevy.GameTimer : IEquatable<GameTimer>
   GameTimer Tick(float delta)
   TimerMode Mode
@@ -13200,6 +13226,7 @@ readonly struct Bevy.Sides : IEquatable<Sides>
   void Deconstruct(out Length Left, out Length Top, out Length Right, out Length Bottom)
 sealed class Bevy.SkyFogSettings
   (float, float, float)? Color { get; set; }
+  FroxelFogSettings? Froxels { get; set; }
   SkyFogSettings()
   float BandDegrees { get; set; }
   float Base { get; set; }

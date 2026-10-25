@@ -10,29 +10,20 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d8ecd271`, item 64's third part with item 71 folded in, pushed at 00:33 on
-2026-10-25 after the run of `53583307` went green; its own run green on the three systems at 00:48,
-carrying a picture with its caption, a Shared line and the review's files, ABI 306.
-Render.SetLook(camera, LookSettings) runs the library's look.slang as an engine pass at a new
-PassPlace of Look after tonemapping and before the anti-aliasing in Core3d and Core2d, a
-render-world system setting the view's extracted Tonemapping to None while a look is on, Bevy
-re-extracting the camera's own each frame so it returns when the look goes, an 8-bit camera keeping
-Bevy's tonemapper with a word said once; the chain is 3DEngine's composite at `8ae947ee`, exposure,
-curve, saturation and tint in linear light, contrast about the middle once encoded, the knee curve
-the default and the numbered curve BSL. Departure, Vivid keeps BSL with no knee as 3DEngine's
-numbered curve takes none, 0.9, 1.3, 1.05 and 1 at exposure 1.6, saturation 1.4 and contrast 1.12
-with Bevy's half-level dither by default, so it reads against 3DEngine's figures; engine passes are
-kept apart from the program's so a look never displaces Shaders.SetPasses; camera.look on the
-console and a Look row on the feature test's graphics page, Vivid by default. Item 71, the point and
-the passes after tonemapping run after the look, fxaa, smaa and cas in 3D and 2D,
-AfterAntialiasingTests holding a green draw under each. LookTests holds the model to
-TonemapCurveTests' seven figures within 0.001 and the ramp through knee, held, vivid and graded
-within 2 levels of the model at every pixel, an 8-bit camera keeping Tony, the look off giving Tony
-back and a not-a-number refused; the Shared line names the departures, Bevy's bloom undivided before
-the look, its vignette before it rather than after the contrast, the dither, and auto exposure
-dropped under a look. 1,847 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and 11.
+Reviewed up to `5041dda3`, item 64's third part's second commit, the look keyed by the sun's height,
+pushed at 01:18 on 2026-10-25 after the run of `d8ecd271` went green; its own run green on the three
+systems at 01:35, carrying a picture with its caption, a Shared line and the review's files.
+LookSettings.Lerp moves the numbers evenly with the curve and the dither the nearer look's,
+LookCycle holds keys by the sun's height in degrees held past the ends, and LookCycle.Day on Vivid
+keeps Vivid from 30 degrees up, 8 degrees saturation 1.48, contrast 1.14 and a warm tint, 2 degrees
+1.55, 1.16 and warmer, minus 6 degrees 1.2, 1.08 and cool, minus 18 degrees 1 and 1.06 and cooler,
+the night's saturation 1 since 0.85 washed the atmosphere's night blue to purple gray; SetLook on a
+camera with a look changes the values without resubmitting the pass; the feature test's Look row has
+Day as its default, DayNight turning it from the sun's elevation. LookCycleTests six; the picture
+Vivid against Day at five hours. 1,853 passed, 3 skipped, no native change. The view from space
+waits on the owner's word.
 
-Before it, `53583307` came, item 64's second part, pushed at 23:20 on 2026-10-24, its run green on
+Before it, `d8ecd271` came, item 64's third part, pushed at 00:33 on 2026-10-25, its run green on
 the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -232,41 +223,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-64. **The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's vibrance.** From
-    Decision 61. The sky and the aerial perspective follow Production Ready Atmosphere Rendering
-    (Hillaire 2020), the transmittance, the multiple scattering and the sky-view LUTs and the aerial
-    perspective volume, with Cody Bennett's post as the reference for the sky-view LUT and the
-    aerial perspective against Bruneton's coefficients; the sun a disc with no blurred dot, the
-    lower hemisphere taking the fog's and the horizon's color as the feature test's does, 3DEngine's
-    vibrance kept with its tone curve and grading, and the volumetric clouds removed; readings of
-    the sky's luminance and color against Bruneton's at four sun heights, and captures at dawn,
-    noon, dusk and night. The coder proposes the phases under this item when item 52 is in; the
-    first lands before item 65. The coder's phases, each a commit with the suite green, are the
-    medium exposed with Earth, Bruneton and ARC presets, Bevy 0.20's atmosphere being Hillaire's
-    with a replaceable medium, the sun a crisp disc, the volumetric clouds out, and a per-pixel
-    reference raymarch the LUT sky is read against at four sun heights with Bruneton and ARC
-    pictures; then the lower hemisphere and the distance fog taking the horizon's color from the
-    atmosphere so the far ground meets the sky with no gray band; then 3DEngine's tone curve and
-    grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
-    from space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's
-    grading keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
-    suggestion the owner heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with their
-    readings; the second next, the distant geometry and the band below the horizon fading to the
-    sky's horizon color by view direction, read from the camera's sky-lit environment map in a pass
-    of the engine's own. The second phase at `53583307` on 2026-10-24, the fog and the band with the
-    frame points ordered; the third next, the grading keyed by the sun's height. The third phase's
-    plan at 23:30, since 3DEngine's look, the voxel game's BSL curve at exposure 1.6, saturation 1.4
-    in linear light after the curve, contrast 1.12 about the middle once encoded and the engine's
-    knee as the default curve, cannot be said in Bevy's tonemappers, is an engine pass in the
-    tonemapper's place, the view's Tonemapping set to None in the render world while a look is on,
-    the look pass after tonemapping and before the anti-aliasing and the passes after tonemapping,
-    Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and its knee,
-    tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then, as a second
-    commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's height,
-    3DEngine keying no grading by the hour. The third phase at `d8ecd271` on 2026-10-25, the look
-    pass with the Vivid preset, item 71 inside it; its second commit next, the look keyed by the
-    sun's height; the fourth, the view from space, on the owner's word.
-
 69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
     leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
     volumetric clouds are written in the engine and lit by Bevy's Hillaire atmosphere as RDR2 lights
@@ -274,7 +230,30 @@ from [SHARED.md](SHARED.md).
     stars and the moon are written in the engine as well; the vendored native/bevy_weather, 0.2.0 at
     about 9,800 lines, leaves the workspace once those stand, nothing of it kept. Phases proposed by
     the coder, each a commit with the suite green, the fog and the clouds first, read against the
-    crate's look and the feature test's captures; after item 64 and before 65.
+    crate's look and the feature test's captures; after item 64 and before 65. The coder's phases at
+    01:18 on 2026-10-25, each a commit with the suite green and pictures, taken as proposed. The
+    fog, froxel-based as RDR2's, a per-camera volume of about 160 by 90 by 64 at High built after
+    the prepass, the density the fog's height layer with box volumes and wind-scrolled noise, lit by
+    the sun through Bevy's shadow cascades and transmittance and the sky-lit map's ambient with
+    temporal reprojection, integrated front to back and applied in the fog's draw slot before
+    tonemapping, SetSkyFog the cheap tier and the far color, read against the crate's fog and Bevy's
+    volumetric fog with the cost. The clouds, a raymarched shell at quarter resolution with temporal
+    reconstruction, Perlin-Worley shape and Worley detail volumes made by compute once, a weather
+    map of coverage and type moved by the wind, lit from Bevy's transmittance LUT and the sky-lit
+    map, composited with the aerial perspective, their shadow a GPU-built cookie on the sun dimming
+    its disc, read against the crate's captures at its presets taken before the fog and against
+    Hillaire and Nubis. The clock and the sky behind the atmosphere, the time of day, latitude and
+    season, the sun's and the moon's directions, the moon's disc with its phase and earthshine, the
+    stars and the galaxy, the feature test's DayNight on it. The weather state, presets, blending,
+    the climate and forecast, wind with gusts moving the clouds, the fog, the rain and a wind vector
+    foliage reads, and ground wetness and snow cover. Rain and snow as GPU particles with an
+    indirect draw, occluded by a top-down depth map so roofs keep rain out, with splashes. Thunder,
+    the strikes, the flash light, the in-cloud glow, a branching bolt drawn, and the delay and the
+    sound. Then the crate leaves, the workspace member and lock, the render feature,
+    render/weather.rs and BcsConfig.weather with its ABI, the Weather types onto the engine's own,
+    the TSV, PublicApi, CHEATSHEET, the guide, the comparisons, BUILDING, the norm's and STYLE's
+    lines, NormTests' exclusions, the notices, the drive and soak scripts and the workflow's
+    comment.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1682,3 +1661,19 @@ tint at 8 and 2, saturation 1.2 and a blue tint at minus 6, and saturation 1 and
 18, every key on the vivid curve and exposure. A look given again to a camera that has one changes
 its numbers alone, so a program gives it every frame. The feature test's Look row has Day, its
 default.
+
+Shared: the fog in froxels and the sun through the atmosphere for any shader on a camera, in the
+commit carrying this line, item 69's first phase. A camera's froxels, 80 by 45 by 64 at Low, 120 by
+68 by 96 at Medium and 160 by 90 by 128 at High, sliced deepening from half a meter to the distance
+asked, are filled after the prepass with the layer's density, a three-octave value noise the wind
+carries and up to eight boxes, and lit by the sky's color along the way, the closed form's, split
+into the sky's mean light from above and below and the sun's share past it, which the brightest
+directional light's shadow cascades take away, with point and spot lights scattered evenly; each
+froxel's point moves through its slice by the golden ratio's fraction and blends at 0.12 with last
+frame's where the point stood, and the slices are added up from the eye in closed form a slice, as
+Hillaire's account of Frostbite has it. Over the sky only the shadows' darkening, the lamps' light
+and the boxes are laid, since the layer's unshadowed light along a way is the sky's there, the boxes'
+share taken away worked out in closed form along the way through each. Bevy's transmittance
+lookup texture and the planet's radii reach every camera shader as `passAtmosphereTransmittance` and
+`passHasAtmosphere`, for the clouds next. 3DEngine's haze is a dome and a terrain term, which may take
+the froxels' split of the sky's light.

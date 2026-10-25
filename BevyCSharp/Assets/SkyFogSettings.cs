@@ -57,4 +57,13 @@ public sealed class SkyFogSettings
 
     /// <summary>How bright <see cref="Color"/> is, in nits, the camera's exposure taking it as it takes the scene, 5,000 unless set.</summary>
     public float Brightness { get; set; } = 5000f;
+
+    /// <summary>
+    /// The fog near the camera worked out in froxels, where shadows cut it into shafts and lamps
+    /// glow in it, or none to work it all out in closed form, none unless set.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Start"/> moves where the closed form begins and has no part in the froxels.
+    /// </remarks>
+    public FroxelFogSettings? Froxels { get; set; }
 }

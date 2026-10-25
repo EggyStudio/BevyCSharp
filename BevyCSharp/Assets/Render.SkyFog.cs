@@ -28,11 +28,22 @@ public static partial class Render
     /// darkening downward. The setting lasts while the app runs, and
     /// <see cref="ClearSkyFog"/> takes it off.
     /// </para>
+    /// <para>
+    /// With <see cref="SkyFogSettings.Froxels"/> the fog near the camera is worked out in froxels
+    /// after the prepass, where the sun's shadows and the scene's lamps reach it, and laid over the
+    /// picture as far as they reach, the closed form going on past them. Over the sky above the
+    /// horizon only the shadows, the lamps and the boxes are laid, as the closed form leaves the
+    /// layer's haze to the sky the atmosphere draws.
+    /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="settings">How thick the fog is, where, and how the band below the horizon darkens.</param>
     /// <exception cref="ArgumentNullException"><paramref name="settings"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">A setting is not a number, or the visibility or the height is not above none.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">
+    /// A setting is not a number, the visibility or the height is not above none, or the froxels
+    /// reach no distance, their lumps have no size, or they name more than eight boxes or a box that
+    /// is empty or clear.
+    /// </exception>
     /// <example>
     /// <code>
     /// Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = ScatteringTerm.EarthArc() });
@@ -50,6 +61,19 @@ public static partial class Render
         if (!float.IsFinite(settings.Start) || !float.IsFinite(settings.Base) || !float.IsFinite(settings.HorizonDegrees)
             || !float.IsFinite(settings.GroundShade) || !float.IsFinite(settings.BandDegrees) || !float.IsFinite(settings.Brightness))
             throw new ArgumentOutOfRangeException(nameof(settings), "A setting of the fog is not a number.");
+        if (settings.Froxels is { } froxels)
+        {
+            if (!float.IsFinite(froxels.Distance) || froxels.Distance <= 1f)
+                throw new ArgumentOutOfRangeException(nameof(settings), froxels.Distance, "The froxels' distance is how far from the eye they reach, past a meter.");
+            if (!float.IsFinite(froxels.LumpSize) || froxels.LumpSize <= 0f || !float.IsFinite(froxels.Lumps)
+                || !float.IsFinite(froxels.Wind.X) || !float.IsFinite(froxels.Wind.Y) || !float.IsFinite(froxels.Wind.Z))
+                throw new ArgumentOutOfRangeException(nameof(settings), "The froxels' lumps have no size, or a setting of theirs is not a number.");
+            if (froxels.Boxes.Count > SkyFog.MostBoxes)
+                throw new ArgumentOutOfRangeException(nameof(settings), froxels.Boxes.Count, $"The froxels take {SkyFog.MostBoxes} boxes at most.");
+            foreach (var box in froxels.Boxes)
+                if (!(box.Visibility > 0f) || !(box.Size.X > 0f && box.Size.Y > 0f && box.Size.Z > 0f) || !float.IsFinite(box.Edge))
+                    throw new ArgumentOutOfRangeException(nameof(settings), box, "A fog box has a size and a visibility above none.");
+        }
 
         var draw = SkyFog.DrawFor(camera, settings);
         var (r, g, b) = settings.Color ?? (1f, 1f, 1f);
@@ -57,6 +81,7 @@ public static partial class Render
             .Set("horizon", new Vector4(Math.Clamp(settings.HorizonDegrees, 0f, 89f), Math.Clamp(settings.GroundShade, 0f, 1f),
                 Math.Clamp(settings.BandDegrees, 0f, 90f), settings.Color is null ? 0f : 1f))
             .Set("color", new Vector4(r * settings.Brightness, g * settings.Brightness, b * settings.Brightness, 1f));
+        SkyFog.SetFroxels(camera, draw, settings);
         Shaders.SetEnginePrepass(camera, SkyFog.Owner, 1u);
         Shaders.SetEngineViewDraws(camera, SkyFog.Owner, ViewDraw.Fixed(draw, FramePoint.BeforeTonemapping, 3, 1, DrawBlend.Alpha, writesDepth: false));
     }
@@ -65,6 +90,7 @@ public static partial class Render
     /// <param name="camera">The camera.</param>
     public static void ClearSkyFog(Entity camera)
     {
+        Shaders.SetEngineViewDispatches(camera, SkyFog.Owner);
         Shaders.SetEngineViewDraws(camera, SkyFog.Owner);
         Shaders.SetEnginePrepass(camera, SkyFog.Owner, 0);
         SkyFog.Forget(camera);
@@ -72,7 +98,7 @@ public static partial class Render
 }
 
 /// <summary>The draws <see cref="Render.SetSkyFog"/> puts on cameras, an instance a camera, an app's own.</summary>
-internal static class SkyFog
+internal static partial class SkyFog
 {
     /// <summary>The name the fog's draw and its prepass are kept under on a camera beside the engine's other parts.</summary>
     internal const string Owner = "sky.fog";
@@ -119,5 +145,7 @@ internal static class SkyFog
         if (ReferenceEquals(_app, App.Running)) return;
         _app = App.Running;
         Fogs.Clear();
+        Froxeled.Clear();
+        _noVolume = AssetHandle.None;
     }
 }

@@ -328,7 +328,7 @@ pub(super) fn run_view_dispatches<const POINT: u8>(
         Option<&PreviousViewUniformOffset>,
         Option<&ViewLightsUniformOffset>,
         Option<&ViewShadowBindings>,
-        Option<&super::ViewEnvironmentTextures>,
+        (Option<&super::ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>),
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -340,7 +340,7 @@ pub(super) fn run_view_dispatches<const POINT: u8>(
     #[cfg(feature = "solari")] traced: Option<Res<crate::render::solari::SceneBindings>>,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass, previous, light_offset, shadows, environment) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures)) = view.into_inner();
 
     #[cfg(feature = "solari")]
     let traced = crate::render::compute::scene_group(&traced);
@@ -363,6 +363,7 @@ pub(super) fn run_view_dispatches<const POINT: u8>(
         prepass,
         previous_uniforms.as_deref().zip(previous),
         environment,
+        super::inputs::ViewAtmosphere::of(atmosphere, atmosphere_textures),
     );
 
     let Some((group, offsets)) = sources.bind(

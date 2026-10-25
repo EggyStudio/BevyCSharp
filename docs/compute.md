@@ -201,18 +201,23 @@ toward, without a pass written only to copy it.
 A shader on a camera also sees the scene's lights the way Bevy's own materials do. It has
 `passDirectionalLightCount()` and `passLights.directional_lights[i]` with each light's color,
 direction and shadow cascades, `passPointLightCount()` and `passPointLights[i]` for point and spot
-lights, while `passDirectionalShadow` and `passPointShadow` read Bevy's shadow maps with its filtering,
-from zero in full shadow to one in full light, a spot light's included. `passPointLightRadiance` is
-the light a point or spot light sends to a point before shadow, falling off with distance and, for a
-spot, with the angle from its axis. A traced ray's hit is shaded with these, without drawing the
-scene's lights a second time. The sky is there too. `passEnvironmentSpecular(direction, roughness)` is
-the light the camera's environment map sends along a direction, blurred as a surface of that
-roughness blurs it, and `passEnvironmentDiffuse(normal)` what it sends a surface facing a way, both
-black when `passHasEnvironment()` is false. A ray that leaves the scene picks up that light, turned and
-scaled exactly as Bevy's own sky and lighting use the same map. And `passBlueNoise(pixel)` is Bevy's
-spatio-temporal blue noise for this frame, four numbers from zero to one whose values are spread
-evenly across the picture and from frame to frame. A technique taking a few random samples a pixel
-picks them with it, so its noise blurs away rather than blotching.
+lights, while `passDirectionalShadow` and `passPointShadow` read Bevy's shadow maps with its
+filtering, from zero in full shadow to one in full light, a spot light's included.
+`passPointLightRadiance` is the light a point or spot light sends to a point before shadow, falling
+off with distance and, for a spot, with the angle from its axis. A traced ray's hit is shaded with
+these, without drawing the scene's lights a second time. The sky is there too.
+`passEnvironmentSpecular(direction, roughness)` is the light the camera's environment map sends
+along a direction, blurred as a surface of that roughness blurs it, and
+`passEnvironmentDiffuse(normal)` what it sends a surface facing a way, both black when
+`passHasEnvironment()` is false. A ray that leaves the scene picks up that light, turned and scaled
+exactly as Bevy's own sky and lighting use the same map. Under one of Bevy's atmospheres,
+`passAtmosphereTransmittance(world, direction)` is the share of light the air lets through from a
+point to the top of the sky along a way, red at a low sun and none where the planet stands in the
+way, which is how Bevy dims a directional light, and one everywhere when `passHasAtmosphere()` is
+false. And `passBlueNoise(pixel)` is Bevy's spatio-temporal blue noise for this frame, four numbers
+from zero to one whose values are spread evenly across the picture and from frame to frame. A
+technique taking a few random samples a pixel picks them with it, so its noise blurs away rather
+than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a

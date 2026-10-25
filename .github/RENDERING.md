@@ -469,6 +469,8 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Screen-space reflections | Has (`Render.SetScreenSpaceReflections`), Bevy's, over its G-buffer |
 | Light probes and irradiance volumes | Has (`Render.SetReflectionProbe`, `Render.SetIrradianceVolume`, and `Render.SetProbeCapture` for a reflection probe that renders itself), with the volume an ordinary 3D image a compute shader can write every frame |
 | Deferred rendering and a G-buffer | Has for Bevy's materials (`Render.SetDeferredRendering`), and readable by a camera's passes and compute as `gbuffer`, unpacked by `passSurfaceOf` (`Shaders.SetPrepass(..., deferred: true)`). Materials a Slang program draws are forward and leave it empty |
+| The sun's light through the atmosphere, for a shader on a camera | Has (`passAtmosphereTransmittance`, `passHasAtmosphere`), Bevy's own transmittance lookup texture, read from any point along any way, as Bevy dims a directional light by it |
+| Volumetric fog lit by the sky, the sun's shadows and the scene's lamps | Has (`SkyFogSettings.Froxels`), froxels filled after the prepass and added up from the eye, laid over the picture before tonemapping with the closed form past them |
 | Ray-traced lighting | Has, Bevy's Solari, in a bridge built with `--solari` and an app that sets `Config.RayTracedLighting` (`Render.SetRayTracedLighting`, `SetRayTraced`). A package's own shaders tracing rays is the ray query row above |
 
 ### Resources and formats

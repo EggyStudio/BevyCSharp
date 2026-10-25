@@ -200,9 +200,10 @@ public partial struct Applied
 
     /// <summary>
     /// The fog over the map, thick enough that the ground's far edge, a few hundred meters off,
-    /// fades toward the horizon, and thinning upward so the zones' tops stand clear.
+    /// fades toward the horizon, and thinning upward so the zones' tops stand clear, worked out in
+    /// froxels near the camera so the zones' shadows cut it into shafts and their lamps glow in it.
     /// </summary>
-    private static readonly SkyFogSettings Fog = new() { Visibility = 700f, Height = 40f };
+    private static readonly SkyFogSettings Fog = new() { Visibility = 700f, Height = 40f, Froxels = new FroxelFogSettings() };
 
     /// <summary>
     /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the

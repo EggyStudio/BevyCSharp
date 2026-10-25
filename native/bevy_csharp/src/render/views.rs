@@ -63,7 +63,7 @@ pub use draws::{BcsViewDraws, DrawBlend, DrawCount, PreparedViewDraws, ViewDraw}
 pub use mesh_draws::supported as mesh_shaders_supported;
 pub use images::{BcsViewImages, ViewImageSpec, ViewImageTextures, scaled, view_names};
 pub use inputs::{
-    SceneLights, ViewEnvironment, ViewEnvironmentTextures, ViewInputSources, ViewInputs, ViewLights,
+    SceneLights, ViewAtmosphere, ViewEnvironment, ViewEnvironmentTextures, ViewInputSources, ViewInputs, ViewLights,
 };
 
 use dispatches::{ViewComputePipelines, forget_view_dispatches, prepare_view_dispatches, run_view_dispatches};

@@ -171,6 +171,12 @@ public struct SceneInfo
     /// The environment's rotation undone, as a quaternion, which turns a world direction into the
     /// one to sample the cubes by.
     public float4 environment_rotation;
+    /// The planet's radius, the atmosphere's top and 1 where the camera is under one of Bevy's
+    /// atmospheres, in meters, which is how `passHasAtmosphere` tells.
+    public float4 atmosphere;
+    /// The turn from the world into the atmosphere's space, meters about the planet's middle with
+    /// up along y, a column at a time.
+    public float4 world_to_atmosphere[4];
 };
 
 /// A point light casts shadows.
@@ -195,6 +201,10 @@ public static const uint DirectionalLightShadows = 1u << 0u;
 /// Bevy's spatio-temporal blue noise, layers of noise whose values are spread evenly both across a
 /// layer and from one layer to the next. Gray until it arrives.
 [[vk::binding(16, 101)]] public Texture2DArray passBlueNoiseLayers;
+
+/// How much of the sun's light the camera's atmosphere lets through to a height along a way, Bevy's
+/// own lookup texture, which `passAtmosphereTransmittance` reads.
+[[vk::binding(17, 101)]] public Texture2D passTransmittanceLut;
 
 /// How many directional lights the camera sees.
 public uint passDirectionalLightCount()
@@ -555,6 +565,41 @@ public bool passHasNormals()
 public bool passHasMotion()
 {
     return (passSceneInfo.own_inputs & 4u) != 0u;
+}
+
+/// Whether the camera is under one of Bevy's atmospheres, which `Render.SetAtmosphere` gives it.
+public bool passHasAtmosphere()
+{
+    return passSceneInfo.atmosphere.z > 0.5;
+}
+
+/// The share of light the camera's atmosphere lets through from a point in the world to the top of
+/// the air along a direction, as Bevy's lighting dims a directional light by it, red at a low sun,
+/// and none where the planet stands in the way. One everywhere without an atmosphere.
+public float3 passAtmosphereTransmittance(float3 world, float3 direction)
+{
+    if (!passHasAtmosphere())
+        return 1.0;
+    float inner = passSceneInfo.atmosphere.x;
+    float outer = passSceneInfo.atmosphere.y;
+    float3 at = passTransform(passSceneInfo.world_to_atmosphere, float4(world, 1.0)).xyz;
+    float3 toward = normalize(passTransform(passSceneInfo.world_to_atmosphere, float4(direction, 0.0)).xyz);
+
+    // Held above the ground as Bevy holds the camera, so a point under the planet's surface reads
+    // the light at the surface.
+    float r = clamp(length(at), inner + 1.0, outer);
+    float mu = dot(at / max(length(at), 1e-3), toward);
+    if (mu < 0.0 && r * r * (mu * mu - 1.0) + inner * inner >= 0.0)
+        return 0.0;
+
+    // Bevy's mapping of a height and a way into its lookup texture, Bruneton's.
+    float horizon = sqrt(outer * outer - inner * inner);
+    float rho = sqrt(max(r * r - inner * inner, 0.0));
+    float top = -r * mu + sqrt(max(r * r * (mu * mu - 1.0) + outer * outer, 0.0));
+    float nearest = outer - r;
+    float farthest = rho + horizon;
+    float2 uv = float2((top - nearest) / max(farthest - nearest, 1e-3), rho / horizon);
+    return passTransmittanceLut.SampleLevel(passPictureSampler, uv, 0.0).rgb;
 }
 
 /// A world direction turned the way the environment's cubes are sampled, rotated as the

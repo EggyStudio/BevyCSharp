@@ -17,7 +17,7 @@ internal static class ConsoleSkyCommands
             return fogged.Count == 0
                 ? "no camera draws the sky's fog"
                 : string.Join("\n", fogged.Select(f => string.Create(CultureInfo.InvariantCulture,
-                    $"{f.Camera}: fog to 95% at {f.Settings.Visibility:0.#} m, thinning by e every {f.Settings.Height:0.#} m above {f.Settings.Base:0.#}, {(f.Ready ? "drawn" : "its draw compiling")}")));
+                    $"{f.Camera}: fog to 95% at {f.Settings.Visibility:0.#} m, thinning by e every {f.Settings.Height:0.#} m above {f.Settings.Base:0.#}{(f.Settings.Froxels is { } froxels ? $", in {froxels.Quality.ToString().ToLowerInvariant()} froxels to {froxels.Distance:0.#} m" : "")}, {(f.Ready ? "drawn" : "its draw compiling")}")));
         }
 
         // The cameras drawing fog, or else the ones it was taken off, or else the field's.
@@ -59,8 +59,60 @@ internal static class ConsoleSkyCommands
                 BandDegrees = was.BandDegrees,
                 Color = was.Color,
                 Brightness = was.Brightness,
+                Froxels = was.Froxels,
             });
         }
         return string.Create(CultureInfo.InvariantCulture, $"fog to 95% at {far:0.#} m, thinning by e every {height:0.#} m above {@base:0.#}, on {cameras.Count} camera{(cameras.Count == 1 ? "" : "s")}");
+    }
+
+    [Command("sky.froxels", "Works the sky's fog out in froxels near the cameras drawing it, as far as given, where shadows cut it into shafts and lamps glow in it, or in closed form alone: sky.froxels <off|low|medium|high> [distance]")]
+    internal static string Froxels(string quality, float distance = 250f)
+    {
+        var word = quality.Trim().ToLowerInvariant();
+        var fogged = SkyFog.All().ToList();
+        if (fogged.Count == 0)
+        {
+            ConsoleHost.Fail("NO_FOG", "No camera draws the sky's fog. Give one fog with sky.fog first.");
+            return "sky.froxels <off|low|medium|high> [distance]";
+        }
+
+        FroxelQuality? asked = null;
+        if (word == "low") asked = FroxelQuality.Low;
+        else if (word == "medium") asked = FroxelQuality.Medium;
+        else if (word == "high") asked = FroxelQuality.High;
+        if ((asked is null && word != "off") || !(distance > 1f))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{quality.Trim()}' is not off, low, medium or high, or the distance is not past a meter.");
+            return "sky.froxels <off|low|medium|high> [distance]";
+        }
+
+        foreach (var (camera, was, _) in fogged)
+        {
+            Render.SetSkyFog(camera, new SkyFogSettings
+            {
+                Visibility = was.Visibility,
+                Height = was.Height,
+                Base = was.Base,
+                Start = was.Start,
+                HorizonDegrees = was.HorizonDegrees,
+                GroundShade = was.GroundShade,
+                BandDegrees = was.BandDegrees,
+                Color = was.Color,
+                Brightness = was.Brightness,
+                Froxels = asked is { } level ? new FroxelFogSettings
+                {
+                    Quality = level,
+                    Distance = distance,
+                    Lumps = was.Froxels?.Lumps ?? 0.5f,
+                    LumpSize = was.Froxels?.LumpSize ?? 30f,
+                    Wind = was.Froxels?.Wind ?? new Vec3(1.5f, 0f, 0.8f),
+                    Lights = was.Froxels?.Lights ?? 16,
+                    Boxes = was.Froxels?.Boxes ?? [],
+                } : null,
+            });
+        }
+        return asked is { } q
+            ? string.Create(CultureInfo.InvariantCulture, $"the fog in {q.ToString().ToLowerInvariant()} froxels to {distance:0.#} m, on {fogged.Count} camera{(fogged.Count == 1 ? "" : "s")}")
+            : "the fog in closed form alone";
     }
 }

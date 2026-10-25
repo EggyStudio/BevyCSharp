@@ -159,6 +159,33 @@ own in place of the sky's, which a camera with no environment map needs. It read
 depth, so it needs a camera drawn once a pixel, and `ClearSkyFog` takes it off. The console's
 `sky.fog` sets it while the app runs.
 
+Near the camera the same fog can be worked out in froxels, cells of the view's frustum:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetSkyFog(camera, new SkyFogSettings
+{
+    Visibility = 700f,
+    Height = 40f,
+    Froxels = new FroxelFogSettings { Quality = FroxelQuality.Medium, Distance = 250f },
+});
+```
+
+Each froxel holds the layer's density, made lumpy by a noise the wind carries (`Lumps`, `LumpSize`,
+`Wind`) and thickened inside any `FogBox` the program names, and the light the fog scatters there.
+That light is the sky's along the way, as the closed form colors it, split into the sky's own, which
+reaches every point, and the sun's share, which the sun's shadow takes away, so a wall's shadow is a
+bluer, darker shaft through the fog and a pillar between the eye and the sun darkens the whole way
+to it. Point and spot lights add their own light, so a lamp glows in the fog. The froxels are added
+up from the eye and laid over the picture as far as `Distance`, and past it the closed form goes on,
+so the two meet with no seam. Over the sky only the shadows, the lamps and the boxes are laid, since
+the sky already holds the layer's haze. Each froxel's point moves through it from frame to frame and
+blends with what it held last frame, which smooths the slices over a few frames. At 1280 by 720 the
+froxels take about 0.1 ms of the GPU at `Low`, 0.2 at `Medium` and 0.5 at `High`. The console's
+`sky.froxels` turns them on and off while the app runs.
+
 A painted sky is a cubemap instead:
 
 <!-- compiled with:
