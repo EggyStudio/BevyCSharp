@@ -108,6 +108,26 @@ stands.
 `sides` flat sides and its opening along Z. It is twice its radius wide and its radius tall, so it
 stands over a doorway as wide as its inside, `radius - thickness` either side of its middle.
 
+### Tube
+
+`Tube(points, radii, sides)`, or `tube SIDES X Y Z RADIUS X Y Z RADIUS` and on, is a round tube
+through a chain of points, with a radius at each, closed at both ends, as a branch or a pipe is.
+It stands where its points are rather than at a place given. A ring of `sides` corners stands
+square to the chain at each point, each turned from the one before by the least that keeps it
+square, so the sides run along a bent chain without twisting about it. The sides are smoothed into
+one another and the ends are flat, and the texture coordinates run once round it and along it in
+lengths of its first ring's circumference:
+
+```csharp
+var pipe = new EditMesh().Tube(
+    [Vec3.Zero, new Vec3(0f, 2f, 0f), new Vec3(1f, 3f, 0f)],
+    [0.2f, 0.2f, 0.15f],
+    8);                                    // 24 vertices, 18 faces
+```
+
+A tube started on another's middle, with a radius under the other's there, starts inside it, which
+closes the joint between them with no boolean, as a tree's branches are joined in [Trees](#trees).
+
 ## The selection
 
 Operations act on what is selected, a set of vertices and a set of faces. Selecting a face selects
@@ -660,6 +680,57 @@ var physics = new PhysicsWorld(new PhysicsSettings());
 ```csharp
 physics.Add(level, Modeling.Collider(mesh), BodyKind.Static, Transform.Identity);
 ```
+
+## Trees
+
+`Trees.Grow(species, seed)` grows a tree's skeleton from a `TreeSpecies`, the controls of Weber and
+Penn's paper of 1995, and `Trees.Build(skeleton)` makes it into an edit mesh of tubes, a stem a
+tube, every face in the `bark` slot. No file is loaded, and a seed grows the same tree each time:
+
+```csharp
+var aspen = new TreeSpecies
+{
+    Shape = TreeShape.TendFlame,
+    Scale = 13f,
+    ScaleVariation = 3f,
+    BaseSize = 0.4f,
+    AttractionUp = 0.5f,
+    Levels =
+    [
+        new TreeLevel { CurveVariation = 20f },
+        new TreeLevel { DownAngle = 60f, DownAngleVariation = -50f, Branches = 50, Length = 0.3f, Curve = -40f, CurveVariation = 50f },
+        new TreeLevel { DownAngle = 45f, DownAngleVariation = 10f, Branches = 30, Length = 0.6f, Curve = -40f, CurveVariation = 75f },
+    ],
+};
+var skeleton = Trees.Grow(aspen, seed: 7);
+var tree = Trees.Build(skeleton);          // drawn with Modeling.Meshes, as any edit mesh
+```
+
+The species sets the crown's outline, eight of them from `TreeShape.Conical` to
+`TreeShape.TendFlame`, how tall the tree is and how much one varies from the next, how much of the
+trunk is bare, how thick the trunk is for its height, and for the trunk and each level of branches
+under it a `TreeLevel`, the angle a stem leaves its parent at, the turn round the parent from one to
+the next, how it bends, how often it forks, how many it carries and how long it grows.
+
+The paper draws each stem from those numbers, and here the branches are grown inside them by space
+colonization after Runions, Lane and Prusinkiewicz (2007), with buds after Palubicki and others
+(2009). Attractors are scattered through the crown's outline, and each bud that perceives some
+ahead of it grows toward them an internode at a time, taking those it comes near, so the crown
+fills its outline and leaves its inside open. The paper's controls are the buds' tendencies:
+
+| Control | What the growth does with it |
+|---|---|
+| `Shape`, `BaseSize` and the first level's `Length` | Where the attractors are scattered, from the crown's foot to the top and as wide as the outline at each height |
+| `DownAngle`, `Rotate` | The way a bud points when its stem sets it, leaning out from the stem and turned round it from the bud before |
+| `Curve`, `CurveVariation`, `AttractionUp` | The turn a stem takes at each internode as it lengthens, a share of the whole bend at each |
+| `Splits`, `SplitAngle` | The chance a stem's tip forks at an internode, so a stem forks as often as `Splits` on average |
+| `Branches` | How many buds a stem sets along its length for the next level, which grow where they find room |
+| `Length` | The most a stem grows, its tip stopping there or sooner where the attractors run out |
+| `Ratio`, `Taper` | How thick the trunk is and how a stem thins, by the pipe model, each point's cross section that of the stems it carries |
+
+The skeleton is the points the stems pass through, each with the point it grew from and its radius,
+so a level may keep it beside the seed and build the same tree where another machine's floating
+point would grow it a little differently.
 
 ---
 

@@ -10,37 +10,32 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5a8c6251`, item 69's seventh phase, the sky and the clouds in the environment map,
-pushed at 10:10 on 2026-10-25 after the run of `4cc89851` went green, its own run green at 10:28 as
-the whole suite's check of the rewrite, carrying the review's files, a captioned picture and a
-Shared line, ABI 309. Bevy's atmosphere draws the sky into the cube its lighting is filtered from
-after the prepass, the next frame filtering it, and where the camera is lit by the sky the clouds
-add dispatches after the prepass, sky_copy copying the cube since a pass cannot read and write it at
-once, the picture's march reading its clear sky from the copy, sky_clouds marching a 64-texel cube
-of six 3D slices twice a texel at jitters 0.25 and 0.75 averaged, and sky_merge writing the clouds
-plus the transmittance times the clear sky back into the cube; the native's sky_lighting_cube gives
-the generated map's key where the atmosphere's map light is on the camera alone, never a program's
-own image, and values.rs binds a cube image as a 2D-array storage view through level_of taking an
-optional dimension; a strike's flash goes into the cube's march too. 0.18 ms of the GPU, the cube's
-march 0.10, the copy and the merge 0.04 each, the froxels 0.15 with the averaged horizon. CloudTests
-reads a wall facing away from the sun at 0.059 blue under the clear sky and -0.04 under a full deck.
-Two departures. The clouds lit by the clouded map turned brown, lit by their own undersides, so both
-marches read the clear sky from the copy made before them; and vertical stripes across the overcast,
-traced by switching each suspect off to the fog's horizon color, the froxels' and sky_fog's skyAlong
-reading the map nearly sharp at the horizon by azimuth where the map holds the deck's structure,
-averaging five reads over 15 degrees of azimuth either side at the same height, rougher reads
-bringing back the seam from the ground of item 64's second part. values.rs reached 808 lines on the
-first suite, failing N 1.3, and was brought to 800 by routing the view through level_of, nothing
-added to build/norm; the first full suite 1,903 passed, 3 skipped and that one failure, 1,907 the
-listing plus 11, and after the rewrite the norm, cloud, fog, weather, compute, view-draw and
-shader-material tests, 89, so the run is the whole suite's check of the rewrite; the bridge's checks
-clean on every profile, Cargo 118, 199 and 11 before and after.
+Reviewed up to `ff5fa5e9`, item 69's last phase, the weather crate's removal, pushed at 11:19 on
+2026-10-25 after the run of `5a8c6251` went green, its own run green at 11:42, carrying the review's
+files and item 73's reply, ABI 310, 62 files, 190 lines in and 13,410 out. The bridge loses
+native/bevy_weather from the workspace and the lock, the render profile's dependency,
+render::weather with its two calls, options.rs's install and BcsConfig.weather; the managed side
+Config.Weather, the Weather facade, the two P/Invokes and WeatherTests, WeatherPreset staying with
+its docs pointing to WeatherState.Set and WeatherConditions.Of; bevy-components.tsv written again
+from an editor build loses the crate's 284 lines, PublicApi.txt the 530 of their wrappers, the cheat
+sheet 3. The feature test loses its config's weather line, the Weather and WeatherTier settings, old
+files still loading since unknown keys are skipped, the Weather page Kind and Forecast or the
+meshlet note, Applied, DayNight and Scene their crate branches and references; the drive drops
+WeatherTier with its frame label under a partly cloudy sky and the denoiser script sets WeatherKind
+Clear. The docs move the weather into sky-and-reflections.md as the engine's rain, snow, lightning
+and state, compared-with-bevy.md's tier table becomes the engine's costs by part, clouds 0.45 ms,
+sky lighting 0.18, froxels 0.18, rain 0.05 and a bolt 0.02, running-a-game.md is rewritten,
+BUILDING.md loses the crate's row and carries the --init sentence under Caches, STYLE.md's idioms
+check and NormTests lose their exclusions, the notices lose the crate's row; NORM.md's two mentions
+of the vendored crate, N 4.1's clause and the annex's sentence, are taken out in both engines for
+the next commits. 1,900 passed, 3 skipped, 1,903 the listing plus 11, the norm and docs tests run
+again after the last edits, 21, the bridge's checks clean on every profile, Cargo 118, 199 and 11.
+
+Before it, `5a8c6251` came, item 69's seventh phase, the sky and the clouds in the environment map,
+pushed at 10:10 on 2026-10-25, its run green at 10:28.
 
 Before it, `4cc89851` came, item 69's sixth phase, the thunder, pushed at 08:51 on 2026-10-25, its
 run green at 09:13.
-
-Before it, `6795478f` came, item 72, the feature test's sample behaviors deleted, pushed at 08:27 on
-2026-10-25, its run green at 08:44.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -236,59 +231,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
-    leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
-    volumetric clouds are written in the engine and lit by Bevy's Hillaire atmosphere as RDR2 lights
-    its froxel fog and raymarched clouds together under its sky; rain, snow, thunder, wind, and the
-    stars and the moon are written in the engine as well; the vendored native/bevy_weather, 0.2.0 at
-    about 9,800 lines, leaves the workspace once those stand, nothing of it kept. Phases proposed by
-    the coder, each a commit with the suite green, the fog and the clouds first, read against the
-    crate's look and the feature test's captures; after item 64 and before 65. The coder's phases at
-    01:18 on 2026-10-25, each a commit with the suite green and pictures, taken as proposed. The
-    fog, froxel-based as RDR2's, a per-camera volume of about 160 by 90 by 64 at High built after
-    the prepass, the density the fog's height layer with box volumes and wind-scrolled noise, lit by
-    the sun through Bevy's shadow cascades and transmittance and the sky-lit map's ambient with
-    temporal reprojection, integrated front to back and applied in the fog's draw slot before
-    tonemapping, SetSkyFog the cheap tier and the far color, read against the crate's fog and Bevy's
-    volumetric fog with the cost. The clouds, a raymarched shell at quarter resolution with temporal
-    reconstruction, Perlin-Worley shape and Worley detail volumes made by compute once, a weather
-    map of coverage and type moved by the wind, lit from Bevy's transmittance LUT and the sky-lit
-    map, composited with the aerial perspective, their shadow a GPU-built cookie on the sun dimming
-    its disc, read against the crate's captures at its presets taken before the fog and against
-    Hillaire and Nubis. The clock and the sky behind the atmosphere, the time of day, latitude and
-    season, the sun's and the moon's directions, the moon's disc with its phase and earthshine, the
-    stars and the galaxy, the feature test's DayNight on it. The weather state, presets, blending,
-    the climate and forecast, wind with gusts moving the clouds, the fog, the rain and a wind vector
-    foliage reads, and ground wetness and snow cover. Rain and snow as GPU particles with an
-    indirect draw, occluded by a top-down depth map so roofs keep rain out, with splashes. Thunder,
-    the strikes, the flash light, the in-cloud glow, a branching bolt drawn, and the delay and the
-    sound. Then the crate leaves, the workspace member and lock, the render feature,
-    render/weather.rs and BcsConfig.weather with its ABI, the Weather types onto the engine's own,
-    the TSV, PublicApi, CHEATSHEET, the guide, the comparisons, BUILDING, the norm's and STYLE's
-    lines, NormTests' exclusions, the notices, the drive and soak scripts and the workflow's
-    comment. The first phase at `7fe46ce3` on 2026-10-25, the froxel fog with its departure over the
-    sky; the clouds next. The second phase's first commit at `f93cb76b` on 2026-10-25, the clouds in
-    the sky with their departure; its second next, the clouds' shadows on the ground, in the froxel
-    fog and on the sun's light, and the stratus deck with the fourth phase's presets. The second
-    phase's second commit at `dc2ea49d` on 2026-10-25, the clouds' shadow as a cookie on the sun and
-    in the fog; the third phase next, the clock and the sky behind the atmosphere. The third phase
-    at `6649ab49` on 2026-10-25, the sky's clock and the night sky, the two departures in the head;
-    the fourth next, the weather state with its presets, the stratus deck among them, the blending,
-    the forecast, the wind and the gusts moving the clouds, the fog, the rain and a wind vector for
-    foliage, and the ground's wetness and snow cover. The fourth phase at `4ac3871a` on 2026-10-25,
-    the weather state with the presets, the forecast, the wind, the wetness and the snow cover,
-    three departures and three faults in the head and the environment map's blue under an overcast
-    kept as a gap; the fifth next, the rain and the snow. The fifth phase at `a2646e71` on
-    2026-10-25, the rain and the snow with a frame point after the temporal antialiasing as its
-    departure and two faults in the head; the sixth next, the thunder, then a seventh taken as
-    proposed, the sky and the clouds rendered into the environment map's cube so an overcast grays
-    the ground and the falling drops rather than darkening their blue, then the crate's removal. The
-    sixth phase at `4cc89851` on 2026-10-25, the thunder, the bolt's program made with the storm as
-    its departure; the seventh next, the sky and the clouds into the environment map's cube. The
-    seventh phase at `5a8c6251` on 2026-10-25, the sky and the clouds in the environment map's cube
-    so an overcast grays the ground, two departures in the head; the eighth next, the crate's
-    removal.
-
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
     choice of the hybrid, grown method at about 21:5x. Weber and Penn's species parameters of 1995,
@@ -324,7 +266,30 @@ from [SHARED.md](SHARED.md).
     growth's own terms, the envelope to the attractors' placement, the down and rotate angles and
     the curve to the tropisms, the splits to the branching's chance, said in the guide so an
     artist's expectations hold. A leaf color per preset with a seasonal tint is cheap and goes in
-    with the presets.
+    with the presets. The coder's phases at 11:22 on 2026-10-25, taken as laid out, each a commit
+    with the suite green and pictures. The first, the growth and the branches, TreeSpecies holding
+    the paper's controls, height and scale, the envelope's eight shapes, the base size, three levels
+    with down and rotate angles, curve, splits, branches and length a level, the taper and the
+    radius ratio, Trees.Grow running space colonization from attractors seeded in the envelope with
+    influence and kill radii, tropisms from the down angle and the curve and radii by the pipe
+    model, the random numbers a PCG of the library's own so the skeleton is the same on every .NET,
+    EditMesh gaining Tube over a chain of points and radii with a child starting inside its parent
+    so the joints close without booleans and the bark's UVs along the length, Trees.Build giving an
+    EditMesh with a plain bark material, and one aspen-like tree in a picture. The second,
+    Palubicki's shadow grid, the leaves as alpha-cut cards with a generated mask and diffuse
+    transmission by the paper's leaf parameters, a noise-made bark, the four presets with a bush and
+    a fern and a leaf color with a seasonal tint, the guide page mapping the paper's terms to the
+    growth's, and the four presets pictured beside the paper's figures. The third, the tree entity
+    by preset and seed grown on a worker at load with about eight variants a species instanced with
+    a yaw and a scale, capsule colliders on the trunk and the thick branches, the levels of detail
+    through VisibilityRange's dither, fewer segments, then leaf cards, then octahedral impostors
+    drawn once a variant into an atlas by an offscreen camera and blended from the three nearest
+    views, an example, and the feature test's sphere-crowned trees grown with a small forest. The
+    fourth, a tree material bending by a per-vertex branch hierarchy of trunk, branch and twig
+    pivots with their phases moved by WeatherState.Wind, the leaves' clusters as meshlet geometry,
+    and the leaves in the scene field as cells passing a share of light with a Shared line for
+    3DEngine's item 100. The level file's and the editor's placing wait for items 65 and 67, the
+    kept skeleton going with 65.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -363,28 +328,6 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
-
-73. **A capture shard's container reaps its children, and the four idle shards go.** From the
-    question of 2026-10-25 at about 10:24 whether headless instances pile up over days. They do not;
-    no game or engine runs headless on the machine beyond the suite running at the moment. But four
-    podman containers named shard1 to shard4, started at about 00:00 on 2026-10-20 for the examples'
-    captures, stand with sleep infinity as their first process, which reaps nothing, so about six
-    hundred finished children, 408 shells, 183 BevyCSharp.Examples and 4 dotnet, all from 01:08 to
-    01:39 that night, stand as defunct entries in the process table to this day, holding no memory
-    and no GPU. The four containers are removed once nothing uses them, and the script that starts a
-    shard gives it an init, podman's --init or a shell that waits on its children, so a shard's
-    children are reaped; a line in the script says why. One commit, with or before item 69's eighth
-    phase. Read at 10:34, the shards are not in use; they were started by hand on 2026-10-20 at
-    01:07 with podman run and sleep infinity, a work script run in each by podman exec, and no
-    script in the repository starts a shard, capture-in-fedora.sh running podman with --rm and
-    ending with its work, so no repository line takes an init. Each shard holds an idle dotnet and
-    VBCSCompiler from that night beside the defunct entries. The coder's removal was refused by its
-    session's permission check and the owner is asked to remove them or allow it; the rule, a work
-    container started with --init and removed as its work ends, goes into BUILDING.md's local
-    recipes in one sentence, with the crate's removal. Removed at 10:37 on 2026-10-25 by the owner's
-    leave, podman killing sleep after ten seconds since it ignores the term signal, the defunct
-    entries gone with them and three unrelated ones left; the sentence stands in BUILDING.md's
-    caches section and goes with the crate's removal, which closes this item.
 
 ## Verdicts
 
@@ -945,6 +888,15 @@ mended at `42abf357`.
     DEVLOG.md regenerated by the review as each item is archived, the coder's next commit carrying
     it as it carries the review's files; the three devlogs were regenerated at 05:16 with the day's
     pictures and items. The same in 3DEngine (Decision 71) and Voxel-Sandbox (Decision 47).
+
+65. **The devlog carries notes beside the pictures.** The owner asked on 2026-10-25 at about 12:01,
+    shown the table of the screen probes' cost at four resolutions from 3DEngine's item 122, that it
+    be written in a devlog or something along those lines. N 4.8 gains the note, a reading worth the
+    devlog's reader with no picture to carry it, a table or a few sentences, saved beside the
+    pictures as a Markdown file named the same way, and DEVLOG.md carries it on its day under the
+    pictures; the generator reads them, and the first note is 3DEngine's
+    2026-10-25-item-122-resolution.md. The same in 3DEngine (Decision 73) and Voxel-Sandbox
+    (Decision 49).
 
 ## Replies
 
@@ -1862,3 +1814,12 @@ profile's dependency, `render::weather` with `bcs_weather_active` and `bcs_weath
 build, loses the crate's 284 lines, and `Bevy.Reflected` the 530 lines of its wrappers. The feature
 test's weather is the engine's alone, its tier gone from the page, the settings and the drive, and
 the guide's section on the weather is the engine's.
+
+Shared: a tube in the modeling and trees grown on it, in the commit carrying this line, item 70's
+first phase. `EditMesh.Tube` sweeps a ring of a number of sides along a chain of points with a
+radius at each, the rings turned by the rotation minimizing frame of Wang and others (2008), the
+sides smoothed and the ends flat, its recipe line `tube SIDES X Y Z RADIUS` and on, which a model
+file of 3DEngine's would read once it has the operation. `Trees.Grow` grows a skeleton of points
+with parent, place and radius from a `TreeSpecies` of Weber and Penn's controls and a seed, by space
+colonization with buds after Palubicki, a PCG of the engine's own for the numbers, and
+`Trees.Build` makes it into an edit mesh, a tube a stem.

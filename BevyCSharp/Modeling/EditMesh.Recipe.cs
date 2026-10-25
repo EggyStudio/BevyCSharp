@@ -236,6 +236,7 @@ public sealed partial class EditMesh
                 case "cone": mesh.Cone(Number(), Number(), Count(), Where(out centered), centered); break;
                 case "stairs": mesh.Stairs(Count(), Number(), Number(), Number(), Where(out centered), centered); break;
                 case "arch": mesh.Arch(Number(), Number(), Number(), Count(), Where(out centered), centered); break;
+                case "tube": Tube(mesh); break;
                 case "select": Select(mesh); break;
                 case "move": mesh.Move(Vector()); break;
                 case "rotate": Rotate(mesh); break;
@@ -330,6 +331,20 @@ public sealed partial class EditMesh
         }
 
         private void Rotate(EditMesh mesh) => mesh.Rotate(Axis(), Number(), Pivot());
+
+        private void Tube(EditMesh mesh)
+        {
+            var sides = Count();
+            var points = new List<Vec3>();
+            var radii = new List<float>();
+            while (_at < words.Length)
+            {
+                points.Add(Vector());
+                radii.Add(Number());
+            }
+
+            mesh.Tube(points, radii, sides);
+        }
 
         private void ChangeModifiers(EditMesh mesh)
         {

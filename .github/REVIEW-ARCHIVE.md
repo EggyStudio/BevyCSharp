@@ -1540,6 +1540,86 @@ a batch.
     Done at `6795478f` on 2026-10-25, the four sample behaviors deleted with their components and
     the verbose flag, nothing found relying on them.
 
+69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
+    leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
+    volumetric clouds are written in the engine and lit by Bevy's Hillaire atmosphere as RDR2 lights
+    its froxel fog and raymarched clouds together under its sky; rain, snow, thunder, wind, and the
+    stars and the moon are written in the engine as well; the vendored native/bevy_weather, 0.2.0 at
+    about 9,800 lines, leaves the workspace once those stand, nothing of it kept. Phases proposed by
+    the coder, each a commit with the suite green, the fog and the clouds first, read against the
+    crate's look and the feature test's captures; after item 64 and before 65. The coder's phases at
+    01:18 on 2026-10-25, each a commit with the suite green and pictures, taken as proposed. The
+    fog, froxel-based as RDR2's, a per-camera volume of about 160 by 90 by 64 at High built after
+    the prepass, the density the fog's height layer with box volumes and wind-scrolled noise, lit by
+    the sun through Bevy's shadow cascades and transmittance and the sky-lit map's ambient with
+    temporal reprojection, integrated front to back and applied in the fog's draw slot before
+    tonemapping, SetSkyFog the cheap tier and the far color, read against the crate's fog and Bevy's
+    volumetric fog with the cost. The clouds, a raymarched shell at quarter resolution with temporal
+    reconstruction, Perlin-Worley shape and Worley detail volumes made by compute once, a weather
+    map of coverage and type moved by the wind, lit from Bevy's transmittance LUT and the sky-lit
+    map, composited with the aerial perspective, their shadow a GPU-built cookie on the sun dimming
+    its disc, read against the crate's captures at its presets taken before the fog and against
+    Hillaire and Nubis. The clock and the sky behind the atmosphere, the time of day, latitude and
+    season, the sun's and the moon's directions, the moon's disc with its phase and earthshine, the
+    stars and the galaxy, the feature test's DayNight on it. The weather state, presets, blending,
+    the climate and forecast, wind with gusts moving the clouds, the fog, the rain and a wind vector
+    foliage reads, and ground wetness and snow cover. Rain and snow as GPU particles with an
+    indirect draw, occluded by a top-down depth map so roofs keep rain out, with splashes. Thunder,
+    the strikes, the flash light, the in-cloud glow, a branching bolt drawn, and the delay and the
+    sound. Then the crate leaves, the workspace member and lock, the render feature,
+    render/weather.rs and BcsConfig.weather with its ABI, the Weather types onto the engine's own,
+    the TSV, PublicApi, CHEATSHEET, the guide, the comparisons, BUILDING, the norm's and STYLE's
+    lines, NormTests' exclusions, the notices, the drive and soak scripts and the workflow's
+    comment. The first phase at `7fe46ce3` on 2026-10-25, the froxel fog with its departure over the
+    sky; the clouds next. The second phase's first commit at `f93cb76b` on 2026-10-25, the clouds in
+    the sky with their departure; its second next, the clouds' shadows on the ground, in the froxel
+    fog and on the sun's light, and the stratus deck with the fourth phase's presets. The second
+    phase's second commit at `dc2ea49d` on 2026-10-25, the clouds' shadow as a cookie on the sun and
+    in the fog; the third phase next, the clock and the sky behind the atmosphere. The third phase
+    at `6649ab49` on 2026-10-25, the sky's clock and the night sky, the two departures in the head;
+    the fourth next, the weather state with its presets, the stratus deck among them, the blending,
+    the forecast, the wind and the gusts moving the clouds, the fog, the rain and a wind vector for
+    foliage, and the ground's wetness and snow cover. The fourth phase at `4ac3871a` on 2026-10-25,
+    the weather state with the presets, the forecast, the wind, the wetness and the snow cover,
+    three departures and three faults in the head and the environment map's blue under an overcast
+    kept as a gap; the fifth next, the rain and the snow. The fifth phase at `a2646e71` on
+    2026-10-25, the rain and the snow with a frame point after the temporal antialiasing as its
+    departure and two faults in the head; the sixth next, the thunder, then a seventh taken as
+    proposed, the sky and the clouds rendered into the environment map's cube so an overcast grays
+    the ground and the falling drops rather than darkening their blue, then the crate's removal. The
+    sixth phase at `4cc89851` on 2026-10-25, the thunder, the bolt's program made with the storm as
+    its departure; the seventh next, the sky and the clouds into the environment map's cube. The
+    seventh phase at `5a8c6251` on 2026-10-25, the sky and the clouds in the environment map's cube
+    so an overcast grays the ground, two departures in the head; the eighth next, the crate's
+    removal. Done at `ff5fa5e9` on 2026-10-25 with the eighth phase, the crate's removal, after the
+    fog and the sky through the atmosphere, the clouds and their shadow, the sky's clock and the
+    night sky, the weather state, the rain and the snow, the thunder and the sky in the environment
+    map, ABI 303 to 310.
+
+73. **A capture shard's container reaps its children, and the four idle shards go.** From the
+    question of 2026-10-25 at about 10:24 whether headless instances pile up over days. They do not;
+    no game or engine runs headless on the machine beyond the suite running at the moment. But four
+    podman containers named shard1 to shard4, started at about 00:00 on 2026-10-20 for the examples'
+    captures, stand with sleep infinity as their first process, which reaps nothing, so about six
+    hundred finished children, 408 shells, 183 BevyCSharp.Examples and 4 dotnet, all from 01:08 to
+    01:39 that night, stand as defunct entries in the process table to this day, holding no memory
+    and no GPU. The four containers are removed once nothing uses them, and the script that starts a
+    shard gives it an init, podman's --init or a shell that waits on its children, so a shard's
+    children are reaped; a line in the script says why. One commit, with or before item 69's eighth
+    phase. Read at 10:34, the shards are not in use; they were started by hand on 2026-10-20 at
+    01:07 with podman run and sleep infinity, a work script run in each by podman exec, and no
+    script in the repository starts a shard, capture-in-fedora.sh running podman with --rm and
+    ending with its work, so no repository line takes an init. Each shard holds an idle dotnet and
+    VBCSCompiler from that night beside the defunct entries. The coder's removal was refused by its
+    session's permission check and the owner is asked to remove them or allow it; the rule, a work
+    container started with --init and removed as its work ends, goes into BUILDING.md's local
+    recipes in one sentence, with the crate's removal. Removed at 10:37 on 2026-10-25 by the owner's
+    leave, podman killing sleep after ten seconds since it ignores the term signal, the defunct
+    entries gone with them and three unrelated ones left; the sentence stands in BUILDING.md's
+    caches section and goes with the crate's removal, which closes this item. Done at `ff5fa5e9` on
+    2026-10-25, the sentence under BUILDING.md's caches, the shards removed at 10:37 by the owner's
+    leave.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

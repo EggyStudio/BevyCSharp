@@ -205,8 +205,8 @@ public sealed partial class EditMesh
 
     /// <summary>
     /// A solid made by pushing an outline out along an axis, its two ends the outline and a side
-    /// face for each of its edges, which is what a box, a cylinder, a wedge, a flight of stairs and
-    /// an arch each are.
+    /// face for each of its edges, as a box, a cylinder, a wedge, a flight of stairs and an arch each
+    /// are.
     /// </summary>
     /// <param name="outline">
     /// The outline in the plane across the axis, in the two coordinates that turn counter-clockwise
@@ -251,6 +251,123 @@ public sealed partial class EditMesh
         }
 
         return (first, firstFace);
+    }
+
+    /// <summary>
+    /// Adds a tube along a chain of points, round about each with a radius of its own, as a branch
+    /// or a pipe is, and closed at both ends.
+    /// </summary>
+    /// <param name="points">The points its middle runs through in order, two or more, no two that follow one another at one place.</param>
+    /// <param name="radii">How far its round side is from its middle at each point, above zero, one for each point.</param>
+    /// <param name="sides">How many sides its round side has, three or more.</param>
+    /// <returns>This mesh, for the next operation.</returns>
+    /// <remarks>
+    /// <para>
+    /// A ring of <paramref name="sides"/> corners stands across the chain at each point, square to
+    /// the way the chain runs there, midway between the ways in and out, and each ring is turned
+    /// from the one before by the least that keeps it square, the rotation minimizing frame of Wang
+    /// and others (2008), so the sides run along the chain with no twist however it bends. The
+    /// sides are smoothed into one another, so the tube is round, and its two ends are flat.
+    /// </para>
+    /// <para>
+    /// Its texture coordinates run once round it, and along it in lengths of its first ring's
+    /// circumference, so a bark texture's texels are square where the tube starts and stretch along
+    /// it only as far as it narrows. A tube that starts on another's middle with a radius under the
+    /// other's there starts inside it, which closes the joint between them with no boolean, as
+    /// <see cref="Trees.Build"/> joins a branch to its parent.
+    /// </para>
+    /// <para>
+    /// It stands where its points are, which are in the mesh's space, and its line in the recipe
+    /// holds every point and radius, <c>tube SIDES X Y Z RADIUS X Y Z RADIUS</c> and on.
+    /// </para>
+    /// </remarks>
+    public EditMesh Tube(IReadOnlyList<Vec3> points, IReadOnlyList<float> radii, int sides)
+    {
+        ArgumentNullException.ThrowIfNull(points);
+        ArgumentNullException.ThrowIfNull(radii);
+        ArgumentOutOfRangeException.ThrowIfLessThan(sides, 3);
+        if (points.Count < 2) throw new ArgumentException("A tube runs through two points or more.", nameof(points));
+        if (radii.Count != points.Count) throw new ArgumentException($"A tube has a radius for each of its {points.Count} points, and {radii.Count} were given.", nameof(radii));
+
+        var count = points.Count;
+        for (var i = 0; i < count; i++)
+        {
+            Positive(radii[i], nameof(radii));
+            var point = points[i];
+            if (!float.IsFinite(point.X) || !float.IsFinite(point.Y) || !float.IsFinite(point.Z)) throw new ArgumentException($"A tube's point {i} is at {point}, which is not a place.", nameof(points));
+            if (i > 0 && point == points[i - 1]) throw new ArgumentException($"A tube's points {i - 1} and {i} are at one place, which gives the way it runs between them no direction.", nameof(points));
+        }
+
+        // The way the chain runs at each point, midway between its ways in and out, the one it has
+        // where it turns straight back.
+        var ways = new Vec3[count];
+        for (var i = 0; i < count; i++)
+        {
+            var into = i > 0 ? (points[i] - points[i - 1]).Normalized : Vec3.Zero;
+            var outOf = i < count - 1 ? (points[i + 1] - points[i]).Normalized : Vec3.Zero;
+            var both = into + outOf;
+            ways[i] = both.LengthSquared > 1e-8f ? both.Normalized : i > 0 ? into : outOf;
+        }
+
+        // Each ring's frame from the one before, by two reflections, the first in the plane square
+        // to the chord between the points and the second in the one that brings the way in line.
+        var across = Vec3.Cross(ways[0], MathF.Abs(ways[0].Y) < 0.9f ? Vec3.UnitY : Vec3.UnitX).Normalized;
+        var first = _positions.Count;
+        var firstFace = _faces.Count;
+        var along = new float[count];
+        for (var i = 0; i < count; i++)
+        {
+            if (i > 0)
+            {
+                var chord = points[i] - points[i - 1];
+                along[i] = along[i - 1] + chord.Length;
+                var reflected = Reflect(across, chord);
+                across = Reflect(reflected, ways[i] - Reflect(ways[i - 1], chord)).Normalized;
+            }
+
+            var up = Vec3.Cross(ways[i], across);
+            for (var side = 0; side < sides; side++)
+            {
+                var (sin, cos) = MathF.SinCos(MathF.Tau * side / sides);
+                AddVertex(points[i] + (across * cos + up * sin) * radii[i]);
+            }
+        }
+
+        // Each side runs round its near ring and back along its far one, which faces it out, as a
+        // prism's sides do, and the ends run their rings backwards and forwards.
+        var round = MathF.Tau * radii[0];
+        for (var i = 0; i < count - 1; i++)
+        {
+            var near = first + i * sides;
+            var far = near + sides;
+            for (var side = 0; side < sides; side++)
+            {
+                var next = (side + 1) % sides;
+                var (u, uNext) = ((float)side / sides, (float)(side + 1) / sides);
+                var (v, vFar) = (along[i] / round, along[i + 1] / round);
+                AddFace([near + side, near + next, far + next, far + side], smooth: 180f, uvs: [new(u, v), new(uNext, v), new(uNext, vFar), new(u, vFar)]);
+            }
+        }
+
+        AddFace(Enumerable.Range(0, sides).Select(side => first + sides - 1 - side).ToArray());
+        AddFace(Enumerable.Range(0, sides).Select(side => first + (count - 1) * sides + side).ToArray());
+
+        _selectedVertices.Clear();
+        _selectedFaces.Clear();
+        _selectedVertices.UnionWith(Enumerable.Range(first, _positions.Count - first));
+        _selectedFaces.UnionWith(Enumerable.Range(firstFace, _faces.Count - firstFace));
+        Changed();
+
+        var line = new System.Text.StringBuilder("tube ").Append(sides);
+        for (var i = 0; i < count; i++) line.Append(' ').Append(V(points[i])).Append(' ').Append(F(radii[i]));
+        return Did(line.ToString());
+    }
+
+    /// <summary>A vector reflected in the plane square to another, which need not be of unit length.</summary>
+    private static Vec3 Reflect(Vec3 vector, Vec3 normal)
+    {
+        var squared = normal.LengthSquared;
+        return squared > 0f ? vector - normal * (2f * Vec3.Dot(normal, vector) / squared) : vector;
     }
 
     /// <summary>

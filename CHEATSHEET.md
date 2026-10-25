@@ -917,6 +917,7 @@ EditMesh Cone(float radius, float height, int sides, Vec3 at = default, bool cen
 EditMesh Wedge(Vec3 size, Vec3 at = default, bool centered = false);  // Adds a wedge, a box cut through from one bottom edge to the opposite top edge, rising along Z
 EditMesh Stairs(int steps, float rise, float run, float width, Vec3 at = default, bool centered = false);  // Adds a flight of stairs rising along Z, closed underneath
 EditMesh Arch(float radius, float thickness, float depth, int sides, Vec3 at = default, bool centered = false);  // Adds an arch, half a ring standing on its two feet, its opening along Z
+EditMesh Tube(IReadOnlyList<Vec3> points, IReadOnlyList<float> radii, int sides);  // Adds a tube along a chain of points, round about each with a radius of its own, as a branch or a pipe is, and closed at both ends
 bool Undo();                                                    // Takes back the last operation, by making the mesh again from the lines before it
 bool Redo();                                                    // Does again the operation last taken back
 EditMesh Run(string line);                                      // Runs one line of a recipe on the mesh, as though its operation were called
@@ -996,6 +997,10 @@ static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = defaul
 static AssetHandle Grid();                                      // Makes the grid of a meter's cell, in its default colors and size
 static AssetHandle Grid(int pixelsPerMeter);                    // Makes the grid of a meter's cell, in its default colors, at a size
 static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
+
+// Trees
+static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
+static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
 ```
 
 ## Shaders

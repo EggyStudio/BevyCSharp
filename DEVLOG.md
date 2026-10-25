@@ -2,9 +2,9 @@
 
 What landed in BevyCSharp, by day and newest first, with the pictures taken on the way, the captures
 the repository keeps under `.github/assets` and the pictures made while an item was built, kept
-under `.github/assets/readings` as WebP files named by their day, each on the day its name says. A
-line under Done names the item of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that
-closed it.
+under `.github/assets/readings` as WebP files named by their day, each on the day its name says, and
+the notes written beside them as Markdown files named the same way. A line under Done names the item
+of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 ## 2026-10-25
 
@@ -67,11 +67,60 @@ looking west as it sets, with the clouds lit by the brightest light before the c
 the sun set behind the planet leaving them black, and by the brightest light through the air after
 it on the right, moonlit gray and warm toward the low moon.
 
+![](.github/assets/readings/2026-10-25-item-69-weather-against-crate.webp)
+The weather crate's few clouds, partly cloudy, overcast, storm and fog presets at noon in the first
+row and in the evening in the third, against the engine's weather on the same presets in the second
+and fourth, its heaps rounded, its overcast and storm a flat deck, its fog a broken deck over a
+misty distance, and the ground under the decks lit blue by Bevy's sky light, which does not see the
+clouds.
+
+![](.github/assets/readings/2026-10-25-item-69-weather-feature-test.webp)
+The feature test's hub at 15:00 under the engine's weather, partly cloudy, overcast and rain in the
+top row and storm, fog and snow below, each taken at once with sky.weather, the decks a darker gray
+as the weather worsens and the fog's deck thinning to a soft broken edge.
+
+![](.github/assets/readings/2026-10-25-item-69-rain-and-snow.webp)
+Rain at 0.8 in a test scene under a clear afternoon sky and lit by a lamp at dusk above, and below,
+the Rain weather's storm seen from under a roof, the air beneath it clear and the rain blowing past
+its edges, and the Snow weather's flakes, all drawn after temporal antialiasing.
+
+![](.github/assets/readings/2026-10-25-item-69-rain-feature-test.webp)
+The feature test's meadow at 15:00 under the engine's Rain, Storm and Snow weathers taken in that
+order, the storm's streaks drawn toward where its wind blows and the snow falling at once where the
+rain had been, and the hub in rain at 21:30 with the drops faint in the dark, the ground under the
+decks lit blue by Bevy's sky light, which does not see the clouds.
+
+![](.github/assets/readings/2026-10-25-item-69-thunder-feature-test.webp)
+The feature test's meadow under its Thunderstorm weather at 22:00 before a strike and three frames
+after one 650 meters off, the bolt standing over the trees, and at 16:00 with a strike 600 meters
+off, its foot behind a tree.
+
+![](.github/assets/readings/2026-10-25-item-69-thunder.webp)
+A test scene under the Thunderstorm weather at night above and by day below, before a strike 900
+meters off, three frames into its flash with the clouds glowing about it, the rain lit and the bolt
+drawn from the clouds' base to the ground, and twelve frames in as the glow dies and the bolt
+flickers on, its foot behind the nearer block.
+
+![](.github/assets/readings/2026-10-25-item-69-sky-lighting-clouds.webp)
+The feature test's hub at 15:00 under its Overcast, Rain and Snow weathers, above with the sky
+lighting filtered from the clear sky, the ground lit blue-teal under the decks, and below with the
+clouds laid over the sky the lighting is filtered from, the ground gray and the flakes white.
+
+![](.github/assets/readings/2026-10-25-item-70-aspen-grown.webp)
+A tree grown by seed 2 from controls near the paper's quaking aspen, bare of leaves under an
+afternoon sun, its trunk bare to four tenths of its height and its branches turning up into a narrow
+crown, and below, seeds 1, 2 and 3 of the same species standing side by side.
+
 Done that day
 
 - Item 64 at `5041dda3`. The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's
   vibrance.
+- Item 69 at `ff5fa5e9`. The weather is the engine's own, lit by the atmosphere, and the vendored
+  weather crate leaves.
 - Item 71 at `d8ecd271`. A frame point after tonemapping is ordered against FXAA, SMAA and CAS.
+- Item 72 at `6795478f`. The feature test's sample behaviors go from the source.
+- Item 73 at `ff5fa5e9`. A capture shard's container reaps its children, and the four idle shards
+  go.
 
 ## 2026-10-24
 
