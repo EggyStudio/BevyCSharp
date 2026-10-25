@@ -12,7 +12,7 @@ namespace Bevy;
 /// taper, how many there are on each stem of the level before and how long they are against it.
 /// </para>
 /// <para>
-/// The paper draws each stem from these numbers alone, and <see cref="Trees.Grow"/> grows them
+/// The paper draws each stem from these numbers alone, and <see cref="Trees.Grow(TreeSpecies, uint)"/> grows them
 /// instead, so each control is a tendency the growth follows. The down and rotate angles are the
 /// way a bud points as it is set, the curve and the attraction up turn a stem as it lengthens, the
 /// splits are the chance its tip forks as it grows, the branches are how many buds a stem sets for
@@ -53,12 +53,20 @@ public sealed record TreeLevel
     public float RotateVariation { get; init; }
 
     /// <summary>
-    /// How many degrees a stem of this level bends over its whole length, downward where above zero
-    /// and upward below it, 0 unless set. The trunk bends to a side chosen at random.
+    /// How many degrees a stem of this level bends over its whole length, or over its first half
+    /// where <see cref="CurveBack"/> is set, downward where above zero and upward below it, 0 unless
+    /// set. The trunk bends to a side chosen at random.
     /// </summary>
     public float Curve { get; init; }
 
+    /// <summary>
+    /// How many degrees a stem of this level bends over its second half, where it is not zero, so a
+    /// stem bent one way and then the other is an S, 0 unless set.
+    /// </summary>
+    public float CurveBack { get; init; }
+
     /// <summary>How many degrees a stem of this level bends at random over its length, either way, 0 unless set.</summary>
+    /// <remarks>Below zero, the paper winds the stem as a helix, and here it bends at random by the size of the number.</remarks>
     public float CurveVariation { get; init; }
 
     /// <summary>How many times a stem of this level forks along its length on average, 0 unless set.</summary>
@@ -66,12 +74,19 @@ public sealed record TreeLevel
     /// The paper counts forks a segment, a stem being a few segments, and this counts them a stem,
     /// so the paper's number is multiplied by its curve resolution to give this one. A fork grows
     /// on as two stems of the same level, half the split angle either side of the way the one was
-    /// growing, each able to grow the length the one had left.
+    /// growing, each able to grow the length the one had left and forking half as often after, as
+    /// the paper's clones do.
     /// </remarks>
     public float Splits { get; init; }
 
-    /// <summary>The angle in degrees between the two stems of a fork, 0 unless set.</summary>
+    /// <summary>
+    /// The angle in degrees between the two stems of a fork, and for the trunk's base splits the
+    /// angle each leans out by, 0 unless set.
+    /// </summary>
     public float SplitAngle { get; init; }
+
+    /// <summary>How far in degrees <see cref="SplitAngle"/> varies either way at random, 0 unless set.</summary>
+    public float SplitAngleVariation { get; init; }
 
     /// <summary>
     /// How many stems of this level each stem of the level before carries at most, 0 unless set.
@@ -98,7 +113,8 @@ public sealed record TreeLevel
 
     /// <summary>
     /// How much a stem of this level narrows along its length, from 0, as thick at its tip as at its
-    /// foot, to 1, thinning as its branches leave it, 1 unless set.
+    /// foot, to 1, thinning as its branches leave it, 1 unless set. The paper's values from 1 to 3,
+    /// which round and ring its stems' ends, are taken as 1.
     /// </summary>
     /// <remarks>
     /// At 1 a stem is as thick at each point as the pipe model makes it, its cross section the sum

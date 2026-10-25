@@ -1,14 +1,15 @@
 namespace Bevy;
 
 /// <summary>
-/// The outline of a tree's crown, the eight of Weber and Penn's paper of 1995, which set how long a
-/// tree's first branches are by how high up the trunk they leave it.
+/// The outline of a tree's crown, the eight of Weber and Penn's paper of 1995 and its pruning
+/// envelope, which set how long a tree's first branches are by how high up the trunk they leave it.
 /// </summary>
 /// <remarks>
 /// Each is a share of the crown's widest reach at each height, from the crown's foot, where
-/// <see cref="TreeSpecies.BaseSize"/> puts it, to the top. The branches grow inside it, from the
-/// attractors <see cref="Trees.Grow"/> scatters through it, so the outline is the crown's as seen
-/// from afar, and its edge is as ragged as the branches that reach it.
+/// <see cref="TreeSpecies.BaseSize"/> puts it, to the top. The first branches are as long as the
+/// share at the height they leave the trunk, and the paths they take as the paper bends them make
+/// the outline <see cref="Trees.Grow(TreeSpecies, uint)"/> scatters its attractors through, so a crown's outline
+/// follows from its shape and its branches' angles together, as the paper's does.
 /// </remarks>
 public enum TreeShape
 {
@@ -35,4 +36,10 @@ public enum TreeShape
 
     /// <summary>A <see cref="Flame"/> that keeps half its width at both ends, as a poplar's or an aspen's.</summary>
     TendFlame,
+
+    /// <summary>
+    /// The pruning envelope the species' <see cref="TreeSpecies.PruneWidth"/>, peak and powers draw,
+    /// the paper's custom shape, as a weeping willow's.
+    /// </summary>
+    Envelope,
 }

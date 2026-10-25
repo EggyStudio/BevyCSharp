@@ -111,6 +111,22 @@ A tree grown by seed 2 from controls near the paper's quaking aspen, bare of lea
 afternoon sun, its trunk bare to four tenths of its height and its branches turning up into a narrow
 crown, and below, seeds 1, 2 and 3 of the same species standing side by side.
 
+Six trees grown from controls near the paper's quaking aspen, its leaves left out, by seeds 1 to 6,
+as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter AnAspenKeepsWithinItsTriangles
+--logger "console;verbosity=detailed"` prints them. The height is the species' 13 meters with three
+either way, the spread is the farthest point from the trunk's axis, the trunk's radius is at the
+ground, and the triangles are those of the bare stems, from twelve sides on the trunk down to three
+on the thinnest twigs.
+
+| Seed | Points | Tips | Height | Spread | Trunk's radius | Triangles |
+|---|---|---|---|---|---|---|
+| 1 | 1165 | 323 | 12.1 m | 2.6 m | 18.0 cm | 12976 |
+| 2 | 1142 | 332 | 15.3 m | 3.9 m | 22.3 cm | 12824 |
+| 3 | 1153 | 341 | 14.8 m | 3.2 m | 21.4 cm | 12922 |
+| 4 | 1144 | 337 | 10.4 m | 2.3 m | 15.2 cm | 12818 |
+| 5 | 1108 | 309 | 10.6 m | 2.4 m | 15.7 cm | 12472 |
+| 6 | 1046 | 305 | 13.1 m | 3.0 m | 19.4 cm | 11868 |
+
 Done that day
 
 - Item 64 at `5041dda3`. The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's

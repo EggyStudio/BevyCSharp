@@ -1000,6 +1000,7 @@ static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);
 
 // Trees
 static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
+static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers);  // Grows a tree of a species from a seed, round boxes it does not grow into and that shade it
 static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
 ```
 

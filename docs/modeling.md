@@ -688,45 +688,54 @@ Penn's paper of 1995, and `Trees.Build(skeleton)` makes it into an edit mesh of 
 tube, every face in the `bark` slot. No file is loaded, and a seed grows the same tree each time:
 
 ```csharp
-var aspen = new TreeSpecies
-{
-    Shape = TreeShape.TendFlame,
-    Scale = 13f,
-    ScaleVariation = 3f,
-    BaseSize = 0.4f,
-    AttractionUp = 0.5f,
-    Levels =
-    [
-        new TreeLevel { CurveVariation = 20f },
-        new TreeLevel { DownAngle = 60f, DownAngleVariation = -50f, Branches = 50, Length = 0.3f, Curve = -40f, CurveVariation = 50f },
-        new TreeLevel { DownAngle = 45f, DownAngleVariation = 10f, Branches = 30, Length = 0.6f, Curve = -40f, CurveVariation = 75f },
-    ],
-};
-var skeleton = Trees.Grow(aspen, seed: 7);
+var skeleton = Trees.Grow(TreeSpecies.QuakingAspen, seed: 7);
 var tree = Trees.Build(skeleton);          // drawn with Modeling.Meshes, as any edit mesh
 ```
 
+The library carries the paper's four species with the values of its appendix,
+`TreeSpecies.QuakingAspen`, `TreeSpecies.BlackTupelo`, `TreeSpecies.WeepingWillow` and
+`TreeSpecies.CaliforniaBlackOak`, and `TreeSpecies.Bush` and `TreeSpecies.Fern` of its own. A
+species is a record, so one is made from another with `with`:
+
+```csharp
+var tallerAspen = TreeSpecies.QuakingAspen with { Scale = 18f, BaseSize = 0.5f };
+```
+
 The species sets the crown's outline, eight of them from `TreeShape.Conical` to
-`TreeShape.TendFlame`, how tall the tree is and how much one varies from the next, how much of the
-trunk is bare, how thick the trunk is for its height, and for the trunk and each level of branches
-under it a `TreeLevel`, the angle a stem leaves its parent at, the turn round the parent from one to
-the next, how it bends, how often it forks, how many it carries and how long it grows.
+`TreeShape.TendFlame` and the paper's pruning envelope as `TreeShape.Envelope`, how tall the tree is
+and how much one varies from the next, how much of the trunk is bare and how many trunks it parts
+into there, how thick the trunk is for its height and how it flares at the ground, and for the trunk
+and each level of branches under it a `TreeLevel`, the angle a stem leaves its parent at, the turn
+round the parent from one to the next, how it bends, how often it forks, how many it carries and how
+long it grows.
 
 The paper draws each stem from those numbers, and here the branches are grown inside them by space
-colonization after Runions, Lane and Prusinkiewicz (2007), with buds after Palubicki and others
-(2009). Attractors are scattered through the crown's outline, and each bud that perceives some
-ahead of it grows toward them an internode at a time, taking those it comes near, so the crown
-fills its outline and leaves its inside open. The paper's controls are the buds' tendencies:
+colonization after Runions, Lane and Prusinkiewicz (2007), with buds and light after Palubicki and
+others (2009). A stem's tip carries it to the length the paper gives it while light reaches the tip,
+and a bud further out than the first level breaks only where it perceives room, attractors scattered
+through the crown's outline, and enough light. Each new point shades the space under it, so the
+crown's inside, under its outside, stays open, and the paper's controls are the buds' tendencies:
 
 | Control | What the growth does with it |
 |---|---|
-| `Shape`, `BaseSize` and the first level's `Length` | Where the attractors are scattered, from the crown's foot to the top and as wide as the outline at each height |
+| `Shape`, `BaseSize` and the first level's `Length` | How long the first branches are by where they leave the trunk, and with their angles and bends the outline the attractors are scattered through |
 | `DownAngle`, `Rotate` | The way a bud points when its stem sets it, leaning out from the stem and turned round it from the bud before |
-| `Curve`, `CurveVariation`, `AttractionUp` | The turn a stem takes at each internode as it lengthens, a share of the whole bend at each |
-| `Splits`, `SplitAngle` | The chance a stem's tip forks at an internode, so a stem forks as often as `Splits` on average |
-| `Branches` | How many buds a stem sets along its length for the next level, which grow where they find room |
-| `Length` | The most a stem grows, its tip stopping there or sooner where the attractors run out |
-| `Ratio`, `Taper` | How thick the trunk is and how a stem thins, by the pipe model, each point's cross section that of the stems it carries |
+| `Curve`, `CurveBack`, `CurveVariation` | The turn a stem takes at each internode as it lengthens, a share of the whole bend at each, or of each half's |
+| `AttractionUp` | A turn toward upright at each internode from the second level of branches on, by the stem's angle from upright |
+| `Splits`, `SplitAngle`, `BaseSplits` | The chance a stem's tip forks at an internode, so a stem forks as often as `Splits` on average, each half turning back toward the way the one grew as the paper's do, and the trunk parting at the crown's foot |
+| `Branches` | How many buds a stem sets along its length for the next level, the first level's all breaking and the rest where they find room and light |
+| `Length` | The most a stem grows, its tip stopping there or sooner where the light runs out |
+| `PruneRatio` and the pruning envelope | Where a branch stops, at the envelope's edge, by the ratio as a chance |
+| `Ratio`, `Taper`, `Flare` | How thick the trunk is and how a stem thins, by the pipe model, each point's cross section that of the stems it carries, and how much wider the trunk's foot is |
+
+A tree grows round boxes given to it, a wall or a neighbor's crown in the tree's own space, which
+no stem grows into and which take the sky from the side next to them, so the tree stands away from
+them toward the light:
+
+```csharp
+var wall = (Low: new Vec3(1f, 0f, -6f), High: new Vec3(1.6f, 18f, 6f));
+var besideTheWall = Trees.Grow(TreeSpecies.QuakingAspen, seed: 5, [wall]);
+```
 
 The skeleton is the points the stems pass through, each with the point it grew from and its radius,
 so a level may keep it beside the seed and build the same tree where another machine's floating

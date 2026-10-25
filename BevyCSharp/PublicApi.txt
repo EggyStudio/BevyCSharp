@@ -13349,6 +13349,7 @@ sealed class Bevy.TreeLevel : IEquatable<TreeLevel>
   TreeLevel()
   bool Equals(TreeLevel? other)
   float Curve { get; init; }
+  float CurveBack { get; init; }
   float CurveVariation { get; init; }
   float DownAngle { get; init; }
   float DownAngleVariation { get; init; }
@@ -13357,6 +13358,7 @@ sealed class Bevy.TreeLevel : IEquatable<TreeLevel>
   float Rotate { get; init; }
   float RotateVariation { get; init; }
   float SplitAngle { get; init; }
+  float SplitAngleVariation { get; init; }
   float Splits { get; init; }
   float Taper { get; init; }
   int Branches { get; init; }
@@ -13380,6 +13382,7 @@ readonly struct Bevy.TreeNode : IEquatable<TreeNode>
 enum Bevy.TreeShape : int
   Conical = 0
   Cylindrical = 3
+  Envelope = 8
   Flame = 5
   Hemispherical = 2
   InverseConical = 6
@@ -13403,18 +13406,32 @@ sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
   bool Equals(TreeSpecies? other)
   float AttractionUp { get; init; }
   float BaseSize { get; init; }
+  float Flare { get; init; }
+  float PrunePowerHigh { get; init; }
+  float PrunePowerLow { get; init; }
+  float PruneRatio { get; init; }
+  float PruneWidth { get; init; }
+  float PruneWidthPeak { get; init; }
   float Ratio { get; init; }
   float Scale { get; init; }
   float ScaleVariation { get; init; }
+  int BaseSplits { get; init; }
   override bool Equals(object? obj)
   override int GetHashCode()
   override string ToString()
+  static TreeSpecies BlackTupelo { get; }
+  static TreeSpecies Bush { get; }
+  static TreeSpecies CaliforniaBlackOak { get; }
+  static TreeSpecies Fern { get; }
+  static TreeSpecies QuakingAspen { get; }
+  static TreeSpecies WeepingWillow { get; }
   static bool op_Equality(TreeSpecies? left, TreeSpecies? right)
   static bool op_Inequality(TreeSpecies? left, TreeSpecies? right)
 static class Bevy.Trees
   const string BarkSlot = "bark"
   static EditMesh Build(TreeSkeleton skeleton)
   static TreeSkeleton Grow(TreeSpecies species, uint seed)
+  static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers)
 readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>
   (Vec2, float) Circumcircle()
   Aabb2d AabbAt(Isometry2d isometry)

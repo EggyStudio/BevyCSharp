@@ -1,215 +1,91 @@
-# Seeing and picking meshes, materials and textures
+# Asset requests
 
-How the editor shows what an entity is drawn with, how a mesh or a material is picked, what the
-asset browser's tiles show, and where a mesh or material made in place lives. What the bridge reads
-back, the preview renderer, the two cards and the picker (§1, §2, §4), the asset browser (§3), and
-a scene's resources, material and mesh files and Make unique (§5) are built, and each section keeps
-the design it was built from. [COMPONENTS.md](COMPONENTS.md) covers
-components in general and [SCENES.md](SCENES.md) how all of it is saved.
+What the engine asks for in textures and reference models, written by the review and answered by
+whoever brings the files. An answer is a folder under `.ref/`, which the repository ignores, and one
+line an asset in the table at the end naming its source and its license. Nothing ships without both.
+The engine keeps no asset as it came; every texture is cut, resized, packed and recolored into the
+collection described below, so send the largest and cleanest source you have and let the import do
+the rest.
 
-## What exists
+## What the engine makes of a texture
 
-- **"Drawn with"** (`BevyCSharp.Editor/Framework/EditorDrawn.cs`) is a section under the components
-  with a Mesh row and a Material row. Each is a button naming the file, or "made here", that opens
-  `PickerWindow` with three groups (§4), Bevy's primitives or a new material, what the scene already
-  draws with, and the model files, searched and picked with the keyboard, and a pick is a step to
-  undo. Under each row is its card (§1).
-- **Thirteen of Bevy's primitives** (`MeshShape`, which are cuboid, sphere, plane, capsule,
-  cylinder, cone, conical frustum, torus, circle, annulus, rectangle, triangle, tetrahedron) are
-  made with `Render.CreateMesh`, which keeps the shape and measures beside the handle
-  (`Render.RecipeOf`), and a material with `Render.CreateMaterial(MaterialSettings)`.
-- **What comes back.** `Render.TryGetMeshInfo` gives a mesh's vertex and index counts, index width,
-  topology, attributes and bounds without copying its vertices, `Render.TryReadMaterial` a standard
-  material's settings whoever made it, `Render.MeshOf` and `MaterialOf` the handles an entity is
-  drawn with, `Render.TryReadMesh` a mesh's triangles and `Render.TryGetBounds` an entity's bounds.
-- **A scene keeps what was made in place.** A primitive, a mesh built vertex by vertex and a
-  standard material made in memory are written into a scene as resources saying how to make them
-  again, shared by an id within the file ([SCENES.md](SCENES.md), §3), and a material can be kept in
-  a file of its own (§5).
-- **The asset browser** (`AssetsTab`) shows tiles, an image as itself, a model as a thumbnail drawn
-  once (§2) and everything else as an icon for its kind, under a search box, a chip per kind and a
-  slider for the tile size (§3).
-- **`PreviewRenderer`** (§2) draws the browser's selected glTF file and the two cards' pictures.
-- **`PickerWindow`**, the window behind Add Entity and Add Component, is a searchable list of rows
-  with an icon and a label.
+The collection is `assets/textures` in the library, built by `build/textures.py` from a manifest that
+names each source under `.ref/` and the recipe applied to it, so the import is repeatable. Every
+entry is a set of three files, each a KTX2 with mipmaps and Basis Universal supercompression, read
+by Bevy's loader and transcoded to the GPU's block format on load.
 
-## Why an entity has no mesh renderer
+| File | Channels | Encoding |
+|---|---|---|
+| `albedo.ktx2` | color in RGB, opacity in A | ETC1S, UASTC where the alpha has edges |
+| `normal.ktx2` | tangent-space normal in RG | UASTC |
+| `surface.ktx2` | roughness in R, translucency in G, occlusion in B | ETC1S |
 
-In Unity a mesh is drawn by an object with a MeshFilter holding the mesh and a MeshRenderer holding
-the materials. In Bevy an entity carries two small components, `Mesh3d` and `MeshMaterial3d`, each
-a handle to an asset shared by every entity using it, and the renderer finds every entity with
-both, gathers them by mesh and material in a world of its own, and draws them in batches. The
-entity is a row in that list, not an object that draws itself. So the editor draws the two
-components as the two cards Unity has, and a card is a view over the component and its asset
-rather than a component of the editor's own.
+A bark set is tileable and no larger than 1024 by 1024, a strip 512 by 1024. A leaf set is one
+atlas of up to eight leaves with alpha, no larger than 1024 by 1024, its translucency from the
+source's subsurface color or derived from the albedo where the source has none. A species costs at
+most 3 MB on disk and the whole collection at most 32 MB, which a test holds. THIRD-PARTY-NOTICES.md
+carries every source's author and license from the manifest.
 
-## 1. The Mesh and Material cards
+## Taken from the folders of 2026-10-25
 
-An entity that draws shows two cards in the details, in the place "Drawn with" has.
+Read in `.ref/Vegetation`, `.ref/vegetation2` and `.ref/vegetation3`. The models (OBJ and MAX files
+of 125 to 427 MB) stay as reference for the grown trees' outlines and are not imported.
 
-Built in `BevyCSharp.Editor/Framework/DrawnCards.cs`, as an open fold under each row:
+| Entry | Source | Maps in the source | For |
+|---|---|---|---|
+| bark, silver birch | vegetation2 Map(4), 4096 | color, normal, gloss, specular | the quaking aspen preset, its nearest kin |
+| leaves, birch | vegetation2 Map(4), 4096 | color, opacity, normal, gloss | the aspen preset |
+| bark, grey willow | vegetation2 text, 2048 by 4096 | color, normal | the weeping willow preset |
+| bark, hornbeam | Vegetation Carpinus_Betulus Map, 2048 by 4096 | color, normal, gloss, occlusion, height | the bush preset and a hedge |
+| leaves, hornbeam | Vegetation Carpinus_Betulus Map, 4096 | color, opacity, normal, gloss, subsurface | the bush preset |
+| bark, silver maple | Vegetation Acer_Saccharinum Map, 4096 | color, normal, gloss, specular, occlusion | a maple preset |
+| leaves, silver maple | Vegetation Acer_Saccharinum Map, 4096 | color, opacity, normal, gloss, subsurface | a maple preset |
+| leaves, maple in fall | vegetation2 3diffrent Map, 4096 | color, normal, opacity, gloss, subsurface, three species | the seasonal tint of the maples |
+| bark and needles, Scots pine | vegetation2 Map(2), 512 by 1024 | color, normal, opacity, subsurface | a pine preset |
+| bark and needles, Monterey cypress | vegetation3 map, 512 by 2048 | color, normal, opacity | a cypress preset |
+| bark, acacia | vegetation3 Map, 2048 | color, normal, opacity | a savanna tree |
+| bark, European linden | vegetation2 Map(1), 1024 by 512 | color, normal, opacity, with a leaf | a linden preset |
+| bark, red maple | vegetation2 map(2), 512 by 2048 | color, normal, opacity, with a leaf | the maple preset's second bark |
+| leaves, alder scans | Vegetation Red_Alder, 48 scans with opacity | color, opacity | the black tupelo preset's oval leaves |
+| leaves, sycamore scans | Vegetation Sycamore, 18 scans with opacity | color, opacity | the California black oak preset's lobed leaves, until an oak comes |
+| leaves, fall scans | Vegetation Various-Fall-Leaves, 80 scans | color | leaf litter and the fall tints |
 
-- **The Mesh card** shows the mesh alone in a plain gray, turned by dragging, with a Wireframe
-  toggle, and what it is made of and where it came from, the file, a primitive's shape and measures
-  (`Render.RecipeOf`), or "built in code", then vertices, triangles, indices and their width,
-  topology, attributes and size.
-- **The Material card** shows the material on a sphere, turned the same way, and its settings as
-  rows (base color, metallic, roughness, emissive, alpha, double-sided, unlit), drawn and undone as
-  a component's fields are. They are fields of a schema over the material, read through
-  `Render.TryReadMaterial` and written through `Render.WriteMaterial` (`bcs_render_material_write`,
-  ABI 157), which writes the settings over the material in place, so the fold says how many
-  entities are drawn with it.
+## Left out
 
-A primitive's measures are rows on the Mesh card, named for its shape (a cuboid's width, height and
-depth, a torus's two radii), which rebuild the mesh in place through `Render.RebuildMesh`
-(`bcs_mesh_rebuild`, ABI 158), so everything sharing it changes and keeps its handle, and a mesh
-file is written again. The Material card's texture slots are rows too, each picked from the images
-under the asset root and showing its image beside its path. The Mesh card's preview shows the mesh
-lit, in a checker whose red corner shows which way its UVs run, or with a line out of every vertex
-along its normal (`Render.TryReadNormals`, `bcs_render_mesh_normals`, ABI 159), drawn as a mesh of
-lines on the preview's own layer, since gizmos take one set of layers for all of them. A model's
-mesh with several primitives is spawned by Bevy as a node with a drawn child for each, so a
-selected node that is not drawn itself lists its drawn children under "Drawn with, in 2 parts", a
-material row each under the part's name, which writes that child alone (`EditorDrawn.Parts`). The
-design, all of it:
+| What | Why |
+|---|---|
+| Giant kelp, green algae and red algae scans | under water, not a tree's; kept in mind for the water's plants |
+| the dried vegetation and the loose leaf set, 1024 cutouts | low in size and without normals; the scans above cover them |
+| the indoor plant set and the HDR | not vegetation for a world |
+| the bamboo set, 480 by 780 | too small to tile; a bamboo comes with a request below |
+| the generic PBR sets in Vegetation/textures | unnamed; the coder reads their albedos and takes a ground or a moss if one is there |
+| the material libraries (Corona, V-Ray, standard) and the MAX files | for other renderers; unreadable here |
 
-- **The Mesh card.**
-  - **A live preview** of the mesh alone, turned by dragging, with toggles for wireframe, normals
-    and a UV checker, as the Better Mesh package shows in Unity.
-  - **What it is made of:** vertices, triangles, sub-meshes, which attributes it has (normals,
-    tangents, UV sets, colors, joints and weights), whether its indices are 16 or 32 bit, and its
-    bounds and size.
-  - **Where it came from:** a file and its label, a primitive with its parameters (editable in
-    place, rebuilding the mesh), or built in code.
-  - **The picker** (§4) from the mesh's name, and the actions of §5.
-- **The Material card.**
-  - **A preview sphere** in the material, turnable like the mesh.
-  - **Its settings as rows:** base color, metallic, roughness, emissive, alpha mode, double-sided,
-    unlit, and the texture slots as small thumbnails, each a picker filtered to textures.
-  - **A shader material** keeps the parameter rows it has today.
-- **What the bridge reads** (built) is `bcs_render_mesh_info` for the counts, attributes, index
-  format and bounds, `bcs_render_material_read` for a `MaterialSettings` back from a
-  `StandardMaterial`, `bcs_render_material_write` for writing one back, and the rest of Bevy's
-  primitives, with each primitive's measures kept on the managed side beside its handle so it can
-  be edited and saved as what it is. The wireframe is `Render.SetWireframe` on the preview's own
-  entities, so only the picture shows edges.
+## Requested
 
-The handles an entity holds are reflected reads of `Mesh3d` and `MeshMaterial3d`
-(`EcsWorld.GetReflectedAsset`, [COMPONENTS.md](COMPONENTS.md) tier 1), which return the key the
-program already holds, so they need no exports of their own.
+What the presets lack and what a forest needs beside trees. A set is color, normal and roughness or
+gloss, with opacity and a subsurface or translucency map for leaves, at 2048 or larger, as PNG or
+JPEG, tileable where it is bark or ground.
 
-## 2. One preview renderer
+| What | For | Form |
+|---|---|---|
+| willow leaves, narrow and drooping | the weeping willow preset | a leaf set or scans with alpha |
+| oak leaves and oak bark | the California black oak preset | a leaf set and a tileable bark |
+| black tupelo bark | the tupelo preset | a tileable bark |
+| fern fronds | the fern preset | scans with alpha, several fronds |
+| grass blades and a meadow tuft | the feature test's meadow and a forest floor | cards with alpha |
+| leaf litter and moss | the forest floor | tileable ground sets |
+| ivy or a climbing vine | walls and trunks | a leaf set with alpha |
+| a spruce or fir branch with its bark | a conifer beside the pine | a branch card set and a tileable bark |
+| a palm frond and trunk | a tropical preset | a frond set and a tileable bark |
 
-The cards, the asset browser and the picker all draw assets, and each drawing one its own way would
-be three cameras, three lights and three framings to keep consistent.
+## How to hand an asset over
 
-Built as `PreviewRenderer` (`BevyCSharp.Editor/Framework/PreviewRenderer.cs`), with four slots on
-render layer bits 12 to 15, each asked for by a key every frame it is wanted, drawing a glTF scene,
-a mesh in gray or a material on a sphere, framed so a ball round the subject fits from any angle,
-turned by a drag, and put away after the panels draw when nothing asked for it. More keys than slots
-take over the one asked for least recently. The details panel's picture of a selected file is one
-key of it.
+Put the files in a folder under `.ref/` and add a row here. An asset without a source and a license
+line is read for reference and never imported.
 
-Thumbnails are built in `BevyCSharp.Editor/Framework/Thumbnails.cs`. A model tile asks for one by
-being drawn, one file is shown in a slot of its own for thirty frames on a transparent background,
-or the color the "Thumbnail background" setting gives, read back with `Render.BeginCapture` and
-written with its alpha by `CapturedImage.ToPng` to `user://thumbnails/`, named by a hash of its
-path, the time it was last written and the background. Under the player's directory rather than
-`build/`, since `user://` loads through Bevy (SCENES.md §1) and a thumbnail is this machine's cache.
-Models, mesh files and material files have them. `Render.Screenshot` writes no alpha, which is why
-a thumbnail goes through a capture instead.
-
-- **`PreviewRenderer`** is a small pool of render targets, each on a render layer bit of its own
-  with its own camera and light. A request names what to draw (a mesh handle, a material on a
-  sphere, a glTF scene, a texture) and gets an image back.
-- **Live previews** (the cards, the selected tile) render every frame and turn with the mouse.
-- **Thumbnails** render once, are captured to PNG in `build/thumbnails/`, keyed by the file's path
-  and modification time, and are drawn from there through `ImGuiTextures.Load`. A few are rendered
-  a frame, so opening a folder of a hundred models fills its tiles over a second rather than
-  stalling for one.
-- **Released when not drawn,** because every live target costs a render pass each frame whether
-  anybody looks at it or not.
-
-## 3. The asset browser
-
-Built, all of it. Model, mesh and material tiles show their thumbnails, an image is itself, and
-every file's tile names its kind on a small badge in its corner (`AssetGrid.BadgeOf`), since the
-thumbnails of a model and of a mesh of it look alike. A search box, a chip per kind and a tile size
-slider sit over the tiles. A picked file is shown in the details panel rather than in a column
-beside the tiles, since picking a file lets go of any entity and one panel shows the one selection
-(`DetailsPanel.AssetDetails`). A model file opens into its meshes, materials and textures, read from
-its JSON by `GltfContents` without loading it. A pick twice on its tile, or `assets.open` with its
-path, goes into it as into a folder, where each part is a tile with its own picture and its own
-details. A part's path is the model's with the part's label after `#`, except a texture the model
-keeps in a file beside it, which Bevy loads from that file and the browser names by it.
-
-- **Tiles show the asset.** A model or mesh is rendered, a material is a sphere in it, a texture is
-  itself, and a scene, a data asset or a sound is its icon with a small badge naming its kind.
-- **A glTF file opens** into its meshes, materials and textures as tiles of their own, so one of
-  them can be dragged or picked without the rest, as Unity and Godot show a model's sub-assets.
-- **Search and kinds.** A search box and a row of chips (models, meshes, materials, textures,
-  scenes, data, audio, shaders) above the tiles, and a slider for the tile size.
-- **The details panel** shows the selected asset with a live `PreviewRenderer` view and the same
-  facts and rows the cards show.
-
-## 4. The picker is the browser
-
-Picking a mesh is finding one among the assets, which the browser does, so the picker is
-the browser's grid in a window rather than a dropdown of paths.
-
-As built, the Mesh and Material rows open `PickerWindow` in its grid mode, with "Built in", "In this
-scene" and "Files" as below, each a heading over a row of tiles. A tile is the browser's
-(`AssetGrid.Face`), wearing the thumbnail of the file or model part it stands for
-(`PickerItem.Path`), and the arrows move a row at a time. Every mesh and material of every model is
-offered. Every other asset field opens the same window. A texture slot offers the images under the
-asset root and those inside models, a sound field the sounds, and a `DataRef<T>` the data files of
-its type. What is picked is held until the field's row is next drawn and written there
-(`FieldPickers.Give`), so the row records it in the history as it records an edit typed into it.
-The built-in shapes, a new material and the meshes and materials the scene already uses have no
-file, and are pictured all the same by `Thumbnails.Drawn`, which draws one as a file's thumbnail is
-drawn and keeps the capture as an image in memory, named by the shape or the handle with what it
-looks like, so a material recolored in its card is pictured again.
-
-- **`AssetGrid`** comes out of `AssetsTab`, the tiles, the search, the kind chips and the
-  thumbnails. The tab draws it, and `PickerWindow` gains a grid mode that draws it too, with
-  `PickerItem` gaining a picture.
-- **A mesh field opens the grid** with its kind fixed and three groups:
-  - **Built in:** Bevy's primitives, each made with default parameters, which the card then edits.
-  - **In this scene:** every mesh already in memory and in use, so picking one shares it rather
-    than making another.
-  - **Files:** meshes, and the meshes inside glTF files.
-- **The same window** picks materials, textures, sounds and `DataRef<T>` data assets, so every
-  asset field in the editor is picked one way. `EditorWidgets.Picking` stays for choices that are
-  not assets, such as an enum.
-- **The keyboard works as in Add Entity:** typing searches, the arrows move, Enter picks, Escape
-  closes.
-
-## 5. Made in place, or an asset
-
-Unity makes every mesh and material a file, and code that builds a cube has to save one somewhere
-before a scene can keep it. Bevy does not ask for that, and a cube built in a script is a mesh with
-no file, as `Render.CreateMesh` makes it today. Godot's answer fits both, and is taken here.
-
-- **A sub-resource belongs to the scene** (built). A mesh or material made in place is saved
-  inside the scene file as how to make it again, a primitive and its parameters, a
-  `MaterialSettings`, or the `MeshData` a script built (`Render.DataOf`, kept beside the handle as a
-  copy when the mesh is made). Two entities using one share it by an id within the scene.
-- **Save as asset** writes it to a file (`*.material.json`, or `*.mesh.json` for a primitive or
-  for generated geometry) and points every entity that used it at the file. As built, each card's
-  "Save as asset" writes `MaterialFiles.SaveAs` or `MeshFiles.SaveAs`, named after the entity, into
-  the folder the browser shows, and the asset is the file's from then on. A mesh file holds
-  geometry as JSON rather than `.glb`, so one reader serves a primitive and a built mesh, and a
-  primitive stays one, editable as its shape (`BevyCSharp/Assets/MeshFiles.cs`).
-- **Make unique** copies a shared one for this entity alone, so changing its color leaves the
-  others. Built for both, on the cards, as a step to undo.
-- **Editing a file asset** changes the file, and every scene using it. The card says how many
-  entities use it, and an edit to a file's material is written to the file as it is made.
-- **Material files** (`*.material.json`, built in `BevyCSharp/Assets/MaterialFiles.cs`) are a
-  `MaterialSettings` with texture references by id and path ([SCENES.md](SCENES.md) §2), read on the
-  managed side into one material per file that every user shares, written by a scene by the file,
-  offered by the picker and drawn as a sphere by the browser, and laid over the material in place
-  when the file changes on disk while assets are watched.
-
-## Order
-
-Every step of this plan is built.
+| Folder | Source | Author | License | Note |
+|---|---|---|---|---|
+| `.ref/Vegetation` | | | | the folder of 2026-10-25 |
+| `.ref/vegetation2` | | | | the folder of 2026-10-25 |
+| `.ref/vegetation3` | | | | the folder of 2026-10-25 |

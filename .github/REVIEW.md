@@ -10,32 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `ff5fa5e9`, item 69's last phase, the weather crate's removal, pushed at 11:19 on
-2026-10-25 after the run of `5a8c6251` went green, its own run green at 11:42, carrying the review's
-files and item 73's reply, ABI 310, 62 files, 190 lines in and 13,410 out. The bridge loses
-native/bevy_weather from the workspace and the lock, the render profile's dependency,
-render::weather with its two calls, options.rs's install and BcsConfig.weather; the managed side
-Config.Weather, the Weather facade, the two P/Invokes and WeatherTests, WeatherPreset staying with
-its docs pointing to WeatherState.Set and WeatherConditions.Of; bevy-components.tsv written again
-from an editor build loses the crate's 284 lines, PublicApi.txt the 530 of their wrappers, the cheat
-sheet 3. The feature test loses its config's weather line, the Weather and WeatherTier settings, old
-files still loading since unknown keys are skipped, the Weather page Kind and Forecast or the
-meshlet note, Applied, DayNight and Scene their crate branches and references; the drive drops
-WeatherTier with its frame label under a partly cloudy sky and the denoiser script sets WeatherKind
-Clear. The docs move the weather into sky-and-reflections.md as the engine's rain, snow, lightning
-and state, compared-with-bevy.md's tier table becomes the engine's costs by part, clouds 0.45 ms,
-sky lighting 0.18, froxels 0.18, rain 0.05 and a bolt 0.02, running-a-game.md is rewritten,
-BUILDING.md loses the crate's row and carries the --init sentence under Caches, STYLE.md's idioms
-check and NormTests lose their exclusions, the notices lose the crate's row; NORM.md's two mentions
-of the vendored crate, N 4.1's clause and the annex's sentence, are taken out in both engines for
-the next commits. 1,900 passed, 3 skipped, 1,903 the listing plus 11, the norm and docs tests run
-again after the last edits, 21, the bridge's checks clean on every profile, Cargo 118, 199 and 11.
+Reviewed up to `70212d49`, item 70's first phase, the growth and the branches, pushed at 12:15 on
+2026-10-25 after the run of `ff5fa5e9` went green, its own run green at 12:38, carrying NORM.md, the
+review's files, DEVLOG.md, a captioned picture, the first devlog note and a Shared line. A new area
+BevyCSharp/Vegetation with its AGENTS.md row holds TreeShape, the paper's eight shapes, TreeLevel,
+one level's controls, TreeSpecies with the trunk and up to three levels of branches, TreeNode of
+parent, place and radius, TreeSkeleton as the plain record comparing its points one by one,
+Trees.Grow by species and seed and Trees.Build; the growth is space colonization with buds after
+Palubicki on an internal PCG32, the trunk's tip growing each cycle to its full height, side buds set
+by Branches, DownAngle with the paper's negative variation along the parent and Rotate with negative
+alternating, shoots turning by Curve, CurveVariation and AttractionUp and forking by Splits, the
+radii by the pipe model eased toward each stem's foot by Taper. EditMesh.Tube sweeps rings along a
+chain with Wang's double-reflection frames, the sides smoothed and the ends flat, the recipe line
+tube with sides and points, Trees.Build making one tube a stem starting on its parent's axis;
+modeling.md gains Tube and Trees sections with a table mapping the paper's controls to the growth,
+the cheat sheet lists Trees. Three departures, the splits counted a stem and not a segment, said in
+TreeLevel's docs; the skeleton's points those the growth makes, about forty internodes to the tree's
+height, nothing simplifying them before they are stored; and the bark slot colored, so the
+modeling's materials draw it as the prototype grid tinted brown, the picture using a plain material.
+The picture shows seed 2 alone and seeds 1 to 3 side by side, and the note holds six seeds' points,
+tips, height, spread, trunk radius and triangles, about 1,100 points, 300 tips and 12 to 13 thousand
+triangles, the timing left out of the test under N 3.3. 1,911 passed, 3 skipped, 1,914 the listing
+plus 11, that run on the assembly before a nullable fix and the measuring test, after which
+TreeTests, TubeTests, NormTests, PublicSurface and ModelingTests passed, 40 of 40, so the run is the
+suite's check of those.
+
+Before it, `ff5fa5e9` came, item 69's last phase, the weather crate's removal, pushed at 11:19 on
+2026-10-25, its run green at 11:42.
 
 Before it, `5a8c6251` came, item 69's seventh phase, the sky and the clouds in the environment map,
 pushed at 10:10 on 2026-10-25, its run green at 10:28.
-
-Before it, `4cc89851` came, item 69's sixth phase, the thunder, pushed at 08:51 on 2026-10-25, its
-run green at 09:13.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -289,7 +293,19 @@ from [SHARED.md](SHARED.md).
     pivots with their phases moved by WeatherState.Wind, the leaves' clusters as meshlet geometry,
     and the leaves in the scene field as cells passing a share of light with a Shared line for
     3DEngine's item 100. The level file's and the editor's placing wait for items 65 and 67, the
-    kept skeleton going with 65.
+    kept skeleton going with 65. The first phase at `70212d49` on 2026-10-25, the growth and the
+    branches with Tube, the three departures in the head; the second next, the shadow grid, the
+    leaves, the bark, the presets against the paper and the guide page. The second phase splits in
+    two at 12:18, taken. The growth first, Palubicki's shadow grid with Borchert and Honda's
+    allocation of the light a bud receives, shading boxes for walls and neighbors, the paper's
+    pruning envelope as the eighth shape for the willow, base splits, curve back and the taper up to
+    the paper's three, the four presets from the appendix with a bush and a fern, tests of each
+    preset's height and spread against the paper's values, a picture of the six bare and a note of
+    their heights and spreads; then the dressing, the leaves as alpha-cut cards with a generated
+    mask and diffuse transmission by the paper's leaf controls, a bark from noise, a leaf color a
+    preset with a seasonal tint, docs/trees.md mapping the paper's terms to the growth's, and the
+    four presets pictured in leaf. The paper's plates stay out of the repository, the note saying
+    how each preset's outline compares.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -328,6 +344,52 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
+
+74. **A texture collection for the vegetation, imported from free sources, small on disk and on the
+    GPU.** From Decision 66, the owner's word of 2026-10-25 at about 13:00. The collection is
+    assets/textures in the library, built by build/textures.py from a manifest naming each source
+    under .ref and the recipe applied to it, the crop, the resize, the channel packing and any color
+    change, so the import is repeatable and the sources stay out of the repository; an entry is
+    three KTX2 files with mipmaps and Basis Universal supercompression, albedo.ktx2 with the color
+    in RGB and the opacity in A, ETC1S or UASTC where the alpha has edges, normal.ktx2 with the
+    tangent-space normal in RG as UASTC, and surface.ktx2 with roughness in R, translucency in G and
+    occlusion in B as ETC1S, Bevy's loader transcoding them to the GPU's block format on load, the
+    bridge gaining the basis-universal feature beside its ktx2 and zstd ones if the transcoder's
+    size and load time allow, KTX2 with BC7 and BC5 under zstd otherwise, the coder reading both; a
+    bark set tileable and at most 1024 square, a strip 512 by 1024, a leaf set one atlas of up to
+    eight leaves with alpha at most 1024 square, its translucency from the source's subsurface color
+    or derived from the albedo; a species at most 3 MB on disk and the collection at most 32 MB, a
+    test holding both and every entry's license line; a manifest textures.json with each entry's
+    name, kind, size, source, author, license and recipe, which THIRD-PARTY-NOTICES.md carries; a
+    lookup in the library by name that a TreeSpecies names for its bark and its leaves, the
+    generated bark and leaf masks of item 70's dressing standing where no entry is named. The first
+    entries are those .github/ASSETS.md lists as taken from the folders of 2026-10-25, bark for
+    birch, grey willow, hornbeam, silver maple, Scots pine, Monterey cypress, acacia, linden and red
+    maple, leaves for birch, hornbeam, silver maple, the three maples in fall, pine and cypress
+    needles, and atlases cut from the alder, sycamore and fall leaf scans, the aspen preset taking
+    the birch, the tupelo the alder leaves, the oak the sycamore leaves until an oak comes, the bush
+    the hornbeam; the models stay reference and are not imported. Nothing ships without a source and
+    a license line in ASSETS.md's last table, which the owner fills; until then the import runs and
+    the entries are kept out of the commit, the manifest marking each as waiting. An AGENTS.md row
+    for ASSETS.md. The tests read the import of one source reproducible byte for byte, the bounds,
+    the license lines, a loaded entry's size and format, and a tree built with a named bark and
+    leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so the
+    dressing takes the collection where it has an entry. Two commits, the pipeline and the format,
+    then the entries. The owner added at 13:08 that branch cards or leaf clusters batched from the
+    leaves are the review's call and that questions are welcome; so the import may also bake branch
+    cards, a twig with several leaves of an atlas drawn into one card with its own normal and
+    translucency, for the middle level of detail where item 70's third phase goes from clusters to
+    cards, the coder choosing per species whether a card is baked or built from the atlas at load,
+    said in the record. The coder's reading at 13:10, taken. Basis Universal is out, its crate among
+    those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2 holding BC7 and
+    BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing added;
+    build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the normals in
+    plain Python with PIL reading, cropping, resizing and packing and Python's own zstd, no numpy,
+    the import taking minutes for the collection, the mips keeping the alpha's coverage so leaves do
+    not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or 512 square
+    and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size, about 1 MB
+    a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built at load
+    from the atlas in item 70's third phase and not baked at import, so the collection stays small.
 
 ## Verdicts
 
@@ -897,6 +959,23 @@ mended at `42abf357`.
     pictures; the generator reads them, and the first note is 3DEngine's
     2026-10-25-item-122-resolution.md. The same in 3DEngine (Decision 73) and Voxel-Sandbox
     (Decision 49).
+
+66. **Free textures ship as a bounded collection; the models stay reference.** The owner put trees'
+    textures and reference models under .ref/Vegetation, vegetation2 and vegetation3, 6 GB of PBR
+    sets, leaf scans and OBJ models, and wrote on 2026-10-25 at about 13:00 that they are free and
+    open source without license, that the review should check them and choose what to implement
+    texture-wise as source assets the way the Source engine ships textures, that a collection can
+    grow from them with a document requesting assets the owner then provides, that the review may
+    compress, change the resolution, crop, adjust and alter the colors as it likes so the tree
+    generator has textures and can build the leaves, that the textures be memory efficient for the
+    repository's size and for rendering alike, that the review choose what it needs and skip the
+    rest, and that the models are reference and not to be imported into the generation. Decision
+    63's rule against asset files narrows to models and large files; a texture collection ships,
+    bounded at 32 MB with entries at most 1024 square as supercompressed KTX2, item 74, and
+    .github/ASSETS.md is the review's request list and the owner's answer sheet, an entry shipping
+    only with a source and a license line there, since the folders carry none and a free claim
+    without its source cannot go into the notices. The paper's presets take the collection's bark
+    and leaves where an entry fits and the generated ones elsewhere.
 
 ## Replies
 
@@ -1823,3 +1902,11 @@ file of 3DEngine's would read once it has the operation. `Trees.Grow` grows a sk
 with parent, place and radius from a `TreeSpecies` of Weber and Penn's controls and a seed, by space
 colonization with buds after Palubicki, a PCG of the engine's own for the numbers, and
 `Trees.Build` makes it into an edit mesh, a tube a stem.
+
+Shared: the trees' light and presets, in the commit carrying this line, item 70's phase (b1). The
+growth gains Palubicki's shadow grid, a point darkening its voxel and a pyramid under it, a tip
+growing while light reaches it and a side bud past the first level breaking only with room and
+light, and `Trees.Grow` an overload taking boxes that no stem enters and that take the sky from
+their side. `TreeSpecies` gains the paper's base splits, curve back, flare and pruning envelope, and
+carries the appendix's four species with its values and a bush and a fern, which a model file of
+3DEngine's could read as data.
