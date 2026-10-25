@@ -52,6 +52,37 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void ALeafDeepInACrownTakesLessOfTheSkyThanOneOnItsRim()
+    {
+        foreach (var species in new[] { Aspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
+        {
+            var leaves = Trees.BuildLeaves(Trees.Grow(species, 2), species, 2);
+            var cards = leaves.Positions.Length / 4;
+            var middles = Enumerable.Range(0, cards).Select(card => (leaves.Positions[card * 4] + leaves.Positions[card * 4 + 1] + leaves.Positions[card * 4 + 2] + leaves.Positions[card * 4 + 3]) * 0.25f).ToArray();
+            var low = middles.Aggregate((a, b) => new Vec3(MathF.Min(a.X, b.X), MathF.Min(a.Y, b.Y), MathF.Min(a.Z, b.Z)));
+            var high = middles.Aggregate((a, b) => new Vec3(MathF.Max(a.X, b.X), MathF.Max(a.Y, b.Y), MathF.Max(a.Z, b.Z)));
+            var (middle, half) = ((low + high) * 0.5f, (high - low) * 0.5f);
+
+            // How far out a leaf stands, one at the crown's bounding ellipsoid, and its shade, the
+            // gray its vertices carry.
+            float Out(Vec3 place) => MathF.Sqrt(Square((place.X - middle.X) / half.X) + Square((place.Y - middle.Y) / half.Y) + Square((place.Z - middle.Z) / half.Z));
+            var shades = Enumerable.Range(0, cards).Select(card => leaves.Colors![card * 16]).ToArray();
+            var deep = Enumerable.Range(0, cards).Where(card => Out(middles[card]) < 0.35f).ToArray();
+            var rim = Enumerable.Range(0, cards).Where(card => Out(middles[card]) > 0.85f).ToArray();
+            var upperRim = rim.Where(card => middles[card].Y > middle.Y).ToArray();
+
+            // Deep in the crown a leaf takes less of the sky than one on its upper rim, the deepest
+            // at half and none darker.
+            Assert.All(shades, shade => Assert.InRange(shade, 0.5f, 1f));
+            var (deepShade, rimShade) = (deep.Average(card => shades[card]), upperRim.Average(card => shades[card]));
+            Assert.True(rimShade - deepShade >= 0.12f, $"{species.LeafSet}'s deep leaves are {deepShade:F2} and its upper rim's {rimShade:F2}");
+            output.WriteLine($"{species.LeafSet}, shades {shades.Min():F2} to {shades.Max():F2}, {deep.Length} deep leaves at {deepShade:F2} and {upperRim.Length} on the upper rim at {rimShade:F2}");
+        }
+
+        static float Square(float value) => value * value;
+    }
+
+    [Fact]
     public void ATreeCarriesThePapersLeavesUpToTheirBound()
     {
         // The aspen's paper carries 25 leaves on each of its 50 branches' 30 twigs, at six tenths.
@@ -411,5 +442,108 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
             }
 
         Assert.True(apart.Count == 0, $"the reduced trees differ from the whole ones, {string.Join(", ", apart)}");
+    }
+    [SkippableFact]
+    public void ACrownShadedByTheSkyItSeesDarkensItsMiddleMoreThanItsEdge()
+    {
+        Needs.Renderer();
+
+        // Each crown in the sun under a pale sky, drawn with each leaf's gray, the share of the sky
+        // it sees, and drawn without it, the same cards from the same place, so a pixel of one is
+        // the same leaf as the pixel of the other. The gray darkens the leaves seen through the
+        // crown's middle, which stand deep in it, more than those at its edge, which stand on its
+        // rim.
+        TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo];
+        var crowns = presets.Select(species =>
+        {
+            var skeleton = Trees.Grow(species, 2);
+            var shaded = Trees.BuildLeaves(skeleton, species, 2);
+            var plain = new MeshData { Positions = shaded.Positions, Normals = shaded.Normals, Uvs = shaded.Uvs, Indices = shaded.Indices };
+            var (low, high) = skeleton.Bounds;
+            var size = MathF.Max(high.Y, MathF.Max(high.X - low.X, high.Z - low.Z));
+            return (Species: species, Skeleton: skeleton, Plain: plain, Shaded: shaded, Middle: new Vec3(0f, high.Y * 0.6f, 0f), Distance: 1.3f * size);
+        }).ToArray();
+
+        Entity camera = default;
+        var shown = new List<Entity[]>();
+        var albedos = new List<AssetHandle>();
+        var run = new PictureRun
+        {
+            Width = 480,
+            Height = 480,
+            Frames = 3000,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 45f });
+                ecs.Add(camera, Transform.Identity);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetClearColor((0.55f, 0.68f, 0.85f, 1f));
+                Render.SetAmbientLight((0.55f, 0.68f, 0.85f), 1500f);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 30_000f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(6f, 8f, 4f), Vec3.Zero, Vec3.UnitY));
+                foreach (var crown in crowns)
+                    foreach (var leaves in new[] { crown.Plain, crown.Shaded })
+                    {
+                        var stems = ecs.Spawn();
+                        Render.SetMesh(ecs, stems, Modeling.Meshes(Trees.Build(crown.Skeleton))[0]);
+                        Render.SetMaterial(ecs, stems, Trees.BarkMaterial(crown.Species));
+                        var cards = ecs.Spawn();
+                        var mesh = Render.CreateMesh(leaves);
+                        Render.GenerateTangents(mesh);
+                        Render.SetMesh(ecs, cards, mesh);
+                        Render.SetMaterial(ecs, cards, Trees.LeafMaterial(crown.Species));
+                        foreach (var part in new[] { stems, cards })
+                        {
+                            ecs.Add(part, Transform.Identity);
+                            ecs.Add(part, Visibility.Hidden);
+                        }
+
+                        shown.Add([stems, cards]);
+                        albedos.Add(TreeTextures.Find(crown.Species.LeafSet!)!.Load().Albedo);
+                    }
+            },
+        };
+
+        run.Wait(10).Until("ready", _ => Render.PipelinesReady())
+            .Until("loaded", _ => albedos.All(image => AssetServer.StateOf(image) is AssetLoadState.Loaded or AssetLoadState.Failed));
+        for (var k = 0; k < crowns.Length * 2; k++)
+        {
+            var (index, crown) = (k, crowns[k / 2]);
+            var eye = crown.Middle + new Vec3(0f, 0.15f, 1f).Normalized * crown.Distance;
+            run.Do($"show {k}", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                for (var other = 0; other < shown.Count; other++)
+                    foreach (var part in shown[other])
+                        ecs.GetRef<Visibility>(part) = other == index ? Visibility.Inherited : Visibility.Hidden;
+                ecs.GetRef<Transform>(camera) = Transform.LookingAt(eye, crown.Middle, Vec3.UnitY);
+            }).Wait(30).Capture($"{k}");
+        }
+
+        run.Go();
+
+        for (var c = 0; c < crowns.Length; c++)
+        {
+            var (plain, shaded) = (run.Picture($"{2 * c}"), run.Picture($"{2 * c + 1}"));
+            var sky = plain.At(0, 0);
+            static float Brightness((byte R, byte G, byte B, byte A) texel) => 0.2126f * texel.R + 0.7152f * texel.G + 0.0722f * texel.B;
+            bool Leaf((byte R, byte G, byte B, byte A) texel) => Math.Abs(texel.R - sky.R) + Math.Abs(texel.G - sky.G) + Math.Abs(texel.B - sky.B) > 40 && texel.G > texel.R;
+
+            // The leaves both pictures show, by how far from the middle of the crown's outline
+            // each stands, one at its edge.
+            var leaves = new List<(float X, float Y, float Plain, float Shaded)>();
+            for (var y = 0u; y < plain.Height; y++)
+            for (var x = 0u; x < plain.Width; x++)
+                if (Leaf(plain.At(x, y)) && Leaf(shaded.At(x, y)))
+                    leaves.Add((x, y, Brightness(plain.At(x, y)), Brightness(shaded.At(x, y))));
+
+            var (left, right, top, bottom) = (leaves.Min(leaf => leaf.X), leaves.Max(leaf => leaf.X), leaves.Min(leaf => leaf.Y), leaves.Max(leaf => leaf.Y));
+            float Out((float X, float Y, float Plain, float Shaded) leaf) =>
+                MathF.Sqrt(MathF.Pow((leaf.X - (left + right) / 2f) / ((right - left) / 2f), 2f) + MathF.Pow((leaf.Y - (top + bottom) / 2f) / ((bottom - top) / 2f), 2f));
+            float Kept(IEnumerable<(float X, float Y, float Plain, float Shaded)> some) => some.Sum(leaf => leaf.Shaded) / some.Sum(leaf => leaf.Plain);
+            var (middle, edge) = (Kept(leaves.Where(leaf => Out(leaf) < 0.45f)), Kept(leaves.Where(leaf => Out(leaf) > 0.8f)));
+            output.WriteLine($"{crowns[c].Species.LeafSet}, the middle keeps {middle:F2} of its brightness with the sky's shade and the edge {edge:F2}");
+            Assert.True(middle <= edge - 0.01f, $"{crowns[c].Species.LeafSet}'s middle keeps {middle:F2} and its edge {edge:F2}");
+        }
     }
 }

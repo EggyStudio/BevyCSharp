@@ -51,8 +51,8 @@ suits foliage and fences. `Blend` is real transparency, drawn after everything e
 to front. `Add` adds to what is behind, so it never darkens it. `AlphaToCoverage` covers as large
 a share of each pixel's samples as the alpha under multisampling, drawn with the opaque surfaces and
 never sorted, so overlapping leaves fade with soft edges in the right order, and with one sample it
-is `Mask` at half alpha. `DoubleSided` draws back faces, for anything modeled as a single sheet, and
-`Unlit` shows the base color flat.
+is `Mask` at half alpha. `DoubleSided` draws back faces, for anything modeled as a single sheet, lit
+by the normal turned round to face the eye, and `Unlit` shows the base color flat.
 
 The finer surface is there as well. `Reflectance` is how much a non-metal reflects head on,
 `Clearcoat` and `ClearcoatRoughness` lay a glossy varnish over the base, as on a car's paint, and

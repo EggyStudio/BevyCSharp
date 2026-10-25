@@ -67,7 +67,9 @@ public sealed class MaterialSettings
     /// </summary>
     /// <remarks>
     /// For anything modeled as a single sheet, such as a leaf, a flag, a curtain. It doubles the
-    /// work for that surface, and lighting on the back face uses the front face's normal.
+    /// work for that surface, and a back face is lit by the front face's normal turned round to
+    /// face the eye, as Bevy's double-sided materials are, so a sheet is lit as a sheet from either
+    /// side.
     /// </remarks>
     public bool DoubleSided { get; set; }
 

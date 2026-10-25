@@ -132,6 +132,13 @@ stands, turned by `LeafBend` to face up and away from the trunk.
 Where `Leaves` is below zero, each stem of the last level is itself a leaf, a frond drawn as a strip
 along its whole length as wide as `LeafScale`, so a fern's fronds bend as their stems do.
 
+A leaf deep in a crown takes less of the sky than one on its rim. The leaves' area is gathered into
+a grid over the crown, and each leaf takes the share of the sky that reaches it through the leaves
+round it by Beer and Lambert's law, drawn as a gray its vertices carry, from the leaf's whole color
+where the sky reaches it to half of it deep in a dense crown and never darker, since the shadow map
+darkens where the sun does not reach. The presets' deepest leaves keep between half and seven
+tenths of their color, and the leaves on a crown's upper rim about nine tenths on average.
+
 `Trees.LeafMaterial(species, fall)` draws the leaves from both sides with light showing through
 them by their translucency, and turns them toward the species' `FallColor` by a share from summer to
 fall, so a game easing the share over a season turns its forest:

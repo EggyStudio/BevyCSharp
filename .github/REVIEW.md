@@ -10,29 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d0da9cf8`, item 70's third phase's first reading, the leaves' thinning settled
-before any level of detail, pushed at 18:42 on 2026-10-25 after the run of `1bd18a6c` went green,
-its own run green at 18:59, carrying REVIEW.md, SHARED.md, DEVLOG.md, a captioned picture with its
-note and a Shared line. The cause was the alpha coverage in the mips, the import keeping the share
-of the whole atlas's texels past one half a level, so at the level where a silver birch box is a
-texel or two across a leaf averaged with the transparent texels round it and its card fell under the
-cut while the atlas's share held, the shadows whole since they cut the same mask far coarser in
-screen terms, the prepass cutoff and a mip bias ruled out. Each level's opacity is scaled so the
-leaves' mean share of their boxes past one half, read bilinearly as a card samples it, stays the top
-level's; the six leaf sets imported again with their albedos alone changing, the import reproducing
-the bytes. A new test reads each preset alone against the sky from 37 degrees above and the side at
-a near distance, twice and four times it, the leaf pixels times the distance squared against the
-nearest's, asserting three quarters, where the old atlases fell to 0.21 and 0.34 for the birch with
-the alder and the willow failing and the new ones hold 0.93 to 1.07, the oak and the alder at four
-times rising to about 1.5 where a leaf is under a texel and all or nothing round it, which the far
-cards take; docs/trees.md says the levels keep each box's share. 1,944 passed, 3 skipped, 1,947 the
-listing plus 11.
+Reviewed up to `ddf51f5a`, item 70's third phase's dither levels, pushed at 20:20 on 2026-10-25
+after the run of `d0da9cf8` went green, its run red within two minutes on the runners' dotnet
+install, Verdict 45, green on the third attempt at 21:43 once the feed settled, carrying REVIEW.md,
+DEVLOG.md, a captioned picture with its note and a Shared line. TreeDetail of Full and Reduced with
+Trees.Build and Trees.BuildLeaves overloads taking it, the public listing gaining five lines; the
+reduced tree has half the tube sides with three at fewest, stems thinner at their start than a
+twenty-fifth of the trunk left out and every other leaf of the full level scaled root two about its
+stalk so the dither shows the same leaves, a fern's fronds kept whole, the stems 4,408 of the
+aspen's 12,482, 3,564 of the tupelo's 12,106 and 8,948 of the oak's 51,236; a planted tree carries
+the full stems on its body with the leaves, the reduced stems and the reduced leaves as children,
+VisibilityRange crossing between 2.5 and 3 heights of the variant times the seed's size. The test
+reads each preset at 2.5 heights from the side and above, the whole tree within a tenth and the
+leaves within a sixth. One departure into the native, a fault of Bevy 0.20 worked around, a
+directional light's cascades measured for the levels from their camera looked up among the
+render-world views by its main entity, which never matches, so Bevy fell back to the shadow origin
+of the lowest camera of all, offscreen a light probe's face, and near trees cast no shadow, the full
+level dithered out by the probe's distance and the reduced not a caster near the camera;
+render/shadow_origin.rs gives each Camera3d drawing to the primary window or the offscreen image the
+shadow's origin, giving way where a game gives the component, a test failing on the old bridge. In
+the feature test from above the shadows fall from 1.89 to 3.16 ms to 0.76 to 0.84 and the opaque
+pass from 0.41 to 0.15 to 0.20, the forest's opaque from 0.68 to 0.32 with the shadows 3.0 to 2.6 to
+2.8, the meadow worse at 2.3 to 2.8 to 3.0 to 3.5 for the shadows and 0.6 to 1.0 to 1.5 for the
+prepass, the ring standing in its bands where both levels draw, a tree in its band showing the
+dither as a darker speckle under SMAA. 1,948 passed, 3 skipped, 1,951 the listing plus 11, the three
+profiles, cargo test and the Windows and macOS checks clean.
+
+Before it, `d0da9cf8` came, item 70's third phase's first reading, the leaves' thinning settled,
+pushed at 18:42 on 2026-10-25, its run green at 18:59.
 
 Before it, `1bd18a6c` came, item 70's third phase's planting and forest, pushed at 17:54 on
 2026-10-25, its run green at 18:16.
-
-Before it, `8aa5bc94` came, item 75, bark depth by parallax occlusion, pushed at 16:42 on
-2026-10-25, its run green at 16:59.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -332,7 +340,10 @@ from [SHARED.md](SHARED.md).
     of the levels of detail in two commits as proposed, the dither between the full tree and the
     reduced one, then the branch cards drawn at load into a target, read back and given levels on
     the CPU by the same sampled share, since the GPU's mip generation would thin them as the atlas
-    did.
+    did. The dither levels at `ddf51f5a` on 2026-10-25, the full and the reduced tree crossing by
+    VisibilityRange, Bevy's shadow origin fault worked around in the bridge; item 76's volume
+    shading next, before the branch cards and the impostors, since both are pictures drawn of the
+    leaves and would miss it otherwise.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -390,12 +401,32 @@ from [SHARED.md](SHARED.md).
     between leaves stay the shadow map's and the indirect light under a canopy the field's share of
     the fourth phase. Tests of a leaf deep in a crown darker than one on the rim under the same sky
     and of the rim's leaves facing out, and a picture pair of a crown flat and shaded in grazing
-    sun. After item 70's levels of detail and before its fourth phase. One commit.
+    sun. After item 70's dither levels and before its branch cards and impostors, which draw
+    pictures of the leaves and would miss the shading if it came after, placed so at 20:20. One
+    commit. The coder's reading at 21:04 and the choice. The bend baked into the vertex normals
+    reads as the sheen feared, an aspen seen from below under a high sun with Bevy's turned card
+    normals reading a mean of 102, 119 and 94, the depth's gray alone 94, 111 and 91, about 8%
+    darker with nothing else changed, the bent normal alone 116, 133 and 114 and both 109, 125 and
+    111, the blue up by twenty with white patches on the sun's side, the leaves mirroring the sky
+    since a normal bent out of the crown points up at it from under it where the card's own turned
+    normal points at the ground, the crowns in the feature test turning gray from below and from
+    inside the forest; side-lit in grazing sun the bend does what it should, the aspen's sun side
+    20.0 brighter than its far side against 11.7 flat. Getting there needed
+    MaterialSettings.SameNormalBothSides, since Bevy's double-sided turns a back face's normal to
+    the eye and a baked bend lit half the cards inward, and a correction of DoubleSided's doc, which
+    claimed the opposite of Bevy's turn. Chosen, the depth commits alone, the vertex gray with
+    Bevy's turned normals and no bend, the doc correction kept and SameNormalBothSides dropped; then
+    the bend for the diffuse term alone as its own commit through a leaf Slang material lighting
+    twice, its cost measured against the leaves' lighting, with SameNormalBothSides if it needs it.
+    The owner, shown the grazing-sun pair at about 21:34, the aspen and the oak flat on the left and
+    with the normal bent half way out of the crown on the right, wrote that it looks great, so the
+    right-hand look is the target the bend's commit gives without the sheen from below, its side-lit
+    picture held against this one.
 
 ## Verdicts
 
-Verdicts 33 to 42 and 44 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open, 43
-mended at `42abf357`.
+Verdicts 33 to 42, 44 and 45 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
+43 mended at `42abf357`.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -1948,3 +1979,11 @@ level past three, dithered between, the reduced level of half the tube sides, th
 than a twenty-fifth of the trunk left out and every other leaf drawn the square root of two larger
 at its place, which covers the same pixels within a tenth where the two change. A level's shadow is
 measured from the scene's camera, which needed Bevy's shadow origin set on it here.
+
+Shared: a crown's leaves shaded by the sky each sees, in the commit carrying this line, item 76's
+first part. The leaves' area is gathered into a grid over the crown, and each leaf takes the share
+of the sky reaching it through the leaves round it by Beer and Lambert's law, along the zenith and a
+ring of eight ways, written as its vertex gray from the whole of its color to half, which darkens its
+ambient, indirect and transmitted light. A normal bent out of the crown and baked into a
+double-sided card mirrors the sky from below, so the bend waits for a material lighting the diffuse
+term by it alone.

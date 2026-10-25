@@ -12,6 +12,10 @@ public static partial class Trees
     // How far a leaf stands off its twig at most, in its own lengths.
     private const float Spread = 1.5f;
 
+    // How dark the deepest leaf of a crown is drawn, the share of its color it keeps where none of
+    // the sky reaches it, gently, since the shadow map darkens what the sun does not reach.
+    private const float LeafShadeLeast = 0.5f;
+
     /// <summary>Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds.</summary>
     /// <param name="skeleton">The tree, as <see cref="Grow(TreeSpecies, uint)"/> grew it.</param>
     /// <param name="species">Its species, whose leaves' count, size, angles and set the cards follow.</param>
@@ -127,6 +131,7 @@ public static partial class Trees
             }
         }
 
+        if (species.Leaves > 0) cards.ShadeBySky();
         return detail == TreeDetail.Reduced && species.Leaves > 0 ? cards.Halved() : cards.Data();
     }
 
@@ -226,6 +231,7 @@ public static partial class Trees
         private readonly List<Vec3> _normals = [];
         private readonly List<float> _uvs = [];
         private readonly List<uint> _indices = [];
+        private float[]? _colors;
 
         /// <summary>A leaf's card, its stalk at a place, running along a way and facing a way, as long and as wide as given.</summary>
         public void Card(Vec3 place, Vec3 leaf, Vec3 face, (float U, float V, float Width, float Height) box, float length, float width)
@@ -291,8 +297,52 @@ public static partial class Trees
             Positions = [.. _positions],
             Normals = [.. _normals],
             Uvs = [.. _uvs],
+            Colors = _colors is null ? null : [.. _colors],
             Indices = [.. _indices],
         };
+
+        /// <summary>
+        /// Shades the cards as a crown, each darkened by how little of the sky reaches it through
+        /// the leaves round it.
+        /// </summary>
+        /// <remarks>
+        /// A crown's leaves each lit by their own card read as a heap of flat cards, the deep ones
+        /// as bright as those on the rim. Lit as a volume, a leaf deep in the crown takes less of
+        /// the sky's light, as the crown's shape and not each card's way decides. The sky a leaf
+        /// sees, from <see cref="CrownSky"/>, is written as its vertices' color, which Bevy
+        /// multiplies into the base color, from the whole of it for a leaf the sky reaches to
+        /// <see cref="LeafShadeLeast"/> of it for one it does not, so it darkens the ambient and
+        /// the indirect light the leaf takes and the light let through it. The direct sun it
+        /// darkens a little too, which the shadow map darkens as well, and so the darkening is
+        /// gentle, the deepest leaf at half and never black. The normal each card is lit by stays
+        /// its own, turned round to face the eye from either side.
+        /// </remarks>
+        public void ShadeBySky()
+        {
+            var cards = _positions.Count / 4;
+            var places = new Vec3[cards];
+            var areas = new float[cards];
+            for (var card = 0; card < cards; card++)
+            {
+                var corner = _positions[card * 4];
+                places[card] = (corner + _positions[card * 4 + 1] + _positions[card * 4 + 2] + _positions[card * 4 + 3]) * 0.25f;
+                areas[card] = Vec3.Cross(_positions[card * 4 + 1] - corner, _positions[card * 4 + 3] - corner).Length;
+            }
+
+            var sky = CrownSky(places, areas);
+            _colors = new float[_positions.Count * 4];
+            for (var card = 0; card < cards; card++)
+            {
+                var shade = LeafShadeLeast + (1f - LeafShadeLeast) * sky[card];
+                for (var corner = card * 4; corner < card * 4 + 4; corner++)
+                {
+                    _colors[corner * 4] = shade;
+                    _colors[corner * 4 + 1] = shade;
+                    _colors[corner * 4 + 2] = shade;
+                    _colors[corner * 4 + 3] = 1f;
+                }
+            }
+        }
 
         /// <summary>
         /// Every other card, each the square root of two larger about its stalk, the middle of its
@@ -304,6 +354,7 @@ public static partial class Trees
             var positions = new Vec3[kept * 4];
             var normals = new Vec3[kept * 4];
             var uvs = new float[kept * 8];
+            var colors = _colors is null ? null : new float[kept * 16];
             var indices = new uint[kept * 6];
             for (var card = 0; card < kept; card++)
             {
@@ -315,6 +366,7 @@ public static partial class Trees
                     normals[card * 4 + corner] = _normals[from + corner];
                     uvs[card * 8 + corner * 2] = _uvs[(from + corner) * 2];
                     uvs[card * 8 + corner * 2 + 1] = _uvs[(from + corner) * 2 + 1];
+                    if (colors is not null) _colors.AsSpan((from + corner) * 4, 4).CopyTo(colors.AsSpan((card * 4 + corner) * 4, 4));
                 }
 
                 var first = (uint)(card * 4);
@@ -322,7 +374,7 @@ public static partial class Trees
                 quad.CopyTo(indices, card * 6);
             }
 
-            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, Indices = indices };
+            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, Colors = colors, Indices = indices };
         }
     }
 }

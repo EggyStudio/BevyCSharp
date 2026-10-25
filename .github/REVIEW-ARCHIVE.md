@@ -1992,3 +1992,17 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     manifest renamed, EXAMPLES.md standing as committed, pushed at 23:31; settles on the Linux suite
     of that push. Settled on the Linux suite of the build run 40027448850 of `a2c8348e`, green on
     the three systems, read at 23:50 on 2026-10-23.
+
+45. **The run of `ddf51f5a` is red on the runners' dotnet install, not on the library.** Read at
+    20:25 on 2026-10-25 from the run's jobs, run 40225592505. The three suites failed in a minute at
+    setup-dotnet, asked for 10.0.x and resolving 10.0.403, whose SDK archive the install script
+    could not download, the Windows runner reading a 409 from the blob while the release feed's
+    index named 10.0.402 as the latest, so Microsoft was publishing a release as the runners asked
+    for it; the same minute took 3DEngine's two runs of `23b4793b`, its Verdict 92. The commit
+    changes nothing of the SDK or the workflow. Nothing to mend in the tree; the failed jobs run
+    again after an hour and the verdict settles when they go green. At 20:38 the feed served the
+    10.0.403 archives for the three systems, so the failed jobs were run again then, ahead of the
+    hour. That attempt failed the same way at 20:39, the install script still not finding the SDK
+    though the archives answer; the next attempt waits for the hour, at about 21:25. Settled at
+    21:46 on 2026-10-25 by the third attempt, green on the three systems once Microsoft's feed
+    served the release, the second attempt at 20:38 having failed the same way.
