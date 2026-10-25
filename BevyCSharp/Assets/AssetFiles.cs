@@ -66,6 +66,12 @@ public static unsafe class AssetFiles
     /// </summary>
     private static Dictionary<string, Func<Stream?>> _carried = new(StringComparer.Ordinal);
 
+    /// <summary>
+    /// How many times the files have been taken for an app, so what is mounted for one is known to
+    /// be gone in the next, since each takes them afresh.
+    /// </summary>
+    internal static int Started { get; private set; }
+
     /// <summary>Whether any file under the asset root is read from a pack or the game's assembly.</summary>
     public static bool CarriesFiles
     {
@@ -98,6 +104,7 @@ public static unsafe class AssetFiles
         Mounted[] unmounted;
         lock (Gate)
         {
+            Started++;
             replaced = _pack == pack ? null : _pack;
             unmounted = [.. Mounts.Values];
             Mounts.Clear();
@@ -161,6 +168,23 @@ public static unsafe class AssetFiles
             : [];
 
         Mount(folder, new Mounted(files, file => File.OpenRead(Path.Combine(full, file)), null));
+    }
+
+    /// <summary>
+    /// Reads an assembly's resources whose names start with a prefix under a folder of the asset
+    /// root until the next app, each by the rest of its name, as the library's own texture
+    /// collection is read.
+    /// </summary>
+    internal static void Mount(string folder, Assembly assembly, string prefix)
+    {
+        var names = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var name in assembly.GetManifestResourceNames())
+        {
+            var normal = name.Replace('\\', '/');
+            if (normal.StartsWith(prefix, StringComparison.Ordinal)) names[normal[prefix.Length..]] = name;
+        }
+
+        Mount(folder, new Mounted([.. names.Keys.Order(StringComparer.Ordinal)], file => names.TryGetValue(file, out var name) ? assembly.GetManifestResourceStream(name) : null, null));
     }
 
     private static void Mount(string folder, Mounted mounted)

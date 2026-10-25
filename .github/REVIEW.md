@@ -10,36 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `70212d49`, item 70's first phase, the growth and the branches, pushed at 12:15 on
-2026-10-25 after the run of `ff5fa5e9` went green, its own run green at 12:38, carrying NORM.md, the
-review's files, DEVLOG.md, a captioned picture, the first devlog note and a Shared line. A new area
-BevyCSharp/Vegetation with its AGENTS.md row holds TreeShape, the paper's eight shapes, TreeLevel,
-one level's controls, TreeSpecies with the trunk and up to three levels of branches, TreeNode of
-parent, place and radius, TreeSkeleton as the plain record comparing its points one by one,
-Trees.Grow by species and seed and Trees.Build; the growth is space colonization with buds after
-Palubicki on an internal PCG32, the trunk's tip growing each cycle to its full height, side buds set
-by Branches, DownAngle with the paper's negative variation along the parent and Rotate with negative
-alternating, shoots turning by Curve, CurveVariation and AttractionUp and forking by Splits, the
-radii by the pipe model eased toward each stem's foot by Taper. EditMesh.Tube sweeps rings along a
-chain with Wang's double-reflection frames, the sides smoothed and the ends flat, the recipe line
-tube with sides and points, Trees.Build making one tube a stem starting on its parent's axis;
-modeling.md gains Tube and Trees sections with a table mapping the paper's controls to the growth,
-the cheat sheet lists Trees. Three departures, the splits counted a stem and not a segment, said in
-TreeLevel's docs; the skeleton's points those the growth makes, about forty internodes to the tree's
-height, nothing simplifying them before they are stored; and the bark slot colored, so the
-modeling's materials draw it as the prototype grid tinted brown, the picture using a plain material.
-The picture shows seed 2 alone and seeds 1 to 3 side by side, and the note holds six seeds' points,
-tips, height, spread, trunk radius and triangles, about 1,100 points, 300 tips and 12 to 13 thousand
-triangles, the timing left out of the test under N 3.3. 1,911 passed, 3 skipped, 1,914 the listing
-plus 11, that run on the assembly before a nullable fix and the measuring test, after which
-TreeTests, TubeTests, NormTests, PublicSurface and ModelingTests passed, 40 of 40, so the run is the
-suite's check of those.
+Reviewed up to `c7e65c23`, item 70's second phase's growth, pushed at 13:12 on 2026-10-25 after the
+run of `70212d49` went green, its own run green at 13:30, carrying ASSETS.md, the review's files,
+SHARED.md, DEVLOG.md, two captioned pictures and a note. The shadow grid after Palubicki, a point
+darkening its voxel and a pyramid six layers deep under it, a tip growing while its light is at
+least 0.1 and the trunk's regardless, a first-level side bud breaking as it is set so the trunk
+carries the paper's Branches, a bud further out needing attractors and light of 0.2 and lost after
+ten dormant cycles; the crown's outline from probing the paper's own first-level paths at 24 heights
+with second-level stems from each quarter bent by the curves with no randomness; the attraction up
+from the second level on and forked halves turning back over their remaining length, as the paper
+has them; the controls BaseSplits, CurveBack, SplitAngleVariation, Flare, the pruning's ratio,
+width, peak and two powers and TreeShape.Envelope, Taper up to 3 and ScaleVariation up to the scale
+with a floor at a tenth; a Trees.Grow overload taking boxes no stem enters, each shading what is
+under it and up to half the sky beside it; the paper's four presets with the appendix values, the
+splits times the curve resolution, and a bush and a fern; the dense grids walking the cells near a
+bud alone and a point setting at most four side buds. Three departures, the shoots leaning sideways
+from shadow alone with the upward part AttractionUp's, the pull and the lean at 0.1 and 0.05 an
+internode below the paper's curve rates so its bends lead, and Lobes and RatioPower not taken, the
+pipe model giving each stem's thickness. The pictures show the six presets bare and the aspen in the
+open and a meter from a wall; the note's heights fall within the paper's ranges, the tupelo's crown
+28.6 m against 28, and the width over height, the mean of seeds 1 to 3 against the plate, aspen 0.47
+against 0.45, tupelo 0.49 against 0.55, willow 0.80 against 0.9 and oak 1.22 against 1.05. 1,921
+passed, 3 skipped, 1,924 the listing plus 11.
+
+Before it, `70212d49` came, item 70's first phase, the growth and the branches, pushed at 12:15 on
+2026-10-25, its run green at 12:38.
 
 Before it, `ff5fa5e9` came, item 69's last phase, the weather crate's removal, pushed at 11:19 on
 2026-10-25, its run green at 11:42.
-
-Before it, `5a8c6251` came, item 69's seventh phase, the sky and the clouds in the environment map,
-pushed at 10:10 on 2026-10-25, its run green at 10:28.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -305,7 +303,9 @@ from [SHARED.md](SHARED.md).
     mask and diffuse transmission by the paper's leaf controls, a bark from noise, a leaf color a
     preset with a seasonal tint, docs/trees.md mapping the paper's terms to the growth's, and the
     four presets pictured in leaf. The paper's plates stay out of the repository, the note saying
-    how each preset's outline compares.
+    how each preset's outline compares. The second phase's growth at `c7e65c23` on 2026-10-25, the
+    shadow grid, the pruning envelope, the six presets bare against the paper's figures in the note,
+    three departures in the head; item 74's pipeline next, then the dressing.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -359,37 +359,54 @@ from [SHARED.md](SHARED.md).
     bark set tileable and at most 1024 square, a strip 512 by 1024, a leaf set one atlas of up to
     eight leaves with alpha at most 1024 square, its translucency from the source's subsurface color
     or derived from the albedo; a species at most 3 MB on disk and the collection at most 32 MB, a
-    test holding both and every entry's license line; a manifest textures.json with each entry's
-    name, kind, size, source, author, license and recipe, which THIRD-PARTY-NOTICES.md carries; a
-    lookup in the library by name that a TreeSpecies names for its bark and its leaves, the
-    generated bark and leaf masks of item 70's dressing standing where no entry is named. The first
-    entries are those .github/ASSETS.md lists as taken from the folders of 2026-10-25, bark for
-    birch, grey willow, hornbeam, silver maple, Scots pine, Monterey cypress, acacia, linden and red
-    maple, leaves for birch, hornbeam, silver maple, the three maples in fall, pine and cypress
-    needles, and atlases cut from the alder, sycamore and fall leaf scans, the aspen preset taking
-    the birch, the tupelo the alder leaves, the oak the sycamore leaves until an oak comes, the bush
-    the hornbeam; the models stay reference and are not imported. Nothing ships without a source and
-    a license line in ASSETS.md's last table, which the owner fills; until then the import runs and
-    the entries are kept out of the commit, the manifest marking each as waiting. An AGENTS.md row
-    for ASSETS.md. The tests read the import of one source reproducible byte for byte, the bounds,
-    the license lines, a loaded entry's size and format, and a tree built with a named bark and
-    leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so the
-    dressing takes the collection where it has an entry. Two commits, the pipeline and the format,
-    then the entries. The owner added at 13:08 that branch cards or leaf clusters batched from the
-    leaves are the review's call and that questions are welcome; so the import may also bake branch
-    cards, a twig with several leaves of an atlas drawn into one card with its own normal and
-    translucency, for the middle level of detail where item 70's third phase goes from clusters to
-    cards, the coder choosing per species whether a card is baked or built from the atlas at load,
-    said in the record. The coder's reading at 13:10, taken. Basis Universal is out, its crate among
-    those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2 holding BC7 and
-    BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing added;
-    build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the normals in
-    plain Python with PIL reading, cropping, resizing and packing and Python's own zstd, no numpy,
-    the import taking minutes for the collection, the mips keeping the alpha's coverage so leaves do
-    not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or 512 square
-    and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size, about 1 MB
-    a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built at load
-    from the atlas in item 70's third phase and not baked at import, so the collection stays small.
+    test holding both; a manifest textures.json with each entry's name, kind, size, source folder
+    and recipe; a lookup in the library by name that a TreeSpecies names for its bark and its
+    leaves, the generated bark and leaf masks of item 70's dressing standing where no entry is
+    named. The first entries are the sorted folder's, bark for birch, grey willow, hornbeam, silver
+    maple, Scots pine, Monterey cypress, acacia, linden and red maple, leaves for birch, hornbeam,
+    silver maple, the three maples in fall, pine and cypress needles, and atlases cut from the
+    alder, sycamore and fall leaf scans, the aspen preset taking the birch, the tupelo the alder
+    leaves, the oak the sycamore leaves until an oak comes, the bush the hornbeam; the models stay
+    reference and are not imported. ASSETS.md is the review's request list for what the presets
+    still lack. An AGENTS.md row for ASSETS.md. The tests read the import of one source reproducible
+    byte for byte, the bounds, a loaded entry's size and format, and a tree built with a named bark
+    and leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so
+    the dressing takes the collection where it has an entry. Two commits, the pipeline and the
+    format, then the entries. The owner added at 13:08 that branch cards or leaf clusters batched
+    from the leaves are the review's call and that questions are welcome; so the import may also
+    bake branch cards, a twig with several leaves of an atlas drawn into one card with its own
+    normal and translucency, for the middle level of detail where item 70's third phase goes from
+    clusters to cards, the coder choosing per species whether a card is baked or built from the
+    atlas at load, said in the record. The coder's reading at 13:10, taken. Basis Universal is out,
+    its crate among those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2
+    holding BC7 and BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing
+    added; build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the
+    normals in plain Python with PIL reading, cropping, resizing and packing and Python's own zstd,
+    no numpy, the import taking minutes for the collection, the mips keeping the alpha's coverage so
+    leaves do not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or
+    512 square and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size,
+    about 1 MB a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built
+    at load from the atlas in item 70's third phase and not baked at import, so the collection stays
+    small. Changed at 13:40 under Decision 66 as amended. The entries come from the hidden folder
+    .vegetation, where the review sorted the usable sources by kind, bark, leaves, branches and
+    scans, a set a folder with its files named albedo, opacity, normal, gloss or specular,
+    subsurface, ao and height as the source had them and a README saying what each gives and what is
+    needed; the folder stays out of the repository, the import reads it by path, and the manifest
+    names each entry's folder as its source. The entries ship in the second commit; nothing waits.
+    The coder's three points, taken. The surface file follows Bevy's channels, occlusion in R,
+    roughness in G, metallic in B left at zero and the diffuse transmission in A, so one file binds
+    as the occlusion, the metallic-roughness and the transmission textures with no shader of the
+    library's, and Bevy reads BC5 as a two-channel normal by itself; the collection lives in
+    BevyCSharp/Vegetation/Textures, since a folder named assets would collide with BevyCSharp/Assets
+    on a case-insensitive file system, the KTX2 files and textures.json embedded in the library and
+    mounted under bevycsharp/vegetation in the asset root so Bevy's own loader reads them by path,
+    waiting entries imported to Textures/waiting under .gitignore and not embedded, TreeTextures.Add
+    mounting a folder for a local reading or a game's own; the AGENTS.md row for ASSETS.md is the
+    owner's to say, .github being hidden from N 1.5, and the coder asks. At 14:22 the owner told the
+    coder to ship the sorted folder as it is and to say nothing more of it in any document, so the
+    pipeline commit ships no set and adds nothing to the notices, a set ships unless the manifest
+    marks it waiting, the tests run on a 64-square sample kept under the tests' references, and the
+    entries' commit imports the sorted folder by its README's preset map.
 
 ## Verdicts
 
@@ -962,19 +979,18 @@ mended at `42abf357`.
 
 66. **Free textures ship as a bounded collection; the models stay reference.** The owner put trees'
     textures and reference models under .ref/Vegetation, vegetation2 and vegetation3, 6 GB of PBR
-    sets, leaf scans and OBJ models, and wrote on 2026-10-25 at about 13:00 that they are free and
-    open source without license, that the review should check them and choose what to implement
-    texture-wise as source assets the way the Source engine ships textures, that a collection can
-    grow from them with a document requesting assets the owner then provides, that the review may
-    compress, change the resolution, crop, adjust and alter the colors as it likes so the tree
-    generator has textures and can build the leaves, that the textures be memory efficient for the
-    repository's size and for rendering alike, that the review choose what it needs and skip the
-    rest, and that the models are reference and not to be imported into the generation. Decision
-    63's rule against asset files narrows to models and large files; a texture collection ships,
-    bounded at 32 MB with entries at most 1024 square as supercompressed KTX2, item 74, and
-    .github/ASSETS.md is the review's request list and the owner's answer sheet, an entry shipping
-    only with a source and a license line there, since the folders carry none and a free claim
-    without its source cannot go into the notices. The paper's presets take the collection's bark
+    sets, leaf scans and OBJ models, and wrote on 2026-10-25 at about 13:00 that they are free to
+    use, that the review should check them and choose what to implement texture-wise as source
+    assets the way the Source engine ships textures, that a collection can grow from them with a
+    document requesting assets the owner then provides, that the review may compress, change the
+    resolution, crop, adjust and alter the colors as it likes so the tree generator has textures and
+    can build the leaves, that the textures be memory efficient for the repository's size and for
+    rendering alike, that the review choose what it needs and skip the rest, and that the models are
+    reference and not to be imported into the generation. Decision 63's rule against asset files
+    narrows to models and large files; a texture collection ships, bounded at 32 MB with entries at
+    most 1024 square as supercompressed KTX2, item 74, and .github/ASSETS.md is the review's request
+    list. Amended at 14:22 on the owner's word to the coder, the sorted folder .vegetation ships as
+    the collection and no document says more of it. The paper's presets take the collection's bark
     and leaves where an entry fits and the generated ones elsewhere.
 
 ## Replies

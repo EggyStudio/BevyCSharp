@@ -13427,6 +13427,31 @@ sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
   static TreeSpecies WeepingWillow { get; }
   static bool op_Equality(TreeSpecies? left, TreeSpecies? right)
   static bool op_Inequality(TreeSpecies? left, TreeSpecies? right)
+  string? Bark { get; init; }
+  string? Leaves { get; init; }
+enum Bevy.TreeTextureKind : int
+  Bark = 0
+  Leaves = 1
+sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
+  (AssetHandle, AssetHandle, AssetHandle) Load()
+  TreeTextureKind Kind { get; init; }
+  TreeTextureSet(string Name, TreeTextureKind Kind, string Albedo, string Normal, string Surface)
+  bool Equals(TreeTextureSet? other)
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(TreeTextureSet? left, TreeTextureSet? right)
+  static bool op_Inequality(TreeTextureSet? left, TreeTextureSet? right)
+  string Albedo { get; init; }
+  string Name { get; init; }
+  string Normal { get; init; }
+  string Surface { get; init; }
+  void Deconstruct(out string Name, out TreeTextureKind Kind, out string Albedo, out string Normal, out string Surface)
+static class Bevy.TreeTextures
+  const string Folder = "bevycsharp/vegetation"
+  static IReadOnlyList<TreeTextureSet> Add(string directory)
+  static IReadOnlyList<TreeTextureSet> All { get; }
+  static TreeTextureSet? Find(string name)
 static class Bevy.Trees
   const string BarkSlot = "bark"
   static EditMesh Build(TreeSkeleton skeleton)

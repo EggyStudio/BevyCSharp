@@ -197,6 +197,25 @@ compiler put each field, which the generator makes the mirrors in `Bevy.Reflecte
 not the one the built bridge reads, so an upgrade that moved a field is found by the suite and the
 dump written again.
 
+## The vegetation's textures
+
+`BevyCSharp/Vegetation/Textures` holds the bark and leaf sets the library carries in its assembly,
+which `TreeTextures` finds by name, each three KTX2 files in BC7 and BC5 with their mipmaps and zstd
+over each level. `build/textures.py` makes them from the sources sorted under `.vegetation/`, which
+the repository leaves out, by the recipe the collection's `textures.json` gives each set, the crop,
+the size, the maps packed into each file and any change of color, so a set is made again from its
+source byte for byte. It needs Python 3.14, whose own modules have zstd, and Pillow:
+
+```bash
+build/textures.py                # import every set whose source is here
+build/textures.py hazel-leaves   # import one
+```
+
+A set the manifest marks waiting is imported into `waiting/`, which the repository and the build
+leave out, and `TreeTextures.Add` reads it there for a look on the machine that imported it. A set
+is at most 1024 square, a species' bark and leaves at most 3 MB together and the collection at most
+32 MB, which `TreeTexturesTests` holds.
+
 ## Platforms
 
 The managed assembly is portable. The bridge is a cdylib, so it has to be compiled once per

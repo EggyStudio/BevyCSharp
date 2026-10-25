@@ -78,6 +78,16 @@ public sealed partial record TreeSpecies
     /// </remarks>
     public float PruneRatio { get; init; }
 
+    /// <summary>
+    /// The name of the bark set of <see cref="TreeTextures"/> the tree is drawn with, or nothing for
+    /// the bark the generator makes, nothing unless set.
+    /// </summary>
+    /// <remarks>A name the collection does not carry draws the generated bark too, so a species may name a set a game adds later.</remarks>
+    public string? Bark { get; init; }
+
+    /// <summary>The name of the leaf set of <see cref="TreeTextures"/> the tree's leaves are cut from, or nothing for the generated leaves, nothing unless set.</summary>
+    public string? Leaves { get; init; }
+
     /// <summary>The pruning envelope's widest radius as a share of the scale, 0.5 unless set.</summary>
     public float PruneWidth { get; init; } = 0.5f;
 
@@ -111,6 +121,7 @@ public sealed partial record TreeSpecies
         && BaseSize.Equals(other.BaseSize) && BaseSplits == other.BaseSplits && Ratio.Equals(other.Ratio) && Flare.Equals(other.Flare)
         && AttractionUp.Equals(other.AttractionUp) && PruneRatio.Equals(other.PruneRatio) && PruneWidth.Equals(other.PruneWidth)
         && PruneWidthPeak.Equals(other.PruneWidthPeak) && PrunePowerLow.Equals(other.PrunePowerLow) && PrunePowerHigh.Equals(other.PrunePowerHigh)
+        && Bark == other.Bark && Leaves == other.Leaves
         && (ReferenceEquals(Levels, other.Levels) || (Levels is not null && other.Levels is not null && Levels.SequenceEqual(other.Levels)));
 
     /// <inheritdoc/>

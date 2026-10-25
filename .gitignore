@@ -114,3 +114,10 @@ imgui.ini
 
 # Bevy's own assets, which build/fetch-bevy-assets.sh downloads for the examples.
 BevyCSharp.Examples/bevy-assets/
+
+# The vegetation's texture sets imported by build/textures.py whose source and license are not yet
+# given, read where they were imported and never carried.
+/BevyCSharp/Vegetation/Textures/waiting/
+# The sorted sources the vegetation's textures are imported from, kept on the machine that imports
+# them and never in the repository.
+/.vegetation/

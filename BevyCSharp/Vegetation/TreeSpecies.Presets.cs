@@ -63,6 +63,7 @@ public sealed partial record TreeSpecies
         PruneWidthPeak = 0.6f,
         PrunePowerLow = 0.001f,
         PrunePowerHigh = 0.5f,
+        Bark = "willow-bark",
         Levels =
         [
             new TreeLevel { Length = 0.8f, Splits = 0.8f, SplitAngle = 3f, CurveBack = 20f, CurveVariation = 120f },

@@ -89,6 +89,15 @@
         <EmbeddedResource Include="Assets/Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
     </ItemGroup>
 
+    <!-- The vegetation's texture collection and its manifest, which TreeTextures reads under the
+         asset root. The sets waiting for their source and license are left out, as they are left
+         out of the repository, so a build on a machine that imported them carries none of them. -->
+    <ItemGroup>
+        <EmbeddedResource Include="Vegetation/Textures/textures.json" LogicalName="Bevy.Vegetation/textures.json"/>
+        <EmbeddedResource Include="Vegetation/Textures/**/*.ktx2" Exclude="Vegetation/Textures/waiting/**"
+                          LogicalName="Bevy.Vegetation/%(RecursiveDir)%(Filename)%(Extension)"/>
+    </ItemGroup>
+
     <ItemGroup>
         <AdditionalFiles Include="Generated/bevy-components.tsv"/>
         <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>

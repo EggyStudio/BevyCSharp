@@ -1002,6 +1002,13 @@ static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);
 static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
 static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers);  // Grows a tree of a species from a seed, round boxes it does not grow into and that shade it
 static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
+
+// TreeTextures
+static TreeTextureSet? Find(string name);                       // The set of a name, or nothing where the collection has none
+static IReadOnlyList<TreeTextureSet> Add(string directory);     // Adds the sets of a folder on this machine, each in a folder of its name beside a textures.json naming them
+
+// TreeTextureSet
+(AssetHandle Albedo, AssetHandle Normal, AssetHandle Surface) Load();  // Starts loading the set's three images, tiling and filtered between texels and between levels with eight anisotropic samples, the albedo as color and the other two as data
 ```
 
 ## Shaders

@@ -741,6 +741,32 @@ The skeleton is the points the stems pass through, each with the point it grew f
 so a level may keep it beside the seed and build the same tree where another machine's floating
 point would grow it a little differently.
 
+A species names the sets of the library's texture collection its bark and its leaves are drawn
+with, `TreeTextures`, each an albedo, a normal map and a surface of occlusion, roughness and
+translucency in the formats a desktop GPU samples as they are. `TreeSpecies.WeepingWillow` names
+`willow-bark`, and a name the collection has no set of draws the bark and leaves the generator
+makes. A set's three images load with the samplers they are meant for, and its surface is the
+occlusion, the metallic-roughness and the diffuse transmission texture at once:
+
+```csharp
+if (TreeTextures.Find("willow-bark") is { } set)                       // in a system
+{
+    var (albedo, normal, surface) = set.Load();
+    var bark = Render.CreateMaterial(new MaterialSettings
+    {
+        BaseColorTexture = albedo,
+        NormalMap = normal,
+        OcclusionTexture = surface,
+        MetallicRoughnessTexture = surface,
+        Roughness = 1f,
+        Metallic = 1f,
+    });
+}
+```
+
+A game adds a folder of its own sets with `TreeTextures.Add(directory)`, made by the import the
+library's are made by, and a set of the same name stands in place of the library's.
+
 ---
 
 Before this, [Drawing](drawing.md).
