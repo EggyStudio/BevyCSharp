@@ -10,31 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4ee79828`, item 70's second phase's dressing, pushed at 16:06 on 2026-10-25 after
-the run of `d151e0cc` went green, its own run green at 16:23, carrying the review's files,
-DEVLOG.md, two captioned pictures, a note and a Shared line. TreeSpecies gains the paper's leaf
-controls, Leaves as a count a stem with fronds below zero, LeafShape among six generated outlines,
-LeafScale and LeafScaleX, with LeafLevel for the leaves' angles, LeafBend, and BarkColor, LeafColor
-and FallColor a preset, the paper's values set; Bark and Leaves become BarkSet and LeafSet, a
-Replies line under N 2.4 saying so. Trees.BuildLeaves takes the twigs as the stems carrying no
-other, shares the paper's count among them weighted by length at most 30,000 cards with the leaves
-enlarged by the root of the cut up to 1.6 times as the paper's quality factor does, gathers them
-toward each twig's tip at LeafLevel's angles set off their twig by up to 1.5 of their lengths and
-turned by LeafBend to face up and away from the trunk, the cards cut by the import's leaf boxes and
-the fern drawing a strip along each frond. BarkMaterial and LeafMaterial are made once an app for
-each look, a set's surface bound as occlusion, metallic-roughness and diffuse transmission,
-generated noise bark and leaf masks standing in where a species names no set, the fall share tinting
-the set's mean color, which the import records, toward FallColor. docs/trees.md is the guide page
-between Modeling and Materials with a README row and its cheat sheet section, modeling.md's Trees
-section a pointer. The pictures show the six presets in leaf and the aspen in summer and in the
-fall, the note the counts against their bound and each tree against the plates in leaf. 1,937
-passed, 3 skipped, 1,940 the listing plus 11.
+Reviewed up to `8aa5bc94`, item 75, bark depth by parallax occlusion, pushed at 16:42 on 2026-10-25
+after the run of `4ee79828` went green, its own run green at 16:59, carrying REVIEW.md, DEVLOG.md, a
+captioned pair and a note. Bark sets gain depth.ktx2 in BC4 at half the albedo's size, white the
+deepest as Bevy reads it; the hornbeam's depth comes from its source height map stretched from its
+band of 121 to 135 to black and white, the other barks' are integrated from the normal map by
+Frankot and Chellappa in a pure-Python FFT, waves longer than a quarter of the picture faded out,
+which leveled the willow's drift, percentiles 1 to 99 and softened by a texel, the slope's sign
+chosen against the hornbeam's own height map; the sample set gains a derived depth and the
+references are rewritten. TreeTextureSet gains Depth and LoadDepth, and Trees.BarkMaterial binds the
+depth map with a parallax depth scale of a fortieth of the texture's width, a stem's circumference,
+the occlusion method and 12 layers, the generated bark taking depth from its noise and the leaves
+none. One departure, the cost read in a forest scene of its own and not the feature test's, whose
+trees stay sphere crowns until the third phase and whose engine draws read no GPU time: 24 black
+tupelos at 1920 by 1080 on the RTX 4070 Laptop GPU drew the main opaque pass in 5.09 to 5.22 ms flat
+and 5.21 to 5.55 with depth over four runs, a test printing it, the note and the guide saying so.
+The pair shows the tupelo's trunk in grazing sun flat and with depth. 1,940 passed, 3 skipped, 1,943
+the listing plus 11.
+
+Before it, `4ee79828` came, item 70's second phase's dressing, pushed at 16:06 on 2026-10-25, its
+run green at 16:23.
 
 Before it, `d151e0cc` came, item 74's entries, pushed at 15:21 on 2026-10-25, its run green at
 15:39.
-
-Before it, `70f92473` came, item 74's pipeline, pushed at 14:47 on 2026-10-25, its run green at
-15:05.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -306,7 +304,27 @@ from [SHARED.md](SHARED.md).
     comes next, on item 74's sets, the leaf cards cut by the manifest's boxes, and item 75's depth
     goes onto its bark material after. The second phase's dressing at `4ee79828` on 2026-10-25, the
     leaves on the six presets from item 74's atlases with the guide page; item 75's depth on the
-    bark material next, then the third phase, the entity, the variants and the forest.
+    bark material next, then the third phase, the entity, the variants and the forest. The third
+    phase in three commits at 16:44, taken. The planting and the forest, Trees.Plant making a root
+    entity turned by a yaw from the seed and scaled within a tenth with the stems' mesh and bark
+    material on the root and the leaves on a child, one of eight variants picked by the seed and
+    grown on a worker the first time a species asks for it, cached by species value for the app, a
+    Tick system handing the finished meshes to the waiting trees on the main thread, static capsule
+    colliders on child entities along the trunk and every stem thicker than about 8 cm where a
+    physics world is given, Trees.PlantForest scattering by Poisson disk, and the feature test's
+    ring of thirteen sphere-crowned trees becoming grown presets with a small forest beside the
+    meadow as the reading and the picture, the crowns still until the wind; then the levels of
+    detail through VisibilityRange's dither, the full tree, then half the tube sides with the thin
+    twigs dropped and the leaves halved and drawn larger by root two, then branch cards made at load
+    by an offscreen camera, one a thick stem's end; then octahedral impostors, each variant drawn
+    once from an eight by eight grid of directions into an atlas, a Slang material blending the
+    three nearest views, crossfaded in past the second level. Two answers. A Tree component comes
+    with the planting, an EcsText species name and a uint seed, with a registry of species by name
+    holding the presets and Trees.Register, and a tree planted by a level file or an editor is an
+    entity with the component alone that the Tick system grows and dresses, Trees.Plant adding the
+    component to its root, so item 65's level file and item 67's editor place a tree by name and
+    seed and nothing more; and the feature test's forest stands as the example, the examples project
+    holding Bevy's examples alone under N 5.2, docs/trees.md naming the forest as where to look.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -345,20 +363,6 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
-
-75. **Bark has depth by parallax occlusion, its height map taken from the source or derived from the
-    normal.** From the owner's question of 2026-10-25 at about 15:00 whether the tree textures could
-    take parallax occlusion mapping for depth, and the word yes at {now}. About a third of the
-    sorted bark sets carry a height or a displacement map, the hornbeam and silver maple trunks, the
-    Italian cypress and both pines among them; for the rest the import derives the height from the
-    normal map by integrating its slopes, truer than a guess from the color and needing no other
-    tool. An entry gains a fourth file, depth.ktx2, one channel in BC4 at half a byte a texel, the
-    height inverted into the depth Bevy's standard material reads, the coder checking which way Bevy
-    takes it; the tree material sets the parallax depth scale and the occlusion method with a layer
-    count of 8 to 16 on bark alone, the leaf cards taking none. The cost is read in the feature
-    test's forest at 1080p and written into the record and the guide, and a picture pair shows a
-    trunk flat and with depth at reading distance. After item 70's dressing, whose bark material
-    carries the depth, placed so at 15:21. One commit.
 
 ## Verdicts
 
@@ -1894,3 +1898,11 @@ each last stem where the species' leaves are below zero. `Trees.BarkMaterial` an
 `Trees.LeafMaterial` bind a set's surface as occlusion, metallic-roughness and diffuse transmission
 at once, with generated noise bark and leaf masks where a species names no set, and a fall share
 tinting the leaves' mean color to the species' fall color.
+
+Shared: trees planted by name and seed, in the commit carrying this line, item 70's phase (c1). A
+`Tree` component holds a species' registered name and a seed, `Trees.Register` names a species with
+the presets registered under theirs, and a system grows each species' eight variants on a worker the
+first time a tree asks for one and dresses every tree under a child turned and sized by its seed,
+with its stems, its leaves and static capsules along the trunk and each stem twelve centimeters
+thick or more, the tree's own entity given Bevy's visibility where it has none. `Trees.PlantForest`
+spreads a forest over a disc by a Poisson disk.

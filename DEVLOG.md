@@ -137,6 +137,11 @@ The library's six species in leaf by seed 2, their bark and leaves from the text
 above the quaking aspen, the black tupelo and the weeping willow, below the California black oak,
 the bush and the fern, whose fronds are strips along their stems.
 
+![](.github/assets/readings/2026-10-25-item-75-bark-depth.webp)
+The black tupelo's trunk at reading distance with the sun grazing it from the left, its broadleaf
+bark flat on the left and with depth by parallax occlusion on the right, where the ridges stand out
+and hide the grooves behind them toward the trunk's edge while its outline stays round.
+
 Six trees grown from controls near the paper's quaking aspen, its leaves left out, by seeds 1 to 6,
 as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter AnAspenKeepsWithinItsTriangles
 --logger "console;verbosity=detailed"` prints them. The height is the species' 13 meters with three
@@ -244,6 +249,28 @@ cap cards, the alder's two old leaves and the other scans, the grass, the ground
 flowers. The leaf albedos' error is the largest, since a block that holds a leaf's edge holds both
 its color and the background's under one line of endpoints.
 
+The bark's depth, a fourth file of each bark set, as `build/textures.py` imports it. The hornbeam's
+comes from its source's height map, stretched from its narrow band of grays, and the silver birch's,
+the broadleaf's and the weeping willow's from their normal maps' slopes, integrated through the
+Fourier transform with the waves longer than a quarter of the picture faded out, which held the
+willow's depth level where its normal map drifted across its width. Integrated so, the hornbeam's
+normal map gives a height that follows its own height map more closely with the slope down a column
+taken as the normal's Y than as minus it, which chose the sign.
+
+| Set | Depth | On disk | Error |
+|---|---|---|---|
+| silver-birch-bark | 256 by 256 | 40 KB | 42.4 dB |
+| broadleaf-bark | 128 by 512 | 40 KB | 38.0 dB |
+| weeping-willow-bark | 128 by 512 | 42 KB | 39.9 dB |
+| hornbeam-bark | 128 by 256 | 21 KB | 42.4 dB |
+
+The tree material cuts the grooves a fortieth of a stem's circumference deep through twelve layers
+of parallax occlusion, on bark alone. On the RTX 4070 Laptop GPU, 24 black tupelos at 1920 by 1080
+drew their opaque pass in 5.09 to 5.22 ms with flat bark and 5.21 to 5.55 ms with depth over four
+runs, as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+TheDepthsCostIsReadInAForest --logger "console;verbosity=detailed"` prints them, the depth's cost a
+tenth to a half of a millisecond where the leaves' cards hold most of the pass.
+
 Done that day
 
 - Item 64 at `5041dda3`. The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's
@@ -256,6 +283,8 @@ Done that day
   go.
 - Item 74 at `d151e0cc`. A texture collection for the vegetation, imported from free sources, small
   on disk and on the GPU.
+- Item 75 at `8aa5bc94`. Bark has depth by parallax occlusion, its height map taken from the source
+  or derived from the normal.
 
 ## 2026-10-24
 

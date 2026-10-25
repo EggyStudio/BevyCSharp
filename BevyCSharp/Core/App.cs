@@ -425,6 +425,10 @@ public sealed unsafe partial class App : IDisposable
                 if (Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
                     Capture.Screenshot();
 
+                // The trees planted, dressed as their variants grow, their colliders in every run and
+                // their meshes where something draws.
+                Trees.Tick(world);
+
                 // F1's hidden scope and F3's debug overlay, in a run that draws, the scene's
                 // distance field, which the overlay says, the probes global illumination traces
                 // through it, the weather, which gives the clouds, the fog, the rain and the storm

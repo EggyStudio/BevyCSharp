@@ -23,6 +23,32 @@ Render.SetMaterial(ctx.Ecs, crown, Trees.LeafMaterial(species));
 The growth runs on the thread that calls it and touches nothing of the app's, so it runs on a
 worker while a level loads, and the two meshes are made in a system as any mesh is.
 
+## Planting and forests
+
+A tree in a game or a level is an entity with a `Tree` component, its species by a registered name
+and a seed, which the library grows and dresses itself, so a level keeps a name and a number and no
+mesh. `Trees.Plant` makes one at a place, and `Trees.PlantForest` spreads a forest over a disc:
+
+```csharp
+Trees.Plant(ctx.Ecs, "quaking-aspen", seed: 12, new Vec3(4f, 0f, -10f));
+Trees.PlantForest(ctx.Ecs, "black-tupelo", seed: 3, middle: new Vec3(0f, 0f, -60f), radius: 20f, count: 25);
+```
+
+Each species grows eight variants on a worker the first time a tree of it is asked for, and every
+tree shares the variant its seed picks, turned and sized by the seed under a child of its entity,
+so a forest of a hundred trees grows eight and the entity's own transform stays where it was put.
+The trunk and each limb twelve centimeters thick or more stand as capsules the player stops at,
+through the `RigidBody` and `Collider` components the physics plugin makes bodies of. The presets
+are registered as `quaking-aspen`, `black-tupelo`, `weeping-willow`, `california-black-oak`, `bush`
+and `fern`, and a game registers its own:
+
+```csharp
+Trees.Register("tall-aspen", TreeSpecies.QuakingAspen with { Scale = 20f });
+```
+
+The feature test's meadow, south of its hub, is ringed by aspens and oaks with a forest of tupelos
+and aspens behind it, which `./bcs open --feature-test` opens.
+
 ## The presets
 
 `TreeSpecies` carries the four species of Weber and Penn's paper of 1995 with the values of its

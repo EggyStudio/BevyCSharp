@@ -1687,6 +1687,22 @@ a batch.
     ten sets for the six presets at 3.3 MB, the rest of the sorted folder waiting for an item that
     asks.
 
+75. **Bark has depth by parallax occlusion, its height map taken from the source or derived from the
+    normal.** From the owner's question of 2026-10-25 at about 15:00 whether the tree textures could
+    take parallax occlusion mapping for depth, and the word yes at {now}. About a third of the
+    sorted bark sets carry a height or a displacement map, the hornbeam and silver maple trunks, the
+    Italian cypress and both pines among them; for the rest the import derives the height from the
+    normal map by integrating its slopes, truer than a guess from the color and needing no other
+    tool. An entry gains a fourth file, depth.ktx2, one channel in BC4 at half a byte a texel, the
+    height inverted into the depth Bevy's standard material reads, the coder checking which way Bevy
+    takes it; the tree material sets the parallax depth scale and the occlusion method with a layer
+    count of 8 to 16 on bark alone, the leaf cards taking none. The cost is read in the feature
+    test's forest at 1080p and written into the record and the guide, and a picture pair shows a
+    trunk flat and with depth at reading distance. After item 70's dressing, whose bark material
+    carries the depth, placed so at 15:21. One commit. Done at `8aa5bc94` on 2026-10-25, the depth
+    from the source's height or integrated from the normal, Bevy's occlusion at 12 layers on bark
+    alone, about 0.2 ms on 24 trunks at 1080p, the departure in the head.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

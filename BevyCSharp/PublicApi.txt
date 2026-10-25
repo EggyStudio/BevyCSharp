@@ -13345,6 +13345,9 @@ enum Bevy.TransitionStep : int
   Enter = 2
   Exit = 0
   Transition = 1
+struct Bevy.Tree
+  EcsText Species
+  uint Seed
 enum Bevy.TreeLeafShape : int
   FiveLobeMaple = 4
   Oval = 0
@@ -13474,13 +13477,19 @@ static class Bevy.TreeTextures
   static IReadOnlyList<TreeTextureSet> All { get; }
   static TreeTextureSet? Find(string name)
 static class Bevy.Trees
+  const int Variants = 8
   const string BarkSlot = "bark"
   static AssetHandle BarkMaterial(TreeSpecies species)
   static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)
   static EditMesh Build(TreeSkeleton skeleton)
+  static Entity Plant(EcsWorld ecs, string species, uint seed, Vec3 place)
+  static IReadOnlyList<Entity> PlantForest(EcsWorld ecs, string species, uint seed, Vec3 middle, float radius, int count)
+  static IReadOnlyList<string> SpeciesNames { get; }
   static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers)
+  static TreeSpecies? Species(string name)
+  static void Register(string name, TreeSpecies species)
 readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>
   (Vec2, float) Circumcircle()
   Aabb2d AabbAt(Isometry2d isometry)

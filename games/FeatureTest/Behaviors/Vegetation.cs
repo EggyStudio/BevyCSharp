@@ -5,8 +5,8 @@ using Bevy.Physics;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// The vegetation south of the hub, a meadow of grass and a ring of trees bent by a wind a Slang
-/// shader blows.
+/// The vegetation south of the hub, a meadow of grass bent by a wind a Slang shader blows, a ring of
+/// trees grown from a seed round it and a forest behind it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -14,13 +14,19 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// instanced batch, each placed, turned and sized at random from a seed, so the meadow is the same
 /// every run. The wind is the vertex shader's (<c>shaders/wind.slang</c>), which bends each blade
 /// by how high its vertices stand and takes the gusts' phase from where the blade stands, so the
-/// meadow ripples rather than swaying as one. The trees' crowns are drawn with the same shader under
-/// gentler values, over trunks of Bevy's standard material that the player cannot walk through.
-/// Where the engine's weather runs over the map, the wind's way and strength are its.
+/// meadow ripples rather than swaying as one. Where the engine's weather runs over the map, the
+/// wind's way and strength are its.
+/// </para>
+/// <para>
+/// The trees are planted by species and seed with <see cref="Trees.Plant"/>, quaking aspens and
+/// California black oaks in a ring round the meadow, bushes and a fern in it, and a forest of black
+/// tupelos and aspens behind it from <see cref="Trees.PlantForest"/>, each grown on a worker as the
+/// map starts and dressed once its variant has grown, its trunk and thick limbs capsules the player
+/// stops at. The guide's page on trees names this forest as where to see them.
 /// </para>
 /// <para>
 /// The blades cast no shadows, which thousands of small ones would cost more than they show, and
-/// the crowns do, through the shader's prepass, which bends them the same way.
+/// the trees do.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -39,9 +45,8 @@ public partial struct Vegetation
     /// <summary>Which way the wind blows, across the ground, where no weather says.</summary>
     private static readonly Vector2 Wind = Vector2.Normalize(new Vector2(0.8f, 0.6f));
 
-    // The materials the wind is given to, whether they are made, and the wind they were last given.
+    // The material the wind is given to, whether it is made, and the wind it was last given.
     private static ShaderMaterial _grass;
-    private static ShaderMaterial _crown;
     private static bool _sown;
     private static Vector2 _blowing;
 
@@ -65,7 +70,7 @@ public partial struct Vegetation
         Blocks.Static(ecs, "Meadow", Middle + new Vec3(0f, 0.02f, 0f), new Vec3((Half * 2f) + 2f, 0.04f, (Half * 2f) + 2f), Render.CreateMaterial(0.16f, 0.17f, 0.07f, roughness: 1f));
 
         Meadow(ecs, program);
-        Trees(ecs, program);
+        Plant(ecs);
         _sown = true;
 
         // A board at the meadow's edge, facing the road from the hub.
@@ -76,8 +81,8 @@ public partial struct Vegetation
     }
 
     /// <summary>
-    /// Turns the meadow's and the crowns' wind to the map's weather's, its way and how hard it blows,
-    /// where the engine's weather runs.
+    /// Turns the meadow's wind to the map's weather's, its way and how hard it blows, where the
+    /// engine's weather runs.
     /// </summary>
     /// <remarks>
     /// The conditions' wind is given rather than the gusting one, and given again only once it has
@@ -103,7 +108,6 @@ public partial struct Vegetation
         if (Vector2.Distance(blowing, _blowing) < 0.02f) return;
         _blowing = blowing;
         _grass.Set("wind", blowing);
-        _crown.Set("wind", blowing);
     }
 
     /// <summary>Writes on the board, every frame, as gizmos do.</summary>
@@ -114,7 +118,7 @@ public partial struct Vegetation
 
         // Turned half round, since text unturned faces along Z and the board faces back to the hub.
         Gizmos.Text(
-            "Grass and trees in a wind a Slang shader blows",
+            "Grass in a wind, trees grown from a seed",
             new Vec3(0f, Ground + 1.9f, 56.44f),
             Quat.FromRotationY(MathF.PI),
             0.2f,
@@ -153,47 +157,26 @@ public partial struct Vegetation
     }
 
     /// <summary>
-    /// Trees in a ring round the meadow and a few in it, each a trunk the player stops at and a
-    /// crown the wind bends from its bottom up.
+    /// Aspens and oaks by turns in a ring round the meadow, two bushes and a fern in it, and a forest
+    /// of tupelos and aspens behind it, to the south.
     /// </summary>
-    private static void Trees(EcsWorld ecs, ShaderProgram program)
+    private static void Plant(EcsWorld ecs)
     {
-        const float Radius = 1.4f;
-        var crown = _crown = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = program })
-            .Set("sway", 0.3f)
-            .Set("root", -Radius)
-            .Set("reach", Radius * 2f)
-            .Set("speed", 1.1f)
-            .Set("wind", Wind)
-            .Set("lean", 0f)
-            .Set("low", new Vector4(0.03f, 0.12f, 0.03f, 1f))
-            .Set("high", new Vector4(0.18f, 0.42f, 0.1f, 1f));
-
-        var bark = Render.CreateMaterial(0.35f, 0.24f, 0.15f, roughness: 0.9f);
-        var trunk = Render.CreateMesh(MeshShape.Cylinder, 0.2f, 3f);
-        var ball = Render.CreateMesh(MeshShape.Sphere, Radius);
-
-        var spots = new List<Vec3>();
         for (var k = 0; k < 10; k++)
         {
             var angle = (k + 0.5f) / 10f * MathF.Tau;
-            spots.Add(Middle + new Vec3(MathF.Sin(angle) * (Half + 2.5f), 0f, MathF.Cos(angle) * (Half + 2.5f)));
+            var spot = Middle + new Vec3(MathF.Sin(angle) * (Half + 2.5f), 0f, MathF.Cos(angle) * (Half + 2.5f));
+            Trees.Plant(ecs, k % 2 == 0 ? "quaking-aspen" : "california-black-oak", (uint)(70 + k), spot);
         }
 
-        spots.AddRange([Middle + new Vec3(-6f, 0f, 5f), Middle + new Vec3(7f, 0f, -3f), Middle + new Vec3(2f, 0f, 11f)]);
+        Trees.Plant(ecs, "bush", 81, Middle + new Vec3(-6f, 0f, 5f));
+        Trees.Plant(ecs, "bush", 82, Middle + new Vec3(7f, 0f, -3f));
+        Trees.Plant(ecs, "fern", 83, Middle + new Vec3(2f, 0f, 11f));
 
-        var number = 0;
-        foreach (var spot in spots)
-        {
-            number++;
-            Blocks.Shape(ecs, $"Tree {number}", trunk, bark, Transform.At(spot.X, Ground + 1.5f, spot.Z), ColliderShape.Cylinder);
-
-            var top = ecs.Spawn();
-            Render.SetMesh(ecs, top, ball);
-            Render.SetMaterial(ecs, top, crown);
-            ecs.Add(top, new Transform(new Vec3(spot.X, Ground + 3.4f + Radius * 0.6f, spot.Z), Quat.Identity, new Vec3(1f, 1.25f, 1f)));
-            ecs.SetName(top, $"Tree {number}, crown");
-        }
+        // The tupelos to the west and the aspens to the east, each a forest of its own.
+        var forest = Middle + new Vec3(0f, 0f, 33f);
+        Trees.PlantForest(ecs, "black-tupelo", 84, forest + new Vec3(-11f, 0f, 0f), 10f, 6);
+        Trees.PlantForest(ecs, "quaking-aspen", 85, forest + new Vec3(11f, 0f, 0f), 10f, 9);
     }
 
     /// <summary>

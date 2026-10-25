@@ -1011,6 +1011,10 @@ static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree'
 static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed);  // Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds
 static AssetHandle BarkMaterial(TreeSpecies species);           // The material a species' bark is drawn with
 static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f);  // The material a species' leaves are drawn with, turned toward its fall color by a share
+static void Register(string name, TreeSpecies species);         // Registers a species under a name, which a Tree component names it by, replacing one registered under it before
+static TreeSpecies? Species(string name);                       // The species registered under a name, or nothing
+static Entity Plant(EcsWorld ecs, string species, uint seed, Vec3 place);  // Plants a tree, an entity at a place with a Tree component naming its species and seed
+static IReadOnlyList<Entity> PlantForest(EcsWorld ecs, string species, uint seed, Vec3 middle, float radius, int count);  // Plants a forest, trees of a species spread over a disc on level ground, none nearer another than an even spread allows
 
 // TreeTextures
 static TreeTextureSet? Find(string name);                       // The set of a name, or nothing where the collection has none
