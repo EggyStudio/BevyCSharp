@@ -238,10 +238,13 @@ culling instances or clusters tests a box against. It turns Bevy's occlusion cul
 camera as well, since that builds it. A screen-space trace needs the nearest depth instead, which a
 camera image with mip levels, built a level at a time, gives.
 
-A dispatch on a camera runs every frame at one of four points, which are `AfterPrepass`, once depth,
+A dispatch on a camera runs every frame at a point of its frame. `AfterPrepass` is once depth,
 normals, motion, shadows and Bevy's own ambient occlusion exist and before anything is lit;
-`AfterOpaque`, between opaque and transparent geometry; and `BeforeTonemapping` or
-`AfterTonemapping`, ahead of the passes on the same side. Its workgroups cover a fraction of the
+`AfterOpaque` is between opaque and transparent geometry; `BeforeTonemapping` and
+`AfterTonemapping` are ahead of the passes on the same side; and `AfterTemporalAntialiasing` is
+after Bevy's temporal antialiasing and before the passes before tonemapping, where a draw of sparks
+or rain shows as drawn, since they move with no motion of their own in the prepass and the
+antialiasing's history would average them away. Its workgroups cover a fraction of the
 picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer (`Indirect`). It reads the same
 inputs a pass does through `import bcs_pass;`, and a compute shader importing `bcs_compute` runs on
 a camera as well, reading only time.

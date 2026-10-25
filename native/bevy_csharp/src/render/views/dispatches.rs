@@ -46,9 +46,13 @@ pub enum FramePoint {
     /// On the picture as the screen will show it, before the passes that run after tonemapping.
     AfterTonemapping = 3,
     /// Inside the prepass, once Bevy's geometry has drawn depth, normals, motion and the deferred
-    /// buffers, so a draw here is part of what everything after the prepass reads. Numbered last
-    /// because it was added last, though it comes first in the frame.
+    /// buffers, so a draw here is part of what everything after the prepass reads. Numbered after
+    /// the points before it because it was added after them, though it comes first in the frame.
     InPrepass = 4,
+    /// On the linear picture after Bevy's temporal antialiasing and before its motion blur, depth of
+    /// field, bloom and tonemapping, for what moves with no motion of its own in the prepass, which
+    /// the antialiasing would average away. Numbered last because it was added last.
+    AfterTemporalAntialiasing = 5,
 }
 
 impl FramePoint {
@@ -59,6 +63,7 @@ impl FramePoint {
             2 => Self::BeforeTonemapping,
             3 => Self::AfterTonemapping,
             4 => Self::InPrepass,
+            5 => Self::AfterTemporalAntialiasing,
             _ => return None,
         })
     }

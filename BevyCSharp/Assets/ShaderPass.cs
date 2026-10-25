@@ -15,7 +15,9 @@ namespace Bevy;
 /// the lit surfaces goes (a screen-space reflection or GI composite, a fog glass should not be
 /// under). It needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), since a
 /// multisampled picture is not resolved until transparent geometry is drawn. Null runs the pass by
-/// <paramref name="AfterTonemapping"/>, and the tonemapping points may be named here as well.
+/// <paramref name="AfterTonemapping"/>, and the tonemapping points may be named here as well, a pass
+/// before tonemapping running after temporal antialiasing, so
+/// <see cref="FramePoint.AfterTemporalAntialiasing"/> names the same place.
 /// </param>
 public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTonemapping = false, FramePoint? At = null)
 {
@@ -29,7 +31,7 @@ public readonly record struct ShaderPass(ShaderInstance Instance, bool AfterTone
     internal int Place => EnginePlace ?? At switch
     {
         null => AfterTonemapping ? 1 : 0,
-        FramePoint.BeforeTonemapping => 0,
+        FramePoint.BeforeTonemapping or FramePoint.AfterTemporalAntialiasing => 0,
         FramePoint.AfterTonemapping => 1,
         FramePoint.AfterOpaque => 2,
         _ => throw new ArgumentException(

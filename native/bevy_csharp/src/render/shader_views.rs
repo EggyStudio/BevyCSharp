@@ -19,8 +19,8 @@ pub struct BcsViewImage {
     pub history: i32,
     /// How many mip levels, at least one.
     pub mips: i32,
-    /// The frame point at which the picture is copied in, `1` to `3` as for a dispatch, or `-1`
-    /// for none. Only into a format a draw can write numbers to, which is a float or eight-bit one.
+    /// The frame point at which the picture is copied in, `1` to `3` or `5` as for a dispatch, or
+    /// `-1` for none. Only into a format a draw can write numbers to, which is a float or eight-bit one.
     pub copy: i32,
     /// Non-zero to clear it to zero at the start of every frame.
     pub clear: i32,
@@ -47,7 +47,8 @@ fn copy_target(format: bevy::render::render_resource::TextureFormat) -> bool {
 #[derive(Clone, Copy)]
 pub struct BcsViewDispatch {
     pub instance: i32,
-    /// `0` after the prepass, `1` after opaque geometry, `2` before tonemapping, `3` after it.
+    /// `0` after the prepass, `1` after opaque geometry, `2` before tonemapping, `3` after it, `4`
+    /// inside the prepass and `5` after temporal antialiasing.
     pub point: i32,
     /// `0` counted from the picture's size, `1` fixed, `2` read from a buffer.
     pub mode: i32,
@@ -116,7 +117,7 @@ pub unsafe extern "C" fn bcs_render_set_view_images(
                 // an integer image cannot hold one, so both are refused rather than copied as zeros.
                 let copy = match image.copy {
                     -1 => None,
-                    1..=3 => super::views::FramePoint::from_number(image.copy),
+                    1..=3 | 5 => super::views::FramePoint::from_number(image.copy),
                     _ => return status::NULL_ARG,
                 };
 

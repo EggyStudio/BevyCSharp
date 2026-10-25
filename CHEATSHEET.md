@@ -814,6 +814,7 @@ static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an e
 static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
 static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
 static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth);  // Builds a convex polygon pushed out into a solid depth deep along Z, centered on its middle, from its corners in order around it
+static void SetPrecipitation(Entity camera, PrecipitationSettings? settings);  // Lets rain and snow fall about a camera, or with null stops them
 static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most from a given number of triangles at most, with a far cascade after them where asked, or turns it off with none, which it is by default
 static void SetSceneFieldShadows(FieldShadows shadows);         // Chooses where the scene's distance field darkens the light of each directional light it closes a surface off from, past the light's shadow map's reach by default, everywhere, or nowhere
 static void DrawSceneFieldWindow();                             // Draws the scene's distance field in an ImGui window of its own, what it is built from and a slice across one of its cascades, with its settings to change while it is looked at
@@ -823,7 +824,7 @@ static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Mak
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
 static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog over a camera's picture in the color the sky has at the horizon along each way, replacing any it had, so distant geometry fades into the sky behind it and the sky below the horizon takes the horizon's color
 static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
-static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
+static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is

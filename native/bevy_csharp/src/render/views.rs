@@ -15,9 +15,9 @@
 //! reachable a level at a time as `name_mip0`, `name_mip1` and so on, which is how a depth pyramid
 //! is built one level from the last, reading one level while writing the next.
 //!
-//! **Compute on a camera.** A dispatch attached to a camera runs every frame at one of four points,
-//! after the prepass, after opaque geometry and before transparent, before tonemapping, or after
-//! it. Its workgroups are either counted from the picture's size, a fixed number, or read from a
+//! **Compute on a camera.** A dispatch attached to a camera runs every frame at a point of its frame,
+//! inside the prepass, after it, after opaque geometry and before transparent, before tonemapping,
+//! after temporal antialiasing, or after tonemapping. Its workgroups are either counted from the picture's size, a fixed number, or read from a
 //! buffer another dispatch wrote, so a shader can decide on the GPU how much work follows.
 //!
 //! **The inputs.** Every pass and every dispatch on a camera reads the same second group, which
@@ -257,6 +257,17 @@ pub fn install(app: &mut App) {
                     .after(Core3dSystems::MainPass)
                     .before(Core3dSystems::EarlyPostProcess)
                     .before(super::passes::BeforeTonemappingPasses),
+                // After Bevy's temporal antialiasing and before its motion blur, depth of field,
+                // bloom and tonemapping, and before the passes that run before tonemapping, which
+                // see what draws here. What moves with no motion of its own in the prepass, as
+                // rain does, is averaged away by the antialiasing's history, which it is drawn
+                // after here. Each part after the one before, the picture copied, the dispatches
+                // run and the draws drawn.
+                (copy_pictures::<5>, run_view_dispatches::<5>, run_view_draws::<5>)
+                    .chain()
+                    .after(Core3dSystems::EarlyPostProcess)
+                    .before(Core3dSystems::PostProcess)
+                    .before(super::passes::BeforeTonemappingPasses),
                 run_view_draws::<3>
                     .after(run_view_dispatches::<3>)
                     .after(tonemapping)
@@ -280,9 +291,14 @@ pub fn install(app: &mut App) {
                 run_view_dispatches::<1>
                     .after(Core2dSystems::MainPass)
                     .before(Core2dSystems::EarlyPostProcess),
-                // Before Bevy's bloom and effect stack, as in 3D.
+                // Before Bevy's bloom and effect stack, as in 3D, the point after temporal
+                // antialiasing after it, which 2D has none of.
                 run_view_dispatches::<2>
                     .after(Core2dSystems::EarlyPostProcess)
+                    .before(Core2dSystems::PostProcess)
+                    .before(super::passes::BeforeTonemappingPasses),
+                run_view_dispatches::<5>
+                    .after(run_view_dispatches::<2>)
                     .before(Core2dSystems::PostProcess)
                     .before(super::passes::BeforeTonemappingPasses),
                 run_view_dispatches::<3>

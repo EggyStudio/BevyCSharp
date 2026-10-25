@@ -10,40 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6649ab49`, item 69's third phase, the sky's clock and the night sky, pushed at 05:09
-on 2026-10-25 after the run of `dc2ea49d` went green, its own run green at 05:26, carrying two
-pictures with captions, a Shared line and the review's files, no native change. SkyClock holds the
-hour, the day of the year at 79, the latitude at 45, the axial tilt at 23.44 and the moon's age at
-the start, Advance moving it, and gives the sun's and the moon's directions along the ecliptic, the
-moon a synodic month behind the sun without its five degrees of inclination, the phase and the lit
-share, the pole, the sky's turn as local sidereal time from the sun's hour angle and right
-ascension, TowardSky by right ascension and declination, the altitudes and a DayPhase of Night below
--12 degrees, Dawn or Dusk to 6 and Day; SkyClockTests, 8, read the equinox noon, rise and set at 6
-and 18 with no tilt, the solstices within a degree, the full and the new moon, Advance over the
-year's end, the pole star and the sidereal day. Render.SetNightSky with night_sky.slang draws
-additively at BeforeTonemapping under the owner celestial, before the clouds and the fog, stars on a
-cube grid at one cell in five of 160 with a brightness of the twentieth power times 600 nits under
-half a pixel wide and twinkling near the horizon, the galaxy's band about the real galactic pole and
-center with dark lanes, the moon a lit sphere with earthshine 0.012 and noise seas at 0.7 degrees,
-all through the atmosphere's transmittance, the stars and the galaxy fading between 3 degrees above
-the horizon and about 9 below; NightSkyTests, 4, read stars at night, none by day, a half moon lit
-on the sun's side and refused settings. Two departures. The first stars at 1,500 nits, one cell in
-three and the ninth power showed by day by 148 levels and far too dense, read in pictures, so they
-came to 600 nits, one in five and the twentieth power with the fade by the sun's height, a test
-holding the day's picture within 3 levels; and a fault found, the feature test's sun under the
-atmosphere keeping 12,500 lux after it set, so the clouds, the fog and the cloud shadow picking the
-brightest directional light took the set sun and the night's clouds were black, all three picking by
-the light through the air, the color times the transmittance summed, so the moon lights them at
-night. The feature test's DayNight runs on a SkyClock at the equinox with the moon near full, the
-moonlight scaled by the lit share, the moon light's disk off and the camera given SetNightSky at 1.5
-degrees in place of the star cubemap, Stars, TurnStars, Toward and the Starlight curve gone. 1,880
-passed, 3 skipped, 1,883 the listing plus 11.
+Reviewed up to `4ac3871a`, item 69's fourth phase, the weather state, pushed at 06:30 on 2026-10-25
+after the run of `6649ab49` went green, its own run green at 06:53, carrying DEVLOG.md, NORM.md,
+SHARED.md, the review's files, two pictures with captions and a Shared line, no native change.
+WeatherState eases WeatherConditions toward a target with a half-life of 30 s, the crate's 15
+presets or a forecast reading storminess from value-noise octaves scaled by WeatherClimate,
+Temperate, Maritime, Arid, Tropical or Polar, up a ladder of seven presets, the temperature by
+season and hour, snow below 1 C and mist at dawn, with gusting wind, ground wetness and snow cover;
+Render.SetWeather lays cover, deck, base, top, density and wind over the clouds and visibility, in
+log space toward 80 m, and froxel wind over the fog every frame, a camera whose settings stand
+taking the numbers alone with no image, dispatch or draw given again; CloudSettings.Stratus adds a
+flat deck. Three departures, a sky.weather command taking a preset, the forecast, still or the state
+with its BCS.md row, the feature test's cloud cover slider and its drive line gone for a Weather
+page showing Kind and Forecast, and the meadow and the crowns taking the weather's mean wind, the
+way and a strength by the square root of the speed, set when it moves more than 0.02 since each set
+costs a bind group. Three faults found and fixed, the previous clouds' sampler set on the shadow
+instance so it threw every frame once compiled, guarded in SkyWeatherTests with a ShadowLight; a
+local kind shadowing the uniform so the deck read the weather's green and came out in columns, the
+uniform renamed stratus with a regression test; and density returning early where the heaps had no
+cover so a partial deck ended along the weather map's texels in straight steps, both early returns
+counting the deck. A gap kept, Bevy's sky-lit environment map ignoring the clouds so the ground
+under an overcast is lit blue. 1,889 passed, 3 skipped, 1,892 the listing plus 11.
+
+Before it, `6649ab49` came, item 69's third phase, the sky's clock and the night sky, pushed at
+05:09 on 2026-10-25, its run green at 05:26.
 
 Before it, `dc2ea49d` came, item 69's second phase's second commit, the clouds' shadow, pushed at
 04:19 on 2026-10-25, its run green at 04:41.
-
-Before it, `f93cb76b` came, item 69's clouds, pushed at 03:13 on 2026-10-25, its run green on the
-three systems.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -278,7 +271,10 @@ from [SHARED.md](SHARED.md).
     at `6649ab49` on 2026-10-25, the sky's clock and the night sky, the two departures in the head;
     the fourth next, the weather state with its presets, the stratus deck among them, the blending,
     the forecast, the wind and the gusts moving the clouds, the fog, the rain and a wind vector for
-    foliage, and the ground's wetness and snow cover.
+    foliage, and the ground's wetness and snow cover. The fourth phase at `4ac3871a` on 2026-10-25,
+    the weather state with the presets, the forecast, the wind, the wetness and the snow cover,
+    three departures and three faults in the head and the environment map's blue under an overcast
+    kept as a gap; the fifth next, the rain and the snow.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1764,3 +1760,21 @@ numbers alone, so its images, dispatches and draws are not given again. The clou
 flat deck low in the layer with a wide threshold carrying the body's noise, which the crate's
 overcast and storm are, and the deck reaches past where the heaps have any cover, or it ends along
 the weather map's texels in straight steps.
+
+Shared: the rain and the snow, in the commit carrying this line, item 69's fifth phase. A compute
+pass on the camera moves 16,384 to 65,536 particles a frame in two boxes held in the world about it,
+two in three in a near box a quarter of the far one's reach, wrapped at their sides so walking moves
+through the rain. A drop falls at the speed Atlas's fit gives its size, the sizes spreading wider the
+harder it rains, and a flake at about a meter a second with a flutter, both on the wind, each
+particle's kind following from its number and the rain's share of the fall every frame, so a change
+of weather turns the drops in the air to flakes. Those in front of the camera are counted with an
+atomic into an indirect draw with the light each sends to the eye worked out once, the brightest
+light through the air with its shadow and the clouds', the environment map's and the lamps', and are
+drawn as streaks over a thirtieth of a second capped at 25 centimeters and flakes over a 120th, a
+pixel and a half wide at least and fainter by how much narrower they are to the power 0.6. A camera
+of its own looking straight down draws the scene's depth over 96 meters into a map of heights 256 a
+side, switched on through Bevy's reflected camera for a few frames once the camera has moved 12
+meters, and a particle ends below that height, splashing into a ring of 4,096 where it lands within
+15 meters. The bridge gains a frame point after temporal antialiasing and before motion blur, bloom
+and depth of field, at ABI 308, since the antialiasing's history kept a speck moving with no motion
+of its own at a tenth of its strength. Some 0.05 ms of the GPU at 1280 by 720.

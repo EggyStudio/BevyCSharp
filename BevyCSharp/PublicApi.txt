@@ -2355,6 +2355,7 @@ sealed class Bevy.FrameCosts : IEquatable<FrameCosts>
 enum Bevy.FramePoint : int
   AfterOpaque = 1
   AfterPrepass = 0
+  AfterTemporalAntialiasing = 5
   AfterTonemapping = 3
   BeforeTonemapping = 2
   InPrepass = 4
@@ -5135,6 +5136,20 @@ sealed class Bevy.PostSettings
   float Sharpen { get; set; }
   int Msaa { get; set; }
   static PostSettings Glow { get; }
+enum Bevy.PrecipitationQuality : int
+  High = 2
+  Low = 0
+  Medium = 1
+sealed class Bevy.PrecipitationSettings
+  PrecipitationQuality Quality { get; set; }
+  PrecipitationSettings()
+  Vec3 Wind { get; set; }
+  bool Roofs { get; set; }
+  bool Splashes { get; set; }
+  float Rain { get; set; }
+  float Reach { get; set; }
+  float Snow { get; set; }
+  uint RoofLayers { get; set; }
 readonly struct Bevy.Press : IEquatable<Press>, IPointerEvent
   PointerButton Button { get; init; }
   PointerHit Hit { get; init; }
@@ -12654,6 +12669,7 @@ static class Bevy.Render
   static void SetPathTraced(Entity camera, bool on)
   static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
   static void SetPostProcessing(Entity camera, PostSettings settings)
+  static void SetPrecipitation(Entity camera, PrecipitationSettings? settings)
   static void SetProbeCapture(Entity probe, ProbeCaptureSettings? settings)
   static void SetRayTraced(Entity entity, AssetHandle mesh)
   static void SetRayTracedDenoiser(bool on, DenoiserSettings? settings = null)
@@ -12675,7 +12691,7 @@ static class Bevy.Render
   static void SetSortedTransparency(Entity camera, bool on = true, uint layers = 0u, float average = 0f, float threshold = 0f)
   static void SetSunDisk(Entity light, SunDisk disk)
   static void SetViewport(Entity camera, uint x, uint y, uint width, uint height)
-  static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null)
+  static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null)
   static void SetWireframe(Entity entity, bool on, (float, float, float, float) color = default)
   static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels)
   static void WriteMesh(AssetHandle mesh, MeshData data)

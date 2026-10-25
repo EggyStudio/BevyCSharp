@@ -12,28 +12,30 @@ public static partial class Render
     /// Every frame the weather moves on by the game's clock (<see cref="WeatherState.Advance"/>)
     /// and its conditions are laid over the settings given here. The clouds take its cover, its
     /// share of a flat deck, its base, top and density, and its wind, which the fog's froxels
-    /// drift on too. The fog's visibility thins toward some eighty meters as its fog thickens. Either
-    /// set of settings can be none, and that part is left to the program.
+    /// drift on too. The fog's visibility thins toward some eighty meters as its fog thickens. The
+    /// rain and the snow fall as hard as it rains and snows, on the gusting wind. Any set of settings
+    /// can be none, and that part is left to the program.
     /// </para>
     /// <para>
     /// The settings given are kept as the weather's starting point and not changed, and the camera
-    /// is given new ones every frame, which change its clouds' and fog's numbers alone. Rain, snow
-    /// and thunder fall in the scene once the engine draws them, and the ground's wetness and snow
-    /// cover are the state's for a program's materials to read.
+    /// is given new ones every frame, which change its clouds', fog's and rain's numbers alone.
+    /// Thunder strikes once the engine draws it, and the ground's wetness and snow cover are the
+    /// state's for a program's materials to read.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="weather">The weather, or null to take it off.</param>
     /// <param name="clouds">The clouds the weather starts from, or none to leave the camera's clouds alone.</param>
     /// <param name="fog">The fog the weather starts from, or none to leave the camera's fog alone.</param>
+    /// <param name="precipitation">The rain and snow the weather starts from, or none to leave the camera's alone.</param>
     /// <example>
     /// <code>
     /// var weather = new WeatherState { Forecast = true, Clock = clock };
-    /// Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f });
+    /// Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings());
     /// weather.Set(WeatherPreset.Rain);   // eases into rain over a minute or so
     /// </code>
     /// </example>
-    public static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null)
+    public static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null)
     {
         if (weather is null)
         {
@@ -41,8 +43,8 @@ public static partial class Render
             return;
         }
 
-        SkyWeather.Set(camera, weather, clouds, fog);
-        SkyWeather.Apply(camera, weather, clouds, fog);
+        SkyWeather.Set(camera, weather, clouds, fog, precipitation);
+        SkyWeather.Apply(camera, weather, clouds, fog, precipitation);
     }
 }
 
@@ -50,12 +52,12 @@ public static partial class Render
 internal static class SkyWeather
 {
     private static App? _app;
-    private static readonly Dictionary<ulong, (WeatherState Weather, CloudSettings? Clouds, SkyFogSettings? Fog)> Weathers = [];
+    private static readonly Dictionary<ulong, (WeatherState Weather, CloudSettings? Clouds, SkyFogSettings? Fog, PrecipitationSettings? Precipitation)> Weathers = [];
 
-    internal static void Set(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog)
+    internal static void Set(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog, PrecipitationSettings? precipitation)
     {
         ForgetOtherApps();
-        Weathers[camera.Bits] = (weather, clouds, fog);
+        Weathers[camera.Bits] = (weather, clouds, fog, precipitation);
     }
 
     internal static void Clear(Entity camera)
@@ -77,15 +79,15 @@ internal static class SkyWeather
         ForgetOtherApps();
         if (Weathers.Count == 0) return;
         var delta = world.Resource<Time>().Delta;
-        foreach (var (camera, (weather, clouds, fog)) in Weathers)
+        foreach (var (camera, (weather, clouds, fog, precipitation)) in Weathers)
         {
             weather.Advance(delta);
-            Apply(new Entity(camera), weather, clouds, fog);
+            Apply(new Entity(camera), weather, clouds, fog, precipitation);
         }
     }
 
-    /// <summary>The camera's clouds and fog under the weather's conditions now, laid over the settings it starts from.</summary>
-    internal static void Apply(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog)
+    /// <summary>The camera's clouds, fog and rain under the weather's conditions now, laid over the settings it starts from.</summary>
+    internal static void Apply(Entity camera, WeatherState weather, CloudSettings? clouds, SkyFogSettings? fog, PrecipitationSettings? precipitation)
     {
         var now = weather.Current;
         if (clouds is not null)
@@ -121,6 +123,21 @@ internal static class SkyWeather
                 };
             }
             Render.SetSkyFog(camera, given);
+        }
+
+        if (precipitation is not null)
+        {
+            Render.SetPrecipitation(camera, new PrecipitationSettings
+            {
+                Rain = Math.Clamp(now.Rain, 0f, 1f),
+                Snow = Math.Clamp(now.Snow, 0f, 1f),
+                Wind = weather.Wind,
+                Quality = precipitation.Quality,
+                Reach = precipitation.Reach,
+                Roofs = precipitation.Roofs,
+                RoofLayers = precipitation.RoofLayers,
+                Splashes = precipitation.Splashes,
+            });
         }
     }
 

@@ -14,9 +14,10 @@ namespace Bevy;
 /// A point of the frame at which the camera's picture is copied into the image, scaled to it and
 /// point sampled, or null for none. With <paramref name="History"/>, <c>Name_previous</c> is then
 /// last frame's picture, which a technique reusing last frame's lighting reads. Copied at
-/// <see cref="FramePoint.BeforeTonemapping"/> it is the lit picture in its own units, and at
-/// <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry, which needs a camera
-/// drawn once a pixel. Only a float or eight-bit format can hold it, and
+/// <see cref="FramePoint.BeforeTonemapping"/> it is the lit picture in its own units, at
+/// <see cref="FramePoint.AfterTemporalAntialiasing"/> the same once temporal antialiasing has
+/// smoothed it, and at <see cref="FramePoint.AfterOpaque"/> the same without transparent geometry,
+/// which needs a camera drawn once a pixel. Only a float or eight-bit format can hold it, and
 /// <see cref="FramePoint.AfterPrepass"/> and <see cref="FramePoint.InPrepass"/> are refused, since
 /// nothing is lit there yet.
 /// </param>

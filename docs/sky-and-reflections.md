@@ -239,7 +239,33 @@ lit from the sun's way, so its phase is the clock's. The clouds and the fog lie 
 they are lit by whichever directional light gets most through the air, so at night the moon lights
 them.
 
-A weather moves the clouds and the fog together:
+Rain and snow fall about the camera:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetPrecipitation(camera, new PrecipitationSettings { Rain = 0.6f, Wind = new Vec3(3f, 0f, 1f) });
+```
+
+The drops and the flakes are points moved on the GPU every frame in two boxes held in the world
+about the camera, a near one holding most of them and a far one `Reach` to each side, so walking
+moves through the rain and a drop leaving one side comes in at the other. A drop falls as fast as
+one its size does, the drops larger the harder it rains, and is drawn as the streak it makes over a
+camera's shutter. A flake drifts down at about a meter a second, fluttering, and both drift on
+`Wind`. Those in front of the camera are counted into an indirect draw with the light each sends
+toward the eye, the sun's through the air, its shadows and the clouds', the sky's and the lamps', so
+rain glints toward a low sun and shows in a lamp's light at night. They are drawn at
+`FramePoint.AfterTemporalAntialiasing`, since temporal antialiasing would average away a speck
+moving with no motion of its own in the prepass. With `Roofs`, a camera of its own looking down
+draws what stands over the ground about the camera, 96 meters across, into a map of heights, again
+whenever the camera has moved some 12 meters, and the rain keeps out from under a roof, a tree or a
+bridge and splashes where it lands close by. Whatever moves is drawn into the map where it stood, so
+a game puts what moves on a layer of its own and leaves it out of `RoofLayers`. At 1280 by 720 the
+rain takes some 0.05 ms of the GPU at `Medium`, and the map some 0.02 ms on the frames it is drawn,
+beside the scene drawn again from above.
+
+A weather moves the clouds, the fog and the rain together:
 
 <!-- compiled with:
 Entity camera = default, sun = default;
@@ -247,7 +273,7 @@ SkyClock clock = new();
 -->
 ```csharp
 var weather = new WeatherState { Clock = clock, Forecast = true, Climate = WeatherClimate.Maritime };
-Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f });
+Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings());
 
 weather.Forecast = false;
 weather.Set(WeatherPreset.Storm);                  // eased into over a minute or so
@@ -264,11 +290,12 @@ at night, the rain falling as snow below a degree and a mist lying on calm morni
 the same `Seed` on every machine. `Wind` is the wind of the moment, gusting by the conditions'
 `Gusts`, and `Wetness` and `SnowCover` say how wet the ground is and how much of it lies under snow,
 for a program's materials to darken and whiten by. `Render.SetWeather` moves the state on every
-frame by the game's clock and lays its conditions over the cloud and fog settings given beside it,
-which take the place of the camera's own `SetClouds` and `SetSkyFog`. The clouds take the cover,
-the deck, the base, the top, the density and the wind, the fog thins toward some eighty meters as
-the weather's fog thickens, and its froxels drift on the same wind. Either set of settings can be
-none, and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
+frame by the game's clock and lays its conditions over the cloud, fog and rain settings given beside
+it, which take the place of the camera's own `SetClouds`, `SetSkyFog` and `SetPrecipitation`. The
+clouds take the cover, the deck, the base, the top, the density and the wind, the fog thins toward
+some eighty meters as the weather's fog thickens, and its froxels drift on the same wind, and it
+rains and snows as hard as the weather does, on the gusting wind. Any set of settings can be none,
+and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
 the forecast, while the app runs.
 
 A painted sky is a cubemap instead:
