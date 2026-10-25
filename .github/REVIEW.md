@@ -10,33 +10,39 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `4ac3871a`, item 69's fourth phase, the weather state, pushed at 06:30 on 2026-10-25
-after the run of `6649ab49` went green, its own run green at 06:53, carrying DEVLOG.md, NORM.md,
-SHARED.md, the review's files, two pictures with captions and a Shared line, no native change.
-WeatherState eases WeatherConditions toward a target with a half-life of 30 s, the crate's 15
-presets or a forecast reading storminess from value-noise octaves scaled by WeatherClimate,
-Temperate, Maritime, Arid, Tropical or Polar, up a ladder of seven presets, the temperature by
-season and hour, snow below 1 C and mist at dawn, with gusting wind, ground wetness and snow cover;
-Render.SetWeather lays cover, deck, base, top, density and wind over the clouds and visibility, in
-log space toward 80 m, and froxel wind over the fog every frame, a camera whose settings stand
-taking the numbers alone with no image, dispatch or draw given again; CloudSettings.Stratus adds a
-flat deck. Three departures, a sky.weather command taking a preset, the forecast, still or the state
-with its BCS.md row, the feature test's cloud cover slider and its drive line gone for a Weather
-page showing Kind and Forecast, and the meadow and the crowns taking the weather's mean wind, the
-way and a strength by the square root of the speed, set when it moves more than 0.02 since each set
-costs a bind group. Three faults found and fixed, the previous clouds' sampler set on the shadow
-instance so it threw every frame once compiled, guarded in SkyWeatherTests with a ShadowLight; a
-local kind shadowing the uniform so the deck read the weather's green and came out in columns, the
-uniform renamed stratus with a regression test; and density returning early where the heaps had no
-cover so a partial deck ended along the weather map's texels in straight steps, both early returns
-counting the deck. A gap kept, Bevy's sky-lit environment map ignoring the clouds so the ground
-under an overcast is lit blue. 1,889 passed, 3 skipped, 1,892 the listing plus 11.
+Reviewed up to `a2646e71`, item 69's fifth phase, the rain and the snow, pushed at 08:03 on
+2026-10-25 after the run of `4ac3871a` went green, the run watched, carrying SHARED.md, two pictures
+with captions and a Shared line, ABI 308. Render.SetPrecipitation with PrecipitationSettings and a
+PrecipitationQuality of 16, 32 or 64 thousand particles falling in two boxes held in the world, each
+particle's kind following from its number and the rain's share every frame, the drops and the flakes
+counted with an atomic into an indirect draw and each one's light worked out once from the brightest
+light through the air with its shadow and the clouds' shadow, the environment map and the lamps, the
+splashes in a ring of 4,096, the roofs map from an orthographic camera looking down over 96 m at 256
+texels a side, switched on through the reflected CameraRef.IsActive for a few frames once the camera
+has moved 12 m; SetWeather gains a precipitation parameter and the feature test rains. One
+departure, a new FramePoint.AfterTemporalAntialiasing, the bridge's point 5, since TAA's history
+kept a moving speck at a tenth of its strength and the feature test's snow vanished under it, a test
+drawing a speck at a hashed place each frame under TAA and reading above 230 after the point and
+below 170 before, the point before motion blur, bloom and depth of field since Bevy's effect stack
+is crate-private and a point after depth of field could not be ordered, view images copying at it
+and a pass at it running where BeforeTonemapping passes do. Two faults found and fixed, the drops
+becoming flakes at the top of the box alone after rain so the air stayed empty for tens of seconds,
+the kind worked out per frame; and far drops held at 1.5 px drawing lines across a storm's sky, the
+drops fading from 0.4 of the reach with opacity as the width ratio to the power 0.6, streaks capped
+at 25 cm and the near fade over 0.4 to 1.8 m. The environment map's gap read, SetSkyLighting's
+intensity letting the cover dim the map from managed code when the cover changes, but darkening the
+blue rather than graying it, the drops and the flakes taking the same blue, so the overcast's gray
+needs the sky and the clouds rendered into a cube the GPU filters as SetImageLighting does, a phase
+of its own proposed after the thunder and before the crate's removal. 0.05 ms of the GPU at 1280 by
+720, moving 0.022, drawing 0.011 and clearing 0.011, the roofs map 0.017 on the frames it is drawn.
+1,897 passed, 3 skipped, 1,900 the listing plus 11, the bridge's checks clean on every profile,
+Cargo 118, 199 and 11.
+
+Before it, `4ac3871a` came, item 69's fourth phase, the weather state, pushed at 06:30 on
+2026-10-25, its run green at 06:53.
 
 Before it, `6649ab49` came, item 69's third phase, the sky's clock and the night sky, pushed at
 05:09 on 2026-10-25, its run green at 05:26.
-
-Before it, `dc2ea49d` came, item 69's second phase's second commit, the clouds' shadow, pushed at
-04:19 on 2026-10-25, its run green at 04:41.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -274,7 +280,11 @@ from [SHARED.md](SHARED.md).
     foliage, and the ground's wetness and snow cover. The fourth phase at `4ac3871a` on 2026-10-25,
     the weather state with the presets, the forecast, the wind, the wetness and the snow cover,
     three departures and three faults in the head and the environment map's blue under an overcast
-    kept as a gap; the fifth next, the rain and the snow.
+    kept as a gap; the fifth next, the rain and the snow. The fifth phase at `a2646e71` on
+    2026-10-25, the rain and the snow with a frame point after the temporal antialiasing as its
+    departure and two faults in the head; the sixth next, the thunder, then a seventh taken as
+    proposed, the sky and the clouds rendered into the environment map's cube so an overcast grays
+    the ground and the falling drops rather than darkening their blue, then the crate's removal.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -350,6 +360,19 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
+
+72. **The feature test's sample behaviors go from the source.** From the word of 2026-10-25 at
+    08:18, with the console of the feature test run from games/FeatureTest on the desktop and closed
+    by its window, that its final state and transforms lists are residue not to be in the builds,
+    and at 08:22 that the sample behaviors themselves are to be deleted, the tests and the docs
+    holding what they showed. Diagnostics, which counts spinners, lifetimes and grounded entities
+    and reports them at shutdown, Movement, which spawns five moving entities and integrates them,
+    Orbit, which moves entities by Bevy's Transform and parents one to another, and Spinner, a
+    behavior that is its own component, are demonstrations from the program's first days and not
+    zones, pages or checks of the feature test; they go with the entities they spawned and their
+    console reports, and any other behavior that demonstrates alone goes with them, the coder naming
+    each. The drive script, the tests and the docs are read first for a line, a count or a reference
+    that relied on them and moved to what remains. One commit, with or before item 69's sixth phase.
 
 ## Verdicts
 

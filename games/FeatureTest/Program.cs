@@ -25,14 +25,11 @@ const GraphicsBackend Backend = GraphicsBackend.Vulkan;
 //   --backend                  vulkan|dx12|metal|gl|auto
 //   --frames N                 how many ticks to run, for a run with no window
 //   --serve                    answer `bcs` while it runs
-//   --verbose                  print a progress line every 20 frames
 //   --timings                  measure each render pass on the GPU, for render.timings, and run
 //                              offscreen as fast as the GPU goes, so the frame rate is its cost
 var offscreen = args.Contains("--offscreen");
 var windowed = !offscreen && (RunInWindow || args.Contains("--window"));
 if (args.Contains("--headless")) windowed = false;
-
-Trace.Verbose = args.Contains("--verbose");
 
 // The memory cap a tool starting it would give, eight gigabytes or a quarter of the machine's where
 // that is less, unless BCS_MEMORY_CAP_GB names another, since a scene or a technique tried here can
