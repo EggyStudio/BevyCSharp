@@ -743,13 +743,14 @@ point would grow it a little differently.
 
 A species names the sets of the library's texture collection its bark and its leaves are drawn
 with, `TreeTextures`, each an albedo, a normal map and a surface of occlusion, roughness and
-translucency in the formats a desktop GPU samples as they are. `TreeSpecies.WeepingWillow` names
-`willow-bark`, and a name the collection has no set of draws the bark and leaves the generator
-makes. A set's three images load with the samplers they are meant for, and its surface is the
+translucency in the formats a desktop GPU samples as they are. Each preset names its sets, the quaking
+aspen `silver-birch-bark` and `silver-birch-leaves`, the weeping willow its own, and a name the
+collection has no set of draws the bark and leaves the generator makes. A leaf set's entry in the
+collection's manifest gives where each leaf of its atlas is, so a card shows one leaf. A set's three images load with the samplers they are meant for, and its surface is the
 occlusion, the metallic-roughness and the diffuse transmission texture at once:
 
 ```csharp
-if (TreeTextures.Find("willow-bark") is { } set)                       // in a system
+if (TreeTextures.Find("weeping-willow-bark") is { } set)               // in a system
 {
     var (albedo, normal, surface) = set.Load();
     var bark = Render.CreateMaterial(new MaterialSettings

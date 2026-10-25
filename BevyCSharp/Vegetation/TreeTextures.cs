@@ -43,7 +43,7 @@ public static class TreeTextures
     }
 
     /// <summary>The set of a name, or nothing where the collection has none.</summary>
-    /// <param name="name">The set's name, as <c>willow-bark</c>.</param>
+    /// <param name="name">The set's name, as <c>silver-birch-bark</c>.</param>
     public static TreeTextureSet? Find(string name)
     {
         ArgumentNullException.ThrowIfNull(name);

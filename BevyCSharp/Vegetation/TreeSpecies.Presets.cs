@@ -16,6 +16,8 @@ public sealed partial record TreeSpecies
         Ratio = 0.015f,
         Flare = 0.6f,
         AttractionUp = 0.5f,
+        Bark = "silver-birch-bark",
+        Leaves = "silver-birch-leaves",
         Levels =
         [
             new TreeLevel { CurveVariation = 20f },
@@ -34,6 +36,8 @@ public sealed partial record TreeSpecies
         Ratio = 0.015f,
         Flare = 1f,
         AttractionUp = 0.5f,
+        Bark = "broadleaf-bark",
+        Leaves = "red-alder-leaves",
         Levels =
         [
             new TreeLevel { Taper = 1.1f, CurveVariation = 40f },
@@ -63,7 +67,8 @@ public sealed partial record TreeSpecies
         PruneWidthPeak = 0.6f,
         PrunePowerLow = 0.001f,
         PrunePowerHigh = 0.5f,
-        Bark = "willow-bark",
+        Bark = "weeping-willow-bark",
+        Leaves = "weeping-willow-leaves",
         Levels =
         [
             new TreeLevel { Length = 0.8f, Splits = 0.8f, SplitAngle = 3f, CurveBack = 20f, CurveVariation = 120f },
@@ -87,6 +92,8 @@ public sealed partial record TreeSpecies
         Ratio = 0.018f,
         Flare = 1.2f,
         AttractionUp = 0.8f,
+        Bark = "broadleaf-bark",
+        Leaves = "shingle-oak-leaves",
         Levels =
         [
             new TreeLevel { Taper = 0.95f, Splits = 3.2f, SplitAngle = 10f, CurveVariation = 90f },
@@ -105,6 +112,8 @@ public sealed partial record TreeSpecies
         BaseSplits = 6,
         Ratio = 0.02f,
         AttractionUp = 0.4f,
+        Bark = "hornbeam-bark",
+        Leaves = "hornbeam-leaves",
         Levels =
         [
             new TreeLevel { SplitAngle = 18f, SplitAngleVariation = 6f, CurveVariation = 30f },
@@ -124,6 +133,7 @@ public sealed partial record TreeSpecies
         ScaleVariation = 0.2f,
         BaseSize = 0f,
         Ratio = 0.1f,
+        Leaves = "fern-leaves",
         Levels =
         [
             new TreeLevel { Length = 0.1f },

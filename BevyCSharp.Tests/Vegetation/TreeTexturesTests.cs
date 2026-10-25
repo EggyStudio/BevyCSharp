@@ -81,6 +81,45 @@ public sealed class TreeTexturesTests
         }
     }
 
+    [Fact]
+    public void EveryPresetFindsItsBarkAndItsLeaves()
+    {
+        foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
+        {
+            Assert.Equal(TreeTextureKind.Bark, TreeTextures.Find(species.Bark!)?.Kind);
+            Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(species.Leaves!)?.Kind);
+        }
+
+        Assert.Null(TreeSpecies.Fern.Bark);
+        Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(TreeSpecies.Fern.Leaves!)?.Kind);
+    }
+
+    [Fact]
+    public void ALeafSetsManifestGivesEachLeafsBoxInItsAtlas()
+    {
+        using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(Collection, "textures.json")));
+        foreach (var entry in manifest.RootElement.GetProperty("entries").EnumerateArray().Where(entry => entry.GetProperty("kind").GetString() == "leaves"))
+        {
+            var boxes = entry.GetProperty("leaves").EnumerateArray().Select(box => box.EnumerateArray().Select(value => value.GetSingle()).ToArray()).ToArray();
+            Assert.NotEmpty(boxes);
+            Assert.All(boxes, box => Assert.True(box[0] >= 0f && box[1] >= 0f && box[2] > 0f && box[3] > 0f && box[0] + box[2] <= 1.0001f && box[1] + box[3] <= 1.0001f, $"{entry.GetProperty("name")} has a leaf at {string.Join(", ", box)}"));
+        }
+    }
+
+    [SkippableFact]
+    public void ASetImportsAsTheCollectionHoldsIt()
+    {
+        var python = Textures();
+        Needs.Folder(Path.Combine(CheatsheetTests.RepositoryRoot(), ".vegetation", "leaves", "shingle-oak"), "the shingle oak leaves' source");
+        using var folder = new TestFolder("bcs-textures-");
+        Run(python, "--out", folder.Path, "shingle-oak-leaves");
+
+        foreach (var file in new[] { "albedo.ktx2", "normal.ktx2", "surface.ktx2" })
+        {
+            Assert.Equal(File.ReadAllBytes(Path.Combine(Collection, "shingle-oak-leaves", file)), File.ReadAllBytes(Path.Combine(folder.Path, "shingle-oak-leaves", file)));
+        }
+    }
+
     [SkippableFact]
     public void TheSampleImportsTheSameBytesAsTheTestsKeep()
     {

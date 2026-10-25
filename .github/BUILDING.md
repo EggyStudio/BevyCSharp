@@ -208,7 +208,7 @@ source byte for byte. It needs Python 3.14, whose own modules have zstd, and Pil
 
 ```bash
 build/textures.py                # import every set whose source is here
-build/textures.py hazel-leaves   # import one
+build/textures.py fern-leaves    # import one
 ```
 
 A set the manifest marks waiting is imported into `waiting/`, which the repository and the build

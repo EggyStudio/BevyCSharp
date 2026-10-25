@@ -10,34 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c7e65c23`, item 70's second phase's growth, pushed at 13:12 on 2026-10-25 after the
-run of `70212d49` went green, its own run green at 13:30, carrying ASSETS.md, the review's files,
-SHARED.md, DEVLOG.md, two captioned pictures and a note. The shadow grid after Palubicki, a point
-darkening its voxel and a pyramid six layers deep under it, a tip growing while its light is at
-least 0.1 and the trunk's regardless, a first-level side bud breaking as it is set so the trunk
-carries the paper's Branches, a bud further out needing attractors and light of 0.2 and lost after
-ten dormant cycles; the crown's outline from probing the paper's own first-level paths at 24 heights
-with second-level stems from each quarter bent by the curves with no randomness; the attraction up
-from the second level on and forked halves turning back over their remaining length, as the paper
-has them; the controls BaseSplits, CurveBack, SplitAngleVariation, Flare, the pruning's ratio,
-width, peak and two powers and TreeShape.Envelope, Taper up to 3 and ScaleVariation up to the scale
-with a floor at a tenth; a Trees.Grow overload taking boxes no stem enters, each shading what is
-under it and up to half the sky beside it; the paper's four presets with the appendix values, the
-splits times the curve resolution, and a bush and a fern; the dense grids walking the cells near a
-bud alone and a point setting at most four side buds. Three departures, the shoots leaning sideways
-from shadow alone with the upward part AttractionUp's, the pull and the lean at 0.1 and 0.05 an
-internode below the paper's curve rates so its bends lead, and Lobes and RatioPower not taken, the
-pipe model giving each stem's thickness. The pictures show the six presets bare and the aspen in the
-open and a meter from a wall; the note's heights fall within the paper's ranges, the tupelo's crown
-28.6 m against 28, and the width over height, the mean of seeds 1 to 3 against the plate, aspen 0.47
-against 0.45, tupelo 0.49 against 0.55, willow 0.80 against 0.9 and oak 1.22 against 1.05. 1,921
-passed, 3 skipped, 1,924 the listing plus 11.
+Reviewed up to `70f92473`, item 74's pipeline, pushed at 14:47 on 2026-10-25 after the run of
+`c7e65c23` went green, its own run green at 15:05, carrying ASSETS.md, the review's files and
+DEVLOG.md. build/textures.py encodes BC7 mode 6 with endpoints along the principal axis refit by
+least squares for the albedo and the surface and BC5 as two BC4 blocks for the normal, writes KTX2
+with a data format descriptor and levels down to a texel each under zstd at level 19, keeps the
+alpha's coverage in the mips with transparent texels taking the nearest opaque color and resizes the
+channels one at a time since Pillow premultiplies, encode being the one place a format is chosen;
+the out and sample options write textures.json beside the sets, sets marked waiting going to the
+ignored waiting folder. The library gains TreeTextures with Find, All and Add and
+TreeTextureSet.Load with repeat, linear filtering and eight anisotropic samples, the embedded sets
+mounted under bevycsharp/vegetation through a new internal resource mount in AssetFiles once an app,
+and TreeSpecies gains Bark and Leaves, the willow naming willow-bark until the entries' commit
+renames it; .gitignore takes .vegetation and the waiting folder. The sample set under the tests'
+references is held byte for byte against the sample option, its headers checked, loaded through Bevy
+at 64, 32 and 32 in BC7 and BC5, and the bounds checked. No set ships. 1,927 passed, 3 skipped,
+1,930 the listing plus 11.
+
+Before it, `c7e65c23` came, item 70's second phase's growth, pushed at 13:12 on 2026-10-25, its run
+green at 13:30.
 
 Before it, `70212d49` came, item 70's first phase, the growth and the branches, pushed at 12:15 on
 2026-10-25, its run green at 12:38.
-
-Before it, `ff5fa5e9` came, item 69's last phase, the weather crate's removal, pushed at 11:19 on
-2026-10-25, its run green at 11:42.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -406,7 +400,22 @@ from [SHARED.md](SHARED.md).
     coder to ship the sorted folder as it is and to say nothing more of it in any document, so the
     pipeline commit ships no set and adds nothing to the notices, a set ships unless the manifest
     marks it waiting, the tests run on a 64-square sample kept under the tests' references, and the
-    entries' commit imports the sorted folder by its README's preset map.
+    entries' commit imports the sorted folder by its README's preset map. The pipeline at `70f92473`
+    on 2026-10-25, the encoder, the KTX2 writer, the mount and the lookup, no set shipped; the
+    entries next, the six presets' sets alone.
+
+75. **Bark has depth by parallax occlusion, its height map taken from the source or derived from the
+    normal.** From the owner's question of 2026-10-25 at about 15:00 whether the tree textures could
+    take parallax occlusion mapping for depth, and the word yes at {now}. About a third of the
+    sorted bark sets carry a height or a displacement map, the hornbeam and silver maple trunks, the
+    Italian cypress and both pines among them; for the rest the import derives the height from the
+    normal map by integrating its slopes, truer than a guess from the color and needing no other
+    tool. An entry gains a fourth file, depth.ktx2, one channel in BC4 at half a byte a texel, the
+    height inverted into the depth Bevy's standard material reads, the coder checking which way Bevy
+    takes it; the tree material sets the parallax depth scale and the occlusion method with a layer
+    count of 8 to 16 on bark alone, the leaf cards taking none. The cost is read in the feature
+    test's forest at 1080p and written into the record and the guide, and a picture pair shows a
+    trunk flat and with depth at reading distance. After item 74's entries. One commit.
 
 ## Verdicts
 

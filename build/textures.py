@@ -112,6 +112,8 @@ def main():
         if not arguments.out:
             entry["files"] = {file: size for file, (size, _) in report.items()}
             entry["error"] = {file: round(error, 1) for file, (_, error) in report.items()}
+            if entry["kind"] == "leaves":
+                entry["leaves"] = leaf_boxes(maps["albedo"])
 
     if not arguments.out:
         with open(MANIFEST, "w", encoding="utf-8", newline="\n") as file:
@@ -270,6 +272,53 @@ def sample_maps():
             normal.putpixel((x, y), (int(128 + 60 * math.cos(x * 0.8)), int(128 + 60 * math.sin(y * 0.4)), 255))
             surface.putpixel((x, y), (255, 200, 0, 8 * x))
     return {"albedo": albedo, "normal": normal, "surface": surface}
+
+
+def leaf_boxes(albedo):
+    """
+    Where each leaf of an atlas is, as the share of its width and height from its left and top
+    and the share it spans, the opaque regions of its opacity read texel by texel, so a frond's thin
+    stalk holds it together, a region under a tenth the largest's area left out as a scrap of a stem
+    or a cut, in rows from the top and each row from the left, so a card shows one leaf.
+    """
+    small = albedo.getchannel("A")
+    width, height = small.size
+    solid = [value > 127 for value in small.tobytes()]
+    seen = [False] * len(solid)
+    boxes = []
+    for start in range(len(solid)):
+        if not solid[start] or seen[start]:
+            continue
+        stack = [start]
+        seen[start] = True
+        left, top, right, bottom, area = width, height, 0, 0, 0
+        while stack:
+            at = stack.pop()
+            x, y = at % width, at // width
+            left, right, top, bottom = min(left, x), max(right, x), min(top, y), max(bottom, y)
+            area += 1
+            for near in (at - 1 if x > 0 else -1, at + 1 if x < width - 1 else -1, at - width, at + width):
+                if 0 <= near < len(solid) and solid[near] and not seen[near]:
+                    seen[near] = True
+                    stack.append(near)
+        boxes.append((area, left, top, right + 1, bottom + 1))
+
+    if not boxes:
+        return []
+    largest = max(box[0] for box in boxes)
+    kept = sorted((box for box in boxes if box[0] * 10 >= largest), key=lambda box: box[2] + box[4])
+
+    # A row is the leaves whose middles stand within half a typical leaf's height of the first's.
+    tall = sorted(box[4] - box[2] for box in kept)[len(kept) // 2]
+    rows = []
+    for box in kept:
+        if rows and (box[2] + box[4]) - (rows[-1][0][2] + rows[-1][0][4]) <= tall:
+            rows[-1].append(box)
+        else:
+            rows.append([box])
+    ordered = [box for row in rows for box in sorted(row, key=lambda box: box[1])]
+    return [[round(left / width, 4), round(top / height, 4), round((right - left) / width, 4), round((bottom - top) / height, 4)]
+            for _, left, top, right, bottom in ordered]
 
 
 # The levels.
