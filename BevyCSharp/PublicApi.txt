@@ -821,6 +821,25 @@ readonly struct Bevy.Click : IEquatable<Click>, IPointerEvent
   static bool op_Inequality(Click left, Click right)
   void Deconstruct(out PointerButton Button, out PointerHit Hit, out TimeSpan Duration, out int Count)
 delegate void Bevy.CloneHook<T>(ref T component)
+enum Bevy.CloudQuality : int
+  High = 2
+  Low = 0
+  Medium = 1
+sealed class Bevy.CloudSettings
+  CloudQuality Quality { get; set; }
+  CloudSettings()
+  Vec3 Wind { get; set; }
+  float Ambient { get; set; }
+  float Bottom { get; set; }
+  float Coverage { get; set; }
+  float Density { get; set; }
+  float DetailSize { get; set; }
+  float Distance { get; set; }
+  float Erosion { get; set; }
+  float ShapeSize { get; set; }
+  float Top { get; set; }
+  float WeatherSize { get; set; }
+  uint Seed { get; set; }
 struct Bevy.Color : IEquatable<Color>
   Color WithAlpha(float alpha)
   Color(float r, float g, float b, float a = 1f)
@@ -12586,6 +12605,7 @@ static class Bevy.Render
   static void SetCameraTarget(Entity camera, AssetHandle target, int layer)
   static void SetCameraTarget(Entity camera, Entity window)
   static void SetClearColor((float, float, float, float) color)
+  static void SetClouds(Entity camera, CloudSettings? settings)
   static void SetColorGrading(Entity camera, GradingSettings? settings)
   static void SetContactShadows(Entity camera, ContactShadowSettings? settings)
   static void SetDeferredRendering(bool on)

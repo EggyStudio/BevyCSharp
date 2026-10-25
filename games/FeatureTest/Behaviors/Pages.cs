@@ -67,6 +67,7 @@ internal static class Pages
         new ToggleRow("Auto exposure", () => S.AutoExposure, value => Settings.Change(s => s with { AutoExposure = value })),
         new SliderRow("Sharpening", () => S.Sharpen, value => Settings.Change(s => s with { Sharpen = value }), 0f, 1f, 0.1f),
         new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
+        new SliderRow("Cloud cover", () => S.CloudCover, value => Settings.Change(s => s with { CloudCover = value }), 0f, 1f, 0.05f),
     ]);
 
     /// <summary>

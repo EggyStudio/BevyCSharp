@@ -65,6 +65,73 @@ internal static class ConsoleSkyCommands
         return string.Create(CultureInfo.InvariantCulture, $"fog to 95% at {far:0.#} m, thinning by e every {height:0.#} m above {@base:0.#}, on {cameras.Count} camera{(cameras.Count == 1 ? "" : "s")}");
     }
 
+    [Command("sky.clouds", "Draws clouds over the sky of the cameras drawing them, or the cameras drawing the sky's fog, covering this much of it at a quality, takes them off, or says them: sky.clouds [off|coverage] [low|medium|high]")]
+    internal static string CloudsCommand(string coverage = "", string quality = "medium")
+    {
+        var word = coverage.Trim().ToLowerInvariant();
+        var clouded = Clouds.All().ToList();
+        if (word == "")
+        {
+            return clouded.Count == 0
+                ? "no camera draws clouds"
+                : string.Join("\n", clouded.Select(c => string.Create(CultureInfo.InvariantCulture,
+                    $"{c.Camera}: clouds over {c.Settings.Coverage:0.##} of the sky from {c.Settings.Bottom:0} to {c.Settings.Top:0} m at {c.Settings.Quality.ToString().ToLowerInvariant()}")));
+        }
+
+        var cameras = clouded.Count > 0 ? clouded.Select(c => c.Camera).ToList() : SkyFog.All().Select(f => f.Camera).ToList();
+        if (cameras.Count == 0)
+        {
+            ConsoleHost.Fail("NO_CAMERA", "No camera draws clouds or the sky's fog.");
+            return "sky.clouds [off|coverage] [low|medium|high]";
+        }
+
+        if (word == "off")
+        {
+            foreach (var camera in cameras) Render.SetClouds(camera, null);
+            return "the clouds are off";
+        }
+
+        CloudQuality? level = quality.Trim().ToLowerInvariant() switch
+        {
+            "low" => CloudQuality.Low,
+            "medium" => CloudQuality.Medium,
+            "high" => CloudQuality.High,
+            _ => null,
+        };
+        if (!float.TryParse(word, NumberStyles.Float, CultureInfo.InvariantCulture, out var cover) || cover is < 0f or > 1f || level is null)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{coverage.Trim()}' is not off or a share of the sky from 0 to 1, or '{quality.Trim()}' is not low, medium or high.");
+            return "sky.clouds [off|coverage] [low|medium|high]";
+        }
+
+        foreach (var camera in cameras)
+        {
+            var was = clouded.FirstOrDefault(c => c.Camera == camera).Settings;
+            var settings = was is null ? new CloudSettings() : Copy(was);
+            settings.Coverage = cover;
+            settings.Quality = level.Value;
+            Render.SetClouds(camera, settings);
+        }
+        return string.Create(CultureInfo.InvariantCulture, $"clouds over {cover:0.##} of the sky at {level.Value.ToString().ToLowerInvariant()}, on {cameras.Count} camera{(cameras.Count == 1 ? "" : "s")}");
+    }
+
+    private static CloudSettings Copy(CloudSettings was) => new()
+    {
+        Quality = was.Quality,
+        Coverage = was.Coverage,
+        Bottom = was.Bottom,
+        Top = was.Top,
+        Density = was.Density,
+        ShapeSize = was.ShapeSize,
+        DetailSize = was.DetailSize,
+        Erosion = was.Erosion,
+        WeatherSize = was.WeatherSize,
+        Wind = was.Wind,
+        Distance = was.Distance,
+        Ambient = was.Ambient,
+        Seed = was.Seed,
+    };
+
     [Command("sky.froxels", "Works the sky's fog out in froxels near the cameras drawing it, as far as given, where shadows cut it into shafts and lamps glow in it, or in closed form alone: sky.froxels <off|low|medium|high> [distance]")]
     internal static string Froxels(string quality, float distance = 250f)
     {

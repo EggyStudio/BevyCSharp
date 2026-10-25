@@ -15,8 +15,8 @@ of crates, doors, a lift, a rope and a heightmap terrain. West is the render gal
 dielectric to a metal and from polished to rough, a Cornell box and a row of modeled shapes. North
 is the light hall, a bay for each way of lighting a scene. South is a meadow of grass and trees in
 the wind. North-east is the scenes zone, where the panel's Scenes page fetches Intel Sponza and
-stands it there. A day passes over all of it, under a sky scattered from the sun, and the
-weather page brings rain, snow and fog on top.
+stands it there. A day passes over all of it, under a sky scattered from the sun with clouds the
+effects page sets the cover of, and the weather page brings rain, snow and fog on top.
 
 Keys
 ----

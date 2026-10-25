@@ -189,6 +189,10 @@ public partial struct Applied
 
             _backdrop = backdrop;
         }
+
+        // The engine's clouds over the atmosphere's sky, where the weather's own do not run.
+        var clouded = !Weather.Active && backdrop == Backdrop.Atmosphere && settings.CloudCover > 0f;
+        Render.SetClouds(camera, clouded ? new CloudSettings { Coverage = settings.CloudCover } : null);
     }
 
     /// <summary>

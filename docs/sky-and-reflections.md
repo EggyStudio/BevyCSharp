@@ -186,6 +186,26 @@ blends with what it held last frame, which smooths the slices over a few frames.
 froxels take about 0.1 ms of the GPU at `Low`, 0.2 at `Medium` and 0.5 at `High`. The console's
 `sky.froxels` turns them on and off while the app runs.
 
+Clouds fill the sky above the atmosphere's camera:
+
+<!-- compiled with:
+Entity camera = default;
+-->
+```csharp
+Render.SetClouds(camera, new CloudSettings { Coverage = 0.45f, Quality = CloudQuality.Medium });
+```
+
+They lie in a layer between `Bottom` and `Top` over the planet, shaped as Schneider's clouds for
+Horizon Zero Dawn are. A weather map says where the sky has cloud and what kind, flat heaps or
+towers, `Coverage` how much of it does, tiling noise `ShapeSize` across cuts each body and finer
+noise `DetailSize` across wears its edges, and `Wind` carries all of it. The sun's light reaches
+them through the atmosphere, so a sunset's clouds glow gold from below, a forward lobe silvers an
+edge against the sun, and scattering many times over keeps a thick cloud's sides white. A far cloud
+fades into the sky's color, and the sun's disc does not show through a cloud before it. The clouds
+are marched at half the picture's size and settle over a few frames, and at 1280 by 720 take about
+0.3 ms of the GPU at `Low`, 0.5 at `Medium` and 1 at `High`. They lie behind every piece of geometry
+and in front of the sky's fog. The console's `sky.clouds` sets them while the app runs.
+
 A painted sky is a cubemap instead:
 
 <!-- compiled with:

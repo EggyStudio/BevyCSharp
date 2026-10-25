@@ -10,20 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `5041dda3`, item 64's third part's second commit, the look keyed by the sun's height,
-pushed at 01:18 on 2026-10-25 after the run of `d8ecd271` went green; its own run green on the three
-systems at 01:35, carrying a picture with its caption, a Shared line and the review's files.
-LookSettings.Lerp moves the numbers evenly with the curve and the dither the nearer look's,
-LookCycle holds keys by the sun's height in degrees held past the ends, and LookCycle.Day on Vivid
-keeps Vivid from 30 degrees up, 8 degrees saturation 1.48, contrast 1.14 and a warm tint, 2 degrees
-1.55, 1.16 and warmer, minus 6 degrees 1.2, 1.08 and cool, minus 18 degrees 1 and 1.06 and cooler,
-the night's saturation 1 since 0.85 washed the atmosphere's night blue to purple gray; SetLook on a
-camera with a look changes the values without resubmitting the pass; the feature test's Look row has
-Day as its default, DayNight turning it from the sun's elevation. LookCycleTests six; the picture
-Vivid against Day at five hours. 1,853 passed, 3 skipped, no native change. The view from space
-waits on the owner's word.
+Reviewed up to `7fe46ce3`, item 69's first phase, the fog in froxels, pushed at 02:09 on 2026-10-25
+after the run of `5041dda3` went green; its own run green on the three systems at 02:27, carrying
+three pictures with captions and the review's files, no ABI change. SkyFogSettings.Froxels holds a
+quality of Low, Medium or High at 80 by 45 by 64, 120 by 68 by 96 and 160 by 90 by 128, a distance
+of 250, lumps with their size and wind, 16 lights and up to eight boxes, the kernels running as
+fixed dispatches after the prepass, two scatter volumes trading places each frame with a
+golden-ratio jitter through the slice and the history blended at 0.12 where reprojected, the
+integration energy conserving a slice; the light is the sky's color along the way split into the
+sky's mean diffuse and the sun's share, which the brightest directional light's cascades take away,
+with point and spot lights scattered evenly, the froxels equal to the closed form with no
+directional light within 6 levels. Departure, over the sky above the horizon only the deviations
+from the layer's unshadowed light are laid, the shadows' darkening, the lamps' light and the boxes
+in full, since a full composite washed the vivid sky to the horizon's color. The native gains the
+atmosphere's transmittance for a pass through Bevy's LUT with SceneInfo grown to 112 bytes, tested,
+the groundwork for the clouds. Costs at 1280 by 720, Low 0.06 and 0.02 ms, Medium 0.16 and 0.035,
+High 0.44 and 0.07, the draw 0.03, the feature test at Medium; sky.froxels on the console.
+FroxelFogTests six. 1,859 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and 11; N 1.2
+caught on the first run and mended before the commit.
 
-Before it, `d8ecd271` came, item 64's third part, pushed at 00:33 on 2026-10-25, its run green on
+Before it, `5041dda3` came, item 64's look cycle, pushed at 01:17 on 2026-10-25, its run green on
 the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -253,7 +259,8 @@ from [SHARED.md](SHARED.md).
     render/weather.rs and BcsConfig.weather with its ABI, the Weather types onto the engine's own,
     the TSV, PublicApi, CHEATSHEET, the guide, the comparisons, BUILDING, the norm's and STYLE's
     lines, NormTests' exclusions, the notices, the drive and soak scripts and the workflow's
-    comment.
+    comment. The first phase at `7fe46ce3` on 2026-10-25, the froxel fog with its departure over the
+    sky; the clouds next.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1677,3 +1684,17 @@ share taken away worked out in closed form along the way through each. Bevy's tr
 lookup texture and the planet's radii reach every camera shader as `passAtmosphereTransmittance` and
 `passHasAtmosphere`, for the clouds next. 3DEngine's haze is a dome and a terrain term, which may take
 the froxels' split of the sky's light.
+
+Shared: the engine's clouds, in the commit carrying this line, item 69's second phase, which 3DEngine
+may take for its own sky. A shell from 1,500 to 4,500 meters over a planet of earth's radius is
+marched at half the picture's size after the prepass, 48, 72 or 128 steps along a way and 4 or 6
+doubling toward the sun, through a 128 cubed Perlin-Worley and Worley volume, a 32 cubed Worley
+detail and a 512 square weather map, all tiling and made once on the GPU; the density is Schneider's
+for Horizon Zero Dawn, coverage a soft threshold over the weather, a profile thinning over most of
+the height so the threshold narrows each cloud into a dome, the detail wearing the edges. The sun's
+light comes through Bevy's transmittance lookup at each point, the march toward the sun at half the
+density, Wrenninge's four octaves with a lobe of 0.8 forward and minus 0.3 back, and the sky's light
+from above and below; the air in front fades a cloud toward the environment map's color, which holds
+no sun disc, a cover under a hundredth through is made whole, and the history is blended at 0.12
+except where the cover differs, so the disc does not burn through a cloud's lagging edge. The draw
+lays it over sky pixels before the fog. A flat overcast deck waits on phase (d)'s presets.
