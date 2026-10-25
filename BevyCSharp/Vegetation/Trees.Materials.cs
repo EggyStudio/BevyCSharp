@@ -12,11 +12,19 @@ public static partial class Trees
     /// <param name="species">The species, whose <see cref="TreeSpecies.BarkSet"/> or <see cref="TreeSpecies.BarkColor"/> it is made from.</param>
     /// <returns>The material, the same one for the same bark while the app runs.</returns>
     /// <remarks>
-    /// The bark set's three images where the collection has the set the species names, the surface
-    /// giving the occlusion and the roughness, and otherwise a bark of ridges made from noise, tinted
-    /// by the species' bark color. Either repeats once round each stem and along it in lengths of the
-    /// stem's circumference, as <see cref="EditMesh.Tube"/> lays its coordinates, so a thick trunk's
-    /// bark is coarser than a twig's.
+    /// <para>
+    /// The bark set's images where the collection has the set the species names, the surface giving
+    /// the occlusion and the roughness, and otherwise a bark of ridges made from noise, tinted by the
+    /// species' bark color. Either repeats once round each stem and along it in lengths of the stem's
+    /// circumference, as <see cref="EditMesh.Tube"/> lays its coordinates, so a thick trunk's bark is
+    /// coarser than a twig's.
+    /// </para>
+    /// <para>
+    /// The bark takes depth by parallax occlusion from the set's depth, or the noise's, its grooves
+    /// cut a fortieth of the stem's circumference deep, about two and a half centimeters on a trunk
+    /// thirty across, through twelve layers at most, so its ridges hide the grooves behind them as the
+    /// eye moves round a trunk while the stem's outline stays round.
+    /// </para>
     /// </remarks>
     public static AssetHandle BarkMaterial(TreeSpecies species)
     {
@@ -28,7 +36,7 @@ public static partial class Trees
             if (set is not null)
             {
                 var (albedo, normal, surface) = set.Load();
-                return Render.CreateMaterial(new MaterialSettings
+                return Render.CreateMaterial(Deep(new MaterialSettings
                 {
                     BaseColorTexture = albedo,
                     NormalMap = normal,
@@ -36,22 +44,24 @@ public static partial class Trees
                     MetallicRoughnessTexture = surface,
                     Roughness = 1f,
                     Metallic = 1f,
-                });
+                }, set.LoadDepth()));
             }
 
-            var (color, bumps) = Generated("bark pictures", () =>
+            var (color, bumps, depth) = Generated("bark pictures", () =>
             {
-                var (pixels, normals) = TreeLooks.Bark();
-                return (Image(pixels, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: true), Image(normals, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false));
+                var (pixels, normals, depths) = TreeLooks.Bark();
+                return (Image(pixels, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: true),
+                    Image(normals, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false),
+                    Image(depths, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false));
             });
             var tint = species.BarkColor;
-            return Render.CreateMaterial(new MaterialSettings
+            return Render.CreateMaterial(Deep(new MaterialSettings
             {
                 BaseColor = (tint.R, tint.G, tint.B, 1f),
                 BaseColorTexture = color,
                 NormalMap = bumps,
                 Roughness = 0.9f,
-            });
+            }, depth));
         });
     }
 
@@ -116,6 +126,22 @@ public static partial class Trees
                 DoubleSided = true,
             });
         });
+    }
+
+    // How deep the bark's grooves are, in its texture's width, which is a stem's circumference, and
+    // the most layers its parallax occlusion searches.
+    private const float BarkDepth = 1f / 40f;
+    private const float BarkLayers = 12f;
+
+    /// <summary>A bark's settings with its depth for parallax occlusion, where it has one.</summary>
+    private static MaterialSettings Deep(MaterialSettings settings, AssetHandle depth)
+    {
+        if (depth == AssetHandle.None) return settings;
+        settings.DepthMap = depth;
+        settings.ParallaxDepthScale = BarkDepth;
+        settings.ParallaxMethod = ParallaxMethod.Occlusion;
+        settings.ParallaxLayers = BarkLayers;
+        return settings;
     }
 
     private static float Toward(float from, float to, float share) => from + (to - from) * share;

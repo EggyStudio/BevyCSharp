@@ -138,6 +138,12 @@ if (TreeTextures.Find("weeping-willow-bark") is { } set)               // in a s
 A game adds a folder of its own sets with `TreeTextures.Add(directory)`, made by the import the
 library's are made by, and a set of the same name stands in place of the library's.
 
+A bark set carries its depth too, and `Trees.BarkMaterial` gives the bark depth by Bevy's parallax
+occlusion, its grooves a fortieth of a stem's circumference deep through twelve layers, so its ridges
+hide the grooves behind them as the eye moves round a trunk. The leaves take none. On an RTX 4070
+Laptop GPU a forest of 24 tupelos at 1920 by 1080 draws its opaque pass a tenth to a half of a
+millisecond slower with the depth than without, as `TheDepthsCostIsReadInAForest` prints it.
+
 ## The skeleton
 
 The skeleton is the points the stems pass through, each with the point it grew from and its radius,

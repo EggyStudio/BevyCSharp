@@ -10,30 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `d151e0cc`, item 74's entries, pushed at 15:21 on 2026-10-25 after the run of
-`70f92473` went green, its own run green at 15:39, carrying REVIEW.md, a captioned picture and a
-note. Ten sets imported from the sorted folder by its preset map, 3.3 MB of the 32, a species from
-549 KB for the oak to 749 for the willow. The barks, the silver birch at 512 square, the broadleaf
-for the tupelo and the oak and the weeping willow at 256 by 1024, the hornbeam at 256 by 512; the
-leaves, the birch's twelve at 512, the willow's five with its green top row cropped at 1024 by 256,
-the hornbeam's twenty at 512, the shingle oak's two at 512 by 256, the red alder's fronts and backs
-of three scans in a grid of six at 512, and the fern's five fronds with a scrap of stalk at 512.
-Roughness is one minus gloss where gloss exists and constant otherwise, occlusion comes from ao,
-translucency from subsurface or from the albedo's luminance at 0.8 where there is none. The import
-writes each leaf's box in its atlas into the manifest, opaque regions traced texel by texel with a
-region under a tenth of the largest dropped, ordered in rows from the top, for the dressing's cards.
-Everything else in the sorted folder stayed out. The tests read every preset finding its sets with
-the right kinds, the leaf boxes inside their atlases, the shingle oak leaves importing byte for byte
-as the collection holds them where the folder exists, and the bounds over real sets. The picture
-shows each bark on its preset's trunk and the six atlases on cut-out cards, the leaves on the trees
-coming with the dressing's cards; the note holds the sizes and the errors. 1,930 passed, 3 skipped,
-1,933 the listing plus 11.
+Reviewed up to `4ee79828`, item 70's second phase's dressing, pushed at 16:06 on 2026-10-25 after
+the run of `d151e0cc` went green, its own run green at 16:23, carrying the review's files,
+DEVLOG.md, two captioned pictures, a note and a Shared line. TreeSpecies gains the paper's leaf
+controls, Leaves as a count a stem with fronds below zero, LeafShape among six generated outlines,
+LeafScale and LeafScaleX, with LeafLevel for the leaves' angles, LeafBend, and BarkColor, LeafColor
+and FallColor a preset, the paper's values set; Bark and Leaves become BarkSet and LeafSet, a
+Replies line under N 2.4 saying so. Trees.BuildLeaves takes the twigs as the stems carrying no
+other, shares the paper's count among them weighted by length at most 30,000 cards with the leaves
+enlarged by the root of the cut up to 1.6 times as the paper's quality factor does, gathers them
+toward each twig's tip at LeafLevel's angles set off their twig by up to 1.5 of their lengths and
+turned by LeafBend to face up and away from the trunk, the cards cut by the import's leaf boxes and
+the fern drawing a strip along each frond. BarkMaterial and LeafMaterial are made once an app for
+each look, a set's surface bound as occlusion, metallic-roughness and diffuse transmission,
+generated noise bark and leaf masks standing in where a species names no set, the fall share tinting
+the set's mean color, which the import records, toward FallColor. docs/trees.md is the guide page
+between Modeling and Materials with a README row and its cheat sheet section, modeling.md's Trees
+section a pointer. The pictures show the six presets in leaf and the aspen in summer and in the
+fall, the note the counts against their bound and each tree against the plates in leaf. 1,937
+passed, 3 skipped, 1,940 the listing plus 11.
+
+Before it, `d151e0cc` came, item 74's entries, pushed at 15:21 on 2026-10-25, its run green at
+15:39.
 
 Before it, `70f92473` came, item 74's pipeline, pushed at 14:47 on 2026-10-25, its run green at
 15:05.
-
-Before it, `c7e65c23` came, item 70's second phase's growth, pushed at 13:12 on 2026-10-25, its run
-green at 13:30.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -303,7 +304,9 @@ from [SHARED.md](SHARED.md).
     shadow grid, the pruning envelope, the six presets bare against the paper's figures in the note,
     three departures in the head; item 74's pipeline next, then the dressing. At 15:21 the dressing
     comes next, on item 74's sets, the leaf cards cut by the manifest's boxes, and item 75's depth
-    goes onto its bark material after.
+    goes onto its bark material after. The second phase's dressing at `4ee79828` on 2026-10-25, the
+    leaves on the six presets from item 74's atlases with the guide page; item 75's depth on the
+    bark material next, then the third phase, the entity, the variants and the forest.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a

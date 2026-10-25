@@ -13451,6 +13451,7 @@ enum Bevy.TreeTextureKind : int
 sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
   (AssetHandle, AssetHandle, AssetHandle) Load()
   (int, int)? Size { get; init; }
+  AssetHandle LoadDepth()
   Color MeanColor { get; init; }
   IReadOnlyList<(float, float, float, float)> LeafBoxes { get; init; }
   TreeTextureKind Kind { get; init; }
@@ -13465,6 +13466,7 @@ sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
   string Name { get; init; }
   string Normal { get; init; }
   string Surface { get; init; }
+  string? Depth { get; init; }
   void Deconstruct(out string Name, out TreeTextureKind Kind, out string Albedo, out string Normal, out string Surface)
 static class Bevy.TreeTextures
   const string Folder = "bevycsharp/vegetation"

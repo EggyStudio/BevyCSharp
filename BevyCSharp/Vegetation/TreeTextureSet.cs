@@ -39,6 +39,23 @@ public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Al
     public Color MeanColor { get; init; } = Color.White;
 
     /// <summary>
+    /// A bark's depth for parallax occlusion, one channel in BC4, white the deepest, as Bevy's
+    /// material reads its depth map, or nothing for a set without one.
+    /// </summary>
+    public string? Depth { get; init; }
+
+    /// <summary>
+    /// Starts loading the set's depth as data, tiling and filtered as <see cref="Load"/>'s images
+    /// are, or answers nothing for a set without one. Only valid inside a system.
+    /// </summary>
+    public AssetHandle LoadDepth()
+    {
+        if (Depth is null) return AssetHandle.None;
+        TreeTextures.Carry();
+        return AssetServer.LoadImage(Depth, Sampled(srgb: false));
+    }
+
+    /// <summary>
     /// Starts loading the set's three images, tiling and filtered between texels and between
     /// levels with eight anisotropic samples, the albedo as color and the other two as data. Only
     /// valid inside a system.
@@ -48,16 +65,16 @@ public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Al
     public (AssetHandle Albedo, AssetHandle Normal, AssetHandle Surface) Load()
     {
         TreeTextures.Carry();
-        TextureSettings Sampled(bool srgb) => new()
-        {
-            Wrap = TextureWrap.Repeat,
-            MagFilter = TextureFilter.Linear,
-            MinFilter = TextureFilter.Linear,
-            MipmapFilter = TextureFilter.Linear,
-            Anisotropy = 8,
-            Srgb = srgb,
-        };
-
         return (AssetServer.LoadImage(Albedo, Sampled(true)), AssetServer.LoadImage(Normal, Sampled(false)), AssetServer.LoadImage(Surface, Sampled(false)));
     }
+
+    private static TextureSettings Sampled(bool srgb) => new()
+    {
+        Wrap = TextureWrap.Repeat,
+        MagFilter = TextureFilter.Linear,
+        MinFilter = TextureFilter.Linear,
+        MipmapFilter = TextureFilter.Linear,
+        Anisotropy = 8,
+        Srgb = srgb,
+    };
 }

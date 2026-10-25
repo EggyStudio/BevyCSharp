@@ -201,7 +201,7 @@ dump written again.
 
 `BevyCSharp/Vegetation/Textures` holds the bark and leaf sets the library carries in its assembly,
 which `TreeTextures` finds by name, each three KTX2 files in BC7 and BC5 with their mipmaps and zstd
-over each level. `build/textures.py` makes them from the sources sorted under `.vegetation/`, which
+over each level, and a bark a fourth, its depth in BC4. `build/textures.py` makes them from the sources sorted under `.vegetation/`, which
 the repository leaves out, by the recipe the collection's `textures.json` gives each set, the crop,
 the size, the maps packed into each file and any change of color, so a set is made again from its
 source byte for byte. It needs Python 3.14, whose own modules have zstd, and Pillow:

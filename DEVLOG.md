@@ -128,6 +128,15 @@ weeping willow's own, the oak's broadleaf and the bush's hornbeam, and below the
 cards cut out by their opacity, the silver birch, the alder, the willow, the shingle oak, the
 hornbeam and the fern.
 
+![](.github/assets/readings/2026-10-25-item-70-aspen-fall.webp)
+The quaking aspen of seed 2 in summer on the left and with its leaves turned all the way to its fall
+color on the right, the silver birch leaves' mean green tinted to gold.
+
+![](.github/assets/readings/2026-10-25-item-70-presets-in-leaf.webp)
+The library's six species in leaf by seed 2, their bark and leaves from the texture collection,
+above the quaking aspen, the black tupelo and the weeping willow, below the California black oak,
+the bush and the fern, whose fronds are strips along their stems.
+
 Six trees grown from controls near the paper's quaking aspen, its leaves left out, by seeds 1 to 6,
 as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter AnAspenKeepsWithinItsTriangles
 --logger "console;verbosity=detailed"` prints them. The height is the species' 13 meters with three
@@ -143,6 +152,31 @@ on the thinnest twigs.
 | 4 | 1144 | 337 | 10.4 m | 2.3 m | 15.2 cm | 12818 |
 | 5 | 1108 | 309 | 10.6 m | 2.4 m | 15.7 cm | 12472 |
 | 6 | 1046 | 305 | 13.1 m | 3.0 m | 19.4 cm | 11868 |
+
+The six presets in leaf by seed 2, as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+EveryPresetsLeavesKeepToTheirBound --logger "console;verbosity=detailed"` prints them. The paper's
+leaves on each twig are the species' own, the twigs are the stems the grown tree carries no other
+on, and the cards are its leaves, a frond strip each for the fern.
+
+| Preset | Leaves on each twig, the paper's | Twigs | Cards | Triangles of the cards | Triangles of the stems |
+|---|---|---|---|---|---|
+| quaking aspen | 25 | 298 | 22500 | 45000 | 12482 |
+| black tupelo | 6 | 467 | 29999 | 59998 | 12106 |
+| weeping willow | 15 | 2880 | 29999 | 59998 | 46466 |
+| California black oak | 25 | 2110 | 30000 | 60000 | 51236 |
+| bush | 12 | 407 | 10080 | 20160 | 32350 |
+| fern | -1 | 13 | 13 | 560 | 4952 |
+
+The aspen carries the paper's 22,500 leaves, its 25 on each of the 900 twigs its levels make,
+shared among the 298 it grew. The tupelo, the willow and the oak reach the bound of 30,000, their
+leaves drawn larger by the root of the paper's count over it, 1.04 times for the tupelo's 32,400
+and the most, 1.6, for the willow's 1,215,000 and the oak's 216,000, their three trunks each counted.
+
+Held against the paper's plates in leaf, the aspen's crown is the narrow oval of plate 1 (q) over
+its bare trunk, the tupelo's a crown on a central leader as plate 2 (a)'s, more open than the
+paper's dense one, the willow's an umbrella of arching limbs with its leaves hanging along them,
+shorter than plate 5's curtains, which the pruning envelope cuts, and the oak's a broad rounded
+crown as plate 1 (a)'s, lighter in color for its shingle oak leaves.
 
 The six presets grown bare by seeds 1 to 3, as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj
 --filter APresetStandsAsTallAsThePapersAndAsWideAsItsPlate --logger "console;verbosity=detailed"`

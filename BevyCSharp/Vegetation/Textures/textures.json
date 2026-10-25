@@ -28,12 +28,14 @@
       "files": {
         "albedo.ktx2": 304510,
         "normal.ktx2": 86663,
-        "surface.ktx2": 62468
+        "surface.ktx2": 62468,
+        "depth.ktx2": 41967
       },
       "error": {
         "albedo.ktx2": 44.7,
         "normal.ktx2": 42.3,
-        "surface.ktx2": 45.1
+        "surface.ktx2": 45.1,
+        "depth.ktx2": 42.4
       },
       "color": [
         0.5234,
@@ -63,12 +65,14 @@
       "files": {
         "albedo.ktx2": 317788,
         "normal.ktx2": 87947,
-        "surface.ktx2": 638
+        "surface.ktx2": 638,
+        "depth.ktx2": 41013
       },
       "error": {
         "albedo.ktx2": 42.3,
         "normal.ktx2": 38.9,
-        "surface.ktx2": 51.1
+        "surface.ktx2": 51.1,
+        "depth.ktx2": 38.0
       },
       "color": [
         0.4511,
@@ -104,12 +108,14 @@
       "files": {
         "albedo.ktx2": 283747,
         "normal.ktx2": 87275,
-        "surface.ktx2": 60205
+        "surface.ktx2": 60205,
+        "depth.ktx2": 43412
       },
       "error": {
         "albedo.ktx2": 45.5,
         "normal.ktx2": 40.0,
-        "surface.ktx2": 48.6
+        "surface.ktx2": 48.6,
+        "depth.ktx2": 39.9
       },
       "color": [
         0.428,
@@ -139,18 +145,23 @@
           },
           "occlusion": {
             "file": "ao.jpg"
+          },
+          "depth": {
+            "file": "height.jpg"
           }
         }
       ],
       "files": {
         "albedo.ktx2": 151099,
         "normal.ktx2": 43575,
-        "surface.ktx2": 31537
+        "surface.ktx2": 31537,
+        "depth.ktx2": 21831
       },
       "error": {
         "albedo.ktx2": 43.6,
         "normal.ktx2": 45.9,
-        "surface.ktx2": 47.9
+        "surface.ktx2": 47.9,
+        "depth.ktx2": 42.4
       },
       "color": [
         0.369,

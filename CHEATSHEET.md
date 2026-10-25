@@ -1017,6 +1017,7 @@ static TreeTextureSet? Find(string name);                       // The set of a 
 static IReadOnlyList<TreeTextureSet> Add(string directory);     // Adds the sets of a folder on this machine, each in a folder of its name beside a textures.json naming them
 
 // TreeTextureSet
+AssetHandle LoadDepth();                                        // Starts loading the set's depth as data, tiling and filtered as Load's images are, or answers nothing for a set without one
 (AssetHandle Albedo, AssetHandle Normal, AssetHandle Surface) Load();  // Starts loading the set's three images, tiling and filtered between texels and between levels with eight anisotropic samples, the albedo as color and the other two as data
 ```
 

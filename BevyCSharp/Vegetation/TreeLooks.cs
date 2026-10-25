@@ -17,10 +17,11 @@ internal static class TreeLooks
         [(0f, 0f, 0.5f, 0.5f), (0.5f, 0f, 0.5f, 0.5f), (0f, 0.5f, 0.5f, 0.5f), (0.5f, 0.5f, 0.5f, 0.5f)];
 
     /// <summary>
-    /// The bark's color and its normal map as RGBA, a gray of ridges running along the stem, from
-    /// noise four times finer round it than along it, in sRGB, and the normal its ridges make.
+    /// The bark's color, its normal map and its depth as RGBA, a gray of ridges running along the
+    /// stem, from noise four times finer round it than along it, in sRGB, the normal its ridges make,
+    /// and their depth, white the deepest, as Bevy's material reads it.
     /// </summary>
-    public static (byte[] Color, byte[] Normal) Bark()
+    public static (byte[] Color, byte[] Normal, byte[] Depth) Bark()
     {
         var height = new float[BarkWidth * BarkHeight];
         for (var y = 0; y < BarkHeight; y++)
@@ -42,6 +43,7 @@ internal static class TreeLooks
 
         var color = new byte[BarkWidth * BarkHeight * 4];
         var normal = new byte[BarkWidth * BarkHeight * 4];
+        var depth = new byte[BarkWidth * BarkHeight * 4];
         for (var y = 0; y < BarkHeight; y++)
         for (var x = 0; x < BarkWidth; x++)
         {
@@ -49,6 +51,8 @@ internal static class TreeLooks
             var gray = (byte)Math.Clamp(110f + 145f * height[at], 0f, 255f);
             color[4 * at] = color[4 * at + 1] = color[4 * at + 2] = gray;
             color[4 * at + 3] = 255;
+            depth[4 * at] = depth[4 * at + 1] = depth[4 * at + 2] = (byte)(255 - gray);
+            depth[4 * at + 3] = 255;
 
             // The slope round and along, the ridges standing out by a few texels' worth.
             var dx = height[(x + 1) % BarkWidth + BarkWidth * y] - height[(x + BarkWidth - 1) % BarkWidth + BarkWidth * y];
@@ -60,7 +64,7 @@ internal static class TreeLooks
             normal[4 * at + 3] = 255;
         }
 
-        return (color, normal);
+        return (color, normal, depth);
     }
 
     /// <summary>

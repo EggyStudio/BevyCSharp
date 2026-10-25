@@ -15,6 +15,13 @@ Bevy's loader through the bridge's ktx2 and zstd_rust features:
     surface.ktx2  BC7, linear   occlusion in R, roughness in G, metallic in B and translucency in A,
                                 as Bevy's material reads its occlusion, metallic-roughness and
                                 diffuse transmission textures, so one file is bound to all three
+    depth.ktx2    BC4           a bark's depth for parallax occlusion, white the deepest, as Bevy's
+                                material reads its depth map, half a byte a texel
+
+A bark's depth is its source's height turned over where the recipe names one, its grays stretched to
+black and white, and otherwise the height its normal map's slopes add up to, integrated over the whole picture at once through its
+Fourier transform, which a bark's tiling suits, scaled so its lowest and highest hundredths are
+black and white, and softened by a texel, as a steep step in a depth map shows as a jagged edge.
 
 A desktop GPU samples BC7 and BC5 as they are, a byte a texel. The normal and the surface are half the
 albedo's size, which a bark or a leaf does not show and which keeps a species under 3 MB. The
@@ -45,18 +52,20 @@ import struct
 import sys
 from compression import zstd
 
-from PIL import Image, ImageChops, ImageEnhance, ImageMath
+from PIL import Image, ImageChops, ImageEnhance, ImageFilter, ImageMath
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COLLECTION = os.path.join(ROOT, "BevyCSharp", "Vegetation", "Textures")
 MANIFEST = os.path.join(COLLECTION, "textures.json")
 
 # Vulkan's numbers for the formats, which a KTX2 file names its texels by.
+BC4_UNORM = 139
 BC5_UNORM = 141
 BC7_UNORM = 145
 BC7_SRGB = 146
 
 # The Khronos data format descriptor's color models and transfer functions for them.
+MODEL_BC4 = 131
 MODEL_BC5 = 132
 MODEL_BC7 = 134
 TRANSFER_LINEAR = 1
@@ -188,7 +197,109 @@ def read_entry(entry, source):
         mask = opacity.resize(size_of(small), Image.Resampling.LANCZOS)
         surface.paste(piece, small[:2], mask if part.get("opacity") is not None else None)
 
-    return {"albedo": albedo, "normal": normal, "surface": surface}
+    maps = {"albedo": albedo, "normal": normal, "surface": surface}
+    if entry["kind"] == "bark":
+        part = entry["parts"][0]
+        if "depth" in part:
+            height = stretched(read_channel(source, part["depth"], normal.size))
+        else:
+            height = height_of(normal)
+        maps["depth"] = ImageChops.invert(height).filter(ImageFilter.GaussianBlur(1))
+    return maps
+
+
+def stretched(image):
+    """A one-channel image with its lowest and highest hundredths made black and white, as a source's height is often a narrow band of grays."""
+    histogram = image.histogram()
+    total = sum(histogram)
+    counted, low, high = 0, 0, 255
+    for value, count in enumerate(histogram):
+        counted += count
+        if counted <= total // 100:
+            low = value + 1
+        if counted < total - total // 100:
+            high = value + 1
+    span = max(high - low, 1)
+    return image.point(lambda value: max(0, min(255, round(255 * (value - low) / span))))
+
+
+def height_of(normal):
+    """
+    The height a tangent-space normal map's slopes add up to, the slope along a row minus its X over
+    its Z and down a column its Y over its Z, as an OpenGL map's Y points up the picture, solved for
+    over the whole map at once in the Fourier domain as Frankot and Chellappa solve it, the waves
+    longer than a quarter of it faded out, its lowest and highest hundredths black and white.
+    """
+    width, height = normal.size
+    data = normal.convert("RGB").tobytes()
+    along, down = [], []
+    for i in range(width * height):
+        x, y, z = (data[3 * i + c] / 127.5 - 1.0 for c in range(3))
+        z = max(z, 0.1)
+        along.append(complex(-x / z))
+        down.append(complex(y / z))
+    first, second = fourier(along, width, height), fourier(down, width, height)
+    solved = [0j] * (width * height)
+
+    # The waves longer than a quarter of the picture faded out, as a normal map's slopes drift a
+    # little over its whole width, which summed would tilt the bark's depth across it.
+    cutoff = 2 * math.pi * 4 / min(width, height)
+    for row in range(height):
+        v = (row if row < height // 2 else row - height) * 2 * math.pi / height
+        for column in range(width):
+            u = (column if column < width // 2 else column - width) * 2 * math.pi / width
+            if u or v:
+                at = column + width * row
+                kept = 1.0 - math.exp(-(u * u + v * v) / (cutoff * cutoff))
+                solved[at] = kept * (-1j * u * first[at] - 1j * v * second[at]) / (u * u + v * v)
+    values = [value.real for value in fourier(solved, width, height, invert=True)]
+    ordered = sorted(values)
+    low, high = ordered[len(ordered) // 100], ordered[-1 - len(ordered) // 100]
+    span = high - low or 1.0
+    image = Image.new("L", (width, height))
+    image.putdata([max(0, min(255, round(255 * (value - low) / span))) for value in values])
+    return image
+
+
+def fourier(values, width, height, invert=False):
+    """A picture's two-dimensional discrete Fourier transform, or its inverse, its rows and then its columns."""
+    rows = [transform(values[row * width:(row + 1) * width], invert) for row in range(height)]
+    out = [0j] * (width * height)
+    for column in range(width):
+        transformed = transform([rows[row][column] for row in range(height)], invert)
+        for row in range(height):
+            out[column + width * row] = transformed[row]
+    return out
+
+
+def transform(values, invert):
+    """The Fourier transform of a power of two of numbers, by Cooley and Tukey's halving."""
+    count = len(values)
+    out = list(values)
+    j = 0
+    for i in range(1, count):
+        bit = count >> 1
+        while j & bit:
+            j ^= bit
+            bit >>= 1
+        j |= bit
+        if i < j:
+            out[i], out[j] = out[j], out[i]
+    length = 2
+    while length <= count:
+        angle = (2 * math.pi / length) * (1 if invert else -1)
+        step = complex(math.cos(angle), math.sin(angle))
+        half = length // 2
+        for start in range(0, count, length):
+            turn = 1 + 0j
+            for k in range(half):
+                a = out[start + k]
+                b = out[start + k + half] * turn
+                out[start + k] = a + b
+                out[start + k + half] = a - b
+                turn *= step
+        length <<= 1
+    return [value / count for value in out] if invert else out
 
 
 def read_map(source, spec, mode):
@@ -259,7 +370,7 @@ def size_of(box):
 
 
 def sample_maps():
-    """An entry from no source, a ringed bark of 64 by 64 with a hole cut in it, for the tests."""
+    """An entry from no source, a ringed bark of 64 by 64 with a hole cut in it and its depth from its normal, for the tests."""
     albedo = Image.new("RGBA", (64, 64))
     normal = Image.new("RGB", (32, 32))
     surface = Image.new("RGBA", (32, 32))
@@ -272,7 +383,7 @@ def sample_maps():
         for x in range(32):
             normal.putpixel((x, y), (int(128 + 60 * math.cos(x * 0.8)), int(128 + 60 * math.sin(y * 0.4)), 255))
             surface.putpixel((x, y), (255, 200, 0, 8 * x))
-    return {"albedo": albedo, "normal": normal, "surface": surface}
+    return {"albedo": albedo, "normal": normal, "surface": surface, "depth": ImageChops.invert(height_of(normal)).filter(ImageFilter.GaussianBlur(1))}
 
 
 def mean_color(albedo):
@@ -339,7 +450,7 @@ def leaf_boxes(albedo):
 # The levels.
 
 def write_entry(maps, folder, kind):
-    """Writes an entry's three files into a folder, and says each one's size and its encoding's error."""
+    """Writes an entry's files into a folder, and says each one's size and its encoding's error."""
     os.makedirs(folder, exist_ok=True)
     report = {}
     for name, image in maps.items():
@@ -435,6 +546,9 @@ def encode(name, levels):
     if name == "normal":
         blocks = [bc5(level) for level in levels]
         return BC5_UNORM, blocks, psnr_bc5(levels[0], blocks[0])
+    if name == "depth":
+        blocks = [bc4(level) for level in levels]
+        return BC4_UNORM, blocks, psnr_bc4(levels[0], blocks[0])
     blocks = [bc7(level) for level in levels]
     return BC7_SRGB if name == "albedo" else BC7_UNORM, blocks, psnr_bc7(levels[0], blocks[0])
 
@@ -589,6 +703,27 @@ def bc5(image):
     return bytes(out)
 
 
+def bc4(image):
+    """The image's one channel in BC4."""
+    out = bytearray()
+    for block in texel_blocks(image.convert("L"), 1):
+        out += bc4_block([texel[0] for texel in block])
+    return bytes(out)
+
+
+def psnr_bc4(image, blocks):
+    total = 0
+    count = 0
+    for at, texels in enumerate(texel_blocks(image.convert("L"), 1)):
+        block = blocks[8 * at:8 * at + 8]
+        palette = bc4_palette(block)
+        bits = int.from_bytes(block, "little") >> 16
+        for i, texel in enumerate(texels):
+            total += (palette[bits >> (3 * i) & 7] - texel[0]) ** 2
+            count += 1
+    return psnr(total, count)
+
+
 def bc4_block(values):
     """One channel's block in BC4's eight-step mode, its highest value first."""
     high, low = max(values), min(values)
@@ -696,7 +831,10 @@ def ktx2(format, levels, blocks):
 
 def data_format(format):
     """The data format descriptor of a block format, its total size first and its one basic block."""
-    if format == BC5_UNORM:
+    if format == BC4_UNORM:
+        model, transfer = MODEL_BC4, TRANSFER_LINEAR
+        samples = [(0, 63, 0)]
+    elif format == BC5_UNORM:
         model, transfer = MODEL_BC5, TRANSFER_LINEAR
         samples = [(0, 63, 0), (64, 63, 1)]
     else:
@@ -706,7 +844,7 @@ def data_format(format):
     block = struct.pack("<II", 0, 2 | block_size << 16)
     block += struct.pack("<4B", model, 1, transfer, 0)
     block += struct.pack("<4B", 3, 3, 0, 0)
-    block += struct.pack("<8B", 16, 0, 0, 0, 0, 0, 0, 0)
+    block += struct.pack("<8B", 8 if format == BC4_UNORM else 16, 0, 0, 0, 0, 0, 0, 0)
     for offset, length, channel in samples:
         block += struct.pack("<HBB4BII", offset, length, channel, 0, 0, 0, 0, 0, 0xFFFFFFFF)
     return struct.pack("<I", 4 + len(block)) + block
