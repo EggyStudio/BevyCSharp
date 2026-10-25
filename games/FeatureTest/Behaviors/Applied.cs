@@ -173,12 +173,15 @@ public partial struct Applied
                 Render.ClearSkyLighting(camera);
                 Render.ClearAtmosphere(camera);
                 Render.ClearSkyFog(camera);
+                Render.SetNightSky(camera, null);
                 Render.SetSkybox(camera, _dusk, brightness: 600f);
             }
             else
             {
-                // The stars behind the atmosphere, dark until DayNight brightens them at dusk.
-                Render.SetSkybox(camera, DayNight.Stars(), brightness: 0f);
+                // The stars, the galaxy and the moon behind the atmosphere, standing by the day's
+                // clock and coming out as the sun goes down.
+                Render.SetSkybox(camera, AssetHandle.None, brightness: 0f);
+                Render.SetNightSky(camera, new NightSkySettings { Clock = DayNight.Clock, MoonSize = 1.5f });
                 Render.SetAtmosphere(camera, Applied.Sky());
                 Render.SetSkyLighting(camera);
 

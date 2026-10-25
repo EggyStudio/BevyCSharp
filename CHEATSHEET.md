@@ -796,6 +796,7 @@ static void SetLook(Entity camera, LookSettings? look);         // Gives a camer
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
 static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
+static void SetNightSky(Entity camera, NightSkySettings? settings);  // Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing where the settings' clock puts them, or with null takes it off
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
@@ -1839,6 +1840,10 @@ static bool Unmount(ScenePack pack);                            // Stops reading
 static Segment2d FromDirectionAndLength(Vec2 direction, float length);  // A segment centered on the origin along a direction, a length long
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
+
+// SkyClock
+void Advance(float hours);                                      // Moves the clock on by hours, the day of the year with it
+Vec3 TowardSky(float rightAscension, float declination);        // The way toward a point of the sky given in its own coordinates, its right ascension and declination in radians, as the stars stand at this hour
 
 // Sphere
 Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other

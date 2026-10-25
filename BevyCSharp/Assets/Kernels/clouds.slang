@@ -141,14 +141,18 @@ float density(float3 world, float3 planet, bool detailed)
     return cloud * shape.y;
 }
 
-// The directional light that lights the scene most, the sun by day, or none.
+// The directional light that lights the scene most through the air, the sun by day and the moon
+// at night, or none.
 int brightest()
 {
     int best = -1;
     float most = 0.0;
     for (uint i = 0u; i < passDirectionalLightCount(); i++)
     {
-        float bright = dot(passLights.directional_lights[i].color.rgb, float3(0.2126, 0.7152, 0.0722));
+        // By the light that gets through the air to here, so a sun set behind the planet gives way
+        // to the moon at night.
+        float3 through = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
+        float bright = dot(passLights.directional_lights[i].color.rgb * through, float3(0.2126, 0.7152, 0.0722));
         if (bright > most)
         {
             most = bright;

@@ -11,27 +11,27 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// The hour runs on from the one the settings hold at <see cref="FeatureSettings.DaySpeed"/> hours
 /// a minute of the game's clock, and the panel's Time page and <c>day.hour</c> set it. Where the
-/// sun stands is worked out for the equinox at <see cref="FeatureSettings.Latitude"/>, so it rises
-/// at six and sets at eighteen anywhere but at the poles, climbing as high as the latitude lets it
-/// at noon. The moon is full, opposite the sun and half an hour behind it, so it rises as the sun
-/// sets. North is along negative Z, the way the light hall stands from the hub, and east along
-/// positive X.
+/// sun, the moon and the stars stand is the engine's sky clock's (<see cref="SkyClock"/>), at the
+/// March equinox at <see cref="FeatureSettings.Latitude"/>, so the sun rises near six and sets near
+/// eighteen, and the moon starts the day nearly full, rising as the sun sets, waxing and waning as
+/// the days go. North is along negative Z, the way the light hall stands from the hub, and east
+/// along positive X.
 /// </para>
 /// <para>
-/// Bevy's atmosphere scatters the light of every directional light and draws each one's disk, so
-/// the moon's disk and the pale blue of a moonlit sky come from it with nothing drawn here, and
-/// <see cref="Render.SetSkyLighting"/> lights the scene from that sky as it changes. The atmosphere
+/// Bevy's atmosphere scatters the light of every directional light, so the pale blue of a moonlit
+/// sky comes from it, and <see cref="Render.SetSkyLighting"/> lights the scene from that sky as it
+/// changes. The moon's own disc, with its phase, is the night sky's, so its light draws none. The atmosphere
 /// also dims and reddens a low sun's light on whatever it falls on, so the sun's color curve warms
 /// it a little only. The lights' strengths and colors are curves by the hour, each light's
 /// strength brought to nothing as it reaches the horizon, and the one that is up casts the shadows,
 /// so a night costs no more shadow views than a day.
 /// </para>
 /// <para>
-/// The stars are a cubemap drawn here (<see cref="Stars"/>), behind the atmosphere, which draws
-/// over them with as much of them as the air lets through, so they fade toward the horizon. Their
-/// brightness is a curve by the hour that is nothing by day, and they turn about the pole star with
-/// the hour, as the sun does. Under the dusk backdrop the sky stays the dusk one, and the sun and
-/// the moon go on moving.
+/// The stars, the galaxy and the moon are the engine's night sky (<see cref="Render.SetNightSky"/>),
+/// which <see cref="Applied"/> gives the camera under the atmosphere with this clock, so they turn
+/// about the pole star with the hours and come out as the sun goes down. The moon's light is its
+/// curve by the hour times the share of its face the sun lights. Under the dusk backdrop the sky
+/// stays the dusk one, and the sun and the moon go on moving.
 /// </para>
 /// <para>
 /// Where the weather runs, the day hands it the sun and the moon, marked as its own, and its clock,
@@ -92,22 +92,9 @@ public partial struct DayNight
         new(24f, 20f, 0.55f, 0.65f, 1f),
     ];
 
-    /// <summary>
-    /// The stars' brightness, in the skybox's candelas a square meter, by the hour.
-    /// </summary>
-    private static readonly Key[] Starlight =
-    [
-        new(0f, 1_200f, 1f, 1f, 1f),
-        new(5f, 1_200f, 1f, 1f, 1f),
-        new(6.25f, 0f, 1f, 1f, 1f),
-        new(17.75f, 0f, 1f, 1f, 1f),
-        new(19f, 1_200f, 1f, 1f, 1f),
-        new(24f, 1_200f, 1f, 1f, 1f),
-    ];
-
-    private static float _hour = 8f;
+    // The sky's clock, at the March equinox, the moon half a day short of full at its start.
+    private static readonly SkyClock Sky = new() { Hour = 8f, DayOfYear = 79f, MoonAgeAtStart = (SkyClock.SynodicMonth / 2f) - 79.5f };
     private static Entity _moon = Entity.None;
-    private static AssetHandle _stars = AssetHandle.None;
 
     /// <summary>
     /// What was last given each light, so a light is written only where it changed.
@@ -117,7 +104,10 @@ public partial struct DayNight
     private static (float Light, Color Color) _ambient = (-1f, default);
 
     /// <summary>The hour of the day now, from midnight at zero.</summary>
-    internal static float Hour => _hour;
+    internal static float Hour => Sky.Hour;
+
+    /// <summary>The sky's clock, which the night sky stands by.</summary>
+    internal static SkyClock Clock => Sky;
 
     /// <summary>
     /// Starts the day at the hour the settings hold, and puts the moon in the sky.
@@ -125,9 +115,10 @@ public partial struct DayNight
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
-        _hour = Wrap(Settings.Current.Hour);
+        Sky.Hour = Wrap(Settings.Current.Hour);
+        Sky.DayOfYear = 79f;
+        Sky.Latitude = Settings.Current.Latitude;
         _moon = Entity.None;
-        _stars = AssetHandle.None;
         _ambient = (-1f, default);
         Given.Clear();
         Settings.Changed -= OnChanged;
@@ -146,8 +137,9 @@ public partial struct DayNight
         ctx.Ecs.SetName(_moon, "Moon");
 
         // The weather's moon where it runs, which it steers from then on, so it makes none of its
-        // own.
+        // own, and elsewhere a light with no disc, the night sky drawing the moon's.
         if (Weather.Active) ctx.Ecs.Insert<MoonLightRef>(_moon);
+        else Render.SetSunDisk(_moon, SunDisk.Off);
         Turn(ctx);
     }
 
@@ -158,7 +150,9 @@ public partial struct DayNight
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
         var settings = Settings.Current;
-        _hour = Wrap(_hour + (settings.DaySpeed * ctx.Time.Delta / 60f));
+        Sky.Latitude = settings.Latitude;
+        Sky.Advance(settings.DaySpeed * ctx.Time.Delta / 60f);
+        var hour = Sky.Hour;
 
         if (Weather.Active)
         {
@@ -166,8 +160,8 @@ public partial struct DayNight
             return;
         }
 
-        var sun = Toward(_hour, settings.Latitude, 0f);
-        var moon = Toward(_hour + 12.5f, settings.Latitude, -0.08f);
+        var sun = Sky.SunDirection;
+        var moon = Sky.MoonDirection;
         var shadows = settings.Shadows && !Render.RayTracingActive;
 
         // Under the atmosphere the sun shines as it does above the air, its noon strength and white,
@@ -175,28 +169,31 @@ public partial struct DayNight
         // it behind the planet, so the curve's reddening and its fade at the horizon, which would
         // count the air twice and leave the sunset no light to scatter, are kept for the dusk sky.
         var raw = Applied.AtmosphereDrawn;
-        Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, _hour), shadows && sun.Y > 0f, fade: !raw);
-        Shine(ctx.Ecs, _moon, moon, At(Moonlight, _hour), shadows && sun.Y <= 0f && moon.Y > 0f);
+        Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, hour), shadows && sun.Y > 0f, fade: !raw);
+        var (moonlight, moonColor) = At(Moonlight, hour);
+        Shine(ctx.Ecs, _moon, moon, (moonlight * Sky.MoonLit, moonColor), shadows && sun.Y <= 0f && moon.Y > 0f);
 
-        var (light, color) = At(Ambient, _hour);
+        var (light, color) = At(Ambient, hour);
         if (MathF.Abs(light - _ambient.Light) > 0.1f)
         {
             Render.SetAmbientLight((color.R, color.G, color.B), light);
             _ambient = (light, color);
         }
 
-        TurnStars(ctx.Ecs, settings.Latitude);
-
         // The look follows the sun's height, its numbers alone changing on the camera.
         if (settings.Look == Look.Day && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
-            Render.SetLook(camera, Cycle.At(Elevation(sun)));
+            Render.SetLook(camera, Cycle.At(Sky.SunAltitude));
     }
 
     /// <summary>The day's look, keyed by the sun's height, which the camera follows while the graphics page asks for it.</summary>
     private static readonly LookCycle Cycle = LookCycle.Day();
 
     /// <summary>The day's look at the hour now.</summary>
-    internal static LookSettings LookNow(FeatureSettings settings) => Cycle.At(Elevation(Toward(_hour, settings.Latitude, 0f)));
+    internal static LookSettings LookNow(FeatureSettings settings)
+    {
+        Sky.Latitude = settings.Latitude;
+        return Cycle.At(Sky.SunAltitude);
+    }
 
     /// <summary>
     /// Sets the weather's clock to this hour and latitude, held still between frames.
@@ -205,7 +202,7 @@ public partial struct DayNight
     {
         if (ecs.Resource<WeatherTimeRef>() is not { } clock) return;
 
-        var day = _hour / 24f;
+        var day = Sky.Hour / 24f;
         if (!clock.Paused) clock.Paused = true;
         if (MathF.Abs(clock.TimeOfDay - day) > 1e-6f) clock.TimeOfDay = day;
         if (clock.Latitude != latitude) clock.Latitude = latitude;
@@ -217,8 +214,8 @@ public partial struct DayNight
     /// </summary>
     internal static void SetHour(float hour)
     {
-        _hour = Wrap(hour);
-        Settings.Change(s => s with { Hour = _hour });
+        Sky.Hour = Wrap(hour);
+        Settings.Change(s => s with { Hour = Sky.Hour });
     }
 
     /// <summary>Sets the hour, or says it and where the sun and the moon stand.</summary>
@@ -236,12 +233,9 @@ public partial struct DayNight
             SetHour(asked);
         }
 
-        var latitude = Settings.Current.Latitude;
-        var sun = Toward(_hour, latitude, 0f);
-        var moon = Toward(_hour + 12.5f, latitude, -0.08f);
-
-        var minutes = (int)MathF.Round(_hour * 60f) % (24 * 60);
-        return $"{minutes / 60:00}:{minutes % 60:00}, the sun {Elevation(sun):0} degrees and the moon {Elevation(moon):0} degrees above the horizon";
+        Sky.Latitude = Settings.Current.Latitude;
+        var minutes = (int)MathF.Round(Sky.Hour * 60f) % (24 * 60);
+        return $"{minutes / 60:00}:{minutes % 60:00}, the sun {Sky.SunAltitude:0} degrees and the moon {Sky.MoonAltitude:0} degrees above the horizon, the moon {Sky.MoonLit:0%} lit";
     }
 
     /// <summary>
@@ -250,26 +244,8 @@ public partial struct DayNight
     /// </summary>
     private static void OnChanged(FeatureSettings was)
     {
-        if (Settings.Current.Hour != was.Hour) _hour = Wrap(Settings.Current.Hour);
+        if (Settings.Current.Hour != was.Hour) Sky.Hour = Wrap(Settings.Current.Hour);
     }
-
-    /// <summary>
-    /// The direction toward a body of the sky at an hour, for a latitude and the body's declination
-    /// in radians, from the hour angle by the usual spherical astronomy.
-    /// </summary>
-    private static Vec3 Toward(float hour, float latitude, float declination)
-    {
-        var angle = (Wrap(hour) - 12f) * MathF.PI / 12f;
-        var phi = latitude * MathF.PI / 180f;
-
-        var east = -MathF.Cos(declination) * MathF.Sin(angle);
-        var north = (MathF.Sin(declination) * MathF.Cos(phi)) - (MathF.Cos(declination) * MathF.Cos(angle) * MathF.Sin(phi));
-        var up = (MathF.Sin(declination) * MathF.Sin(phi)) + (MathF.Cos(declination) * MathF.Cos(angle) * MathF.Cos(phi));
-        return new Vec3(east, up, -north).Normalized;
-    }
-
-    /// <summary>How high a direction stands above the horizon, in degrees.</summary>
-    private static float Elevation(Vec3 direction) => MathF.Asin(Math.Clamp(direction.Y, -1f, 1f)) * 180f / MathF.PI;
 
     /// <summary>
     /// Points a light from a direction and gives it its strength and color, brought to nothing at
@@ -295,96 +271,6 @@ public partial struct DayNight
         wrapped.ShadowMapsEnabled = shadows;
         Given[light] = (strength, given.Color, shadows);
     }
-
-    /// <summary>
-    /// Keeps the stars' brightness and their turn about the pole star to the hour, where the
-    /// camera's skybox is the stars, which <see cref="Applied"/> puts there under the atmosphere.
-    /// </summary>
-    private static void TurnStars(EcsWorld ecs, float latitude)
-    {
-        if (Scene.Camera is not { } camera || !ecs.IsAlive(camera) || !_stars.IsValid) return;
-        if (ecs.Get<SkyboxRef>(camera) is not { } skybox || skybox.Image != _stars) return;
-
-        // The sky turns west about the pole star, which stands as high as the latitude, a full
-        // turn a day, so the stars set where the sun does.
-        var phi = latitude * MathF.PI / 180f;
-        var pole = new Vec3(0f, MathF.Sin(phi), -MathF.Cos(phi));
-        skybox.Rotation = Quat.FromAxisAngle(pole, -(_hour - 12f) * MathF.PI / 12f);
-
-        var brightness = At(Starlight, _hour).Light;
-        if (MathF.Abs(skybox.Brightness - brightness) > 0.5f) skybox.Brightness = brightness;
-    }
-
-    /// <summary>
-    /// The stars as a cubemap, drawn here a pixel at a time the first time they are asked for, on
-    /// black, a faint band of the galaxy across them.
-    /// </summary>
-    /// <remarks>
-    /// Each face's pixel is turned into the direction it is seen along, by the layout every cubemap
-    /// shares, as the dusk sky's are (<see cref="Applied"/>). A star comes from a hash of the
-    /// pixel, the same each run, most of them faint and a few bright, a little blue or a little
-    /// yellow.
-    /// </remarks>
-    internal static AssetHandle Stars()
-    {
-        if (_stars.IsValid) return _stars;
-
-        const int Size = 512;
-        var band = new Vec3(0.3f, 0.55f, 0.78f).Normalized;
-        var pixels = new byte[Size * Size * 6 * 4];
-        for (var face = 0; face < 6; face++)
-        {
-            for (var y = 0; y < Size; y++)
-            {
-                for (var x = 0; x < Size; x++)
-                {
-                    var u = (2f * (x + 0.5f) / Size) - 1f;
-                    var v = (2f * (y + 0.5f) / Size) - 1f;
-                    var direction = (face switch
-                    {
-                        0 => new Vec3(1f, -v, -u),
-                        1 => new Vec3(-1f, -v, u),
-                        2 => new Vec3(u, 1f, v),
-                        3 => new Vec3(u, -1f, -v),
-                        4 => new Vec3(u, -v, 1f),
-                        _ => new Vec3(-u, -v, -1f),
-                    }).Normalized;
-
-                    var hash = (uint)((face * 73_856_093) ^ (y * 19_349_663) ^ (x * 83_492_791));
-                    hash = (hash ^ (hash >> 13)) * 0x5bd1e995u;
-                    hash ^= hash >> 15;
-
-                    // The galaxy's band, faint and a little uneven, where the direction is near
-                    // its plane.
-                    var across = Vec3.Dot(direction, band);
-                    var glow = 0.035f * MathF.Exp(-(across * across) / 0.02f) * (0.7f + (0.3f * ((hash >> 8) % 100) / 100f));
-                    var (r, g, b) = (glow * 0.9f, glow * 0.92f, glow);
-
-                    if (hash % 420 == 0)
-                    {
-                        var bright = MathF.Pow(((hash >> 9) % 1000) / 1000f, 4f);
-                        var shine = 0.08f + (0.92f * bright);
-                        (r, g, b) = ((hash >> 20) % 3) switch
-                        {
-                            0 => (shine * 0.8f, shine * 0.88f, shine),
-                            1 => (shine, shine * 0.92f, shine * 0.75f),
-                            _ => (shine, shine, shine),
-                        };
-                    }
-
-                    var at = ((((face * Size) + y) * Size) + x) * 4;
-                    (pixels[at], pixels[at + 1], pixels[at + 2], pixels[at + 3]) =
-                        (Byte(r), Byte(g), Byte(b), 255);
-                }
-            }
-        }
-
-        _stars = Render.CreateImage(pixels, Size, Size * 6);
-        Render.MakeCubemap(_stars);
-        return _stars;
-    }
-
-    private static byte Byte(float value) => (byte)Math.Clamp(value * 255f, 0f, 255f);
 
     /// <summary>
     /// A curve's strength and color at an hour, straight between the keys either side.

@@ -164,15 +164,18 @@ float cloudShadow(float3 at)
     return cloud_shadow.SampleLevel(cloud_shadow_sampler, uv - floor(uv), 0.0).r;
 }
 
-// The directional light that lights the scene most, whose shadow the sun's share of the fog's light
-// falls into, or none.
+// The directional light that lights the scene most through the air, the sun by day and the moon at
+// night, whose shadow the sun's share of the fog's light falls into, or none.
 int brightest()
 {
     int best = -1;
     float most = 0.0;
     for (uint i = 0u; i < passDirectionalLightCount(); i++)
     {
-        float bright = dot(passLights.directional_lights[i].color.rgb, float3(0.2126, 0.7152, 0.0722));
+        // By the light that gets through the air to here, so a sun set behind the planet gives way
+        // to the moon at night.
+        float3 through = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
+        float bright = dot(passLights.directional_lights[i].color.rgb * through, float3(0.2126, 0.7152, 0.0722));
         if (bright > most)
         {
             most = bright;

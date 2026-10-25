@@ -1340,6 +1340,11 @@ readonly struct Bevy.DataRef<T> : IDataRef, IEquatable<DataRef<T>>
 sealed class Bevy.DataVersionAttribute : Attribute
   DataVersionAttribute(int version)
   int Version { get; }
+enum Bevy.DayPhase : int
+  Dawn = 1
+  Day = 2
+  Dusk = 3
+  Night = 0
 static class Bevy.Debug
   static Key? OverlayKey { get; set; }
   static bool OverlayShown { get; set; }
@@ -4638,6 +4643,16 @@ static class Bevy.Navigation
   static void BlockEdge(Entity node, CompassOctant direction, Entity other = default)
   static void Clear()
   static void Forget(Entity node)
+sealed class Bevy.NightSkySettings
+  NightSkySettings()
+  SkyClock Clock { get; set; }
+  float Earthshine { get; set; }
+  float Galaxy { get; set; }
+  float Moon { get; set; }
+  float MoonSize { get; set; }
+  float StarGrid { get; set; }
+  float Stars { get; set; }
+  float Twinkle { get; set; }
 sealed class Bevy.NotSavedAttribute : Attribute
   NotSavedAttribute()
 enum Bevy.NoteKind : int
@@ -12633,6 +12648,7 @@ static class Bevy.Render
   static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights)
   static void SetMeshletMesh(EcsWorld world, Entity entity, AssetHandle meshlet)
   static void SetMipGeneration(AssetHandle image, bool on)
+  static void SetNightSky(Entity camera, NightSkySettings? settings)
   static void SetPanCamera(Entity camera, PanCameraSettings settings)
   static void SetPathTraced(Entity camera, bool on)
   static void SetPerspective(Entity camera, float fieldOfView, float near, float far)
@@ -13247,6 +13263,26 @@ readonly struct Bevy.Sides : IEquatable<Sides>
   static bool op_Equality(Sides left, Sides right)
   static bool op_Inequality(Sides left, Sides right)
   void Deconstruct(out Length Left, out Length Top, out Length Right, out Length Bottom)
+sealed class Bevy.SkyClock
+  DayPhase Phase { get; }
+  SkyClock()
+  Vec3 MoonDirection { get; }
+  Vec3 Pole { get; }
+  Vec3 SunDirection { get; }
+  Vec3 TowardSky(float rightAscension, float declination)
+  const float SynodicMonth = 29.530588f
+  float AxialTilt { get; set; }
+  float DayOfYear { get; set; }
+  float Hour { get; set; }
+  float Latitude { get; set; }
+  float MoonAge { get; }
+  float MoonAgeAtStart { get; set; }
+  float MoonAltitude { get; }
+  float MoonLit { get; }
+  float MoonPhase { get; }
+  float SkyTurn { get; }
+  float SunAltitude { get; }
+  void Advance(float hours)
 sealed class Bevy.SkyFogSettings
   (float, float, float)? Color { get; set; }
   FroxelFogSettings? Froxels { get; set; }

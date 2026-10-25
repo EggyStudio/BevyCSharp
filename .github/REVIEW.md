@@ -10,32 +10,24 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f93cb76b`, item 69's second phase's first commit, the engine's clouds in the sky,
-pushed at 03:13 on 2026-10-25 after the run of `7fe46ce3` went green; its own run green on the three
-systems at 03:28, carrying three pictures with captions, a Shared line and the review's files, no
-native change. Render.SetClouds takes CloudSettings with a quality of Low, Medium or High at 48, 72
-and 128 steps along a way with 4, 6 and 6 doubling toward the sun, a coverage of 0.45, a layer from
-1,500 to 4,500 m, a density, the shape, detail and weather scales, a wind, a distance of 40 km and
-an ambient; cloud_noise.slang makes a 128-cube Perlin-Worley volume, a 32-cube Worley detail and a
-512-square weather map once on the GPU, clouds.slang marches a pixel at half size after the prepass
-into a history image and clouds_draw.slang lays it over the sky before tonemapping and before the
-sky's fog; the density follows Schneider and Nubis with a soft coverage threshold over a stretched
-weather map and a profile thinning over most of the height so domes come rather than walls, the
-lighting Hillaire's with the sun through the atmosphere's transmittance at each point, the sun's
-march at half density, Wrenninge's four octaves and lobes of 0.8 forward and minus 0.3 back, the
-ambient the environment's diffuse from above and below, the aerial perspective fading toward the
-map's sky color and a cover under 1 percent through made whole. Departure, the history blended at
-0.12 but where the cover differs, weighted toward this frame by four times the difference, since the
-sun's disc showed white through an overcast with the cover lagging. Costs at 1280 by 720, Low about
-0.28 ms, Medium 0.45 to 0.53, High 0.85 to 1.2, the draw 0.02 to 0.035, the noise's one-off 2.5 to 4
-ms; read against the crate's four presets at High beside coverages of 0.3 to 1 at noon and evening,
-the crate's overcast and storm a flat deck where the engine's at 1 is broken heaps, a stratus deck
-for the presets; the feature test's CloudCover on the effects page under the atmosphere, the drive
-script's setting turning the march on in the lavapipe drive; sky.clouds on the console. CloudTests
-six. 1,865 passed, 3 skipped.
+Reviewed up to `dc2ea49d`, item 69's second phase's second commit, the clouds' shadow, pushed at
+04:19 on 2026-10-25 after the run of `f93cb76b` went green, its own run green at 04:41, carrying two
+pictures with captions, a Shared line and the review's files, ABI 307. CloudSettings gains the
+shadow light, a size of 16 km and a strength; a second entry point in clouds.slang runs a fixed
+dispatch before the march, 16 steps from the ground toward the sun through the shell for each texel
+of a 512-square in the sun's own axes mapped as Bevy's decal is with its middle snapped a texel at a
+time, 0.063 ms; the native's set_directional_cookie inserts a tiled DirectionalLightTexture with a
+frame, frame_cookies setting the light's transform to the square's scale and middle with the
+program's rotation so the program keeps its sun, tiled since an untiled cookie blacks the sun out
+past the square; the froxel fog reads the same square to scale the sun's share, the clouds ticking
+before the fog; a fault found before the commit, the frame's numbers going to the march alone so the
+shadow read a planet of radius 0, caught by the tests. CloudShadowTests reads the ground shadowed in
+patches at 0.6 cover, a clear sky's shadow within 2 levels and the clouds off taking it off; the
+crate's CPU cookie beside the engine's. 1,868 passed, 3 skipped, the bridge's checks clean, Cargo
+118, 199 and 11.
 
-Before it, `7fe46ce3` came, item 69's first phase, pushed at 02:08 on 2026-10-25, its run green on
-the three systems.
+Before it, `f93cb76b` came, item 69's clouds, pushed at 03:13 on 2026-10-25, its run green on the
+three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
 2026-10-24, its run green on the three systems.
@@ -267,7 +259,9 @@ from [SHARED.md](SHARED.md).
     comment. The first phase at `7fe46ce3` on 2026-10-25, the froxel fog with its departure over the
     sky; the clouds next. The second phase's first commit at `f93cb76b` on 2026-10-25, the clouds in
     the sky with their departure; its second next, the clouds' shadows on the ground, in the froxel
-    fog and on the sun's light, and the stratus deck with the fourth phase's presets.
+    fog and on the sun's light, and the stratus deck with the fourth phase's presets. The second
+    phase's second commit at `dc2ea49d` on 2026-10-25, the clouds' shadow as a cookie on the sun and
+    in the fog; the third phase next, the clock and the sky behind the atmosphere.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1714,3 +1708,18 @@ directional light picture, giving the light's global transform the square's scal
 Bevy works it out each frame and leaving its turn the program's, through
 `bcs_render_set_directional_cookie` at ABI 307; the froxels' fog reads the same square for the sun's
 share. The crate built its cookie of 128 texels on the CPU at 1.5 to 20 ms and owned its sun.
+
+Shared: the sky's clock and the night sky, in the commit carrying this line, item 69's third phase,
+which 3DEngine's day sky may read beside its own. `SkyClock` puts the sun by the hour, the day of
+the year and the latitude, its declination from the axial tilt and its right ascension along the
+ecliptic, the moon a synodic month behind the sun along the ecliptic without its five degrees, the
+stars by the local sidereal time, the sun's hour angle and right ascension, with tests holding the
+equinox noon at 90 less the latitude, the solstices' noons within a degree, the full moon opposite the
+sun and lit whole, the pole star still and a star back after 23.9345 hours. `Render.SetNightSky`
+adds over sky pixels before the clouds, by its owner's order, stars hashed on a cube's faces, one cell
+in five of 160 a side, a twentieth power of a number for their brightness, under half a pixel wide
+and twinkling near the horizon, the galaxy's band about the galactic pole with its bulge and dark
+lanes, and the moon a sphere lit from the sun's way with earthshine and noise seas, all through the
+atmosphere's transmittance, the stars and galaxy coming out as the sun goes from three degrees up to
+nine down. The clouds, the fog and the shadow now take the directional light that gets most through
+the air, so the moon lights them at night.

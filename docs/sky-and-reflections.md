@@ -210,6 +210,33 @@ picture, so their shadows drift over the ground and the fog in froxels darkens i
 tenth of a millisecond more. The light's global transform takes the square's scale and middle each
 frame and its turn stays the program's. The console's `sky.clouds` sets them while the app runs.
 
+The sky has a clock, and behind the atmosphere the stars, the galaxy and the moon stand by it:
+
+<!-- compiled with:
+Entity camera = default, sun = default, moon = default;
+float delta = default;
+-->
+```csharp
+var clock = new SkyClock { Latitude = 50f, DayOfYear = 172f, Hour = 21f };
+Render.SetNightSky(camera, new NightSkySettings { Clock = clock });
+Render.SetSunDisk(moon, SunDisk.Off);              // the night sky draws the moon's disc
+
+clock.Advance(delta / 60f);                        // an hour a minute, every frame
+```
+
+`SkyClock` works out where the sun, the moon and the stars stand at an hour of a day of the year for
+a latitude, by the usual spherical astronomy, with north along negative Z and east along positive X.
+`SunDirection` and `MoonDirection` aim a directional light, the day of the year moves the sun by the
+earth's `AxialTilt`, so summer days are long, and a tilt of none keeps every day the equinox's. The
+moon goes about the sky once a synodic month behind the sun, so `MoonPhase` and `MoonLit` follow the
+days, and `Phase` says whether it is night, dawn, day or dusk. `Render.SetNightSky` adds the stars,
+the galaxy's band and the moon's disc over the sky through as much of their light as the atmosphere
+lets through, so they fade and redden toward the horizon. The stars and the galaxy turn about the
+pole star with the clock's sidereal time and come out as the sun goes down, and the moon's disc is
+lit from the sun's way, so its phase is the clock's. The clouds and the fog lie over all of it, and
+they are lit by whichever directional light gets most through the air, so at night the moon lights
+them.
+
 A painted sky is a cubemap instead:
 
 <!-- compiled with:
