@@ -840,6 +840,7 @@ sealed class Bevy.CloudSettings
   float ShadowSize { get; set; }
   float ShadowStrength { get; set; }
   float ShapeSize { get; set; }
+  float Stratus { get; set; }
   float Top { get; set; }
   float WeatherSize { get; set; }
   uint Seed { get; set; }
@@ -12674,6 +12675,7 @@ static class Bevy.Render
   static void SetSortedTransparency(Entity camera, bool on = true, uint layers = 0u, float average = 0f, float threshold = 0f)
   static void SetSunDisk(Entity light, SunDisk disk)
   static void SetViewport(Entity camera, uint x, uint y, uint width, uint height)
+  static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null)
   static void SetWireframe(Entity entity, bool on, (float, float, float, float) color = default)
   static void WriteImagePixels(AssetHandle image, ReadOnlySpan<byte> texels)
   static void WriteMesh(AssetHandle mesh, MeshData data)
@@ -14256,6 +14258,30 @@ enum Bevy.VisibilityMode : byte
 static class Bevy.Weather
   static bool Active { get; }
   static void SetPreset(WeatherPreset preset, bool immediately = false)
+enum Bevy.WeatherClimate : int
+  Arid = 2
+  Maritime = 1
+  Polar = 4
+  Temperate = 0
+  Tropical = 3
+sealed class Bevy.WeatherConditions
+  WeatherConditions Copy()
+  WeatherConditions()
+  float CloudBase { get; set; }
+  float CloudCover { get; set; }
+  float CloudDensity { get; set; }
+  float CloudTop { get; set; }
+  float Fog { get; set; }
+  float Gusts { get; set; }
+  float Rain { get; set; }
+  float Snow { get; set; }
+  float Stratus { get; set; }
+  float Temperature { get; set; }
+  float Thunder { get; set; }
+  float WindFrom { get; set; }
+  float WindSpeed { get; set; }
+  static WeatherConditions Lerp(WeatherConditions from, WeatherConditions to, float share)
+  static WeatherConditions Of(WeatherPreset preset)
 enum Bevy.WeatherPreset : int
   Blizzard = 11
   Clear = 0
@@ -14272,6 +14298,24 @@ enum Bevy.WeatherPreset : int
   Snow = 10
   Storm = 7
   Thunderstorm = 8
+sealed class Bevy.WeatherState
+  SkyClock? Clock { get; set; }
+  Vec3 Carried { get; }
+  Vec3 Wind { get; }
+  WeatherClimate Climate { get; set; }
+  WeatherConditions Current { get; }
+  WeatherConditions ForecastAt(float dayOfYear, float hour)
+  WeatherConditions Target { get; }
+  WeatherState()
+  bool Forecast { get; set; }
+  float HalfLife { get; set; }
+  float SnowCover { get; }
+  float SystemsPerDay { get; set; }
+  float Wetness { get; }
+  uint Seed { get; set; }
+  void Advance(float seconds)
+  void Set(WeatherConditions target, bool immediately = false)
+  void Set(WeatherPreset preset, bool immediately = false)
 sealed class Bevy.WideAttribute : Attribute
   WideAttribute()
 static class Bevy.Window

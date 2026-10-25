@@ -155,8 +155,6 @@ public sealed record FeatureSettings
     /// <summary>What is drawn behind the scene.</summary>
     public Backdrop Backdrop { get; init; } = Backdrop.Atmosphere;
 
-    /// <summary>How much of the atmosphere's sky the engine's clouds cover, from none at zero to all at one.</summary>
-    public float CloudCover { get; init; } = 0.4f;
 
     /// <summary>Every sound's loudness, from silent at zero to as recorded at one.</summary>
     public float Master { get; init; } = 1f;
@@ -208,8 +206,8 @@ public sealed record FeatureSettings
     /// </summary>
     public bool Weather { get; init; }
 
-    /// <summary>The weather's conditions while the forecast is off.</summary>
-    public WeatherPreset WeatherKind { get; init; } = WeatherPreset.Clear;
+    /// <summary>The weather's conditions while the forecast is off, the engine's where the crate's does not run.</summary>
+    public WeatherPreset WeatherKind { get; init; } = WeatherPreset.PartlyCloudy;
 
     /// <summary>
     /// How finely the weather's clouds, fog and rain are drawn, against what they cost.

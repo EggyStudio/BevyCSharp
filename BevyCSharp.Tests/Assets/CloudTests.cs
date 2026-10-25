@@ -30,6 +30,17 @@ public sealed class CloudTests
     }
 
     [SkippableFact]
+    public void AtOneCoverageHeapsLeaveTheSkyOpenWhereADeckClosesIt()
+    {
+        Needs.Shaders();
+        var bare = Sky(null);
+        var heaps = Covered(bare, Sky(new CloudSettings { Coverage = 0.5f }));
+        var deck = Covered(bare, Sky(new CloudSettings { Coverage = 0.5f, Stratus = 1f }));
+        Assert.True(heaps < 0.45, $"heaps at half coverage cover {heaps} of the sky");
+        Assert.True(deck > heaps + 0.3, $"a deck at half coverage covers {deck} of the sky where heaps cover {heaps}");
+    }
+
+    [SkippableFact]
     public void GeometryStandsInFrontOfTheClouds()
     {
         Needs.Shaders();

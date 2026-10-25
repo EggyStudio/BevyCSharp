@@ -75,6 +75,7 @@ public static partial class Render
                     throw new ArgumentOutOfRangeException(nameof(settings), box, "A fog box has a size and a visibility above none.");
         }
 
+        var standing = SkyFog.Drawn(camera);
         var draw = SkyFog.DrawFor(camera, settings);
         var (r, g, b) = settings.Color ?? (1f, 1f, 1f);
         draw.Set("fog", new Vector4(settings.Visibility, Math.Max(0f, settings.Start), settings.Height, settings.Base))
@@ -82,6 +83,10 @@ public static partial class Render
                 Math.Clamp(settings.BandDegrees, 0f, 90f), settings.Color is null ? 0f : 1f))
             .Set("color", new Vector4(r * settings.Brightness, g * settings.Brightness, b * settings.Brightness, 1f));
         SkyFog.SetFroxels(camera, draw, settings);
+
+        // A camera drawing the fog since an earlier frame takes the numbers alone, so the weather
+        // can give them every frame.
+        if (standing) return;
         Shaders.SetEnginePrepass(camera, SkyFog.Owner, 1u);
         Shaders.SetEngineViewDraws(camera, SkyFog.Owner, ViewDraw.Fixed(draw, FramePoint.BeforeTonemapping, 3, 1, DrawBlend.Alpha, writesDepth: false));
     }
@@ -118,11 +123,19 @@ internal static partial class SkyFog
         return draw;
     }
 
+    /// <summary>Whether a camera draws the fog in the running app.</summary>
+    internal static bool Drawn(Entity camera)
+    {
+        ForgetOtherApps();
+        return Fogs.TryGetValue(camera.Bits, out var fog) && fog.On;
+    }
+
     /// <summary>Marks a camera's fog taken off, keeping its draw and settings for <see cref="Off"/>.</summary>
     internal static void Forget(Entity camera)
     {
         ForgetOtherApps();
         if (Fogs.TryGetValue(camera.Bits, out var fog)) Fogs[camera.Bits] = fog with { On = false };
+        if (Froxeled.TryGetValue(camera.Bits, out var froxels)) froxels.Dispatched = false;
     }
 
     /// <summary>The cameras drawing fog in the running app, with the settings each was given and whether its draw has compiled.</summary>

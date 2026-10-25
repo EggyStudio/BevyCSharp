@@ -16,6 +16,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// by how high its vertices stand and takes the gusts' phase from where the blade stands, so the
 /// meadow ripples rather than swaying as one. The trees' crowns are drawn with the same shader under
 /// gentler values, over trunks of Bevy's standard material that the player cannot walk through.
+/// Where the engine's weather runs over the map, the wind's way and strength are its.
 /// </para>
 /// <para>
 /// The blades cast no shadows, which thousands of small ones would cost more than they show, and
@@ -35,13 +36,21 @@ public partial struct Vegetation
 
     private const float Half = 15f;
 
-    /// <summary>Which way the wind blows, across the ground.</summary>
+    /// <summary>Which way the wind blows, across the ground, where no weather says.</summary>
     private static readonly Vector2 Wind = Vector2.Normalize(new Vector2(0.8f, 0.6f));
+
+    // The materials the wind is given to, whether they are made, and the wind they were last given.
+    private static ShaderMaterial _grass;
+    private static ShaderMaterial _crown;
+    private static bool _sown;
+    private static Vector2 _blowing;
 
     /// <summary>Sows the meadow and plants the trees.</summary>
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
+        _sown = false;
+        _blowing = Wind;
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
         var ecs = ctx.Ecs;
@@ -57,12 +66,44 @@ public partial struct Vegetation
 
         Meadow(ecs, program);
         Trees(ecs, program);
+        _sown = true;
 
         // A board at the meadow's edge, facing the road from the hub.
         Blocks.Static(ecs, "Vegetation board", new Vec3(0f, Ground + 1.9f, 56.5f), new Vec3(6.6f, 0.8f, 0.1f), Render.CreateMaterial(0.9f, 0.86f, 0.75f, roughness: 0.7f));
         var post = Render.CreateMaterial(0.45f, 0.32f, 0.2f, roughness: 0.85f);
         Blocks.Static(ecs, "Vegetation board, left post", new Vec3(-3f, Ground + 0.75f, 56.5f), new Vec3(0.15f, 1.5f, 0.15f), post);
         Blocks.Static(ecs, "Vegetation board, right post", new Vec3(3f, Ground + 0.75f, 56.5f), new Vec3(0.15f, 1.5f, 0.15f), post);
+    }
+
+    /// <summary>
+    /// Turns the meadow's and the crowns' wind to the map's weather's, its way and how hard it blows,
+    /// where the engine's weather runs.
+    /// </summary>
+    /// <remarks>
+    /// The conditions' wind is given rather than the gusting one, and given again only once it has
+    /// moved by more than a little, since every value a material is given costs it a new bind group,
+    /// and the shader's own waves are the gusts.
+    /// </remarks>
+    [OnUpdate]
+    public static void Blow(BehaviorContext ctx)
+    {
+        if (!_sown) return;
+
+        var blowing = Wind;
+        if (Applied.MapWeatherOn)
+        {
+            // Coming from the north, at 0, it blows south, along positive Z. A stronger wind bends
+            // further, by the square root of its speed against the 4.5 meters a second of the
+            // partly cloudy day the meadow was tuned in.
+            var now = Applied.MapWeather.Current;
+            var from = now.WindFrom * MathF.PI / 180f;
+            blowing = new Vector2(-MathF.Sin(from), MathF.Cos(from)) * MathF.Sqrt(Math.Clamp(now.WindSpeed / 4.5f, 0.05f, 6f));
+        }
+
+        if (Vector2.Distance(blowing, _blowing) < 0.02f) return;
+        _blowing = blowing;
+        _grass.Set("wind", blowing);
+        _crown.Set("wind", blowing);
     }
 
     /// <summary>Writes on the board, every frame, as gizmos do.</summary>
@@ -85,7 +126,7 @@ public partial struct Vegetation
     /// <summary>The blades, one entity each, sharing a mesh and a material.</summary>
     private static void Meadow(EcsWorld ecs, ShaderProgram program)
     {
-        var grass = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = program, Cull = CullMode.None })
+        var grass = _grass = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = program, Cull = CullMode.None })
             .Set("sway", 0.22f)
             .Set("root", 0f)
             .Set("reach", 0.6f)
@@ -118,7 +159,7 @@ public partial struct Vegetation
     private static void Trees(EcsWorld ecs, ShaderProgram program)
     {
         const float Radius = 1.4f;
-        var crown = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = program })
+        var crown = _crown = Shaders.CreateMaterial(new ShaderMaterialSettings { Program = program })
             .Set("sway", 0.3f)
             .Set("root", -Radius)
             .Set("reach", Radius * 2f)

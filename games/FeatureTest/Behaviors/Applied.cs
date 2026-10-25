@@ -72,6 +72,8 @@ public partial struct Applied
         _backdrop = null;
         _dusk = AssetHandle.None;
         _weather = null;
+        _kind = null;
+        MapWeatherOn = false;
         _focus = 10f;
     }
 
@@ -185,19 +187,47 @@ public partial struct Applied
                 Render.SetAtmosphere(camera, Applied.Sky());
                 Render.SetSkyLighting(camera);
 
-                // The far ground and the zones' far walls faded into the sky behind them, and the
-                // sky below the horizon the horizon's color rather than the planet's even gray.
-                Render.SetSkyFog(camera, Fog);
             }
 
             _backdrop = backdrop;
         }
 
-        // The engine's clouds over the atmosphere's sky, where the weather's own do not run, their
-        // shadows drifting over the map in the sun.
-        var clouded = !Weather.Active && backdrop == Backdrop.Atmosphere && settings.CloudCover > 0f;
-        Render.SetClouds(camera, clouded ? new CloudSettings { Coverage = settings.CloudCover, ShadowLight = Scene.Sun } : null);
+        // The engine's weather over the atmosphere's sky, where the crate's does not run, its kind
+        // from the panel or its forecast from the day's clock, giving the clouds, their shadows over
+        // the map in the sun, and the fog, which fades the far ground and the zones' far walls into
+        // the sky behind them and gives the sky below the horizon the horizon's color.
+        if (!Weather.Active && backdrop == Backdrop.Atmosphere)
+        {
+            MapWeather.Clock = DayNight.Clock;
+            MapWeather.Forecast = settings.Procedural;
+            if (!settings.Procedural && _kind != settings.WeatherKind)
+            {
+                MapWeather.Set(settings.WeatherKind, immediately: _kind is null);
+                _kind = settings.WeatherKind;
+            }
+            if (settings.Procedural) _kind = null;
+            Render.SetWeather(camera, MapWeather, new CloudSettings { ShadowLight = Scene.Sun }, Fog);
+            MapWeatherOn = true;
+        }
+        else
+        {
+            if (!Weather.Active)
+            {
+                Render.SetWeather(camera, null);
+                Render.SetClouds(camera, null);
+            }
+            MapWeatherOn = false;
+        }
     }
+
+    /// <summary>The engine's weather over the map.</summary>
+    internal static readonly WeatherState MapWeather = new() { HalfLife = 20f };
+
+    /// <summary>Whether the engine's weather runs over the map, which the vegetation's wind follows.</summary>
+    internal static bool MapWeatherOn { get; private set; }
+
+    // The kind last given the engine's weather, none at the start and while the forecast writes it.
+    private static WeatherPreset? _kind;
 
     /// <summary>
     /// The sky over the map, earth's air with the amounts the Atmosphere Rendering Parameter

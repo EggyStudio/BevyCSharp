@@ -198,7 +198,9 @@ Render.SetClouds(camera, new CloudSettings { Coverage = 0.45f, Quality = CloudQu
 They lie in a layer between `Bottom` and `Top` over the planet, shaped as Schneider's clouds for
 Horizon Zero Dawn are. A weather map says where the sky has cloud and what kind, flat heaps or
 towers, `Coverage` how much of it does, tiling noise `ShapeSize` across cuts each body and finer
-noise `DetailSize` across wears its edges, and `Wind` carries all of it. The sun's light reaches
+noise `DetailSize` across wears its edges, and `Wind` carries all of it. `Stratus` turns the cover
+from heaps into a flat deck low in the layer, its edge ragged where the weather map thins it, which an
+overcast or a rainy sky is. The sun's light reaches
 them through the atmosphere, so a sunset's clouds glow gold from below, a forward lobe silvers an
 edge against the sun, and scattering many times over keeps a thick cloud's sides white. A far cloud
 fades into the sky's color, and the sun's disc does not show through a cloud before it. The clouds
@@ -236,6 +238,38 @@ pole star with the clock's sidereal time and come out as the sun goes down, and 
 lit from the sun's way, so its phase is the clock's. The clouds and the fog lie over all of it, and
 they are lit by whichever directional light gets most through the air, so at night the moon lights
 them.
+
+A weather moves the clouds and the fog together:
+
+<!-- compiled with:
+Entity camera = default, sun = default;
+SkyClock clock = new();
+-->
+```csharp
+var weather = new WeatherState { Clock = clock, Forecast = true, Climate = WeatherClimate.Maritime };
+Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f });
+
+weather.Forecast = false;
+weather.Set(WeatherPreset.Storm);                  // eased into over a minute or so
+```
+
+`WeatherState` holds the conditions of the moment in a `WeatherConditions`, how much cloud and how
+much of it a deck, the clouds' base and top, how hard it rains or snows, how thick the fog is, the
+wind and the temperature, and eases them toward a target by half the way every `HalfLife` seconds,
+so a front comes in over a minute rather than at once. `Set` gives it one of the presets, or
+conditions of the program's own, to ease toward or to take at once. With `Forecast` on it writes the
+target itself from the clock's day and hour, weather systems passing `SystemsPerDay` times a day
+between clear skies and thunderstorms as stormy as the `Climate` makes them, colder in winter and
+at night, the rain falling as snow below a degree and a mist lying on calm mornings, the same for
+the same `Seed` on every machine. `Wind` is the wind of the moment, gusting by the conditions'
+`Gusts`, and `Wetness` and `SnowCover` say how wet the ground is and how much of it lies under snow,
+for a program's materials to darken and whiten by. `Render.SetWeather` moves the state on every
+frame by the game's clock and lays its conditions over the cloud and fog settings given beside it,
+which take the place of the camera's own `SetClouds` and `SetSkyFog`. The clouds take the cover,
+the deck, the base, the top, the density and the wind, the fog thins toward some eighty meters as
+the weather's fog thickens, and its froxels drift on the same wind. Either set of settings can be
+none, and that part stays the program's. The console's `sky.weather` gives the cameras a preset, or
+the forecast, while the app runs.
 
 A painted sky is a cubemap instead:
 

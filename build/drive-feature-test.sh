@@ -80,13 +80,12 @@ quiet day.hour 8
 # software renderer marches the clouds in time and each run captures the same sky, and put back as
 # it was at the end with the day.
 weather_was=()
-for name in WeatherTier WeatherKind Procedural CloudCover; do
+for name in WeatherTier WeatherKind Procedural; do
   weather_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
 done
 quiet setting "WeatherTier Potato"
 quiet setting "WeatherKind PartlyCloudy"
 quiet setting "Procedural false"
-quiet setting "CloudCover 0.45"
 
 quiet frames.wait 30
 quiet mode walking

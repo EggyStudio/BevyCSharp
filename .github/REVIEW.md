@@ -10,27 +10,40 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `dc2ea49d`, item 69's second phase's second commit, the clouds' shadow, pushed at
-04:19 on 2026-10-25 after the run of `f93cb76b` went green, its own run green at 04:41, carrying two
-pictures with captions, a Shared line and the review's files, ABI 307. CloudSettings gains the
-shadow light, a size of 16 km and a strength; a second entry point in clouds.slang runs a fixed
-dispatch before the march, 16 steps from the ground toward the sun through the shell for each texel
-of a 512-square in the sun's own axes mapped as Bevy's decal is with its middle snapped a texel at a
-time, 0.063 ms; the native's set_directional_cookie inserts a tiled DirectionalLightTexture with a
-frame, frame_cookies setting the light's transform to the square's scale and middle with the
-program's rotation so the program keeps its sun, tiled since an untiled cookie blacks the sun out
-past the square; the froxel fog reads the same square to scale the sun's share, the clouds ticking
-before the fog; a fault found before the commit, the frame's numbers going to the march alone so the
-shadow read a planet of radius 0, caught by the tests. CloudShadowTests reads the ground shadowed in
-patches at 0.6 cover, a clear sky's shadow within 2 levels and the clouds off taking it off; the
-crate's CPU cookie beside the engine's. 1,868 passed, 3 skipped, the bridge's checks clean, Cargo
-118, 199 and 11.
+Reviewed up to `6649ab49`, item 69's third phase, the sky's clock and the night sky, pushed at 05:09
+on 2026-10-25 after the run of `dc2ea49d` went green, its own run green at 05:26, carrying two
+pictures with captions, a Shared line and the review's files, no native change. SkyClock holds the
+hour, the day of the year at 79, the latitude at 45, the axial tilt at 23.44 and the moon's age at
+the start, Advance moving it, and gives the sun's and the moon's directions along the ecliptic, the
+moon a synodic month behind the sun without its five degrees of inclination, the phase and the lit
+share, the pole, the sky's turn as local sidereal time from the sun's hour angle and right
+ascension, TowardSky by right ascension and declination, the altitudes and a DayPhase of Night below
+-12 degrees, Dawn or Dusk to 6 and Day; SkyClockTests, 8, read the equinox noon, rise and set at 6
+and 18 with no tilt, the solstices within a degree, the full and the new moon, Advance over the
+year's end, the pole star and the sidereal day. Render.SetNightSky with night_sky.slang draws
+additively at BeforeTonemapping under the owner celestial, before the clouds and the fog, stars on a
+cube grid at one cell in five of 160 with a brightness of the twentieth power times 600 nits under
+half a pixel wide and twinkling near the horizon, the galaxy's band about the real galactic pole and
+center with dark lanes, the moon a lit sphere with earthshine 0.012 and noise seas at 0.7 degrees,
+all through the atmosphere's transmittance, the stars and the galaxy fading between 3 degrees above
+the horizon and about 9 below; NightSkyTests, 4, read stars at night, none by day, a half moon lit
+on the sun's side and refused settings. Two departures. The first stars at 1,500 nits, one cell in
+three and the ninth power showed by day by 148 levels and far too dense, read in pictures, so they
+came to 600 nits, one in five and the twentieth power with the fade by the sun's height, a test
+holding the day's picture within 3 levels; and a fault found, the feature test's sun under the
+atmosphere keeping 12,500 lux after it set, so the clouds, the fog and the cloud shadow picking the
+brightest directional light took the set sun and the night's clouds were black, all three picking by
+the light through the air, the color times the transmittance summed, so the moon lights them at
+night. The feature test's DayNight runs on a SkyClock at the equinox with the moon near full, the
+moonlight scaled by the lit share, the moon light's disk off and the camera given SetNightSky at 1.5
+degrees in place of the star cubemap, Stars, TurnStars, Toward and the Starlight curve gone. 1,880
+passed, 3 skipped, 1,883 the listing plus 11.
+
+Before it, `dc2ea49d` came, item 69's second phase's second commit, the clouds' shadow, pushed at
+04:19 on 2026-10-25, its run green at 04:41.
 
 Before it, `f93cb76b` came, item 69's clouds, pushed at 03:13 on 2026-10-25, its run green on the
 three systems.
-
-Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
-2026-10-24, its run green on the three systems.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -261,7 +274,11 @@ from [SHARED.md](SHARED.md).
     the sky with their departure; its second next, the clouds' shadows on the ground, in the froxel
     fog and on the sun's light, and the stratus deck with the fourth phase's presets. The second
     phase's second commit at `dc2ea49d` on 2026-10-25, the clouds' shadow as a cookie on the sun and
-    in the fog; the third phase next, the clock and the sky behind the atmosphere.
+    in the fog; the third phase next, the clock and the sky behind the atmosphere. The third phase
+    at `6649ab49` on 2026-10-25, the sky's clock and the night sky, the two departures in the head;
+    the fourth next, the weather state with its presets, the stratus deck among them, the blending,
+    the forecast, the wind and the gusts moving the clouds, the fog, the rain and a wind vector for
+    foliage, and the ground's wetness and snow cover.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -889,6 +906,14 @@ mended at `42abf357`.
     a grown one, the owner chose the hybrid, grown method, the paper's parameters as the controls
     and the branches grown inside them by space colonization with light competition. Item 70 holds
     it after the weather and before the level file.
+
+64. **The devlog written as the work goes.** The owner asked on 2026-10-25 at 05:13 that the
+    sessions write the devlog more often than at a day's end, though not at every commit. N 4.8
+    gains the cadence, an item that changes what is seen ending with at least one captioned picture,
+    a pair before and after where it mends and one a phase where it is built in phases, and
+    DEVLOG.md regenerated by the review as each item is archived, the coder's next commit carrying
+    it as it carries the review's files; the three devlogs were regenerated at 05:16 with the day's
+    pictures and items. The same in 3DEngine (Decision 71) and Voxel-Sandbox (Decision 47).
 
 ## Replies
 
@@ -1723,3 +1748,19 @@ lanes, and the moon a sphere lit from the sun's way with earthshine and noise se
 atmosphere's transmittance, the stars and galaxy coming out as the sun goes from three degrees up to
 nine down. The clouds, the fog and the shadow now take the directional light that gets most through
 the air, so the moon lights them at night.
+
+Shared: the weather state, in the commit carrying this line, item 69's fourth phase, which
+3DEngine's sky may read beside its own. `WeatherState` eases its `WeatherConditions` toward a target
+by half the way every 30 seconds, the target one of the crate's fifteen presets, as the crate sets
+them, or a forecast from the clock's day and hour, a storminess of three octaves of value noise over
+1.5 weather systems a day scaled by a climate's mean and swing and read up a ladder of seven presets
+from clear to a thunderstorm, the temperature by the season and the hour, the rain falling as snow
+below a degree and a mist at dawn on calm days, the same for the same seed. The wind gusts by the
+conditions' share about their speed and wavers about their direction, and the ground wets in rain,
+dries over some 400 seconds and whitens under snow. `Render.SetWeather` lays the conditions over a
+camera's clouds and fog every frame, the clouds' cover, base, top, density and wind and the fog's
+visibility in log space toward 80 meters, and a camera whose settings stand otherwise takes the
+numbers alone, so its images, dispatches and draws are not given again. The clouds gain `Stratus`, a
+flat deck low in the layer with a wide threshold carrying the body's noise, which the crate's
+overcast and storm are, and the deck reaches past where the heaps have any cover, or it ends along
+the weather map's texels in straight steps.

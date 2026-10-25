@@ -25,6 +25,12 @@ public sealed class CloudSettings
     /// <summary>How much of the sky has cloud, from none at 0 to overcast at 1, 0.45 unless set.</summary>
     public float Coverage { get; set; } = 0.45f;
 
+    /// <summary>
+    /// How much of the cover is a flat deck of stratus rather than heaps of cumulus, from heaps at 0
+    /// to a deck at 1, which an overcast or a rainy sky is, 0 unless set.
+    /// </summary>
+    public float Stratus { get; set; }
+
     /// <summary>The height of the layer's base above the ground, in meters, 1,500 unless set.</summary>
     public float Bottom { get; set; } = 1500f;
 

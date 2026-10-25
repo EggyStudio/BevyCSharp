@@ -6,6 +6,73 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 line under Done names the item of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that
 closed it.
 
+## 2026-10-25
+
+![](.github/assets/readings/2026-10-25-item-64-look-cycle.webp)
+The feature test looking west at 12:00, 17:00, 17:36, 18:24 and 21:00, the sun at 45, 11, 4, minus 4
+and minus 30 degrees, under the vivid look above and the day's cycle on it below, the two alike at
+noon, the cycle warmer and deeper toward sunset, bluer through the twilight and a calmer navy at
+night.
+
+![](.github/assets/readings/2026-10-25-item-69-crate-references.webp)
+The weather crate's sky at its High tier before item 69 replaces it, few clouds, partly cloudy,
+overcast, storm and fog left to right, at noon above and near sunset below, the references the
+engine's own fog and clouds are read against.
+
+![](.github/assets/readings/2026-10-25-item-69-froxel-colonnade.webp)
+A colonnade between the camera and a sun 8 degrees up in fog seen to 95% at 160 meters, the fog in
+closed form, in froxels at High and in Bevy's own volumetric fog above, and by night under three
+lamps in closed form and in froxels below, the lamps glowing in the froxels, with the middle of the
+day pair beside them, where the pillar standing between the eye and the sun casts its shadow down
+the whole way and the fog there takes the sky's blue alone.
+
+![](.github/assets/readings/2026-10-25-item-69-froxels-feature-test.webp)
+The feature test's render gallery at 17:36 with the fog in closed form on the left and in froxels at
+Medium on the right, the fog in the gallery wall's shadow before it lit by the sky alone and bluer.
+
+![](.github/assets/readings/2026-10-25-item-69-cloud-coverages.webp)
+The engine's clouds at coverages of 0.15, 0.3, 0.5, 0.7 and 0.9, at noon above and with the sun four
+degrees up below, from a clear sky through fair weather heaps to a broken sky.
+
+![](.github/assets/readings/2026-10-25-item-69-clouds-against-crate.webp)
+The weather crate's few clouds, partly cloudy, overcast and storm at its High tier in the first and
+third rows, at noon and near sunset, and the engine's clouds at High under the same sky at coverages
+of 0.3, 0.5, 0.75 and 1 below each, rounded heaps with worn edges, white by day and lit gold from
+below at sunset where the crate's are small and gray and its overcast a flat deck.
+
+![](.github/assets/readings/2026-10-25-item-69-clouds-feature-test.webp)
+The feature test's hub at 14:00 and 17:36 under no cloud on the left and the engine's clouds at a
+cover of 0.4 on the right, white heaps by day and at sunset dark with gold lit tops and a bright
+edge on the one before the sun.
+
+![](.github/assets/readings/2026-10-25-item-69-cloud-shadows-against-crate.webp)
+The ground seen from 300 meters up under the weather crate's partly cloudy sky and its cookie built
+on the CPU on the left, and under the engine's clouds at a coverage of 0.5 and their shadow built on
+the GPU on the right, the shade under a cloud lit by the sky alone and blue, soft at its edges and
+drifting with the clouds.
+
+![](.github/assets/readings/2026-10-25-item-69-cloud-shadows-feature-test.webp)
+The feature test's hub from 90 meters up at 14:00 under no cloud on the left and in a cloud's shadow
+at a cover of 0.5 on the right, the ground and the froxels' fog over it lit by the sky alone.
+
+![](.github/assets/readings/2026-10-25-item-69-night-sky-against-crate.webp)
+The weather crate's clear sky at midnight on the left, and the engine's night sky by its sky clock
+at midnight and at 20:30, under Bevy's atmosphere lit by a gibbous moon, the stars fine and few
+bright, the galaxy's band crossing the sky with its dark lanes, and the moon a small disc lit from
+the sun's way.
+
+![](.github/assets/readings/2026-10-25-item-69-night-sky-feature-test.webp)
+The feature test's sky by the clock at 19:12 looking east as the full moon rises and at 03:00
+looking west as it sets, with the clouds lit by the brightest light before the change on the left,
+the sun set behind the planet leaving them black, and by the brightest light through the air after
+it on the right, moonlit gray and warm toward the low moon.
+
+Done that day
+
+- Item 64 at `5041dda3`. The sky is photoreal after Hillaire's 2020 atmosphere, keeping 3DEngine's
+  vibrance.
+- Item 71 at `d8ecd271`. A frame point after tonemapping is ordered against FXAA, SMAA and CAS.
+
 ## 2026-10-24
 
 ![](.github/assets/readings/2026-10-24-denoiser-checker-crops.webp)
@@ -67,6 +134,51 @@ The feature test's Cornell box at High, its path-traced reference and the differ
 whose lamp panel read 40,053 against the reference's 49, which item 60 traced to the emissive's
 exposure weight the bridge never set.
 
+![](.github/assets/readings/2026-10-24-item-52-edge-leak.webp)
+The floor about the foot of an edge a stone wall's two halves meet along, a glowstone beyond it, at
+eight times its brightness, the fan of light through the edge before the field's resolve held the
+cells about it inside and none after, 15 sRGB levels at the brightest where 3 with the edge closed
+by a block.
+
+![](.github/assets/readings/2026-10-24-item-52-screen-probes-cornell.webp)
+The feature test's Cornell box at High with the screen probes on the left and left out on the right,
+the probes darkening the blocks' feet and the corners and leaving streaks a tile wide on the back
+wall, the blotches 3DEngine names as a term.
+
+![](.github/assets/readings/2026-10-24-item-63-hud.webp)
+The feature test's hub before item 63 on the left, a sprite throbbing at the top left, the frame's
+count at the bottom left and the scene's gizmos drawn a second time as marks at the middle by the
+sprite's 2D camera, and after it on the right, the frame's rate in green at the top left and the
+middle clear.
+
+![](.github/assets/readings/2026-10-24-item-64-feature-test-sunset.webp)
+The feature test looking west at 17:00, 17:36, 18:00 and 18:12, above as the day's curve dimmed the
+sun to nothing at the horizon and below with the sun given as above the air and the atmosphere
+dimming it, the sunset's band and the sun's red disc back.
+
+![](.github/assets/readings/2026-10-24-item-64-sky-readings.webp)
+The sky toward the sun at 30, 8, 2 and -2 degrees, each row Bruneton's amounts from Bevy's lookup
+textures and raymarched, then the Atmosphere Rendering Parameter Calculator's the same two ways, the
+lookup textures within a level of the raymarch and the calculator's sunset gold under a gray green
+where Bruneton's is orange under purple.
+
+![](.github/assets/readings/2026-10-24-item-64-far-ground-fog.webp)
+The feature test along its far ground at 14:00 above and 17:36 below, on the left with the
+atmosphere's even ground under the horizon and the level's edge standing against it, and on the
+right under the sky's fog at 700 meters, the band under the horizon in the horizon's color and the
+far ground fading into it, warm toward the setting sun.
+
+![](.github/assets/readings/2026-10-24-item-64-fog-sharp-read.webp)
+The horizon at 17:36 without fog, then under fog whose color was read from the sky's light through a
+wide lobe that took in the dark ground under the horizon and left a blue gray band, then read nearly
+sharp, the band and the haze gold as the sky above them.
+
+![](.github/assets/readings/2026-10-24-item-64-looks.webp)
+The feature test along its far ground at 14:00 above and 17:36 below, under Bevy's TonyMcMapface on
+the left, the engine's curve with its knee in the middle, and the vivid look 3DEngine's block game
+is graded by on the right, the sky deep blue at the top by day and the setting sun's light gold on
+the ground.
+
 ![](.github/assets/denoiser.webp)
 Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
 opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
@@ -80,6 +192,8 @@ Done that day
 
 - Item 51 at `c230300b`. Radiance cascades over the field, 3DEngine's second phase, lighting Bevy's
   surfaces through an additive pass (Decision 51).
+- Item 52 at `f0ae14ec`. The screen's probes, the glow lights and the counted meshes, 3DEngine's
+  third phase and its mends of 2026-10-21 (Decision 51).
 - Item 54 at `97440a1d`. A denoiser over Solari's lit result, so the ray-traced tier's picture is
   clean (Decision 52).
 - Item 59 at `750c9cbc`. The denoiser's node comes down from 3.6 ms at 1080p, read stage by stage
@@ -88,6 +202,8 @@ Done that day
 - Item 61 at `eca6e651`. No running sentence holds a colon, across the documents, the comments and
   the scripts.
 - Item 62 at `ce186327`. The open floor test reads the same light every run.
+- Item 63 at `30362cf2`. The feature test's HUD is clean, a green frame rate in a corner and nothing
+  else over the view.
 
 ## 2026-10-23
 
@@ -777,8 +893,8 @@ the extrusion row of 3d_shapes. (`6b94ca28`)
 ![](.github/assets/examples/load_gltf.webp)
 ![](.github/assets/examples/query_gltf_primitives.webp)
 ![](.github/assets/examples/update_gltf_scene.webp)
-The five glTF examples and hello_world are written, and fps_overlay is marked missing for want of
-Bevy's dev tools. (`bb440b9a`)
+The five glTF examples and hello_world are written, and fps_overlay is marked missing lacking Bevy's
+dev tools. (`bb440b9a`)
 
 ![](.github/assets/examples/clear_color.webp)
 ![](.github/assets/examples/minimizing.webp)

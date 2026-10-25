@@ -56,7 +56,7 @@ public static partial class Render
 
         float[] numbers =
         [
-            settings.Coverage, settings.Bottom, settings.Top, settings.Density, settings.ShapeSize, settings.DetailSize,
+            settings.Coverage, settings.Stratus, settings.Bottom, settings.Top, settings.Density, settings.ShapeSize, settings.DetailSize,
             settings.Erosion, settings.WeatherSize, settings.Wind.X, settings.Wind.Y, settings.Wind.Z, settings.Distance, settings.Ambient,
             settings.ShadowSize, settings.ShadowStrength,
         ];
@@ -120,7 +120,9 @@ internal static class Clouds
     {
         ForgetOtherApps();
         var noise = NoiseFor(settings.Seed);
-        if (!Cameras.TryGetValue(camera.Bits, out var clouds))
+        var had = Cameras.TryGetValue(camera.Bits, out var found);
+        var clouds = found!;
+        if (!had)
         {
             clouds = new Camera
             {
@@ -130,6 +132,9 @@ internal static class Clouds
             };
             Cameras[camera.Bits] = clouds;
         }
+        // A camera whose clouds stand as they are takes the numbers alone, so the weather can give
+        // them every frame, its image, dispatches and draw left as they were.
+        var standing = had && clouds.Settings.ShadowLight == settings.ShadowLight && clouds.Shadow.IsValid == !settings.ShadowLight.IsNone;
         if (!clouds.Shadowed.IsNone && clouds.Shadowed != settings.ShadowLight) Uncookie(clouds);
         clouds.Settings = settings;
         if (!settings.ShadowLight.IsNone && !clouds.Shadow.IsValid)
@@ -143,6 +148,7 @@ internal static class Clouds
         if (clouds.Shadow.IsValid) Feed(clouds, clouds.Shadow, noise);
         clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
         Turn(clouds, 0f);
+        if (standing) return;
 
         Shaders.SetEngineViewImages(camera, Owner, new ViewImage("clouds", ShaderImageFormat.Rgba16Float, Scale: 0.5f, History: true));
         Shaders.SetEnginePrepass(camera, Owner, 1u);
@@ -158,11 +164,15 @@ internal static class Clouds
         var settings = clouds.Settings;
         instance.Set("shape", new Vector4(Math.Clamp(settings.Coverage, 0f, 1f), settings.Density, 1f / settings.ShapeSize, 1f / settings.DetailSize))
             .Set("lobes", new Vector4(0.8f, -0.3f, 0.3f, Math.Max(0f, settings.Ambient)))
+            .Set("stratus", new Vector4(Math.Clamp(settings.Stratus, 0f, 1f), 0f, 0f, 0f))
             .SetTexture("cloud_shape", noise.Shape)
             .SetTexture("cloud_detail", noise.Detail)
             .SetTexture("cloud_weather", noise.Weather)
-            .SetSampler("cloud_sampler", SamplerSettings.Linear)
-            .SetSampler("clouds_previous_sampler", SamplerSettings.Clamped);
+            .SetSampler("cloud_sampler", SamplerSettings.Linear);
+
+        // Last frame's clouds are the march's alone, which the shadow does not declare, and a
+        // value set for what a compiled shader does not declare is refused.
+        if (instance == clouds.March) instance.SetSampler("clouds_previous_sampler", SamplerSettings.Clamped);
     }
 
     internal static void Clear(Entity camera)

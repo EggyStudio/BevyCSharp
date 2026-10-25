@@ -823,6 +823,7 @@ static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Mak
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
 static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog over a camera's picture in the color the sky has at the horizon along each way, replacing any it had, so distant geometry fades into the sky behind it and the sky below the horizon takes the horizon's color
 static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
+static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is
@@ -1872,4 +1873,15 @@ static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each componen
 
 // Weather
 static void SetPreset(WeatherPreset preset, bool immediately = false);  // Sets the weather to a preset, eased into over its transition, or at once
+
+// WeatherConditions
+WeatherConditions Copy();                                       // A copy, to change without changing these
+static WeatherConditions Lerp(WeatherConditions from, WeatherConditions to, float share);  // The weather part of the way from one set of conditions to another, each number that far between the two
+static WeatherConditions Of(WeatherPreset preset);              // The conditions a preset names
+
+// WeatherState
+void Set(WeatherPreset preset, bool immediately = false);       // Gives the weather a preset to ease toward, or to take at once
+void Set(WeatherConditions target, bool immediately = false);   // Gives the weather conditions to ease toward, or to take at once
+void Advance(float seconds);                                    // Moves the weather on, its conditions, its wind and the ground
+WeatherConditions ForecastAt(float dayOfYear, float hour);      // The conditions the forecast gives a day of the year and an hour
 ```

@@ -20,6 +20,7 @@ internal static partial class SkyFog
         internal required FroxelFogSettings Settings { get; set; }
         internal int Frames { get; set; }
         internal Vec3 Carried { get; set; }
+        internal bool Dispatched { get; set; }
     }
 
     private static readonly Dictionary<ulong, Froxels> Froxeled = [];
@@ -91,9 +92,11 @@ internal static partial class SkyFog
             .SetTexture("fog_volume", froxels.Volume)
             .SetSampler("fog_volume_sampler", SamplerSettings.Clamped);
 
+        if (froxels.Dispatched) return;
         Shaders.SetEngineViewDispatches(camera, Owner,
             ViewDispatch.Fixed(froxels.Inject, FramePoint.AfterPrepass, (grid.X + 3) / 4, (grid.Y + 3) / 4, (grid.Z + 3) / 4),
             ViewDispatch.Fixed(froxels.Integrate, FramePoint.AfterPrepass, (grid.X + 7) / 8, (grid.Y + 7) / 8));
+        froxels.Dispatched = true;
     }
 
     /// <summary>

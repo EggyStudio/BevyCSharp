@@ -50,6 +50,9 @@ uniform float4 march;
 // the sky's own light is.
 uniform float4 lobes;
 
+// x: the share of the cover that is a flat deck of stratus rather than heaps. yzw: unused.
+uniform float4 stratus;
+
 // The share of the sun's light the clouds let through to the ground over a square about the
 // camera, in the red, which `shadows` writes and Bevy lays over the sun's light as its picture.
 [format("rgba8")] WTexture2D<float4> cloud_shadow;
@@ -111,8 +114,16 @@ float density(float3 world, float3 planet, bool detailed)
     // coverage alone would set it, since a cloud's dome fills less than its patch, and none at a
     // coverage of none.
     float4 weather = cloud_weather.SampleLevel(cloud_sampler, float3(drifted.xz * wind.w, 0.25), 0.0);
-    float cover = saturate(remap(weather.r, 0.95 - shape.x, 1.45 - shape.x, 0.0, 1.0)) * smoothstep(0.0, 0.1, shape.x);
-    if (cover <= 0.0)
+    float some = smoothstep(0.0, 0.1, shape.x);
+    float cover = saturate(remap(weather.r, 0.95 - shape.x, 1.45 - shape.x, 0.0, 1.0)) * some;
+
+    // A flat deck covers most of the sky at the same coverage, low in the layer, which an overcast
+    // is. Its edge, where the weather thins it, comes out ragged rather than a wall, from a wide
+    // threshold with the body's noise carried into it. It reaches past where the heaps have any
+    // cover at all, so a point is empty only where neither has, or the deck would end along the
+    // weather map's texels, a run of straight steps.
+    float deckCover = stratus.x > 0.0 ? saturate(remap(weather.r, 0.55 - shape.x * 0.9, 1.05 - shape.x * 0.9, 0.0, 1.0)) * some : 0.0;
+    if (cover <= 0.0 && deckCover <= 0.0)
         return 0.0;
 
     // A rounded base and a top that rises with the cloud's kind, flat heaps to towers, thinning over
@@ -120,13 +131,20 @@ float density(float3 world, float3 planet, bool detailed)
     float kind = weather.g;
     float top = lerp(0.35, 1.0, kind);
     float profile = smoothstep(0.0, 0.08, h) * (1.0 - smoothstep(top * 0.15, top, h));
-    if (profile <= 0.0)
+    float deckProfile = smoothstep(0.0, 0.06, h) * (1.0 - smoothstep(0.3, 0.6, h));
+    if (profile <= 0.0 && deckProfile * deckCover <= 0.0)
         return 0.0;
 
     float4 body = cloud_shape.SampleLevel(cloud_sampler, drifted * shape.z, 0.0);
     float heaps = body.g * 0.625 + body.b * 0.25 + body.a * 0.125;
     float base = saturate(remap(body.r, heaps - 1.0, 1.0, 0.0, 1.0));
-    float cloud = saturate(remap(base * profile, 1.0 - cover, 1.0, 0.0, 1.0)) * cover;
+    // None where the heaps have no cover, whose threshold would be a division by nothing.
+    float cloud = cover > 0.0 ? saturate(remap(base * profile, 1.0 - cover, 1.0, 0.0, 1.0)) * cover : 0.0;
+    if (deckCover > 0.0)
+    {
+        float deck = saturate(remap(lerp(0.7, base, 0.6) * deckProfile, 1.0 - deckCover, 1.0, 0.0, 1.0)) * deckCover;
+        cloud = lerp(cloud, deck, saturate(stratus.x));
+    }
     if (cloud <= 0.0)
         return 0.0;
 
@@ -135,7 +153,7 @@ float density(float3 world, float3 planet, bool detailed)
         float4 fine = cloud_detail.SampleLevel(cloud_sampler, drifted * shape.w, 0.0);
         float wisps = fine.r * 0.625 + fine.g * 0.25 + fine.b * 0.125;
         // Wisps at the base turn to billows toward the top.
-        float wear = lerp(wisps, 1.0 - wisps, saturate(h * 4.0)) * 0.75 * march.z;
+        float wear = lerp(wisps, 1.0 - wisps, saturate(h * 4.0)) * 0.75 * march.z * (1.0 - 0.6 * saturate(stratus.x));
         cloud = saturate(remap(cloud, wear, 1.0, 0.0, 1.0));
     }
     return cloud * shape.y;

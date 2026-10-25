@@ -107,7 +107,7 @@ internal static class ConsoleSkyCommands
         foreach (var camera in cameras)
         {
             var was = clouded.FirstOrDefault(c => c.Camera == camera).Settings;
-            var settings = was is null ? new CloudSettings() : Copy(was);
+            var settings = was is null ? new CloudSettings() : SkyWeather.Copy(was);
             settings.Coverage = cover;
             settings.Quality = level.Value;
             Render.SetClouds(camera, settings);
@@ -115,22 +115,44 @@ internal static class ConsoleSkyCommands
         return string.Create(CultureInfo.InvariantCulture, $"clouds over {cover:0.##} of the sky at {level.Value.ToString().ToLowerInvariant()}, on {cameras.Count} camera{(cameras.Count == 1 ? "" : "s")}");
     }
 
-    private static CloudSettings Copy(CloudSettings was) => new()
+    [Command("sky.weather", "Gives the engine's weather on the cameras a preset to ease into, or at once, turns its forecast on or off, or says what it is: sky.weather [preset|forecast|still] [now]")]
+    internal static string WeatherCommand(string word = "", string when = "")
     {
-        Quality = was.Quality,
-        Coverage = was.Coverage,
-        Bottom = was.Bottom,
-        Top = was.Top,
-        Density = was.Density,
-        ShapeSize = was.ShapeSize,
-        DetailSize = was.DetailSize,
-        Erosion = was.Erosion,
-        WeatherSize = was.WeatherSize,
-        Wind = was.Wind,
-        Distance = was.Distance,
-        Ambient = was.Ambient,
-        Seed = was.Seed,
-    };
+        var weathers = SkyWeather.All().ToList();
+        if (weathers.Count == 0)
+        {
+            ConsoleHost.Fail("NO_WEATHER", "No camera has the engine's weather. Give one weather with Render.SetWeather.");
+            return "sky.weather [preset|forecast|still] [now]";
+        }
+
+        var asked = word.Trim();
+        if (asked.Length == 0)
+        {
+            return string.Join("\n", weathers.Select(w => string.Create(CultureInfo.InvariantCulture,
+                $"{w.Camera}: cloud {w.Weather.Current.CloudCover:0.##} ({w.Weather.Current.Stratus:0.##} a deck), rain {w.Weather.Current.Rain:0.##}, snow {w.Weather.Current.Snow:0.##}, fog {w.Weather.Current.Fog:0.##}, wind {w.Weather.Wind.Length:0.#} m/s, {w.Weather.Current.Temperature:0.#} C, the ground {w.Weather.Wetness:0.##} wet and {w.Weather.SnowCover:0.##} under snow{(w.Weather.Forecast ? ", by the forecast" : "")}")));
+        }
+
+        if (asked.Equals("forecast", StringComparison.OrdinalIgnoreCase) || asked.Equals("still", StringComparison.OrdinalIgnoreCase))
+        {
+            var on = asked.Equals("forecast", StringComparison.OrdinalIgnoreCase);
+            foreach (var (_, weather) in weathers) weather.Forecast = on;
+            return on ? "the forecast writes the weather" : "the weather holds what it was last given";
+        }
+
+        if (!Enum.TryParse<WeatherPreset>(asked, ignoreCase: true, out var preset) || !Enum.IsDefined(preset))
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{asked}' is not forecast, still or a preset, which are {string.Join(", ", Enum.GetNames<WeatherPreset>())}.");
+            return "sky.weather [preset|forecast|still] [now]";
+        }
+
+        var now = when.Trim().Equals("now", StringComparison.OrdinalIgnoreCase);
+        foreach (var (_, weather) in weathers)
+        {
+            weather.Forecast = false;
+            weather.Set(preset, now);
+        }
+        return now ? $"the weather is {preset}" : $"the weather eases into {preset}";
+    }
 
     [Command("sky.froxels", "Works the sky's fog out in froxels near the cameras drawing it, as far as given, where shadows cut it into shafts and lamps glow in it, or in closed form alone: sky.froxels <off|low|medium|high> [distance]")]
     internal static string Froxels(string quality, float distance = 250f)
