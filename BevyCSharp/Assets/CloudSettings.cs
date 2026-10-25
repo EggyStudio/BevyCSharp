@@ -57,4 +57,22 @@ public sealed class CloudSettings
 
     /// <summary>The seed the noise is made from, so two games' skies differ, 0 unless set.</summary>
     public uint Seed { get; set; }
+
+    /// <summary>
+    /// The directional light the clouds shadow, the sun, or none to cast no shadow, none unless set.
+    /// </summary>
+    /// <remarks>
+    /// The clouds' shadow is laid over the light as its picture across a square
+    /// <see cref="ShadowSize"/> wide about the camera, repeating past it, and the light's global
+    /// transform is given that square's scale and middle each frame after Bevy works it out, its turn
+    /// left the program's. A directional light lights by its turn alone, so its light and its shadow
+    /// maps are as they were. The sky's fog in froxels darkens in the shadow too.
+    /// </remarks>
+    public Entity ShadowLight { get; set; } = Entity.None;
+
+    /// <summary>How wide the square the shadow is worked out over is, in meters, 16,000 unless set.</summary>
+    public float ShadowSize { get; set; } = 16_000f;
+
+    /// <summary>How much of the sun's light a thick cloud's shadow takes away, from none at 0 to all at 1, 1 unless set.</summary>
+    public float ShadowStrength { get; set; } = 1f;
 }

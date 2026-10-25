@@ -498,6 +498,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_set_light_cookie(ulong light, int image);
 
+    /// <summary>Lays a picture over a directional light across a square of the world about a point, or with an image under zero takes it off.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_directional_cookie(ulong light, int image, float half, float x, float y, float z);
+
     /// <summary>Softens a light's shadows as a light of a size, or hardens them with zero.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

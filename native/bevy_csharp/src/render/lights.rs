@@ -270,6 +270,85 @@ pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
     })
 }
 
+/// Where a directional light's picture lies over the world, a square `half` world units from its
+/// middle to each side, about `center`, along the light's own axes.
+///
+/// Bevy lays a directional light's picture across the light's own space, a square two units wide
+/// scaled and moved by the light's transform, so a picture meant to lie over kilometers of ground
+/// needs a light scaled to them, which a program aiming its sun does not give it. The light's
+/// global transform is given this scale and middle after Bevy works it out each frame, its turn
+/// left the program's, and a directional light lights by its turn alone, so nothing else moves.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component, Clone, Copy)]
+pub struct BcsCookieFrame {
+    pub half: f32,
+    pub center: bevy::math::Vec3,
+}
+
+/// Gives each directional light with a framed picture the frame, after transforms are worked out.
+#[cfg(feature = "render")]
+pub fn frame_cookies(
+    mut lights: bevy::ecs::system::Query<(&BcsCookieFrame, &mut bevy::transform::components::GlobalTransform)>,
+) {
+    for (frame, mut global) in &mut lights {
+        let rotation = global.rotation();
+        *global = bevy::transform::components::GlobalTransform::from(bevy::transform::components::Transform {
+            translation: frame.center,
+            rotation,
+            scale: bevy::math::Vec3::splat(frame.half.max(1e-3)),
+        });
+    }
+}
+
+/// Lays a picture over a directional light's light across a square of the world `half` units from
+/// its middle to each side about a point, repeating past it, or with an image under zero takes it
+/// off. Only the picture's red is read, how much light gets through.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_set_directional_cookie(light: u64, image: i32, half: f32, x: f32, y: f32, z: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (light, image, half, x, y, z);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::light::{DirectionalLight, DirectionalLightTexture};
+
+            let handle = if image >= 0 {
+                match crate::state::with_world_opt(|world| crate::assets::clone_handle(world, image)).flatten() {
+                    Some(handle) => Some(handle.typed::<bevy::image::Image>()),
+                    None => return status::NOT_PRESENT,
+                }
+            } else {
+                None
+            };
+
+            crate::state::with_world(|world| {
+                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                if world.get::<DirectionalLight>(entity).is_none() {
+                    return status::NO_COMPONENT;
+                }
+
+                match handle {
+                    Some(image) => {
+                        world.entity_mut(entity).insert((
+                            DirectionalLightTexture { image, tiled: true },
+                            BcsCookieFrame { half, center: bevy::math::Vec3::new(x, y, z) },
+                        ));
+                    }
+                    None => {
+                        world.entity_mut(entity).remove::<(DirectionalLightTexture, BcsCookieFrame)>();
+                    }
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Softens a light's shadow the farther it falls from what casts it, as a light of `size` world
 /// units across does, or with a size of zero or less makes it hard again.
 ///

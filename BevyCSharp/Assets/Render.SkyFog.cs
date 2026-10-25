@@ -147,5 +147,6 @@ internal static partial class SkyFog
         Fogs.Clear();
         Froxeled.Clear();
         _noVolume = AssetHandle.None;
+        _noShadow = AssetHandle.None;
     }
 }

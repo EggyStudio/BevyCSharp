@@ -316,9 +316,13 @@ internal static unsafe partial class SceneField
     /// One of the library's compute programs, compiled from its own copy of the kernel, which the field
     /// and global illumination's probes are built and traced with.
     /// </summary>
-    // Named by its file, so its GPU time reads as shader field_splat and the like.
-    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl) =>
-        Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(file) { Source = Kernel(file) }, ComputeTarget = target });
+    // Named by its file, so its GPU time reads as shader field_splat and the like, and by its entry
+    // point beside the file's name where it is not main, as shader clouds_shadows.
+    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl, string entry = "main")
+    {
+        var named = entry == "main" ? file : $"{Path.GetFileNameWithoutExtension(file)}_{entry}.slang";
+        return Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(named, entry) { Source = Kernel(file) }, ComputeTarget = target });
+    }
 
     /// <summary>An instance of one of the library's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
     internal static ShaderInstance Draw(string file)

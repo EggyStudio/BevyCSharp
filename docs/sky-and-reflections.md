@@ -189,10 +189,10 @@ froxels take about 0.1 ms of the GPU at `Low`, 0.2 at `Medium` and 0.5 at `High`
 Clouds fill the sky above the atmosphere's camera:
 
 <!-- compiled with:
-Entity camera = default;
+Entity camera = default, sun = default;
 -->
 ```csharp
-Render.SetClouds(camera, new CloudSettings { Coverage = 0.45f, Quality = CloudQuality.Medium });
+Render.SetClouds(camera, new CloudSettings { Coverage = 0.45f, Quality = CloudQuality.Medium, ShadowLight = sun });
 ```
 
 They lie in a layer between `Bottom` and `Top` over the planet, shaped as Schneider's clouds for
@@ -204,7 +204,11 @@ edge against the sun, and scattering many times over keeps a thick cloud's sides
 fades into the sky's color, and the sun's disc does not show through a cloud before it. The clouds
 are marched at half the picture's size and settle over a few frames, and at 1280 by 720 take about
 0.3 ms of the GPU at `Low`, 0.5 at `Medium` and 1 at `High`. They lie behind every piece of geometry
-and in front of the sky's fog. The console's `sky.clouds` sets them while the app runs.
+and in front of the sky's fog. With `ShadowLight` they shadow the sun, how much of its light gets
+through worked out over a square `ShadowSize` wide about the camera and laid over the light as its
+picture, so their shadows drift over the ground and the fog in froxels darkens in them, for under a
+tenth of a millisecond more. The light's global transform takes the square's scale and middle each
+frame and its turn stays the program's. The console's `sky.clouds` sets them while the app runs.
 
 A painted sky is a cubemap instead:
 

@@ -48,6 +48,16 @@ uniform float4 horizon;
 // in the picture's units before the exposure.
 uniform float4 color;
 
+// The clouds' shadow where the camera has clouds shadowing the sun (Render.SetClouds), how much of
+// the sun's light gets through to a point, over a square laid in the sun's own axes. xyz: the
+// square's middle, and w: how far from it to each side. The sun's across and up, and in the
+// across's w 1 where there is a shadow.
+Texture2D<float4> cloud_shadow;
+SamplerState cloud_shadow_sampler;
+uniform float4 cloud_frame;
+uniform float4 cloud_across;
+uniform float4 cloud_up;
+
 // The boxes the fog is thickened inside, two of these a box, its middle and how much light a meter
 // of it takes away, then half its size and over how far its edge fades.
 uniform float4 boxes[16];
@@ -142,6 +152,18 @@ float density(float3 at)
     return thick;
 }
 
+// How much of the sun's light the clouds let through to a point, read where the line through it
+// along the sun's light crosses the shadow's square, as Bevy reads the shadow laid over the sun.
+float cloudShadow(float3 at)
+{
+    if (cloud_across.w < 0.5)
+        return 1.0;
+    float3 apart = at - cloud_frame.xyz;
+    float2 local = float2(dot(apart, cloud_across.xyz), dot(apart, cloud_up.xyz)) / max(cloud_frame.w, 1e-3);
+    float2 uv = local * float2(-0.5, 0.5) + 0.5;
+    return cloud_shadow.SampleLevel(cloud_shadow_sampler, uv - floor(uv), 0.0).r;
+}
+
 // The directional light that lights the scene most, whose shadow the sun's share of the fog's light
 // falls into, or none.
 int brightest()
@@ -188,7 +210,7 @@ void main(uint3 id : SV_DispatchThreadID)
     if (sun >= 0)
     {
         float3 ambient = min(skyAmbient(), sky);
-        float shadow = passDirectionalShadow(uint(sun), at, -way, passViewDepth(at));
+        float shadow = passDirectionalShadow(uint(sun), at, -way, passViewDepth(at)) * cloudShadow(at);
         light = ambient + (sky - ambient) * shadow;
     }
 

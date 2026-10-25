@@ -716,6 +716,7 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
             (
                 super::instances::write_instances.after(bevy::transform::TransformSystems::Propagate),
                 super::instances::write_materials,
+                super::lights::frame_cookies.after(bevy::transform::TransformSystems::Propagate),
             ),
         )
         .add_systems(

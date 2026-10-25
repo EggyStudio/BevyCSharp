@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bevy.Interop;
 
 namespace Bevy;
 
@@ -24,6 +25,12 @@ public static partial class Render
     /// (<see cref="PostSettings.Msaa"/> of one), whose depth says where the sky is. The setting
     /// lasts while the app runs.
     /// </para>
+    /// <para>
+    /// With <see cref="CloudSettings.ShadowLight"/> the clouds shadow the sun, how much of its light
+    /// gets through worked out over a square about the camera each frame and laid over the light as
+    /// its picture, which Bevy's lighting reads, so the clouds' shadows drift over the ground with
+    /// them, and the sky's fog in froxels darkens in them too.
+    /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="settings">The clouds, or null to take them off.</param>
@@ -31,6 +38,7 @@ public static partial class Render
     /// A setting is not a number, the layer's top is not above its base, or a size, the density or
     /// the distance is not above none.
     /// </exception>
+    /// <exception cref="BevyNativeException">The settings name a shadow light that is not a directional light.</exception>
     /// <example>
     /// <code>
     /// Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = ScatteringTerm.EarthArc() });
@@ -50,12 +58,13 @@ public static partial class Render
         [
             settings.Coverage, settings.Bottom, settings.Top, settings.Density, settings.ShapeSize, settings.DetailSize,
             settings.Erosion, settings.WeatherSize, settings.Wind.X, settings.Wind.Y, settings.Wind.Z, settings.Distance, settings.Ambient,
+            settings.ShadowSize, settings.ShadowStrength,
         ];
         if (!numbers.All(float.IsFinite))
             throw new ArgumentOutOfRangeException(nameof(settings), "A setting of the clouds is not a number.");
         if (!(settings.Top > settings.Bottom) || settings.Bottom < 0f)
             throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' top is above their base, which is above the ground.");
-        if (!(settings.Density > 0f && settings.ShapeSize > 0f && settings.DetailSize > 0f && settings.WeatherSize > 0f && settings.Distance > 0f))
+        if (!(settings.Density > 0f && settings.ShapeSize > 0f && settings.DetailSize > 0f && settings.WeatherSize > 0f && settings.Distance > 0f && settings.ShadowSize > 0f))
             throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' density, sizes and distance are above none.");
 
         Clouds.Set(camera, settings);
@@ -70,6 +79,9 @@ internal static class Clouds
 
     // The planet's radius the shell lies over where the camera has no atmosphere to say, earth's.
     private const float EarthRadius = 6_360_000f;
+
+    // The texels across the clouds' shadow.
+    private const uint ShadowTexels = 512;
 
     private static App? _app;
     private static Noise? _noise;
@@ -94,6 +106,14 @@ internal static class Clouds
         internal required CloudSettings Settings { get; set; }
         internal int Frames { get; set; }
         internal Vec3 Carried { get; set; }
+
+        // The shadow's dispatch and image, made the first time the camera's clouds shadow a light,
+        // the light given the picture and the square's middle last given it.
+        internal ShaderInstance Shadow { get; set; }
+        internal AssetHandle ShadowImage { get; set; } = AssetHandle.None;
+        internal Entity Shadowed { get; set; } = Entity.None;
+        internal Vec3 Middle { get; set; }
+        internal (Vec3 Across, Vec3 Up) Axes { get; set; }
     }
 
     internal static void Set(Entity camera, CloudSettings settings)
@@ -110,28 +130,46 @@ internal static class Clouds
             };
             Cameras[camera.Bits] = clouds;
         }
+        if (!clouds.Shadowed.IsNone && clouds.Shadowed != settings.ShadowLight) Uncookie(clouds);
         clouds.Settings = settings;
+        if (!settings.ShadowLight.IsNone && !clouds.Shadow.IsValid)
+        {
+            clouds.Shadow = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "shadows"));
+            clouds.ShadowImage = Shaders.CreateImage(ShadowTexels, ShadowTexels, ShaderImageFormat.Rgba8);
+            clouds.Shadow.SetTexture("cloud_shadow", clouds.ShadowImage);
+        }
 
-        clouds.March.Set("shape", new Vector4(Math.Clamp(settings.Coverage, 0f, 1f), settings.Density, 1f / settings.ShapeSize, 1f / settings.DetailSize))
+        Feed(clouds, clouds.March, noise);
+        if (clouds.Shadow.IsValid) Feed(clouds, clouds.Shadow, noise);
+        clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
+        Turn(clouds, 0f);
+
+        Shaders.SetEngineViewImages(camera, Owner, new ViewImage("clouds", ShaderImageFormat.Rgba16Float, Scale: 0.5f, History: true));
+        Shaders.SetEnginePrepass(camera, Owner, 1u);
+        var march = ViewDispatch.PerPixel(clouds.March, FramePoint.AfterPrepass, 8, 8, 0.5f);
+        if (settings.ShadowLight.IsNone) Shaders.SetEngineViewDispatches(camera, Owner, march);
+        else Shaders.SetEngineViewDispatches(camera, Owner, ViewDispatch.Fixed(clouds.Shadow, FramePoint.AfterPrepass, ShadowTexels / 8, ShadowTexels / 8), march);
+        Shaders.SetEngineViewDraws(camera, Owner, ViewDraw.Fixed(clouds.Draw, FramePoint.BeforeTonemapping, 3, 1, DrawBlend.Alpha, writesDepth: false));
+    }
+
+    // The numbers and the noise both the march and the shadow read.
+    private static void Feed(Camera clouds, ShaderInstance instance, Noise noise)
+    {
+        var settings = clouds.Settings;
+        instance.Set("shape", new Vector4(Math.Clamp(settings.Coverage, 0f, 1f), settings.Density, 1f / settings.ShapeSize, 1f / settings.DetailSize))
             .Set("lobes", new Vector4(0.8f, -0.3f, 0.3f, Math.Max(0f, settings.Ambient)))
             .SetTexture("cloud_shape", noise.Shape)
             .SetTexture("cloud_detail", noise.Detail)
             .SetTexture("cloud_weather", noise.Weather)
             .SetSampler("cloud_sampler", SamplerSettings.Linear)
             .SetSampler("clouds_previous_sampler", SamplerSettings.Clamped);
-        clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
-        Turn(clouds, 0f);
-
-        Shaders.SetEngineViewImages(camera, Owner, new ViewImage("clouds", ShaderImageFormat.Rgba16Float, Scale: 0.5f, History: true));
-        Shaders.SetEnginePrepass(camera, Owner, 1u);
-        Shaders.SetEngineViewDispatches(camera, Owner, ViewDispatch.PerPixel(clouds.March, FramePoint.AfterPrepass, 8, 8, 0.5f));
-        Shaders.SetEngineViewDraws(camera, Owner, ViewDraw.Fixed(clouds.Draw, FramePoint.BeforeTonemapping, 3, 1, DrawBlend.Alpha, writesDepth: false));
     }
 
     internal static void Clear(Entity camera)
     {
         ForgetOtherApps();
-        if (!Cameras.Remove(camera.Bits)) return;
+        if (!Cameras.Remove(camera.Bits, out var clouds)) return;
+        Uncookie(clouds);
         Shaders.SetEngineViewDraws(camera, Owner);
         Shaders.SetEngineViewDispatches(camera, Owner);
         Shaders.SetEnginePrepass(camera, Owner, 0);
@@ -170,7 +208,57 @@ internal static class Clouds
 
         if (Cameras.Count == 0) return;
         var delta = world.Resource<Time>().Delta;
-        foreach (var clouds in Cameras.Values) Turn(clouds, delta);
+        var ecs = world.Resource<EcsWorld>();
+        foreach (var (camera, clouds) in Cameras)
+        {
+            Turn(clouds, delta);
+            Cookie(ecs, new Entity(camera), clouds);
+        }
+    }
+
+    /// <summary>The clouds' shadow on a camera, its image and the square it lies over, for the fog to read, or none.</summary>
+    internal static (AssetHandle Image, Vec3 Middle, float Half, Vec3 Across, Vec3 Up)? ShadowFor(Entity camera)
+    {
+        ForgetOtherApps();
+        if (!Cameras.TryGetValue(camera.Bits, out var clouds) || clouds.Shadowed.IsNone) return null;
+        return (clouds.ShadowImage, clouds.Middle, clouds.Settings.ShadowSize / 2f, clouds.Axes.Across, clouds.Axes.Up);
+    }
+
+    // Lays the shadow over its light about the camera, the square's middle moved a texel at a time
+    // across the sun's own axes so the shadow does not crawl as the camera moves, and hands the
+    // shadow's dispatch the square.
+    private static void Cookie(EcsWorld ecs, Entity camera, Camera clouds)
+    {
+        var light = clouds.Settings.ShadowLight;
+        if (light.IsNone || !clouds.Shadow.IsValid || !ecs.IsAlive(light)) return;
+
+        var turn = ecs.GetOrDefault<Transform>(light).Rotation;
+        var (across, up, along) = (turn * new Vec3(1f, 0f, 0f), turn * new Vec3(0f, 1f, 0f), turn * new Vec3(0f, 0f, 1f));
+        var eye = ecs.GetOrDefault<GlobalTransform>(camera).Translation;
+        var texel = clouds.Settings.ShadowSize / ShadowTexels;
+        float Snap(float value) => MathF.Round(value / texel) * texel;
+        var middle = (across * Snap(Vec3.Dot(eye, across))) + (up * Snap(Vec3.Dot(eye, up))) + (along * Vec3.Dot(eye, along));
+        var half = clouds.Settings.ShadowSize / 2f;
+
+        clouds.Shadow.Set("shadow_frame", new Vector4(middle.X, middle.Y, middle.Z, half))
+            .Set("shadow_across", new Vector4(across.X, across.Y, across.Z, 0f))
+            .Set("shadow_up", new Vector4(up.X, up.Y, up.Z, Math.Clamp(clouds.Settings.ShadowStrength, 0f, 1f)));
+        if (clouds.Shadowed != light || clouds.Middle != middle)
+        {
+            Native.Check(Native.bcs_render_set_directional_cookie(light.Bits, clouds.ShadowImage.Key, half, middle.X, middle.Y, middle.Z),
+                $"laying the clouds' shadow over {light}");
+            clouds.Shadowed = light;
+        }
+        clouds.Middle = middle;
+        clouds.Axes = (across, up);
+    }
+
+    // Takes the shadow off the light it was laid over.
+    private static void Uncookie(Camera clouds)
+    {
+        if (clouds.Shadowed.IsNone) return;
+        Native.bcs_render_set_directional_cookie(clouds.Shadowed.Bits, -1, 0f, 0f, 0f, 0f);
+        clouds.Shadowed = Entity.None;
     }
 
     private static void Turn(Camera clouds, float delta)
@@ -178,8 +266,7 @@ internal static class Clouds
         clouds.Frames++;
         clouds.Carried += clouds.Settings.Wind * delta;
         var settings = clouds.Settings;
-        clouds.March.Set("layer", new Vector4(settings.Bottom, settings.Top, EarthRadius, settings.Distance))
-            .Set("wind", new Vector4(clouds.Carried.X, clouds.Carried.Y, clouds.Carried.Z, 1f / settings.WeatherSize));
+
         // The steps along a way and toward the sun.
         var (steps, toward) = settings.Quality switch
         {
@@ -187,7 +274,13 @@ internal static class Clouds
             CloudQuality.High => (128f, 6f),
             _ => (72f, 6f),
         };
-        clouds.March.Set("march", new Vector4(steps, toward, Math.Max(0f, settings.Erosion), clouds.Frames > 2 && (_noise?.Made ?? false) ? 1f : 0f));
+        var history = clouds.Frames > 2 && (_noise?.Made ?? false) ? 1f : 0f;
+        foreach (var instance in clouds.Shadow.IsValid ? [clouds.March, clouds.Shadow] : new[] { clouds.March })
+        {
+            instance.Set("layer", new Vector4(settings.Bottom, settings.Top, EarthRadius, settings.Distance))
+                .Set("wind", new Vector4(clouds.Carried.X, clouds.Carried.Y, clouds.Carried.Z, 1f / settings.WeatherSize))
+                .Set("march", new Vector4(steps, toward, Math.Max(0f, settings.Erosion), history));
+        }
     }
 
     // The noise for a seed, made again where the seed differs from the one the app has.

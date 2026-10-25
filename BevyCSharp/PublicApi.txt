@@ -828,6 +828,7 @@ enum Bevy.CloudQuality : int
 sealed class Bevy.CloudSettings
   CloudQuality Quality { get; set; }
   CloudSettings()
+  Entity ShadowLight { get; set; }
   Vec3 Wind { get; set; }
   float Ambient { get; set; }
   float Bottom { get; set; }
@@ -836,6 +837,8 @@ sealed class Bevy.CloudSettings
   float DetailSize { get; set; }
   float Distance { get; set; }
   float Erosion { get; set; }
+  float ShadowSize { get; set; }
+  float ShadowStrength { get; set; }
   float ShapeSize { get; set; }
   float Top { get; set; }
   float WeatherSize { get; set; }

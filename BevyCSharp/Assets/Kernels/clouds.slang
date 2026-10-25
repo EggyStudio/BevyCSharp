@@ -50,6 +50,19 @@ uniform float4 march;
 // the sky's own light is.
 uniform float4 lobes;
 
+// The share of the sun's light the clouds let through to the ground over a square about the
+// camera, in the red, which `shadows` writes and Bevy lays over the sun's light as its picture.
+[format("rgba8")] WTexture2D<float4> cloud_shadow;
+
+// The square the shadow lies over, in the sun's own axes. xyz: its middle. w: how far from the
+// middle to each side.
+uniform float4 shadow_frame;
+
+// The sun's own across and up, the axes its picture is laid along, and in w how dark the shadows
+// are, from none at 0 to all of the light taken at 1.
+uniform float4 shadow_across;
+uniform float4 shadow_up;
+
 static const float Pi = 3.14159265;
 
 float remap(float value, float low, float high, float toLow, float toHigh)
@@ -297,4 +310,56 @@ void main(uint3 id : SV_DispatchThreadID)
         }
     }
     clouds.Store(id.xy, now);
+}
+
+// The clouds' shadow over a square about the camera, each texel marched from the ground under it
+// toward the sun through the shell, how much light gets through.
+//
+// The texel's place across and up is in the sun's own axes, as Bevy lays a directional light's
+// picture, its across reading backward, and the ground under it is where the line through it along
+// the sun's light meets the ground's height.
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void shadows(uint3 id : SV_DispatchThreadID)
+{
+    uint2 size;
+    cloud_shadow.GetDimensions(size.x, size.y);
+    if (any(id.xy >= size))
+        return;
+
+    int sun = brightest();
+    if (sun < 0)
+    {
+        cloud_shadow.Store(id.xy, float4(1.0, 1.0, 1.0, 1.0));
+        return;
+    }
+    float3 toSun = normalize(passLights.directional_lights[sun].direction_to_light);
+
+    float2 uv = (float2(id.xy) + 0.5) / float2(size);
+    float2 local = float2((0.5 - uv.x) * 2.0, (uv.y - 0.5) * 2.0) * shadow_frame.w;
+    float3 onPlane = shadow_frame.xyz + shadow_across.xyz * local.x + shadow_up.xyz * local.y;
+
+    // Along the sun's light to the ground's height, then up toward the sun through the shell.
+    float down = onPlane.y / max(toSun.y, 0.05);
+    float3 ground = onPlane - toSun * down;
+    float3 center = float3(0.0, -layer.z, 0.0);
+    float2 inner = sphere(ground - center, toSun, layer.z + layer.x);
+    float2 outer = sphere(ground - center, toSun, layer.z + layer.y);
+    float enter = max(inner.y, 0.0);
+    float leave = outer.y;
+
+    float optical = 0.0;
+    if (leave > enter)
+    {
+        static const float Steps = 16.0;
+        float stride = (leave - enter) / Steps;
+        for (float i = 0.5; i < Steps; i += 1.0)
+        {
+            float3 world = ground + toSun * (enter + stride * i);
+            optical += density(world, world - center, false) * stride;
+        }
+    }
+
+    float through = lerp(1.0, exp(-optical), saturate(shadow_up.w));
+    cloud_shadow.Store(id.xy, float4(through, through, through, 1.0));
 }

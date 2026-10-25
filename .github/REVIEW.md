@@ -10,26 +10,31 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `7fe46ce3`, item 69's first phase, the fog in froxels, pushed at 02:09 on 2026-10-25
-after the run of `5041dda3` went green; its own run green on the three systems at 02:27, carrying
-three pictures with captions and the review's files, no ABI change. SkyFogSettings.Froxels holds a
-quality of Low, Medium or High at 80 by 45 by 64, 120 by 68 by 96 and 160 by 90 by 128, a distance
-of 250, lumps with their size and wind, 16 lights and up to eight boxes, the kernels running as
-fixed dispatches after the prepass, two scatter volumes trading places each frame with a
-golden-ratio jitter through the slice and the history blended at 0.12 where reprojected, the
-integration energy conserving a slice; the light is the sky's color along the way split into the
-sky's mean diffuse and the sun's share, which the brightest directional light's cascades take away,
-with point and spot lights scattered evenly, the froxels equal to the closed form with no
-directional light within 6 levels. Departure, over the sky above the horizon only the deviations
-from the layer's unshadowed light are laid, the shadows' darkening, the lamps' light and the boxes
-in full, since a full composite washed the vivid sky to the horizon's color. The native gains the
-atmosphere's transmittance for a pass through Bevy's LUT with SceneInfo grown to 112 bytes, tested,
-the groundwork for the clouds. Costs at 1280 by 720, Low 0.06 and 0.02 ms, Medium 0.16 and 0.035,
-High 0.44 and 0.07, the draw 0.03, the feature test at Medium; sky.froxels on the console.
-FroxelFogTests six. 1,859 passed, 3 skipped, the bridge's checks clean, Cargo 118, 199 and 11; N 1.2
-caught on the first run and mended before the commit.
+Reviewed up to `f93cb76b`, item 69's second phase's first commit, the engine's clouds in the sky,
+pushed at 03:13 on 2026-10-25 after the run of `7fe46ce3` went green; its own run green on the three
+systems at 03:28, carrying three pictures with captions, a Shared line and the review's files, no
+native change. Render.SetClouds takes CloudSettings with a quality of Low, Medium or High at 48, 72
+and 128 steps along a way with 4, 6 and 6 doubling toward the sun, a coverage of 0.45, a layer from
+1,500 to 4,500 m, a density, the shape, detail and weather scales, a wind, a distance of 40 km and
+an ambient; cloud_noise.slang makes a 128-cube Perlin-Worley volume, a 32-cube Worley detail and a
+512-square weather map once on the GPU, clouds.slang marches a pixel at half size after the prepass
+into a history image and clouds_draw.slang lays it over the sky before tonemapping and before the
+sky's fog; the density follows Schneider and Nubis with a soft coverage threshold over a stretched
+weather map and a profile thinning over most of the height so domes come rather than walls, the
+lighting Hillaire's with the sun through the atmosphere's transmittance at each point, the sun's
+march at half density, Wrenninge's four octaves and lobes of 0.8 forward and minus 0.3 back, the
+ambient the environment's diffuse from above and below, the aerial perspective fading toward the
+map's sky color and a cover under 1 percent through made whole. Departure, the history blended at
+0.12 but where the cover differs, weighted toward this frame by four times the difference, since the
+sun's disc showed white through an overcast with the cover lagging. Costs at 1280 by 720, Low about
+0.28 ms, Medium 0.45 to 0.53, High 0.85 to 1.2, the draw 0.02 to 0.035, the noise's one-off 2.5 to 4
+ms; read against the crate's four presets at High beside coverages of 0.3 to 1 at noon and evening,
+the crate's overcast and storm a flat deck where the engine's at 1 is broken heaps, a stratus deck
+for the presets; the feature test's CloudCover on the effects page under the atmosphere, the drive
+script's setting turning the march on in the lavapipe drive; sky.clouds on the console. CloudTests
+six. 1,865 passed, 3 skipped.
 
-Before it, `5041dda3` came, item 64's look cycle, pushed at 01:17 on 2026-10-25, its run green on
+Before it, `7fe46ce3` came, item 69's first phase, pushed at 02:08 on 2026-10-25, its run green on
 the three systems.
 
 Before it, `0f0be8f0` came, item 51's first commit with the devlog's move, pushed at 08:19 on
@@ -260,7 +265,9 @@ from [SHARED.md](SHARED.md).
     the TSV, PublicApi, CHEATSHEET, the guide, the comparisons, BUILDING, the norm's and STYLE's
     lines, NormTests' exclusions, the notices, the drive and soak scripts and the workflow's
     comment. The first phase at `7fe46ce3` on 2026-10-25, the froxel fog with its departure over the
-    sky; the clouds next.
+    sky; the clouds next. The second phase's first commit at `f93cb76b` on 2026-10-25, the clouds in
+    the sky with their departure; its second next, the clouds' shadows on the ground, in the froxel
+    fog and on the sun's light, and the stratus deck with the fourth phase's presets.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1698,3 +1705,12 @@ from above and below; the air in front fades a cloud toward the environment map'
 no sun disc, a cover under a hundredth through is made whole, and the history is blended at 0.12
 except where the cover differs, so the disc does not burn through a cloud's lagging edge. The draw
 lays it over sky pixels before the fog. A flat overcast deck waits on phase (d)'s presets.
+
+Shared: the clouds' shadow, in the commit carrying this line, item 69's second phase, second commit.
+A second entry point of the clouds' kernel marches 16 steps from the ground toward the sun through
+the shell for each texel of a 512 square laid in the sun's own axes, 16 kilometers wide about the
+camera and moved a texel at a time, at 0.06 ms, and the bridge lays it over the sun as Bevy's tiled
+directional light picture, giving the light's global transform the square's scale and middle after
+Bevy works it out each frame and leaving its turn the program's, through
+`bcs_render_set_directional_cookie` at ABI 307; the froxels' fog reads the same square for the sun's
+share. The crate built its cookie of 128 texels on the CPU at 1.5 to 20 ms and owned its sun.

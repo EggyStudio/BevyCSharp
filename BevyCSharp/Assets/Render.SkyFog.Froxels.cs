@@ -24,6 +24,7 @@ internal static partial class SkyFog
 
     private static readonly Dictionary<ulong, Froxels> Froxeled = [];
     private static AssetHandle _noVolume = AssetHandle.None;
+    private static AssetHandle _noShadow = AssetHandle.None;
 
     private static (uint X, uint Y, uint Z) GridOf(FroxelQuality quality) => quality switch
     {
@@ -82,7 +83,7 @@ internal static partial class SkyFog
             .SetNumbers("counts", 4, (ReadOnlySpan<uint>)[(uint)asked.Boxes.Count, 0u, 0u, 0u])
             .SetSampler("fog_sampler", SamplerSettings.Clamped);
         froxels.Integrate.Set("grid", reach);
-        Turn(froxels, 0f);
+        Turn(camera, froxels, 0f);
 
         draw.Set("froxels", new Vector4(1f, grid.Z, asked.Distance, 0f))
             .Set("boxes", boxes)
@@ -104,10 +105,10 @@ internal static partial class SkyFog
         ForgetOtherApps();
         if (Froxeled.Count == 0) return;
         var delta = world.Resource<Time>().Delta;
-        foreach (var froxels in Froxeled.Values) Turn(froxels, delta);
+        foreach (var (camera, froxels) in Froxeled) Turn(new Entity(camera), froxels, delta);
     }
 
-    private static void Turn(Froxels froxels, float delta)
+    private static void Turn(Entity camera, Froxels froxels, float delta)
     {
         froxels.Frames++;
         froxels.Carried += froxels.Settings.Wind * delta;
@@ -122,6 +123,27 @@ internal static partial class SkyFog
             .Set("lumps", new Vector4(Math.Clamp(settings.Lumps, 0f, 1f), 1f / settings.LumpSize, within, froxels.Frames > 2 ? 1f : 0f))
             .Set("wind", new Vector4(froxels.Carried.X, froxels.Carried.Y, froxels.Carried.Z, Math.Max(0, settings.Lights)));
         froxels.Integrate.SetTexture("fog_scatter", froxels.Scatter[now]).SetTexture("fog_volume", froxels.Volume);
+
+        // The clouds' shadow where the camera's clouds cast one, which darkens the sun's share.
+        if (Clouds.ShadowFor(camera) is { } shadow)
+        {
+            froxels.Inject.SetTexture("cloud_shadow", shadow.Image)
+                .Set("cloud_frame", new Vector4(shadow.Middle.X, shadow.Middle.Y, shadow.Middle.Z, shadow.Half))
+                .Set("cloud_across", new Vector4(shadow.Across.X, shadow.Across.Y, shadow.Across.Z, 1f))
+                .Set("cloud_up", new Vector4(shadow.Up.X, shadow.Up.Y, shadow.Up.Z, 0f));
+        }
+        else
+        {
+            froxels.Inject.SetTexture("cloud_shadow", NoShadow()).Set("cloud_across", Vector4.Zero);
+        }
+        froxels.Inject.SetSampler("cloud_shadow_sampler", SamplerSettings.Linear);
+    }
+
+    // The image froxels with no clouds' shadow are bound, which they never read.
+    private static AssetHandle NoShadow()
+    {
+        if (!_noShadow.IsValid) _noShadow = Shaders.CreateImage(1, 1, ShaderImageFormat.Rgba8);
+        return _noShadow;
     }
 
     /// <summary>Whether every camera's froxel programs have compiled, so a frame draws them.</summary>
