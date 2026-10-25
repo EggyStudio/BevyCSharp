@@ -39,6 +39,13 @@ public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Al
     public Color MeanColor { get; init; } = Color.White;
 
     /// <summary>
+    /// The mean of the surface's occlusion, roughness, metallic and translucency over the albedo's
+    /// opaque texels, which a tree's far card, a picture of a whole branch, is drawn with, or a
+    /// surface fully rough and lit through nowhere where the manifest does not say.
+    /// </summary>
+    internal (float Occlusion, float Roughness, float Metallic, float Translucency) MeanSurface { get; init; } = (1f, 1f, 0f, 0f);
+
+    /// <summary>
     /// A bark's depth for parallax occlusion, one channel in BC4, white the deepest, as Bevy's
     /// material reads its depth map, or nothing for a set without one.
     /// </summary>

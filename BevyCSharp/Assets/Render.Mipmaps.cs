@@ -56,6 +56,25 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Makes an image from its levels made here, the full size first and each smaller level after
+    /// it, half the one above and a pixel at least, as <see cref="MipChain"/> lays them out, for an
+    /// image whose levels are made otherwise than by a mean, as a tree's cards keep each card's
+    /// leaves in its levels.
+    /// </summary>
+    internal static AssetHandle CreateImageLevels(ReadOnlySpan<byte> chain, uint width, uint height, bool srgb, uint levels)
+    {
+        int key;
+        fixed (byte* at = chain)
+        {
+            key = Native.bcs_render_create_image_levels(at, width, height, srgb ? 1 : 0, levels);
+        }
+
+        if (key < 0) throw NoRenderer($"Creating a {width}x{height} image with its levels");
+
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
     /// An image's pixels with every smaller level after them, each half the one above and a pixel
     /// at least, each of its pixels the mean of those above it, as light where they are sRGB.
     /// </summary>

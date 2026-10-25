@@ -43,8 +43,9 @@ An entry is imported into its folder in the collection, which the library embeds
 manifest marks waiting into waiting/, which the repository and the build leave out, so it is read
 where it was imported and never carried, and is named in a textures.json there that
 TreeTextures.Add reads, as --out's and --sample's folders are. Each import into the collection
-writes the files' sizes and the encoders' error back into the manifest. The same sources and recipe
-make the same bytes, which the tests hold.
+writes the files' sizes, the encoders' error, the mean color and surface of the opaque texels and a
+leaf set's boxes back into the manifest. The same sources and recipe make the same bytes, which the
+tests hold.
 """
 
 import argparse
@@ -126,6 +127,7 @@ def main():
             entry["files"] = {file: size for file, (size, _) in report.items()}
             entry["error"] = {file: round(error, 1) for file, (_, error) in report.items()}
             entry["color"] = mean_color(maps["albedo"])
+            entry["surface"] = mean_surface(maps)
             if boxes is not None:
                 entry["leaves"] = boxes
 
@@ -401,6 +403,21 @@ def mean_color(albedo):
     if count == 0:
         return [0.0, 0.0, 0.0]
     sums = [sum(value * n for value, n in enumerate(Image.composite(band, Image.new("L", band.size), alpha).histogram())) for band in color.split()]
+    return [round(total / count / 255, 4) for total in sums]
+
+
+def mean_surface(maps):
+    """
+    The mean of the surface's occlusion, roughness, metallic and translucency over the albedo's
+    opaque texels, from zero to one as the material reads them, which a picture of a whole branch,
+    as a tree's far card is, takes for the leaves it holds.
+    """
+    surface = maps["surface"]
+    alpha = maps["albedo"].getchannel("A").resize(surface.size, Image.Resampling.BOX).point(lambda value: 255 if value > 127 else 0)
+    count = alpha.histogram()[255]
+    if count == 0:
+        return [1.0, 1.0, 0.0, 0.0]
+    sums = [sum(value * n for value, n in enumerate(Image.composite(band, Image.new("L", band.size), alpha).histogram())) for band in surface.split()]
     return [round(total / count / 255, 4) for total in sums]
 
 

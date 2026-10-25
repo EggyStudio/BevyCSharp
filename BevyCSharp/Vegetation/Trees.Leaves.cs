@@ -67,13 +67,23 @@ public static partial class Trees
         Check(species);
         if (!Enum.IsDefined(detail)) throw new ArgumentOutOfRangeException(nameof(detail), detail, "A level of detail is one of TreeDetail's.");
 
+        var cards = MakeCards(skeleton, species, seed);
+        return detail == TreeDetail.Reduced && species.Leaves > 0 ? cards.Halved() : cards.Data();
+    }
+
+    /// <summary>
+    /// A tree's leaves as their cards are made, shaded by the sky each sees, each knowing the twig
+    /// it stands on, which the far level's cards of whole branches are drawn from.
+    /// </summary>
+    private static Cards MakeCards(TreeSkeleton skeleton, TreeSpecies species, uint seed)
+    {
         var boxes = LeafBoxes(species, out var aspect);
         var cards = new Cards();
-        if (species.Leaves == 0) return cards.Data();
+        if (species.Leaves == 0) return cards;
 
         var random = new Pcg((ulong)seed ^ 0x9E3779B97F4A7C15ul);
         var twigs = Twigs(skeleton);
-        var lengths = twigs.Select(Length).OrderBy(length => length).ToArray();
+        var lengths = twigs.Select(twig => Length(twig.Points)).OrderBy(length => length).ToArray();
         var typical = lengths.Length > 0 ? lengths[lengths.Length / 2] : 1f;
 
         // The paper's count of leaves, shared among the twigs there are, and each leaf's scale.
@@ -83,13 +93,14 @@ public static partial class Trees
 
         // Shared by each twig's length against most twigs', a short one taking fewer, so the leaves
         // drawn come to the count.
-        var weights = twigs.Select(twig => Math.Clamp(Length(twig) / typical, 0.3f, 1f)).ToArray();
+        var weights = twigs.Select(twig => Math.Clamp(Length(twig.Points) / typical, 0.3f, 1f)).ToArray();
         var perWeight = weights.Length > 0 ? drawn / weights.Sum() : 0f;
         var owed = 0f;
 
         for (var t = 0; t < twigs.Count; t++)
         {
-            var twig = twigs[t];
+            var twig = twigs[t].Points;
+            cards.Tip = twigs[t].Tip;
             if (species.Leaves < 0)
             {
                 for (var i = 0; i < -species.Leaves; i++) cards.Frond(twig, boxes[random.Below(boxes.Count)], species.LeafScale, aspect, MathF.PI * i / -species.Leaves);
@@ -132,7 +143,7 @@ public static partial class Trees
         }
 
         if (species.Leaves > 0) cards.ShadeBySky();
-        return detail == TreeDetail.Reduced && species.Leaves > 0 ? cards.Halved() : cards.Data();
+        return cards;
     }
 
     /// <summary>
@@ -161,14 +172,14 @@ public static partial class Trees
         return TreeLooks.LeafBoxes;
     }
 
-    /// <summary>The twigs, each from the point it leaves its parent to its tip, through every point between, which carries no other stem.</summary>
-    private static List<Vec3[]> Twigs(TreeSkeleton skeleton)
+    /// <summary>The twigs, each its tip's node and its points from the point it leaves its parent to its tip, through every point between, which carries no other stem.</summary>
+    private static List<(int Tip, Vec3[] Points)> Twigs(TreeSkeleton skeleton)
     {
         var nodes = skeleton.Nodes;
         var children = new int[nodes.Count];
         for (var i = 1; i < nodes.Count; i++) children[nodes[i].Parent]++;
 
-        var twigs = new List<Vec3[]>();
+        var twigs = new List<(int, Vec3[])>();
         for (var tip = 1; tip < nodes.Count; tip++)
         {
             if (children[tip] != 0) continue;
@@ -182,7 +193,7 @@ public static partial class Trees
             }
 
             points.Reverse();
-            twigs.Add([.. points]);
+            twigs.Add((tip, [.. points]));
         }
 
         return twigs;
@@ -224,6 +235,18 @@ public static partial class Trees
 
     private static float Radians(float degrees) => degrees * (MathF.PI / 180f);
 
+    /// <summary>
+    /// A way folded onto the unit square octahedrally, its upper half the diamond in the middle and
+    /// its lower half the four corners, as the leaf material unfolds it.
+    /// </summary>
+    private static (float U, float V) Folded(Vec3 way)
+    {
+        var sum = MathF.Abs(way.X) + MathF.Abs(way.Y) + MathF.Abs(way.Z);
+        var (x, y, z) = (way.X / sum, way.Y / sum, way.Z / sum);
+        if (y < 0f) (x, z) = ((1f - MathF.Abs(z)) * (x >= 0f ? 1f : -1f), (1f - MathF.Abs(x)) * (z >= 0f ? 1f : -1f));
+        return (x * 0.5f + 0.5f, z * 0.5f + 0.5f);
+    }
+
     /// <summary>The cards' vertices and triangles as they are made.</summary>
     private sealed class Cards
     {
@@ -233,6 +256,16 @@ public static partial class Trees
         private readonly List<uint> _indices = [];
         private float[]? _colors;
         private float[]? _secondUvs;
+        private readonly List<int> _tips = [];
+
+        /// <summary>The node of the tip of the twig the cards made next stand on.</summary>
+        public int Tip { get; set; }
+
+        /// <summary>The node of the tip of the twig each card stands on, a card a strip for fronds.</summary>
+        public IReadOnlyList<int> Tips => _tips;
+
+        /// <summary>The cards' vertices, four a card in the order <see cref="Card"/> makes them.</summary>
+        public IReadOnlyList<Vec3> Positions => _positions;
 
         /// <summary>A leaf's card, its stalk at a place, running along a way and facing a way, as long and as wide as given.</summary>
         public void Card(Vec3 place, Vec3 leaf, Vec3 face, (float U, float V, float Width, float Height) box, float length, float width)
@@ -245,6 +278,7 @@ public static partial class Trees
             Vertex(place + side + leaf * length, face, box.U + box.Width, box.V);
             Vertex(place - side + leaf * length, face, box.U, box.V);
             _indices.AddRange([first, first + 1, first + 2, first, first + 2, first + 3]);
+            _tips.Add(Tip);
         }
 
         /// <summary>
@@ -352,16 +386,44 @@ public static partial class Trees
             }
         }
 
-        /// <summary>
-        /// A way folded onto the unit square octahedrally, its upper half the diamond in the
-        /// middle and its lower half the four corners, as the leaf material unfolds it.
-        /// </summary>
-        private static (float U, float V) Folded(Vec3 way)
+        /// <summary>The given cards as they are, with their colors and their ways out.</summary>
+        public MeshData Subset(IReadOnlyList<int> cards)
         {
-            var sum = MathF.Abs(way.X) + MathF.Abs(way.Y) + MathF.Abs(way.Z);
-            var (x, y, z) = (way.X / sum, way.Y / sum, way.Z / sum);
-            if (y < 0f) (x, z) = ((1f - MathF.Abs(z)) * (x >= 0f ? 1f : -1f), (1f - MathF.Abs(x)) * (z >= 0f ? 1f : -1f));
-            return (x * 0.5f + 0.5f, z * 0.5f + 0.5f);
+            var positions = new Vec3[cards.Count * 4];
+            var normals = new Vec3[cards.Count * 4];
+            var uvs = new float[cards.Count * 8];
+            var colors = _colors is null ? null : new float[cards.Count * 16];
+            var indices = new uint[cards.Count * 6];
+            for (var k = 0; k < cards.Count; k++)
+            {
+                var from = cards[k] * 4;
+                for (var corner = 0; corner < 4; corner++)
+                {
+                    positions[k * 4 + corner] = _positions[from + corner];
+                    normals[k * 4 + corner] = _normals[from + corner];
+                    uvs[(k * 4 + corner) * 2] = _uvs[(from + corner) * 2];
+                    uvs[(k * 4 + corner) * 2 + 1] = _uvs[(from + corner) * 2 + 1];
+                    if (colors is not null) _colors.AsSpan((from + corner) * 4, 4).CopyTo(colors.AsSpan((k * 4 + corner) * 4, 4));
+                }
+
+                var first = (uint)(k * 4);
+                uint[] quad = [first, first + 1, first + 2, first, first + 2, first + 3];
+                quad.CopyTo(indices, k * 6);
+            }
+
+            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, Colors = colors, Indices = indices };
+        }
+
+        /// <summary>The way out of the crown each card carries, unfolded as the leaf material unfolds it.</summary>
+        public Vec3 WayOut(int card)
+        {
+            if (_secondUvs is null) return Vec3.UnitY;
+            var (x, z) = (_secondUvs[card * 8] * 2f - 1f, _secondUvs[card * 8 + 1] * 2f - 1f);
+            var y = 1f - MathF.Abs(x) - MathF.Abs(z);
+            var t = MathF.Max(-y, 0f);
+            x += x >= 0f ? -t : t;
+            z += z >= 0f ? -t : t;
+            return new Vec3(x, y, z).Normalized;
         }
 
         /// <summary>

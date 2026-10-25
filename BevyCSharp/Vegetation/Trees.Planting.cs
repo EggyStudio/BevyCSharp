@@ -27,6 +27,12 @@ public static partial class Trees
     private const float ReducedFrom = 2.5f;
     private const float ReducedFade = 0.5f;
 
+    // Where the reduced level gives way to the far one of limbs and cards, and over how much, in the
+    // tree's heights, a tree there some tenths of a 45 degree picture's height, each card some tens
+    // of pixels across, which its picture holds.
+    private const float CardsFrom = 6f;
+    private const float CardsFade = 1.2f;
+
     // The far end of the furthest level, where nothing yet draws a tree further off.
     private const float Furthest = 1e7f;
 
@@ -51,9 +57,10 @@ public static partial class Trees
 
     /// <summary>
     /// A variant grown, its skeleton and height, its stems' and leaves' data at each level of
-    /// detail, by <see cref="TreeDetail"/>, and the capsules it stands as.
+    /// detail, by <see cref="TreeDetail"/>, the plan of its far level of limbs and cards where its
+    /// leaves are cards, and the capsules it stands as.
     /// </summary>
-    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
+    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, CardPlan? Cards, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
 
     /// <summary>What a tree was dressed as, and the child it was dressed under.</summary>
     private sealed class Dressing(string species, uint seed)
@@ -160,6 +167,7 @@ public static partial class Trees
     internal static void Tick(World world)
     {
         if (App.Running is not { } app) return;
+        Ticks.GetOrCreateValue(app).Value++;
         var ecs = world.Resource<EcsWorld>();
         var dressed = Dressed.GetOrCreateValue(app);
         var draws = App.HasRenderer && !world.Resource<Config>().Headless;
@@ -202,7 +210,11 @@ public static partial class Trees
             }
 
             if (!growing.IsCompletedSuccessfully) continue;
-            dressing.Body = Dress(ecs, app, entity, name, species, variant, seed, growing.Result, draws);
+
+            // Where it is drawn, dressed once its variant's far cards are pictured, or have failed.
+            var pictures = draws ? Pictured(ecs, app, species, variant, growing.Result) : null;
+            if (draws && pictures is null) continue;
+            dressing.Body = Dress(ecs, app, entity, name, species, variant, seed, growing.Result, draws, pictures);
         }
     }
 
@@ -215,12 +227,14 @@ public static partial class Trees
         var skeleton = Grow(species, seed);
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
         var stems = levels.Select(level => Modeling.Build(Build(skeleton, level))[0]).ToArray();
-        var leaves = levels.Select(level => BuildLeaves(skeleton, species, seed, level)).ToArray();
-        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, Capsules(skeleton));
+        var cards = MakeCards(skeleton, species, seed);
+        MeshData[] leaves = [cards.Data(), species.Leaves > 0 ? cards.Halved() : cards.Data()];
+        var plan = species.Leaves > 0 ? PlanCards(skeleton, cards) : null;
+        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, plan, Capsules(skeleton));
     }
 
     /// <summary>Dresses a tree under a child of its own, turned and sized by its seed, with its variant's meshes, materials and capsules.</summary>
-    private static Entity Dress(EcsWorld ecs, App app, Entity tree, string name, TreeSpecies species, int variant, uint seed, Grown grown, bool draws)
+    private static Entity Dress(EcsWorld ecs, App app, Entity tree, string name, TreeSpecies species, int variant, uint seed, Grown grown, bool draws, CardPictures? pictures)
     {
         // A turn and a size of a tenth either way, from the seed.
         var random = new Pcg((ulong)seed * 0x9E3779B97F4A7C15ul + 1);
@@ -251,8 +265,10 @@ public static partial class Trees
             // tree's own heights so a bush changes as near as it is small, each mesh dithered out
             // over the half height where the other is dithered in.
             var height = grown.Height * size;
+            var far = pictures is { Drawn: true };
             var full = (Start: new FloatRange(0f, 0f), End: new FloatRange(ReducedFrom * height, (ReducedFrom + ReducedFade) * height));
-            var reduced = (Start: full.End, End: new FloatRange(Furthest, Furthest));
+            var reduced = (Start: full.End, End: far ? new FloatRange(CardsFrom * height, (CardsFrom + CardsFade) * height) : new FloatRange(Furthest, Furthest));
+            var cards = (Start: reduced.End, End: new FloatRange(Furthest, Furthest));
 
             Render.SetMesh(ecs, body, made.Stems[(int)TreeDetail.Full]);
             Render.SetMaterial(ecs, body, BarkMaterial(species));
@@ -262,6 +278,13 @@ public static partial class Trees
             {
                 Part(ecs, body, $"{name} {seed}, leaves", made.Leaves[(int)TreeDetail.Full], LeafMaterial(species), full);
                 Part(ecs, body, $"{name} {seed}, leaves, reduced", made.Leaves[(int)TreeDetail.Reduced], LeafMaterial(species), reduced);
+            }
+
+            // Far off, the thickest limbs and each one's foliage as a card.
+            if (far)
+            {
+                Part(ecs, body, $"{name} {seed}, limbs", pictures!.Limbs, BarkMaterial(species), cards);
+                Part(ecs, body, $"{name} {seed}, cards", pictures.Quads, pictures.Material, cards);
             }
         }
 
@@ -319,13 +342,7 @@ public static partial class Trees
     private static List<(Vec3 From, Vec3 To, float Radius)> Capsules(TreeSkeleton skeleton)
     {
         var nodes = skeleton.Nodes;
-        var carried = new int[nodes.Count];
-        Array.Fill(carried, -1);
-        for (var i = 1; i < nodes.Count; i++)
-        {
-            var parent = nodes[i].Parent;
-            if (carried[parent] < 0 || nodes[i].Radius > nodes[carried[parent]].Radius) carried[parent] = i;
-        }
+        var carried = Carried(nodes);
 
         var capsules = new List<(Vec3 From, Vec3 To, float Radius)>();
         var starts = Enumerable.Range(0, nodes.Count).Where(i => i == 0 || carried[nodes[i].Parent] != i).OrderByDescending(i => nodes[i].Radius);

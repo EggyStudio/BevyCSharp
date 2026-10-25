@@ -47,13 +47,7 @@ public static partial class Trees
                 }, set.LoadDepth()));
             }
 
-            var (color, bumps, depth) = Generated("bark pictures", () =>
-            {
-                var (pixels, normals, depths) = TreeLooks.Bark();
-                return (Image(pixels, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: true),
-                    Image(normals, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false),
-                    Image(depths, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false));
-            });
+            var (color, bumps, depth) = BarkPictures();
             var tint = species.BarkColor;
             return Render.CreateMaterial(Deep(new MaterialSettings
             {
@@ -123,7 +117,7 @@ public static partial class Trees
                 });
             }
 
-            var atlas = Generated($"leaf pictures {species.LeafShape} {species.LeafScaleX}", () => Image(TreeLooks.Leaves(species.LeafShape, species.LeafScaleX), TreeLooks.LeafSize, TreeLooks.LeafSize, srgb: true));
+            var atlas = LeafPictures(species);
             var (summer, autumn) = (species.LeafColor, species.FallColor);
             return Render.CreateLeafMaterial(new MaterialSettings
             {
@@ -152,6 +146,19 @@ public static partial class Trees
         settings.ParallaxLayers = BarkLayers;
         return settings;
     }
+
+    /// <summary>The generated bark's color, normal and depth, made once an app.</summary>
+    private static (AssetHandle Color, AssetHandle Normal, AssetHandle Depth) BarkPictures() => Generated("bark pictures", () =>
+    {
+        var (pixels, normals, depths) = TreeLooks.Bark();
+        return (Image(pixels, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: true),
+            Image(normals, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false),
+            Image(depths, TreeLooks.BarkWidth, TreeLooks.BarkHeight, srgb: false));
+    });
+
+    /// <summary>The generated leaves' atlas of a species' shape, made once an app.</summary>
+    private static AssetHandle LeafPictures(TreeSpecies species) =>
+        Generated($"leaf pictures {species.LeafShape} {species.LeafScaleX}", () => Image(TreeLooks.Leaves(species.LeafShape, species.LeafScaleX), TreeLooks.LeafSize, TreeLooks.LeafSize, srgb: true));
 
     private static float Toward(float from, float to, float share) => from + (to - from) * share;
 

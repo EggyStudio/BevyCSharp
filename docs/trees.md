@@ -37,12 +37,16 @@ Trees.PlantForest(ctx.Ecs, "black-tupelo", seed: 3, middle: new Vec3(0f, 0f, -60
 Each species grows eight variants on a worker the first time a tree of it is asked for, and every
 tree shares the variant its seed picks, turned and sized by the seed under a child of its entity,
 so a forest of a hundred trees grows eight and the entity's own transform stays where it was put.
-A planted tree is drawn in two levels of detail, `TreeDetail.Full` near the camera and
-`TreeDetail.Reduced` from two and a half of its heights away, the two dithered one into the other
-over half a height by Bevy's visibility range, so no tree pops. The reduced level has half the tube
-sides, leaves out the stems thinner than a twenty-fifth of the trunk, and draws every other leaf
-the square root of two larger at its place, so the crown covers as much with half the cards, and
-its shadow is drawn the same way, measured from the scene's camera. `Trees.Build` and
+A planted tree is drawn in three levels of detail, `TreeDetail.Full` near the camera,
+`TreeDetail.Reduced` from two and a half of its heights away and a far level from six, each
+dithered into the next by Bevy's visibility range, so no tree pops. The reduced level has half the
+tube sides, leaves out the stems thinner than a twenty-fifth of the trunk, and draws every other
+leaf the square root of two larger at its place, so the crown covers as much with half the cards.
+The far level is the tree's sixteen thickest stems with a third of their sides and the branches and
+leaves each one carries pictured on two crossed cards, which a camera of the library's own draws
+once a variant into an atlas as the trees are planted, with a normal map of the leaves it pictures.
+A tree is dressed once its variant's pictures are taken, some frames after it has grown. Each
+level's shadow is drawn the same way, measured from the scene's camera. `Trees.Build` and
 `Trees.BuildLeaves` take the level for a tree built by hand.
 
 The trunk and each limb twelve centimeters thick or more stand as capsules the player stops at,

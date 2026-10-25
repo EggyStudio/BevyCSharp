@@ -1703,6 +1703,51 @@ a batch.
     from the source's height or integrated from the normal, Bevy's occlusion at 12 layers on bark
     alone, about 0.2 ms on 24 trunks at 1080p, the departure in the head.
 
+76. **A crown shades as a volume, each leaf's depth and outward direction taken from the shadow
+    grid.** From the owner's question of 2026-10-25 at about 19:45 on the leaves' normals, and the
+    word yes at 19:55. A leaf card's own normal is right for its specular and its transmission, but
+    a crown shades mostly as a volume, leaves deep inside and on the far side getting less sun and
+    sky than those on the lit rim, so per-leaf normals alone read as a heap of flat cards; bending
+    the normals outward is the stand-in artists use, toward a sphere by the shortcut and toward the
+    crown's real shape by the physical form. The growth's shadow grid already holds the leaf density
+    of each variant, so at each leaf the dressing reads two numbers from it and writes them per
+    vertex. The depth is the density above and around the leaf by Beer and Lambert's law, which
+    scales the ambient and the indirect light the leaf takes and gives the transmission its
+    thickness; the outward direction is the grid's gradient, toward which the leaf's normal is bent
+    about half way for the diffuse term alone, the leaf's own normal kept for specular and
+    transmission. No proxy mesh and no distance field is built, the grid being finer than a hull and
+    already computed. The leaf material carries the two in its vertex stream, through the standard
+    material where it can and a Slang material of the library's where it cannot; direct shadows
+    between leaves stay the shadow map's and the indirect light under a canopy the field's share of
+    the fourth phase. Tests of a leaf deep in a crown darker than one on the rim under the same sky
+    and of the rim's leaves facing out, and a picture pair of a crown flat and shaded in grazing
+    sun. After item 70's dither levels and before its branch cards and impostors, which draw
+    pictures of the leaves and would miss the shading if it came after, placed so at 20:20. One
+    commit. The coder's reading at 21:04 and the choice. The bend baked into the vertex normals
+    reads as the sheen feared, an aspen seen from below under a high sun with Bevy's turned card
+    normals reading a mean of 102, 119 and 94, the depth's gray alone 94, 111 and 91, about 8%
+    darker with nothing else changed, the bent normal alone 116, 133 and 114 and both 109, 125 and
+    111, the blue up by twenty with white patches on the sun's side, the leaves mirroring the sky
+    since a normal bent out of the crown points up at it from under it where the card's own turned
+    normal points at the ground, the crowns in the feature test turning gray from below and from
+    inside the forest; side-lit in grazing sun the bend does what it should, the aspen's sun side
+    20.0 brighter than its far side against 11.7 flat. Getting there needed
+    MaterialSettings.SameNormalBothSides, since Bevy's double-sided turns a back face's normal to
+    the eye and a baked bend lit half the cards inward, and a correction of DoubleSided's doc, which
+    claimed the opposite of Bevy's turn. Chosen, the depth commits alone, the vertex gray with
+    Bevy's turned normals and no bend, the doc correction kept and SameNormalBothSides dropped; then
+    the bend for the diffuse term alone as its own commit through a leaf Slang material lighting
+    twice, its cost measured against the leaves' lighting, with SameNormalBothSides if it needs it.
+    The owner, shown the grazing-sun pair at about 21:34, the aspen and the oak flat on the left and
+    with the normal bent half way out of the crown on the right, wrote that it looks great, so the
+    right-hand look is the target the bend's commit gives without the sheen from below, its side-lit
+    picture held against this one. The first part at `6b2503ff` on 2026-10-25, the depth as a vertex
+    gray from the sky each leaf sees, the deepest at half; the bend next as its own commit through
+    the leaf material, the owner's liked pair its target. Done at `14c2df0f` on 2026-10-25 with the
+    second part, the leaf material lighting the diffuse term on the bent normal and the rest on the
+    leaf's own, the sun's side showing and no sky mirrored from below, 2.3 ms on 24 trunks' crowns
+    at 1080p.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

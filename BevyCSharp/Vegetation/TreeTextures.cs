@@ -133,6 +133,7 @@ public static class TreeTextures
             if (entry.TryGetProperty("size", out var size)) set = set with { Size = (size[0].GetInt32(), size[1].GetInt32()) };
             if (exists($"{name}/depth.ktx2")) set = set with { Depth = $"{under}/{name}/depth.ktx2" };
             if (entry.TryGetProperty("color", out var color)) set = set with { MeanColor = Color.FromSrgb(color[0].GetSingle(), color[1].GetSingle(), color[2].GetSingle()) };
+            if (entry.TryGetProperty("surface", out var surface)) set = set with { MeanSurface = (surface[0].GetSingle(), surface[1].GetSingle(), surface[2].GetSingle(), surface[3].GetSingle()) };
             if (entry.TryGetProperty("leaves", out var leaves) && leaves.GetArrayLength() > 0)
             {
                 set = set with { LeafBoxes = [.. leaves.EnumerateArray().Select(box => (box[0].GetSingle(), box[1].GetSingle(), box[2].GetSingle(), box[3].GetSingle()))] };

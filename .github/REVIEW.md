@@ -10,29 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6b2503ff`, item 76's first part, the crown's depth, pushed at 21:57 on 2026-10-25
-after the run of `ddf51f5a` went green, its own run green at 22:14, carrying the review's files,
-DEVLOG.md, a captioned pair with its note and a Shared line. Trees.Volume.cs takes the cards' leaf
-area, the card's area times a fill of 0.6, into a grid of 24 voxels across the crown's longest side
-and reads the sky a leaf sees by Beer and Lambert along the zenith and a ring of eight ways 30
-degrees below it, cosine-weighted, half the leaf area facing a ray, from a voxel off the leaf,
-written as the cards' vertex gray at 0.5 plus half the sky so the deepest leaf stands at half and
-never darker, the cards keeping their own normals with Bevy turning them; no public listing change,
-SameNormalBothSides dropped and the bridge back to HEAD and rebuilt before the suite, DoubleSided's
-remark and docs/materials.md corrected to say the back face is lit by the normal turned round to
-face the eye. The tests read a leaf deep in a crown taking less of the sky than one on its rim
-across the five presets, every shade 0.5 to 1 and the deep mean at least 0.12 under the upper rim's,
-measured 0.55 to 0.79 against 0.87 to 0.96, and a crown shaded by the sky darkening its middle more
-than its edge, the aspen and the tupelo keeping 0.93 and 0.95 of the middle's brightness and 0.97 at
-the edge; the rendered change is gentle, the note saying so and why the bend waits. 1,950 passed, 3
-skipped, 1,953 the listing plus 11.
+Reviewed up to `14c2df0f`, item 76's second part, the crown lit as a volume, pushed at 22:57 on
+2026-10-25 after the run of `6b2503ff` went green, its own run green at 23:15, carrying REVIEW.md,
+DEVLOG.md, a captioned picture with its note and a Shared line, ABI 311. The native gains
+render/leaves.rs, LeafMaterial an extended standard material with an empty extension and a WESL
+fragment under a UUID handle, the standard material's input then Bevy's lighting applied twice, the
+diffuse pass on the normal bent half way toward the way out with reflectance 0 and no transmission
+and the base times one less the transmission, the rest on the leaf's own turned normal with the
+transmission at one and the base times it, summed and finished by the post-lighting step, the dither
+kept, the forward method; a create call, the attach branch and the material plugin in the render
+install; the mesh data gains second UVs at offset 72, inserted as UV_1, with both layout tests. The
+managed side gains MeshData.SecondUvs carried in Render.Meshes, the kept copy and MeshJson, an
+internal Render.CreateLeafMaterial and Trees.LeafMaterial building it in both branches; the leaves
+write the way out, the grid's smoothed gradient leaning a quarter toward the crown's middle-out,
+folded octahedrally into the second UVs, the reduced level copying it. The tests read the rim's way
+out pointing out at 89.7 to 95% against a bar of 85, the side-lit aspen 8.8 to 28.8 and the oak 11.0
+to 41.8 toward the sun with no sky mirrored from below, 99, 115 and 90 by the own normals and 106,
+123 and 97 bent, and the cost in a forest, 24 tupelos at 1920 by 1080 drawing the opaque pass in
+5.19 ms standard and 7.52 as a crown on the RTX 4070 Laptop GPU, the feature test at 720p up 0.06 to
+0.11 ms a view. The three profiles, cargo test and the Windows and macOS checks clean; 1,952 passed,
+3 skipped, 1,955 the listing plus 11.
+
+Before it, `6b2503ff` came, item 76's first part, the crown's depth, pushed at 21:57 on 2026-10-25,
+its run green at 22:14.
 
 Before it, `ddf51f5a` came, item 70's third phase's dither levels, pushed at 20:20 on 2026-10-25,
 its run red twice on the runners' dotnet install and green on the third attempt at 21:43, Verdict
 45.
-
-Before it, `d0da9cf8` came, item 70's third phase's first reading, the leaves' thinning settled,
-pushed at 18:42 on 2026-10-25, its run green at 18:59.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -374,48 +378,6 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
-
-76. **A crown shades as a volume, each leaf's depth and outward direction taken from the shadow
-    grid.** From the owner's question of 2026-10-25 at about 19:45 on the leaves' normals, and the
-    word yes at 19:55. A leaf card's own normal is right for its specular and its transmission, but
-    a crown shades mostly as a volume, leaves deep inside and on the far side getting less sun and
-    sky than those on the lit rim, so per-leaf normals alone read as a heap of flat cards; bending
-    the normals outward is the stand-in artists use, toward a sphere by the shortcut and toward the
-    crown's real shape by the physical form. The growth's shadow grid already holds the leaf density
-    of each variant, so at each leaf the dressing reads two numbers from it and writes them per
-    vertex. The depth is the density above and around the leaf by Beer and Lambert's law, which
-    scales the ambient and the indirect light the leaf takes and gives the transmission its
-    thickness; the outward direction is the grid's gradient, toward which the leaf's normal is bent
-    about half way for the diffuse term alone, the leaf's own normal kept for specular and
-    transmission. No proxy mesh and no distance field is built, the grid being finer than a hull and
-    already computed. The leaf material carries the two in its vertex stream, through the standard
-    material where it can and a Slang material of the library's where it cannot; direct shadows
-    between leaves stay the shadow map's and the indirect light under a canopy the field's share of
-    the fourth phase. Tests of a leaf deep in a crown darker than one on the rim under the same sky
-    and of the rim's leaves facing out, and a picture pair of a crown flat and shaded in grazing
-    sun. After item 70's dither levels and before its branch cards and impostors, which draw
-    pictures of the leaves and would miss the shading if it came after, placed so at 20:20. One
-    commit. The coder's reading at 21:04 and the choice. The bend baked into the vertex normals
-    reads as the sheen feared, an aspen seen from below under a high sun with Bevy's turned card
-    normals reading a mean of 102, 119 and 94, the depth's gray alone 94, 111 and 91, about 8%
-    darker with nothing else changed, the bent normal alone 116, 133 and 114 and both 109, 125 and
-    111, the blue up by twenty with white patches on the sun's side, the leaves mirroring the sky
-    since a normal bent out of the crown points up at it from under it where the card's own turned
-    normal points at the ground, the crowns in the feature test turning gray from below and from
-    inside the forest; side-lit in grazing sun the bend does what it should, the aspen's sun side
-    20.0 brighter than its far side against 11.7 flat. Getting there needed
-    MaterialSettings.SameNormalBothSides, since Bevy's double-sided turns a back face's normal to
-    the eye and a baked bend lit half the cards inward, and a correction of DoubleSided's doc, which
-    claimed the opposite of Bevy's turn. Chosen, the depth commits alone, the vertex gray with
-    Bevy's turned normals and no bend, the doc correction kept and SameNormalBothSides dropped; then
-    the bend for the diffuse term alone as its own commit through a leaf Slang material lighting
-    twice, its cost measured against the leaves' lighting, with SameNormalBothSides if it needs it.
-    The owner, shown the grazing-sun pair at about 21:34, the aspen and the oak flat on the left and
-    with the normal bent half way out of the crown on the right, wrote that it looks great, so the
-    right-hand look is the target the bend's commit gives without the sheen from below, its side-lit
-    picture held against this one. The first part at `6b2503ff` on 2026-10-25, the depth as a vertex
-    gray from the sky each leaf sees, the deepest at half; the bend next as its own commit through
-    the leaf material, the owner's liked pair its target.
 
 ## Verdicts
 
@@ -1989,3 +1951,11 @@ from the engine's own lighting, the diffuse light by the leaf's normal bent half
 the specular and the light let through by its own, so the crown's sun side stands out more than
 three times as far and a crown seen from below mirrors no sky, at 7.5 ms of a 1080p forest's opaque
 pass against 5.2 lit once.
+
+Shared: a planted tree's far level of limbs and branch cards, in the commit carrying this line, item
+70's phase (c2), its last part. Past six of its heights a tree is drawn as its sixteen thickest
+stems and each one's foliage on two crossed cards in the plane its leaves spread most in, pictured
+once a variant by an orthographic camera on a render layer of its own into an atlas, read back and
+given levels that keep each card's leaves, with a normal map of the leaves drawn on the CPU and the
+leaf set's mean surface, which the import records. The far level covers the crown within a fifth and
+lights it within a sixth of the reduced level, and halves a distant forest's shadow pass.

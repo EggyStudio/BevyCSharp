@@ -109,6 +109,31 @@ public static partial class Trees
         var nodes = skeleton.Nodes;
 
         // The child that carries each point's stem on, the thickest, the first of equals.
+        var carried = Carried(nodes);
+
+        var mesh = new EditMesh()
+            .SlotRename(EditMesh.DefaultSlot, BarkSlot)
+            .SlotColor(BarkSlot, 0.40f, 0.34f, 0.28f)
+            .SlotRoughness(BarkSlot, 0.9f);
+
+        for (var start = 0; start < nodes.Count; start++)
+        {
+            var parent = nodes[start].Parent;
+            if (parent >= 0 && carried[parent] == start) continue;
+            if (reduced && nodes[start].Radius < nodes[0].Radius * ThinnestReduced) continue;
+            Stem(mesh, nodes, carried, start, reduced ? 2 : 1);
+        }
+
+        return mesh.SelectNone();
+    }
+
+    /// <summary>
+    /// The child that carries each point's stem on, the thickest of its children, the first of
+    /// equals, or none for a tip, so a stem is the run of points from where it starts through each
+    /// point's carried child.
+    /// </summary>
+    private static int[] Carried(IReadOnlyList<TreeNode> nodes)
+    {
         var carried = new int[nodes.Count];
         Array.Fill(carried, -1);
         for (var i = 1; i < nodes.Count; i++)
@@ -117,40 +142,33 @@ public static partial class Trees
             if (carried[parent] < 0 || nodes[i].Radius > nodes[carried[parent]].Radius) carried[parent] = i;
         }
 
-        var mesh = new EditMesh()
-            .SlotRename(EditMesh.DefaultSlot, BarkSlot)
-            .SlotColor(BarkSlot, 0.40f, 0.34f, 0.28f)
-            .SlotRoughness(BarkSlot, 0.9f);
+        return carried;
+    }
 
-        var trunk = nodes[0].Radius;
+    /// <summary>
+    /// Adds the stem that starts at a point as a tube, from its parent's middle through each point
+    /// it carries on, with sides by its thickness against the trunk divided by a share.
+    /// </summary>
+    private static void Stem(EditMesh mesh, IReadOnlyList<TreeNode> nodes, int[] carried, int start, int fewerSides)
+    {
         var points = new List<Vec3>();
         var radii = new List<float>();
-        for (var start = 0; start < nodes.Count; start++)
+        var parent = nodes[start].Parent;
+        if (parent >= 0)
         {
-            var parent = nodes[start].Parent;
-            if (parent >= 0 && carried[parent] == start) continue;
-            if (reduced && nodes[start].Radius < trunk * ThinnestReduced) continue;
-
-            points.Clear();
-            radii.Clear();
-            if (parent >= 0)
-            {
-                points.Add(nodes[parent].Place);
-                radii.Add(nodes[start].Radius);
-            }
-
-            for (var node = start; node >= 0; node = carried[node])
-            {
-                points.Add(nodes[node].Place);
-                radii.Add(nodes[node].Radius);
-            }
-
-            if (points.Count < 2) continue;
-            var sides = Math.Clamp(2 + (int)MathF.Round(10f * MathF.Sqrt(radii[0] / trunk)), 3, 12);
-            mesh.Tube(points, radii, reduced ? Math.Max(3, sides / 2) : sides);
+            points.Add(nodes[parent].Place);
+            radii.Add(nodes[start].Radius);
         }
 
-        return mesh.SelectNone();
+        for (var node = start; node >= 0; node = carried[node])
+        {
+            points.Add(nodes[node].Place);
+            radii.Add(nodes[node].Radius);
+        }
+
+        if (points.Count < 2) return;
+        var sides = Math.Clamp(2 + (int)MathF.Round(10f * MathF.Sqrt(radii[0] / nodes[0].Radius)), 3, 12);
+        mesh.Tube(points, radii, Math.Max(3, sides / fewerSides));
     }
 
     private static void Check(TreeSpecies species)
