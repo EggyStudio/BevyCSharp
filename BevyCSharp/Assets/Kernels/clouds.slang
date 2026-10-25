@@ -187,27 +187,93 @@ int brightest()
     return best;
 }
 
-[shader("compute")]
-[numthreads(8, 8, 1)]
-void main(uint3 id : SV_DispatchThreadID)
+[format("rgba16f")] WTexture3D<float4> sky_cloud_cube;
+Texture3D<float4> sky_cloud_layer;
+TextureCube<float4> sky_source;
+[format("rgba16f")] WTexture3D<float4> sky_held;
+Texture3D<float4> sky_copied;
+[format("rgba16f")] WTexture2DArray<float4> sky_cube;
+SamplerState sky_sampler;
+
+// The way a cube's texel looks along as the GPU samples a cube, Bevy's `sample_cube_dir`, a face
+// numbered +X, -X, +Y, -Y, +Z and -Z.
+float3 cubeDir(float2 uv, uint face)
 {
-    uint2 size;
-    clouds.GetDimensions(size.x, size.y);
-    if (any(id.xy >= size))
-        return;
+    float2 c = uv * 2.0 - 1.0;
+    float3 d;
+    if (face == 0u) d = float3(1.0, -c.y, -c.x);
+    else if (face == 1u) d = float3(-1.0, -c.y, c.x);
+    else if (face == 2u) d = float3(c.x, 1.0, c.y);
+    else if (face == 3u) d = float3(c.x, -1.0, -c.y);
+    else if (face == 4u) d = float3(c.x, -c.y, 1.0);
+    else d = float3(-c.x, -c.y, -1.0);
+    return normalize(d);
+}
 
-    float2 uv = (float2(id.xy) + 0.5) / float2(size);
-    float3 way = normalize(passRayDirection(uv));
-    float3 eye = passView.world_position;
+// 1 in x where the camera is lit by the sky, whose clear sky `sky_copy` has copied out of the cube
+// before the clouds are marched and laid over it, so the clouds are lit by the clear sky above them
+// and fade into its color along the way rather than into the clouded cube the scene is lit by,
+// which would light them by their own undersides.
+uniform float4 sky_lit;
 
+// The face of a cube a way the GPU samples it along falls on, and where on it, the inverse of
+// `cubeDir`.
+void cubeFace(float3 d, out uint face, out float2 uv)
+{
+    float3 a = abs(d);
+    float2 c;
+    if (a.x >= a.y && a.x >= a.z)
+    {
+        face = d.x > 0.0 ? 0u : 1u;
+        c = float2(d.x > 0.0 ? -d.z : d.z, -d.y) / a.x;
+    }
+    else if (a.y >= a.z)
+    {
+        face = d.y > 0.0 ? 2u : 3u;
+        c = float2(d.x, d.y > 0.0 ? d.z : -d.z) / a.y;
+    }
+    else
+    {
+        face = d.z > 0.0 ? 4u : 5u;
+        c = float2(d.z > 0.0 ? d.x : -d.x, -d.y) / a.z;
+    }
+    uv = c * 0.5 + 0.5;
+}
+
+// The clear sky's light along a world way, from the copy of the atmosphere's cube, before the
+// exposure.
+float3 clearSky(float3 way)
+{
+    uint face;
+    float2 uv;
+    cubeFace(float3(way.xy, -way.z), face, uv);
+    return sky_copied.SampleLevel(sky_sampler, float3(uv, (float(face) + 0.5) / 6.0), 0.0).rgb * passSceneInfo.environment_intensity;
+}
+
+// The clear sky's light about the up or down way, from the pole and a ring sixty degrees from it,
+// each weighed by how squarely it lights a surface facing that way, as Bevy's diffuse map holds it.
+float3 clearAmbient(float up)
+{
+    float3 light = clearSky(float3(0.0, up, 0.0));
+    float weight = 1.0;
+    for (int i = 0; i < 8; i++)
+    {
+        float angle = float(i) * 0.785398;
+        light += 0.5 * clearSky(float3(cos(angle) * 0.866, up * 0.5, sin(angle) * 0.866));
+        weight += 0.5;
+    }
+    return light / weight;
+}
+
+// The clouds along a way from an eye, the light they send toward it with the sky's color in front
+// of them, multiplied by how much they cover, and how much they cover, after the exposure, marched
+// in so many steps from a point the jitter, from 0 to 1, moves along the first, and the depth the
+// light came from on average, or the farthest the march reaches where none came.
+float4 marchClouds(float3 eye, float3 way, float steps, float jitter, out float meanDepth)
+{
     // The planet's middle under the world's origin, the ground there at height zero.
     float3 center = float3(0.0, -layer.z, 0.0);
     float3 from = eye - center;
-
-    // Geometry over the whole of this texel leaves no sky for the clouds to lie over.
-    int2 pixel = int2(id.xy) * 2;
-    bool sky = passLoadDepth(pixel) <= 0.0 || passLoadDepth(pixel + int2(1, 0)) <= 0.0
-        || passLoadDepth(pixel + int2(0, 1)) <= 0.0 || passLoadDepth(pixel + int2(1, 1)) <= 0.0;
 
     float2 inner = sphere(from, way, layer.z + layer.x);
     float2 outer = sphere(from, way, layer.z + layer.y);
@@ -231,12 +297,11 @@ void main(uint3 id : SV_DispatchThreadID)
     leave = min(leave, layer.w);
 
     float4 now = float4(0.0, 0.0, 0.0, 0.0);
-    float meanDepth = layer.w;
-    if (sky && passHasDepth() && enter >= 0.0 && leave > enter)
+    meanDepth = layer.w;
+    if (enter >= 0.0 && leave > enter)
     {
-        float steps = max(march.x, 1.0);
         float stride = (leave - enter) / steps;
-        float t = enter + stride * passBlueNoise(int2(id.xy)).x;
+        float t = enter + stride * jitter;
 
         int sun = brightest();
         float3 toSun = sun >= 0 ? normalize(passLights.directional_lights[sun].direction_to_light) : float3(0.0, 1.0, 0.0);
@@ -245,6 +310,11 @@ void main(uint3 id : SV_DispatchThreadID)
 
         float3 skyAbove = passHasEnvironment() ? passEnvironmentDiffuse(float3(0.0, 1.0, 0.0)) * passView.exposure : 0.0;
         float3 skyBelow = passHasEnvironment() ? passEnvironmentDiffuse(float3(0.0, -1.0, 0.0)) * passView.exposure : 0.0;
+        if (sky_lit.x > 0.5)
+        {
+            skyAbove = clearAmbient(1.0) * passView.exposure;
+            skyBelow = clearAmbient(-1.0) * passView.exposure;
+        }
 
         float3 light = 0.0;
         float through = 1.0;
@@ -321,6 +391,8 @@ void main(uint3 id : SV_DispatchThreadID)
             float3 air = passAtmosphereTransmittance(eye, way) / max(passAtmosphereTransmittance(point, way), 1e-4);
             air = saturate(air);
             float3 skyColor = passHasEnvironment() ? passEnvironmentSpecular(way, 0.0) * passView.exposure : 0.0;
+            if (sky_lit.x > 0.5)
+                skyColor = clearSky(way) * passView.exposure;
             float cover = 1.0 - through;
 
             // Faded out toward the farthest the march reaches, so the clouds do not end in a line.
@@ -329,6 +401,32 @@ void main(uint3 id : SV_DispatchThreadID)
             now = float4(shown, cover) * fade;
         }
     }
+
+    return now;
+}
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void main(uint3 id : SV_DispatchThreadID)
+{
+    uint2 size;
+    clouds.GetDimensions(size.x, size.y);
+    if (any(id.xy >= size))
+        return;
+
+    float2 uv = (float2(id.xy) + 0.5) / float2(size);
+    float3 way = normalize(passRayDirection(uv));
+    float3 eye = passView.world_position;
+
+    // Geometry over the whole of this texel leaves no sky for the clouds to lie over.
+    int2 pixel = int2(id.xy) * 2;
+    bool sky = passLoadDepth(pixel) <= 0.0 || passLoadDepth(pixel + int2(1, 0)) <= 0.0
+        || passLoadDepth(pixel + int2(0, 1)) <= 0.0 || passLoadDepth(pixel + int2(1, 1)) <= 0.0;
+
+    float4 now = float4(0.0, 0.0, 0.0, 0.0);
+    float meanDepth = layer.w;
+    if (sky && passHasDepth())
+        now = marchClouds(eye, way, max(march.x, 1.0), passBlueNoise(int2(id.xy)).x, meanDepth);
 
     // Last frame's clouds where they stood in last frame's view.
     if (march.w > 0.5)
@@ -397,4 +495,72 @@ void shadows(uint3 id : SV_DispatchThreadID)
 
     float through = lerp(1.0, exp(-optical), saturate(shadow_up.w));
     cloud_shadow.Store(id.xy, float4(through, through, through, 1.0));
+}
+
+// The clouds over the sky the scene is lit by (Render.SetSkyLighting), passes on the camera after
+// the prepass, after Bevy's atmosphere has drawn the sky into the cube its lighting is filtered from
+// and before the next frame filters it. `sky_copy` copies the atmosphere's cube, before the clouds
+// are marched, for both marches to be lit by and for `sky_merge`, since a pass cannot read and write
+// the cube at once. `sky_clouds` marches the clouds along the middle of each texel of a small cube
+// of its own, six slices of a 3D image, from the camera in the steps the picture's march takes,
+// twice from points a step apart and averaged, keeping their light before the exposure, as the atmosphere's cube keeps the sky's, and how
+// much of the sky behind them gets through, and `sky_merge` lays the small cube's clouds over the
+// copy, read between their texels, and writes the cube back. So an overcast grays and dims the light
+// the ground, the rain and the clouds themselves are lit by, and a clear sky's patch lets its blue
+// through.
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void sky_clouds(uint3 id : SV_DispatchThreadID)
+{
+    uint3 size;
+    sky_cloud_cube.GetDimensions(size.x, size.y, size.z);
+    if (any(id >= size))
+        return;
+
+    // The world's way for the texel, its z turned, since a cube's faces are laid out for a
+    // left-handed world, as Bevy draws the atmosphere's cube. Below the horizon the planet stands
+    // in the way.
+    float2 uv = (float2(id.xy) + 0.5) / float2(size.xy);
+    float3 face = cubeDir(uv, id.z);
+    float3 way = float3(face.xy, -face.z);
+
+    // Two marches from points a quarter and three quarters along the first step, averaged, in the
+    // picture's steps, since the fog reads this cube nearly sharp along the horizon, where a deck
+    // seen edge on is marched far, and the step's aliasing from one texel to the next would show
+    // in it as stripes up the picture.
+    float4 cloud = 0.0;
+    if (way.y > -0.02)
+    {
+        float meanDepth;
+        float steps = max(march.x, 16.0);
+        cloud = 0.5 * (marchClouds(passView.world_position, way, steps, 0.25, meanDepth)
+            + marchClouds(passView.world_position, way, steps, 0.75, meanDepth));
+    }
+    sky_cloud_cube.Store(id, float4(cloud.rgb / max(passView.exposure, 1e-10), 1.0 - cloud.a));
+}
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void sky_copy(uint3 id : SV_DispatchThreadID)
+{
+    uint3 size;
+    sky_held.GetDimensions(size.x, size.y, size.z);
+    if (any(id >= size))
+        return;
+    float2 uv = (float2(id.xy) + 0.5) / float2(size.xy);
+    sky_held.Store(id, sky_source.SampleLevel(sky_sampler, cubeDir(uv, id.z), 0.0));
+}
+
+[shader("compute")]
+[numthreads(8, 8, 1)]
+void sky_merge(uint3 id : SV_DispatchThreadID)
+{
+    uint3 size;
+    sky_cube.GetDimensions(size.x, size.y, size.z);
+    if (any(id.xy >= size.xy) || id.z >= 6u)
+        return;
+    float2 uv = (float2(id.xy) + 0.5) / float2(size.xy);
+    float3 sky = sky_copied.Load(int4(int3(id), 0)).rgb;
+    float4 cloud = sky_cloud_layer.SampleLevel(sky_sampler, float3(uv, (float(id.z) + 0.5) / 6.0), 0.0);
+    sky_cube.Store(id, float4(cloud.rgb + cloud.a * sky, 1.0));
 }

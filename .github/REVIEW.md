@@ -10,52 +10,33 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `6795478f`, item 72, the feature test's sample behaviors deleted, read at 08:26 on
-2026-10-25, carrying the review's files and SHARED.md, pushed at 08:27 on 2026-10-25 once the run of
-`a2646e71` went green, its own run green at 08:44. Diagnostics with its SampleReport, the shutdown
-final state and Trace, the progress printer under RunIf; Movement with its five moving entities and
-Gravity; Orbit with the planet and the moon, their gizmos and the transforms list; Spinner with
-Lifetime; the feature test's Components.cs with Position, Velocity, Falls and Grounded, which those
-alone used; and Program.cs's verbose flag and its option line, which Trace alone read. Every other
-behavior is a zone, a page or a check, FlyCamera the spectator camera six behaviors use, Capture a
-check, Renderer kept as the item says. The drive, the tests, the docs, the READMEs, the workflow and
-build/norm read first and found relying on none of them, the library's BehaviorAttribute example
-naming a Spinner and a Gravity of its own. An offscreen run of 300 frames exits 0 with no final
-state or transforms list, the startup notes and Bevy's info and warn lines left as the item leaves
-them. The 18 norm tests pass; the full suite runs on the tree with the thunder, which commits next,
-so this commit's suite is the next commit's and the run's. After `a2646e71`, item 69's fifth phase,
-the rain and the snow, pushed at 08:03 on 2026-10-25 after the run of `4ac3871a` went green, its own
-run green at 08:26, carrying SHARED.md, two pictures with captions and a Shared line, ABI 308.
-Render.SetPrecipitation with PrecipitationSettings and a PrecipitationQuality of 16, 32 or 64
-thousand particles falling in two boxes held in the world, each particle's kind following from its
-number and the rain's share every frame, the drops and the flakes counted with an atomic into an
-indirect draw and each one's light worked out once from the brightest light through the air with its
-shadow and the clouds' shadow, the environment map and the lamps, the splashes in a ring of 4,096,
-the roofs map from an orthographic camera looking down over 96 m at 256 texels a side, switched on
-through the reflected CameraRef.IsActive for a few frames once the camera has moved 12 m; SetWeather
-gains a precipitation parameter and the feature test rains. One departure, a new
-FramePoint.AfterTemporalAntialiasing, the bridge's point 5, since TAA's history kept a moving speck
-at a tenth of its strength and the feature test's snow vanished under it, a test drawing a speck at
-a hashed place each frame under TAA and reading above 230 after the point and below 170 before, the
-point before motion blur, bloom and depth of field since Bevy's effect stack is crate-private and a
-point after depth of field could not be ordered, view images copying at it and a pass at it running
-where BeforeTonemapping passes do. Two faults found and fixed, the drops becoming flakes at the top
-of the box alone after rain so the air stayed empty for tens of seconds, the kind worked out per
-frame; and far drops held at 1.5 px drawing lines across a storm's sky, the drops fading from 0.4 of
-the reach with opacity as the width ratio to the power 0.6, streaks capped at 25 cm and the near
-fade over 0.4 to 1.8 m. The environment map's gap read, SetSkyLighting's intensity letting the cover
-dim the map from managed code when the cover changes, but darkening the blue rather than graying it,
-the drops and the flakes taking the same blue, so the overcast's gray needs the sky and the clouds
-rendered into a cube the GPU filters as SetImageLighting does, a phase of its own proposed after the
-thunder and before the crate's removal. 0.05 ms of the GPU at 1280 by 720, moving 0.022, drawing
-0.011 and clearing 0.011, the roofs map 0.017 on the frames it is drawn. 1,897 passed, 3 skipped,
-1,900 the listing plus 11, the bridge's checks clean on every profile, Cargo 118, 199 and 11.
+Reviewed up to `4cc89851`, item 69's sixth phase, the thunder, pushed at 08:51 on 2026-10-25 after
+the run of `6795478f` went green, its own run green at 09:13, carrying the review's files, two
+pictures with captions and a Shared line, no native change. Render.SetThunder and
+Render.StrikeLightning with ThunderSettings and a LightningStrike record, Struck a callback with the
+strike's place, distance, thunder delay and whether it went to the ground, SetWeather taking the
+weather's thunder rate, a sky.strike command with its BCS.md row and sky.weather saying the strikes
+a minute. The strikes are a Poisson process, area-uniform between Nearest and Farthest, two in three
+to the ground, the flicker the crate's envelope; the flash moves a point light set through the
+reflected PointLightRef when its intensity changes, a glow in the clouds' march, a bell 600 m wide
+at the base plus 300 m with the march's history off while it flashes, and a bolt of 128
+midpoint-displaced segments and three to six branches drawn added at AfterTemporalAntialiasing and
+fading into the cloud base, 0.02 ms of the GPU while it flashes; the thunder is synthesized into
+pooled sample streams a sixth of a second ahead and falls silent where the app has no audio. One
+departure, the bolt's program made when the storm is set rather than at the first strike, since the
+night scratch showed no bolt while it compiled. ThunderTests, 6, read the flash's envelope, the
+Poisson mean of the gaps at 10 s for six a minute, the bolt's channel and branches, far thunder
+longer, quieter and lower than near by its zero crossings, a night strike lighting the ground and
+drawing its bolt with Struck giving the distance and the delay, and refused settings,
+SkyWeatherTests reading the storm's rate. Seen once and not in two more runs, four of the feature
+test's own shaders reported unreadable at frame 194 in a run after a build, the files untouched
+here. 1,903 passed, 3 skipped, 1,906 the listing plus 11.
+
+Before it, `6795478f` came, item 72, the feature test's sample behaviors deleted, pushed at 08:27 on
+2026-10-25, its run green at 08:44.
 
 Before it, `4ac3871a` came, item 69's fourth phase, the weather state, pushed at 06:30 on
 2026-10-25, its run green at 06:53.
-
-Before it, `6649ab49` came, item 69's third phase, the sky's clock and the night sky, pushed at
-05:09 on 2026-10-25, its run green at 05:26.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -297,7 +278,9 @@ from [SHARED.md](SHARED.md).
     2026-10-25, the rain and the snow with a frame point after the temporal antialiasing as its
     departure and two faults in the head; the sixth next, the thunder, then a seventh taken as
     proposed, the sky and the clouds rendered into the environment map's cube so an overcast grays
-    the ground and the falling drops rather than darkening their blue, then the crate's removal.
+    the ground and the falling drops rather than darkening their blue, then the crate's removal. The
+    sixth phase at `4cc89851` on 2026-10-25, the thunder, the bolt's program made with the storm as
+    its departure; the seventh next, the sky and the clouds into the environment map's cube.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
     with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
@@ -1818,3 +1801,17 @@ low-passes whose cutoff falls from 3,000 hertz near or 250 far to 110, lifted by
 the band it lets through, three to six rolls at seeded times, a crack for a strike within two
 kilometers, softly clipped, heard after the distance over 343 meters a second, its streams kept for
 the next clap. The crate drew no bolt and played a clip the game gave it.
+
+Shared: the clouds in the sky lighting, in the commit carrying this line, item 69's environment map
+phase, for 3DEngine's sky light beside its own. Bevy's atmosphere draws the sky into the cube its
+lighting is filtered from on the camera's frame after the prepass, and its filtering reads the cube
+as the next frame begins, so three dispatches on the camera after the prepass lay the clouds over
+it. A copy of the cube, which a pass cannot read and write at once, is taken first and lights both
+cloud marches with the clear sky, so the clouds are not lit by their own undersides; a march into a
+cube of 64 texels a face, six slices of a 3D image, twice a texel from points a step apart and
+averaged, keeps the clouds' light before the exposure and how much of the sky gets through; and the
+merge writes the cube back through a two-dimensional array view of its six faces, which the bridge
+gives a cube image for a storage binding at ABI 309, with `bcs_render_sky_lighting_cube` handing the
+managed side the atmosphere's cube alone. The fog's horizon color is read sharp at five ways over
+thirty degrees and averaged, since the clouds along the horizon otherwise stood up the picture as
+stripes through the froxels. Some 0.18 ms of the GPU at 1280 by 720.

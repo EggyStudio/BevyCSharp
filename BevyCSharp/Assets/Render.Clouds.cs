@@ -20,6 +20,14 @@ public static partial class Render
     /// move smoothly on the wind.
     /// </para>
     /// <para>
+    /// On a camera lit by the sky (<see cref="SetSkyLighting"/>), the clouds are laid over the sky
+    /// its lighting is filtered from as well, marched each frame into a small cube of their own from
+    /// the camera after Bevy's atmosphere has drawn the sky into its cube, so an overcast grays and
+    /// dims the light the ground, the rain and the clouds' own fog are lit by, and a clear patch lets
+    /// its blue through. The clouds themselves are lit by the clear sky, copied out of the cube
+    /// before they are laid over it.
+    /// </para>
+    /// <para>
     /// The noise they are cut from is made once an app on the GPU, the first time a camera asks,
     /// and the clouds show the frame after it is made. They need a camera drawn once a pixel
     /// (<see cref="PostSettings.Msaa"/> of one), whose depth says where the sky is. The setting
@@ -80,8 +88,10 @@ internal static class Clouds
     // The planet's radius the shell lies over where the camera has no atmosphere to say, earth's.
     private const float EarthRadius = 6_360_000f;
 
-    // The texels across the clouds' shadow.
+    // The texels across the clouds' shadow, and across each face of the small cube the clouds over
+    // the sky lighting are marched into.
     private const uint ShadowTexels = 512;
+    private const uint SkyTexels = 64;
 
     private static App? _app;
     private static Noise? _noise;
@@ -114,6 +124,14 @@ internal static class Clouds
         internal Entity Shadowed { get; set; } = Entity.None;
         internal Vec3 Middle { get; set; }
         internal (Vec3 Across, Vec3 Up) Axes { get; set; }
+
+        // The cube the camera's sky lighting is filtered from, where it has one, the three passes
+        // laying the clouds over it, the small cube they are marched into and the copy of the sky.
+        internal AssetHandle SkyCube { get; set; } = AssetHandle.None;
+        internal ShaderInstance SkyClouds { get; set; }
+        internal ShaderInstance SkyCopy { get; set; }
+        internal ShaderInstance SkyMerge { get; set; }
+        internal (uint Width, uint Height) SkySize { get; set; }
     }
 
     internal static void Set(Entity camera, CloudSettings settings)
@@ -146,16 +164,73 @@ internal static class Clouds
 
         Feed(clouds, clouds.March, noise);
         if (clouds.Shadow.IsValid) Feed(clouds, clouds.Shadow, noise);
+        if (clouds.SkyClouds.IsValid) Feed(clouds, clouds.SkyClouds, noise);
         clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
         Turn(camera, clouds, 0f);
         if (standing) return;
 
         Shaders.SetEngineViewImages(camera, Owner, new ViewImage("clouds", ShaderImageFormat.Rgba16Float, Scale: 0.5f, History: true));
         Shaders.SetEnginePrepass(camera, Owner, 1u);
-        var march = ViewDispatch.PerPixel(clouds.March, FramePoint.AfterPrepass, 8, 8, 0.5f);
-        if (settings.ShadowLight.IsNone) Shaders.SetEngineViewDispatches(camera, Owner, march);
-        else Shaders.SetEngineViewDispatches(camera, Owner, ViewDispatch.Fixed(clouds.Shadow, FramePoint.AfterPrepass, ShadowTexels / 8, ShadowTexels / 8), march);
+        Submit(camera, clouds);
         Shaders.SetEngineViewDraws(camera, Owner, ViewDraw.Fixed(clouds.Draw, FramePoint.BeforeTonemapping, 3, 1, DrawBlend.Alpha, writesDepth: false));
+    }
+
+    // The camera's dispatches, the shadow's where the clouds cast one, the march, and where the
+    // camera is lit by the sky, the copy of its clear sky before the march and the two passes laying
+    // the clouds over it after, all after the prepass, which is after Bevy's atmosphere draws the
+    // sky into its cube.
+    private static void Submit(Entity camera, Camera clouds)
+    {
+        var dispatches = new List<ViewDispatch>();
+        if (clouds.Shadow.IsValid && !clouds.Settings.ShadowLight.IsNone)
+            dispatches.Add(ViewDispatch.Fixed(clouds.Shadow, FramePoint.AfterPrepass, ShadowTexels / 8, ShadowTexels / 8));
+        var (width, height) = clouds.SkySize;
+        if (clouds.SkyCube.IsValid)
+            dispatches.Add(ViewDispatch.Fixed(clouds.SkyCopy, FramePoint.AfterPrepass, (width + 7) / 8, (height + 7) / 8, 6));
+        dispatches.Add(ViewDispatch.PerPixel(clouds.March, FramePoint.AfterPrepass, 8, 8, 0.5f));
+        if (clouds.SkyCube.IsValid)
+        {
+            dispatches.Add(ViewDispatch.Fixed(clouds.SkyClouds, FramePoint.AfterPrepass, SkyTexels / 8, SkyTexels / 8, 6));
+            dispatches.Add(ViewDispatch.Fixed(clouds.SkyMerge, FramePoint.AfterPrepass, (width + 7) / 8, (height + 7) / 8, 6));
+        }
+        Shaders.SetEngineViewDispatches(camera, Owner, [.. dispatches]);
+    }
+
+    // Finds the cube the camera's sky lighting is filtered from, and makes the passes that lay the
+    // clouds over it where the camera has gained one, or takes them off where it has lost it.
+    private static void Light(Entity camera, Camera clouds)
+    {
+        var key = Native.bcs_render_sky_lighting_cube(camera.Bits);
+        var cube = key >= 0 ? new AssetHandle(key) : AssetHandle.None;
+        if (cube == clouds.SkyCube) return;
+        if (cube.IsValid && !Render.TryImageSize(cube, out _, out _, out _)) return;
+
+        clouds.SkyCube = cube;
+        if (!cube.IsValid) clouds.March.Set("sky_lit", Vector4.Zero);
+        if (cube.IsValid)
+        {
+            Render.TryImageSize(cube, out var width, out var height, out _);
+            clouds.SkySize = (width, height);
+            var small = Shaders.CreateImage(SkyTexels, SkyTexels, ShaderImageFormat.Rgba16Float, depth: 6);
+            var held = Shaders.CreateImage(width, height, ShaderImageFormat.Rgba16Float, depth: 6);
+            if (!clouds.SkyClouds.IsValid)
+            {
+                clouds.SkyClouds = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_clouds"));
+                clouds.SkyCopy = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_copy"));
+                clouds.SkyMerge = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_merge"));
+            }
+            clouds.SkyClouds.SetTexture("sky_cloud_cube", small);
+            clouds.SkyCopy.SetTexture("sky_source", cube).SetTexture("sky_held", held).SetSampler("sky_sampler", SamplerSettings.Clamped);
+            clouds.SkyMerge.SetTexture("sky_cube", cube).SetTexture("sky_copied", held).SetTexture("sky_cloud_layer", small)
+                .SetSampler("sky_sampler", SamplerSettings.Clamped);
+            Feed(clouds, clouds.SkyClouds, NoiseFor(clouds.Settings.Seed));
+
+            // Both marches read the clear sky from the copy made before them.
+            foreach (var marching in new[] { clouds.March, clouds.SkyClouds })
+                marching.SetTexture("sky_copied", held).SetSampler("sky_sampler", SamplerSettings.Clamped).Set("sky_lit", new Vector4(1f, 0f, 0f, 0f));
+            Turn(camera, clouds, 0f);
+        }
+        Submit(camera, clouds);
     }
 
     // The numbers and the noise both the march and the shadow read.
@@ -221,6 +296,7 @@ internal static class Clouds
         var ecs = world.Resource<EcsWorld>();
         foreach (var (camera, clouds) in Cameras)
         {
+            Light(new Entity(camera), clouds);
             Turn(new Entity(camera), clouds, delta);
             Cookie(ecs, new Entity(camera), clouds);
         }
@@ -279,9 +355,14 @@ internal static class Clouds
         clouds.Frames++;
         clouds.Carried += clouds.Settings.Wind * delta;
         var settings = clouds.Settings;
+        // The glow on the sky lighting's clouds as well, so a strike lights the scene from the
+        // clouds it flashes in.
         var glow = SkyThunder.GlowFor(camera);
-        clouds.March.Set("flash", glow is { } lit ? new Vector4(lit.Middle.X, lit.Middle.Y, lit.Middle.Z, lit.Light) : Vector4.Zero)
-            .Set("flash_color", glow is { } tint ? new Vector4(tint.Color, tint.Radius) : Vector4.Zero);
+        foreach (var marching in clouds.SkyClouds.IsValid ? [clouds.March, clouds.SkyClouds] : new[] { clouds.March })
+        {
+            marching.Set("flash", glow is { } lit ? new Vector4(lit.Middle.X, lit.Middle.Y, lit.Middle.Z, lit.Light) : Vector4.Zero)
+                .Set("flash_color", glow is { } tint ? new Vector4(tint.Color, tint.Radius) : Vector4.Zero);
+        }
 
         // The steps along a way and toward the sun.
         var (steps, toward) = settings.Quality switch
@@ -291,7 +372,10 @@ internal static class Clouds
             _ => (72f, 6f),
         };
         var history = clouds.Frames > 2 && (_noise?.Made ?? false) && glow is null ? 1f : 0f;
-        foreach (var instance in clouds.Shadow.IsValid ? [clouds.March, clouds.Shadow] : new[] { clouds.March })
+        var instances = new List<ShaderInstance> { clouds.March };
+        if (clouds.Shadow.IsValid) instances.Add(clouds.Shadow);
+        if (clouds.SkyClouds.IsValid) instances.Add(clouds.SkyClouds);
+        foreach (var instance in instances)
         {
             instance.Set("layer", new Vector4(settings.Bottom, settings.Top, EarthRadius, settings.Distance))
                 .Set("wind", new Vector4(clouds.Carried.X, clouds.Carried.Y, clouds.Carried.Z, 1f / settings.WeatherSize))

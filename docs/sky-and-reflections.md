@@ -210,7 +210,11 @@ and in front of the sky's fog. With `ShadowLight` they shadow the sun, how much 
 through worked out over a square `ShadowSize` wide about the camera and laid over the light as its
 picture, so their shadows drift over the ground and the fog in froxels darkens in them, for under a
 tenth of a millisecond more. The light's global transform takes the square's scale and middle each
-frame and its turn stays the program's. The console's `sky.clouds` sets them while the app runs.
+frame and its turn stays the program's. On a camera lit by the sky (`SetSkyLighting`), the clouds
+are laid over the sky its lighting is filtered from as well, marched each frame into a small cube of
+their own after Bevy's atmosphere has drawn the sky, so an overcast grays and dims the light the
+ground and the rain are lit by and a clear patch lets its blue through, for some 0.18 ms more. The
+console's `sky.clouds` sets them while the app runs.
 
 The sky has a clock, and behind the atmosphere the stars, the galaxy and the moon stand by it:
 

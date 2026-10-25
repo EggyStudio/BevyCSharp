@@ -90,10 +90,17 @@ float3 skyAlong(float3 way)
     float across = length(flat);
     flat = across > 1e-4 ? flat / across : float2(0.0, -1.0);
     float up = clamp(way.y, 0.0, top);
-    float3 raised = normalize(float3(flat.x * sqrt(max(1.0 - up * up, 0.0)), up, flat.y * sqrt(max(1.0 - up * up, 0.0))));
+    float level = sqrt(max(1.0 - up * up, 0.0));
     if (horizon.w > 0.5 || !passHasEnvironment())
         return color.rgb * passView.exposure;
-    return passEnvironmentSpecular(raised, 0.08) * passView.exposure;
+    float3 light = 0.0;
+    for (int k = -2; k <= 2; k++)
+    {
+        float turn = float(k) * 0.1309;
+        float2 turned = float2(flat.x * cos(turn) - flat.y * sin(turn), flat.x * sin(turn) + flat.y * cos(turn));
+        light += passEnvironmentSpecular(normalize(float3(turned.x * level, up, turned.y * level)), 0.08);
+    }
+    return light * 0.2 * passView.exposure;
 }
 
 // The light of the sky alone, the even part of the fog's light every point gets whatever shadow it

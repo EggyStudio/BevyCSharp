@@ -159,6 +159,14 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_set_sky_lighting(
         ulong camera, int on, float intensity, uint size);
 
+    /// <summary>
+    /// The cube a camera's sky lighting is filtered from, which Bevy's atmosphere draws after the
+    /// prepass, as an asset key, or <c>NOT_PRESENT</c> where it has none yet.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_sky_lighting_cube(ulong camera);
+
     /// <summary>Draws a cubemap behind everything a camera draws.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

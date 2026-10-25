@@ -92,6 +92,69 @@ public sealed class CloudTests
         Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetClouds(default, new CloudSettings { Coverage = float.NaN }));
     }
 
+    /// <summary>
+    /// An overcast laid over the sky the camera is lit by grays the light a wall in its own shade is
+    /// lit by, which a clear sky lights blue.
+    /// </summary>
+    [SkippableFact]
+    public void AnOvercastGraysTheSkyLightAShadedWallIsLitBy()
+    {
+        Needs.Shaders();
+        var clear = Blueness(Shaded(null));
+        var overcast = Blueness(Shaded(new CloudSettings { Coverage = 1f, Stratus = 1f, Bottom = 900f, Top = 2200f, Density = 0.08f }));
+        Assert.True(clear > 0.04, $"the clear sky lights the shaded wall {clear:0.000} blue");
+        Assert.True(overcast < clear * 0.6, $"the overcast lights the shaded wall {overcast:0.000} blue against the clear sky's {clear:0.000}");
+    }
+
+    // How much bluer than red the middle of a picture is, against its brightness.
+    private static double Blueness(CapturedImage picture)
+    {
+        double red = 0, blue = 0, all = 0;
+        for (var y = picture.Height / 3; y < picture.Height * 2 / 3; y++)
+            for (var x = picture.Width / 3; x < picture.Width * 2 / 3; x++)
+            {
+                var (r, g, b, _) = picture.At(x, y);
+                red += r;
+                blue += b;
+                all += r + g + b;
+            }
+        return (blue - red) / Math.Max(all, 1.0);
+    }
+
+    // A white wall filling the view, its face turned from the sun behind it, so the sky's light is
+    // all that reaches it, under the clouds given or none, the camera lit by the sky.
+    private static CapturedImage Shaded(CloudSettings? clouds)
+    {
+        var run = new PictureRun
+        {
+            Width = 160,
+            Height = 90,
+            Frames = 1500,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 40f });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 2f, 0f), new Vec3(0f, 2f, -5f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None, Dither = false });
+                Render.SetAtmosphere(camera, new AtmosphereSettings());
+                Render.SetSkyLighting(camera);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 12_500f, Shadows = false });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(0f, 0.6f, -0.8f), Vec3.Zero, Vec3.UnitY));
+                var wall = ecs.Spawn();
+                Render.SetMesh(ecs, wall, Render.CreateMesh(MeshShape.Cuboid, 20f, 12f, 0.5f));
+                Render.SetMaterial(ecs, wall, Render.CreateMaterial(0.8f, 0.8f, 0.8f, roughness: 1f));
+                ecs.Add(wall, Transform.At(0f, 2f, -5f));
+                if (clouds is not null) Render.SetClouds(camera, clouds);
+            },
+        };
+        run.Wait(10)
+            .Until("compiled", _ => clouds is null || Clouds.Ready())
+            .Until("ready", _ => Render.PipelinesReady())
+            .Wait(30)
+            .Capture("wall")
+            .Go();
+        return run.Picture("wall");
+    }
+
     private static double Luma((byte R, byte G, byte B, byte A) pixel) => (0.2126 * pixel.R) + (0.7152 * pixel.G) + (0.0722 * pixel.B);
 
     // The share of the upper half's pixels, all sky, that differ by more than ten levels between two pictures.

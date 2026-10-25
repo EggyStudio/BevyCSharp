@@ -509,7 +509,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                             {
                                 match mip {
                                     None => Some(image.texture_view.clone()),
-                                    Some(mip) => level_of(image, *mip, &mut packed.problems, &binding.name),
+                                    Some(mip) => level_of(image, *mip, None, &mut packed.problems, &binding.name),
                                 }
                             } else {
                                 packed.problems.push(format!(
@@ -556,8 +556,12 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                         .usage
                         .contains(TextureUsages::STORAGE_BINDING);
 
+                    // A cube is written as its six faces, since no shader writes a cube whole.
+                    let cube_as_array = view_dimension(image) == TextureViewDimension::Cube
+                        && *dimension == TextureViewDimension::D2Array;
+
                     if image.texture_descriptor.format != *format
-                        || view_dimension(image) != *dimension
+                        || (view_dimension(image) != *dimension && !cube_as_array)
                         || !writable
                     {
                         return Err(PackError::Missing(format!(
@@ -572,9 +576,10 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
 
                     // A storage binding holds exactly one level, so an image with several is bound
                     // at the level asked for, or its first.
+                    let array = cube_as_array.then_some(TextureViewDimension::D2Array);
                     let level = match (mip, image.texture_descriptor.mip_level_count) {
-                        (None, 1) => Some(image.texture_view.clone()),
-                        (mip, _) => level_of(image, mip.unwrap_or(0), &mut packed.problems, &key),
+                        (None, 1) if !cube_as_array => Some(image.texture_view.clone()),
+                        (mip, _) => level_of(image, mip.unwrap_or(0), array, &mut packed.problems, &key),
                     };
 
                     let Some(level) = level else {
@@ -628,8 +633,14 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
     Ok(packed)
 }
 
-/// A view of one mip level of an image, or `None` with a problem noted where it has no such level.
-fn level_of(image: &GpuImage, mip: u32, problems: &mut Vec<String>, name: &str) -> Option<TextureView> {
+/// A view of one mip level of an image, as `dimension` where given, or `None` with a problem noted.
+fn level_of(
+    image: &GpuImage,
+    mip: u32,
+    dimension: Option<TextureViewDimension>,
+    problems: &mut Vec<String>,
+    name: &str,
+) -> Option<TextureView> {
     if mip >= image.texture_descriptor.mip_level_count {
         problems.push(format!(
             "{name}: mip level {mip} was asked for, and the image has {}",
@@ -638,13 +649,12 @@ fn level_of(image: &GpuImage, mip: u32, problems: &mut Vec<String>, name: &str) 
         return None;
     }
 
+    let seen = image.texture_view_descriptor.clone().unwrap_or_default();
     Some(image.texture.create_view(&TextureViewDescriptor {
         base_mip_level: mip,
         mip_level_count: Some(1),
-        ..image
-            .texture_view_descriptor
-            .clone()
-            .unwrap_or_default()
+        dimension: dimension.or(seen.dimension),
+        ..seen
     }))
 }
 

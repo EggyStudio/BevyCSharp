@@ -64,12 +64,22 @@ float3 skyAlong(float3 way)
     float across = length(flat);
     flat = across > 1e-4 ? flat / across : float2(0.0, -1.0);
     float up = clamp(way.y, 0.0, top);
-    float3 raised = normalize(float3(flat.x * sqrt(max(1.0 - up * up, 0.0)), up, flat.y * sqrt(max(1.0 - up * up, 0.0))));
+    float level = sqrt(max(1.0 - up * up, 0.0));
     if (horizon.w > 0.5 || !passHasEnvironment())
         return color.rgb * passView.exposure;
-    // Read nearly sharp. The map is the sky's scattered light alone, with no sun disk to blur away,
-    // and a rough read near the horizon takes in the dark ground under it, which leaves a seam.
-    return passEnvironmentSpecular(raised, 0.08) * passView.exposure;
+    // Read nearly sharp, since the map is the sky's scattered light alone, with no sun disk to blur
+    // away, and a rough read near the horizon takes in the dark ground under it, which leaves a seam.
+    // It is read at five ways spread over thirty degrees about the way and averaged, as fog scatters
+    // forward the light from about the way, so the clouds the camera's sky lighting holds along the
+    // horizon do not stand up the picture as stripes.
+    float3 light = 0.0;
+    for (int k = -2; k <= 2; k++)
+    {
+        float turn = float(k) * 0.1309;
+        float2 turned = float2(flat.x * cos(turn) - flat.y * sin(turn), flat.x * sin(turn) + flat.y * cos(turn));
+        light += passEnvironmentSpecular(normalize(float3(turned.x * level, up, turned.y * level)), 0.08);
+    }
+    return light * 0.2 * passView.exposure;
 }
 
 // The share of a point's light the fog takes away between the eye and the point, through a layer

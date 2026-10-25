@@ -70,6 +70,54 @@ pub extern "C" fn bcs_render_set_sky_lighting(
     })
 }
 
+/// The cube a camera's sky lighting ([`bcs_render_set_sky_lighting`]) is filtered from, as the key
+/// the managed side knows an asset by, or `NOT_PRESENT` where the camera has no sky lighting or
+/// Bevy has not made its cube yet, which it does as the component goes on.
+///
+/// Bevy's atmosphere draws the sky into the cube on the camera's frame, after the prepass and before
+/// the main pass, and its filtering reads the cube as the next frame begins, so a shader on the
+/// camera writing it after the prepass lays what it writes over the sky the scene is lit by, as the
+/// clouds are laid there. The same key comes back each time it is asked for.
+///
+/// # Safety
+/// `camera` must be a live camera entity.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_render_sky_lighting_cube(camera: u64) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = camera;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::ecs::entity::Entity;
+            use bevy::light::{AtmosphereEnvironmentMapLight, GeneratedEnvironmentMapLight};
+
+            let entity = Entity::from_bits(camera);
+
+            with_world(|world| {
+                if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
+                    return refusal;
+                }
+
+                // Only the atmosphere's own cube, never an image a program lit the scene with.
+                let camera = world.entity(entity);
+                if !camera.contains::<AtmosphereEnvironmentMapLight>() {
+                    return status::NOT_PRESENT;
+                }
+                let Some(generated) = camera.get::<GeneratedEnvironmentMapLight>() else {
+                    return status::NOT_PRESENT;
+                };
+
+                let handle = generated.environment_map.clone().untyped();
+                crate::assets::key_for(world, handle)
+            })
+        }
+    })
+}
+
 /// Lights the scene from a cubemap, filtered on the GPU.
 ///
 /// The other way to light a scene from its surroundings. [`bcs_render_set_sky_lighting`] derives
