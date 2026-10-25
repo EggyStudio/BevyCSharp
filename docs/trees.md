@@ -37,6 +37,14 @@ Trees.PlantForest(ctx.Ecs, "black-tupelo", seed: 3, middle: new Vec3(0f, 0f, -60
 Each species grows eight variants on a worker the first time a tree of it is asked for, and every
 tree shares the variant its seed picks, turned and sized by the seed under a child of its entity,
 so a forest of a hundred trees grows eight and the entity's own transform stays where it was put.
+A planted tree is drawn in two levels of detail, `TreeDetail.Full` near the camera and
+`TreeDetail.Reduced` from two and a half of its heights away, the two dithered one into the other
+over half a height by Bevy's visibility range, so no tree pops. The reduced level has half the tube
+sides, leaves out the stems thinner than a twenty-fifth of the trunk, and draws every other leaf
+the square root of two larger at its place, so the crown covers as much with half the cards, and
+its shadow is drawn the same way, measured from the scene's camera. `Trees.Build` and
+`Trees.BuildLeaves` take the level for a tree built by hand.
+
 The trunk and each limb twelve centimeters thick or more stand as capsules the player stops at,
 through the `RigidBody` and `Collider` components the physics plugin makes bodies of. The presets
 are registered as `quaking-aspen`, `black-tupelo`, `weeping-willow`, `california-black-oak`, `bush`

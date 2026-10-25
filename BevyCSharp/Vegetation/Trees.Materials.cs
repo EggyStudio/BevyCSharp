@@ -71,7 +71,7 @@ public static partial class Trees
     /// <returns>The material, the same one for the same leaves and share while the app runs.</returns>
     /// <remarks>
     /// <para>
-    /// The cards of <see cref="BuildLeaves"/> are cut out by the leaves' opacity at one half and drawn
+    /// The cards of <see cref="BuildLeaves(TreeSkeleton, TreeSpecies, uint, TreeDetail)"/> are cut out by the leaves' opacity at one half and drawn
     /// from both sides, and light shows through them by their translucency, the leaf set's where it
     /// has one, so a crown lit from behind lets the light through at its edges.
     /// </para>

@@ -274,7 +274,7 @@ public sealed partial class EditMesh
     /// circumference, so a bark texture's texels are square where the tube starts and stretch along
     /// it only as far as it narrows. A tube that starts on another's middle with a radius under the
     /// other's there starts inside it, which closes the joint between them with no boolean, as
-    /// <see cref="Trees.Build"/> joins a branch to its parent.
+    /// <see cref="Trees.Build(TreeSkeleton, TreeDetail)"/> joins a branch to its parent.
     /// </para>
     /// <para>
     /// It stands where its points are, which are in the mesh's space, and its line in the recipe

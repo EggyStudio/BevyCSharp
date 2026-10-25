@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>
 /// A grown tree's stems as points, each with the point it grew from, its place and its radius,
-/// which <see cref="Trees.Build"/> makes into a mesh.
+/// which <see cref="Trees.Build(TreeSkeleton, TreeDetail)"/> makes into a mesh.
 /// </summary>
 /// <remarks>
 /// <para>

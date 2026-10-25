@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Trees grown by <see cref="Trees.Grow(TreeSpecies, uint)"/> and built by <see cref="Trees.Build"/>,
+/// Trees grown by <see cref="Trees.Grow(TreeSpecies, uint)"/> and built by <see cref="Trees.Build(TreeSkeleton, TreeDetail)"/>,
 /// their sameness by seed, the presets' sizes against the paper's, their thickness by the pipe
 /// model, the boxes they grow round and their meshes.
 /// </summary>
@@ -209,6 +209,29 @@ public sealed class TreeTests(ITestOutputHelper output)
             Assert.InRange(triangles, 5_000, 40_000);
             output.WriteLine($"| {seed} | {nodes.Count} | {tips} | {skeleton.Bounds.High.Y:0.0} m | {spread:0.0} m | {nodes[0].Radius * 100f:0.0} cm | {triangles} |");
         }
+    }
+
+    [Fact]
+    public void AReducedTreeKeepsItsTrunkAndLimbsInFewerTriangles()
+    {
+        foreach (var species in new[] { Aspen, TreeSpecies.BlackTupelo, TreeSpecies.CaliforniaBlackOak })
+        {
+            var skeleton = Trees.Grow(species, 2);
+            var full = Trees.Build(skeleton);
+            var reduced = Trees.Build(skeleton, TreeDetail.Reduced);
+            var fullTriangles = Modeling.Build(full)[0].Indices!.Length / 3;
+            var reducedTriangles = Modeling.Build(reduced)[0].Indices!.Length / 3;
+
+            // Half the sides and the thinnest stems left out, the tree as tall within a fiftieth,
+            // its top a twig over the trunk's tip or a ring of fewer sides turned another way, and
+            // closed.
+            Assert.InRange(reducedTriangles, fullTriangles / 10, fullTriangles / 2);
+            Assert.InRange(reduced.Bounds.High.Y, 0.98f * full.Bounds.High.Y, 1.02f * full.Bounds.High.Y);
+            Assert.True(reduced.IsClosed, $"{reduced.OpenEdges} edges of the reduced tree are open");
+            output.WriteLine($"{species.LeafSet}'s tree, {fullTriangles} triangles of stem in full and {reducedTriangles} reduced");
+        }
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => Trees.Build(Trees.Grow(Aspen, 2), (TreeDetail)7));
     }
 
     [Fact]

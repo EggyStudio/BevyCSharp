@@ -299,6 +299,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // normal prepass among them.
             crate::render::mended::install(&mut app);
 
+            // The scene's camera the origin a shadow's levels of detail are measured from, which
+            // Bevy otherwise takes from a light probe's camera in an offscreen run.
+            crate::render::shadow_origin::install(&mut app);
+
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();

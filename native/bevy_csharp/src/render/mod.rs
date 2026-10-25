@@ -65,6 +65,8 @@ pub mod shader_materials;
 pub mod shader_targets;
 pub mod shader_views;
 pub mod shaders;
+#[cfg(feature = "render")]
+pub mod shadow_origin;
 pub mod slang;
 pub mod solari;
 pub mod spirv_compute;

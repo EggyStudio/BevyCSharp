@@ -10,28 +10,29 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1bd18a6c`, item 70's third phase's planting and forest, pushed at 17:54 on
-2026-10-25 after the run of `8aa5bc94` went green, its own run green at 18:16, carrying the review's
-files, DEVLOG.md, a captioned picture with its note and a Shared line. A Tree component of an
-EcsText species and a uint seed, a registry with the six presets and Trees.Register, Trees.Plant and
-Trees.PlantForest by Poisson disk, a Tick in FrameSync growing eight variants a species on a worker
-and dressing each tree, a bare entity with the component alone grown and dressed. Three departures
-and a fault. The stems sit on a child body carrying the seed's yaw and size and not on the root, so
-the root's transform stays where the level put it, the leaves a child of that body; the capsules
-stand on stems of 6 cm radius, at most 24 a variant; the root had no Visibility while it parented
-meshes, so Bevy warned B0004 for every tree and one aspen's leaves stayed undrawn until something
-re-extracted them, the dressing giving the root Visibility.Inherited with the planting test
-asserting it. Open for the levels of detail, the nearest aspen's leaves seen from 37 degrees above
-whole at 15 m, thin at 25 and gone from 35 while the crowns' shadows stay whole, the cause unsettled
-and the note saying so. The 28 trees against the sphere crowns offscreen at 1280 by 720, the shadows
-from 0.11 to 0.14 ms to 1.6 to 3.3, the prepass and the opaque pass each up 0.4 to 0.7. 1,943
-passed, 3 skipped, 1,946 the listing plus 11.
+Reviewed up to `d0da9cf8`, item 70's third phase's first reading, the leaves' thinning settled
+before any level of detail, pushed at 18:42 on 2026-10-25 after the run of `1bd18a6c` went green,
+its own run green at 18:59, carrying REVIEW.md, SHARED.md, DEVLOG.md, a captioned picture with its
+note and a Shared line. The cause was the alpha coverage in the mips, the import keeping the share
+of the whole atlas's texels past one half a level, so at the level where a silver birch box is a
+texel or two across a leaf averaged with the transparent texels round it and its card fell under the
+cut while the atlas's share held, the shadows whole since they cut the same mask far coarser in
+screen terms, the prepass cutoff and a mip bias ruled out. Each level's opacity is scaled so the
+leaves' mean share of their boxes past one half, read bilinearly as a card samples it, stays the top
+level's; the six leaf sets imported again with their albedos alone changing, the import reproducing
+the bytes. A new test reads each preset alone against the sky from 37 degrees above and the side at
+a near distance, twice and four times it, the leaf pixels times the distance squared against the
+nearest's, asserting three quarters, where the old atlases fell to 0.21 and 0.34 for the birch with
+the alder and the willow failing and the new ones hold 0.93 to 1.07, the oak and the alder at four
+times rising to about 1.5 where a leaf is under a texel and all or nothing round it, which the far
+cards take; docs/trees.md says the levels keep each box's share. 1,944 passed, 3 skipped, 1,947 the
+listing plus 11.
+
+Before it, `1bd18a6c` came, item 70's third phase's planting and forest, pushed at 17:54 on
+2026-10-25, its run green at 18:16.
 
 Before it, `8aa5bc94` came, item 75, bark depth by parallax occlusion, pushed at 16:42 on
 2026-10-25, its run green at 16:59.
-
-Before it, `4ee79828` came, item 70's second phase's dressing, pushed at 16:06 on 2026-10-25, its
-run green at 16:23.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -326,7 +327,12 @@ from [SHARED.md](SHARED.md).
     holding Bevy's examples alone under N 5.2, docs/trees.md naming the forest as where to look. The
     third phase's planting and forest at `1bd18a6c` on 2026-10-25, the Tree component, the registry,
     the variants on a worker and the feature test's forest, the departures and the fault in the
-    head, the leaves thinning with distance open for the levels of detail, which come next.
+    head, the leaves thinning with distance open for the levels of detail, which come next. The
+    thinning settled at `d0da9cf8` on 2026-10-25, the mips keeping each leaf box's share; the rest
+    of the levels of detail in two commits as proposed, the dither between the full tree and the
+    reduced one, then the branch cards drawn at load into a target, read back and given levels on
+    the CPU by the same sampled share, since the GPU's mip generation would thin them as the atlas
+    did.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -365,6 +371,26 @@ from [SHARED.md](SHARED.md).
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
     the captures of the feature test retaken and the owner shown the result. After item 67.
+
+76. **A crown shades as a volume, each leaf's depth and outward direction taken from the shadow
+    grid.** From the owner's question of 2026-10-25 at about 19:45 on the leaves' normals, and the
+    word yes at 19:55. A leaf card's own normal is right for its specular and its transmission, but
+    a crown shades mostly as a volume, leaves deep inside and on the far side getting less sun and
+    sky than those on the lit rim, so per-leaf normals alone read as a heap of flat cards; bending
+    the normals outward is the stand-in artists use, toward a sphere by the shortcut and toward the
+    crown's real shape by the physical form. The growth's shadow grid already holds the leaf density
+    of each variant, so at each leaf the dressing reads two numbers from it and writes them per
+    vertex. The depth is the density above and around the leaf by Beer and Lambert's law, which
+    scales the ambient and the indirect light the leaf takes and gives the transmission its
+    thickness; the outward direction is the grid's gradient, toward which the leaf's normal is bent
+    about half way for the diffuse term alone, the leaf's own normal kept for specular and
+    transmission. No proxy mesh and no distance field is built, the grid being finer than a hull and
+    already computed. The leaf material carries the two in its vertex stream, through the standard
+    material where it can and a Slang material of the library's where it cannot; direct shadows
+    between leaves stay the shadow map's and the indirect light under a canopy the field's share of
+    the fourth phase. Tests of a leaf deep in a crown darker than one on the rim under the same sky
+    and of the rim's leaves facing out, and a picture pair of a crown flat and shaded in grazing
+    sun. After item 70's levels of detail and before its fourth phase. One commit.
 
 ## Verdicts
 
@@ -1915,3 +1941,10 @@ box is a texel or two across, where keeping the share of the whole atlas's texel
 still holds, so each level's opacity is scaled to keep the share of each leaf's box past one half
 as a card samples it, read between the level's texels, which holds a crown's leaves to four times
 the distance that loses them otherwise.
+
+Shared: a tree's levels of detail, in the commit carrying this line, item 70's phase (c2). A
+planted tree is drawn whole within two and a half of its heights of the camera and in a reduced
+level past three, dithered between, the reduced level of half the tube sides, the stems thinner
+than a twenty-fifth of the trunk left out and every other leaf drawn the square root of two larger
+at its place, which covers the same pixels within a tenth where the two change. A level's shadow is
+measured from the scene's camera, which needed Bevy's shadow origin set on it here.

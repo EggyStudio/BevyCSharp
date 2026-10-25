@@ -7,7 +7,7 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// <see cref="Grow(TreeSpecies, uint)"/> grows a tree's skeleton, the points its stems pass through with their
-/// thickness, and <see cref="Build"/> makes the skeleton into an <see cref="EditMesh"/> of tapered
+/// thickness, and <see cref="Build(TreeSkeleton, TreeDetail)"/> makes the skeleton into an <see cref="EditMesh"/> of tapered
 /// tubes, which <see cref="Modeling.Meshes"/> draws as it draws any other. The two are apart so a
 /// skeleton can be kept, in a level or a save, and built again without growing it.
 /// </para>
@@ -29,8 +29,11 @@ namespace Bevy;
 /// </remarks>
 public static partial class Trees
 {
-    /// <summary>The material slot of the bark, which every face <see cref="Build"/> makes is in.</summary>
+    /// <summary>The material slot of the bark, which every face <see cref="Build(TreeSkeleton, TreeDetail)"/> makes is in.</summary>
     public const string BarkSlot = "bark";
+
+    // How thin a stem the reduced level leaves out, against the trunk, where it starts.
+    private const float ThinnestReduced = 1f / 25f;
 
     /// <summary>Grows a tree of a species from a seed.</summary>
     /// <param name="species">The species.</param>
@@ -85,9 +88,24 @@ public static partial class Trees
     /// three for the thinnest twigs, so the triangles go where they are seen.
     /// </para>
     /// </remarks>
-    public static EditMesh Build(TreeSkeleton skeleton)
+    public static EditMesh Build(TreeSkeleton skeleton) => Build(skeleton, TreeDetail.Full);
+
+    /// <summary>Makes a tree's skeleton into a mesh of its stems at a level of detail.</summary>
+    /// <param name="skeleton">The skeleton.</param>
+    /// <param name="detail">The level, every stem with all its sides, or the reduced one a tree further off is drawn in.</param>
+    /// <returns>A new mesh, every face in <see cref="BarkSlot"/>, colored as bark.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">The level is not one of <see cref="TreeDetail"/>'s.</exception>
+    /// <remarks>
+    /// The full level is <see cref="Build(TreeSkeleton)"/>'s. The reduced one gives each stem half
+    /// its sides, three at the fewest, and leaves out each stem thinner where it starts than a
+    /// twenty-fifth of the trunk, and so the stems it carries, which are thinner still, as
+    /// <see cref="TreeDetail.Reduced"/> says.
+    /// </remarks>
+    public static EditMesh Build(TreeSkeleton skeleton, TreeDetail detail)
     {
         ArgumentNullException.ThrowIfNull(skeleton);
+        if (!Enum.IsDefined(detail)) throw new ArgumentOutOfRangeException(nameof(detail), detail, "A level of detail is one of TreeDetail's.");
+        var reduced = detail == TreeDetail.Reduced;
         var nodes = skeleton.Nodes;
 
         // The child that carries each point's stem on, the thickest, the first of equals.
@@ -111,6 +129,7 @@ public static partial class Trees
         {
             var parent = nodes[start].Parent;
             if (parent >= 0 && carried[parent] == start) continue;
+            if (reduced && nodes[start].Radius < trunk * ThinnestReduced) continue;
 
             points.Clear();
             radii.Clear();
@@ -128,7 +147,7 @@ public static partial class Trees
 
             if (points.Count < 2) continue;
             var sides = Math.Clamp(2 + (int)MathF.Round(10f * MathF.Sqrt(radii[0] / trunk)), 3, 12);
-            mesh.Tube(points, radii, sides);
+            mesh.Tube(points, radii, reduced ? Math.Max(3, sides / 2) : sides);
         }
 
         return mesh.SelectNone();

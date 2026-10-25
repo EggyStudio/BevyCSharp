@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 namespace Bevy.Tests;
 
 /// <summary>
-/// A grown tree's leaves by <see cref="Trees.BuildLeaves"/>, the same by seed, as many as the
+/// A grown tree's leaves by <see cref="Trees.BuildLeaves(TreeSkeleton, TreeSpecies, uint, TreeDetail)"/>, the same by seed, as many as the
 /// paper's within their bound, standing on the twigs and facing up and out, a fern's as fronds along
 /// its stems, and the bark's and the leaves' materials, a tree in leaf drawn.
 /// </summary>
@@ -23,6 +23,32 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         Assert.Equal(first.Positions, again.Positions);
         Assert.Equal(first.Uvs, again.Uvs);
         Assert.NotEqual(first.Positions, Trees.BuildLeaves(skeleton, Aspen, 5).Positions);
+    }
+
+    [Fact]
+    public void AReducedCrownIsEveryOtherLeafAtItsPlaceTwiceTheArea()
+    {
+        var skeleton = Trees.Grow(Aspen, 4);
+        var full = Trees.BuildLeaves(skeleton, Aspen, 4);
+        var reduced = Trees.BuildLeaves(skeleton, Aspen, 4, TreeDetail.Reduced);
+        var cards = full.Positions.Length / 4;
+        Assert.Equal(cards / 2, reduced.Positions.Length / 4);
+        Assert.Equal(cards / 2 * 6, reduced.Indices!.Length);
+
+        static Vec3 Stalk(Vec3[] positions, int card) => (positions[card * 4] + positions[card * 4 + 1]) * 0.5f;
+        static float Area(Vec3[] positions, int card) =>
+            Vec3.Cross(positions[card * 4 + 1] - positions[card * 4], positions[card * 4 + 3] - positions[card * 4]).Length;
+
+        for (var card = 0; card < cards / 2; card++)
+        {
+            Assert.True((Stalk(reduced.Positions, card) - Stalk(full.Positions, 2 * card)).Length < 1e-4f, $"card {card} stands off its leaf's stalk");
+            Assert.InRange(Area(reduced.Positions, card) / Area(full.Positions, 2 * card), 1.999f, 2.001f);
+        }
+
+        // A fern's fronds are its whole leaves and are kept.
+        var fern = Trees.Grow(TreeSpecies.Fern, 4);
+        Assert.Equal(Trees.BuildLeaves(fern, TreeSpecies.Fern, 4).Positions, Trees.BuildLeaves(fern, TreeSpecies.Fern, 4, TreeDetail.Reduced).Positions);
+        Assert.Throws<ArgumentOutOfRangeException>(() => Trees.BuildLeaves(skeleton, Aspen, 4, (TreeDetail)7));
     }
 
     [Fact]
@@ -281,5 +307,109 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
             }
 
         Assert.True(thinned.Count == 0, $"the crowns thin with distance, {string.Join(", ", thinned)}");
+    }
+    [SkippableFact]
+    public void AReducedTreeCoversItsCrownAsTheFullOneDoesWhereTheyChange()
+    {
+        Needs.Renderer();
+
+        // Each tree drawn whole and drawn reduced, alone against the sky from the side and from 37
+        // degrees above at two and a half of its heights, where a planted tree is dithered from one
+        // to the other. The reduced tree covers as many pixels within a tenth and as many of leaf
+        // within a sixth, its larger cards a little more, where the twigs it leaves out showed
+        // between the leaves as lines a pixel wide, so the change does not show.
+        TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush];
+        TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
+        var trees = presets.Select(species =>
+        {
+            var skeleton = Trees.Grow(species, 2);
+            var height = skeleton.Bounds.High.Y;
+            return (Species: species, Skeleton: skeleton, Middle: new Vec3(0f, height * 0.55f, 0f), Distance: 2.5f * height);
+        }).ToArray();
+        (string Name, Vec3 Way)[] ways = [("the side", new Vec3(-1f, 0.05f, -0.4f).Normalized), ("above", new Vec3(-0.6f, 0.6f, -0.53f).Normalized)];
+
+        Entity camera = default;
+        var shown = new List<Entity[]>();
+        var albedos = new List<AssetHandle>();
+        var run = new PictureRun
+        {
+            Width = 480,
+            Height = 360,
+            Frames = 3000,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 45f });
+                ecs.Add(camera, Transform.Identity);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetClearColor((0.6f, 0.75f, 0.95f, 1f));
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 6f, 5f), Vec3.Zero, Vec3.UnitY));
+                foreach (var tree in trees)
+                    foreach (var level in levels)
+                    {
+                        var stems = ecs.Spawn();
+                        Render.SetMesh(ecs, stems, Modeling.Meshes(Trees.Build(tree.Skeleton, level))[0]);
+                        Render.SetMaterial(ecs, stems, Trees.BarkMaterial(tree.Species));
+                        var cards = ecs.Spawn();
+                        Render.SetMesh(ecs, cards, Render.CreateMesh(Trees.BuildLeaves(tree.Skeleton, tree.Species, 2, level)));
+                        Render.SetMaterial(ecs, cards, Trees.LeafMaterial(tree.Species));
+                        foreach (var part in new[] { stems, cards })
+                        {
+                            ecs.Add(part, Transform.Identity);
+                            ecs.Add(part, Visibility.Hidden);
+                        }
+
+                        shown.Add([stems, cards]);
+                        albedos.Add(TreeTextures.Find(tree.Species.LeafSet!)!.Load().Albedo);
+                    }
+            },
+        };
+
+        run.Wait(10).Until("ready", _ => Render.PipelinesReady())
+            .Until("loaded", _ => albedos.All(image => AssetServer.StateOf(image) is AssetLoadState.Loaded or AssetLoadState.Failed));
+        for (var k = 0; k < trees.Length * levels.Length; k++)
+        {
+            var (index, tree) = (k, trees[k / levels.Length]);
+            run.Do($"show {k}", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                for (var other = 0; other < shown.Count; other++)
+                    foreach (var part in shown[other])
+                        ecs.GetRef<Visibility>(part) = other == index ? Visibility.Inherited : Visibility.Hidden;
+            });
+            foreach (var (name, way) in ways)
+            {
+                var eye = tree.Middle + way * tree.Distance;
+                run.Do($"{k} {name}", world => world.Resource<EcsWorld>().GetRef<Transform>(camera) = Transform.LookingAt(eye, tree.Middle, Vec3.UnitY))
+                    .Wait(20)
+                    .Capture($"{k} {name}");
+            }
+        }
+
+        run.Go();
+
+        var apart = new List<string>();
+        for (var t = 0; t < trees.Length; t++)
+            foreach (var (name, _) in ways)
+            {
+                // A leaf's pixel is greener than it is red and blue, and the rest that is not the
+                // sky is the stems' or a leaf's in shade.
+                (int Leaves, int Stems) Counted(int level)
+                {
+                    var picture = run.Picture($"{t * levels.Length + level} {name}");
+                    var sky = picture.At(0, 0);
+                    var leaves = PictureRun.Count(picture, (r, g, b) => g > r && g > b + 8);
+                    var any = PictureRun.Count(picture, (r, g, b) => Math.Abs(r - sky.R) + Math.Abs(g - sky.G) + Math.Abs(b - sky.B) > 30);
+                    return (leaves, any - leaves);
+                }
+
+                var (full, reduced) = (Counted(0), Counted(1));
+                output.WriteLine($"{trees[t].Species.LeafSet}'s tree from {name} at {trees[t].Distance:F1} m, leaves {full.Leaves} whole and {reduced.Leaves} reduced, stems {full.Stems} and {reduced.Stems}");
+                var (fullTree, reducedTree) = (full.Leaves + full.Stems, reduced.Leaves + reduced.Stems);
+                if (Math.Abs(reducedTree - fullTree) > fullTree / 10 || Math.Abs(reduced.Leaves - full.Leaves) > full.Leaves / 6)
+                    apart.Add($"{trees[t].Species.LeafSet} from {name}");
+            }
+
+        Assert.True(apart.Count == 0, $"the reduced trees differ from the whole ones, {string.Join(", ", apart)}");
     }
 }

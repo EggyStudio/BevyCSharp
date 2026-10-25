@@ -64,7 +64,8 @@ public sealed class TreePlantingTests
         Entity firstBody = default, secondBody = default, renamedBody = default;
         AssetHandle firstMesh = default, secondMesh = default;
         var colliders = new List<Collider>();
-        var leaves = 0;
+        var parts = new List<string>();
+        FloatRange fullEnd = default, reducedStart = default, reducedEnd = default;
         var size = 0f;
         var takesPart = false;
 
@@ -102,8 +103,15 @@ public sealed class TreePlantingTests
                 foreach (var child in ecs.ChildrenOf(firstBody))
                 {
                     if (ecs.Has<Collider>(child)) colliders.Add(ecs.GetOrDefault<Collider>(child));
-                    else leaves++;
+                    else parts.Add(ecs.NameOf(child) ?? "");
                 }
+
+                // The full level's stems on the body, and the reduced level's leaves taking over
+                // where the full level's are dithered out.
+                fullEnd = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(firstBody)!.Value.EndMargin;
+                var reduced = ecs.ChildrenOf(firstBody).First(child => ecs.NameOf(child) == "quaking-aspen 3, leaves, reduced");
+                reducedStart = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(reduced)!.Value.StartMargin;
+                reducedEnd = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(reduced)!.Value.EndMargin;
 
                 // A tree given another seed is dressed again.
                 renamedBody = Body(ecs, renamed);
@@ -119,11 +127,52 @@ public sealed class TreePlantingTests
         // The tree's own entity takes part in Bevy's visibility, as the parent of its meshes, where
         // without it a tree's leaves stayed undrawn until something moved them.
         Assert.True(takesPart, "the tree's entity has no Visibility");
-        Assert.Equal(1, leaves);
+        Assert.Equal(["quaking-aspen 3, leaves", "quaking-aspen 3, leaves, reduced", "quaking-aspen 3, stems, reduced"], parts.Order(StringComparer.Ordinal));
+
+        // The aspen, about 13 meters tall, changes level two and a half to three of its heights away.
+        Assert.Equal(fullEnd, reducedStart);
+        Assert.InRange(fullEnd.Start, 2.5f * 9f, 2.5f * 18f);
+        Assert.Equal(0.5f / 2.5f * fullEnd.Start, fullEnd.End - fullEnd.Start, 3);
+        Assert.True(reducedEnd.Start > 1e6f, $"the reduced level ends at {reducedEnd}");
         // The aspen's limbs are thinner than a capsule's twelve centimeters, so its trunk stands alone,
         // a capsule meters tall.
         Assert.InRange(colliders.Count, 1, 24);
         Assert.All(colliders, collider => Assert.True(collider.Shape == ColliderShape.Capsule && collider.Size.X >= 0.12f, $"a collider is {collider.Shape} {collider.Size}"));
         Assert.True(colliders.Max(collider => collider.Size.Y) > 3f, "no capsule stands along the trunk");
+    }
+    [SkippableFact]
+    public void TheScenesCameraIsWhereATreesShadowIsMeasuredFrom()
+    {
+        Needs.Renderer();
+
+        // A camera spawned first and drawing into an image of its own, as a light probe's face
+        // cameras do, and the scene's camera after it. Bevy measures a sun's shadows by the first
+        // camera of all in an offscreen run unless one carries ShadowLodOrigin, so a tree near the
+        // scene's camera had its full level dithered out of its shadow by the far camera's distance
+        // and its reduced level left out as too near, and cast none. The scene's camera is given
+        // the origin, and the other is not.
+        Entity aside = default, camera = default;
+        var origins = (Aside: true, Camera: false);
+        var run = new PictureRun
+        {
+            Frames = 600,
+            Scene = ecs =>
+            {
+                aside = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 45f });
+                ecs.Add(aside, Transform.LookingAt(new Vec3(0f, 10f, 500f), new Vec3(0f, 0f, 520f), Vec3.UnitY));
+                Render.SetCameraTarget(aside, Render.CreateTarget(64, 64));
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 45f });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 10f, 22f), Vec3.Zero, Vec3.UnitY));
+            },
+        };
+
+        run.Wait(10).Do("read", world =>
+        {
+            var ecs = world.Resource<EcsWorld>();
+            origins = (ecs.Get<Bevy.Reflected.ShadowLodOriginRef>(aside) is not null, ecs.Get<Bevy.Reflected.ShadowLodOriginRef>(camera) is not null);
+        }).Go();
+
+        Assert.False(origins.Aside, "the camera drawing into an image of its own is the shadows' origin");
+        Assert.True(origins.Camera, "the scene's camera is not the shadows' origin");
     }
 }

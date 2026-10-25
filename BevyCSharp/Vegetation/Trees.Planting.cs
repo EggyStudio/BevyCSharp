@@ -18,6 +18,18 @@ public static partial class Trees
     private const float ThinnestCollider = 0.06f;
     private const int MostCapsules = 24;
 
+    // Where a tree is dithered from its full level to its reduced one, in its own heights from the
+    // camera, which Bevy reads from the tree's foot. The tree fills about half a 45 degree picture's
+    // height there, and the reduced level's half as many cards of twice the area cover the crown
+    // within a sixth of what the full level's cover and the whole tree within a tenth, as
+    // AReducedTreeCoversItsCrownAsTheFullOneDoesWhereTheyChange measures, so the change does not
+    // show as the dither fades one level into the other over half a height.
+    private const float ReducedFrom = 2.5f;
+    private const float ReducedFade = 0.5f;
+
+    // The far end of the furthest level, where nothing yet draws a tree further off.
+    private const float Furthest = 1e7f;
+
     private static readonly Lock Registry = new();
     private static readonly Dictionary<string, TreeSpecies> Named = new(StringComparer.Ordinal)
     {
@@ -35,10 +47,13 @@ public static partial class Trees
 
     // Each app's dressed trees, and its meshes of each variant.
     private static readonly ConditionalWeakTable<App, Dictionary<Entity, Dressing>> Dressed = new();
-    private static readonly ConditionalWeakTable<App, Dictionary<(TreeSpecies, int), (AssetHandle Stems, AssetHandle Leaves)>> Meshes = new();
+    private static readonly ConditionalWeakTable<App, Dictionary<(TreeSpecies, int), (AssetHandle[] Stems, AssetHandle[] Leaves)>> Meshes = new();
 
-    /// <summary>A variant grown, its skeleton, its stems' and leaves' data, and the capsules it stands as.</summary>
-    private sealed record Grown(TreeSkeleton Skeleton, MeshData Stems, MeshData Leaves, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
+    /// <summary>
+    /// A variant grown, its skeleton and height, its stems' and leaves' data at each level of
+    /// detail, by <see cref="TreeDetail"/>, and the capsules it stands as.
+    /// </summary>
+    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
 
     /// <summary>What a tree was dressed as, and the child it was dressed under.</summary>
     private sealed class Dressing(string species, uint seed)
@@ -198,9 +213,10 @@ public static partial class Trees
         // same eight in every game.
         var seed = (uint)(0x7E57_0000 + variant);
         var skeleton = Grow(species, seed);
-        var stems = Modeling.Build(Build(skeleton))[0];
-        var leaves = BuildLeaves(skeleton, species, seed);
-        return new Grown(skeleton, stems, leaves, Capsules(skeleton));
+        TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
+        var stems = levels.Select(level => Modeling.Build(Build(skeleton, level))[0]).ToArray();
+        var leaves = levels.Select(level => BuildLeaves(skeleton, species, seed, level)).ToArray();
+        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, Capsules(skeleton));
     }
 
     /// <summary>Dresses a tree under a child of its own, turned and sized by its seed, with its variant's meshes, materials and capsules.</summary>
@@ -226,28 +242,26 @@ public static partial class Trees
             var meshes = Meshes.GetOrCreateValue(app);
             if (!meshes.TryGetValue((species, variant), out var made))
             {
-                var stems = Render.CreateMesh(grown.Stems);
-                Render.GenerateTangents(stems);
-                var leaves = AssetHandle.None;
-                if (grown.Leaves.Positions.Length > 0)
-                {
-                    leaves = Render.CreateMesh(grown.Leaves);
-                    Render.GenerateTangents(leaves);
-                }
-
-                meshes[(species, variant)] = made = (stems, leaves);
+                meshes[(species, variant)] = made = (
+                    [.. grown.Stems.Select(Created)],
+                    [.. grown.Leaves.Select(leaves => leaves.Positions.Length > 0 ? Created(leaves) : AssetHandle.None)]);
             }
 
-            Render.SetMesh(ecs, body, made.Stems);
+            // The full level near the camera and the reduced one further off, measured in the
+            // tree's own heights so a bush changes as near as it is small, each mesh dithered out
+            // over the half height where the other is dithered in.
+            var height = grown.Height * size;
+            var full = (Start: new FloatRange(0f, 0f), End: new FloatRange(ReducedFrom * height, (ReducedFrom + ReducedFade) * height));
+            var reduced = (Start: full.End, End: new FloatRange(Furthest, Furthest));
+
+            Render.SetMesh(ecs, body, made.Stems[(int)TreeDetail.Full]);
             Render.SetMaterial(ecs, body, BarkMaterial(species));
-            if (made.Leaves != AssetHandle.None)
+            Ranged(ecs, body, full);
+            Part(ecs, body, $"{name} {seed}, stems, reduced", made.Stems[(int)TreeDetail.Reduced], BarkMaterial(species), reduced);
+            if (made.Leaves[(int)TreeDetail.Full] != AssetHandle.None)
             {
-                var crown = ecs.Spawn();
-                ecs.Add(crown, Transform.Identity);
-                Render.SetMesh(ecs, crown, made.Leaves);
-                Render.SetMaterial(ecs, crown, LeafMaterial(species));
-                ecs.SetParent(crown, body);
-                ecs.SetName(crown, $"{name} {seed}, leaves");
+                Part(ecs, body, $"{name} {seed}, leaves", made.Leaves[(int)TreeDetail.Full], LeafMaterial(species), full);
+                Part(ecs, body, $"{name} {seed}, leaves, reduced", made.Leaves[(int)TreeDetail.Reduced], LeafMaterial(species), reduced);
             }
         }
 
@@ -264,6 +278,38 @@ public static partial class Trees
         }
 
         return body;
+    }
+
+    /// <summary>A mesh made from a variant's data, with the tangents its bark's or leaves' normal map is read along.</summary>
+    private static AssetHandle Created(MeshData data)
+    {
+        var mesh = Render.CreateMesh(data);
+        Render.GenerateTangents(mesh);
+        return mesh;
+    }
+
+    /// <summary>A part of a tree's body, a mesh in a material drawn over a range of distances.</summary>
+    private static void Part(EcsWorld ecs, Entity body, string name, AssetHandle mesh, AssetHandle material, (FloatRange Start, FloatRange End) range)
+    {
+        var part = ecs.Spawn();
+        ecs.Add(part, Transform.Identity);
+        Render.SetMesh(ecs, part, mesh);
+        Render.SetMaterial(ecs, part, material);
+        Ranged(ecs, part, range);
+        ecs.SetParent(part, body);
+        ecs.SetName(part, name);
+    }
+
+    /// <summary>
+    /// Gives a mesh Bevy's visibility range, drawn from the start's far end to the end's near end
+    /// and dithered in and out over each, measured from the entity's place.
+    /// </summary>
+    private static void Ranged(EcsWorld ecs, Entity entity, (FloatRange Start, FloatRange End) range)
+    {
+        var visibility = ecs.Insert<Bevy.Reflected.VisibilityRangeRef>(entity);
+        visibility.StartMargin = range.Start;
+        visibility.EndMargin = range.End;
+        visibility.UseAabb = false;
     }
 
     /// <summary>

@@ -13348,6 +13348,9 @@ enum Bevy.TransitionStep : int
 struct Bevy.Tree
   EcsText Species
   uint Seed
+enum Bevy.TreeDetail : int
+  Full = 0
+  Reduced = 1
 enum Bevy.TreeLeafShape : int
   FiveLobeMaple = 4
   Oval = 0
@@ -13482,10 +13485,12 @@ static class Bevy.Trees
   static AssetHandle BarkMaterial(TreeSpecies species)
   static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)
   static EditMesh Build(TreeSkeleton skeleton)
+  static EditMesh Build(TreeSkeleton skeleton, TreeDetail detail)
   static Entity Plant(EcsWorld ecs, string species, uint seed, Vec3 place)
   static IReadOnlyList<Entity> PlantForest(EcsWorld ecs, string species, uint seed, Vec3 middle, float radius, int count)
   static IReadOnlyList<string> SpeciesNames { get; }
   static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed)
+  static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed, TreeDetail detail)
   static TreeSkeleton Grow(TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers)
   static TreeSpecies? Species(string name)

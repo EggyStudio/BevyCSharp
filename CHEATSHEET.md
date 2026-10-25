@@ -1008,7 +1008,9 @@ The guide's page is [trees.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
 static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers);  // Grows a tree of a species from a seed, round boxes it does not grow into and that shade it
 static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
+static EditMesh Build(TreeSkeleton skeleton, TreeDetail detail);  // Makes a tree's skeleton into a mesh of its stems at a level of detail
 static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed);  // Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds
+static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed, TreeDetail detail);  // Makes the leaves of a grown tree at a level of detail
 static AssetHandle BarkMaterial(TreeSpecies species);           // The material a species' bark is drawn with
 static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f);  // The material a species' leaves are drawn with, turned toward its fall color by a share
 static void Register(string name, TreeSpecies species);         // Registers a species under a name, which a Tree component names it by, replacing one registered under it before

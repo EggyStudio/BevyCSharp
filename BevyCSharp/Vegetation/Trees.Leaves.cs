@@ -40,11 +40,28 @@ public static partial class Trees
     /// tip, so a fern's or a palm's frond bends as its stem does.
     /// </para>
     /// </remarks>
-    public static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed)
+    public static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed) => BuildLeaves(skeleton, species, seed, TreeDetail.Full);
+
+    /// <summary>Makes the leaves of a grown tree at a level of detail.</summary>
+    /// <param name="skeleton">The tree, as <see cref="Grow(TreeSpecies, uint)"/> grew it.</param>
+    /// <param name="species">Its species, whose leaves' count, size, angles and set the cards follow.</param>
+    /// <param name="seed">The seed the tree grew from, which places the leaves the same way each time.</param>
+    /// <param name="detail">The level, every leaf, or the reduced one a tree further off is drawn in.</param>
+    /// <returns>The cards' mesh, drawn with <see cref="LeafMaterial"/>, with no positions where the species has no leaves.</returns>
+    /// <exception cref="ArgumentOutOfRangeException">A control of the species is outside what it may be, or the level is not one of <see cref="TreeDetail"/>'s.</exception>
+    /// <remarks>
+    /// The full level is <see cref="BuildLeaves(TreeSkeleton, TreeSpecies, uint)"/>'s. The reduced
+    /// one is every other card of it, at the same place, each drawn the square root of two larger
+    /// about its stalk, so the crown covers as much with half the cards and the two levels show the
+    /// same leaves as a tree is dithered from one to the other. Fronds are kept whole, since a frond
+    /// is a fern's whole leaf.
+    /// </remarks>
+    public static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed, TreeDetail detail)
     {
         ArgumentNullException.ThrowIfNull(skeleton);
         ArgumentNullException.ThrowIfNull(species);
         Check(species);
+        if (!Enum.IsDefined(detail)) throw new ArgumentOutOfRangeException(nameof(detail), detail, "A level of detail is one of TreeDetail's.");
 
         var boxes = LeafBoxes(species, out var aspect);
         var cards = new Cards();
@@ -110,7 +127,7 @@ public static partial class Trees
             }
         }
 
-        return cards.Data();
+        return detail == TreeDetail.Reduced && species.Leaves > 0 ? cards.Halved() : cards.Data();
     }
 
     /// <summary>
@@ -276,5 +293,36 @@ public static partial class Trees
             Uvs = [.. _uvs],
             Indices = [.. _indices],
         };
+
+        /// <summary>
+        /// Every other card, each the square root of two larger about its stalk, the middle of its
+        /// first two corners, so half the cards cover what all of them do.
+        /// </summary>
+        public MeshData Halved()
+        {
+            var kept = _positions.Count / 8;
+            var positions = new Vec3[kept * 4];
+            var normals = new Vec3[kept * 4];
+            var uvs = new float[kept * 8];
+            var indices = new uint[kept * 6];
+            for (var card = 0; card < kept; card++)
+            {
+                var from = card * 8;
+                var stalk = (_positions[from] + _positions[from + 1]) * 0.5f;
+                for (var corner = 0; corner < 4; corner++)
+                {
+                    positions[card * 4 + corner] = stalk + (_positions[from + corner] - stalk) * MathF.Sqrt(2f);
+                    normals[card * 4 + corner] = _normals[from + corner];
+                    uvs[card * 8 + corner * 2] = _uvs[(from + corner) * 2];
+                    uvs[card * 8 + corner * 2 + 1] = _uvs[(from + corner) * 2 + 1];
+                }
+
+                var first = (uint)(card * 4);
+                uint[] quad = [first, first + 1, first + 2, first, first + 2, first + 3];
+                quad.CopyTo(indices, card * 6);
+            }
+
+            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, Indices = indices };
+        }
     }
 }
