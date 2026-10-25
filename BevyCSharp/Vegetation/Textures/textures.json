@@ -197,7 +197,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 216237,
+        "albedo.ktx2": 215540,
         "normal.ktx2": 37975,
         "surface.ktx2": 51849
       },
@@ -345,7 +345,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 240879,
+        "albedo.ktx2": 240896,
         "normal.ktx2": 43644,
         "surface.ktx2": 52372
       },
@@ -424,7 +424,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 280890,
+        "albedo.ktx2": 280843,
         "normal.ktx2": 57295,
         "surface.ktx2": 63075
       },
@@ -614,7 +614,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 123071,
+        "albedo.ktx2": 123023,
         "normal.ktx2": 14937,
         "surface.ktx2": 18732
       },
@@ -768,7 +768,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 256492,
+        "albedo.ktx2": 256896,
         "normal.ktx2": 614,
         "surface.ktx2": 56677
       },
@@ -848,7 +848,7 @@
         }
       ],
       "files": {
-        "albedo.ktx2": 276878,
+        "albedo.ktx2": 276818,
         "normal.ktx2": 66598,
         "surface.ktx2": 56629
       },

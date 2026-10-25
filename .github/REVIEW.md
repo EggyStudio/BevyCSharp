@@ -10,29 +10,28 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8aa5bc94`, item 75, bark depth by parallax occlusion, pushed at 16:42 on 2026-10-25
-after the run of `4ee79828` went green, its own run green at 16:59, carrying REVIEW.md, DEVLOG.md, a
-captioned pair and a note. Bark sets gain depth.ktx2 in BC4 at half the albedo's size, white the
-deepest as Bevy reads it; the hornbeam's depth comes from its source height map stretched from its
-band of 121 to 135 to black and white, the other barks' are integrated from the normal map by
-Frankot and Chellappa in a pure-Python FFT, waves longer than a quarter of the picture faded out,
-which leveled the willow's drift, percentiles 1 to 99 and softened by a texel, the slope's sign
-chosen against the hornbeam's own height map; the sample set gains a derived depth and the
-references are rewritten. TreeTextureSet gains Depth and LoadDepth, and Trees.BarkMaterial binds the
-depth map with a parallax depth scale of a fortieth of the texture's width, a stem's circumference,
-the occlusion method and 12 layers, the generated bark taking depth from its noise and the leaves
-none. One departure, the cost read in a forest scene of its own and not the feature test's, whose
-trees stay sphere crowns until the third phase and whose engine draws read no GPU time: 24 black
-tupelos at 1920 by 1080 on the RTX 4070 Laptop GPU drew the main opaque pass in 5.09 to 5.22 ms flat
-and 5.21 to 5.55 with depth over four runs, a test printing it, the note and the guide saying so.
-The pair shows the tupelo's trunk in grazing sun flat and with depth. 1,940 passed, 3 skipped, 1,943
-the listing plus 11.
+Reviewed up to `1bd18a6c`, item 70's third phase's planting and forest, pushed at 17:54 on
+2026-10-25 after the run of `8aa5bc94` went green, its own run green at 18:16, carrying the review's
+files, DEVLOG.md, a captioned picture with its note and a Shared line. A Tree component of an
+EcsText species and a uint seed, a registry with the six presets and Trees.Register, Trees.Plant and
+Trees.PlantForest by Poisson disk, a Tick in FrameSync growing eight variants a species on a worker
+and dressing each tree, a bare entity with the component alone grown and dressed. Three departures
+and a fault. The stems sit on a child body carrying the seed's yaw and size and not on the root, so
+the root's transform stays where the level put it, the leaves a child of that body; the capsules
+stand on stems of 6 cm radius, at most 24 a variant; the root had no Visibility while it parented
+meshes, so Bevy warned B0004 for every tree and one aspen's leaves stayed undrawn until something
+re-extracted them, the dressing giving the root Visibility.Inherited with the planting test
+asserting it. Open for the levels of detail, the nearest aspen's leaves seen from 37 degrees above
+whole at 15 m, thin at 25 and gone from 35 while the crowns' shadows stay whole, the cause unsettled
+and the note saying so. The 28 trees against the sphere crowns offscreen at 1280 by 720, the shadows
+from 0.11 to 0.14 ms to 1.6 to 3.3, the prepass and the opaque pass each up 0.4 to 0.7. 1,943
+passed, 3 skipped, 1,946 the listing plus 11.
+
+Before it, `8aa5bc94` came, item 75, bark depth by parallax occlusion, pushed at 16:42 on
+2026-10-25, its run green at 16:59.
 
 Before it, `4ee79828` came, item 70's second phase's dressing, pushed at 16:06 on 2026-10-25, its
 run green at 16:23.
-
-Before it, `d151e0cc` came, item 74's entries, pushed at 15:21 on 2026-10-25, its run green at
-15:39.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -324,7 +323,10 @@ from [SHARED.md](SHARED.md).
     entity with the component alone that the Tick system grows and dresses, Trees.Plant adding the
     component to its root, so item 65's level file and item 67's editor place a tree by name and
     seed and nothing more; and the feature test's forest stands as the example, the examples project
-    holding Bevy's examples alone under N 5.2, docs/trees.md naming the forest as where to look.
+    holding Bevy's examples alone under N 5.2, docs/trees.md naming the forest as where to look. The
+    third phase's planting and forest at `1bd18a6c` on 2026-10-25, the Tree component, the registry,
+    the variants on a worker and the feature test's forest, the departures and the fault in the
+    head, the leaves thinning with distance open for the levels of detail, which come next.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -1906,3 +1908,10 @@ first time a tree asks for one and dresses every tree under a child turned and s
 with its stems, its leaves and static capsules along the trunk and each stem twelve centimeters
 thick or more, the tree's own entity given Bevy's visibility where it has none. `Trees.PlantForest`
 spreads a forest over a disc by a Poisson disk.
+
+Shared: leaf atlases that keep their leaves with distance, in the commit carrying this line, item
+70's phase (c2), its first reading. An alpha-cut leaf atlas's smaller levels lose a leaf once its
+box is a texel or two across, where keeping the share of the whole atlas's texels past the cut
+still holds, so each level's opacity is scaled to keep the share of each leaf's box past one half
+as a card samples it, read between the level's texels, which holds a crown's leaves to four times
+the distance that loses them otherwise.

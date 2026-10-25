@@ -142,6 +142,45 @@ The black tupelo's trunk at reading distance with the sun grazing it from the le
 bark flat on the left and with depth by parallax occlusion on the right, where the ridges stand out
 and hide the grooves behind them toward the trunk's edge while its outline stays round.
 
+![](.github/assets/readings/2026-10-25-item-70-forest.webp)
+The feature test's meadow from the road with its ring of grown aspens and oaks, the forest of aspens
+and tupelos behind it from inside, and the whole from above, where the nearest aspen's leaves thin
+out at that distance.
+
+The feature test's meadow planted with `Trees.Plant` and `Trees.PlantForest`, a ring of ten aspens
+and oaks round it, two bushes and a fern in it, and a forest of six tupelos and nine aspens behind
+it, 28 trees in all, which grow eight variants of each species once and share their meshes. The
+sphere crowns it stood with before are the other side of the table.
+
+Each view was read in `./bcs open --feature-test --offscreen --frames 0 --frame-time 0.0166667
+--hold loads,commands --timings`, the camera set by `./bcs command look`, 120 frames waited, and the
+passes read with `./bcs command render.timings`, on the RTX 4070 Laptop GPU at 1280 by 720. The
+meadow is seen from the road at `look 0 1.2 46 0 4 80`, the forest from inside at `look 0 1.6 90 0
+7 110`, and the whole from above at `look -40 38 38 0 0 92`.
+
+| View | Shadows, spheres | Shadows, trees | Prepass, spheres | Prepass, trees | Opaque, spheres | Opaque, trees |
+|---|---|---|---|---|---|---|
+| meadow | 0.142 ms | 3.276 ms | 0.030 ms | 0.607 ms | 0.029 ms | 0.441 ms |
+| forest | 0.116 ms | 3.026 ms | 0.002 ms | 0.369 ms | 0.027 ms | 0.673 ms |
+| above | 0.113 ms | 1.594 ms | 0.023 ms | 0.549 ms | 0.036 ms | 0.476 ms |
+
+The trees cost the most in the sun's shadow cascades, which draw every card of every crown near the
+camera whichever way it looks, and less in the prepass and the opaque pass, which see only what is
+in view. The whole frame's GPU time, 12.6, 16.2 and 12.6 ms with the spheres and 12.6, 12.0 and
+10.4 ms with the trees as `./bcs command frame.profile` gives it, swings more between runs than the
+trees add to it, so the passes are what is read here. The fewer cards and sides of item 70's next
+part are for the shadow pass first.
+
+One aspen of the ring stood bare in the first pictures, its leaves drawn once anything moved them.
+The tree's own entity, the parent of its meshes, had no `Visibility`, which Bevy warns of as B0004
+for every tree in the session's log, and dressing a tree gives it one.
+
+Seen from 37 degrees above, the nearest aspen's leaves are whole at 15 meters, thin at 25 and gone
+from 35, with `./bcs command look` set at points 15, 25, 35, 46, 60 and 80 meters from its crown
+along that line and `./bcs shot` taken at each, while the crowns' shadows on the grass, seen from
+straight above at 60 meters, stay whole. Why the leaves thin there is not settled here, and the far
+crowns of item 70's next part take it up.
+
 Six trees grown from controls near the paper's quaking aspen, its leaves left out, by seeds 1 to 6,
 as `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter AnAspenKeepsWithinItsTriangles
 --logger "console;verbosity=detailed"` prints them. The height is the species' 13 meters with three

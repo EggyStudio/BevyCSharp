@@ -137,7 +137,9 @@ var autumn = Trees.LeafMaterial(TreeSpecies.QuakingAspen, fall: 0.8f);   // in a
 A species names the sets of the library's texture collection its bark and its leaves are drawn
 with, `BarkSet` and `LeafSet`, which `TreeTextures` finds by name, each an albedo, a normal map and a
 surface of occlusion, roughness and translucency in the formats a desktop GPU samples as they are. A
-leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf. Where the
+leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf, and its smaller
+levels keep the share of each box a card sees past the cut, so a crown keeps its leaves as it
+stands further off, until a leaf is about a texel of the level it is drawn from. Where the
 collection has no set of the name a species gives, the bark is drawn from ridged noise in its
 `BarkColor` and the leaves from a generated atlas of its `LeafShape` in its `LeafColor`.
 

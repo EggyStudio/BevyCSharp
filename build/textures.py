@@ -31,9 +31,12 @@ second branch of it.
 The encoders are written here, BC7's mode 6 with each block's endpoints along its principal axis and
 fitted again by least squares, and BC4 twice for BC5, so the import needs Python 3.14, whose own
 compression module has zstd, and Pillow, and nothing else. Each level is made from the one above by a
-box filter, an albedo's opacity scaled so the share of a leaf's texels past one half stays as it is
-at the top level, so a leaf does not thin away in the distance, and the color under a cut-out leaf's
-transparent texels is the color of the leaf nearest, so no dark rim shows as it shrinks.
+box filter, and the color under a cut-out leaf's transparent texels is the color of the leaf nearest,
+so no dark rim shows as it shrinks. A leaf atlas's opacity is scaled at each level so the share of
+each leaf's box past one half, read between the level's texels as a card samples it, stays the top
+level's on average, so a leaf holds in the distance until its box is about a texel across. Keeping
+the share of the whole atlas's texels instead loses the leaves a level sooner, where a box two
+texels across is averaged with the transparent texels round it.
 
 A source is a folder of .vegetation/, which the repository leaves out, the one the manifest names.
 An entry is imported into its folder in the collection, which the library embeds, and one the
@@ -113,7 +116,8 @@ def main():
 
         root = arguments.out or (COLLECTION if ships(entry) else os.path.join(COLLECTION, "waiting"))
         maps = read_entry(entry, source)
-        report = write_entry(maps, os.path.join(root, entry["name"]), entry["kind"])
+        boxes = leaf_boxes(maps["albedo"]) if entry["kind"] == "leaves" else None
+        report = write_entry(maps, os.path.join(root, entry["name"]), entry["kind"], boxes)
         if root != COLLECTION:
             list_entry(root, entry["name"], entry["kind"])
         print(f"{entry['name']}: {', '.join(f'{file} {size // 1024} KB, {error:.1f} dB' for file, (size, error) in report.items())}"
@@ -122,8 +126,8 @@ def main():
             entry["files"] = {file: size for file, (size, _) in report.items()}
             entry["error"] = {file: round(error, 1) for file, (_, error) in report.items()}
             entry["color"] = mean_color(maps["albedo"])
-            if entry["kind"] == "leaves":
-                entry["leaves"] = leaf_boxes(maps["albedo"])
+            if boxes is not None:
+                entry["leaves"] = boxes
 
     if not arguments.out:
         with open(MANIFEST, "w", encoding="utf-8", newline="\n") as file:
@@ -449,12 +453,15 @@ def leaf_boxes(albedo):
 
 # The levels.
 
-def write_entry(maps, folder, kind):
-    """Writes an entry's files into a folder, and says each one's size and its encoding's error."""
+def write_entry(maps, folder, kind, boxes=None):
+    """
+    Writes an entry's files into a folder, and says each one's size and its encoding's error, a
+    leaf atlas's levels keeping its leaves by the boxes leaf_boxes() finds.
+    """
     os.makedirs(folder, exist_ok=True)
     report = {}
     for name, image in maps.items():
-        levels = mip_chain(image, keep_coverage=name == "albedo" and kind == "leaves")
+        levels = mip_chain(image, boxes if name == "albedo" and kind == "leaves" else None)
         format, blocks, error = encode(name, levels)
         data = ktx2(format, levels, blocks)
         path = os.path.join(folder, f"{name}.ktx2")
@@ -465,19 +472,23 @@ def write_entry(maps, folder, kind):
     return report
 
 
-def mip_chain(image, keep_coverage):
-    """The image and each level under it, half the size of the one above, down to a texel."""
+def mip_chain(image, boxes=None):
+    """
+    The image and each level under it, half the size of the one above, down to a texel, a leaf
+    atlas's opacity scaled at each level to keep the share of its leaves' boxes past one half.
+    """
     if image.mode == "RGBA":
         image = bleed(image)
     levels = [image]
-    coverage = covered(image.getchannel("A"), 1.0) if keep_coverage else None
+    rects = [placed(box, image.size) for box in boxes] if boxes else None
+    share = sampled_share(image.getchannel("A"), rects, image.size) if rects else None
     while levels[-1].size != (1, 1):
         above = levels[-1]
         size = (max(above.width // 2, 1), max(above.height // 2, 1))
         level = resized(above, size, Image.Resampling.BOX)
-        if coverage is not None:
+        if share is not None:
             alpha = level.getchannel("A")
-            scale = coverage_scale(alpha, coverage)
+            scale = sampled_scale(alpha, rects, image.size, share)
             level.putalpha(alpha.point(lambda value: min(255, round(value * scale))))
         levels.append(level)
     return levels
@@ -517,19 +528,25 @@ def bleed(image):
     return result
 
 
-def covered(alpha, scale):
-    """The share of texels whose opacity, scaled, is past one half."""
-    histogram = alpha.histogram()
-    total = sum(histogram)
-    return sum(count for value, count in enumerate(histogram) if value * scale >= 127.5) / total
+def sampled_share(alpha, rects, size):
+    """
+    The leaves' mean share of their boxes past one half, a level's opacity read between its texels
+    at the top level's size, as a card drawing the box samples it.
+    """
+    between = alpha.resize(size, Image.Resampling.BILINEAR)
+    shares = []
+    for rect in rects:
+        histogram = between.crop(rect).histogram()
+        shares.append(sum(histogram[128:]) / max(1, sum(histogram)))
+    return sum(shares) / len(shares)
 
 
-def coverage_scale(alpha, coverage):
-    """The scale of a level's opacity that keeps the share past one half nearest the top level's."""
-    low, high = 0.25, 8.0
-    for _ in range(24):
+def sampled_scale(alpha, rects, size, share):
+    """The scale of a level's opacity that keeps the leaves' sampled share nearest the top level's."""
+    low, high = 0.25, 16.0
+    for _ in range(20):
         middle = (low + high) / 2
-        if covered(alpha, middle) < coverage:
+        if sampled_share(alpha.point(lambda value: min(255, round(value * middle))), rects, size) < share:
             low = middle
         else:
             high = middle

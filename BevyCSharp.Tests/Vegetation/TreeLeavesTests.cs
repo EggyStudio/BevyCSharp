@@ -183,4 +183,103 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
             Assert.True(covered > total / 5, $"{covered} of {total} pixels of the crown between {from} and {to} hide the sky");
         }
     }
+    [SkippableFact]
+    public void ACrownKeepsItsLeavesWithDistance()
+    {
+        Needs.Renderer();
+
+        // Each preset alone against the sky, from 37 degrees above and from the side, at a distance
+        // that holds its crown in the picture and at twice and four times it. A crown's leaves cover
+        // the same share of it however far it stands, so its leaves' pixels times the distance
+        // squared hold, where a leaf a card samples from a level of its atlas a texel or two across
+        // would be lost to the transparent texels round it and the crown thin away.
+        TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush, TreeSpecies.Fern];
+        var crowns = presets.Select(species =>
+        {
+            var skeleton = Trees.Grow(species, 2);
+            var leaves = Trees.BuildLeaves(skeleton, species, 2);
+            var low = leaves.Positions.Aggregate((a, b) => new Vec3(MathF.Min(a.X, b.X), MathF.Min(a.Y, b.Y), MathF.Min(a.Z, b.Z)));
+            var high = leaves.Positions.Aggregate((a, b) => new Vec3(MathF.Max(a.X, b.X), MathF.Max(a.Y, b.Y), MathF.Max(a.Z, b.Z)));
+            var size = MathF.Max(high.Y - low.Y, MathF.Max(high.X - low.X, high.Z - low.Z));
+            return (Species: species, Skeleton: skeleton, Leaves: leaves, Middle: (low + high) * 0.5f, Near: 1.6f * size);
+        }).ToArray();
+        (string Name, Vec3 Way)[] ways = [("above", new Vec3(-0.6f, 0.6f, -0.53f).Normalized), ("the side", new Vec3(-1f, 0.05f, -0.4f).Normalized)];
+        float[] times = [1f, 2f, 4f];
+
+        Entity camera = default;
+        var shown = new List<Entity[]>();
+        var albedos = new List<AssetHandle>();
+        var run = new PictureRun
+        {
+            Width = 640,
+            Height = 360,
+            Frames = 4000,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 45f });
+                ecs.Add(camera, Transform.Identity);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetClearColor((0.6f, 0.75f, 0.95f, 1f));
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 6f, 5f), Vec3.Zero, Vec3.UnitY));
+                foreach (var crown in crowns)
+                {
+                    var stems = ecs.Spawn();
+                    Render.SetMesh(ecs, stems, Modeling.Meshes(Trees.Build(crown.Skeleton))[0]);
+                    Render.SetMaterial(ecs, stems, Trees.BarkMaterial(crown.Species));
+                    var cards = ecs.Spawn();
+                    Render.SetMesh(ecs, cards, Render.CreateMesh(crown.Leaves));
+                    Render.SetMaterial(ecs, cards, Trees.LeafMaterial(crown.Species));
+                    foreach (var part in new[] { stems, cards })
+                    {
+                        ecs.Add(part, Transform.Identity);
+                        ecs.Add(part, Visibility.Hidden);
+                    }
+
+                    shown.Add([stems, cards]);
+                    albedos.Add(TreeTextures.Find(crown.Species.LeafSet!)!.Load().Albedo);
+                }
+            },
+        };
+
+        run.Wait(10).Until("ready", _ => Render.PipelinesReady())
+            .Until("loaded", _ => albedos.All(image => AssetServer.StateOf(image) is AssetLoadState.Loaded or AssetLoadState.Failed));
+        for (var k = 0; k < crowns.Length; k++)
+        {
+            var (index, crown) = (k, crowns[k]);
+            run.Do($"show {k}", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                for (var other = 0; other < shown.Count; other++)
+                    foreach (var part in shown[other])
+                        ecs.GetRef<Visibility>(part) = other == index ? Visibility.Inherited : Visibility.Hidden;
+            });
+            foreach (var (name, way) in ways)
+                foreach (var time in times)
+                {
+                    var eye = crown.Middle + way * (crown.Near * time);
+                    run.Do($"{k} {name} {time}", world => world.Resource<EcsWorld>().GetRef<Transform>(camera) = Transform.LookingAt(eye, crown.Middle, Vec3.UnitY))
+                        .Wait(20)
+                        .Capture($"{k} {name} {time}");
+                }
+        }
+
+        run.Go();
+
+        var thinned = new List<string>();
+        for (var k = 0; k < crowns.Length; k++)
+            foreach (var (name, _) in ways)
+            {
+                var kept = times.Select(time =>
+                {
+                    var picture = run.Picture($"{k} {name} {time}");
+                    var leafy = PictureRun.Count(picture, (r, g, b) => g > r && g > b + 8);
+                    return leafy * time * time;
+                }).ToArray();
+                output.WriteLine($"{crowns[k].Species.LeafSet} from {name}, {crowns[k].Near:F1} m and twice and four times it: {string.Join(", ", kept.Select(value => $"{value / kept[0]:F2}"))} of the nearest's leaves for the crown's size");
+                if (kept.Skip(1).Any(value => value < 0.75f * kept[0])) thinned.Add($"{crowns[k].Species.LeafSet} from {name}");
+            }
+
+        Assert.True(thinned.Count == 0, $"the crowns thin with distance, {string.Join(", ", thinned)}");
+    }
 }
