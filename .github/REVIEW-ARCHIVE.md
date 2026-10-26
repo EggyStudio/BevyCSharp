@@ -2205,3 +2205,23 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     though the archives answer; the next attempt waits for the hour, at about 21:25. Settled at
     21:46 on 2026-10-25 by the third attempt, green on the three systems once Microsoft's feed
     served the release, the second attempt at 20:38 having failed the same way.
+
+46. **The run of `f703b3b1` is red on the three suites, the level tests building the prototype
+    picture where the push's bridge has no renderer.** Read at 11:24 on 2026-10-26. On each system
+    two of LevelTests' cases fail, the headless build with its collision and entities by class and
+    the console command's build, both through Levels.Spawn drawing a slot as the prototype of its
+    name, Modeling's GridOf calling Images.Grid and Render.CreateImage for a 1024 by 1024 picture
+    with its mipmaps, which the bridge answers with its renderer-missing error, since a push's run
+    tests the library on a bridge built without the renderer while the coder's own bridge has it;
+    the console case then reads the failure's text where it expected the built line, and an
+    IndexOutOfRangeException rides inside the AggregateException beside the bridge's error, a second
+    thing to read. Linux 1,556 passed and 2 failed in under five minutes, Windows 1,353 and 2, macOS
+    alike. The mend is Levels.Spawn, or the prototype's lookup under it, asking App.HasRenderer
+    before making a picture and giving a slot its material without one where the bridge has no
+    renderer, so a headless level builds its collision and entities anywhere, as the trees' pictures
+    already wait on the renderer; the two tests then pass on the push's bridge, and the out-of-range
+    index is read and mended or named. Small, before item 65's second phase, run on a bridge built
+    without the renderer before committing. Mended at `25e9f601` on 2026-10-26, the parts drawn
+    where the renderer is and the bodies given in code, the index the test's own on an empty array
+    after the spawn's throw; settled when its run goes green. Settled on 2026-10-26 by the run of
+    `25e9f601`, green on the three suites at 11:58.

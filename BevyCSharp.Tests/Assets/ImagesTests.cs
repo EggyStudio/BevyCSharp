@@ -18,41 +18,50 @@ public sealed class ImagesTests
     private static byte Red(byte[] pixels, int size, int x, int y) => pixels[(y * size + x) * 4];
 
     [Fact]
-    public void AGridOfAHundredPixelsAMeterHasItsLinesAtTheMeterAndEveryTenth()
+    public void AGridOfAHundredPixelsAMeterHasItsLinesAtTheMeterTheHalfAndTheQuarters()
     {
         var pixels = Images.GridPixels(100, Face, Line, Fine);
         Assert.Equal(100 * 100 * 4, pixels.Length);
 
         // A meter's line two pixels wide, one on each edge, so cells tiled make it whole.
-        Assert.Equal(0, Red(pixels, 100, 0, 50));
-        Assert.Equal(0, Red(pixels, 100, 99, 50));
-        Assert.Equal(0, Red(pixels, 100, 50, 0));
+        Assert.Equal(0, Red(pixels, 100, 0, 10));
+        Assert.Equal(0, Red(pixels, 100, 99, 10));
+        Assert.Equal(0, Red(pixels, 100, 10, 0));
 
-        // A tenth's line a pixel wide on each tenth, the meter's line over it where they cross, its
-        // gray of half written as the sRGB byte 128.
-        for (var tenth = 1; tenth < 10; tenth++)
+        // The half's line of the line's color and a quarter's of the fine gray, a pixel wide each,
+        // the meter's line over them where they cross, the gray of half written as the sRGB byte
+        // 128, and no mark on a cell too small to letter.
+        Assert.Equal((0, 0), (Red(pixels, 100, 50, 10), Red(pixels, 100, 10, 50)));
+        foreach (var quarter in new[] { 25, 75 })
         {
-            Assert.Equal(128, Red(pixels, 100, tenth * 10, 55));
-            Assert.Equal(128, Red(pixels, 100, 55, tenth * 10));
-            Assert.Equal(0, Red(pixels, 100, tenth * 10, 0));
+            Assert.Equal(128, Red(pixels, 100, quarter, 10));
+            Assert.Equal(128, Red(pixels, 100, 10, quarter));
+            Assert.Equal(0, Red(pixels, 100, quarter, 0));
         }
 
-        Assert.Equal(255, Red(pixels, 100, 55, 55));
-        Assert.Equal(255, Red(pixels, 100, 11, 1));
+        Assert.Equal(255, Red(pixels, 100, 10, 10));
+        Assert.Equal(255, Red(pixels, 100, 3, 3));
     }
 
     [Fact]
-    public void AGridOfTheDefaultSizeHasItsLinesWidenedWithIt()
+    public void AGridOfTheDefaultSizeHasItsLinesWidenedWithItAndItsSizeMarked()
     {
         var pixels = Images.GridPixels(Images.DefaultPixelsPerMeter, Face, Line, Fine);
         const int Size = Images.DefaultPixelsPerMeter;
 
         // A meter's line eight pixels wide, four on each edge.
-        Assert.All([0, 3, 1020, 1023], x => Assert.Equal(0, Red(pixels, Size, x, 500)));
-        Assert.Equal(255, Red(pixels, Size, 4, 500));
+        Assert.All([0, 3, 1020, 1023], x => Assert.Equal(0, Red(pixels, Size, x, 300)));
+        Assert.Equal(255, Red(pixels, Size, 4, 300));
 
-        // A tenth's line two pixels wide, starting a pixel before its tenth at 102.4.
-        Assert.Equal((255, 128, 128, 255), (Red(pixels, Size, 100, 500), Red(pixels, Size, 101, 500), Red(pixels, Size, 102, 500), Red(pixels, Size, 103, 500)));
+        // The half's line four pixels wide from 510, and a quarter's two from 255.
+        Assert.Equal((255, 0, 0, 255), (Red(pixels, Size, 509, 300), Red(pixels, Size, 510, 300), Red(pixels, Size, 513, 300), Red(pixels, Size, 514, 300)));
+        Assert.Equal((255, 128, 128, 255), (Red(pixels, Size, 254, 300), Red(pixels, Size, 255, 300), Red(pixels, Size, 256, 300), Red(pixels, Size, 257, 300)));
+
+        // The mark's squares eight pixels a side from 20 in, the 1's top square the third of its
+        // row and the m's third row three squares of five.
+        Assert.Equal((255, 0, 0, 255), (Red(pixels, Size, 20, 20), Red(pixels, Size, 36, 20), Red(pixels, Size, 43, 27), Red(pixels, Size, 44, 20)));
+        Assert.Equal((0, 0, 255, 0), (Red(pixels, Size, 68, 36), Red(pixels, Size, 76, 36), Red(pixels, Size, 84, 36), Red(pixels, Size, 92, 36)));
+        Assert.Equal(255, Red(pixels, Size, 68, 20));
     }
 
     [Fact]

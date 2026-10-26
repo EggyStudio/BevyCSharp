@@ -11,17 +11,18 @@ public static partial class Modeling
     /// material slots a level's faces are sorted into.
     /// </summary>
     /// <remarks>
-    /// A floor gray, a wall a pale warm gray, a ceiling a pale blue, stairs orange, a door green, a
-    /// window blue and a hazard red, as sRGB colors, as the prototype textures of the engines of the
-    /// 2000s told a reader of a level what each surface was for. The same names and colors in
-    /// 3DEngine, so a level blocked out in either reads the same.
+    /// Unreal's level prototyping palette, a floor a dark gray, a wall a light gray, a ceiling a
+    /// lighter one and stairs, ramps and the parts that move the prototyping orange, with a door
+    /// green, a window blue and a hazard red, as sRGB colors, as the prototype textures of the
+    /// engines of the 2000s told a reader of a level what each surface was for. The same names and
+    /// colors in 3DEngine, so a level blocked out in either reads the same.
     /// </remarks>
     public static IReadOnlyDictionary<string, Color> PrototypeColors { get; } = new Dictionary<string, Color>(StringComparer.Ordinal)
     {
-        ["floor"] = Color.FromSrgb(0.52f, 0.53f, 0.55f),
-        ["wall"] = Color.FromSrgb(0.82f, 0.79f, 0.72f),
-        ["ceiling"] = Color.FromSrgb(0.70f, 0.77f, 0.86f),
-        ["stairs"] = Color.FromSrgb(0.92f, 0.56f, 0.22f),
+        ["floor"] = Color.FromSrgb(0.31f, 0.31f, 0.32f),
+        ["wall"] = Color.FromSrgb(0.71f, 0.71f, 0.70f),
+        ["ceiling"] = Color.FromSrgb(0.82f, 0.82f, 0.83f),
+        ["stairs"] = Color.FromSrgb(0.96f, 0.46f, 0.13f),
         ["door"] = Color.FromSrgb(0.38f, 0.72f, 0.38f),
         ["window"] = Color.FromSrgb(0.36f, 0.62f, 0.92f),
         ["hazard"] = Color.FromSrgb(0.90f, 0.22f, 0.16f),

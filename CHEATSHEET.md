@@ -996,7 +996,7 @@ static void DrawPanel(BehaviorContext ctx, EditMesh mesh, Entity camera = defaul
 // Images
 static AssetHandle Grid();                                      // Makes the grid of a meter's cell, in its default colors and size
 static AssetHandle Grid(int pixelsPerMeter);                    // Makes the grid of a meter's cell, in its default colors, at a size
-static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
+static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line, a thinner line across its middle and a fine line at each quarter, with a mark of its size in its corner, to tile a level's faces whose texture coordinates are in meters
 ```
 
 ## Levels

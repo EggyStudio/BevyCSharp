@@ -489,17 +489,20 @@ one.
 ## Grid prototyping
 
 A level blocked out reads by color and by a grid of a meter, as the prototype textures of the
-engines of the 2000s read. `Images.Grid()` makes the image of one meter's cell, its edges a line and
-a finer line every tenth of a meter, 1024 pixels a meter with its smaller levels, repeating, and the
-texture coordinates of a built face are in meters, so the grid shows a meter on every face and runs
-on across faces. `Modeling.Prototype(name)` is the grid tinted by the color of a part of a level:
+engines of the 2000s read. `Images.Grid()` makes the image of one meter's cell, its edges a line, a
+thinner line across its middle and a fine line at each quarter, with `1m` marked in its corner, 1024
+pixels a meter with its smaller levels, repeating, and the texture coordinates of a built face are in
+meters, so the grid shows a meter on every face and runs on across faces. Its steps are a level
+editor's grid steps, so a brush snapped to a quarter, a half or a whole meter ends on a line.
+`Modeling.Prototype(name)` is the grid tinted by the color of a part of a level, in Unreal's level
+prototyping palette:
 
 | Name | Color |
 |---|---|
-| `floor` | Gray |
-| `wall` | A pale warm gray |
-| `ceiling` | A pale blue |
-| `stairs` | Orange |
+| `floor` | A dark gray |
+| `wall` | A light gray |
+| `ceiling` | A lighter gray |
+| `stairs` | The prototyping orange, for stairs, ramps and the parts that move |
 | `door` | Green |
 | `window` | Blue |
 | `hazard` | Red |
