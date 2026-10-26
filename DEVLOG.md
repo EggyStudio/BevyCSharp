@@ -172,6 +172,87 @@ the frame's globals, the time among them, at binding 1 where the main pass's hol
 Bevy's own prepass shaders read none, so the trees' and the impostor's prepass vertex stages declare
 them there.
 
+Item 77, what the trees hold, read by species, variant and part, and what a forest of a thousand
+trees of three species and the suite hold and leave behind, then cut as the reading showed.
+
+As `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+AVariantKeepsItsSkeletonAndCapsulesAloneForTheProcess --logger "console;verbosity=detailed"` prints
+it, a species' eight variants, their arrays' bytes in megabytes, the skeleton and the capsules the
+process keeps, and the rest, which each app that draws a variant shapes from the skeleton. The two
+cards of a branch share their stems and leaves, counted once.
+
+| Species | kept | drawn from | stems, full | stems, reduced | leaves, full | leaves, reduced | far limbs and quads | cards' stems | cards' leaves |
+|---|---|---|---|---|---|---|---|---|---|
+| quaking-aspen | 0.17 | 156.3 | 12.6 | 4.5 | 64.5 | 32.3 | 1.7 | 3.6 | 37.1 |
+| black-tupelo | 0.20 | 202.4 | 13.5 | 4.2 | 86.1 | 43.0 | 1.6 | 4.6 | 49.4 |
+| weeping-willow | 0.88 | 270.5 | 54.6 | 10.9 | 86.1 | 43.0 | 3.3 | 23.2 | 49.4 |
+| california-black-oak | 0.89 | 261.4 | 49.5 | 8.4 | 86.1 | 43.0 | 3.6 | 21.4 | 49.4 |
+| bush | 0.47 | 125.6 | 34.4 | 18.2 | 28.9 | 14.5 | 3.4 | 9.6 | 16.6 |
+| fern | 0.06 | 11.1 | 6.9 | 3.4 | 0.5 | 0.5 | | | |
+
+Before the cuts the process kept all of it, 1,027 MB for the forty-eight variants the suite plants,
+for as long as it ran. The same test prints what shaping a species' first variant allocates beside
+what it keeps, 63 MB for an aspen's 19.5, 73 for a tupelo's 25.2, 152 for a willow's 35.6, 128 for
+an oak's 32.6, 74 for a bush's 15.6 and 7 for a fern's 1.3, three to five times. The pictures'
+staging is the cards' stems and leaves stood under the world and the captures, the cards' 512 texels
+a side of four bytes and the impostor's 1024, a megabyte and four, and the atlases' levels read back
+come to 2.8 MB of the cards' colors and normals and 4.2 MB of the impostor's colors, normals and
+faces a variant, which the app's record of the variant held as bytes after the images were made from
+them.
+
+As `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+AThousandTreeForestOfThreeSpeciesHoldsItsMeshesAndAtlasesAlone --logger
+"console;verbosity=detailed"` prints it, run alone in a 20 GB scope, a thousand trees of three
+species, aspens, tupelos and oaks on three discs, drawn at 640 by 360 on an RTX 4070 Laptop GPU and
+read once they are all dressed, after a compacting collection, and again once its app and one after
+it have run. The same test read the forest before the cuts, and with the cuts and every variant
+shaped at once.
+
+| | before the cuts | shaped at once | four at a time |
+|---|---|---|---|
+| managed memory live, dressed | 1,317 MB | 21.7 MB | 21.4 MB |
+| the variants, kept for the process | 621.3 MB | 1.26 MB | 1.26 MB |
+| the variants' shapes and pictures, held by the app | | 0 | 0 |
+| the process, anonymous resident, dressed | 5.52 GB | 4.92 GB | 2.13 GB |
+| its peak | 5.62 GB | 4.99 GB | 2.19 GB |
+| the bridge's allocations | 871 MB | 863 MB | 846 MB |
+| the GPU's allocations | 1.62 GB | 1.65 GB | 1.08 GB |
+| managed memory live after, 19.2 MB before | | | 21.2 MB |
+| the test | 28 s | 30 s | 56 s |
+
+Before the cuts the variants held 621 MB of the live memory, the copies `Render.CreateMesh` keeps of
+data for a scene to write down held 477 MB, and the app's record of each variant held its atlases'
+levels. With the first two cut and the last let go, what the process holds of a dressed forest is
+the bridge's meshes and atlases, the GPU driver's own memory and the garbage the collector has not
+yet taken back, which took the process to 4.99 GB at its peak with every variant shaped at once.
+Before the cuts the variants' 621 MB stayed for as long as the process ran. Once the forest's app
+and one more have run, the process holds 2.0 MB more than before, the twenty-four variants'
+skeletons and capsules among it. The engine holds the last app it ran through statics such as
+SceneField's until the next app replaces them, and lets the ones before it go.
+
+Three cuts. The process keeps a variant's skeleton and capsules alone, and an app that draws the
+variant shapes its meshes' data and plans its far levels from the skeleton on a worker and lets go
+of both, the plans' per-card stems and leaves among them, once its meshes are made and its far
+levels pictured, the atlases' bytes with them. The trees' meshes are made without the copy
+`Render.CreateMesh` keeps of data for a scene to write down, since a scene writes a tree as its
+species and seed. And an app shapes and pictures four variants at a time, since shaping allocates
+several times what it keeps in arrays the collector takes back in its full collections alone.
+
+The suite, run whole through `build/test.py suite --no-build --timeout-minutes 100` in a 20 GB scope
+with `BCS_MEMORY_CAP_GB=3`, passed 1,976 tests and skipped 3 in one host in 42 minutes, the
+listing's 1,968 and eleven rows its theories add, and no stop at the cap. The host's anonymous
+resident memory, `RssAnon` of its `/proc` status read each second by a loop beside the run, was
+2,222 MB at most, as the canopy's tests ran, and the script read the host's whole resident set at
+2,803 MB at most. Before the cuts the host passed the 3.75 GB cap the scope gave it after 469 tests,
+in a different tree test each of three runs.
+
+Done that day
+
+- Item 70 at `929a1cf7`. Trees and foliage grow from a seed inside Weber and Penn's parameters,
+  through the modeling, with no asset files.
+- Item 77 at `bc5559d2`. The trees' memory for the process read and cut, and the memory guard's stop
+  read as a stop.
+
 ## 2026-10-25
 
 ![](.github/assets/readings/2026-10-25-item-64-look-cycle.webp)

@@ -10,36 +10,42 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `929a1cf7`, item 70's fourth phase's leaves in the scene field, pushed at 07:13 on
-2026-10-26 after the run of `fc02fec5` went green, its own run green at 07:30 with Windows in 17
-minutes, carrying the review's files with two faults and a lead under Replies, SHARED.md, DEVLOG.md
-and a captioned picture with its note, the commit's sentence naming the guard's cap of 8 GB inside
-the 20 GB scope. MaterialSettings.LightThrough, public, is the share of global illumination's light
-a meter of a surface lets through, with three bridge calls setting and reading it and setting a
-material's field tint, ABI 314, the bridge keeping them beside the material and writing the share in
-the fourth channel of each draw's color; the field's splat and stamp paint the alpha as
-lightThroughPaint gives it and the resolve scales the glow alike, bcs_field gaining
-lightThroughPaint, Of, At, Depth and Kept and bcs_gi seesPastLeaves and fractional texel marks;
-gi_trace crosses up to four light-through surfaces and is built twice, a NO_LIGHT_THROUGH build for
-a frame where nothing lets light through, the share kept before an interval in an R16Float image
-beside the distances since the images have no two-channel half format, gi_ambient reading it,
-gi_screen crossing under a flag in texels.z and gi_merge asking seesPastLeaves with the field's
-colors. The field's gather reads the leaf and bark materials through their standard base and skips
-the impostor, and takes a mesh with a visibility range only where the field's eye stands within it,
-the two faults; the leaves let half through (Trees.LeafLightThrough), the leaves, the cards and the
-bark set's mean colors tinting them in the field. The slab test reads 0.44 and 0.32 at 2.5 m up at
-Low and High against 3DEngine's 0.36 and 0.40 and the geometry's 0.36, and 0.24 and 0.24 at 5.5 m
-against 0.37 and 0.32 and the geometry's 0.41, the 5.5 m gap and a tenth held back by an all-through
-slab at Low a lead; the floor under nine tupelos takes 0.21 of what solid leaves hold back, the same
-in three runs; the presets' crowns hold 0.77 to 1.53 m² of leaf a m³, letting 0.46 to 0.68 through a
-meter. The suite whole at the 8 GB cap, 1,973 passed, 3 skipped, 1,976 the listing plus 11, the
-scope's peak 5.4 GB; the three profiles, cargo test and the Windows and macOS checks clean.
+Reviewed up to `8a85790a`, item 77 in two commits, `bc5559d2` the trees' memory and `8a85790a` the
+guard's stop, read at 09:36 on 2026-10-26, the first pushed at 09:37 after the run of `929a1cf7`
+went green, its run green at 09:55 with Windows in 17 minutes, the second pushed at 09:56, its run
+green at 10:13 with the suites in 16 to 17 minutes; carrying the review's files with the Reply's
+colon recast, three leads and a Shared line, DEVLOG.md and a note. The reading found a species'
+eight variants drawn from 11 to 271 MB of meshes' data and plans, all kept for the process, 1,027 MB
+for the 48 variants the suite plants, the skeletons and capsules 0.06 to 0.89 MB, the per-card stems
+and leaves 3.6 to 23.2 MB of stems and up to 49.4 of leaves a species, and shaping a variant
+allocating 3 to 5 times what it keeps, 128 MB for an oak's 33. Three cuts, the process keeping a
+variant's skeleton and capsules alone with an app that draws it shaping the rest on a worker and
+letting go once the meshes are made and the far levels pictured, the plans' per-card stems and
+leaves and the atlases' bytes with it; tree meshes made without the copy Render.CreateMesh keeps for
+a scene through an internal overload, 477 MB in a forest; and four variants shaped and pictured at a
+time. A thousand trees of three species dressed hold 21 MB of managed memory against 1,317, the
+process peaking at 2.19 GB against 5.6, 4.99 with every variant shaped at once, so the bound of four
+is most of the gain, the test taking 56 s against 30. The suite ran whole in one host through
+build/test.py at a 3 GB cap in a 20 GB scope, 1,976 passed and 3 skipped, the listing plus 11, in 42
+minutes with no stop and the host's RssAnon peaking at 2,222 MB in the canopy tests, the first
+attempt hitting test.py's own 40-minute limit and the rerun given 100, CI's limit a thing to watch.
+MemoryGuard writes its line to the file BCS_MEMORY_CAP_SAID names and test.py names one a dotnet
+process and reads it before the output, a stopped process's line saying the guard's reading and cap
+before test.py's own peak and the page putting the guard's whole line under the loss, a stand-in
+case covering a line vstest cut off, a real host stopped at 0.2 GB reading as stopped and its rerun
+part too. The three leads, the atlases' main-world copies of 7 MB a variant that RENDER_WORLD could
+drop, a saved scene writing a dressed tree's body, parts and capsules beside its Tree component so a
+load dresses it again, and statics such as SceneField._app keeping the last app alive until the next
+replaces it. No public line changed. The owner asked at 10:45 on 2026-10-26 for quick links to the
+devlog and the cheat sheet at the very top of the README, plain links to the files; the reviewer
+wrote the line as the README's first line with full addresses as N 4.3 has them, the coder
+committing README.md alone.
+
+Before it, `929a1cf7` came, item 70's fourth phase's leaves in the scene field, pushed at 07:13 on
+2026-10-26 after the run of `fc02fec5` went green, its run green at 07:30.
 
 Before it, `fc02fec5` came, item 70's fourth phase's wind, pushed at 04:05 on 2026-10-26 after the
 run of `6777b172` went green, its run green at 04:20.
-
-Before it, `6777b172` came, item 70's third phase's impostors, pushed at 02:28 on 2026-10-26 after
-the run of `b9cd8d74` went green, its run green at 02:46.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -235,148 +241,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
-    with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
-    choice of the hybrid, grown method at about 21:5x. Weber and Penn's species parameters of 1995,
-    the crown's envelope, the branch angles, the taper and the leaves' arrangement, stay the
-    controls an artist sets, and within them the branch structure grows from a seed by space
-    colonization after Runions, Lane and Prusinkiewicz (2007) with light competition through a
-    shadow grid after Palubicki and others (2009), so crowns fill naturally and react to neighbors
-    and walls; the branches are smooth tapered generalized cylinders with joints through the
-    modeling's EditMesh with a bark material, the leaves small geometry clusters where meshlets run
-    and alpha-cut cards elsewhere with Bevy's diffuse transmission, octahedral impostors at distance
-    with instancing for forests, and the wind from a per-vertex branch hierarchy as SpeedTree's and
-    Pivot Painter's, which item 69's wind moves; the same seed grows the same tree bit for bit. The
-    paper's four presets, the quaking aspen, the black tupelo, the weeping willow and the California
-    black oak, with bushes and ferns beside them, are the library's first entries; a tree entity
-    placed by preset and seed in the level file of item 65 and the editor of item 67, an example and
-    a guide page showing the parameters; tests of determinism by seed, each preset's height and
-    spread within the paper's values and the triangle counts within bounds, and captures of the four
-    presets held against the paper's figures for their overall shape. Phases proposed by the coder,
-    the growth and the branches first, then the leaves and the presets, then the entity, the
-    impostors and the editor; the wind with item 69. After item 69 and before 65. The reviewer's
-    additions at 21:35, each its own small part. A species grows a handful of variants by seed,
-    eight or so, and a forest instances the variants with a yaw and a scale a tree, as SpeedTree
-    does, rather than growing each tree; the growth runs on a worker at the level's load and the
-    grown skeleton, nodes with parent, place and radius, may be kept in the level file beside the
-    seed so a tree is the same on every machine whatever the floating point of the growth. The bark
-    and the leaves' pictures are generated too, small noise-made textures and leaf masks, so no
-    texture set becomes the large file the owner ruled out. Each tree gets its colliders, a capsule
-    for the trunk and the thick branches. The levels of detail cross-fade by dither so no tree pops,
-    the cylinders' segments falling first, then the clusters to cards, then the impostor. The leaves
-    are written into the scene field as cells that pass a share of light, as 3DEngine's item 100
-    gives its field, so the global illumination under a canopy is a shade and not a cave, the share
-    shared with 3DEngine through SHARED.md. The paper's parameters that name a growth map to the
-    growth's own terms, the envelope to the attractors' placement, the down and rotate angles and
-    the curve to the tropisms, the splits to the branching's chance, said in the guide so an
-    artist's expectations hold. A leaf color per preset with a seasonal tint is cheap and goes in
-    with the presets. The coder's phases at 11:22 on 2026-10-25, taken as laid out, each a commit
-    with the suite green and pictures. The first, the growth and the branches, TreeSpecies holding
-    the paper's controls, height and scale, the envelope's eight shapes, the base size, three levels
-    with down and rotate angles, curve, splits, branches and length a level, the taper and the
-    radius ratio, Trees.Grow running space colonization from attractors seeded in the envelope with
-    influence and kill radii, tropisms from the down angle and the curve and radii by the pipe
-    model, the random numbers a PCG of the library's own so the skeleton is the same on every .NET,
-    EditMesh gaining Tube over a chain of points and radii with a child starting inside its parent
-    so the joints close without booleans and the bark's UVs along the length, Trees.Build giving an
-    EditMesh with a plain bark material, and one aspen-like tree in a picture. The second,
-    Palubicki's shadow grid, the leaves as alpha-cut cards with a generated mask and diffuse
-    transmission by the paper's leaf parameters, a noise-made bark, the four presets with a bush and
-    a fern and a leaf color with a seasonal tint, the guide page mapping the paper's terms to the
-    growth's, and the four presets pictured beside the paper's figures. The third, the tree entity
-    by preset and seed grown on a worker at load with about eight variants a species instanced with
-    a yaw and a scale, capsule colliders on the trunk and the thick branches, the levels of detail
-    through VisibilityRange's dither, fewer segments, then leaf cards, then octahedral impostors
-    drawn once a variant into an atlas by an offscreen camera and blended from the three nearest
-    views, an example, and the feature test's sphere-crowned trees grown with a small forest. The
-    fourth, a tree material bending by a per-vertex branch hierarchy of trunk, branch and twig
-    pivots with their phases moved by WeatherState.Wind, the leaves' clusters as meshlet geometry,
-    and the leaves in the scene field as cells passing a share of light with a Shared line for
-    3DEngine's item 100. The level file's and the editor's placing wait for items 65 and 67, the
-    kept skeleton going with 65. The first phase at `70212d49` on 2026-10-25, the growth and the
-    branches with Tube, the three departures in the head; the second next, the shadow grid, the
-    leaves, the bark, the presets against the paper and the guide page. The second phase splits in
-    two at 12:18, taken. The growth first, Palubicki's shadow grid with Borchert and Honda's
-    allocation of the light a bud receives, shading boxes for walls and neighbors, the paper's
-    pruning envelope as the eighth shape for the willow, base splits, curve back and the taper up to
-    the paper's three, the four presets from the appendix with a bush and a fern, tests of each
-    preset's height and spread against the paper's values, a picture of the six bare and a note of
-    their heights and spreads; then the dressing, the leaves as alpha-cut cards with a generated
-    mask and diffuse transmission by the paper's leaf controls, a bark from noise, a leaf color a
-    preset with a seasonal tint, docs/trees.md mapping the paper's terms to the growth's, and the
-    four presets pictured in leaf. The paper's plates stay out of the repository, the note saying
-    how each preset's outline compares. The second phase's growth at `c7e65c23` on 2026-10-25, the
-    shadow grid, the pruning envelope, the six presets bare against the paper's figures in the note,
-    three departures in the head; item 74's pipeline next, then the dressing. At 15:21 the dressing
-    comes next, on item 74's sets, the leaf cards cut by the manifest's boxes, and item 75's depth
-    goes onto its bark material after. The second phase's dressing at `4ee79828` on 2026-10-25, the
-    leaves on the six presets from item 74's atlases with the guide page; item 75's depth on the
-    bark material next, then the third phase, the entity, the variants and the forest. The third
-    phase in three commits at 16:44, taken. The planting and the forest, Trees.Plant making a root
-    entity turned by a yaw from the seed and scaled within a tenth with the stems' mesh and bark
-    material on the root and the leaves on a child, one of eight variants picked by the seed and
-    grown on a worker the first time a species asks for it, cached by species value for the app, a
-    Tick system handing the finished meshes to the waiting trees on the main thread, static capsule
-    colliders on child entities along the trunk and every stem thicker than about 8 cm where a
-    physics world is given, Trees.PlantForest scattering by Poisson disk, and the feature test's
-    ring of thirteen sphere-crowned trees becoming grown presets with a small forest beside the
-    meadow as the reading and the picture, the crowns still until the wind; then the levels of
-    detail through VisibilityRange's dither, the full tree, then half the tube sides with the thin
-    twigs dropped and the leaves halved and drawn larger by root two, then branch cards made at load
-    by an offscreen camera, one a thick stem's end; then octahedral impostors, each variant drawn
-    once from an eight by eight grid of directions into an atlas, a Slang material blending the
-    three nearest views, crossfaded in past the second level. Two answers. A Tree component comes
-    with the planting, an EcsText species name and a uint seed, with a registry of species by name
-    holding the presets and Trees.Register, and a tree planted by a level file or an editor is an
-    entity with the component alone that the Tick system grows and dresses, Trees.Plant adding the
-    component to its root, so item 65's level file and item 67's editor place a tree by name and
-    seed and nothing more; and the feature test's forest stands as the example, the examples project
-    holding Bevy's examples alone under N 5.2, docs/trees.md naming the forest as where to look. The
-    third phase's planting and forest at `1bd18a6c` on 2026-10-25, the Tree component, the registry,
-    the variants on a worker and the feature test's forest, the departures and the fault in the
-    head, the leaves thinning with distance open for the levels of detail, which come next. The
-    thinning settled at `d0da9cf8` on 2026-10-25, the mips keeping each leaf box's share; the rest
-    of the levels of detail in two commits as proposed, the dither between the full tree and the
-    reduced one, then the branch cards drawn at load into a target, read back and given levels on
-    the CPU by the same sampled share, since the GPU's mip generation would thin them as the atlas
-    did. The dither levels at `ddf51f5a` on 2026-10-25, the full and the reduced tree crossing by
-    VisibilityRange, Bevy's shadow origin fault worked around in the bridge; item 76's volume
-    shading next, before the branch cards and the impostors, since both are pictures drawn of the
-    leaves and would miss it otherwise. The far level at `b9cd8d74` on 2026-10-26, the limbs as thin
-    tubes and the foliage on crossed cards pictured once a variant, three faults in the head; the
-    impostors next. The impostors at `6777b172` on 2026-10-26, one quad past twenty heights painted
-    from three of sixty-four frames, two departures and a fault's mend in the head; (d) next in
-    three commits as the coder proposed on 2026-10-26, the wind first, each stem and leaf vertex
-    carrying its sway with the trunk bending about its foot, the branches swinging about their
-    pivots and the leaves fluttering from a wind uniform written each frame from the camera's
-    WeatherState, the cards by their limb and the impostor by the trunk; then the leaves in the
-    scene field, each crown's leaf area density written as cells passing the share Beer and Lambert
-    give, with a canopy's shade pictured with and without; then the meshlet leaf clusters where the
-    bridge is built with meshlets, the coder first reading whether Bevy 0.20's meshlet pass can draw
-    the leaf material's two lightings and saying under Replies what it would take if not. The wind
-    at `fc02fec5` on 2026-10-26, the sway streams and the shared vertex stages, two trees of one
-    variant out of step, the cost within the spread; d2 next, the leaves in the scene field. The
-    leaves in the field at `929a1cf7` on 2026-10-26, LightThrough on the material and in the field's
-    alpha, the floor under nine tupelos at 0.21 of the held-back light, two faults and a lead in the
-    head; item 77 next, the trees' memory, then d3.
-
-77. **The trees' memory for the process read and cut, and the memory guard's stop read as a stop.**
-    From the test host's stops of 2026-10-26, read at 06:3x. The suite's host passed 3.75 GB of
-    memory after 469 tests, the guard's cap inside a 20 GB scope, a quarter of the 15 GB the GC sees
-    there and 8 GB outside one, its _exit leaving no core and vstest's message cutting the guard's
-    line off, so the stop read as a crash twice; a 16 GB runner's cap is 4 GB and build/test.py
-    reruns the suite in parts after such a stop, so CI may meet it and absorb it unseen. Two parts.
-    The memory the trees hold for the process is read by species and variant, the eight variants'
-    skeletons and leaves, the far-level plans with each card's stems and leaves, the pictures'
-    staging and the atlases, and what a planted forest and the suite leave behind, the readings in a
-    note; then cut, the plans' per-card stems and leaves released once the cards are pictured, the
-    meshes released after upload or the variant cache bounded, as the reading shows, so the suite's
-    host peaks under 3 GB and a forest of a thousand trees of three species holds no more than the
-    reading says it needs. And build/test.py prints the guard's own line when the host exits with
-    its code, the cap and the measured peak in the run's summary, so a stop reads as a stop. One or
-    two commits, after item 70's leaves in the scene field (d2) and before its meshlet clusters
-    (d3).
-
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
     world-aligned mapping a face, and entities with a class, keyvalues and the connections of item
@@ -389,7 +253,10 @@ from [SHARED.md](SHARED.md).
     planes as .map and .vmf have them, built through EditMesh with a material and alignment a face,
     entities with class, keys and outputs, round-trip tests and colliders; then the prototype
     material, a world-aligned meter grid in Unreal's palette with Source's marks; then the feature
-    test's hub from a file, the other rooms under item 68.
+    test's hub from a file, the other rooms under item 68. The format is Valve 220 map text as
+    TrenchBroom reads and writes it, Decision 67 of 2026-10-26. The loader's fixture from the tool
+    itself waits on a small level saved in TrenchBroom, asked in ASSETS.md on 2026-10-26; the phase
+    ships with its own round-trip tests and the fixture's test is added when the file comes.
 
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
@@ -999,6 +866,19 @@ Verdicts 33 to 42, 44 and 45 are settled, said under each in REVIEW-ARCHIVE.md; 
     list. Amended at 14:22 on the owner's word to the coder, the sorted folder .vegetation ships as
     the collection and no document says more of it. The paper's presets take the collection's bark
     and leaves where an entry fits and the generated ones elsewhere.
+
+67. **The level file is Valve 220 map text.** Proposed by the coder on 2026-10-26 at item 65's start
+    and taken. A level is the text TrenchBroom reads and writes, entities in braces with key and
+    value lines and brushes in nested braces, each face a plane by three points with a material, a
+    world-aligned mapping of two axes with offsets, a rotation and two scales; the coordinates
+    TrenchBroom's, Z up in units, a worldspawn key giving the units a meter, 32 by default, the
+    loader turning them to meters Y up by a proper rotation; item 66's connections as Source-style
+    output keyvalues on the entity, target, input, parameter, delay and times, duplicate keys
+    keeping their order, parsed and kept in the first phase and fired by item 66; the writer
+    canonical so the engine's own file round-trips byte for byte and TrenchBroom's by value;
+    materials as slot names, a prototype name or a texture path. Chosen over a format of the
+    engine's own and over Hammer's vmf, since TrenchBroom is open source on every system and item
+    67's editor writes the same file, so a level can be blocked out in it today.
 
 ## Replies
 
@@ -2097,3 +1977,23 @@ Shared: build/test.py reading a memory guard's stop from a file it names for eac
 commit carrying this line, since dotnet test quotes only a window of a crashed host's output and cut
 the guard's line off twice on 2026-10-26. 3DEngine's build/test.py reads no cap, so it is offered
 for a guard of its own.
+
+Item 70's meshlet leaf clusters, (d3), read before any cut from Bevy 0.20's meshlet module in
+bevy_pbr. Its pass cannot draw the leaf material's two lightings, so the clusters wait, as the order
+says. Four things stand in the way. The meshlet material pipeline leaves out any material whose
+alpha mode is not opaque, so a leaf card cut by its picture's mask draws nothing, and the leaves
+would have to be cut as their outlines, some eight triangles a leaf against two.
+MeshletMesh::from_mesh takes positions, normals and the first texture coordinates and refuses a mesh
+with anything else, so the crown's shade in the vertex colors and the way out of the crown in the
+second coordinates, which the diffuse lighting bends the normal toward, would have to be read in the
+fragment shader from a texture of the crown's volume by the fragment's place in the tree's space. A
+meshlet material has no vertex stage, so neither the leaves nor the bark could sway, and a tree
+drawn as clusters near the camera would stand still in the wind its far levels bend in. And the
+scene field reads each drawn mesh's triangles from Bevy's meshes, which a meshlet mesh is not, so
+the clusters would leave the canopy out of the field. The conversion is no obstacle, a tupelo's
+60,000 leaf triangles cut into clusters in 1.6 s and an oak's 44,130 stem triangles in 0.7 s on a
+worker, as a scratch test timed Render.CreateMeshletMesh's baked files, and the GPU the pass asks
+for, 64-bit atomic textures on Vulkan or Metal and no MSAA, the bridge handles where meshlets are
+built. What it would take is Bevy's meshlet pass taking alpha-masked materials, extra vertex
+attributes and a vertex displacement, or a patched copy of its raster and material passes in the
+bridge, which is large; until one of them, the near levels stay the cards they are.

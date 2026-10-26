@@ -52,6 +52,7 @@ JPEG, tileable where it is bark or ground.
 | ivy or a climbing vine | walls and trunks | a leaf set with alpha |
 | a spruce or fir branch with its bark | a conifer beside the pine | a branch card set and a tileable bark |
 | a palm frond and trunk | a tropical preset | a frond set and a tileable bark |
+| a small level saved by TrenchBroom, the Generic game in the Valve format, a few brushes with one face's texture rotated and scaled, a point entity with two keys and a brush entity | the level loader's fixture of item 65, so the round trip is read against the tool's own file | the .map text file as saved |
 
 ## How to hand an asset over
 
