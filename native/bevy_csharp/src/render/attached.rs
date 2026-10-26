@@ -107,6 +107,7 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                             }
 
                             if crate::render::leaves::attach(&mut entity_mut, &untyped)
+                                || crate::render::impostors::attach(&mut entity_mut, &untyped)
                                 || crate::render::shaders::attach(&mut entity_mut, &untyped)
                             {
                                 status::OK

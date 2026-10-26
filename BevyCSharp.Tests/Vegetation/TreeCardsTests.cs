@@ -146,6 +146,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
         Assert.InRange(far.Pixels / (float)near.Pixels, 0.7f, 1.25f);
         Assert.InRange(far.Brightness / near.Brightness, 0.8f, 1.2f);
     }
+
     [SkippableFact]
     public void TheFarLevelsCostIsReadInADistantForest()
     {

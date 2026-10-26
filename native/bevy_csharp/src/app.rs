@@ -306,6 +306,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
             // The material a tree's leaves are lit by, the standard material lit as a crown.
             crate::render::leaves::install(&mut app);
 
+            // The material a far tree is drawn with, one quad painted from its pictures.
+            crate::render::impostors::install(&mut app);
+
             // An image cannot be told it is a cubemap until it has loaded, so what asks for one
             // leaves the handle here and this picks it up on whichever frame the pixels arrive.
             app.init_resource::<crate::render::post::PendingCubemaps>();

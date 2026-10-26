@@ -33,6 +33,12 @@ public static partial class Trees
     private const float CardsFrom = 6f;
     private const float CardsFade = 1.2f;
 
+    // Where the cards give way to the impostor, and over how much, in the tree's heights, a tree
+    // there some sixty pixels tall in a 45 degree picture 1080 pixels high, as tall as the tree
+    // stands in a frame of its atlas.
+    private const float ImpostorFrom = 20f;
+    private const float ImpostorFade = 4f;
+
     // The far end of the furthest level, where nothing yet draws a tree further off.
     private const float Furthest = 1e7f;
 
@@ -57,10 +63,10 @@ public static partial class Trees
 
     /// <summary>
     /// A variant grown, its skeleton and height, its stems' and leaves' data at each level of
-    /// detail, by <see cref="TreeDetail"/>, the plan of its far level of limbs and cards where its
-    /// leaves are cards, and the capsules it stands as.
+    /// detail, by <see cref="TreeDetail"/>, the plans of its far level of limbs and cards and of its
+    /// impostor where its leaves are cards, and the capsules it stands as.
     /// </summary>
-    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, CardPlan? Cards, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
+    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, CardPlan? Cards, ImpostorPlan? Impostor, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
 
     /// <summary>What a tree was dressed as, and the child it was dressed under.</summary>
     private sealed class Dressing(string species, uint seed)
@@ -211,7 +217,7 @@ public static partial class Trees
 
             if (!growing.IsCompletedSuccessfully) continue;
 
-            // Where it is drawn, dressed once its variant's far cards are pictured, or have failed.
+            // Where it is drawn, dressed once its variant's far levels are pictured, or have failed.
             var pictures = draws ? Pictured(ecs, app, species, variant, growing.Result) : null;
             if (draws && pictures is null) continue;
             dressing.Body = Dress(ecs, app, entity, name, species, variant, seed, growing.Result, draws, pictures);
@@ -230,7 +236,8 @@ public static partial class Trees
         var cards = MakeCards(skeleton, species, seed);
         MeshData[] leaves = [cards.Data(), species.Leaves > 0 ? cards.Halved() : cards.Data()];
         var plan = species.Leaves > 0 ? PlanCards(skeleton, cards) : null;
-        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, plan, Capsules(skeleton));
+        var impostor = plan is null ? null : PlanImpostor(stems[(int)TreeDetail.Full], leaves[(int)TreeDetail.Full]);
+        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, plan, impostor, Capsules(skeleton));
     }
 
     /// <summary>Dresses a tree under a child of its own, turned and sized by its seed, with its variant's meshes, materials and capsules.</summary>
@@ -253,13 +260,7 @@ public static partial class Trees
 
         if (draws)
         {
-            var meshes = Meshes.GetOrCreateValue(app);
-            if (!meshes.TryGetValue((species, variant), out var made))
-            {
-                meshes[(species, variant)] = made = (
-                    [.. grown.Stems.Select(Created)],
-                    [.. grown.Leaves.Select(leaves => leaves.Positions.Length > 0 ? Created(leaves) : AssetHandle.None)]);
-            }
+            var made = VariantMeshes(app, species, variant, grown);
 
             // The full level near the camera and the reduced one further off, measured in the
             // tree's own heights so a bush changes as near as it is small, each mesh dithered out
@@ -268,7 +269,8 @@ public static partial class Trees
             var far = pictures is { Drawn: true };
             var full = (Start: new FloatRange(0f, 0f), End: new FloatRange(ReducedFrom * height, (ReducedFrom + ReducedFade) * height));
             var reduced = (Start: full.End, End: far ? new FloatRange(CardsFrom * height, (CardsFrom + CardsFade) * height) : new FloatRange(Furthest, Furthest));
-            var cards = (Start: reduced.End, End: new FloatRange(Furthest, Furthest));
+            var cards = (Start: reduced.End, End: new FloatRange(ImpostorFrom * height, (ImpostorFrom + ImpostorFade) * height));
+            var impostor = (Start: cards.End, End: new FloatRange(Furthest, Furthest));
 
             Render.SetMesh(ecs, body, made.Stems[(int)TreeDetail.Full]);
             Render.SetMaterial(ecs, body, BarkMaterial(species));
@@ -280,11 +282,15 @@ public static partial class Trees
                 Part(ecs, body, $"{name} {seed}, leaves, reduced", made.Leaves[(int)TreeDetail.Reduced], LeafMaterial(species), reduced);
             }
 
-            // Far off, the thickest limbs and each one's foliage as a card.
+            // Far off, the thickest limbs and each one's foliage as a card, and further off the
+            // impostor, which takes no shadow, since its own, cast by a quad square to the light
+            // through the tree's middle, would darken whichever half of it stands behind that quad.
             if (far)
             {
                 Part(ecs, body, $"{name} {seed}, limbs", pictures!.Limbs, BarkMaterial(species), cards);
                 Part(ecs, body, $"{name} {seed}, cards", pictures.Quads, pictures.Material, cards);
+                var standIn = Part(ecs, body, $"{name} {seed}, impostor", pictures.ImpostorQuad, pictures.ImpostorMaterial, impostor);
+                Render.SetMeshFlags(ecs, standIn, MeshFlags.NoShadowReceiving);
             }
         }
 
@@ -303,6 +309,20 @@ public static partial class Trees
         return body;
     }
 
+    /// <summary>A variant's meshes in an app, its stems' and leaves' at each level, made the first time they are asked for.</summary>
+    private static (AssetHandle[] Stems, AssetHandle[] Leaves) VariantMeshes(App app, TreeSpecies species, int variant, Grown grown)
+    {
+        var meshes = Meshes.GetOrCreateValue(app);
+        if (!meshes.TryGetValue((species, variant), out var made))
+        {
+            meshes[(species, variant)] = made = (
+                [.. grown.Stems.Select(Created)],
+                [.. grown.Leaves.Select(leaves => leaves.Positions.Length > 0 ? Created(leaves) : AssetHandle.None)]);
+        }
+
+        return made;
+    }
+
     /// <summary>A mesh made from a variant's data, with the tangents its bark's or leaves' normal map is read along.</summary>
     private static AssetHandle Created(MeshData data)
     {
@@ -312,7 +332,7 @@ public static partial class Trees
     }
 
     /// <summary>A part of a tree's body, a mesh in a material drawn over a range of distances.</summary>
-    private static void Part(EcsWorld ecs, Entity body, string name, AssetHandle mesh, AssetHandle material, (FloatRange Start, FloatRange End) range)
+    private static Entity Part(EcsWorld ecs, Entity body, string name, AssetHandle mesh, AssetHandle material, (FloatRange Start, FloatRange End) range)
     {
         var part = ecs.Spawn();
         ecs.Add(part, Transform.Identity);
@@ -321,6 +341,7 @@ public static partial class Trees
         Ranged(ecs, part, range);
         ecs.SetParent(part, body);
         ecs.SetName(part, name);
+        return part;
     }
 
     /// <summary>

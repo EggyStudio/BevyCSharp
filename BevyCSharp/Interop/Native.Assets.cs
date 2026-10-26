@@ -42,36 +42,6 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_tilemap_read(ulong entity, int start, NativeTile* tiles, int count);
 
-    /// <summary>Builds a 2D mesh's color material and returns an asset key.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_color_material_create(NativeColorMaterial* config);
-
-    /// <summary>Writes over a 2D mesh's color material in place.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_color_material_write(int handle, NativeColorMaterial* config);
-
-    /// <summary>Builds a material and returns an asset key.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_material_create(NativeMaterialConfig* config);
-
-    /// <summary>Builds Bevy's forward decal material over a standard one and returns an asset key.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_material_create_forward_decal(NativeMaterialConfig* config, float depthFadeFactor, float depthBias);
-
-    /// <summary>Builds the bridge's leaf material over a standard one and returns an asset key.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_material_create_leaf(NativeMaterialConfig* config);
-
-    /// <summary>Makes an entity a forward decal drawn with a forward decal material.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_set_forward_decal(ulong entity, int material);
-
     /// <summary>Reads a mesh's counts, attributes and bounds.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -81,16 +51,6 @@ internal static unsafe partial class Native
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_mesh_generate_tangents(int handle);
-
-    /// <summary>Reads a standard material's settings back.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_material_write(int handle, NativeMaterialConfig* config);
-
-    /// <summary>Reads a standard material's settings back.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_render_material_read(int handle, NativeMaterialConfig* config);
 
     /// <summary>Writes where an entity's mesh or material was loaded from.</summary>
     [LibraryImport(Library)]

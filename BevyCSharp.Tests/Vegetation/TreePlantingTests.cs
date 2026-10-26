@@ -65,7 +65,7 @@ public sealed class TreePlantingTests
         AssetHandle firstMesh = default, secondMesh = default;
         var colliders = new List<Collider>();
         var parts = new List<string>();
-        FloatRange fullEnd = default, reducedStart = default, reducedEnd = default;
+        FloatRange fullEnd = default, reducedStart = default, reducedEnd = default, cardsEnd = default, impostorStart = default;
         var size = 0f;
         var takesPart = false;
 
@@ -112,6 +112,10 @@ public sealed class TreePlantingTests
                 var reduced = ecs.ChildrenOf(firstBody).First(child => ecs.NameOf(child) == "quaking-aspen 3, leaves, reduced");
                 reducedStart = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(reduced)!.Value.StartMargin;
                 reducedEnd = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(reduced)!.Value.EndMargin;
+                var cards = ecs.ChildrenOf(firstBody).First(child => ecs.NameOf(child) == "quaking-aspen 3, cards");
+                cardsEnd = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(cards)!.Value.EndMargin;
+                var impostor = ecs.ChildrenOf(firstBody).First(child => ecs.NameOf(child) == "quaking-aspen 3, impostor");
+                impostorStart = ecs.Get<Bevy.Reflected.VisibilityRangeRef>(impostor)!.Value.StartMargin;
 
                 // A tree given another seed is dressed again.
                 renamedBody = Body(ecs, renamed);
@@ -127,20 +131,24 @@ public sealed class TreePlantingTests
         // The tree's own entity takes part in Bevy's visibility, as the parent of its meshes, where
         // without it a tree's leaves stayed undrawn until something moved them.
         Assert.True(takesPart, "the tree's entity has no Visibility");
-        Assert.Equal(["quaking-aspen 3, cards", "quaking-aspen 3, leaves", "quaking-aspen 3, leaves, reduced", "quaking-aspen 3, limbs", "quaking-aspen 3, stems, reduced"], parts.Order(StringComparer.Ordinal));
+        Assert.Equal(["quaking-aspen 3, cards", "quaking-aspen 3, impostor", "quaking-aspen 3, leaves", "quaking-aspen 3, leaves, reduced", "quaking-aspen 3, limbs", "quaking-aspen 3, stems, reduced"], parts.Order(StringComparer.Ordinal));
 
         // The aspen, about 13 meters tall, changes level two and a half to three of its heights away.
         Assert.Equal(fullEnd, reducedStart);
         Assert.InRange(fullEnd.Start, 2.5f * 9f, 2.5f * 18f);
         Assert.Equal(0.5f / 2.5f * fullEnd.Start, fullEnd.End - fullEnd.Start, 3);
-        // The reduced level gives way to the far one of cards six heights away.
+        // The reduced level gives way to the far one of cards six heights away, and the cards to the
+        // impostor twenty heights away.
         Assert.Equal(6f / 2.5f * fullEnd.Start, reducedEnd.Start, 2);
+        Assert.Equal(cardsEnd, impostorStart);
+        Assert.Equal(20f / 2.5f * fullEnd.Start, impostorStart.Start, 2);
         // The aspen's limbs are thinner than a capsule's twelve centimeters, so its trunk stands alone,
         // a capsule meters tall.
         Assert.InRange(colliders.Count, 1, 24);
         Assert.All(colliders, collider => Assert.True(collider.Shape == ColliderShape.Capsule && collider.Size.X >= 0.12f, $"a collider is {collider.Shape} {collider.Size}"));
         Assert.True(colliders.Max(collider => collider.Size.Y) > 3f, "no capsule stands along the trunk");
     }
+
     [SkippableFact]
     public void TheScenesCameraIsWhereATreesShadowIsMeasuredFrom()
     {

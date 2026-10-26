@@ -10,33 +10,37 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `14c2df0f`, item 76's second part, the crown lit as a volume, pushed at 22:57 on
-2026-10-25 after the run of `6b2503ff` went green, its own run green at 23:15, carrying REVIEW.md,
-DEVLOG.md, a captioned picture with its note and a Shared line, ABI 311. The native gains
-render/leaves.rs, LeafMaterial an extended standard material with an empty extension and a WESL
-fragment under a UUID handle, the standard material's input then Bevy's lighting applied twice, the
-diffuse pass on the normal bent half way toward the way out with reflectance 0 and no transmission
-and the base times one less the transmission, the rest on the leaf's own turned normal with the
-transmission at one and the base times it, summed and finished by the post-lighting step, the dither
-kept, the forward method; a create call, the attach branch and the material plugin in the render
-install; the mesh data gains second UVs at offset 72, inserted as UV_1, with both layout tests. The
-managed side gains MeshData.SecondUvs carried in Render.Meshes, the kept copy and MeshJson, an
-internal Render.CreateLeafMaterial and Trees.LeafMaterial building it in both branches; the leaves
-write the way out, the grid's smoothed gradient leaning a quarter toward the crown's middle-out,
-folded octahedrally into the second UVs, the reduced level copying it. The tests read the rim's way
-out pointing out at 89.7 to 95% against a bar of 85, the side-lit aspen 8.8 to 28.8 and the oak 11.0
-to 41.8 toward the sun with no sky mirrored from below, 99, 115 and 90 by the own normals and 106,
-123 and 97 bent, and the cost in a forest, 24 tupelos at 1920 by 1080 drawing the opaque pass in
-5.19 ms standard and 7.52 as a crown on the RTX 4070 Laptop GPU, the feature test at 720p up 0.06 to
-0.11 ms a view. The three profiles, cargo test and the Windows and macOS checks clean; 1,952 passed,
-3 skipped, 1,955 the listing plus 11.
+Reviewed up to `b9cd8d74`, item 70's third phase's far level, the limbs and branch cards, pushed at
+00:14 on 2026-10-26 after the run of `14c2df0f` went green, its own run green at 00:36, carrying the
+review's files, DEVLOG.md, a captioned picture with its note and a Shared line. On the worker
+Trees.Cards.cs keeps the sixteen thickest stem chains as tubes at a third of their sides, gathers
+every other chain and every leaf card by its twig's tip to its nearest kept ancestor, and gives each
+group two crossed cards, the PCA plane of its leaves upright and facing out and that plane turned a
+quarter round its upright, each as large as its leaves' and stems' outline, up to 32 cells six a
+side in a 512 atlas. Trees.CardPictures.cs draws them once an app and variant through a state
+machine in Tick, the cards' stems and leaves stood in a grid far below the world on their own render
+layer, turned and scaled to their cells, unlit with the vertex depth gray baked, an orthographic
+camera into a created target with no tonemapping, captured after the pipelines and the set's albedo
+load, read back, the color levels by the mip chain with the sampled-share alpha scaling a card
+rectangle and a normal atlas rasterized on the CPU from the same triangles, the dressing waiting on
+it up to 900 frames before warning and dressing without; the card material is the leaf material with
+the two atlases, the set's mean occlusion and translucency, fully rough at reflectance 0.3, the
+import recording a surface mean an entry with the files unchanged. The reduced level ends at 7.2
+heights and the far one runs from there. Three faults found on the way, one card a branch covering
+0.6 and thinning seen along it, flat cards lit by their face up to 1.65 too bright, and the
+capture's bytes sRGB where the manifest's color was first misread as linear. The tests read each
+limb's foliage gathered onto two crossed cards facing out, the far tree covering its crown as the
+reduced one does at eight heights, the aspen 735 against 774 pixels, the tupelo 1,115 against 1,372
+and the oak 3,020 against 3,036 within bars of 0.7 to 1.25 of coverage and 0.8 to 1.2 of brightness,
+and the cost in a distant forest, 48 tupelos 160 m off at 1080p with the shadow from 0.97 to 0.42 ms
+and the opaque pass from 3.20 to 2.95. No public listing change, the bridge untouched; 1,957 passed,
+3 skipped, 1,960 the listing plus 11.
+
+Before it, `14c2df0f` came, item 76's second part, the crown lit as a volume, pushed at 22:57 on
+2026-10-25, its run green at 23:15.
 
 Before it, `6b2503ff` came, item 76's first part, the crown's depth, pushed at 21:57 on 2026-10-25,
 its run green at 22:14.
-
-Before it, `ddf51f5a` came, item 70's third phase's dither levels, pushed at 20:20 on 2026-10-25,
-its run red twice on the runners' dotnet install and green on the third attempt at 21:43, Verdict
-45.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -339,7 +343,9 @@ from [SHARED.md](SHARED.md).
     did. The dither levels at `ddf51f5a` on 2026-10-25, the full and the reduced tree crossing by
     VisibilityRange, Bevy's shadow origin fault worked around in the bridge; item 76's volume
     shading next, before the branch cards and the impostors, since both are pictures drawn of the
-    leaves and would miss it otherwise.
+    leaves and would miss it otherwise. The far level at `b9cd8d74` on 2026-10-26, the limbs as thin
+    tubes and the foliage on crossed cards pictured once a variant, three faults in the head; the
+    impostors next.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -1959,3 +1965,23 @@ once a variant by an orthographic camera on a render layer of its own into an at
 given levels that keep each card's leaves, with a normal map of the leaves drawn on the CPU and the
 leaf set's mean surface, which the import records. The far level covers the crown within a fifth and
 lights it within a sixth of the reduced level, and halves a distant forest's shadow pass.
+
+Item 70's impostors, in the commit carrying this line, two departures from the plan. The material is
+WESL in the bridge, as the leaf material is, where the plan named a Slang one, since a Slang shader
+compiles through slangc on the machine it first runs on and a planted tree draws on every machine.
+Its fragment reads three atlases, the color, the normal a leaf's diffuse light is lit by and the
+leaf's own normal turned to each frame's eye, so the blend is lit twice as the leaf material lights
+a leaf, and it takes the leaf set's mean roughness and metallic where the cards are fully rough,
+without which the tupelo's and the oak's impostors read 0.78 and 0.83 of their cards. One fault of
+the cards' commit is mended on the way, the meshes, materials and target stood for a variant's
+pictures held for the app's life, which are released once the pictures are read. No public listing
+change, ABI 312.
+
+Shared: a planted tree's octahedral impostor, in the commit carrying this line, item 70's phase
+(c3). Past twenty of its heights a tree is one quad turned to the eye, painted from the three of
+sixty-four pictures of the whole tree taken nearest the way it is seen, the ways an eight by eight
+grid folded octahedrally over the upper half of the sphere, pictured once a variant beside its
+cards, with the normals a leaf is lit by drawn on the CPU into two atlases so the blend is lit as
+the leaf material lights a leaf. It covers the crown within a sixth of the cards and lights it
+within an eighth, casts its shadow and takes none, and halves the opaque pass of a thousand far
+trees against their cards.

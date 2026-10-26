@@ -30,6 +30,7 @@ pub mod captures;
 pub mod compression;
 pub mod compute;
 pub mod constants;
+pub mod impostors;
 pub mod instances;
 pub mod layers;
 pub mod leaves;

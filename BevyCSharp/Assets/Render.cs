@@ -566,6 +566,33 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Builds the material a far tree is drawn with as an octahedral impostor, one quad turned to
+    /// the view and painted from the three frames of its atlases pictured nearest the way it is seen.
+    /// </summary>
+    /// <param name="settings">The standard material's values it is lit by, its textures unread.</param>
+    /// <param name="colors">The atlas of the tree pictured unlit, a frame a way.</param>
+    /// <param name="normals">The atlas of the normals its diffuse light is lit by, in the tree's space, and whether a leaf is pictured.</param>
+    /// <param name="faces">The atlas of the normals the light let through it and its specular are lit by, in the tree's space.</param>
+    /// <param name="middle">The middle of the tree's sphere, in the tree's space.</param>
+    /// <param name="extent">Half a frame's side in the tree's meters.</param>
+    /// <param name="across">The frames a side of the atlases.</param>
+    /// <remarks>
+    /// Internal to the trees, which picture the frames and build the quad it stands, and drawn
+    /// forward whatever the camera, as <c>native/bevy_csharp/src/render/impostors.rs</c> says.
+    /// </remarks>
+    internal static AssetHandle CreateImpostorMaterial(MaterialSettings settings, AssetHandle colors, AssetHandle normals, AssetHandle faces, Vec3 middle, float extent, int across)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = Config(settings);
+        var key = Native.bcs_material_create_impostor(&native, colors.Key, normals.Key, faces.Key, middle.X, middle.Y, middle.Z, extent, (uint)across);
+        if (key == NativeStatus.Unsupported) throw NoRenderer("Building an impostor material");
+
+        Native.Check(key, "building an impostor material");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>
     /// Writes settings over a standard material in place, so everything drawn with it changes.
     /// </summary>
     /// <remarks>
