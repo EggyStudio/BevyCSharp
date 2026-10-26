@@ -36,6 +36,11 @@ walls a light gray and the ramp the prototyping orange, and near its corner the 
 and quarter lines with 1m marked in each cell's corner, the steps a brush snapped to TrenchBroom's
 grid ends on.
 
+![](.github/assets/readings/2026-10-26-item-65-hub.webp)
+The feature test's hub loaded from its level file, an octagonal plaza in the prototyping palette
+with a rounded doorway arched in orange toward each zone and the signposts outside them, from above
+and from inside beside the turning cube and the lamp.
+
 Item 70's leaves in the scene field, as cells that let a share of global illumination's light
 through, as 3DEngine's item 100 gives its field. `MaterialSettings.LightThrough` is the share of the
 light that passes a meter of a surface's depth. The bridge keeps it beside the material and writes

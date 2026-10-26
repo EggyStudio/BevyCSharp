@@ -9,15 +9,18 @@ desktop has, and nothing else installed.
 The map
 -------
 
-You start on the hub, a cube turning in the middle and a signpost to each zone. East is the course,
-ramps, stairs, a beam, a tunnel, ice, a bounce pad, moving platforms and gaps, beside a playground
-of crates, doors, a lift, a rope and a heightmap terrain. West is the render gallery, spheres from a
-dielectric to a metal and from polished to rough, a Cornell box and a row of modeled shapes. North
-is the light hall, a bay for each way of lighting a scene. South is a meadow of grass and trees in
-the wind. North-east is the scenes zone, where the panel's Scenes page fetches Intel Sponza and
-stands it there. A day passes over all of it, under a sky scattered from the sun, with stars and a
-moon that wax and wane at night, and the weather page sets the kind of weather, its clouds, fog,
-rain, snow and thunder, or lets a forecast set it by the day.
+You start on the hub, a plaza in the prototyping palette with a cube turning in the middle and a
+rounded doorway toward each zone with its signpost outside. The plaza is assets/levels/hub.map, a
+level file TrenchBroom opens (BevyCSharp/Levels/TrenchBroom in the engine's repository says how), so
+a change saved there is the hub the next run loads. East is the course, ramps, stairs, a beam, a
+tunnel, ice, a bounce pad, moving platforms and gaps, beside a playground of crates, doors, a lift,
+a rope and a heightmap terrain. West is the render gallery, spheres from a dielectric to a metal and
+from polished to rough, a Cornell box and a row of modeled shapes. North is the light hall, a bay
+for each way of lighting a scene. South is a meadow of grass and trees in the wind. North-east is
+the scenes zone, where the panel's Scenes page fetches Intel Sponza and stands it there. A day
+passes over all of it, under a sky scattered from the sun, with stars and a moon that wax and wane
+at night, and the weather page sets the kind of weather, its clouds, fog, rain, snow and thunder, or
+lets a forecast set it by the day.
 
 Keys
 ----

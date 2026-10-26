@@ -4,8 +4,8 @@ using Bevy.Reflected;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// The hub, the middle of the map, a cube turning in place over a ground that runs out to every
-/// zone, under a sky and a sun.
+/// The hub, the middle of the map, a cube turning in place over a plaza walled round with a rounded
+/// doorway toward each zone, on a ground that runs out to every zone, under a sky and a sun.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -15,7 +15,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </para>
 /// <para>
 /// The ground is wide enough for every zone round the hub, with a slab under it for what falls,
-/// and the signposts at the hub's edge are <see cref="Zones"/>'.
+/// and the signposts at the hub's edge are <see cref="Zones"/>'. The plaza is the level file
+/// <c>levels/hub.map</c>, its floor a hair above the ground and its walls in the prototyping
+/// palette, built with its collision by <see cref="Levels.Load"/> with its root on the ground, and
+/// drawn in TrenchBroom from the same file.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -38,6 +41,9 @@ public partial struct Scene
 
     /// <summary>How far the ground runs, each side, from one edge to the other.</summary>
     public const float GroundSize = 240f;
+
+    /// <summary>How high the plaza's floor stands above the ground, its four units of the level file.</summary>
+    public const float PlazaHeight = 0.125f;
 
     /// <summary>The ground, the cube and the lamp, for a behavior that builds on the scene.</summary>
     internal static (Entity Ground, Entity Cube, Entity Lamp) Parts { get; private set; }
@@ -140,6 +146,9 @@ public partial struct Scene
         }));
         ctx.Ecs.Add(ground, Transform.At(0f, GroundHeight, 0f));
         ctx.Ecs.SetName(ground, "Ground");
+
+        // The plaza, its file's floor at zero standing on the ground.
+        Levels.Load(ctx.Ecs, "levels/hub.map", Transform.At(0f, GroundHeight, 0f));
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));

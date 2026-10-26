@@ -58,7 +58,8 @@ public sealed class LevelShapesTests
             Assert.All(corners, corner =>
             {
                 var reach = Math.Sqrt((corner.X - center.X) * (corner.X - center.X) + (corner.Z - center.Z) * (corner.Z - center.Z));
-                Assert.True(Math.Abs(reach - 48) < 1e-9 || Math.Abs(reach - 64) < 1e-9, $"a corner {reach} from the ring's middle");
+                // On the ring's inside or its outside, within the millionth of a unit a point is kept to.
+                Assert.True(Math.Abs(reach - 48) < 1e-5 || Math.Abs(reach - 64) < 1e-5, $"a corner {reach} from the ring's middle");
             });
         }
     }

@@ -41,7 +41,7 @@ public partial struct Zones
     /// <summary>Every zone, the hub first.</summary>
     public static IReadOnlyList<Zone> All { get; } =
     [
-        new("Hub", Vec3.Zero, new Vec3(3.5f, 3f, 6f), new Vec3(0f, Scene.GroundHeight, 6f), 15f),
+        new("Hub", Vec3.Zero, new Vec3(3.5f, 3f, 6f), new Vec3(0f, Scene.GroundHeight + Scene.PlazaHeight, 6f), 15f),
         new("Course", new Vec3(70f, 0f, 0f), new Vec3(48f, 4f, 0f), new Vec3(46f, Scene.GroundHeight, 0f), 30f),
         new("Render gallery", new Vec3(-70f, 0f, 0f), new Vec3(-52f, 4f, 0f), new Vec3(-50f, Scene.GroundHeight, 0f), 25f),
         new("Lights", new Vec3(0f, 0f, -70f), new Vec3(0f, 4f, -52f), new Vec3(0f, Scene.GroundHeight, -50f), 25f),

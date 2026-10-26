@@ -4226,8 +4226,8 @@ readonly struct Bevy.LevelPoint : IEquatable<LevelPoint>
 static class Bevy.Levels
   const int PrototypePixels = 512
   const string PrototypeFolder = "proto/"
-  static Entity Load(EcsWorld ecs, string path)
-  static Entity Spawn(EcsWorld ecs, Level level, string name = "level")
+  static Entity Load(EcsWorld ecs, string path, Transform? place = null)
+  static Entity Spawn(EcsWorld ecs, Level level, string name = "level", Transform? place = null)
   static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys)
   static IReadOnlyList<string> ClassNames { get; }
   static IReadOnlyList<string> WritePrototypePictures(string folder)

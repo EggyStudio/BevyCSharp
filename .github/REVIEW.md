@@ -10,36 +10,26 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `1092b434`, item 65's second phase in two commits, `ce142f8a` the grid and the
-palette and `1092b434` the pictures and the TrenchBroom config, pushed together at 12:26 on
-2026-10-26 after the run of `25e9f601` went green, the run of `1092b434` red at 12:44 on the three
-suites, Verdict 47, carrying the review's files with a Shared line, DEVLOG.md and a captioned
-picture. Images.Grid's cell keeps its meter edge line a 128th wide and adds a 256th line at the half
-and 512th fine lines at the quarters in place of the tenths, on TrenchBroom's 8, 16 and 32 unit
-steps, with 1m lettered in each cell's top left in 5 by 7 squares a 128th of the cell where the cell
-has 128 pixels or more; PrototypeColors keeps its seven names in Unreal's tones, floor 0.31, 0.31,
-0.32, wall 0.71, 0.71, 0.70, ceiling 0.82, 0.82, 0.83 and stairs 0.96, 0.46, 0.13 in sRGB, door,
-window and hazard unchanged; ImagesTests rewritten for the steps and the mark, docs/modeling.md
-updated, the room and a close corner pictured. A face is read over its material's picture, a
-prototype over Levels.PrototypePixels at 512, a PNG or JPEG under the asset root's textures folder
-over its header's pixels, anything else over the units a meter; Levels.WritePrototypePictures and
-level.textures write the seven pictures at 512 tinted as the materials draw them unlit, on the CPU
-so they work headless; BevyCSharp/Levels/TrenchBroom holds the pictures, GameConfig.cfg at version 9
-in the layout of TrenchBroom's Generic config with the Valve format alone and a face scale of a
-sixteenth, BevyCSharp.fgd with worldspawn and its units a meter, info_player_start and tree to grow
-with item 66, and a README on installing it naming TrenchBroom with no link; a test holds the
-shipped pictures byte for byte to the engine's output, docs/levels.md has the sentence on a face's
-scale meeting its picture, the public listing gains PrototypeFolder, PrototypePixels and
-WritePrototypePictures. The whole suite in one host at the 3 GB cap with both commits, 1,990 passed
-and 3 skipped, the listing of 1,982 plus 11, the host peaking at 2,207 MB; the level, images,
-modeling and material-slot tests pass on the headless bridge, 27 with the 4 needing a renderer
-skipped; NormTests pass.
+Reviewed up to `c6b95ea9`, three commits pushed together at 12:57 on 2026-10-26 after the red run of
+`1092b434` ended, the run of `c6b95ea9` green at 13:13 with the suites in 13 to 16 minutes, Verdict
+47 settled by it, the pixels agreeing on the runners. `8a287c2f` has the feature test's drive asking
+the meadow for one of its planted trees by species and seed so the drive runs whole again;
+`d53a3108` is item 65's third phase's helpers, levels blocked out in code with boxes, ramps, arches
+and walls with rounded doorways, each a convex brush mapped along the world's axes as a new face in
+TrenchBroom is, LevelBrush.Shapes and Level.Shapes with six public lines, the cheat sheet and
+docs/levels.md; `c6b95ea9` is Verdict 47's mend, the shipped prototype pictures held to what the
+engine draws pixel for pixel through AnimationReader.Png, a difference naming the first differing
+pixel with both values and the count and writing the drawn picture under the tests' results, which
+the test-digest artifact carries, the pixels agreeing here in Debug and Release, the drawing
+rounding three grid tones each tinted by each prototype with the least margin 0.0014 of a step from
+a rounding boundary, so the runners' failure should have been the PNG bytes alone, the next run's
+page confirming it or naming the pixel.
+
+Before it, `1092b434` came, item 65's second phase in two commits, pushed at 12:26 on 2026-10-26,
+its run red at 12:44 on the three suites at the shipped-pictures test, Verdict 47.
 
 Before it, `25e9f601` came, Verdict 46's mend, pushed at 11:40 on 2026-10-26, its run green at
 11:58, the verdict settled.
-
-Before it, `f703b3b1` came, item 65's first phase, the level file's format and loader, pushed at
-11:05 on 2026-10-26, its run red at 11:23 on the three suites, Verdict 46.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -279,7 +269,9 @@ from [SHARED.md](SHARED.md).
     a generator and checked in as text, Scene.cs loading it in place of the turning cube with the
     ground and the signposts kept outside the ring and the player's start read from the file, a test
     reading the file back with its five doorways and the start, the drive's and capture jobs' new
-    picture, the FeatureTest README and docs/levels.md pointing at the file.
+    picture, the FeatureTest README and docs/levels.md pointing at the file. The helpers at
+    `d53a3108` on 2026-10-26, boxes, wedges, arches and doorways as brushes; the hub's file next,
+    and the level then grows into item 68's rooms by the owner's word of that day, Decision 68.
 
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
@@ -303,27 +295,21 @@ from [SHARED.md](SHARED.md).
     Decision 61, the owner finding the level ugly. The level is rebuilt as a file of item 65 in the
     prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
     kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
-    the captures of the feature test retaken and the owner shown the result. After item 67.
+    the captures of the feature test retaken and the owner shown the result. After item 67. Brought
+    forward on 2026-10-26 by the owner's word, Decision 68, after item 65's hub commit and before 66
+    and 67, in the phases the coder proposed, the hub as the plaza first; then the rooms and the
+    boundary, a hall for the course, a gallery room, light bays, a meadow courtyard and a scenes
+    hall joined by corridors, ramps and a raised walkway inside a tall wall, the ground plane, the
+    terrain and the light hall's house going and Zones' centers and starts moving into the rooms,
+    the layout pictured before content moves; then each zone's content moved in, one commit a zone,
+    the drive's stations and captures updated as each moves; then the drive and captures retaken,
+    the README and docs saying the new map. The engine's features stay; a check a room cannot hold
+    goes with a note.
 
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 46 are settled, said under each in REVIEW-ARCHIVE.md; 2, 43 and 47 are
-open, 43 mended at `42abf357`.
-
-47. **The run of `1092b434` is red on the three suites, the shipped prototype pictures compared byte
-    for byte with what the engine draws on another machine.** Read at 12:49 on 2026-10-26. On Linux,
-    Windows and macOS alike one test fails, LevelTests' case that holds the shipped pictures to the
-    engine's output, at floor.png, the first it reads, with everything else green, 1,559 passed on
-    Linux and 1,356 on Windows; the pictures were written on the coder's machine and the test
-    compares the PNG bytes, so an encoder's compression, metadata or ordering that differs by system
-    or library version fails it where the pixels may well agree, and if the pixels differ too the
-    CPU drawing or the tint is not the same on every machine, which the test must say. The mend
-    decodes both pictures and compares the pixels, exact for a drawing meant to be the same
-    everywhere, with the first differing pixel and its two values in the failure's text; if the
-    pixels differ on the runners, the drawing is made the same everywhere, integer steps in place of
-    what rounds apart, and the shipped pictures written again. Small, before item 65's third phase
-    goes on; the run's artifacts hold the runners' pictures if the test writes them on failure,
-    which it should.
+Verdicts 33 to 42 and 44 to 47 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
+43 mended at `42abf357`.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -917,6 +903,21 @@ open, 43 mended at `42abf357`.
     materials as slot names, a prototype name or a texture path. Chosen over a format of the
     engine's own and over Hammer's vmf, since TrenchBroom is open source on every system and item
     67's editor writes the same file, so a level can be blocked out in it today.
+
+68. **The feature test's open map is legacy and its features move into one generated level.** The
+    owner wrote to the coder's session on 2026-10-26, about 12:5x, having seen the level work and
+    liking the arches made with the modeling, that the terrain, the house with its lighting and the
+    open ground around them are legacy, to be deleted and implemented in the generated level as
+    rooms and open courtyards, the walls up so no horizon shows as in a prototype level, and the
+    structure made interesting to show what the tools can do. So item 68 comes forward, after the
+    hub commit of item 65's third phase and before items 66 and 67. The level grows into rooms off
+    the plaza's doorways, a hall for the course, a gallery room, light bays, a meadow courtyard open
+    to the sky and a scenes hall, joined by corridors, ramps and a raised walkway inside a tall
+    boundary wall; the ground plane, the heightmap terrain and the light hall's house go from the
+    feature test, the engine's own features staying and each zone's checks moving into its room or
+    going with a note; the layout drawn by the generator into the level's file and pictured to the
+    owner before the zones' content moves in, one commit a zone, the drive's stations and captures
+    following each, the README and the docs saying the new map at the end.
 
 ## Replies
 
@@ -2147,3 +2148,25 @@ more from where its rounding turns, the least 0.0014 at the window's red over a 
 function differing in its last digit moves a value by a few millionths of a step, so the pixels
 should agree on the runners as well and the failure was the bytes alone, which the next run's page
 confirms or names. 8a287c2f before it waits with it.
+
+Item 65's third phase, its second commit, the feature test's hub from a level file, in the commit
+carrying this line. games/FeatureTest/assets/levels/hub.map is an octagonal plaza nine meters from
+its middle to its walls' insides, its floor an octagon four units up made of a square's planes and
+the same square's turned an eighth, eight walls half a meter thick and five meters high, a rounded
+doorway three meters wide and four high with its arch in the prototyping orange in the five toward
+the zones, and the player's start six meters south facing north. HubLevelTests holds the file to its
+generator by value within a millionth of a unit, since a sine may differ in its last digit between
+systems, writes it again with BCS_WRITE_LEVELS=1, and reads a doorway open toward each zone and a
+wall in the three ways between. The shapes keep their points to a millionth of a unit and take a
+quarter turn's sine and cosine whole, so the file holds no dust of a sine. Levels.Spawn and
+Levels.Load take where the level's root stands, since its bodies are put where it stands as they are
+made, and the feature test stands the hub on its ground with it, the plaza's floor Scene.PlazaHeight
+over it and Zones' hub start on the floor. The turning cube stays and turns in the plaza's middle,
+since the crates and the ray-traced occlusion page build on it. The feature test's drive runs whole
+on it, its peak 3.44 GB and its 1-hub capture the plaza, and 8a287c2f before this commit points the
+drive's zone check at the meadow's quaking-aspen 70, the meadow naming its trees by species and seed
+since 1bd18a6c, so the drive had stopped there on every run since. The picture is
+2026-10-26-item-65-hub.webp. The whole suite ran with this and the helpers' commit, 1,997 passed and
+3 skipped in one host at the 3 GB cap, and the level, shapes and hub tests pass on the headless
+bridge. The public listing reshapes Levels.Load and Levels.Spawn, each given a place after its other
+parameters, which a call giving the earlier ones keeps.

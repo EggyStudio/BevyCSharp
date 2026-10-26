@@ -2225,3 +2225,21 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     where the renderer is and the bodies given in code, the index the test's own on an empty array
     after the spawn's throw; settled when its run goes green. Settled on 2026-10-26 by the run of
     `25e9f601`, green on the three suites at 11:58.
+
+47. **The run of `1092b434` is red on the three suites, the shipped prototype pictures compared byte
+    for byte with what the engine draws on another machine.** Read at 12:49 on 2026-10-26. On Linux,
+    Windows and macOS alike one test fails, LevelTests' case that holds the shipped pictures to the
+    engine's output, at floor.png, the first it reads, with everything else green, 1,559 passed on
+    Linux and 1,356 on Windows; the pictures were written on the coder's machine and the test
+    compares the PNG bytes, so an encoder's compression, metadata or ordering that differs by system
+    or library version fails it where the pixels may well agree, and if the pixels differ too the
+    CPU drawing or the tint is not the same on every machine, which the test must say. The mend
+    decodes both pictures and compares the pixels, exact for a drawing meant to be the same
+    everywhere, with the first differing pixel and its two values in the failure's text; if the
+    pixels differ on the runners, the drawing is made the same everywhere, integer steps in place of
+    what rounds apart, and the shipped pictures written again. Small, before item 65's third phase
+    goes on; the run's artifacts hold the runners' pictures if the test writes them on failure,
+    which it should. Mended at `c6b95ea9` on 2026-10-26, the pictures compared pixel for pixel and
+    the drawn one kept with the run's page; settled when its run goes green. Settled on 2026-10-26
+    by the run of `c6b95ea9`, green on the three suites at 13:13, so the runners' failure was the
+    PNG bytes alone.

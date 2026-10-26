@@ -82,25 +82,31 @@ public static class Levels
     /// <summary>Reads a level file and builds it into the world. Only valid inside a system.</summary>
     /// <param name="ecs">The world.</param>
     /// <param name="path">The file, relative to the asset root unless it is a full path.</param>
+    /// <param name="place">Where the level's root stands, the file's origin, at the world's origin where none is given.</param>
     /// <returns>The level's root, under which every entity of it stands.</returns>
     /// <exception cref="FileNotFoundException">There is no such file.</exception>
     /// <exception cref="FormatException">The file is not map text, or a key of it is not what its class reads.</exception>
-    public static Entity Load(EcsWorld ecs, string path) => Spawn(ecs, Level.Load(path), Path.GetFileNameWithoutExtension(path));
+    public static Entity Load(EcsWorld ecs, string path, Transform? place = null) => Spawn(ecs, Level.Load(path), Path.GetFileNameWithoutExtension(path), place);
 
     /// <summary>Builds a level into the world. Only valid inside a system.</summary>
     /// <param name="ecs">The world.</param>
     /// <param name="level">The level.</param>
     /// <param name="name">What the root is named, the level's.</param>
+    /// <param name="place">
+    /// Where the level's root stands, the file's origin, at the world's origin where none is given,
+    /// so a level drawn with its floor at zero stands on a ground at another height. Its bodies are
+    /// put where it stands as they are made, so the root is placed here rather than moved after.
+    /// </param>
     /// <returns>The level's root, under which every entity of it stands, so despawning it takes the level away.</returns>
     /// <exception cref="FormatException">A key is not what its class reads, as an <c>origin</c> of other than three numbers, or a brush closes no solid.</exception>
-    public static Entity Spawn(EcsWorld ecs, Level level, string name = "level")
+    public static Entity Spawn(EcsWorld ecs, Level level, string name = "level", Transform? place = null)
     {
         ArgumentNullException.ThrowIfNull(ecs);
         ArgumentNullException.ThrowIfNull(level);
 
         var units = level.UnitsPerMeter;
         var root = ecs.Spawn();
-        ecs.Add(root, Transform.Identity);
+        ecs.Add(root, place ?? Transform.Identity);
         ecs.Add(root, Visibility.Inherited);
         ecs.SetName(root, name);
 

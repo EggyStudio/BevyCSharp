@@ -80,11 +80,16 @@ public sealed partial class LevelBrush
     /// <remarks>The faces' offsets, rotations and scales are kept, and their axes are the ones a face facing its new way takes.</remarks>
     public LevelBrush Turned(double degrees, LevelPoint about)
     {
-        var (cos, sin) = (Math.Cos(degrees * Math.PI / 180), Math.Sin(degrees * Math.PI / 180));
+        // A quarter turn's sine and cosine taken whole, where the library's give six parts in a
+        // hundred quadrillion for a zero, which a file would carry as dust on every point.
+        var quarters = degrees / 90;
+        var (cos, sin) = quarters == Math.Round(quarters)
+            ? (((int)Math.Round(quarters) % 4 + 4) % 4) switch { 0 => (1.0, 0.0), 1 => (0.0, 1.0), 2 => (-1.0, 0.0), _ => (0.0, -1.0) }
+            : (Math.Cos(degrees * Math.PI / 180), Math.Sin(degrees * Math.PI / 180));
         LevelPoint Turn(LevelPoint point)
         {
             var (x, y) = (point.X - about.X, point.Y - about.Y);
-            return new LevelPoint(about.X + x * cos - y * sin, about.Y + x * sin + y * cos, point.Z);
+            return new LevelPoint(Kept(about.X + x * cos - y * sin), Kept(about.Y + x * sin + y * cos), point.Z);
         }
 
         var turned = new LevelBrush();
@@ -111,8 +116,9 @@ public sealed partial class LevelBrush
         // Points a hair apart are one, so an arch's first segment, whose inside and outside meet at
         // the ring's foot, is the triangle it is.
         var points = new List<(double X, double Z)>();
-        foreach (var point in outline)
+        foreach (var raw in outline)
         {
+            (double X, double Z) point = (Kept(raw.X), Kept(raw.Z));
             if (points.Count == 0 || Math.Abs(points[^1].X - point.X) + Math.Abs(points[^1].Z - point.Z) > 1e-9) points.Add(point);
         }
 
@@ -153,6 +159,17 @@ public sealed partial class LevelBrush
         var (x, y, z) = (Math.Abs(normal.X), Math.Abs(normal.Y), Math.Abs(normal.Z));
         if (z >= x && z >= y) return (new(1, 0, 0), new(0, -1, 0));
         return x >= y ? (new(0, 1, 0), new(0, 0, -1)) : (new(1, 0, 0), new(0, 0, -1));
+    }
+
+    /// <summary>
+    /// A coordinate kept to a millionth of a unit, so a point a turn or an arch works out is written
+    /// as a few digits rather than seventeen and the dust of a sine, and reads the same on a system
+    /// whose sine differs in its last digit. A millionth of a unit is far below a texel.
+    /// </summary>
+    internal static double Kept(double value)
+    {
+        var kept = Math.Round(value, 6, MidpointRounding.AwayFromZero);
+        return kept == 0 ? 0 : kept;
     }
 
     private static void Sized(LevelPoint low, LevelPoint high)

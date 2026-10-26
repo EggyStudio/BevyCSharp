@@ -9,10 +9,12 @@ saves with the Generic game and the Valve map format, so a level is drawn there 
 var root = Levels.Load(ctx.Ecs, "levels/room.map");          // everything under one root
 ```
 
-Every entity of the level stands under the root, so despawning the root takes the level away.
-`Level.Load` reads the file alone, `Level.Parse` reads map text, and `Levels.Spawn` builds a level
-read or made in code into the world. `level.load` does the same from the console and from `./bcs`,
-so a level saved in TrenchBroom is tried in a running app as soon as it is saved.
+Every entity of the level stands under the root, so despawning the root takes the level away, and
+the root stands where `place` puts it, the file's origin, as the feature test stands its hub,
+`games/FeatureTest/assets/levels/hub.map`, on its ground. `Level.Load` reads the file alone,
+`Level.Parse` reads map text, and `Levels.Spawn` builds a level read or made in code into the world.
+`level.load` does the same from the console and from `./bcs`, so a level saved in TrenchBroom is
+tried in a running app as soon as it is saved.
 
 ## The file
 
