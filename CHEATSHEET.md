@@ -1015,6 +1015,7 @@ static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys);  /
 static Level Load(string path);                                 // Reads a level from a file, as the game reads its assets
 string Save(string path);                                       // Writes the level to a file, which Load reads back the same
 static Level Parse(string text, string name = "the level");     // Reads a level from map text
+static IReadOnlyList<LevelBrush> Doorway(LevelPoint low, LevelPoint high, double width, double height, string material, string? arch = null, int segments = 8, double scale = 0.0625);  // A wall along X with a rounded opening through its middle, a brush each side of the opening and the wall above it cut into straight segments round the opening's top, as a level editor's arch tool cuts one
 string Write();                                                 // The level as map text in the Valve 220 format, as TrenchBroom lays it out
 
 // LevelEntity
@@ -1022,6 +1023,10 @@ IEnumerable<string> All(string key);                            // Every value o
 
 // LevelBrush
 LevelPoint[][] Polygons();                                      // Each face's polygon, its corners wound clockwise seen from outside as the file's points are, in the file's units, or nothing for a face whose plane only touches the solid
+static LevelBrush Box(LevelPoint low, LevelPoint high, string material, double scale = 0.0625);  // A box between two corners
+static LevelBrush Wedge(LevelPoint low, LevelPoint high, string material, double scale = 0.0625);  // A ramp between two corners, its slope rising along X from the low corner's height at its low X to the high corner's at its high X
+static IReadOnlyList<LevelBrush> Arch(LevelPoint center, double radius, double thickness, double depth, string material, int segments = 8, double degrees = 180, double scale = 0.0625);  // An arch standing across X, a half ring or a part of one cut into straight segments, a brush each, as Hammer's arch tool cuts one
+LevelBrush Turned(double degrees, LevelPoint about);            // The brush turned about the vertical line through a point, its faces' mapping taken again from the world, so its material lies on it as on one drawn where it stands
 
 // LevelPoint
 Vec3 Meters(double unitsPerMeter);                              // The point in meters with Y up, the file's (x, y, z) at (x, z, -y) and divided by its units a meter

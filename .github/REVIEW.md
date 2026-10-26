@@ -10,53 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `25e9f601`, Verdict 46's mend, pushed at 11:40 on 2026-10-26 after the red run of
-`f703b3b1` ended, its own run green at 11:58 with the suites in 16 to 17 minutes, Verdict 46 settled
-by it. Levels.Build draws a slot's parts only where App.HasRenderer holds, and since a mesh collider
-fits drawn meshes alone and Colliders.TryFit answers false without a renderer, each brush entity
-also gets a static body given in code wherever the world has a PhysicsWorld, the RigidBody and
-Collider components kept beside it and the sync leaving a body added in code alone, so a level
-collides the same with and without a renderer and despawning the root takes the bodies on the next
-step; the IndexOutOfRangeException was the test's own, index 0 of an empty array after the spawn had
-thrown and left the root as none, a second failure riding on the first, the update returning without
-a root and the world-parts count expecting 0 without a renderer. Checked on a headless bridge built
-with cargo's headless feature into a cache folder and a worktree of the commit given that library,
-the parent commit failing the same two tests with the same text and the mend passing all 12
-LevelTests there and again on the editor bridge; NormTests pass; a memory note records that CI's
-bridge is headless and how to test against one. After `f703b3b1`, item 65's first phase, the level
-file's format and loader, read at 10:50 on 2026-10-26, pushed at 11:05 once the run of `f75ebdae`
-went green, its own run red at 11:23 on the three suites, Verdict 46, 21 files, the whole suite in
-one host at the 3 GB cap, 1,988 passed and 3 skipped, the listing of 1,980 plus 11, in 45 minutes
-with the host's RssAnon at 2,107 MB at most. Level, LevelEntity, LevelBrush, LevelFace and
-LevelPoint hold a file with points in double precision, the canonical writer laying it out as
-TrenchBroom does so the engine's own file round-trips byte for byte, a file laid out another way,
-shared-line braces, tabs and signed numbers, reading to the same values, Quake's older face format
-refused at its line; a brush's corners are where three planes meet within the rest, shared between
-faces, an open brush refused by every edge having to run back round a neighbor. Levels.Spawn builds
-everything under a root, the worldspawn's and each brush entity's brushes through EditMesh with a
-slot a material and each face's own texture coordinates, each slot drawn as the prototype of its
-name and the brushes colliding as a mesh collider on a static body, point entities at their origin
-with the angle or angles turning minus Z to face the file's X, brush entities unturned at their
-origin or their brushes' middle, a first try turning them having put the collision a quarter turn
-off the drawing, which the test caught; LevelKeys on every entity with Levels.KeysOf and
-Levels.Register, the engine registering tree with species and seed; level.load as a console command
-and a ./bcs verb; docs/levels.md names _units_per_meter with its default of 32 and TrenchBroom as
-the tool with no link, the README and AGENTS.md gaining their rows and the cheat sheet a Levels
-group. Twelve tests, the parse, both round trips and the refusals at their lines, corners and
-winding, the ramp's touching face and the open brush, meters Y up and texels, a headless build with
-physics raycasts on the floor, the ramp and the door, and the console command; the room pictured;
-the public listing gains the seven types with nothing removed or reshaped. The fixture from the tool
-itself waits for the owner's file. After `f75ebdae`, the README's quick links, pushed at 10:47 on
-2026-10-26 after the run of `8a85790a` went green, its own run green at 11:04 with the suites in 14
-to 17 minutes, README.md's first line with the review's files, SHARED.md, DEVLOG.md and ASSETS.md
-and the d3 reading under Replies, nothing of item 65; N 4.2 and FirstGameTests pass on the tree, 18
-of 18 and 5 of 5. Item 65's first phase is built and its whole-suite run at the 3 GB cap in flight.
+Reviewed up to `1092b434`, item 65's second phase in two commits, `ce142f8a` the grid and the
+palette and `1092b434` the pictures and the TrenchBroom config, pushed together at 12:26 on
+2026-10-26 after the run of `25e9f601` went green, the run of `1092b434` watched, carrying the
+review's files with a Shared line, DEVLOG.md and a captioned picture. Images.Grid's cell keeps its
+meter edge line a 128th wide and adds a 256th line at the half and 512th fine lines at the quarters
+in place of the tenths, on TrenchBroom's 8, 16 and 32 unit steps, with 1m lettered in each cell's
+top left in 5 by 7 squares a 128th of the cell where the cell has 128 pixels or more;
+PrototypeColors keeps its seven names in Unreal's tones, floor 0.31, 0.31, 0.32, wall 0.71, 0.71,
+0.70, ceiling 0.82, 0.82, 0.83 and stairs 0.96, 0.46, 0.13 in sRGB, door, window and hazard
+unchanged; ImagesTests rewritten for the steps and the mark, docs/modeling.md updated, the room and
+a close corner pictured. A face is read over its material's picture, a prototype over
+Levels.PrototypePixels at 512, a PNG or JPEG under the asset root's textures folder over its
+header's pixels, anything else over the units a meter; Levels.WritePrototypePictures and
+level.textures write the seven pictures at 512 tinted as the materials draw them unlit, on the CPU
+so they work headless; BevyCSharp/Levels/TrenchBroom holds the pictures, GameConfig.cfg at version 9
+in the layout of TrenchBroom's Generic config with the Valve format alone and a face scale of a
+sixteenth, BevyCSharp.fgd with worldspawn and its units a meter, info_player_start and tree to grow
+with item 66, and a README on installing it naming TrenchBroom with no link; a test holds the
+shipped pictures byte for byte to the engine's output, docs/levels.md has the sentence on a face's
+scale meeting its picture, the public listing gains PrototypeFolder, PrototypePixels and
+WritePrototypePictures. The whole suite in one host at the 3 GB cap with both commits, 1,990 passed
+and 3 skipped, the listing of 1,982 plus 11, the host peaking at 2,207 MB; the level, images,
+modeling and material-slot tests pass on the headless bridge, 27 with the 4 needing a renderer
+skipped; NormTests pass.
 
-Before it, `8a85790a` came, item 77's second part, the guard's stop read as a stop, pushed at 09:56
-on 2026-10-26 after `bc5559d2`'s run went green, its run green at 10:13.
+Before it, `25e9f601` came, Verdict 46's mend, pushed at 11:40 on 2026-10-26, its run green at
+11:58, the verdict settled.
 
-Before it, `929a1cf7` came, item 70's fourth phase's leaves in the scene field, pushed at 07:13 on
-2026-10-26 after the run of `fc02fec5` went green, its run green at 07:30.
+Before it, `f703b3b1` came, item 65's first phase, the level file's format and loader, pushed at
+11:05 on 2026-10-26, its run red at 11:23 on the three suites, Verdict 46.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -284,7 +267,19 @@ from [SHARED.md](SHARED.md).
     picture under a folder TrenchBroom reads, a TrenchBroom game config in the repository with the
     Generic layout, the Valve format, a face scale of a sixteenth and an fgd of the engine's
     classes, the engine reading each material's own texel size in place of the units a meter;
-    rounded doorways are the third phase's brushes, not a material.
+    rounded doorways are the third phase's brushes, not a material. The second phase at `ce142f8a`
+    and `1092b434` on 2026-10-26, Unreal's tones and the editor's grid steps, the pictures and the
+    TrenchBroom config shipped under the levels folder, the palette to 3DEngine as its item 130. The
+    third phase in two commits as the coder proposed, public helpers on Level making brushes as
+    Hammer's block and arch tools do, a box, a wedge, an arch of convex segments and a doorway with
+    a rounded opening, each face with world-aligned axes so a file built in code is what TrenchBroom
+    draws, item 67's block tool reusing them; then the hub's file under the feature test's assets, a
+    raised plaza floor, a ring of low walls with five rounded doorways in orange framing toward the
+    zones' roads, steps down in orange and an info_player_start at the hub's start, written once by
+    a generator and checked in as text, Scene.cs loading it in place of the turning cube with the
+    ground and the signposts kept outside the ring and the player's start read from the file, a test
+    reading the file back with its five doorways and the start, the drive's and capture jobs' new
+    picture, the FeatureTest README and docs/levels.md pointing at the file.
 
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
@@ -2110,3 +2105,17 @@ bridge, the prototype's picture made on the CPU with no renderer, and the whole 
 commit, 1,990 passed and 3 skipped. docs/levels.md says in a sentence how a face's scale meets its
 picture's size. The public listing gains Levels.PrototypeFolder, Levels.PrototypePixels and
 Levels.WritePrototypePictures, no line removed or reshaped.
+
+Item 65's third phase, its first commit, the brushes a level is blocked out with, in the commit
+carrying this line. LevelBrush.Box, LevelBrush.Wedge, a ramp rising along X, and LevelBrush.Arch, a
+ring or a part of one cut into straight segments as Hammer's arch tool cuts one, are each a convex
+outline across Y stretched along it, every face wound as the file winds one and mapped along the
+world's axes as a new face is, at LevelBrush.DefaultScale, a sixteenth, so a prototype's cell spans
+a meter. Level.Doorway is a wall along X with a rounded opening, a brush each side and the wall
+above cut into segments along rays round the opening's half circle and through the wall's top
+corners, so each segment's outer side lies along one edge and stays convex. LevelBrush.Turned turns
+a brush about the vertical and maps its faces again from the world. LevelShapesTests holds each to
+its faces, corners and volume, the doorway's open where its opening is and solid beside and over it,
+within the eight chords' cut of the circle, and a turned box to its corners and its new mapping.
+docs/levels.md shows a room built in code. The public listing gains the six, no line removed or
+reshaped.

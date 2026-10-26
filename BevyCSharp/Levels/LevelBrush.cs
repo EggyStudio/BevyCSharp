@@ -6,7 +6,7 @@ namespace Bevy;
 /// are found where three planes meet within the rest (<see cref="Polygons"/>), so a brush stays
 /// convex whatever moves its planes and two of them never share a corner by accident.
 /// </remarks>
-public sealed class LevelBrush
+public sealed partial class LevelBrush
 {
     // How far, in the file's units, a corner may stand outside a plane and still be within it, and
     // how near two corners may be and be one. Planes through integer points meet at corners exact in

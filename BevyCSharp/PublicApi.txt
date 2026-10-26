@@ -4158,15 +4158,21 @@ sealed class Bevy.Level
   const string Extension = ".map"
   const string UnitsPerMeterKey = "_units_per_meter"
   double UnitsPerMeter { get; }
+  static IReadOnlyList<LevelBrush> Doorway(LevelPoint low, LevelPoint high, double width, double height, string material, string? arch = null, int segments = 8, double scale = 0.0625d)
   static Level Load(string path)
   static Level Parse(string text, string name = "the level")
   string Game { get; set; }
   string Save(string path)
   string Write()
 sealed class Bevy.LevelBrush
+  LevelBrush Turned(double degrees, LevelPoint about)
   LevelBrush()
   LevelPoint[]?[] Polygons()
   List<LevelFace> Faces { get; }
+  const double DefaultScale = 0.0625d
+  static IReadOnlyList<LevelBrush> Arch(LevelPoint center, double radius, double thickness, double depth, string material, int segments = 8, double degrees = 180d, double scale = 0.0625d)
+  static LevelBrush Box(LevelPoint low, LevelPoint high, string material, double scale = 0.0625d)
+  static LevelBrush Wedge(LevelPoint low, LevelPoint high, string material, double scale = 0.0625d)
 sealed class Bevy.LevelEntity
   IEnumerable<string> All(string key)
   LevelEntity()

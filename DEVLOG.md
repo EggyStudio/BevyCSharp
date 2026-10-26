@@ -30,6 +30,12 @@ a ramp the world's brushes and its door a brush entity, each drawn as the protot
 material's name with the meter grid aligned to the world across every face, and a bush placed by a
 tree entity's species and seed.
 
+![](.github/assets/readings/2026-10-26-item-65-palette.webp)
+The room of the level file again in Unreal's level prototyping palette, the floor a dark gray, the
+walls a light gray and the ramp the prototyping orange, and near its corner the grid's meter, half
+and quarter lines with 1m marked in each cell's corner, the steps a brush snapped to TrenchBroom's
+grid ends on.
+
 Item 70's leaves in the scene field, as cells that let a share of global illumination's light
 through, as 3DEngine's item 100 gives its field. `MaterialSettings.LightThrough` is the share of the
 light that passes a meter of a surface's depth. The bridge keeps it beside the material and writes

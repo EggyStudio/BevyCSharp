@@ -83,3 +83,23 @@ Levels.Register("light", (ecs, entity, source) =>
 
 The engine registers `tree`, a tree of the `species` key's name and the `seed` key's seed, which
 the library grows and dresses as any planted tree.
+
+## Building a level in code
+
+`LevelBrush.Box`, `LevelBrush.Wedge` and `LevelBrush.Arch` make brushes as a level editor's tools
+do, a box, a ramp rising along X and a ring cut into straight segments, and `Level.Doorway` a wall
+along X with a rounded opening through it, each face mapped as a new face is, along the world's axes
+at a sixteenth's scale. `LevelBrush.Turned` turns a brush about the vertical and maps its faces
+again from the world, so a wall another way is one of these turned:
+
+```csharp
+var level = new Level();
+var world = new LevelEntity();
+world["classname"] = "worldspawn";
+world.Brushes.Add(LevelBrush.Box(new LevelPoint(-256, -256, -16), new LevelPoint(256, 256, 0), "proto/floor"));
+world.Brushes.AddRange(Level.Doorway(new LevelPoint(-128, 240, 0), new LevelPoint(128, 256, 160), 64, 128, "proto/wall", arch: "proto/stairs"));
+world.Brushes.AddRange(Level.Doorway(new LevelPoint(-128, 240, 0), new LevelPoint(128, 256, 160), 64, 128, "proto/wall")
+    .Select(brush => brush.Turned(90, new LevelPoint(0, 0, 0))));
+level.Entities.Add(world);
+level.Save("levels/room.map");
+```
