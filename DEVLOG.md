@@ -19,6 +19,58 @@ A quaking aspen and a black tupelo near and an oak behind them in a wind of 18 m
 blowing to the right, each trunk leaning downwind, its limbs swinging out of step and its leaves
 fluttering, with their shadows swaying under them.
 
+![](.github/assets/readings/2026-10-26-item-70-canopy.webp)
+The floor under nine black tupelos at High under the sky's light alone, their leaves held solid in
+global illumination's distance field above and letting half the light through a meter below, the
+floor under the crowns lighter and its dark patches gone.
+
+Item 70's leaves in the scene field, as cells that let a share of global illumination's light
+through, as 3DEngine's item 100 gives its field. `MaterialSettings.LightThrough` is the share of the
+light that passes a meter of a surface's depth. The bridge keeps it beside the material and writes
+it in the fourth channel of each drawn mesh's color, the field's splat and stamp paint a cell's alpha
+from 1 for a solid surface down to a half for one letting all through, and the resolve scales the
+glow alike, so a reader dividing by the alpha takes the colors back. The probes' rays cross such a
+surface, keeping the share for each meter of it and taking the rest from the surface, four such
+surfaces at most, a crossing before a ray's interval kept for its probe's own faces alone. The screen
+probes' rays cross them too, and the merge sees the probes above past them. A frame where nothing
+drawn lets light through traces with a build that leaves the crossing out. A planted tree's leaves
+let half through a meter, and the field paints the bark and the leaves their sets' mean colors. The
+picture is the floor under nine black tupelos seven meters apart at High under the sky's light
+alone, the leaves held solid in the field above and letting half through a meter below.
+
+As `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough --logger
+"console;verbosity=detailed"` prints it, a gray floor under a dark green slab a meter thick and
+twenty across, read in linear light under the sky alone, the share of the sky's light a solid slab
+holds back that the floor takes under a slab letting half through a meter, beside what the slab's
+depth along each way the floor's sky comes from gives and what 3DEngine's engine reads of the same
+scene.
+
+| Slab | geometry | Low | High | 3DEngine, Low | 3DEngine, High |
+|---|---|---|---|---|---|
+| 2.5 m up | 0.36 | 0.44 | 0.32 | 0.36 | 0.40 |
+| 5.5 m up | 0.41 | 0.24 | 0.24 | 0.37 | 0.32 |
+
+The floor reads 0.0600 open, 0.0161 under a solid slab 2.5 m up and 0.0242 under one 5.5 m up, and
+under a slab letting all through 0.0582 and 0.0569 at High, and 0.0564 at Low 5.5 m up, which holds
+back a tenth of what a solid slab does where 3DEngine's holds back a hundredth.
+
+`AForestFloorTakesTheSkyLightItsCanopyLetsThrough` prints the floor under the middle of the nine
+tupelos at High under a bright sky alone, 0.2341 with no trees, 0.0375 under leaves held solid and
+0.0797 under leaves letting half through a meter, 0.21 of what the solid canopy holds back, the same
+in three runs, the floor's sky coming through the crowns along most of its ways.
+`ACrownLetsAboutHalfTheLightThroughAMeter` prints the presets' crowns at 0.77 to 1.53 square meters
+of leaf a cubic meter of the half meter cells their leaves lie in, letting 0.46 to 0.68 of the light
+through a meter by Beer and Lambert's law.
+
+Two faults were found on the way. The field read a drawn mesh's material only where it was the
+standard material, so since the leaf material and the wind's bark material came, a tree stood in the
+field white and closed. It reads the leaves' and the bark's materials through the standard material
+they are built over, and leaves the impostor out. And the field took every visible mesh, where a
+visibility range hides a mesh from each view and not from what it inherits, so a planted tree stood
+in it as its full, reduced and far levels at once; it takes a mesh with a range where the eye the
+field lies around stands within it.
+
 Item 70's impostor, a planted tree past twenty of its heights drawn as one quad turned to the eye
 and painted from three of sixty-four pictures of the whole tree. Each variant is pictured once an
 app from eight by eight ways laid on a square folded over the upper half of the sphere, the square's
@@ -1353,7 +1405,7 @@ random_sampling is written with them. (`a31e3b32`)
 
 ![](.github/assets/examples/light_textures.webp)
 ![](.github/assets/examples/reflection_probes.webp)
-Light textures are drawn now that the bridge builds them, and Bevy's light_textures and
+Light textures are drawn since the bridge builds them, and Bevy's light_textures and
 reflection_probes examples are written in C#. (`7618f24e`)
 
 ![](.github/assets/examples/clustered_decal_maps.webp)

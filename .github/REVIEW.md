@@ -10,50 +10,36 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `fc02fec5`, item 70's fourth phase's wind, pushed at 04:05 on 2026-10-26 after the
-run of `6777b172` went green, its own run green at 04:20 with the suites in 12 to 15 minutes,
-carrying the review's files, SHARED.md, DEVLOG.md and a captioned animated picture of 32 frames with
-its note. In the bridge render/sway.rs holds the TreeWind uniform, the wind of this frame and the
-last with the trunk, limb and flutter stiffness and the flutter's frequency, a WESL sway shared by
-Bevy's mesh vertex stage and prepass vertex stage, each written again for meshes neither skinned,
-morphed nor compressed, the previous position swayed for the motion vectors, a specialize that
-appends the two sway streams to the vertex buffer Bevy built at locations 8 and 9 and sets
-TREE_SWAY, BarkSway as an ExtendedMaterial on the standard material with bcs_material_create_bark,
-bcs_render_set_tree_wind, and a PostUpdate system writing the wind into every tree material on the
-frames it changes; the leaf material takes the uniform at 100 and the vertex stages, the impostor
-the uniform at 107 and shifts its quad by the trunk's bend at its middle's height, the prepass
-stages declaring Bevy's globals at the view group's binding 1, ABI 313. Trees.Wind.cs shares the
-limb plan with PlanCards, the sixteen cards' limbs and each thinner stem off the trunk a limb of its
-own, and writes the streams for the stems by each stem's run of faces, the leaves with a stalk and a
-phase a card, the far cards' quads and the limbs, the stiffness from the species' height and leaf
-length; Trees.Wind, public, or the first weather's wind is written each frame from Tick,
-PublicApi.txt gaining the line. The streams test prints each tree's stem vertices swinging and its
-limbs among the leaves; two aspens of one variant at 25 m in 20 m/s lean 3.85 to 4.96 pixels
-downwind and are out of step by up to 0.51, still air giving the same picture frame to frame; 24
-tupelos at 1080p cost the shadow pass 3.39 against 3.38 ms and the opaque 6.30 against 6.24, within
-the runs' spread. The three profiles, cargo test and the Windows and macOS checks clean; the first
-suite run aborted after 469 tests, the test host crashing with no message as a test's app started,
-the 59 tree tests then passing alone and a whole rerun under --blame-crash passing, 1,966 passed and
-3 skipped, 1,969 the listing plus 11, with no crash file, the cause not found and kept as a lead.
-The host crashed again at 03:58 with d2's tree in place, after 469 tests as before, --blame-crash
-naming TreeCardsTests' distant forest, 48 tupelos and 96 reduced meshes with tangents in one step,
-the log stopping mid-line with no panic and no .NET fatal error, two engine scratch programs holding
-1.1 GB of the GPU at 81% busy; a rerun in a named scope peaked at 5.5 GB of RAM under a 20 GB cap
-without crashing, the logs kept under ~/.cache/bevycsharp, and the coder chases it before d2, the
-same count twice pointing at what the sequence accumulates, the GPU's memory first. Found at 06:3x,
-the memory guard and not a fault, vstest's diag log holding the host's exit code 86 and the guard's
-line, 3.77 GB past a cap of 3.75, the cap a quarter of the 15 GB the GC sees inside the 20 GB scope
-where a run outside takes 8, the guard's _exit leaving no core and vstest's crash message quoting a
-fixed window of stderr cut mid-line, the host living four minutes past it; the GPU's memory does not
-climb, the host's own 208 to 1,169 MB with each app; so item 70's tests lift the host past the old
-margin, a 16 GB runner's cap of 4 GB may meet the same stop and build/test.py's rerun in parts
-absorbs it, item 77.
+Reviewed up to `929a1cf7`, item 70's fourth phase's leaves in the scene field, pushed at 07:13 on
+2026-10-26 after the run of `fc02fec5` went green, its own run green at 07:30 with Windows in 17
+minutes, carrying the review's files with two faults and a lead under Replies, SHARED.md, DEVLOG.md
+and a captioned picture with its note, the commit's sentence naming the guard's cap of 8 GB inside
+the 20 GB scope. MaterialSettings.LightThrough, public, is the share of global illumination's light
+a meter of a surface lets through, with three bridge calls setting and reading it and setting a
+material's field tint, ABI 314, the bridge keeping them beside the material and writing the share in
+the fourth channel of each draw's color; the field's splat and stamp paint the alpha as
+lightThroughPaint gives it and the resolve scales the glow alike, bcs_field gaining
+lightThroughPaint, Of, At, Depth and Kept and bcs_gi seesPastLeaves and fractional texel marks;
+gi_trace crosses up to four light-through surfaces and is built twice, a NO_LIGHT_THROUGH build for
+a frame where nothing lets light through, the share kept before an interval in an R16Float image
+beside the distances since the images have no two-channel half format, gi_ambient reading it,
+gi_screen crossing under a flag in texels.z and gi_merge asking seesPastLeaves with the field's
+colors. The field's gather reads the leaf and bark materials through their standard base and skips
+the impostor, and takes a mesh with a visibility range only where the field's eye stands within it,
+the two faults; the leaves let half through (Trees.LeafLightThrough), the leaves, the cards and the
+bark set's mean colors tinting them in the field. The slab test reads 0.44 and 0.32 at 2.5 m up at
+Low and High against 3DEngine's 0.36 and 0.40 and the geometry's 0.36, and 0.24 and 0.24 at 5.5 m
+against 0.37 and 0.32 and the geometry's 0.41, the 5.5 m gap and a tenth held back by an all-through
+slab at Low a lead; the floor under nine tupelos takes 0.21 of what solid leaves hold back, the same
+in three runs; the presets' crowns hold 0.77 to 1.53 m² of leaf a m³, letting 0.46 to 0.68 through a
+meter. The suite whole at the 8 GB cap, 1,973 passed, 3 skipped, 1,976 the listing plus 11, the
+scope's peak 5.4 GB; the three profiles, cargo test and the Windows and macOS checks clean.
+
+Before it, `fc02fec5` came, item 70's fourth phase's wind, pushed at 04:05 on 2026-10-26 after the
+run of `6777b172` went green, its run green at 04:20.
 
 Before it, `6777b172` came, item 70's third phase's impostors, pushed at 02:28 on 2026-10-26 after
 the run of `b9cd8d74` went green, its run green at 02:46.
-
-Before it, `b9cd8d74` came, item 70's third phase's far level, the limbs and branch cards, pushed at
-00:14 on 2026-10-26 after the run of `14c2df0f` went green, its run green at 00:36.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -369,7 +355,10 @@ from [SHARED.md](SHARED.md).
     bridge is built with meshlets, the coder first reading whether Bevy 0.20's meshlet pass can draw
     the leaf material's two lightings and saying under Replies what it would take if not. The wind
     at `fc02fec5` on 2026-10-26, the sway streams and the shared vertex stages, two trees of one
-    variant out of step, the cost within the spread; d2 next, the leaves in the scene field.
+    variant out of step, the cost within the spread; d2 next, the leaves in the scene field. The
+    leaves in the field at `929a1cf7` on 2026-10-26, LightThrough on the material and in the field's
+    alpha, the floor under nine tupelos at 0.21 of the held-back light, two faults and a lead in the
+    head; item 77 next, the trees' memory, then d3.
 
 77. **The trees' memory for the process read and cut, and the memory guard's stop read as a stop.**
     From the test host's stops of 2026-10-26, read at 06:3x. The suite's host passed 3.75 GB of
@@ -2058,10 +2047,11 @@ past the leaves. Two faults found on the way. The field read only the standard m
 leaves, since item 76, and the bark, since the wind, stood in it white and closed; it reads them
 through their standard base and leaves the impostor out. And it took every level of a planted tree
 at once, a visibility range hiding a mesh from each view and not from what it inherits; it takes a
-mesh with a range where the field's eye stands within it. A lead, not chased: five and a half meters
-up the floor takes 0.24 of the held-back sky light where the geometry gives 0.41 and 3DEngine reads
-0.37 and 0.32, and a slab letting all through holds back a tenth at Low where 3DEngine's holds back
-a hundredth. The public listing gains MaterialSettings.LightThrough. No line removed or reshaped.
+mesh with a range where the field's eye stands within it. A lead, not chased, is the floor five and
+a half meters up, which takes 0.24 of the held-back sky light where the geometry gives 0.41 and
+3DEngine reads 0.37 and 0.32, and a slab letting all through holds back a tenth at Low where
+3DEngine's holds back a hundredth. The public listing gains MaterialSettings.LightThrough. No line
+removed or reshaped.
 
 Shared: a surface letting a share of global illumination's light through, in the commit carrying
 this line, item 70's phase (d2), BevyCSharp's side of SHARED.md's light-through row.
@@ -2072,3 +2062,25 @@ at the first surface. A floor under a slab twenty across letting half through a 
 the sky light a solid slab holds back at Low and 0.32 at High two and a half meters up, and 0.24 at
 both five and a half up, against 3DEngine's 0.36, 0.40, 0.37 and 0.32. A planted tree's leaves let
 half through a meter, and nine tupelos' floor takes 0.21 of what their leaves held solid hold back.
+
+Item 77's trees' memory, in the commit carrying this line, the reading in
+2026-10-26-item-77-memory.md. A species' eight variants are drawn from 11 to 271 MB of their meshes'
+data and plans, 1,027 MB for the forty-eight the suite plants, which the process kept for as long as
+it ran, and their skeletons and capsules come to 0.06 to 0.89 MB. The process keeps those alone, and
+an app that draws a variant shapes the rest from the skeleton on a worker and lets go of it, the
+plans' per-card stems and leaves and the atlases' bytes among it, once the meshes are made and the
+far levels pictured. The trees' meshes are made without the copy Render.CreateMesh keeps of data for
+a scene, 477 MB of a forest's, since a scene writes a tree as its species and seed. And an app
+shapes four variants at a time, since shaping one allocates three to five times what it keeps in
+arrays the collector takes back in its full collections alone, so a thousand trees of three species
+peak at 2.2 GB of the machine's memory against 5.0 GB shaped at once, their test taking 56 seconds
+against 30, and once dressed hold 21 MB of managed memory against 1,317 MB, beside the bridge's 846
+MB of their meshes and atlases. The suite ran whole in one host at a cap of 3 GB in a 20 GB scope,
+1,976 passed and 3 skipped, the host's anonymous memory read at 2,222 MB at most, where it passed
+the 3.75 GB cap after 469 tests before. Three leads, not chased. The bridge keeps each atlas in
+Bevy's main world after its upload, 7 MB a variant nothing reads again, which
+RenderAssetUsages::RENDER_WORLD would let go for an ABI call. A scene saved with planted trees
+writes their dressed bodies, parts and capsules beside the Tree component, since the save's default
+takes every entity carrying a component of the project's own, so a load dresses each tree again
+beside its old parts. And the engine keeps the last app it ran through statics such as SceneField's
+until the next app replaces them. No public line changed.

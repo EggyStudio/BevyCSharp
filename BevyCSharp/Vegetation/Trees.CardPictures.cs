@@ -2,11 +2,13 @@ using System.Runtime.CompilerServices;
 
 namespace Bevy;
 
-// The pictures of a variant's far levels, taken once an app by cameras of their own, each card's
-// stems and leaves stood in a cell of a grid far under the world, turned to face the camera and
-// scaled to fill the cell, and the whole tree in each frame of its impostor, drawn unlit into two
-// atlases, read back, and given their smaller levels here with the leaves kept in them, as the leaf
-// sets' levels keep theirs.
+// A variant as an app draws it, its meshes made from the shapes a worker makes of its skeleton, and
+// the pictures of its far levels, taken once an app by cameras of their own, each card's stems and
+// leaves stood in a cell of a grid far under the world, turned to face the camera and scaled to fill
+// the cell, and the whole tree in each frame of its impostor, drawn unlit into two atlases, read
+// back, and given their smaller levels here with the leaves kept in them, as the leaf sets' levels
+// keep theirs. The shapes and the pictures' bytes are let go once the pictures are made, so a variant
+// the app draws holds its meshes and its atlases and nothing of what they were made from.
 public static partial class Trees
 {
     // The render layer only the camera taking the pictures sees, so the scene's cameras, its lights'
@@ -27,15 +29,29 @@ public static partial class Trees
     // levels, with a warning in the log.
     private const int CardPicturesLongest = 900;
 
+    // How many variants an app shapes and pictures at once, the rest waiting their turn. Shaping a
+    // variant allocates three to five times what it keeps, 128 MB for an oak's 33, in arrays large
+    // enough that the collector takes them back in its full collections alone, so a forest of three
+    // species shaping its twenty-four variants at once held 5.0 GB of the machine's memory at its
+    // peak, and four at a time 2.2 GB, its test taking 56 seconds against 30.
+    private const int MostShapedAtOnce = 4;
+
     private static readonly ConditionalWeakTable<App, Dictionary<(TreeSpecies, int), CardPictures>> TakenPictures = new();
     private static readonly ConditionalWeakTable<App, StrongBox<long>> Ticks = new();
 
-    private enum CardStep { Waiting, Capturing, Leveling, Done, Failed }
+    private enum CardStep { Shaping, Waiting, Capturing, Leveling, Done, Failed }
 
-    /// <summary>A variant's pictures as they are taken, and what its far levels are drawn with once they are.</summary>
+    /// <summary>
+    /// A variant in an app, its shapes as a worker makes them, its meshes once they are made, its
+    /// pictures as they are taken, and what its far levels are drawn with once they are.
+    /// </summary>
     private sealed class CardPictures
     {
         public CardStep Step;
+        public int Slot;
+        public Task<Shapes>? Shaping;
+        public Shapes? Shapes;
+        public (AssetHandle[] Stems, AssetHandle[] Leaves)? Meshes;
         public int Frames;
         public long Advanced = -1;
         public Entity Camera = Entity.None;
@@ -60,35 +76,76 @@ public static partial class Trees
 
         /// <summary>Whether the far levels are drawn, their pictures taken.</summary>
         public bool Drawn => Step == CardStep.Done;
+
+        /// <summary>Ends at a step, done or failed, letting go of what the meshes and the pictures were made from.</summary>
+        public void End(CardStep step)
+        {
+            Step = step;
+            (Shaping, Shapes, Levels, ImpostorLevels) = (null, null, null, null);
+            (Picture, ImpostorPicture) = (null, null);
+        }
     }
 
     /// <summary>
-    /// Takes a step toward a variant's pictures, at most one a frame, and answers them once they are
-    /// taken or have failed, or nothing while they are being taken.
+    /// Takes a step toward a variant's meshes and pictures, at most one a frame, and answers them
+    /// once the pictures are taken or have failed, or nothing while they are being made.
     /// </summary>
+    /// <remarks>
+    /// The shapes are made on a worker the first time an app draws the variant, its meshes from them
+    /// once they are, and its far levels are stood and pictured after. A variant whose shapes were
+    /// not made is drawn without meshes, its trees standing as their capsules alone.
+    /// </remarks>
     private static CardPictures? Pictured(EcsWorld ecs, App app, TreeSpecies species, int variant, Grown grown)
     {
         var all = TakenPictures.GetOrCreateValue(app);
-        if (!all.TryGetValue((species, variant), out var pictures))
-        {
-            all[(species, variant)] = pictures = new CardPictures();
-            if (grown.Cards is null || grown.Impostor is null) pictures.Step = CardStep.Failed;
-            else Stand(ecs, app, pictures, grown, species, variant, all.Count - 1);
-        }
+        if (!all.TryGetValue((species, variant), out var pictures)) all[(species, variant)] = pictures = new CardPictures { Slot = all.Count };
 
         var tick = Ticks.GetOrCreateValue(app).Value;
         if (pictures.Step is CardStep.Done or CardStep.Failed || pictures.Advanced == tick) return pictures.Step is CardStep.Done or CardStep.Failed ? pictures : null;
         pictures.Advanced = tick;
-        pictures.Frames++;
 
+        // The shapes take as long as the workers do, and the pictures' frames are counted after.
+        if (pictures.Step == CardStep.Shaping)
+        {
+            if (pictures.Shaping is null)
+            {
+                if (all.Values.Count(other => other.Shaping is not null || other.Shapes is not null) >= MostShapedAtOnce) return null;
+                pictures.Shaping = Task.Run(() => ShapeVariant(species, variant, grown.Skeleton));
+            }
+
+            if (!pictures.Shaping.IsCompleted) return null;
+            if (pictures.Shaping.IsFaulted)
+            {
+                EngineLog.Error(app, "trees", $"[BevyCSharp] The meshes of a tree's variant {variant}, its leaves {species.LeafSet ?? "generated"}, were not made. {pictures.Shaping.Exception?.InnerException?.Message}", pictures.Shaping.Exception);
+                pictures.End(CardStep.Failed);
+                return pictures;
+            }
+
+            var shapes = pictures.Shaping.Result;
+            pictures.Shaping = null;
+            pictures.Meshes = VariantMeshes(shapes);
+            if (shapes.Cards is null || shapes.Impostor is null)
+            {
+                pictures.End(CardStep.Failed);
+                return pictures;
+            }
+
+            pictures.Shapes = shapes;
+            Stand(ecs, pictures, species);
+            pictures.Step = CardStep.Waiting;
+            return null;
+        }
+
+        pictures.Frames++;
         if (pictures.Frames > CardPicturesLongest)
         {
             Log.Warn($"The far levels of a tree's variant {variant}, its leaves {species.LeafSet ?? "generated"}, were not pictured in {CardPicturesLongest} frames, and its trees are drawn without them.");
             Unstand(ecs, pictures);
-            pictures.Step = CardStep.Failed;
+            pictures.End(CardStep.Failed);
             return pictures;
         }
 
+        var shaped = pictures.Shapes!;
         switch (pictures.Step)
         {
             // Pictured once what they are drawn with has loaded and every pipeline is made, a few
@@ -110,8 +167,8 @@ public static partial class Trees
                 if (pictures.Picture is { } cardPixels && pictures.ImpostorPicture is { } framePixels)
                 {
                     Unstand(ecs, pictures);
-                    var (plan, impostor) = (grown.Cards!, grown.Impostor!);
-                    var (stems, leaves) = (grown.Stems[(int)TreeDetail.Full], grown.Leaves[(int)TreeDetail.Full]);
+                    var (plan, impostor) = (shaped.Cards!, shaped.Impostor!);
+                    var (stems, leaves) = (shaped.Stems[(int)TreeDetail.Full], shaped.Leaves[(int)TreeDetail.Full]);
                     pictures.Levels = Task.Run(() => CardLevels(cardPixels, plan));
                     pictures.ImpostorLevels = Task.Run(() => ImpostorLevels(framePixels, impostor, stems, leaves));
                     (pictures.Picture, pictures.ImpostorPicture) = (null, null);
@@ -125,7 +182,7 @@ public static partial class Trees
                 {
                     var fault = pictures.Levels.Exception ?? pictures.ImpostorLevels.Exception;
                     EngineLog.Error(app, "trees", $"[BevyCSharp] The far levels' pictures were not made. {fault?.InnerException?.Message}", fault);
-                    pictures.Step = CardStep.Failed;
+                    pictures.End(CardStep.Failed);
                     break;
                 }
 
@@ -153,8 +210,8 @@ public static partial class Trees
                 }, Stiffness(species));
                 if (species.LeafSet is { } leafSet && TreeTextures.Find(leafSet) is { Kind: TreeTextureKind.Leaves } leafLook)
                     Render.SetFieldTint(pictures.Material, (leafLook.MeanColor.R, leafLook.MeanColor.G, leafLook.MeanColor.B));
-                pictures.Limbs = Created(grown.Cards!.Limbs);
-                pictures.Quads = Created(grown.Cards.Quads);
+                pictures.Limbs = Created(shaped.Cards!.Limbs);
+                pictures.Quads = Created(shaped.Cards.Quads);
 
                 // The impostor lit as the leaves are, by the frames' normals and the set's mean
                 // surface, its roughness and metallic among them. Its texels each picture a leaf or
@@ -172,9 +229,9 @@ public static partial class Trees
                     Roughness = surface.Roughness,
                     Metallic = surface.Metallic,
                     AlphaMode = AlphaMode.Mask,
-                }, frameAtlas, frameBumps, faceBumps, grown.Impostor!.Middle, grown.Impostor.Extent, ImpostorAcross, Stiffness(species).Trunk);
-                pictures.ImpostorQuad = Render.CreateMesh(grown.Impostor.Quad);
-                pictures.Step = CardStep.Done;
+                }, frameAtlas, frameBumps, faceBumps, shaped.Impostor!.Middle, shaped.Impostor.Extent, ImpostorAcross, Stiffness(species).Trunk);
+                pictures.ImpostorQuad = Render.CreateMesh(shaped.Impostor.Quad, kept: false);
+                pictures.End(CardStep.Done);
                 return pictures;
         }
 
@@ -187,9 +244,10 @@ public static partial class Trees
     /// impostor's frames above them, drawn unlit so the pictures hold their colors and the far
     /// levels are lit as they are drawn, and spawns the cameras that picture them into the atlases.
     /// </summary>
-    private static void Stand(EcsWorld ecs, App app, CardPictures pictures, Grown grown, TreeSpecies species, int variant, int slot)
+    private static void Stand(EcsWorld ecs, CardPictures pictures, TreeSpecies species)
     {
-        var plan = grown.Cards!;
+        var shapes = pictures.Shapes!;
+        var plan = shapes.Cards!;
         var (leafImage, leafTint, barkImage, barkTint) = CardLooks(species, pictures.Awaited);
         var leaves = Render.CreateMaterial(new MaterialSettings
         {
@@ -202,7 +260,7 @@ public static partial class Trees
         var bark = Render.CreateMaterial(new MaterialSettings { BaseColor = barkTint, BaseColorTexture = barkImage, Unlit = true });
         pictures.Made.AddRange([leaves, bark]);
 
-        var middle = CardStage + new Vec3(slot * CardStageApart, 0f, 0f);
+        var middle = CardStage + new Vec3(pictures.Slot * CardStageApart, 0f, 0f);
         var half = plan.Across * 0.5f;
         foreach (var card in plan.Cards)
         {
@@ -214,7 +272,7 @@ public static partial class Trees
             {
                 if (data.Positions.Length == 0) continue;
                 var part = ecs.Spawn();
-                var mesh = Render.CreateMesh(data);
+                var mesh = Render.CreateMesh(data, kept: false);
                 pictures.Made.Add(mesh);
                 ecs.Add(part, new Transform(place, turn, new Vec3(card.Scale)));
                 Render.SetMesh(ecs, part, mesh);
@@ -240,8 +298,8 @@ public static partial class Trees
         Render.SetCameraTarget(pictures.Camera, pictures.Target);
         Render.SetPostProcessing(pictures.Camera, new PostSettings { Hdr = false, Msaa = 1, Tonemapper = Tonemapper.None, Dither = false });
 
-        var (stems, foliage) = VariantMeshes(app, species, variant, grown);
-        StandImpostor(ecs, pictures, grown.Impostor!, middle, stems[(int)TreeDetail.Full], foliage[(int)TreeDetail.Full], bark, leaves);
+        var (stems, foliage) = pictures.Meshes!.Value;
+        StandImpostor(ecs, pictures, shapes.Impostor!, middle, stems[(int)TreeDetail.Full], foliage[(int)TreeDetail.Full], bark, leaves);
         pictures.Made.Add(pictures.ImpostorTarget);
     }
 

@@ -29,11 +29,24 @@ public static unsafe partial class Render
     /// vertex, or a stream is outside the streams' locations, shares one with another, or has a
     /// name the running app gave a stream of another format or location.
     /// </exception>
-    public static AssetHandle CreateMesh(MeshData mesh)
+    public static AssetHandle CreateMesh(MeshData mesh) => CreateMesh(mesh, kept: true);
+
+    /// <summary>
+    /// Builds a mesh from vertices, keeping a copy of them for a scene to write down, as <see
+    /// cref="CreateMesh(MeshData)"/> does, or none, for a mesh the library makes again from what it
+    /// was made from, as a planted tree's, which a scene writes as its species and seed.
+    /// </summary>
+    /// <remarks>
+    /// The copy is as large as the vertices, so a forest of a thousand trees of three species held
+    /// 477 MB of copies of its meshes that nothing read.
+    /// </remarks>
+    internal static AssetHandle CreateMesh(MeshData mesh, bool kept)
     {
         var key = Send(mesh, AssetHandle.None);
-        Keep(key, mesh);
-        return new AssetHandle(key);
+        var made = new AssetHandle(key);
+        if (kept) Keep(key, mesh);
+        else Forget(made);
+        return made;
     }
 
     /// <summary>Writes vertices over a mesh, so everything drawn with it changes. Only valid inside a system.</summary>

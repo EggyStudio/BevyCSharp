@@ -53,20 +53,26 @@ public static partial class Trees
         ["fern"] = TreeSpecies.Fern,
     };
 
-    // The variants grown, by species and variant, for the whole process, since a skeleton and its
-    // meshes' data belong to no app.
+    // The variants grown, by species and variant, for the whole process, since a skeleton belongs to
+    // no app. A variant keeps its skeleton and the capsules it stands as, a hundred kilobytes at
+    // most, and not its meshes' data, some tens of megabytes, which each app that draws it shapes
+    // from its skeleton and lets go once its meshes are made and its far levels pictured. Kept, the meshes'
+    // data of every variant the suite plants came to a gigabyte that no app read again, and a forest
+    // of three species held 621 MB of it after its trees were dressed.
     private static readonly ConcurrentDictionary<(TreeSpecies Species, int Variant), Lazy<Task<Grown>>> Growing = new();
 
-    // Each app's dressed trees, and its meshes of each variant.
+    // Each app's dressed trees.
     private static readonly ConditionalWeakTable<App, Dictionary<Entity, Dressing>> Dressed = new();
-    private static readonly ConditionalWeakTable<App, Dictionary<(TreeSpecies, int), (AssetHandle[] Stems, AssetHandle[] Leaves)>> Meshes = new();
+
+    /// <summary>A variant grown, its skeleton and height, and the capsules it stands as.</summary>
+    private sealed record Grown(TreeSkeleton Skeleton, float Height, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
 
     /// <summary>
-    /// A variant grown, its skeleton and height, its stems' and leaves' data at each level of
-    /// detail, by <see cref="TreeDetail"/>, the plans of its far level of limbs and cards and of its
-    /// impostor where its leaves are cards, and the capsules it stands as.
+    /// What a variant is drawn from, its stems' and leaves' data at each level of detail, by <see
+    /// cref="TreeDetail"/>, and the plans of its far level of limbs and cards and of its impostor
+    /// where its leaves are cards, shaped from its skeleton in each app that draws it.
     /// </summary>
-    private sealed record Grown(TreeSkeleton Skeleton, float Height, MeshData[] Stems, MeshData[] Leaves, CardPlan? Cards, ImpostorPlan? Impostor, IReadOnlyList<(Vec3 From, Vec3 To, float Radius)> Capsules);
+    private sealed record Shapes(MeshData[] Stems, MeshData[] Leaves, CardPlan? Cards, ImpostorPlan? Impostor);
 
     /// <summary>What a tree was dressed as, and the child it was dressed under.</summary>
     private sealed class Dressing(string species, uint seed)
@@ -218,20 +224,34 @@ public static partial class Trees
 
             if (!growing.IsCompletedSuccessfully) continue;
 
-            // Where it is drawn, dressed once its variant's far levels are pictured, or have failed.
+            // Where it is drawn, dressed once its variant's meshes are made and its far levels are
+            // pictured, or have failed.
             var pictures = draws ? Pictured(ecs, app, species, variant, growing.Result) : null;
             if (draws && pictures is null) continue;
-            dressing.Body = Dress(ecs, app, entity, name, species, variant, seed, growing.Result, draws, pictures);
+            dressing.Body = Dress(ecs, entity, name, species, seed, growing.Result, draws, pictures);
         }
     }
 
-    /// <summary>Grows a variant of a species, its stems and leaves built and its capsules found, on whatever thread runs it.</summary>
+    /// <summary>Grows a variant of a species and finds its capsules, on whatever thread runs it.</summary>
     private static Grown GrowVariant(TreeSpecies species, int variant)
     {
-        // The variants' own seeds, apart from any seed a game gives, so the same species grows the
-        // same eight in every game.
-        var seed = (uint)(0x7E57_0000 + variant);
-        var skeleton = Grow(species, seed);
+        var skeleton = Grow(species, VariantSeed(variant));
+        return new Grown(skeleton, skeleton.Bounds.High.Y, Capsules(skeleton));
+    }
+
+    /// <summary>
+    /// A variant's own seed, apart from any seed a game gives, so the same species grows the same
+    /// eight in every game.
+    /// </summary>
+    private static uint VariantSeed(int variant) => (uint)(0x7E57_0000 + variant);
+
+    /// <summary>
+    /// Shapes what a variant is drawn from out of its skeleton, its stems and leaves built and its
+    /// far levels planned, on whatever thread runs it.
+    /// </summary>
+    private static Shapes ShapeVariant(TreeSpecies species, int variant, TreeSkeleton skeleton)
+    {
+        var seed = VariantSeed(variant);
         var limbs = PlanLimbs(skeleton);
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
         var stems = levels.Select(level => SwayingStems(skeleton, level, limbs)).ToArray();
@@ -240,11 +260,14 @@ public static partial class Trees
         MeshData[] leaves = [cards.Data(), species.Leaves > 0 ? cards.Halved() : cards.Data()];
         var plan = species.Leaves > 0 ? PlanCards(skeleton, cards, limbs) : null;
         var impostor = plan is null ? null : PlanImpostor(stems[(int)TreeDetail.Full], leaves[(int)TreeDetail.Full]);
-        return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, plan, impostor, Capsules(skeleton));
+        return new Shapes(stems, leaves, plan, impostor);
     }
 
-    /// <summary>Dresses a tree under a child of its own, turned and sized by its seed, with its variant's meshes, materials and capsules.</summary>
-    private static Entity Dress(EcsWorld ecs, App app, Entity tree, string name, TreeSpecies species, int variant, uint seed, Grown grown, bool draws, CardPictures? pictures)
+    /// <summary>
+    /// Dresses a tree under a child of its own, turned and sized by its seed, with its variant's
+    /// meshes and materials where they were made and its capsules.
+    /// </summary>
+    private static Entity Dress(EcsWorld ecs, Entity tree, string name, TreeSpecies species, uint seed, Grown grown, bool draws, CardPictures? pictures)
     {
         // A turn and a size of a tenth either way, from the seed.
         var random = new Pcg((ulong)seed * 0x9E3779B97F4A7C15ul + 1);
@@ -261,10 +284,8 @@ public static partial class Trees
         ecs.SetParent(body, tree);
         ecs.SetName(body, $"{name} {seed}, stems");
 
-        if (draws)
+        if (draws && pictures?.Meshes is { } made)
         {
-            var made = VariantMeshes(app, species, variant, grown);
-
             // The full level near the camera and the reduced one further off, measured in the
             // tree's own heights so a bush changes as near as it is small, each mesh dithered out
             // over the half height where the other is dithered in.
@@ -312,24 +333,14 @@ public static partial class Trees
         return body;
     }
 
-    /// <summary>A variant's meshes in an app, its stems' and leaves' at each level, made the first time they are asked for.</summary>
-    private static (AssetHandle[] Stems, AssetHandle[] Leaves) VariantMeshes(App app, TreeSpecies species, int variant, Grown grown)
-    {
-        var meshes = Meshes.GetOrCreateValue(app);
-        if (!meshes.TryGetValue((species, variant), out var made))
-        {
-            meshes[(species, variant)] = made = (
-                [.. grown.Stems.Select(Created)],
-                [.. grown.Leaves.Select(leaves => leaves.Positions.Length > 0 ? Created(leaves) : AssetHandle.None)]);
-        }
-
-        return made;
-    }
+    /// <summary>A variant's meshes, its stems' and leaves' at each level, made in the running app.</summary>
+    private static (AssetHandle[] Stems, AssetHandle[] Leaves) VariantMeshes(Shapes shapes) =>
+        ([.. shapes.Stems.Select(Created)], [.. shapes.Leaves.Select(leaves => leaves.Positions.Length > 0 ? Created(leaves) : AssetHandle.None)]);
 
     /// <summary>A mesh made from a variant's data, with the tangents its bark's or leaves' normal map is read along.</summary>
     private static AssetHandle Created(MeshData data)
     {
-        var mesh = Render.CreateMesh(data);
+        var mesh = Render.CreateMesh(data, kept: false);
         Render.GenerateTangents(mesh);
         return mesh;
     }
