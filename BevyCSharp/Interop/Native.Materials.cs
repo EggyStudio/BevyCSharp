@@ -37,6 +37,21 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_material_create_bark(NativeMaterialConfig* config, float trunk, float limb, float flutter, float frequency);
 
+    /// <summary>Gives a material the share of global illumination's light that passes a unit of its depth.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_set_light_through(int material, float share);
+
+    /// <summary>Reads the share of light a material lets pass a unit of its depth.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_light_through(int material, float* share);
+
+    /// <summary>Gives a material the color the scene's distance field paints its base color times.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_set_field_tint(int material, float r, float g, float b);
+
     /// <summary>Sets the wind the trees' materials sway in.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

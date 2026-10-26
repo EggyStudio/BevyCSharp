@@ -28,6 +28,10 @@ Texture3D<float4> merged;
 // ray met a face from behind.
 Texture3D<float> distances;
 
+// The share of light this cascade's rays kept across surfaces that let light through before their
+// interval began, as gi_trace.slang wrote it, which the probe's faces take their light times.
+Texture3D<float> kept;
+
 // Every cascade's probes' reach, eight by eight directions a probe, the cascades one after another
 // along z.
 [format("r16f")] RWTexture3D<float> reach;
@@ -142,9 +146,10 @@ void main(uint3 id : SV_DispatchThreadID)
             float2 uv = (float2(float(u), float(v)) + 0.5) / float(texels);
             float share = octahedronShare(uv);
             float weight = max(dot(fromOctahedron(uv), axis), 0.0) * share;
+            float before = kept.Load(from);
             shares += share;
-            sum += light.rgb * weight;
-            sky += merged_sky.Load(from) * weight;
+            sum += light.rgb * before * weight;
+            sky += merged_sky.Load(from) * before * weight;
             weights += weight;
             // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or 1.
             valid = max(valid, light.a > 0.25 ? 1.0 : 0.0);

@@ -25,6 +25,8 @@ Texture3D<float4> above;
 
 StructuredBuffer<FieldInfo> info;
 Texture3D<float> field;
+// The field's colors, whose alpha says where a surface lets light through (seesPastLeaves).
+Texture3D<float4> albedo;
 SamplerState field_sampler;
 
 // Where the trace moved each probe to this frame, after each probe's own light, its share and the
@@ -114,7 +116,7 @@ void main(uint3 id : SV_DispatchThreadID, uint3 local : SV_GroupThreadID)
         int3 neighbor = clamp(base + offset, int3(0), int3(int(probes) - 1));
         float3 upperProbe = ac.xyz + (float3(neighbor) + 0.5 + placeOf(neighbor, upperCascade, probes).xyz) * (ac.w * spacing.x);
         seen[slot * 8u + traced] = upper > 0u && live && oc.w > 0.0
-            && seesThrough(field, field_sampler, fieldInfo, origin, upperProbe, oc.w * 0.5) ? 1u : 0u;
+            && seesPastLeaves(field, field_sampler, albedo, fieldInfo, origin, upperProbe, oc.w * 0.5) ? 1u : 0u;
     }
     GroupMemoryBarrierWithGroupSync();
 

@@ -38,7 +38,9 @@ pub struct BcsFieldDraw {
     pub triangles: u32,
     /// The rows of the matrix from the mesh's own space to the world's, three of four.
     pub rows: [f32; 12],
-    /// The material's base color in linear light, white for a material the bridge cannot read.
+    /// The material's base color in linear light, white for a material the bridge cannot read, and
+    /// in its fourth channel the share of global illumination's light the material lets pass a unit
+    /// of its depth.
     pub color: [f32; 4],
     /// The material's emission in linear light, in the units of the camera's picture as Bevy shows
     /// it, times the camera's exposure by the share of it the material's `emissive_exposure_weight`
@@ -165,6 +167,91 @@ pub unsafe extern "C" fn bcs_scene_field_pool_bytes(out: *mut i64) -> i32 {
     })
 }
 
+/// Gives a material the share of global illumination's light that passes a unit of its depth, as a
+/// canopy's leaves let it through, which the scene's distance field paints its cells with and the
+/// probes' rays cross them by, from 0, a solid surface, to 1.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_material_set_light_through(material: i32, share: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (material, share);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if !share.is_finite() {
+                return status::INVALID_STATE;
+            }
+            crate::state::with_world(|world| changed_look(world, material, |look| look.through = share.clamp(0.0, 1.0)))
+        }
+    })
+}
+
+/// Writes the share of light a material lets pass a unit of its depth, 0 where it was given none.
+///
+/// # Safety
+///
+/// `share` must be null or point to a writable float.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_material_light_through(material: i32, share: *mut f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (material, share);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if share.is_null() {
+                return status::NULL_ARG;
+            }
+            crate::state::with_world(|world| {
+                let Some(handle) = crate::assets::clone_handle(world, material) else {
+                    return status::NO_COMPONENT;
+                };
+                let through = world.get_resource::<FieldLooks>().and_then(|looks| looks.0.get(&handle.id())).map_or(0.0, |look| look.through);
+                unsafe { share.write(through) };
+                status::OK
+            })
+        }
+    })
+}
+
+/// Gives a material the color the scene's distance field paints its base color times, as the mean
+/// of a texture the field does not read.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_material_set_field_tint(material: i32, r: f32, g: f32, b: f32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (material, r, g, b);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if !(r.is_finite() && g.is_finite() && b.is_finite()) {
+                return status::INVALID_STATE;
+            }
+            crate::state::with_world(|world| changed_look(world, material, |look| look.tint = Some([r.max(0.0), g.max(0.0), b.max(0.0)])))
+        }
+    })
+}
+
+/// Changes the field's look of the material a key names, answering whether there was one.
+#[cfg(feature = "render")]
+fn changed_look(world: &mut bevy::ecs::world::World, material: i32, change: impl FnOnce(&mut FieldLook)) -> i32 {
+    let Some(handle) = crate::assets::clone_handle(world, material) else {
+        return status::NO_COMPONENT;
+    };
+    let mut looks = world.get_resource_or_init::<FieldLooks>();
+    change(looks.0.entry(handle.id()).or_default());
+    status::OK
+}
+
 #[cfg(feature = "render")]
 pub use built::*;
 
@@ -253,8 +340,30 @@ mod built {
         }
     }
 
+    /// What the field takes from a material beyond Bevy's own settings, by the material's asset, the
+    /// share of global illumination's light that passes a unit of its depth, as a canopy's leaves
+    /// let it through, and a color its base color is painted times, as the trees give the mean of
+    /// their pictures, since the field paints a surface its base color and reads no texture.
+    #[derive(Resource, Default)]
+    pub struct FieldLooks(pub HashMap<bevy::asset::UntypedAssetId, FieldLook>);
+
+    /// A material's share of light let through and its field color.
+    #[derive(Clone, Copy, Default)]
+    pub struct FieldLook {
+        pub through: f32,
+        pub tint: Option<[f32; 3]>,
+    }
+
     /// The meshes drawn that cast shadows, as many as `out` holds, how many there are, and the
     /// camera the field lies around.
+    ///
+    /// A mesh drawn with the standard material, or with one of the trees' materials built over it,
+    /// the leaves' and the bark's, is painted its base color, times its field color where it has
+    /// one, and lets through the share its material was given. A tree's impostor is left out, its
+    /// one quad standing for the whole tree only as it is drawn. A mesh with a visibility range is
+    /// taken where the eye the field lies around stands within it, as Bevy draws it for that eye,
+    /// since its visibility range hides it from each view and not from what it inherits, and a
+    /// planted tree's every level stood in the field at once.
     pub fn gather(world: &mut World, out: &mut [BcsFieldDraw]) -> (usize, BcsFieldEye) {
         use bevy::camera::primitives::Aabb;
         use bevy::camera::visibility::InheritedVisibility;
@@ -285,19 +394,36 @@ mod built {
             &Mesh3d,
             &GlobalTransform,
             &InheritedVisibility,
-            Option<&MeshMaterial3d<StandardMaterial>>,
+            (
+                Option<&MeshMaterial3d<StandardMaterial>>,
+                Option<&MeshMaterial3d<crate::render::leaves::LeafMaterial>>,
+                Option<&MeshMaterial3d<crate::render::sway::BarkMaterial>>,
+                Has<MeshMaterial3d<crate::render::impostors::ImpostorMaterial>>,
+            ),
             Option<&Aabb>,
             Has<SkinnedMesh>,
+            Option<&bevy::camera::visibility::VisibilityRange>,
         ), Without<NotShadowCaster>>();
 
         let found = world.resource_scope::<FieldMeshes, usize>(|world, mut meshes| {
             let materials = world.get_resource::<Assets<StandardMaterial>>();
+            let leaves = world.get_resource::<Assets<crate::render::leaves::LeafMaterial>>();
+            let barks = world.get_resource::<Assets<crate::render::sway::BarkMaterial>>();
+            let looks = world.get_resource::<FieldLooks>();
             let data = world.get_resource::<Assets<Mesh>>();
             let mut found = 0usize;
 
-            for (mesh, place, visible, material, bounds, skinned) in query.iter(world) {
-                if !visible.get() {
+            for (mesh, place, visible, (standard, leaf, bark, impostor), bounds, skinned, range) in query.iter(world) {
+                if !visible.get() || impostor {
                     continue;
+                }
+                if let Some(range) = range
+                    && eye.found != 0
+                {
+                    let away = place.translation().distance(bevy::math::Vec3::from_array(eye.position));
+                    if away < range.start_margin.start || away >= range.end_margin.end {
+                        continue;
+                    }
                 }
 
                 let number = meshes.number(mesh.id());
@@ -325,8 +451,24 @@ mod built {
                 let affine = place.affine();
                 let (x, y, z, t) = (affine.matrix3.x_axis, affine.matrix3.y_axis, affine.matrix3.z_axis, affine.translation);
 
-                let standard = material.and_then(|material| materials.and_then(|materials| materials.get(&material.0)));
-                let color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
+                // The standard material itself, or the one a tree's material is built over, and the
+                // look the field keeps for the material drawn.
+                let (standard, id) = if let Some(material) = standard {
+                    (materials.and_then(|materials| materials.get(&material.0)), Some(material.0.id().untyped()))
+                } else if let Some(material) = leaf {
+                    (leaves.and_then(|leaves| leaves.get(&material.0)).map(|leaf| &leaf.base), Some(material.0.id().untyped()))
+                } else if let Some(material) = bark {
+                    (barks.and_then(|barks| barks.get(&material.0)).map(|bark| &bark.base), Some(material.0.id().untyped()))
+                } else {
+                    (None, None)
+                };
+                let look = id.and_then(|id| looks.and_then(|looks| looks.0.get(&id))).copied().unwrap_or_default();
+                let mut color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
+                if let Some(tint) = look.tint {
+                    for (channel, times) in color.iter_mut().zip(tint) {
+                        *channel *= times;
+                    }
+                }
                 // Bevy shows an emission times the exposure by the share of it the material's
                 // emissive_exposure_weight sets (pbr_functions' emissive_light), so global
                 // illumination carries it so.
@@ -343,7 +485,7 @@ mod built {
                     flags: u32::from(open) | (u32::from(skinned) << 1),
                     triangles,
                     rows: [x.x, y.x, z.x, t.x, x.y, y.y, z.y, t.y, x.z, y.z, z.z, t.z],
-                    color: [color[0], color[1], color[2], 1.0],
+                    color: [color[0], color[1], color[2], look.through.clamp(0.0, 1.0)],
                     emission: [emission[0], emission[1], emission[2], 0.0],
                     low: [low[0], low[1], low[2], 0.0],
                     high: [high[0], high[1], high[2], 0.0],

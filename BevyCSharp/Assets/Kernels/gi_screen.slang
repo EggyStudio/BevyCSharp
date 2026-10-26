@@ -73,7 +73,8 @@ uniform float4 screen;
 uniform float4 probes;
 
 // x: the world's first cascade's octahedron's texels along each side. y: its second's, or 0 where it
-// has none. zw: unused.
+// has none. z: 1 where some surface lets light through this frame (lightThroughAt), whose check a
+// frame of none skips. w: unused.
 uniform uint4 texels;
 
 // xy: how far from its tile's middle each probe marches to the glow lights from this frame, in
@@ -522,22 +523,33 @@ void main(uint3 id : SV_DispatchThreadID)
             // spans, one over the cube of its octahedron point's distance, as the gather of the
             // world's probes weighs its texels.
             float weight = local.z / (local.w * local.w * local.w);
-            // Where the ray met a surface, on the picture or past it in the field, shaded once below,
-            // since each shading inlines the field's reads and the glow lights' marches, and the
-            // kernel shading at each of the three places a ray may meet one compiled to three times
-            // the code.
+            // Where the ray met a surface, on the picture or past it in the field, shaded in one place
+            // in the loop below, since each shading inlines the field's reads and the glow lights'
+            // marches, and the kernel shading at each of the three places a ray may meet one
+            // compiled to three times the code.
+            //
+            // A surface that lets a share of light through, as a canopy's leaves, is crossed through
+            // the field, which holds what lies behind it where the picture's depth does not, the ray
+            // keeping that share for each unit of its depth and the rest taking the surface's light,
+            // as the cascades' rays cross it (gi_trace.slang), four of them at most, and a solid one
+            // ends the ray, taking all of what is left. A ray that meets nothing more takes the light
+            // beyond its reach times the share it kept.
             float3 light = float3(0.0);
+            float through = 1.0;
             float3 hit;
             float leftAt;
-            bool met = traceScreen(start, way, length, 12, hit, leftAt);
-            if (!met)
+            bool onScreen = traceScreen(start, way, length, 12, hit, leftAt);
+            float t = onScreen ? distance(start, hit) : leftAt < length ? traceField(scene_field, scene_field_sampler, info, start, way, leftAt, length) : -1.0;
+            bool far = false;
+            [loop]
+            for (int layer = 0; layer < 6; layer++)
             {
-                float t = leftAt < length ? traceField(scene_field, scene_field_sampler, info, start, way, leftAt, length) : -1.0;
-                met = t >= 0.0;
-                hit = start + way * t;
-                if (!met)
+                if (t < 0.0)
                 {
-                    light = beyond(world, start, n, way, length, around);
+                    if (far)
+                        break;
+                    far = true;
+                    float3 past = beyond(world, start, n, way, length, around);
                     // A ray past its reach whose world probes hold nothing along its way goes on
                     // through the field, as far as four times its reach and within the cascade it
                     // starts in and the next coarser one, and takes the light of what it meets, since
@@ -545,19 +557,31 @@ void main(uint3 id : SV_DispatchThreadID)
                     // walls read 78% under their reference in 3DEngine where 67% so. Into the coarser
                     // cascades the march passed walls thinner than their cells, and a closed room took
                     // the sky's light.
-                    if (luminance(light) <= 1e-6)
+                    if (luminance(past) > 1e-6)
                     {
-                        float far = traceFieldWithin(scene_field, scene_field_sampler, info, start, way, length, 4.0 * length, fieldCascade(info, start, 1.0) + 1);
-                        met = far >= 0.0;
-                        hit = start + way * far;
+                        light += past * through;
+                        break;
+                    }
+                    t = traceFieldWithin(scene_field, scene_field_sampler, info, start, way, length, 4.0 * length, fieldCascade(info, start, 1.0) + 1);
+                    if (t < 0.0)
+                    {
+                        light += past * through;
+                        break;
                     }
                 }
-            }
-            if (met)
-            {
+                float3 at = onScreen ? hit : start + way * t;
+                onScreen = false;
+                float passing = !far && layer < 4 && texels.z != 0u ? lightThroughAt(scene_albedo, info, at) : 0.0;
+                bool inside = false;
+                float deep = passing > 0.0 ? lightThroughDepth(scene_field, scene_field_sampler, info, start, way, t, length - t, inside) : -1.0;
+                float passes = deep >= 0.0 ? lightThroughKept(passing, deep, fieldCell(info, at), inside) : 0.0;
                 float3 own;
-                light = shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
-                    probe_cubes, hit, way, probes.x, probes.y, probes.z, float3(1.0), own);
+                light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
+                    probe_cubes, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
+                through *= passes;
+                if (deep < 0.0)
+                    break;
+                t = inside ? -1.0 : traceField(scene_field, scene_field_sampler, info, start, way, t + deep, length);
             }
             sum += light * weight;
             weights += weight;

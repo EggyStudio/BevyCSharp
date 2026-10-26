@@ -4348,6 +4348,7 @@ sealed class Bevy.MaterialSettings
   float Clearcoat { get; set; }
   float ClearcoatRoughness { get; set; }
   float DiffuseTransmission { get; set; }
+  float LightThrough { get; set; }
   float LightmapExposure { get; set; }
   float Metallic { get; set; }
   float ParallaxDepthScale { get; set; }

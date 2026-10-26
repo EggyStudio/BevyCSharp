@@ -69,6 +69,11 @@ Texture3D<float4> bounced;
 // to find a probe inside a solid.
 [format("r16f")] RWTexture3D<float> distances;
 
+// The share of light each ray kept across surfaces that let light through before its interval
+// began, which the probe's own faces take its light times (gi_ambient.slang), where the cascade
+// below, whose interval that is, takes the light from the interval on whole.
+[format("r16f")] RWTexture3D<float> kept;
+
 // Each probe's own light as gi_ambient.slang left it, the frame before's and the one before that side
 // by side, the share of the indirect light each probe takes, and where this trace moved each probe
 // to, its move in its spacing with w 1 where it stands outside every mesh, every cascade, laid out as
@@ -103,10 +108,13 @@ groupshared float4 probeShare;
 groupshared float3 nearNow[32];
 groupshared float3 nearBefore[32];
 groupshared float4 brought[64];
-// Each ray's light and mark, and its own light with how far it went, below zero where it met a face
-// from behind, for the first ray of its texel to take together.
+// Each ray's light and mark, its own light with how far it went, below zero where it met a face from
+// behind, the share of it that met nothing and the share it kept before its interval began, for the
+// first ray of its texel to take together.
 groupshared float4 rayLight[64];
 groupshared float4 rayOwn[64];
+groupshared float rayNothing[64];
+groupshared float rayEarly[64];
 
 // The field's layout with each cascade at the corner it lay at the frame before, where the faces of
 // the indirect light, which the rays read, were gathered. Read at this frame's corners, a cascade
@@ -232,6 +240,11 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     float3 own = float3(0.0);
     float reached = 0.0;
     bool behind = false;
+    // The share of the ray's light still to come past the surfaces that let light through it
+    // crossed, which a ray that met nothing hands on to the cascade above, and the share it kept
+    // across those before its interval began, which its probe's own faces alone take.
+    float through = 1.0;
+    float keptBefore = 1.0;
     if (oc.w <= 0.0)
     {
     }
@@ -246,23 +259,85 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         float3 way = fromOctahedron((float2(texel) + within) / float(texels));
         float t = traceField(field, field_sampler, fieldInfo, origin, way, 0.0, interval.y);
         reached = t >= 0.0 ? t : interval.y;
+        // A ray that came on a face from behind it stops half a cell or more behind the face, having
+        // stepped from a cell no face comes within the band of, which the field holds as the open,
+        // straight into the cells behind it, where a ray from in front, slowing as it nears the
+        // face, stops within a tenth of a cell of it.
+        behind = t >= 0.0 && fieldDistance(field, field_sampler, fieldInfo, origin + way * t) < -0.5 * fieldCell(fieldInfo, origin + way * t);
+#if defined(NO_LIGHT_THROUGH)
+        // A frame where no surface lets light through traces with this build, whose ray stops at the
+        // first surface it meets and takes its light, as it did before any surface let light
+        // through, so such a frame's light is that light to the bit.
         if (t >= 0.0)
         {
-            float3 hit = origin + way * t;
             light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
-                bounced, hit, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
-            // A ray that came on a face from behind it stops half a cell or more behind the face,
-            // having stepped from a cell no face comes within the band of, which the field holds as
-            // the open, straight into the cells behind it, where a ray from in front, slowing as it
-            // nears the face, stops within a tenth of a cell of it.
-            behind = fieldDistance(field, field_sampler, fieldInfo, hit) < -0.5 * fieldCell(fieldInfo, hit);
+                bounced, origin + way * t, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
+            through = 0.0;
         }
         else if (cascade.w != 0u)
         {
             float3 sky = skyAlong(lit, way);
             light = float4(sky, 0.25);
             own = sky;
+            through = 0.0;
         }
+#else
+        // A surface that lets a share of light through, as a canopy's leaves, is crossed, the ray
+        // keeping that share for each unit of its depth and the rest taking the surface's light as
+        // a solid's would, up to four of them before the ray stops at the next as a solid, as
+        // 3DEngine's rays cross them. One crossed before the interval began is the cascade below's,
+        // whose ray takes this one's light from the interval on whole where it met nothing, so it
+        // takes nothing of the light and keeps its share for the probe's own faces alone. A solid
+        // surface is shaded in the same place as a crossed one, keeping none, so the build holds
+        // one copy of the shading.
+        float3 crossed = float3(0.0), crossedOwn = float3(0.0);
+        float firstAt = -1.0;
+        [loop]
+        for (int layer = 0; layer < 5 && t >= 0.0; layer++)
+        {
+            float3 at = origin + way * t;
+            float passing = layer < 4 ? lightThroughAt(albedo, fieldInfo, at) : 0.0;
+            bool inside = false;
+            float depth = passing > 0.0 ? lightThroughDepth(field, field_sampler, fieldInfo, origin, way, t, interval.y - t, inside) : -1.0;
+            float passes = depth >= 0.0 ? lightThroughKept(passing, depth, fieldCell(fieldInfo, at), inside) : 0.0;
+            if (depth >= 0.0 && t < interval.x)
+                keptBefore *= passes;
+            else
+            {
+                float3 itsOwn;
+                float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
+                    bounced, at, way, float(probes), interval.z, interval.w, share, itsOwn);
+                crossed += itsLight * (through * (1.0 - passes));
+                crossedOwn += itsOwn * (through * (1.0 - passes));
+                through *= passes;
+                firstAt = firstAt < 0.0 ? t : firstAt;
+            }
+            if (depth < 0.0)
+                break;
+            // A ray still within at its interval's end met nothing past it, its share handed on.
+            t = inside ? -1.0 : traceField(field, field_sampler, fieldInfo, origin, way, t + depth, interval.y);
+        }
+        // How far it went is where it stopped, past what it crossed, which the screen's probes read
+        // the cascades' light beyond their reach by.
+        reached = t >= 0.0 ? t : interval.y;
+        // Marked by what the ray met first that counts, a surface crossed in its interval or one it
+        // stopped at, before its interval began or in it.
+        float mark = firstAt >= 0.0 ? (firstAt < interval.x ? 0.5 : 0.0) : 1.0;
+        if (t < 0.0 && cascade.w != 0u)
+        {
+            float3 sky = skyAlong(lit, way);
+            light = float4(crossed + through * sky, firstAt >= 0.0 ? mark : 0.25);
+            own = crossedOwn + through * sky;
+            through = 0.0;
+        }
+        else if (firstAt >= 0.0)
+        {
+            // A surface it stopped at, or those it crossed with nothing past them, the share of the
+            // light it kept left for the cascade above to give.
+            light = float4(crossed, mark);
+            own = crossedOwn;
+        }
+#endif
     }
     if (walledIn != 0u)
     {
@@ -270,11 +345,17 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         own = float3(0.0);
     }
 
+    // A ray that met nothing at all, and one that crossed surfaces letting light through and met
+    // nothing past them, hand on the share they kept.
+    float nothingShare = light.a >= 0.75 ? 1.0 : place.w < 0.5 || walledIn != 0u ? 0.0 : through;
+
     // A texel's rays taken together by its first, the light of those that met a surface or the sky
     // over how many there are, marked with what most met and how many met nothing (texelMark), their
     // own light and their reach their means, and a face met from behind where most met one so.
     rayLight[lane] = light;
     rayOwn[lane] = float4(own, behind ? -reached : reached);
+    rayNothing[lane] = nothingShare;
+    rayEarly[lane] = keptBefore;
     GroupMemoryBarrierWithGroupSync();
     float4 texelLight = float4(0.0);
     float3 texelOwn = float3(0.0);
@@ -282,7 +363,10 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     {
         float3 met = float3(0.0);
         float reach = 0.0;
-        uint surfaces = 0u, early = 0u, skies = 0u, nothing = 0u, behinds = 0u;
+        // How many met a surface, one before their interval began and the sky, and the share that
+        // met nothing, fractions of a ray where one crossed surfaces letting light through.
+        uint surfaces = 0u, early = 0u, skies = 0u, behinds = 0u;
+        float nothing = 0.0, before = 0.0;
         for (uint q = 0u; q < each; q++)
         {
             float4 one = rayLight[lane + q];
@@ -290,13 +374,14 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             surfaces += one.a < 0.125 ? 1u : 0u;
             skies += one.a >= 0.125 && one.a < 0.375 ? 1u : 0u;
             early += one.a >= 0.375 && one.a < 0.75 ? 1u : 0u;
-            nothing += one.a >= 0.75 ? 1u : 0u;
+            nothing += rayNothing[lane + q];
+            before += rayEarly[lane + q];
             met += one.a < 0.75 ? one.rgb : float3(0.0);
             texelOwn += itsOwn.rgb;
             reach += abs(itsOwn.w);
             behinds += itsOwn.w < 0.0 ? 1u : 0u;
         }
-        float most = nothing * 2u > each ? 1.0 : early > surfaces && early >= skies ? 0.5 : skies > surfaces ? 0.25 : 0.0;
+        float most = nothing * 2.0 > float(each) ? 1.0 : early > surfaces && early >= skies ? 0.5 : skies > surfaces ? 0.25 : 0.0;
         texelLight = float4(met / float(each), texelMark(most, nothing, each));
         texelOwn /= float(each);
         reach /= float(each);
@@ -304,6 +389,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         {
             radiance.Store(written, texelLight);
             distances[written] = behinds * 2u > each ? -reach : reach;
+            kept[written] = before / float(each);
         }
     }
 

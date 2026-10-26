@@ -48,6 +48,11 @@ internal static unsafe partial class WorldProbes
     private static App? _app;
     private static Made? _made;
     private static ShaderProgram _traceProgram, _mergeProgram, _ambientProgram;
+
+    // The trace built without the crossing of surfaces that let light through, which a frame where
+    // nothing drawn lets light through traces with, so its light is the light the probes took
+    // before any surface let light through.
+    private static ShaderProgram _traceSolid;
     // The copy of the camera's environment map the probes' rays read where they meet nothing, and
     // the camera it runs on.
     private static ShaderInstance _sky;
@@ -82,9 +87,11 @@ internal static unsafe partial class WorldProbes
     {
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
-        public AssetHandle[] Radiance = [], Merged = [], Distances = [], MergedSky = [];
+        public AssetHandle[] Radiance = [], Merged = [], Distances = [], Kept = [], MergedSky = [];
         public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, SkyMap, NoSky = AssetHandle.None;
         public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
+        // Whether the traces run the build that crosses surfaces letting light through.
+        public bool Crossing = true;
         public (float Start, float End)[] Intervals = [];
         public readonly byte[] LightBytes = new byte[LightsBytes];
         public readonly byte[] GlowBytes = new byte[GlowLights.Most * GlowLights.Bytes];
@@ -185,6 +192,7 @@ internal static unsafe partial class WorldProbes
         {
             _app = App.Running;
             (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
+            _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
             (_screenTrace, _screenFilter, _screenGlow, _screenCamera, _screenImages, _screenDispatches) = (default, default, default, Entity.None, null, null);
             Places.Forget();
@@ -200,14 +208,15 @@ internal static unsafe partial class WorldProbes
         if (!_traceProgram.IsValid)
         {
             _traceProgram = SceneField.KernelProgram("gi_trace.slang");
+            _traceSolid = SceneField.KernelProgram("gi_trace.slang", defines: new Dictionary<string, ShaderDefine> { ["NO_LIGHT_THROUGH"] = true });
             _mergeProgram = SceneField.KernelProgram("gi_merge.slang");
             _ambientProgram = SceneField.KernelProgram("gi_ambient.slang");
             _light = SceneField.Draw("gi_light.slang");
             _sky = Shaders.CreateInstance(SceneField.KernelProgram("gi_sky.slang"));
         }
 
-        if (_traceProgram.State != ShaderProgramState.Ready || _mergeProgram.State != ShaderProgramState.Ready
-            || _ambientProgram.State != ShaderProgramState.Ready)
+        if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready
+            || _mergeProgram.State != ShaderProgramState.Ready || _ambientProgram.State != ShaderProgramState.Ready)
             return;
 
         var texels = TexelsFor(quality, CascadesFor(quality, plan), plan.HasFar);
@@ -250,6 +259,7 @@ internal static unsafe partial class WorldProbes
         var made = new Made(quality, texels);
         var cascades = (uint)texels.Length;
         (made.Radiance, made.Merged, made.Distances, made.MergedSky) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
+        made.Kept = new AssetHandle[cascades];
         (made.Trace, made.Merge, made.Ambient) = (new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades]);
         for (var c = 0; c < cascades; c++)
         {
@@ -257,6 +267,7 @@ internal static unsafe partial class WorldProbes
             made.Radiance[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Merged[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Distances[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
+            made.Kept[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
             made.MergedSky[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
             (made.Trace[c], made.Merge[c], made.Ambient[c]) =
                 (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
@@ -297,7 +308,7 @@ internal static unsafe partial class WorldProbes
             _skyCamera = Entity.None;
         }
         if (_made is not { } made) return;
-        foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.MergedSky)
+        foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.Kept).Concat(made.MergedSky)
                      .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.NoSky]))
             AssetServer.Release(handle);
         _made = null;
@@ -359,6 +370,15 @@ internal static unsafe partial class WorldProbes
 
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
         var parity = (uint)(_frame & 1);
+
+        // The build that crosses surfaces letting light through where any drawn this frame lets some
+        // through, and the one that stops at the first surface where none does.
+        if (made.Crossing != SceneField.LightThrough)
+        {
+            made.Crossing = SceneField.LightThrough;
+            foreach (var trace in made.Trace) trace.Program = made.Crossing ? _traceProgram : _traceSolid;
+        }
+
         for (var c = 0; c < cascades; c++)
         {
             var n = (uint)made.Texels[c];
@@ -368,7 +388,7 @@ internal static unsafe partial class WorldProbes
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
                 .SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("distances", made.Distances[c])
-                .SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
+                .SetTexture("kept", made.Kept[c]).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))
                 .SetNumbers("follow", 4, follow);
             Shaders.Dispatch(made.Trace[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
@@ -380,7 +400,7 @@ internal static unsafe partial class WorldProbes
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 0u : (uint)made.Texels[c + 1]];
             ReadOnlySpan<uint> counts = [(uint)cascades, 0, 0, 0];
             made.Merge[c].SetTexture("radiance", made.Radiance[c]).SetTexture("above", c == last ? made.Radiance[c] : made.Merged[c + 1])
-                .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped)
+                .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetTexture("albedo", albedo).SetSampler("field_sampler", SamplerSettings.Clamped)
                 .SetBuffer("held", made.Held).SetTexture("merged_sky", made.MergedSky[c]).SetTexture("above_sky", c == last ? made.NoSky : made.MergedSky[c + 1])
                 .SetTexture("reach_above", made.Reach)
                 .SetNumbers("cascade", 4, cascade).Set("spacing", new Vector4(ProbeSpacing, 0, 0, c == last ? 0 : made.Intervals[c + 1].End))
@@ -392,7 +412,7 @@ internal static unsafe partial class WorldProbes
         {
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, parity + (lying[c] ? 2u : 0u)];
-            made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("distances", made.Distances[c])
+            made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("distances", made.Distances[c]).SetTexture("kept", made.Kept[c])
                 .SetTexture("reach", made.Reach).SetBuffer("partial", made.Partial).SetBuffer("held", made.Held)
                 .SetTexture("merged_sky", made.MergedSky[c]).SetTexture("skies", made.Skies)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, 0, 0, 0));

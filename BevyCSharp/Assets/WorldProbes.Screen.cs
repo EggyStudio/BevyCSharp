@@ -199,7 +199,7 @@ internal static partial class WorldProbes
         var reach = 2 * ProbeSpacing * plan.CellSize;
         var jitter = JitterAt(_frame, tile);
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
-        ReadOnlySpan<uint> texels = [(uint)made.Texels[0], cascades > 1 ? (uint)made.Texels[1] : 0, 0, 0];
+        ReadOnlySpan<uint> texels = [(uint)made.Texels[0], cascades > 1 ? (uint)made.Texels[1] : 0, SceneField.LightThrough ? 1u : 0u, 0];
         _screenTrace.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
             .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows)

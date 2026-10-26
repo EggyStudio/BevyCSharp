@@ -298,10 +298,18 @@ public static unsafe partial class Render
             SpecularTexture = Texture(read.SpecularTexture),
             SpecularTintTexture = Texture(read.SpecularTintTexture),
             OpaqueRenderMethod = (OpaqueRenderMethod)read.OpaqueRenderMethod,
+            LightThrough = LightThroughOf(material),
         };
         return true;
 
         static AssetHandle Texture(int key) => key >= 0 ? new AssetHandle(key) : AssetHandle.None;
+
+        static float LightThroughOf(AssetHandle material)
+        {
+            float through;
+            Native.Check(Native.bcs_material_light_through(material.Key, &through), $"reading the light {material} lets through");
+            return through;
+        }
     }
 
     /// <summary>
@@ -541,8 +549,29 @@ public static unsafe partial class Render
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a material");
 
         Native.Check(key, "building a material");
-        return new AssetHandle(key);
+        return LettingThrough(new AssetHandle(key), settings);
     }
+
+    /// <summary>A material made, given the share of global illumination's light its settings let through where they let some.</summary>
+    private static AssetHandle LettingThrough(AssetHandle material, MaterialSettings settings)
+    {
+        if (settings.LightThrough != 0f) Native.Check(Native.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
+        return material;
+    }
+
+    /// <summary>The share of light the settings let through, held to 0 to 1, or 0 where it is no number.</summary>
+    private static float Through(MaterialSettings settings) => float.IsFinite(settings.LightThrough) ? Math.Clamp(settings.LightThrough, 0f, 1f) : 0f;
+
+    /// <summary>Gives any material the share of global illumination's light that passes a meter of its depth, as a test sets a tree's leaves'.</summary>
+    internal static void SetLightThrough(AssetHandle material, float share) =>
+        Native.Check(Native.bcs_material_set_light_through(material.Key, share), $"letting light through {material}");
+
+    /// <summary>
+    /// Gives a material the color the scene's distance field paints its base color times, as the
+    /// mean of a texture the field does not read, which the trees give their bark and leaves.
+    /// </summary>
+    internal static void SetFieldTint(AssetHandle material, (float R, float G, float B) tint) =>
+        Native.Check(Native.bcs_material_set_field_tint(material.Key, tint.R, tint.G, tint.B), $"tinting {material} in the scene's distance field");
 
     /// <summary>
     /// Builds the material a tree's leaves are drawn with, a standard material lit twice a pixel,
@@ -562,7 +591,7 @@ public static unsafe partial class Render
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a leaf material");
 
         Native.Check(key, "building a leaf material");
-        return new AssetHandle(key);
+        return LettingThrough(new AssetHandle(key), settings);
     }
 
     /// <summary>
@@ -582,7 +611,7 @@ public static unsafe partial class Render
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a bark material");
 
         Native.Check(key, "building a bark material");
-        return new AssetHandle(key);
+        return LettingThrough(new AssetHandle(key), settings);
     }
 
     /// <summary>Sets the wind the trees' materials sway in, in the world's meters a second.</summary>
@@ -634,6 +663,7 @@ public static unsafe partial class Render
         var native = Config(settings);
         var status = Native.bcs_render_material_write(material.Key, &native);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Writing a material");
+        if (status == NativeStatus.Ok) Native.Check(Native.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
 
         return status == NativeStatus.Ok;
     }

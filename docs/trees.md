@@ -68,6 +68,13 @@ carries the pivot of the limb it swings with and the pivot its leaf flutters abo
 and the leaves' materials move it by in their vertex stages, so the shadows sway with the trees, the
 far cards swing with the limbs whose leaves they picture and the impostor leans with its trunk.
 
+In global illumination's distance field a planted tree's leaves let half the light through a meter
+of the crown (`MaterialSettings.LightThrough`), about what Beer and Lambert's law gives the presets'
+crowns, so the floor under a forest takes the share of the sky's light its canopy lets through
+rather than lying as dark as under a roof, as the global illumination guide in
+[ray-tracing.md](ray-tracing.md) says. The field paints the bark and the leaves their sets' mean
+colors and takes each tree in the level the camera draws it in.
+
 The trunk and each limb twelve centimeters thick or more stand as capsules the player stops at,
 through the `RigidBody` and `Collider` components the physics plugin makes bodies of. The presets
 are registered as `quaking-aspen`, `black-tupelo`, `weeping-willow`, `california-black-oak`, `bush`

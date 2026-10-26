@@ -157,6 +157,20 @@ public sealed class MaterialSettings
     /// </summary>
     public float DiffuseTransmission { get; set; }
 
+    /// <summary>
+    /// The share of global illumination's light that passes a meter of the surface's depth, as
+    /// through a canopy's leaves, from 0, a solid surface, the default, to 1.
+    /// </summary>
+    /// <remarks>
+    /// The scene's distance field holds such a surface as it holds a solid one, and the probes' rays
+    /// cross it, keeping this share of their light for each meter they cross and taking the rest from
+    /// the surface, so a floor under a canopy takes the share of the sky's light its leaves let
+    /// through rather than lying as dark as under a roof. It changes nothing Bevy draws, the light
+    /// let through a leaf being <see cref="DiffuseTransmission"/>'s. A value outside 0 to 1 is held
+    /// to it.
+    /// </remarks>
+    public float LightThrough { get; set; }
+
     /// <summary>How thick the material is where light passes through, in world units.</summary>
     public float Thickness { get; set; }
 

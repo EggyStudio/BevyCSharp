@@ -156,11 +156,13 @@ void resolve(uint3 id, uint index, uint e)
     // most of, a whole face at most, as the faces of a strip along a wall lend a cell beside it what
     // it shows from the front and from above alike, where summed they would lend it twice that. The
     // larger of that and the cell's own, since an emitter that painted the cell its own gives it its
-    // whole light, as an emissive panel under a ceiling does.
+    // whole light, as an emissive panel under a ceiling does, times the paint's alpha where a
+    // surface painted the cell, as its color is (lightThroughPaint in bcs_field.slang), since a reader
+    // divides both by it.
     float3 light = float3(float(emitted[e]), float(emitted[e + 1u]), float(emitted[e + 2u])) / 256.0;
     float3 seen = float3(float(emitted[e + 3u]), float(emitted[e + 4u]), float(emitted[e + 5u])) / 1024.0;
     float3 lent = light * min(max(seen.x, max(seen.y, seen.z)), 1.0);
     // Alpha 1 where the light is a carried emitter's, which a probe's ray leaves out.
     float4 painted = glow[index];
-    glow_field.Store(at, float4(max(painted.rgb, lent), any(lent > painted.rgb) ? 0.0 : painted.a));
+    glow_field.Store(at, float4(max(painted.rgb, lent) * (paint.a > 0.0 ? paint.a : 1.0), any(lent > painted.rgb) ? 0.0 : painted.a));
 }

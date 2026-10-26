@@ -29,7 +29,10 @@ internal unsafe struct NativeFieldDraw
     /// <summary>The rows of the matrix from the mesh's own space to the world's, three of four.</summary>
     [FieldOffset(16)] public fixed float Rows[12];
 
-    /// <summary>The material's base color in linear light, red, green and blue.</summary>
+    /// <summary>
+    /// The material's base color in linear light, red, green and blue, and the share of global
+    /// illumination's light it lets pass a unit of its depth.
+    /// </summary>
     [FieldOffset(64)] public fixed float Color[4];
 
     /// <summary>The material's emission in linear light.</summary>

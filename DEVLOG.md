@@ -14,6 +14,11 @@ through a narrow lens, level and from a third of the way up the sky, each as its
 and its reduced level from the left, and below a forest of the three seen from a hill out to past a
 kilometer beside the sixty-four frames of the tupelo's fourth variant.
 
+![](.github/assets/readings/2026-10-26-item-70-wind.webp)
+A quaking aspen and a black tupelo near and an oak behind them in a wind of 18 meters a second
+blowing to the right, each trunk leaning downwind, its limbs swinging out of step and its leaves
+fluttering, with their shadows swaying under them.
+
 Item 70's impostor, a planted tree past twenty of its heights drawn as one quad turned to the eye
 and painted from three of sixty-four pictures of the whole tree. Each variant is pictured once an
 app from eight by eight ways laid on a square folded over the upper half of the sphere, the square's
@@ -72,6 +77,48 @@ black tupelos planted on a disc thirty-eight of their heights off, the nearest s
 at 1920 by 1080, the opaque pass 0.90 and 1.00 ms in two runs with the trees as limbs and cards and
 0.55 and 0.49 ms as impostors, and the shadow pass 0.05 ms either way, the sun's shadow reaching no
 tree so far off.
+
+Item 70's wind, a planted tree swaying in the wind in three movements, as SpeedTree's and Pivot
+Painter's wind moves a tree by the pivots its vertices carry. Its trunk bends downwind by the square
+of a point's height, each limb swings about where it leaves its parent by the square of a point's
+reach from there, and each leaf flutters about its stalk across its reach, each limb and leaf in a
+phase of its own and each tree in one from where it stands. Each vertex of the stems and leaves
+carries two streams of the game's own at locations 8 and 9, the pivot and phase of the limb it
+swings with and the pivot and phase its leaf flutters about. The limbs are the tree's sixteen
+thickest stems, the ones its far cards gather its foliage by, and each thinner stem growing from the
+trunk below them swings as a limb of its own. The bark takes a material extension of its own and
+the leaf material gains the same vertex stages, Bevy's mesh vertex stage and prepass vertex stage
+written again with the sway, which their specialize hands the two streams after the attributes
+Bevy's pipeline gave them, so the shadows sway with the trees. The far cards swing with their limbs
+and the impostor leans with its trunk. The wind is the weather's of the first camera given one, or
+the one `Trees.Wind` sets, written into every tree material on the frames it changes, with the frame
+before's for the motion vectors. A gale bends a tree's top by about a fiftieth of its height. The
+picture is a quaking aspen and a black tupelo near and an oak behind them in a wind of 18 meters a
+second blowing to the right, thirty-two frames.
+
+As `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter
+EachVertexOfATreeCarriesThePivotOfTheLimbItSwingsWith --logger "console;verbosity=detailed"` prints
+them, the stems' vertices swinging with a limb and the limbs among the leaves.
+
+| Tree | Stem vertices swinging | Stem vertices | Limbs among the leaves | Leaves |
+|---|---|---|---|---|
+| quaking aspen | 22716 | 24948 | 204 | 22500 |
+| black tupelo | 22482 | 24762 | 292 | 29999 |
+| California black oak | 104220 | 106404 | 467 | 30000 |
+
+`AWindBendsATreeDownwindAndTwoTreesAlikeSwayOutOfStep` prints two aspens of one seed, so of one
+variant, turn and size, ten meters apart and seen from 25 meters, their crowns' middles 3.85 to 4.96
+pixels downwind of where they stood in still air in a wind of 20 meters a second, over six moments,
+the two apart by up to 0.51 pixels, and in still air the picture the same from frame to frame.
+
+The cost, as `TheWindsCostIsReadInAForest` prints it on the RTX 4070 Laptop GPU, 24 planted tupelos
+drawn whole at 1920 by 1080, the shadow pass 3.39 ms in still air and 3.38 ms in a wind of 15 meters
+a second, and the opaque pass 6.30 and 6.24 ms, the sway's cost within a run's own spread.
+
+One thing was found on the way. Bevy's prepass draws with a view bind group of its own, which holds
+the frame's globals, the time among them, at binding 1 where the main pass's holds them at 11, and
+Bevy's own prepass shaders read none, so the trees' and the impostor's prepass vertex stages declare
+them there.
 
 ## 2026-10-25
 

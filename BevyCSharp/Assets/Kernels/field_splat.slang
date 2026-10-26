@@ -34,9 +34,11 @@ struct FieldInstance
     float4 row0;
     float4 row1;
     float4 row2;
-    // x: its mesh's first triangle in the pool. y: how many it has. z: 1 when the mesh has no
-    // inside, as a double-sided one, whose cells are all in front. w: the first of its triangles
-    // counted over every instance of the build before it.
+    // x: its mesh's first triangle in the pool. y: how many it has. z: 1 in its lowest bit when the
+    // mesh has no inside, as a double-sided one, whose cells are all in front, and in its second byte
+    // the share of light that passes a unit of its depth in 255ths (lightThroughPaint in
+    // bcs_field.slang). w: the first of its triangles counted over every instance of the build
+    // before it.
     uint4 triangles;
     // rgb: the surface's color, linear. w: 2 where global illumination carries its emission as a glow
     // light, 1 elsewhere.
@@ -259,7 +261,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
     float longest = max(dot(b - a, b - a), max(dot(c - b, c - b), dot(a - c, a - c)));
     if (dot(face, face) <= 1e-8 * longest * longest)
         return;
-    bool sided = instance.triangles.z == 0u && dot(face, face) > 1e-20;
+    bool sided = (instance.triangles.z & 1u) == 0u && dot(face, face) > 1e-20;
     uint way = dot(face, face) > 1e-20 ? way8(face) : 0u;
     float faceLength = length(face);
 
@@ -351,9 +353,12 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
         else if (cells[index].load() == code)
         {
             float3 weights = barycentric(q, a, b, c);
+            // The color painted times the paint's alpha, which tells a surface that lets light
+            // through from a solid one, as lightThroughPaint in bcs_field.slang gives it.
+            float coverage = 1.0 - 0.5 * float((instance.triangles.z >> 8u) & 255u) / 255.0;
             float3 painted = instance.color.rgb * (weights.x * cornerColor(ca.w) + weights.y * cornerColor(cb.w) + weights.z * cornerColor(cc.w));
-            uint3 bytes = uint3(saturate(painted) * 255.0 + 0.5);
-            albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (255u << 24);
+            uint4 bytes = uint4(uint3(saturate(painted * coverage) * 255.0 + 0.5), uint(coverage * 255.0 + 0.5));
+            albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (bytes.a << 24);
             // Alpha 1 where global illumination carries the emitter as a glow light, which a probe's
             // ray that meets it leaves out (surfaceGlowUncarried).
             float3 e = max(instance.emission.rgb, 0.0);

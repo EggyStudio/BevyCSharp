@@ -251,3 +251,68 @@ public float3 surfaceAlbedoFacing(Texture3D<uint> faces, Texture3D<float4> albed
     }
     return sum.a > 0.01 ? sum.rgb / sum.a : surfaceAlbedo(albedo, linear, info, p);
 }
+
+/// The alpha a cell of the field's colors is painted with by a surface that lets `through` of the
+/// light pass a unit of its depth (`MaterialSettings.LightThrough`), its color painted times it, 1
+/// for a solid surface down to a half for one that lets all of it through, so a reader that divides
+/// a blend of the colors by their alphas takes the colors back and weighs such a cell less, and one
+/// that reads a cell as it is takes the share back (`lightThroughOf`), as 3DEngine's field paints it.
+public float lightThroughPaint(float through)
+{
+    return 1.0 - 0.5 * saturate(through);
+}
+
+/// The share of light a cell painted with `alpha` lets pass a unit of its surface's depth, 0 for a
+/// solid surface's cell or one no surface painted.
+public float lightThroughOf(float alpha)
+{
+    return alpha > 0.25 ? saturate(2.0 * (1.0 - alpha)) : 0.0;
+}
+
+/// The share of light the surface met at `p` lets pass a unit of its depth, read from the cell `p`
+/// lies in as it is, 0 for a solid surface's cell or one no surface painted.
+public float lightThroughAt(Texture3D<float4> albedo, FieldInfo info, float3 p)
+{
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0)
+        return 0.0;
+    float4 oc = info.cascades[c].origin_and_cell;
+    int size = int(info.counts.y);
+    int3 cell = clamp(int3(floor((p - oc.xyz) / oc.w)), int3(0), int3(size - 1));
+    return lightThroughOf(albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a);
+}
+
+/// How far a ray along `way` from `origin` that met such a surface at `t` runs before it has left
+/// it, half a cell a step while the field holds the point within half a cell of a surface or inside
+/// one, and in `inside` whether it is still within at `t` plus `most`, its interval's end, or after
+/// 64 steps, as a ray grazing a canopy is, where it ends that far in. A crown's leaves, cards the
+/// field holds half a cell either side, run together into one region where they lie closer than a
+/// cell, which a ray crosses whole.
+public float lightThroughDepth(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside)
+{
+    float depth = 0.0;
+    inside = true;
+    [loop]
+    for (int step = 0; step < 64; step++)
+    {
+        float3 p = origin + way * (t + depth);
+        float cell = fieldCell(info, p);
+        if (cell <= 0.0 || depth > 0.0 && fieldDistance(field, linear, info, p) > 0.5 * cell)
+        {
+            inside = false;
+            return depth;
+        }
+        depth += 0.5 * cell;
+        if (depth >= most)
+            return most;
+    }
+    return depth;
+}
+
+/// The share of light a ray keeps crossing a surface that lets `passing` through a unit of its
+/// depth, run through for `depth` from a hit with cells `cell` wide, less the three quarters of a
+/// cell the hit lies before the surface and the march's last step leaves past it, where it left it.
+public float lightThroughKept(float passing, float depth, float cell, bool inside)
+{
+    return pow(passing, inside ? depth : max(depth - 0.75 * cell, 0.0));
+}

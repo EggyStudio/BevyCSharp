@@ -80,23 +80,24 @@ public uint RaysAt(uint texels)
     return texels <= 8u ? 4u : 1u;
 }
 
-/// A texel's mark as the trace writes it for `rays` rays, `nothing` of which met nothing, says
-/// what most of them met, 0 a surface, a half a surface before their interval began, a quarter the sky
+/// A texel's mark as the trace writes it for `rays` rays, `nothing` of which met nothing, a part of
+/// one for a ray that crossed surfaces letting light through and met nothing past them, says what
+/// most of them met, 0 a surface, a half a surface before their interval began, a quarter the sky
 /// and 1 nothing, moved a sixteenth on for each that met nothing, up from 0 or a half and down from
 /// 1 for each that met something, so the mark stays within the band each reader tells what a
 /// texel's rays met by; `texelNothing` reads back how many met nothing.
-public float texelMark(float most, uint nothing, uint rays)
+public float texelMark(float most, float nothing, uint rays)
 {
-    return most >= 0.75 ? 1.0 - 0.0625 * float(rays - nothing) : most + 0.0625 * float(nothing);
+    return most >= 0.75 ? 1.0 - 0.0625 * (float(rays) - nothing) : most + 0.0625 * nothing;
 }
 
-public uint texelNothing(float mark, uint rays)
+public float texelNothing(float mark, uint rays)
 {
     if (mark >= 0.75)
-        return rays - uint((1.0 - mark) / 0.0625 + 0.5);
+        return float(rays) - (1.0 - mark) / 0.0625;
     if (mark >= 0.375)
-        return uint((mark - 0.5) / 0.0625 + 0.5);
-    return mark >= 0.1875 ? 0u : uint(mark / 0.0625 + 0.5);
+        return (mark - 0.5) / 0.0625;
+    return mark >= 0.1875 ? 0.0 : mark / 0.0625;
 }
 
 /// A point or spot light the indirect light is lit by, as the bridge gathers it.
@@ -245,6 +246,35 @@ public bool seesThrough(Texture3D<float> field, SamplerState linear, FieldInfo i
     float3 toward = b - a;
     float length = length(toward);
     return length <= clearance * 2.0 || traceField(field, linear, info, a, toward / length, clearance, length - clearance) < 0.0;
+}
+
+/// Whether nothing the field holds stands between `a` and `b` but surfaces that let light through,
+/// four of them at most, as `seesThrough` asks, the light a ray crossing them keeps being its own to
+/// take. The merge asks it of the probes of the cascade above, which a canopy hides from those under
+/// it, and in 3DEngine the floor under one four units up took no sky through the screen's probes
+/// however much of it the leaves let through until the merge asked it so.
+public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 a, float3 b, float clearance)
+{
+    float3 toward = b - a;
+    float length = length(toward);
+    if (length <= clearance * 2.0)
+        return true;
+    float3 way = toward / length;
+    float t = clearance;
+    [loop]
+    for (int layer = 0; layer < 4; layer++)
+    {
+        t = traceField(field, linear, info, a, way, t, length - clearance);
+        if (t < 0.0)
+            return true;
+        if (lightThroughAt(albedo, info, a + way * t) <= 0.0)
+            return false;
+        bool inside = false;
+        t += lightThroughDepth(field, linear, info, a, way, t, length - clearance - t, inside);
+        if (inside)
+            return true;
+    }
+    return false;
 }
 
 /// The directions each probe's reach is kept along, eight by eight of its octahedron.

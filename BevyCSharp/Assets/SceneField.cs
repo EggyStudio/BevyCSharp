@@ -33,6 +33,13 @@ namespace Bevy;
 /// </remarks>
 internal static unsafe partial class SceneField
 {
+    /// <summary>
+    /// Whether a mesh drawn this frame lets a share of global illumination's light through
+    /// (<see cref="MaterialSettings.LightThrough"/>), so the probes' rays cross such surfaces, where
+    /// a frame of none traces with a build that leaves the crossing out.
+    /// </summary>
+    internal static bool LightThrough { get; private set; }
+
     /// <summary>The distance a cell holds before its cascade is built, which reads as nothing near, in world units.</summary>
     internal const float Far = 10000f;
 
@@ -318,10 +325,15 @@ internal static unsafe partial class SceneField
     /// </summary>
     // Named by its file, so its GPU time reads as shader field_splat and the like, and by its entry
     // point beside the file's name where it is not main, as shader clouds_shadows.
-    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl, string entry = "main")
+    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl, string entry = "main", IReadOnlyDictionary<string, ShaderDefine>? defines = null)
     {
         var named = entry == "main" ? file : $"{Path.GetFileNameWithoutExtension(file)}_{entry}.slang";
-        return Shaders.CreateProgram(new ShaderProgramSettings { Compute = new ShaderStage(named, entry) { Source = Kernel(file) }, ComputeTarget = target });
+        return Shaders.CreateProgram(new ShaderProgramSettings
+        {
+            Compute = new ShaderStage(named, entry) { Source = Kernel(file) },
+            ComputeTarget = target,
+            Defines = defines is null ? new(StringComparer.Ordinal) : new(defines, StringComparer.Ordinal),
+        });
     }
 
     /// <summary>An instance of one of the library's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
@@ -427,6 +439,7 @@ internal static unsafe partial class SceneField
 
         Drawn.Clear();
         Weights.Clear();
+        var through = false;
         for (var i = 0; i < count; i++)
         {
             ref var draw = ref _draws[i];
@@ -437,12 +450,16 @@ internal static unsafe partial class SceneField
                 draw.Rows[2], draw.Rows[6], draw.Rows[10], 0,
                 draw.Rows[3], draw.Rows[7], draw.Rows[11], 1);
             var bounds = new SceneFieldPlan.Box(new Vector3(draw.Low[0], draw.Low[1], draw.Low[2]), new Vector3(draw.High[0], draw.High[1], draw.High[2]));
+            // The color's fourth channel is the share of light the surface lets pass a unit of its
+            // depth, as the bridge writes it.
             var instance = new SceneFieldPlan.Instance(draw.Mesh, draw.Generation, world, (draw.Flags & 1) != 0, bounds,
-                new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]));
+                new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]), Math.Clamp(draw.Color[3], 0f, 1f));
+            through |= instance.Through > 0f;
             if (once && !Once.Add(instance)) continue;
             Drawn.Add((instance, (draw.Flags & 2) != 0));
         }
 
+        LightThrough = through;
         Once.Clear();
 
         if (eye.Found == 0) return null;
@@ -526,8 +543,11 @@ internal static unsafe partial class SceneField
                 if (many == 0) continue;
                 var w = instance.World;
                 records.AddRange([w.M11, w.M21, w.M31, w.M41, w.M12, w.M22, w.M32, w.M42, w.M13, w.M23, w.M33, w.M43]);
+                // Whether it has no inside in the lowest bit, and the share of light it lets through
+                // in 255ths in the second byte.
+                var sides = (instance.DoubleSided ? 1u : 0u) | ((uint)MathF.Round(instance.Through * 255f) << 8);
                 records.AddRange([BitConverter.UInt32BitsToSingle(start), BitConverter.UInt32BitsToSingle(many),
-                    BitConverter.UInt32BitsToSingle(instance.DoubleSided ? 1u : 0u), BitConverter.UInt32BitsToSingle((uint)triangles)]);
+                    BitConverter.UInt32BitsToSingle(sides), BitConverter.UInt32BitsToSingle((uint)triangles)]);
                 records.AddRange([instance.Color.X, instance.Color.Y, instance.Color.Z, Carried(instance, plan.CellSize) ? 2 : 1,
                     instance.Emission.X, instance.Emission.Y, instance.Emission.Z, instance.Emission == Vector3.Zero ? 0 : Thinnest(instance)]);
                 triangles += (int)many;
@@ -622,9 +642,9 @@ internal static unsafe partial class SceneField
         var shapes = _shapes.AsSpan(0, floats);
         for (var s = 0; s < plan.Shapes.Count; s++)
         {
-            var (m, center, extents, scale, color) = plan.Shapes[s];
+            var (m, center, extents, scale, color, through) = plan.Shapes[s];
             ReadOnlySpan<float> values = [m.M11, m.M21, m.M31, m.M41, m.M12, m.M22, m.M32, m.M42, m.M13, m.M23, m.M33, m.M43,
-                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, 0];
+                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, through];
             values.CopyTo(shapes[(s * (ShapeBytes / 4))..]);
         }
 

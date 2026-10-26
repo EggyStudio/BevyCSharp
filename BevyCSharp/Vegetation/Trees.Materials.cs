@@ -8,6 +8,12 @@ public static partial class Trees
 {
     private static readonly ConditionalWeakTable<App, Dictionary<string, AssetHandle>> Made = new();
 
+    // The share of global illumination's light a crown lets through a meter of it, which Beer and
+    // Lambert's law gives a crown of about one and a half square meters of leaf a cubic meter, the
+    // presets' crowns lying about it, as ACrownLetsAboutHalfTheLightThroughAMeter reads them, so a
+    // forest floor takes the share of the sky's light its canopy lets through.
+    internal const float LeafLightThrough = 0.5f;
+
     /// <summary>The material a species' bark is drawn with. Only valid inside a system.</summary>
     /// <param name="species">The species, whose <see cref="TreeSpecies.BarkSet"/> or <see cref="TreeSpecies.BarkColor"/> it is made from.</param>
     /// <returns>The material, the same one for the same bark while the app runs.</returns>
@@ -41,7 +47,7 @@ public static partial class Trees
             if (set is not null)
             {
                 var (albedo, normal, surface) = set.Load();
-                return Render.CreateBarkMaterial(Deep(new MaterialSettings
+                var made = Render.CreateBarkMaterial(Deep(new MaterialSettings
                 {
                     BaseColorTexture = albedo,
                     NormalMap = normal,
@@ -50,6 +56,8 @@ public static partial class Trees
                     Roughness = 1f,
                     Metallic = 1f,
                 }, set.LoadDepth()), stiffness);
+                Render.SetFieldTint(made, (set.MeanColor.R, set.MeanColor.G, set.MeanColor.B));
+                return made;
             }
 
             var (color, bumps, depth) = BarkPictures();
@@ -93,6 +101,12 @@ public static partial class Trees
     /// A planted tree's leaves sway in the <see cref="Wind"/> with their limbs and flutter about
     /// their stalks, by the species' height and leaf length, the stiffness the material is made with.
     /// </para>
+    /// <para>
+    /// The crown lets half of global illumination's light through a meter of it
+    /// (<see cref="MaterialSettings.LightThrough"/>), and the scene's distance field paints it the
+    /// leaf set's mean color, so the floor under a forest takes the share of the sky's light its
+    /// canopy lets through, tinted by the leaves.
+    /// </para>
     /// </remarks>
     public static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)
     {
@@ -111,7 +125,7 @@ public static partial class Trees
                 var (albedo, normal, surface) = set.Load();
                 var mean = set.MeanColor;
                 (float, float, float, float) tint = (Toward(1f, species.FallColor.R / MathF.Max(mean.R, 1e-3f), fall), Toward(1f, species.FallColor.G / MathF.Max(mean.G, 1e-3f), fall), Toward(1f, species.FallColor.B / MathF.Max(mean.B, 1e-3f), fall), 1f);
-                return Render.CreateLeafMaterial(new MaterialSettings
+                var made = Render.CreateLeafMaterial(new MaterialSettings
                 {
                     BaseColor = tint,
                     BaseColorTexture = albedo,
@@ -124,7 +138,10 @@ public static partial class Trees
                     Metallic = 1f,
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
+                    LightThrough = LeafLightThrough,
                 }, stiffness);
+                Render.SetFieldTint(made, (mean.R, mean.G, mean.B));
+                return made;
             }
 
             var atlas = LeafPictures(species);
@@ -137,6 +154,7 @@ public static partial class Trees
                 Roughness = 0.6f,
                 AlphaMode = AlphaMode.Mask,
                 DoubleSided = true,
+                LightThrough = LeafLightThrough,
             }, stiffness);
         });
     }

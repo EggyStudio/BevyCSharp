@@ -23,7 +23,8 @@ struct FieldShape
     float4 center_and_scale;
     // xyz: the box's half extents in its own space.
     float4 extents;
-    // rgb: the mesh's color, linear.
+    // rgb: the mesh's color, linear. w: the share of light that passes a unit of its depth
+    // (lightThroughPaint in bcs_field.slang).
     float4 color;
 };
 
@@ -86,7 +87,8 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
         if (abs(box) < min(nearest, reach))
         {
             nearest = abs(box);
-            paint = float4(shape.color.rgb, 1.0);
+            float coverage = lightThroughPaint(shape.color.w);
+            paint = float4(shape.color.rgb * coverage, coverage);
             // The box's face nearest the cell, the axis it lies furthest out along, in the world.
             int axis = q.x >= q.y && q.x >= q.z ? 0 : q.y >= q.z ? 1 : 2;
             float3 outward = float3(axis == 0 ? sign(own.x) : 0.0, axis == 1 ? sign(own.y) : 0.0, axis == 2 ? sign(own.z) : 0.0);

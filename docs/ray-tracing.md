@@ -310,6 +310,23 @@ around it, traced through the picture and the field below a roughness of a half,
 sky only as far as the probes see it, so a closed room's polished floor shows no sky. Bevy's
 screen-space ambient occlusion is left as Bevy gives it.
 
+A surface may let a share of the indirect light through each meter of its depth, as a canopy's
+leaves do, which the probes' rays cross where they would stop at a solid surface, keeping that share
+of their light a meter and taking the rest from the surface, through four such surfaces at most:
+
+```csharp
+Render.CreateMaterial(new MaterialSettings { BaseColor = (0.2f, 0.35f, 0.1f, 1f), LightThrough = 0.5f });
+```
+
+The field paints such a surface as it paints a solid one, with its share in its colors' alpha, and a
+floor under it takes the share of the sky's light it lets through rather than lying as dark as under
+a roof. Under a slab twenty meters across two and a half meters up letting half through a meter, a
+floor takes 0.32 to 0.44 of the sky's light a solid slab holds back, and 0.24 five and a half meters
+up, where the slab's depth along each way gives 0.36 and 0.41, as
+`AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough` reads it. A frame where
+nothing drawn lets light through traces with a build that leaves the crossing out, so its light is
+what it was before any surface let light through. A planted tree's leaves let half through a meter.
+
 Beside the probes in cascades stands a probe for every few pixels of the picture, every 16 at `Low`,
 12 at `Medium` and 8 at `High`, on the surface the camera's depth shows there. Each sends sixteen
 rays through the depth and the field as far as twice the first cascade's probes are apart and takes
