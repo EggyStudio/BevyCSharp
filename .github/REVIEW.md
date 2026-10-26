@@ -10,11 +10,34 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `f75ebdae`, the README's quick links, pushed at 10:47 on 2026-10-26 after the run of
-`8a85790a` went green, its own run watched, README.md's first line with the review's files,
-SHARED.md, DEVLOG.md and ASSETS.md and the d3 reading under Replies, nothing of item 65; N 4.2 and
-FirstGameTests pass on the tree, 18 of 18 and 5 of 5. Item 65's first phase is built and its
-whole-suite run at the 3 GB cap in flight.
+Reviewed up to `f703b3b1`, item 65's first phase, the level file's format and loader, read at 10:50
+on 2026-10-26, pushed at 11:05 once the run of `f75ebdae` went green, its own run red at 11:23 on
+the three suites, Verdict 46, 21 files, the whole suite in one host at the 3 GB cap, 1,988 passed
+and 3 skipped, the listing of 1,980 plus 11, in 45 minutes with the host's RssAnon at 2,107 MB at
+most. Level, LevelEntity, LevelBrush, LevelFace and LevelPoint hold a file with points in double
+precision, the canonical writer laying it out as TrenchBroom does so the engine's own file
+round-trips byte for byte, a file laid out another way, shared-line braces, tabs and signed numbers,
+reading to the same values, Quake's older face format refused at its line; a brush's corners are
+where three planes meet within the rest, shared between faces, an open brush refused by every edge
+having to run back round a neighbor. Levels.Spawn builds everything under a root, the worldspawn's
+and each brush entity's brushes through EditMesh with a slot a material and each face's own texture
+coordinates, each slot drawn as the prototype of its name and the brushes colliding as a mesh
+collider on a static body, point entities at their origin with the angle or angles turning minus Z
+to face the file's X, brush entities unturned at their origin or their brushes' middle, a first try
+turning them having put the collision a quarter turn off the drawing, which the test caught;
+LevelKeys on every entity with Levels.KeysOf and Levels.Register, the engine registering tree with
+species and seed; level.load as a console command and a ./bcs verb; docs/levels.md names
+_units_per_meter with its default of 32 and TrenchBroom as the tool with no link, the README and
+AGENTS.md gaining their rows and the cheat sheet a Levels group. Twelve tests, the parse, both round
+trips and the refusals at their lines, corners and winding, the ramp's touching face and the open
+brush, meters Y up and texels, a headless build with physics raycasts on the floor, the ramp and the
+door, and the console command; the room pictured; the public listing gains the seven types with
+nothing removed or reshaped. The fixture from the tool itself waits for the owner's file. After
+`f75ebdae`, the README's quick links, pushed at 10:47 on 2026-10-26 after the run of `8a85790a` went
+green, its own run green at 11:04 with the suites in 14 to 17 minutes, README.md's first line with
+the review's files, SHARED.md, DEVLOG.md and ASSETS.md and the d3 reading under Replies, nothing of
+item 65; N 4.2 and FirstGameTests pass on the tree, 18 of 18 and 5 of 5. Item 65's first phase is
+built and its whole-suite run at the 3 GB cap in flight.
 
 Before it, `8a85790a` came, item 77's second part, the guard's stop read as a stop, pushed at 09:56
 on 2026-10-26 after `bc5559d2`'s run went green, its run green at 10:13.
@@ -231,7 +254,24 @@ from [SHARED.md](SHARED.md).
     test's hub from a file, the other rooms under item 68. The format is Valve 220 map text as
     TrenchBroom reads and writes it, Decision 67 of 2026-10-26. The loader's fixture from the tool
     itself waits on a small level saved in TrenchBroom, asked in ASSETS.md on 2026-10-26; the phase
-    ships with its own round-trip tests and the fixture's test is added when the file comes.
+    ships with its own round-trip tests and the fixture's test is added when the file comes. The
+    first phase at `f703b3b1` on 2026-10-26, the format and the loader, the room pictured. The
+    second phase reads each material's own texel size for the mapping, the picture's pixels a meter,
+    with the units a meter as the fallback for a material without a picture, since the first phase
+    maps one repeat a meter at scale 1 and 512 pixel prototype pictures with a game config's face
+    scale of a sixteenth would otherwise repeat wrong. The second phase in two commits as the coder
+    proposed on 2026-10-26: the grid's steps follow the editor's snap at 32 units a meter, the meter
+    edge line kept with a half-meter line and quarter-meter fine lines in place of the tenths, a
+    small 1 m measure mark in each cell's corner from a 5 by 7 bitmap font in code as the dev
+    textures print their sizes, and Unreal's palette by the names a level uses, the floor a dark
+    gray, the wall a light gray, the ceiling lighter, stairs, ramps and moving parts the prototyping
+    orange, door, window and hazard keeping green, blue and red, proto_dark, proto_light and
+    proto_orange naming the tones, the palette's change going to 3DEngine by a Shared line since
+    SHARED.md keeps the look alike; then level.textures writing each prototype as a 512 pixel
+    picture under a folder TrenchBroom reads, a TrenchBroom game config in the repository with the
+    Generic layout, the Valve format, a face scale of a sixteenth and an fgd of the engine's
+    classes, the engine reading each material's own texel size in place of the units a meter;
+    rounded doorways are the third phase's brushes, not a material.
 
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
@@ -259,8 +299,25 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 33 to 42, 44 and 45 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`.
+Verdicts 33 to 42, 44 and 45 are settled, said under each in REVIEW-ARCHIVE.md; 2, 43 and 46 are
+open, 43 mended at `42abf357`.
+
+46. **The run of `f703b3b1` is red on the three suites, the level tests building the prototype
+    picture where the push's bridge has no renderer.** Read at 11:24 on 2026-10-26. On each system
+    two of LevelTests' cases fail, the headless build with its collision and entities by class and
+    the console command's build, both through Levels.Spawn drawing a slot as the prototype of its
+    name, Modeling's GridOf calling Images.Grid and Render.CreateImage for a 1024 by 1024 picture
+    with its mipmaps, which the bridge answers with its renderer-missing error, since a push's run
+    tests the library on a bridge built without the renderer while the coder's own bridge has it;
+    the console case then reads the failure's text where it expected the built line, and an
+    IndexOutOfRangeException rides inside the AggregateException beside the bridge's error, a second
+    thing to read. Linux 1,556 passed and 2 failed in under five minutes, Windows 1,353 and 2, macOS
+    alike. The mend is Levels.Spawn, or the prototype's lookup under it, asking App.HasRenderer
+    before making a picture and giving a slot its material without one where the bridge has no
+    renderer, so a headless level builds its collision and entities anywhere, as the trees' pictures
+    already wait on the renderer; the two tests then pass on the push's bridge, and the out-of-range
+    index is read and mended or named. Small, before item 65's second phase, run on a bridge built
+    without the renderer before committing.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -2001,3 +2058,18 @@ itself wrote waits for the owner's, asked in ASSETS.md. The picture is the room 
 skipped, the host's anonymous memory 2,107 MB at most. The public listing gains Level, LevelEntity,
 LevelBrush, LevelFace, LevelPoint, LevelKeys and Levels, no line removed or reshaped, and AGENTS.md
 gains BevyCSharp/Levels's row under N 1.5.
+
+Verdict 46, in the commit carrying this line. Levels.Spawn drew each slot through
+Modeling.Materials, whose prototype makes the grid's picture, which a bridge built without the
+renderer refuses, so the push's runs failed the two tests that build a level headless, while this
+machine's bridge has the renderer. A brush entity is drawn only where App.HasRenderer holds, and
+collides as its edit mesh's triangles through a static body given in code where the world simulates
+bodies, Modeling.Collider of the same mesh, since a Collider of ColliderShape.Mesh fits only what is
+drawn and fits nothing without a renderer, so a headless level collides as a drawn one does; the
+components stay beside the body, which the simulation leaves to the body given in code. The
+IndexOutOfRangeException was the test's own, its update reading the level's children after the spawn
+had thrown and left no root, index 0 of an empty array at LevelTests.cs line 234, a second failure
+riding on the first and no fault of the harness, and it returns where there is no root. The two
+tests pass on a bridge built headless, cargo's release build with the headless feature alone into a
+scratch target, in a worktree of this commit given that library, where the commit before fails the
+same two as the runs did, and all twelve of LevelTests pass on it and on the editor's bridge.

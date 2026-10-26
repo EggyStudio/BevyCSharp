@@ -24,6 +24,12 @@ The floor under nine black tupelos at High under the sky's light alone, their le
 global illumination's distance field above and letting half the light through a meter below, the
 floor under the crowns lighter and its dark patches gone.
 
+![](.github/assets/readings/2026-10-26-item-65-room.webp)
+A room loaded from a level file of TrenchBroom's Valve format, its floor, walls, a hazard block and
+a ramp the world's brushes and its door a brush entity, each drawn as the prototype of its
+material's name with the meter grid aligned to the world across every face, and a bush placed by a
+tree entity's species and seed.
+
 Item 70's leaves in the scene field, as cells that let a share of global illumination's light
 through, as 3DEngine's item 100 gives its field. `MaterialSettings.LightThrough` is the share of the
 light that passes a meter of a surface's depth. The bridge keeps it beside the material and writes

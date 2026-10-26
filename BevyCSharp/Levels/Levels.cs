@@ -177,30 +177,42 @@ public static class Levels
 
     /// <summary>
     /// Builds an entity's brushes into an edit mesh about the entity's place, draws each slot as a
-    /// part under it and makes it collide as its triangles.
+    /// part under it where there is a renderer, and makes it collide as its triangles.
     /// </summary>
+    /// <remarks>
+    /// The collision is the edit mesh's triangles as a static body given in code, where the world
+    /// simulates bodies, rather than a collider fitted to what is drawn, which a build with no
+    /// renderer cannot fit, so a level collides the same with a renderer and without, and a server
+    /// or a headless test walks it. The components stay beside the body, which the simulation
+    /// leaves to the body given in code, and fit what is drawn where the simulation starts after.
+    /// </remarks>
     private static void Build(EcsWorld ecs, Entity entity, LevelEntity source, double units, int index)
     {
         var at = ecs.TryGet<Transform>(entity, out var placed) ? placed.Translation : Vec3.Zero;
         var mesh = Mesh(source, units, at);
         if (mesh.FaceCount == 0) return;
 
-        var meshes = Modeling.Meshes(mesh);
-        var materials = Modeling.Materials(mesh);
-        for (var slot = 0; slot < meshes.Length; slot++)
+        if (App.HasRenderer)
         {
-            if (meshes[slot] == AssetHandle.None) continue;
-            var part = ecs.Spawn();
-            ecs.Add(part, Transform.Identity);
-            ecs.Add(part, Visibility.Inherited);
-            Render.SetMesh(ecs, part, meshes[slot]);
-            Render.SetMaterial(ecs, part, materials[slot]);
-            ecs.SetParent(part, entity);
-            ecs.SetName(part, $"{ecs.NameOf(entity)}, {mesh.Slots[slot]}");
+            var meshes = Modeling.Meshes(mesh);
+            var materials = Modeling.Materials(mesh);
+            for (var slot = 0; slot < meshes.Length; slot++)
+            {
+                if (meshes[slot] == AssetHandle.None) continue;
+                var part = ecs.Spawn();
+                ecs.Add(part, Transform.Identity);
+                ecs.Add(part, Visibility.Inherited);
+                Render.SetMesh(ecs, part, meshes[slot]);
+                Render.SetMaterial(ecs, part, materials[slot]);
+                ecs.SetParent(part, entity);
+                ecs.SetName(part, $"{ecs.NameOf(entity)}, {mesh.Slots[slot]}");
+            }
         }
 
         ecs.Add(entity, new RigidBody { Kind = BodyKind.Static });
         ecs.Add(entity, new Collider { Shape = ColliderShape.Mesh });
+        if (App.Running?.World.TryResource<PhysicsWorld>() is { } physics && !physics.Has(entity))
+            physics.Add(entity, Modeling.Collider(mesh), BodyKind.Static, Colliders.WorldOf(ecs, entity));
     }
 
     /// <summary>

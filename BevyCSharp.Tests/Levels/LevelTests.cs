@@ -227,7 +227,8 @@ public sealed class LevelTests
         harness.OnContext(Stage.Startup, ctx => root = Levels.Spawn(ctx.Ecs, Level.Parse(Room), "room"));
         harness.OnContext(Stage.Update, ctx =>
         {
-            if (++frame != 20) return;
+            // A spawn that failed leaves no root, and the failure says why.
+            if (++frame != 20 || root == Entity.None) return;
             var ecs = ctx.Ecs;
             var entities = ecs.ChildrenOf(root);
             children = [.. entities.Select(entity => (ecs.NameOf(entity) ?? "", ecs.GetOrDefault<LevelKeys>(entity).ClassName.Value, ecs.GetOrDefault<LevelKeys>(entity).TargetName.Value))];
@@ -246,7 +247,7 @@ public sealed class LevelTests
         harness.Run();
 
         Assert.Equal([("worldspawn", "worldspawn", ""), ("info_player_start", "info_player_start", ""), ("door", "func_door", "door"), ("tree", "tree", "")], children);
-        Assert.Equal(2, worldParts);
+        Assert.Equal(App.HasRenderer ? 2 : 0, worldParts);
 
         // The start two meters along minus X and three quarters of a meter up, its forward, minus Z,
         // where the file's yaw of 90 faces, the file's plus Y, which is minus Z with Y up.
