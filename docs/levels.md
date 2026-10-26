@@ -16,6 +16,11 @@ so a level saved in TrenchBroom is tried in a running app as soon as it is saved
 
 ## The file
 
+The repository's `BevyCSharp/Levels/TrenchBroom` folder holds a game config and the engine's
+classes for TrenchBroom, with the prototype materials' pictures it shows, and its README says how
+to install them. `Levels.WritePrototypePictures`, or `level.textures` from the console and `./bcs`,
+writes the pictures again into a game's folder.
+
 A level's coordinates are TrenchBroom's, Z up and in units. The `worldspawn` entity's
 `_units_per_meter` key says how many units make a meter, and a level without it has 32, so
 TrenchBroom's 32 unit grid is a meter and its 8 unit grid a quarter of one. The engine turns a
@@ -29,13 +34,17 @@ material and two axes across the world with an offset each, a rotation and two s
 ( -128 -128 0 ) ( -128 -127 0 ) ( -127 -128 0 ) floor [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1
 ```
 
-The material is a name, which the face is drawn with as a modeling slot of that name is, so a face
-of `wall` is drawn as a wall's prototype. The mapping is aligned to the world, a point on the face
-falling on the material's texel along each axis over the scale and moved by the offset, and a
-material's picture spans as many texels as the level has units a meter, so at a scale of one it
-repeats once a meter. A brush's corners are found where three of its planes meet within the rest,
-so a brush is always convex and two faces meet edge to edge, and one whose planes close nothing is
-refused with the entity it belongs to.
+A face's material is laid over it by its picture's texels, a point falling on the texel its axis
+gives over the face's scale and moved by its offset, so a picture of 512 texels at a scale of a
+sixteenth spans 32 units, a meter, the same in TrenchBroom and in the engine. A material under
+`proto/`, as `proto/floor`, is drawn as the prototype of the rest of its name, the grid in Unreal's
+level prototyping palette (the modeling page's grid prototyping), over a picture of 512 texels. A
+material with a picture of its own under the asset root's `textures` folder, a PNG or a JPEG of its
+name, is drawn with it over its own pixels, and any other name is drawn as the modeling slot of that
+name over a picture of the level's units a meter, so at a scale of one it repeats once a meter. A
+brush's corners are found where three of its planes meet within the rest, so a brush is always
+convex and two faces meet edge to edge, and one whose planes close nothing is refused with the
+entity it belongs to.
 
 A key may come more than once, as an output naming its target does when a button opens two doors:
 

@@ -74,6 +74,34 @@ public static partial class Modeling
         }
     }
 
+    /// <summary>
+    /// A prototype's picture as a level editor shows it, the grid's cell at a size tinted by the
+    /// prototype's color as its material multiplies its texture, four bytes a pixel in sRGB, rows
+    /// from the top.
+    /// </summary>
+    /// <param name="tint">The prototype's color.</param>
+    /// <param name="size">How many pixels a side, sixteen or more.</param>
+    /// <remarks>The grid is read as sRGB, as the material samples it, multiplied in linear light and written as sRGB again.</remarks>
+    internal static byte[] PrototypePicture(Color tint, int size)
+    {
+        var pixels = Images.GridPixels(size, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
+        var tints = new[] { tint.R, tint.G, tint.B };
+        var tables = new byte[3][];
+        for (var channel = 0; channel < 3; channel++)
+        {
+            tables[channel] = new byte[256];
+            for (var value = 0; value < 256; value++)
+            {
+                var lit = Color.FromSrgb8((byte)value, (byte)value, (byte)value).R * tints[channel];
+                tables[channel][value] = (byte)Math.Clamp(MathF.Round(new Color(lit, lit, lit, 1f).ToSrgb().X * 255f), 0f, 255f);
+            }
+        }
+
+        for (var at = 0; at < pixels.Length; at += 4)
+        for (var channel = 0; channel < 3; channel++) pixels[at + channel] = tables[channel][pixels[at + channel]];
+        return pixels;
+    }
+
     /// <summary>The grid image an app's prototype materials share, made the first time one is asked for.</summary>
     private static AssetHandle GridOf(App app) => Grids.GetValue(app, _ => new StrongBox<AssetHandle>(Images.Grid())).Value;
 }

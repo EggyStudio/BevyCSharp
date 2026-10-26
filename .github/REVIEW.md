@@ -2092,3 +2092,21 @@ and fine lines of 0.68 a 512th wide at its quarters in place of the tenths, each
 and 1m lettered in the line's color in its top left corner, letters of five by seven squares each a
 128th of the cell, two squares in from the edge line, where the cell has 128 pixels or more. The
 quarters and the half are TrenchBroom's 8 and 16 unit steps at 32 units a meter.
+
+Item 65's second phase, its second commit, the pictures and the TrenchBroom config, in the commit
+carrying this line. A face's material is read over its picture's texels, as the review's word on
+item 65 asked. A material under proto/ is drawn as the prototype of the rest of its name over
+Levels.PrototypePixels, 512, a material with a PNG or a JPEG of its name under the asset root's
+textures folder is drawn with it over its own pixels read from its header, and any other over the
+units a meter as before, so the room's faces of floor and wall read as they did.
+Levels.WritePrototypePictures, or level.textures from the console and ./bcs, writes the seven
+prototypes' pictures at 512 tinted as their materials draw them unlit, and
+BevyCSharp/Levels/TrenchBroom ships them with a version 9 game config of the Valve format alone and
+a new face's scale of a sixteenth, so its picture spans 32 units, a meter, in TrenchBroom as in the
+engine, an fgd of worldspawn with its _units_per_meter, info_player_start and tree, which grows with
+item 66's classes, and a README on installing them naming TrenchBroom. A test holds the shipped
+pictures byte for byte to what the engine writes. The level and images tests pass on the headless
+bridge, the prototype's picture made on the CPU with no renderer, and the whole suite with the first
+commit, 1,990 passed and 3 skipped. docs/levels.md says in a sentence how a face's scale meets its
+picture's size. The public listing gains Levels.PrototypeFolder, Levels.PrototypePixels and
+Levels.WritePrototypePictures, no line removed or reshaped.

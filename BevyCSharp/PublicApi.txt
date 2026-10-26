@@ -4218,10 +4218,13 @@ readonly struct Bevy.LevelPoint : IEquatable<LevelPoint>
   static bool op_Inequality(LevelPoint left, LevelPoint right)
   void Deconstruct(out double X, out double Y, out double Z)
 static class Bevy.Levels
+  const int PrototypePixels = 512
+  const string PrototypeFolder = "proto/"
   static Entity Load(EcsWorld ecs, string path)
   static Entity Spawn(EcsWorld ecs, Level level, string name = "level")
   static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys)
   static IReadOnlyList<string> ClassNames { get; }
+  static IReadOnlyList<string> WritePrototypePictures(string folder)
   static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn)
 enum Bevy.LightGizmoColoring : int
   ByKind = 3

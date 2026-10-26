@@ -204,9 +204,9 @@ public sealed class LevelTests
 
         // At a scale of one a material repeats each meter along its axes.
         var floorTop = world.Brushes[0].Faces[3];
-        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(floorTop, new LevelPoint(64, 32, 0), 32));
+        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(floorTop, new LevelPoint(64, 32, 0), 32, 32));
         var scaled = floorTop with { ScaleU = 0.5, UOffset = 16 };
-        Assert.Equal(new Vec2(4.5f, -1f), Levels.Texel(scaled, new LevelPoint(64, 32, 0), 32));
+        Assert.Equal(new Vec2(4.5f, -1f), Levels.Texel(scaled, new LevelPoint(64, 32, 0), 32, 32));
     }
 
     [Fact]
@@ -300,6 +300,46 @@ public sealed class LevelTests
         Assert.Equal(1, under);
         Assert.StartsWith($"{broken}, line 2: ", refused);
         Assert.Equal($"there is no level at {folder.File("none.map")}", missing);
+    }
+
+    [Fact]
+    public void TheShippedPrototypePicturesAreTheOnesTheEngineDraws()
+    {
+        // Written again beside the shipped ones and read byte for byte, so a change to the grid or
+        // the palette that leaves the pictures TrenchBroom shows behind fails here, until
+        // `./bcs command level.textures BevyCSharp/Levels/TrenchBroom` writes them again.
+        using var folder = new TestFolder("bcs-prototype-pictures-");
+        var written = Levels.WritePrototypePictures(folder.Path);
+        var shipped = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Levels", "TrenchBroom", "textures", "proto");
+        Assert.Equal(Modeling.PrototypeColors.Keys.Order(StringComparer.Ordinal), Directory.GetFiles(shipped, "*.png").Select(Path.GetFileNameWithoutExtension).Order(StringComparer.Ordinal));
+        foreach (var path in written)
+        {
+            var bytes = File.ReadAllBytes(path);
+            Assert.Equal((Levels.PrototypePixels, Levels.PrototypePixels), Levels.PictureSize(bytes));
+            Assert.True(bytes.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(shipped, Path.GetFileName(path)))), $"{Path.GetFileName(path)} is not the picture the engine draws");
+        }
+    }
+
+    [Fact]
+    public void AFacesMaterialIsReadOverItsPicturesTexels()
+    {
+        // A prototype's picture of 512 texels at a sixteenth's scale repeats once 32 units, a meter,
+        // drawn as the prototype of the rest of its name, and a name with no picture over the
+        // level's units a meter, so the same face at a scale of one repeats once a meter too.
+        var level = Level.Parse(Room.Replace(" floor [", " proto/floor [").Replace("( 0 -64 0 ) ( 0 -63 0 ) ( 0 -64 1 ) proto/floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1", "( 0 -64 0 ) ( 0 -63 0 ) ( 0 -64 1 ) proto/floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 0.0625 0.0625"));
+        var world = level.World!;
+        var mesh = Levels.Mesh(world, 32, Vec3.Zero);
+        Assert.Equal(["floor", "wall"], mesh.Slots);
+
+        var face = world.Brushes[0].Faces[3] with { ScaleU = 0.0625, ScaleV = 0.0625 };
+        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(face, new LevelPoint(64, 32, 0), Levels.PrototypePixels, Levels.PrototypePixels));
+        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(world.Brushes[0].Faces[3], new LevelPoint(64, 32, 0), 32, 32));
+
+        // A PNG's and a JPEG's size read from their headers.
+        Assert.Equal((512, 512), Levels.PictureSize(PngWriter.Still(512, 512, new byte[512 * 512 * 4])));
+        byte[] jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x04, 0x00, 0x00, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x01, 0x80, 0x02, 0x00, 0x03, 0x00, 0x00];
+        Assert.Equal((512, 384), Levels.PictureSize(jpeg));
+        Assert.Null(Levels.PictureSize([1, 2, 3]));
     }
 
     /// <summary>An axis-aligned box brush's six faces, as TrenchBroom writes one.</summary>

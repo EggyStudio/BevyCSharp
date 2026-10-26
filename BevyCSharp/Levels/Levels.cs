@@ -27,12 +27,29 @@ namespace Bevy;
 /// its place and its keys for a game to read.
 /// </para>
 /// <para>
-/// A material's picture spans as many texels as the level has units a meter, so at a scale of one a
-/// face's material repeats once a meter, as the prototype materials' grid does.
+/// A face's material is read over its picture's texels, as TrenchBroom draws it. A material under
+/// <see cref="PrototypeFolder"/>, as <c>proto/floor</c>, is drawn as the prototype of the rest of
+/// its name over a picture of <see cref="PrototypePixels"/>, which <see cref="WritePrototypePictures"/>
+/// writes for TrenchBroom, so a face of a sixteenth's scale repeats once a meter in both. A material
+/// with a picture under the asset root's <c>textures</c> folder, a PNG or a JPEG of its name, is
+/// drawn with it over its own pixels, and any other is drawn as the slot of its name over a picture
+/// of the level's units a meter, so at a scale of one it repeats once a meter.
 /// </para>
 /// </remarks>
 public static class Levels
 {
+    /// <summary>
+    /// The folder of a level's materials a prototype's picture stands in, so a face of
+    /// <c>proto/floor</c> is drawn as the <c>floor</c> prototype (<see cref="Modeling.Prototype(string)"/>).
+    /// </summary>
+    public const string PrototypeFolder = "proto/";
+
+    /// <summary>
+    /// How many texels a side a prototype's picture has, as <see cref="WritePrototypePictures"/>
+    /// writes them for a level editor, a meter's cell of the grid.
+    /// </summary>
+    public const int PrototypePixels = 512;
+
     private static readonly Lock Registry = new();
     private static readonly Dictionary<string, Action<EcsWorld, Entity, LevelEntity>> Classes = new(StringComparer.Ordinal)
     {
@@ -113,6 +130,34 @@ public static class Levels
         }
 
         return root;
+    }
+
+    /// <summary>
+    /// Writes each prototype's picture as TrenchBroom shows it, under a game's folder, for a level
+    /// editor to draw a face of <c>proto/floor</c> as the engine draws it.
+    /// </summary>
+    /// <param name="folder">The game's folder, TrenchBroom's game path, under whose <c>textures/proto</c> the pictures go.</param>
+    /// <returns>The pictures' full paths, one a name of <see cref="Modeling.PrototypeColors"/>.</returns>
+    /// <remarks>
+    /// Each is the grid's cell of <see cref="PrototypePixels"/> a side tinted by its prototype's color,
+    /// as its material draws it unlit, so with a face scale of a sixteenth, which the game config
+    /// beside the engine's levels gives a new face, a cell spans 32 units, a meter at the default
+    /// units a meter, in TrenchBroom as in the engine.
+    /// </remarks>
+    public static IReadOnlyList<string> WritePrototypePictures(string folder)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(folder);
+        var into = Path.Combine(folder, "textures", PrototypeFolder.TrimEnd('/'));
+        Directory.CreateDirectory(into);
+        var written = new List<string>();
+        foreach (var (name, color) in Modeling.PrototypeColors)
+        {
+            var path = Path.Combine(into, name + ".png");
+            File.WriteAllBytes(path, PngWriter.Still(PrototypePixels, PrototypePixels, Modeling.PrototypePicture(color, PrototypePixels)));
+            written.Add(path);
+        }
+
+        return written;
     }
 
     /// <summary>The keyvalues an entity's <see cref="LevelKeys"/> holds, in the level file's order.</summary>
@@ -217,12 +262,16 @@ public static class Levels
 
     /// <summary>
     /// An entity's brushes as an edit mesh in meters about a place, a slot each material, each face's
-    /// corners wound as Bevy's front faces are and given the texture coordinates its axes say.
+    /// corners wound as Bevy's front faces are and given the texture coordinates its axes say over
+    /// its material's picture.
     /// </summary>
     internal static EditMesh Mesh(LevelEntity source, double units, Vec3 at)
     {
         var mesh = new EditMesh();
-        var first = source.Brushes.SelectMany(brush => brush.Faces).Select(face => face.Material).FirstOrDefault();
+        var materials = new Dictionary<string, Material>(StringComparer.Ordinal);
+        Material Of(string name) => materials.TryGetValue(name, out var known) ? known : materials[name] = MaterialOf(name, units);
+
+        var first = source.Brushes.SelectMany(brush => brush.Faces).Select(face => Of(face.Material).Slot).FirstOrDefault();
         if (first is not null && first != EditMesh.DefaultSlot) mesh.SlotRename(EditMesh.DefaultSlot, first);
 
         foreach (var brush in source.Brushes)
@@ -233,6 +282,7 @@ public static class Levels
             {
                 if (polygons[f] is not { } polygon) continue;
                 var face = brush.Faces[f];
+                var material = Of(face.Material);
 
                 // The file winds a face clockwise seen from outside, and Bevy draws the side its
                 // corners run counter-clockwise round, so they are taken backwards.
@@ -243,23 +293,76 @@ public static class Levels
                     var point = polygon[polygon.Length - 1 - i];
                     if (!vertices.TryGetValue(point, out var vertex)) vertices[point] = vertex = mesh.AddCorner(point.Meters(units) - at);
                     corners[i] = vertex;
-                    uvs[i] = Texel(face, point, units);
+                    uvs[i] = Texel(face, point, material.Width, material.Height);
                 }
 
-                mesh.AddPolygon(corners, face.Material, uvs);
+                mesh.AddPolygon(corners, material.Slot, uvs);
             }
+        }
+
+        foreach (var material in materials.Values)
+        {
+            if (material.Picture is { } picture && mesh.Slots.Contains(material.Slot)) mesh.SlotTexture(material.Slot, picture);
         }
 
         return mesh;
     }
 
     /// <summary>
-    /// Where a point of a face falls on its material, its texel along each axis, scaled and moved,
-    /// over the texels the material's picture spans, a level's units a meter.
+    /// What a level's material is drawn as, the slot it is drawn in, its picture's size in texels and
+    /// the picture where it has one of its own.
     /// </summary>
-    internal static Vec2 Texel(LevelFace face, LevelPoint point, double units) =>
-        new((float)((LevelPoint.Dot(point, face.UAxis) / face.ScaleU + face.UOffset) / units),
-            (float)((LevelPoint.Dot(point, face.VAxis) / face.ScaleV + face.VOffset) / units));
+    private readonly record struct Material(string Slot, double Width, double Height, string? Picture);
+
+    /// <summary>
+    /// A material by its name, a prototype under <see cref="PrototypeFolder"/> as the prototype of the
+    /// rest of its name with a picture of <see cref="PrototypePixels"/>, a name with a picture under
+    /// the asset root's <c>textures</c> folder drawn with it, and any other name as the slot of its
+    /// name with a picture of the level's units a meter.
+    /// </summary>
+    private static Material MaterialOf(string name, double units)
+    {
+        if (name.StartsWith(PrototypeFolder, StringComparison.Ordinal) && name.Length > PrototypeFolder.Length)
+            return new Material(name[PrototypeFolder.Length..], PrototypePixels, PrototypePixels, null);
+
+        foreach (var extension in new[] { ".png", ".jpg", ".jpeg" })
+        {
+            var path = $"textures/{name}{extension}";
+            if (AssetFiles.Exists(path) && PictureSize(AssetFiles.ReadAllBytes(path)) is { } size) return new Material(name, size.Width, size.Height, path);
+        }
+
+        return new Material(name, units, units, null);
+    }
+
+    /// <summary>A PNG's or a JPEG's width and height from its header, or nothing for other bytes.</summary>
+    internal static (int Width, int Height)? PictureSize(byte[] bytes)
+    {
+        // A PNG's header chunk holds its width and height as big-endian four byte numbers.
+        ReadOnlySpan<byte> png = [0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A];
+        if (bytes.Length >= 24 && bytes.AsSpan(0, 8).SequenceEqual(png))
+            return (System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(bytes.AsSpan(16)), System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(bytes.AsSpan(20)));
+
+        // A JPEG's size is in its start of frame, after the segments before it, each a marker and a length.
+        if (bytes.Length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) return null;
+        for (var at = 2; at + 9 < bytes.Length;)
+        {
+            if (bytes[at] != 0xFF) return null;
+            var marker = bytes[at + 1];
+            var length = bytes[at + 2] << 8 | bytes[at + 3];
+            if (marker is >= 0xC0 and <= 0xCF and not (0xC4 or 0xC8 or 0xCC)) return (bytes[at + 7] << 8 | bytes[at + 8], bytes[at + 5] << 8 | bytes[at + 6]);
+            at += 2 + length;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Where a point of a face falls on its material, its texel along each axis, scaled and moved,
+    /// over the texels its picture spans each way.
+    /// </summary>
+    internal static Vec2 Texel(LevelFace face, LevelPoint point, double width, double height) =>
+        new((float)((LevelPoint.Dot(point, face.UAxis) / face.ScaleU + face.UOffset) / width),
+            (float)((LevelPoint.Dot(point, face.VAxis) / face.ScaleV + face.VOffset) / height));
 
     /// <summary>A tree of the <c>species</c> key's name and the <c>seed</c> key's seed.</summary>
     private static void PlantTree(EcsWorld ecs, Entity entity, LevelEntity source)

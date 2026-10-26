@@ -1008,6 +1008,7 @@ The guide's page is [levels.md](https://github.com/EggyStudio/BevyCSharp/blob/ma
 static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn);  // Says how an entity of a class is spawned, called with the entity placed under the level and carrying LevelKeys, after its brushes are built where it has any
 static Entity Load(EcsWorld ecs, string path);                  // Reads a level file and builds it into the world
 static Entity Spawn(EcsWorld ecs, Level level, string name = "level");  // Builds a level into the world
+static IReadOnlyList<string> WritePrototypePictures(string folder);  // Writes each prototype's picture as TrenchBroom shows it, under a game's folder, for a level editor to draw a face of proto/floor as the engine draws it
 static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys);  // The keyvalues an entity's LevelKeys holds, in the level file's order
 
 // Level

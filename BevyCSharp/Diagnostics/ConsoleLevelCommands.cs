@@ -31,4 +31,12 @@ internal static class ConsoleLevelCommands
             return fault.Message;
         }
     }
+
+    /// <summary>Writes the prototypes' pictures as TrenchBroom shows them under a game's folder.</summary>
+    [Command("level.textures", "Writes the prototype materials' pictures for TrenchBroom under a game's folder, in textures/proto: level.textures <folder>")]
+    internal static string Textures(string folder)
+    {
+        var written = Levels.WritePrototypePictures(folder);
+        return $"wrote {written.Count} pictures to {Path.GetDirectoryName(written[0])}";
+    }
 }
