@@ -10,42 +10,17 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `8a85790a`, item 77 in two commits, `bc5559d2` the trees' memory and `8a85790a` the
-guard's stop, read at 09:36 on 2026-10-26, the first pushed at 09:37 after the run of `929a1cf7`
-went green, its run green at 09:55 with Windows in 17 minutes, the second pushed at 09:56, its run
-green at 10:13 with the suites in 16 to 17 minutes; carrying the review's files with the Reply's
-colon recast, three leads and a Shared line, DEVLOG.md and a note. The reading found a species'
-eight variants drawn from 11 to 271 MB of meshes' data and plans, all kept for the process, 1,027 MB
-for the 48 variants the suite plants, the skeletons and capsules 0.06 to 0.89 MB, the per-card stems
-and leaves 3.6 to 23.2 MB of stems and up to 49.4 of leaves a species, and shaping a variant
-allocating 3 to 5 times what it keeps, 128 MB for an oak's 33. Three cuts, the process keeping a
-variant's skeleton and capsules alone with an app that draws it shaping the rest on a worker and
-letting go once the meshes are made and the far levels pictured, the plans' per-card stems and
-leaves and the atlases' bytes with it; tree meshes made without the copy Render.CreateMesh keeps for
-a scene through an internal overload, 477 MB in a forest; and four variants shaped and pictured at a
-time. A thousand trees of three species dressed hold 21 MB of managed memory against 1,317, the
-process peaking at 2.19 GB against 5.6, 4.99 with every variant shaped at once, so the bound of four
-is most of the gain, the test taking 56 s against 30. The suite ran whole in one host through
-build/test.py at a 3 GB cap in a 20 GB scope, 1,976 passed and 3 skipped, the listing plus 11, in 42
-minutes with no stop and the host's RssAnon peaking at 2,222 MB in the canopy tests, the first
-attempt hitting test.py's own 40-minute limit and the rerun given 100, CI's limit a thing to watch.
-MemoryGuard writes its line to the file BCS_MEMORY_CAP_SAID names and test.py names one a dotnet
-process and reads it before the output, a stopped process's line saying the guard's reading and cap
-before test.py's own peak and the page putting the guard's whole line under the loss, a stand-in
-case covering a line vstest cut off, a real host stopped at 0.2 GB reading as stopped and its rerun
-part too. The three leads, the atlases' main-world copies of 7 MB a variant that RENDER_WORLD could
-drop, a saved scene writing a dressed tree's body, parts and capsules beside its Tree component so a
-load dresses it again, and statics such as SceneField._app keeping the last app alive until the next
-replaces it. No public line changed. The owner asked at 10:45 on 2026-10-26 for quick links to the
-devlog and the cheat sheet at the very top of the README, plain links to the files; the reviewer
-wrote the line as the README's first line with full addresses as N 4.3 has them, the coder
-committing README.md alone.
+Reviewed up to `f75ebdae`, the README's quick links, pushed at 10:47 on 2026-10-26 after the run of
+`8a85790a` went green, its own run watched, README.md's first line with the review's files,
+SHARED.md, DEVLOG.md and ASSETS.md and the d3 reading under Replies, nothing of item 65; N 4.2 and
+FirstGameTests pass on the tree, 18 of 18 and 5 of 5. Item 65's first phase is built and its
+whole-suite run at the 3 GB cap in flight.
+
+Before it, `8a85790a` came, item 77's second part, the guard's stop read as a stop, pushed at 09:56
+on 2026-10-26 after `bc5559d2`'s run went green, its run green at 10:13.
 
 Before it, `929a1cf7` came, item 70's fourth phase's leaves in the scene field, pushed at 07:13 on
 2026-10-26 after the run of `fc02fec5` went green, its run green at 07:30.
-
-Before it, `fc02fec5` came, item 70's fourth phase's wind, pushed at 04:05 on 2026-10-26 after the
-run of `6777b172` went green, its run green at 04:20.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -1997,3 +1972,32 @@ for, 64-bit atomic textures on Vulkan or Metal and no MSAA, the bridge handles w
 built. What it would take is Bevy's meshlet pass taking alpha-masked materials, extra vertex
 attributes and a vertex displacement, or a patched copy of its raster and material passes in the
 bridge, which is large; until one of them, the near levels stay the cards they are.
+
+Item 65's first phase, the format and the loader, in the commit carrying this line, as Decision 67
+has it. Level reads and writes Valve 220 map text, entities in braces with their keyvalues kept in
+order and duplicates kept, as two outputs of one name are, and brushes of faces each three points of
+a plane, a material, two axes with offsets, a rotation and two scales, each point in double
+precision as LevelPoint, since a corner found where planes meet moves by as much as the digits a
+float drops. The canonical writer lays a file out as TrenchBroom does, its game and format comments
+and a comment numbering each entity and brush, so the engine's own file reads and writes back byte
+for byte, and a file laid out otherwise, braces sharing lines, tabs, numbers with points and signs,
+reads to the same values and writes the canonical form. A face in Quake's older format, with no
+axes, is refused at its line with TrenchBroom's menu named for converting it. A brush's corners are
+where three of its planes meet within the rest, each found once and shared, and planes leaving the
+solid open are refused, every edge having to run back round the face beside it. Levels.Spawn builds
+it under a root, the worldspawn's brushes and each brush entity's through an EditMesh, a slot a
+material and every face's coordinates its own, drawn as the slot of its material's name and
+colliding as their triangles on a static body; a point entity stands at its origin turned by its
+angle or angles so its minus Z looks along the file's X turned, and a brush entity stands unturned
+at its origin or its brushes' middle, which the first try did not, its collision turned a quarter
+off its drawing. Every entity carries LevelKeys, its class, its targetname and its keys as the file
+writes them, Levels.Register says what a class makes, and the engine registers tree from a species
+and a seed. The worldspawn's _units_per_meter key, 32 by default, is named in docs/levels.md with
+TrenchBroom as the tool, and a material's picture spans the units a meter, so it repeats once a
+meter at a scale of one, as the prototype grid does; phase two's prototypes settle what TrenchBroom
+shows for them. level.load builds a file from the console and ./bcs. The test on a file TrenchBroom
+itself wrote waits for the owner's, asked in ASSETS.md. The picture is the room in
+2026-10-26-item-65-room.webp. The suite ran whole in one host at the 3 GB cap, 1,988 passed and 3
+skipped, the host's anonymous memory 2,107 MB at most. The public listing gains Level, LevelEntity,
+LevelBrush, LevelFace, LevelPoint, LevelKeys and Levels, no line removed or reshaped, and AGENTS.md
+gains BevyCSharp/Levels's row under N 1.5.

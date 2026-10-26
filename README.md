@@ -296,6 +296,7 @@ transform the renderer reads and a sound played from C# is an entity in the same
 | [Assets and models](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/assets-and-models.md) | Loading from a folder, an assembly or a pack, and glTF models |
 | [Drawing](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/drawing.md) | Meshes and materials made in code, and meshlets |
 | [Modeling](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/modeling.md) | Meshes shaped by operations, kept as a recipe and built into meshes and colliders |
+| [Levels](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/levels.md) | Levels of brushes and entities drawn in TrenchBroom, built into a scene with their collision |
 | [Trees](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/trees.md) | Trees and plants grown from a seed within Weber and Penn's controls, with their bark and leaves |
 | [Materials and textures](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/materials.md) | Bevy's physically based material and its images |
 | [Shaders](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/shaders.md) | Materials and passes written in Slang, compiled and reloaded as the game runs |

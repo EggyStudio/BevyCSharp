@@ -4150,6 +4150,79 @@ enum Bevy.LengthUnit : int
   Auto = 0
   Percent = 2
   Px = 1
+sealed class Bevy.Level
+  Level()
+  LevelEntity? World { get; }
+  List<LevelEntity> Entities { get; }
+  const double DefaultUnitsPerMeter = 32d
+  const string Extension = ".map"
+  const string UnitsPerMeterKey = "_units_per_meter"
+  double UnitsPerMeter { get; }
+  static Level Load(string path)
+  static Level Parse(string text, string name = "the level")
+  string Game { get; set; }
+  string Save(string path)
+  string Write()
+sealed class Bevy.LevelBrush
+  LevelBrush()
+  LevelPoint[]?[] Polygons()
+  List<LevelFace> Faces { get; }
+sealed class Bevy.LevelEntity
+  IEnumerable<string> All(string key)
+  LevelEntity()
+  List<KeyValuePair<string, string>> Keys { get; }
+  List<LevelBrush> Brushes { get; }
+  string ClassName { get; }
+  string? this[string key] { get; set; }
+sealed class Bevy.LevelFace : IEquatable<LevelFace>
+  LevelFace(LevelPoint First, LevelPoint Second, LevelPoint Third, string Material, LevelPoint UAxis, double UOffset, LevelPoint VAxis, double VOffset, double Rotation, double ScaleU, double ScaleV)
+  LevelPoint First { get; init; }
+  LevelPoint Normal { get; }
+  LevelPoint Second { get; init; }
+  LevelPoint Third { get; init; }
+  LevelPoint UAxis { get; init; }
+  LevelPoint VAxis { get; init; }
+  bool Equals(LevelFace? other)
+  double Distance { get; }
+  double Rotation { get; init; }
+  double ScaleU { get; init; }
+  double ScaleV { get; init; }
+  double UOffset { get; init; }
+  double VOffset { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(LevelFace? left, LevelFace? right)
+  static bool op_Inequality(LevelFace? left, LevelFace? right)
+  string Material { get; init; }
+  void Deconstruct(out LevelPoint First, out LevelPoint Second, out LevelPoint Third, out string Material, out LevelPoint UAxis, out double UOffset, out LevelPoint VAxis, out double VOffset, out double Rotation, out double ScaleU, out double ScaleV)
+struct Bevy.LevelKeys
+  EcsText ClassName
+  EcsText Keys
+  EcsText TargetName
+readonly struct Bevy.LevelPoint : IEquatable<LevelPoint>
+  LevelPoint(double X, double Y, double Z)
+  Vec3 Meters(double unitsPerMeter)
+  bool Equals(LevelPoint other)
+  double X { get; init; }
+  double Y { get; init; }
+  double Z { get; init; }
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static LevelPoint FromMeters(Vec3 meters, double unitsPerMeter)
+  static LevelPoint op_Addition(LevelPoint a, LevelPoint b)
+  static LevelPoint op_Multiply(LevelPoint a, double s)
+  static LevelPoint op_Subtraction(LevelPoint a, LevelPoint b)
+  static bool op_Equality(LevelPoint left, LevelPoint right)
+  static bool op_Inequality(LevelPoint left, LevelPoint right)
+  void Deconstruct(out double X, out double Y, out double Z)
+static class Bevy.Levels
+  static Entity Load(EcsWorld ecs, string path)
+  static Entity Spawn(EcsWorld ecs, Level level, string name = "level")
+  static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys)
+  static IReadOnlyList<string> ClassNames { get; }
+  static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn)
 enum Bevy.LightGizmoColoring : int
   ByKind = 3
   Manual = 0

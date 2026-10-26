@@ -999,6 +999,34 @@ static AssetHandle Grid(int pixelsPerMeter);                    // Makes the gri
 static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);  // Makes the image of one meter's cell of a grid, its edges a line and a finer line every tenth of a meter, to tile a level's faces whose texture coordinates are in meters
 ```
 
+## Levels
+
+The guide's page is [levels.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/levels.md).
+
+```csharp
+// Levels
+static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn);  // Says how an entity of a class is spawned, called with the entity placed under the level and carrying LevelKeys, after its brushes are built where it has any
+static Entity Load(EcsWorld ecs, string path);                  // Reads a level file and builds it into the world
+static Entity Spawn(EcsWorld ecs, Level level, string name = "level");  // Builds a level into the world
+static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys);  // The keyvalues an entity's LevelKeys holds, in the level file's order
+
+// Level
+static Level Load(string path);                                 // Reads a level from a file, as the game reads its assets
+string Save(string path);                                       // Writes the level to a file, which Load reads back the same
+static Level Parse(string text, string name = "the level");     // Reads a level from map text
+string Write();                                                 // The level as map text in the Valve 220 format, as TrenchBroom lays it out
+
+// LevelEntity
+IEnumerable<string> All(string key);                            // Every value of a key, in the file's order
+
+// LevelBrush
+LevelPoint[][] Polygons();                                      // Each face's polygon, its corners wound clockwise seen from outside as the file's points are, in the file's units, or nothing for a face whose plane only touches the solid
+
+// LevelPoint
+Vec3 Meters(double unitsPerMeter);                              // The point in meters with Y up, the file's (x, y, z) at (x, z, -y) and divided by its units a meter
+static LevelPoint FromMeters(Vec3 meters, double unitsPerMeter);  // The point a place in meters with Y up stands at in a file of the given units a meter
+```
+
 ## Trees
 
 The guide's page is [trees.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/trees.md).
