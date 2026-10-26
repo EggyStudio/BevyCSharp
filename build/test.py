@@ -10,7 +10,9 @@ cargo, `renderer`, the same with the renderer's crates, and `suite`, the managed
 dotnet test. Each is held to a time and a memory. A process that ends by itself, passing or
 failing, is read, the suite from its results file and cargo from what it prints under `failures:`.
 One that is lost, by a crash, a hang, its time or its memory, the memory cap MemoryGuard holds the
-suite's host to, or a bridge that does not build, is said first on the page. A suite that is lost runs again in parts, each a process under the same
+suite's host to, or a bridge that does not build, is said first on the page, a host the cap stopped
+with the guard's own line, which the guard writes to a file the script names for each process, since
+dotnet test quotes only a window of a crashed host's output. A suite that is lost runs again in parts, each a process under the same
 limits, so a part that is lost costs only its own tests. A part of the suite is a run of its test
 classes in order, at least a hundred tests, and the last part takes whatever no other names, so no
 test falls between two parts.
@@ -77,6 +79,7 @@ class Process:
         self.peak_mb = 0
         self.past_mb = None       # the reading that passed the memory limit, and the limit
         self.lost = None          # None, or "crash", "hang", "time", "memory", "cap" or "build"
+        self.said = None          # what MemoryGuard said as it stopped the host at its cap
         self.running = []         # the tests it was in, where the blame collector says
         self.after = None         # the last test to end before it was lost
         self.last_lines = []
@@ -84,7 +87,7 @@ class Process:
         self.results = {}         # a cargo part's, by test, as a results file holds them
 
     def summary(self):
-        how = (LOSSES[self.lost] + (past(self.past_mb) + "," if self.past_mb else "")) if self.lost else "ended"
+        how = (LOSSES[self.lost] + (past(self.past_mb) + "," if self.past_mb else "") + (guarded(self.said) if self.said else "")) if self.lost else "ended"
         held = f", {self.peak_mb:,} MB at most" if self.peak_mb else ""
         tests = f"{self.counts['Passed']:,} passed, {self.counts['Failed']:,} failed, {self.counts['NotExecuted']:,} skipped, "
         return f"{self.label}: {tests}{how} after {duration(self.seconds)}{held}, exit code {self.exit_code}, its output in {self.output}"
@@ -94,14 +97,24 @@ LOSSES = {"time": "ended at its time limit", "memory": "ended at its memory limi
           "crash": "lost to a crash", "build": "did not build", "cap": "stopped at its memory cap"}
 
 
+def guarded(said):
+    """The reading the guard stopped a host at and its cap, from its line, said after the loss, the
+    line itself under the loss on the page, where the summary's line has no room for it."""
+    found = CAP_SAID.search(said)
+    return f", the guard reading {found.group(1)} GB past its cap of {found.group(2)} GB," if found else ""
+
+
 def past(reading):
     """The reading that passed the memory limit and the limit, said after the loss, as the cap's line
     says the guard's, so a process ended for its memory is read on the page and not guessed at."""
     return f", its largest process read at {reading[0]:,} MB past the {reading[1]:,} MB allowed" if reading else ""
 
 # What MemoryGuard says as it ends a process past its cap, whose exit vstest reports as a crashed
-# host, its tally of the tests that ran before passing for a whole run's.
-CAP_SAID = re.compile(r"\[BevyCSharp\] The process holds [\d.]+ GB of the machine's memory, past its cap of")
+# host, its tally of the tests that ran before passing for a whole run's. The guard writes it to the
+# file the variable names as well, since vstest's account quotes a window of the host's output that
+# may end before it.
+CAP_SAID = re.compile(r"\[BevyCSharp\] The process holds ([\d.]+) GB of the machine's memory, past its cap of ([\d.]+) GB[^\n]*")
+CAP_SAID_VARIABLE = "BCS_MEMORY_CAP_SAID"
 
 
 def command_of(process, args, results):
@@ -127,6 +140,10 @@ def command_of(process, args, results):
 def run(process, args, results):
     command = command_of(process, args, results)
     output_path = os.path.join(results, process.output)
+    said_path = os.path.join(results, process.name + ".cap.txt")
+    if os.path.exists(said_path):
+        os.remove(said_path)
+    environment = dict(os.environ, **{CAP_SAID_VARIABLE: said_path}) if process.kind == "dotnet" else None
     started = time.monotonic()
     with open(output_path, "w", encoding="utf-8", errors="replace", newline="\n") as output:
         # A cargo part is compiled first, held to the time alone, since compiling the renderer's
@@ -136,7 +153,7 @@ def run(process, args, results):
             if process.exit_code != 0 and not process.lost:
                 process.lost = "build"
         if not process.lost:
-            process.exit_code = watch(command, output, process, args, started, memory=True)
+            process.exit_code = watch(command, output, process, args, started, memory=True, environment=environment)
     process.seconds = time.monotonic() - started
 
     text = read_text(output_path)
@@ -144,10 +161,12 @@ def run(process, args, results):
         return read_cargo(process, text)
 
     if process.lost is None:
+        said = CAP_SAID.search(read_text(said_path) if os.path.exists(said_path) else "") or CAP_SAID.search(text)
         if "inactivity time of" in text:
             process.lost = "hang"
-        elif CAP_SAID.search(text) and ("Test Run Aborted" in text or "test run was aborted" in text):
+        elif said and (os.path.exists(said_path) or "Test Run Aborted" in text or "test run was aborted" in text):
             process.lost = "cap"
+            process.said = said.group(0).strip()
         elif "Test Run Aborted" in text or "test run was aborted" in text or not os.path.exists(os.path.join(results, process.name + ".trx")):
             process.lost = "crash"
     process.counts = Counter(outcome for outcome, _, _ in read_results(os.path.join(results, process.name + ".trx")).values())
@@ -158,10 +177,10 @@ def run(process, args, results):
     return process
 
 
-def watch(command, output, process, args, started, memory):
+def watch(command, output, process, args, started, memory, environment=None):
     """Runs a command into the output, ending it at the time limit, and at the memory limit where asked."""
     options = {"start_new_session": True} if os.name != "nt" else {"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP}
-    child = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, cwd=ROOT, **options)
+    child = subprocess.Popen(command, stdout=output, stderr=subprocess.STDOUT, cwd=ROOT, env=environment, **options)
     limit_seconds = args.timeout_minutes * 60
     while child.poll() is None:
         time.sleep(0.25)
@@ -562,7 +581,7 @@ def digest(results_dir, processes, listed, seconds):
         "commit": commit(),
         "passed": outcomes["Passed"], "failed": outcomes["Failed"], "skipped": outcomes["NotExecuted"], "no_result": no_result,
         "seconds": round(seconds), "peak_mb": max((p.peak_mb for p in processes), default=0),
-        "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "seconds": round(p.seconds), "peak_mb": p.peak_mb, "exit_code": p.exit_code,
+        "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "said": p.said, "seconds": round(p.seconds), "peak_mb": p.peak_mb, "exit_code": p.exit_code,
                        "running": p.running, "after": p.after, "last_lines": p.last_lines, "summary": p.summary()} for p in processes],
         "causes": sorted(causes.values(), key=lambda c: (-c["count"], c["key"])),
         "repeated": repeated_lines(read_text(path) for path in outputs),
@@ -610,6 +629,8 @@ def page(d):
             continue
         held = f" holding {p['peak_mb']:,} MB" if p["peak_mb"] else ""
         lines.append(f"### Lost: {p['label']}, {LOSSES[p['lost']]}{past(p.get('past_mb'))}, after {duration(p['seconds'])}{held}, exit code {p['exit_code']}")
+        if p.get("said"):
+            lines.append(f"The guard said: {p['said']}")
         if p["running"]:
             lines.append("In " + ", ".join(f"`{t}`" for t in p["running"]))
         elif p.get("after"):

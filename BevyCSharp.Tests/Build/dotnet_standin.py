@@ -4,7 +4,8 @@
 Its tests are 40 of AlphaTests, 35 of BravoTests, 30 of CharlieTests and 5 of NormTests. Asked for
 them with --list-tests it lists them. Asked to run them with no filter, as the suite whole, it hangs,
 grows until it is ended, dies with exit code 134, or ends as dotnet test does once MemoryGuard has
-stopped its host at the cap, as BCS_STANDIN says. With a filter, as a part, it passes the tests the
+stopped its host at the cap, its line in the output or cut from it and in the file the script names,
+as BCS_STANDIN says. With a filter, as a part, it passes the tests the
 filter takes and writes their results file.
 """
 
@@ -62,13 +63,21 @@ def main():
         elif mode == "die":
             print("the last words of a process about to die", flush=True)
             os._exit(134)
-        elif mode == "cap":
+        elif mode in ("cap", "cut"):
             # The guard's line, then vstest's account of the host it ended, whose tally of the
-            # tests that ran before reads as a pass.
-            print("[BevyCSharp] The process holds 3.76 GB of the machine's memory, past its cap of 3.75 GB, so it "
-                  "stops here rather than take what the machine has left. The cap is Config.MemoryCap or "
-                  "BCS_MEMORY_CAP_GB.", flush=True)
-            print("The active test run was aborted. Reason: Test host process crashed", flush=True)
+            # tests that ran before reads as a pass. Cut, the account quotes a window of the host's
+            # output that ends before the line, which the guard wrote to the file the script named.
+            said = ("[BevyCSharp] The process holds 3.76 GB of the machine's memory, past its cap of 3.75 GB, so it "
+                    "stops here rather than take what the machine has left. The cap is Config.MemoryCap or "
+                    "BCS_MEMORY_CAP_GB.")
+            if mode == "cap":
+                print(said, flush=True)
+                print("The active test run was aborted. Reason: Test host process crashed", flush=True)
+            else:
+                with open(os.environ["BCS_MEMORY_CAP_SAID"], "w", encoding="utf-8") as f:
+                    f.write(said + "\n")
+                print("The active test run was aborted. Reason: Test host process crashed : 2026-10-26T06:30:00.000000Z  "
+                      "INFO bevy_render::renderer: AdapterInfo { name: \"NVIDIA GeForce RTX", flush=True)
             print("Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1", flush=True)
             print("Test Run Aborted.", flush=True)
             return 1

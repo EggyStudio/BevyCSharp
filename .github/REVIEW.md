@@ -2084,3 +2084,16 @@ writes their dressed bodies, parts and capsules beside the Tree component, since
 takes every entity carrying a component of the project's own, so a load dresses each tree again
 beside its old parts. And the engine keeps the last app it ran through statics such as SceneField's
 until the next app replaces them. No public line changed.
+
+Item 77's guard's stop, in the commit carrying this line. MemoryGuard writes its line to the file
+BCS_MEMORY_CAP_SAID names as well as to the console and the crash file, and build/test.py names one
+for each suite process it runs, so a host the cap stopped reads as stopped whatever window of its
+output vstest quotes. The process's line on the page says the guard's reading and its cap before the
+most the script read it holding, and the guard's own line stands under its loss. The stand-in gained
+a host whose line vstest cut off, and a real host stopped at a fifth of a gigabyte read as stopped
+with its line, as did the part it ran again in. No public line changed.
+
+Shared: build/test.py reading a memory guard's stop from a file it names for each process, in the
+commit carrying this line, since dotnet test quotes only a window of a crashed host's output and cut
+the guard's line off twice on 2026-10-26. 3DEngine's build/test.py reads no cap, so it is offered
+for a guard of its own.

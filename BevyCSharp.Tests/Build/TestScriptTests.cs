@@ -138,6 +138,7 @@ public sealed class TestScriptTests : IDisposable
     [InlineData("grow", "ended at its memory limit, its largest process read at", 200)]
     [InlineData("die", "lost to a crash", 200)]
     [InlineData("cap", "stopped at its memory cap", 200)]
+    [InlineData("cut", "stopped at its memory cap", 200)]
     public void ALostSuiteIsSaidFirstAndRunsAgainInParts(string mode, string said, int megabytes)
     {
         var python = Needs.Python();
@@ -149,7 +150,16 @@ public sealed class TestScriptTests : IDisposable
         var page = File.ReadAllLines(_folder.File("digest.md"));
         Assert.Contains("110 passed, 0 failed, 0 skipped, 0 without a result", page[0]);
         Assert.StartsWith($"### Lost: the suite, {said}", page.First(line => line.StartsWith("### ", StringComparison.Ordinal)));
-        if (mode == "cap") Assert.Contains(page, line => line.Contains("past its cap of 3.75 GB", StringComparison.Ordinal));
+        if (mode is "cap" or "cut")
+        {
+            // The guard's reading and its cap in the suite's summary, before the most the script read
+            // it holding where it read any, which a stand-in ending in its first quarter second
+            // leaves unread, and the guard's own line under its loss, whether vstest's account
+            // quoted the line or cut it off.
+            Assert.Contains(page, line => line.StartsWith("- the suite: ", StringComparison.Ordinal) && line.Contains("stopped at its memory cap, the guard reading 3.76 GB past its cap of 3.75 GB, after", StringComparison.Ordinal));
+            Assert.Contains("The guard said: [BevyCSharp] The process holds 3.76 GB of the machine's memory, past its cap of 3.75 GB, so it stops here rather than take what the machine has left. The cap is Config.MemoryCap or BCS_MEMORY_CAP_GB.", page);
+        }
+
         if (mode == "grow") Assert.Contains(page, line => line.StartsWith("### Lost", StringComparison.Ordinal) && line.Contains("MB past the 200 MB allowed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- AlphaTests to CharlieTests: 105 passed", StringComparison.Ordinal));
         Assert.Contains(page, line => line.StartsWith("- NormTests: 5 passed", StringComparison.Ordinal));

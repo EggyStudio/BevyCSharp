@@ -36,9 +36,12 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A test host stopped this way reads to <c>dotnet test</c> as one that crashed, and its tally of
-/// the tests that ran before still says they passed, so <c>build/test.py</c>, which <c>bcs test</c>
-/// and CI run the suite through, says a host whose output holds this line was stopped at its cap,
-/// runs the suite again in parts and counts every listed test without a result.
+/// the tests that ran before still says they passed. <c>dotnet test</c> quotes only a window of a
+/// crashed host's output, which may cut this line off, so where <c>BCS_MEMORY_CAP_SAID</c> names a
+/// file the line is written there as well. <c>build/test.py</c>, which <c>bcs test</c> and CI run
+/// the suite through, names one for each process it runs, and says a host whose file or output
+/// holds the line was stopped at its cap, the line in the run's summary with the most it read the
+/// host holding, runs the suite again in parts and counts every listed test without a result.
 /// </para>
 /// </remarks>
 public static partial class MemoryGuard
@@ -48,6 +51,9 @@ public static partial class MemoryGuard
 
     /// <summary>What the process exits with when it is stopped at its cap.</summary>
     public const int ExitCode = 86;
+
+    /// <summary>The variable naming a file the guard writes what it says to as it stops the process.</summary>
+    internal const string SaidVariable = "BCS_MEMORY_CAP_SAID";
 
     private const long Gigabyte = 1L << 30;
 
@@ -250,7 +256,10 @@ public static partial class MemoryGuard
         }
     }
 
-    /// <summary>Says why on the console and in the crash file, and ends the process.</summary>
+    /// <summary>
+    /// Says why on the console, in the crash file and in the file the environment names, and ends
+    /// the process.
+    /// </summary>
     private static void Stop(string said)
     {
         Console.Error.WriteLine(said);
@@ -262,6 +271,15 @@ public static partial class MemoryGuard
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
             // Said on the console already, and a tool controlling the app reads the console.
+        }
+
+        try
+        {
+            if (Environment.GetEnvironmentVariable(SaidVariable) is { Length: > 0 } file) File.WriteAllText(file, said + "\n");
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+        {
+            // A path that cannot be written leaves the console's line and the crash file's.
         }
 
         // Said again, last, since Bevy's threads go on writing to the console while the crash file
