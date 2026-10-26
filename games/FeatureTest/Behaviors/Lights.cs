@@ -142,39 +142,11 @@ public partial struct Lights
     }
 
     /// <summary>
-    /// The walls, the partitions between the bays, the roof, the floor and the aisle's lamps.
+    /// The aisle's lamps. The hall's walls, partitions, roof and floor are the level's
+    /// (<c>levels/feature-test.map</c>), at the sizes and places they were drawn at here.
     /// </summary>
     private static void Shell(EcsWorld ecs)
     {
-        var plaster = Render.CreateMaterial(0.7f, 0.68f, 0.64f, roughness: 0.9f);
-        var concrete = Render.CreateMaterial(0.42f, 0.42f, 0.42f, roughness: 0.8f);
-        var roof = Render.CreateMaterial(0.3f, 0.28f, 0.27f, roughness: 0.9f);
-
-        const float Half = 12f, Door = 2f, DoorHeight = 4f;
-        var middle = (Front + Back) / 2f;
-        var length = Front - Back;
-        var up = Ground + (Height / 2f);
-
-        // The front wall either side of the doorway and over it.
-        var side = Half - Door;
-        Blocks.Static(ecs, "Hall front wall, west", new Vec3(-Door - (side / 2f), up, Front), new Vec3(side, Height, Wall), plaster);
-        Blocks.Static(ecs, "Hall front wall, east", new Vec3(Door + (side / 2f), up, Front), new Vec3(side, Height, Wall), plaster);
-        Blocks.Static(ecs, "Hall lintel", new Vec3(0f, Ground + DoorHeight + ((Height - DoorHeight) / 2f), Front), new Vec3(Door * 2f, Height - DoorHeight, Wall), plaster);
-
-        Blocks.Static(ecs, "Hall back wall", new Vec3(0f, up, Back), new Vec3((Half * 2f) + Wall, Height, Wall), plaster);
-        Blocks.Static(ecs, "Hall west wall", new Vec3(-Half, up, middle), new Vec3(Wall, Height, length), plaster);
-        Blocks.Static(ecs, "Hall east wall", new Vec3(Half, up, middle), new Vec3(Wall, Height, length), plaster);
-        Blocks.Static(ecs, "Hall roof", new Vec3(0f, Ground + Height + 0.15f, middle), new Vec3((Half * 2f) + Wall, 0.3f, length + Wall), roof);
-        Blocks.Static(ecs, "Hall floor", new Vec3(0f, Ground + 0.02f, middle), new Vec3(Half * 2f, 0.04f, length), concrete);
-
-        // Partitions between the bays, from the aisle's edge to the outer walls.
-        for (var bay = 0; bay < Bays.Length - 1; bay++)
-        {
-            var z = (Bays[bay] + Bays[bay + 1]) / 2f;
-            Blocks.Static(ecs, $"Hall partition {bay + 1}, west", new Vec3(-8f, up, z), new Vec3(8f, Height, Wall), plaster);
-            Blocks.Static(ecs, $"Hall partition {bay + 1}, east", new Vec3(8f, up, z), new Vec3(8f, Height, Wall), plaster);
-        }
-
         // Dim lamps down the aisle, enough to walk by and no more, so each bay's own light is
         // what lights it.
         foreach (var z in new[] { -60f, -72f, -84f })

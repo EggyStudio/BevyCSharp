@@ -1027,6 +1027,7 @@ static LevelBrush Box(LevelPoint low, LevelPoint high, string material, double s
 static LevelBrush Wedge(LevelPoint low, LevelPoint high, string material, double scale = 0.0625);  // A ramp between two corners, its slope rising along X from the low corner's height at its low X to the high corner's at its high X
 static IReadOnlyList<LevelBrush> Arch(LevelPoint center, double radius, double thickness, double depth, string material, int segments = 8, double degrees = 180, double scale = 0.0625);  // An arch standing across X, a half ring or a part of one cut into straight segments, a brush each, as Hammer's arch tool cuts one
 LevelBrush Turned(double degrees, LevelPoint about);            // The brush turned about the vertical line through a point, its faces' mapping taken again from the world, so its material lies on it as on one drawn where it stands
+LevelBrush Moved(LevelPoint by);                                // The brush moved, its faces' mapping taken again from the world, so its material stays where the world puts it rather than going with the brush, as a moved brush's does in TrenchBroom with its texture lock off
 
 // LevelPoint
 Vec3 Meters(double unitsPerMeter);                              // The point in meters with Y up, the file's (x, y, z) at (x, z, -y) and divided by its units a meter

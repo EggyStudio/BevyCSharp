@@ -11,10 +11,10 @@ var root = Levels.Load(ctx.Ecs, "levels/room.map");          // everything under
 
 Every entity of the level stands under the root, so despawning the root takes the level away, and
 the root stands where `place` puts it, the file's origin, as the feature test stands its hub,
-`games/FeatureTest/assets/levels/hub.map`, on its ground. `Level.Load` reads the file alone,
-`Level.Parse` reads map text, and `Levels.Spawn` builds a level read or made in code into the world.
-`level.load` does the same from the console and from `./bcs`, so a level saved in TrenchBroom is
-tried in a running app as soon as it is saved.
+`games/FeatureTest/assets/levels/feature-test.map`, on its ground. `Level.Load` reads the file
+alone, `Level.Parse` reads map text, and `Levels.Spawn` builds a level read or made in code into the
+world. `level.load` does the same from the console and from `./bcs`, so a level saved in TrenchBroom
+is tried in a running app as soon as it is saved.
 
 ## The file
 
@@ -91,8 +91,9 @@ the library grows and dresses as any planted tree.
 `LevelBrush.Box`, `LevelBrush.Wedge` and `LevelBrush.Arch` make brushes as a level editor's tools
 do, a box, a ramp rising along X and a ring cut into straight segments, and `Level.Doorway` a wall
 along X with a rounded opening through it, each face mapped as a new face is, along the world's axes
-at a sixteenth's scale. `LevelBrush.Turned` turns a brush about the vertical and maps its faces
-again from the world, so a wall another way is one of these turned:
+at a sixteenth's scale. `LevelBrush.Turned` turns a brush about the vertical and `LevelBrush.Moved`
+moves it, each mapping its faces again from the world, so a wall another way or elsewhere is one of
+these turned and moved, as the feature test's level is built:
 
 ```csharp
 var level = new Level();

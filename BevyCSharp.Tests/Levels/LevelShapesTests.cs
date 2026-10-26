@@ -120,6 +120,21 @@ public sealed class LevelShapesTests
         Assert.Equal(turned.Faces.Select(face => face.Normal), Written(turned).Faces.Select(face => face.Normal));
     }
 
+    [Fact]
+    public void ABrushMovedKeepsItsShapeAndTakesItsMappingFromTheWorld()
+    {
+        var box = LevelBrush.Box(new LevelPoint(0, -8, 0), new LevelPoint(128, 8, 96), "proto/wall");
+        var moved = box.Moved(new LevelPoint(64, -32, 16));
+        var corners = moved.Polygons().OfType<LevelPoint[]>().SelectMany(polygon => polygon).ToList();
+
+        Assert.Equal((64.0, 192.0, -40.0, -24.0, 16.0, 112.0), (corners.Min(p => p.X), corners.Max(p => p.X), corners.Min(p => p.Y), corners.Max(p => p.Y), corners.Min(p => p.Z), corners.Max(p => p.Z)));
+        Assert.Equal(Volume(box), Volume(moved), 6);
+
+        // Its faces keep their axes and offsets, so the material stays where the world puts it and
+        // a point of the world falls on the same texel as before.
+        Assert.Equal(box.Faces.Select(face => (face.UAxis, face.VAxis, face.UOffset, face.VOffset)), moved.Faces.Select(face => (face.UAxis, face.VAxis, face.UOffset, face.VOffset)));
+    }
+
     /// <summary>A convex brush's volume, a pyramid from its first corner to each face.</summary>
     private static double Volume(LevelBrush brush)
     {

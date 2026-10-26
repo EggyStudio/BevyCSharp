@@ -265,6 +265,8 @@ in a different tree test each of three runs.
 
 Done that day
 
+- Item 65 at `c5cb4888`. A level is a file of brushes and entities the engine loads, and the
+  prototyping look is its palette.
 - Item 70 at `929a1cf7`. Trees and foliage grow from a seed inside Weber and Penn's parameters,
   through the modeling, with no asset files.
 - Item 77 at `bc5559d2`. The trees' memory for the process read and cut, and the memory guard's stop

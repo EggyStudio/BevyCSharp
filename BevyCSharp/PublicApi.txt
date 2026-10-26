@@ -4165,6 +4165,7 @@ sealed class Bevy.Level
   string Save(string path)
   string Write()
 sealed class Bevy.LevelBrush
+  LevelBrush Moved(LevelPoint by)
   LevelBrush Turned(double degrees, LevelPoint about)
   LevelBrush()
   LevelPoint[]?[] Polygons()

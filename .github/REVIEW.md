@@ -10,26 +10,25 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `c6b95ea9`, three commits pushed together at 12:57 on 2026-10-26 after the red run of
-`1092b434` ended, the run of `c6b95ea9` green at 13:13 with the suites in 13 to 16 minutes, Verdict
-47 settled by it, the pixels agreeing on the runners. `8a287c2f` has the feature test's drive asking
-the meadow for one of its planted trees by species and seed so the drive runs whole again;
-`d53a3108` is item 65's third phase's helpers, levels blocked out in code with boxes, ramps, arches
-and walls with rounded doorways, each a convex brush mapped along the world's axes as a new face in
-TrenchBroom is, LevelBrush.Shapes and Level.Shapes with six public lines, the cheat sheet and
-docs/levels.md; `c6b95ea9` is Verdict 47's mend, the shipped prototype pictures held to what the
-engine draws pixel for pixel through AnimationReader.Png, a difference naming the first differing
-pixel with both values and the count and writing the drawn picture under the tests' results, which
-the test-digest artifact carries, the pixels agreeing here in Debug and Release, the drawing
-rounding three grid tones each tinted by each prototype with the least margin 0.0014 of a step from
-a rounding boundary, so the runners' failure should have been the PNG bytes alone, the next run's
-page confirming it or naming the pixel.
+Reviewed up to `c5cb4888`, item 65's third phase's hub, pushed at 13:40 on 2026-10-26 after the run
+of `c6b95ea9` went green, its own run green at 13:57 with the suites in 15 to 17 minutes, carrying
+the review's files with a Reply, DEVLOG.md and a captioned picture.
+games/FeatureTest/assets/levels/hub.map is the octagonal plaza with a rounded doorway under an
+orange arch toward each of the five zones and the start six meters south facing north; HubLevelTests
+holds the file to its generator by value within a millionth of a unit, BCS_WRITE_LEVELS=1 writing it
+again, and checks a doorway open toward each zone and a wall the three ways between; the shapes keep
+their points to a millionth and take quarter turns whole, so the file has no sine dust. Levels.Load
+and Levels.Spawn take a place for the root since bodies are made where the root stands, the public
+listing reshaping those two lines, the Reply saying so under N 2.4; Scene stands the hub on the
+ground with Zones' hub start on the plaza floor, the cube kept since Crates and RTAO build on it.
+The whole suite in one host at the 3 GB cap, 1,997 passed and 3 skipped, the listing of 1,989 plus
+11; the level, shapes and hub tests pass on the headless bridge and the drive ran whole on it.
+
+Before it, `c6b95ea9` came with `8a287c2f` and `d53a3108`, Verdict 47's mend, the drive's zone check
+and the level helpers, pushed at 12:57 on 2026-10-26, its run green at 13:13, the verdict settled.
 
 Before it, `1092b434` came, item 65's second phase in two commits, pushed at 12:26 on 2026-10-26,
 its run red at 12:44 on the three suites at the shipped-pictures test, Verdict 47.
-
-Before it, `25e9f601` came, Verdict 46's mend, pushed at 11:40 on 2026-10-26, its run green at
-11:58, the verdict settled.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -225,54 +224,6 @@ from [SHARED.md](SHARED.md).
    **The pack run for 0.4**, green on Linux, macOS and Windows and playing Courtyard, settles the
    item (Decision 8).
 
-65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
-    palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
-    world-aligned mapping a face, and entities with a class, keyvalues and the connections of item
-    66; the engine loads it into a scene, the brushes meshed with their collision, the entities
-    spawned by class; the palette is Unreal's level prototyping look, orange and gray with a
-    world-aligned meter grid as Source's dev textures have, with rounded doorways among the brush
-    shapes; a test loading a small level and reading its brushes and entities, and the feature
-    test's rooms rebuilt from such a file as the first level. Phases proposed by the coder; after
-    item 64's first phase. The coder's phases are the format and the loader, convex brushes as
-    planes as .map and .vmf have them, built through EditMesh with a material and alignment a face,
-    entities with class, keys and outputs, round-trip tests and colliders; then the prototype
-    material, a world-aligned meter grid in Unreal's palette with Source's marks; then the feature
-    test's hub from a file, the other rooms under item 68. The format is Valve 220 map text as
-    TrenchBroom reads and writes it, Decision 67 of 2026-10-26. The loader's fixture from the tool
-    itself waits on a small level saved in TrenchBroom, asked in ASSETS.md on 2026-10-26; the phase
-    ships with its own round-trip tests and the fixture's test is added when the file comes. The
-    first phase at `f703b3b1` on 2026-10-26, the format and the loader, the room pictured. The
-    second phase reads each material's own texel size for the mapping, the picture's pixels a meter,
-    with the units a meter as the fallback for a material without a picture, since the first phase
-    maps one repeat a meter at scale 1 and 512 pixel prototype pictures with a game config's face
-    scale of a sixteenth would otherwise repeat wrong. The second phase in two commits as the coder
-    proposed on 2026-10-26: the grid's steps follow the editor's snap at 32 units a meter, the meter
-    edge line kept with a half-meter line and quarter-meter fine lines in place of the tenths, a
-    small 1 m measure mark in each cell's corner from a 5 by 7 bitmap font in code as the dev
-    textures print their sizes, and Unreal's palette by the names a level uses, the floor a dark
-    gray, the wall a light gray, the ceiling lighter, stairs, ramps and moving parts the prototyping
-    orange, door, window and hazard keeping green, blue and red, proto_dark, proto_light and
-    proto_orange naming the tones, the palette's change going to 3DEngine by a Shared line since
-    SHARED.md keeps the look alike; then level.textures writing each prototype as a 512 pixel
-    picture under a folder TrenchBroom reads, a TrenchBroom game config in the repository with the
-    Generic layout, the Valve format, a face scale of a sixteenth and an fgd of the engine's
-    classes, the engine reading each material's own texel size in place of the units a meter;
-    rounded doorways are the third phase's brushes, not a material. The second phase at `ce142f8a`
-    and `1092b434` on 2026-10-26, Unreal's tones and the editor's grid steps, the pictures and the
-    TrenchBroom config shipped under the levels folder, the palette to 3DEngine as its item 130. The
-    third phase in two commits as the coder proposed, public helpers on Level making brushes as
-    Hammer's block and arch tools do, a box, a wedge, an arch of convex segments and a doorway with
-    a rounded opening, each face with world-aligned axes so a file built in code is what TrenchBroom
-    draws, item 67's block tool reusing them; then the hub's file under the feature test's assets, a
-    raised plaza floor, a ring of low walls with five rounded doorways in orange framing toward the
-    zones' roads, steps down in orange and an info_player_start at the hub's start, written once by
-    a generator and checked in as text, Scene.cs loading it in place of the turning cube with the
-    ground and the signposts kept outside the ring and the player's start read from the file, a test
-    reading the file back with its five doorways and the start, the drive's and capture jobs' new
-    picture, the FeatureTest README and docs/levels.md pointing at the file. The helpers at
-    `d53a3108` on 2026-10-26, boxes, wedges, arches and doorways as brushes; the hub's file next,
-    and the level then grows into item 68's rooms by the owner's word of that day, Decision 68.
-
 66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
     An entity's output names a target entity, an input on it, a parameter, a delay and whether it
     fires once, the engine firing them at run time in order with their delays, the level file
@@ -304,7 +255,15 @@ from [SHARED.md](SHARED.md).
     the layout pictured before content moves; then each zone's content moved in, one commit a zone,
     the drive's stations and captures updated as each moves; then the drive and captures retaken,
     the README and docs saying the new map. The engine's features stay; a check a room cannot hold
-    goes with a note.
+    goes with a note. The second phase as the coder proposed on 2026-10-26 after the hub, courts
+    enclosing each zone's content where it stands so the drive stays green before anything moves,
+    the course and playground, the gallery, the meadow and forests, the Sponza yard with its corner
+    toward the hub cut away and the light hall's shell rebuilt from brushes at its size, arched
+    corridors joining them to the plaza, the west corridor an arcade and the meadow given a raised
+    walkway on ramps, the ground plane's mesh going with an entity at ground height for Crates' slab
+    and the RTAO rays, Lights.Shell replaced by brushes, a public LevelBrush.Moved for the generator
+    and item 67's editor, the layout pictured to the owner and in the devlog with a line a room
+    before the third phase.
 
 ## Verdicts
 
@@ -2170,3 +2129,26 @@ since 1bd18a6c, so the drive had stopped there on every run since. The picture i
 3 skipped in one host at the 3 GB cap, and the level, shapes and hub tests pass on the headless
 bridge. The public listing reshapes Levels.Load and Levels.Spawn, each given a place after its other
 parameters, which a call giving the earlier ones keeps.
+
+Decision 68's second phase, item 68's first commit, the feature test's map one walled level, in the
+commit carrying this line. The level, renamed games/FeatureTest/assets/levels/feature-test.map and
+written by FeatureTestLevelTests, keeps the plaza and adds a court round each zone where the zone's
+pieces stand, so the drive stays whole before the next phase moves them: the course and the
+playground east in a court of 10 m walls, the gallery west, the meadow and its forests south with a
+walkway four meters up its west wall on two ramps, and the scenes yard north-east, its walls 16 m
+and its corner toward the plaza cut away by a wall with a doorway. The light hall's shell, its
+walls, partitions, roof and floor, is the level's brushes at the sizes Lights.Shell drew, which
+keeps the aisle's lamps alone. Corridors six meters wide and 7 m high join the plaza's doorways to
+the courts, the west one beside an arcade of four arches, the south one under five arches, the
+north-east one along the diagonal, each opening into its court through a rounded doorway. The ground
+plane is no longer drawn, its entity kept where the floors stand for the crates' slab and the
+ray-traced occlusion's rays, and every floor is the level's. The test holds each zone's start to a
+floor with room for a body, and from each start, the walkway's middle and both ramps' tops, at an
+eye's height, a wall across every one of 64 level ways, so the sky shows over the walls and never
+the horizon. LevelBrush.Moved moves a brush with its mapping taken from the world, and the generator
+stands each wall by building it along X, turning it and moving it. The drive runs whole on it, its
+peak 3.83 GB, the hall's bays on the brushes' walls as they were. The picture is
+2026-10-26-item-68-layout.webp with 2026-10-26-item-68-layout.md, a line a room of what it holds,
+sent to the owner. The whole suite ran with it, 1,999 passed and 3 skipped in one host at the 3 GB
+cap, and the level tests pass on the headless bridge. The public listing gains LevelBrush.Moved, no
+line removed or reshaped.

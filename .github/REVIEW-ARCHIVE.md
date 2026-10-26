@@ -1902,6 +1902,56 @@ a batch.
     and the leaves in the field at `929a1cf7` on 2026-10-26, the trees grown, dressed, planted,
     leveled, swayed and shading their floor; item 77 took their memory.
 
+65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
+    palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
+    world-aligned mapping a face, and entities with a class, keyvalues and the connections of item
+    66; the engine loads it into a scene, the brushes meshed with their collision, the entities
+    spawned by class; the palette is Unreal's level prototyping look, orange and gray with a
+    world-aligned meter grid as Source's dev textures have, with rounded doorways among the brush
+    shapes; a test loading a small level and reading its brushes and entities, and the feature
+    test's rooms rebuilt from such a file as the first level. Phases proposed by the coder; after
+    item 64's first phase. The coder's phases are the format and the loader, convex brushes as
+    planes as .map and .vmf have them, built through EditMesh with a material and alignment a face,
+    entities with class, keys and outputs, round-trip tests and colliders; then the prototype
+    material, a world-aligned meter grid in Unreal's palette with Source's marks; then the feature
+    test's hub from a file, the other rooms under item 68. The format is Valve 220 map text as
+    TrenchBroom reads and writes it, Decision 67 of 2026-10-26. The loader's fixture from the tool
+    itself waits on a small level saved in TrenchBroom, asked in ASSETS.md on 2026-10-26; the phase
+    ships with its own round-trip tests and the fixture's test is added when the file comes. The
+    first phase at `f703b3b1` on 2026-10-26, the format and the loader, the room pictured. The
+    second phase reads each material's own texel size for the mapping, the picture's pixels a meter,
+    with the units a meter as the fallback for a material without a picture, since the first phase
+    maps one repeat a meter at scale 1 and 512 pixel prototype pictures with a game config's face
+    scale of a sixteenth would otherwise repeat wrong. The second phase in two commits as the coder
+    proposed on 2026-10-26: the grid's steps follow the editor's snap at 32 units a meter, the meter
+    edge line kept with a half-meter line and quarter-meter fine lines in place of the tenths, a
+    small 1 m measure mark in each cell's corner from a 5 by 7 bitmap font in code as the dev
+    textures print their sizes, and Unreal's palette by the names a level uses, the floor a dark
+    gray, the wall a light gray, the ceiling lighter, stairs, ramps and moving parts the prototyping
+    orange, door, window and hazard keeping green, blue and red, proto_dark, proto_light and
+    proto_orange naming the tones, the palette's change going to 3DEngine by a Shared line since
+    SHARED.md keeps the look alike; then level.textures writing each prototype as a 512 pixel
+    picture under a folder TrenchBroom reads, a TrenchBroom game config in the repository with the
+    Generic layout, the Valve format, a face scale of a sixteenth and an fgd of the engine's
+    classes, the engine reading each material's own texel size in place of the units a meter;
+    rounded doorways are the third phase's brushes, not a material. The second phase at `ce142f8a`
+    and `1092b434` on 2026-10-26, Unreal's tones and the editor's grid steps, the pictures and the
+    TrenchBroom config shipped under the levels folder, the palette to 3DEngine as its item 130. The
+    third phase in two commits as the coder proposed, public helpers on Level making brushes as
+    Hammer's block and arch tools do, a box, a wedge, an arch of convex segments and a doorway with
+    a rounded opening, each face with world-aligned axes so a file built in code is what TrenchBroom
+    draws, item 67's block tool reusing them; then the hub's file under the feature test's assets, a
+    raised plaza floor, a ring of low walls with five rounded doorways in orange framing toward the
+    zones' roads, steps down in orange and an info_player_start at the hub's start, written once by
+    a generator and checked in as text, Scene.cs loading it in place of the turning cube with the
+    ground and the signposts kept outside the ring and the player's start read from the file, a test
+    reading the file back with its five doorways and the start, the drive's and capture jobs' new
+    picture, the FeatureTest README and docs/levels.md pointing at the file. The helpers at
+    `d53a3108` on 2026-10-26, boxes, wedges, arches and doorways as brushes; the hub's file next,
+    and the level then grows into item 68's rooms by the owner's word of that day, Decision 68. Done
+    at `c5cb4888` on 2026-10-26 with the third phase's hub, the plaza from a level file in place of
+    the open ground's cube alone, the level then growing under item 68 by Decision 68.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

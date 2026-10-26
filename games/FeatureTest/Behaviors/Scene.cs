@@ -5,7 +5,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
 /// The hub, the middle of the map, a cube turning in place over a plaza walled round with a rounded
-/// doorway toward each zone, on a ground that runs out to every zone, under a sky and a sun.
+/// doorway toward each zone, in a level of walled courts and corridors under a sky and a sun.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -14,11 +14,13 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// the camera and make the sun again with or without shadows (<see cref="Applied"/>).
 /// </para>
 /// <para>
-/// The ground is wide enough for every zone round the hub, with a slab under it for what falls,
-/// and the signposts at the hub's edge are <see cref="Zones"/>'. The plaza is the level file
-/// <c>levels/hub.map</c>, its floor a hair above the ground and its walls in the prototyping
-/// palette, built with its collision by <see cref="Levels.Load"/> with its root on the ground, and
-/// drawn in TrenchBroom from the same file.
+/// The map is the level file <c>levels/feature-test.map</c>, the plaza, a walled court round each
+/// zone, the corridors from the plaza's doorways to them, the light hall's shell and the meadow's
+/// raised walkway, its walls high enough that the sky shows over them and never the horizon, built
+/// with its collision by <see cref="Levels.Load"/> with its root at the ground's height and drawn in
+/// TrenchBroom from the same file. The signposts at the plaza's doorways are <see cref="Zones"/>'.
+/// The ground is no longer drawn, its entity kept where the floors stand for the crates' slab and
+/// the ray-traced occlusion's rays.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -39,7 +41,7 @@ public partial struct Scene
     /// <summary>How high the ground is, below the cube's middle.</summary>
     public const float GroundHeight = -1.2f;
 
-    /// <summary>How far the ground runs, each side, from one edge to the other.</summary>
+    /// <summary>How far the crates' slab under the floors runs, each side, from one edge to the other.</summary>
     public const float GroundSize = 240f;
 
     /// <summary>How high the plaza's floor stands above the ground, its four units of the level file.</summary>
@@ -133,22 +135,13 @@ public partial struct Scene
         }));
         ctx.Ecs.Add(lamp, Transform.At(-2.5f, 1.2f, 1.5f));
 
+        // Where the ground was, undrawn, the level's floors standing at its height.
         var ground = ctx.Ecs.Spawn();
-        Render.SetMesh(ctx.Ecs, ground, Render.CreateMesh(MeshShape.Plane, GroundSize, GroundSize));
-        // Tiling takes both halves, a repeating sampler, and UVs that run past one. The plane's
-        // own UVs stop at one however large it is, so without the scale this shows a single
-        // stretched copy, a square of the checker two units across.
-        Render.SetMaterial(ctx.Ecs, ground, Render.CreateMaterial(new MaterialSettings
-        {
-            BaseColorTexture = AssetServer.LoadImage("textures/checker.png", TextureSettings.Tiling),
-            UvScale = (GroundSize / 2f, GroundSize / 2f),
-            Roughness = 0.9f,
-        }));
         ctx.Ecs.Add(ground, Transform.At(0f, GroundHeight, 0f));
         ctx.Ecs.SetName(ground, "Ground");
 
-        // The plaza, its file's floor at zero standing on the ground.
-        Levels.Load(ctx.Ecs, "levels/hub.map", Transform.At(0f, GroundHeight, 0f));
+        // The level, its file's floors at zero standing at the ground's height.
+        Levels.Load(ctx.Ecs, "levels/feature-test.map", Transform.At(0f, GroundHeight, 0f));
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));

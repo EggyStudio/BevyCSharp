@@ -104,6 +104,25 @@ public sealed partial class LevelBrush
     }
 
     /// <summary>
+    /// The brush moved, its faces' mapping taken again from the world, so its material stays where
+    /// the world puts it rather than going with the brush, as a moved brush's does in TrenchBroom
+    /// with its texture lock off.
+    /// </summary>
+    /// <param name="by">How far it moves along each of the file's axes, in its units.</param>
+    /// <remarks>
+    /// With <see cref="Turned"/>, a wall or a ramp made along X at the origin is stood anywhere
+    /// facing any way. The faces' offsets, rotations and scales are kept.
+    /// </remarks>
+    public LevelBrush Moved(LevelPoint by)
+    {
+        LevelPoint Move(LevelPoint point) => new(Kept(point.X + by.X), Kept(point.Y + by.Y), Kept(point.Z + by.Z));
+
+        var moved = new LevelBrush();
+        foreach (var face in Faces) moved.Faces.Add(face with { First = Move(face.First), Second = Move(face.Second), Third = Move(face.Third) });
+        return moved;
+    }
+
+    /// <summary>
     /// A brush of a convex outline across Y, its points as (X, Z) in either winding, stretched from
     /// one Y to another, each face's three points wound as the file winds them and its axes the
     /// world's.
