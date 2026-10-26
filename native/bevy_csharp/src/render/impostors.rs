@@ -25,6 +25,10 @@
 //! The quad's mesh holds a corner of the quad in each vertex's texture coordinates and places that
 //! span the tree's sphere, so Bevy's bounds round the mesh, which cull it from a view and a shadow,
 //! hold the tree from every way.
+//!
+//! In the wind the quad moves as the tree's trunk bends at the height of its middle (see
+//! [`super::sway`]), its frames read where they would be without it, so the whole tree leans as
+//! the nearer levels' trunks do and its limbs and leaves stay still in it, too small to see.
 
 use crate::interop::{status, BcsMaterialConfig};
 
@@ -43,7 +47,8 @@ pub struct ImpostorShape {
     pub across: u32,
 }
 
-/// What the impostor material adds to the standard material, the shape and the three atlases.
+/// What the impostor material adds to the standard material, the shape, the three atlases and the
+/// wind it leans in.
 #[cfg(feature = "render")]
 #[derive(bevy::asset::Asset, bevy::render::render_resource::AsBindGroup, bevy::reflect::Reflect, Debug, Clone, Default)]
 pub struct ImpostorFrames {
@@ -58,6 +63,8 @@ pub struct ImpostorFrames {
     #[texture(105)]
     #[sampler(106)]
     pub faces: Option<bevy::asset::Handle<bevy::image::Image>>,
+    #[uniform(107)]
+    pub wind: super::sway::TreeWind,
 }
 
 #[cfg(feature = "render")]
@@ -180,6 +187,8 @@ fn billboard(instance_index: u32, corner_uv: vec2<f32>) -> Billboard {
     let local_from_world = mesh_functions::get_local_from_world(instance_index);
     let orthographic = view.clip_from_view[3].w == 1.0;
 
+    let shift = tree_bent(shape.middle.y, tree_wind.now.xyz, globals.time, local_from_world, tree_phase(world_from_local));
+
     var eye = vec3<f32>(0.0);
     var toward: vec3<f32>;
     if orthographic {
@@ -202,8 +211,8 @@ fn billboard(instance_index: u32, corner_uv: vec2<f32>) -> Billboard {
 
     var out: Billboard;
     out.local_position = local;
-    out.local_ray = select(local - eye, -toward, orthographic);
-    out.world_position = world_from_local * vec4<f32>(local, 1.0);
+    out.local_ray = select(local + shift - eye, -toward, orthographic);
+    out.world_position = world_from_local * vec4<f32>(local + shift, 1.0);
     out.nearest = nearest_frames(toward);
     return out;
 }
@@ -281,7 +290,7 @@ const IMPOSTOR_MAIN_IMPORTS: &str = r#"import bevy_pbr::render::{
     forward_io::{Vertex, FragmentOutput, decompress_vertex},
     mesh_functions,
     mesh_bindings::mesh,
-    mesh_view_bindings::view,
+    mesh_view_bindings::{view, globals},
     view_transformations::position_world_to_clip,
     pbr_bindings,
     pbr_types::pbr_input_new,
@@ -485,14 +494,14 @@ pub(crate) fn install(app: &mut bevy::app::App) {
         let _ = shaders.insert(
             IMPOSTOR_MAIN.id(),
             bevy::shader::Shader::from_wesl(
-                format!("{IMPOSTOR_MAIN_IMPORTS}{IMPOSTOR_COMMON}{IMPOSTOR_MAIN_STAGES}"),
+                format!("{IMPOSTOR_MAIN_IMPORTS}{}{IMPOSTOR_COMMON}{IMPOSTOR_MAIN_STAGES}", super::sway::sway_at(107)),
                 "bcs/impostor.wesl",
             ),
         );
         let _ = shaders.insert(
             IMPOSTOR_PREPASS.id(),
             bevy::shader::Shader::from_wesl(
-                format!("{IMPOSTOR_PREPASS_IMPORTS}{IMPOSTOR_COMMON}{IMPOSTOR_PREPASS_STAGES}"),
+                format!("{IMPOSTOR_PREPASS_IMPORTS}{}{}{IMPOSTOR_COMMON}{IMPOSTOR_PREPASS_STAGES}", super::sway::PREPASS_GLOBALS, super::sway::sway_at(107)),
                 "bcs/impostor_prepass.wesl",
             ),
         );
@@ -512,7 +521,8 @@ pub fn attach(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::as
 }
 
 /// Makes an impostor material from the settings a standard material is made with, the three
-/// atlases its frames are read from and the shape they picture, and returns its key.
+/// atlases its frames are read from, the shape they picture and the trunk's stiffness in the wind,
+/// as [`super::sway::TreeWind`] holds it, and returns its key.
 ///
 /// The standard material's values light it, its base color scaling the pictured color, its
 /// roughness, reflectance and diffuse transmission as the leaf material takes them, and its alpha
@@ -533,11 +543,12 @@ pub unsafe extern "C" fn bcs_material_create_impostor(
     middle_z: f32,
     extent: f32,
     across: u32,
+    trunk: f32,
 ) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (config, colors, normals, faces, middle_x, middle_y, middle_z, extent, across);
+            let _ = (config, colors, normals, faces, middle_x, middle_y, middle_z, extent, across, trunk);
             status::UNSUPPORTED
         }
 
@@ -583,6 +594,7 @@ pub unsafe extern "C" fn bcs_material_create_impostor(
                     colors: Some(colors),
                     normals: Some(normals),
                     faces: Some(faces),
+                    wind: super::sway::TreeWind::new(world, trunk, 0.0, 0.0, 0.0),
                 };
 
                 let Some(mut materials) = world.get_resource_mut::<Assets<ImpostorMaterial>>() else {

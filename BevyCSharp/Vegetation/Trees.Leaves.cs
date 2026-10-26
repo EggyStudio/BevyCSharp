@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Bevy;
 
 // The leaves, a card a leaf along every twig, cut from the species' leaf set or the generated leaves,
@@ -258,6 +260,16 @@ public static partial class Trees
         private float[]? _secondUvs;
         private readonly List<int> _tips = [];
 
+        // Each vertex's leaf, the place it flutters about and its twig's tip, and once the limbs
+        // are known its two sway streams.
+        private readonly List<int> _leafOf = [];
+        private readonly List<Vec3> _held = [];
+        private readonly List<int> _tipOf = [];
+        private Vector4[]? _limbs;
+        private Vector4[]? _own;
+        private int _leaf;
+        private Vec3 _holding;
+
         /// <summary>The node of the tip of the twig the cards made next stand on.</summary>
         public int Tip { get; set; }
 
@@ -273,6 +285,7 @@ public static partial class Trees
             // Wound counter-clockwise seen from the face, as Bevy's front faces are.
             var side = Vec3.Cross(leaf, face).Normalized * (width * 0.5f);
             var first = (uint)_positions.Count;
+            (_leaf, _holding) = (_tips.Count, place);
             Vertex(place - side, face, box.U, box.V + box.Height);
             Vertex(place + side, face, box.U + box.Width, box.V + box.Height);
             Vertex(place + side + leaf * length, face, box.U + box.Width, box.V);
@@ -291,6 +304,7 @@ public static partial class Trees
             if (length <= 0f) return;
             var lying = box.Width * aspect > box.Height;
             var first = (uint)_positions.Count;
+            (_leaf, _holding) = (_leafOf.Count > 0 ? _leafOf[^1] + 1 : 0, stem[0]);
             var along = 0f;
             for (var i = 0; i < stem.Length; i++)
             {
@@ -325,6 +339,9 @@ public static partial class Trees
             _normals.Add(normal);
             _uvs.Add(u);
             _uvs.Add(v);
+            _leafOf.Add(_leaf);
+            _held.Add(_holding);
+            _tipOf.Add(Tip);
         }
 
         public MeshData Data() => new()
@@ -335,7 +352,25 @@ public static partial class Trees
             Colors = _colors is null ? null : [.. _colors],
             SecondUvs = _secondUvs is null ? null : [.. _secondUvs],
             Indices = [.. _indices],
+            Streams = _limbs is null ? null : Streams(_limbs, _own!),
         };
+
+        /// <summary>
+        /// Gives each vertex the pivot of the limb its twig grows from and the pivot its leaf
+        /// flutters about, a card's stalk or a frond's foot, each leaf with a phase of its own. A
+        /// leaf on the trunk itself swings with no limb, its stalk standing for the pivot.
+        /// </summary>
+        public void Sway(LimbPlan plan)
+        {
+            _limbs = new Vector4[_positions.Count];
+            _own = new Vector4[_positions.Count];
+            for (var i = 0; i < _positions.Count; i++)
+            {
+                var held = _held[i];
+                _limbs[i] = plan.Pivot(plan.LimbOf(plan.StemOf[_tipOf[i]]), held);
+                _own[i] = new Vector4(held.X, held.Y, held.Z, Phase(0x5EED + _leafOf[i]));
+            }
+        }
 
         /// <summary>
         /// Shades the cards as a crown, each darkened by how little of the sky reaches it through
@@ -438,6 +473,8 @@ public static partial class Trees
             var uvs = new float[kept * 8];
             var colors = _colors is null ? null : new float[kept * 16];
             var secondUvs = _secondUvs is null ? null : new float[kept * 8];
+            var limbs = _limbs is null ? null : new Vector4[kept * 4];
+            var own = _own is null ? null : new Vector4[kept * 4];
             var indices = new uint[kept * 6];
             for (var card = 0; card < kept; card++)
             {
@@ -451,6 +488,7 @@ public static partial class Trees
                     uvs[card * 8 + corner * 2 + 1] = _uvs[(from + corner) * 2 + 1];
                     if (colors is not null) _colors.AsSpan((from + corner) * 4, 4).CopyTo(colors.AsSpan((card * 4 + corner) * 4, 4));
                     if (secondUvs is not null) _secondUvs.AsSpan((from + corner) * 2, 2).CopyTo(secondUvs.AsSpan((card * 4 + corner) * 2, 2));
+                    if (limbs is not null) (limbs[card * 4 + corner], own![card * 4 + corner]) = (_limbs![from + corner], _own![from + corner]);
                 }
 
                 var first = (uint)(card * 4);
@@ -458,7 +496,7 @@ public static partial class Trees
                 quad.CopyTo(indices, card * 6);
             }
 
-            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, SecondUvs = secondUvs, Colors = colors, Indices = indices };
+            return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, SecondUvs = secondUvs, Colors = colors, Indices = indices, Streams = limbs is null ? null : Streams(limbs, own!) };
         }
     }
 }

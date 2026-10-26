@@ -149,7 +149,7 @@ public static partial class Trees
                     Reflectance = 0.3f,
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
-                });
+                }, Stiffness(species));
                 pictures.Limbs = Created(grown.Cards!.Limbs);
                 pictures.Quads = Created(grown.Cards.Quads);
 
@@ -169,7 +169,7 @@ public static partial class Trees
                     Roughness = surface.Roughness,
                     Metallic = surface.Metallic,
                     AlphaMode = AlphaMode.Mask,
-                }, frameAtlas, frameBumps, faceBumps, grown.Impostor!.Middle, grown.Impostor.Extent, ImpostorAcross);
+                }, frameAtlas, frameBumps, faceBumps, grown.Impostor!.Middle, grown.Impostor.Extent, ImpostorAcross, Stiffness(species).Trunk);
                 pictures.ImpostorQuad = Render.CreateMesh(grown.Impostor.Quad);
                 pictures.Step = CardStep.Done;
                 return pictures;

@@ -105,6 +105,15 @@ public static partial class Trees
     {
         ArgumentNullException.ThrowIfNull(skeleton);
         if (!Enum.IsDefined(detail)) throw new ArgumentOutOfRangeException(nameof(detail), detail, "A level of detail is one of TreeDetail's.");
+        return Build(skeleton, detail, null);
+    }
+
+    /// <summary>
+    /// The stems' mesh at a level of detail, noting where each stem starts, its first face and how
+    /// many faces it has, where runs are asked for.
+    /// </summary>
+    private static EditMesh Build(TreeSkeleton skeleton, TreeDetail detail, List<(int Start, int First, int Faces)>? runs)
+    {
         var reduced = detail == TreeDetail.Reduced;
         var nodes = skeleton.Nodes;
 
@@ -121,7 +130,9 @@ public static partial class Trees
             var parent = nodes[start].Parent;
             if (parent >= 0 && carried[parent] == start) continue;
             if (reduced && nodes[start].Radius < nodes[0].Radius * ThinnestReduced) continue;
+            var first = mesh.FaceCount;
             Stem(mesh, nodes, carried, start, reduced ? 2 : 1);
+            runs?.Add((start, first, mesh.FaceCount - first));
         }
 
         return mesh.SelectNone();

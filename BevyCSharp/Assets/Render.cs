@@ -553,17 +553,40 @@ public static unsafe partial class Render
     /// Internal to the trees, which build the meshes it reads, and drawn forward whatever the
     /// camera, as <c>native/bevy_csharp/src/render/leaves.rs</c> says.
     /// </remarks>
-    internal static AssetHandle CreateLeafMaterial(MaterialSettings settings)
+    internal static AssetHandle CreateLeafMaterial(MaterialSettings settings, Trees.TreeStiffness stiffness)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_leaf(&native);
+        var key = Native.bcs_material_create_leaf(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a leaf material");
 
         Native.Check(key, "building a leaf material");
         return new AssetHandle(key);
     }
+
+    /// <summary>
+    /// Builds the material a tree's stems are drawn with, a standard material whose vertices sway in
+    /// the wind by the pivots the stems carry.
+    /// </summary>
+    /// <remarks>
+    /// Internal to the trees, which build the meshes it reads, as
+    /// <c>native/bevy_csharp/src/render/sway.rs</c> says.
+    /// </remarks>
+    internal static AssetHandle CreateBarkMaterial(MaterialSettings settings, Trees.TreeStiffness stiffness)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+
+        var native = Config(settings);
+        var key = Native.bcs_material_create_bark(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
+        if (key == NativeStatus.Unsupported) throw NoRenderer("Building a bark material");
+
+        Native.Check(key, "building a bark material");
+        return new AssetHandle(key);
+    }
+
+    /// <summary>Sets the wind the trees' materials sway in, in the world's meters a second.</summary>
+    internal static void SetTreeWind(Vec3 wind) => Native.bcs_render_set_tree_wind(wind.X, wind.Y, wind.Z);
 
     /// <summary>
     /// Builds the material a far tree is drawn with as an octahedral impostor, one quad turned to
@@ -576,16 +599,17 @@ public static unsafe partial class Render
     /// <param name="middle">The middle of the tree's sphere, in the tree's space.</param>
     /// <param name="extent">Half a frame's side in the tree's meters.</param>
     /// <param name="across">The frames a side of the atlases.</param>
+    /// <param name="trunk">How far the tree's trunk bends in the wind, as the leaves' and the bark's materials take it.</param>
     /// <remarks>
     /// Internal to the trees, which picture the frames and build the quad it stands, and drawn
     /// forward whatever the camera, as <c>native/bevy_csharp/src/render/impostors.rs</c> says.
     /// </remarks>
-    internal static AssetHandle CreateImpostorMaterial(MaterialSettings settings, AssetHandle colors, AssetHandle normals, AssetHandle faces, Vec3 middle, float extent, int across)
+    internal static AssetHandle CreateImpostorMaterial(MaterialSettings settings, AssetHandle colors, AssetHandle normals, AssetHandle faces, Vec3 middle, float extent, int across, float trunk)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_impostor(&native, colors.Key, normals.Key, faces.Key, middle.X, middle.Y, middle.Z, extent, (uint)across);
+        var key = Native.bcs_material_create_impostor(&native, colors.Key, normals.Key, faces.Key, middle.X, middle.Y, middle.Z, extent, (uint)across, trunk);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building an impostor material");
 
         Native.Check(key, "building an impostor material");

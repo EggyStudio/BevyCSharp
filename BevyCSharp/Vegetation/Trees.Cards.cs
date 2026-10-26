@@ -46,30 +46,12 @@ public static partial class Trees
     /// large as its cell holds it without stretching.
     /// </para>
     /// </remarks>
-    private static CardPlan? PlanCards(TreeSkeleton skeleton, Cards leaves)
+    private static CardPlan? PlanCards(TreeSkeleton skeleton, Cards leaves, LimbPlan limbPlan)
     {
         var nodes = skeleton.Nodes;
         if (leaves.Tips.Count == 0) return null;
         var carried = Carried(nodes);
-
-        // The stem each point is on, by where the stem starts, and the stems by thickness.
-        var stemOf = new int[nodes.Count];
-        var starts = new List<int>();
-        for (var start = 0; start < nodes.Count; start++)
-        {
-            var parent = nodes[start].Parent;
-            if (parent >= 0 && carried[parent] == start) continue;
-            starts.Add(start);
-            for (var node = start; node >= 0; node = carried[node]) stemOf[node] = start;
-        }
-
-        var kept = starts.OrderByDescending(start => nodes[start].Radius).ThenBy(start => start).Take(CardLimbs).ToHashSet();
-
-        // The kept stem each stem grows from, itself where it is kept, worked out from the trunk up
-        // since a stem starts after the one it grows from.
-        var owner = new Dictionary<int, int>();
-        foreach (var start in starts)
-            owner[start] = kept.Contains(start) || start == 0 ? start : owner[stemOf[nodes[start].Parent]];
+        var (stemOf, starts, kept, owner) = (limbPlan.StemOf, limbPlan.Starts, limbPlan.Kept, limbPlan.Owner);
 
         var gathered = new Dictionary<int, (List<int> Stems, List<int> Cards)>();
         (List<int> Stems, List<int> Cards) Of(int keptStem) =>
@@ -82,12 +64,18 @@ public static partial class Trees
         var crown = middles.Aggregate(Vec3.Zero, (sum, place) => sum + place) * (1f / middles.Length);
 
         var limbs = new EditMesh().SlotRename(EditMesh.DefaultSlot, BarkSlot);
-        foreach (var start in kept.Order()) Stem(limbs, nodes, carried, start, 3);
+        var runs = new List<(int Start, int First, int Faces)>();
+        foreach (var start in kept.Order())
+        {
+            var first = limbs.FaceCount;
+            Stem(limbs, nodes, carried, start, 3);
+            runs.Add((start, first, limbs.FaceCount - first));
+        }
 
         var groups = gathered.Where(group => group.Value.Cards.Count > 0).OrderBy(group => group.Key).ToArray();
         var cells = Math.Max(1, (int)MathF.Ceiling(MathF.Sqrt(groups.Length * 2)));
         var planned = new List<PlannedCard>();
-        var quads = new List<(PlannedCard Card, Vec3 Out)>();
+        var quads = new List<(PlannedCard Card, Vec3 Out, int Limb)>();
         foreach (var (keptStem, (stemStarts, cardsOf)) in groups)
         {
             var branches = new EditMesh().SlotRename(EditMesh.DefaultSlot, BarkSlot);
@@ -117,11 +105,11 @@ public static partial class Trees
             {
                 var card = Pictured(mean, planeRight, up, planeFace, stems, gatheredLeaves, planned.Count, cells);
                 planned.Add(card);
-                quads.Add((card, outward));
+                quads.Add((card, outward, limbPlan.LimbOf(keptStem)));
             }
         }
 
-        return new CardPlan(Built(limbs), planned, cells, Quads(quads, cells));
+        return new CardPlan(Swaying(limbs, runs, limbPlan), planned, cells, Quads(quads, cells, limbPlan));
     }
 
     /// <summary>
@@ -148,7 +136,7 @@ public static partial class Trees
 
     /// <summary>A grown tree's far level as a planted tree of its species draws it, or nothing where its leaves are fronds.</summary>
     internal static CardPlan? PlanFarLevel(TreeSkeleton skeleton, TreeSpecies species, uint seed) =>
-        species.Leaves > 0 ? PlanCards(skeleton, MakeCards(skeleton, species, seed)) : null;
+        species.Leaves > 0 ? PlanCards(skeleton, MakeCards(skeleton, species, seed), PlanLimbs(skeleton)) : null;
 
     /// <summary>The middle of a leaf's card, the mean of its four corners.</summary>
     private static Vec3 CardMiddle(IReadOnlyList<Vec3> positions, int card) =>
@@ -195,19 +183,22 @@ public static partial class Trees
     /// <summary>
     /// The cards as the far level draws them, a rectangle each in the tree's space facing out of the
     /// crown, with its picture's place in its cell of the atlas, the way out of the crown its leaves
-    /// carry for the leaf material, and a color of white.
+    /// carry for the leaf material, a color of white, and the pivot of the limb whose leaves it
+    /// pictures, which it swings about.
     /// </summary>
-    private static MeshData Quads(IReadOnlyList<(PlannedCard Card, Vec3 Out)> cards, int across)
+    private static MeshData Quads(IReadOnlyList<(PlannedCard Card, Vec3 Out, int Limb)> cards, int across, LimbPlan limbPlan)
     {
         var positions = new Vec3[cards.Count * 4];
         var normals = new Vec3[cards.Count * 4];
         var uvs = new float[cards.Count * 8];
         var secondUvs = new float[cards.Count * 8];
         var colors = new float[cards.Count * 16];
+        var limbs = new System.Numerics.Vector4[cards.Count * 4];
+        var own = new System.Numerics.Vector4[cards.Count * 4];
         var indices = new uint[cards.Count * 6];
         for (var k = 0; k < cards.Count; k++)
         {
-            var (card, outward) = cards[k];
+            var (card, outward, limb) = cards[k];
             var folded = Folded(outward);
             (float X, float Y)[] corners = [(-1f, -1f), (1f, -1f), (1f, 1f), (-1f, 1f)];
             for (var corner = 0; corner < 4; corner++)
@@ -219,6 +210,8 @@ public static partial class Trees
                 (uvs[at * 2], uvs[at * 2 + 1]) = CellPlace(card, x, y, across);
                 (secondUvs[at * 2], secondUvs[at * 2 + 1]) = folded;
                 colors.AsSpan(at * 4, 4).Fill(1f);
+                limbs[at] = limbPlan.Pivot(limb, positions[at]);
+                own[at] = new System.Numerics.Vector4(positions[at].X, positions[at].Y, positions[at].Z, 0f);
             }
 
             var first = (uint)(k * 4);
@@ -226,7 +219,7 @@ public static partial class Trees
             quad.CopyTo(indices, k * 6);
         }
 
-        return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, SecondUvs = secondUvs, Colors = colors, Indices = indices };
+        return new MeshData { Positions = positions, Normals = normals, Uvs = uvs, SecondUvs = secondUvs, Colors = colors, Indices = indices, Streams = Streams(limbs, own) };
     }
 
     /// <summary>

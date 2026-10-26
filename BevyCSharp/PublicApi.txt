@@ -13496,6 +13496,7 @@ static class Bevy.Trees
   static TreeSkeleton Grow(TreeSpecies species, uint seed)
   static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers)
   static TreeSpecies? Species(string name)
+  static Vec3? Wind { get; set; }
   static void Register(string name, TreeSpecies species)
 readonly struct Bevy.Triangle2d : IBounded2d, IEquatable<Triangle2d>
   (Vec2, float) Circumcircle()

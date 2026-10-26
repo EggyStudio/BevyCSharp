@@ -19,21 +19,44 @@
 //! Lit twice, a leaf's pixel costs about twice the standard material's lighting, every light and
 //! shadow looked at twice, and the leaves are drawn forward, never into the deferred buffers, which
 //! hold one normal.
+//!
+//! The leaves sway in the wind as the bark does, through the tree's vertex stages (see
+//! [`super::sway`]), so a leaf stays on its twig.
 
 use crate::interop::{status, BcsMaterialConfig};
 
 #[cfg(feature = "render")]
 use crate::state::with_world;
 
-/// What the leaf material adds to the standard material, nothing but its shader.
+/// What the leaf material adds to the standard material, its shaders and the wind it sways in.
 #[cfg(feature = "render")]
 #[derive(bevy::asset::Asset, bevy::render::render_resource::AsBindGroup, bevy::reflect::Reflect, Debug, Clone, Default)]
-pub struct LeafLighting {}
+pub struct LeafLighting {
+    #[uniform(100)]
+    pub wind: super::sway::TreeWind,
+}
 
 #[cfg(feature = "render")]
 impl bevy::pbr::MaterialExtension for LeafLighting {
+    fn vertex_shader() -> bevy::shader::ShaderRef {
+        super::sway::TREE_MAIN.into()
+    }
+
     fn fragment_shader() -> bevy::shader::ShaderRef {
         LEAF_FRAGMENT.into()
+    }
+
+    fn prepass_vertex_shader() -> bevy::shader::ShaderRef {
+        super::sway::TREE_PREPASS.into()
+    }
+
+    fn specialize(
+        _pipeline: &bevy::pbr::MaterialExtensionPipeline,
+        descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
+        layout: &bevy::mesh::MeshVertexBufferLayoutRef,
+        _key: bevy::pbr::MaterialExtensionKey<Self>,
+    ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        super::sway::specialize(descriptor, layout)
     }
 }
 
@@ -131,7 +154,8 @@ pub fn attach(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::as
     }
 }
 
-/// Makes a leaf material from the settings a standard material is made with and returns its key.
+/// Makes a leaf material from the settings a standard material is made with and the tree's
+/// stiffness in the wind, as [`super::sway::TreeWind`] holds it, and returns its key.
 ///
 /// The standard material is drawn forward whatever the camera, since the deferred buffers hold one
 /// normal and the leaf is lit by two.
@@ -140,11 +164,17 @@ pub fn attach(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::as
 ///
 /// `config` must be null or point to a readable [`BcsMaterialConfig`].
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn bcs_material_create_leaf(config: *const BcsMaterialConfig) -> i32 {
+pub unsafe extern "C" fn bcs_material_create_leaf(
+    config: *const BcsMaterialConfig,
+    trunk: f32,
+    limb: f32,
+    flutter: f32,
+    frequency: f32,
+) -> i32 {
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = config;
+            let _ = (config, trunk, limb, flutter, frequency);
             status::UNSUPPORTED
         }
 
@@ -163,7 +193,8 @@ pub unsafe extern "C" fn bcs_material_create_leaf(config: *const BcsMaterialConf
                     Err(status) => return status,
                 };
                 base.opaque_render_method = bevy::material::OpaqueRendererMethod::Forward;
-                let material = LeafMaterial { base, extension: LeafLighting {} };
+                let wind = super::sway::TreeWind::new(world, trunk, limb, flutter, frequency);
+                let material = LeafMaterial { base, extension: LeafLighting { wind } };
 
                 let Some(mut materials) = world.get_resource_mut::<Assets<LeafMaterial>>() else {
                     return status::UNSUPPORTED;

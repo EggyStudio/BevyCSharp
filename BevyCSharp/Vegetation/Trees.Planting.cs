@@ -177,6 +177,7 @@ public static partial class Trees
         var ecs = world.Resource<EcsWorld>();
         var dressed = Dressed.GetOrCreateValue(app);
         var draws = App.HasRenderer && !world.Resource<Config>().Headless;
+        if (draws) Blow();
 
         var trees = new List<(Entity Entity, string Species, uint Seed)>();
         foreach (var row in ecs.Query<Tree>(markChanged: false)) trees.Add((row.Entity, row.Component.Species.Value ?? "", row.Component.Seed));
@@ -231,11 +232,13 @@ public static partial class Trees
         // same eight in every game.
         var seed = (uint)(0x7E57_0000 + variant);
         var skeleton = Grow(species, seed);
+        var limbs = PlanLimbs(skeleton);
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
-        var stems = levels.Select(level => Modeling.Build(Build(skeleton, level))[0]).ToArray();
+        var stems = levels.Select(level => SwayingStems(skeleton, level, limbs)).ToArray();
         var cards = MakeCards(skeleton, species, seed);
+        cards.Sway(limbs);
         MeshData[] leaves = [cards.Data(), species.Leaves > 0 ? cards.Halved() : cards.Data()];
-        var plan = species.Leaves > 0 ? PlanCards(skeleton, cards) : null;
+        var plan = species.Leaves > 0 ? PlanCards(skeleton, cards, limbs) : null;
         var impostor = plan is null ? null : PlanImpostor(stems[(int)TreeDetail.Full], leaves[(int)TreeDetail.Full]);
         return new Grown(skeleton, skeleton.Bounds.High.Y, stems, leaves, plan, impostor, Capsules(skeleton));
     }

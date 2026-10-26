@@ -53,6 +53,21 @@ variant's pictures are taken, some frames after it has grown. Each level's shado
 way, measured from the scene's camera. `Trees.Build` and `Trees.BuildLeaves` take the level for a
 tree built by hand.
 
+A planted tree sways in the wind. Its trunk bends downwind, each limb swings about where it leaves
+its parent, and each leaf flutters about its stalk, each limb and leaf in a phase of its own and
+each tree in one from where it stands, so a forest of one species does not sway in step. The wind is
+the weather's of the first camera `Render.SetWeather` was given, gusting and turning as the weather
+does, or the one `Trees.Wind` sets, in meters a second:
+
+```csharp
+Trees.Wind = new Vec3(12f, 0f, 3f);
+```
+
+A gale bends a tree's top by about a fiftieth of its height. Each vertex of the stems and leaves
+carries the pivot of the limb it swings with and the pivot its leaf flutters about, which the bark's
+and the leaves' materials move it by in their vertex stages, so the shadows sway with the trees, the
+far cards swing with the limbs whose leaves they picture and the impostor leans with its trunk.
+
 The trunk and each limb twelve centimeters thick or more stand as capsules the player stops at,
 through the `RigidBody` and `Collider` components the physics plugin makes bodies of. The presets
 are registered as `quaking-aspen`, `black-tupelo`, `weeping-willow`, `california-black-oak`, `bush`

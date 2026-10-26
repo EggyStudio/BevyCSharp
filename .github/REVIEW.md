@@ -10,37 +10,39 @@ removed from here once the commit that settles it has been read. A stash of ever
 takes what was written here since the last commit out of the tree until it is popped, so a stash
 names its own paths.
 
-Reviewed up to `b9cd8d74`, item 70's third phase's far level, the limbs and branch cards, pushed at
-00:14 on 2026-10-26 after the run of `14c2df0f` went green, its own run green at 00:36, carrying the
-review's files, DEVLOG.md, a captioned picture with its note and a Shared line. On the worker
-Trees.Cards.cs keeps the sixteen thickest stem chains as tubes at a third of their sides, gathers
-every other chain and every leaf card by its twig's tip to its nearest kept ancestor, and gives each
-group two crossed cards, the PCA plane of its leaves upright and facing out and that plane turned a
-quarter round its upright, each as large as its leaves' and stems' outline, up to 32 cells six a
-side in a 512 atlas. Trees.CardPictures.cs draws them once an app and variant through a state
-machine in Tick, the cards' stems and leaves stood in a grid far below the world on their own render
-layer, turned and scaled to their cells, unlit with the vertex depth gray baked, an orthographic
-camera into a created target with no tonemapping, captured after the pipelines and the set's albedo
-load, read back, the color levels by the mip chain with the sampled-share alpha scaling a card
-rectangle and a normal atlas rasterized on the CPU from the same triangles, the dressing waiting on
-it up to 900 frames before warning and dressing without; the card material is the leaf material with
-the two atlases, the set's mean occlusion and translucency, fully rough at reflectance 0.3, the
-import recording a surface mean an entry with the files unchanged. The reduced level ends at 7.2
-heights and the far one runs from there. Three faults found on the way, one card a branch covering
-0.6 and thinning seen along it, flat cards lit by their face up to 1.65 too bright, and the
-capture's bytes sRGB where the manifest's color was first misread as linear. The tests read each
-limb's foliage gathered onto two crossed cards facing out, the far tree covering its crown as the
-reduced one does at eight heights, the aspen 735 against 774 pixels, the tupelo 1,115 against 1,372
-and the oak 3,020 against 3,036 within bars of 0.7 to 1.25 of coverage and 0.8 to 1.2 of brightness,
-and the cost in a distant forest, 48 tupelos 160 m off at 1080p with the shadow from 0.97 to 0.42 ms
-and the opaque pass from 3.20 to 2.95. No public listing change, the bridge untouched; 1,957 passed,
-3 skipped, 1,960 the listing plus 11.
+Reviewed up to `6777b172`, item 70's third phase's impostors, pushed at 02:28 on 2026-10-26 after
+the run of `b9cd8d74` went green, its own run green at 02:46 with Windows in 18 minutes, carrying
+the review's files, SHARED.md, DEVLOG.md, a captioned picture with its note, and under Replies two
+departures, a fault's mend and a Shared line. In the bridge render/impostors.rs holds
+ExtendedMaterial<StandardMaterial, ImpostorFrames>, its uniform at binding 100 with the sphere's
+middle and extent and the frames across, the colors at 101 and 102, the lit normals at 103 and 104
+and the leaves' own at 105 and 106, WESL vertex and fragment stages for the main pass and the
+prepasses, shadows, depth, normal and motion with the unclipped depth emulated, forward only, with
+bcs_material_create_impostor, the attach branch and the install, ABI 312. The vertex stage stands
+the quad at the sphere's middle square to the eye, or to the view's way when orthographic so a
+light's shadow sees the tree from the light, and picks the three frames at the corners of the
+triangle of the hemi-octahedral eight by eight grid the way falls in; the fragment meets the eye's
+ray with each frame's plane, blends by weight times opacity and lights twice as the leaf material
+does. Trees.Impostors.cs plans the sphere and the quad; the sixty-four copies of the full tree stand
+in a grid above the cards' grid on layer 30 and are captured at 1024 beside the cards in the same
+state machine, the colors halved with the sampled share kept, the bent and the own normals drawn on
+the CPU; the impostor runs from twenty heights with a fade of four and takes no shadow.
+Native.Materials.cs takes the material imports out of Native.Assets.cs, which had passed N 1.3's 800
+lines. Two departures, WESL in place of Slang since slangc compiles on first run and a planted tree
+draws on every machine, and a third atlas of the leaves' own normals with the leaf set's mean
+roughness and metallic on the impostor, without which the tupelo and the oak read 0.78 and 0.83 of
+their cards; the cards' commit had held its staging meshes, materials and target for the app's life,
+released once read. At twenty-eight heights the impostor covers 1.06 to 1.16 of the cards at 0.89 to
+1.08 of their brightness; a thousand tupelos thirty-eight heights off at 1080p cost the opaque pass
+0.90 and 1.00 ms as cards against 0.55 and 0.49 as impostors, the shadow pass 0.05 either way. The
+three profiles, cargo test and the Windows and macOS checks clean; 1,966 in the suite, the listing
+plus 11, 1,962 passed and 3 skipped, its one failure N 1.3 mended by the split, NormTests 18 of 18.
+
+Before it, `b9cd8d74` came, item 70's third phase's far level, the limbs and branch cards, pushed at
+00:14 on 2026-10-26 after the run of `14c2df0f` went green, its run green at 00:36.
 
 Before it, `14c2df0f` came, item 76's second part, the crown lit as a volume, pushed at 22:57 on
 2026-10-25, its run green at 23:15.
-
-Before it, `6b2503ff` came, item 76's first part, the crown's depth, pushed at 21:57 on 2026-10-25,
-its run green at 22:14.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -345,7 +347,16 @@ from [SHARED.md](SHARED.md).
     shading next, before the branch cards and the impostors, since both are pictures drawn of the
     leaves and would miss it otherwise. The far level at `b9cd8d74` on 2026-10-26, the limbs as thin
     tubes and the foliage on crossed cards pictured once a variant, three faults in the head; the
-    impostors next.
+    impostors next. The impostors at `6777b172` on 2026-10-26, one quad past twenty heights painted
+    from three of sixty-four frames, two departures and a fault's mend in the head; (d) next in
+    three commits as the coder proposed on 2026-10-26, the wind first, each stem and leaf vertex
+    carrying its sway with the trunk bending about its foot, the branches swinging about their
+    pivots and the leaves fluttering from a wind uniform written each frame from the camera's
+    WeatherState, the cards by their limb and the impostor by the trunk; then the leaves in the
+    scene field, each crown's leaf area density written as cells passing the share Beer and Lambert
+    give, with a canopy's shade pictured with and without; then the meshlet leaf clusters where the
+    bridge is built with meshlets, the coder first reading whether Bevy 0.20's meshlet pass can draw
+    the leaf material's two lightings and saying under Replies what it would take if not.
 
 65. **A level is a file of brushes and entities the engine loads, and the prototyping look is its
     palette.** From Decision 61. A text level file holds brushes, convex solids with a texture and a
@@ -1985,3 +1996,22 @@ cards, with the normals a leaf is lit by drawn on the CPU into two atlases so th
 the leaf material lights a leaf. It covers the crown within a sixth of the cards and lights it
 within an eighth, casts its shadow and takes none, and halves the opaque pass of a thousand far
 trees against their cards.
+
+Item 70's wind, (d1), in the commit carrying this line. The sway rides on two streams of the game's
+own at locations 8 and 9, the limb's pivot and phase and the leaf's, which the bridge's stream
+registry carries, so the mesh data is unchanged; the ABI moves to 313 for the leaf, bark and
+impostor materials' stiffness and the wind's call. The bark takes a material extension of its own.
+The limbs are the cards' sixteen, with each thinner stem off the trunk below them swinging as a limb
+of its own, so a card swings with the leaves it pictures. Bevy's prepass view group holds the
+globals at binding 1, where the main pass holds them at 11, which the trees' and the impostor's
+prepass stages declare. The public listing gains Trees.Wind, the wind set by a game or taken from
+the first weather. No line removed or reshaped.
+
+Shared: a planted tree swaying in the wind, in the commit carrying this line, item 70's phase (d1).
+Each vertex of the stems and leaves carries the pivot and phase of the limb it swings with and of
+the stalk its leaf flutters about, the trunk bending by the square of the height, a limb by the
+square of the reach from its pivot and a leaf across its reach, each tree in a phase from where it
+stands, moved in the vertex stages of the bark's and the leaves' materials and their prepasses so
+the shadows sway, the far cards swinging with their limbs and the impostor leaning with its trunk.
+The wind is the weather's or one a game sets. It costs nothing measurable in a forest's passes at
+1080p.

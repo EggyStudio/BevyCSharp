@@ -25,18 +25,23 @@ public static partial class Trees
     /// thirty across, through twelve layers at most, so its ridges hide the grooves behind them as the
     /// eye moves round a trunk while the stem's outline stays round.
     /// </para>
+    /// <para>
+    /// A planted tree's stems sway in the <see cref="Wind"/> by the species' height, the stiffness the
+    /// material is made with, so species of one bark and different heights take a material each.
+    /// </para>
     /// </remarks>
     public static AssetHandle BarkMaterial(TreeSpecies species)
     {
         ArgumentNullException.ThrowIfNull(species);
         var set = species.BarkSet is { } name && TreeTextures.Find(name) is { Kind: TreeTextureKind.Bark } found ? found : null;
-        var key = set is null ? $"bark {Key(species.BarkColor)}" : $"bark {set.Name}";
+        var stiffness = Stiffness(species);
+        var key = set is null ? $"bark {Key(species.BarkColor)} {stiffness}" : $"bark {set.Name} {stiffness}";
         return Once(key, () =>
         {
             if (set is not null)
             {
                 var (albedo, normal, surface) = set.Load();
-                return Render.CreateMaterial(Deep(new MaterialSettings
+                return Render.CreateBarkMaterial(Deep(new MaterialSettings
                 {
                     BaseColorTexture = albedo,
                     NormalMap = normal,
@@ -44,18 +49,18 @@ public static partial class Trees
                     MetallicRoughnessTexture = surface,
                     Roughness = 1f,
                     Metallic = 1f,
-                }, set.LoadDepth()));
+                }, set.LoadDepth()), stiffness);
             }
 
             var (color, bumps, depth) = BarkPictures();
             var tint = species.BarkColor;
-            return Render.CreateMaterial(Deep(new MaterialSettings
+            return Render.CreateBarkMaterial(Deep(new MaterialSettings
             {
                 BaseColor = (tint.R, tint.G, tint.B, 1f),
                 BaseColorTexture = color,
                 NormalMap = bumps,
                 Roughness = 0.9f,
-            }, depth));
+            }, depth), stiffness);
         });
     }
 
@@ -84,15 +89,20 @@ public static partial class Trees
     /// color. The share is kept to a hundredth, so a game easing it over a season makes a hundred
     /// materials at most.
     /// </para>
+    /// <para>
+    /// A planted tree's leaves sway in the <see cref="Wind"/> with their limbs and flutter about
+    /// their stalks, by the species' height and leaf length, the stiffness the material is made with.
+    /// </para>
     /// </remarks>
     public static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)
     {
         ArgumentNullException.ThrowIfNull(species);
         fall = MathF.Round(Math.Clamp(float.IsFinite(fall) ? fall : 0f, 0f, 1f), 2);
         var set = species.LeafSet is { } name && TreeTextures.Find(name) is { Kind: TreeTextureKind.Leaves } found ? found : null;
+        var stiffness = Stiffness(species);
         var key = set is null
-            ? $"leaves {species.LeafShape} {species.LeafScaleX} {Key(species.LeafColor)} {Key(species.FallColor)} {fall}"
-            : $"leaves {set.Name} {Key(species.FallColor)} {fall}";
+            ? $"leaves {species.LeafShape} {species.LeafScaleX} {Key(species.LeafColor)} {Key(species.FallColor)} {fall} {stiffness}"
+            : $"leaves {set.Name} {Key(species.FallColor)} {fall} {stiffness}";
 
         return Once(key, () =>
         {
@@ -114,7 +124,7 @@ public static partial class Trees
                     Metallic = 1f,
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
-                });
+                }, stiffness);
             }
 
             var atlas = LeafPictures(species);
@@ -127,7 +137,7 @@ public static partial class Trees
                 Roughness = 0.6f,
                 AlphaMode = AlphaMode.Mask,
                 DoubleSided = true,
-            });
+            }, stiffness);
         });
     }
 

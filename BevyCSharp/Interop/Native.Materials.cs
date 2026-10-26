@@ -30,12 +30,22 @@ internal static unsafe partial class Native
     /// <summary>Builds the bridge's leaf material over a standard one and returns an asset key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_material_create_leaf(NativeMaterialConfig* config);
+    internal static partial int bcs_material_create_leaf(NativeMaterialConfig* config, float trunk, float limb, float flutter, float frequency);
+
+    /// <summary>Builds the bridge's bark material over a standard one and returns an asset key.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_material_create_bark(NativeMaterialConfig* config, float trunk, float limb, float flutter, float frequency);
+
+    /// <summary>Sets the wind the trees' materials sway in.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_tree_wind(float x, float y, float z);
 
     /// <summary>Builds the bridge's impostor material over a standard one, with its three atlases and the shape they picture, and returns an asset key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_material_create_impostor(NativeMaterialConfig* config, int colors, int normals, int faces, float middleX, float middleY, float middleZ, float extent, uint across);
+    internal static partial int bcs_material_create_impostor(NativeMaterialConfig* config, int colors, int normals, int faces, float middleX, float middleY, float middleZ, float extent, uint across, float trunk);
 
     /// <summary>Makes an entity a forward decal drawn with a forward decal material.</summary>
     [LibraryImport(Library)]
