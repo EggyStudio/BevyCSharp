@@ -266,7 +266,7 @@ holds "$hill" ">" "$ground + 0.3" || fail "the player fell through the terrain t
 quiet mode spectator
 quiet frames.wait 5
 view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "${8:-40}"; shot "$1"; }
-for piece in "Gallery wall" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "Tree 1, crown"; do
+for piece in "Gallery wall" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "quaking-aspen 70"; do
   ./bcs command --timeout 600 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
 done
 view 5-gallery -55 4 -3 -63.5 3 -1 60
