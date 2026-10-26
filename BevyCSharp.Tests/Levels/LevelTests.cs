@@ -305,18 +305,48 @@ public sealed class LevelTests
     [Fact]
     public void TheShippedPrototypePicturesAreTheOnesTheEngineDraws()
     {
-        // Written again beside the shipped ones and read byte for byte, so a change to the grid or
-        // the palette that leaves the pictures TrenchBroom shows behind fails here, until
-        // `./bcs command level.textures BevyCSharp/Levels/TrenchBroom` writes them again.
-        using var folder = new TestFolder("bcs-prototype-pictures-");
-        var written = Levels.WritePrototypePictures(folder.Path);
-        var shipped = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Levels", "TrenchBroom", "textures", "proto");
+        // Each shipped picture read back and held pixel for pixel to the one the engine draws, so a
+        // change to the grid or the palette that leaves the pictures TrenchBroom shows behind fails
+        // here, until `./bcs command level.textures BevyCSharp/Levels/TrenchBroom` writes them again.
+        // Pixels rather than the file's bytes, since an encoder's compression may differ between
+        // systems and runtimes while the picture is the same. A picture that differs is written
+        // under the results' prototype-pictures folder, which the workflow keeps beside its page.
+        var root = CheatsheetTests.RepositoryRoot();
+        var shipped = Path.Combine(root, "BevyCSharp", "Levels", "TrenchBroom", "textures", "proto");
         Assert.Equal(Modeling.PrototypeColors.Keys.Order(StringComparer.Ordinal), Directory.GetFiles(shipped, "*.png").Select(Path.GetFileNameWithoutExtension).Order(StringComparer.Ordinal));
-        foreach (var path in written)
+
+        var differences = new List<string>();
+        foreach (var (name, color) in Modeling.PrototypeColors)
         {
-            var bytes = File.ReadAllBytes(path);
-            Assert.Equal((Levels.PrototypePixels, Levels.PrototypePixels), Levels.PictureSize(bytes));
-            Assert.True(bytes.AsSpan().SequenceEqual(File.ReadAllBytes(Path.Combine(shipped, Path.GetFileName(path)))), $"{Path.GetFileName(path)} is not the picture the engine draws");
+            var drawn = Modeling.PrototypePicture(color, Levels.PrototypePixels);
+            var read = AnimationReader.Png(File.ReadAllBytes(Path.Combine(shipped, name + ".png"))).Frames[0];
+            Assert.Equal((Levels.PrototypePixels, Levels.PrototypePixels), (read.Width, read.Height));
+            var at = Enumerable.Range(0, drawn.Length).FirstOrDefault(i => drawn[i] != read.Pixels[i], -1);
+            if (at < 0) continue;
+
+            var (pixel, x, y) = (at / 4 * 4, at / 4 % Levels.PrototypePixels, at / 4 / Levels.PrototypePixels);
+            var count = Enumerable.Range(0, drawn.Length / 4).Count(i => !drawn.AsSpan(i * 4, 4).SequenceEqual(read.Pixels.AsSpan(i * 4, 4)));
+            differences.Add($"{name}.png first differs at ({x}, {y}), drawn {string.Join(" ", drawn[pixel..(pixel + 4)])} and shipped {string.Join(" ", read.Pixels[pixel..(pixel + 4)])}, {count} pixels in all");
+            var kept = Path.Combine(root, "BevyCSharp.Tests", "TestResults", "prototype-pictures");
+            Directory.CreateDirectory(kept);
+            File.WriteAllBytes(Path.Combine(kept, name + ".png"), PngWriter.Still(Levels.PrototypePixels, Levels.PrototypePixels, drawn));
+        }
+
+        Assert.True(differences.Count == 0, string.Join("; ", differences));
+
+        // Every value the drawing rounds to a byte stands a thousandth of a step or more from where
+        // the rounding turns, so a system whose power function differs in its last digit draws the
+        // same pixels. The grid's three tones, tinted by each prototype's color as the drawing tints
+        // them, are the values it rounds.
+        var grid = Images.GridPixels(Levels.PrototypePixels, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
+        var tones = Enumerable.Range(0, grid.Length / 4).Select(i => grid[i * 4]).Distinct().ToArray();
+        foreach (var (name, color) in Modeling.PrototypeColors)
+        foreach (var tint in new[] { color.R, color.G, color.B })
+        foreach (var tone in tones)
+        {
+            var lit = Color.FromSrgb8(tone, tone, tone).R * tint;
+            var step = new Color(lit, lit, lit, 1f).ToSrgb().X * 255f;
+            Assert.True(Math.Abs(step - Math.Floor(step) - 0.5) > 1e-3, $"{name}'s tint takes the tone {tone} to {step}, too near where its rounding turns");
         }
     }
 

@@ -12,17 +12,17 @@ names its own paths.
 
 Reviewed up to `1092b434`, item 65's second phase in two commits, `ce142f8a` the grid and the
 palette and `1092b434` the pictures and the TrenchBroom config, pushed together at 12:26 on
-2026-10-26 after the run of `25e9f601` went green, the run of `1092b434` watched, carrying the
-review's files with a Shared line, DEVLOG.md and a captioned picture. Images.Grid's cell keeps its
-meter edge line a 128th wide and adds a 256th line at the half and 512th fine lines at the quarters
-in place of the tenths, on TrenchBroom's 8, 16 and 32 unit steps, with 1m lettered in each cell's
-top left in 5 by 7 squares a 128th of the cell where the cell has 128 pixels or more;
-PrototypeColors keeps its seven names in Unreal's tones, floor 0.31, 0.31, 0.32, wall 0.71, 0.71,
-0.70, ceiling 0.82, 0.82, 0.83 and stairs 0.96, 0.46, 0.13 in sRGB, door, window and hazard
-unchanged; ImagesTests rewritten for the steps and the mark, docs/modeling.md updated, the room and
-a close corner pictured. A face is read over its material's picture, a prototype over
-Levels.PrototypePixels at 512, a PNG or JPEG under the asset root's textures folder over its
-header's pixels, anything else over the units a meter; Levels.WritePrototypePictures and
+2026-10-26 after the run of `25e9f601` went green, the run of `1092b434` red at 12:44 on the three
+suites, Verdict 47, carrying the review's files with a Shared line, DEVLOG.md and a captioned
+picture. Images.Grid's cell keeps its meter edge line a 128th wide and adds a 256th line at the half
+and 512th fine lines at the quarters in place of the tenths, on TrenchBroom's 8, 16 and 32 unit
+steps, with 1m lettered in each cell's top left in 5 by 7 squares a 128th of the cell where the cell
+has 128 pixels or more; PrototypeColors keeps its seven names in Unreal's tones, floor 0.31, 0.31,
+0.32, wall 0.71, 0.71, 0.70, ceiling 0.82, 0.82, 0.83 and stairs 0.96, 0.46, 0.13 in sRGB, door,
+window and hazard unchanged; ImagesTests rewritten for the steps and the mark, docs/modeling.md
+updated, the room and a close corner pictured. A face is read over its material's picture, a
+prototype over Levels.PrototypePixels at 512, a PNG or JPEG under the asset root's textures folder
+over its header's pixels, anything else over the units a meter; Levels.WritePrototypePictures and
 level.textures write the seven pictures at 512 tinted as the materials draw them unlit, on the CPU
 so they work headless; BevyCSharp/Levels/TrenchBroom holds the pictures, GameConfig.cfg at version 9
 in the layout of TrenchBroom's Generic config with the Valve format alone and a face scale of a
@@ -307,8 +307,23 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 46 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`.
+Verdicts 33 to 42 and 44 to 46 are settled, said under each in REVIEW-ARCHIVE.md; 2, 43 and 47 are
+open, 43 mended at `42abf357`.
+
+47. **The run of `1092b434` is red on the three suites, the shipped prototype pictures compared byte
+    for byte with what the engine draws on another machine.** Read at 12:49 on 2026-10-26. On Linux,
+    Windows and macOS alike one test fails, LevelTests' case that holds the shipped pictures to the
+    engine's output, at floor.png, the first it reads, with everything else green, 1,559 passed on
+    Linux and 1,356 on Windows; the pictures were written on the coder's machine and the test
+    compares the PNG bytes, so an encoder's compression, metadata or ordering that differs by system
+    or library version fails it where the pixels may well agree, and if the pixels differ too the
+    CPU drawing or the tint is not the same on every machine, which the test must say. The mend
+    decodes both pictures and compares the pixels, exact for a drawing meant to be the same
+    everywhere, with the first differing pixel and its two values in the failure's text; if the
+    pixels differ on the runners, the drawing is made the same everywhere, integer steps in place of
+    what rounds apart, and the shipped pictures written again. Small, before item 65's third phase
+    goes on; the run's artifacts hold the runners' pictures if the test writes them on failure,
+    which it should.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -2119,3 +2134,16 @@ its faces, corners and volume, the doorway's open where its opening is and solid
 within the eight chords' cut of the circle, and a turned box to its corners and its new mapping.
 docs/levels.md shows a room built in code. The public listing gains the six, no line removed or
 reshaped.
+
+Verdict 47, in the commit carrying this line. The test compared the bytes of the pictures it wrote
+with the shipped ones, and an encoder's compression may write the same picture as other bytes on
+another system or runtime, as .NET's zlib may. It reads each shipped picture back and holds it pixel
+for pixel to the one Modeling.PrototypePicture draws, and on a difference names the first differing
+pixel with both values and the count, and writes the drawn picture under
+TestResults/prototype-pictures, which the test-digest artifact carries from each system. On this
+machine the pixels agree in Debug and in Release. The drawing rounds three tones of the grid, 89,
+173 and 230, tinted by each prototype, and the test holds every one to a thousandth of a step or
+more from where its rounding turns, the least 0.0014 at the window's red over a line, where a power
+function differing in its last digit moves a value by a few millionths of a step, so the pixels
+should agree on the runners as well and the failure was the bytes alone, which the next run's page
+confirms or names. 8a287c2f before it waits with it.
