@@ -18,17 +18,19 @@ namespace Bevy.Tests;
 /// threads, which the next eighty should not add to.
 /// </para>
 /// <para>
-/// The heap is read after every tenth app, and judged by how far its floor rose, the least reading
-/// from the seventieth app to the hundredth against the greater of the twentieth's and the
-/// thirtieth's, as 3DEngine's resident memory is judged from the greatest of its early readings.
-/// On macOS the heap rises and falls back by several megabytes every few dozen apps, a leak raises
-/// the floor as it raises every reading, and a trough after the base is not a rise. On the macOS
-/// suite of <c>5f051299</c>, build run 39547498414, the heap read 101.10 and 103.34 MB at the twentieth app and the
-/// thirtieth, fell to 90.84 at the fortieth and climbed back 2 MB every ten apps to 102.94 at the
-/// hundredth, while its census found 0.3 MB more alive, and the least of the twentieth to the
-/// fiftieth, the trough, made a rise of 6.0 where the base read here makes none. A leak of an
-/// eighth of a megabyte an app still fails, over the forty apps from the thirtieth to the
-/// seventieth.
+/// The heap is read after every tenth app as the bytes the last full blocking collection kept, its
+/// live objects, and judged by how far its floor rose, the least reading from the seventieth app to
+/// the hundredth against the greater of the twentieth's and the thirtieth's, as 3DEngine's resident
+/// memory is judged from the greatest of its early readings. <see cref="GC.GetTotalMemory"/> counts
+/// with the live objects what a collection left on the heap where it did not compact, which on
+/// macOS rose and fell back by several megabytes every few dozen apps. On the macOS suite of
+/// <c>5f051299</c>, build run 39547498414, it read 101.10 and 103.34 MB at the twentieth app and the
+/// thirtieth, fell to 90.84 at the fortieth and climbed back 2 MB every ten apps, while its census
+/// found 0.3 MB more alive, and on <c>7e35f94b</c>'s, build run 41097236243, it climbed 1.5 MB every
+/// ten apps from 108.33 at the twentieth to 119.07 at the hundredth with no trough between, its
+/// floor rising 5.9 while its census found 0.4 MB more alive, as 3DEngine's test found it swing (its
+/// <c>1398ed24</c>). A leak of an eighth of a megabyte an app still fails, over the forty apps from
+/// the thirtieth to the seventieth.
 /// </para>
 /// <para>
 /// Where <c>BCS_GCDUMP</c> names <c>dotnet-gcdump</c>, as the macOS job has it, the heap's types are
@@ -68,9 +70,12 @@ public sealed class AppLeakTests(ITestOutputHelper output)
                 if (failure is not null) grown = $"no census, {failure}";
             }
 
+            // The live objects, the bytes the last full blocking collection kept, since what an
+            // uncompacted collection leaves on the heap swings on macOS (the remarks say by how much).
             GC.Collect();
             GC.WaitForPendingFinalizers();
-            var heap = GC.GetTotalMemory(forceFullCollection: true) / 1e6;
+            GC.Collect();
+            var heap = GC.GetGCMemoryInfo(GCKind.FullBlocking).PromotedBytes / 1e6;
             heaps.Add((i, heap));
             output.WriteLine($"{i,3} apps: resident {resident:0} MB, heap {heap:0.00} MB");
 

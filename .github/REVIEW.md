@@ -3,7 +3,11 @@
 Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on
 macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
 batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
-mend, the two to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
+the character climbs and red where it cannot, a wall with two arches parting the course from the
+playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
+green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
+load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
 the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
 moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
 with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
@@ -255,7 +259,7 @@ from [SHARED.md](SHARED.md).
     shell and the corridors round the zones where they stand, no horizon from any start, the walkway
     or the ramps, the layout pictured and sent; the third phase next, each zone's pieces moved into
     its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
-    course court next.
+    course court next. The course court at `3417d612` on 2026-10-30.
 
 78. **The README's words under the header are the owner's.** The owner wrote on 2026-10-30 that
     below the README's header stands "Bevy C# [Behavior] on a struct are component & systems,
@@ -315,7 +319,10 @@ open, 43 mended at `42abf357`.
     hall's load are the first places to read. The mend finds what each app leaves behind and lets it
     go or makes it once for the process, the test reading flat on macOS; if the growth is the
     runtime's own on that system, the reading says so with the types and the bound follows. Small,
-    first, the commit going with `169d5afe`.
+    first, the commit going with `169d5afe`. Read on 2026-10-30, no app code changed since
+    `7e082be1` and a census finds about 0.4 MB alive against GetTotalMemory's 10.7 MB more, so the
+    measure is the mend, the test reading the promoted bytes of the last full blocking collection as
+    3DEngine's does, 19.82 to 19.83 MB over a hundred apps.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -798,3 +805,14 @@ The whole suite ran with it in one host at the 3 GB cap, 1,998 passed, 3 skipped
 RayTracingTests' denoiser at 1080p reading 4.95 ms against its 3.2, as it reads alone three times
 while 3DEngine's sessions run apps on the same GPU. The picture is 2026-10-30-item-68-course.webp.
 The public listing is unchanged.
+
+Verdict 48, in the commit carrying this line. Nothing an app runs changed since 7e082be1, 0ed9073c
+being the level's file and the feature test and 7e35f94b the harness pointing the user directory a
+test earlier, and 7e35f94b's census found about 0.4 MB more alive from the twentieth app to the
+hundredth, the method and parameter infos and the event source's table among it the census's own
+as the test's remarks say, while GC.GetTotalMemory climbed 10.7 MB in even steps with no trough, as
+it climbed 2 MB every ten apps on 5f051299. The test reads the heap as the bytes the last full
+blocking collection kept, as 3DEngine's AppLeakTests does since its 1398ed24, its bound unchanged,
+and here it reads 19.82 to 19.83 MB from the tenth app to the hundredth. The whole suite ran with
+it, 1,999 passed and 3 skipped in one host at the 3 GB cap.
+Shared: the two engines' AppLeakTests read the heap the same way.

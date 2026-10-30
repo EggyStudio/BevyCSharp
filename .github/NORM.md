@@ -326,6 +326,12 @@ reviewing session records a commit in a few lines, the detail in the archive's i
 the commit, and its watch wakes once an hour, the runs' ends reported by waits. By review, the
 reviewer reading each report's and each record's length.
 
+**N 7.8 A session runs a program offscreen or headless, and opens a window only to read what a
+window alone shows.** The owner's word of 2026-10-30. A test, a reading, a capture and a drive run
+offscreen or headless as they do; a window is opened on the owner's machine for the window's own
+questions, the swapchain and its format, the modes and sizes, a screenshot read against an offscreen
+capture, and closed when read. By review.
+
 ## Conformance
 
 `checked` names what checks the rule. `listed` is checked with that many places to mend on the
