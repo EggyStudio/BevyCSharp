@@ -1952,6 +1952,41 @@ a batch.
     at `c5cb4888` on 2026-10-26 with the third phase's hub, the plaza from a level file in place of
     the open ground's cube alone, the level then growing under item 68 by Decision 68.
 
+79. **The feature test's window shows what the devlog's pictures show.** The owner wrote on
+    2026-10-30 that the feature test run by hand does not look like the devlog's pictures, the
+    clouds and the lighting looking far worse than the latest pictures of the clouds, which come
+    from the drive's offscreen runs. A reading first, in the owner's own way of running with the
+    same build, window size and mode. The weather preset, hour and quality of the pictured frames
+    are read against what a run by hand starts with and what keys change them; a window screenshot
+    at the pictures' views is read against offscreen captures of the same frames, pixel by pixel,
+    the swapchain's format and tone mapping against the capture's; and the clouds and the global
+    illumination under movement and in the first seconds are read against a still that settled,
+    since temporal passes converge over frames. Then the mend for what the reading shows, the
+    feature test starting as pictured or its keys said on screen, a window path matching the
+    capture's, or the README saying what settles and how long. First, before item 68's next zone,
+    with a note and the pair of pictures. The owner added that the feature test is run with dotnet
+    run, the bin folder deleted at times, so the C# build is current, the clouds the most visible
+    difference, and that the sessions may open a window on this machine and capture it; the reading
+    runs windowed the owner's way and asks first which native bridge dotnet run loads, since the
+    clouds' shaders live in the bridge and a bridge not rebuilt since a pull is older than the C#
+    that calls it, the freshness check read for why it did not say so. Read first on 2026-10-30, the
+    bridge is not stale for the clouds on this machine, a plain dotnet run copying the library built
+    on 2026-10-26 at 04:45, which holds the cloud code of 2025-10-25 and lacks only scene_field.rs's
+    light-through of `929a1cf7`; the owner's saved settings start at hour 11 with the day stopped
+    and PartlyCloudy where the pictures stand at 15:00 and 8:00, the window ugly standing still, so
+    size and settling are out; the windowed Debug run against offscreen at one pose and hour, pixel
+    by pixel, is next. Read at the owner's settings on 2026-10-30, the window equal to offscreen
+    within 0.3 to 1.2% on still views, so not the swapchain; the fault is the clouds lit from the
+    eye's side, the start view north at 11:00 with the sun behind, coming out gray and no brighter
+    than the sky, the phase of two Henyey-Greenstein lobes over four octaves returning about 0.08 of
+    the light toward the sun where a white cloud returns about 0.25, the devlog's 15:00 shots facing
+    the sun's side where the forward lobe whitens them; a smaller lavender tint from the clear sky's
+    ambient of `5a8c6251`; and near clouds as soft smears with the walls hiding the horizon's. The
+    mend is the clouds' many-times-scattered light so a front-lit thick cloud reaches a white
+    albedo, then the tint, each with a pair at the owner's settings. Done at `e3ddec48` on
+    2026-10-30, the many-times-scattered share in the clouds' march, the other glitches the owner
+    sees to items 81 and 82.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

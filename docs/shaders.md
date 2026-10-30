@@ -112,7 +112,12 @@ The prepass draws depth for shadows, and normals and motion for the effects that
 less than the main pass and its time elsewhere, so a prepass stage reads `meshPrepassGlobals`
 where the main pass reads `meshGlobals`, and a pipeline given the other refuses to build. A
 material that moves its vertices needs a prepass vertex shader moving them the same way, or it casts
-the shadow of the mesh it started from, and one that discards pixels needs a prepass fragment shader
+the shadow of the mesh it started from. The same way means the same sums in the same order, as the
+example adds the same height to the same local position in both. The main pass draws a pixel only
+where it is at least as near as the prepass's depth, so a point reached by other arithmetic, a push
+added in the world in one stage and in the mesh's own space in the other, can land a rounding behind
+it, and the pixel is left as nothing drew there, dark holes in the mesh that move as it moves. One
+that discards pixels needs a prepass fragment shader
 discarding the same ones. Both read the material's values like the main stages do. A vertex stage
 left out is Bevy's own. Defines reach the shader as `-D`, and a program with different defines is a
 different program compiled on its own.

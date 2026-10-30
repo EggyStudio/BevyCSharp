@@ -1,16 +1,24 @@
 # Review
 
-Reviewed up to `1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on
-2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three
-suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the last full blocking
-collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it
-carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on
-2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's
-REVIEW.md line reading the head, the batch's items and the Replies by the owner's word in the
-coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court (the
-still stations as brushes, orange where the character climbs and red where it cannot, a wall with
-two arches parting the course from the playground, the terrain gone for a terraced mound with the
-drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
+Reviewed up to `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of
+`1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes. The march adds an
+isotropic share for the light scattered more often than the four octaves follow, a deep front-lit
+cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud tops from 166,
+163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the lavender going with
+the gray, the 15:00 sun side keeping its shading and overcast and storm staying gray; 49 cloud,
+weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out of GPU memory
+under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher panicking on a
+send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612`
+at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14
+on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the last full
+blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999
+passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at
+18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
+AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
+in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
+(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
+with two arches parting the course from the playground, the terrain gone for a terraced mound with
+the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
 flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
 phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
 lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
@@ -274,39 +282,6 @@ from [SHARED.md](SHARED.md).
     a link to the bcs script or a plain mark, and stands as written until answered. One commit,
     small, documents alone, before item 68's next phase commit.
 
-79. **The feature test's window shows what the devlog's pictures show.** The owner wrote on
-    2026-10-30 that the feature test run by hand does not look like the devlog's pictures, the
-    clouds and the lighting looking far worse than the latest pictures of the clouds, which come
-    from the drive's offscreen runs. A reading first, in the owner's own way of running with the
-    same build, window size and mode. The weather preset, hour and quality of the pictured frames
-    are read against what a run by hand starts with and what keys change them; a window screenshot
-    at the pictures' views is read against offscreen captures of the same frames, pixel by pixel,
-    the swapchain's format and tone mapping against the capture's; and the clouds and the global
-    illumination under movement and in the first seconds are read against a still that settled,
-    since temporal passes converge over frames. Then the mend for what the reading shows, the
-    feature test starting as pictured or its keys said on screen, a window path matching the
-    capture's, or the README saying what settles and how long. First, before item 68's next zone,
-    with a note and the pair of pictures. The owner added that the feature test is run with dotnet
-    run, the bin folder deleted at times, so the C# build is current, the clouds the most visible
-    difference, and that the sessions may open a window on this machine and capture it; the reading
-    runs windowed the owner's way and asks first which native bridge dotnet run loads, since the
-    clouds' shaders live in the bridge and a bridge not rebuilt since a pull is older than the C#
-    that calls it, the freshness check read for why it did not say so. Read first on 2026-10-30, the
-    bridge is not stale for the clouds on this machine, a plain dotnet run copying the library built
-    on 2026-10-26 at 04:45, which holds the cloud code of 2025-10-25 and lacks only scene_field.rs's
-    light-through of `929a1cf7`; the owner's saved settings start at hour 11 with the day stopped
-    and PartlyCloudy where the pictures stand at 15:00 and 8:00, the window ugly standing still, so
-    size and settling are out; the windowed Debug run against offscreen at one pose and hour, pixel
-    by pixel, is next. Read at the owner's settings on 2026-10-30, the window equal to offscreen
-    within 0.3 to 1.2% on still views, so not the swapchain; the fault is the clouds lit from the
-    eye's side, the start view north at 11:00 with the sun behind, coming out gray and no brighter
-    than the sky, the phase of two Henyey-Greenstein lobes over four octaves returning about 0.08 of
-    the light toward the sun where a white cloud returns about 0.25, the devlog's 15:00 shots facing
-    the sun's side where the forward lobe whitens them; a smaller lavender tint from the clear sky's
-    ambient of `5a8c6251`; and near clouds as soft smears with the walls hiding the horizon's. The
-    mend is the clouds' many-times-scattered light so a front-lit thick cloud reaches a white
-    albedo, then the tint, each with a pair at the owner's settings.
-
 81. **The meadow's grass holds its light from one frame to the next.** The owner wrote on 2026-10-30
     at 20:4x that the feature test looks good but the grass in the vegetation areas glitches, dark
     patches for one frame that change the next, and asked that two pictures be taken one after the
@@ -317,7 +292,14 @@ from [SHARED.md](SHARED.md).
     or the smoothing's history; then the mend so a still view of the grass changes by no more than
     the smoothing's own grain between frames, read by the difference picture's share of pixels past
     a threshold before and after, with a pair or a short animation at the owner's settings. First
-    after item 79's cloud mend.
+    after item 79's cloud mend. The cause read on 2026-10-30, the grass shader's main vertex stage
+    adding the wind's push in world space while the prepass took it into mesh space and back through
+    the transform, the two depths differing by a rounding so that where the main pass landed behind
+    the prepass depth nothing drew, a dark blade-shaped hole moving as the wind bent the blade, the
+    frames identical with time frozen; the mend places the main pass's point by the prepass's own
+    sums, pixels changing over a quarter between consecutive frames from 4.96% to 0.20% and blades
+    darker than 0.6 of their surroundings from 0.58% to none, docs/shaders.md saying the same way
+    means the same sums in the same order.
 
 82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
     21:0x that in the lighting room the room gets brighter when the camera looks left and darker
@@ -869,3 +851,16 @@ app stops, after its last frame, on every run here, a lead not chased. The whole
 1,978 passed, 3 skipped and 21 failed, every failure BounceRoomsTests' rooms ending in Bevy's out
 of memory while 3DEngine's sessions' apps held the GPU's memory, the class passing alone after, 55
 of 55.
+
+Item 81, the grass, in the commit carrying this line. The meadow's blades went dark in patches that
+changed each frame, at the owner's settings, with the sun's shadows on or off, the blades casting
+none; with the clock stopped two frames were the same. The grass's main vertex stage added the
+wind's push in the world and its prepass stage in the mesh's own space and back through the
+transform, so a bent point's depth differed by a rounding between them, and where the main pass's
+fell behind the prepass's nothing drew, a dark hole the blade's shape that moved as the wind bent it.
+The main pass places the point by the prepass's own sums. Over consecutive frames of the same view
+the pixels changing by more than a quarter fell from 4.96 to 0.20 percent, and those darker than
+0.6 of the light about them from 0.58 percent of the grass to none. docs/shaders.md says that a
+prepass moving vertices the same way means by the same sums in the same order, and why. The picture
+is 2026-10-30-item-81-grass.webp, sent to the owner. The whole suite ran with it, 1,999 passed and
+3 skipped in one host at the 3 GB cap.

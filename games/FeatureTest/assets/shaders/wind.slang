@@ -5,7 +5,7 @@
 // origin setting the phase of the gusts, and the field ripples rather than swaying as one. A vertex
 // bends by how high it stands on its mesh, its root not at all and its top the most, along the
 // wind's direction in the world, whichever way the blade is turned. The prepass bends the same
-// way, so the shadows and the depth the effects read follow the blades.
+// way, by the same sums, so the shadows and the depth the effects read follow the blades.
 
 import bcs;
 
@@ -56,19 +56,6 @@ float3 blown(uint instance, float3 position, float time)
     return world + float3(wind.x * bend, -0.3 * bend * h, wind.y * bend);
 }
 
-[shader("vertex")]
-MeshVertexOutput vertex(MeshVertex v)
-{
-    MeshVertexOutput output;
-    let world = blown(v.instance_index, v.position, meshGlobals.time);
-    output.world_position = float4(world, 1.0);
-    output.position = meshWorldToClip(world);
-    output.world_normal = meshNormalLocalToWorld(v.instance_index, v.normal);
-    output.uv = float2(v.uv.x, height(v.position));
-    output.instance_index = v.instance_index;
-    return output;
-}
-
 /// A direction in the world taken into the mesh's own space, by the inverse of its transform,
 /// which Bevy keeps transposed for the normals, so its columns are the rows wanted here.
 float3 world_to_local(uint instance, float3 direction)
@@ -79,6 +66,24 @@ float3 world_to_local(uint instance, float3 direction)
     let c1 = float3(a[0].w, a[1].xy);
     let c2 = float3(a[1].zw, b);
     return float3(dot(c0, direction), dot(c1, direction), dot(c2, direction));
+}
+
+[shader("vertex")]
+MeshVertexOutput vertex(MeshVertex v)
+{
+    MeshVertexOutput output;
+    // Placed as the prepass places it, the push taken into the mesh's own space and back, since
+    // the main pass draws only where it meets the prepass's depth. Added in the world instead, a
+    // point can land a rounding behind the prepass's, and a blade goes dark where nothing draws,
+    // changing as the wind bends it.
+    let push = blown(v.instance_index, v.position, meshGlobals.time) - meshLocalToWorld(v.instance_index, v.position);
+    let world = meshLocalToWorld(v.instance_index, v.position + world_to_local(v.instance_index, push));
+    output.world_position = float4(world, 1.0);
+    output.position = meshWorldToClip(world);
+    output.world_normal = meshNormalLocalToWorld(v.instance_index, v.normal);
+    output.uv = float2(v.uv.x, height(v.position));
+    output.instance_index = v.instance_index;
+    return output;
 }
 
 [shader("vertex")]

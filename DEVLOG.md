@@ -6,6 +6,24 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-10-30
+
+![](.github/assets/readings/2026-10-30-item-68-course.webp)
+The course court with its stations made of the level's brushes, from above its north-west corner,
+then its ramps at 15 to 60 degrees and its stairs, orange where the character climbs and red where
+it cannot, the beam between its landings beside the tunnel, and the playground behind a wall with
+two arches, its rope, plate and lamp before the terraced mound.
+
+![](.github/assets/readings/2026-10-30-item-79-clouds.webp)
+The feature test's partly cloudy sky before the clouds' many-times-scattered light on the left and
+after it on the right, above at the saved hour of 11:00 from the plaza looking north with the sun
+behind, the clouds gray and lavender before and white with shaded bases after, and below at 15:00
+from above the walls toward the sun's side, where they keep their shading.
+
+Done that day
+
+- Item 79 at `e3ddec48`. The feature test's window shows what the devlog's pictures show.
+
 ## 2026-10-26
 
 ![](.github/assets/readings/2026-10-26-item-70-impostors.webp)
