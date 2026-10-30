@@ -16,7 +16,7 @@ corridor from each doorway to the zone's court. The level is assets/levels/featu
 file TrenchBroom opens (BevyCSharp/Levels/TrenchBroom in the engine's repository says how), so a
 change saved there is the map the next run loads. East is the course, ramps, stairs, a beam, a
 tunnel, ice, a bounce pad, moving platforms and gaps, beside a playground of crates, doors, a lift,
-a rope and a heightmap terrain. West, past an arcade of four arches, is the render gallery, spheres
+a rope and a mound of terraces. West, past an arcade of four arches, is the render gallery, spheres
 from a dielectric to a metal and from polished to rough, a Cornell box and a row of modeled shapes.
 North is the light hall, a bay for each way of lighting a scene. South, under five arches, is a
 meadow of grass and trees in the wind, with a walkway four meters up its west wall. North-east is

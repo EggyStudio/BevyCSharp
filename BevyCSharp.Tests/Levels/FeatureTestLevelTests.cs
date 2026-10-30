@@ -5,8 +5,8 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The feature test's level, its plaza, a walled court round each zone where the zone stands, the
-/// corridors that join them, the light hall's shell and the meadow's raised walkway, written by the
-/// generator here and held to it.
+/// corridors that join them, the light hall, the course's stations, the playground's mound and the
+/// meadow's raised walkway, written by the generator here and held to it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -68,6 +68,8 @@ public sealed class FeatureTestLevelTests
         Walkway(brushes);
         Yard(brushes);
         Hall(brushes);
+        Course(brushes);
+        Mound(brushes);
 
         // The corridors from the plaza's doorways, each six meters wide, the west one an aisle and an
         // arcade beside it, the south one under arches, the north-east one along the diagonal.
@@ -213,6 +215,98 @@ public sealed class FeatureTestLevelTests
         brushes.Add(Block(-Half - Wall / 2, Half + Wall / 2, Height, Height + 0.3, Back - Wall / 2, Front + Wall / 2, "proto/ceiling"));
     }
 
+    /// <summary>
+    /// The course's stations that stand still, in three rows east of its start where the feature
+    /// test's Course tries the player on them, and a wall with two arches parting the course from the
+    /// playground south of it. What the character climbs is the prototyping orange, what it cannot
+    /// climb red and a ledge or a landing the walls' gray, so a station says at a look which it is.
+    /// The ice, the bounce pad, the conveyor, the pit and what moves are the feature test's own,
+    /// since what a surface does to the player is read from the entity under it.
+    /// </summary>
+    private static void Course(List<LevelBrush> brushes)
+    {
+        // The north row climbs. Ramps at 15, 30, 45 and 60 degrees from a foot at x 50 to landings a
+        // meter and a half up, the last steeper than the character's 46 stands on, and east of them
+        // stairs of steps 0.15, 0.25 and 0.4 high, the last over its step height of 0.35, each lane
+        // two and a half meters wide.
+        const double Rise = 1.5, Lane = 2.5, Tread = 0.35;
+        double[] angles = [15, 30, 45, 60];
+        for (var i = 0; i < angles.Length; i++)
+        {
+            var z = -19 + i * 3.2;
+            var run = Rise / Math.Tan(angles[i] * Math.PI / 180);
+            brushes.Add(Ramp((50, z), (50 + run, z), Lane, Rise, angles[i] > 46 ? "proto/hazard" : "proto/stairs"));
+            brushes.Add(Block(50 + run, 52 + run, 0, Rise, z - Lane / 2, z + Lane / 2, "proto/wall"));
+        }
+
+        double[] steps = [0.15, 0.25, 0.4];
+        for (var flight = 0; flight < steps.Length; flight++)
+        {
+            var z = -19 + flight * 3.2;
+            var count = (int)Math.Round(1.6 / steps[flight]);
+            var material = steps[flight] > 0.35 ? "proto/hazard" : "proto/stairs";
+            for (var i = 0; i < count; i++)
+                brushes.Add(Block(61.825 + i * Tread, 61.825 + (i + 1) * Tread, 0, steps[flight] * (i + 1), z - Lane / 2, z + Lane / 2, material));
+            var landing = 61.825 + count * Tread;
+            brushes.Add(Block(landing, landing + 2, 0, steps[flight] * count, z - Lane / 2, z + Lane / 2, "proto/wall"));
+        }
+
+        // A beam a third of a meter wide and a meter up between two landings, steps up to the first,
+        // and a tunnel 1.3 m high, too low to stand in and crawled through crouched.
+        Steps(brushes, 73.825, -8);
+        brushes.Add(Block(75.75, 77.25, 0, 1, -9, -7, "proto/wall"));
+        brushes.Add(Block(77.25, 86.75, 0.8, 1, -8.165, -7.835, "proto/stairs"));
+        brushes.Add(Block(86.75, 88.25, 0, 1, -9, -7, "proto/wall"));
+        brushes.Add(Block(78, 86, 0, 1.3, -14.4, -14, "proto/wall"));
+        brushes.Add(Block(78, 86, 0, 1.3, -12, -11.6, "proto/wall"));
+        brushes.Add(Block(78, 86, 1.3, 1.7, -14.4, -11.6, "proto/ceiling"));
+
+        // The middle row tries the ground underfoot, and the ledge over its bounce pad stands too high
+        // to jump to. The south row moves, between ledges the platform runs to and fro over, the
+        // ledge the elevator lifts to, and six ledges with gaps from a meter to three between them, up
+        // steps at their start.
+        brushes.Add(Block(68.5, 71.5, 0, 5, -2, 2, "proto/wall"));
+        brushes.Add(Block(50.5, 53.5, 0, 1.5, 8.5, 11.5, "proto/wall"));
+        brushes.Add(Block(62.5, 65.5, 0, 1.5, 8.5, 11.5, "proto/wall"));
+        brushes.Add(Block(70.5, 73.5, 0, 7, 12.5, 15.5, "proto/wall"));
+        Steps(brushes, 83.825, 6);
+        var x = 87.25;
+        brushes.Add(Block(85.75, x, 0, 1, 5, 7, "proto/wall"));
+        foreach (var gap in new[] { 1.0, 1.5, 2, 2.5, 3 })
+        {
+            brushes.Add(Block(x + gap, x + gap + 1.5, 0, 1, 5, 7, "proto/wall"));
+            x += gap + 1.5;
+        }
+
+        // The wall between the course and the playground, lower than the court's, with an arch at each
+        // end of the playground.
+        brushes.AddRange(Wall((44.25, 18), (115.75, 18), 5, (14, 4, 4), (50, 4, 4)));
+    }
+
+    /// <summary>Four steps up to a meter, each a tread deep and a quarter meter higher, two meters wide.</summary>
+    private static void Steps(List<LevelBrush> brushes, double x, double z)
+    {
+        for (var i = 0; i < 4; i++)
+            brushes.Add(Block(x + i * 0.35, x + (i + 1) * 0.35, 0, 0.25 * (i + 1), z - 1, z + 1, "proto/stairs"));
+    }
+
+    /// <summary>
+    /// The playground's mound, three terraces a meter over each other, each up a ramp from the west,
+    /// where a body dropped on it lands on the top.
+    /// </summary>
+    private static void Mound(List<LevelBrush> brushes)
+    {
+        const double X = 100, Z = 29;
+        double[] halves = [7, 4, 1.5];
+        for (var tier = 0; tier < halves.Length; tier++)
+        {
+            var half = halves[tier];
+            brushes.Add(Block(X - half, X + half, tier, tier + 1, Z - half, Z + half, "proto/wall"));
+            var foot = tier == 0 ? X - half - 4 : X - halves[tier - 1];
+            brushes.Add(Ramp((foot, Z), (X - half, Z), 2, 1, "proto/stairs", tier));
+        }
+    }
+
     /// <summary>A floor half a meter deep, its top the ground's.</summary>
     private static void Floor(List<LevelBrush> brushes, double x0, double x1, double z0, double z1) =>
         brushes.Add(Block(x0, x1, -0.5, 0, z0, z1, "proto/floor"));
@@ -255,14 +349,14 @@ public sealed class FeatureTestLevelTests
         return pieces.Select(piece => (turn == 0 ? piece : piece.Turned(turn, origin)).Moved(At(from.X, 0, from.Z)));
     }
 
-    /// <summary>A ramp from one point of the ground to another, as wide as given, rising from nothing at its start to its height at its end.</summary>
-    private static LevelBrush Ramp((double X, double Z) from, (double X, double Z) to, double width, double rise)
+    /// <summary>A ramp from one point to another at a height over the ground, as wide as given, rising from that height at its start by its rise at its end.</summary>
+    private static LevelBrush Ramp((double X, double Z) from, (double X, double Z) to, double width, double rise, string material = "proto/stairs", double foot = 0)
     {
         var (dx, dz) = (to.X - from.X, to.Z - from.Z);
         var length = Math.Sqrt(dx * dx + dz * dz);
-        var ramp = LevelBrush.Wedge(new LevelPoint(0, -width / 2 * Units, 0), new LevelPoint(length * Units, width / 2 * Units, rise * Units), "proto/stairs");
+        var ramp = LevelBrush.Wedge(new LevelPoint(0, -width / 2 * Units, 0), new LevelPoint(length * Units, width / 2 * Units, rise * Units), material);
         var turn = Math.Round(Math.Atan2(-dz, dx) * 180 / Math.PI, 9);
-        return (turn == 0 ? ramp : ramp.Turned(turn, new LevelPoint(0, 0, 0))).Moved(At(from.X, 0, from.Z));
+        return (turn == 0 ? ramp : ramp.Turned(turn, new LevelPoint(0, 0, 0))).Moved(At(from.X, foot, from.Z));
     }
 
     [Fact]
@@ -314,7 +408,7 @@ public sealed class FeatureTestLevelTests
     }
 
     [Fact]
-    public void NoHorizonShowsFromAnyStartTheWalkwayOrARampsTop()
+    public void NoHorizonShowsFromAnyStartOrAnyHeightThePlayerReaches()
     {
         var brushes = Level.Parse(File.ReadAllText(LevelPath), LevelPath).World!.Brushes;
 
@@ -326,13 +420,14 @@ public sealed class FeatureTestLevelTests
             Assert.Null(Hit(brushes, feet + new LevelPoint(0, 0, 0.2 * Units), new LevelPoint(0, 0, 1), 1.6 * Units));
         }
 
-        // From every start, the walkway's middle and each ramp's top, at an eye's height, a wall
-        // stands across every level way within the level, so the sky shows over walls and never the
-        // horizon.
+        // From every start, the walkway's middle, each of its ramps' tops, the ledge the course's
+        // elevator lifts to and the playground mound's top, at an eye's height, a wall stands across
+        // every level way within the level, so the sky shows over walls and never the horizon.
         (string, double, double, double)[] eyes =
         [
             .. Starts.Select(start => (start.Zone, start.X, start.Y + 1.7, start.Z)),
             ("the walkway", -28.25, 5.7, 86), ("the north ramp's top", -28.25, 5.7, 62), ("the south ramp's top", -28.25, 5.7, 110),
+            ("the elevator's ledge", 72, 8.7, 14), ("the mound's top", 100, 4.7, 29),
         ];
         foreach (var (where, x, y, z) in eyes)
         for (var step = 0; step < 64; step++)

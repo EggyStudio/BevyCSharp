@@ -1,15 +1,25 @@
 # Review
 
-Reviewed up to `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its run green at
-14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub); `c6b95ea9` with
-`8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level helpers); `1092b434`
-and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict 47; `25e9f601`
-(Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge, Verdict 46;
-`f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70 d2);
-`fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail stands in
-its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused from
-2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and asked
-that the sessions spend fewer tokens at the same quality, N 7.7.
+Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on
+macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
+batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
+mend, the two to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
+moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
+with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
+reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
+directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
+Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
+the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
+run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
+`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
+helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
+47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
+Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
+d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
+stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
+from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
+asked that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -244,7 +254,8 @@ from [SHARED.md](SHARED.md).
     before the third phase. The second phase at `7e082be1` on 2026-10-26, the courts, the hall's
     shell and the corridors round the zones where they stand, no horizon from any start, the walkway
     or the ramps, the layout pictured and sent; the third phase next, each zone's pieces moved into
-    its court's own structure, one zone a commit.
+    its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
+    course court next.
 
 78. **The README's words under the header are the owner's.** The owner wrote on 2026-10-30 that
     below the README's header stands "Bevy C# [Behavior] on a struct are component & systems,
@@ -254,10 +265,57 @@ from [SHARED.md](SHARED.md).
     a link to the bcs script or a plain mark, and stands as written until answered. One commit,
     small, documents alone, before item 68's next phase commit.
 
+79. **The feature test's window shows what the devlog's pictures show.** The owner wrote on
+    2026-10-30 that the feature test run by hand does not look like the devlog's pictures, the
+    clouds and the lighting looking far worse than the latest pictures of the clouds, which come
+    from the drive's offscreen runs. A reading first, in the owner's own way of running with the
+    same build, window size and mode. The weather preset, hour and quality of the pictured frames
+    are read against what a run by hand starts with and what keys change them; a window screenshot
+    at the pictures' views is read against offscreen captures of the same frames, pixel by pixel,
+    the swapchain's format and tone mapping against the capture's; and the clouds and the global
+    illumination under movement and in the first seconds are read against a still that settled,
+    since temporal passes converge over frames. Then the mend for what the reading shows, the
+    feature test starting as pictured or its keys said on screen, a window path matching the
+    capture's, or the README saying what settles and how long. First, before item 68's next zone,
+    with a note and the pair of pictures. The owner added that the feature test is run with dotnet
+    run, the bin folder deleted at times, so the C# build is current, the clouds the most visible
+    difference, and that the sessions may open a window on this machine and capture it; the reading
+    runs windowed the owner's way and asks first which native bridge dotnet run loads, since the
+    clouds' shaders live in the bridge and a bridge not rebuilt since a pull is older than the C#
+    that calls it, the freshness check read for why it did not say so. Read first on 2026-10-30, the
+    bridge is not stale for the clouds on this machine, a plain dotnet run copying the library built
+    on 2026-10-26 at 04:45, which holds the cloud code of 2025-10-25 and lacks only scene_field.rs's
+    light-through of `929a1cf7`; the owner's saved settings start at hour 11 with the day stopped
+    and PartlyCloudy where the pictures stand at 15:00 and 8:00, the window ugly standing still, so
+    size and settling are out; the windowed Debug run against offscreen at one pose and hour, pixel
+    by pixel, is next.
+
+80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
+    item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
+    GenerateNuspec alone, so build and run never check, and its inputs are the Rust files and
+    Cargo.toml alone, so a changed shader under native never counts as stale; a person running
+    dotnet run after a pull can draw last week's shaders under this week's C# with no word. The
+    check runs before build too, cheap by file times, over every file under native the library is
+    built from, shaders among them, and says in one line which file is newer than the library and
+    which script rebuilds it; the README's dotnet run paragraph says so where it said it under
+    building from source alone. One commit, small, after item 79.
+
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 47 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`.
+Verdicts 33 to 42 and 44 to 47 are settled, said under each in REVIEW-ARCHIVE.md; 2, 43 and 48 are
+open, 43 mended at `42abf357`.
+
+48. **The run of `7e35f94b` is red on macOS, the heap's floor rising across a hundred apps.** Read
+    at 18:39 on 2026-10-30. AppLeakTests' hundred apps read the heap's floor 5.9 MB higher at the
+    hundredth than at the twentieth on macOS, 108.3 to 119.1 MB in even steps of about 1.5 MB every
+    ten apps, the growers strings by 8,791, RuntimeParameterInfo by 684, RuntimeMethodInfo by 255
+    and an EventSource metadata entry, Linux and Windows passing the same test; the steady step says
+    something each app makes is kept in a static, reflection over methods and their parameters among
+    it, new since `7e082be1`, so the module initializer of `7e35f94b`, the level's registry or the
+    hall's load are the first places to read. The mend finds what each app leaves behind and lets it
+    go or makes it once for the process, the test reading flat on macOS; if the growth is the
+    runtime's own on that system, the reading says so with the types and the bound follows. Small,
+    first, the commit going with `169d5afe`.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -725,3 +783,18 @@ EngineHarness's static constructor points the directory back at the shared one. 
 it from a module initializer as the test assembly loads, and each test of SaveGameTests,
 PersistentTests and WindowMemoryTests passes run alone, as FileHandleTests and BadFileTests do. The
 whole suite ran with it and the light hall's commit.
+
+Decision 68's third phase, the course court, in the commit carrying this line. The course's stations
+that stand still, the ramps, the stairs, the beam, the tunnel and the ledges, are the level's brushes
+at the places Course gave them, orange where the character climbs and red where it cannot; the ice,
+the bounce pad, the conveyor, the pit and what moves stay Course's entities, since the player reads
+a surface from the entity under it. A wall 5 m high with two arches parts the course from the
+playground, and the heightmap terrain goes with its balls, a mound of three terraces with a ramp up
+each in its place. Of the drive's checks the terrain's moved to the mound's top, the player dropped
+at x 100 and z 29 landing over 2.5 m up, and none went; the horizon test casts from the elevator's
+ledge and the mound's top as well, renamed NoHorizonShowsFromAnyStartOrAnyHeightThePlayerReaches.
+The drive runs whole, its peak 3.87 GB, and the level tests pass on the headless bridge, 23 of 23.
+The whole suite ran with it in one host at the 3 GB cap, 1,998 passed, 3 skipped and 1 failed,
+RayTracingTests' denoiser at 1080p reading 4.95 ms against its 3.2, as it reads alone three times
+while 3DEngine's sessions run apps on the same GPU. The picture is 2026-10-30-item-68-course.webp.
+The public listing is unchanged.

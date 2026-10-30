@@ -253,11 +253,11 @@ quiet frames.wait 40
 grep -q "\[Playground\] the plate is pressed" "$log" || fail "the pressure plate did not light its lamp under the player"
 shot 4-playground
 
-# The terrain, which the player lands on above the ground under it.
-at 100 "$(up 8)" 24
+# The playground's mound, whose top the player lands on three meters over the ground.
+at 100 "$(up 8)" 29
 quiet frames.wait 120
 read -r _ hill _ < <(where)
-holds "$hill" ">" "$ground + 0.3" || fail "the player fell through the terrain to y $hill"
+holds "$hill" ">" "$ground + 2.5" || fail "the player fell through the mound's top to y $hill"
 
 # The zones drawn rather than played, from the spectator camera, the gallery's wall, its row of
 # modeled primitives, its room cut by booleans and its box, each bay of the light hall from its
