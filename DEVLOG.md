@@ -41,6 +41,38 @@ The feature test's hub loaded from its level file, an octagonal plaza in the pro
 with a rounded doorway arched in orange toward each zone and the signposts outside them, from above
 and from inside beside the turning cube and the lamp.
 
+![](.github/assets/readings/2026-10-26-item-68-layout.webp)
+The feature test's map as one walled level, from above the plaza with its corridors to the course
+court, the gallery court, the light hall, the meadow court and the scenes yard, and inside it the
+arcade beside the west corridor, the arches over the south corridor and the meadow from its raised
+walkway, the sky over the walls and no horizon.
+
+![](.github/assets/readings/2026-10-26-item-68-hall.webp)
+The light hall at the end of the plaza's north corridor, its aisle walls opened by four arched bays
+a side with each bay's lights behind its arch and its label above it, seen down the aisle, from the
+plaza through the corridor's doorway and from above over its roof.
+
+Item 68's layout, the feature test's open map made one walled level of courts and corridors, its
+walls higher than an eye on any floor, walkway or ramp's top, so the sky shows over them and never
+the horizon. The level is `games/FeatureTest/assets/levels/feature-test.map`, written by
+`FeatureTestLevelTests`, and each court stands round its zone where the zone's pieces stand, so the
+next phase moves each zone's pieces into its court's own structure.
+
+| Room | Walls | What it holds |
+|---|---|---|
+| The plaza | 5 m, an octagon nine meters to its walls | The turning cube and the lamp, a rounded doorway toward each zone |
+| The course court, east | 10 m, 72 by 64 m | The course's stations, ramps, stairs, the beam, the tunnel, ice, the bounce pad, platforms and gaps, and the playground's crates, door, lift, rope and terrain |
+| The gallery court, west | 10 m, 34 by 41 m | The spheres, the gallery wall, the Cornell box, the modeled row and the room cut by booleans |
+| The light hall, north | 5.5 m, roofed, 24 by 32 m | The eight bays of lighting, its shell the level's brushes where the hall's walls, partitions and roof stood |
+| The meadow court, south | 10 m, 60 by 71 m | The meadow's grass, its ring of trees, the bushes and the fern, the forests behind, and a walkway four meters up its west wall on two ramps |
+| The scenes yard, north-east | 16 m, 66 by 68 m, its corner toward the plaza cut away | Intel Sponza where the panel's Scenes page stands it |
+| The corridors | 7 m, six meters wide | East to the course, west to the gallery beside an arcade of four arches, south to the meadow under five arches, north to the light hall, and north-east along the diagonal to the yard's cut corner |
+
+As `dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj --filter FeatureTestLevelTests` holds it,
+each zone's start stands on a floor with room for a body, and from each start, from the walkway's
+middle and from both ramps' tops, at an eye's height, a wall stands across every one of 64 level
+ways within the level. The level is 282 brushes.
+
 Item 70's leaves in the scene field, as cells that let a share of global illumination's light
 through, as 3DEngine's item 100 gives its field. `MaterialSettings.LightThrough` is the share of the
 light that passes a meter of a surface's depth. The bridge keeps it beside the material and writes

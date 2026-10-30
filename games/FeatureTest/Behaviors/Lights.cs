@@ -5,13 +5,15 @@ using Bevy.Reflected;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// The light hall north of the hub, a roofed building of eight bays off an aisle, each showing one
-/// way of lighting a scene.
+/// The light hall north of the hub, a roofed room of the level, eight bays opening off its aisle
+/// through arches, each showing one way of lighting a scene.
 /// </summary>
 /// <remarks>
 /// <para>
-/// The hall is shut but for a doorway facing the road from the hub, so its bays are lit by what
-/// they hold rather than by the sun, where the sun casts shadows. Down the west side are point
+/// The hall's walls, its arches and its roof are the level's (<c>levels/feature-test.map</c>), and
+/// the lights, the shapes they fall on and the aisle's lamps are made here. It is shut but for a
+/// rounded doorway at the end of the corridor from the plaza, so its bays are lit by what they hold
+/// rather than by the sun, where the sun casts shadows. Down the west side are point
 /// lights in red, green and blue whose shadows cross in their mixtures, a spot light shaped by a
 /// cookie into a window's frame, a light the size of a panel whose shadows soften as they stretch
 /// away, and a spot shining down through slats into a fog volume, its shafts drawn by the camera's
@@ -43,10 +45,10 @@ public partial struct Lights
     private const float Wall = 0.3f;
 
     /// <summary>The front of the hall, toward the hub, and its back.</summary>
-    private const float Front = -56f, Back = -88f;
+    private const float Front = -24f, Back = -56f;
 
     /// <summary>The middle of each bay along the hall, from the door.</summary>
-    private static readonly float[] Bays = [-60f, -68f, -76f, -84f];
+    private static readonly float[] Bays = [Front - 4f, Front - 12f, Front - 20f, Front - 28f];
 
     /// <summary>Whether the camera has volumetric fog, which it has inside the hall.</summary>
     private static bool _fogged;
@@ -136,20 +138,20 @@ public partial struct Lights
         var facingWest = Quat.FromRotationY(-MathF.PI / 2f);
         for (var bay = 0; bay < Bays.Length; bay++)
         {
-            Gizmos.Text(west[bay], new Vec3(-4.05f, Ground + 4.9f, Bays[bay]), facingEast, 0.2f, (0f, 0f), ink, inFront: false);
-            Gizmos.Text(east[bay], new Vec3(4.05f, Ground + 4.9f, Bays[bay]), facingWest, 0.2f, (0f, 0f), ink, inFront: false);
+            Gizmos.Text(west[bay], new Vec3(-3.8f, Ground + 4.9f, Bays[bay]), facingEast, 0.2f, (0f, 0f), ink, inFront: false);
+            Gizmos.Text(east[bay], new Vec3(3.8f, Ground + 4.9f, Bays[bay]), facingWest, 0.2f, (0f, 0f), ink, inFront: false);
         }
     }
 
     /// <summary>
-    /// The aisle's lamps. The hall's walls, partitions, roof and floor are the level's
-    /// (<c>levels/feature-test.map</c>), at the sizes and places they were drawn at here.
+    /// The aisle's lamps. The hall's walls with their arches, its partitions, roof and floor are the
+    /// level's (<c>levels/feature-test.map</c>), between the front and back the bays stand by here.
     /// </summary>
     private static void Shell(EcsWorld ecs)
     {
         // Dim lamps down the aisle, enough to walk by and no more, so each bay's own light is
         // what lights it.
-        foreach (var z in new[] { -60f, -72f, -84f })
+        foreach (var z in new[] { Front - 4f, Front - 16f, Front - 28f })
         {
             var lamp = Render.SpawnLight(new LightSettings
             {

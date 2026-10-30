@@ -46,7 +46,7 @@ public sealed class FeatureTestLevelTests
     private static readonly (string Zone, double X, double Y, double Z)[] Starts =
     [
         ("hub", 0, FloorTop / Units, 6), ("course", 46, 0, 0), ("gallery", -50, 0, 0),
-        ("lights", 0, 0, -50), ("vegetation", 0, 0, 50), ("scenes", 45, 0, -45),
+        ("lights", 0, 0, -18), ("vegetation", 0, 0, 50), ("scenes", 45, 0, -45),
     ];
 
     private static string LevelPath => Path.Combine(CheatsheetTests.RepositoryRoot(), "games", "FeatureTest", "assets", "levels", "feature-test.map");
@@ -87,9 +87,9 @@ public sealed class FeatureTestLevelTests
         foreach (var z in new[] { 16.0, 24, 32, 40, 48 })
             brushes.AddRange(LevelBrush.Arch(At(0, 4.2, z), 3 * Units, 0.6 * Units, 0.6 * Units, "proto/stairs"));
 
-        Floor(brushes, -3, 3, -56, -9);
-        brushes.AddRange(Wall((-3, -9.25), (-3, -55.85), CorridorWall));
-        brushes.AddRange(Wall((3, -9.25), (3, -55.85), CorridorWall));
+        Floor(brushes, -3, 3, -24, -9);
+        brushes.AddRange(Wall((-3, -9.25), (-3, -23.85), CorridorWall));
+        brushes.AddRange(Wall((3, -9.25), (3, -23.85), CorridorWall));
 
         // The north-east corridor runs from the plaza to the scenes yard's cut corner, where the
         // corner's line, x minus z at 86, meets the diagonal 86 over the root of two from the middle.
@@ -184,23 +184,31 @@ public sealed class FeatureTestLevelTests
     }
 
     /// <summary>
-    /// The light hall's shell where the feature test's hall stood, its floor, its walls five and a
-    /// half meters high, a rounded doorway toward the plaza, the partitions between its bays and its
-    /// roof, so its bays' lights light a shut room.
+    /// The light hall at the end of the corridor north of the plaza, its floor, its walls five and a
+    /// half meters high, a rounded doorway toward the plaza, the partitions between its bays, the
+    /// walls along its aisle with an arch into each bay, their piers meeting the partitions, and its
+    /// roof, so its bays' lights light a shut room. The feature test's Lights stands its bays' lights
+    /// at the same front and back.
     /// </summary>
     private static void Hall(List<LevelBrush> brushes)
     {
-        const double Half = 12, Front = -56, Back = -88, Height = 5.5, Wall = 0.3;
+        const double Half = 12, Front = -24, Back = -56, Height = 5.5, Wall = 0.3;
         Floor(brushes, -Half, Half, Back, Front);
         brushes.AddRange(Walls((-Half - Wall / 2, Front), (Half + Wall / 2, Front), Height, Wall, (Half + Wall / 2, 4, 4)));
         brushes.AddRange(Walls((-Half - Wall / 2, Back), (Half + Wall / 2, Back), Height, Wall));
         brushes.AddRange(Walls((-Half, Front), (-Half, Back), Height, Wall));
         brushes.AddRange(Walls((Half, Front), (Half, Back), Height, Wall));
-        foreach (var z in new[] { -64.0, -72, -80 })
+        foreach (var z in new[] { Front - 8, Front - 16, Front - 24 })
         {
             brushes.AddRange(Walls((-Half, z), (-4, z), Height, Wall));
             brushes.AddRange(Walls((4, z), (Half, z), Height, Wall));
         }
+
+        // An arch six meters wide into each bay, its top four and a half meters up, so a bay's name
+        // over it stands on the wall above, and a pier of two meters between two arches.
+        (double, double, double)[] arches = [(4, 6, 4.5), (12, 6, 4.5), (20, 6, 4.5), (28, 6, 4.5)];
+        brushes.AddRange(Walls((-4, Front), (-4, Back), Height, Wall, arches));
+        brushes.AddRange(Walls((4, Front), (4, Back), Height, Wall, arches));
 
         brushes.Add(Block(-Half - Wall / 2, Half + Wall / 2, Height, Height + 0.3, Back - Wall / 2, Front + Wall / 2, "proto/ceiling"));
     }

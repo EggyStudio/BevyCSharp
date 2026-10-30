@@ -20,8 +20,8 @@ public readonly record struct Zone(string Name, Vec3 Center, Vec3 Eye, Vec3 Star
 /// </summary>
 /// <remarks>
 /// <para>
-/// The hub is the middle of the map, where the program starts, and each zone lies along a road out
-/// of it, the course to the east, the render gallery to the west, the lights to the north, the
+/// The hub is the middle of the map, where the program starts, and each zone lies along a corridor
+/// out of it, the course to the east, the render gallery to the west, the lights to the north, the
 /// vegetation to the south and the scenes to the north-east. A zone is filled by the batch that
 /// writes it, so a signpost may point at an empty field for a while, its name saying what the
 /// field will hold.
@@ -44,7 +44,7 @@ public partial struct Zones
         new("Hub", Vec3.Zero, new Vec3(3.5f, 3f, 6f), new Vec3(0f, Scene.GroundHeight + Scene.PlazaHeight, 6f), 15f),
         new("Course", new Vec3(70f, 0f, 0f), new Vec3(48f, 4f, 0f), new Vec3(46f, Scene.GroundHeight, 0f), 30f),
         new("Render gallery", new Vec3(-70f, 0f, 0f), new Vec3(-52f, 4f, 0f), new Vec3(-50f, Scene.GroundHeight, 0f), 25f),
-        new("Lights", new Vec3(0f, 0f, -70f), new Vec3(0f, 4f, -52f), new Vec3(0f, Scene.GroundHeight, -50f), 25f),
+        new("Lights", new Vec3(0f, 0f, -40f), new Vec3(0f, 4f, -20f), new Vec3(0f, Scene.GroundHeight, -18f), 25f),
         new("Vegetation", new Vec3(0f, 0f, 70f), new Vec3(0f, 4f, 52f), new Vec3(0f, Scene.GroundHeight, 50f), 25f),
         new("Scenes", new Vec3(60f, 0f, -60f), new Vec3(46f, 4f, -46f), new Vec3(45f, Scene.GroundHeight, -45f), 25f),
     ];
@@ -172,7 +172,7 @@ public partial struct Zones
         return $"gliding for {frames} frames";
     }
 
-    /// <summary>Where a zone's signpost stands, at the hub's edge on the road to it.</summary>
+    /// <summary>Where a zone's signpost stands, at the hub's edge in the corridor to it.</summary>
     internal static Vec3 SignOf(Zone zone)
     {
         var flat = new Vec3(zone.Center.X, 0f, zone.Center.Z).Normalized;

@@ -274,7 +274,7 @@ view 5-models -57.1 2.6 0.5 -57.1 -0.6 9
 view 5-room -66.6 1.2 5 -66.8 0.3 13
 view 6-cornell -62 2.8 -13 -72 1.8 -13
 bay=7
-for z in -60 -68 -76 -84; do
+for z in -28 -36 -44 -52; do
   view "$bay-hall-west" 0 1.3 "$z" -10 0.2 "$z"
   view "$((bay + 1))-hall-east" 0 1.3 "$z" 10 0.2 "$z"
   bay=$((bay + 2))
