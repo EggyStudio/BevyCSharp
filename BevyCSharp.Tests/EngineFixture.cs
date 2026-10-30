@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Bevy;
 using Xunit;
 
@@ -33,7 +34,6 @@ public sealed class EngineHarness : IDisposable
 
     static EngineHarness()
     {
-        UserData.Root = UserDirectory;
         AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
             // A file held as the process ends is the process's to let go, and fails no test.
@@ -46,6 +46,15 @@ public sealed class EngineHarness : IDisposable
             }
         };
     }
+
+#pragma warning disable CA2255 // Run as the test assembly loads, before any test's constructor.
+    // Pointed as the test assembly loads rather than as the first harness is made, since a test
+    // that points the directory at one of its own does so in its constructor, before its first
+    // harness, and were that harness the run's first, the static constructor would point the
+    // directory back at the shared one under the test, as SaveGameTests run alone shows.
+    [ModuleInitializer]
+    internal static void PointThePlayersDirectory() => UserData.Root = UserDirectory;
+#pragma warning restore CA2255
 
     private readonly App _app;
     private readonly List<Exception> _failures = [];

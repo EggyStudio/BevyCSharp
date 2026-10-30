@@ -717,3 +717,11 @@ bridge, 23 of 23. The whole suite ran with it and the next commit in one host at
 light through at High five and a half units up, its share 0.17 against the test's least of 0.2,
 which reads 0.24 alone three times and in its class, the half slab's floor alone reading lower in
 the whole run, a lead not chased. The public listing is unchanged.
+
+The suite's player directory, in the commit carrying this line. SaveGameTests'
+ASaveHoldsOnlyTheFieldsPlayChangedSoAFixedLevelStillReachesIt fails run alone, its save not where
+its constructor pointed the directory, since its first harness is then the run's first and
+EngineHarness's static constructor points the directory back at the shared one. EngineHarness points
+it from a module initializer as the test assembly loads, and each test of SaveGameTests,
+PersistentTests and WindowMemoryTests passes run alone, as FileHandleTests and BadFileTests do. The
+whole suite ran with it and the light hall's commit.
