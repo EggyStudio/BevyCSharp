@@ -1,29 +1,34 @@
 # Review
 
-Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on
-macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
-batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
-mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
-the character climbs and red where it cannot, a wall with two arches parting the course from the
-playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
-green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
-load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
-the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
-moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
-with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
-reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
-directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
-Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
-the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
-run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
-`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
-helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
-47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
-Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
-d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
-stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
-from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
-asked that the sessions spend fewer tokens at the same quality, N 7.7.
+Reviewed up to `1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on
+2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three
+suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the last full blocking
+collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it
+carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on
+2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's
+REVIEW.md line reading the head, the batch's items and the Replies by the owner's word in the
+coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court (the
+still stations as brushes, orange where the character climbs and red where it cannot, a wall with
+two arches parting the course from the playground, the terrain gone for a terraced mound with the
+drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
+flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
+phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
+lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
+headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
+High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
+`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
+passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
+by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
+pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
+said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
+drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
+shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
+red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
+`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
+level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
+words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
+README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
+7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -292,7 +297,36 @@ from [SHARED.md](SHARED.md).
     light-through of `929a1cf7`; the owner's saved settings start at hour 11 with the day stopped
     and PartlyCloudy where the pictures stand at 15:00 and 8:00, the window ugly standing still, so
     size and settling are out; the windowed Debug run against offscreen at one pose and hour, pixel
-    by pixel, is next.
+    by pixel, is next. Read at the owner's settings on 2026-10-30, the window equal to offscreen
+    within 0.3 to 1.2% on still views, so not the swapchain; the fault is the clouds lit from the
+    eye's side, the start view north at 11:00 with the sun behind, coming out gray and no brighter
+    than the sky, the phase of two Henyey-Greenstein lobes over four octaves returning about 0.08 of
+    the light toward the sun where a white cloud returns about 0.25, the devlog's 15:00 shots facing
+    the sun's side where the forward lobe whitens them; a smaller lavender tint from the clear sky's
+    ambient of `5a8c6251`; and near clouds as soft smears with the walls hiding the horizon's. The
+    mend is the clouds' many-times-scattered light so a front-lit thick cloud reaches a white
+    albedo, then the tint, each with a pair at the owner's settings.
+
+81. **The meadow's grass holds its light from one frame to the next.** The owner wrote on 2026-10-30
+    at 20:4x that the feature test looks good but the grass in the vegetation areas glitches, dark
+    patches for one frame that change the next, and asked that two pictures be taken one after the
+    other to see it. A reading first, two consecutive offscreen captures at the meadow and their
+    difference picture, then the cause among the frame-to-frame terms, the global illumination's
+    screen probes and their history, the leaves' share in the scene field with the wind moving the
+    grass, the leaf material's twofold lighting under a swaying normal, the shadow cascades' jitter,
+    or the smoothing's history; then the mend so a still view of the grass changes by no more than
+    the smoothing's own grain between frames, read by the difference picture's share of pixels past
+    a threshold before and after, with a pair or a short animation at the owner's settings. First
+    after item 79's cloud mend.
+
+82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
+    21:0x that in the lighting room the room gets brighter when the camera looks left and darker
+    when it looks right. A reading first, offscreen in the hall at the owner's settings, the same
+    point turned left and right with the mean of the frame and of a fixed wall patch, then the cause
+    among the view-dependent terms, the camera's exposure adapting to what is in view, the global
+    illumination's screen probes or the cascades' merge changing with the view, the clustered lights
+    cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
+    percent from either side, with a pair at the owner's settings. After item 81.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -306,23 +340,8 @@ from [SHARED.md](SHARED.md).
 
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 47 are settled, said under each in REVIEW-ARCHIVE.md; 2, 43 and 48 are
-open, 43 mended at `42abf357`.
-
-48. **The run of `7e35f94b` is red on macOS, the heap's floor rising across a hundred apps.** Read
-    at 18:39 on 2026-10-30. AppLeakTests' hundred apps read the heap's floor 5.9 MB higher at the
-    hundredth than at the twentieth on macOS, 108.3 to 119.1 MB in even steps of about 1.5 MB every
-    ten apps, the growers strings by 8,791, RuntimeParameterInfo by 684, RuntimeMethodInfo by 255
-    and an EventSource metadata entry, Linux and Windows passing the same test; the steady step says
-    something each app makes is kept in a static, reflection over methods and their parameters among
-    it, new since `7e082be1`, so the module initializer of `7e35f94b`, the level's registry or the
-    hall's load are the first places to read. The mend finds what each app leaves behind and lets it
-    go or makes it once for the process, the test reading flat on macOS; if the growth is the
-    runtime's own on that system, the reading says so with the types and the bound follows. Small,
-    first, the commit going with `169d5afe`. Read on 2026-10-30, no app code changed since
-    `7e082be1` and a census finds about 0.4 MB alive against GetTotalMemory's 10.7 MB more, so the
-    measure is the mend, the test reading the promoted bytes of the last full blocking collection as
-    3DEngine's does, 19.82 to 19.83 MB over a hundred apps.
+Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
+43 mended at `42abf357`.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -816,3 +835,37 @@ blocking collection kept, as 3DEngine's AppLeakTests does since its 1398ed24, it
 and here it reads 19.82 to 19.83 MB from the tenth app to the hundredth. The whole suite ran with
 it, 1,999 passed and 3 skipped in one host at the 3 GB cap.
 Shared: the two engines' AppLeakTests read the heap the same way.
+
+Item 79's reading, the feature test as the owner runs it, dotnet run in the window as it opens with
+the saved settings, hour 11, the day stopped, PartlyCloudy, High, at the start and a view a court,
+against the same views offscreen and the devlog's pictures. The window draws what the capture draws,
+the views differing by 0.3 to 1.2 percent where nothing moves and more only where the fireflies and
+the clouds' drift do, at 18 to 35 frames a second while 3DEngine's sessions run apps on the GPU; the
+bridge is current for the clouds (the earlier line). What looks wrong, the clouds first:
+- Clouds lit from the eye's side, the sun behind the start's view north at 11:00, read gray and no
+  brighter than the sky, where the pictures at 15:00 faced the sun's side; the march's phase, seven
+  tenths a lobe forward and three a weak one back, and four octaves give a thick cloud about 0.08 of
+  the sun's light back toward it, where a white cloud gives about a quarter. A real fault.
+- The clouds carry a lavender tint since 5a8c6251 lit them from the copied clear sky, the tint gone
+  with that light taken off the march and the gray staying. A real fault, smaller.
+- Near clouds over the walls read as soft smears, the half size march and its history over clouds
+  seen higher and closer than the pictures' clouds at the horizon, which the walls hide. The view.
+- Above the walls, in the spectator camera alone, the level stands in an empty haze, no ground
+  outside it. The level, not seen from any floor.
+The owner is asked for the other glitches; the mends follow in this order.
+
+Item 79's first mend, the clouds, in the commit carrying this line. The march adds the light a cloud
+scatters more times than its four octaves follow, twice the sun's over four pi, even every way and
+fading toward the sun at a fifth of the light taken away, which brings a deep cloud lit from the
+eye's side from 0.09 to 0.11 of the sun's light to 0.23 to 0.25, a white cloud's. At the owner's
+view a cloud's top reads 216, 209, 195 where it read 166, 163, 160, and its shaded base 181, 177,
+172 where it read 146, 146, 154, the lavender gone with the gray, since the tint was the weak sun's
+light under the sky's blue; a cosine weighed ring of the clear sky for the ambient changed a base's
+color by a level and is not taken. Toward the sun's side at 15:00 the clouds keep their shading,
+overcast and storm stay gray, and the cloud, weather, atmosphere and sky tests pass, 49 of 49. The
+picture is 2026-10-30-item-79-clouds.webp. The near clouds read crisp with their light, the softness
+going with the low contrast, so no third mend. Bevy's asset watcher panics on a closed channel as an
+app stops, after its last frame, on every run here, a lead not chased. The whole suite ran with it,
+1,978 passed, 3 skipped and 21 failed, every failure BounceRoomsTests' rooms ending in Bevy's out
+of memory while 3DEngine's sessions' apps held the GPU's memory, the class passing alone after, 55
+of 55.

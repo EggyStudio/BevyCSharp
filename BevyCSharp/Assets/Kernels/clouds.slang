@@ -8,7 +8,8 @@
 // reaches a point through Bevy's atmosphere, red at a low sun, dimmed through the cloud toward the
 // sun by a short march, and scattered toward the eye by two lobes, a strong one forward that
 // silvers a cloud's edge against the sun and a weak one back, with Wrenninge's octaves standing in
-// for the light a cloud scatters many times over. The sky's own light reaches each point from above
+// for the light a cloud scatters many times over and an even share for what they leave out, so a
+// thick cloud lit from the eye's side reads white. The sky's own light reaches each point from above
 // at the cloud's top and from below at its base. The light is added up as it fades through the
 // cloud, a step at a time in closed form, so a thick step does not brighten it past what its light
 // could give.
@@ -74,6 +75,14 @@ uniform float4 shadow_across;
 uniform float4 shadow_up;
 
 static const float Pi = 3.14159265;
+
+// The light a cloud scatters more times than the octaves follow, as a share of the sun's, scattered
+// evenly every way. A deep cloud of droplets takes almost nothing away, so nearly all the sun's
+// light comes back out of it, spread as a white wall spreads it, about four fifths of the sun's
+// over pi toward an eye with the sun at its back. The octaves give it 0.09 to 0.11 there, a deep
+// cloud lit from the eye's side reading gray against the sky, and this brings it to 0.23 to 0.25,
+// worked out for a deep cloud with its path toward the sun as long as the eye's into it.
+static const float Diffused = 2.0;
 
 float remap(float value, float low, float high, float toLow, float toHigh)
 {
@@ -354,6 +363,9 @@ float4 marchClouds(float3 eye, float3 way, float steps, float jitter, out float 
                     b *= 0.35;
                     c *= 0.6;
                 }
+                // What the octaves leave out, fading toward the sun as a fifth of the light taken
+                // away, the depth over which a cloud scattering mostly forward spreads its light.
+                scattered += Diffused / (4.0 * Pi) * exp(-0.2 * toward);
                 // The sky's light from all around, scattered evenly, the sky's from above at the
                 // cloud's top and the dimmer light from below at its base.
                 float h = within(planet);

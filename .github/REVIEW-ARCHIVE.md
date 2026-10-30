@@ -2294,6 +2294,23 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     by the run of `c6b95ea9`, green on the three suites at 13:13, so the runners' failure was the
     PNG bytes alone.
 
+48. **The run of `7e35f94b` is red on macOS, the heap's floor rising across a hundred apps.** Read
+    at 18:39 on 2026-10-30. AppLeakTests' hundred apps read the heap's floor 5.9 MB higher at the
+    hundredth than at the twentieth on macOS, 108.3 to 119.1 MB in even steps of about 1.5 MB every
+    ten apps, the growers strings by 8,791, RuntimeParameterInfo by 684, RuntimeMethodInfo by 255
+    and an EventSource metadata entry, Linux and Windows passing the same test; the steady step says
+    something each app makes is kept in a static, reflection over methods and their parameters among
+    it, new since `7e082be1`, so the module initializer of `7e35f94b`, the level's registry or the
+    hall's load are the first places to read. The mend finds what each app leaves behind and lets it
+    go or makes it once for the process, the test reading flat on macOS; if the growth is the
+    runtime's own on that system, the reading says so with the types and the bound follows. Small,
+    first, the commit going with `169d5afe`. Read on 2026-10-30, no app code changed since
+    `7e082be1` and a census finds about 0.4 MB alive against GetTotalMemory's 10.7 MB more, so the
+    measure is the mend, the test reading the promoted bytes of the last full blocking collection as
+    3DEngine's does, 19.82 to 19.83 MB over a hundred apps. Mended at `1226ff50` on 2026-10-30;
+    settled when its run goes green. Settled on 2026-10-30 by the run of `1226ff50`, green on the
+    three suites at 20:14.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
