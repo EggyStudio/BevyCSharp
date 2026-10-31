@@ -50,8 +50,8 @@ ray-traced lighting is on, where the bridge and the GPU have them. North of the 
 has a bay each for point lights in red, green and blue, a spot light through a cookie, a light the
 size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
 captured once, an irradiance volume made in code, clustered decals and emission for the bloom. South
-of the hub a meadow of grass, every blade an entity drawn in one instanced batch, and a ring of
-trees bend in a wind a Slang vertex shader blows. In the scenes zone north-east of the hub the
+of the hub a meadow of the engine's grass, crossed cards on the leaves' material, and a ring of
+trees sway in one wind. In the scenes zone north-east of the hub the
 panel's Scenes page fetches a scene pack and loads it, Intel Sponza first, standing with its main
 door open for the player to walk in, its heaviest meshes drawn as meshlets where the graphics page's
 meshlets run from the next start, which its page switches off and on saying the frame time of each,

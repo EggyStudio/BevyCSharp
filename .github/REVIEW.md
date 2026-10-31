@@ -1,20 +1,24 @@
 # Review
 
-Reviewed up to `c5d9cd20`, item 78, pushed at 12:23 on 2026-10-31 with `d92ac690`, item 83's first
-phase, after the run of `391d6b85` went green at 11:59, its run green at 12:42 with the suites in 14
-to 17 minutes. `c5d9cd20` puts the owner's line under the README's header verbatim with [bcs] a
-plain mark, check-docs, NormTests, FirstGameTests and DocsScriptTests passing. `d92ac690` brings
-three grass cards into the bounded collection, wheat-grass at 1024 by 512 and two tufts at 512,
-0.76, 0.26 and 0.31 MB of a collection at 4.9 of 32, textures.py taking a grass kind,
-TreeTextureKind gaining Grass, docs/trees.md naming the cards; the suite 2,000 passed and 3 skipped
-after BarkDepthTests, which took any set that is not leaves for bark, was made to read bark alone.
-It carries the version's commit's review files. Before it `1c9b6baf`, item 84, pushed at 11:02, its
-run green at 11:25, the light-through test at 180 traced frames, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
-reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
-09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
-mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
-81's grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+Reviewed up to `1099cb35`, item 83's second phase, pushed at 13:15 on 2026-10-31 after the run of
+`c5d9cd20` went green at 12:42, its run green at 13:32 with the suites in 11 to 14 minutes.
+Grass.Plant and GrassSettings plant patches of 8 m, a mesh each built once as planted, drawn with
+the leaf material through Trees.GrassMaterial once an app a set, both sway streams holding the root
+so the main pass and the prepass share one sway function, no shadows cast unless asked, a run
+without a renderer planting entities alone; the stiffness 0.15, 0.6, 0.15 and 5 moves a 0.7 m tip a
+third of its height at 15 m/s where a softer first value folded the blades flat, the sheets in the
+day's dump; GrassTests 5 of 5, a backlit clump 319 against 244 front-lit, the wind test claiming
+movement in wind and none in still air since crossed cards' edge-on ends confound a root check in
+pixels; docs, CHEATSHEET and the listing follow; the suite 2,006 passed and 3 skipped. Before it
+`c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at 12:42 with
+the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in the
+collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run green
+at 11:25, the light-through test at 180 traced frames, recorded under the item in REVIEW-ARCHIVE.md.
+Before it `391d6b85`, the version to 0.6, the owner's change committed by the reviewer and pushed at
+11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at 09:10, its run green at
+09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback mended in
+render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's
+grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
 minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
 item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
 green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
@@ -311,7 +315,8 @@ from [SHARED.md](SHARED.md).
     leaves in one view and by frame.profile before and after, with a picture. First phase done at
     `d92ac690`, read at 12:24 on 2026-10-31, the three grass cards in the collection with their
     channels, a grass kind in textures.py and TreeTextureKind, BarkDepthTests reading bark alone.
-    Second phase under way.
+    Second phase done at `1099cb35`, the engine grass as recorded in the head; third phase, the
+    meadow, under way.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -997,3 +1002,16 @@ not, 5 of 5; that the roots stand still is held by the streams and the sway's ar
 picture of crossed cards shows the edge-on card's near end falling lower as its blades lean.
 docs/trees.md has a section on grass, and CHEATSHEET.md and the public listing gain Grass.Plant and
 GrassSettings. The whole suite ran with it, 2,006 passed and 3 skipped in one host at the 3 GB cap.
+
+Item 83's third phase, the meadow, in the commit carrying this line. The feature test's meadow is
+Grass.Plant over its 30 meters square, three clumps of wheat grass a square meter 0.6 m tall,
+where 14,000 blade entities on a shader of its own stood; the shader, games/FeatureTest/assets/
+shaders/wind.slang, and the system that gave it the weather's wind go, the grass swaying in the
+trees' wind, which is the weather's. By frame.profile over 120 frames offscreen at the drive's meadow
+view and the saved settings, with 3DEngine's sessions' apps on the same GPU, the frame went from
+47.7 to 36.7 ms, the main schedule from 45.8 to 13.7, the render schedule from 39.7 to 35.4, and the
+world from 15,066 entities to 1,083. Seen against the trees' leaves in that view the grass takes
+the light as they do, its far blades showing the stipple an alpha cut makes at a distance under SMAA.
+The drive runs whole on it, its meadow checks kept, its peak 3.90 GB, and docs/running-a-game.md says
+the meadow's grass. The picture is 2026-10-31-item-83-meadow.webp, the pictures on the way in the
+day's dump. The whole suite ran with it, 2,006 passed and 3 skipped in one host at the 3 GB cap.
