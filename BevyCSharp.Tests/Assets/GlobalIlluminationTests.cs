@@ -534,10 +534,10 @@ public sealed partial class GlobalIlluminationTests
     /// The mean color of the middle of the camera's picture, five pixels a side, looking from
     /// <paramref name="eye"/> at <paramref name="at"/> under a white ambient light of
     /// <paramref name="ambient"/>, once the field holds the scene's still meshes and, where
-    /// <paramref name="traced"/>, the probes have traced for a while.
+    /// <paramref name="traced"/>, the probes have traced for <paramref name="frames"/> frames.
     /// </summary>
     private static (int R, int G, int B) Looking(Action<EcsWorld> scene, int stills, Vec3 eye, Vec3 at, float ambient, bool traced,
-        Action<Entity>? lit = null)
+        Action<Entity>? lit = null, int frames = 60)
     {
         var run = new PictureRun
         {
@@ -553,7 +553,7 @@ public sealed partial class GlobalIlluminationTests
             },
         }
             .Until("settled", _ => Settled(stills))
-            .Until("traced", _ => !traced || WorldProbes.TracedFrames >= 60)
+            .Until("traced", _ => !traced || WorldProbes.TracedFrames >= frames)
             .Until("drawn", _ => EngineDrawsOn(traced))
             .Capture("seen");
         run.Go();

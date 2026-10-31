@@ -2007,6 +2007,34 @@ a batch.
     means the same sums in the same order. Done at `de14e311` on 2026-10-30, the two vertex stages
     summing the wind the same way.
 
+82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
+    21:0x that in the lighting room the room gets brighter when the camera looks left and darker
+    when it looks right. A reading first, offscreen in the hall at the owner's settings, the same
+    point turned left and right with the mean of the frame and of a fixed wall patch, then the cause
+    among the view-dependent terms, the camera's exposure adapting to what is in view, the global
+    illumination's screen probes or the cascades' merge changing with the view, the clustered lights
+    cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
+    percent from either side, with a pair at the owner's settings. After item 81. Read at 08:02 on
+    2026-10-31, the cause Bevy 0.20's. The floor two metres ahead, swept every 15 degrees, reads
+    0.24 to 0.27 and 0.14 to 0.17 from 165 to 315 degrees, the same at 15:00 and gone at night;
+    without the bay's irradiance volume no jump, with the probe alone none, with the volume alone
+    the jump, the dark arc where the volume is in the view's frustum. pbr_functions.wesl at 702 to
+    711 under IRRADIANCE_VOLUME, set a view after culling, adds the volume's light and marks diffuse
+    indirect found for every point in view, inside a volume or not, so the environment map's
+    diffuse, the sky's ambient, is lost for the whole view; the lines read by the reviewer. The mend
+    through render/mended.rs as one shader, taken or refused whole, marking diffuse indirect found
+    only where a volume holds the point, with a mend test, the shader-mends bit, the three profiles
+    and the sweep before and after; a point inside the volume reads as before. Taken. Done at
+    `785a1136`, read at 09:12 on 2026-10-31. The mend goes through render/mended.rs as one shader,
+    bits 4 and 5 and Render.IrradianceFallbackMended, diffuse indirect marked found only where a
+    volume holds the point, the comment naming pbr_functions.wesl 702 to 711 so the mend is dropped
+    when a Bevy release has it; the floor two metres ahead reads 0.24 to 0.27 at every 15 degrees of
+    the turn where it read 0.14 to 0.17 from 165 to 315; LightProbeTests holds the outside floor
+    within 3%, the floor inside the volume dark and the mend made; the sheet
+    2026-10-31-item-82-hall.webp with four labeled frames, box A alone, the plot of the floor
+    against the turn and a white ground; docs/sky-and-reflections.md says so. Headless here, render
+    and editor in the container, the bridge's tests passing.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

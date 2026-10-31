@@ -1,13 +1,19 @@
 # Review
 
-Reviewed up to `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30 after the run of
-`e3ddec48` went green, its run green at 22:49 with the suites in 12 to 18 minutes; the main pass
-places a bent blade by the prepass's sums, the pixels changing over a quarter between frames from
-4.96% to 0.20% and the dark blades gone, docs/shaders.md saying why, the suite 1,999 passed. The
-owner asked in the coder's session for grass as physically shaded as the trees, item 83, its place
-after 82 unless the owner says to start at once. Before it `e3ddec48`, item 79's cloud mend, pushed
-at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run green at 21:30 with the
-suites in 12 to 17 minutes. The march adds an isotropic share for the light scattered more often
+Reviewed up to `785a1136`, item 82, pushed at 09:10 on 2026-10-31 after the run of `de14e311` went
+green, its run green at 09:29 with the suites in 13 to 18 minutes. The irradiance volume's fallback
+is mended in render/mended.rs, bits 4 and 5 and Render.IrradianceFallbackMended, the comment naming
+pbr_functions.wesl 702 to 711; the light hall's floor reads 0.24 to 0.27 at every turn where it fell
+to 0.14 to 0.17 with the bay's volume in view; LightProbeTests holds the outside floor within 3%,
+the floor inside the volume dark and the mend made; the sheet remade to N 4.9 as it stands, four
+labeled frames, box A alone, the plot and a white ground; docs/sky-and-reflections.md. The suite
+1,998 passed, 3 skipped and 2 failed, GlobalIlluminationTests' light-through at 5.5 up reading High
+0.17 and Low 0.16 against 0.2 in the whole run and passing alone, item 84. It carries N 4.9 and
+Decision 69, the Shared row and DEVLOG.md. Before it `de14e311`, item 81's grass mend, pushed at
+22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18 minutes, the dark blades
+gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend,
+pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run green at 21:30 with
+the suites in 12 to 17 minutes. The march adds an isotropic share for the light scattered more often
 than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to
 0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146,
 154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side keeping its shading and
@@ -287,24 +293,21 @@ from [SHARED.md](SHARED.md).
     a link to the bcs script or a plain mark, and stands as written until answered. One commit,
     small, documents alone, before item 68's next phase commit.
 
-82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
-    21:0x that in the lighting room the room gets brighter when the camera looks left and darker
-    when it looks right. A reading first, offscreen in the hall at the owner's settings, the same
-    point turned left and right with the mean of the frame and of a fixed wall patch, then the cause
-    among the view-dependent terms, the camera's exposure adapting to what is in view, the global
-    illumination's screen probes or the cascades' merge changing with the view, the clustered lights
-    cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
-    percent from either side, with a pair at the owner's settings. After item 81. Read at 08:02 on
-    2026-10-31, the cause Bevy 0.20's. The floor two metres ahead, swept every 15 degrees, reads
-    0.24 to 0.27 and 0.14 to 0.17 from 165 to 315 degrees, the same at 15:00 and gone at night;
-    without the bay's irradiance volume no jump, with the probe alone none, with the volume alone
-    the jump, the dark arc where the volume is in the view's frustum. pbr_functions.wesl at 702 to
-    711 under IRRADIANCE_VOLUME, set a view after culling, adds the volume's light and marks diffuse
-    indirect found for every point in view, inside a volume or not, so the environment map's
-    diffuse, the sky's ambient, is lost for the whole view; the lines read by the reviewer. The mend
-    through render/mended.rs as one shader, taken or refused whole, marking diffuse indirect found
-    only where a volume holds the point, with a mend test, the shader-mends bit, the three profiles
-    and the sweep before and after; a point inside the volume reads as before. Taken.
+84. **The light-through tests read the same in the whole suite as alone.** In the whole run at
+    `785a1136` GlobalIlluminationTests' light-through at 5.5 up read High 0.17 and Low 0.16 against
+    0.2 and both pass alone, as they did at an earlier run; the half slab's floor reads 0.0303 at
+    both heights in the whole run where alone it reads 0.0329 and 0.0353, so an earlier test leaves
+    something that changes the light through, by order and not by time. A reading first, the test
+    before them found by halving the run, and what it leaves, a setting, an asset or a resource kept
+    across engines; the mend where it is small, the suite reading alike in both orders, else the
+    lead recorded here and the two tests' bounds left as they are. Small, before 83. Read at 10:17
+    on 2026-10-31, the cause the GPU's load and not the order. Each half of the 262 classes and all
+    of them run before the test read clean, the half slab 0.0329; the test alone with the feature
+    test drawing offscreen on the same GPU reads as the failing runs did, the solid slab 0.0152 and
+    0.0217 and the half 0.0300, since the three sessions share one GPU and another's suite was
+    drawing; with 180 traced frames in place of 60 under the same load all four cases read their
+    settled values. The mend gives Looking a frame count, 60 by default, the light-through test
+    asking 180 with a comment, the class 26 of 26 in 3 minutes; the commit awaited.
 
 83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
     seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
@@ -314,8 +317,18 @@ from [SHARED.md](SHARED.md).
     transmission, the alpha mask, two-sided normals and LightThrough, its cards clumps from the
     sorted grass sets picked by kind and density and shipped in the bounded collection as the trees'
     leaves are, the meadow using it; read against the trees' leaves in one view and by the meadow's
-    cost before and after, the drive's meadow checks kept, a captioned picture. After item 82 unless
-    the owner says to start at once; phases proposed by the coder.
+    cost before and after, the drive's meadow checks kept, a captioned picture. After item 84, in
+    three phases the coder proposed on 2026-10-31, a commit each. First the grass sets into the
+    bounded collection, recipes in build/textures.py for the sets with albedo, opacity and normal, a
+    Grass kind beside Bark and Leaf in TreeTextureSet, the collection's size and count said, a test
+    that each loads with its channels. Second the engine grass, Grass.Plant in
+    BevyCSharp/Vegetation/Grass.cs taking the area, the set, density, height and seed, clumps as
+    crossed alpha-masked cards batched a mesh a patch rather than an entity a blade, drawn with the
+    leaves' material and the trees' Wind with the root pinned, the main pass and the prepass placing
+    a vertex by the same sums as item 81 asks, tests that a backlit clump transmits, the wind moves
+    tops and not roots and a patch builds headless, the docs page's lines. Third the meadow on it in
+    place of its 14,000 strip entities, the drive's meadow checks kept, read against the trees'
+    leaves in one view and by frame.profile before and after, with a picture.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -487,6 +500,15 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     not a checklist, labels where panels could be confused and a box only where a number is read
     there, a white ground as before, and difference panels and plots where they tell the reading. N
     4.9 is rewritten so.
+
+70. **Every picture a session makes goes to the repository's dump folder.** The owner asked on
+    2026-10-31 at 09:3x that all the pictures a session makes be kept apart from the devlog's chosen
+    ones, in a dump folder, for every project, and chose the folder inside each repository and
+    ignored by git, the pictures as captured in PNG named by time, item and a word, and a captions
+    line a picture written as the shot is taken; N 4.10 in the three repositories. At 09:5x the
+    owner added that the sessions had captured and compared pictures without showing them, and asked
+    that every picture a session reads or compares be shown in the session as it is made, none kept
+    behind the scenes; N 4.10 says so.
 
 ## Replies
 
@@ -905,3 +927,15 @@ units up at High and at Low, 0.17 and 0.16 of what the solid slab holds back aga
 least of 0.2, as 0ed9073c's run read it before this mend; in the whole run the half slab's floor
 reads 0.0303 at both heights where alone it reads 0.0329 and 0.0353, so a test before it leaves
 something the light through reads, a lead for a verdict.
+
+Item 84, the light through the slabs, in the commit carrying this line. It is the GPU's load and not
+the order. Each half of the 263 classes before the test, run before it, and all of them together,
+left it reading as it does alone, the half slab's floor 0.0329 five units up, and nothing ran beside
+it in the failing run; run alone with the feature test drawing offscreen on the same GPU, as
+3DEngine's sessions' apps drew beside the suite, its floors read as the failing runs read them, the
+solid slab's 0.0152 two and a half units up and 0.0217 five up and the half slab's 0.0300, and
+after 180 traced frames rather than 60 they read as they do with the GPU to the suite, all four
+cases. The probes and the field under load lag the frames counted, so the light-through test waits
+for 180 traced frames, Looking taking the count with 60 its default, the class passing 26 of 26 in
+three minutes. The whole suite ran with it, 2,000 passed and 3 skipped in one host at the 3 GB cap.
+.gitignore leaves out .github/dump/ (N 4.10).

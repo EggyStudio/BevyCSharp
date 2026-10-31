@@ -121,3 +121,6 @@ BevyCSharp.Examples/bevy-assets/
 # The sorted sources the vegetation's textures are imported from, kept on the machine that imports
 # them and never in the repository.
 /.vegetation/
+
+# The pictures a session makes while it works (N 4.10), which the owner reads and prunes by day.
+.github/dump/

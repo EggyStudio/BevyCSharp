@@ -231,6 +231,19 @@ panel keeps the same view and exposure. The ground stays white, with labels in d
 shown the kinds on 2026-10-31, keeps the plain form as it was and asks that a sheet's parts come
 from its reading and not from a list. By review.
 
+**N 4.10 Every picture a session makes is kept in the repository's dump folder, apart from the
+devlog's chosen few.** N 4.8 keeps the pictures chosen for the devlog; the rest, every shot,
+comparison and sheet a session makes while it works, went to its scratch space and was gone with the
+session. Each goes as it is made, as captured, into `.github/dump/<date>/` under the repository,
+named by the time, the item and a word, as `09-41-item-83-meadow-before.png`, with a line in that
+day's `captions.md`, the file's name then a bar then one sentence, written as the shot is taken. The
+folder is in `.gitignore` and never committed; the owner reads it and prunes it by day. A session
+takes its shots there directly rather than copying them after, so nothing is lost when a session
+ends or the machine restarts. Every picture a session reads or compares is also shown to the owner
+in the session as it is made, with its sentence, since the owner follows the work by its pictures
+and a capture compared behind the scenes and never shown is work the owner cannot see. By review,
+the reviewer reading a day's folder against the items worked.
+
 ## 5 Examples and games
 
 **N 5.1 An example has the followed engine's name for it where that engine has one, is opened by
@@ -383,6 +396,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 4.7 | checked, `NormTests` and `PackageContentsTests` | checked, `NormTests` |
 | N 4.8 | by review | by review |
 | N 4.9 | by review | by review |
+| N 4.10 | by review | by review |
 | N 5.1 | checked, the pack workflow's capture of every example | checked, the pack workflow's capture of every example |
 | N 5.2 | checked, `NormTests.N_5_2` before a commit and `build/examples-table.py --check` in the workflow | checked, `build/examples-table.py --check` in the workflow |
 | N 5.3 | checked, the pack workflow's games | checked, the pack workflow's Courtyard |

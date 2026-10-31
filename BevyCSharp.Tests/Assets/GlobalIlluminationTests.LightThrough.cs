@@ -43,7 +43,12 @@ public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
                 eye: new Vec3(0f, 1.2f, 7f),
                 at: new Vec3(0f, 0f, 3.5f),
                 ambient: 400f,
-                traced: true);
+                traced: true,
+                // Traced for three seconds' frames rather than one's, since with the GPU drawing for
+                // another app beside the suite, as 3DEngine's sessions do, the floors read after 60
+                // came out short of where they settle, the half slab's at 0.0303 where it settles at
+                // 0.0329 five units up, and at 180 they read as they do with the GPU to the suite.
+                frames: 180);
             return Luminance(r, g, b);
         }
 
