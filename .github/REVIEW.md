@@ -1,16 +1,20 @@
 # Review
 
-Reviewed up to `1c9b6baf`, item 84, pushed at 11:02 on 2026-10-31 after the run of `785a1136` went
-green at 09:29, its run green at 11:25 with the suites in 13 to 18 minutes. The light-through test
-waits for 180 traced frames, Looking's count 60 by default, since another session's drawing on the
-shared GPU left the light unsettled at 60; .gitignore leaves out .github/dump/ (N 4.10); the suite
-2,000 passed and 3 skipped, NormTests 18 of 18. It carries N 4.9 as rewritten, N 4.10, Decisions 69
-and 70 and DEVLOG.md. After it `391d6b85`, the version to 0.6 in build/version.txt, the owner's
-change committed by the reviewer on the owner's word and pushed at 11:42, its run green at 11:59
-with the suites in 14 to 17 minutes. Before it `785a1136`, item 82, pushed at 09:10, its run green
-at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback mended in
-render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's
-grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+Reviewed up to `c5d9cd20`, item 78, pushed at 12:23 on 2026-10-31 with `d92ac690`, item 83's first
+phase, after the run of `391d6b85` went green at 11:59, its run green at 12:42 with the suites in 14
+to 17 minutes. `c5d9cd20` puts the owner's line under the README's header verbatim with [bcs] a
+plain mark, check-docs, NormTests, FirstGameTests and DocsScriptTests passing. `d92ac690` brings
+three grass cards into the bounded collection, wheat-grass at 1024 by 512 and two tufts at 512,
+0.76, 0.26 and 0.31 MB of a collection at 4.9 of 32, textures.py taking a grass kind,
+TreeTextureKind gaining Grass, docs/trees.md naming the cards; the suite 2,000 passed and 3 skipped
+after BarkDepthTests, which took any set that is not leaves for bark, was made to read bark alone.
+It carries the version's commit's review files. Before it `1c9b6baf`, item 84, pushed at 11:02, its
+run green at 11:25, the light-through test at 180 traced frames, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
+09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
+mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
+81's grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
 minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
 item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
 green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
@@ -285,17 +289,6 @@ from [SHARED.md](SHARED.md).
     its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
     course court next. The course court at `3417d612` on 2026-10-30.
 
-78. **The README's words under the header are the owner's.** The owner wrote on 2026-10-30 that
-    below the README's header stands "Bevy C# [Behavior] on a struct are component & systems,
-    generated at compile or runtime and wired straight into Bevy's ECS. Implementing Radiance
-    Cascades. [bcs]", in place of the line there; every test or check that reads the README's first
-    paragraph follows, FirstGameTests among them; the bracketed bcs is a question put to the owner,
-    a link to the bcs script or a plain mark, and stands as written until answered. One commit,
-    small, documents alone, between item 83's phases. Answered on 2026-10-31 at 12:13, the bracketed
-    bcs is BevyCSharp's short identifier, named from its command line, since the engine's name alone
-    is general; it stays as written, a plain mark in the text, no link. Goes at once, a commit of
-    its own.
-
 83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
     seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
     like them. Today the grass is a shader of its own, a two-tone gradient with the normal leaned
@@ -315,7 +308,10 @@ from [SHARED.md](SHARED.md).
     a vertex by the same sums as item 81 asks, tests that a backlit clump transmits, the wind moves
     tops and not roots and a patch builds headless, the docs page's lines. Third the meadow on it in
     place of its 14,000 strip entities, the drive's meadow checks kept, read against the trees'
-    leaves in one view and by frame.profile before and after, with a picture.
+    leaves in one view and by frame.profile before and after, with a picture. First phase done at
+    `d92ac690`, read at 12:24 on 2026-10-31, the three grass cards in the collection with their
+    channels, a grass kind in textures.py and TreeTextureKind, BarkDepthTests reading bark alone.
+    Second phase under way.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -531,6 +527,13 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     while each engine keeps its GPU binding; the order when the time comes Blender, the levels with
     the modeling library, the landscape tool, parallax and the tiers, the Unity subset last, none
     before the engine's GI items (3DEngine Decision 75).
+
+72. **The version's major and minor move by the reviewer's judgment.** The owner wrote on 2026-10-31
+    at 12:4x that the reviewer moves build/version.txt by its judgment of the project, commits it
+    and pushes it, the owner's hand no longer needed. The judgment is a minor at a step the project
+    has taken, a capability or a changed surface that a package or release carries, and the major on
+    the owner's word. The engine stands at 0.6 since `391d6b85`, the owner's own move, and stays
+    until the grass and the levels carry it to its next minor.
 
 ## Replies
 
@@ -978,3 +981,19 @@ item quotes it, the bracketed bcs a plain mark, in place of the line with Bevy's
 reads that paragraph: FirstGameTests reads the README's first program, and build/check-docs.py
 follows its links, passing with one fewer; NormTests, FirstGameTests and DocsScriptTests pass with
 it, and the package's description keeps its own words.
+
+Item 83's second phase, the engine's grass, in the commit carrying this line. Grass.Plant covers a
+stretch with clumps of two cards crossed from a grass set, in square patches of eight meters, a mesh
+a patch made once as it is planted and moved by the wind in the shader alone, drawn with the leaves'
+material through Trees.GrassMaterial, made once an app for each set; each card's sway streams hold
+its root with a phase of the clump's own, so the main pass and the prepass place a vertex by the
+same function, and its second coordinates the way straight up; it casts no shadows unless asked,
+and a run without a renderer plants the entities alone. Its stiffness moves a 0.7 m blade's tip
+about a third of its height in a wind of 15 meters a second, where the first, softer one folded
+the blades flat. GrassTests: a patch's cards stand on the ground with both streams at the root, the
+same seed plants the same patch, a stretch is cut into patches headless, grass lit from behind reads
+319 against 244 lit from the eye's side, and a strong wind moves the blades where still air does
+not, 5 of 5; that the roots stand still is held by the streams and the sway's arithmetic, since a
+picture of crossed cards shows the edge-on card's near end falling lower as its blades lean.
+docs/trees.md has a section on grass, and CHEATSHEET.md and the public listing gain Grass.Plant and
+GrassSettings. The whole suite ran with it, 2,006 passed and 3 skipped in one host at the 3 GB cap.

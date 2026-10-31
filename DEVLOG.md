@@ -16,7 +16,9 @@ mean gray from 0 to 1 at every 15 degrees round, 0.241 at 150 and 0.141 at 165 b
 
 Done that day
 
+- Item 78 at `c5d9cd20`. The README's words under the header, as given.
 - Item 82 at `785a1136`. The light hall keeps its brightness as the camera turns.
+- Item 83 at `d92ac690`. The grass is shaded as the trees are.
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
 
 ## 2026-10-30

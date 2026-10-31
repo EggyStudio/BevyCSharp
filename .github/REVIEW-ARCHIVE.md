@@ -2051,6 +2051,18 @@ a batch.
     settled values. The mend gives Looking a frame count, 60 by default, the light-through test
     asking 180 with a comment, the class 26 of 26 in 3 minutes. Done at `1c9b6baf`.
 
+78. **The README's words under the header are the owner's.** The owner wrote on 2026-10-30 that
+    below the README's header stands "Bevy C# [Behavior] on a struct are component & systems,
+    generated at compile or runtime and wired straight into Bevy's ECS. Implementing Radiance
+    Cascades. [bcs]", in place of the line there; every test or check that reads the README's first
+    paragraph follows, FirstGameTests among them; the bracketed bcs is a question put to the owner,
+    a link to the bcs script or a plain mark, and stands as written until answered. One commit,
+    small, documents alone, between item 83's phases. Answered on 2026-10-31 at 12:13, the bracketed
+    bcs is BevyCSharp's short identifier, named from its command line, since the engine's name alone
+    is general; it stays as written, a plain mark in the text, no link. Goes at once, a commit of
+    its own. Done at `c5d9cd20`, the line verbatim, the mark plain, the checks that read the first
+    paragraph passing.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -234,6 +234,31 @@ hide the grooves behind them as the eye moves round a trunk. The leaves take non
 Laptop GPU a forest of 24 tupelos at 1920 by 1080 draws its opaque pass a tenth to a half of a
 millisecond slower with the depth than without, as `TheDepthsCostIsReadInAForest` prints it.
 
+## Grass
+
+`Grass.Plant` covers a stretch of ground with clumps of two cards crossed, cut from one of the
+collection's grass cards and drawn with the leaves' material, so a blade takes the sun and the sky
+as a leaf does, lets the light behind it through and sways in the wind the trees sway in:
+
+```csharp
+var meadow = Grass.Plant(ctx.Ecs, new Vec3(0f, 0f, 70f), new Vec2(60f, 70f), new GrassSettings
+{
+    Set = "wheat-grass",     // or grass-tuft-a, grass-tuft-b
+    Density = 3f,            // clumps a square meter
+    Height = 0.6f,           // meters, a third either way unless Variation says otherwise
+    Seed = 4,
+});
+```
+
+The stretch is cut into square patches, eight meters unless `PatchSize` says otherwise, each a mesh
+of its own under the entity returned, so the camera culls a patch out of view as one and a meadow
+is a draw a patch. A patch's mesh is made as it is planted and the wind moves it in the shader, so
+nothing is built again while it sways. A card's roots stand still in the wind and its blades swing
+and flutter about them, each clump in a phase of its own. The blades cast no shadows unless
+`CastsShadows` asks, which many small cut-out cards cost more than they show, and they receive them
+either way. The same settings over the same stretch plant the same grass, and a run with no renderer
+plants the patches' entities and draws nothing, as trees do.
+
 ## The skeleton
 
 The skeleton is the points the stems pass through, each with the point it grew from and its radius,

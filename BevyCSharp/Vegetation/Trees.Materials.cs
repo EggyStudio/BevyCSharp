@@ -159,6 +159,33 @@ public static partial class Trees
         });
     }
 
+    /// <summary>
+    /// The material a grass set's cards are drawn with, the leaves' material over the set's pictures,
+    /// its blades letting the light behind them through and the field's light through them as a
+    /// crown's leaves do, and swaying stiff as grass stands (<see cref="Grass"/>), made once an app
+    /// for each set.
+    /// </summary>
+    internal static AssetHandle GrassMaterial(TreeTextureSet set) => Once($"grass {set.Name}", () =>
+    {
+        var (albedo, normal, surface) = set.Load();
+        var made = Render.CreateLeafMaterial(new MaterialSettings
+        {
+            BaseColorTexture = albedo,
+            NormalMap = normal,
+            OcclusionTexture = surface,
+            MetallicRoughnessTexture = surface,
+            DiffuseTransmissionTexture = surface,
+            DiffuseTransmission = 1f,
+            Roughness = 1f,
+            Metallic = 1f,
+            AlphaMode = AlphaMode.Mask,
+            DoubleSided = true,
+            LightThrough = LeafLightThrough,
+        }, Grass.Stiffness);
+        Render.SetFieldTint(made, (set.MeanColor.R, set.MeanColor.G, set.MeanColor.B));
+        return made;
+    });
+
     // How deep the bark's grooves are, in its texture's width, which is a stem's circumference, and
     // the most layers its parallax occlusion searches.
     private const float BarkDepth = 1f / 40f;

@@ -2708,6 +2708,23 @@ enum Bevy.GraphicsBackend : int
   Metal = 3
   OpenGL = 4
   Vulkan = 1
+static class Bevy.Grass
+  static Entity Plant(EcsWorld ecs, Vec3 center, Vec2 size, GrassSettings? settings = null)
+sealed class Bevy.GrassSettings : IEquatable<GrassSettings>
+  GrassSettings()
+  bool CastsShadows { get; init; }
+  bool Equals(GrassSettings? other)
+  float Density { get; init; }
+  float Height { get; init; }
+  float PatchSize { get; init; }
+  float Variation { get; init; }
+  override bool Equals(object? obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(GrassSettings? left, GrassSettings? right)
+  static bool op_Inequality(GrassSettings? left, GrassSettings? right)
+  string Set { get; init; }
+  uint Seed { get; init; }
 enum Bevy.GridFlow : int
   Column = 1
   ColumnDense = 3

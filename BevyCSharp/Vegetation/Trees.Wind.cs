@@ -165,6 +165,9 @@ public static partial class Trees
         return (SwayingStems(skeleton, TreeDetail.Full, limbs), cards.Data(), species.Leaves > 0 ? PlanCards(skeleton, cards, limbs) : null);
     }
 
+    /// <summary>The two sway streams of a mesh's vertices, as the grass's cards carry them too.</summary>
+    internal static MeshStream[] SwayStreams(Vector4[] limbs, Vector4[] own) => Streams(limbs, own);
+
     /// <summary>The two sway streams of a mesh's vertices.</summary>
     private static MeshStream[] Streams(Vector4[] limbs, Vector4[] own) =>
     [

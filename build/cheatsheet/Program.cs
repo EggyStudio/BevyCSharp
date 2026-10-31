@@ -29,7 +29,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
     ("Modeling", "modeling.md", ["EditMesh", "Modeling", "Images"]),
     ("Levels", "levels.md", ["Levels", "Level", "LevelEntity", "LevelBrush", "LevelPoint"]),
-    ("Trees", "trees.md", ["Trees", "TreeTextures", "TreeTextureSet"]),
+    ("Trees", "trees.md", ["Trees", "TreeTextures", "TreeTextureSet", "Grass"]),
     ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw", "ComponentArray`1"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),
     ("The interface", "ui.md", ["Ui", "UiGrid", "TextEdit", "Feathers", "Length", "Sides", "Corners", "Track", "ImGuiRuntime", "ImGuiTextures"]),
