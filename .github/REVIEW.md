@@ -1,42 +1,47 @@
 # Review
 
-Reviewed up to `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of
-`1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes. The march adds an
-isotropic share for the light scattered more often than the four octaves follow, a deep front-lit
-cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud tops from 166,
-163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the lavender going with
-the gray, the 15:00 sun side keeping its shading and overcast and storm staying gray; 49 cloud,
-weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out of GPU memory
-under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher panicking on a
-send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612`
-at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14
-on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the last full
-blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999
-passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at
-18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
-flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
-phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
-lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
-headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
-High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
-`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
-passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
-shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
-red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
-`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
-level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+Reviewed up to `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30 after the run of
+`e3ddec48` went green, its run green at 22:49 with the suites in 12 to 18 minutes; the main pass
+places a bent blade by the prepass's sums, the pixels changing over a quarter between frames from
+4.96% to 0.20% and the dark blades gone, docs/shaders.md saying why, the suite 1,999 passed. The
+owner asked in the coder's session for grass as physically shaded as the trees, item 83, its place
+after 82 unless the owner says to start at once. Before it `e3ddec48`, item 79's cloud mend, pushed
+at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run green at 21:30 with the
+suites in 12 to 17 minutes. The march adds an isotropic share for the light scattered more often
+than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to
+0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146,
+154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side keeping its shading and
+overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21
+BounceRoomsTests failed out of GPU memory under other sessions' apps and pass alone, 55 of 55; a
+lead, Bevy's asset watcher panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's
+mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b`
+ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests
+reads the promoted bytes of the last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB
+over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to
+`7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone,
+Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the batch's items and
+the Replies by the owner's word in the coder's session, held for Verdict 48's mend, and after it
+`3417d612`, item 68's course court (the still stations as brushes, orange where the character climbs
+and red where it cannot, a wall with two arches parting the course from the playground, the terrain
+gone for a terraced mound with the drive's check on its top, the drive green, 1,998 passed with the
+denoiser's 1080p time read as a flake under the other sessions' GPU load), the three to go together.
+`0ed9073c` is item 68's third phase's first zone, the light hall at the north corridor's end with
+arched bays off the aisle, the lights and the drive's eight bay views moved and none gone, the drive
+green, 23 level tests on the headless bridge, the suite 1,998 passed with one failure read as a
+flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its
+class, a lead if it fails again; `7e35f94b` points the tests' user directory from a module
+initializer so SaveGameTests' FixedLevel passes alone, the detail under Replies. build/version.txt
+stands changed in the tree from 0.5 to 0.6 by no session's hand, left for the owner's word. Before
+it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its run green at 14:52. Before
+it on 2026-10-26, each green but where said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and
+`d53a3108` (Verdict 47's mend, the drive's zone check, the level helpers); `1092b434` and `ce142f8a`
+(65's second phase), red at the shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend);
+`f703b3b1` (65's first phase), red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's
+quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70
+c3); `b9cd8d74` (70's far level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its
+devlog note and its own words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30
+the owner wrote the README's new words (item 78) and asked that the sessions spend fewer tokens at
+the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -282,25 +287,6 @@ from [SHARED.md](SHARED.md).
     a link to the bcs script or a plain mark, and stands as written until answered. One commit,
     small, documents alone, before item 68's next phase commit.
 
-81. **The meadow's grass holds its light from one frame to the next.** The owner wrote on 2026-10-30
-    at 20:4x that the feature test looks good but the grass in the vegetation areas glitches, dark
-    patches for one frame that change the next, and asked that two pictures be taken one after the
-    other to see it. A reading first, two consecutive offscreen captures at the meadow and their
-    difference picture, then the cause among the frame-to-frame terms, the global illumination's
-    screen probes and their history, the leaves' share in the scene field with the wind moving the
-    grass, the leaf material's twofold lighting under a swaying normal, the shadow cascades' jitter,
-    or the smoothing's history; then the mend so a still view of the grass changes by no more than
-    the smoothing's own grain between frames, read by the difference picture's share of pixels past
-    a threshold before and after, with a pair or a short animation at the owner's settings. First
-    after item 79's cloud mend. The cause read on 2026-10-30, the grass shader's main vertex stage
-    adding the wind's push in world space while the prepass took it into mesh space and back through
-    the transform, the two depths differing by a rounding so that where the main pass landed behind
-    the prepass depth nothing drew, a dark blade-shaped hole moving as the wind bent the blade, the
-    frames identical with time frozen; the mend places the main pass's point by the prepass's own
-    sums, pixels changing over a quarter between consecutive frames from 4.96% to 0.20% and blades
-    darker than 0.6 of their surroundings from 0.58% to none, docs/shaders.md saying the same way
-    means the same sums in the same order.
-
 82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
     21:0x that in the lighting room the room gets brighter when the camera looks left and darker
     when it looks right. A reading first, offscreen in the hall at the owner's settings, the same
@@ -308,7 +294,28 @@ from [SHARED.md](SHARED.md).
     among the view-dependent terms, the camera's exposure adapting to what is in view, the global
     illumination's screen probes or the cascades' merge changing with the view, the clustered lights
     cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
-    percent from either side, with a pair at the owner's settings. After item 81.
+    percent from either side, with a pair at the owner's settings. After item 81. Read at 08:02 on
+    2026-10-31, the cause Bevy 0.20's. The floor two metres ahead, swept every 15 degrees, reads
+    0.24 to 0.27 and 0.14 to 0.17 from 165 to 315 degrees, the same at 15:00 and gone at night;
+    without the bay's irradiance volume no jump, with the probe alone none, with the volume alone
+    the jump, the dark arc where the volume is in the view's frustum. pbr_functions.wesl at 702 to
+    711 under IRRADIANCE_VOLUME, set a view after culling, adds the volume's light and marks diffuse
+    indirect found for every point in view, inside a volume or not, so the environment map's
+    diffuse, the sky's ambient, is lost for the whole view; the lines read by the reviewer. The mend
+    through render/mended.rs as one shader, taken or refused whole, marking diffuse indirect found
+    only where a volume holds the point, with a mend test, the shader-mends bit, the three profiles
+    and the sweep before and after; a point inside the volume reads as before. Taken.
+
+83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
+    seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
+    like them. Today the grass is a shader of its own, a two-tone gradient with the normal leaned
+    70% up, no texture and no transmission. An engine grass under BevyCSharp/Vegetation beside
+    Trees, drawn with the leaves' wind material, albedo, normal and surface textures, diffuse
+    transmission, the alpha mask, two-sided normals and LightThrough, its cards clumps from the
+    sorted grass sets picked by kind and density and shipped in the bounded collection as the trees'
+    leaves are, the meadow using it; read against the trees' leaves in one view and by the meadow's
+    cost before and after, the drive's meadow checks kept, a captioned picture. After item 82 unless
+    the owner says to start at once; phases proposed by the coder.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -469,6 +476,17 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     going with a note; the layout drawn by the generator into the level's file and pictured to the
     owner before the zones' content moves in, one commit a zone, the drive's stations and captures
     following each, the README and the docs saying the new map at the end.
+
+69. **A reading's picture explains itself, and a plain capture or pair stays where it shows the
+    thing.** The owner wrote on 2026-10-31 that 3DEngine's sheets for item 136, the canopy and the
+    grove with their labeled panels, difference panels and lettered boxes, were liked very much,
+    that plain captures and side-by-side views are liked too, and that each is used where it fits. N
+    4.9 in the three repositories says what a sheet carries. Shown BevyCSharp's item 82 sheet at
+    09:1x the same day, the owner said the rule is not a list of parts to implement, that the plain
+    captures and pairs made before were already right, and answered four questions, a principle and
+    not a checklist, labels where panels could be confused and a box only where a number is read
+    there, a white ground as before, and difference panels and plots where they tell the reading. N
+    4.9 is rewritten so.
 
 ## Replies
 
@@ -864,3 +882,26 @@ the pixels changing by more than a quarter fell from 4.96 to 0.20 percent, and t
 prepass moving vertices the same way means by the same sums in the same order, and why. The picture
 is 2026-10-30-item-81-grass.webp, sent to the owner. The whole suite ran with it, 1,999 passed and
 3 skipped in one host at the 3 GB cap.
+
+Item 82, the light hall, in the commit carrying this line. From the aisle at z -40 the floor two
+meters ahead, read every 15 degrees round at the owner's settings, stood at 0.24 to 0.27 and
+dropped to 0.14 to 0.17 from 165 to 315 degrees, about two fifths at once, the same at 15:00 and
+gone at night, and the dark half is where the bay's irradiance volume is in the view's frustum: with
+the volume taken out there is no step, with the reflection probe alone none, with the volume alone
+the step. Bevy 0.20's render/pbr_functions.wesl, lines 702 to 711, sets found_diffuse_indirect after
+irradiance_volume_light whether a volume held the point or not, so while a view holds a volume
+every point outside it loses the environment map's diffuse light. render/mended.rs mends it, the
+diffuse light counted found only where Bevy's search finds a volume holding the point, named in the
+mend so it goes when a release moves that text, and Render.IrradianceFallbackMended reads it in bits
+4 and 5 of bcs_render_shader_mends. With it the floor reads 0.24 to 0.27 at every turn.
+LightProbeTests holds a floor outside an empty volume to within three percent of its light with the
+volume behind the camera, the floor the volume holds dark, and the mend made; the light probe and
+the other mends' tests pass, 17 of 17, and docs/sky-and-reflections.md says the environment's light
+stays outside a volume. The picture is 2026-10-31-item-82-hall.webp, remade to N 4.9 as it
+stands. The editor bridge was built with it, the headless profile checks here and the render and
+editor profiles in the build container, the bridge's tests pass, and the whole suite ran, 1,998
+passed, 3 skipped and 2 failed, GlobalIlluminationTests' floor under the half slab five and a half
+units up at High and at Low, 0.17 and 0.16 of what the solid slab holds back against the test's
+least of 0.2, as 0ed9073c's run read it before this mend; in the whole run the half slab's floor
+reads 0.0303 at both heights where alone it reads 0.0329 and 0.0353, so a test before it leaves
+something the light through reads, a lead for a verdict.

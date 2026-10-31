@@ -415,7 +415,8 @@ Render.SetIrradianceVolume(hall, light, intensity: 1000f);
 It holds, for a grid of points across the box, the light a surface facing each of the six axis
 directions receives there, and a surface blends the points around it by its normal. That is light
 that varies through space, which a map the same everywhere cannot be, and Bevy's materials take it
-as their diffuse light in place of the environment's. The image is an ordinary 3D image, so a
+as their diffuse light in place of the environment's inside the box. Outside it the environment's
+light stays, whether the box is in view or not. The image is an ordinary 3D image, so a
 compute shader can write it every frame and whatever it works out lights everything drawn with a
 material from `Render.CreateMaterial`, with no change to those materials:
 

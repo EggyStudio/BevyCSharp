@@ -22,6 +22,9 @@ const PBR_FRAGMENT: &str = "embedded://bevy_pbr/render/pbr_fragment.wesl";
 /// Where `bevy_pbr` loads the functions that write and read its deferred G-buffer from.
 const DEFERRED_FUNCTIONS: &str = "embedded://bevy_pbr/deferred/functions.wesl";
 
+/// Where `bevy_pbr` loads the functions its lighting is worked out with, forward and deferred.
+const PBR_FUNCTIONS: &str = "embedded://bevy_pbr/render/pbr_functions.wesl";
+
 /// The mend of an exposed emissive drawn deferred, in Bevy 0.20's `deferred/functions.wesl`.
 ///
 /// A material's emissive alpha says how much of the camera's exposure its light takes, all of it at
@@ -61,6 +64,32 @@ const ANISOTROPY: [(&str, &str); 3] = [
     ),
 ];
 
+/// The mend of the light from the sky outside an irradiance volume, in Bevy 0.20's
+/// `render/pbr_functions.wesl`.
+///
+/// Where a view holds an irradiance volume, Bevy's lighting looks for one about each point and then
+/// counts the point's diffuse light as found whether a volume held it or not, so every point the
+/// volume does not hold loses the environment map's diffuse light, the sky's light, and gets
+/// nothing in its place. Bevy culls the volumes by each view's frustum, so a room with a small
+/// volume in a corner dims all over as the camera turns the volume into view and brightens as it
+/// turns away, the feature test's light hall by about two fifths. The mend counts the diffuse light
+/// as found only where a volume holds the point, as Bevy's search for one decides it, and leaves
+/// the environment map to light the rest, as it lights them with no volume in view.
+///
+/// The fault is lines 702 to 711 of Bevy 0.20's file, the `IRRADIANCE_VOLUME` block setting
+/// `found_diffuse_indirect` to true after `irradiance_volume_light`. A release that sets it from
+/// whether a volume held the point moves that text, the mend is refused, and it goes.
+const IRRADIANCE_FALLBACK: [(&str, &str); 2] = [
+    (
+        "@if(IRRADIANCE_VOLUME) import package::light_probe::irradiance_volume;\n",
+        "@if(IRRADIANCE_VOLUME) import package::light_probe::irradiance_volume;\n@if(IRRADIANCE_VOLUME) import package::light_probe::{light_probe_iterator_new, light_probe_iterator_next};\n",
+    ),
+    (
+        "        indirect_light += irradiance_volume_light * diffuse_color * diffuse_occlusion;\n        found_diffuse_indirect = true;\n",
+        "        indirect_light += irradiance_volume_light * diffuse_color * diffuse_occlusion;\n        var volumes = light_probe_iterator_new(in.world_position.xyz, true, &clusterable_object_index_ranges);\n        found_diffuse_indirect = light_probe_iterator_next(&volumes).texture_index >= 0;\n",
+    ),
+];
+
 /// Whether each mend has been made, refused, or waits for its shader to load.
 #[derive(Resource, Default)]
 pub struct ShaderMends {
@@ -68,6 +97,8 @@ pub struct ShaderMends {
     anisotropy: Option<bool>,
     deferred_functions: Option<Handle<Shader>>,
     emissive_exposure: Option<bool>,
+    pbr_functions: Option<Handle<Shader>>,
+    irradiance_fallback: Option<bool>,
 }
 
 pub(crate) fn install(app: &mut App) {
@@ -110,6 +141,15 @@ fn mend(server: Res<AssetServer>, mut shaders: ResMut<Assets<Shader>>, mut mends
         &mut mends.deferred_functions,
         &mut mends.emissive_exposure,
         "an exposed emissive drawn deferred is shown unexposed, as the field's shadows and global illumination draw",
+    );
+    mend_one(
+        &server,
+        &mut shaders,
+        PBR_FUNCTIONS,
+        &IRRADIANCE_FALLBACK,
+        &mut mends.pbr_functions,
+        &mut mends.irradiance_fallback,
+        "the sky's light leaves everything an irradiance volume does not hold while one is in view",
     );
 }
 
@@ -156,9 +196,9 @@ fn mend_one(
 
 /// Writes whether each of Bevy's shaders the bridge mends was mended, two bits a mend, the first
 /// set where it was made and the second where it was refused, its text not the one the mend was
-/// written for, the standard material's anisotropy under a normal prepass in bits 0 and 1 and an
-/// exposed emissive drawn deferred in bits 2 and 3. Neither set is a mend whose shader has not
-/// loaded yet.
+/// written for, the standard material's anisotropy under a normal prepass in bits 0 and 1, an
+/// exposed emissive drawn deferred in bits 2 and 3, and the sky's light outside an irradiance volume
+/// in bits 4 and 5. Neither set is a mend whose shader has not loaded yet.
 ///
 /// # Safety
 /// `mends` must be writable.
@@ -176,7 +216,11 @@ pub unsafe extern "C" fn bcs_render_shader_mends(mends: *mut u32) -> i32 {
             };
             let bits = world
                 .get_resource::<ShaderMends>()
-                .map_or(0, |mends| bits_of(mends.anisotropy) | bits_of(mends.emissive_exposure) << 2);
+                .map_or(0, |mends| {
+                    bits_of(mends.anisotropy)
+                        | bits_of(mends.emissive_exposure) << 2
+                        | bits_of(mends.irradiance_fallback) << 4
+                });
             unsafe { mends.write(bits) };
             status::OK
         })

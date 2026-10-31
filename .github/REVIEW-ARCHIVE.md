@@ -1987,6 +1987,26 @@ a batch.
     2026-10-30, the many-times-scattered share in the clouds' march, the other glitches the owner
     sees to items 81 and 82.
 
+81. **The meadow's grass holds its light from one frame to the next.** The owner wrote on 2026-10-30
+    at 20:4x that the feature test looks good but the grass in the vegetation areas glitches, dark
+    patches for one frame that change the next, and asked that two pictures be taken one after the
+    other to see it. A reading first, two consecutive offscreen captures at the meadow and their
+    difference picture, then the cause among the frame-to-frame terms, the global illumination's
+    screen probes and their history, the leaves' share in the scene field with the wind moving the
+    grass, the leaf material's twofold lighting under a swaying normal, the shadow cascades' jitter,
+    or the smoothing's history; then the mend so a still view of the grass changes by no more than
+    the smoothing's own grain between frames, read by the difference picture's share of pixels past
+    a threshold before and after, with a pair or a short animation at the owner's settings. First
+    after item 79's cloud mend. The cause read on 2026-10-30, the grass shader's main vertex stage
+    adding the wind's push in world space while the prepass took it into mesh space and back through
+    the transform, the two depths differing by a rounding so that where the main pass landed behind
+    the prepass depth nothing drew, a dark blade-shaped hole moving as the wind bent the blade, the
+    frames identical with time frozen; the mend places the main pass's point by the prepass's own
+    sums, pixels changing over a quarter between consecutive frames from 4.96% to 0.20% and blades
+    darker than 0.6 of their surroundings from 0.58% to none, docs/shaders.md saying the same way
+    means the same sums in the same order. Done at `de14e311` on 2026-10-30, the two vertex stages
+    summing the wind the same way.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

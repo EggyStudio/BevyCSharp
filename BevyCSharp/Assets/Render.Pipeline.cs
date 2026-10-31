@@ -106,6 +106,30 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Whether the bridge mended Bevy's lighting to keep the sky's light outside an irradiance
+    /// volume while one is in view, true once mended, false where Bevy's shader is not the text the
+    /// mend was written for, and null before the shader has loaded or where nothing is drawn.
+    /// </summary>
+    /// <remarks>
+    /// Bevy 0.20 counts a point's diffuse light as found once it has looked for an irradiance
+    /// volume about it, whether one held it or not, so while a view holds a volume every point
+    /// outside it lost the environment map's diffuse light, and a room with a small volume dimmed as
+    /// the camera turned it into view. The bridge counts it found only where a volume holds the
+    /// point (<c>render/mended.rs</c>), and a release whose text moved refuses the mend, which a
+    /// test holds.
+    /// </remarks>
+    internal static bool? IrradianceFallbackMended
+    {
+        get
+        {
+            if (!App.HasRenderer) return null;
+            uint mends;
+            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.IrradianceFallbackMended");
+            return (mends & 16) != 0 ? true : (mends & 32) != 0 ? false : null;
+        }
+    }
+
+    /// <summary>
     /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.

@@ -219,6 +219,18 @@ a Markdown file named the same way, as `2026-10-25-item-122-resolution.md`, and 
 on its day under the pictures. By review, the reviewer reading each commit for the pictures its
 report names and regenerating DEVLOG.md as it archives an item.
 
+**N 4.9 A picture shows what the words claim, and carries nothing for form's sake.** A plain
+capture, a pair before and after or a collage of views on a white ground, as the sessions made them
+before 2026-10-31, is the form by default, and the caption says which is which. Where a picture
+reads something, the session adds what that reading needs and no more, as 3DEngine's canopy and
+grove sheets of item 136 did. A title and a label a panel go where several panels could be confused;
+a box is drawn at a place only where a number read there is given in the caption or the note, never
+a box with no reading; a difference panel against a reference, or a plot, as the light hall's floor
+against the turn in BevyCSharp's item 82, goes where it says more than the frames do; and every
+panel keeps the same view and exposure. The ground stays white, with labels in dark text. The owner,
+shown the kinds on 2026-10-31, keeps the plain form as it was and asks that a sheet's parts come
+from its reading and not from a list. By review.
+
 ## 5 Examples and games
 
 **N 5.1 An example has the followed engine's name for it where that engine has one, is opened by
@@ -370,6 +382,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 4.6 | by review | by review |
 | N 4.7 | checked, `NormTests` and `PackageContentsTests` | checked, `NormTests` |
 | N 4.8 | by review | by review |
+| N 4.9 | by review | by review |
 | N 5.1 | checked, the pack workflow's capture of every example | checked, the pack workflow's capture of every example |
 | N 5.2 | checked, `NormTests.N_5_2` before a commit and `build/examples-table.py --check` in the workflow | checked, `build/examples-table.py --check` in the workflow |
 | N 5.3 | checked, the pack workflow's games | checked, the pack workflow's Courtyard |

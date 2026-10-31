@@ -305,6 +305,85 @@ public sealed class LightProbeTests
     }
 
     /// <summary>
+    /// A floor lit by the camera's environment map alone keeps its light where an empty irradiance
+    /// volume beside it turns into view, as it has with the volume behind the camera, and the floor
+    /// the volume holds takes the volume's light, which is none. Bevy 0.20
+    /// counted a point's diffuse light as found once it had looked for a volume about it, so while
+    /// a view held one every point outside it lost the map's diffuse light, and the feature test's
+    /// light hall dimmed by about two fifths as the camera turned its bay's volume into view; the
+    /// bridge mends that (<see cref="Render.IrradianceFallbackMended"/>).
+    /// </summary>
+    [SkippableFact]
+    public void AFloorOutsideAnIrradianceVolumeKeepsTheEnvironmentsLightWhileTheVolumeIsInView()
+    {
+        Needs.Renderer();
+
+        var volume = Entity.None;
+        bool? mended = null;
+        var picture = new PictureRun
+        {
+            Width = 128,
+            Height = 64,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings
+                {
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                    FieldOfView = 40f,
+                });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 3f, 6f), Vec3.Zero, Vec3.UnitY));
+                Render.SetAmbientLight((0f, 0f, 0f), 0f);
+                var cubemap = AssetServer.Load(AssetKind.Image, "textures/cubemap.png");
+                Render.SetEnvironmentMap(camera, cubemap, cubemap, intensity: 3000f);
+
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 8f, 0.1f, 8f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(new MaterialSettings { BaseColor = (0.8f, 0.8f, 0.8f, 1f), Roughness = 1f }));
+                ecs.Add(floor, Transform.At(0f, -0.05f, 0f));
+
+                // An empty volume, which lights what it holds with nothing, behind the camera.
+                volume = ecs.Spawn();
+                ecs.Add(volume, Transform.At(0f, 1f, 20f));
+                Render.SetIrradianceVolume(volume, Shaders.CreateImage(2, 4, ShaderImageFormat.Rgba16Float, depth: 6));
+            },
+        };
+
+        picture.Wait(ShaderMaterialTests.Settled).Capture("behind")
+            .Do("turning the volume into view", world => world.Resource<EcsWorld>().Set(volume, Transform.At(2.5f, 0.3f, 0f)))
+            .Wait(ShaderMaterialTests.Settled)
+            .Do("reading the mend", _ => mended = Render.IrradianceFallbackMended)
+            .Capture("in view").Go();
+
+        // The floor's middle, which the volume a unit across at its side does not hold, and the
+        // floor under the volume, at x 2.5, which falls about the 96th column of the 32nd row.
+        var behind = Brightness(picture.Picture("behind"), 48, 80);
+        var inView = Brightness(picture.Picture("in view"), 48, 80);
+        var heldBehind = Patch(picture.Picture("behind"), 94, 30);
+        var heldInView = Patch(picture.Picture("in view"), 94, 30);
+        Assert.True(mended, $"Bevy's lighting was not mended, {mended?.ToString() ?? "its shader not loaded"}");
+        Assert.True(behind > 1000, $"the environment map lit the floor with {behind}");
+        Assert.InRange(inView, behind * 0.97, behind * 1.03);
+        Assert.True(heldInView < heldBehind / 4, $"the floor the empty volume holds read {heldInView}, and {heldBehind} with the volume away");
+    }
+
+    /// <summary>The summed channels of a square four pixels across from a corner.</summary>
+    private static long Patch(CapturedImage picture, uint x, uint y)
+    {
+        long sum = 0;
+        for (var row = y; row < y + 4; row++)
+        {
+            for (var column = x; column < x + 4; column++)
+            {
+                var pixel = picture.At(column, row);
+                sum += pixel.R + pixel.G + pixel.B;
+            }
+        }
+
+        return sum;
+    }
+
+    /// <summary>
     /// A white cube in a volume lit green from above, red from the front and blue from behind,
     /// with nothing else lighting the scene, or the same cube drawn by a shader of its own.
     /// </summary>

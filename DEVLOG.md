@@ -20,9 +20,16 @@ after it on the right, above at the saved hour of 11:00 from the plaza looking n
 behind, the clouds gray and lavender before and white with shaded bases after, and below at 15:00
 from above the walls toward the sun's side, where they keep their shading.
 
+![](.github/assets/readings/2026-10-30-item-81-grass.webp)
+Two frames one after the other of the meadow's grass at the saved settings, above with blades gone
+dark where the main pass placed them a rounding behind the prepass's depth and nothing drew,
+different in each frame as the wind bent them, and below with both passes placing a blade by the
+same sums, its blades lit evenly.
+
 Done that day
 
 - Item 79 at `e3ddec48`. The feature test's window shows what the devlog's pictures show.
+- Item 81 at `de14e311`. The meadow's grass holds its light from one frame to the next.
 
 ## 2026-10-26
 
