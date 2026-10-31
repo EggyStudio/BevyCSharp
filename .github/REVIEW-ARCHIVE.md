@@ -2102,6 +2102,12 @@ a batch.
     `a01b2df`, LevelSpawner the binding, the format's tests in the module's suite, the drive's
     courts green.
 
+86. **Three asks of the afternoon in the feature test.** Given in the coder's session on
+    2026-10-31 before 16:56, the player drawn as a plain capsule; the 1 m prototyping grid whiter,
+    floors and walls at 0.90 and ceilings at 0.95, chosen by the owner from pictures, with a Shared
+    line for the grid's row; and Sponza's z-fight with the yard's floor gone by standing Sponza 2 cm
+    over it. One commit after the gallery court's, the drive's checks green. Done at `26763e87`.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

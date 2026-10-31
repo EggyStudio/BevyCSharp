@@ -49,7 +49,7 @@ public enum Look
     /// <summary>The vivid look, the shadows darkened and the colors deepened.</summary>
     Vivid,
 
-    /// <summary>The vivid look by day, warmer toward sunset, bluer through the twilight and cool at night.</summary>
+    /// <summary>The vivid look by day with its saturation calmed, warmer toward sunset, bluer through the twilight and cool at night.</summary>
     Day,
 }
 

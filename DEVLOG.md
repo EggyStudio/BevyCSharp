@@ -21,6 +21,12 @@ crossed on the leaves' material, the frame at 47.7 ms and 36.7 ms by frame.profi
 offscreen, the main schedule 45.8 ms and 13.7 ms, the render schedule 39.7 ms and 35.4 ms, and the
 world 15,066 entities and 1,083, with 3DEngine's sessions' apps on the same GPU.
 
+![](.github/assets/readings/2026-10-31-item-68-gallery.webp)
+The gallery court from 20 m over its east doorway at 11:00 under a partly cloudy sky, on the left
+with the spheres on a freestanding dark slab in one open court and on the right on the level's wall
+across it, an arch north of the spheres toward the Cornell box beyond and one south toward the room
+cut by booleans.
+
 Done that day
 
 - Item 78 at `c5d9cd20`. The README's words under the header, as given.
@@ -28,6 +34,7 @@ Done that day
 - Item 83 at `219142e2`. The grass is shaded as the trees are.
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
 - Item 85 at `f4e99658`. The engine takes the Levels module as a submodule.
+- Item 86 at `26763e87`. Three asks of the afternoon in the feature test.
 
 ## 2026-10-30
 
