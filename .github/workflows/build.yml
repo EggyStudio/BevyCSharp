@@ -81,6 +81,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -134,6 +136,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -282,6 +286,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/download-artifact@v8
         with:
@@ -317,6 +323,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -458,6 +466,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -547,6 +557,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -611,6 +623,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/download-artifact@v8
         with:
@@ -659,6 +673,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:
@@ -741,6 +757,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          submodules: true
 
       - uses: actions/setup-dotnet@v6
         with:

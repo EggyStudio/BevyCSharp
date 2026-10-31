@@ -4,7 +4,9 @@ How to build the native bridge and the package. Using BevyCSharp needs none of t
 package ships a prebuilt bridge per platform; this is for working on the bridge itself.
 
 You need the [.NET 10 SDK](https://dotnet.microsoft.com/download) and
-[Rust](https://rustup.rs).
+[Rust](https://rustup.rs), and the modules both engines share, each a git submodule under
+`modules/`, which `git clone --recurse-submodules` fetches, or `git submodule update --init` in a
+clone made without it.
 
 ```bash
 build/build-native.sh          # build the native bridge (headless profile)

@@ -17,7 +17,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// The map is the level file <c>levels/feature-test.map</c>, the plaza, a walled court round each
 /// zone, the corridors from the plaza's doorways to them, the light hall's shell and the meadow's
 /// raised walkway, its walls high enough that the sky shows over them and never the horizon, built
-/// with its collision by <see cref="Levels.Load"/> with its root at the ground's height and drawn in
+/// with its collision by <see cref="LevelSpawner.Load"/> with its root at the ground's height and drawn in
 /// TrenchBroom from the same file. The signposts at the plaza's doorways are <see cref="Zones"/>'.
 /// The ground is no longer drawn, its entity kept where the floors stand for the crates' slab and
 /// the ray-traced occlusion's rays.
@@ -141,7 +141,7 @@ public partial struct Scene
         ctx.Ecs.SetName(ground, "Ground");
 
         // The level, its file's floors at zero standing at the ground's height.
-        Levels.Load(ctx.Ecs, "levels/feature-test.map", Transform.At(0f, GroundHeight, 0f));
+        LevelSpawner.Load(ctx.Ecs, "levels/feature-test.map", Transform.At(0f, GroundHeight, 0f));
 
         var cube = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, cube, Render.CreateMesh(MeshShape.Cuboid, 1.6f, 1.6f, 1.6f));

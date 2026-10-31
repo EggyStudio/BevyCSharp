@@ -26,6 +26,8 @@
 
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
+        <!-- The Levels module's types, which the library keeps to itself and the level tests read. -->
+        <ProjectReference Include="../modules/Levels/Levels/Levels.csproj"/>
 
         <!--
           The editor, for the tables under it: what is on the menu, what an entity looks like in a

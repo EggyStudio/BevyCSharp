@@ -2063,6 +2063,33 @@ a batch.
     its own. Done at `c5d9cd20`, the line verbatim, the mark plain, the checks that read the first
     paragraph passing.
 
+83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
+    seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
+    like them. Today the grass is a shader of its own, a two-tone gradient with the normal leaned
+    70% up, no texture and no transmission. An engine grass under BevyCSharp/Vegetation beside
+    Trees, drawn with the leaves' wind material, albedo, normal and surface textures, diffuse
+    transmission, the alpha mask, two-sided normals and LightThrough, its cards clumps from the
+    sorted grass sets picked by kind and density and shipped in the bounded collection as the trees'
+    leaves are, the meadow using it; read against the trees' leaves in one view and by the meadow's
+    cost before and after, the drive's meadow checks kept, a captioned picture. After item 84, in
+    three phases the coder proposed on 2026-10-31, a commit each. First the grass sets into the
+    bounded collection, recipes in build/textures.py for the sets with albedo, opacity and normal, a
+    Grass kind beside Bark and Leaf in TreeTextureSet, the collection's size and count said, a test
+    that each loads with its channels. Second the engine grass, Grass.Plant in
+    BevyCSharp/Vegetation/Grass.cs taking the area, the set, density, height and seed, clumps as
+    crossed alpha-masked cards batched a mesh a patch rather than an entity a blade, drawn with the
+    leaves' material and the trees' Wind with the root pinned, the main pass and the prepass placing
+    a vertex by the same sums as item 81 asks, tests that a backlit clump transmits, the wind moves
+    tops and not roots and a patch builds headless, the docs page's lines. Third the meadow on it in
+    place of its 14,000 strip entities, the drive's meadow checks kept, read against the trees'
+    leaves in one view and by frame.profile before and after, with a picture. First phase done at
+    `d92ac690`, read at 12:24 on 2026-10-31, the three grass cards in the collection with their
+    channels, a grass kind in textures.py and TreeTextureKind, BarkDepthTests reading bark alone.
+    Second phase done at `1099cb35`, the engine grass as recorded in the head; third phase done at
+    `219142e2`, the meadow on the engine grass as the head records, the frame at the drive's meadow
+    view 47.7 to 36.7 ms and the entities 15,066 to 1,083, a plain pair with the numbers. Done at
+    `219142e2`.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -1,14 +1,15 @@
 using System.Globalization;
 using Bevy;
 using Bevy.Physics;
+using Levels;
 using Xunit;
 
 namespace Bevy.Tests;
 
 /// <summary>
-/// A level file of brushes and entities in the Valve 220 map format TrenchBroom writes, read,
-/// written back and built into a scene, its brushes meshed with their collision and its entities
-/// spawned by class.
+/// A level file of brushes and entities in the Valve 220 map format TrenchBroom writes, which the
+/// Levels module reads and tests, built into a scene by the engine's binding, its brushes meshed
+/// with their collision and its entities spawned by class.
 /// </summary>
 [Collection("engine")]
 public sealed class LevelTests
@@ -67,149 +68,6 @@ public sealed class LevelTests
         "");
 
     [Fact]
-    public void ALevelIsReadAsItsEntitiesKeysAndBrushes()
-    {
-        var level = Level.Parse(Room);
-
-        Assert.Equal("Generic", level.Game);
-        Assert.Equal(["worldspawn", "info_player_start", "func_door", "tree"], level.Entities.Select(entity => entity.ClassName));
-        Assert.Same(level.Entities[0], level.World);
-        Assert.Equal(Level.DefaultUnitsPerMeter, level.UnitsPerMeter);
-        Assert.Equal([3, 0, 1, 0], level.Entities.Select(entity => entity.Brushes.Count));
-        Assert.All(level.World!.Brushes, brush => Assert.Equal(6, brush.Faces.Count));
-
-        // Two outputs of one name kept in their order, the first answered by the indexer.
-        var door = level.Entities[2];
-        Assert.Equal(["lamp,TurnOn,,0,-1", "chime,Play,,0.5,1"], door.All("OnOpen"));
-        Assert.Equal("lamp,TurnOn,,0,-1", door["OnOpen"]);
-
-        var slope = level.World.Brushes[2].Faces[3];
-        Assert.Equal(new LevelPoint(128, -64, 64), slope.First);
-        Assert.Equal("floor", slope.Material);
-        Assert.Equal((new LevelPoint(1, 0, 0), 0.0, new LevelPoint(0, -1, 0), 0.0), (slope.UAxis, slope.UOffset, slope.VAxis, slope.VOffset));
-        Assert.Equal((0.0, 1.0, 1.0), (slope.Rotation, slope.ScaleU, slope.ScaleV));
-    }
-
-    [Fact]
-    public void ALevelWrittenByTheEngineReadsAndWritesBackByteForByte()
-    {
-        Assert.Equal(Room, Level.Parse(Room).Write());
-
-        // Numbers that are not whole, a quote in a value and a units key, made in code and written,
-        // read back the same and written again the same.
-        var made = new Level();
-        var world = new LevelEntity();
-        world["classname"] = "worldspawn";
-        world[Level.UnitsPerMeterKey] = "64";
-        var brush = new LevelBrush();
-        brush.Faces.Add(new LevelFace(new(0.5, -1.25, 1e-7), new(3.0000001, 2, 0), new(0, 0, -7.75), "dev/grid", new(0.7071067811865476, 0.7071067811865476, 0), 12.5, new(0, 0, -1), -3, 45, 0.25, 0.0625));
-        world.Brushes.Add(brush);
-        made.Entities.Add(world);
-        var sign = new LevelEntity();
-        sign["classname"] = "info_sign";
-        sign["message"] = "Mind the \"gap\"";
-        made.Entities.Add(sign);
-
-        var text = made.Write();
-        var read = Level.Parse(text);
-        Assert.Equal(text, read.Write());
-        Assert.Equal(64, read.UnitsPerMeter);
-        Assert.Equal("Mind the \"gap\"", read.Entities[1]["message"]);
-        Assert.Equal(brush.Faces[0], read.World!.Brushes[0].Faces[0]);
-    }
-
-    [Fact]
-    public void ALevelLaidOutAnotherWayReadsTheSameAndIsWrittenTheEnginesWay()
-    {
-        // Braces sharing lines, numbers written with a point and a sign, tabs, comments after a
-        // key and no comments numbering anything, as a hand or another tool may write a level.
-        const string other = "{ \"classname\" \"worldspawn\" // the world\n"
-                             + "{\t( -128.0 -128 -16 ) ( -128 -127 -16 ) ( -128 -128 -15 ) floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1\n"
-                             + "( -128 -128 -16 ) ( -128 -128 -15 ) ( -127 -128 -16 ) floor [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1.0 1\n"
-                             + "( -128 -128 -16 ) ( -127 -128 -16 ) ( -128 -127 -16 ) floor [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1\n"
-                             + "( 128 128 0 ) ( 128 129 0 ) ( 129 128 0 ) floor [ 1 0 0 0 ] [ 0 -1 0 0 ] 0 1 1\n"
-                             + "( 128 128 0 ) ( 129 128 0 ) ( 128 128 1 ) floor [ 1 0 0 0 ] [ 0 0 -1 0 ] 0 1 1\n"
-                             + "( 128 128 0 ) ( 128 128 1 ) ( 128 129 0 ) floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 +1 1 } }";
-        var read = Level.Parse(other);
-        var written = read.Write();
-
-        Assert.Equal(Box(-128, -128, -16, 128, 128, 0, "floor"), string.Join("\n", written.Split('\n').Where(line => line.StartsWith('('))));
-        Assert.Equal(written, Level.Parse(written).Write());
-    }
-
-    [Theory]
-    [InlineData("{ \"classname\" \"worldspawn\"\n{\n( 0 0 0 ) ( 0 1 0 ) ( 0 0 1 ) floor 0 0 0 1 1\n}\n}", 3, "Quake's older format")]
-    [InlineData("{ \"classname\" \"worldspawn\"\n\"wad\"\n}", 3, "quoted value is meant")]
-    [InlineData("{ \"classname\" \"worldspawn\"\n{\n( 0 0 0 ) ( 0 1 0 ) ( 0 0 x ) floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1\n}\n}", 3, "point's z is meant as a number")]
-    [InlineData("{ \"classname\" \"worldspawn\"\n{\n( 0 0 0 ) ( 0 1 0 ) ( 0 0 1 ) floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1 0 0 0\n}\n}", 3, "goes on with 0")]
-    [InlineData("{ \"classname\" \"worldspawn\"\n", 2, "ends inside an entity")]
-    public void AFileThatIsNotMapTextIsRefusedAtTheLineItFailsOn(string text, int line, string said)
-    {
-        var fault = Assert.Throws<FormatException>(() => Level.Parse(text, "broken.map"));
-        Assert.StartsWith($"broken.map, line {line}: ", fault.Message);
-        Assert.Contains(said, fault.Message);
-    }
-
-    [Fact]
-    public void ABrushsCornersAreWherePlanesMeetWithinTheRest()
-    {
-        var world = Level.Parse(Room).World!;
-
-        // A box, six faces of four corners, eight corners in all, each face wound clockwise seen
-        // from outside, its normal the way out.
-        var box = world.Brushes[0];
-        var faces = box.Polygons();
-        Assert.All(faces, face => Assert.Equal(4, face!.Length));
-        Assert.Equal(8, faces.SelectMany(face => face!).Distinct().Count());
-        for (var f = 0; f < faces.Length; f++)
-        {
-            var corners = faces[f]!;
-            var normal = LevelPoint.Cross(corners[0] - corners[1], corners[2] - corners[1]);
-            Assert.True(LevelPoint.Dot(normal, box.Faces[f].Normal) > 0, $"face {f} is wound against its plane");
-        }
-
-        // The ramp's back face only touches it along the edge its slope meets its floor at, and is
-        // no polygon; the slope and its floor are four corners, its sides three.
-        var ramp = world.Brushes[2].Polygons();
-        Assert.Null(ramp[0]);
-        Assert.Equal([3, 3, 4, 4, 4], ramp.Skip(1).Select(face => face!.Length).Order());
-
-        // Planes that close nothing are refused.
-        var open = new LevelBrush();
-        open.Faces.AddRange(box.Faces.Take(5));
-        Assert.Throws<InvalidOperationException>(() => open.Polygons());
-    }
-
-    [Fact]
-    public void ALevelsUnitsAreTurnedIntoMetersWithYUpAndItsAxesIntoTexels()
-    {
-        // The file's (x, y, z) at (x, z, -y) over its units a meter, a turn keeping a face's winding.
-        Assert.Equal(new Vec3(2f, 3f, -1f), new LevelPoint(64, 32, 96).Meters(32));
-        Assert.Equal(new LevelPoint(64, 32, 96), LevelPoint.FromMeters(new Vec3(2f, 3f, -1f), 32));
-
-        // The floor's top from four meters on each side at Y zero to its foot half a meter down,
-        // and the wall's face on the side minus Z, which the file's plus Y is.
-        var world = Level.Parse(Room).World!;
-        var mesh = Levels.Mesh(world, 32, Vec3.Zero);
-        var (low, high) = mesh.Bounds;
-        Assert.Equal(new Vec3(-4f, -0.5f, -4f), low);
-        Assert.Equal(new Vec3(4f, 3f, 4f), high);
-        Assert.Equal(["floor", "wall"], mesh.Slots);
-        Assert.Equal(6 + 6 + 5, mesh.FaceCount);
-        Assert.Equal(0, mesh.OpenEdges);
-
-        // Every face of the mesh faces the way its plane does once turned, so Bevy draws its outside.
-        var top = Enumerable.Range(0, mesh.FaceCount).Single(face => mesh.Center(face).Y == 0f && mesh.Normal(face).Y > 0.99f && mesh.Center(face).X == 0f);
-        Assert.Equal(Vec3.UnitY, mesh.Normal(top));
-
-        // At a scale of one a material repeats each meter along its axes.
-        var floorTop = world.Brushes[0].Faces[3];
-        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(floorTop, new LevelPoint(64, 32, 0), 32, 32));
-        var scaled = floorTop with { ScaleU = 0.5, UOffset = 16 };
-        Assert.Equal(new Vec2(4.5f, -1f), Levels.Texel(scaled, new LevelPoint(64, 32, 0), 32, 32));
-    }
-
-    [Fact]
     public void ALevelIsBuiltIntoTheSceneWithItsCollisionAndItsEntitiesByClass()
     {
         using var harness = new EngineHarness(frames: 30, fps: 240, fixedHz: 120, frameSeconds: 1.0 / 240);
@@ -224,7 +82,7 @@ public sealed class LevelTests
         Tree tree = default;
         var worldParts = 0;
 
-        harness.OnContext(Stage.Startup, ctx => root = Levels.Spawn(ctx.Ecs, Level.Parse(Room), "room"));
+        harness.OnContext(Stage.Startup, ctx => root = LevelSpawner.Spawn(ctx.Ecs, Level.Parse(Room), "room"));
         harness.OnContext(Stage.Update, ctx =>
         {
             // A spawn that failed leaves no root, and the failure says why.
@@ -235,7 +93,7 @@ public sealed class LevelTests
             worldParts = ecs.ChildrenOf(entities[0]).Length;
             start = ecs.GetOrDefault<Transform>(entities[1]);
             door = ecs.GetOrDefault<Transform>(entities[2]);
-            doorKeys = Levels.KeysOf(ecs.GetOrDefault<LevelKeys>(entities[2]));
+            doorKeys = LevelSpawner.KeysOf(ecs.GetOrDefault<LevelKeys>(entities[2]));
             tree = ecs.GetOrDefault<Tree>(entities[3]);
 
             var physics = ctx.Res<PhysicsWorld>();
@@ -318,18 +176,18 @@ public sealed class LevelTests
         var differences = new List<string>();
         foreach (var (name, color) in Modeling.PrototypeColors)
         {
-            var drawn = Modeling.PrototypePicture(color, Levels.PrototypePixels);
+            var drawn = Modeling.PrototypePicture(color, LevelSpawner.PrototypePixels);
             var read = AnimationReader.Png(File.ReadAllBytes(Path.Combine(shipped, name + ".png"))).Frames[0];
-            Assert.Equal((Levels.PrototypePixels, Levels.PrototypePixels), (read.Width, read.Height));
+            Assert.Equal((LevelSpawner.PrototypePixels, LevelSpawner.PrototypePixels), (read.Width, read.Height));
             var at = Enumerable.Range(0, drawn.Length).FirstOrDefault(i => drawn[i] != read.Pixels[i], -1);
             if (at < 0) continue;
 
-            var (pixel, x, y) = (at / 4 * 4, at / 4 % Levels.PrototypePixels, at / 4 / Levels.PrototypePixels);
+            var (pixel, x, y) = (at / 4 * 4, at / 4 % LevelSpawner.PrototypePixels, at / 4 / LevelSpawner.PrototypePixels);
             var count = Enumerable.Range(0, drawn.Length / 4).Count(i => !drawn.AsSpan(i * 4, 4).SequenceEqual(read.Pixels.AsSpan(i * 4, 4)));
             differences.Add($"{name}.png first differs at ({x}, {y}), drawn {string.Join(" ", drawn[pixel..(pixel + 4)])} and shipped {string.Join(" ", read.Pixels[pixel..(pixel + 4)])}, {count} pixels in all");
             var kept = Path.Combine(root, "BevyCSharp.Tests", "TestResults", "prototype-pictures");
             Directory.CreateDirectory(kept);
-            File.WriteAllBytes(Path.Combine(kept, name + ".png"), PngWriter.Still(Levels.PrototypePixels, Levels.PrototypePixels, drawn));
+            File.WriteAllBytes(Path.Combine(kept, name + ".png"), PngWriter.Still(LevelSpawner.PrototypePixels, LevelSpawner.PrototypePixels, drawn));
         }
 
         Assert.True(differences.Count == 0, string.Join("; ", differences));
@@ -338,7 +196,7 @@ public sealed class LevelTests
         // the rounding turns, so a system whose power function differs in its last digit draws the
         // same pixels. The grid's three tones, tinted by each prototype's color as the drawing tints
         // them, are the values it rounds.
-        var grid = Images.GridPixels(Levels.PrototypePixels, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
+        var grid = Images.GridPixels(LevelSpawner.PrototypePixels, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
         var tones = Enumerable.Range(0, grid.Length / 4).Select(i => grid[i * 4]).Distinct().ToArray();
         foreach (var (name, color) in Modeling.PrototypeColors)
         foreach (var tint in new[] { color.R, color.G, color.B })
@@ -348,28 +206,6 @@ public sealed class LevelTests
             var step = new Color(lit, lit, lit, 1f).ToSrgb().X * 255f;
             Assert.True(Math.Abs(step - Math.Floor(step) - 0.5) > 1e-3, $"{name}'s tint takes the tone {tone} to {step}, too near where its rounding turns");
         }
-    }
-
-    [Fact]
-    public void AFacesMaterialIsReadOverItsPicturesTexels()
-    {
-        // A prototype's picture of 512 texels at a sixteenth's scale repeats once 32 units, a meter,
-        // drawn as the prototype of the rest of its name, and a name with no picture over the
-        // level's units a meter, so the same face at a scale of one repeats once a meter too.
-        var level = Level.Parse(Room.Replace(" floor [", " proto/floor [").Replace("( 0 -64 0 ) ( 0 -63 0 ) ( 0 -64 1 ) proto/floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 1 1", "( 0 -64 0 ) ( 0 -63 0 ) ( 0 -64 1 ) proto/floor [ 0 1 0 0 ] [ 0 0 -1 0 ] 0 0.0625 0.0625"));
-        var world = level.World!;
-        var mesh = Levels.Mesh(world, 32, Vec3.Zero);
-        Assert.Equal(["floor", "wall"], mesh.Slots);
-
-        var face = world.Brushes[0].Faces[3] with { ScaleU = 0.0625, ScaleV = 0.0625 };
-        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(face, new LevelPoint(64, 32, 0), Levels.PrototypePixels, Levels.PrototypePixels));
-        Assert.Equal(new Vec2(2f, -1f), Levels.Texel(world.Brushes[0].Faces[3], new LevelPoint(64, 32, 0), 32, 32));
-
-        // A PNG's and a JPEG's size read from their headers.
-        Assert.Equal((512, 512), Levels.PictureSize(PngWriter.Still(512, 512, new byte[512 * 512 * 4])));
-        byte[] jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x04, 0x00, 0x00, 0xFF, 0xC0, 0x00, 0x11, 0x08, 0x01, 0x80, 0x02, 0x00, 0x03, 0x00, 0x00];
-        Assert.Equal((512, 384), Levels.PictureSize(jpeg));
-        Assert.Null(Levels.PictureSize([1, 2, 3]));
     }
 
     /// <summary>An axis-aligned box brush's six faces, as TrenchBroom writes one.</summary>

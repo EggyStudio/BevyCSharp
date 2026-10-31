@@ -1,4 +1,5 @@
 using Bevy;
+using Levels;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -105,7 +106,7 @@ public sealed class FeatureTestLevelTests
         // Where the player starts, six meters south of the middle on the plaza's floor, facing north.
         var start = new LevelEntity();
         start["classname"] = "info_player_start";
-        start["origin"] = $"0 -192 {LevelPoint.Number(FloorTop)}";
+        start["origin"] = $"0 -192 {FloorTop.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
         start["angle"] = "90";
 
         var level = new Level();
@@ -379,7 +380,7 @@ public sealed class FeatureTestLevelTests
             {
                 Assert.Equal(mine.Material, theirs.Material);
                 foreach (var (a, b) in new[] { (mine.First, theirs.First), (mine.Second, theirs.Second), (mine.Third, theirs.Third), (mine.UAxis, theirs.UAxis), (mine.VAxis, theirs.VAxis) })
-                    Assert.True((a - b).Length < 1e-6, $"brush {brush} reads {b} where the generator writes {a}; run these tests with BCS_WRITE_LEVELS=1 to write it again.");
+                    Assert.True(Length(a - b) < 1e-6, $"brush {brush} reads {b} where the generator writes {a}; run these tests with BCS_WRITE_LEVELS=1 to write it again.");
             }
         }
     }
@@ -403,7 +404,7 @@ public sealed class FeatureTestLevelTests
         Assert.All(new[] { 45.0, 135.0, 225.0 }, turn => Assert.False(Open(turn), $"the way at {turn} degrees is open"));
 
         var start = level.Entities.Single(entity => entity.ClassName == "info_player_start");
-        Assert.Equal(new Vec3(0f, 0.125f, 6f), new LevelPoint(0, -192, FloorTop).Meters(level.UnitsPerMeter));
+        Assert.Equal(new System.Numerics.Vector3(0f, 0.125f, 6f), new LevelPoint(0, -192, FloorTop).Meters(level.UnitsPerMeter));
         Assert.Equal(("0 -192 4", "90"), (start["origin"], start["angle"]));
     }
 
@@ -438,6 +439,10 @@ public sealed class FeatureTestLevelTests
         }
     }
 
+    private static double Dot(LevelPoint a, LevelPoint b) => a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+
+    private static double Length(LevelPoint a) => Math.Sqrt(Dot(a, a));
+
     /// <summary>How far along a ray it first meets a brush, or nothing within the reach.</summary>
     private static double? Hit(IReadOnlyList<LevelBrush> brushes, LevelPoint from, LevelPoint way, double reach)
     {
@@ -448,7 +453,7 @@ public sealed class FeatureTestLevelTests
             foreach (var face in brush.Faces)
             {
                 var (normal, distance) = (face.Normal, face.Distance);
-                var (along, outside) = (LevelPoint.Dot(normal, way), LevelPoint.Dot(normal, from) - distance);
+                var (along, outside) = (Dot(normal, way), Dot(normal, from) - distance);
                 if (Math.Abs(along) < 1e-12)
                 {
                     if (outside > 1e-6) misses = true;

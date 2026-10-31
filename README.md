@@ -379,7 +379,9 @@ Known gaps:
 
 Using the package needs none of this, since it ships a prebuilt bridge for every supported
 platform. This
-is for working on the bridge itself.
+is for working on the bridge itself. A clone takes the modules both engines share, which the
+library references from `modules/`, with `git clone --recurse-submodules`, or with
+`git submodule update --init` in a clone made without it.
 
 ```bash
 build/build-native.sh          # the headless bridge

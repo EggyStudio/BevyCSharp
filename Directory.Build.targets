@@ -8,4 +8,17 @@
     -->
     <Import Project="$(MSBuildThisFileDirectory)BevyCSharp/build/BevyCSharp.Embed.targets"/>
 
+    <!--
+      The library keeps its reference to the modules to itself, so the package carries their
+      assemblies in its lib folder rather than naming them as packages it depends on, and a project
+      here that references the library references the modules beside it, so its build lists them
+      among the assemblies it loads, as a game on the package has them from the lib folder.
+    -->
+    <ItemGroup Condition="'$(MSBuildProjectName)' != 'BevyCSharp'">
+        <_BevyCSharpReference Include="@(ProjectReference->WithMetadataValue('Filename', 'BevyCSharp'))"/>
+        <_LevelsReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Levels'))"/>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Levels/Levels/Levels.csproj"
+                          Condition="'@(_BevyCSharpReference)' != '' And '@(_LevelsReference)' == ''"/>
+    </ItemGroup>
+
 </Project>

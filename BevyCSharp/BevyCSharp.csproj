@@ -77,6 +77,27 @@
     </ItemGroup>
 
     <!--
+      The modules both engines share, each its own repository checked out as a git submodule under
+      modules/, whose assemblies the library references and the package carries in its lib folder
+      beside the library's, with their documentation, since a package cannot name a project as a
+      dependency and the modules are not packages of their own.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModules</TargetsForTfmSpecificBuildOutput>
+    </PropertyGroup>
+    <Target Name="BevyCSharpPackModules" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Levels'"/>
+            <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
+            <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
+                                  Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
+        </ItemGroup>
+    </Target>
+
+    <!--
       The description of Bevy's reflected components, written by the schema.dump command and
       checked in. The generator turns it into the typed wrappers in Bevy.Reflected. It is named here
       and nowhere else, so only the library is compiled with the wrappers and a game's own

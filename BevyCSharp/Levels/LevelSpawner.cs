@@ -1,21 +1,24 @@
 using System.Globalization;
+using System.Numerics;
 using Bevy.Physics;
+using Levels;
 
 namespace Bevy;
 
 /// <summary>
 /// Builds a level file into a scene, its brushes meshed with their collision and its entities
-/// spawned by class.
+/// spawned by class, the engine's binding of the Levels module, which reads the file and gives its
+/// brushes out as meshes and hulls.
 /// </summary>
 /// <remarks>
 /// <para>
 /// Each entity of the level becomes an entity under the level's root, named by its
 /// <c>targetname</c> or its class and carrying <see cref="LevelKeys"/>. The <c>worldspawn</c>'s
-/// brushes, and each brush entity's, are built through an <see cref="EditMesh"/>, a slot a
-/// material, each face given the texture coordinates its axes, offsets and scales say, and drawn
-/// as the slot of its material's name is (<see cref="Modeling.Materials"/>), so a face of the
-/// material <c>wall</c> is drawn as a wall's prototype. They collide as their triangles, a static
-/// body of <see cref="ColliderShape.Mesh"/>.
+/// brushes, and each brush entity's, are the module's meshes (<see cref="LevelGeometry.Meshes"/>), a
+/// mesh a material, each face given the texture coordinates its axes, offsets and scales say, and
+/// drawn as the material of its name is, so a face of the material <c>wall</c> is drawn as a
+/// wall's prototype. They collide as their triangles, a static body of
+/// <see cref="ColliderShape.Mesh"/>.
 /// </para>
 /// <para>
 /// A point entity stands at its <c>origin</c>, turned by its <c>angle</c>, the yaw in degrees, or
@@ -36,7 +39,7 @@ namespace Bevy;
 /// of the level's units a meter, so at a scale of one it repeats once a meter.
 /// </para>
 /// </remarks>
-public static class Levels
+public static class LevelSpawner
 {
     /// <summary>
     /// The folder of a level's materials a prototype's picture stands in, so a face of
@@ -84,9 +87,15 @@ public static class Levels
     /// <param name="path">The file, relative to the asset root unless it is a full path.</param>
     /// <param name="place">Where the level's root stands, the file's origin, at the world's origin where none is given.</param>
     /// <returns>The level's root, under which every entity of it stands.</returns>
+    /// <remarks>The file is read as the game reads its assets (<see cref="AssetFiles"/>), from what it carries or from the disk.</remarks>
     /// <exception cref="FileNotFoundException">There is no such file.</exception>
     /// <exception cref="FormatException">The file is not map text, or a key of it is not what its class reads.</exception>
-    public static Entity Load(EcsWorld ecs, string path, Transform? place = null) => Spawn(ecs, Level.Load(path), Path.GetFileNameWithoutExtension(path), place);
+    public static Entity Load(EcsWorld ecs, string path, Transform? place = null)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(path);
+        if (!AssetFiles.Exists(path)) throw new FileNotFoundException($"There is no level at {path}.", path);
+        return Spawn(ecs, Level.Parse(AssetFiles.ReadAllText(path), path), Path.GetFileNameWithoutExtension(path), place);
+    }
 
     /// <summary>Builds a level into the world. Only valid inside a system.</summary>
     /// <param name="ecs">The world.</param>
@@ -189,7 +198,7 @@ public static class Levels
     /// </summary>
     private static void Place(EcsWorld ecs, Entity entity, LevelEntity source, double units, int index)
     {
-        var at = source["origin"] is { } origin ? Point(origin, "origin", index).Meters(units)
+        var at = source["origin"] is { } origin ? Of(Point(origin, "origin", index).Meters(units))
             : source.Brushes.Count > 0 && source.ClassName != "worldspawn" ? Middle(source, units)
             : Vec3.Zero;
         // A brush entity's brushes are where the file puts them, so it stands unturned whatever its angles.
@@ -223,152 +232,116 @@ public static class Levels
         if (corners.Count == 0) return Vec3.Zero;
         var low = new LevelPoint(corners.Min(p => p.X), corners.Min(p => p.Y), corners.Min(p => p.Z));
         var high = new LevelPoint(corners.Max(p => p.X), corners.Max(p => p.Y), corners.Max(p => p.Z));
-        return ((low + high) * 0.5).Meters(units);
+        return Of(((low + high) * 0.5).Meters(units));
     }
 
     /// <summary>
-    /// Builds an entity's brushes into an edit mesh about the entity's place, draws each slot as a
-    /// part under it where there is a renderer, and makes it collide as its triangles.
+    /// Builds an entity's brushes from the module's meshes about the entity's place, draws each
+    /// material's as a part under it where there is a renderer, and makes it collide as their
+    /// triangles.
     /// </summary>
     /// <remarks>
-    /// The collision is the edit mesh's triangles as a static body given in code, where the world
+    /// The collision is the meshes' triangles as a static body given in code, where the world
     /// simulates bodies, rather than a collider fitted to what is drawn, which a build with no
     /// renderer cannot fit, so a level collides the same with a renderer and without, and a server
     /// or a headless test walks it. The components stay beside the body, which the simulation
     /// leaves to the body given in code, and fit what is drawn where the simulation starts after.
+    /// The module gives a convex hull a brush as well (<see cref="LevelGeometry.Hulls"/>), which a
+    /// body of several shapes would take, and a body takes one shape here.
     /// </remarks>
     private static void Build(EcsWorld ecs, Entity entity, LevelEntity source, double units, int index)
     {
         var at = ecs.TryGet<Transform>(entity, out var placed) ? placed.Translation : Vec3.Zero;
-        var mesh = Mesh(source, units, at);
-        if (mesh.FaceCount == 0) return;
+        var meshes = LevelGeometry.Meshes(source, units, new Vector3(at.X, at.Y, at.Z), Pictures.Shared);
+        if (meshes.Count == 0) return;
 
         if (App.HasRenderer)
         {
-            var meshes = Modeling.Meshes(mesh);
-            var materials = Modeling.Materials(mesh);
-            for (var slot = 0; slot < meshes.Length; slot++)
+            foreach (var mesh in meshes)
             {
-                if (meshes[slot] == AssetHandle.None) continue;
                 var part = ecs.Spawn();
                 ecs.Add(part, Transform.Identity);
                 ecs.Add(part, Visibility.Inherited);
-                Render.SetMesh(ecs, part, meshes[slot]);
-                Render.SetMaterial(ecs, part, materials[slot]);
+                Render.SetMesh(ecs, part, Render.CreateMesh(Drawn(mesh), kept: false));
+                Render.SetMaterial(ecs, part, MaterialOf(mesh.Material));
                 ecs.SetParent(part, entity);
-                ecs.SetName(part, $"{ecs.NameOf(entity)}, {mesh.Slots[slot]}");
+                ecs.SetName(part, $"{ecs.NameOf(entity)}, {SlotOf(mesh.Material)}");
             }
         }
 
         ecs.Add(entity, new RigidBody { Kind = BodyKind.Static });
         ecs.Add(entity, new Collider { Shape = ColliderShape.Mesh });
         if (App.Running?.World.TryResource<PhysicsWorld>() is { } physics && !physics.Has(entity))
-            physics.Add(entity, Modeling.Collider(mesh), BodyKind.Static, Colliders.WorldOf(ecs, entity));
+            physics.Add(entity, Collision(meshes), BodyKind.Static, Colliders.WorldOf(ecs, entity));
     }
 
-    /// <summary>
-    /// An entity's brushes as an edit mesh in meters about a place, a slot each material, each face's
-    /// corners wound as Bevy's front faces are and given the texture coordinates its axes say over
-    /// its material's picture.
-    /// </summary>
-    internal static EditMesh Mesh(LevelEntity source, double units, Vec3 at)
+    /// <summary>A module's mesh as the mesh the engine draws.</summary>
+    private static MeshData Drawn(LevelMesh mesh) => new()
     {
-        var mesh = new EditMesh();
-        var materials = new Dictionary<string, Material>(StringComparer.Ordinal);
-        Material Of(string name) => materials.TryGetValue(name, out var known) ? known : materials[name] = MaterialOf(name, units);
+        Positions = [.. mesh.Positions.Select(Of)],
+        Normals = [.. mesh.Normals.Select(Of)],
+        ComputeNormals = false,
+        Uvs = [.. mesh.Uvs.SelectMany(uv => new[] { uv.X, uv.Y })],
+        Indices = mesh.Indices,
+    };
 
-        var first = source.Brushes.SelectMany(brush => brush.Faces).Select(face => Of(face.Material).Slot).FirstOrDefault();
-        if (first is not null && first != EditMesh.DefaultSlot) mesh.SlotRename(EditMesh.DefaultSlot, first);
-
-        foreach (var brush in source.Brushes)
+    /// <summary>Every mesh's triangles as one shape, each mesh's corners after the ones before.</summary>
+    private static PhysicsShape Collision(IReadOnlyList<LevelMesh> meshes)
+    {
+        var positions = new List<Vec3>();
+        var indices = new List<uint>();
+        foreach (var mesh in meshes)
         {
-            var polygons = brush.Polygons();
-            var vertices = new Dictionary<LevelPoint, int>();
-            for (var f = 0; f < brush.Faces.Count; f++)
-            {
-                if (polygons[f] is not { } polygon) continue;
-                var face = brush.Faces[f];
-                var material = Of(face.Material);
-
-                // The file winds a face clockwise seen from outside, and Bevy draws the side its
-                // corners run counter-clockwise round, so they are taken backwards.
-                var corners = new int[polygon.Length];
-                var uvs = new Vec2[polygon.Length];
-                for (var i = 0; i < polygon.Length; i++)
-                {
-                    var point = polygon[polygon.Length - 1 - i];
-                    if (!vertices.TryGetValue(point, out var vertex)) vertices[point] = vertex = mesh.AddCorner(point.Meters(units) - at);
-                    corners[i] = vertex;
-                    uvs[i] = Texel(face, point, material.Width, material.Height);
-                }
-
-                mesh.AddPolygon(corners, material.Slot, uvs);
-            }
+            var first = (uint)positions.Count;
+            positions.AddRange(mesh.Positions.Select(Of));
+            indices.AddRange(mesh.Indices.Select(index => first + index));
         }
 
-        foreach (var material in materials.Values)
-        {
-            if (material.Picture is { } picture && mesh.Slots.Contains(material.Slot)) mesh.SlotTexture(material.Slot, picture);
-        }
-
-        return mesh;
+        return PhysicsShape.Mesh([.. positions], [.. indices]);
     }
 
-    /// <summary>
-    /// What a level's material is drawn as, the slot it is drawn in, its picture's size in texels and
-    /// the picture where it has one of its own.
-    /// </summary>
-    private readonly record struct Material(string Slot, double Width, double Height, string? Picture);
+    private static Vec3 Of(Vector3 value) => new(value.X, value.Y, value.Z);
+
+    /// <summary>The name a material is drawn as, a prototype's without <see cref="PrototypeFolder"/>.</summary>
+    private static string SlotOf(string material) =>
+        material.StartsWith(PrototypeFolder, StringComparison.Ordinal) && material.Length > PrototypeFolder.Length ? material[PrototypeFolder.Length..] : material;
 
     /// <summary>
     /// A material by its name, a prototype under <see cref="PrototypeFolder"/> as the prototype of the
-    /// rest of its name with a picture of <see cref="PrototypePixels"/>, a name with a picture under
-    /// the asset root's <c>textures</c> folder drawn with it, and any other name as the slot of its
-    /// name with a picture of the level's units a meter.
+    /// rest of its name, a name with a picture under the asset root's <c>textures</c> folder drawn
+    /// with it, and any other name as the prototype of its name.
     /// </summary>
-    private static Material MaterialOf(string name, double units)
+    private static AssetHandle MaterialOf(string name)
+    {
+        if (Picture(name) is { Path: { } path }) return Modeling.Material(name, new SlotLook { Texture = path });
+        return Modeling.Prototype(SlotOf(name));
+    }
+
+    /// <summary>
+    /// A material's picture, a prototype's of <see cref="PrototypePixels"/> and no file, a PNG or a
+    /// JPEG of its name under the asset root's <c>textures</c> folder, or none.
+    /// </summary>
+    private static (string? Path, int Width, int Height)? Picture(string name)
     {
         if (name.StartsWith(PrototypeFolder, StringComparison.Ordinal) && name.Length > PrototypeFolder.Length)
-            return new Material(name[PrototypeFolder.Length..], PrototypePixels, PrototypePixels, null);
+            return (null, PrototypePixels, PrototypePixels);
 
         foreach (var extension in new[] { ".png", ".jpg", ".jpeg" })
         {
             var path = $"textures/{name}{extension}";
-            if (AssetFiles.Exists(path) && PictureSize(AssetFiles.ReadAllBytes(path)) is { } size) return new Material(name, size.Width, size.Height, path);
-        }
-
-        return new Material(name, units, units, null);
-    }
-
-    /// <summary>A PNG's or a JPEG's width and height from its header, or nothing for other bytes.</summary>
-    internal static (int Width, int Height)? PictureSize(byte[] bytes)
-    {
-        // A PNG's header chunk holds its width and height as big-endian four byte numbers.
-        ReadOnlySpan<byte> png = [0x89, (byte)'P', (byte)'N', (byte)'G', 0x0D, 0x0A, 0x1A, 0x0A];
-        if (bytes.Length >= 24 && bytes.AsSpan(0, 8).SequenceEqual(png))
-            return (System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(bytes.AsSpan(16)), System.Buffers.Binary.BinaryPrimitives.ReadInt32BigEndian(bytes.AsSpan(20)));
-
-        // A JPEG's size is in its start of frame, after the segments before it, each a marker and a length.
-        if (bytes.Length < 4 || bytes[0] != 0xFF || bytes[1] != 0xD8) return null;
-        for (var at = 2; at + 9 < bytes.Length;)
-        {
-            if (bytes[at] != 0xFF) return null;
-            var marker = bytes[at + 1];
-            var length = bytes[at + 2] << 8 | bytes[at + 3];
-            if (marker is >= 0xC0 and <= 0xCF and not (0xC4 or 0xC8 or 0xCC)) return (bytes[at + 7] << 8 | bytes[at + 8], bytes[at + 5] << 8 | bytes[at + 6]);
-            at += 2 + length;
+            if (AssetFiles.Exists(path) && LevelGeometry.PictureSize(AssetFiles.ReadAllBytes(path)) is { } size) return (path, size.Width, size.Height);
         }
 
         return null;
     }
 
-    /// <summary>
-    /// Where a point of a face falls on its material, its texel along each axis, scaled and moved,
-    /// over the texels its picture spans each way.
-    /// </summary>
-    internal static Vec2 Texel(LevelFace face, LevelPoint point, double width, double height) =>
-        new((float)((LevelPoint.Dot(point, face.UAxis) / face.ScaleU + face.UOffset) / width),
-            (float)((LevelPoint.Dot(point, face.VAxis) / face.ScaleV + face.VOffset) / height));
+    /// <summary>The engine's answer to the module for a material's picture, by <see cref="Picture"/>.</summary>
+    private sealed class Pictures : ILevelMaterials
+    {
+        public static readonly Pictures Shared = new();
+
+        public (double Width, double Height)? PictureSize(string material) => Picture(material) is { } picture ? (picture.Width, picture.Height) : null;
+    }
 
     /// <summary>A tree of the <c>species</c> key's name and the <c>seed</c> key's seed.</summary>
     private static void PlantTree(EcsWorld ecs, Entity entity, LevelEntity source)

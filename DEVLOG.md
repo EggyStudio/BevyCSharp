@@ -14,11 +14,18 @@ irradiance volume mend above and after it below, and box A, the floor two meters
 mean gray from 0 to 1 at every 15 degrees round, 0.241 at 150 and 0.141 at 165 before, 0.241 and
 0.240 after, the step gone wherever the bay's volume is in view.
 
+![](.github/assets/readings/2026-10-31-item-83-meadow.webp)
+The feature test's meadow from the drive's meadow view at the saved settings, on the left its grass
+as 14,000 blade entities on a stylized shader and on the right the engine's grass, wheat grass cards
+crossed on the leaves' material, the frame at 47.7 ms and 36.7 ms by frame.profile over 120 frames
+offscreen, the main schedule 45.8 ms and 13.7 ms, the render schedule 39.7 ms and 35.4 ms, and the
+world 15,066 entities and 1,083, with 3DEngine's sessions' apps on the same GPU.
+
 Done that day
 
 - Item 78 at `c5d9cd20`. The README's words under the header, as given.
 - Item 82 at `785a1136`. The light hall keeps its brightness as the camera turns.
-- Item 83 at `d92ac690`. The grass is shaded as the trees are.
+- Item 83 at `219142e2`. The grass is shaded as the trees are.
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
 
 ## 2026-10-30

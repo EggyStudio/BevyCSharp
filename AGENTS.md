@@ -81,13 +81,14 @@ Stop any serving session before running the suite.
 | `BevyCSharp.Scripting` | The script host that compiles behavior scripts while an app runs |
 | `BevyCSharp.Player` | Plays a scene file with its scripts, which the editor's Play scene runs |
 | `native/bevy_csharp/src` | The Rust bridge, one module per subsystem |
+| `modules` | The modules both engines share, each its own repository checked out as a git submodule, the Levels module among them |
 | `BevyCSharp/Assets` | Assets and what draws them, in `AssetServer`, `Render`, `Render2d`, `Shaders`, `Ui`, `Gizmos`, `Audio` and `Animation` |
 | `BevyCSharp/Behaviors` | The `[Behavior]` attributes, run conditions, `BehaviorContext` and the runner behaviors are registered with |
 | `BevyCSharp/Generated` | `bevy-components.tsv`, Bevy's components as the wrappers in `Bevy.Reflected` are generated from |
 | `BevyCSharp/Input` | `Input`, `Key`, gamepads and `SyntheticInput` |
 | `BevyCSharp/Math` | `Vec2`, `Vec3`, `Quat`, `Transform` and `GlobalTransform` |
 | `BevyCSharp/Modeling` | `EditMesh`, a mesh shaped by operations through a selection, as a modeling program shapes one |
-| `BevyCSharp/Levels` | Level files of brushes and entities in the Valve 220 map format, in `Level`, built into a scene with their collision by `Levels` |
+| `BevyCSharp/Levels` | The binding of the Levels module (`modules/Levels`), `LevelSpawner`, which builds a level's meshes, collision and entities into a scene, with the engine's TrenchBroom classes |
 | `BevyCSharp/Vegetation` | Trees grown from a species and a seed, in `Trees`, `TreeSpecies` and `TreeSkeleton`, and built into meshes through the modeling |
 | `BevyCSharp/Scenes` | Scene files, saved games and `Persistent<T>` settings |
 | `BevyCSharp/Time` | `Time`, the frame's clock and the fixed one |

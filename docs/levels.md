@@ -6,22 +6,29 @@ Source's levels are. The file is map text in the Valve 220 format, which TrenchB
 saves with the Generic game and the Valve map format, so a level is drawn there and loaded here:
 
 ```csharp
-var root = Levels.Load(ctx.Ecs, "levels/room.map");          // everything under one root
+var root = LevelSpawner.Load(ctx.Ecs, "levels/room.map");    // everything under one root
 ```
 
 Every entity of the level stands under the root, so despawning the root takes the level away, and
 the root stands where `place` puts it, the file's origin, as the feature test stands its hub,
-`games/FeatureTest/assets/levels/feature-test.map`, on its ground. `Level.Load` reads the file
-alone, `Level.Parse` reads map text, and `Levels.Spawn` builds a level read or made in code into the
-world. `level.load` does the same from the console and from `./bcs`, so a level saved in TrenchBroom
-is tried in a running app as soon as it is saved.
+`games/FeatureTest/assets/levels/feature-test.map`, on its ground. `Level.Parse` reads map text,
+`Level.Load` a file off the disk, and `LevelSpawner.Spawn` builds a level read or made in code into
+the world. `level.load` does the same from the console and from `./bcs`, so a level saved in
+TrenchBroom is tried in a running app as soon as it is saved.
+
+The format, the brushes and the shapes below are the Levels module's, a library both engines share,
+checked out under `modules/Levels` and named in the namespace `Levels`, which the package carries
+beside the engine. It gives an entity's brushes out as a mesh a material and a convex hull a brush,
+and `LevelSpawner` is this engine's binding of it, drawing the meshes as their materials, making
+their collision and spawning the entities by class.
 
 ## The file
 
-The repository's `BevyCSharp/Levels/TrenchBroom` folder holds a game config and the engine's
-classes for TrenchBroom, with the prototype materials' pictures it shows, and its README says how
-to install them. `Levels.WritePrototypePictures`, or `level.textures` from the console and `./bcs`,
-writes the pictures again into a game's folder.
+The repository's `BevyCSharp/Levels/TrenchBroom` folder holds a game config and the engine's classes
+for TrenchBroom, beside the module's base classes in `modules/Levels/TrenchBroom/Levels.fgd`, with
+the prototype materials' pictures it shows, and its README says how to install them.
+`LevelSpawner.WritePrototypePictures`, or `level.textures` from the console and `./bcs`, writes the
+pictures again into a game's folder.
 
 A level's coordinates are TrenchBroom's, Z up and in units. The `worldspawn` entity's
 `_units_per_meter` key says how many units make a meter, and a level without it has 32, so
@@ -71,12 +78,13 @@ or its `angles`, the pitch, the yaw and the roll, so its forward, minus Z, looks
 draws its arrow.
 
 Every entity carries a `LevelKeys` component, its class, its `targetname` and every key, which
-`Levels.KeysOf` reads back, so a class the engine does not know still stands where the level put
-it with everything the level said of it. `Levels.Register` says what a class makes of its entity,
-here a light of the brightness its `light` key gives, in lumens, standing where the entity does:
+`LevelSpawner.KeysOf` reads back, so a class the engine does not know still stands where the level
+put it with everything the level said of it. `LevelSpawner.Register` says what a class makes of its
+entity, here a light of the brightness its `light` key gives, in lumens, standing where the entity
+does:
 
 ```csharp
-Levels.Register("light", (ecs, entity, source) =>
+LevelSpawner.Register("light", (ecs, entity, source) =>
 {
     var lumens = float.Parse(source["light"] ?? "800", System.Globalization.CultureInfo.InvariantCulture);
     ecs.SetParent(Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = lumens }), entity);
@@ -95,6 +103,9 @@ at a sixteenth's scale. `LevelBrush.Turned` turns a brush about the vertical and
 moves it, each mapping its faces again from the world, so a wall another way or elsewhere is one of
 these turned and moved, as the feature test's level is built:
 
+<!-- compiled with:
+using Levels;
+-->
 ```csharp
 var level = new Level();
 var world = new LevelEntity();

@@ -1,17 +1,18 @@
 # Review
 
-Reviewed up to `1099cb35`, item 83's second phase, pushed at 13:15 on 2026-10-31 after the run of
-`c5d9cd20` went green at 12:42, its run green at 13:32 with the suites in 11 to 14 minutes.
-Grass.Plant and GrassSettings plant patches of 8 m, a mesh each built once as planted, drawn with
-the leaf material through Trees.GrassMaterial once an app a set, both sway streams holding the root
-so the main pass and the prepass share one sway function, no shadows cast unless asked, a run
-without a renderer planting entities alone; the stiffness 0.15, 0.6, 0.15 and 5 moves a 0.7 m tip a
-third of its height at 15 m/s where a softer first value folded the blades flat, the sheets in the
-day's dump; GrassTests 5 of 5, a backlit clump 319 against 244 front-lit, the wind test claiming
-movement in wind and none in still air since crossed cards' edge-on ends confound a root check in
-pixels; docs, CHEATSHEET and the listing follow; the suite 2,006 passed and 3 skipped. Before it
-`c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at 12:42 with
-the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in the
+Reviewed up to `219142e2`, item 83's third phase and its end, pushed at 14:08 on 2026-10-31 after
+the run of `1099cb35` went green at 13:32, its run green at 14:31 with the suites in 14 to 18
+minutes. The meadow is Grass.Plant over 30 m square at 3 clumps a square metre and 0.6 m, in place
+of 14,000 blade entities, wind.slang and its weather-wind system gone and the grass swaying in the
+trees' wind; frame.profile over 120 frames at the drive's meadow view reads the frame 47.7 to 36.7
+ms, the main schedule 45.8 to 13.7, the render 39.7 to 35.4, the entities 15,066 to 1,083; the grass
+takes the light as the leaves do, far blades showing an alpha-cut stipple under SMAA; the drive
+green at a peak of 3.90 GB, docs/running-a-game.md following; a plain pair with the numbers in its
+caption, the in-between shots in the dump and shown to the owner; the suite 2,006 passed and 3
+skipped. Before it `1099cb35`, 83's second phase, pushed at 13:15, its run green at 13:32 with the
+suites in 11 to 14 minutes, the engine grass, recorded under the item in REVIEW-ARCHIVE.md. Before
+it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at 12:42
+with the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in the
 collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run green
 at 11:25, the light-through test at 180 traced frames, recorded under the item in REVIEW-ARCHIVE.md.
 Before it `391d6b85`, the version to 0.6, the owner's change committed by the reviewer and pushed at
@@ -293,31 +294,6 @@ from [SHARED.md](SHARED.md).
     its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
     course court next. The course court at `3417d612` on 2026-10-30.
 
-83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
-    seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
-    like them. Today the grass is a shader of its own, a two-tone gradient with the normal leaned
-    70% up, no texture and no transmission. An engine grass under BevyCSharp/Vegetation beside
-    Trees, drawn with the leaves' wind material, albedo, normal and surface textures, diffuse
-    transmission, the alpha mask, two-sided normals and LightThrough, its cards clumps from the
-    sorted grass sets picked by kind and density and shipped in the bounded collection as the trees'
-    leaves are, the meadow using it; read against the trees' leaves in one view and by the meadow's
-    cost before and after, the drive's meadow checks kept, a captioned picture. After item 84, in
-    three phases the coder proposed on 2026-10-31, a commit each. First the grass sets into the
-    bounded collection, recipes in build/textures.py for the sets with albedo, opacity and normal, a
-    Grass kind beside Bark and Leaf in TreeTextureSet, the collection's size and count said, a test
-    that each loads with its channels. Second the engine grass, Grass.Plant in
-    BevyCSharp/Vegetation/Grass.cs taking the area, the set, density, height and seed, clumps as
-    crossed alpha-masked cards batched a mesh a patch rather than an entity a blade, drawn with the
-    leaves' material and the trees' Wind with the root pinned, the main pass and the prepass placing
-    a vertex by the same sums as item 81 asks, tests that a backlit clump transmits, the wind moves
-    tops and not roots and a patch builds headless, the docs page's lines. Third the meadow on it in
-    place of its 14,000 strip entities, the drive's meadow checks kept, read against the trees'
-    leaves in one view and by frame.profile before and after, with a picture. First phase done at
-    `d92ac690`, read at 12:24 on 2026-10-31, the three grass cards in the collection with their
-    channels, a grass kind in textures.py and TreeTextureKind, BarkDepthTests reading bark alone.
-    Second phase done at `1099cb35`, the engine grass as recorded in the head; third phase, the
-    meadow, under way.
-
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
     GenerateNuspec alone, so build and run never check, and its inputs are the Rust files and
@@ -327,6 +303,16 @@ from [SHARED.md](SHARED.md).
     built from, shaders among them, and says in one line which file is newer than the library and
     which script rebuilds it; the README's dotnet run paragraph says so where it said it under
     building from source alone. One commit, small, after item 79.
+
+85. **The engine takes the Levels module as a submodule.** After the module's item 3 lands in its
+    three parts, this engine adds the Levels repository as a git submodule under modules/ and
+    references its project, the workflows checking submodules out; BevyCSharp/Levels becomes the
+    binding, LevelSpawner (the module's Decision 6) with the entities, transforms, LevelKeys, the
+    class registry, the materials by name, Render.CreateMesh from a LevelMesh and Bepu bodies from a
+    LevelHull, a convex hull a brush in place of one mesh collider, WritePrototypePictures, the
+    console commands and FeatureTestLevelTests, the format types deleted here, docs/levels.md
+    pointing at the module, the drive's court checks green as they are. One commit, the module
+    pushed first. Then item 68's courts on it.
 
 ## Verdicts
 
@@ -1015,3 +1001,25 @@ the light as they do, its far blades showing the stipple an alpha cut makes at a
 The drive runs whole on it, its meadow checks kept, its peak 3.90 GB, and docs/running-a-game.md says
 the meadow's grass. The picture is 2026-10-31-item-83-meadow.webp, the pictures on the way in the
 day's dump. The whole suite ran with it, 2,006 passed and 3 skipped in one host at the 3 GB cap.
+
+Item 85, the Levels module's binding, in the commit carrying this line. The module is a git
+submodule at modules/Levels on a01b2df; the library references its project to itself and the
+package carries Levels.dll and Levels.xml in its lib folder with no dependency named for it,
+Directory.Build.targets giving every project here that references the library the module as well,
+so its build lists the assembly it loads; the workflows' ten checkouts take submodules. The format,
+the brushes and their shapes and the pure tests go, and Levels becomes LevelSpawner, Levels' Decision
+6, building the module's meshes, a mesh a material over the pictures the binding answers for
+through ILevelMaterials, drawn as their materials, and colliding as their triangles, one static
+mesh body an entity as before; a body takes one shape and a compound of a hull a brush is the
+module's LevelHull waiting for one, a departure from the proposal's hulls. Level.Load reads a path
+off the disk, so LevelSpawner.Load reads the asset through AssetFiles and parses it. EditMesh.Levels
+goes with the mesh it built. The TrenchBroom folder keeps the tree in BevyCSharp.fgd beside the
+module's Levels.fgd, both in the config. The public listing loses the format's 71 lines to the
+module's namespace and Bevy.Levels becomes Bevy.LevelSpawner with the same members (N 2.4); the
+cheat sheet's Levels group is LevelSpawner. docs/levels.md says the module and the binding, and the
+guide's blocks build on a local package with the module's types; the README and BUILDING.md say a
+clone takes the submodule; AGENTS.md's BevyCSharp/Levels row is the binding's on the owner's word of
+2026-10-31 in the coder's session, with a comma for the asked colon, and the modules row is N 1.5's.
+The drive runs whole on it, its court checks green, its peak 3.87 GB. The whole suite ran with it,
+1,989 passed and 3 skipped in one host at the 3 GB cap, the 17 fewer than item 83's run being the
+format's tests, which run in the module's Levels.Tests.

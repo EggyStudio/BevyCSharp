@@ -1,0 +1,3 @@
+[submodule "modules/Levels"]
+	path = modules/Levels
+	url = https://github.com/EggyStudio/Levels.git

@@ -1004,34 +1004,12 @@ static AssetHandle Grid(int pixelsPerMeter, Color face, Color line, Color fine);
 The guide's page is [levels.md](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/levels.md).
 
 ```csharp
-// Levels
+// LevelSpawner
 static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn);  // Says how an entity of a class is spawned, called with the entity placed under the level and carrying LevelKeys, after its brushes are built where it has any
 static Entity Load(EcsWorld ecs, string path, Transform? place = null);  // Reads a level file and builds it into the world
 static Entity Spawn(EcsWorld ecs, Level level, string name = "level", Transform? place = null);  // Builds a level into the world
 static IReadOnlyList<string> WritePrototypePictures(string folder);  // Writes each prototype's picture as TrenchBroom shows it, under a game's folder, for a level editor to draw a face of proto/floor as the engine draws it
 static IReadOnlyList<KeyValuePair<string, string>> KeysOf(in LevelKeys keys);  // The keyvalues an entity's LevelKeys holds, in the level file's order
-
-// Level
-static Level Load(string path);                                 // Reads a level from a file, as the game reads its assets
-string Save(string path);                                       // Writes the level to a file, which Load reads back the same
-static Level Parse(string text, string name = "the level");     // Reads a level from map text
-static IReadOnlyList<LevelBrush> Doorway(LevelPoint low, LevelPoint high, double width, double height, string material, string? arch = null, int segments = 8, double scale = 0.0625);  // A wall along X with a rounded opening through its middle, a brush each side of the opening and the wall above it cut into straight segments round the opening's top, as a level editor's arch tool cuts one
-string Write();                                                 // The level as map text in the Valve 220 format, as TrenchBroom lays it out
-
-// LevelEntity
-IEnumerable<string> All(string key);                            // Every value of a key, in the file's order
-
-// LevelBrush
-LevelPoint[][] Polygons();                                      // Each face's polygon, its corners wound clockwise seen from outside as the file's points are, in the file's units, or nothing for a face whose plane only touches the solid
-static LevelBrush Box(LevelPoint low, LevelPoint high, string material, double scale = 0.0625);  // A box between two corners
-static LevelBrush Wedge(LevelPoint low, LevelPoint high, string material, double scale = 0.0625);  // A ramp between two corners, its slope rising along X from the low corner's height at its low X to the high corner's at its high X
-static IReadOnlyList<LevelBrush> Arch(LevelPoint center, double radius, double thickness, double depth, string material, int segments = 8, double degrees = 180, double scale = 0.0625);  // An arch standing across X, a half ring or a part of one cut into straight segments, a brush each, as Hammer's arch tool cuts one
-LevelBrush Turned(double degrees, LevelPoint about);            // The brush turned about the vertical line through a point, its faces' mapping taken again from the world, so its material lies on it as on one drawn where it stands
-LevelBrush Moved(LevelPoint by);                                // The brush moved, its faces' mapping taken again from the world, so its material stays where the world puts it rather than going with the brush, as a moved brush's does in TrenchBroom with its texture lock off
-
-// LevelPoint
-Vec3 Meters(double unitsPerMeter);                              // The point in meters with Y up, the file's (x, y, z) at (x, z, -y) and divided by its units a meter
-static LevelPoint FromMeters(Vec3 meters, double unitsPerMeter);  // The point a place in meters with Y up stands at in a file of the given units a meter
 ```
 
 ## Trees

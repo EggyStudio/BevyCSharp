@@ -28,7 +28,7 @@ var groups = new (string Title, string Page, string[] Types)[]
     ("Assets and models", "assets-and-models.md", ["AssetServer", "AssetFiles", "AssetIds", "AssetPack", "Streaming", "GltfContents", "GltfPart", "Animation", "AnimationCurve", "AnimationTarget", "MeshFiles", "MaterialFiles"]),
     ("Drawing", "drawing.md", ["Render", "MeshShape", "Render2d", "CapturedImage", "CapturedTexels", "EffectSettings", "Picking"]),
     ("Modeling", "modeling.md", ["EditMesh", "Modeling", "Images"]),
-    ("Levels", "levels.md", ["Levels", "Level", "LevelEntity", "LevelBrush", "LevelPoint"]),
+    ("Levels", "levels.md", ["LevelSpawner"]),
     ("Trees", "trees.md", ["Trees", "TreeTextures", "TreeTextureSet", "Grass"]),
     ("Shaders", "shaders.md", ["Shaders", "ShaderValues", "ShaderMaterial", "ShaderProgram", "ShaderStage", "ViewDispatch", "ViewDraw", "ComponentArray`1"]),
     ("Gizmos", "gizmos.md", ["Gizmos", "Gizmos+BatchScope", "GizmoSegment"]),

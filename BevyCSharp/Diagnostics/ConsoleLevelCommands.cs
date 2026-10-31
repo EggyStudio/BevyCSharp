@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>Building a level file into the running app's world, from the console and the command line.</summary>
 /// <remarks>
-/// The same <see cref="Levels.Load"/> a game calls, so a level saved from TrenchBroom is tried in a
+/// The same <see cref="LevelSpawner.Load"/> a game calls, so a level saved from TrenchBroom is tried in a
 /// running app with <c>./bcs command level.load levels/room.map</c>, and loaded again after each save
 /// once the last load's root is despawned.
 /// </remarks>
@@ -21,7 +21,7 @@ internal static class ConsoleLevelCommands
         try
         {
             var ecs = ConsoleHost.Ecs;
-            var root = Levels.Load(ecs, path);
+            var root = LevelSpawner.Load(ecs, path);
             var entities = ecs.ChildrenOf(root);
             return $"built {path} under {root}, {entities.Length} entities";
         }
@@ -36,7 +36,7 @@ internal static class ConsoleLevelCommands
     [Command("level.textures", "Writes the prototype materials' pictures for TrenchBroom under a game's folder, in textures/proto: level.textures <folder>")]
     internal static string Textures(string folder)
     {
-        var written = Levels.WritePrototypePictures(folder);
+        var written = LevelSpawner.WritePrototypePictures(folder);
         return $"wrote {written.Count} pictures to {Path.GetDirectoryName(written[0])}";
     }
 }
