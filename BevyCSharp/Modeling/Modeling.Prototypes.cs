@@ -11,17 +11,19 @@ public static partial class Modeling
     /// material slots a level's faces are sorted into.
     /// </summary>
     /// <remarks>
-    /// Unreal's level prototyping palette, a floor a dark gray, a wall a light gray, a ceiling a
-    /// lighter one and stairs, ramps and the parts that move the prototyping orange, with a door
-    /// green, a window blue and a hazard red, as sRGB colors, as the prototype textures of the
-    /// engines of the 2000s told a reader of a level what each surface was for. The same names and
-    /// colors in 3DEngine, so a level blocked out in either reads the same.
+    /// After Unreal's level prototyping palette, a floor and a wall nearly white, a ceiling whiter
+    /// still and stairs, ramps and the parts that move the prototyping orange, with a door green, a
+    /// window blue and a hazard red, as sRGB colors, as the prototype textures of the engines of the
+    /// 2000s told a reader of a level what each surface was for. The floors and walls are near white
+    /// rather than Unreal's dark and middle grays, which read as dull and muddy under the sky, a wall
+    /// parting from the floor it stands on by the light on each. The same names in 3DEngine, whose
+    /// palette is this one but for its grayer floors, walls and ceilings.
     /// </remarks>
     public static IReadOnlyDictionary<string, Color> PrototypeColors { get; } = new Dictionary<string, Color>(StringComparer.Ordinal)
     {
-        ["floor"] = Color.FromSrgb(0.31f, 0.31f, 0.32f),
-        ["wall"] = Color.FromSrgb(0.71f, 0.71f, 0.70f),
-        ["ceiling"] = Color.FromSrgb(0.82f, 0.82f, 0.83f),
+        ["floor"] = Color.FromSrgb(0.90f, 0.90f, 0.89f),
+        ["wall"] = Color.FromSrgb(0.90f, 0.90f, 0.89f),
+        ["ceiling"] = Color.FromSrgb(0.95f, 0.95f, 0.96f),
         ["stairs"] = Color.FromSrgb(0.96f, 0.46f, 0.13f),
         ["door"] = Color.FromSrgb(0.38f, 0.72f, 0.38f),
         ["window"] = Color.FromSrgb(0.36f, 0.62f, 0.92f),
@@ -35,7 +37,7 @@ public static partial class Modeling
     /// <param name="name">
     /// One of <see cref="PrototypeColors"/>, such as <c>wall</c>, which a material slot of that name
     /// is drawn with. Any other name, <see cref="EditMesh.DefaultSlot"/> among them, takes the
-    /// grid's own gray.
+    /// grid as it is, white with light gray lines.
     /// </param>
     /// <returns>The material, the same one for the same name while the app runs.</returns>
     public static AssetHandle Prototype(string name)
@@ -84,7 +86,7 @@ public static partial class Modeling
     /// <remarks>The grid is read as sRGB, as the material samples it, multiplied in linear light and written as sRGB again.</remarks>
     internal static byte[] PrototypePicture(Color tint, int size)
     {
-        var pixels = Images.GridPixels(size, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
+        var pixels = Images.GridPixels(size, PrototypeFace, PrototypeLine, PrototypeFine);
         var tints = new[] { tint.R, tint.G, tint.B };
         var tables = new byte[3][];
         for (var channel = 0; channel < 3; channel++)
@@ -102,6 +104,18 @@ public static partial class Modeling
         return pixels;
     }
 
+    // The prototype grid's face, its lines a meter and a half meter apart with its mark, and its
+    // quarters' lines, before a prototype's color tints them. The face is all but white, so a
+    // prototype's color shows as itself, and the lines a light gray, so the grid measures a face
+    // without darkening it, where the default grid's darker lines over a near white wall read as
+    // dirt. A face of 0.99 rather than 1, since a white face tinted by a color of a whole tenth,
+    // as the hazard's 0.9, lands a byte of TrenchBroom's picture on a half, which one system's
+    // power function may round up and another's down.
+    internal static Color PrototypeFace => Color.FromSrgb(0.99f, 0.99f, 0.99f);
+    internal static Color PrototypeLine => Color.FromSrgb(0.6f, 0.6f, 0.6f);
+    internal static Color PrototypeFine => Color.FromSrgb(0.82f, 0.82f, 0.82f);
+
     /// <summary>The grid image an app's prototype materials share, made the first time one is asked for.</summary>
-    private static AssetHandle GridOf(App app) => Grids.GetValue(app, _ => new StrongBox<AssetHandle>(Images.Grid())).Value;
+    private static AssetHandle GridOf(App app) =>
+        Grids.GetValue(app, _ => new StrongBox<AssetHandle>(Images.Grid(Images.DefaultPixelsPerMeter, PrototypeFace, PrototypeLine, PrototypeFine))).Value;
 }

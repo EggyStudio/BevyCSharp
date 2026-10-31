@@ -196,7 +196,7 @@ public sealed class LevelTests
         // the rounding turns, so a system whose power function differs in its last digit draws the
         // same pixels. The grid's three tones, tinted by each prototype's color as the drawing tints
         // them, are the values it rounds.
-        var grid = Images.GridPixels(LevelSpawner.PrototypePixels, Images.DefaultFace, Images.DefaultLine, Images.DefaultFine);
+        var grid = Images.GridPixels(LevelSpawner.PrototypePixels, Modeling.PrototypeFace, Modeling.PrototypeLine, Modeling.PrototypeFine);
         var tones = Enumerable.Range(0, grid.Length / 4).Select(i => grid[i * 4]).Distinct().ToArray();
         foreach (var (name, color) in Modeling.PrototypeColors)
         foreach (var tint in new[] { color.R, color.G, color.B })

@@ -112,16 +112,16 @@ public sealed class ImagesTests
                 var material = Modeling.Prototype("floor");
                 Render.SetMaterial(ecs, entity, material);
                 same = Modeling.Prototype("floor") == material;
-                other = Modeling.Prototype("wall") != material;
+                other = Modeling.Prototype("stairs") != material;
             },
         };
         run.Wait(30).Capture("floor").Go();
         picture = run.Picture("floor");
 
         Assert.True(same, "the same name gives the same material");
-        Assert.True(other, "another name gives another");
+        Assert.True(other, "a name of another color gives another");
 
-        // The floor below the horizon is drawn gray, the floor's tint, red, green and blue near one
+        // The floor below the horizon is drawn in the floor's tint, red, green and blue near one
         // another, dim under a light that grazes it and not black, as a texture whose levels did
         // not arrive would leave it, and the run logged no error from the GPU.
         var (r, g, b, _) = picture!.At(32, 40);

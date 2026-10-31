@@ -143,18 +143,13 @@ public partial struct Player
 
         if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        // A capsule to be seen in the third person, with a visor showing which way it faces.
+        // A plain capsule to be seen in the third person, its shape the collider's and nothing on it,
+        // the view behind it saying which way it faces.
         _figure = ctx.Ecs.Spawn();
         Render.SetMesh(ctx.Ecs, _figure, Render.CreateMesh(MeshShape.Capsule, Radius, Tall - (2f * Radius)));
         Render.SetMaterial(ctx.Ecs, _figure, Render.CreateMaterial(0.9f, 0.45f, 0.15f, roughness: 0.6f));
         ctx.Ecs.Add(_figure, Transform.At(0f, Tall / 2f, 0f));
         ctx.Ecs.SetParent(_figure, player);
-
-        var visor = ctx.Ecs.Spawn();
-        Render.SetMesh(ctx.Ecs, visor, Render.CreateMesh(MeshShape.Cuboid, 0.4f, 0.14f, 0.12f));
-        Render.SetMaterial(ctx.Ecs, visor, Render.CreateMaterial(0.15f, 0.2f, 0.25f, metallic: 0.6f, roughness: 0.2f));
-        ctx.Ecs.Add(visor, Transform.At(0f, (Tall / 2f) - 0.25f, -Radius + 0.02f));
-        ctx.Ecs.SetParent(visor, _figure);
 
         Console.WriteLine("[Player] WASD walks, Space jumps, Shift sprints, C crouches, F3 and F4 step the mode, F5 the view");
     }

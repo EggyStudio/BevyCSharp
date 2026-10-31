@@ -114,7 +114,10 @@ public sealed class ModelingTests
     public void ThePrototypeColorsNameEachPartOfALevelAndAMaterialIsMadeInsideAnApp()
     {
         Assert.Equal(new[] { "floor", "wall", "ceiling", "stairs", "door", "window", "hazard" }, Modeling.PrototypeColors.Keys);
-        Assert.Equal(7, Modeling.PrototypeColors.Values.Distinct().Count());
+        // The floor and the wall one near white, read apart by the light on each, and every other
+        // part a color of its own.
+        Assert.Equal(Modeling.PrototypeColors["floor"], Modeling.PrototypeColors["wall"]);
+        Assert.Equal(6, Modeling.PrototypeColors.Values.Distinct().Count());
         Assert.Throws<InvalidOperationException>(() => Modeling.Prototype("wall"));
     }
 

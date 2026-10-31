@@ -494,20 +494,20 @@ thinner line across its middle and a fine line at each quarter, with `1m` marked
 pixels a meter with its smaller levels, repeating, and the texture coordinates of a built face are in
 meters, so the grid shows a meter on every face and runs on across faces. Its steps are a level
 editor's grid steps, so a brush snapped to a quarter, a half or a whole meter ends on a line.
-`Modeling.Prototype(name)` is the grid tinted by the color of a part of a level, in Unreal's level
-prototyping palette:
+`Modeling.Prototype(name)` is a white grid with light gray lines tinted by the color of a part of a
+level, after Unreal's level prototyping palette, its floors and walls lighter:
 
 | Name | Color |
 |---|---|
-| `floor` | A dark gray |
-| `wall` | A light gray |
-| `ceiling` | A lighter gray |
+| `floor` | Nearly white |
+| `wall` | Nearly white |
+| `ceiling` | Whiter still |
 | `stairs` | The prototyping orange, for stairs, ramps and the parts that move |
 | `door` | Green |
 | `window` | Blue |
 | `hazard` | Red |
 
-Any other name takes the grid's own gray, and `Modeling.Prototype(color)` any color. A material
+Any other name takes the grid as it is, and `Modeling.Prototype(color)` any color. A material
 slot named for a part is drawn with that part's material until it is given a look, which
 `Modeling.Materials` follows, so a room sorted into slots is drawn by color with one line a slot:
 

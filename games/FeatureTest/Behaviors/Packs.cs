@@ -39,8 +39,12 @@ public partial struct Packs
 {
     private const float Ground = Scene.GroundHeight;
 
-    /// <summary>Where a scene's origin stands, beyond the zone's start from the hub.</summary>
-    private static readonly Vec3 Site = new(70f, Ground, -70f);
+    /// <summary>
+    /// Where a scene's origin stands, beyond the zone's start from the hub, two centimeters over the
+    /// yard's floor, so a scene's ground at its origin's height lies over the level's floor rather
+    /// than in its plane, where the two would fight for the same depth and flicker as the view moves.
+    /// </summary>
+    private static readonly Vec3 Site = new(70f, Ground + 0.02f, -70f);
 
     /// <summary>Turned so the scene's +X, where Sponza's main door is, faces the hub.</summary>
     private static readonly Quat Facing = Quat.FromRotationY(-3f * MathF.PI / 4f);
