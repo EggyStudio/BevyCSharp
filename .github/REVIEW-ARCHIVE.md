@@ -2108,6 +2108,14 @@ a batch.
     line for the grid's row; and Sponza's z-fight with the yard's floor gone by standing Sponza 2 cm
     over it. One commit after the gallery court's, the drive's checks green. Done at `26763e87`.
 
+87. **The feature test's day is filled near neutral until global illumination carries it.** The
+    owner found on 2026-10-31 the white level blue in shade and the morning sun too warm, chose that
+    global illumination is fixed first and used in the feature test after the radiance cascades'
+    fix, and took the near-neutral fill shown meanwhile (Decision 74). In DayNight a warm white
+    ambient fill of 1000 by day, the Day look's saturation at a quarter of what it added, 1.4 to
+    1.1, and a mild daytime white balance, a plain pair in the hall and the yard. One commit after
+    its suite, before item 88. Done at `60638b01`, the pair 2026-10-31-item-87-fill.webp.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

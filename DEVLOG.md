@@ -27,6 +27,12 @@ with the spheres on a freestanding dark slab in one open court and on the right 
 across it, an arch north of the spheres toward the Cornell box beyond and one south toward the room
 cut by booleans.
 
+![](.github/assets/readings/2026-10-31-item-87-fill.webp)
+The light hall's aisle above and the scenes yard below at 8:00 under a partly cloudy sky over the
+white prototypes, on the left with the ambient light at 80 and the day's look at its full
+saturation, the hall's floor and the yard's shade blue, and on the right with a warm white fill of
+1000 and the look at a quarter of its saturation, balanced a little toward blue, both near white.
+
 Done that day
 
 - Item 78 at `c5d9cd20`. The README's words under the header, as given.
@@ -35,6 +41,8 @@ Done that day
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
 - Item 85 at `f4e99658`. The engine takes the Levels module as a submodule.
 - Item 86 at `26763e87`. Three asks of the afternoon in the feature test.
+- Item 87 at `60638b01`. The feature test's day is filled near neutral until global illumination
+  carries it.
 
 ## 2026-10-30
 

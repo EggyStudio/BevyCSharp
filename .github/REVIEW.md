@@ -1,68 +1,66 @@
 # Review
 
-Reviewed up to `26763e87`, item 86, pushed at 16:58 on 2026-10-31 with `63aca2f2`, item 68's gallery
-court, after the run of `f4e99658` went green at 15:52, its run green at 17:17 with the suites in 11
-to 18 minutes. The gallery court gains a wall of the level's 8.6 m high across it at x -64.2 parting
-it into two rooms, an arch 5.4 m wide framing the Cornell box and one 4 m wide opening toward the
-boolean room moved 0.6 m west, the spheres on a dark board of the gallery's, the Cornell box the
-gallery's with the reason in the Reply. Item 86 takes the player's visor away, sets the prototypes'
-floors and walls at 0.90 and ceilings at 0.95 over a grid of their own with the face 0.99 and the
-lines 0.6 and 0.82 as the owner chose from pictures, floor and wall sharing one material as
-ModelingTests and ImagesTests say, the TrenchBroom pictures rewritten, Sponza 2 cm over the yard
-floor ending the z-fight. The drive green at a peak of 3.72 GB, the suite 1,990 passed and 3 skipped
-at the 3 GB cap, the public listing unchanged. Before it `f4e99658`, item 85, pushed at 15:29, its
-run green at 15:52 with the suites in 13 to 19 minutes, the Levels module as a submodule with
-LevelSpawner the binding, recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item
-83's end, pushed at 14:08, its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on
-the engine grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second
-phase, pushed at 13:15, its run green at 13:32 with the suites in 11 to 14 minutes, the engine
-grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23
-with `d92ac690`, 83's first phase, its run green at 12:42 with the suites in 14 to 17 minutes, the
-README's line verbatim and the three grass cards in the collection, recorded under the items. Before
-it `1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the light-through test at 180
-traced frames, recorded under the item in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to
-0.6, the owner's change committed by the reviewer and pushed at 11:42, its run green at 11:59.
-Before it `785a1136`, item 82, pushed at 09:10, its run green at 09:29 with the suites in 13 to 18
-minutes, the irradiance volume's fallback mended in render/mended.rs, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30, its
-run green at 22:49 with the suites in 12 to 18 minutes, the dark blades gone, recorded under the
-item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30
-after the run of `1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes.
-The march adds an isotropic share for the light scattered more often than the four octaves follow, a
-deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud
-tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the
-lavender going with the gray, the 15:00 sun side keeping its shading and overcast and storm staying
-gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out
-of GPU memory under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher
-panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe`
-and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50`
-green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the
-last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite
-1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c`
-at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
-flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
-phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
-lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
-headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
-High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
-`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
-passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
-shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
-red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
-`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
-level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+Reviewed up to `60638b01`, item 87, pushed at 21:07 on 2026-10-31 after the run of `26763e87` went
+green at 17:17, its run green at 21:29 with the suites in 15 to 18 minutes. The feature test's day
+takes a warm white ambient fill of 1000, the Day look at a quarter of its saturation and a mild
+daytime white balance from 8 degrees of sun up, the owner's interim choice (Decision 74), a plain
+pair of the hall's aisle and the scenes yard at 8:00 under a partly cloudy sky; the suite 1,990
+passed and 3 skipped at the 3 GB cap, the drive green at a peak of 3.65 GB. The owner's own session
+hit item 88's prepass panic at 20:48 from ScreenSpaceLight in the panel, a path the mend covers too.
+Before it `26763e87`, item 86, pushed at 16:58 with `63aca2f2`, 68's gallery court, its run green at
+17:17 with the suites in 11 to 18 minutes, recorded under the items. Before it `f4e99658`, item 85,
+pushed at 15:29, its run green at 15:52 with the suites in 13 to 19 minutes, the Levels module as a
+submodule with LevelSpawner the binding, recorded under the item in REVIEW-ARCHIVE.md. Before it
+`219142e2`, item 83's end, pushed at 14:08, its run green at 14:31 with the suites in 14 to 18
+minutes, the meadow on the engine grass, recorded under the item in REVIEW-ARCHIVE.md. Before it
+`1099cb35`, 83's second phase, pushed at 13:15, its run green at 13:32 with the suites in 11 to 14
+minutes, the engine grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item
+78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at 12:42 with the suites in 14
+to 17 minutes, the README's line verbatim and the three grass cards in the collection, recorded
+under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the
+light-through test at 180 traced frames, recorded under the item in REVIEW-ARCHIVE.md. Before it
+`391d6b85`, the version to 0.6, the owner's change committed by the reviewer and pushed at 11:42,
+its run green at 11:59. Before it `785a1136`, item 82, pushed at 09:10, its run green at 09:29 with
+the suites in 13 to 18 minutes, the irradiance volume's fallback mended in render/mended.rs,
+recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at
+22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18 minutes, the dark blades
+gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend,
+pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run green at 21:30 with
+the suites in 12 to 17 minutes. The march adds an isotropic share for the light scattered more often
+than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to
+0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146,
+154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side keeping its shading and
+overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21
+BounceRoomsTests failed out of GPU memory under other sessions' apps and pass alone, 55 of 55; a
+lead, Bevy's asset watcher panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's
+mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b`
+ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests
+reads the promoted bytes of the last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB
+over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to
+`7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone,
+Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the batch's items and
+the Replies by the owner's word in the coder's session, held for Verdict 48's mend, and after it
+`3417d612`, item 68's course court (the still stations as brushes, orange where the character climbs
+and red where it cannot, a wall with two arches parting the course from the playground, the terrain
+gone for a terraced mound with the drive's check on its top, the drive green, 1,998 passed with the
+denoiser's 1080p time read as a flake under the other sessions' GPU load), the three to go together.
+`0ed9073c` is item 68's third phase's first zone, the light hall at the north corridor's end with
+arched bays off the aisle, the lights and the drive's eight bay views moved and none gone, the drive
+green, 23 level tests on the headless bridge, the suite 1,998 passed with one failure read as a
+flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its
+class, a lead if it fails again; `7e35f94b` points the tests' user directory from a module
+initializer so SaveGameTests' FixedLevel passes alone, the detail under Replies. build/version.txt
+stands changed in the tree from 0.5 to 0.6 by no session's hand, left for the owner's word. Before
+it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its run green at 14:52. Before
+it on 2026-10-26, each green but where said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and
+`d53a3108` (Verdict 47's mend, the drive's zone check, the level helpers); `1092b434` and `ce142f8a`
+(65's second phase), red at the shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend);
+`f703b3b1` (65's first phase), red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's
+quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70
+c3); `b9cd8d74` (70's far level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its
+devlog note and its own words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30
+the owner wrote the README's new words (item 78) and asked that the sessions spend fewer tokens at
+the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -311,14 +309,6 @@ from [SHARED.md](SHARED.md).
     which script rebuilds it; the README's dotnet run paragraph says so where it said it under
     building from source alone. One commit, small, after item 79.
 
-87. **The feature test's day is filled near neutral until global illumination carries it.** The
-    owner found on 2026-10-31 the white level blue in shade and the morning sun too warm, chose that
-    global illumination is fixed first and used in the feature test after the radiance cascades'
-    fix, and took the near-neutral fill shown meanwhile (Decision 74). In DayNight a warm white
-    ambient fill of 1000 by day, the Day look's saturation at a quarter of what it added, 1.4 to
-    1.1, and a mild daytime white balance, a plain pair in the hall and the yard. One commit after
-    its suite, before item 88.
-
 88. **Switching global illumination at run time no longer panics.** gi.set medium in the feature
     test panics in Bevy at queue_prepass_material_meshes, an unwrap of a missing opaque deferred
     phase, the crash report of 2026-10-31 17:18 under the feature test's logs; read at 20:18,
@@ -328,7 +318,16 @@ from [SHARED.md](SHARED.md).
     setting both reach the path, so a player can hit it. The mend gives every 3D camera with a
     prepass a DeferredPrepass while materials are deferred and takes it off after, with a test that
     switches GI with a probe's cameras alive and fails without the mend. Small, after 87 and before
-    68's meadow court. Global illumination on by default waits as Decision 74 says.
+    68's meadow court. Global illumination on by default waits as Decision 74 says. The owner's own
+    session hit the same panic at 20:48 on 2026-10-31 when ScreenSpaceLight went on from the panel,
+    a path the mend covers. Corrected on 2026-10-31 at 21:3x, the probe's face cameras hold no
+    prepass and Bevy skips them; the camera that panics is the weather's camera over the roofs in
+    Render.Precipitation.cs, orthographic at order -100 with a depth prepass made while materials
+    were forward, so it holds depth and no G-buffer when the scene camera turns deferred on. The
+    test draws depth into an image of its own through a second camera made first, then switches the
+    field and GI on mid-run, and panics on the old bridge after the forward picture; the mend gives
+    such a camera the G-buffer and drops it to one sample while it holds it, Bevy's deferred passes
+    taking a single sample, and gives its multisampling back after.
 
 ## Verdicts
 
@@ -1111,3 +1110,25 @@ on it, its peak 3.65 GB. The picture is 2026-10-31-item-87-fill.webp, the light 
 scenes yard before and after, the trials and the drive's four views in the day's dump. The whole
 suite ran with it, 1,990 passed and 3 skipped in one host at the 3 GB cap. The public listing is
 unchanged.
+
+Item 88, in the commit carrying this line. While Bevy's materials are drawn deferred, a system of
+the bridge's gives every 3D camera drawing a prepass of depth, normals or motion and no G-buffer one,
+with depth where it had none and one sample a pixel, and takes what it gave off once materials are
+forward, giving its multisampling back, a camera that asked for the G-buffer itself or reflects the
+screen keeping it. Bevy 0.20's queue_prepass_material_meshes puts a deferred material into the
+deferred phase of every camera drawing a prepass and unwraps it, and the camera that had none in the
+feature test was the weather's camera over the roofs, depth alone since it was made while materials
+were forward, not the probe's six face cameras, which draw no prepass and are passed over; feature.gi
+on and gi.set medium ended the app the frame after, as the owner's own session did at 20:48 under
+the screen-space light. A G-buffer alone was not enough for a multisampled camera, whose depth of
+four samples beside a G-buffer of one failed wgpu's validation, so such a camera draws one sample
+while it holds the G-buffer given. GlobalIlluminationTests holds a second camera drawing depth into an
+image of its own, made first, then the scene's distance field and global illumination switched on:
+on the bridge before, the run took its forward picture and panicked at prepass/mod.rs:1425 after the
+switch; on this one it draws on and lights the floor. feature.gi on and gi.set medium in the feature
+test draw on with no error logged. SetDeferredRendering's remarks say it. cargo check passes on the
+three profiles and cargo test with no feature, 118 passed. The whole suite's first run failed the
+new test alone, its lit picture black thirty frames after the switch while every material was
+prepared again under the suite's load, and it waits 180 frames, as the light-through test does; the
+whole suite then ran with it, 1,991 passed and 3 skipped in one host at the 3 GB cap. The public
+listing is unchanged.

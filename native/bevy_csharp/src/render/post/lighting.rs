@@ -40,7 +40,7 @@ pub extern "C" fn bcs_render_set_deferred(on: i32) -> i32 {
 /// Whether Bevy's own materials are drawn deferred, as last asked.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource)]
-struct Deferred(bool);
+pub struct Deferred(bool);
 
 /// Whether Bevy's materials are drawn deferred in this app, because a camera asked for the G-buffer
 /// or because Solari, which draws every material that way, is running.
@@ -76,6 +76,92 @@ pub(super) fn set_deferred(world: &mut bevy::ecs::world::World, on: bool) {
             if let Some(material) = materials.get_mut(id) {
                 material.into_inner();
             }
+        }
+    }
+}
+
+/// Marks a camera given Bevy's G-buffer, and the depth prepass it is drawn over where the camera had
+/// none, because materials are drawn deferred rather than because the camera asked for either.
+#[cfg(feature = "render")]
+#[derive(bevy::ecs::component::Component)]
+pub struct DeferredForMaterials {
+    /// Whether the depth prepass was given with the G-buffer, and goes with it.
+    depth: bool,
+    /// The multisampling the camera had, which a G-buffer cannot be drawn with, given back after.
+    msaa: bevy::render::view::Msaa,
+}
+
+/// While Bevy's materials are drawn deferred, gives every 3D camera drawing a prepass a G-buffer as
+/// well, and takes those it gave off again once materials are forward.
+///
+/// Bevy queues a deferred material into the deferred phase of every camera drawing a prepass, and
+/// unwraps that phase, so a camera with a depth, normal or motion prepass and no G-buffer ends the
+/// app the frame materials go deferred (`queue_prepass_material_meshes` in Bevy 0.20). A prepass
+/// comes from many places, temporal antialiasing, contact shadows, ambient occlusion, a shader pass
+/// reading depth, and a camera may have had one before anything turned deferred on, so asking for a
+/// prepass alone cannot keep the rule; this keeps it every frame. Such a camera draws one sample a
+/// pixel while it has the G-buffer, since Bevy's deferred passes take a single sample and a
+/// multisampled depth beside a G-buffer of one fails the GPU's validation, and its multisampling is
+/// given back after. A camera that asked for its G-buffer itself, or reflects the screen, which
+/// brings one, keeps it when materials go forward.
+#[cfg(feature = "render")]
+pub fn keep_deferred_phases(
+    mut commands: bevy::ecs::system::Commands,
+    world_deferred: Option<bevy::ecs::system::Res<Deferred>>,
+    needing: bevy::ecs::system::Query<
+        (
+            bevy::ecs::entity::Entity,
+            bevy::ecs::query::Has<bevy::core_pipeline::prepass::DepthPrepass>,
+            Option<&bevy::render::view::Msaa>,
+        ),
+        (
+            bevy::ecs::query::With<bevy::camera::Camera3d>,
+            bevy::ecs::query::Or<(
+                bevy::ecs::query::With<bevy::core_pipeline::prepass::DepthPrepass>,
+                bevy::ecs::query::With<bevy::core_pipeline::prepass::NormalPrepass>,
+                bevy::ecs::query::With<bevy::core_pipeline::prepass::MotionVectorPrepass>,
+            )>,
+            bevy::ecs::query::Without<bevy::core_pipeline::prepass::DeferredPrepass>,
+        ),
+    >,
+    given: bevy::ecs::system::Query<(
+        bevy::ecs::entity::Entity,
+        &DeferredForMaterials,
+        Option<&RequestedPrepass>,
+        bevy::ecs::query::Has<bevy::pbr::ScreenSpaceReflections>,
+    )>,
+) {
+    use bevy::core_pipeline::prepass::{DeferredPrepass, DepthPrepass};
+    use bevy::render::view::Msaa;
+
+    let deferred = world_deferred.is_some_and(|deferred| deferred.0) || crate::render::solari::running();
+
+    if deferred {
+        for (camera, has_depth, msaa) in &needing {
+            let msaa = msaa.copied().unwrap_or_default();
+            commands
+                .entity(camera)
+                .insert((DeferredPrepass, DepthPrepass, Msaa::Off, DeferredForMaterials { depth: !has_depth, msaa }));
+        }
+
+        return;
+    }
+
+    for (camera, given, asked, reflecting) in &given {
+        let mut camera = commands.entity(camera);
+        camera.remove::<DeferredForMaterials>();
+
+        // Asked for since, by the camera or by its reflections, so left where it is, and the
+        // camera left at one sample with it.
+        if asked.is_some_and(|asked| asked.0 & 8 != 0) || reflecting {
+            continue;
+        }
+
+        camera.remove::<DeferredPrepass>();
+        camera.insert(given.msaa);
+
+        if given.depth && !asked.is_some_and(|asked| asked.0 & (1 | 32) != 0) {
+            camera.remove::<DepthPrepass>();
         }
     }
 }

@@ -570,9 +570,14 @@ mod tests {
 /// defaults and every frame after it too, until something changes the value again. Comparing the
 /// two each frame costs a few floats and catches a change however it was made, so a value is in
 /// the picture from the frame it was set.
+///
+/// Keeps, too, a G-buffer on every camera drawing a prepass while materials are deferred
+/// ([`lighting::keep_deferred_phases`]), before the cameras are extracted.
 #[cfg(feature = "render")]
 pub fn install(app: &mut bevy::app::App) {
     use bevy::render::{ExtractSchedule, RenderApp};
+
+    app.add_systems(bevy::app::PostUpdate, lighting::keep_deferred_phases);
 
     let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
         return;

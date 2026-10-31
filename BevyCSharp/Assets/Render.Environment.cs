@@ -634,6 +634,10 @@ public static unsafe partial class Render
     /// writes a color, unless the program has a deferred stage
     /// (<see cref="ShaderProgramSettings.Deferred"/>), which writes the surface and is drawn only
     /// by a camera that draws deferred. Every Bevy material is prepared again when it changes.
+    /// While it is on, every 3D camera drawing a prepass of depth, normals or motion is given the
+    /// G-buffer too and drawn once a pixel, and its multisampling is given back once it is off,
+    /// since Bevy queues each deferred material into the deferred phase of every camera drawing a
+    /// prepass, and a camera with none ended the app the frame materials went deferred.
     /// </remarks>
     public static void SetDeferredRendering(bool on) =>
         Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");

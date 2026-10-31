@@ -575,6 +575,60 @@ public sealed partial class GlobalIlluminationTests
     /// +y, -y, +z and -z in turn, the light in rgb and the probe's place in alpha, once the field holds
     /// the scene's still meshes and the probes have traced for a while.
     /// </summary>
+    /// <summary>
+    /// Global illumination switched on while a second camera draws depth into an image of its own,
+    /// as the weather's camera over the roofs does, draws on and lights the floor. Switching it on
+    /// draws every material deferred, and Bevy 0.20 queues a deferred material into the deferred
+    /// phase of every camera drawing a prepass, which a camera given depth before, with no
+    /// G-buffer, lacks, so the frame after the switch ended the app, as the feature test's did under
+    /// its weather, until such a camera was given one while materials are deferred. The second
+    /// camera is multisampled, as a camera is unless set otherwise, which a G-buffer is not drawn
+    /// with.
+    /// </summary>
+    [SkippableFact]
+    public void SwitchingItOnWhileASecondCameraDrawsDepthDrawsOn()
+    {
+        Needs.Shaders();
+        var run = new PictureRun
+        {
+            Scene = ecs =>
+            {
+                PictureRun.Camera(ecs, new Vec3(0f, 2f, 6f));
+                Floor(ecs, (0.8f, 0.8f, 0.8f));
+                Block(ecs, (0.8f, 0.05f, 0.05f), new Vec3(-2.2f, 2f, 0f), new Vec3(0.4f, 4f, 8f));
+                Sun(ecs, new Vec3(4f, 6f, 1f));
+
+                // Looking down into a small image of its own before the main camera, its depth drawn
+                // first, while materials are forward.
+                var above = Render.SpawnCamera3d(new CameraSettings { Projection = CameraProjection.Orthographic, Height = 20f, Order = -100 });
+                Render.SetCameraTarget(above, Render.CreateTarget(64, 64));
+                ecs.Add(above, Transform.LookingAt(new Vec3(0f, 30f, 0f), Vec3.Zero, new Vec3(0f, 0f, -1f)));
+                Shaders.SetPrepass(above, depth: true);
+            },
+        };
+
+        // The scene's distance field and global illumination switched on together after the first
+        // picture, since the field's shadows alone draw materials deferred.
+        run.Capture("forward")
+            .Do("switching global illumination on", _ =>
+            {
+                Render.SetSceneField(2, 0.25f);
+                Render.SetGlobalIllumination(GlobalIllumination.Low);
+            })
+            // Every material is prepared again for the deferred passes, which under the suite's load
+            // left the floor undrawn thirty frames on, so the light-through test's wait.
+            .Wait(180)
+            .Capture("lit")
+            .Go();
+
+        // The floor at the bottom of the picture is drawn and lit in both.
+        foreach (var name in new[] { "forward", "lit" })
+        {
+            var (r, g, b, _) = run.Picture(name).At(48, 90);
+            Assert.True(r + g + b > 60, $"the floor reads {r} {g} {b} in the {name} picture");
+        }
+    }
+
     private static Vector4[] Probe(Action<EcsWorld> scene, int stills, params Vector3[] points) => Probe(scene, stills, points, sky: false);
 
     private static Vector4[] Probe(Action<EcsWorld> scene, int stills, Vector3 point, bool sky) => Probe(scene, stills, [point], sky);
