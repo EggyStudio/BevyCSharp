@@ -4,7 +4,7 @@
 
 # Bevy C#
 
-Write [Bevy](https://bevy.org) games in C#.
+Bevy C# [Behavior] on a struct are component & systems, generated at compile or runtime and wired straight into Bevy's ECS. Implementing Radiance Cascades. [bcs]
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4) ![Graphics](https://img.shields.io/badge/Graphics-wgpu%20%28Vulkan%2C%20DX12%2C%20Metal%29-AC162C) ![Windowing](https://img.shields.io/badge/Windowing-winit-0B7BB2) ![Shaders](https://img.shields.io/badge/Shaders-Slang-2E7D32) ![Status](https://img.shields.io/badge/Status-Early-yellow)
 

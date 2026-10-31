@@ -972,3 +972,9 @@ color the most of it, which phase 2 reads on the cards. TreeTextureKind gains Gr
 the three found as grass, 10 of 10; docs/trees.md names them. The whole suite ran, 2,000 passed, 3
 skipped and 1 failed, BarkDepthTests holding every set but leaves to a depth map, which grass goes
 without as leaves do; the test says so, and it, the texture, norm and docs tests pass, 39 of 39.
+
+Item 78, in the commit carrying this line. Under the README's header stands the owner's line as the
+item quotes it, the bracketed bcs a plain mark, in place of the line with Bevy's link. Nothing else
+reads that paragraph: FirstGameTests reads the README's first program, and build/check-docs.py
+follows its links, passing with one fewer; NormTests, FirstGameTests and DocsScriptTests pass with
+it, and the package's description keeps its own words.
