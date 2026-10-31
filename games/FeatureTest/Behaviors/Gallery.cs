@@ -9,31 +9,37 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The wall faces the road from the hub, so the player arrives in front of it. Its seven columns go
-/// from a dielectric to a metal and its five rows from polished to rough, as Bevy's <c>pbr</c>
-/// example lays them out, with a row above of red spheres under a clearcoat from polished to rough
-/// (<c>clearcoat</c>) and a row of brushed metal spheres from no anisotropy to full
-/// (<c>anisotropy</c>). Each row is named in the gizmos' stroke font beside it.
+/// The spheres stand on a dark board against the level's wall across the gallery's court
+/// (<c>levels/feature-test.map</c>), which faces the corridor from the hub, so the player arrives
+/// in front of them, and which parts the court into two rooms, an arch north of the spheres framing
+/// the Cornell box and one south of them opening toward the room cut by booleans. The spheres'
+/// seven columns go from a dielectric to a metal and their five rows from polished to rough, as
+/// Bevy's <c>pbr</c> example lays them out, with a row above of red spheres under a clearcoat from
+/// polished to rough (<c>clearcoat</c>) and a row of brushed metal spheres from no anisotropy to
+/// full (<c>anisotropy</c>). Each row is named in the gizmos' stroke font beside it.
 /// </para>
 /// <para>
-/// The Cornell box stands south of the wall, open toward the road, a white room with a red wall
-/// and a green one, a tall block and a short one, and an emissive panel under the ceiling with a
-/// point light beneath it. It is lit by the point light's shadow map, and where the program was
-/// started with ray-traced lighting (the panel's graphics page, from the next start) and the
-/// bridge and the GPU have Solari, by rays from the panel instead, the walls' colors carried onto
-/// the blocks by global illumination, the room's meshes given to the rays as they are made.
+/// The Cornell box stands west of the wall, open toward its arch, a white room with a red wall and
+/// a green one, a tall block and a short one, and an emissive panel under the ceiling with a point
+/// light beneath it. It is lit by the point light's shadow map, and where the program was started
+/// with ray-traced lighting (the panel's graphics page, from the next start) and the bridge and the
+/// GPU have Solari, by rays from the panel instead, the walls' colors carried onto the blocks by
+/// global illumination, the room's meshes given to the rays as they are made.
 /// </para>
 /// <para>
-/// North of the wall stands a row of the primitives an <see cref="EditMesh"/> is shaped from, a box,
-/// a plane, a cylinder and a cone smoothed round, a wedge, a flight of stairs and an arch, each
-/// built into its mesh by <see cref="Modeling.Meshes"/> and solid as the triangles it is drawn
-/// with, so the player climbs the stairs and walks under the arch. West of the row stands a room cut
-/// by the edit mesh's booleans, a door and a window through its front and a flight of stairs inside,
-/// each part in its prototype material, the grid a meter on every face.
+/// South of the spheres stands a row of the primitives an <see cref="EditMesh"/> is shaped from, a
+/// box, a plane, a cylinder and a cone smoothed round, a wedge, a flight of stairs and an arch,
+/// each built into its mesh by <see cref="Modeling.Meshes"/> and solid as the triangles it is drawn
+/// with, so the player climbs the stairs and walks under the arch. Past the wall's south arch
+/// stands a room cut by the edit mesh's booleans, a door and a window through its front and a
+/// flight of stairs inside, each part in its prototype material, the grid a meter on every face.
 /// </para>
 /// <para>
-/// Every sphere and block is a static body (<see cref="Blocks"/>), so the player walks round the
-/// wall and into the box rather than through them.
+/// The Cornell box is made here rather than of the level's brushes, since it shows white, red and
+/// green walls lit by one lamp and, under Solari, the light its rays carry between them, where the
+/// level is drawn in the prototyping palette and its brushes are not given to the rays. Every
+/// sphere and block is a static body (<see cref="Blocks"/>), so the player walks into the box
+/// rather than through it.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -41,7 +47,7 @@ public partial struct Gallery
 {
     private const float Ground = Scene.GroundHeight;
 
-    /// <summary>Builds the wall of spheres and the Cornell box.</summary>
+    /// <summary>Builds the wall of spheres, the Cornell box, the row of primitives and the room.</summary>
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
@@ -54,8 +60,8 @@ public partial struct Gallery
         var sphere = Render.CreateMesh(MeshShape.Sphere, 0.45f);
         Render.GenerateTangents(sphere);
 
-        // Seven columns from dielectric to metal along the wall, five rows from polished to rough
-        // up it, the wall facing east along the road from the hub.
+        // Seven columns from dielectric to metal along the level's wall, five rows from polished to
+        // rough up it, the wall facing east toward the corridor from the hub.
         for (var column = 0; column < 7; column++)
         {
             var metallic = column / 6f;
@@ -84,9 +90,11 @@ public partial struct Gallery
             });
         }
 
-        // A backing for the wall, so each sphere stands out against something matte, running on to
-        // the right as the wall is faced to hold the rows' names.
-        Blocks.Static(ecs, "Gallery wall", new Vec3(-64.2f, Ground + 4.2f, -2.4f), new Vec3(0.3f, 8.8f, 13.8f), Render.CreateMaterial(0.12f, 0.12f, 0.13f, roughness: 1f));
+
+        // A dark board on the level's wall behind the spheres, so each sphere stands out against
+        // something matte rather than a prototype's light grid, running on to the right as the wall
+        // is faced to hold the rows' names.
+        Blocks.Static(ecs, "Spheres' board", new Vec3(-64.025f, Ground + 4.25f, -2.4f), new Vec3(0.05f, 8.5f, 13.8f), Render.CreateMaterial(0.12f, 0.12f, 0.13f, roughness: 1f));
 
         Cornell(ecs);
         Models(ecs);
@@ -107,8 +115,8 @@ public partial struct Gallery
         Gizmos.Text("roughness, up", new Vec3(-63.9f, Spot(0, 2f).Y, -4.7f), facing, 0.22f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text("clearcoat, polished to rough", new Vec3(-63.9f, Spot(0, 5.3f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
         Gizmos.Text("anisotropy, none to whole", new Vec3(-63.9f, Spot(0, 6.5f).Y, -4.7f), facing, 0.2f, (-0.5f, 0f), ink, inFront: false);
-        // The row's name faces south, toward the road it is seen from, a half turn from the way a
-        // text faces unturned.
+        // The row's name faces north, toward the spheres it is seen from beside, a half turn from the
+        // way a text faces unturned.
         Gizmos.Text("an edit mesh's primitives", new Vec3(ModelsFrom + 3f * ModelsApart, Ground + 2.4f, ModelsZ), Quat.FromRotationY(MathF.PI), 0.25f, (0f, 0f), ink, inFront: false);
         Gizmos.Text(
             Render.RayTracingActive ? "Cornell box, lit by rays" : Lights.CastShadows ? "Cornell box, lit by a shadow map" : "Cornell box, lit with no shadows while meshlets run",
@@ -121,7 +129,7 @@ public partial struct Gallery
     /// </summary>
     private static Vec3 Spot(int column, float row) => new(-63.5f, Ground + 1.05f + (row * 1.05f), (3 - column) * 1.15f);
 
-    /// <summary>A white room open toward the road, a red wall and a green one, two blocks and a lamp.</summary>
+    /// <summary>A white room open east toward the wall's arch, a red wall and a green one, two blocks and a lamp.</summary>
     private static void Cornell(EcsWorld ecs)
     {
         const float Size = 5f;
@@ -165,14 +173,14 @@ public partial struct Gallery
 
     /// <summary>
     /// Where along X the first of the row of primitives stands, east of the others, the row clear
-    /// of the wall of spheres for a view along it from the road.
+    /// of the wall of spheres for a view along it from the east room.
     /// </summary>
     private const float ModelsFrom = -52f;
 
     /// <summary>How far apart the primitives stand, along X.</summary>
     private const float ModelsApart = -1.7f;
 
-    /// <summary>Where along Z the row stands, north of the wall, facing the road from the hub.</summary>
+    /// <summary>Where along Z the row stands, south of the spheres in the east room.</summary>
     private const float ModelsZ = 9f;
 
     /// <summary>
@@ -203,14 +211,18 @@ public partial struct Gallery
         }
     }
 
-    /// <summary>Where the room cut by booleans has its lowest corner, west of the row, its front facing the road.</summary>
-    private static readonly Vec3 RoomCorner = new(-70f, Ground, 12f);
+    /// <summary>
+    /// Where the room cut by booleans has its lowest corner, west of the level's wall past its south
+    /// arch, a quarter meter clear of the wall, its front facing north toward the arch's way in.
+    /// </summary>
+    private static readonly Vec3 RoomCorner = new(-70.6f, Ground, 12f);
 
     /// <summary>
     /// A room of six by five meters and three high, its walls, floor and ceiling two tenths thick, a
-    /// door and a window cut through its front, which faces the road, and a flight of stairs inside
-    /// along its west wall, each part in a slot of its own drawn in that part's prototype material,
-    /// and solid as the triangles it is drawn with, so the player walks in through the door.
+    /// door and a window cut through its front, which faces north toward the way in from the wall's
+    /// south arch, and a flight of stairs inside along its west wall, each part in a slot of its own
+    /// drawn in that part's prototype material, and solid as the triangles it is drawn with, so the
+    /// player walks in through the door.
     /// </summary>
     private static void Room(EcsWorld ecs)
     {

@@ -43,10 +43,11 @@ camera through everything, and F5 steps the view from its eyes, from behind and 
 mode. East of the hub the course tries it on ramps and stairs, a beam, a tunnel to crawl through,
 ice, a bounce pad, a pit, a moving platform, an elevator, a turning disc, a conveyor and gaps to
 jump, beside a playground of crates, a door on a hinge, a lift, a rope and a pressure plate, and a
-mound of terraces. West of the hub the render gallery holds a wall of spheres from a dielectric to a
-metal and from polished to rough, with a row under a clearcoat and a brushed row, and a Cornell box
-lit by a point light's shadow map, or by Solari's rays from the next start once the graphics page's
-ray-traced lighting is on, where the bridge and the GPU have them. North of the hub the light hall
+mound of terraces. West of the hub the render gallery holds spheres from a dielectric to a metal and
+from polished to rough, with a row under a clearcoat and a brushed row, on a wall that parts its
+court in two, and through an arch in that wall a Cornell box lit by a point light's shadow map, or
+by Solari's rays from the next start once the graphics page's ray-traced lighting is on, where the
+bridge and the GPU have them. North of the hub the light hall
 has a bay each for point lights in red, green and blue, a spot light through a cookie, a light the
 size of a panel with soft shadows, a light through slats into a fog volume, a reflection probe
 captured once, an irradiance volume made in code, clustered decals and emission for the bloom. South

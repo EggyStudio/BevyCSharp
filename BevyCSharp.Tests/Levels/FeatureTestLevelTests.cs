@@ -6,8 +6,8 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The feature test's level, its plaza, a walled court round each zone where the zone stands, the
-/// corridors that join them, the light hall, the course's stations, the playground's mound and the
-/// meadow's raised walkway, written by the generator here and held to it.
+/// corridors that join them, the light hall, the gallery's wall, the course's stations, the
+/// playground's mound and the meadow's raised walkway, written by the generator here and held to it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -69,6 +69,7 @@ public sealed class FeatureTestLevelTests
         Walkway(brushes);
         Yard(brushes);
         Hall(brushes);
+        Gallery(brushes);
         Course(brushes);
         Mound(brushes);
 
@@ -215,6 +216,17 @@ public sealed class FeatureTestLevelTests
 
         brushes.Add(Block(-Half - Wall / 2, Half + Wall / 2, Height, Height + 0.3, Back - Wall / 2, Front + Wall / 2, "proto/ceiling"));
     }
+
+    /// <summary>
+    /// The wall across the gallery court that the spheres stand against, which parts the court into
+    /// two rooms, the spheres and the edit mesh's primitives east of it, where the corridor comes in,
+    /// and the Cornell box and the room cut by booleans west of it. An arch north of the spheres
+    /// frames the box from the east room, wide and high enough that the box and its name over it
+    /// show whole through it, and one south of them opens toward the room's door. The wall is lower
+    /// than the court's, so it reads as a partition.
+    /// </summary>
+    private static void Gallery(List<LevelBrush> brushes) =>
+        brushes.AddRange(Walls((-64.2, -19.75), (-64.2, 20.75), 8.6, 0.3, (6.75, 5.4, 5.6), (27.75, 4, 4)));
 
     /// <summary>
     /// The course's stations that stand still, in three rows east of its start where the feature
@@ -406,6 +418,21 @@ public sealed class FeatureTestLevelTests
         var start = level.Entities.Single(entity => entity.ClassName == "info_player_start");
         Assert.Equal(new System.Numerics.Vector3(0f, 0.125f, 6f), new LevelPoint(0, -192, FloorTop).Meters(level.UnitsPerMeter));
         Assert.Equal(("0 -192 4", "90"), (start["origin"], start["angle"]));
+    }
+
+    [Fact]
+    public void TheGalleryWallStandsBehindTheSpheresAndOpensOnTheBoxAndTheRoom()
+    {
+        var brushes = Level.Parse(File.ReadAllText(LevelPath), LevelPath).World!.Brushes;
+
+        // Looking west from the east room two meters up, the wall stands behind the spheres, four
+        // meters on, and is open toward the Cornell box and toward the room's door, the box's arch
+        // five meters up as well, where the box's name stands over it.
+        double? West(double z, double y) => Hit(brushes, At(-60, y, z), new LevelPoint(-1, 0, 0), 8 * Units);
+        Assert.Equal(4.05 * Units, West(0, 2)!.Value, 6);
+        Assert.Null(West(-13, 2));
+        Assert.Null(West(-13, 5));
+        Assert.Null(West(8, 2));
     }
 
     [Fact]

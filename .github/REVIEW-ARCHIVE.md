@@ -2090,6 +2090,18 @@ a batch.
     view 47.7 to 36.7 ms and the entities 15,066 to 1,083, a plain pair with the numbers. Done at
     `219142e2`.
 
+85. **The engine takes the Levels module as a submodule.** After the module's item 3 lands in its
+    three parts, this engine adds the Levels repository as a git submodule under modules/ and
+    references its project, the workflows checking submodules out; BevyCSharp/Levels becomes the
+    binding, LevelSpawner (the module's Decision 6) with the entities, transforms, LevelKeys, the
+    class registry, the materials by name, Render.CreateMesh from a LevelMesh and Bepu bodies from a
+    LevelHull, a convex hull a brush in place of one mesh collider, WritePrototypePictures, the
+    console commands and FeatureTestLevelTests, the format types deleted here, docs/levels.md
+    pointing at the module, the drive's court checks green as they are. One commit, the module
+    pushed first. Then item 68's courts on it. Done at `f4e99658` on 2026-10-31, the submodule at
+    `a01b2df`, LevelSpawner the binding, the format's tests in the module's suite, the drive's
+    courts green.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

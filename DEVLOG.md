@@ -27,6 +27,7 @@ Done that day
 - Item 82 at `785a1136`. The light hall keeps its brightness as the camera turns.
 - Item 83 at `219142e2`. The grass is shaded as the trees are.
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
+- Item 85 at `f4e99658`. The engine takes the Levels module as a submodule.
 
 ## 2026-10-30
 

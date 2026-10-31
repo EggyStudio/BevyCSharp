@@ -17,7 +17,8 @@ file TrenchBroom opens (BevyCSharp/Levels/TrenchBroom in the engine's repository
 change saved there is the map the next run loads. East is the course, ramps, stairs, a beam, a
 tunnel, ice, a bounce pad, moving platforms and gaps, beside a playground of crates, doors, a lift,
 a rope and a mound of terraces. West, past an arcade of four arches, is the render gallery, spheres
-from a dielectric to a metal and from polished to rough, a Cornell box and a row of modeled shapes.
+from a dielectric to a metal and from polished to rough on a wall that parts its court in two, a row
+of modeled shapes before them and a Cornell box and a room cut by booleans through the wall's arches.
 North is the light hall, a bay for each way of lighting a scene. South, under five arches, is a
 meadow of grass and trees in the wind, with a walkway four meters up its west wall. North-east is
 the scenes zone, where the panel's Scenes page fetches Intel Sponza and stands it there. A day

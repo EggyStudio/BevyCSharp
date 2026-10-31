@@ -259,19 +259,19 @@ quiet frames.wait 120
 read -r _ hill _ < <(where)
 holds "$hill" ">" "$ground + 2.5" || fail "the player fell through the mound's top to y $hill"
 
-# The zones drawn rather than played, from the spectator camera, the gallery's wall, its row of
+# The zones drawn rather than played, from the spectator camera, the gallery's spheres, its row of
 # modeled primitives, its room cut by booleans and its box, each bay of the light hall from its
 # aisle, and the meadow. A zone that failed to build ends the program or leaves its pieces out,
 # which the first entity asked of each says.
 quiet mode spectator
 quiet frames.wait 5
 view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "${8:-40}"; shot "$1"; }
-for piece in "Gallery wall" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "quaking-aspen 70"; do
+for piece in "Clearcoat sphere 1" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "quaking-aspen 70"; do
   ./bcs command --timeout 600 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
 done
 view 5-gallery -55 4 -3 -63.5 3 -1 60
 view 5-models -57.1 2.6 0.5 -57.1 -0.6 9
-view 5-room -66.6 1.2 5 -66.8 0.3 13
+view 5-room -67.2 1.2 5 -67.4 0.3 13
 view 6-cornell -62 2.8 -13 -72 1.8 -13
 bay=7
 for z in -28 -36 -44 -52; do
