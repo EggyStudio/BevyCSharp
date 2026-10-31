@@ -13539,6 +13539,7 @@ sealed class Bevy.TreeSpecies : IEquatable<TreeSpecies>
   string? LeafSet { get; init; }
 enum Bevy.TreeTextureKind : int
   Bark = 0
+  Grass = 2
   Leaves = 1
 sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
   (AssetHandle, AssetHandle, AssetHandle) Load()

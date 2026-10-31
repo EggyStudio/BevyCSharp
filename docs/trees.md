@@ -200,7 +200,10 @@ leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf
 levels keep the share of each box a card sees past the cut, so a crown keeps its leaves as it
 stands further off, until a leaf is about a texel of the level it is drawn from. Where the
 collection has no set of the name a species gives, the bark is drawn from ridged noise in its
-`BarkColor` and the leaves from a generated atlas of its `LeafShape` in its `LeafColor`.
+`BarkColor` and the leaves from a generated atlas of its `LeafShape` in its `LeafColor`. The
+collection carries cards of grass as well, `wheat-grass`, `grass-tuft-a` and `grass-tuft-b`, of the
+kind `TreeTextureKind.Grass`, each a card of blades rooted along its bottom edge whose smaller levels
+keep the share of the whole card past the cut.
 
 A set's three images load with the samplers they are meant for, and its surface is the occlusion,
 the metallic-roughness and the diffuse transmission texture at once, as `Trees.BarkMaterial` binds

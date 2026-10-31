@@ -8,4 +8,7 @@ public enum TreeTextureKind
 
     /// <summary>An atlas of leaves with their opacity, cut out on the cards a tree's leaves are drawn on.</summary>
     Leaves,
+
+    /// <summary>A card of grass blades with their opacity, the blades' roots along its bottom edge, cut out on the cards grass is drawn on.</summary>
+    Grass,
 }

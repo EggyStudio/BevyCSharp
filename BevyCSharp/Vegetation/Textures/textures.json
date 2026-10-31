@@ -960,6 +960,198 @@
         0.0,
         0.2579
       ]
+    },
+    {
+      "name": "wheat-grass",
+      "kind": "grass",
+      "source": ".vegetation/grass/wheat-grass-clump",
+      "size": [
+        1024,
+        512
+      ],
+      "parts": [
+        {
+          "albedo": {
+            "file": "albedo.png",
+            "crop": [
+              32,
+              476,
+              980,
+              469
+            ]
+          },
+          "opacity": {
+            "file": "opacity.png",
+            "crop": [
+              32,
+              476,
+              980,
+              469
+            ]
+          },
+          "normal": {
+            "file": "normal.png",
+            "crop": [
+              32,
+              476,
+              980,
+              469
+            ]
+          },
+          "roughness": 0.6,
+          "translucency": "albedo",
+          "translucency_gain": 0.8
+        }
+      ],
+      "files": {
+        "albedo.ktx2": 536688,
+        "normal.ktx2": 141447,
+        "surface.ktx2": 103948
+      },
+      "error": {
+        "albedo.ktx2": 32.3,
+        "normal.ktx2": 42.1,
+        "surface.ktx2": 37.9
+      },
+      "color": [
+        0.5146,
+        0.5601,
+        0.2247
+      ],
+      "surface": [
+        1.0,
+        0.6237,
+        0.0,
+        0.3799
+      ]
+    },
+    {
+      "name": "grass-tuft-a",
+      "kind": "grass",
+      "source": ".vegetation/grass/clumps-a",
+      "size": [
+        512,
+        512
+      ],
+      "parts": [
+        {
+          "albedo": {
+            "file": "albedo.png",
+            "crop": [
+              16,
+              33,
+              991,
+              991
+            ]
+          },
+          "opacity": {
+            "file": "opacity.png",
+            "crop": [
+              16,
+              33,
+              991,
+              991
+            ]
+          },
+          "normal": {
+            "file": "normal.png",
+            "crop": [
+              16,
+              33,
+              991,
+              991
+            ]
+          },
+          "roughness": 0.6,
+          "translucency": "albedo",
+          "translucency_gain": 0.8
+        }
+      ],
+      "files": {
+        "albedo.ktx2": 181440,
+        "normal.ktx2": 51977,
+        "surface.ktx2": 37135
+      },
+      "error": {
+        "albedo.ktx2": 29.6,
+        "normal.ktx2": 41.6,
+        "surface.ktx2": 42.2
+      },
+      "color": [
+        0.4547,
+        0.5128,
+        0.24
+      ],
+      "surface": [
+        1.0,
+        0.6526,
+        0.0,
+        0.3211
+      ]
+    },
+    {
+      "name": "grass-tuft-b",
+      "kind": "grass",
+      "source": ".vegetation/grass/clumps-b",
+      "size": [
+        512,
+        512
+      ],
+      "parts": [
+        {
+          "albedo": {
+            "file": "albedo.png",
+            "crop": [
+              16,
+              90,
+              934,
+              934
+            ]
+          },
+          "opacity": {
+            "file": "opacity.png",
+            "crop": [
+              16,
+              90,
+              934,
+              934
+            ]
+          },
+          "normal": {
+            "file": "normal.png",
+            "crop": [
+              16,
+              90,
+              934,
+              934
+            ]
+          },
+          "roughness": 0.6,
+          "translucency": "albedo",
+          "translucency_gain": 0.8
+        }
+      ],
+      "files": {
+        "albedo.ktx2": 215421,
+        "normal.ktx2": 63611,
+        "surface.ktx2": 43457
+      },
+      "error": {
+        "albedo.ktx2": 28.9,
+        "normal.ktx2": 38.7,
+        "surface.ktx2": 39.9
+      },
+      "color": [
+        0.4485,
+        0.5105,
+        0.2371
+      ],
+      "surface": [
+        1.0,
+        0.6622,
+        0.0,
+        0.3095
+      ]
     }
   ]
 }

@@ -38,6 +38,10 @@ level's on average, so a leaf holds in the distance until its box is about a tex
 the share of the whole atlas's texels instead loses the leaves a level sooner, where a box two
 texels across is averaged with the transparent texels round it.
 
+A grass entry is a card of blades whose roots stand along its bottom edge, cut out as a leaf atlas is,
+its levels keeping the share of the whole card past one half, since its blades are one cluster rather
+than leaves apart.
+
 A source is a folder of .vegetation/, which the repository leaves out, the one the manifest names.
 An entry is imported into its folder in the collection, which the library embeds, and one the
 manifest marks waiting into waiting/, which the repository and the build leave out, so it is read
@@ -118,7 +122,7 @@ def main():
         root = arguments.out or (COLLECTION if ships(entry) else os.path.join(COLLECTION, "waiting"))
         maps = read_entry(entry, source)
         boxes = leaf_boxes(maps["albedo"]) if entry["kind"] == "leaves" else None
-        report = write_entry(maps, os.path.join(root, entry["name"]), entry["kind"], boxes)
+        report = write_entry(maps, os.path.join(root, entry["name"]), entry["kind"], boxes if boxes is not None else card_box(entry))
         if root != COLLECTION:
             list_entry(root, entry["name"], entry["kind"])
         print(f"{entry['name']}: {', '.join(f'{file} {size // 1024} KB, {error:.1f} dB' for file, (size, error) in report.items())}"
@@ -468,6 +472,15 @@ def leaf_boxes(albedo):
             for _, left, top, right, bottom in ordered]
 
 
+def card_box(entry):
+    """
+    A grass card's one box, the whole card, its blades standing on its bottom edge, so its levels
+    keep the share of its blades past one half as a leaf atlas's keep its leaves, and nothing for
+    any other kind.
+    """
+    return [[0.0, 0.0, 1.0, 1.0]] if entry["kind"] == "grass" else None
+
+
 # The levels.
 
 def write_entry(maps, folder, kind, boxes=None):
@@ -478,7 +491,7 @@ def write_entry(maps, folder, kind, boxes=None):
     os.makedirs(folder, exist_ok=True)
     report = {}
     for name, image in maps.items():
-        levels = mip_chain(image, boxes if name == "albedo" and kind == "leaves" else None)
+        levels = mip_chain(image, boxes if name == "albedo" and kind in ("leaves", "grass") else None)
         format, blocks, error = encode(name, levels)
         data = ktx2(format, levels, blocks)
         path = os.path.join(folder, f"{name}.ktx2")

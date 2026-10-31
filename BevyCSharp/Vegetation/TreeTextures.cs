@@ -3,8 +3,8 @@ using System.Text.Json;
 namespace Bevy;
 
 /// <summary>
-/// The vegetation's texture collection, the bark and leaf sets the library carries by name, which a
-/// species names for its bark and its leaves and a game may add its own to.
+/// The vegetation's texture collection, the bark, leaf and grass sets the library carries by name,
+/// which a species names for its bark and its leaves and a game may add its own to.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -121,7 +121,8 @@ public static class TreeTextures
             {
                 "bark" => TreeTextureKind.Bark,
                 "leaves" => TreeTextureKind.Leaves,
-                var other => throw new InvalidDataException($"{what} gives the set {name} the kind {other}, which is neither bark nor leaves."),
+                "grass" => TreeTextureKind.Grass,
+                var other => throw new InvalidDataException($"{what} gives the set {name} the kind {other}, which is not bark, leaves or grass."),
             };
 
             string[] files = ["albedo.ktx2", "normal.ktx2", "surface.ktx2"];

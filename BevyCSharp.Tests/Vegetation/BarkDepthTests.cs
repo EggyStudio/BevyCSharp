@@ -15,11 +15,12 @@ public sealed class BarkDepthTests(ITestOutputHelper output)
     private static readonly string Collection = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Vegetation", "Textures");
 
     [Fact]
-    public void EveryBarkCarriesItsDepthAndNoLeafSetDoes()
+    public void EveryBarkCarriesItsDepthAndNoLeafOrGrassSetDoes()
     {
         foreach (var set in TreeTextures.All.Where(set => set.Albedo.StartsWith($"{TreeTextures.Folder}/{set.Name}/", StringComparison.Ordinal)))
         {
-            if (set.Kind == TreeTextureKind.Leaves)
+            // Leaves and grass are cut-out cards, which carry no depth.
+            if (set.Kind != TreeTextureKind.Bark)
             {
                 Assert.Null(set.Depth);
                 continue;

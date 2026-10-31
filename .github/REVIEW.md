@@ -1,53 +1,53 @@
 # Review
 
-Reviewed up to `785a1136`, item 82, pushed at 09:10 on 2026-10-31 after the run of `de14e311` went
-green, its run green at 09:29 with the suites in 13 to 18 minutes. The irradiance volume's fallback
-is mended in render/mended.rs, bits 4 and 5 and Render.IrradianceFallbackMended, the comment naming
-pbr_functions.wesl 702 to 711; the light hall's floor reads 0.24 to 0.27 at every turn where it fell
-to 0.14 to 0.17 with the bay's volume in view; LightProbeTests holds the outside floor within 3%,
-the floor inside the volume dark and the mend made; the sheet remade to N 4.9 as it stands, four
-labeled frames, box A alone, the plot and a white ground; docs/sky-and-reflections.md. The suite
-1,998 passed, 3 skipped and 2 failed, GlobalIlluminationTests' light-through at 5.5 up reading High
-0.17 and Low 0.16 against 0.2 in the whole run and passing alone, item 84. It carries N 4.9 and
-Decision 69, the Shared row and DEVLOG.md. Before it `de14e311`, item 81's grass mend, pushed at
-22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18 minutes, the dark blades
-gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend,
-pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run green at 21:30 with
-the suites in 12 to 17 minutes. The march adds an isotropic share for the light scattered more often
-than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to
-0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146,
-154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side keeping its shading and
-overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21
-BounceRoomsTests failed out of GPU memory under other sessions' apps and pass alone, 55 of 55; a
-lead, Bevy's asset watcher panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's
-mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b`
-ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests
-reads the promoted bytes of the last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB
-over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to
-`7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone,
-Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the batch's items and
-the Replies by the owner's word in the coder's session, held for Verdict 48's mend, and after it
-`3417d612`, item 68's course court (the still stations as brushes, orange where the character climbs
-and red where it cannot, a wall with two arches parting the course from the playground, the terrain
-gone for a terraced mound with the drive's check on its top, the drive green, 1,998 passed with the
-denoiser's 1080p time read as a flake under the other sessions' GPU load), the three to go together.
-`0ed9073c` is item 68's third phase's first zone, the light hall at the north corridor's end with
-arched bays off the aisle, the lights and the drive's eight bay views moved and none gone, the drive
-green, 23 level tests on the headless bridge, the suite 1,998 passed with one failure read as a
-flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its
-class, a lead if it fails again; `7e35f94b` points the tests' user directory from a module
-initializer so SaveGameTests' FixedLevel passes alone, the detail under Replies. build/version.txt
-stands changed in the tree from 0.5 to 0.6 by no session's hand, left for the owner's word. Before
-it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its run green at 14:52. Before
-it on 2026-10-26, each green but where said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and
-`d53a3108` (Verdict 47's mend, the drive's zone check, the level helpers); `1092b434` and `ce142f8a`
-(65's second phase), red at the shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend);
-`f703b3b1` (65's first phase), red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's
-quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70
-c3); `b9cd8d74` (70's far level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its
-devlog note and its own words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30
-the owner wrote the README's new words (item 78) and asked that the sessions spend fewer tokens at
-the same quality, N 7.7.
+Reviewed up to `1c9b6baf`, item 84, pushed at 11:02 on 2026-10-31 after the run of `785a1136` went
+green at 09:29, its run green at 11:25 with the suites in 13 to 18 minutes. The light-through test
+waits for 180 traced frames, Looking's count 60 by default, since another session's drawing on the
+shared GPU left the light unsettled at 60; .gitignore leaves out .github/dump/ (N 4.10); the suite
+2,000 passed and 3 skipped, NormTests 18 of 18. It carries N 4.9 as rewritten, N 4.10, Decisions 69
+and 70 and DEVLOG.md. After it `391d6b85`, the version to 0.6 in build/version.txt, the owner's
+change committed by the reviewer on the owner's word and pushed at 11:42, its run green at 11:59
+with the suites in 14 to 17 minutes. Before it `785a1136`, item 82, pushed at 09:10, its run green
+at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback mended in
+render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's
+grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
+item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
+green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
+scattered more often than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of
+the light to 0.23 to 0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the
+bases from 146, 146, 154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side
+keeping its shading and overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests
+pass; the suite's 21 BounceRoomsTests failed out of GPU memory under other sessions' apps and pass
+alone, 55 of 55; a lead, Bevy's asset watcher panicking on a send as an app stops. Before it
+`1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after
+the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict
+48 settled; AppLeakTests reads the promoted bytes of the last full blocking collection as 3DEngine's
+does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared
+line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35
+on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
+batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
+mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
+the character climbs and red where it cannot, a wall with two arches parting the course from the
+playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
+green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
+load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
+moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
+with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
+reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
+directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
+Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
+the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
+run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
+`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
+helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
+47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
+Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
+d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
+stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
+from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
+asked that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -291,23 +291,10 @@ from [SHARED.md](SHARED.md).
     Cascades. [bcs]", in place of the line there; every test or check that reads the README's first
     paragraph follows, FirstGameTests among them; the bracketed bcs is a question put to the owner,
     a link to the bcs script or a plain mark, and stands as written until answered. One commit,
-    small, documents alone, before item 68's next phase commit.
-
-84. **The light-through tests read the same in the whole suite as alone.** In the whole run at
-    `785a1136` GlobalIlluminationTests' light-through at 5.5 up read High 0.17 and Low 0.16 against
-    0.2 and both pass alone, as they did at an earlier run; the half slab's floor reads 0.0303 at
-    both heights in the whole run where alone it reads 0.0329 and 0.0353, so an earlier test leaves
-    something that changes the light through, by order and not by time. A reading first, the test
-    before them found by halving the run, and what it leaves, a setting, an asset or a resource kept
-    across engines; the mend where it is small, the suite reading alike in both orders, else the
-    lead recorded here and the two tests' bounds left as they are. Small, before 83. Read at 10:17
-    on 2026-10-31, the cause the GPU's load and not the order. Each half of the 262 classes and all
-    of them run before the test read clean, the half slab 0.0329; the test alone with the feature
-    test drawing offscreen on the same GPU reads as the failing runs did, the solid slab 0.0152 and
-    0.0217 and the half 0.0300, since the three sessions share one GPU and another's suite was
-    drawing; with 180 traced frames in place of 60 under the same load all four cases read their
-    settled values. The mend gives Looking a frame count, 60 by default, the light-through test
-    asking 180 with a comment, the class 26 of 26 in 3 minutes; the commit awaited.
+    small, documents alone, between item 83's phases. Answered on 2026-10-31 at 12:13, the bracketed
+    bcs is BevyCSharp's short identifier, named from its command line, since the engine's name alone
+    is general; it stays as written, a plain mark in the text, no link. Goes at once, a commit of
+    its own.
 
 83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
     seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
@@ -509,6 +496,41 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     owner added that the sessions had captured and compared pictures without showing them, and asked
     that every picture a session reads or compares be shown in the session as it is made, none kept
     behind the scenes; N 4.10 says so.
+
+71. **Six ideas for later, thought about and not scheduled.** The owner wrote on 2026-10-31 at about
+    11:50 six things to consider in the future, a landscape tool with non-destructive stamps,
+    procedural generation, erosion, vegetation placement and texture mapping; parallax occlusion
+    mapping and tessellation for vegetation in tiers; the two engines' levels interchangeable
+    through one level-building system; Blender files used live; Unity and UnityEngine namespaces as
+    a bridge for Unity packages; and the big parts, radiance cascades, the editor, the modeling and
+    the level builder, as engine-agnostic libraries like BepuPhysics; and said they are thought
+    about, written down for the future and taken when it suits. Written as rows to consider in
+    SHARED.md, with the Valve 220 levels' own row. At 12:0x the owner added the vegetation of
+    BevyCSharp made engine-agnostic too, bridged to and used by both engines; a row of its own, the
+    species, skeleton, meshes, texture sets and placement as one managed package and each engine
+    binding the leaves' material, the wind, the impostors and the light through. Before 12:10 the
+    owner made the repositories `Modeling`, `Vegetation`, `Levels`, `Landscape` and
+    `RadianceCascades` under EggyStudio, cloned beside the engines under `Projects/Modules/`, each
+    with its license alone; they are filled when the GI items are done, the coder owning the code
+    today moving it and the other engine's coder binding the package, the reviewer writing each
+    one's REVIEW.md and NORM.md at its birth. A sixth, `Tools`, made then on the reviewer's
+    proposal, for the scripts and the shared documents' sources the repositories duplicate by hand.
+    The owner then chose git submodules over packages for the modules, since a package's upload,
+    wait, test and pack is slower to iterate; each engine takes a module as a submodule built as a
+    project, a change to a module is a commit in its repository first and the engine's commit that
+    uses it moves the submodule's pointer, the reviewer pushing the module's repository before the
+    engine's, and the workflows check submodules out. At 12:3x the owner said the modules may be
+    tried at once beside the engine's GI work (3DEngine Decision 79), the documents first, then the
+    rest as the other projects have it, then the engines taking them; each module has REVIEW.md and
+    NORM.md from the reviewer, the game's session writes the documents and the skeletons, the owning
+    sessions move the code after their current items, BevyCSharp's Vegetation after item 83 and
+    Levels after 68's phases that touch it. The reviewer's view there in short, the levels and the
+    Blender path small, the landscape tool large and the best candidate for one managed library,
+    tessellation 3DEngine's alone since Bevy's renderer has no tessellation stage, the Unity bridge
+    feasible as a script subset only, and the cascades sharing their CPU side and Slang shaders
+    while each engine keeps its GPU binding; the order when the time comes Blender, the levels with
+    the modeling library, the landscape tool, parallax and the tiers, the Unity subset last, none
+    before the engine's GI items (3DEngine Decision 75).
 
 ## Replies
 
@@ -939,3 +961,14 @@ cases. The probes and the field under load lag the frames counted, so the light-
 for 180 traced frames, Looking taking the count with 60 its default, the class passing 26 of 26 in
 three minutes. The whole suite ran with it, 2,000 passed and 3 skipped in one host at the 3 GB cap.
 .gitignore leaves out .github/dump/ (N 4.10).
+
+Item 83's first phase, the grass sets, in the commit carrying this line. build/textures.py takes a
+grass kind, a card of blades rooted along its bottom edge cut out as a leaf atlas is, its levels
+keeping the whole card's share past one half; the manifest carries wheat-grass at 1024 by 512 from
+the wheat grass clump and grass-tuft-a and grass-tuft-b at 512 square from the two clumps, each
+cropped to its blades, 763, 263 and 314 KB, the collection about 4.9 MB of its 32. The albedos read
+29 to 32 dB, as five of the six leaf atlases read 30 to 36, cut-out edges against their bled
+color the most of it, which phase 2 reads on the cards. TreeTextureKind gains Grass, the public listing that line, and TreeTexturesTests holds
+the three found as grass, 10 of 10; docs/trees.md names them. The whole suite ran, 2,000 passed, 3
+skipped and 1 failed, BarkDepthTests holding every set but leaves to a depth map, which grass goes
+without as leaves do; the test says so, and it, the texture, norm and docs tests pass, 39 of 39.

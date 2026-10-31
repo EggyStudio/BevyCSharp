@@ -2035,6 +2035,22 @@ a batch.
     against the turn and a white ground; docs/sky-and-reflections.md says so. Headless here, render
     and editor in the container, the bridge's tests passing.
 
+84. **The light-through tests read the same in the whole suite as alone.** In the whole run at
+    `785a1136` GlobalIlluminationTests' light-through at 5.5 up read High 0.17 and Low 0.16 against
+    0.2 and both pass alone, as they did at an earlier run; the half slab's floor reads 0.0303 at
+    both heights in the whole run where alone it reads 0.0329 and 0.0353, so an earlier test leaves
+    something that changes the light through, by order and not by time. A reading first, the test
+    before them found by halving the run, and what it leaves, a setting, an asset or a resource kept
+    across engines; the mend where it is small, the suite reading alike in both orders, else the
+    lead recorded here and the two tests' bounds left as they are. Small, before 83. Read at 10:17
+    on 2026-10-31, the cause the GPU's load and not the order. Each half of the 262 classes and all
+    of them run before the test read clean, the half slab 0.0329; the test alone with the feature
+    test drawing offscreen on the same GPU reads as the failing runs did, the solid slab 0.0152 and
+    0.0217 and the half 0.0300, since the three sessions share one GPU and another's suite was
+    drawing; with 180 traced frames in place of 60 under the same load all four cases read their
+    settled values. The mend gives Looking a frame count, 60 by default, the light-through test
+    asking 180 with a comment, the class 26 of 26 in 3 minutes. Done at `1c9b6baf`.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

@@ -95,6 +95,13 @@ public sealed class TreeTexturesTests
     }
 
     [Fact]
+    public void TheGrassCardsAreCarriedAsGrass()
+    {
+        foreach (var name in new[] { "wheat-grass", "grass-tuft-a", "grass-tuft-b" })
+            Assert.Equal(TreeTextureKind.Grass, TreeTextures.Find(name)?.Kind);
+    }
+
+    [Fact]
     public void ALeafSetsManifestGivesEachLeafsBoxInItsAtlas()
     {
         using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(Collection, "textures.json")));
