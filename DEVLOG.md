@@ -19,6 +19,12 @@ Sponza from outside its main door in the scenes yard as the drive takes it, on t
 the feature test's fixed place and on the right at the level's info_scene point, its door turned
 down the corridor from the plaza, the two the same to a third of a level on average.
 
+![](.github/assets/readings/2026-11-01-item-89-first-frame.webp)
+The feature test's drive at its effects view under a dusk sky with ambient occlusion on, on the left
+shot forty frames after the page switched them on, the level's walls and floor, the spheres' board
+and their clearcoat row not yet drawn while their pipelines compiled, and on the right shot once
+pipelines.wait answered, the clock held still meanwhile, the view whole.
+
 ## 2026-10-31
 
 ![](.github/assets/readings/2026-10-31-item-82-hall.webp)

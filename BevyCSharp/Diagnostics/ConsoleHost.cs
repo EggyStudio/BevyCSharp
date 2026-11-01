@@ -44,6 +44,13 @@ public static class ConsoleHost
     /// </summary>
     internal static ulong? PendingFrom { get; private set; }
 
+    /// <summary>
+    /// Whether <see cref="Pending"/> waits on something other than the game, as the renderer's
+    /// pipelines, so a clock held between commands stays still while it waits and the runner
+    /// counts <see cref="LaterFrames"/> in the frames the app draws.
+    /// </summary>
+    internal static bool PendingStill { get; private set; }
+
     /// <summary>The frame a runner gives <see cref="Pending"/> up at, counted from <paramref name="now"/> or a later frame the command named.</summary>
     internal static ulong GiveUpAt(ulong now) => Math.Max(now, PendingFrom ?? now) + LaterFrames;
 
@@ -124,6 +131,22 @@ public static class ConsoleHost
     }
 
     /// <summary>
+    /// <see cref="Later"/> for a command that waits on something other than the game, which leaves
+    /// a clock held between commands still while it waits, so the command after it finds the game
+    /// where the one before left it however long the wait took on the device.
+    /// </summary>
+    /// <remarks>
+    /// The frames still run, the clock held at its moment, and a runner gives the poll up after
+    /// <see cref="LaterFrames"/> of them, counted in the frames the app draws since the clock's own
+    /// count stands still.
+    /// </remarks>
+    internal static void LaterStill(Func<string?> poll)
+    {
+        Later(poll);
+        PendingStill = true;
+    }
+
+    /// <summary>
     /// Lends the world to commands run inside the returned scope.
     /// </summary>
     /// <example>
@@ -140,6 +163,7 @@ public static class ConsoleHost
         Held = null;
         Pending = null;
         PendingFrom = null;
+        PendingStill = false;
     }
 
     /// <summary>The loan, which ends when it is disposed.</summary>

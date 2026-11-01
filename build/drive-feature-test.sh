@@ -55,7 +55,14 @@ up() { awk -v g="$ground" -v d="$1" 'BEGIN { print g + d }'; }
 holds() { awk "BEGIN { exit !(($1) $2 ($3)) }"; }
 # Puts the player at a station's start and waits for it to settle.
 at() { quiet player.put "$1" "$2" "$3"; quiet frames.wait 20; }
-shot() { ./bcs shot "$shots/$1.png" --timeout 600 > "$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
+# A shot once every pipeline its view asked for has compiled, the clock held still while they do,
+# since what is drawn with one compiling is left out of the picture, and the effects view, taken
+# forty frames after its page switched the dusk and the occlusion on, drew the dusk with the level's
+# walls and floor and the spheres' board missing.
+shot() {
+  quiet pipelines.wait
+  ./bcs shot "$shots/$1.png" --timeout 600 > "$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"
+}
 
 trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop > /dev/null 2>&1 || true' EXIT

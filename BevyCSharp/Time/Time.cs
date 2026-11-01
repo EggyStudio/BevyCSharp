@@ -196,6 +196,12 @@ public sealed unsafe class Time
     /// whether the frames had run ahead of the machine or behind it.
     /// </para>
     /// <para>
+    /// How Bevy compiles its pipelines is settled as the app begins, so a clock set here in a
+    /// running app leaves them compiling off the main thread as before, and what comes into view
+    /// draws whole only once they have compiled, where an app begun on a set clock
+    /// (<see cref="Config.FrameSeconds"/>) compiles each in the frame that asks for it.
+    /// </para>
+    /// <para>
     /// Read from the engine when asked, and zero where there is no engine to ask.
     /// </para>
     /// </remarks>

@@ -356,24 +356,42 @@ internal static partial class ConsoleWorldCommands
 
     /// <summary>Answers once every pipeline the renderer was asked for has compiled.</summary>
     /// <remarks>
+    /// <para>
     /// What a capture of a scene waits for, rather than a number of frames, since Bevy compiles a
     /// pipeline off the main thread over a time no count of frames promises, and what is drawn with
     /// one still compiling is left out of the picture. A capture of every example taken a hundred
     /// and twenty frames in drew the transmission example black once, which the same capture taken
-    /// again did not. A run that draws nothing answers at once, having nothing to compile.
+    /// again did not, and the feature test's meadow, first seen forty frames before its shot, lost
+    /// its grass or its walls' light in ten fresh sessions of ten, its pipelines compiling five
+    /// seconds more. A run that draws nothing answers at once, having nothing to compile.
+    /// </para>
+    /// <para>
+    /// Ready for three frames running, since a pipeline is asked for as the frame that needs it is
+    /// drawn, so one frame's yes can come before a pipeline the next frame waits on. A clock held
+    /// between commands stays still while it waits (<see cref="ConsoleHost.LaterStill"/>), so the
+    /// shot after it is of the moment the command before it left, however long the device took to
+    /// compile.
+    /// </para>
     /// </remarks>
     [Command("pipelines.wait", "Answers once every pipeline asked for has compiled: pipelines.wait")]
     internal static string WaitForPipelines()
     {
         const string none = "this run draws nothing, so nothing compiles";
+        const int running = 3;
+        var ready = 0;
+        var last = 0ul;
 
-        // Not in the first three frames, when nothing has been asked for yet and none is waiting.
+        // Not in the first three frames, when nothing has been asked for yet and none is waiting,
+        // and asked once a frame, so a frame's yes is counted once.
         string? Ready()
         {
             try
             {
                 var frame = ConsoleHost.Time.FrameCount;
-                return frame >= 3 && Render.PipelinesReady() ? $"pipelines ready at frame {frame}" : null;
+                if (frame == last) return null;
+                last = frame;
+                ready = frame >= 3 && Render.PipelinesReady() ? ready + 1 : 0;
+                return ready >= running ? $"pipelines ready at frame {frame}" : null;
             }
             catch (Interop.BevyNativeException)
             {
@@ -385,7 +403,7 @@ internal static partial class ConsoleWorldCommands
         if (!App.HasRenderer) return none;
         if (Ready() is { } now) return now;
 
-        ConsoleHost.Later(Ready);
+        ConsoleHost.LaterStill(Ready);
         return "waiting for pipelines";
     }
 

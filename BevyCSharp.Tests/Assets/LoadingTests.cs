@@ -55,4 +55,59 @@ public sealed class LoadingTests
         Assert.True(readyAt >= loadedAt, "the pipelines never came ready after the scene loaded");
         Assert.Equal(AssetLoadState.Failed, missingState);
     }
+
+    /// <summary>
+    /// An app begun on a set clock draws a cube whole in the first frame that shows it, as it does
+    /// ten frames on, the cube behind the camera until then so nothing has asked for its pipelines.
+    /// </summary>
+    /// <remarks>
+    /// What a capture on a set clock rests on, the examples' captures among them, since only an app
+    /// begun on one compiles each pipeline in the frame that asks for it. The feature test given its
+    /// clock once it ran compiled off the main thread, and its meadow, first seen forty frames
+    /// before its shot, lost its grass or its walls' light in ten fresh sessions of ten. Begun on
+    /// the machine's clock, this test's first frame drew no cube.
+    /// </remarks>
+    [SkippableFact]
+    public void AnAppBegunOnASetClockDrawsWhatComesIntoViewWholeInItsFirstFrame()
+    {
+        Needs.Renderer();
+
+        var camera = Entity.None;
+        CapturedImage? first = null, later = null;
+        Capture? ticket = null;
+
+        bool Read(ref CapturedImage? picture) =>
+            Render.TryReadCapture(ticket!.Value, out picture) && picture is not null;
+
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Frames = 600,
+            Configure = config => config.FrameSeconds = 1.0 / 60.0,
+            Scene = ecs =>
+            {
+                camera = PictureRun.Camera(ecs);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 2_000f, Shadows = false });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(2f, 4f, 4f), new Vec3(0f, 0f, 12f), Vec3.UnitY));
+                PictureRun.Cube(ecs, Render.CreateMaterial(0.9f, 0.1f, 0.1f, roughness: 0.6f), at: new Vec3(0f, 0f, 12f));
+            },
+        };
+
+        run.Until("drawn", world => world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady()).Wait(5)
+            .Do("turned to the cube", world =>
+            {
+                world.Resource<EcsWorld>().Set(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), new Vec3(0f, 0f, 12f), Vec3.UnitY));
+                ticket = Render.BeginCapture();
+            })
+            .Until("the first frame", _ => Read(ref first))
+            .Wait(10)
+            .Do("later", _ => ticket = Render.BeginCapture())
+            .Until("a later frame", _ => Read(ref later))
+            .Go();
+
+        Assert.True(PictureRun.Red(later!) > 300, $"the later frame shows {PictureRun.Red(later!)} red pixels of the cube");
+        var apart = first!.Pixels.Zip(later!.Pixels, (a, b) => Math.Abs(a - b)).Average();
+        Assert.True(apart < 3, $"the first frame is {apart:0.00} levels from the later one a channel, its red pixels {PictureRun.Red(first)} against {PictureRun.Red(later)}");
+    }
 }

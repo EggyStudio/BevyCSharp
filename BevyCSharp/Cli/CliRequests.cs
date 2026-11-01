@@ -45,6 +45,12 @@ internal sealed class CliRequest(string operation, string? line, string? id)
     /// </summary>
     public Func<string?>? Poll { get; set; }
 
+    /// <summary>
+    /// Whether <see cref="Poll"/> waits on something other than the game, which leaves a clock held
+    /// between commands still, <see cref="Release"/> then counted in the frames the app draws.
+    /// </summary>
+    public bool Still { get; set; }
+
     /// <summary>Hands the answer back to whoever is waiting.</summary>
     public void Complete(string envelope) => _answer.TrySetResult(envelope);
 }
@@ -84,7 +90,8 @@ internal sealed class CliQueue
     /// <para>
     /// Where the clock is held between commands (<see cref="ClockHolds.Commands"/>), it moves in the
     /// next frame if a command's answer is still held and stands still if none is, so the clock
-    /// moves only while a command waits. A wait counts the frames the clock moved in, which then
+    /// moves only while a command waits. A command waiting on something other than the game, as
+    /// <c>pipelines.wait</c> does on the renderer, leaves it still (<see cref="CliRequest.Still"/>). A wait counts the frames the clock moved in, which then
     /// are the frames it waited through, and a command after it finds the game where the wait
     /// left it, however many frames came between the two.
     /// </para>
@@ -101,7 +108,7 @@ internal sealed class CliQueue
 
         var time = world.Resource<Time>();
         Release(world, time);
-        time.HoldStill(_held.Count == 0);
+        time.HoldStill(_held.TrueForAll(request => request.Still));
     }
 
     /// <summary>Releases each held request whose frame has come or whose answer has arrived.</summary>
@@ -127,7 +134,7 @@ internal sealed class CliQueue
                     request.Complete(CliDispatch.Release(request, frame));
                     _held.RemoveAt(index);
                 }
-                else if (clock >= request.Release)
+                else if ((request.Still ? frame : clock) >= request.Release)
                 {
                     request.Complete(CliJson.Fail(
                         request.Operation,

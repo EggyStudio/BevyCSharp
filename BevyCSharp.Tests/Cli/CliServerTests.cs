@@ -312,6 +312,48 @@ public sealed class CliServerTests : IDisposable
         static ulong Frame(JsonElement answer) => answer.GetProperty("data").GetProperty("frame").GetUInt64();
     }
 
+    /// <summary>
+    /// A command waiting on something other than the game, as <c>pipelines.wait</c> waits on the
+    /// renderer, leaves a clock held between commands still while the frames are drawn, so the
+    /// command after it finds the game where the one before left it, and a wait for the game's own
+    /// frames after it moves the clock as before.
+    /// </summary>
+    /// <remarks>
+    /// The drive's shots wait for the pipelines their view asked for, which on the working machine
+    /// took five seconds after the camera moved, and a clock moving through that wait would put each
+    /// shot at a moment of the game that hung on how fast the device compiled.
+    /// </remarks>
+    [Fact]
+    public void AWaitOnTheRendererLeavesAHeldClockStill()
+    {
+        var elapsed = new System.Collections.Concurrent.ConcurrentDictionary<ulong, double>();
+        using var app = Serving(new Config { Headless = true, HeadlessFps = 60, FrameSeconds = 0.1 });
+        app.AddSystem(Stage.Update, new SystemDescriptor(
+            world => elapsed[world.Resource<Time>().FrameCount] = world.Resource<Time>().ElapsedSeconds,
+            "Test.Clock"));
+
+        var running = Start(app);
+        var session = Ready();
+        ulong from, drawn, five;
+
+        try
+        {
+            from = Frame(Ask(session, "run", "app.hold commands"));
+            drawn = Frame(Ask(session, "run", "tests.drawn"));
+            five = Frame(Ask(session, "run", "frames.wait 5"));
+        }
+        finally
+        {
+            Stop(session, running);
+        }
+
+        Assert.True(drawn >= from + 5, $"the wait on the drawn frames answered in frame {drawn}, asked after {from}");
+        Assert.Equal(elapsed[from], elapsed[drawn], 9);
+        Assert.Equal(0.5, elapsed[five] - elapsed[drawn], 9);
+
+        static ulong Frame(JsonElement answer) => answer.GetProperty("data").GetProperty("frame").GetUInt64();
+    }
+
     // A capture's file, once the picture has come back off the GPU and been written whole.
     private static string Written(string path)
     {
@@ -639,5 +681,18 @@ public sealed class CliServerTests : IDisposable
         }
 
         Assert.Null(after);
+    }
+}
+
+/// <summary>A command that exists only for <see cref="CliServerTests.AWaitOnTheRendererLeavesAHeldClockStill"/> to call.</summary>
+internal static class RendererWaitCommands
+{
+    /// <summary>Answers once five more frames have been drawn, waiting as <c>pipelines.wait</c> does.</summary>
+    [Command("tests.drawn", "Answers once five more frames have been drawn, a held clock still meanwhile")]
+    internal static string Drawn()
+    {
+        var until = ConsoleHost.Time.FrameCount + 5;
+        ConsoleHost.LaterStill(() => ConsoleHost.Time.FrameCount >= until ? $"drawn to frame {ConsoleHost.Time.FrameCount}" : null);
+        return "waiting for five frames to be drawn";
     }
 }

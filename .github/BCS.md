@@ -141,11 +141,16 @@ request is accepted.
 asks `record.status` until the app says the file is written, however long the recording takes by
 the machine's clock, so it answers with the path or with why there is none.
 
-**A capture taken in the first moments of a session shows an empty scene**, because a material's
-render pipeline is compiled the first time something asks to be drawn with it and the renderer
-skips the mesh until it is ready. `./bcs open` returns as soon as the app answers, which is before
-that. Give a fresh session `./bcs command frames.wait 120` before believing a picture with nothing
-in it.
+**A capture taken in the first moments of a session, or of a place the camera has not shown
+before, misses what it shows**, because a material's render pipeline is compiled the first time
+something asks to be drawn with it and the renderer skips the mesh until it is ready, which over a
+scene of many materials takes seconds. `./bcs open` returns as soon as the app answers, which is
+before that. The feature test's meadow, first seen forty frames before its shot, lost its grass or
+its walls' light in ten fresh sessions of ten, the pipelines it asked for compiling for five seconds
+more. Give a fresh session or a new view `./bcs command pipelines.wait` before believing its picture,
+which answers once every pipeline asked for has compiled and leaves a clock held between commands
+still while it waits, or open the session on a set clock, which compiles each pipeline in the frame
+that asks for it.
 
 **A picture or a check that has to be the same on every device** runs on a set clock, held still
 where devices would spend different numbers of frames. `./bcs open --frame-time 0.016666 --hold
@@ -153,7 +158,11 @@ loads,commands` makes each frame a sixtieth of a second to the game, holds the c
 app loads is loading, and holds it between commands, so it moves only while one waits.
 `frames.wait`, `input.hold` and `./bcs shot <path> <frame>` count the frames the clock moved in, so
 each lands on the same moment of the game however many frames a device spent loading or between
-two commands. `app.hold` changes the holds in a running app.
+two commands. An app begun on a set clock, by `--frame-time` or the `BCS_FRAME_TIME` variable a
+script starts a program with, also compiles each pipeline in the frame that asks for it, so a frame
+draws whole whatever it shows. `app.hold` changes the holds in a running app, and `app.frametime`
+sets its clock, which leaves its pipelines compiling off the main thread, since Bevy settles how it
+compiles as the app begins.
 
 **On a machine with no display**, open the session with `--offscreen`. It installs the renderer and
 draws into an image instead of a window, so `shot` produces a real picture of the scene, panels and

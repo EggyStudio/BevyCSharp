@@ -236,7 +236,7 @@ and asks it things:
 ./bcs command input.drop 'levels/yard.scene.json;notes.txt'   # files dropped on the window, for a game to read
 ./bcs command frames.wait 5            # five frames of the clock, those a hold keeps still left out
 ./bcs command app.hold commands        # the set clock moving only while a command waits
-./bcs command pipelines.wait           # until every pipeline asked for has compiled
+./bcs command pipelines.wait           # until every pipeline asked for has compiled, a held clock still meanwhile
 ./bcs command frame.profile 240        # what a frame spends, split as .github/PERFORMANCE.md describes
 ./bcs command diagnostics              # Bevy's diagnostics store, as its log prints it
 ./bcs command state.set Mode Over      # a state moved by its enum's name, at its next transition

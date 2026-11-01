@@ -88,7 +88,10 @@ internal static partial class ConsoleWorldCommands
     /// <summary>Sets the seconds each frame advances the clock by, or lets the machine's clock run.</summary>
     /// <remarks>
     /// So a session is scripted in frames, as a test is, and <c>frames.wait 60</c> after
-    /// <c>app.frametime 0.016666</c> is a second of the game whatever the machine took.
+    /// <c>app.frametime 0.016666</c> is a second of the game whatever the machine took. The
+    /// pipelines go on compiling off the main thread, which Bevy settles as the app begins, so a
+    /// capture after the view changes waits for <c>pipelines.wait</c>, or the app begins on a set
+    /// clock (<c>bcs open --frame-time</c>), which compiles each in the frame that asks for it.
     /// </remarks>
     [Command("app.frametime", "Seconds each frame advances the clock by, or off for the machine's clock: app.frametime [seconds|off]")]
     internal static string FrameTime(string line)

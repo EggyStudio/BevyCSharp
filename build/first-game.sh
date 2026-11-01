@@ -49,6 +49,9 @@ for step in games/FirstGame/steps/*.cs; do
         case "$n" in 01 | 02 | 03) ;; *) c input.hold D 60 ;; esac
         case "$n" in 11 | 12) c state.set Mode Won ;; esac
         c frames.wait 10
+        # Once every pipeline the view asked for has compiled, since what is drawn with one
+        # compiling is left out of the picture.
+        c pipelines.wait
         ./bcs shot "$work/$n.png" --name Coins --timeout 600 >"$work/said.txt" \
             || fail "$n" "./bcs shot ended with $?, $(head -n 1 "$work/said.txt")"
         ./bcs stop --name Coins >"$work/said.txt" || fail "$n" "./bcs stop ended with $?, $(head -n 1 "$work/said.txt")"
