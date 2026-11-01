@@ -14,6 +14,11 @@ doorway below, on the left with its trees planted by the feature test and on the
 trees as entities of the level, each where it stood and turned a quarter, since an entity of a level
 with no angle faces east.
 
+![](.github/assets/readings/2026-11-01-item-68-scenes.webp)
+Sponza from outside its main door in the scenes yard as the drive takes it, on the left standing at
+the feature test's fixed place and on the right at the level's info_scene point, its door turned
+down the corridor from the plaza, the two the same to a third of a level on average.
+
 ## 2026-10-31
 
 ![](.github/assets/readings/2026-10-31-item-82-hall.webp)

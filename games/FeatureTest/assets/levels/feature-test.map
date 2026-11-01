@@ -4596,3 +4596,9 @@
 "species" "quaking-aspen"
 "seed" "777871446"
 }
+// entity 30
+{
+"classname" "info_scene"
+"origin" "2240 2240 0"
+"angle" "225"
+}

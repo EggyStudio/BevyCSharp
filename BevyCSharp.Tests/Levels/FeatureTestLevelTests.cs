@@ -7,8 +7,8 @@ namespace Bevy.Tests;
 /// <summary>
 /// The feature test's level, its plaza, a walled court round each zone where the zone stands, the
 /// corridors that join them, the light hall, the gallery's wall, the course's stations, the
-/// playground's mound and the meadow's raised walkway and trees, written by the generator here and
-/// held to it.
+/// playground's mound, the meadow's raised walkway and trees and the place in the scenes yard where a
+/// scene stands, written by the generator here and held to it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -115,7 +115,24 @@ public sealed class FeatureTestLevelTests
         level.Entities.Add(world);
         level.Entities.Add(start);
         level.Entities.AddRange(Meadow());
+        level.Entities.Add(SceneSite());
         return level;
+    }
+
+    /// <summary>
+    /// Where a scene pack stands in the scenes yard, a point of a class the engine does not know,
+    /// which the feature test's Packs finds by its class and stands the scene at, its arrow the way
+    /// the scene's front faces, Sponza's main door, down the diagonal toward the corridor's doorway
+    /// and the plaza beyond it.
+    /// </summary>
+    private static LevelEntity SceneSite()
+    {
+        var at = At(70, 0, -70);
+        var site = new LevelEntity();
+        site["classname"] = "info_scene";
+        site["origin"] = FormattableString.Invariant($"{at.X} {at.Y} {at.Z}");
+        site["angle"] = "225";
+        return site;
     }
 
     /// <summary>
@@ -507,6 +524,24 @@ public sealed class FeatureTestLevelTests
 
             Assert.All(feet.Where((_, other) => other != index), other => Assert.True(Length(other - foot) >= 1.5 * Units, $"{name} stands {Length(other - foot) / Units:0.00} m from another tree"));
         }
+    }
+
+    [Fact]
+    public void TheScenesSiteStandsOnTheYardsFloorFacingTheWayFromThePlaza()
+    {
+        var level = Level.Parse(File.ReadAllText(LevelPath), LevelPath);
+        var brushes = level.World!.Brushes;
+        var site = level.Entities.Single(entity => entity.ClassName == "info_scene");
+        Assert.Equal(("2240 2240 0", "225"), (site["origin"], site["angle"]));
+
+        // On the yard's floor with the sky over it, and from two meters up the way its arrow points,
+        // the file's yaw of 225 degrees, nothing stands before the corridor's doorway in the yard's
+        // cut corner, 38 m on, so the scene's door faces the way the player comes from the plaza.
+        var foot = At(70, 0, -70);
+        Assert.True(Hit(brushes, foot + new LevelPoint(0, 0, Units), new LevelPoint(0, 0, -1), 1.2 * Units) is { } below && below >= Units - 1, "the scenes' site stands on no floor");
+        Assert.Null(Hit(brushes, foot + new LevelPoint(0, 0, 0.2 * Units), new LevelPoint(0, 0, 1), 40 * Units));
+        var way = new LevelPoint(-Math.Sqrt(0.5), -Math.Sqrt(0.5), 0);
+        Assert.Null(Hit(brushes, At(70, 2, -70), way, 40 * Units));
     }
 
     [Fact]

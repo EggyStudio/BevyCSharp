@@ -53,8 +53,8 @@ size of a panel with soft shadows, a light through slats into a fog volume, a re
 captured once, an irradiance volume made in code, clustered decals and emission for the bloom. South
 of the hub a meadow of the engine's grass, crossed cards on the leaves' material, and a ring of
 trees sway in one wind. In the scenes zone north-east of the hub the
-panel's Scenes page fetches a scene pack and loads it, Intel Sponza first, standing with its main
-door open for the player to walk in, its heaviest meshes drawn as meshlets where the graphics page's
+panel's Scenes page fetches a scene pack and loads it, Intel Sponza first, standing at the level's
+`info_scene` point with its main door open for the player to walk in, its heaviest meshes drawn as meshlets where the graphics page's
 meshlets run from the next start, which its page switches off and on saying the frame time of each,
 the light hall's lamps then casting no shadows, since with meshlets each shadow view holds a few
 hundred megabytes of the graphics driver's memory, and `./bcs scenes fetch intel-sponza` fetches one

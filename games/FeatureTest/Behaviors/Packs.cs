@@ -19,10 +19,12 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// runs and spawning its model in the zone, and unloads it again.
 /// </para>
 /// <para>
-/// Sponza stands with its main door, at the end of its long axis, turned to the road from the hub
-/// and swung open, so the player walks in, and its floors, walls, columns and arches are mesh
-/// colliders once their meshes have loaded. Its attribution is written over the doorway while it
-/// stands, as its license asks.
+/// A scene stands where the level's <c>info_scene</c> point does (<c>levels/feature-test.map</c>),
+/// turned the way its arrow points, so a level editor moves and turns it. Sponza stands with its
+/// main door, at the end of its long axis, turned down the corridor from the hub and swung open, so
+/// the player walks in, and its floors, walls, columns and arches are mesh colliders once their
+/// meshes have loaded. Its attribution is written over the doorway while it stands, as its license
+/// asks.
 /// </para>
 /// <para>
 /// Where meshlets run (the graphics page, from the next start), the scene's heaviest meshes, of
@@ -37,17 +39,15 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 [Behavior]
 public partial struct Packs
 {
-    private const float Ground = Scene.GroundHeight;
+    /// <summary>The class of the level's point a scene stands at, its arrow the way the scene's +X faces.</summary>
+    private const string SiteClass = "info_scene";
 
     /// <summary>
-    /// Where a scene's origin stands, beyond the zone's start from the hub, two centimeters over the
-    /// yard's floor, so a scene's ground at its origin's height lies over the level's floor rather
-    /// than in its plane, where the two would fight for the same depth and flicker as the view moves.
+    /// How far over the level's point a scene's origin stands, two centimeters, so a scene's ground at
+    /// its origin's height lies over the yard's floor rather than in its plane, where the two would
+    /// fight for the same depth and flicker as the view moves.
     /// </summary>
-    private static readonly Vec3 Site = new(70f, Ground + 0.02f, -70f);
-
-    /// <summary>Turned so the scene's +X, where Sponza's main door is, faces the hub.</summary>
-    private static readonly Quat Facing = Quat.FromRotationY(-3f * MathF.PI / 4f);
+    private const float Lift = 0.02f;
 
     /// <summary>The pieces of a scene the player stands on or is stopped by, by their names.</summary>
     private static readonly Regex Solid = new("floor|wall|column|arch|stair|step|exterior", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -83,6 +83,9 @@ public partial struct Packs
     private static Entity _root = Entity.None;
     private static bool _fitted;
 
+    /// <summary>Where the scene standing stands and how it is turned.</summary>
+    private static (Vec3 At, Quat Facing) _site;
+
     /// <summary>The packs the manifests name.</summary>
     internal static IReadOnlyList<ScenePack> Known { get; private set; } = [];
 
@@ -105,6 +108,7 @@ public partial struct Packs
         _scene = AssetHandle.None;
         _root = Entity.None;
         _fitted = false;
+        _site = default;
         _asMeshlets = false;
         _onGpu = false;
         _timings = default;
@@ -196,8 +200,17 @@ public partial struct Packs
 
             if (state != AssetLoadState.Loaded) return;
 
+            if (SiteOf(ecs) is not { } site)
+            {
+                Problems[pack.Name] = $"The level has no {SiteClass} for {pack.Title} to stand at.";
+                Console.WriteLine($"[Packs] {Problems[pack.Name]}");
+                Unload(ctx);
+                return;
+            }
+
+            _site = site;
             _root = ecs.SpawnScene(_scene);
-            ecs.Add(_root, new Transform(Site, Facing, Vec3.One));
+            ecs.Add(_root, new Transform(site.At, site.Facing, Vec3.One));
             ecs.SetName(_root, pack.Title);
             Console.WriteLine($"[Packs] {pack.Title} stands in the scenes zone. {pack.Attribution}");
             return;
@@ -309,9 +322,10 @@ public partial struct Packs
         if (_shown is not { } pack || !ctx.Ecs.IsAlive(_root) || !App.HasRenderer || ctx.Res<Config>().Headless) return;
 
         // Over Sponza's main door, facing out along its axis toward the hub.
-        var outward = Facing * Vec3.UnitX;
-        var at = Site + (Facing * new Vec3(20f, 0f, 0f)) + new Vec3(0f, 4.2f, 0f);
-        var turned = Facing * Quat.FromRotationY(MathF.PI / 2f);
+        var (site, facing) = _site;
+        var outward = facing * Vec3.UnitX;
+        var at = site + (facing * new Vec3(20f, 0f, 0f)) + new Vec3(0f, 4.2f, 0f);
+        var turned = facing * Quat.FromRotationY(MathF.PI / 2f);
         Gizmos.Text(Wrap(pack.Attribution, 60), at + (outward * 0.1f), turned, 0.16f, (0f, 0f), (0.95f, 0.92f, 0.8f, 1f), inFront: false);
     }
 
@@ -330,6 +344,26 @@ public partial struct Packs
             : [new TextRow("Meshlets do not run, so the meshes are plain.")],
         .. Wrap(pack.Attribution, 44).Split('\n').Select(line => (Row)new TextRow(line)),
     ]);
+
+    /// <summary>
+    /// Where a scene stands, <see cref="Lift"/> over the level's <c>info_scene</c>, and how it is
+    /// turned, so its +X looks the way the point's arrow does, or nothing where the level has none.
+    /// </summary>
+    /// <remarks>
+    /// A point of a level faces along its minus Z, so the scene is turned a quarter more about Y,
+    /// which carries its +X onto the point's minus Z.
+    /// </remarks>
+    private static (Vec3 At, Quat Facing)? SiteOf(EcsWorld ecs)
+    {
+        foreach (var row in ecs.Query<LevelKeys>(markChanged: false))
+        {
+            if (row.Component.ClassName.Value != SiteClass) continue;
+            var placed = ecs.GetOrDefault<GlobalTransform>(row.Entity);
+            return (placed.Translation + new Vec3(0f, Lift, 0f), placed.Rotation * Quat.FromRotationY(MathF.PI / 2f));
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Opens Sponza's main door and makes its solid pieces mesh colliders, once the scene's entities
