@@ -97,10 +97,10 @@ test's hub at 15:00 under an overcast, read from the passes the feature test's `
 
 | part | GPU time |
 |---|---:|
-| The clouds marched at `Medium`, their draw and their shadow on the sun | 0.45 ms |
-| The clouds laid over the sky the scene is lit by | 0.18 ms |
-| The fog in froxels at `Medium` | 0.18 ms |
-| Rain or snow at `Medium` | 0.05 ms |
+| The clouds marched at `Medium`, their draw and their shadow on the sun | 0.27 ms |
+| The clouds laid over the sky the scene is lit by | 0.29 ms |
+| The fog in froxels at `Medium` | 0.38 ms |
+| Rain or snow at `Medium` | 0.04 ms |
 | A bolt of lightning while it flashes | 0.02 ms |
 
 ```bash

@@ -1,14 +1,16 @@
 # Review
 
-Reviewed up to `5fb59903`, item 90's first commit, pushed at 17:57 on 2026-11-01 after 3ee62451's
-green run, its run green at 18:16 on the three systems in about 16 minutes; the clouds', the froxel
-fog's and the precipitation's kernels choosing their light in each entry before any thread branches,
-since llvmpipe faults on the transmittance lookup after a group's threads have parted,
-KernelLightTests reading the kernels for it, 1,996 passing at the 3 GB cap; it keeps the form and
-carries the review's files. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
-`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
-in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
-their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+Reviewed up to `58265110`, item 90's second commit and its end, pushed at 23:03 on 2026-11-01, its
+run green at 23:22 on the three systems in about 15 minutes; the pack run started from it at 23:22
+with publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item
+90's limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against
+the workflow's 26.2.4, Verdict 49, the rest awaited. Before it `5fb59903`, item 90's first commit,
+pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing their light
+before any thread branches since llvmpipe faults on the transmittance lookup after a group's threads
+have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the
+run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
+`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
+ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
 while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
 game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
@@ -385,7 +387,18 @@ from [SHARED.md](SHARED.md).
     weather off, 40 frames against 5, the gallery and hall views 0.02 to 0.08 levels apart where
     run-to-run noise is 0.3 to 0.5, the meadow 0.49 by its trees' sway, the effects view keeping its
     60 since it streaks at 5, the mode banner waited out once after mode spectator; rain and snow on
-    llvmpipe against the GPU 0.9 and 7.4 levels apart by where the flakes fall.
+    llvmpipe against the GPU 0.9 and 7.4 levels apart by where the flakes fall. Done at `58265110`
+    on 2026-11-01, read at 23:03, its push after 5fb59903's green run; the drive in the runner's
+    setting 6,290 s with the weather off, about 71 minutes on the runner and 75 with the steps
+    before, rain and snow drawn without a crash, the drive job's limit 100 with its reason; the soak
+    in a job of its own, feature-test-soak with a limit of 40, passing cold in a container read as
+    the runner's 15.6 GiB, 1,720 s with 555 to answer and compile and six rounds of 194 at 4.14 then
+    3.96 GB, after three mends a cold start needed, soak.sh and the drive waiting 600 s for a first
+    answer while lavapipe compiles, the feature test given the drive's 8 GiB cap where its default
+    quarter of the runtime's reading held it back, and pipelines.wait run before the first round so
+    compiles do not read as growth; the GPU pair as read, the effects view keeping its 60; the
+    reading 2026-11-01-item-90-rain-snow.webp; 1,996 in the suite. Then 68's phase 4, the stale
+    figures measured on the old open map retaken on the GPU with the drive's views.
 
 91. **The sky's clock, weather and looks move to the Sky module.** SkyClock, WeatherState and
     LookCycle, which reference no engine, move as they are with their tests to `Modules/Sky` as the
@@ -400,7 +413,7 @@ from [SHARED.md](SHARED.md).
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`.
+43 mended at `42abf357`. Verdict 49 is open.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -427,6 +440,16 @@ Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md
     first publish, under N 3.5. One commit, small, with the coder's next batch. Mended at `42abf357`
     on 2026-10-23, the version and BUILDING.md's sentence; settles when a pack run's defaults step
     passes.
+
+49. **The pack run's Fedora captures fail on Mesa 26.2.5 where the workflow names 26.2.4.** Read at
+    00:13 on 2026-11-02 in the pack run started from `58265110` at 23:22, the first since
+    2026-10-21, the captures-fedora job red at its step capturing the six in Fedora 44, the guard's
+    own message saying Fedora 44's Mesa is 26.2.5 where the workflow names 26.2.4, on which the
+    examples' pictures captured there were measured, and asking that they be taken again on 26.2.5
+    and the version named in the workflow; the native, build and storm jobs green, the drive, the
+    soak, the games and the four captures still running at the reading. The mend is the six pictures
+    taken again in Fedora 44 on Mesa 26.2.5, read against the old within the bar the guard keeps and
+    the version named in the workflow, one commit; settled by the next pack run's Fedora job green.
 
 ## Decisions
 
@@ -1357,3 +1380,34 @@ free, the factor of 1.48 measured the same way. The picture is 2026-11-01-item-9
 the GPU's pair beside lavapipe's, the views at 5 and 40 frames, the effects view and the banners in
 the day's dump. The whole suite ran with it, 1,996 passed, 0 failed and 3 skipped in 42 m 24 s at
 the 3 GB cap, and NormTests passed, 18. The public listing is unchanged.
+
+Decision 68's fourth phase, in the commit carrying this line. The drive ran whole on the GPU at
+58265110, 244 s, and every view it takes of the walled map went to the owner in one sheet, the
+drive's captures being its own and kept nowhere in the tree. A sweep of the README, the guide,
+BUILDING.md, CHEATSHEET.md and the feature test's README found the map said as it stands, each zone
+where Zones and the level put it; what was stale had been measured or pictured on the open map, and
+is taken again here on the GPU. The denoiser's readings (build/denoiser-readings.py, 256 frames a
+view) give a filtered frame 1.3 to 6.4 levels of 255 from the mean where a grainy one lies 8.9 to
+18.0, the teleports opening on courts and the gallery's on the spheres close up, the filtered
+frame's distance there on their rims and reflections; after the strafe the uncovered surfaces lie 18
+to 20 levels from their mean where a grainy frame's lie 38. The guide gives those figures without
+its words that the strafe leaves no trail, since the stopped frames show the back wall's light over
+the strip where the mean shows the tall block's uncovered side. denoiser.webp is taken again from
+the readings' kept frames and scene-field.webp in the gallery court, its slice in the second cascade
+showing the court's walls round the Cornell box and the spheres, which the guide's sentence names.
+The weather's passes at the hub at 15:00 under an overcast read the clouds and their shadow on the
+sun 0.27 ms where the open hub read 0.45, the clouds laid over the sky 0.29 with their copy and
+merge, the froxel fog 0.38 with its integration and the precipitation's compute 0.04; the bolt's
+0.02 stays, as a draw in the view reads no GPU time in the feature test and a bolt's cost is not the
+map's. The RTAO's ray scene holds the hidden ground's plane, the cube and the lamp, the level's
+walls left out of it, which the guide says, its paint at the hub darkening the capsule and the
+walls' feet and leaving the floor along the walls white. Playground's Build and Zones' remarks lose
+the terrain and the empty field. Two leads, for an item if wanted. The Cornell box's lamp shows a
+gray face under rays in a grainy frame, in their mean and in the denoiser's frame, where on
+2026-10-24 it was white, its Emissive alpha of 1 having become Bevy's emissive exposure weight at
+36d783bf that afternoon. And the denoiser's frame brightens the ceiling round the lamp about 24
+levels over the mean, which with the lamp is about 1.3 of the Cornell view's 6.4, the view 5.0 below
+it. The picture is 2026-11-01-item-68-scene-field.webp, the drive's sheet, the denoiser's pair, the
+lamp and the hub's occlusion in the day's dump. The whole suite ran with it, 1,996 passed, 0 failed
+and 3 skipped in 44 m 17 s at the 3 GB cap, and NormTests passed, 18. The public listing is
+unchanged.

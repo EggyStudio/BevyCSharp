@@ -38,6 +38,12 @@ Medium for thirty frames each after a course run without it, so the clouds', the
 precipitation's kernels run on the device that ended the program in them before their light was
 chosen first.
 
+![](.github/assets/readings/2026-11-01-item-68-scene-field.webp)
+The scene field's window at the feature test's gallery seen from above in its second cascade, on the
+left over the open map on 2026-10-23, the board of spheres standing free on the checkered ground,
+and on the right in the walled gallery court, the Cornell box at the slice's top, the spheres' wall
+below it and the court's walls round them.
+
 Done that day
 
 - Item 89 at `3ee62451`. A fresh offscreen session's first frame is whole.

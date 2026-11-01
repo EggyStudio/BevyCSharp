@@ -22,9 +22,7 @@ public readonly record struct Zone(string Name, Vec3 Center, Vec3 Eye, Vec3 Star
 /// <para>
 /// The hub is the middle of the map, where the program starts, and each zone lies along a corridor
 /// out of it, the course to the east, the render gallery to the west, the lights to the north, the
-/// vegetation to the south and the scenes to the north-east. A zone is filled by the batch that
-/// writes it, so a signpost may point at an empty field for a while, its name saying what the
-/// field will hold.
+/// vegetation to the south and the scenes to the north-east.
 /// </para>
 /// <para>
 /// Each signpost is a post and a board turned to face the hub, with the zone's name written on the

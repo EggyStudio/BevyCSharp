@@ -36,7 +36,7 @@ public partial struct Playground
     private static AssetHandle _unlit;
     private static bool _shining;
 
-    /// <summary>Builds the playground and the terrain.</summary>
+    /// <summary>Builds the playground's crates, balls, door, lift, rope and plate.</summary>
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {

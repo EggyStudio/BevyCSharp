@@ -37,10 +37,10 @@ which the bridge does not build. It is spatiotemporal variance-guided filtering.
 to the pixel's history where the surface there is the same one, and what noise is left is filtered
 in five passes that stop at edges, what the surface sends back by its color and its shine taken off
 first and put back after, so a texture stays sharp. A still view is clean within a few frames. At
-each of the feature test's views a filtered frame lies 0.9 to 4.9 levels of 255 from the mean of 256
-grainy frames, where a grainy frame lies 5.8 to 14.4, and a camera strafing past a pillar at six
-meters a second leaves no trail, the surfaces it uncovers 14 levels from their mean where a grainy
-frame's are 31 (`python3 build/denoiser-readings.py`, on an RTX 4070 Laptop GPU). On that GPU it
+each of the feature test's views a filtered frame lies 1.3 to 6.4 levels of 255 from the mean of 256
+grainy frames, where a grainy frame lies 8.9 to 18.0, and after a camera strafes past a pillar at
+six meters a second the surfaces it uncovers lie 18 to 20 levels from their mean where a grainy
+frame's lie 38 (`python3 build/denoiser-readings.py`, on an RTX 4070 Laptop GPU). On that GPU it
 takes two thirds of what the lighting does, 1.9 ms at 1920 by 1080 in Bevy's own Solari scene
 (`./bcs command render.timings` after `./bcs open --example solari --offscreen --size 1920x1080`),
 and 2.5 ms where every pixel is filtered, which `TheDenoiserKeepsToItsBudgetAt1080p` holds within
@@ -194,11 +194,11 @@ rays, and on a backend other than Vulkan the SPIR-V is translated by naga, which
 compute and not ray queries.
 
 The feature test carries ray-traced ambient occlusion built this way, with no Solari. A plane, a box
-and a sphere stand in for its ground, cube and lamp in a ray scene, a compute shader traces four
-short rays from every surface on screen (`games/FeatureTest/assets/shaders/rtao.slang`), and the
-answer is written into the occlusion Bevy's own lighting reads. Its panel's graphics page turns it
-on, and `./bcs command feature.rtao show` on a running one paints the occlusion in place of the
-picture.
+and a sphere stand in for its hub's floor, cube and lamp in a ray scene, the level's walls left out
+of it, a compute shader traces four short rays from every surface on screen
+(`games/FeatureTest/assets/shaders/rtao.slang`), and the answer is written into the occlusion Bevy's
+own lighting reads. Its panel's graphics page turns it on, and `./bcs command feature.rtao show` on
+a running one paints the occlusion in place of the picture.
 
 ### The scene's distance field
 
@@ -268,8 +268,8 @@ in a window of its own, with its settings, the contact shadows, a slice across X
 through the eye or a chosen cell, and what `gi.state` says. In the slice a point inside a mesh is
 red, its surface black, and the open space gray in bands a cell apart, so a wall, a gap the field
 closes and a mesh left out all show. The feature test's debug page turns it on, here at its gallery
-seen from above in the second cascade, the Cornell box at the top and the wall of spheres beside
-it:
+seen from above in the second cascade, the Cornell box at the top, the wall of spheres below it and
+the court's walls round them:
 
 ![The scene field's window at the feature test's gallery](../.github/assets/scene-field.webp)
 
