@@ -158,6 +158,15 @@ public static partial class Trees
         ArgumentOutOfRangeException.ThrowIfNegative(count);
         if (Species(species) is null) throw new ArgumentException($"No species is registered as {species}, of {string.Join(", ", SpeciesNames)}.", nameof(species));
 
+        return [.. ForestPlaces(seed, middle, radius, count).Select(tree => Plant(ecs, species, tree.Seed, tree.Place))];
+    }
+
+    /// <summary>
+    /// Where the trees of a forest stand and the seed of each, as <see cref="PlantForest"/> plants
+    /// them, so a level written in code places the same forest as its trees one by one.
+    /// </summary>
+    internal static IReadOnlyList<(Vec3 Place, uint Seed)> ForestPlaces(uint seed, Vec3 middle, float radius, int count)
+    {
         var random = new Pcg((ulong)seed);
         var apart = 0.7f * MathF.Sqrt(MathF.PI * radius * radius / MathF.Max(count, 1));
         var places = new List<Vec3>();
@@ -169,7 +178,7 @@ public static partial class Trees
             if (places.All(other => (other - place).LengthSquared >= apart * apart)) places.Add(place);
         }
 
-        return [.. places.Select(place => Plant(ecs, species, random.Next(), place))];
+        return [.. places.Select(place => (place, random.Next()))];
     }
 
     /// <summary>

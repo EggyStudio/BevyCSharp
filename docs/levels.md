@@ -92,7 +92,8 @@ LevelSpawner.Register("light", (ecs, entity, source) =>
 ```
 
 The engine registers `tree`, a tree of the `species` key's name and the `seed` key's seed, which
-the library grows and dresses as any planted tree.
+the library grows and dresses as any planted tree. Where it has no `targetname` it is named by the
+two, as `quaking-aspen 70`, as `Trees.Plant` names a tree.
 
 ## Building a level in code
 

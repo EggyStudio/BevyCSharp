@@ -4400,3 +4400,199 @@
 "origin" "0 -192 4"
 "angle" "90"
 }
+// entity 2
+{
+"classname" "tree"
+"origin" "173 -2869 0"
+"species" "quaking-aspen"
+"seed" "70"
+}
+// entity 3
+{
+"classname" "tree"
+"origin" "453 -2665 0"
+"species" "california-black-oak"
+"seed" "71"
+}
+// entity 4
+{
+"classname" "tree"
+"origin" "560 -2336 0"
+"species" "quaking-aspen"
+"seed" "72"
+}
+// entity 5
+{
+"classname" "tree"
+"origin" "453 -2007 0"
+"species" "california-black-oak"
+"seed" "73"
+}
+// entity 6
+{
+"classname" "tree"
+"origin" "173 -1803 0"
+"species" "quaking-aspen"
+"seed" "74"
+}
+// entity 7
+{
+"classname" "tree"
+"origin" "-173 -1803 0"
+"species" "california-black-oak"
+"seed" "75"
+}
+// entity 8
+{
+"classname" "tree"
+"origin" "-453 -2007 0"
+"species" "quaking-aspen"
+"seed" "76"
+}
+// entity 9
+{
+"classname" "tree"
+"origin" "-560 -2336 0"
+"species" "california-black-oak"
+"seed" "77"
+}
+// entity 10
+{
+"classname" "tree"
+"origin" "-453 -2665 0"
+"species" "quaking-aspen"
+"seed" "78"
+}
+// entity 11
+{
+"classname" "tree"
+"origin" "-173 -2869 0"
+"species" "california-black-oak"
+"seed" "79"
+}
+// entity 12
+{
+"classname" "tree"
+"origin" "-192 -2496 0"
+"species" "bush"
+"seed" "81"
+}
+// entity 13
+{
+"classname" "tree"
+"origin" "224 -2240 0"
+"species" "bush"
+"seed" "82"
+}
+// entity 14
+{
+"classname" "tree"
+"origin" "64 -2688 0"
+"species" "fern"
+"seed" "83"
+}
+// entity 15
+{
+"classname" "tree"
+"origin" "-408 -3504 0"
+"species" "black-tupelo"
+"seed" "4227606840"
+}
+// entity 16
+{
+"classname" "tree"
+"origin" "-164 -3153 0"
+"species" "black-tupelo"
+"seed" "3706974298"
+}
+// entity 17
+{
+"classname" "tree"
+"origin" "-219 -3513 0"
+"species" "black-tupelo"
+"seed" "3716167305"
+}
+// entity 18
+{
+"classname" "tree"
+"origin" "-512 -3311 0"
+"species" "black-tupelo"
+"seed" "2824281345"
+}
+// entity 19
+{
+"classname" "tree"
+"origin" "-658 -3470 0"
+"species" "black-tupelo"
+"seed" "1978732392"
+}
+// entity 20
+{
+"classname" "tree"
+"origin" "-283 -3337 0"
+"species" "black-tupelo"
+"seed" "657897248"
+}
+// entity 21
+{
+"classname" "tree"
+"origin" "391 -3571 0"
+"species" "quaking-aspen"
+"seed" "4050595095"
+}
+// entity 22
+{
+"classname" "tree"
+"origin" "431 -3193 0"
+"species" "quaking-aspen"
+"seed" "2829516764"
+}
+// entity 23
+{
+"classname" "tree"
+"origin" "313 -3383 0"
+"species" "quaking-aspen"
+"seed" "811683935"
+}
+// entity 24
+{
+"classname" "tree"
+"origin" "642 -3369 0"
+"species" "quaking-aspen"
+"seed" "379558142"
+}
+// entity 25
+{
+"classname" "tree"
+"origin" "140 -3232 0"
+"species" "quaking-aspen"
+"seed" "508809163"
+}
+// entity 26
+{
+"classname" "tree"
+"origin" "527 -3478 0"
+"species" "quaking-aspen"
+"seed" "3509515852"
+}
+// entity 27
+{
+"classname" "tree"
+"origin" "302 -3237 0"
+"species" "quaking-aspen"
+"seed" "858278428"
+}
+// entity 28
+{
+"classname" "tree"
+"origin" "257 -3619 0"
+"species" "quaking-aspen"
+"seed" "2138211042"
+}
+// entity 29
+{
+"classname" "tree"
+"origin" "129 -3528 0"
+"species" "quaking-aspen"
+"seed" "777871446"
+}

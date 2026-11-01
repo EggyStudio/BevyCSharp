@@ -6,6 +6,14 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-01
+
+![](.github/assets/readings/2026-11-01-item-68-meadow.webp)
+The meadow court at 11:00 under a clear sky from its walkway's north end above and from its north
+doorway below, on the left with its trees planted by the feature test and on the right with the same
+trees as entities of the level, each where it stood and turned a quarter, since an entity of a level
+with no angle faces east.
+
 ## 2026-10-31
 
 ![](.github/assets/readings/2026-10-31-item-82-hall.webp)
@@ -43,6 +51,7 @@ Done that day
 - Item 86 at `26763e87`. Three asks of the afternoon in the feature test.
 - Item 87 at `60638b01`. The feature test's day is filled near neutral until global illumination
   carries it.
+- Item 88 at `11efeefe`. Switching global illumination at run time no longer panics.
 
 ## 2026-10-30
 

@@ -104,7 +104,7 @@ public sealed class LevelTests
 
         harness.Run();
 
-        Assert.Equal([("worldspawn", "worldspawn", ""), ("info_player_start", "info_player_start", ""), ("door", "func_door", "door"), ("tree", "tree", "")], children);
+        Assert.Equal([("worldspawn", "worldspawn", ""), ("info_player_start", "info_player_start", ""), ("door", "func_door", "door"), ("black-tupelo 3", "tree", "")], children);
         Assert.Equal(App.HasRenderer ? 2 : 0, worldParts);
 
         // The start two meters along minus X and three quarters of a meter up, its forward, minus Z,

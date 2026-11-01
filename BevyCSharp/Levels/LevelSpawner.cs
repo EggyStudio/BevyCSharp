@@ -74,7 +74,11 @@ public static class LevelSpawner
     /// </summary>
     /// <param name="className">The class, as <c>info_player_start</c>, replacing one registered before.</param>
     /// <param name="spawn">What makes the entity what the class is, from the world, the entity and the level's entity.</param>
-    /// <remarks>The engine registers <c>tree</c>, a tree of the <c>species</c> key's name and the <c>seed</c> key's seed (<see cref="Tree"/>).</remarks>
+    /// <remarks>
+    /// The engine registers <c>tree</c>, a tree of the <c>species</c> key's name and the <c>seed</c>
+    /// key's seed (<see cref="Tree"/>), named by the two as a planted tree is where it has no
+    /// <c>targetname</c>.
+    /// </remarks>
     public static void Register(string className, Action<EcsWorld, Entity, LevelEntity> spawn)
     {
         ArgumentException.ThrowIfNullOrEmpty(className);
@@ -343,11 +347,17 @@ public static class LevelSpawner
         public (double Width, double Height)? PictureSize(string material) => Picture(material) is { } picture ? (picture.Width, picture.Height) : null;
     }
 
-    /// <summary>A tree of the <c>species</c> key's name and the <c>seed</c> key's seed.</summary>
+    /// <summary>
+    /// A tree of the <c>species</c> key's name and the <c>seed</c> key's seed, named by the two as
+    /// <see cref="Trees.Plant"/> names a tree where it has no <c>targetname</c>, so a level's trees
+    /// are told apart by name as planted ones are.
+    /// </summary>
     private static void PlantTree(EcsWorld ecs, Entity entity, LevelEntity source)
     {
         var seed = source["seed"] is { } said ? uint.TryParse(said, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) ? parsed : throw new FormatException($"A tree's seed is {said}, where a whole number is meant.") : 0u;
-        ecs.Add(entity, new Tree { Species = source["species"] ?? "", Seed = seed });
+        var species = source["species"] ?? "";
+        ecs.Add(entity, new Tree { Species = species, Seed = seed });
+        if (string.IsNullOrEmpty(source["targetname"])) ecs.SetName(entity, $"{species} {seed}");
     }
 
     private static LevelPoint Point(string text, string key, int index)

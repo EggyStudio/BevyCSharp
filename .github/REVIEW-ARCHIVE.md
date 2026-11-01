@@ -2116,6 +2116,27 @@ a batch.
     1.1, and a mild daytime white balance, a plain pair in the hall and the yard. One commit after
     its suite, before item 88. Done at `60638b01`, the pair 2026-10-31-item-87-fill.webp.
 
+88. **Switching global illumination at run time no longer panics.** gi.set medium in the feature
+    test panics in Bevy at queue_prepass_material_meshes, an unwrap of a missing opaque deferred
+    phase, the crash report of 2026-10-31 17:18 under the feature test's logs; read at 20:18,
+    post/lighting.rs's set_deferred(true) turns every StandardMaterial deferred app-wide, and a
+    camera with a prepass but no DeferredPrepass, the light hall's live reflection probe's six face
+    cameras among them, has no deferred phase to queue into; the panel's GI and its Reflections
+    setting both reach the path, so a player can hit it. The mend gives every 3D camera with a
+    prepass a DeferredPrepass while materials are deferred and takes it off after, with a test that
+    switches GI with a probe's cameras alive and fails without the mend. Small, after 87 and before
+    68's meadow court. Global illumination on by default waits as Decision 74 says. The owner's own
+    session hit the same panic at 20:48 on 2026-10-31 when ScreenSpaceLight went on from the panel,
+    a path the mend covers. Corrected on 2026-10-31 at 21:3x, the probe's face cameras hold no
+    prepass and Bevy skips them; the camera that panics is the weather's camera over the roofs in
+    Render.Precipitation.cs, orthographic at order -100 with a depth prepass made while materials
+    were forward, so it holds depth and no G-buffer when the scene camera turns deferred on. The
+    test draws depth into an image of its own through a second camera made first, then switches the
+    field and GI on mid-run, and panics on the old bridge after the forward picture; the mend gives
+    such a camera the G-buffer and drops it to one sample while it holds it, Bevy's deferred passes
+    taking a single sample, and gives its multisampling back after. Done at `11efeefe`, the mend and
+    its test as the head records.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

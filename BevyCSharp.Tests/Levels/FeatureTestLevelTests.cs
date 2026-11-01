@@ -7,7 +7,8 @@ namespace Bevy.Tests;
 /// <summary>
 /// The feature test's level, its plaza, a walled court round each zone where the zone stands, the
 /// corridors that join them, the light hall, the gallery's wall, the course's stations, the
-/// playground's mound and the meadow's raised walkway, written by the generator here and held to it.
+/// playground's mound and the meadow's raised walkway and trees, written by the generator here and
+/// held to it.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -113,7 +114,46 @@ public sealed class FeatureTestLevelTests
         var level = new Level();
         level.Entities.Add(world);
         level.Entities.Add(start);
+        level.Entities.AddRange(Meadow());
         return level;
+    }
+
+    /// <summary>
+    /// The meadow's trees, aspens and oaks by turns in a ring round its grass, two bushes and a fern
+    /// in it and a forest of tupelos and one of aspens behind it to the south, each a tree of the
+    /// engine's class standing at its trunk's foot with its species and its seed, the forests spread
+    /// as <see cref="Trees.PlantForest"/> spreads them. The grass and the soil under it stay the
+    /// feature test's own, since the engine draws grass over a place rather than from a class.
+    /// </summary>
+    private static IEnumerable<LevelEntity> Meadow()
+    {
+        const double X = 0, Z = 73, Ring = 17.5;
+        var trees = new List<(string Species, uint Seed, double X, double Z)>();
+        for (var k = 0; k < 10; k++)
+        {
+            var angle = (k + 0.5) / 10 * Math.Tau;
+            trees.Add((k % 2 == 0 ? "quaking-aspen" : "california-black-oak", (uint)(70 + k), X + (Math.Sin(angle) * Ring), Z + (Math.Cos(angle) * Ring)));
+        }
+
+        trees.Add(("bush", 81, X - 6, Z + 5));
+        trees.Add(("bush", 82, X + 7, Z - 3));
+        trees.Add(("fern", 83, X + 2, Z + 11));
+        foreach (var (species, seed, east, count) in new[] { ("black-tupelo", 84u, -11f, 6), ("quaking-aspen", 85u, 11f, 9) })
+        foreach (var (place, own) in Trees.ForestPlaces(seed, new Vec3(east, 0f, (float)Z + 33f), 10f, count))
+            trees.Add((species, own, place.X, place.Z));
+
+        // Each at a whole unit, as an editor snaps an entity, a sixty-fourth of a meter from the
+        // place the forest drew at most.
+        static string Whole(double meters) => ((long)Math.Round(meters * Units)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        foreach (var (species, seed, x, z) in trees)
+        {
+            var tree = new LevelEntity();
+            tree["classname"] = "tree";
+            tree["origin"] = $"{Whole(x)} {Whole(-z)} 0";
+            tree["species"] = species;
+            tree["seed"] = seed.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            yield return tree;
+        }
     }
 
     /// <summary>The plaza, an octagon of walls round a floor of a square's planes and the same square's turned an eighth, a doorway in five of its walls.</summary>
@@ -433,6 +473,40 @@ public sealed class FeatureTestLevelTests
         Assert.Null(West(-13, 2));
         Assert.Null(West(-13, 5));
         Assert.Null(West(8, 2));
+    }
+
+    [Fact]
+    public void TheMeadowsTreesStandOnItsFloorClearOfItsWallsAndItsWalkway()
+    {
+        var level = Level.Parse(File.ReadAllText(LevelPath), LevelPath);
+        var brushes = level.World!.Brushes;
+        var trees = level.Entities.Where(entity => entity.ClassName == "tree").ToList();
+
+        // The ring's ten, the two bushes and the fern, and the forests' fifteen, each of a species the
+        // engine registers.
+        Assert.Equal(28, trees.Count);
+        Assert.All(trees, tree => Assert.NotNull(Trees.Species(tree["species"] ?? "")));
+
+        // Each stands on a floor with the sky over it and no wall within a meter and a half of its
+        // trunk, the walkway's pillars and ramps among them, and no other trunk within a meter and a
+        // half of it.
+        var feet = trees
+            .Select(tree => tree["origin"]!.Split(' ').Select(part => double.Parse(part, System.Globalization.CultureInfo.InvariantCulture)).ToArray())
+            .Select(at => new LevelPoint(at[0], at[1], at[2]))
+            .ToList();
+        for (var index = 0; index < trees.Count; index++)
+        {
+            var (foot, name) = (feet[index], $"{trees[index]["species"]} {trees[index]["seed"]}");
+            Assert.True(Hit(brushes, foot + new LevelPoint(0, 0, Units), new LevelPoint(0, 0, -1), 1.2 * Units) is { } below && below >= Units - 1, $"{name} stands on no floor");
+            Assert.Null(Hit(brushes, foot + new LevelPoint(0, 0, 0.2 * Units), new LevelPoint(0, 0, 1), 40 * Units));
+            for (var step = 0; step < 16; step++)
+            {
+                var angle = step * Math.Tau / 16;
+                Assert.True(Hit(brushes, foot + new LevelPoint(0, 0, Units), new LevelPoint(Math.Cos(angle), Math.Sin(angle), 0), 1.5 * Units) is null, $"{name} stands against a wall");
+            }
+
+            Assert.All(feet.Where((_, other) => other != index), other => Assert.True(Length(other - foot) >= 1.5 * Units, $"{name} stands {Length(other - foot) / Units:0.00} m from another tree"));
+        }
     }
 
     [Fact]
