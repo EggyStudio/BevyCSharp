@@ -32,10 +32,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <see cref="DayNight"/> keeps the stars to the hour.
 /// </para>
 /// <para>
-/// Where the weather runs, the sky is the weather's and the backdrop is left alone. Its tier and
-/// whether the forecast sets it go on its resources, and with the forecast off, the kind of
-/// weather is set as a preset, eased into. Its clouds' cover is held at none whatever the kind or
-/// the forecast gives, so its rain, snow and fog come without them.
+/// The engine's weather runs over the atmosphere's sky at the quality the weather page sets, or not
+/// at all where that is off. With the forecast off, the kind of weather is set as a preset and eased
+/// into, from the kind before it, and at once where the weather comes on, since nothing drawn is
+/// left to ease from.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -189,7 +189,7 @@ public partial struct Applied
         // the map in the sun, the fog, which fades the far ground and the zones' far walls into the
         // sky behind them and gives the sky below the horizon the horizon's color, the rain and the
         // snow, and the lightning and its thunder.
-        if (backdrop == Backdrop.Atmosphere)
+        if (backdrop == Backdrop.Atmosphere && settings.WeatherQuality != WeatherQuality.Off)
         {
             MapWeather.Clock = DayNight.Clock;
             MapWeather.Forecast = settings.Procedural;
@@ -199,7 +199,8 @@ public partial struct Applied
                 _kind = settings.WeatherKind;
             }
             if (settings.Procedural) _kind = null;
-            Render.SetWeather(camera, MapWeather, new CloudSettings { ShadowLight = Scene.Sun }, Fog, new PrecipitationSettings(), new ThunderSettings());
+            var quality = settings.WeatherQuality;
+            Render.SetWeather(camera, MapWeather, new CloudSettings { ShadowLight = Scene.Sun, Quality = (CloudQuality)(quality - 1) }, Fog((FroxelQuality)(quality - 1)), new PrecipitationSettings { Quality = (PrecipitationQuality)(quality - 1) }, new ThunderSettings());
             MapWeatherOn = true;
         }
         else
@@ -209,6 +210,10 @@ public partial struct Applied
             Render.SetPrecipitation(camera, null);
             Render.SetThunder(camera, null);
             MapWeatherOn = false;
+            // So the kind shows at once when the weather comes back, as the drive's rain and snow
+            // need within a few tens of frames, where easing it from a weather nobody saw would
+            // take some twenty seconds of the clock.
+            _kind = null;
         }
     }
 
@@ -218,7 +223,8 @@ public partial struct Applied
     /// <summary>Whether the engine's weather runs over the map, which the vegetation's wind follows.</summary>
     internal static bool MapWeatherOn { get; private set; }
 
-    // The kind last given the engine's weather, none at the start and while the forecast writes it.
+    // The kind last given the engine's weather, none at the start, while the forecast writes it and
+    // while the weather is off.
     private static WeatherPreset? _kind;
 
     /// <summary>
@@ -233,7 +239,7 @@ public partial struct Applied
     /// fades toward the horizon, and thinning upward so the zones' tops stand clear, worked out in
     /// froxels near the camera so the zones' shadows cut it into shafts and their lamps glow in it.
     /// </summary>
-    private static readonly SkyFogSettings Fog = new() { Visibility = 700f, Height = 40f, Froxels = new FroxelFogSettings() };
+    private static SkyFogSettings Fog(FroxelQuality quality) => new() { Visibility = 700f, Height = 40f, Froxels = new FroxelFogSettings { Quality = quality } };
 
     /// <summary>
     /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the

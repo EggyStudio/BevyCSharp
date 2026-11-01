@@ -69,7 +69,7 @@ internal static class Pages
         new ChoiceRow<Backdrop>("Sky", () => S.Backdrop, value => Settings.Change(s => s with { Backdrop = value })),
     ]);
 
-    /// <summary>The weather's page, its kind of weather and whether the forecast sets it.</summary>
+    /// <summary>The weather's page, its kind of weather, whether the forecast sets it and how finely it is drawn.</summary>
     private static Page Skies() => new("Weather",
         Render.MeshletsActive
             ? [new TextRow("Meshlets keep the weather out.")]
@@ -77,6 +77,7 @@ internal static class Pages
             [
                 new ChoiceRow<WeatherPreset>("Kind", () => S.WeatherKind, value => Settings.Change(s => s with { WeatherKind = value })),
                 new ToggleRow("Forecast", () => S.Procedural, value => Settings.Change(s => s with { Procedural = value })),
+                new ChoiceRow<WeatherQuality>("Quality", () => S.WeatherQuality, value => Settings.Change(s => s with { WeatherQuality = value })),
             ]);
 
     private static Page Audio() => new("Audio",

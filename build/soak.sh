@@ -35,6 +35,11 @@ case "$name" in
 esac
 if [ "$name" = feature-test ]; then
     folder="${3:-games/FeatureTest/bin/Release/net10.0}"
+    # Eight gigabytes where the environment names none, as the drive gives it, since on lavapipe
+    # with no shader cache of Mesa's, as the soak's job of its own starts, the feature test reached
+    # the cap it is given otherwise, a quarter of the runner's 15.6 gigabytes, while its pipelines
+    # compiled.
+    export BCS_MEMORY_CAP_GB="${BCS_MEMORY_CAP_GB:-8}"
 else
     folder="${3:-games/$program/bin/Debug/net10.0}"
 fi
@@ -55,14 +60,23 @@ fail() { echo "FAILED: $name: $*" >&2; tail -20 "$log" >&2 || true; exit 1; }
 trap 'code=$?; echo "FAILED: $name: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop --name "$program" >/dev/null 2>&1 || true' EXIT
 (cd "$folder" && { BCS_OFFSCREEN=1 BCS_SERVE=1 "./$program" "${args[@]}"; echo "[soak] the game exited with $?"; } >"$log" 2>&1 &)
-for _ in $(seq 1 120); do ./bcs status 2>/dev/null | grep -q "ready.*$program" && break; sleep 1; done
-./bcs status | grep -q "ready.*$program" || fail "the game never answered"
+# Ten minutes for the game to answer, as long as each command is given, and its answer taken once
+# rather than asked for again. On lavapipe with no shader cache of Mesa's, as the feature test's soak
+# in a job of its own starts, the game says it is ready at its first frame and then answers nothing
+# for minutes while its pipelines compile, so a second asking read it unreachable, and two minutes
+# of asking ran out on the working machine.
+answered=0
+for _ in $(seq 1 600); do ./bcs status 2>/dev/null | grep -q "ready.*$program" && { answered=1; break; }; sleep 1; done
+[ "$answered" = 1 ] || fail "the game never answered"
 
 # Each frame a sixtieth of a second of the game, so a round walks as far on a slow machine as on a
 # fast one.
 [ "$name" = stress ] || quiet app.frametime 0.0166667
 quiet frames.wait 60
-if [ "$name" = feature-test ]; then quiet mode walking; fi
+# The feature test's pipelines compiled before its first round, which on lavapipe with no shader
+# cache of Mesa's take minutes and grow what it holds while they do, so its readings are not of
+# compiles.
+if [ "$name" = feature-test ]; then quiet mode walking; quiet pipelines.wait; fi
 
 round() {
     case "$name" in

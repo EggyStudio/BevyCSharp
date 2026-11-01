@@ -14,6 +14,13 @@
 # to the course leaves it, and judged by where `player` says it is after. A failure is said as an
 # error annotation with the program's last lines at a warning or worse, and a capture of each
 # station is left in the folder SHOTS names, or a temporary one.
+#
+# WEATHER_QUALITY names the weather's quality for the run, the game's own where it names none. The
+# workflow names Off, since its software device spent nearly a third of each frame on the weather
+# and the drive ran past the job's limit under it, and without the weather each view waits five
+# frames for its shot where forty let the clouds settle. Rain and snow over the playground at the
+# end run the weather's kernels on that device all the same, since llvmpipe once ended the feature
+# test in them where a GPU drew them whole.
 set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
@@ -49,6 +56,8 @@ quiet() { c "$@" > /dev/null; }
 where() { c player | sed -n 's/^at \([-0-9.]*\) \([-0-9.]*\) \([-0-9.]*\),.*/\1 \2 \3/p'; }
 # A piece's place as "x y z", read from its transform's line.
 piece() { c entity.get "$@" | sed -n 's/^Transform.Translation = //p' | tr ',' ' '; }
+# A setting's value, without the quotes the setting command gives a choice's or a text's in.
+setting() { c setting "$1" | sed -n 's/^[A-Za-z]* = "\{0,1\}\([^"]*\)"\{0,1\}$/\1/p'; }
 # A height above the ground, as a number bcs can be given.
 up() { awk -v g="$ground" -v d="$1" 'BEGIN { print g + d }'; }
 # Whether one sum compares with another as asked, awk working out both.
@@ -69,8 +78,13 @@ trap './bcs stop > /dev/null 2>&1 || true' EXIT
 ./bcs stop > /dev/null 2>&1 || true
 
 (cd "$program" && { ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve; echo "[course] the feature test exited with $?"; } > "$log" 2>&1 &)
-for _ in $(seq 1 90); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && break; sleep 1; done
-./bcs status | grep -q "ready.*BevyCSharp.FeatureTest" || fail "the feature test never answered"
+# Ten minutes for the feature test to answer, as long as each command is given, and its answer taken
+# once rather than asked for again, since on lavapipe with no shader cache of Mesa's, as the
+# workflow's runner starts, it says it is ready at its first frame and then answers nothing for
+# minutes while its pipelines compile, which a second asking can read as unreachable (build/soak.sh).
+answered=0
+for _ in $(seq 1 600); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && { answered=1; break; }; sleep 1; done
+[ "$answered" = 1 ] || fail "the feature test never answered"
 
 quiet app.frametime 0.0166667
 quiet app.hold commands
@@ -84,19 +98,21 @@ quiet setting "DaySpeed 0"
 quiet day.hour 8
 
 # The weather held to a partly cloudy sky with the forecast off, so each run captures the same sky,
-# and put back as it was at the end with the day.
+# at the quality WEATHER_QUALITY names, and put back as it was at the end with the day.
 weather_was=()
-for name in WeatherKind Procedural; do
+for name in WeatherKind Procedural WeatherQuality; do
   weather_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
 done
 quiet setting "WeatherKind PartlyCloudy"
 quiet setting "Procedural false"
+if [ -n "${WEATHER_QUALITY:-}" ]; then quiet setting "WeatherQuality $WEATHER_QUALITY"; fi
+quality=$(setting WeatherQuality)
 
 quiet frames.wait 30
 quiet mode walking
 shot 1-hub
 
-# The hub's frame time under the weather, beside Sponza's, which on the workflow's software
+# The hub's frame time at the run's weather, beside Sponza's, which on the workflow's software
 # renderer measures the weather's cost there. Each is a frame's mean on the machine's clock over 30
 # frames, as frame.profile measures it, where the rate app.status says is the set clock's, a
 # sixtieth of a second a frame on any device, and less where held frames pass none.
@@ -104,7 +120,7 @@ frame_time() {
   c frame.profile 30 | tail -n 1 | sed -n 's/.*frame_ms=\([0-9.]*\).*/\1/p' \
     | awk -v name="$1" '{ printf "%s %.1f ms\n", name, $1 }' >> "$shots/frame-times.txt"
 }
-frame_time "1-hub, under a partly cloudy sky"
+frame_time "1-hub, the weather $quality"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
 read -r _ y z < <(where)
@@ -270,9 +286,16 @@ holds "$hill" ">" "$ground + 2.5" || fail "the player fell through the mound's t
 # modeled primitives, its room cut by booleans and its box, each bay of the light hall from its
 # aisle, and the meadow. A zone that failed to build ends the program or leaves its pieces out,
 # which the first entity asked of each says.
+# The mode's banner stays a second and a half of the clock, ninety frames, so it is waited out
+# before the first view.
 quiet mode spectator
-quiet frames.wait 5
-view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "${8:-40}"; shot "$1"; }
+quiet frames.wait 90
+# Each view waits forty frames for its shot, or as many as it names, so the clouds settle after the
+# camera's jump, and five without the weather where it names none, the shot waiting for the view's
+# pipelines either way. The effects view names sixty, since five leave its floor and its spheres
+# streaked after the page switched the dusk and the occlusion on.
+settle() { if [ -z "$1" ] && [ "$quality" = Off ]; then echo 5; else echo "${1:-40}"; fi; }
+view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "$(settle "${8:-}")"; shot "$1"; }
 for piece in "Clearcoat sphere 1" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "quaking-aspen 70"; do
   ./bcs command --timeout 600 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
 done
@@ -290,7 +313,6 @@ view 15-meadow 12 1.5 80 0 0.5 70
 
 # The effects page's ambient occlusion and dusk sky through the setting command, each put back as
 # it was after, so a run on the working machine leaves its settings as it found them.
-setting() { c setting "$1" | sed -n 's/^[A-Za-z]* = "\{0,1\}\([^"]*\)"\{0,1\}$/\1/p'; }
 occlusion=$(setting AmbientOcclusion)
 backdrop=$(setting Backdrop)
 quiet setting "AmbientOcclusion true"
@@ -313,9 +335,30 @@ if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END
   quiet scene.unload
 fi
 
-# Night over the hub, the moon and the stars over it, and the day put back as it was.
+# Night over the hub, the moon and the stars over it.
 quiet day.hour 23
 view 20-night 0 3 -20 0 16 20 60
+
+# Rain and then snow over the playground in the morning, thirty frames each at the run's quality for
+# the weather, or the game's Medium where the run is without it, so the clouds', the fog's and the
+# precipitation's kernels run on whatever device draws the drive, and the program ending in them
+# fails the next command. The weather is put off and on around each kind, which then comes at once
+# rather than easing in over twenty seconds of the clock.
+quiet day.hour 8
+on=$quality
+if [ "$quality" = Off ]; then on=Medium; fi
+weathered() {
+  quiet setting "WeatherQuality Off"
+  quiet setting "WeatherKind $2"
+  quiet setting "WeatherQuality $on"
+  quiet look -- 70 8 36 88 1 12
+  quiet frames.wait 30
+  shot "$1"
+}
+weathered 21-rain Rain
+weathered 22-snow Snow
+
+# The day and the weather put back as they were.
 quiet setting "DaySpeed $day_speed"
 quiet setting "Hour $day_hour"
 for was in "${weather_was[@]}"; do quiet setting "$was"; done

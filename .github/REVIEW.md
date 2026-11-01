@@ -1,9 +1,14 @@
 # Review
 
-Reviewed up to `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of
-`3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
-`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
-ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+Reviewed up to `5fb59903`, item 90's first commit, pushed at 17:57 on 2026-11-01 after 3ee62451's
+green run, its run green at 18:16 on the three systems in about 16 minutes; the clouds', the froxel
+fog's and the precipitation's kernels choosing their light in each entry before any thread branches,
+since llvmpipe faults on the transmittance lookup after a group's threads have parted,
+KernelLightTests reading the kernels for it, 1,996 passing at the 3 GB cap; it keeps the form and
+carries the review's files. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
+`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
+in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
+their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
 while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
 game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
@@ -353,7 +358,34 @@ from [SHARED.md](SHARED.md).
     a quality setting the drive passes as WeatherTier did, or no weather there where Low still runs
     past about 75 minutes scaled, the Medium path kept covered by the sky tests and the GPU drive,
     the job's limit unchanged, chosen by the coder's measurement of the hub and the meadow per
-    variant and reported with the commit.
+    variant and reported with the commit. Measured at 18:58 in the runner's setting, llvmpipe on
+    four threads, the hub 1,484 ms a frame at Medium, 1,329 at Low and 1,058 with no weather, the
+    meadow 32.4, 31.6 and 31.0 s and 12 s without shadows, so the meadow's trees cost more than the
+    weather, pipelines.wait about 190 s more there; the drive alone about 99 minutes on the runner
+    as is, 94 at Low and 85 with no weather, over the limit each way. The call is a WeatherQuality
+    setting of the feature test (Low, Medium, High, Off) the drive passes from an environment value,
+    the workflow setting Off and the GPU drive keeping the game's Medium, and the drive's views
+    waiting 5 frames before a shot in place of 40 or 60 when the weather is off, the clouds' history
+    being the one reason for the wait, about 65 minutes on the runner together, after a 5-frame view
+    is read against a 40-frame one on the GPU and the whole drive is run in the runner's setting for
+    its real time; with the three kernels run on the runner's lavapipe by the drive itself after its
+    views, the weather back on at Medium over the playground under Rain for 30 frames and Snow for
+    30, about two minutes, since the Linux test job builds a headless bridge and every drawing test
+    skips there; a kind showing at once when the map's weather comes back from off, with no drawn
+    weather left to ease from; the job's limit unchanged. The Reply's line on four processors is
+    corrected in that commit, taskset outside the container never having reached it. Run whole in
+    the runner's setting at 21:20 with the weather off and the five-frame views, the drive passed in
+    104.8 minutes there, about 71 on the runner, rain and snow included with no crash, the hub 1,195
+    ms a frame and the peak 4.57 GB, the course's 4,600 frames of holds taking 60 of the minutes;
+    with the soak's 16 and the setup's 4 the job would read about 91 against its 90. The call is the
+    soak in a job of its own beside the drive with its own pack and build and a limit from its
+    measured time, and the drive job's limit at 100 with the reason that the drive reads about 75
+    minutes since item 69's course holds and the trees, so 90 would be met by the runner's variance
+    and not a hang (N 6.8); not shadows off on lavapipe, not 120 on one job. The GPU pair with the
+    weather off, 40 frames against 5, the gallery and hall views 0.02 to 0.08 levels apart where
+    run-to-run noise is 0.3 to 0.5, the meadow 0.49 by its trees' sway, the effects view keeping its
+    60 since it streaks at 5, the mode banner waited out once after mode spectator; rain and snow on
+    llvmpipe against the GPU 0.9 and 7.4 levels apart by where the flakes fall.
 
 91. **The sky's clock, weather and looks move to the Sky module.** SkyClock, WeatherState and
     LookCycle, which reference no engine, move as they are with their tests to `Modules/Sky` as the
@@ -1283,3 +1315,45 @@ call of it first in an entry, which the head's kernels fail, the clouds' two cal
 the precipitation's one none of them first. The picture is 2026-11-01-item-90-lavapipe.webp, the
 hub's pair in the day's dump. The whole suite ran with it, 1,996 passed, 0 failed and 3 skipped in
 46 m 34 s at the 3 GB cap. The public listing is unchanged.
+
+Item 90's second commit, in the commit carrying this line. The feature test's weather page has a
+quality, Off, Low, Medium and High, Medium its own, which the clouds', the froxel fog's and the
+precipitation's qualities follow, Off leaving the atmosphere's sky alone; the drive passes
+WEATHER_QUALITY to it and the workflow names Off. With the weather off the drive's views wait 5
+frames for their shot where they waited 40, the clouds' history having been the one reason for the
+wait, and a view that names its own count keeps it, the effects view its 60, since at 5 its floor
+and lower spheres are streaked; the mode's banner, which showed in every five-frame view of the
+first trial, is waited out once after the spectator mode, its 90 frames. After the night the drive
+puts the weather back at Medium over the playground under rain for 30 frames and snow for 30, so the
+clouds', the fog's and the precipitation's kernels run on the runner's lavapipe, where the Linux
+test job's headless bridge skips every drawing test; the setting is put off and on around each kind,
+and the map's weather shows a kind at once when it comes back from off, as nothing drawn is left to
+ease from. On the GPU with the weather off the views at 5 frames lie 0.02 to 0.08 levels from those
+at 40 on average in the gallery and the hall and 0.49 in the meadow by its trees' sway, where two
+runs of the same drive put the hub 0.40 apart, the rain 0.54, the snow 0.33 and the night 0.44;
+those drives took 225 s and 209 s, and the drive of the commit 244 s. In the runner's setting the
+drive passed in 6,290 s, its rain and snow drawn without a crash, 0.9 and 7.4 levels from the GPU's,
+the snow by where its flakes fell, the hub 1,195 ms a frame and the peak 4.57 GB. Sixty of its 105
+minutes are the course's stations, held in frames, which the shots' shorter waits leave alone, so at
+the runner's pace, 1.48 times this one, it takes about 71 minutes, 75 with the steps before it,
+where the estimate of 65 left the stations out. The drive job's limit is 100 with that reason, and
+the soak is a job of its own beside it, feature-test-soak, its limit 40. In a 12 GB container the
+soak first stopped at the feature test's own cap of 2.25 GiB, a quarter of the 9 GiB the runtime
+reads there, where the runner's 15.6 GiB gives 3.9 and its soak at 09fc95dd held 2.47 GB, so it ran
+again in a container the runtime reads as the runner's. Started cold there, as a job of its own
+starts it, the feature test says it is ready at its first frame and then answers nothing for minutes
+while lavapipe compiles its pipelines with no shader cache of Mesa's, so soak.sh's two minutes of
+asking ran out, and its second asking, as the drive's, could read it unreachable; then it reached
+that 3.9 GiB cap while compiling. soak.sh and the drive wait ten minutes, as long as each command,
+and take the first answer; soak.sh gives the feature test the drive's cap of 8 and waits for its
+pipelines before the first round, so the readings are not of compiles. So the soak passed cold, 25 s
+for apt, 5 for slangc, 36 for the pack and 4 for the build, then 1,720 s, 555 to answer and compile
+and six rounds of 194 s, past its 900 to be read six times, the process at 4.14 GB then 3.96,
+nothing climbing; about 20 minutes on the runner with some four before it, at most about 35. The
+earlier Replies' lavapipe "held to four processors", item 89's lead and this item's first commit,
+were wrong, as taskset outside podman exec does not reach the container, whose processes allow every
+processor, so every run in that setup had llvmpipe's four threads with the machine's 32 processors
+free, the factor of 1.48 measured the same way. The picture is 2026-11-01-item-90-rain-snow.webp,
+the GPU's pair beside lavapipe's, the views at 5 and 40 frames, the effects view and the banners in
+the day's dump. The whole suite ran with it, 1,996 passed, 0 failed and 3 skipped in 42 m 24 s at
+the 3 GB cap, and NormTests passed, 18. The public listing is unchanged.

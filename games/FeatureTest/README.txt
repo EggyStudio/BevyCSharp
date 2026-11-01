@@ -24,7 +24,7 @@ meadow of grass and trees in the wind, with a walkway four meters up its west wa
 the scenes zone, where the panel's Scenes page fetches Intel Sponza and stands it there. A day
 passes over all of it, under a sky scattered from the sun, with stars and a moon that wax and wane
 at night, and the weather page sets the kind of weather, its clouds, fog, rain, snow and thunder, or
-lets a forecast set it by the day.
+lets a forecast set it by the day, and how finely it is drawn, or not at all.
 
 Keys
 ----

@@ -31,6 +31,13 @@ on a GPU and on the right on Mesa's llvmpipe on four threads as the workflow's r
 clouds' kernels choosing their light before their threads part, which llvmpipe needs, the clouds
 thinner on the left since that run began from a clear sky.
 
+![](.github/assets/readings/2026-11-01-item-90-rain-snow.webp)
+The feature test's playground at 8:00 under rain on the left and snow on the right, as the
+workflow's drive takes them at its end on Mesa's llvmpipe on four threads, the weather put back at
+Medium for thirty frames each after a course run without it, so the clouds', the fog's and the
+precipitation's kernels run on the device that ended the program in them before their light was
+chosen first.
+
 Done that day
 
 - Item 89 at `3ee62451`. A fresh offscreen session's first frame is whole.

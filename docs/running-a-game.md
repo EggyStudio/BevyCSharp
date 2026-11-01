@@ -31,7 +31,8 @@ latitude, the sun and a full moon carried across Bevy's atmosphere as two direct
 strength and color follow the hour, the scene lit from the sky as it changes and the stars out at
 night, and `./bcs command day.hour 22` sets the hour from a terminal. The engine's weather runs
 over it where meshlets do not, clouds, fog, rain, snow and thunder from the kind of weather its page
-sets, or from a forecast by the day's clock, and `./bcs command sky.weather Storm now` sets it from
+sets, or from a forecast by the day's clock, as finely as the page's quality asks or not at all,
+and `./bcs command sky.weather Storm now` sets it from
 a terminal. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
 holds, and the key under Escape opens the console. The player is a capsule on a
@@ -64,7 +65,8 @@ whatever the view rests on, motion blur, chromatic aberration, auto exposure, sh
 sky drawn in code, and `./bcs command setting AmbientOcclusion true` changes a setting as the panel
 does. In spectator mode `./bcs command look 6 3 8 0 0 0` puts the camera at a point looking at
 another. `build/drive-feature-test.sh` walks the player through each station through `bcs` and
-captures each zone, as the pack workflow does.
+captures each zone, as the pack workflow does, without the weather there (`WEATHER_QUALITY=Off`),
+which its software device spent nearly a third of each frame on.
 
 There are three ways to run the same behaviors, and `Config` chooses between them. A window is the
 usual one. `Headless` installs no renderer, for a test or a dedicated server. `Offscreen` installs

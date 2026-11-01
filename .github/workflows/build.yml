@@ -451,13 +451,14 @@ jobs:
   drive:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # An hour and a half. The course run's holds and waits come to some 4,600 frames, and lavapipe
-    # held to four processors of the working machine draws the hub under its weather at 1.1 frames a
-    # second, with slangc or without, so the run took some 70 minutes there. The runner played Swarm
-    # in 7.4 minutes where that machine took 11, which puts the run near 47 minutes here, with the
-    # pack, the build and the fetch of slangc before it and the soak of fifteen minutes after it, or
-    # of twenty-two and a half where its rounds are too slow for six readings in fifteen.
-    timeout-minutes: 90
+    # A hundred minutes. The course run took 105 minutes without the weather on the working
+    # machine's lavapipe on four threads in the runner's image, sixty of them the course's stations,
+    # whose holds and waits are counted in frames of about a second each there, and the runner,
+    # about 1.48 times as fast by the hub's frame time at 09fc95dd, would take about 71, or 75 with
+    # the pack, the build and the fetch of slangc before it. Ninety would be reached by the runner's
+    # own variance rather than by a hang, which a hundred still finds (NORM.md, N 6.8). The soak
+    # runs in a job of its own beside this one.
+    timeout-minutes: 100
     needs: [native]
     # Each step through build/step.py, as the games job has it.
     defaults:
@@ -491,27 +492,18 @@ jobs:
       - name: Pack
         run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
+      # Without the weather, which took nearly a third of each frame on lavapipe and ran the course
+      # past the job's limit, the drive's rain and snow at its end running the weather's kernels
+      # here all the same.
       - name: Run the feature test's course
         env:
           SHOTS: ${{ runner.temp }}/feature-test
           BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
+          WEATHER_QUALITY: "Off"
         run: |
           mkdir -p "$SHOTS"
           dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
           build/drive-feature-test.sh games/FeatureTest/bin/Release/net10.0
-
-      # The feature test played a round at a time at the hub, as the games job soaks the games
-      # (build/soaks.sh), here after the course run, which left its shaders compiled in the cache
-      # beside its assets, so the readings are not of compiles. Alone on the runner, since on the
-      # working machine's lavapipe held to four processors its first round ended six minutes into
-      # its soak with the three games beside it, and three minutes in alone, each round after it
-      # taking 132 seconds; fifteen minutes read it seven times there, nothing climbing, and at the
-      # runner's pace about ten.
-      - name: Play the feature test a while and check nothing it holds grows
-        if: ${{ !cancelled() }}
-        env:
-          BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
-        run: build/soaks.sh 900 feature-test
 
       # Each station's capture, the program's log and the frame times, which say where a failed
       # course run went wrong.
@@ -521,6 +513,62 @@ jobs:
           name: feature-test
           path: ${{ runner.temp }}/feature-test
           if-no-files-found: ignore
+
+  # The feature test played a round at a time at the hub, as the games job soaks the games
+  # (build/soaks.sh), built on a package as the drive builds it, in a job of its own beside the
+  # drive so that neither runs the other past its limit. Its pipelines compile before its first
+  # round and it holds to the drive's memory cap, since it starts with no shader cache of Mesa's
+  # (build/soak.sh).
+  feature-test-soak:
+    if: ${{ inputs.pack }}
+    runs-on: ubuntu-24.04
+    # Forty minutes. On the working machine's lavapipe on four threads in the runner's image, from
+    # no shader cache of Mesa's as the job starts, the feature test answered its first commands
+    # after nine minutes of compiling and then played six rounds of 194 seconds, past its fifteen
+    # minutes to be read six times, 29 minutes in all, which at the runner's pace, about 1.48 times
+    # as fast, is about 20, with some four for the steps before it. The longest the soak plays, its
+    # fifteen minutes and half of them again, comes to about 35 there, and forty still finds a hang
+    # (NORM.md, N 6.8).
+    timeout-minutes: 40
+    needs: [native]
+    # Each step through build/step.py, as the games job has it.
+    defaults:
+      run:
+        shell: python3 build/step.py {0}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: native-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe and ALSA, as the games job has them.
+      - name: Install a software Vulkan and ALSA
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
+
+      # The feature test compiles its .slang shaders as it runs, as the drive job says.
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
+      # A package of this commit's library and the Linux bridge alone, as the games job packs one.
+      - name: Pack
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+
+      - name: Build the feature test
+        run: dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
+
+      - name: Play the feature test a while and check nothing it holds grows
+        env:
+          BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
+        run: build/soaks.sh 900 feature-test
 
       # The soak's readings, the program's log, the soak's errors and the check's words.
       - uses: actions/upload-artifact@v7

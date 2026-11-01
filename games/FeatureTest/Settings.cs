@@ -69,6 +69,25 @@ public enum Quality
     Ultra,
 }
 
+/// <summary>How finely the weather page has the weather drawn, against what it costs.</summary>
+public enum WeatherQuality
+{
+    /// <summary>
+    /// No clouds, fog or rain, the atmosphere's sky alone, which the workflow's drive asks for on
+    /// its software device, where the weather took nearly a third of each frame.
+    /// </summary>
+    Off,
+
+    /// <summary>The clouds marched in the fewest steps, the fog in the fewest froxels and the fewest drops.</summary>
+    Low,
+
+    /// <summary>The engine's own for each.</summary>
+    Medium,
+
+    /// <summary>The clouds in the most steps, the fog in the most froxels and the most drops.</summary>
+    High,
+}
+
 /// <summary>Everything the admin panel sets, kept between runs.</summary>
 /// <remarks>
 /// A record read whole from the player's settings file as the program starts and written whole
@@ -208,6 +227,9 @@ public sealed record FeatureSettings
     /// <see cref="WeatherKind"/>.
     /// </summary>
     public bool Procedural { get; init; }
+
+    /// <summary>How finely the weather is drawn, or not at all.</summary>
+    public WeatherQuality WeatherQuality { get; init; } = WeatherQuality.Medium;
 
     /// <summary>The settings a tier gives, from these.</summary>
     public FeatureSettings At(Quality tier) => tier switch

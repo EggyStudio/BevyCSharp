@@ -490,9 +490,9 @@ first wave, the feature test's player back where its walk round a square of the 
 stress program after a number of frames, so two readings of a game that leaks nothing match.
 `build/soaks.sh <seconds> <game>...` soaks several at once and judges each, a failure said as one
 error naming each game's failure and each value that climbed. The pack workflow soaks Courtyard,
-Swarm and the stress program at once for ten minutes, and the feature test alone for fifteen after
-its course run, since lavapipe plays a round of each in a minute or two, and a ten-minute run of
-each game holds level here.
+Swarm and the stress program at once for ten minutes, and the feature test alone for fifteen in a
+job beside its course run, since lavapipe plays a round of each in a minute or two, and a
+ten-minute run of each game holds level here.
 
 The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
 and its patch is the number of commits since that file last changed, so each commit raises it by
