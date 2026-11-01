@@ -2137,6 +2137,17 @@ a batch.
     taking a single sample, and gives its multisampling back after. Done at `11efeefe`, the mend and
     its test as the head records.
 
+89. **A fresh offscreen session's first frame is whole.** Found with the meadow court on 2026-11-01,
+    a fresh offscreen session's first shot of the drive's meadow view shows the grass black or the
+    court's walls dark in about half the runs, HEAD's build too, every later frame whole and the
+    drive's capture whole. A reading first of what the first frame lacks, the grass's wind streams
+    or a material's textures not yet uploaded, the probes' or the field's first build, by the first
+    three frames' means across ten fresh sessions; then the mend, the first frame waiting for what
+    it draws, or a test that the first frame is within a few levels of the tenth. Small, after the
+    scenes yard. Done at `3ee62451` with `b79314ca` before it, the mend and its reading as the head
+    records; starting on a set clock was dropped since it streaked the effects view under ambient
+    occlusion.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

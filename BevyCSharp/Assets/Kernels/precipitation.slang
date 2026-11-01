@@ -153,7 +153,9 @@ float cloudShadow(float3 at)
 }
 
 // The directional light that lights the scene most through the air, the sun by day and the moon
-// at night, or none (clouds.slang's).
+// at night, or none, chosen first in the entry before any thread returns and handed to lightOf,
+// since llvmpipe faults on this loop's transmittance read once the threads of a group have parted
+// (clouds.slang's).
 int brightest()
 {
     int best = -1;
@@ -202,10 +204,11 @@ float3 velocityOf(float4 particle, bool flake)
     return float3(0.0, -speed, 0.0) + wind.xyz;
 }
 
-// The light a particle sends toward the eye, before the exposure. A flake is white and scatters
-// what lights it. A drop bends the sky behind and about it toward the eye, so it shows the sky's
-// light, and the sun and the lamps glint in it, the sun brightest seen past the drop toward it.
-float3 lightOf(float3 world, bool flake)
+// The light a particle sends toward the eye, before the exposure, the directional light given the
+// one brightest() chose. A flake is white and scatters what lights it. A drop bends the sky behind
+// and about it toward the eye, so it shows the sky's light, and the sun and the lamps glint in it,
+// the sun brightest seen past the drop toward it.
+float3 lightOf(float3 world, bool flake, int light)
 {
     float3 toEye = normalize(passView.world_position - world);
     float3 sky = 0.0;
@@ -214,7 +217,6 @@ float3 lightOf(float3 world, bool flake)
 
     float3 sun = 0.0;
     float facing = 0.0;
-    int light = brightest();
     if (light >= 0)
     {
         float3 toSun = normalize(passLights.directional_lights[light].direction_to_light);
@@ -236,6 +238,7 @@ float3 lightOf(float3 world, bool flake)
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
+    int light = brightest();
     uint i = id.x;
     if (i >= uint(clock.w))
         return;
@@ -288,7 +291,7 @@ void main(uint3 id : SV_DispatchThreadID)
             uint slot = counts[4].add(1u) % uint(amount.w);
             float3 at = float3(particle.x, roof, particle.z);
             splashes[slot * 2u] = float4(at, clock.x);
-            splashes[slot * 2u + 1u] = float4(1.5 * lightOf(at + float3(0.0, 0.03, 0.0), false) * passView.exposure, lerp(0.08, 0.16, particle.w));
+            splashes[slot * 2u + 1u] = float4(1.5 * lightOf(at + float3(0.0, 0.03, 0.0), false, light) * passView.exposure, lerp(0.08, 0.16, particle.w));
         }
 
         float4 h = hash4(uint4(i, frame, 41u, 7u));
@@ -320,5 +323,5 @@ void main(uint3 id : SV_DispatchThreadID)
     uint slot = counts[1].add(1u);
     drawn[slot * 3u] = float4(particle.xyz, width);
     drawn[slot * 3u + 1u] = float4(velocity, flake ? 1.0 : 0.0);
-    drawn[slot * 3u + 2u] = float4(lightOf(particle.xyz, flake) * passView.exposure, opacity);
+    drawn[slot * 3u + 2u] = float4(lightOf(particle.xyz, flake, light) * passView.exposure, opacity);
 }

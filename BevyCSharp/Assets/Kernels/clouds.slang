@@ -176,7 +176,12 @@ float density(float3 world, float3 planet, bool detailed)
 }
 
 // The directional light that lights the scene most through the air, the sun by day and the moon
-// at night, or none.
+// at night, or none, the same for every texel of a view.
+//
+// Each entry calls it first, before any of its threads returns or takes a branch of its own, and
+// hands the light on. Mesa's llvmpipe, the software Vulkan the workflow's runners draw with, faults
+// on the transmittance read in this loop where it runs once the threads of a group have parted, as
+// it did inside the march's branches, ending the feature test within a minute of its start there.
 int brightest()
 {
     int best = -1;
@@ -276,9 +281,10 @@ float3 clearAmbient(float up)
 
 // The clouds along a way from an eye, the light they send toward it with the sky's color in front
 // of them, multiplied by how much they cover, and how much they cover, after the exposure, marched
-// in so many steps from a point the jitter, from 0 to 1, moves along the first, and the depth the
-// light came from on average, or the farthest the march reaches where none came.
-float4 marchClouds(float3 eye, float3 way, float steps, float jitter, out float meanDepth)
+// in so many steps from a point the jitter, from 0 to 1, moves along the first, and lit by the light
+// brightest() chose, and the depth the light came from on average, or the farthest the march
+// reaches where none came.
+float4 marchClouds(float3 eye, float3 way, float steps, float jitter, int sun, out float meanDepth)
 {
     // The planet's middle under the world's origin, the ground there at height zero.
     float3 center = float3(0.0, -layer.z, 0.0);
@@ -312,7 +318,6 @@ float4 marchClouds(float3 eye, float3 way, float steps, float jitter, out float 
         float stride = (leave - enter) / steps;
         float t = enter + stride * jitter;
 
-        int sun = brightest();
         float3 toSun = sun >= 0 ? normalize(passLights.directional_lights[sun].direction_to_light) : float3(0.0, 1.0, 0.0);
         float3 sunLight = sun >= 0 ? passLights.directional_lights[sun].color.rgb * passView.exposure : 0.0;
         float cosine = dot(way, toSun);
@@ -421,6 +426,7 @@ float4 marchClouds(float3 eye, float3 way, float steps, float jitter, out float 
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
+    int sun = brightest();
     uint2 size;
     clouds.GetDimensions(size.x, size.y);
     if (any(id.xy >= size))
@@ -438,7 +444,7 @@ void main(uint3 id : SV_DispatchThreadID)
     float4 now = float4(0.0, 0.0, 0.0, 0.0);
     float meanDepth = layer.w;
     if (sky && passHasDepth())
-        now = marchClouds(eye, way, max(march.x, 1.0), passBlueNoise(int2(id.xy)).x, meanDepth);
+        now = marchClouds(eye, way, max(march.x, 1.0), passBlueNoise(int2(id.xy)).x, sun, meanDepth);
 
     // Last frame's clouds where they stood in last frame's view.
     if (march.w > 0.5)
@@ -467,12 +473,12 @@ void main(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void shadows(uint3 id : SV_DispatchThreadID)
 {
+    int sun = brightest();
     uint2 size;
     cloud_shadow.GetDimensions(size.x, size.y);
     if (any(id.xy >= size))
         return;
 
-    int sun = brightest();
     if (sun < 0)
     {
         cloud_shadow.Store(id.xy, float4(1.0, 1.0, 1.0, 1.0));
@@ -524,6 +530,7 @@ void shadows(uint3 id : SV_DispatchThreadID)
 [numthreads(8, 8, 1)]
 void sky_clouds(uint3 id : SV_DispatchThreadID)
 {
+    int sun = brightest();
     uint3 size;
     sky_cloud_cube.GetDimensions(size.x, size.y, size.z);
     if (any(id >= size))
@@ -545,8 +552,8 @@ void sky_clouds(uint3 id : SV_DispatchThreadID)
     {
         float meanDepth;
         float steps = max(march.x, 16.0);
-        cloud = 0.5 * (marchClouds(passView.world_position, way, steps, 0.25, meanDepth)
-            + marchClouds(passView.world_position, way, steps, 0.75, meanDepth));
+        cloud = 0.5 * (marchClouds(passView.world_position, way, steps, 0.25, sun, meanDepth)
+            + marchClouds(passView.world_position, way, steps, 0.75, sun, meanDepth));
     }
     sky_cloud_cube.Store(id, float4(cloud.rgb / max(passView.exposure, 1e-10), 1.0 - cloud.a));
 }

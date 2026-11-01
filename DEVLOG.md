@@ -25,6 +25,16 @@ shot forty frames after the page switched them on, the level's walls and floor, 
 and their clearcoat row not yet drawn while their pipelines compiled, and on the right shot once
 pipelines.wait answered, the clock held still meanwhile, the view whole.
 
+![](.github/assets/readings/2026-11-01-item-90-lavapipe.webp)
+The feature test's playground at 8:00 under a partly cloudy sky as the drive takes it, on the left
+on a GPU and on the right on Mesa's llvmpipe on four threads as the workflow's runners draw it, the
+clouds' kernels choosing their light before their threads part, which llvmpipe needs, the clouds
+thinner on the left since that run began from a clear sky.
+
+Done that day
+
+- Item 89 at `3ee62451`. A fresh offscreen session's first frame is whole.
+
 ## 2026-10-31
 
 ![](.github/assets/readings/2026-10-31-item-82-hall.webp)

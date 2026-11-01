@@ -172,7 +172,9 @@ float cloudShadow(float3 at)
 }
 
 // The directional light that lights the scene most through the air, the sun by day and the moon at
-// night, whose shadow the sun's share of the fog's light falls into, or none.
+// night, whose shadow the sun's share of the fog's light falls into, or none, chosen first in the
+// entry before any thread returns, since llvmpipe faults on this loop's transmittance read once the
+// threads of a group have parted (clouds.slang's).
 int brightest()
 {
     int best = -1;
@@ -196,6 +198,7 @@ int brightest()
 [numthreads(4, 4, 4)]
 void main(uint3 id : SV_DispatchThreadID)
 {
+    int sun = brightest();
     uint3 size = uint3(grid.xyz);
     if (any(id >= size))
         return;
@@ -216,7 +219,6 @@ void main(uint3 id : SV_DispatchThreadID)
     float3 sky = skyAlong(way);
     float3 light = sky;
 
-    int sun = brightest();
     if (sun >= 0)
     {
         float3 ambient = min(skyAmbient(), sky);
