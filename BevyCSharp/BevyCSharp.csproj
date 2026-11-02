@@ -84,13 +84,14 @@
     -->
     <ItemGroup>
         <ProjectReference Include="../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
     </ItemGroup>
     <PropertyGroup>
         <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModules</TargetsForTfmSpecificBuildOutput>
     </PropertyGroup>
     <Target Name="BevyCSharpPackModules" DependsOnTargets="ResolveReferences">
         <ItemGroup>
-            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Levels'"/>
+            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Levels' Or '%(ReferencePath.Filename)' == 'Sky'"/>
             <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
             <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
                                   Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>

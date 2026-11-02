@@ -1,4 +1,5 @@
 using Bevy;
+using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -6,7 +7,8 @@ namespace Bevy.Tests;
 /// <summary>
 /// A camera's look (<see cref="Render.SetLook"/>), SHARED.md's ramp drawn through it and held to a
 /// model of it worked out here, and the model held to the figures 3DEngine's own tests hold its
-/// curve to, so a look with the same numbers shows the same picture in both engines.
+/// curve to, so a look with the same numbers shows the same picture in both engines, and a look
+/// given again as a cycle by the sun's height gives it every frame.
 /// </summary>
 [Collection("engine")]
 public sealed class LookTests
@@ -106,6 +108,28 @@ public sealed class LookTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetLook(default, new LookSettings { Saturation = float.NaN }));
         Assert.Throws<ArgumentOutOfRangeException>(() => Render.SetLook(default, new LookSettings { CurveWhite = float.PositiveInfinity }));
+    }
+
+    [SkippableFact]
+    public void ALookGivenAgainChangesThePicture()
+    {
+        Needs.Shaders();
+        // Gray, then given again with its color back, as a cycle gives a camera its look every
+        // frame, which changes the look's numbers alone.
+        var camera = Entity.None;
+        var run = RampRun(new LookSettings { Saturation = 0f }, hdr: true, spawned: c => camera = c);
+        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady() && Looks.All().All(l => l.Ready))
+            .Wait(ShaderMaterialTests.Settled)
+            .Capture("gray")
+            .Do("giving the look again", _ => Render.SetLook(camera, new LookSettings { Saturation = 1f, Dither = false }))
+            .Wait(10)
+            .Capture("colored")
+            .Go();
+
+        var gray = run.Picture("gray").At(600, 1);
+        var colored = run.Picture("colored").At(600, 1);
+        Assert.True(Math.Abs(gray.R - gray.G) <= 2, $"the red row under a gray look reads {gray}");
+        Assert.True(colored.R - Math.Max(colored.G, colored.B) > 100, $"the red row given its color back reads {colored}");
     }
 
     // The ramp's rows, gray, red, green and blue alone, cyan, magenta and yellow, and the value with

@@ -1,4 +1,5 @@
 using Bevy;
+using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -45,10 +46,10 @@ public sealed class NightSkyTests
         var picture = Sky(settings, clock, towardMoon: true);
 
         // Half the moon's radius toward the sun and away from it, along the sun's way across the picture.
-        var forward = clock.MoonDirection;
+        var forward = Of(clock.MoonDirection);
         var right = Vec3.Cross(forward, Vec3.UnitY).Normalized;
         var up = Vec3.Cross(right, forward);
-        var (across, down) = (Vec3.Dot(clock.SunDirection, right), -Vec3.Dot(clock.SunDirection, up));
+        var (across, down) = (Vec3.Dot(Of(clock.SunDirection), right), -Vec3.Dot(Of(clock.SunDirection), up));
         var length = MathF.Sqrt((across * across) + (down * down));
         var pixels = 1.5f / (30f / picture.Height);
         var (cx, cy) = (picture.Width / 2f, picture.Height / 2f);
@@ -89,14 +90,14 @@ public sealed class NightSkyTests
             {
                 var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = towardMoon ? 30f : 60f });
                 var eye = new Vec3(0f, 2f, 0f);
-                var toward = towardMoon ? clock.MoonDirection : new Vec3(0f, MathF.Sin(MathF.PI / 3f), MathF.Cos(MathF.PI / 3f));
+                var toward = towardMoon ? Of(clock.MoonDirection) : new Vec3(0f, MathF.Sin(MathF.PI / 3f), MathF.Cos(MathF.PI / 3f));
                 ecs.Add(camera, Transform.LookingAt(eye, eye + toward, Vec3.UnitY));
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
                 if (atmosphere)
                 {
                     Render.SetAtmosphere(camera, new AtmosphereSettings());
                     var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 12_500f, Shadows = false });
-                    ecs.Add(sun, Transform.LookingAt(clock.SunDirection, Vec3.Zero, Vec3.UnitY));
+                    ecs.Add(sun, Transform.LookingAt(Of(clock.SunDirection), Vec3.Zero, Vec3.UnitY));
                 }
                 if (settings is not null) Render.SetNightSky(camera, settings);
             },
@@ -109,4 +110,7 @@ public sealed class NightSkyTests
             .Go();
         return run.Picture("sky");
     }
+
+    // The Sky module works in System.Numerics' vectors.
+    private static Vec3 Of(System.Numerics.Vector3 value) => new(value.X, value.Y, value.Z);
 }

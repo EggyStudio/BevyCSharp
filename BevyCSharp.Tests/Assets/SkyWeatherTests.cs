@@ -1,4 +1,5 @@
 using Bevy;
+using Sky;
 using Xunit;
 
 namespace Bevy.Tests;

@@ -17,8 +17,11 @@
     <ItemGroup Condition="'$(MSBuildProjectName)' != 'BevyCSharp'">
         <_BevyCSharpReference Include="@(ProjectReference->WithMetadataValue('Filename', 'BevyCSharp'))"/>
         <_LevelsReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Levels'))"/>
+        <_SkyReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Sky'))"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Levels/Levels/Levels.csproj"
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_LevelsReference)' == ''"/>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Sky/Sky/Sky.csproj"
+                          Condition="'@(_BevyCSharpReference)' != '' And '@(_SkyReference)' == ''"/>
     </ItemGroup>
 
 </Project>

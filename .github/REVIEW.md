@@ -1,35 +1,37 @@
 # Review
 
-Reviewed up to `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the
-three systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's
-first step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the
-form and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02,
-its run green at 14:50 on the three systems; it keeps the form and carries the review's files.
-Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on
-the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green
-at 14:30 with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green
-and 0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51.
-Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at
-02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with publish
-on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit
-of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read
-at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
-beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
-form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
-pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
-pack run started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its
-drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at
-00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its
-captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the
-run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of
-100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
-published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
-commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
-their light before any thread branches since llvmpipe faults on the transmittance lookup after a
-group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
-`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
-in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
-their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+Reviewed up to `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the
+three systems; it keeps the form and carries the review's files. Before it `add899da`, item 94,
+pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three systems; it keeps the form and
+carries the review's files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on
+2026-11-02, its run green at 17:33 on the three systems; it keeps the form and carries the review's
+files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the
+three systems; it keeps the form and carries the review's files. Before it `b8cc8316`, Verdict 51's
+mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in about 20
+minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the drive in 125
+minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18 published, the
+first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts
+49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in
+about 14 minutes; the pack run started from it at 02:26 with publish on, its captures jobs green,
+which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where
+the run before took 67, Verdict 51, so no package was published; read at 04:30. Before it
+`720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run,
+its run green at 00:42 on the three systems in about 17 minutes; it keeps the form and carries the
+review's files. Before it `58265110`, item 90's second commit and its end, pushed at 23:03 on
+2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the pack run started
+from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs
+the proof of item 90's limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on
+Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43,
+many_foxes and specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on
+those three jobs alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under
+its 40 and the games in 35, the pack job skipped so no package was published, the next pack run
+after the two verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after
+3ee62451's green run, its run green at 18:16, the kernels choosing their light before any thread
+branches since llvmpipe faults on the transmittance lookup after a group's threads have parted.
+Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of
+`3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
+`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
+ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
 while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
 game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
@@ -309,126 +311,6 @@ from [SHARED.md](SHARED.md).
     with snapping, undo and saving; the clip tool, vertex editing kept convex and face texturing;
     entities, their properties and item 66's connections panel.
 
-68. **The feature test's level is remade in the new tools and looks as the owner asked.** From
-    Decision 61, the owner finding the level ugly. The level is rebuilt as a file of item 65 in the
-    prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
-    kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
-    the captures of the feature test retaken and the owner shown the result. After item 67. Brought
-    forward on 2026-10-26 by the owner's word, Decision 68, after item 65's hub commit and before 66
-    and 67, in the phases the coder proposed, the hub as the plaza first; then the rooms and the
-    boundary, a hall for the course, a gallery room, light bays, a meadow courtyard and a scenes
-    hall joined by corridors, ramps and a raised walkway inside a tall wall, the ground plane, the
-    terrain and the light hall's house going and Zones' centers and starts moving into the rooms,
-    the layout pictured before content moves; then each zone's content moved in, one commit a zone,
-    the drive's stations and captures updated as each moves; then the drive and captures retaken,
-    the README and docs saying the new map. The engine's features stay; a check a room cannot hold
-    goes with a note. The second phase as the coder proposed on 2026-10-26 after the hub, courts
-    enclosing each zone's content where it stands so the drive stays green before anything moves,
-    the course and playground, the gallery, the meadow and forests, the Sponza yard with its corner
-    toward the hub cut away and the light hall's shell rebuilt from brushes at its size, arched
-    corridors joining them to the plaza, the west corridor an arcade and the meadow given a raised
-    walkway on ramps, the ground plane's mesh going with an entity at ground height for Crates' slab
-    and the RTAO rays, Lights.Shell replaced by brushes, a public LevelBrush.Moved for the generator
-    and item 67's editor, the layout pictured to the owner and in the devlog with a line a room
-    before the third phase. The second phase at `7e082be1` on 2026-10-26, the courts, the hall's
-    shell and the corridors round the zones where they stand, no horizon from any start, the walkway
-    or the ramps, the layout pictured and sent; the third phase next, each zone's pieces moved into
-    its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
-    course court next. The course court at `3417d612` on 2026-10-30. The gallery court landed at
-    `63aca2f2` on 2026-10-31, the first court built on the Levels module; the meadow court next, its
-    trees as level tree entities. The meadow court landed at `7332bc50` on 2026-11-01, its trees as
-    level tree entities; the scenes yard next, then phase 4. The scenes yard landed at `3808bd37` on
-    2026-11-01, the pack's site an info_scene point in the level, which ends the third phase's
-    courts; phase 4 after item 89. The fourth phase is done at `720ec3db`, read at 00:23 on
-    2026-11-02, which ends the item, the ray tracing guide's denoiser figures read again over 256
-    frames a view, filtered 1.3 to 6.4 levels from the mean and grainy 8.9 to 18.0, the strafe's
-    uncovered surfaces 18 to 20 against 38, denoiser.webp and scene-field.webp retaken on the walled
-    map, the RTAO sentence corrected, the weather's costs at the hub at 15:00 under an overcast in
-    the comparison guide (clouds and their shadow 0.27 ms, the clouds over the sky 0.29, froxel fog
-    0.38, precipitation 0.04), two remarks losing the old map's words, the reading
-    2026-11-01-item-68-scene-field.webp; the GPU drive whole in 244 s, every view sent to the owner
-    in one sheet; 1,996 in the suite. Two leads from the reading are item 92.
-
-80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
-    item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
-    GenerateNuspec alone, so build and run never check, and its inputs are the Rust files and
-    Cargo.toml alone, so a changed shader under native never counts as stale; a person running
-    dotnet run after a pull can draw last week's shaders under this week's C# with no word. The
-    check runs before build too, cheap by file times, over every file under native the library is
-    built from, shaders among them, and says in one line which file is newer than the library and
-    which script rebuilds it; the README's dotnet run paragraph says so where it said it under
-    building from source alone. One commit, small, after item 79.
-
-90. **The feature test runs on the runner's lavapipe without a crash.** Found by the coder on
-    2026-11-01 at 11:58 beside item 89, in the pack run's own setup run locally, the sdk image with
-    Mesa 25.2.8's llvmpipe on four threads, a render bridge of the day's native code, a fresh
-    archive checkout and the job's steps; the program segfaults 20 to 60 s in, before the drive's
-    first view, at `3808bd37` and on item 89's tree alike, on a set clock or not, the faulting frame
-    in code without symbols with a stack of packed floats, llvmpipe running a shader; the drive
-    passed there in about 70 minutes around 2026-10-17 to 19, so a commit since brought it, and the
-    pack run's drive job would fail at the head. A bisection first over the commits since, by the
-    drive in that setup, the suspects the grass shaders of item 83, the G-buffer given to cameras of
-    item 88 and the shader mends of item 82; then the mend by the cause, or where it is llvmpipe's
-    own fault a way around it said in the shader with the reason; read by the drive whole in that
-    setup and its time against the job's 90 minutes. After 89, before 68's phase 4, since the next
-    package needs it. Read on 2026-11-01 at 17:07, the cause found by bisection, `6649ab49` crashing
-    after 38 s where `f93cb76b` and `dc2ea49d` survive 240, item 69's third phase weighing each
-    light by the transmittance at the eye in brightest(), a lookup llvmpipe faults on with a null
-    read in its JIT code when the loop runs after a group's threads have parted inside the march's
-    branches; the way around, each entry of clouds, fog_froxels and precipitation choosing its light
-    before any thread branches and passing it on, the reason in clouds.slang's comment, lavapipe
-    running 150 s under the defaults, Rain and Snow, the 34 sky tests and the suite's 1,995 passing,
-    the GPU drive green. In the runner's setting the mended drive runs 128 minutes to the meadow
-    with no crash and stops there, each frame over 15 s, the hub 1,728 ms a frame under a partly
-    cloudy sky, since item 69's last phase the drive runs the engine's full weather at Medium on
-    lavapipe where it set WeatherTier Potato, never measured in a pack run since `09fc95dd`; the
-    setting runs about 1.48 times slower than the runner, so the job would run past its 90 minutes.
-    Two commits, the mend first and on its own, then the drive's weather on lavapipe set Low through
-    a quality setting the drive passes as WeatherTier did, or no weather there where Low still runs
-    past about 75 minutes scaled, the Medium path kept covered by the sky tests and the GPU drive,
-    the job's limit unchanged, chosen by the coder's measurement of the hub and the meadow per
-    variant and reported with the commit. Measured at 18:58 in the runner's setting, llvmpipe on
-    four threads, the hub 1,484 ms a frame at Medium, 1,329 at Low and 1,058 with no weather, the
-    meadow 32.4, 31.6 and 31.0 s and 12 s without shadows, so the meadow's trees cost more than the
-    weather, pipelines.wait about 190 s more there; the drive alone about 99 minutes on the runner
-    as is, 94 at Low and 85 with no weather, over the limit each way. The call is a WeatherQuality
-    setting of the feature test (Low, Medium, High, Off) the drive passes from an environment value,
-    the workflow setting Off and the GPU drive keeping the game's Medium, and the drive's views
-    waiting 5 frames before a shot in place of 40 or 60 when the weather is off, the clouds' history
-    being the one reason for the wait, about 65 minutes on the runner together, after a 5-frame view
-    is read against a 40-frame one on the GPU and the whole drive is run in the runner's setting for
-    its real time; with the three kernels run on the runner's lavapipe by the drive itself after its
-    views, the weather back on at Medium over the playground under Rain for 30 frames and Snow for
-    30, about two minutes, since the Linux test job builds a headless bridge and every drawing test
-    skips there; a kind showing at once when the map's weather comes back from off, with no drawn
-    weather left to ease from; the job's limit unchanged. The Reply's line on four processors is
-    corrected in that commit, taskset outside the container never having reached it. Run whole in
-    the runner's setting at 21:20 with the weather off and the five-frame views, the drive passed in
-    104.8 minutes there, about 71 on the runner, rain and snow included with no crash, the hub 1,195
-    ms a frame and the peak 4.57 GB, the course's 4,600 frames of holds taking 60 of the minutes;
-    with the soak's 16 and the setup's 4 the job would read about 91 against its 90. The call is the
-    soak in a job of its own beside the drive with its own pack and build and a limit from its
-    measured time, and the drive job's limit at 100 with the reason that the drive reads about 75
-    minutes since item 69's course holds and the trees, so 90 would be met by the runner's variance
-    and not a hang (N 6.8); not shadows off on lavapipe, not 120 on one job. The GPU pair with the
-    weather off, 40 frames against 5, the gallery and hall views 0.02 to 0.08 levels apart where
-    run-to-run noise is 0.3 to 0.5, the meadow 0.49 by its trees' sway, the effects view keeping its
-    60 since it streaks at 5, the mode banner waited out once after mode spectator; rain and snow on
-    llvmpipe against the GPU 0.9 and 7.4 levels apart by where the flakes fall. Done at `58265110`
-    on 2026-11-01, read at 23:03, its push after 5fb59903's green run; the drive in the runner's
-    setting 6,290 s with the weather off, about 71 minutes on the runner and 75 with the steps
-    before, rain and snow drawn without a crash, the drive job's limit 100 with its reason; the soak
-    in a job of its own, feature-test-soak with a limit of 40, passing cold in a container read as
-    the runner's 15.6 GiB, 1,720 s with 555 to answer and compile and six rounds of 194 at 4.14 then
-    3.96 GB, after three mends a cold start needed, soak.sh and the drive waiting 600 s for a first
-    answer while lavapipe compiles, the feature test given the drive's 8 GiB cap where its default
-    quarter of the runtime's reading held it back, and pipelines.wait run before the first round so
-    compiles do not read as growth; the GPU pair as read, the effects view keeping its 60; the
-    reading 2026-11-01-item-90-rain-snow.webp; 1,996 in the suite. Then 68's phase 4, the stale
-    figures measured on the old open map retaken on the GPU with the drive's views. Proven on the
-    runner at 01:13 on 2026-11-02 in the pack run from `58265110`, the drive green in 67 minutes
-    under its 100 and the soak in 25 under its 40, rain and snow drawn there without a crash.
-
 91. **The sky's clock, weather and looks move to the Sky module.** SkyClock, WeatherState and
     LookCycle, which reference no engine, move as they are with their tests to `Modules/Sky` as the
     module's item 3's first part (Decision 75), the engine taking the module as a git submodule
@@ -437,33 +319,15 @@ from [SHARED.md](SHARED.md).
     the module, pushed by the reviewing session before the commit here that moves the pointer; the
     night sky, the sky fog, the clouds and the atmosphere stay here, Bevy drawing them from the
     module's numbers; the suite green on the three systems. After 90 and 68's phase 4, beside the
-    Vegetation move.
-
-92. **The Cornell lamp under rays, its face and its halo.** Two leads from item 68's fourth reading
-    on 2026-11-02. First, the lamp's face reads gray under rays, in a grainy frame, in their mean
-    and in the denoiser's, where the picture of 2026-10-24 at 09:23 had it white; the lamp's
-    Emissive alpha of 1 became Bevy's emissive_exposure_weight at `36d783bf` that afternoon, so the
-    cause is read there first, the face white again as an emitter is, read against the reference
-    frame. Second, the denoiser's frame brightens the ceiling round the lamp about 24 levels over
-    the mean, about 1.3 of the Cornell view's 6.4 where below the lamp the view lies at 5.0, a bias
-    of the filter next to an emitter; the cause read in the denoiser's weights at the lamp's edge
-    and mended where it is the filter's, the figures of the guide read again. One or two commits,
-    after Verdict 49's mend and before 80. Done at `99160868` on 2026-11-02, read at 14:32. The
-    lamp's face, `36d783bf` having written the G-buffer's emissive already exposed where Solari and
-    the denoiser expose it again, the alpha carried in the deferred flag bits, the color kept raw
-    and a lightmap's light divided by what the pass adds, a test reading an exposed emissive the
-    same under rays as forward within 2% where 0.0383 against 38.2 before. The ring, read in linear
-    light as the denoised Cornell view against the mean of 32 grainy frames, the edge at 0.37 to
-    0.59 of its mean and the ring 5 to 20 px out at 1.12 to 1.23, two causes in the denoiser, the
-    taps weighed against one frame's variance where the filter is given the history's mean, the
-    variance taken as the spread times the blend, and the first pass's filtered light kept as
-    history which re-blurred a still view every frame, the temporal mean kept instead; with both
-    every band at 0.89 to 0.98; the guide's figures from 1.3 to 6.2 to 1.6 to 5.3, the gallery 6.18
-    to 2.65, the vegetation 3.74 to 1.82, the cost 1.99 ms against 1.94; the helmet's reflection in
-    solari_reflections sharp by the same mend, its Fedora pictures taken again within 2.7% of the
-    old; a test of the band beside a lamp within 15% of the grainy mean; 1,998 in the suite; the
-    Cornell and reflections readings sent to the owner. A lead for the readings script, the
-    reference taken before tonemapping.
+    Vegetation move. Read at 20:40 on 2026-11-02 before the move. The three stand on six
+    engine-defined types, DayPhase, WeatherConditions, WeatherPreset, WeatherClimate, LookSettings
+    and LookCurve, none referencing the engine beyond crefs, so nine files move, Vec3 becoming
+    System.Numerics.Vector3 as the module's Sun and Atmosphere use it with a private conversion at
+    each use here, the namespace Sky, the crefs as prose; SkyClockTests and WeatherStateTests move
+    whole, the look tests split by what needs the engine; the module referenced as Levels is, the
+    nine types leaving the public listing; Sky.Atmosphere meeting the engine's Atmosphere component,
+    the engine's winning inside its namespace and a game qualifying where it uses both, said in the
+    guide.
 
 93. **The drive's course is cheaper on lavapipe.** From Verdict 51's reading on 2026-11-02. The
     course's stations judge only where the player stands, yet each of its frames costs 1.1 to 1.7 s
@@ -492,23 +356,21 @@ from [SHARED.md](SHARED.md).
     unchanged, the 7763 reckoned at about 108 of its 125; the suite 1,997 with one failure that
     passes alone 3 of 3, item 94. The course drawn smaller waits on the next pack run's reading.
 
-94. **A scene field shadow test fails once in a suite and passes alone.** From item 93's suite on
-    2026-11-02:
-    SceneFieldShadowTests.TheWindowsSliceAcrossABoxIsRedInsideBlackAtItsFacesAndGrayBeyond, its
-    image readback answering NoComponent, the component type never registered with the world, a
-    second into the test, in a batch that changed no code a test runs, passing alone three of three
-    and in the two suites before. The cause read, the readback's registration racing the world's or
-    a test before it leaving a world behind, and the test or the readback made to hold, read by the
-    suite run three times with the test in its place. One commit, before 80. Done at `add899da` on
-    2026-11-02, read at 19:37. The cause, the slice being no handle until field_slice.slang has
-    compiled, the last of the five programs the field's tick makes, which settled did not wait for,
-    the bridge answering an unknown key with NO_COMPONENT; in the failed run the two compiles before
-    it logged at 53.47 and 53.58 s and the test failed at 53.67; no world left behind, the field
-    resetting its statics for each app. The mend, the slicing step an Until asking each frame until
-    the slice answers an image, the image read refusing a missing handle with an ArgumentException
-    saying so, and a test of that refusal; the suite three times with the test in place, 1,999
-    passed each in 43 to 45 minutes, the slice test in 1 to 2 s. A lead, the bridge's readers
-    answering an unknown key with NO_COMPONENT in 11 places and NOT_PRESENT in 17.
+95. **Global illumination on by default in the feature test.** Decision 74. The owner chose on
+    2026-10-31 to fix global illumination and use it in the feature test after the cascades' fix,
+    taking a near-neutral fill for the time being (item 87). With 82, 87, 88 and 92 landed, the
+    hall's faults are read again with the fill off, the white level blue in shade and the morning
+    sun too warm, against the walled map's reference and the owner's eye; where they are mended,
+    global illumination goes on by default and the fill comes off; where one remains, it is named
+    with its cause and mended, each a commit, the drive and the pictures read after. After 91.
+
+96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
+    Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
+    tests to `Modules/Vegetation`, one commit a part, the engine binding the leaves' material, the
+    wind, the impostors and the light through as its renderer has them, the engine taking the module
+    as a submodule under `modules/` as it takes Sky (item 91's form), the module pushed before the
+    commit here that moves the pointer, a Shared line when a part lands, the suite and the drive
+    green. After 95.
 
 ## Verdicts
 
@@ -1668,3 +1530,31 @@ build/norm/1.4.txt holds 32 lines where it held 31. The README says it under the
 and under building from source, and BUILDING.md beside BCS101. The whole suite ran with it, 2,002
 passed and 3 skipped in 43 m 45 s at the 3 GB cap, none aborted, its -warnaserror build saying no
 BCS102 on the checkout's current bridge. NormTests passed, 18. The public listing is unchanged.
+
+Item 91, in the commit carrying this line. The Sky module is a submodule under modules/Sky at
+fbc385e, the module's item 3's first part, which moved SkyClock, WeatherState and LookCycle there
+with the six types they stand on, DayPhase, WeatherConditions, WeatherPreset, WeatherClimate,
+LookSettings and LookCurve, in the namespace Sky, BevyCSharp's Vec3 becoming System.Numerics'
+Vector3 and the references to Render in their documentation said in words. The library references
+the module as it does Levels, with PrivateAssets all and the pack target carrying Sky.dll and
+Sky.xml in the lib folder, which a package packed here showed, and Directory.Build.targets gives it
+to every project here that references the library. The nine files and SkyClockTests and
+WeatherStateTests are gone here, and LookCycleTests' one drawn test is in LookTests beside the
+look's other drawn tests, its five others in the module. The night sky, the weather and the look
+read the module through using Sky, the weather's wind and the clock's ways turned into Vec3 where a
+camera's settings or a transform takes them, through SkyWeather.FromSky and a private Of in the
+night sky's tests and the feature test's day and night. The night sky, the sky fog, the clouds and
+the atmosphere stay here, drawn by Bevy from the module's numbers. The guide's sky page names the
+module where the clock comes, with a sentence on its Atmosphere sharing a name with the engine's
+component, the engine's winning inside its namespace and a file with both usings naming the one it
+means in full, and the look's section says its settings are the module's. The guide's blocks of the
+two pages built on that package, 33 of them, and the feature test built on it with -warnaserror. The
+whole suite ran with it, 1,982 passed and 3 skipped in 43 m 21 s at the 3 GB cap, none aborted, the
+20 tests that moved the difference from 2,002. NormTests passed, 18. PublicApi.txt and CHEATSHEET.md
+are written again by build/api.sh and build/cheatsheet, so the public listing changes, the nine
+types' 108 lines leaving it, while Render.SetLook, Render.SetWeather and NightSkySettings.Clock keep
+theirs, the listing naming a type by its name alone, and take the module's types.
+
+Shared: item 91 takes the Sky module into BevyCSharp at fbc385e, the clock, the weather and the
+looks by the sun's height read from it as 3DEngine reads the sun's and the sky's light, both
+engines' pointers at or past fbc385e once 3DEngine moves its own.

@@ -1340,11 +1340,6 @@ readonly struct Bevy.DataRef<T> : IDataRef, IEquatable<DataRef<T>>
 sealed class Bevy.DataVersionAttribute : Attribute
   DataVersionAttribute(int version)
   int Version { get; }
-enum Bevy.DayPhase : int
-  Dawn = 1
-  Day = 2
-  Dusk = 3
-  Night = 0
 static class Bevy.Debug
   static Key? OverlayKey { get; set; }
   static bool OverlayShown { get; set; }
@@ -4292,31 +4287,6 @@ enum Bevy.LogicalKeyKind : int
   Character = 1
   Dead = 2
   Named = 0
-enum Bevy.LookCurve : int
-  Knee = 0
-  Numbered = 1
-sealed class Bevy.LookCycle
-  IReadOnlyList<(float, LookSettings)> Keys { get; }
-  LookCycle Add(float degrees, LookSettings look)
-  LookCycle()
-  LookSettings At(float degrees)
-  static LookCycle Day()
-sealed class Bevy.LookSettings
-  (float, float, float) Tint { get; set; }
-  LookCurve Curve { get; set; }
-  LookSettings()
-  bool Dither { get; set; }
-  float Contrast { get; set; }
-  float CurveExposure { get; set; }
-  float CurveLower { get; set; }
-  float CurveUpper { get; set; }
-  float CurveWhite { get; set; }
-  float Exposure { get; set; }
-  float Knee { get; set; }
-  float KneeStrength { get; set; }
-  float Saturation { get; set; }
-  static LookSettings Lerp(LookSettings from, LookSettings to, float share)
-  static LookSettings Vivid()
 sealed class Bevy.MainThreadAttribute : Attribute
   MainThreadAttribute()
 sealed class Bevy.MapValue : IEnumerable, IEnumerable<KeyValuePair<object, object>>, IEquatable<MapValue>, IReadOnlyCollection<KeyValuePair<object, object>>, IReadOnlyList<KeyValuePair<object, object>>
@@ -12803,26 +12773,6 @@ readonly struct Bevy.Sides : IEquatable<Sides>
   static bool op_Equality(Sides left, Sides right)
   static bool op_Inequality(Sides left, Sides right)
   void Deconstruct(out Length Left, out Length Top, out Length Right, out Length Bottom)
-sealed class Bevy.SkyClock
-  DayPhase Phase { get; }
-  SkyClock()
-  Vec3 MoonDirection { get; }
-  Vec3 Pole { get; }
-  Vec3 SunDirection { get; }
-  Vec3 TowardSky(float rightAscension, float declination)
-  const float SynodicMonth = 29.530588f
-  float AxialTilt { get; set; }
-  float DayOfYear { get; set; }
-  float Hour { get; set; }
-  float Latitude { get; set; }
-  float MoonAge { get; }
-  float MoonAgeAtStart { get; set; }
-  float MoonAltitude { get; }
-  float MoonLit { get; }
-  float MoonPhase { get; }
-  float SkyTurn { get; }
-  float SunAltitude { get; }
-  void Advance(float hours)
 sealed class Bevy.SkyFogSettings
   (float, float, float)? Color { get; set; }
   FroxelFogSettings? Froxels { get; set; }
@@ -13958,64 +13908,6 @@ enum Bevy.VisibilityMode : byte
   Hidden = 1
   Inherited = 0
   Visible = 2
-enum Bevy.WeatherClimate : int
-  Arid = 2
-  Maritime = 1
-  Polar = 4
-  Temperate = 0
-  Tropical = 3
-sealed class Bevy.WeatherConditions
-  WeatherConditions Copy()
-  WeatherConditions()
-  float CloudBase { get; set; }
-  float CloudCover { get; set; }
-  float CloudDensity { get; set; }
-  float CloudTop { get; set; }
-  float Fog { get; set; }
-  float Gusts { get; set; }
-  float Rain { get; set; }
-  float Snow { get; set; }
-  float Stratus { get; set; }
-  float Temperature { get; set; }
-  float Thunder { get; set; }
-  float WindFrom { get; set; }
-  float WindSpeed { get; set; }
-  static WeatherConditions Lerp(WeatherConditions from, WeatherConditions to, float share)
-  static WeatherConditions Of(WeatherPreset preset)
-enum Bevy.WeatherPreset : int
-  Blizzard = 11
-  Clear = 0
-  Drizzle = 5
-  FewClouds = 1
-  Fog = 12
-  Hazy = 4
-  LightSnow = 9
-  MistyMorning = 13
-  Overcast = 3
-  PartlyCloudy = 2
-  Rain = 6
-  Sandstorm = 14
-  Snow = 10
-  Storm = 7
-  Thunderstorm = 8
-sealed class Bevy.WeatherState
-  SkyClock? Clock { get; set; }
-  Vec3 Carried { get; }
-  Vec3 Wind { get; }
-  WeatherClimate Climate { get; set; }
-  WeatherConditions Current { get; }
-  WeatherConditions ForecastAt(float dayOfYear, float hour)
-  WeatherConditions Target { get; }
-  WeatherState()
-  bool Forecast { get; set; }
-  float HalfLife { get; set; }
-  float SnowCover { get; }
-  float SystemsPerDay { get; set; }
-  float Wetness { get; }
-  uint Seed { get; set; }
-  void Advance(float seconds)
-  void Set(WeatherConditions target, bool immediately = false)
-  void Set(WeatherPreset preset, bool immediately = false)
 sealed class Bevy.WideAttribute : Attribute
   WideAttribute()
 static class Bevy.Window

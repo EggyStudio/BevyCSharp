@@ -3,6 +3,7 @@ using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Bevy;
 using Bevy.Reflected;
+using Sky;
 
 namespace BevyCSharp.FeatureTest;
 

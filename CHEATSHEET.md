@@ -1825,15 +1825,6 @@ static void WarnOnce(string message, string file = "", int line = 0);  // Writes
 static void ErrorOnce(string message, string file = "", int line = 0);  // Writes a line at the error level the first time this line of code runs, Bevy's error_once!
 static void Once(Action work, string file = "", int line = 0);  // Runs work the first time this line of code runs and never again, Bevy's once!
 
-// LookCycle
-LookCycle Add(float degrees, LookSettings look);                // Keeps a look at a height of the sun, replacing one kept there
-LookSettings At(float degrees);                                 // The look at a height of the sun, between the two kept about it
-static LookCycle Day();                                         // A day's cycle on Vivid, the vivid look by day, warmer and deeper as the sun goes down to the horizon, bluer and calmer through the twilight, and cool at night
-
-// LookSettings
-static LookSettings Lerp(LookSettings from, LookSettings to, float share);  // A look part of the way from one to another, each number that far between the two, for a look that changes as a day goes (LookCycle)
-static LookSettings Vivid();                                    // A vivid look, Numbered at an exposure of 0.9, a white of 1.3 and powers of 1.05 and 1, the light raised by 1.6 before it, a saturation of 1.4 and a contrast of 1.12
-
 // MemoryGuard
 static long ResidentBytes();                                    // How many bytes of the machine's memory the process holds now
 static void Watch(double gigabytes);                            // Holds the process to a cap from here on, starting the watch the first time, or with zero lifts the cap
@@ -1890,10 +1881,6 @@ static Segment2d FromDirectionAndLength(Vec2 direction, float length);  // A seg
 Aabb2d AabbAt(Isometry2d isometry);                             // The box about the shape where it is placed, Bevy's aabb_2d
 BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle about the shape where it is placed, Bevy's bounding_circle
 
-// SkyClock
-void Advance(float hours);                                      // Moves the clock on by hours, the day of the year with it
-Vec3 TowardSky(float rightAscension, float declination);        // The way toward a point of the sky given in its own coordinates, its right ascension and declination in radians, as the stars stand at this hour
-
 // Sphere
 Vec3 SampleInterior(Random random);                             // A point inside it, each as likely as any other
 Vec3 SampleBoundary(Random random);                             // A point on its surface, each as likely as any other
@@ -1918,15 +1905,4 @@ static float PerpDot(Vec2 a, Vec2 b);                           // The dot produ
 static Vec2 Min(Vec2 a, Vec2 b);                                // The smaller of each component
 static Vec2 Max(Vec2 a, Vec2 b);                                // The larger of each component
 static Vec2 Clamp(Vec2 v, Vec2 min, Vec2 max);                  // Each component held between its bounds
-
-// WeatherConditions
-WeatherConditions Copy();                                       // A copy, to change without changing these
-static WeatherConditions Lerp(WeatherConditions from, WeatherConditions to, float share);  // The weather part of the way from one set of conditions to another, each number that far between the two
-static WeatherConditions Of(WeatherPreset preset);              // The conditions a preset names
-
-// WeatherState
-void Set(WeatherPreset preset, bool immediately = false);       // Gives the weather a preset to ease toward, or to take at once
-void Set(WeatherConditions target, bool immediately = false);   // Gives the weather conditions to ease toward, or to take at once
-void Advance(float seconds);                                    // Moves the weather on, its conditions, its wind and the ground
-WeatherConditions ForecastAt(float dayOfYear, float hour);      // The conditions the forecast gives a day of the year and an hour
 ```

@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Reflected;
+using Sky;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -165,8 +166,8 @@ public partial struct DayNight
         Sky.Advance(settings.DaySpeed * ctx.Time.Delta / 60f);
         var hour = Sky.Hour;
 
-        var sun = Sky.SunDirection;
-        var moon = Sky.MoonDirection;
+        var sun = Of(Sky.SunDirection);
+        var moon = Of(Sky.MoonDirection);
         var shadows = settings.Shadows && !Render.RayTracingActive;
 
         // Under the atmosphere the sun shines as it does above the air, its noon strength and white,
@@ -320,4 +321,7 @@ public partial struct DayNight
 
     /// <summary>An hour brought into the day, from zero up to twenty four.</summary>
     private static float Wrap(float hour) => ((hour % 24f) + 24f) % 24f;
+
+    /// <summary>A way the Sky module gives, in System.Numerics' vectors, as one of the engine's.</summary>
+    private static Vec3 Of(System.Numerics.Vector3 value) => new(value.X, value.Y, value.Z);
 }

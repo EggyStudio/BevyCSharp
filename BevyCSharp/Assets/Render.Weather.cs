@@ -1,3 +1,5 @@
+using Sky;
+
 namespace Bevy;
 
 public static partial class Render
@@ -110,7 +112,7 @@ internal static class SkyWeather
             given.Bottom = Math.Max(0f, now.CloudBase);
             given.Top = Math.Max(given.Bottom + 100f, now.CloudTop);
             given.Density = clouds.Density * Math.Max(0.01f, now.CloudDensity);
-            given.Wind = weather.Wind;
+            given.Wind = FromSky(weather.Wind);
             Render.SetClouds(camera, given);
         }
 
@@ -129,7 +131,7 @@ internal static class SkyWeather
                     Distance = froxels.Distance,
                     Lumps = froxels.Lumps,
                     LumpSize = froxels.LumpSize,
-                    Wind = weather.Wind,
+                    Wind = FromSky(weather.Wind),
                     Lights = froxels.Lights,
                     Boxes = froxels.Boxes,
                 };
@@ -143,7 +145,7 @@ internal static class SkyWeather
             {
                 Rain = Math.Clamp(now.Rain, 0f, 1f),
                 Snow = Math.Clamp(now.Snow, 0f, 1f),
-                Wind = weather.Wind,
+                Wind = FromSky(weather.Wind),
                 Quality = precipitation.Quality,
                 Reach = precipitation.Reach,
                 Roofs = precipitation.Roofs,
@@ -205,6 +207,12 @@ internal static class SkyWeather
         Brightness = was.Brightness,
         Froxels = was.Froxels,
     };
+
+    /// <summary>
+    /// A vector of the Sky module, which works in System.Numerics' as both engines read it, as one of
+    /// the engine's.
+    /// </summary>
+    internal static Vec3 FromSky(System.Numerics.Vector3 value) => new(value.X, value.Y, value.Z);
 
     private static void ForgetOtherApps()
     {

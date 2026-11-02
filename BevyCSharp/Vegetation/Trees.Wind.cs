@@ -181,7 +181,7 @@ public static partial class Trees
     /// </summary>
     private static void Blow()
     {
-        var wind = Wind ?? SkyWeather.All().Select(pair => (Vec3?)pair.Weather.Wind).FirstOrDefault() ?? Vec3.Zero;
+        var wind = Wind ?? SkyWeather.All().Select(pair => (Vec3?)SkyWeather.FromSky(pair.Weather.Wind)).FirstOrDefault() ?? Vec3.Zero;
         Render.SetTreeWind(wind);
     }
 }
