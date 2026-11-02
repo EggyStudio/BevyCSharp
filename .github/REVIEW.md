@@ -1,20 +1,22 @@
 # Review
 
-Reviewed up to `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02,
-its run green at 21:57 on the three systems, the first with the submodule checked out; it keeps the
-form and carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02,
-its run green at 20:55 on the three systems; it keeps the form and carries the review's files.
-Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three
-systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's first
-step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the form
-and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its
-run green at 14:50 on the three systems; it keeps the form and carries the review's files. Before it
-`b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three
-systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green at 14:30
-with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green and
-0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before
-it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on
-the three systems in about 14 minutes; the pack run started from it at 02:26 with publish on, its
+Reviewed up to `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on 2026-11-02, its run
+green at 22:55 on the three systems; it keeps the form and carries the review's files. Before it
+`1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02, its run green
+at 21:57 on the three systems, the first with the submodule checked out; it keeps the form and
+carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run
+green at 20:55 on the three systems; it keeps the form and carries the review's files. Before it
+`add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three systems; it
+keeps the form and carries the review's files. Before it `54f985a4`, item 93's first step, pushed at
+17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the form and carries the
+review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50
+on the three systems; it keeps the form and carries the review's files. Before it `b8cc8316`,
+Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in
+about 20 minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the
+drive in 125 minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18
+published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it
+`a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the
+three systems in about 14 minutes; the pack run started from it at 02:26 with publish on, its
 captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100
 minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read at
 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
@@ -391,7 +393,16 @@ from [SHARED.md](SHARED.md).
     seam at High along the yard wall's base, item 97. The order is the Length mend, the reference
     through the air and gi.compare answering with GI off, Medium's bounce by its cause, the hall's
     bay and wall against the corrected reference, then GI on by default with the fill off and the
-    drive's GI off on lavapipe through an environment value as the weather is.
+    drive's GI off on lavapipe through an environment value as the weather is. The Length mend is
+    `e6a458b1`, pushed at 22:36, with a test holding a steady wind to its line; 1,983 in the suite.
+    Found while reading the reference's fault, the bridge's GI lights give the sun as color times
+    illuminance over pi, exposed, with no transmittance, and the reference, the probes' trace and
+    the pass's ground term past the probes take it from there, so the probes' bounce at a low sun is
+    too bright and too white as well; the reference and the light pass are camera passes and read
+    the transmittance at the camera as Bevy does, the probes' trace a world dispatch handed the
+    transmittance toward the sun by the camera's sky copy. So the second commit is the reference and
+    gi.compare alone, and the probes' and the ground term's share a commit of its own after it and
+    before Medium's coverage, since it changes every GI reading.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -1604,3 +1615,34 @@ by its name, the night sky's, the weather's and the day and night's each turning
 Vec3 first. The whole suite ran with it, 1,983 passed and 3 skipped in 46 m 39 s at the 3 GB cap,
 none aborted, item 95's work held aside so the suite read this commit alone. NormTests passed, 18.
 The public listing is unchanged.
+
+Item 95's second commit, the measure's faults, in the commit carrying this line. gi.reference lit
+its faces by the sun as it is above the air, the light's own color and strength as the bridge's
+lights give the probes, where Bevy dims and reddens the sun through the camera's air for the
+picture, so the yard's sunlit faces at eight in the morning read 30 to 45% over the picture whatever
+the probes gave the shade. The reference's kernel reads Bevy's transmittance toward the sun at the
+camera before any thread returns and dims the sun by it, as the clouds read it, and
+GiReferenceTests.TheReferencesSunIsDimmedThroughTheAirAsThePictures holds a white floor under a sun
+ten degrees up, the first face's light alone in both, within 8% of the picture in each channel,
+where the reference read 1.60, 2.95 and 9.43 times the picture's red, green and blue before.
+gi.compare with global illumination off read a black picture and in the feature test gave no answer.
+Global illumination asks for Bevy's G-buffer, which draws every material deferred and leaves them so
+when it is turned off, and keep_deferred_phases gave the G-buffer to a 3D camera drawing a prepass
+alone, so the camera, left with none, drew no deferred material and showed its clear color, which a
+player turning global illumination off on the panel would have seen too. While materials are
+deferred every 3D camera keeps the G-buffer and the depth it is drawn over, and
+ThePictureIsReadWithGlobalIlluminationOff reads the picture's light after global illumination was on
+and turned off, where it read black, and where it was never on. The read also waited as long as the
+console, so given up by the console it held the measure busy for every read after. It gives itself
+up ten frames sooner, a reference after its paths' frames as well, and says where it stood, and
+AReadThatNeverAnswersGivesItselfUpBeforeTheConsoleDoes holds a read on a camera drawing nothing to
+that, where it ran to 602 frames. The probes' own sun and the light pass's ground past the probes
+take the same light from above the air, the next commit. cargo check passed on headless and the
+editor build of the bridge is clean, the change lying in a function every profile but headless
+compiles, and cargo test with no feature passed, 118. The whole suite ran with it, 1,987 passed and
+3 skipped in 45 m 26 s at the 3 GB cap, none aborted, item 95's game work held aside. NormTests
+passed, 18. The public listing is unchanged.
+
+Shared: a path-traced reference lights its faces by the sun as the picture's lighting gives it,
+through the same air, since one lit by the sun above the air read a low sun's sunlit faces a third
+over the picture. 3DEngine's BounceReference and its sky of item 170 are to consider.

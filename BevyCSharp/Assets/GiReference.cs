@@ -26,7 +26,8 @@ namespace Bevy;
 /// material's base color, emissive light, roughness, metallic and reflectance as the engine's
 /// material buffer has them, so a texture counts as its base color and a mesh's vertices' colors are
 /// left out. The lights are those global illumination's probes are lit by, the sun, the light from
-/// all around and the sixteen point and spot lights nearest the camera. It needs a GPU that traces
+/// all around and the sixteen point and spot lights nearest the camera, the sun dimmed through the
+/// camera's air as Bevy's lighting dims it for the picture. It needs a GPU that traces
 /// rays (<see cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so the app keeps one,
 /// with its geometry pool, from one reference to the next, and makes a larger one where a scene has
 /// more meshes than it holds.
@@ -59,12 +60,15 @@ internal static unsafe class GiReference
 
     private enum Stage { Sizing, Tracing, Reading, Copying }
 
+    /// <summary>How many frames before the console gives a command up a job gives itself up.</summary>
+    private const int GiveUpSooner = 10;
+
     private sealed class Job
     {
         public required bool Reference;
         public required Entity Camera;
         public string? Path;
-        public int Samples, Faces, Width, Height, Added, Frames;
+        public int Samples, Faces, Width, Height, Added, Frames, Steps;
         public Stage Stage;
         public AssetHandle Size = AssetHandle.None, Picture = AssetHandle.None, Sums = AssetHandle.None, Regions = AssetHandle.None;
         public BufferRead? SizeRead, SumsRead, RegionsRead, PictureRead;
@@ -152,6 +156,17 @@ internal static unsafe class GiReference
             Finish(job);
             return "the camera went away before it was done";
         }
+
+        // The console gives a command up after its frames and steps it no more, so a job waiting on
+        // a copy that never ran held the measure busy for every command after. The job gives itself
+        // up a few frames sooner, a reference after its paths' frames as well, and says where it was.
+        if (++job.Steps > (job.Reference ? job.Samples : 0) + (int)ConsoleHost.LaterFrames - GiveUpSooner)
+            return Failed(job, job.Stage switch
+            {
+                Stage.Sizing => "the picture's size was never read, its copy not compiling or the camera drawing nothing",
+                Stage.Copying => "the picture was never read back",
+                _ => "the reference was never read back",
+            });
 
         job.Frames++;
         switch (job.Stage)
@@ -280,7 +295,7 @@ internal static unsafe class GiReference
         {
             // The copy runs once its program has compiled, and its size is read a frame after.
             if (job.Frames >= 3 && rays.Copy.Program.State == ShaderProgramState.Ready) job.SizeRead = Shaders.BeginBufferRead(job.Size);
-            return (ulong)job.Frames > ConsoleHost.LaterFrames ? Failed(job, "the picture's size was never read, its copy not compiling") : null;
+            return null;
         }
 
         if (!Shaders.TryReadBuffer<uint>(job.SizeRead.Value, out var size) || size is null) return null;

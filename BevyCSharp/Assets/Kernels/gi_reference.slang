@@ -196,6 +196,14 @@ float3 trace(GiLights given, float3 origin, float3 way, inout uint state)
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
+    // The sun as Bevy's lighting gives the picture, dimmed and reddened through the camera's air
+    // toward it, read at the camera as Bevy reads it and before any thread returns, as the clouds
+    // read it. The lights give the sun as it is above the air, which lit the reference's sunlit faces
+    // a third over the picture's at a low sun and whiter.
+    GiLights given = lights[0];
+    if (given.sunDirection.w > 0.5)
+        given.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, given.sunDirection.xyz);
+
     uint width, height;
     sums.GetDimensions(width, height);
     if (id.x >= width || id.y >= height)
@@ -207,7 +215,6 @@ void main(uint3 id : SV_DispatchThreadID)
     RayHit met = rayTraceIn(scene, passRayOrigin(middle), way, 0.0, 1e5);
     regions[id.xy] = met.hit ? met.instance * 8u + axisOf(normalAt(met, way)) + 1u : 0u;
 
-    GiLights given = lights[0];
     float3 sum = float3(0.0);
     for (uint s = 0u; s < counts.x; s++)
     {

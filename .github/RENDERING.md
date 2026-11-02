@@ -270,8 +270,9 @@ The reference global illumination is measured against is 3DEngine's (`GiReferenc
 a geometry pool with the engine's instance and material buffers. It lights the first face a path
 meets as Bevy's lighting does, Burley's diffuse term and the specular lobe by the material's
 roughness, metallic and reflectance, and every face after as the probes do, with the probes' own
-lights and the light from all around where a path meets nothing, and a point light's shadow starts a
-tenth of a unit from it as Bevy's shadow maps do. It runs as a dispatch on the camera, compiled to
+lights and the light from all around where a path meets nothing, the sun dimmed through the camera's
+air as Bevy dims it for the picture, and a point light's shadow starts a tenth of a unit from it as
+Bevy's shadow maps do. It runs as a dispatch on the camera, compiled to
 SPIR-V for its ray queries, a share of the paths each frame, and the engine's dispatches on a camera
 are kept apart from the program's as its draws are. `gi.reference <png> <samples> [bounces]` writes
 it with its linear light, its regions and their names, and `gi.compare <png>` reads the camera's

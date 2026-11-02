@@ -91,15 +91,18 @@ pub struct DeferredForMaterials {
     msaa: bevy::render::view::Msaa,
 }
 
-/// While Bevy's materials are drawn deferred, gives every 3D camera drawing a prepass a G-buffer as
-/// well, and takes those it gave off again once materials are forward.
+/// While Bevy's materials are drawn deferred, gives every 3D camera a G-buffer, and the depth prepass
+/// it is drawn over, and takes those it gave off again once materials are forward.
 ///
 /// Bevy queues a deferred material into the deferred phase of every camera drawing a prepass, and
 /// unwraps that phase, so a camera with a depth, normal or motion prepass and no G-buffer ends the
-/// app the frame materials go deferred (`queue_prepass_material_meshes` in Bevy 0.20). A prepass
-/// comes from many places, temporal antialiasing, contact shadows, ambient occlusion, a shader pass
-/// reading depth, and a camera may have had one before anything turned deferred on, so asking for a
-/// prepass alone cannot keep the rule; this keeps it every frame. Such a camera draws one sample a
+/// app the frame materials go deferred (`queue_prepass_material_meshes` in Bevy 0.20). A camera with
+/// no prepass at all draws no deferred material, since Bevy queues one into that phase alone, so
+/// once global illumination, which asks for the G-buffer and leaves materials deferred, was turned
+/// off, its camera drew nothing but its clear color. A prepass comes from many places, temporal
+/// antialiasing, contact shadows, ambient occlusion, a shader pass reading depth, and a camera may
+/// have had one before anything turned deferred on, so asking for a prepass alone cannot keep the
+/// rule; this keeps it every frame. Such a camera draws one sample a
 /// pixel while it has the G-buffer, since Bevy's deferred passes take a single sample and a
 /// multisampled depth beside a G-buffer of one fails the GPU's validation, and its multisampling is
 /// given back after. A camera that asked for its G-buffer itself, or reflects the screen, which
@@ -116,11 +119,6 @@ pub fn keep_deferred_phases(
         ),
         (
             bevy::ecs::query::With<bevy::camera::Camera3d>,
-            bevy::ecs::query::Or<(
-                bevy::ecs::query::With<bevy::core_pipeline::prepass::DepthPrepass>,
-                bevy::ecs::query::With<bevy::core_pipeline::prepass::NormalPrepass>,
-                bevy::ecs::query::With<bevy::core_pipeline::prepass::MotionVectorPrepass>,
-            )>,
             bevy::ecs::query::Without<bevy::core_pipeline::prepass::DeferredPrepass>,
         ),
     >,
