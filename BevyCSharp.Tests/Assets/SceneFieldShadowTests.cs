@@ -38,11 +38,15 @@ public sealed class SceneFieldShadowTests
         };
 
         AssetHandle image = AssetHandle.None;
+        // The slice's program compiles beside the three the field is built with and can come after
+        // them, and until it has the slice is no image, which the whole suite once read back a second
+        // into the run, so it is asked for each frame until it answers one.
         run.Until("settled", _ => SceneField.Plan is { StillCount: 1 } plan && plan.Shapes.Count == 0)
-            .Do("slicing across y through the box's middle", _ =>
+            .Until("slicing across y through the box's middle", _ =>
             {
                 origin = SceneField.Plan!.BuiltOrigin(0)!.Value;
                 image = SceneField.Slice(0, 1, (int)MathF.Floor((1f - origin.Y) / 0.25f));
+                return image != AssetHandle.None;
             })
             .Wait(3)
             .Do("asking for the slice", _ => read = Shaders.BeginImageRead(image))

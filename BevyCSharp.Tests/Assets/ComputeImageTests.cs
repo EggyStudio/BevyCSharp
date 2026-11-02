@@ -17,6 +17,18 @@ namespace Bevy.Tests;
 public sealed class ComputeImageTests
 {
     /// <summary>
+    /// A read of no image is refused with words naming that, before the bridge is asked, where the
+    /// bridge answered its key as a component type the world never registered, which the scene
+    /// field's slice, read before its program had compiled, once failed with in the whole suite.
+    /// </summary>
+    [Fact]
+    public void AReadOfNoImageIsRefusedSayingSo()
+    {
+        var refused = Assert.Throws<ArgumentException>(() => Shaders.BeginImageRead(AssetHandle.None));
+        Assert.Contains("No image was given", refused.Message);
+    }
+
+    /// <summary>
     /// An image a compute shader wrote is read back texel by texel in order, its rows without the
     /// padding the GPU's copy gives them, which a row three texels long has most of.
     /// </summary>

@@ -333,12 +333,21 @@ public static unsafe partial class Shaders
     /// </para>
     /// <para>
     /// A picture a camera drew is read with <see cref="Render.BeginCapture()"/>, which hands it
-    /// over as colors. A block-compressed image has no size a texel and is refused.
+    /// over as colors. A block-compressed image has no size a texel and is refused, and so is
+    /// <see cref="AssetHandle.None"/>, which names no image.
     /// </para>
     /// </remarks>
+    /// <exception cref="ArgumentException">The image is <see cref="AssetHandle.None"/>.</exception>
     /// <exception cref="BevyNativeException">The image is not loaded, or is block-compressed.</exception>
-    public static BufferRead BeginImageRead(AssetHandle image) =>
-        new(Native.Check(Native.bcs_shader_image_read(image.Key), "reading an image back"));
+    public static BufferRead BeginImageRead(AssetHandle image)
+    {
+        // The bridge answers a key it holds no handle under as a type the world never registered,
+        // which sent the reading of the scene field's slice, asked for before the slice's program
+        // had compiled and so before it had an image, toward the world's types.
+        if (image == AssetHandle.None)
+            throw new ArgumentException("No image was given. Make one with Shaders.CreateImage, or wait for the call that answers one.", nameof(image));
+        return new(Native.Check(Native.bcs_shader_image_read(image.Key), "reading an image back"));
+    }
 
     /// <summary>
     /// The bytes a read brought back, once they have arrived. Only valid inside a system.
