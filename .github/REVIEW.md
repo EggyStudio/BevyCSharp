@@ -1,14 +1,20 @@
 # Review
 
-Reviewed up to `58265110`, item 90's second commit and its end, pushed at 23:03 on 2026-11-01, its
-run green at 23:22 on the three systems in about 15 minutes; the pack run started from it at 23:22
-with publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item
-90's limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against
-the workflow's 26.2.4, Verdict 49, the rest awaited. Before it `5fb59903`, item 90's first commit,
-pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing their light
-before any thread branches since llvmpipe faults on the transmittance lookup after a group's threads
-have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the
-run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
+Reviewed up to `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside
+the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the form and
+carries the review's files. Before it `58265110`, item 90's second commit and its end, pushed at
+23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the pack run
+started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its drive and
+soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at 00:13 on
+2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its captures jobs
+red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the run ended red
+at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of 100, the soak
+in 25 under its 40 and the games in 35, the pack job skipped so no package was published, the next
+pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at
+17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing their light before
+any thread branches since llvmpipe faults on the transmittance lookup after a group's threads have
+parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run
+of `3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
 `b79314ca` moves the clock's console commands beside app.hold into a file of their own,
 ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
@@ -320,7 +326,15 @@ from [SHARED.md](SHARED.md).
     trees as level tree entities. The meadow court landed at `7332bc50` on 2026-11-01, its trees as
     level tree entities; the scenes yard next, then phase 4. The scenes yard landed at `3808bd37` on
     2026-11-01, the pack's site an info_scene point in the level, which ends the third phase's
-    courts; phase 4 after item 89.
+    courts; phase 4 after item 89. The fourth phase is done at `720ec3db`, read at 00:23 on
+    2026-11-02, which ends the item, the ray tracing guide's denoiser figures read again over 256
+    frames a view, filtered 1.3 to 6.4 levels from the mean and grainy 8.9 to 18.0, the strafe's
+    uncovered surfaces 18 to 20 against 38, denoiser.webp and scene-field.webp retaken on the walled
+    map, the RTAO sentence corrected, the weather's costs at the hub at 15:00 under an overcast in
+    the comparison guide (clouds and their shadow 0.27 ms, the clouds over the sky 0.29, froxel fog
+    0.38, precipitation 0.04), two remarks losing the old map's words, the reading
+    2026-11-01-item-68-scene-field.webp; the GPU drive whole in 244 s, every view sent to the owner
+    in one sheet; 1,996 in the suite. Two leads from the reading are item 92.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -398,7 +412,9 @@ from [SHARED.md](SHARED.md).
     quarter of the runtime's reading held it back, and pipelines.wait run before the first round so
     compiles do not read as growth; the GPU pair as read, the effects view keeping its 60; the
     reading 2026-11-01-item-90-rain-snow.webp; 1,996 in the suite. Then 68's phase 4, the stale
-    figures measured on the old open map retaken on the GPU with the drive's views.
+    figures measured on the old open map retaken on the GPU with the drive's views. Proven on the
+    runner at 01:13 on 2026-11-02 in the pack run from `58265110`, the drive green in 67 minutes
+    under its 100 and the soak in 25 under its 40, rain and snow drawn there without a crash.
 
 91. **The sky's clock, weather and looks move to the Sky module.** SkyClock, WeatherState and
     LookCycle, which reference no engine, move as they are with their tests to `Modules/Sky` as the
@@ -410,10 +426,21 @@ from [SHARED.md](SHARED.md).
     module's numbers; the suite green on the three systems. After 90 and 68's phase 4, beside the
     Vegetation move.
 
+92. **The Cornell lamp under rays, its face and its halo.** Two leads from item 68's fourth reading
+    on 2026-11-02. First, the lamp's face reads gray under rays, in a grainy frame, in their mean
+    and in the denoiser's, where the picture of 2026-10-24 at 09:23 had it white; the lamp's
+    Emissive alpha of 1 became Bevy's emissive_exposure_weight at `36d783bf` that afternoon, so the
+    cause is read there first, the face white again as an emitter is, read against the reference
+    frame. Second, the denoiser's frame brightens the ceiling round the lamp about 24 levels over
+    the mean, about 1.3 of the Cornell view's 6.4 where below the lamp the view lies at 5.0, a bias
+    of the filter next to an emitter; the cause read in the denoiser's weights at the lamp's edge
+    and mended where it is the filter's, the figures of the guide read again. One or two commits,
+    after Verdict 49's mend and before 80.
+
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`. Verdict 49 is open.
+43 mended at `42abf357`. Verdicts 49 and 50 are open.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -450,6 +477,18 @@ Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md
     soak, the games and the four captures still running at the reading. The mend is the six pictures
     taken again in Fedora 44 on Mesa 26.2.5, read against the old within the bar the guard keeps and
     the version named in the workflow, one commit; settled by the next pack run's Fedora job green.
+
+50. **Two of the pack run's captures differ from the checked-in pictures past the bar.** Read at
+    00:43 on 2026-11-02 in the pack run started from `58265110`, the captures jobs comparing the
+    examples' pictures taken on the runner with the checked-in ones, many_foxes differing in 11.8%
+    of its pixels and specular_tint in 5.9% where 2.0% is allowed, the other captures jobs green,
+    the drive still running. The pictures were last taken for the pack run of `09fc95dd` on
+    2026-10-21, and items 82 to 90 since changed what the examples draw, the irradiance volume's
+    fallback, the day's fill, the cameras' G-buffer among them, with no pack run to show it. The
+    mend is each picture read against its checked-in one, the difference named as a landed item's
+    change, then the picture taken again on the runner's own Mesa and checked in with the item
+    named, or as a fault, then mended; one commit with Verdict 49's, since both retake pictures on
+    the runners; settled by the next pack run's captures jobs green.
 
 ## Decisions
 
@@ -1411,3 +1450,30 @@ it. The picture is 2026-11-01-item-68-scene-field.webp, the drive's sheet, the d
 lamp and the hub's occlusion in the day's dump. The whole suite ran with it, 1,996 passed, 0 failed
 and 3 skipped in 44 m 17 s at the 3 GB cap, and NormTests passed, 18. The public listing is
 unchanged.
+
+Verdicts 49 and 50, in the commit carrying this line. Fedora 44 carries Mesa 26.2.5, and the six
+were captured there again at the head (build/capture-in-fedora.sh from an archive checkout with a
+--render --meshlet --solari bridge of the head's native code, 799 s), the workflow and BUILDING.md
+naming 26.2.5. clustered_decals, meshlet, test_meshlet and many_meshlet_materials lie within the
+compare's bar of their pictures, meshlet's byte for byte, so the new Mesa moved nothing they draw.
+solari differs in 17.2% and solari_reflections in 15.5%, each drawn clean where its picture of
+2026-10-19 was grainy, since the bridge's denoiser has filtered Solari's light wherever it runs from
+97440a1d on 2026-10-24, after the last pack run that compared them; solari_reflections' near-mirror
+shows the helmet's reflection blurred by it, which item 92 may read beside the lamp's halo.
+many_foxes and specular_tint, captured in the runner's image on its Mesa 25.2.8, read the pack run's
+11.8% and 5.9%. Shot round its frame, specular_tint matches its picture no closer than at frames 120
+to 122, its camera some four pixels further round, about a frame's turn, since the example turns it
+each Update as Bevy's does and Update runs in the frames a load holds the clock for; each fox seeks
+its run by its entity's number. A bridge built from the head with the trees' three material plugins
+left out of every app (the leaves' 14c2df0f, the impostors' 6777b172, the bark's and the wind's
+fc02fec5, on 2026-10-25 and 26) draws specular_tint within the bar and many_foxes at 9.3%, the rest
+coming from the other resources every app gained since, the scene field's among them, which take
+entities before the foxes'. So both are those items' changes to every app's start and not faults,
+and both are taken again on the runner's Mesa with the head's render bridge; the gallery's seven
+pictures are made again from the new captures (build/examples-table.py). The picture is
+2026-11-02-verdict-49-solari.webp, both pairs in the day's dump. The whole suite ran with it, 1,996
+passed, 0 failed and 3 skipped in 42 m 14 s at the 3 GB cap, and NormTests passed, 18. The public
+listing is unchanged.
+
+Shared: SHARED.md's row on captures names Fedora 44's Mesa 26.2.4, which the workflow holds Fedora's
+to; from the commit carrying this line the workflow names 26.2.5, the six taken again on it.

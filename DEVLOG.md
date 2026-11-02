@@ -6,6 +6,15 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-02
+
+![](.github/assets/readings/2026-11-02-verdict-49-solari.webp)
+Bevy's solari_reflections example in Fedora 44 on Mesa's lavapipe, on the left as checked in on
+2026-10-19, grainy, and on the right taken again on Mesa 26.2.5, the bridge's denoiser filtering
+Solari's light, the walls and floor clean and the near-mirror's reflection of the helmet blurred.
+
+Done that day
+
 ## 2026-11-01
 
 ![](.github/assets/readings/2026-11-01-item-68-meadow.webp)
