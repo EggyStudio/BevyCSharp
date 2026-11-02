@@ -1,22 +1,26 @@
 # Review
 
-Reviewed up to `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside
-the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the form and
-carries the review's files. Before it `58265110`, item 90's second commit and its end, pushed at
-23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the pack run
-started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its drive and
-soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at 00:13 on
-2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its captures jobs
-red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the run ended red
-at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of 100, the soak
-in 25 under its 40 and the games in 35, the pack job skipped so no package was published, the next
-pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at
-17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing their light before
-any thread branches since llvmpipe faults on the transmittance lookup after a group's threads have
-parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run
-of `3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
-`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
-ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+Reviewed up to `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green
+at 02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with
+publish on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at
+the limit of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was
+published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23
+on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems in about 17 minutes;
+it keeps the form and carries the review's files. Before it `58265110`, item 90's second commit and
+its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15
+minutes; the pack run started from it at 23:22 with publish on, the first since `09fc95dd` of
+2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora
+job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of
+its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50;
+the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit
+of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
+published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
+commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
+their light before any thread branches since llvmpipe faults on the transmittance lookup after a
+group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
+`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
+in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
+their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
 while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
 game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
@@ -437,10 +441,21 @@ from [SHARED.md](SHARED.md).
     and mended where it is the filter's, the figures of the guide read again. One or two commits,
     after Verdict 49's mend and before 80.
 
+93. **The drive's course is cheaper on lavapipe.** From Verdict 51's reading on 2026-11-02. The
+    course's stations judge only where the player stands, yet each of its frames costs 1.1 to 1.7 s
+    drawn at full size on the runner's llvmpipe, and the course is 60 of the drive's minutes; the
+    drive's course drawn smaller, or with fewer frames between stations where nothing is judged, or
+    both, the stations' judgments and the views' pictures unchanged, read by the drive's time in the
+    runner's setting on each processor the runner has and by the GPU drive unchanged. One or two
+    commits, after 92. A reading from Verdict 51's runs at 08:02, each station's frames.wait of its
+    frames plus five after an input.hold counts the hold's frames again, since the hold answers only
+    once they have passed, so the course's walking frames run twice; the first thing this item takes
+    out.
+
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`. Verdicts 49 and 50 are open.
+Verdicts 33 to 42 and 44 to 50 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
+43 mended at `42abf357`. Verdict 51 is open.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -468,27 +483,38 @@ Verdicts 33 to 42 and 44 to 48 are settled, said under each in REVIEW-ARCHIVE.md
     on 2026-10-23, the version and BUILDING.md's sentence; settles when a pack run's defaults step
     passes.
 
-49. **The pack run's Fedora captures fail on Mesa 26.2.5 where the workflow names 26.2.4.** Read at
-    00:13 on 2026-11-02 in the pack run started from `58265110` at 23:22, the first since
-    2026-10-21, the captures-fedora job red at its step capturing the six in Fedora 44, the guard's
-    own message saying Fedora 44's Mesa is 26.2.5 where the workflow names 26.2.4, on which the
-    examples' pictures captured there were measured, and asking that they be taken again on 26.2.5
-    and the version named in the workflow; the native, build and storm jobs green, the drive, the
-    soak, the games and the four captures still running at the reading. The mend is the six pictures
-    taken again in Fedora 44 on Mesa 26.2.5, read against the old within the bar the guard keeps and
-    the version named in the workflow, one commit; settled by the next pack run's Fedora job green.
-
-50. **Two of the pack run's captures differ from the checked-in pictures past the bar.** Read at
-    00:43 on 2026-11-02 in the pack run started from `58265110`, the captures jobs comparing the
-    examples' pictures taken on the runner with the checked-in ones, many_foxes differing in 11.8%
-    of its pixels and specular_tint in 5.9% where 2.0% is allowed, the other captures jobs green,
-    the drive still running. The pictures were last taken for the pack run of `09fc95dd` on
-    2026-10-21, and items 82 to 90 since changed what the examples draw, the irradiance volume's
-    fallback, the day's fill, the cameras' G-buffer among them, with no pack run to show it. The
-    mend is each picture read against its checked-in one, the difference named as a landed item's
-    change, then the picture taken again on the runner's own Mesa and checked in with the item
-    named, or as a fault, then mended; one commit with Verdict 49's, since both retake pictures on
-    the runners; settled by the next pack run's captures jobs green.
+51. **The pack run's drive is cancelled at its limit of 100 minutes where the run before took 67.**
+    Read at 04:30 on 2026-11-02 in the pack run started from `a18496c3` at 02:26, the drive job
+    cancelled at 04:23 after one hour and forty minutes, every other job green, the captures among
+    them, so the pack job did not run and no package was published; the step's log shows the build
+    and then the cancel alone, since step.py prints the course's lines at its end, so where the
+    drive stood is not known from the run. Two leads, first the waits of item 90's second commit,
+    600 s for a command's first answer, which turn a command that never answers into ten minutes
+    each where it failed at once before, so a hang in the course or at a view's shot would read as
+    slowness up to the limit; second the runner's own variance, which 67 to over 100 exceeds. The
+    mend is the drive's progress written to the step's log as it goes, each station and view with
+    its time, so a cancelled job says where it stood; the waits bounded by what each command needs
+    rather than 600 s for all; the cause read by a drive in the runner's setting with those lines;
+    and the limit left at 100. Settled by the next pack run's drive green. The cause, read by the
+    coder at 04:39 from the run's own feature-test artifact, uploaded at the cancel with the game's
+    log and every capture to the meadow, is the runner's processor and no hang, the 67-minute drive
+    having run on an AMD EPYC 9V45 and the cancelled one on an EPYC 7763, 1.63 times slower at the
+    hub (1,143 ms a frame against 701) and 1.63 to 1.82 slower on every stretch, cancelled four
+    minutes into the effects view where the step needed about 108 minutes and the job 112; so a
+    limit of 100 fails whenever the drive draws a 7763. The call is the limit at 125 with both
+    processors and their times named in its comment, the progress lines, the processor and the
+    device named at the start, each command's time in commands.txt and the waits bounded by kind
+    (frames.wait 60 s plus 3 a frame, pipelines.wait, scene.load and the first command 900 s, the
+    first answer 180, the rest 120), the figures from a run in the runner's setting; the course made
+    cheaper on lavapipe is item 93. At 08:02 the bounds are being set from four runs in the runner's
+    setting that each ended at a bound and named it. The cold compile slows frames to about 12 s
+    each until the first pipelines.wait answers, so the 900 s bound covers every command until then;
+    input.hold answers only once its frames have passed, at 0.9 to 1.2 s a frame, so a hold takes
+    the per-frame bound; each view waits for its pipelines after its look; the gallery's 60 frames
+    ran past 240 s, more than 4 s a frame, so the views take a per-frame figure of their own set
+    from a fifth run; the course's stations at 3 s a frame. The station times match from run to run,
+    the hub at 8:46, the ramps at 28:43, the tunnel at 53:41 and the zones at 70:52, the container's
+    hub frame 1,184 ms against the 7763's 1,143.
 
 ## Decisions
 
@@ -1477,3 +1503,33 @@ listing is unchanged.
 
 Shared: SHARED.md's row on captures names Fedora 44's Mesa 26.2.4, which the workflow holds Fedora's
 to; from the commit carrying this line the workflow names 26.2.5, the six taken again on it.
+
+Verdict 51, in the commit carrying this line. The cancelled job's feature-test artifact, uploaded at
+the cancel with the game's log and every capture to the meadow, names the cause, the runner's
+processor, with no hang anywhere. The 67-minute run had an AMD EPYC 9V45, its hub drawn in 701 ms a
+frame, and the cancelled one an EPYC 7763, its hub drawn in 1,143 ms, every stretch between its
+captures 1.63 to 1.82 times as long. The drive job's limit is 125 minutes, its comment naming both
+processors and their times (N 6.8). The course script says each station and view with its time as it
+ends, and the processor and the device at its start, so a cancelled job says where it stood; it
+writes each command's time to commands.txt beside the captures, and it bounds each command by its
+kind where every command had ten minutes. Five runs of the step in the runner's image on lavapipe
+with four threads and no shader cache of Mesa's, through build/step.py, set the bounds, four of them
+ending at a bound with the command, its bound and bcs's TIMEOUT in their error. The start's compiles
+draw a frame in about twelve seconds, so every command before the first wait for pipelines has
+fifteen minutes, the hub's thirty frames taking 357 s. A held key answers once its frames have
+passed, so it has a wait's bound, three seconds a frame and a minute more, the crawl's 360 taking
+317 s; the wait after each hold counts the hold's frames again, which item 93 takes out. A view
+waits for its pipelines before its frames, and its frames have fifteen minutes, the gallery's sixty
+taking 326 s and the meadow's five 188; a shot has five minutes, the meadow's taking 94 s, and any
+other command two, 32 s at most. The fifth run reached the zones in 71:55 and the views, in a run of
+their own, took 38:55, about 111 minutes for the step on a container whose hub draws in 1,184 ms,
+close to the 7763's, so about 115 for the job with the pack and the build before it. The games job's
+comment says the feature test is soaked in a job of its own. The whole suite ran with it, 1,997
+passed, 0 failed and 3 skipped in 46 m 30 s at the 3 GB cap, item 92's test in the tree beside it,
+and NormTests passed, 18. The public listing is unchanged.
+
+Shared: a scripted run in a workflow step says each stage with its time as it ends, and the
+processor and the device at its start, so a job cancelled at its limit says where it stood, and
+bounds each command by what its kind takes in the runner's setting, so a hang fails where it stands
+(build/drive-feature-test.sh, from the commit carrying this line); SHARED.md's row on build/step.py
+is the nearest.

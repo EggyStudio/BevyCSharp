@@ -2507,6 +2507,45 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     settled when its run goes green. Settled on 2026-10-30 by the run of `1226ff50`, green on the
     three suites at 20:14.
 
+49. **The pack run's Fedora captures fail on Mesa 26.2.5 where the workflow names 26.2.4.** Read at
+    00:13 on 2026-11-02 in the pack run started from `58265110` at 23:22, the first since
+    2026-10-21, the captures-fedora job red at its step capturing the six in Fedora 44, the guard's
+    own message saying Fedora 44's Mesa is 26.2.5 where the workflow names 26.2.4, on which the
+    examples' pictures captured there were measured, and asking that they be taken again on 26.2.5
+    and the version named in the workflow; the native, build and storm jobs green, the drive, the
+    soak, the games and the four captures still running at the reading. The mend is the six pictures
+    taken again in Fedora 44 on Mesa 26.2.5, read against the old within the bar the guard keeps and
+    the version named in the workflow, one commit; Settled by the pack run started from `a18496c3`
+    at 02:26 on 2026-11-02, its captures jobs green, Fedora's among them. The mend is at `a18496c3`,
+    pushed at 02:11, the six captured again in Fedora 44 on Mesa 26.2.5 with the head's render
+    bridge, the workflow and BUILDING.md naming 26.2.5; clustered_decals, meshlet, test_meshlet and
+    many_meshlet_materials within the bar and meshlet byte for byte, so the new Mesa changed nothing
+    they draw; solari differing by 17.2% and solari_reflections by 15.5%, both drawn clean where the
+    pictures of 2026-10-19 were grainy since the bridge's denoiser has filtered Solari's light from
+    `97440a1d` on 2026-10-24, after the last pack run compared them; the near mirror's helmet
+    blurred by the denoiser, beside item 92's halo.
+
+50. **Two of the pack run's captures differ from the checked-in pictures past the bar.** Read at
+    00:43 on 2026-11-02 in the pack run started from `58265110`, the captures jobs comparing the
+    examples' pictures taken on the runner with the checked-in ones, many_foxes differing in 11.8%
+    of its pixels and specular_tint in 5.9% where 2.0% is allowed, the other captures jobs green,
+    the drive still running. The pictures were last taken for the pack run of `09fc95dd` on
+    2026-10-21, and items 82 to 90 since changed what the examples draw, the irradiance volume's
+    fallback, the day's fill, the cameras' G-buffer among them, with no pack run to show it. The
+    mend is each picture read against its checked-in one, the difference named as a landed item's
+    change, then the picture taken again on the runner's own Mesa and checked in with the item
+    named, or as a fault, then mended; one commit with Verdict 49's, since both retake pictures on
+    the runners; Settled by the pack run started from `a18496c3` at 02:26 on 2026-11-02, its
+    captures jobs green, Fedora's among them. The mend is at `a18496c3`, pushed at 02:11, both
+    captured in the runner's image on Mesa 25.2.8 at the pack run's 11.8% and 5.9%; specular_tint
+    matching its picture best a frame's turn further round, since the example turns the camera each
+    Update and Update also runs in frames a load holds the clock for, and each fox seeking its run
+    by its entity's number; a bridge from the head with the trees' three material plugins left out
+    drawing specular_tint within the bar and many_foxes at 9.3%, the rest from the other resources
+    every app gained since, the scene field's among them, which take entities before the foxes do;
+    so both are those items' changes to every app's start, not faults, retaken with the head's
+    render bridge, the gallery's seven pictures remade.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session

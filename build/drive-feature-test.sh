@@ -41,15 +41,59 @@ fail() {
   exit 1
 }
 
-# Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
-# most of them wait for frames, as many as 365 for the crawl through the tunnel, and a software
-# device, as the workflow's runner has, draws the hub under its weather a few frames a second. The
-# pack run of d2a20b6a ended here on a command's timeout with nothing said but bcs's exit code, so
-# one that fails says its words, its code and the first line bcs gave of why, as Swarm's play does,
-# and anything else that fails is named by the trap below. bcs writes why to its output, as it
-# writes the answer, so the output is kept in a file and passed on once the command has worked. The
-# timeout comes before the command's words, since bcs passes on whatever follows a `--` as it is.
-c() { ./bcs command --timeout 600 "$@" > "$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
+# Each station and view says its name as it ends, with the time it took and the time the run has
+# taken, so a job ended at its limit says in its log how far the run went and where the time went.
+# The processor is said first, since the pack run of a18496c3 drew a runner whose lavapipe drew the
+# course 1.6 times as slowly as the run before it, and the job reached its limit with nothing to
+# say for it but the captures it had uploaded.
+since=$SECONDS
+clock() { printf '%d:%02d' $(($1 / 60)) $(($1 % 60)); }
+took() {
+  echo "[course] $1 took $(clock $((SECONDS - since))), the run $(clock "$SECONDS")"
+  since=$SECONDS
+}
+processor=$(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo 2> /dev/null | head -n 1 || true)
+echo "[course] on ${processor:-a processor that does not name itself}, $(getconf _NPROCESSORS_ONLN) threads"
+
+# Each command is given as long as its kind takes on the working machine's lavapipe on four threads
+# in the runner's image, whose hub draws at about the pace of the runner's slower processor, and
+# twice that or more, so one that never answers fails the run where it stands, where ten minutes
+# for every command would let a hang read as slowness up to the job's limit. A wait for frames in
+# the course, and a key held for frames, which answers once they have passed, is given three
+# seconds a frame and a minute more, where a frame there took at most 1.9 seconds. A wait for
+# frames in a view, a wait for pipelines and the load of a scene are given fifteen minutes, where
+# the gallery's sixty frames took 326 seconds, the meadow's five 188 and its pipelines 95. A shot is
+# given five minutes, where the meadow's took 94 seconds, three of its frames, and any other
+# command two minutes, where each answered within a frame, 32 seconds at the meadow. Every command
+# before the first wait for pipelines has answered is given fifteen minutes too, since with no
+# shader cache of Mesa's, as the runner starts, the start's compiles draw a frame in about twelve
+# seconds, and the hub's thirty took 357.
+#
+# The pack run of d2a20b6a ended here on a command's timeout with nothing said but bcs's exit code,
+# so one that fails says its words, its code, its bound and the first line bcs gave of why, as
+# Swarm's play does, and anything else that fails is named by the trap below. bcs writes why to its
+# output, as it writes the answer, so the output is kept in a file and passed on once the command
+# has worked. The timeout comes before the command's words, since bcs passes on whatever follows a
+# `--` as it is. Each command's time is written to commands.txt beside the captures.
+cold=1
+views=0
+bound() {
+  if [ "$cold" = 1 ]; then echo 900; return; fi
+  case "$1" in
+    frames.wait | frame.profile) if [ "$views" = 1 ]; then echo 900; else echo $((60 + 3 * $2)); fi ;;
+    input.hold) echo $((60 + 3 * $3)) ;;
+    pipelines.wait | scene.load) echo 900 ;;
+    *) echo 120 ;;
+  esac
+}
+c() {
+  local bound from=$SECONDS
+  bound=$(bound "$@")
+  ./bcs command --timeout "$bound" "$@" > "$said" || fail "./bcs command $* ended with $? within its $bound seconds, $(head -n 1 "$said")"
+  if [ "$1" = pipelines.wait ]; then cold=0; fi
+  echo "$((SECONDS - from)) $*" >> "$shots/commands.txt"
+  cat "$said"
+}
 quiet() { c "$@" > /dev/null; }
 
 # The player's place as "x y z", read from the line `player` answers.
@@ -70,7 +114,7 @@ at() { quiet player.put "$1" "$2" "$3"; quiet frames.wait 20; }
 # walls and floor and the spheres' board missing.
 shot() {
   quiet pipelines.wait
-  ./bcs shot "$shots/$1.png" --timeout 600 > "$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"
+  ./bcs shot "$shots/$1.png" --timeout 300 > "$said" || fail "./bcs shot $1 ended with $? within its 300 seconds, $(head -n 1 "$said")"
 }
 
 trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
@@ -78,15 +122,19 @@ trap './bcs stop > /dev/null 2>&1 || true' EXIT
 ./bcs stop > /dev/null 2>&1 || true
 
 (cd "$program" && { ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve; echo "[course] the feature test exited with $?"; } > "$log" 2>&1 &)
-# Ten minutes for the feature test to answer, as long as each command is given, and its answer taken
-# once rather than asked for again, since on lavapipe with no shader cache of Mesa's, as the
-# workflow's runner starts, it says it is ready at its first frame and then answers nothing for
-# minutes while its pipelines compile, which a second asking can read as unreachable (build/soak.sh).
+# Three minutes for the feature test to answer, and its answer taken once rather than asked for
+# again, since on lavapipe with no shader cache of Mesa's, as the workflow's runner starts, it says
+# it is ready at its first frame and then answers nothing for minutes while its pipelines compile,
+# which a second asking can read as unreachable (build/soak.sh).
 answered=0
-for _ in $(seq 1 600); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && { answered=1; break; }; sleep 1; done
+for _ in $(seq 1 180); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && { answered=1; break; }; sleep 1; done
 [ "$answered" = 1 ] || fail "the feature test never answered"
+took "the start"
 
 quiet app.frametime 0.0166667
+took "the first command"
+adapter=$(sed -n 's/^\[Renderer\] adapter: //p' "$log" | head -n 1)
+echo "[course] drawn by ${adapter:-a device the log does not name}"
 quiet app.hold commands
 
 # The day held still at eight in the morning, the sun low in the east as the views were framed
@@ -121,6 +169,7 @@ frame_time() {
     | awk -v name="$1" '{ printf "%s %.1f ms\n", name, $1 }' >> "$shots/frame-times.txt"
 }
 frame_time "1-hub, the weather $quality"
+took "the hub's shot"
 
 # The hub, with a walk north that the turning cube stops, and a jump.
 read -r _ y z < <(where)
@@ -133,6 +182,7 @@ quiet frames.wait 12
 read -r _ up _ < <(where)
 holds "$up" ">" "$y + 0.6" || fail "a jump took the player only to y $up"
 quiet frames.wait 60
+took "the hub's walk and jump"
 
 # Creative mode's flight on a double tap, rising on Space, and spectator mode leaving it standing.
 quiet mode creative
@@ -152,11 +202,13 @@ quiet mode spectator
 quiet frames.wait 5
 c player | grep -q spectator || fail "the mode command did not set spectator mode"
 quiet mode walking
+took "the modes"
 
 # The course, from its start, facing east along it.
 quiet teleport course
 quiet frames.wait 20
 shot 2-course
+took "the course's start"
 
 # The ramps, each walked east into as far as its landing's middle, three climbed to their landings
 # and the one at 60 degrees not. The frames are the landing's distance at the run's 4.5 a second.
@@ -173,6 +225,7 @@ for i in 0 1 2 3; do
     holds "$top" "<" "$ground + 0.8" || fail "the 60 degree ramp was climbed, which is steeper than the character stands on, to y $top"
   fi
 done
+took "the ramps"
 
 # Stairs of 0.15 climbed and of 0.4 not, its steps over the character's step height.
 at 60.5 "$ground" -19
@@ -185,6 +238,7 @@ quiet input.hold W 90
 quiet frames.wait 95
 read -r _ high _ < <(where)
 holds "$high" "<" "$ground + 0.3" || fail "the stairs of 0.4 were climbed to y $high"
+took "the stairs"
 
 # The beam, walked along from its first landing nearly to its last without falling off.
 at 76.5 "$(up 1.1)" -8
@@ -193,6 +247,7 @@ quiet frames.wait 140
 read -r beam_x beam_y _ < <(where)
 holds "$beam_x" ">" 86 || fail "the beam was not walked along, the player at x $beam_x"
 holds "$beam_y" ">" "$ground + 0.8" || fail "the player fell off the beam, at y $beam_y"
+took "the beam"
 
 # The tunnel, which stops the player standing and lets it through crouched.
 at 76 "$ground" -13
@@ -206,6 +261,7 @@ quiet frames.wait 365
 read -r crawled _ _ < <(where)
 holds "$crawled" ">" 86 || fail "the player did not crawl through the tunnel, only to x $crawled"
 shot 3-tunnel
+took "the tunnel"
 
 # Ice, which keeps some of the speed after the key is let go, where plain ground stops the player at
 # once. The wait after the walk is part of the slide, so the slide read is the part left of it.
@@ -216,6 +272,7 @@ read -r let_go _ _ < <(where)
 quiet frames.wait 30
 read -r slid _ _ < <(where)
 holds "$slid" ">" "$let_go + 0.25" || fail "the player stopped on the ice, from x $let_go to $slid"
+took "the ice"
 
 # The bounce pad, which throws the player high.
 at 66 "$(up 0.3)" 0
@@ -223,12 +280,14 @@ quiet frames.wait 12
 read -r _ thrown _ < <(where)
 holds "$thrown" ">" "$ground + 3" || fail "the bounce pad threw the player only to y $thrown"
 quiet frames.wait 120
+took "the bounce pad"
 
 # The pit, whose sensor puts the player back at the course's start.
 at 78 "$(up 2)" 0
 quiet frames.wait 40
 read -r back _ _ < <(where)
 holds "$back" "<" 47 || fail "the pit did not put the player back at the course's start, it stands at x $back"
+took "the pit"
 
 # The moving platform carries the player and the elevator lifts it, each put on where it is now,
 # and the disc turns it.
@@ -252,35 +311,41 @@ quiet player.put "$px" "$(awk -v y="$py" 'BEGIN { print y + 0.3 }')" "$pz"
 quiet frames.wait 10
 carried=$(moved x 90)
 holds "$carried" ">" 1 || fail "the moving platform did not carry the player, which went $carried from where it stood"
+took "the moving platform"
 read -r ex ey ez < <(piece Elevator)
 quiet player.put "$ex" "$(awk -v y="$ey" 'BEGIN { print y + 0.3 }')" "$ez"
 quiet frames.wait 10
 lifted=$(moved y 90)
 read -r _ ey2 _ < <(piece Elevator)
 holds "$lifted" ">" 1 || fail "the elevator did not move the player, which went $lifted from where it stood, the elevator at y $ey2"
+took "the elevator"
 at 82 "$(up 1)" 10
 read -r turn_x _ turn_z < <(where)
 quiet frames.wait 90
 read -r turned_x _ turned_z < <(where)
 holds "$(awk -v a="$turn_x" -v b="$turned_x" -v c="$turn_z" -v d="$turned_z" 'BEGIN { print sqrt((a-b)^2 + (c-d)^2) }')" ">" 1 || fail "the disc did not turn the player"
+took "the disc"
 
 # The conveyor, which carries the player east with no key held.
 at 86 "$(up 0.3)" 10
 quiet frames.wait 60
 read -r carried _ _ < <(where)
 holds "$carried" ">" 88 || fail "the conveyor did not carry the player, it stands at x $carried"
+took "the conveyor"
 
 # The pressure plate, whose lamp lights under the player.
 at 80 "$(up 0.4)" 24
 quiet frames.wait 40
 grep -q "\[Playground\] the plate is pressed" "$log" || fail "the pressure plate did not light its lamp under the player"
 shot 4-playground
+took "the pressure plate"
 
 # The playground's mound, whose top the player lands on three meters over the ground.
 at 100 "$(up 8)" 29
 quiet frames.wait 120
 read -r _ hill _ < <(where)
 holds "$hill" ">" "$ground + 2.5" || fail "the player fell through the mound's top to y $hill"
+took "the mound"
 
 # The zones drawn rather than played, from the spectator camera, the gallery's spheres, its row of
 # modeled primitives, its room cut by booleans and its box, each bay of the light hall from its
@@ -291,14 +356,25 @@ holds "$hill" ">" "$ground + 2.5" || fail "the player fell through the mound's t
 quiet mode spectator
 quiet frames.wait 90
 # Each view waits forty frames for its shot, or as many as it names, so the clouds settle after the
-# camera's jump, and five without the weather where it names none, the shot waiting for the view's
-# pipelines either way. The effects view names sixty, since five leave its floor and its spheres
-# streaked after the page switched the dusk and the occlusion on.
+# camera's jump, and five without the weather where it names none. The effects view names sixty,
+# since five leave its floor and its spheres streaked after the page switched the dusk and the
+# occlusion on. The view's pipelines are waited for before its frames, the clock still while they
+# compile, as well as before its shot, so the frames it settles over draw all it holds, and the
+# compile's time, a frame of about twelve seconds on lavapipe while one runs, falls in the wait
+# given for it. From here each wait for frames is a view's, given a view's bound (above).
+views=1
 settle() { if [ -z "$1" ] && [ "$quality" = Off ]; then echo 5; else echo "${1:-40}"; fi; }
-view() { quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"; quiet frames.wait "$(settle "${8:-}")"; shot "$1"; }
+view() {
+  quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"
+  quiet pipelines.wait
+  quiet frames.wait "$(settle "${8:-}")"
+  shot "$1"
+  took "the view $1"
+}
 for piece in "Clearcoat sphere 1" "Cornell lamp" "Modeled arch" "Room door" "Reflection probe" "Irradiance volume" "Fog volume" "quaking-aspen 70"; do
-  ./bcs command --timeout 600 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
+  ./bcs command --timeout 120 entity.get "$piece" > "$said" || fail "the zones were not built, $piece is missing, $(head -n 1 "$said")"
 done
+took "the zones' pieces"
 view 5-gallery -55 4 -3 -63.5 3 -1 60
 view 5-models -57.1 2.6 0.5 -57.1 -0.6 9
 view 5-room -67.2 1.2 5 -67.4 0.3 13
@@ -352,8 +428,10 @@ weathered() {
   quiet setting "WeatherKind $2"
   quiet setting "WeatherQuality $on"
   quiet look -- 70 8 36 88 1 12
+  quiet pipelines.wait
   quiet frames.wait 30
   shot "$1"
+  took "the view $1"
 }
 weathered 21-rain Rain
 weathered 22-snow Snow
@@ -362,6 +440,7 @@ weathered 22-snow Snow
 quiet setting "DaySpeed $day_speed"
 quiet setting "Hour $day_hour"
 for was in "${weather_was[@]}"; do quiet setting "$was"; done
+took "the settings put back"
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
 # in what it kept before a run passes the cap and is stopped.
