@@ -130,7 +130,7 @@ internal static class ConsoleSkyCommands
         if (asked.Length == 0)
         {
             return string.Join("\n", weathers.Select(w => string.Create(CultureInfo.InvariantCulture,
-                $"{w.Camera}: cloud {w.Weather.Current.CloudCover:0.##} ({w.Weather.Current.Stratus:0.##} a deck), rain {w.Weather.Current.Rain:0.##}, snow {w.Weather.Current.Snow:0.##}, fog {w.Weather.Current.Fog:0.##}, {w.Weather.Current.Thunder:0.#} strikes a minute, wind {w.Weather.Wind.Length:0.#} m/s, {w.Weather.Current.Temperature:0.#} C, the ground {w.Weather.Wetness:0.##} wet and {w.Weather.SnowCover:0.##} under snow{(w.Weather.Forecast ? ", by the forecast" : "")}")));
+                $"{w.Camera}: cloud {w.Weather.Current.CloudCover:0.##} ({w.Weather.Current.Stratus:0.##} a deck), rain {w.Weather.Current.Rain:0.##}, snow {w.Weather.Current.Snow:0.##}, fog {w.Weather.Current.Fog:0.##}, {w.Weather.Current.Thunder:0.#} strikes a minute, wind {w.Weather.Wind.Length():0.#} m/s, {w.Weather.Current.Temperature:0.#} C, the ground {w.Weather.Wetness:0.##} wet and {w.Weather.SnowCover:0.##} under snow{(w.Weather.Forecast ? ", by the forecast" : "")}")));
         }
 
         if (asked.Equals("forecast", StringComparison.OrdinalIgnoreCase) || asked.Equals("still", StringComparison.OrdinalIgnoreCase))

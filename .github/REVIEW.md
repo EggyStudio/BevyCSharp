@@ -1,37 +1,39 @@
 # Review
 
-Reviewed up to `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the
-three systems; it keeps the form and carries the review's files. Before it `add899da`, item 94,
-pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three systems; it keeps the form and
-carries the review's files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on
-2026-11-02, its run green at 17:33 on the three systems; it keeps the form and carries the review's
-files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the
-three systems; it keeps the form and carries the review's files. Before it `b8cc8316`, Verdict 51's
-mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in about 20
-minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the drive in 125
-minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18 published, the
-first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts
-49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in
-about 14 minutes; the pack run started from it at 02:26 with publish on, its captures jobs green,
-which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where
-the run before took 67, Verdict 51, so no package was published; read at 04:30. Before it
-`720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run,
-its run green at 00:42 on the three systems in about 17 minutes; it keeps the form and carries the
-review's files. Before it `58265110`, item 90's second commit and its end, pushed at 23:03 on
-2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the pack run started
-from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs
-the proof of item 90's limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on
-Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43,
-many_foxes and specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on
-those three jobs alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under
-its 40 and the games in 35, the pack job skipped so no package was published, the next pack run
-after the two verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after
-3ee62451's green run, its run green at 18:16, the kernels choosing their light before any thread
-branches since llvmpipe faults on the transmittance lookup after a group's threads have parted.
-Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of
-`3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
-`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
-ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+Reviewed up to `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02,
+its run green at 21:57 on the three systems, the first with the submodule checked out; it keeps the
+form and carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02,
+its run green at 20:55 on the three systems; it keeps the form and carries the review's files.
+Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three
+systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's first
+step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the form
+and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its
+run green at 14:50 on the three systems; it keeps the form and carries the review's files. Before it
+`b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three
+systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green at 14:30
+with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green and
+0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before
+it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on
+the three systems in about 14 minutes; the pack run started from it at 02:26 with publish on, its
+captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100
+minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read at
+04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
+beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
+form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
+pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
+pack run started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its
+drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at
+00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its
+captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the
+run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of
+100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
+published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
+commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
+their light before any thread branches since llvmpipe faults on the transmittance lookup after a
+group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
+`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
+in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
+their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
 pipelines.wait answer after three ready frames running and keep a held clock still between commands
 while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
 game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
@@ -327,7 +329,15 @@ from [SHARED.md](SHARED.md).
     whole, the look tests split by what needs the engine; the module referenced as Levels is, the
     nine types leaving the public listing; Sky.Atmosphere meeting the engine's Atmosphere component,
     the engine's winning inside its namespace and a game qualifying where it uses both, said in the
-    guide.
+    guide. Done at `1ea6d865` on 2026-11-02, read at 21:35; modules/Sky a submodule at `fbc385e`,
+    the library taking it as it takes Levels with PrivateAssets all, the pack target's filter and
+    Directory.Build.targets giving it to every project in the repository, a package carrying Sky.dll
+    and Sky.xml, the guides' blocks and the feature test building on it; the nine files and the two
+    moved test classes out, users reading the module through its namespace, Vector3 to Vec3 through
+    SkyWeather.FromSky for the wind into the clouds, the froxels, the precipitation and the trees,
+    the guide naming the module and the Atmosphere collision; the public listing 108 lines fewer and
+    the cheat sheet 24; 1,982 in the suite, 2,002 less the 20 tests that moved. The module's item 4
+    is done for this engine by it.
 
 93. **The drive's course is cheaper on lavapipe.** From Verdict 51's reading on 2026-11-02. The
     course's stations judge only where the player stands, yet each of its frames costs 1.1 to 1.7 s
@@ -362,7 +372,26 @@ from [SHARED.md](SHARED.md).
     hall's faults are read again with the fill off, the white level blue in shade and the morning
     sun too warm, against the walled map's reference and the owner's eye; where they are mended,
     global illumination goes on by default and the fill comes off; where one remains, it is named
-    with its cause and mended, each a commit, the drive and the pictures read after. After 91.
+    with its cause and mended, each a commit, the drive and the pictures read after. After 91. The
+    first reading at 21:50 on 2026-11-02, a clear sky at 8:00 on the GPU against a reference of 256
+    paths. A regression of 91 found on the way, sky.weather printing the wind as a function since
+    Vector3's Length is a method where Vec3's was a property and interpolation compiles it silently,
+    mended in ConsoleSkyCommands with a test as a commit of its own. A persisted GlobalIllumination
+    setting, default Medium, applying where Solari is not running, the day's ambient back to the
+    sky's own white while the probes light the scene and the fill kept where GI is off. The hall's
+    aisle with the fill off and GI on is warm from the arches' bounce as the reference is, blue over
+    red 0.62 at Medium against the reference's 0.52 where the fill gave 1.25, but the hall reads 16
+    to 28% under the reference at Medium and 13 to 25 at High, the first right-hand bay crimson and
+    the yellow wall 44% over; the yard's shaded far wall at Medium dark and blue, 2.52 and 53%
+    under, at High 1.30 and 24% over, the fill 1.15, so Medium misses the sunlit floor's bounce onto
+    a wall about 30 m off, coverage the lead, three cascades against High's four; the sunlit floor
+    0.91 in all three. Faults of the tools, the reference's sunlit surfaces 30 to 45% over the
+    picture at both qualities, the sun lit above the air without the transmittance Bevy applies at a
+    low sun, and gi.compare with GI off never answering and leaving the reference busy; a dotted
+    seam at High along the yard wall's base, item 97. The order is the Length mend, the reference
+    through the air and gi.compare answering with GI off, Medium's bounce by its cause, the hall's
+    bay and wall against the corrected reference, then GI on by default with the fill off and the
+    drive's GI off on lavapipe through an environment value as the weather is.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -371,6 +400,12 @@ from [SHARED.md](SHARED.md).
     as a submodule under `modules/` as it takes Sky (item 91's form), the module pushed before the
     commit here that moves the pointer, a Shared line when a part lands, the suite and the drive
     green. After 95.
+
+97. **A dotted seam at High along the yard wall's base.** From item 95's first reading on
+    2026-11-02, a dotted seam drawn at High along the base of the feature test's yard wall under
+    global illumination; the cause read, the probes' reach or the screen's trace at a wall's foot,
+    and mended, read by the base against the reference and the walled map's other feet. One commit,
+    after 95, unless its cause falls out of 95's third commit.
 
 ## Verdicts
 
@@ -1558,3 +1593,14 @@ theirs, the listing naming a type by its name alone, and take the module's types
 Shared: item 91 takes the Sky module into BevyCSharp at fbc385e, the clock, the weather and the
 looks by the sun's height read from it as 3DEngine reads the sun's and the sky's light, both
 engines' pointers at or past fbc385e once 3DEngine moves its own.
+
+Item 91's mend, in the commit carrying this line. The console's sky.weather said the wind as
+System.Func`1[System.Single] m/s from 1ea6d865 on, read in item 95's first session, since
+BevyCSharp's Vec3 gave its length as a property and System.Numerics' Vector3 gives it by a method,
+and an interpolated string takes a method's name without a word from the compiler. The line calls
+Length(), and SkyWeatherTests.TheConsoleSaysTheWindsSpeed holds a steady wind of ten meters a second
+to "wind 10 m/s", failing without the mend. No other reading of the module's vectors takes a method
+by its name, the night sky's, the weather's and the day and night's each turning the vector into a
+Vec3 first. The whole suite ran with it, 1,983 passed and 3 skipped in 46 m 39 s at the 3 GB cap,
+none aborted, item 95's work held aside so the suite read this commit alone. NormTests passed, 18.
+The public listing is unchanged.

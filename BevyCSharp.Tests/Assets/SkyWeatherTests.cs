@@ -66,4 +66,30 @@ public sealed class SkyWeatherTests
             }
         Assert.True(blue < all / 10, $"{blue} of {all} of the sky's pixels are still blue under the rain's deck");
     }
+
+    /// <summary>
+    /// The console says the wind's speed in meters a second, which the Sky module's vector gives by a
+    /// method where the engine's gave it as a property, so the line said the method's name once the
+    /// weather moved there.
+    /// </summary>
+    [SkippableFact]
+    public void TheConsoleSaysTheWindsSpeed()
+    {
+        Needs.Renderer();
+        var weather = new WeatherState();
+        weather.Set(new WeatherConditions { WindSpeed = 10f, Gusts = 0f }, immediately: true);
+        string? said = null;
+        var run = new PictureRun
+        {
+            Scene = _ =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings());
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetWeather(camera, weather);
+            },
+        };
+        run.Wait(3).Do("console", _ => said = ConsoleSkyCommands.WeatherCommand()).Go();
+
+        Assert.Contains("wind 10 m/s", said);
+    }
 }
