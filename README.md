@@ -252,6 +252,11 @@ dotnet run --project BevyCSharp.Examples -- 3d_scene
 ./bcs open --example lighting --offscreen     # serving, for ./bcs to control and capture
 ```
 
+Run from a clone, an example draws with the bridge as it was last built, and the build before it
+warns with `BCS102` when a file the bridge is built from has changed since, a shader among them,
+naming the file and the command that rebuilds it, as [Building from source](#building-from-source)
+says.
+
 ## Install
 
 ```bash
@@ -390,8 +395,12 @@ dotnet test BevyCSharp.Tests/BevyCSharp.Tests.csproj
 ```
 
 The two halves are built separately, and a rebuilt bridge is invisible until a managed build copies
-it, which is why the second line is not optional. `build/build-native.sh --render` adds the renderer
-and Dear ImGui's pass, and `--editor` adds the asset watcher the editor edits files with on top of it.
+it, which is why the second line is not optional. The other way round, a managed build compares the
+bridge in `build/target/release` with every file under `native` it is built from, its shaders among
+them, and warns with `BCS102` where one is newer, naming it, so a pull that changed the bridge says
+so at `dotnet build` and `dotnet run` rather than drawing its old shaders under the new C#.
+`build/build-native.sh --render` adds the renderer and Dear ImGui's pass, and `--editor` adds the
+asset watcher the editor edits files with on top of it.
 
 [.github/BUILDING.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/BUILDING.md) has the rest, the three native profiles and what each
 costs, the platforms and their prerequisites, how the package is assembled for six runtime

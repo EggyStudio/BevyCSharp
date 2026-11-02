@@ -217,21 +217,31 @@
     </ItemGroup>
 
     <!--
-      The native bridge is built by cargo, not by MSBuild, so nothing forces it to be current.
-      A stale artifact is a nasty failure to diagnose: the ABI version still matches, but an
-      entry point added since it was staged is missing, and the app dies on the first call to it
-      with an EntryPointNotFoundException far from the cause.
+      The native bridge is built by cargo, not by MSBuild, so nothing forces it to be current, and a
+      stale one is a nasty failure to diagnose. Its ABI version still matches, but an entry point
+      added since it was built is missing, and the app dies on the first call to it with an
+      EntryPointNotFoundException far from the cause. A shader changed since, which the bridge
+      carries in itself, says nothing at all, and the app draws the shaders of the bridge's build
+      under the C# of the checkout.
 
-      Inputs and Outputs give this without a check of its own. MSBuild skips a target whose outputs
-      are all newer than its inputs, so the body below runs only when the staged bridge is actually
-      stale.
+      Its inputs are every file under native the library is built from, the shaders and its other
+      carried files beside the Rust, the two manifests, the lock and the build script. The test
+      modules and their fixtures are left out, since cargo builds them into the crate's tests alone
+      and a change to one leaves the library as it was.
+
+      Inputs and Outputs give each check below without a comparison of its own. MSBuild skips a
+      target whose outputs are all newer than its inputs, so its body runs only when the bridge is
+      stale. Both build scripts give each copy they stage the time of their run, so a run whose cargo
+      had nothing to do, a file changed that only another profile builds, answers the checks too.
 
       Set BevyCSharpSkipNativeFreshnessCheck=true where timestamps carry no meaning, such as CI
       collecting binaries that were built from this very commit on other machines.
     -->
     <ItemGroup>
-        <BevyCSharpRustSource Include="$(BevyCSharpNativeDir)bevy_csharp/src/**/*.rs"/>
-        <BevyCSharpRustSource Include="$(BevyCSharpNativeDir)bevy_csharp/Cargo.toml"/>
+        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)bevy_csharp/src/**/*"
+                                Exclude="$(BevyCSharpNativeDir)bevy_csharp/src/**/tests.rs;$(BevyCSharpNativeDir)bevy_csharp/src/**/fixtures/**"/>
+        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)bevy_csharp/Cargo.toml;$(BevyCSharpNativeDir)bevy_csharp/build.rs"/>
+        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)Cargo.toml;$(BevyCSharpNativeDir)Cargo.lock"/>
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.so"/>
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/bevy_csharp.dll"/>
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.dylib"/>
@@ -239,7 +249,7 @@
     <Target Name="BevyCSharpVerifyNativeIsCurrent"
             BeforeTargets="GenerateNuspec"
             Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true'"
-            Inputs="@(BevyCSharpRustSource)"
+            Inputs="@(BevyCSharpNativeSource)"
             Outputs="@(BevyCSharpStagedNative)">
 
         <Warning Condition="'@(BevyCSharpStagedNative)' == ''"
@@ -248,7 +258,56 @@
 
         <Error Condition="'@(BevyCSharpStagedNative)' != ''"
                Code="BCS101"
-               Text="The staged native bridge in $(BevyCSharpArtifactDir) is older than the Rust sources in $(BevyCSharpNativeDir). Re-run build/build-native.sh before packing, or the package will ship a bridge missing the newest entry points."/>
+               Text="The staged native bridge in $(BevyCSharpArtifactDir) is older than the files in $(BevyCSharpNativeDir) it is built from, its shaders among them. Re-run build/build-native.sh before packing, or the package will ship a bridge missing the newest entry points and drawing with the shaders it was built with."/>
+    </Target>
+
+    <!--
+      A build checks the bridge it copies beside each project's binaries, the flat one the build
+      scripts leave in build/target/release for running from a clone, where the check above runs at
+      packing alone. A pull that changed a shader or an entry point then says so at dotnet build and
+      dotnet run, where it drew the bridge's old shaders under the new C# with no word. It warns
+      rather than fails, since a stale bridge runs and work on the managed side alone goes on with
+      it, and it runs before the build so the line comes first. Where no build ran here, as in the
+      workflow's jobs that download a bridge into its slot, there is nothing to compare and it says
+      nothing.
+
+      The line names the first of the newer files and counts the others, since one rebuild answers
+      them all. A property batched over the files cannot carry the newest of them from one file to
+      the next, each file's batch reading the property as it stood before any of them, so the first
+      is taken from the list. MSBuild runs a skipped target's property and item groups too, to know
+      what it would have made, so nothing there reads a file it is not sure is there.
+    -->
+    <PropertyGroup>
+        <BevyCSharpDevNative>$(BevyCSharpNativeOutDir)libbevy_csharp.so</BevyCSharpDevNative>
+        <BevyCSharpDevNative Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(BevyCSharpNativeOutDir)bevy_csharp.dll</BevyCSharpDevNative>
+        <BevyCSharpDevNative Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(BevyCSharpNativeOutDir)libbevy_csharp.dylib</BevyCSharpDevNative>
+    </PropertyGroup>
+    <Target Name="BevyCSharpWarnNativeIsStale"
+            BeforeTargets="BeforeBuild"
+            Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true' And Exists('$(BevyCSharpDevNative)')"
+            Inputs="@(BevyCSharpNativeSource)"
+            Outputs="$(BevyCSharpDevNative)">
+
+        <PropertyGroup>
+            <_BevyCSharpDevNativeTime>$([System.IO.File]::GetLastWriteTime('$(BevyCSharpDevNative)').ToUniversalTime().Ticks)</_BevyCSharpDevNativeTime>
+        </PropertyGroup>
+        <ItemGroup>
+            <_BevyCSharpNewerNativeSource Include="@(BevyCSharpNativeSource)"
+                                          Condition="$([System.IO.File]::GetLastWriteTime('%(FullPath)').ToUniversalTime().Ticks) &gt; $(_BevyCSharpDevNativeTime)"/>
+        </ItemGroup>
+        <PropertyGroup>
+            <_BevyCSharpNewer>@(_BevyCSharpNewerNativeSource->'%(FullPath)')</_BevyCSharpNewer>
+            <_BevyCSharpFirstNewer>$(_BevyCSharpNewer)</_BevyCSharpFirstNewer>
+            <_BevyCSharpFirstNewer Condition="$(_BevyCSharpNewer.Contains(';'))">$(_BevyCSharpNewer.Substring(0, $(_BevyCSharpNewer.IndexOf(';'))))</_BevyCSharpFirstNewer>
+            <_BevyCSharpNewerCount>@(_BevyCSharpNewerNativeSource->Count())</_BevyCSharpNewerCount>
+            <_BevyCSharpOthers>$([MSBuild]::Subtract($(_BevyCSharpNewerCount), 1))</_BevyCSharpOthers>
+            <_BevyCSharpAndOthers Condition="'$(_BevyCSharpOthers)' == '1'"> and 1 other file</_BevyCSharpAndOthers>
+            <_BevyCSharpAndOthers Condition="'$(_BevyCSharpOthers)' &gt; '1'"> and $(_BevyCSharpOthers) other files</_BevyCSharpAndOthers>
+        </PropertyGroup>
+
+        <Warning Condition="'$(_BevyCSharpNewerCount)' != '0'"
+                 Code="BCS102"
+                 Text="The native bridge in $(BevyCSharpNativeOutDir) is older than $([MSBuild]::MakeRelative('$(BevyCSharpNativeDir)', '$(_BevyCSharpFirstNewer)'))$(_BevyCSharpAndOthers) in $(BevyCSharpNativeDir) it is built from, so what runs leaves out what changed since it was built. Rebuild it with build/build-native.sh and the profile it was built with, or with ./bcs build, which builds both halves."/>
     </Target>
 
 </Project>

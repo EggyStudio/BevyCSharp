@@ -308,8 +308,15 @@ asking for the engine of the templates' own version. They live in `templates/` w
 for that version, and `build/pack-templates.sh` packs a copy with the version of the engine package
 packed last written in, into `build/package` beside it, so the two go out together.
 
-Packing fails with `BCS101` if the staged bridge is older than the Rust sources, because shipping
-a stale one produces an `EntryPointNotFoundException` far from its cause.
+Packing fails with `BCS101` if the staged bridge is older than a file under `native` it is built
+from, its shaders among them, because a stale one fails with an `EntryPointNotFoundException` far
+from its cause, or draws with the shaders it was built with and says nothing. A build warns with
+`BCS102` where the flat bridge in `build/target/release` is older than one, naming the first and
+counting the others, so running from a clone after a pull says so too. Both leave out the crate's
+test modules and their fixtures, which the library is not built from, and both scripts give the
+copies they stage the time of their run, so a rebuild answers them even where cargo had nothing to
+do. `-p:BevyCSharpSkipNativeFreshnessCheck=true` turns both off where file times mean nothing, as
+in the workflow's jobs that bring a bridge built on another machine.
 
 The package carries `THIRD-PARTY-NOTICES.md`, which names every crate of `native/Cargo.lock` with
 its license and the notices its own files give. `build/third-party-notices.py` writes it through

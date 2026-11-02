@@ -181,5 +181,13 @@ $FlatDir = Join-Path $TargetDir 'release'
 New-Item -ItemType Directory -Force -Path $FlatDir | Out-Null
 Copy-Item -Force $Built (Join-Path $FlatDir $LibName)
 
+# Copy-Item keeps the time cargo gave the library, and cargo leaves the library as it was where no
+# file it read for this profile changed, so a change to a module only another profile builds would
+# leave both copies older than it. The freshness checks of BevyCSharp.csproj compare the copies with
+# every file under native, so each copy is given the time of this run, which is current with them.
+$Stamp = Get-Date
+(Get-Item (Join-Path $RidDir $LibName)).LastWriteTime = $Stamp
+(Get-Item (Join-Path $FlatDir $LibName)).LastWriteTime = $Stamp
+
 Write-Host "==> staged $(Join-Path $RidDir $LibName)"
 Write-Host "==> staged $(Join-Path $FlatDir $LibName) (for local runs)"

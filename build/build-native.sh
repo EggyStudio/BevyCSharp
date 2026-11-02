@@ -302,7 +302,10 @@ if [[ $GAME -eq 1 ]]; then
     exit 0
 fi
 
-# The per-RID slot the NuGet package picks up at pack time.
+# The per-RID slot the NuGet package picks up at pack time. Each copy takes the time of this run,
+# not cargo's, since cargo leaves the library as it was where no file it read for this profile
+# changed, and the freshness checks of BevyCSharp.csproj compare the copies with every file under
+# native, a module only another profile builds among them.
 mkdir -p "$ARTIFACT_DIR/$RID"
 cp "$BUILT" "$ARTIFACT_DIR/$RID/$LIBNAME"
 
