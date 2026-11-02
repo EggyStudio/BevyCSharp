@@ -296,10 +296,14 @@ as in Bevy, which the bridge gives Bevy's own field, since Bevy reads the weight
 the color's alpha, and which the field's gather and the reference take as Bevy shows it. Bevy's
 deferred G-buffer keeps the emissive color and not the weight, so a camera the field's shadows or
 global illumination make deferred showed an exposed emissive unexposed. The bridge mends Bevy's
-`deferred/functions.wesl` in the text Bevy ships (`render/mended.rs`), applying the exposure as the
-G-buffer is written, as the anisotropy mend does in `pbr_fragment.wesl`, and `DeferredEmissiveTests`
-holds an exposed panel drawn deferred to what forward shows and within 2% of its reference, where
-unmended it read 38,165 against 38.2.
+`deferred/functions.wesl` in the text Bevy ships (`render/mended.rs`), as the anisotropy mend does
+in `pbr_fragment.wesl`, carrying the weight to the lighting pass in the G-buffer's flags, in the
+five bits above Bevy's three, where the pass reads it back as the emissive's alpha. The emissive
+stays as Bevy writes it, since Solari and the bridge's denoiser read it from the G-buffer and
+expose all of it themselves, and a mend that exposed it as the G-buffer was written exposed the
+feature test's Cornell lamp twice under rays, its face gray. `DeferredEmissiveTests` holds an
+exposed panel drawn deferred to what forward shows and within 2% of its reference, where unmended
+it read 38,165 against 38.2, and the same panel under rays to what forward shows.
 
 The emitters are 3DEngine's. The gather gives each mesh's emission in the picture's units as Bevy
 shows it, times the camera's exposure by the share of it the emission's alpha sets, the field paints
@@ -529,15 +533,18 @@ accumulated in time, reprojected by the motion vectors onto the previous frame's
 where the previous depth and G-buffer, which Solari double-buffers with ReSTIR on, agree with this
 frame's, with the mean of its luminance and the variance about it beside it. The luminance's
 variance comes from those, or from a seven by seven neighborhood while the history is short, worked
-out in the same dispatch. Five à-trous passes at steps 1 to 16 weigh each tap by its depth, normal
-and luminance, the first pass's light kept as the next frame's history, and the last remodulates
-into the view target. A workgroup of eight by eight whose light all varies by under a hundredth is
-passed through, since its taps would move it by under a level. Each view keeps its history, the
-moments in two textures read and written by turns, and the passes' light and variance ping-ponged
-between two more, all half floats, and each pixel's distance and packed normal in eight bytes, which
-a tap reads in place of the depth and the G-buffer's sixteen, since the stages' time goes to moving
-the picture through memory. A pixel with no G-buffer texel, the sky or a forward material, is left
-as it was.
+out in the same dispatch, and is divided by the frames the history holds, since the filter is given
+their mean, where a frame's lets it blur a slope the mean holds plainly, a ring round the Cornell
+box's lamp a fifth over the mean. Five à-trous passes at steps 1 to 16 weigh each tap by its depth,
+normal and luminance, the light the first pass is given kept as the next frame's history, where the
+paper keeps the pass's filtered light and a still view's history is blurred again each frame, and
+the last remodulates into the view target. A workgroup of eight by eight whose light all varies by
+under a hundredth is passed through, since its taps would move it by under a level. Each view keeps
+its history, the moments in two textures read and written by turns, and the passes' light and
+variance ping-ponged between two more, all half floats, and each pixel's distance and packed normal
+in eight bytes, which a tap reads in place of the depth and the G-buffer's sixteen, since the
+stages' time goes to moving the picture through memory. A pixel with no G-buffer texel, the sky or a
+forward material, is left as it was.
 
 A scene Solari does not keep, such as stand-ins or a lower level of detail for rays, is a ray
 scene over a geometry pool. The render world builds each pool mesh into a bottom-level structure

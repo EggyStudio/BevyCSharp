@@ -303,8 +303,14 @@ fn temporal(@builtin(global_invocation_id) id: vec3<u32>) {
     var spread = (1.0 - alpha) * moments.y + alpha * (1.0 - alpha) * off * off;
     textureStore(moments_out, pixel, vec4<f32>(mean, sqrt(spread), frames, 0.0));
 
+    // The filter takes the variance of the light it is given, the mean of the frames the history
+    // holds, which is a frame's over their count, rather than a frame's. Weighed against a frame's,
+    // a settled view's light is blurred across a slope its frames' mean holds plainly, the ceiling
+    // beside the Cornell box's lamp falling from twenty to one and a half over twelve pixels and
+    // the filter carrying a fifth more light into the ring five to twenty pixels out. A pixel the
+    // camera uncovers has a history of one frame and keeps a frame's.
     if frames < params.variance_frames { spread = nearby_variance(pixel, normal, distance); }
-    textureStore(filtered_start, pixel, vec4<f32>(mix(color, current, alpha), sqrt(spread)));
+    textureStore(filtered_start, pixel, vec4<f32>(mix(color, current, alpha), sqrt(spread * alpha)));
 }
 
 // The luminance's variance over a seven by seven neighborhood of this frame's light, each pixel
@@ -359,11 +365,11 @@ fn change(neighbor: vec2<i32>, distance: f32) -> f32 {
 
 // The fourth stage, one à-trous pass at a step, each tap of the five by five kernel weighed by its
 // depth, normal and luminance against the middle's, the variance filtered with the squares of the
-// weights, and the first pass's light kept as the next frame's history. A workgroup whose pixels
-// are all settled (`SETTLED_NOISE`) passes its light through, which the later passes do over most of
-// a still picture, each having taken the variance down. The last pass is the fifth stage as well,
-// the filtered light times the share the surface sends back with the emissive added back, into the
-// view target where Solari wrote it.
+// weights, and the light the first pass is given kept as the next frame's history. A workgroup
+// whose pixels are all settled (`SETTLED_NOISE`) passes its light through, which the later passes
+// do over most of a still picture, each having taken the variance down. The last pass is the fifth
+// stage as well, the filtered light times the share the surface sends back with the emissive added
+// back, into the view target where Solari wrote it.
 @compute @workgroup_size(8, 8, 1)
 fn atrous(@builtin(global_invocation_id) id: vec3<u32>, @builtin(local_invocation_index) index: u32) {
     let pixel = vec2<i32>(id.xy);
@@ -392,7 +398,14 @@ fn atrous(@builtin(global_invocation_id) id: vec3<u32>, @builtin(local_invocatio
         result = filtered(pixel, middle, pixel_guide);
     }
 
-    if pass_step.first != 0u { textureStore(history_out, pixel, vec4<f32>(result.rgb, 1.0)); }
+    // The next frame's history is the light the temporal stage gave the first pass, its frames'
+    // mean, rather than the pass's filtered light as the paper keeps it. Kept filtered, a still
+    // view's history is blurred again each frame, and over the frames it holds the blur carries
+    // light down a slope its frames' mean holds plainly, a ring round the Cornell box's lamp a
+    // fifth over the mean and the blocks' shading blurred to an even white. A view coming out from
+    // behind another lies as close to its mean either way, the strafe's uncovered surfaces 18
+    // levels from theirs, and 19 with the filtered light kept (build/denoiser-readings.py).
+    if pass_step.first != 0u { textureStore(history_out, pixel, vec4<f32>(middle.rgb, 1.0)); }
     if pass_step.last == 0u {
         textureStore(filtered_out, pixel, result);
         return;

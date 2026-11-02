@@ -28,16 +28,32 @@ const PBR_FUNCTIONS: &str = "embedded://bevy_pbr/render/pbr_functions.wesl";
 /// The mend of an exposed emissive drawn deferred, in Bevy 0.20's `deferred/functions.wesl`.
 ///
 /// A material's emissive alpha says how much of the camera's exposure its light takes, all of it at
-/// 1, Bevy's default, and none at 0. Drawn forward, Bevy's lighting applies that. Drawn deferred, the
+/// 1 and none at 0, Bevy's default. Drawn forward, Bevy's lighting applies that. Drawn deferred, the
 /// G-buffer keeps the emissive's color alone, and the lighting pass reads it back with an alpha of
 /// 0, so an exposed emissive is shown unexposed, a lamp panel of 40,000 nits at about 40,000 where
-/// forward it shows about 40 at Bevy's default exposure. The mend applies the exposure as the
-/// G-buffer is written, by the share of it the alpha sets, so the light read back is the light
-/// forward shows, as Bevy writes a lightmap's light into the same place times the exposure.
-const EMISSIVE_EXPOSURE: [(&str, &str); 1] = [(
-    "    var emissive = in.material.emissive.rgb;\n",
-    "    var emissive = in.material.emissive.rgb * mix(1.0, view.exposure, in.material.emissive.a);\n",
-)];
+/// forward it shows about 40 at Bevy's default exposure.
+///
+/// The mend carries the alpha to the lighting pass in the G-buffer's flags, in 31 steps in the five
+/// bits above Bevy's three, and the pass reads it back as the emissive's alpha, so the light it
+/// shows is the light forward shows. The emissive itself stays as Bevy writes it, since Solari and
+/// the bridge's denoiser read it from the G-buffer and expose all of it themselves, and a lamp
+/// written there exposed was exposed again under rays, its face showing only the light that fell on
+/// it. A lightmap's light, which Bevy writes into the same place times the exposure for a pass that
+/// adds none, is divided by what the pass adds, so it comes out as Bevy shows it.
+const EMISSIVE_EXPOSURE: [(&str, &str); 3] = [
+    (
+        "    let flags = deferred_types::deferred_flags_from_mesh_material_flags(in.flags, in.material.flags);\n",
+        "    let exposed = round(saturate(in.material.emissive.a) * 31.0);\n    let flags = deferred_types::deferred_flags_from_mesh_material_flags(in.flags, in.material.flags) | (u32(exposed) << 3u);\n",
+    ),
+    (
+        "    emissive += in.lightmap_light * diffuse_color * view.exposure;\n",
+        "    emissive += in.lightmap_light * diffuse_color * view.exposure / mix(1.0, view.exposure, exposed / 31.0);\n",
+    ),
+    (
+        "        pbr.material.emissive = vec4(emissive, 0.0);\n",
+        "        pbr.material.emissive = vec4(emissive, f32((flags >> 3u) & 31u) / 31.0);\n",
+    ),
+];
 
 /// The mend of the standard material's anisotropy under a normal prepass, in Bevy 0.20's
 /// `render/pbr_fragment.wesl`.

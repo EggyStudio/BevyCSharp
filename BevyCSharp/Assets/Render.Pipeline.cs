@@ -90,9 +90,10 @@ public static unsafe partial class Render
     /// <remarks>
     /// Bevy 0.20's G-buffer keeps an emissive's color and not its alpha, which says how much of the
     /// camera's exposure it takes, so a camera drawn deferred, as the field's shadows and global
-    /// illumination draw one, showed an exposed emissive unexposed. The bridge applies the exposure as
-    /// the G-buffer is written (<c>render/mended.rs</c>), and a release whose text moved refuses the
-    /// mend, which a test holds.
+    /// illumination draw one, showed an exposed emissive unexposed. The bridge carries the alpha to
+    /// the lighting pass in the G-buffer's flags and leaves the color as Bevy writes it
+    /// (<c>render/mended.rs</c>), since Solari and the bridge's denoiser read it there and expose it
+    /// themselves, and a release whose text moved refuses the mend, which a test holds.
     /// </remarks>
     internal static bool? EmissiveExposureMended
     {

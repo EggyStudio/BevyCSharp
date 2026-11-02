@@ -197,6 +197,149 @@ public sealed class RayTracingTests
     }
 
     /// <summary>
+    /// A still view's denoised light keeps the slope its grainy frames' mean holds beside a lamp
+    /// hung under a ceiling, the band one to five pixels from the lamp within 15% of that mean, read
+    /// before tonemapping.
+    /// </summary>
+    /// <remarks>
+    /// A filter that weighed each tap against one frame's variance rather than its history's mean's,
+    /// and kept its own filtered light as the next frame's history, carried light down the slope
+    /// and out from the lamp, this band at 0.61 of its mean and the feature test's Cornell box's
+    /// ceiling by its lamp at 0.37 to 0.59, with a ring further out a fifth over its mean.
+    /// </remarks>
+    [SkippableFact]
+    public void TheDenoiserKeepsTheSlopeBesideALamp()
+    {
+        Needs.Renderer();
+
+        const int Grainy = 24;
+        var supported = true;
+        var reading = false;
+        var taken = 0;
+        float[]? sum = null;
+        float[]? denoised = null;
+
+        // Reads the camera's light before tonemapping over the frames it takes, handing it on once read.
+        bool Read(World world, Action<float[]> keep)
+        {
+            var ecs = world.Resource<EcsWorld>();
+            if (!reading)
+            {
+                reading = true;
+                Assert.Null(GiReference.BeginPicture(ecs, null));
+                return false;
+            }
+            if (GiReference.Step(ecs) is null) return false;
+            reading = false;
+            keep(GiReference.LastPicture!.Value.Light);
+            return true;
+        }
+
+        new PictureRun
+        {
+            Width = 256,
+            Height = 256,
+            Configure = config => config.RayTracedLighting = true,
+            Scene = ecs =>
+            {
+                supported = Render.RayTracingActive;
+                if (!supported) return;
+
+                var camera = PictureRun.Camera(ecs, new Vec3(0f, 0f, 3f));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetRayTracedLighting(camera, true);
+                Render.SetRayTracedDenoiser(false);
+
+                // A closed white room round the camera, so its light bounces as in the feature
+                // test's Cornell box and is as grainy, and a lamp of that box's light hung two
+                // centimeters under its ceiling, whose back and sides light the ceiling by its edge.
+                // The lamp's emissive takes none of the exposure, which rays pass over, so the
+                // emissive's mend (render/mended.rs) is no part of what is read.
+                var white = Render.CreateMaterial(new MaterialSettings { BaseColor = (0.9f, 0.9f, 0.9f, 1f), Roughness = 1f });
+                void Slab(float x, float y, float z, float width, float height, float depth)
+                {
+                    var mesh = Render.CreateMesh(MeshShape.Cuboid, width, height, depth);
+                    var slab = ecs.Spawn();
+                    Render.SetMesh(ecs, slab, mesh);
+                    Render.SetMaterial(ecs, slab, white);
+                    ecs.Add(slab, Transform.At(x, y, z));
+                    Render.SetRayTraced(slab, mesh);
+                }
+                Slab(0f, 0f, 0f, 4f, 4f, 0.1f);
+                Slab(0f, 0f, 4f, 4f, 4f, 0.1f);
+                Slab(-2f, 0f, 2f, 0.1f, 4f, 4f);
+                Slab(2f, 0f, 2f, 0.1f, 4f, 4f);
+                Slab(0f, -2f, 2f, 4f, 0.1f, 4f);
+                Slab(0f, 2f, 2f, 4f, 0.1f, 4f);
+
+                var lampMesh = Render.CreateMesh(MeshShape.Cuboid, 0.8f, 0.8f, 0.06f);
+                var lamp = ecs.Spawn();
+                Render.SetMesh(ecs, lamp, lampMesh);
+                Render.SetMaterial(ecs, lamp, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Emissive = (40_000f, 38_000f, 34_000f, 0f) }));
+                ecs.Add(lamp, Transform.At(0f, 0f, 0.1f));
+                Render.SetRayTraced(lamp, lampMesh);
+            },
+        }
+            .Until("ready", _ => Render.PipelinesReady())
+            // Solari's world cache settled first, since grainy frames taken sixty frames in read
+            // the room darker than the denoised frame taken after them.
+            .Wait(300)
+            .Until("the grainy frames", world => !supported || (Read(world, light =>
+            {
+                sum ??= new float[light.Length];
+                for (var i = 0; i < light.Length; i++) sum[i] += light[i];
+                taken++;
+            }) && taken >= Grainy))
+            .Do("the denoiser on", _ =>
+            {
+                if (supported) Render.SetRayTracedDenoiser(true);
+            })
+            // The history's 32 frames and as many again, so the view is settled.
+            .Wait(64)
+            .Until("the denoised frame", world => !supported || Read(world, light => denoised = light))
+            .Go();
+
+        Needs.RayTracing(supported);
+
+        const int Width = 256;
+        var pixels = sum!.Length / 3;
+        float Luminance(float[] light, int i) => 0.2126f * light[i * 3] + 0.7152f * light[i * 3 + 1] + 0.0722f * light[i * 3 + 2];
+        var mean = Enumerable.Range(0, pixels).Select(i => Luminance(sum, i) / taken).ToArray();
+        var filtered = Enumerable.Range(0, pixels).Select(i => Luminance(denoised!, i)).ToArray();
+
+        // The lamp's face, as bright as the middle of the denoised frame, which is the lamp's light
+        // with no grain, where the grainy frames' brightest pixel can be one that caught a sample
+        // far over the lamp, and each other pixel's distance from it in steps across and down.
+        var face = filtered[Width / 2 * Width + Width / 2];
+        var distance = Enumerable.Repeat(-1, pixels).ToArray();
+        var queue = new Queue<int>();
+        for (var i = 0; i < pixels; i++)
+        {
+            if (filtered[i] < 0.9f * face) continue;
+            distance[i] = 0;
+            queue.Enqueue(i);
+        }
+        while (queue.Count > 0)
+        {
+            var i = queue.Dequeue();
+            var (x, y) = (i % Width, i / Width);
+            foreach (var (nx, ny) in new[] { (x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1) })
+            {
+                if (nx < 0 || ny < 0 || nx >= Width || ny >= pixels / Width) continue;
+                var next = ny * Width + nx;
+                if (distance[next] >= 0) continue;
+                distance[next] = distance[i] + 1;
+                queue.Enqueue(next);
+            }
+        }
+
+        var edge = Enumerable.Range(0, pixels).Where(i => distance[i] > 1 && distance[i] <= 5).ToArray();
+        Assert.True(edge.Length > 500, $"the band by the lamp holds {edge.Length} pixels");
+        var share = edge.Sum(i => filtered[i]) / edge.Sum(i => mean[i]);
+        Assert.True(Math.Abs(share - 1f) < 0.15f, $"the band by the lamp is denoised to {share:0.000} of its grainy frames' mean");
+    }
+
+    /// <summary>
     /// An emissive wall made of a mesh with no texture coordinates, as a model drawn in plain
     /// colors often is, is given coordinates of zero rather than refused, and lights the floor as
     /// one with coordinates does.

@@ -37,11 +37,11 @@ which the bridge does not build. It is spatiotemporal variance-guided filtering.
 to the pixel's history where the surface there is the same one, and what noise is left is filtered
 in five passes that stop at edges, what the surface sends back by its color and its shine taken off
 first and put back after, so a texture stays sharp. A still view is clean within a few frames. At
-each of the feature test's views a filtered frame lies 1.3 to 6.4 levels of 255 from the mean of 256
-grainy frames, where a grainy frame lies 8.9 to 18.0, and after a camera strafes past a pillar at
-six meters a second the surfaces it uncovers lie 18 to 20 levels from their mean where a grainy
-frame's lie 38 (`python3 build/denoiser-readings.py`, on an RTX 4070 Laptop GPU). On that GPU it
-takes two thirds of what the lighting does, 1.9 ms at 1920 by 1080 in Bevy's own Solari scene
+each of the feature test's views a filtered frame lies 1.6 to 5.3 levels of 255 from the mean of 256
+grainy frames, where a grainy frame lies 8.9 to 17.6, and after a camera strafes past a pillar at
+six meters a second the surfaces it uncovers lie 18 to 19 levels from their mean where a grainy
+frame's lie 38 to 39 (`python3 build/denoiser-readings.py`, on an RTX 4070 Laptop GPU). On that GPU
+it takes two thirds of what the lighting does, 1.9 ms at 1920 by 1080 in Bevy's own Solari scene
 (`./bcs command render.timings` after `./bcs open --example solari --offscreen --size 1920x1080`),
 and 2.5 ms where every pixel is filtered, which `TheDenoiserKeepsToItsBudgetAt1080p` holds within
 3.2 ms. Its four settings start at the defaults of the paper that describes it (Schied and others,

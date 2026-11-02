@@ -1,54 +1,57 @@
 # Review
 
-Reviewed up to `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green
-at 02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with
-publish on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at
-the limit of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was
-published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23
-on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems in about 17 minutes;
-it keeps the form and carries the review's files. Before it `58265110`, item 90's second commit and
-its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15
-minutes; the pack run started from it at 23:22 with publish on, the first since `09fc95dd` of
-2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora
-job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of
-its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50;
-the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit
-of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
-published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
-commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
-their light before any thread branches since llvmpipe faults on the transmittance lookup after a
-group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
-`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
-in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
-their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
-pipelines.wait answer after three ready frames running and keep a held clock still between commands
-while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
-game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
-or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with every
-shot after it whole; the drive's effects view, which had been missing the level, the spheres' board
-and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still through
-a wait and an app begun on a set clock drawing what comes into view whole; the whole suite before
-the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched classes, 78,
-the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the scenes yard,
-pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point
-in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with
-the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88,
-pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the
-run-time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`,
-item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's
-fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58
-with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18 minutes,
-recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52
-with the suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the binding,
-recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08,
-its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine grass, recorded
-under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its
-run green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase,
-its run green at 12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three
-grass cards in the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at
-11:02, its run green at 11:25, the light-through test at 180 traced frames, recorded under the item
-in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+Reviewed up to `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37
+on the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on,
+awaited, its drive the verdict's proof on the runner. Before it `a18496c3`, Verdicts 49 and 50's
+mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14
+minutes; the pack run started from it at 02:26 with publish on, its captures jobs green, which
+settles Verdicts 49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where the
+run before took 67, Verdict 51, so no package was published; read at 04:30. Before it `720ec3db`,
+item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green
+at 00:42 on the three systems in about 17 minutes; it keeps the form and carries the review's files.
+Before it `58265110`, item 90's second commit and its end, pushed at 23:03 on 2026-11-01, its run
+green at 23:22 on the three systems in about 15 minutes; the pack run started from it at 23:22 with
+publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's
+limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the
+workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43, many_foxes and
+specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on those three jobs
+alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under its 40 and the
+games in 35, the pack job skipped so no package was published, the next pack run after the two
+verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after 3ee62451's
+green run, its run green at 18:16, the kernels choosing their light before any thread branches since
+llvmpipe faults on the transmittance lookup after a group's threads have parted. Before it
+`3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of `3808bd37` went
+green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes. `b79314ca` moves the
+clock's console commands beside app.hold into a file of their own, ConsoleWorldCommands.cs having
+crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes pipelines.wait answer after three ready
+frames running and keep a held clock still between commands while it waits, through
+ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first game's shots waiting for it;
+in ten of ten fresh sessions the meadow's first shot had lost its grass or its walls' light, and
+pipelines.wait after the look answered 128 to 141 frames later with every shot after it whole; the
+drive's effects view, which had been missing the level, the spheres' board and the clearcoat row, is
+whole, the drive 249 s where 229; two tests, the held clock still through a wait and an app begun on
+a set clock drawing what comes into view whole; the whole suite before the split 1,994 passed with
+the one failure N 1.3's, after it NormTests and the touched classes, 78, the run standing for the
+whole; the public listing unchanged. Before it `3808bd37`, the scenes yard, pushed at 10:04, its run
+green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point in the level. Before it
+`7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with the suites in 12 to 17
+minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88, pushed at 23:27 on
+2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the run-time switch's panic
+mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`, item 87, pushed at
+21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's fill, recorded under
+the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58 with `63aca2f2`, 68's
+gallery court, its run green at 17:17 with the suites in 11 to 18 minutes, recorded under the items.
+Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52 with the suites in 13 to 19
+minutes, the Levels module as a submodule with LevelSpawner the binding, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08, its run green at 14:31 with
+the suites in 14 to 18 minutes, the meadow on the engine grass, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its run green at 13:32
+with the suites in 11 to 14 minutes, the engine grass, recorded under the item in REVIEW-ARCHIVE.md.
+Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at
+12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in
+the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run
+green at 11:25, the light-through test at 180 traced frames, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
 reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
 09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
 mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
@@ -514,7 +517,15 @@ Verdicts 33 to 42 and 44 to 50 are settled, said under each in REVIEW-ARCHIVE.md
     ran past 240 s, more than 4 s a frame, so the views take a per-frame figure of their own set
     from a fifth run; the course's stations at 3 s a frame. The station times match from run to run,
     the hub at 8:46, the ramps at 28:43, the tunnel at 53:41 and the zones at 70:52, the container's
-    hub frame 1,184 ms against the 7763's 1,143.
+    hub frame 1,184 ms against the 7763's 1,143. The mend is at `b8cc8316`, pushed at 11:14, the
+    drive job at 125 minutes with the two processors and the container named in its comment, the
+    step about 111 minutes in the container with the zones' line at 71:55 and the views 38:55 cold,
+    a progress line a station and view with the processor and the device named at the start and
+    commands.txt in the uploaded folder, the bounds by kind set from what each took (900 s before
+    the first pipelines.wait, 60 s plus 3 a frame for the course's waits and holds, 900 for a view's
+    frames, pipelines.wait and scene.load, 300 for a shot, 120 for the rest, 180 for the first
+    answer), each view waiting for its pipelines after its look; 1,997 in the suite. Settled by the
+    next pack run's drive green.
 
 ## Decisions
 
@@ -1533,3 +1544,44 @@ processor and the device at its start, so a job cancelled at its limit says wher
 bounds each command by what its kind takes in the runner's setting, so a hang fails where it stands
 (build/drive-feature-test.sh, from the commit carrying this line); SHARED.md's row on build/step.py
 is the nearest.
+
+Item 92, in the commit carrying this line. The Cornell lamp's face was gray under rays because
+36d783bf's mend wrote the G-buffer's emissive exposed, and Solari and the denoiser expose it again.
+The mend carries the emissive's alpha to the lighting pass in the G-buffer's flags instead, in the
+five bits above Bevy's three, keeps the color as Bevy writes it and divides a lightmap's light by
+what the pass adds, and AnExposedEmissiveReadsTheSameUnderRaysAsForward holds the panel under rays
+within 2% of forward, where the bridge before it read 0.0383 against 38.2. The ring round the lamp
+was read in linear light, the Cornell view's denoised light against the mean of 32 grainy frames, by
+gi.compare's reading written out with a probe that is not kept. The ceiling's light falls from about
+20 at the lamp's edge to 1.4 twelve pixels out, and the filter left the edge at 0.37 to 0.59 of its
+mean and the ring 5 to 20 pixels out at 1.12 to 1.23, carrying light down the slope. The filter had
+two causes of it, both mended in denoiser.wgsl. Each tap's luminance was weighed against one frame's
+variance, 1.4 to 1.8 times the light there, where the filter is given the history's mean, whose
+variance is a frame's over its frames; and the first pass's filtered light was kept as the history,
+as the paper keeps it, so a still view was blurred again every frame. With the first alone the ring
+read 1.06 to 1.12, and with both every band reads 0.89 to 0.98 of its mean, the 2% the filter takes
+everywhere. The 24 levels read in 8 bits were mostly the readings' reference, the mean of 256
+tonemapped grainy frames, which lies below the tonemapped mean light wherever frames are bright and
+noisy, the lamp's crop 10.9 levels over it before and 9.7 after; a reference taken before
+tonemapping would read the filter alone, a lead for build/denoiser-readings.py. The readings go from
+1.3 to 6.2 levels to 1.6 to 5.3, the render gallery from 6.18 to 2.65 and the vegetation from 3.74
+to 1.82, the four quiet views 0.2 further, and the strafe's uncovered surfaces from 20.6 and 18.9 to
+19.1 and 17.9; the guide says so and denoiser.webp is taken again. The filter's cost holds, a median
+of 1.99 ms in Bevy's Solari scene at 1080p against 1.94 before, five readings each. The helmet in
+solari_reflections was the same blur, its near-mirror's reflection sharp with the mend, and solari
+and solari_reflections, taken again in Fedora 44 on Mesa 26.2.5, differ from their pictures in 2.4%
+and 2.7%, the other four of the six within the bar; both are checked in with the gallery's two and
+captures.tsv. TheDenoiserKeepsTheSlopeBesideALamp holds the band one to five pixels round a lamp
+under a closed room's ceiling within 15% of its grainy frames' mean, which read 0.61 three times of
+three on a bridge with both of the filter's changes undone. The bridge's three profiles check clean
+and its tests pass, 118 and the denoiser's 11 under Solari. The pictures are
+2026-11-02-item-92-cornell.webp and 2026-11-02-item-92-reflections.webp, both in the day's dump. The
+whole suite ran with it, 1,998 passed, 0 failed and 3 skipped in 44 m 45 s at the 3 GB cap, and
+NormTests passed, 18. The public listing is unchanged.
+
+Shared: SHARED.md's row on the denoiser over ray-traced lighting; from the commit carrying this line
+the filter weighs a tap's luminance against the variance of the history's mean, a frame's over the
+frames the history holds, and keeps that mean rather than the first pass's filtered light as the
+next frame's history, where SVGF's paper does both the other way, since together they carried a
+still view's light down a slope its frames hold, a ring round a lamp a fifth over its mean and a
+mirror's reflection blurred.

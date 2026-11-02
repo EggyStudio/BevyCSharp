@@ -17,11 +17,13 @@
 //!    [`DenoiserSettings::history_limit`] frames.
 //! 3. The variance of luminance, from the history's where it holds [`VARIANCE_FRAMES`] or
 //!    more, and from a seven by seven neighborhood of this frame's light where it holds fewer,
-//!    worked out in the temporal stage's dispatch, which holds the moments.
-//! 4. Five à-trous passes at steps 1, 2, 4, 8 and 16, each tap of a five by five B3 spline kernel
-//!    weighted by its depth, normal and luminance differences ([`weight`]), the luminance's against
-//!    the root of the variance blurred over three by three, the variance filtered along with the
-//!    squares of the weights, and the first pass's light kept as the next frame's history. A
+//!    worked out in the temporal stage's dispatch, which holds the moments, and divided by the
+//!    frames the history holds, since the filter is given their mean rather than a frame.
+//! 4. Five à-trous passes at steps 1, 2, 4, 8 and 16, each tap of a five by five B3 spline
+//!    kernel weighted by its depth, normal and luminance differences ([`weight`]), the luminance's
+//!    against the root of the variance blurred over three by three, the variance filtered along
+//!    with the squares of the weights, and the light the first pass is given, the history's mean,
+//!    kept as the next frame's history, where the paper keeps the pass's filtered light. A
 //!    workgroup whose pixels' light all varies by under a hundredth is passed through as it is,
 //!    since the luminance's weight would leave it within a level.
 //! 5. Remodulation, the filtered light times the same share, plus the emissive, into the view

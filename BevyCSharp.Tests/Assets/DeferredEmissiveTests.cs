@@ -6,9 +6,10 @@ namespace Bevy.Tests;
 /// <summary>
 /// An exposed emissive on a camera drawn deferred, as the field's shadows and global illumination
 /// draw one, shows the light it shows drawn forward, the bridge's mend of Bevy's G-buffer
-/// (<c>render/mended.rs</c>) applying the camera's exposure as the G-buffer is written, where Bevy
-/// 0.20 keeps the emissive's color alone and shows it unexposed, about a thousand times too bright
-/// at Bevy's default exposure.
+/// (<c>render/mended.rs</c>) carrying the emissive's alpha to the lighting pass, where Bevy 0.20
+/// keeps the emissive's color alone and shows it unexposed, about a thousand times too bright at
+/// Bevy's default exposure. Under rays it shows the same, Solari exposing the color the G-buffer
+/// keeps once, where a G-buffer written exposed had it exposed twice.
 /// </summary>
 [Collection("engine")]
 public sealed class DeferredEmissiveTests
@@ -32,6 +33,22 @@ public sealed class DeferredEmissiveTests
     }
 
     /// <summary>
+    /// An exposed emissive panel seen under rays reads the light it reads drawn forward, within 2%,
+    /// where a G-buffer written exposed had Solari expose it again, the feature test's Cornell lamp
+    /// showing gray, its own light gone and only what fell on it left.
+    /// </summary>
+    [SkippableFact]
+    public void AnExposedEmissiveReadsTheSameUnderRaysAsForward()
+    {
+        Needs.Shaders();
+        var (traced, mended) = Panel(deferred: true, reference: false, traced: true);
+        Needs.RayTracing(!float.IsNaN(traced));
+        var (forward, _) = Panel(deferred: false, reference: false);
+        Assert.True(mended == true, $"the bridge's mend of Bevy's deferred G-buffer reads {mended?.ToString() ?? "not made"}");
+        Assert.True(Math.Abs(traced / forward - 1f) < 0.02f, $"under rays the panel reads {traced}, forward {forward}");
+    }
+
+    /// <summary>
     /// The lamp panel on a camera drawn deferred reads within 2% of a path-traced reference of the
     /// same view (<c>gi.reference</c>), whose panel emits its light exposed as Bevy shows it, where
     /// unmended it read 40,053 against the reference's 49 in the feature test's Cornell box.
@@ -50,10 +67,11 @@ public sealed class DeferredEmissiveTests
 
     /// <summary>
     /// The luminance of the middle pixel of a camera's picture before tonemapping, looking straight at
-    /// an exposed emissive panel that fills it, drawn deferred or forward, with whether the mend was
-    /// made, and a reference traced first where asked, or NaN where the GPU traces no rays for one.
+    /// an exposed emissive panel that fills it, drawn deferred or forward or lit by Solari's rays,
+    /// with whether the mend was made, and a reference traced first where asked, or NaN where the GPU
+    /// traces no rays for one or the rays are not running.
     /// </summary>
-    private static (float Light, bool? Mended) Panel(bool deferred, bool reference)
+    private static (float Light, bool? Mended) Panel(bool deferred, bool reference, bool traced = false)
     {
         var (light, mended) = (0f, (bool?)null);
         var (supported, begun, read) = (true, false, false);
@@ -61,21 +79,33 @@ public sealed class DeferredEmissiveTests
         {
             Width = 32,
             Height = 32,
+            Configure = config => config.RayTracedLighting = traced,
             Scene = ecs =>
             {
+                if (traced && !Render.RayTracingActive)
+                {
+                    supported = false;
+                    return;
+                }
                 var camera = PictureRun.Camera(ecs, new Vec3(0f, 0f, 3f));
                 // Drawn once a pixel either way, which deferred needs, so the two differ in that alone,
                 // and in floats, so the light is read before tonemapping as it is.
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
                 if (deferred) Shaders.SetPrepass(camera, depth: true, deferred: true);
+                if (traced) Render.SetRayTracedLighting(camera, true);
                 var panel = ecs.Spawn();
-                Render.SetMesh(ecs, panel, Render.CreateMesh(MeshShape.Cuboid, 4f, 4f, 0.1f));
+                var mesh = Render.CreateMesh(MeshShape.Cuboid, 4f, 4f, 0.1f);
+                Render.SetMesh(ecs, panel, mesh);
                 Render.SetMaterial(ecs, panel, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Emissive = Lamp }));
                 ecs.Add(panel, Transform.At(0f, 0f, 0f));
+                if (traced) Render.SetRayTraced(panel, mesh);
             },
         }
+            // The mend changes the G-buffer's reading as well as its writing, so the lighting pass
+            // compiles again once it is made, which the pipelines' readiness can answer before, and
+            // read ten frames on the deferred panel was black.
             .Until("ready", _ => Render.PipelinesReady())
-            .Wait(10)
+            .Wait(ShaderMaterialTests.Settled)
             .Until("referenced", world =>
             {
                 if (!reference) return true;
@@ -91,6 +121,7 @@ public sealed class DeferredEmissiveTests
             })
             .Until("read", world =>
             {
+                if (!supported) return true;
                 var ecs = world.Resource<EcsWorld>();
                 if (!read)
                 {

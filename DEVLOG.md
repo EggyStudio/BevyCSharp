@@ -13,6 +13,20 @@ Bevy's solari_reflections example in Fedora 44 on Mesa's lavapipe, on the left a
 2026-10-19, grainy, and on the right taken again on Mesa 26.2.5, the bridge's denoiser filtering
 Solari's light, the walls and floor clean and the near-mirror's reflection of the helmet blurred.
 
+![](.github/assets/readings/2026-11-02-item-92-cornell.webp)
+The feature test's Cornell box under rays, its denoised frame on the left as item 68 left it on
+2026-11-01, the lamp's face gray inside a bright ring and the blocks' shading blurred to white, and
+on the right with the lamp's emissive kept as Bevy writes it and the denoiser weighing its taps
+against the variance of its history's mean and keeping that mean as its history, the face white, the
+ring gone and the shading between the blocks as the mean of 256 grainy frames shows it.
+
+![](.github/assets/readings/2026-11-02-item-92-reflections.webp)
+Bevy's solari_reflections example on the development machine's GPU, its near-mirror and the mirror
+beside it on the left with the bridge's denoiser as it was, the helmet's reflection a blur and the
+floor's checker in the side mirror gone, and on the right with the denoiser weighing its taps
+against the variance of its history's mean and keeping that mean as its history, the helmet and the
+checker sharp in both.
+
 Done that day
 
 ## 2026-11-01
