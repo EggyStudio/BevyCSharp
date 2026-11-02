@@ -1,57 +1,60 @@
 # Review
 
-Reviewed up to `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37
-on the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on,
-awaited, its drive the verdict's proof on the runner. Before it `a18496c3`, Verdicts 49 and 50's
-mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14
-minutes; the pack run started from it at 02:26 with publish on, its captures jobs green, which
-settles Verdicts 49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where the
-run before took 67, Verdict 51, so no package was published; read at 04:30. Before it `720ec3db`,
-item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green
-at 00:42 on the three systems in about 17 minutes; it keeps the form and carries the review's files.
-Before it `58265110`, item 90's second commit and its end, pushed at 23:03 on 2026-11-01, its run
-green at 23:22 on the three systems in about 15 minutes; the pack run started from it at 23:22 with
-publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's
-limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the
-workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43, many_foxes and
-specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on those three jobs
-alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under its 40 and the
-games in 35, the pack job skipped so no package was published, the next pack run after the two
-verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after 3ee62451's
-green run, its run green at 18:16, the kernels choosing their light before any thread branches since
-llvmpipe faults on the transmittance lookup after a group's threads have parted. Before it
-`3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of `3808bd37` went
-green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes. `b79314ca` moves the
-clock's console commands beside app.hold into a file of their own, ConsoleWorldCommands.cs having
-crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes pipelines.wait answer after three ready
-frames running and keep a held clock still between commands while it waits, through
-ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first game's shots waiting for it;
-in ten of ten fresh sessions the meadow's first shot had lost its grass or its walls' light, and
-pipelines.wait after the look answered 128 to 141 frames later with every shot after it whole; the
-drive's effects view, which had been missing the level, the spheres' board and the clearcoat row, is
-whole, the drive 249 s where 229; two tests, the held clock still through a wait and an app begun on
-a set clock drawing what comes into view whole; the whole suite before the split 1,994 passed with
-the one failure N 1.3's, after it NormTests and the touched classes, 78, the run standing for the
-whole; the public listing unchanged. Before it `3808bd37`, the scenes yard, pushed at 10:04, its run
-green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point in the level. Before it
-`7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with the suites in 12 to 17
-minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88, pushed at 23:27 on
-2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the run-time switch's panic
-mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`, item 87, pushed at
-21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's fill, recorded under
-the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58 with `63aca2f2`, 68's
-gallery court, its run green at 17:17 with the suites in 11 to 18 minutes, recorded under the items.
-Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52 with the suites in 13 to 19
-minutes, the Levels module as a submodule with LevelSpawner the binding, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08, its run green at 14:31 with
-the suites in 14 to 18 minutes, the meadow on the engine grass, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its run green at 13:32
-with the suites in 11 to 14 minutes, the engine grass, recorded under the item in REVIEW-ARCHIVE.md.
-Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at
-12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in
-the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run
-green at 11:25, the light-through test at 180 traced frames, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+Reviewed up to `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the
+three systems; it keeps the form and carries the review's files. Before it `b8cc8316`, Verdict 51's
+mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in about 20
+minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the drive in 125
+minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18 published, the
+first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts
+49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in
+about 14 minutes; the pack run started from it at 02:26 with publish on, its captures jobs green,
+which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where
+the run before took 67, Verdict 51, so no package was published; read at 04:30. Before it
+`720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run,
+its run green at 00:42 on the three systems in about 17 minutes; it keeps the form and carries the
+review's files. Before it `58265110`, item 90's second commit and its end, pushed at 23:03 on
+2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the pack run started
+from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs
+the proof of item 90's limits on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on
+Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43,
+many_foxes and specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on
+those three jobs alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under
+its 40 and the games in 35, the pack job skipped so no package was published, the next pack run
+after the two verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after
+3ee62451's green run, its run green at 18:16, the kernels choosing their light before any thread
+branches since llvmpipe faults on the transmittance lookup after a group's threads have parted.
+Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of
+`3808bd37` went green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes.
+`b79314ca` moves the clock's console commands beside app.hold into a file of their own,
+ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+pipelines.wait answer after three ready frames running and keep a held clock still between commands
+while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
+game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
+or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with every
+shot after it whole; the drive's effects view, which had been missing the level, the spheres' board
+and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still through
+a wait and an app begun on a set clock drawing what comes into view whole; the whole suite before
+the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched classes, 78,
+the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the scenes yard,
+pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point
+in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with
+the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88,
+pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the
+run-time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`,
+item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's
+fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58
+with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18 minutes,
+recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52
+with the suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the binding,
+recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08,
+its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine grass, recorded
+under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its
+run green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase,
+its run green at 12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three
+grass cards in the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at
+11:02, its run green at 11:25, the light-through test at 180 traced frames, recorded under the item
+in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
 reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
 09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
 mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
@@ -442,7 +445,22 @@ from [SHARED.md](SHARED.md).
     the mean, about 1.3 of the Cornell view's 6.4 where below the lamp the view lies at 5.0, a bias
     of the filter next to an emitter; the cause read in the denoiser's weights at the lamp's edge
     and mended where it is the filter's, the figures of the guide read again. One or two commits,
-    after Verdict 49's mend and before 80.
+    after Verdict 49's mend and before 80. Done at `99160868` on 2026-11-02, read at 14:32. The
+    lamp's face, `36d783bf` having written the G-buffer's emissive already exposed where Solari and
+    the denoiser expose it again, the alpha carried in the deferred flag bits, the color kept raw
+    and a lightmap's light divided by what the pass adds, a test reading an exposed emissive the
+    same under rays as forward within 2% where 0.0383 against 38.2 before. The ring, read in linear
+    light as the denoised Cornell view against the mean of 32 grainy frames, the edge at 0.37 to
+    0.59 of its mean and the ring 5 to 20 px out at 1.12 to 1.23, two causes in the denoiser, the
+    taps weighed against one frame's variance where the filter is given the history's mean, the
+    variance taken as the spread times the blend, and the first pass's filtered light kept as
+    history which re-blurred a still view every frame, the temporal mean kept instead; with both
+    every band at 0.89 to 0.98; the guide's figures from 1.3 to 6.2 to 1.6 to 5.3, the gallery 6.18
+    to 2.65, the vegetation 3.74 to 1.82, the cost 1.99 ms against 1.94; the helmet's reflection in
+    solari_reflections sharp by the same mend, its Fedora pictures taken again within 2.7% of the
+    old; a test of the band beside a lamp within 15% of the grainy mean; 1,998 in the suite; the
+    Cornell and reflections readings sent to the owner. A lead for the readings script, the
+    reference taken before tonemapping.
 
 93. **The drive's course is cheaper on lavapipe.** From Verdict 51's reading on 2026-11-02. The
     course's stations judge only where the player stands, yet each of its frames costs 1.1 to 1.7 s
@@ -453,12 +471,20 @@ from [SHARED.md](SHARED.md).
     commits, after 92. A reading from Verdict 51's runs at 08:02, each station's frames.wait of its
     frames plus five after an input.hold counts the hold's frames again, since the hold answers only
     once they have passed, so the course's walking frames run twice; the first thing this item takes
-    out.
+    out. The figures from the pack run of `b8cc8316`, read at 14:33, an EPYC 7763 with llvmpipe on
+    four threads, the hub's frame 2,187 ms, the step ending at 123:15 and the job 10 s inside its
+    125; to the zones' line 72:22 (the hub's shot 11:38, the ramps 10:48, the tunnel 14:14, the
+    stairs 5:42, the beam 4:24, the rest under 4 each) and the views 50:53 (the gallery 8:14, the
+    models 3:02, the hall's eight 3:51, the meadow 9:59, the effects 12:46, the night 7:32, rain and
+    snow 2:25), against the container's 71:55 and 38:55; every command inside its bound, the
+    gallery's frames 394 s of 900, the effects' pipelines 165 s. The course's stations hold keys for
+    1,179 frames and each hold's wait counts them again, about 20 of the 72 minutes at a second a
+    frame, the first thing out.
 
 ## Verdicts
 
-Verdicts 33 to 42 and 44 to 50 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
-43 mended at `42abf357`. Verdict 51 is open.
+Verdicts 33 to 42 and 44 to 51 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
+43 mended at `42abf357`.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException` for
@@ -485,47 +511,6 @@ Verdicts 33 to 42 and 44 to 50 are settled, said under each in REVIEW-ARCHIVE.md
     first publish, under N 3.5. One commit, small, with the coder's next batch. Mended at `42abf357`
     on 2026-10-23, the version and BUILDING.md's sentence; settles when a pack run's defaults step
     passes.
-
-51. **The pack run's drive is cancelled at its limit of 100 minutes where the run before took 67.**
-    Read at 04:30 on 2026-11-02 in the pack run started from `a18496c3` at 02:26, the drive job
-    cancelled at 04:23 after one hour and forty minutes, every other job green, the captures among
-    them, so the pack job did not run and no package was published; the step's log shows the build
-    and then the cancel alone, since step.py prints the course's lines at its end, so where the
-    drive stood is not known from the run. Two leads, first the waits of item 90's second commit,
-    600 s for a command's first answer, which turn a command that never answers into ten minutes
-    each where it failed at once before, so a hang in the course or at a view's shot would read as
-    slowness up to the limit; second the runner's own variance, which 67 to over 100 exceeds. The
-    mend is the drive's progress written to the step's log as it goes, each station and view with
-    its time, so a cancelled job says where it stood; the waits bounded by what each command needs
-    rather than 600 s for all; the cause read by a drive in the runner's setting with those lines;
-    and the limit left at 100. Settled by the next pack run's drive green. The cause, read by the
-    coder at 04:39 from the run's own feature-test artifact, uploaded at the cancel with the game's
-    log and every capture to the meadow, is the runner's processor and no hang, the 67-minute drive
-    having run on an AMD EPYC 9V45 and the cancelled one on an EPYC 7763, 1.63 times slower at the
-    hub (1,143 ms a frame against 701) and 1.63 to 1.82 slower on every stretch, cancelled four
-    minutes into the effects view where the step needed about 108 minutes and the job 112; so a
-    limit of 100 fails whenever the drive draws a 7763. The call is the limit at 125 with both
-    processors and their times named in its comment, the progress lines, the processor and the
-    device named at the start, each command's time in commands.txt and the waits bounded by kind
-    (frames.wait 60 s plus 3 a frame, pipelines.wait, scene.load and the first command 900 s, the
-    first answer 180, the rest 120), the figures from a run in the runner's setting; the course made
-    cheaper on lavapipe is item 93. At 08:02 the bounds are being set from four runs in the runner's
-    setting that each ended at a bound and named it. The cold compile slows frames to about 12 s
-    each until the first pipelines.wait answers, so the 900 s bound covers every command until then;
-    input.hold answers only once its frames have passed, at 0.9 to 1.2 s a frame, so a hold takes
-    the per-frame bound; each view waits for its pipelines after its look; the gallery's 60 frames
-    ran past 240 s, more than 4 s a frame, so the views take a per-frame figure of their own set
-    from a fifth run; the course's stations at 3 s a frame. The station times match from run to run,
-    the hub at 8:46, the ramps at 28:43, the tunnel at 53:41 and the zones at 70:52, the container's
-    hub frame 1,184 ms against the 7763's 1,143. The mend is at `b8cc8316`, pushed at 11:14, the
-    drive job at 125 minutes with the two processors and the container named in its comment, the
-    step about 111 minutes in the container with the zones' line at 71:55 and the views 38:55 cold,
-    a progress line a station and view with the processor and the device named at the start and
-    commands.txt in the uploaded folder, the bounds by kind set from what each took (900 s before
-    the first pipelines.wait, 60 s plus 3 a frame for the course's waits and holds, 900 for a view's
-    frames, pipelines.wait and scene.load, 300 for a shot, 120 for the rest, 180 for the first
-    answer), each view waiting for its pipelines after its look; 1,997 in the suite. Settled by the
-    next pack run's drive green.
 
 ## Decisions
 
@@ -1585,3 +1570,28 @@ frames the history holds, and keeps that mean rather than the first pass's filte
 next frame's history, where SVGF's paper does both the other way, since together they carried a
 still view's light down a slope its frames hold, a ring round a lamp a fifth over its mean and a
 mirror's reflection blurred.
+
+Item 93's first step, in the commit carrying this line. A held key answers once its frames have
+passed, the clock held still between commands, so each station's wait of the hold's frames plus five
+waited them out again; each wait after a hold is the settling alone, five frames, ten after the
+hub's walk and one on the ice, about 1,180 frames fewer. The 60-degree ramp keeps fifty after its
+push, since a character pushed up a slope steeper than it stands on slides back down over them, and
+five read it partway up at y -0.11 on the GPU. The moving platform and the elevator are judged by
+how far the player's place ranged over 180 and 240 frames, read every fifteen, where two readings 90
+frames apart read their swing at the point the run came to it, which the change moved, the platform
+reading 0.53 where it needs 1; over those counts the swing covers more than a meter wherever the run
+meets it, so a wait before them moves the check no more. On the GPU the course passes in 4:14 and
+its pictures lie within the capture bar of a run before the change, except the meadow at 13%, its
+grass and leaves in another pose of their sway, the clock coming to it about 1,200 frames sooner;
+the hub's shot, taken before any station, differs 2.1% between the two runs. In the runner's
+setting, cold and through build/step.py, the step took 97 minutes in one run where it took about
+111, the course to the zones' line 57:53 where it took 71:55, the platform and the elevator 4.7
+minutes more of it. The 7763 drew the course 1.11 times as slowly at b8cc8316, so its job would take
+about 108 of its 125, which the drive job's comment says. The rest of the item, the course drawn
+smaller, waits on the next pack run's reading. The meadow's pair is in the day's dump. The whole
+suite ran with it, 1,997 passed, 1 failed and 3 skipped in 44 m 49 s at the 3 GB cap. The one is
+SceneFieldShadowTests.TheWindowsSliceAcrossABoxIsRedInsideBlackAtItsFacesAndGrayBeyond, whose image
+read back a second into its run answered that the component type was never registered with the Bevy
+world; it passes alone three times of three and passed in the suites of b8cc8316 and 99160868, and
+this batch changes no code a test runs, so the fault is a lead for an item. NormTests passed, 18.
+The public listing is unchanged.

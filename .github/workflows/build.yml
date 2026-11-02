@@ -452,14 +452,13 @@ jobs:
     runs-on: ubuntu-24.04
     # A hundred and twenty-five minutes. The runners differ in their processor, and the course's
     # holds and waits are counted in frames of a second or more each on their lavapipe. The job took
-    # 67 minutes on an AMD EPYC 9V45 at 58265110, its hub drawn in 701 ms a frame, and was stopped at
-    # its limit of 100 on an EPYC 7763 at a18496c3, its hub drawn in 1,143 ms, 1.63 times as slowly,
-    # where it would have taken about 112. The step took about 111 minutes on the working machine's
-    # lavapipe on four threads in the runner's image, its hub drawn in 1,184 ms, the course to its
-    # views in 72 and the views, in a run of their own, in 39. A hundred and twenty-five holds the
-    # slower processor with room for its own variance, and a hang is found sooner by each command's
-    # bound in build/drive-feature-test.sh (NORM.md, N 6.8). The soak runs in a job of its own
-    # beside this one.
+    # 67 minutes on an AMD EPYC 9V45 at 58265110, its hub drawn in 701 ms a frame, and 125 on an
+    # EPYC 7763 at b8cc8316, ten seconds inside the limit, that processor drawing the course 1.11
+    # times as slowly as the working machine's lavapipe on four threads in the runner's image. There
+    # the step takes 97 minutes, so about 108 on the 7763. A hundred and twenty-five holds the slower
+    # processor with room for its own variance, and a hang is found sooner by each command's bound in
+    # build/drive-feature-test.sh (NORM.md, N 6.8). The soak runs in a job of its own beside this
+    # one.
     timeout-minutes: 125
     needs: [native]
     # Each step through build/step.py, as the games job has it.

@@ -171,10 +171,13 @@ frame_time() {
 frame_time "1-hub, the weather $quality"
 took "the hub's shot"
 
-# The hub, with a walk north that the turning cube stops, and a jump.
+# The hub, with a walk north that the turning cube stops, and a jump. A held key answers once its
+# frames have passed, the clock held still between commands, so the wait after each hold is the
+# settling alone, where a wait of the hold's frames again would run the course's walking frames
+# twice, about twenty minutes of the drive job's on the runner's EPYC 7763.
 read -r _ y z < <(where)
 quiet input.hold W 60
-quiet frames.wait 70
+quiet frames.wait 10
 read -r _ _ walked < <(where)
 holds "$walked" "<" "$z - 2" || fail "the player did not walk north from z $z, and stands at z $walked"
 quiet input.key Space
@@ -193,7 +196,7 @@ quiet input.key Space
 quiet frames.wait 5
 c player | grep -q flying || fail "a double tap of jump in creative mode did not take off"
 quiet input.hold Space 40
-quiet frames.wait 45
+quiet frames.wait 5
 read -r _ flown _ < <(where)
 holds "$flown" ">" "$y + 3" || fail "flying with Space held rose only to y $flown"
 quiet mode walking
@@ -212,12 +215,14 @@ took "the course's start"
 
 # The ramps, each walked east into as far as its landing's middle, three climbed to their landings
 # and the one at 60 degrees not. The frames are the landing's distance at the run's 4.5 a second.
+# The steep one is read fifty frames after the push, since a character pushed up a slope steeper
+# than it stands on slides back down over them, and five read it partway up at y -0.11.
 lanes=(-19 -15.8 -12.6 -9.4)
 frames=(108 68 53 45)
 for i in 0 1 2 3; do
   at 48.5 "$ground" "${lanes[$i]}"
   quiet input.hold W "${frames[$i]}"
-  quiet frames.wait "$((frames[i] + 5))"
+  if [ "$i" -lt 3 ]; then quiet frames.wait 5; else quiet frames.wait 50; fi
   read -r _ top _ < <(where)
   if [ "$i" -lt 3 ]; then
     holds "$top" ">" "$ground + 1.3" || fail "the ramp in lane ${lanes[$i]} was not climbed, the player at y $top"
@@ -230,12 +235,12 @@ took "the ramps"
 # Stairs of 0.15 climbed and of 0.4 not, its steps over the character's step height.
 at 60.5 "$ground" -19
 quiet input.hold W 70
-quiet frames.wait 75
+quiet frames.wait 5
 read -r _ stairs _ < <(where)
 holds "$stairs" ">" "$ground + 1.3" || fail "the stairs of 0.15 were not climbed, the player at y $stairs"
 at 60.5 "$ground" -12.6
 quiet input.hold W 90
-quiet frames.wait 95
+quiet frames.wait 5
 read -r _ high _ < <(where)
 holds "$high" "<" "$ground + 0.3" || fail "the stairs of 0.4 were climbed to y $high"
 took "the stairs"
@@ -243,7 +248,7 @@ took "the stairs"
 # The beam, walked along from its first landing nearly to its last without falling off.
 at 76.5 "$(up 1.1)" -8
 quiet input.hold W 135
-quiet frames.wait 140
+quiet frames.wait 5
 read -r beam_x beam_y _ < <(where)
 holds "$beam_x" ">" 86 || fail "the beam was not walked along, the player at x $beam_x"
 holds "$beam_y" ">" "$ground + 0.8" || fail "the player fell off the beam, at y $beam_y"
@@ -252,12 +257,12 @@ took "the beam"
 # The tunnel, which stops the player standing and lets it through crouched.
 at 76 "$ground" -13
 quiet input.hold W 90
-quiet frames.wait 95
+quiet frames.wait 5
 read -r stood _ _ < <(where)
 holds "$stood" "<" 79 || fail "the player walked into the tunnel standing, to x $stood"
 at 76 "$ground" -13
 quiet input.hold W,C 360
-quiet frames.wait 365
+quiet frames.wait 5
 read -r crawled _ _ < <(where)
 holds "$crawled" ">" 86 || fail "the player did not crawl through the tunnel, only to x $crawled"
 shot 3-tunnel
@@ -267,7 +272,7 @@ took "the tunnel"
 # once. The wait after the walk is part of the slide, so the slide read is the part left of it.
 at 52.5 "$(up 0.2)" 0
 quiet input.hold W 60
-quiet frames.wait 61
+quiet frames.wait 1
 read -r let_go _ _ < <(where)
 quiet frames.wait 30
 read -r slid _ _ < <(where)
@@ -292,32 +297,37 @@ took "the pit"
 # The moving platform carries the player and the elevator lifts it, each put on where it is now,
 # and the disc turns it.
 #
-# The platform and the elevator swing back and forth, and each is judged by how far it took the
-# player from where it stood over a set count of frames. The clock stands still between commands,
-# so the run comes to each at the same point of its swing on every device. A clock running between
-# commands brought each device to another point, and on lavapipe the platform's 90 frames straddled
-# the end of its swing, taking the player from x 60.96 to 61.00. A wait added before them moves
-# that point, and the count is chosen again where a check then fails.
-moved() {
-  local axis=$1 x y z start
+# The platform and the elevator swing back and forth, and each is judged by how far the player's
+# place ranged over a count of frames, read every fifteen, long enough that the swing covers more
+# than a meter wherever in it the run comes to it, the platform's 3.5 meters each way at 0.6 a
+# second over 180 frames and the elevator's 3.4 at 0.5 over 240. Two readings a set count of frames
+# apart, which the run once took, read the swing at the point the run came to it, which every wait
+# before them moves, and 90 frames there read 0.35 about a turn, the player at x 60.96 and 61.00.
+ranged() {
+  local axis=$1 x y z low high
   read -r x y z < <(where) || return 1
-  start=${!axis}
-  quiet frames.wait "$2"
-  read -r x y z < <(where) || return 1
-  awk -v a="${!axis}" -v b="$start" 'BEGIN { d = a - b; print (d < 0 ? -d : d) }'
+  low=${!axis}
+  high=$low
+  for _ in $(seq 1 $(($2 / 15))); do
+    quiet frames.wait 15
+    read -r x y z < <(where) || return 1
+    low=$(awk -v a="$low" -v b="${!axis}" 'BEGIN { print (b < a ? b : a) }')
+    high=$(awk -v a="$high" -v b="${!axis}" 'BEGIN { print (b > a ? b : a) }')
+  done
+  awk -v a="$high" -v b="$low" 'BEGIN { print a - b }'
 }
 read -r px py pz < <(piece Moving platform)
 quiet player.put "$px" "$(awk -v y="$py" 'BEGIN { print y + 0.3 }')" "$pz"
 quiet frames.wait 10
-carried=$(moved x 90)
-holds "$carried" ">" 1 || fail "the moving platform did not carry the player, which went $carried from where it stood"
+carried=$(ranged x 180)
+holds "$carried" ">" 1 || fail "the moving platform did not carry the player, whose place ranged over $carried in 180 frames"
 took "the moving platform"
 read -r ex ey ez < <(piece Elevator)
 quiet player.put "$ex" "$(awk -v y="$ey" 'BEGIN { print y + 0.3 }')" "$ez"
 quiet frames.wait 10
-lifted=$(moved y 90)
+lifted=$(ranged y 240)
 read -r _ ey2 _ < <(piece Elevator)
-holds "$lifted" ">" 1 || fail "the elevator did not move the player, which went $lifted from where it stood, the elevator at y $ey2"
+holds "$lifted" ">" 1 || fail "the elevator did not move the player, whose place ranged over $lifted in 240 frames, the elevator at y $ey2"
 took "the elevator"
 at 82 "$(up 1)" 10
 read -r turn_x _ turn_z < <(where)

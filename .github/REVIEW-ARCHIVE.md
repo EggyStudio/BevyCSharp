@@ -2546,6 +2546,49 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     so both are those items' changes to every app's start, not faults, retaken with the head's
     render bridge, the gallery's seven pictures remade.
 
+51. **The pack run's drive is cancelled at its limit of 100 minutes where the run before took 67.**
+    Read at 04:30 on 2026-11-02 in the pack run started from `a18496c3` at 02:26, the drive job
+    cancelled at 04:23 after one hour and forty minutes, every other job green, the captures among
+    them, so the pack job did not run and no package was published; the step's log shows the build
+    and then the cancel alone, since step.py prints the course's lines at its end, so where the
+    drive stood is not known from the run. Two leads, first the waits of item 90's second commit,
+    600 s for a command's first answer, which turn a command that never answers into ten minutes
+    each where it failed at once before, so a hang in the course or at a view's shot would read as
+    slowness up to the limit; second the runner's own variance, which 67 to over 100 exceeds. The
+    mend is the drive's progress written to the step's log as it goes, each station and view with
+    its time, so a cancelled job says where it stood; the waits bounded by what each command needs
+    rather than 600 s for all; the cause read by a drive in the runner's setting with those lines;
+    and the limit left at 100. Settled by the pack run started from `b8cc8316` at 11:38 on
+    2026-11-02, green at 14:30, its drive in 125 minutes on the runner, at the limit's edge, 0.6.18
+    published. The cause, read by the coder at 04:39 from the run's own feature-test artifact,
+    uploaded at the cancel with the game's log and every capture to the meadow, is the runner's
+    processor and no hang, the 67-minute drive having run on an AMD EPYC 9V45 and the cancelled one
+    on an EPYC 7763, 1.63 times slower at the hub (1,143 ms a frame against 701) and 1.63 to 1.82
+    slower on every stretch, cancelled four minutes into the effects view where the step needed
+    about 108 minutes and the job 112; so a limit of 100 fails whenever the drive draws a 7763. The
+    call is the limit at 125 with both processors and their times named in its comment, the progress
+    lines, the processor and the device named at the start, each command's time in commands.txt and
+    the waits bounded by kind (frames.wait 60 s plus 3 a frame, pipelines.wait, scene.load and the
+    first command 900 s, the first answer 180, the rest 120), the figures from a run in the runner's
+    setting; the course made cheaper on lavapipe is item 93. At 08:02 the bounds are being set from
+    four runs in the runner's setting that each ended at a bound and named it. The cold compile
+    slows frames to about 12 s each until the first pipelines.wait answers, so the 900 s bound
+    covers every command until then; input.hold answers only once its frames have passed, at 0.9 to
+    1.2 s a frame, so a hold takes the per-frame bound; each view waits for its pipelines after its
+    look; the gallery's 60 frames ran past 240 s, more than 4 s a frame, so the views take a
+    per-frame figure of their own set from a fifth run; the course's stations at 3 s a frame. The
+    station times match from run to run, the hub at 8:46, the ramps at 28:43, the tunnel at 53:41
+    and the zones at 70:52, the container's hub frame 1,184 ms against the 7763's 1,143. The mend is
+    at `b8cc8316`, pushed at 11:14, the drive job at 125 minutes with the two processors and the
+    container named in its comment, the step about 111 minutes in the container with the zones' line
+    at 71:55 and the views 38:55 cold, a progress line a station and view with the processor and the
+    device named at the start and commands.txt in the uploaded folder, the bounds by kind set from
+    what each took (900 s before the first pipelines.wait, 60 s plus 3 a frame for the course's
+    waits and holds, 900 for a view's frames, pipelines.wait and scene.load, 300 for a shot, 120 for
+    the rest, 180 for the first answer), each view waiting for its pipelines after its look; 1,997
+    in the suite. Settled by the pack run started from `b8cc8316` at 11:38 on 2026-11-02, green at
+    14:30, its drive in 125 minutes on the runner, at the limit's edge, 0.6.18 published.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
