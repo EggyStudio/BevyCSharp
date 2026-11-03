@@ -43,6 +43,13 @@ warm fill on, the box's walls and blocks lit alike, and on the right at the new 
 with the fill off, the red and the green walls' light carried onto the blocks and the floor and the
 shade under them deeper.
 
+![](.github/assets/readings/2026-11-03-item-95-emitters.webp)
+A closed room of the level's white lit by six small emitters at Medium, on the left as global
+illumination carried them, each light let go where it fell to a fiftieth of the picture's unit and
+of the lights at a surface the brightest few alone taken, the room 20 to 30% under its path-traced
+reference, and on the right with each light reaching as far as its size gives it and the rest taken
+in groups by their way, the room within 5% of its reference.
+
 Done that day
 
 ## 2026-11-02

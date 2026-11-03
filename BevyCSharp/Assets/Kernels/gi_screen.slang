@@ -419,7 +419,11 @@ void main(uint3 id : SV_DispatchThreadID)
     // is, its light added to the fainter ones' at the probe and its byte left none, so a pixel reads
     // the light of at most eight at a probe. Every light marched to by its faces and read at each
     // pixel, a room of 64 lamps at 1280 by 720 cost 3DEngine's global illumination 5.3 ms and its
-    // model pass 2.3 more than none, where so they cost 1.8 and 0.3. The glow lights take the
+    // model pass 2.3 more than none, where so they cost 1.8 and 0.3. The fainter ones are grouped by
+    // their way from the surface into four groups at most, as glowLightsAt groups the lights past its
+    // brightest, each group's light taken by how much of its brightest light the surface sees, since
+    // marched to one by one, forty dim emitters that reach as far as one bright one took the probes
+    // from 1.4 ms to 3.6 at 1280 by 720. The glow lights take the
     // surface's normal from its way along each axis of the depth, which holds at a wall's foot where
     // the nearer texel's does not; tilted up the wall, a probe's normal on the floor beside it saw a
     // lamp past the wall that the floor does not.
@@ -452,6 +456,11 @@ void main(uint3 id : SV_DispatchThreadID)
     if (abs(dot(q - p, gn)) > plane || abs(dot(between - p, gn)) > plane)
         q = p;
     float3 faint = float3(0.0);
+    float3 groupWay[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
+    float3 grouped[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
+    float groupBright[4] = { 0.0, 0.0, 0.0, 0.0 };
+    int groupOne[4] = { -1, -1, -1, -1 };
+    int groups = 0;
     uint4 codes = uint4(0u);
     [loop]
     for (int word = 0; word < 16; word++)
@@ -468,7 +477,34 @@ void main(uint3 id : SV_DispatchThreadID)
             if (luminance(arrived) * 8.0 >= glowTotal)
                 levels |= uint(glowLightShown(scene_field, scene_field_sampler, info, light, q, gn, glowCell) * 255.0 + 0.5) << uint(j * 8);
             else
-                faint += arrived * glowLightSeen(scene_field, scene_field_sampler, info, light, q, gn, glowCell);
+            {
+                float3 toward = light.middleAndReach.xyz - p;
+                float3 its = toward * rsqrt(max(dot(toward, toward), 1e-8));
+                int nearest = groups;
+                if (groups >= 4)
+                {
+                    nearest = 0;
+                    float closest = -2.0;
+                    [unroll]
+                    for (int k = 0; k < 4; k++)
+                        if (dot(its, groupWay[k]) > closest)
+                        {
+                            closest = dot(its, groupWay[k]);
+                            nearest = k;
+                        }
+                }
+                else
+                {
+                    groupWay[nearest] = its;
+                    groups++;
+                }
+                grouped[nearest] += arrived;
+                if (luminance(arrived) > groupBright[nearest])
+                {
+                    groupBright[nearest] = luminance(arrived);
+                    groupOne[nearest] = word * 4 + j;
+                }
+            }
         }
         codes[word & 3] = levels;
         if ((word & 3) == 3)
@@ -477,6 +513,10 @@ void main(uint3 id : SV_DispatchThreadID)
             codes = uint4(0u);
         }
     }
+    [unroll]
+    for (int k = 0; k < 4; k++)
+        if (k < groups && groupOne[k] >= 0)
+            faint += grouped[k] * glowLightSeen(scene_field, scene_field_sampler, info, glow_lights[groupOne[k]], q, gn, glowCell);
     // A probe a test feeds a value that is not a number writes one as its fainter lights' light and as
     // its own.
     bool fed = screen.w > 0.5 && uint(screen.w + 0.5) == probe + 1u;

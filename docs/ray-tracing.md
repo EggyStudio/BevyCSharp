@@ -291,11 +291,12 @@ sixteen nearest point and spot lights' and the light that reached it the frame b
 frame adds a bounce, and a ray that meets nothing brings back the camera's ambient light, or the
 world's. `Low` traces two cascades and `Medium` and `High` four, so their probes reach as far as the
 field, `High` finer in direction from the second and `Medium` from the third, and where the program
-asked for no field one is built at four cascades of a quarter meter. An
-emissive surface lights the scene as well, its light brought back by the rays that meet it, and a
-small emitter, as a lamp's panel or a glowing block, is carried as a light of its own, its light
-reaching each surface from its box and shadowed through the field. Nothing is baked, so lights and
-meshes move freely.
+asked for no field one is built at four cascades of a quarter meter. An emissive surface lights the
+scene as well, its light brought back by the rays that meet it, and a small emitter, as a lamp's
+panel or an emissive block, is carried as a light of its own, its light reaching each surface from
+its box and shadowed through the field, the brightest few at a surface one by one and the rest in
+groups by their way from it, so many dim emitters light a room as one of their light together does.
+Nothing is baked, so lights and meshes move freely.
 
 Bevy's lighting takes no indirect light from outside, so a pass of the library's own after the
 opaque surfaces takes back the diffuse share of the ambient light Bevy gave each surface and adds

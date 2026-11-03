@@ -144,21 +144,56 @@ public bool glowLightOn(GlowLight light, float3 p, float3 n, float margin)
     return at < margin && glowLightDistance(light, p + n * margin) >= at + margin * 0.5;
 }
 
+/// The light reaching a point x facing n from a glow light as from one point at its box's middle,
+/// unhidden, each face of the box x lies before by its area and its cosine over the square of the
+/// distance, which glowLightIrradiance takes past eight of the box's half diagonals.
+public float3 glowLightPoint(GlowLight light, float3 x, float3 n)
+{
+    float3 middle = light.middleAndReach.xyz;
+    float4 halves[3] = { light.halfX, light.halfY, light.halfZ };
+    float3 offset = x - middle;
+    float distance2 = max(dot(offset, offset), 1e-8);
+    uint faces = glowFaces(light);
+    float3 way = -offset * rsqrt(distance2);
+    float facing = max(dot(way, n), 0.0);
+    float shown = 0.0;
+    [unroll]
+    for (int k = 0; k < 3; k++)
+    {
+        float3 h = halves[k].xyz;
+        float side = dot(offset, h);
+        float squared = halves[k].w * halves[k].w;
+        if (squared < 1e-12 || abs(side) <= squared || (faces & (1u << uint(2 * k + (side > 0.0 ? 1 : 0)))) == 0u)
+            continue;
+        float4 u = halves[(k + 1) % 3], v = halves[(k + 2) % 3];
+        shown += 4.0 * u.w * v.w * abs(dot(way, h)) / halves[k].w;
+    }
+    return light.glowAndShare.rgb * (shown * facing / distance2 * glowShare(light));
+}
+
 /// The light reaching a point x facing n from a glow light, unhidden, the light from each face of
 /// its box that x lies before, three at most, in closed form within four of the box's half
 /// diagonals, which a path-traced floor beside an emissive block reads to within 3% in 3DEngine from
 /// one block out to four, and past them each face's as points, its area by the two cosines over the
 /// square of its distance, the face cut along its longer side into pieces about as long as its
-/// shorter. None where x lies on the light's own surface, as glowLightOn finds it within margin.
+/// shorter, and past eight of them the box as one point at its middle, each face it shows by its area
+/// and its cosine, where the error lies under the reach's own fade and a light costs a few sums, since
+/// forty dim emitters reaching six times as far as they did took global illumination's passes in a
+/// room of them from 2.4 ms to 4.5 at 1280 by 720 face by face. None where x lies on the light's own
+/// surface, as glowLightOn finds it within margin.
 public float3 glowLightIrradiance(GlowLight light, float3 x, float3 n, float margin)
 {
-    if (glowLightOn(light, x, n, margin))
-        return float3(0.0);
     float3 middle = light.middleAndReach.xyz;
     float4 halves[3] = { light.halfX, light.halfY, light.halfZ };
     float3 offset = x - middle;
-    bool near = dot(offset, offset) < 16.0 * (halves[0].w * halves[0].w + halves[1].w * halves[1].w + halves[2].w * halves[2].w);
+    float diagonal2 = halves[0].w * halves[0].w + halves[1].w * halves[1].w + halves[2].w * halves[2].w;
+    float distance2 = dot(offset, offset);
     uint faces = glowFaces(light);
+    if (distance2 > 64.0 * diagonal2)
+        return glowLightPoint(light, x, n);
+    if (glowLightOn(light, x, n, margin))
+        return float3(0.0);
+    bool near = distance2 < 16.0 * diagonal2;
     float sum = 0.0;
     [unroll]
     for (int k = 0; k < 3; k++)
@@ -498,7 +533,14 @@ public float glowLightShown(Texture3D<float> field, SamplerState linear, FieldIn
 /// The light reaching a surface at p facing n from the glow lights, irradiance, each light's in
 /// closed form faded by its reach, and the `marches` brightest of them, four at most, by how much of
 /// each the surface sees through the field, by the halves of its faces where `halves` asks
-/// (glowLightShown) and by its middle otherwise (glowLightSeen), the others left out. At a probe's ray's
+/// (glowLightShown) and by its middle otherwise (glowLightSeen). The others are grouped by their way
+/// from p into as many groups as there are marches, each joining the group whose first light lies
+/// nearest its way, or opening one while fewer stand, and each group's light is taken by how much of
+/// its brightest light the surface sees, so a surface lit by many lights takes all their light for
+/// twice the marches at most, where the rest left out took a room of six emitters' light 20 to 30%
+/// under its reference, and a group a wall parts is the one light that takes another's sight of it,
+/// as far as its share of the group. Where no more lights than marches reach p, nothing is grouped.
+/// At a probe's ray's
 /// hit, the ray along `way` (zero elsewhere), a light the ray passed through right before it met the
 /// field gives the hit none of its light (glowLightPassed), and a hit within a cell of a light's box
 /// takes the light as its mean over a square a cell wide about the hit on its plane, since a light
@@ -514,6 +556,11 @@ public float3 glowLightsAt(Texture3D<float> field, SamplerState linear, FieldInf
     float bright[4] = { 0.0, 0.0, 0.0, 0.0 };
     int which[4] = { -1, -1, -1, -1 };
     int most = min(marches, 4);
+    float3 groupWay[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
+    float3 grouped[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
+    float groupBright[4] = { 0.0, 0.0, 0.0, 0.0 };
+    int groupOne[4] = { -1, -1, -1, -1 };
+    int groups = 0;
     [loop]
     for (int i = 0; i < count; i++)
     {
@@ -551,6 +598,37 @@ public float3 glowLightsAt(Texture3D<float> field, SamplerState linear, FieldInf
                 b = movedBright;
                 one = movedOne;
             }
+
+        // The light that fell out of the brightest, this one or one it moved out, joins a group.
+        if (one >= 0 && most > 0)
+        {
+            float3 toward = glows[clamp(one, 0, MostGlowLights - 1)].middleAndReach.xyz - p;
+            float3 its = toward * rsqrt(max(dot(toward, toward), 1e-8));
+            int nearest = groups;
+            if (groups >= most)
+            {
+                nearest = 0;
+                float closest = -2.0;
+                [unroll]
+                for (int k = 0; k < 4; k++)
+                    if (k < groups && dot(its, groupWay[k]) > closest)
+                    {
+                        closest = dot(its, groupWay[k]);
+                        nearest = k;
+                    }
+            }
+            else
+            {
+                groupWay[nearest] = its;
+                groups++;
+            }
+            grouped[nearest] += arrived;
+            if (b > groupBright[nearest])
+            {
+                groupBright[nearest] = b;
+                groupOne[nearest] = one;
+            }
+        }
     }
     float3 sum = float3(0.0);
     [unroll]
@@ -559,6 +637,13 @@ public float3 glowLightsAt(Texture3D<float> field, SamplerState linear, FieldInf
         {
             GlowLight light = glows[clamp(which[k], 0, MostGlowLights - 1)];
             sum += kept[k] * (halves ? glowLightShown(field, linear, info, light, p, n, cell) : glowLightSeen(field, linear, info, light, p, n, cell));
+        }
+    [unroll]
+    for (int k = 0; k < 4; k++)
+        if (k < groups && groupOne[k] >= 0)
+        {
+            GlowLight light = glows[clamp(groupOne[k], 0, MostGlowLights - 1)];
+            sum += grouped[k] * (halves ? glowLightShown(field, linear, info, light, p, n, cell) : glowLightSeen(field, linear, info, light, p, n, cell));
         }
     return sum;
 }

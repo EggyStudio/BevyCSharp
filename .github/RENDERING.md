@@ -365,6 +365,26 @@ ms, and a cascade's trace 0.18 ms at `High`. In the bounce rooms the strip's vie
 from its reference where it read 1.00 with no emitter carried, the glowing blocks' 0.05 where 0.30
 and the Cornell box's 0.10 to 0.11 where 0.11, no view wider.
 
+The lights past the brightest at a surface are grouped by their way from it into as many groups as
+there are marches, each joining the group whose first light lies nearest its way or opening one
+while fewer stand, and each group's light is taken by how much of its brightest light the surface
+sees, so a probe's hit marches four times at most, a pixel eight and a screen probe eight by the
+halves of the faces and four more, where the rest were left out. A light's reach is where the light
+it sends a white surface falls to a thousandth of the light it emits, its size alone deciding it. It
+was where that light fell to a fiftieth of the picture's unit, so a dim light reached less far than
+a bright one of its size, and since an emission is in the picture's units, times the camera's
+exposure, every light's reach moved with the exposure, longer at night than by day. Lit by six
+emitters of a sixth of one's light each, a closed room of the level's white read 20 to 30% under its
+reference, 9 to 17% with the reach mended alone and 18 to 26% with the rest counted alone, and reads
+3% under to 5% over with both, as the room of one emitter of their light reads, 4% under to 6% over
+(`ARoomLitBySixEmittersReadsAsItsReference`, `ARoomLitByOneEmitterKeepsItsReading`). Past eight of a
+box's half diagonals its light is a point's at its middle (`glowLightPoint`), since face by face
+forty dim emitters reaching six times as far as they did took global illumination's dispatches in a
+room of them from 2.4 ms to 4.5 at 1280 by 720. A room of forty emitters at `Medium` takes them
+3.6 ms on the RTX 4070 Laptop GPU where they took 2.4, the groups' own marches, and 392 ms on the
+working machine's lavapipe on four threads where 273
+(`TheGlowLightsCostIsReadInARoomOfFortyEmitters`).
+
 The glossy term is 3DEngine's present one. The pass takes back the light from all around Bevy's
 lighting reflected, its ambient term's and its environment map's along the mirror way, and gives it
 again as 3DEngine's model pass does. Below a roughness of 0.5 the reflection is traced through the

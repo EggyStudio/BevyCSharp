@@ -39,9 +39,15 @@ internal static class GlowLights
     /// <summary>The bytes of a light, its middle and reach, its three half sides and its light.</summary>
     public const int Bytes = 80;
 
-    // The light a surface at the reach takes from one, a fiftieth of its own, past which the light is
-    // let go, over a quarter of the box's surface as the box's mean face seen from afar.
-    private const float Faint = 0.02f;
+    // The light a surface at the reach takes from one, a thousandth of the light it emits, past
+    // which the light is let go, over a quarter of the box's surface as the box's mean face seen
+    // from afar. A share of its own, so every light keeps the same share of its light whatever its
+    // brightness, where let go at a fiftieth of the picture's unit a dim light reached less far
+    // than a bright one of its size, and six emitters of a sixth of one's light each reached two
+    // and a half times less far, which took a room of them 9 to 17% further under its reference. A
+    // thousandth keeps the reach of the one emitter of 20,000 under a camera's exposure of 9.7
+    // there.
+    private const float Faint = 0.001f;
 
     /// <summary>A light as it is written, the middle of its box, half its side along each of the box's axes, its light and its surface over its box's.</summary>
     internal readonly record struct Light(Vector3 Middle, Vector3 X, Vector3 Y, Vector3 Z, Vector3 Glow, float Share);
@@ -75,8 +81,7 @@ internal static class GlowLights
             if (places is null) placeOf[n] = n;
             var (middle, x, y, z, glow, share) = lights[n];
             var surface = 4 * FacesSurface(new Vector3(x.Length(), y.Length(), z.Length())) * share;
-            var brightest = MathF.Max(glow.X, MathF.Max(glow.Y, glow.Z));
-            var reach = MathF.Sqrt(brightest * surface / (4 * Faint));
+            var reach = MathF.Sqrt(surface / (4 * Faint));
             var light = floats.Slice(placeOf[n] * Bytes / 4, Bytes / 4);
             (light[0], light[1], light[2], light[3]) = (middle.X, middle.Y, middle.Z, reach);
             (light[4], light[5], light[6], light[7]) = (x.X, x.Y, x.Z, x.Length());
