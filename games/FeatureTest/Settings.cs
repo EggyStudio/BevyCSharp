@@ -232,6 +232,17 @@ public sealed record FeatureSettings
     /// <summary>How finely the weather is drawn, or not at all.</summary>
     public WeatherQuality WeatherQuality { get; init; } = WeatherQuality.Medium;
 
+    /// <summary>
+    /// How finely global illumination is traced through the scene's distance field, or not at all,
+    /// <see cref="GlobalIllumination.Medium"/> unless set.
+    /// </summary>
+    /// <remarks>
+    /// The light the level's near white walls and floors throw into the shade, and into a shut room
+    /// through its doors. Where it is off, or Solari lights the scene in its place, the day fills
+    /// the shade with a warm white light instead (<see cref="Behaviors.DayNight"/>).
+    /// </remarks>
+    public GlobalIllumination GlobalIllumination { get; init; } = GlobalIllumination.Medium;
+
     /// <summary>The settings a tier gives, from these.</summary>
     public FeatureSettings At(Quality tier) => tier switch
     {

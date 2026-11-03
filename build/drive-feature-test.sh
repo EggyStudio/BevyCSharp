@@ -21,6 +21,12 @@
 # frames for its shot where forty let the clouds settle. Rain and snow over the playground at the
 # end run the weather's kernels on that device all the same, since llvmpipe once ended the feature
 # test in them where a GPU drew them whole.
+#
+# GLOBAL_ILLUMINATION names global illumination's quality for the run in the same way, the game's
+# own where it names none, Medium unless a tester set another. The workflow names Off, since on the
+# working machine's lavapipe on four threads the hub took 3.0 seconds a frame with it at Medium and
+# 1.6 without it, without the weather. Where the run's is on, the light hall's irradiance volume's
+# bay is taken a second time with it off.
 set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
@@ -146,15 +152,18 @@ quiet setting "DaySpeed 0"
 quiet day.hour 8
 
 # The weather held to a partly cloudy sky with the forecast off, so each run captures the same sky,
-# at the quality WEATHER_QUALITY names, and put back as it was at the end with the day.
-weather_was=()
-for name in WeatherKind Procedural WeatherQuality; do
-  weather_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
+# at the quality WEATHER_QUALITY names, and global illumination at the quality GLOBAL_ILLUMINATION
+# names, each put back as it was at the end with the day.
+settings_was=()
+for name in WeatherKind Procedural WeatherQuality GlobalIllumination; do
+  settings_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
 done
 quiet setting "WeatherKind PartlyCloudy"
 quiet setting "Procedural false"
 if [ -n "${WEATHER_QUALITY:-}" ]; then quiet setting "WeatherQuality $WEATHER_QUALITY"; fi
+if [ -n "${GLOBAL_ILLUMINATION:-}" ]; then quiet setting "GlobalIllumination $GLOBAL_ILLUMINATION"; fi
 quality=$(setting WeatherQuality)
+illumination=$(setting GlobalIllumination)
 
 quiet frames.wait 30
 quiet mode walking
@@ -365,15 +374,16 @@ took "the mound"
 # before the first view.
 quiet mode spectator
 quiet frames.wait 90
-# Each view waits forty frames for its shot, or as many as it names, so the clouds settle after the
-# camera's jump, and five without the weather where it names none. The effects view names sixty,
-# since five leave its floor and its spheres streaked after the page switched the dusk and the
-# occlusion on. The view's pipelines are waited for before its frames, the clock still while they
-# compile, as well as before its shot, so the frames it settles over draw all it holds, and the
-# compile's time, a frame of about twelve seconds on lavapipe while one runs, falls in the wait
-# given for it. From here each wait for frames is a view's, given a view's bound (above).
+# Each view waits forty frames for its shot, or as many as it names, so the clouds and global
+# illumination's probes settle after the camera's jump, and five without the weather and global
+# illumination where it names none. The effects view names sixty, since five leave its floor and its
+# spheres streaked after the page switched the dusk and the occlusion on. The view's pipelines are
+# waited for before its frames, the clock still while they compile, as well as before its shot, so
+# the frames it settles over draw all it holds, and the compile's time, a frame of about twelve
+# seconds on lavapipe while one runs, falls in the wait given for it. From here each wait for frames
+# is a view's, given a view's bound (above).
 views=1
-settle() { if [ -z "$1" ] && [ "$quality" = Off ]; then echo 5; else echo "${1:-40}"; fi; }
+settle() { if [ -z "$1" ] && [ "$quality" = Off ] && [ "$illumination" = Off ]; then echo 5; else echo "${1:-40}"; fi; }
 view() {
   quiet look -- "$2" "$3" "$4" "$5" "$6" "$7"
   quiet pipelines.wait
@@ -395,6 +405,14 @@ for z in -28 -36 -44 -52; do
   view "$((bay + 1))-hall-east" 0 1.3 "$z" 10 0.2 "$z"
   bay=$((bay + 2))
 done
+# The irradiance volume's bay again with global illumination off where the run's is on, through the
+# setting the graphics page's row changes, since the probes' light stands in for the volume's
+# there, and the bay is there to show the volume's.
+if [ "$illumination" != Off ]; then
+  quiet setting "GlobalIllumination Off"
+  view 10-hall-east-gi-off 0 1.3 -36 10 0.2 -36
+  quiet setting "GlobalIllumination $illumination"
+fi
 view 15-meadow 12 1.5 80 0 0.5 70
 
 # The effects page's ambient occlusion and dusk sky through the setting command, each put back as
@@ -446,10 +464,10 @@ weathered() {
 weathered 21-rain Rain
 weathered 22-snow Snow
 
-# The day and the weather put back as they were.
+# The day, the weather and global illumination put back as they were.
 quiet setting "DaySpeed $day_speed"
 quiet setting "Hour $day_hour"
-for was in "${weather_was[@]}"; do quiet setting "$was"; done
+for was in "${settings_was[@]}"; do quiet setting "$was"; done
 took "the settings put back"
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows

@@ -75,6 +75,12 @@ public partial struct Applied
     private static void OnChanged(FeatureSettings was) => _due = true;
 
     /// <summary>
+    /// Whether global illumination's probes light the scene, which the settings ask for and Solari
+    /// does not stand in for, its rays carrying the light from wall to wall themselves.
+    /// </summary>
+    internal static bool Probed => Settings.Current.GlobalIllumination != GlobalIllumination.Off && !Render.RayTracingActive;
+
+    /// <summary>
     /// Applies what is due, and keeps new meshes drawn as their edges while that is on.
     /// </summary>
     [OnUpdate]
@@ -96,6 +102,7 @@ public partial struct Applied
         if (!drawn) return;
 
         if (!ctx.Res<Config>().Offscreen) Window.SetMode(settings.Window);
+        Render.SetGlobalIllumination(Probed ? settings.GlobalIllumination : GlobalIllumination.Off);
         if (Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera)) Camera(camera, settings);
         Scene.Light(ctx.Ecs, settings.Shadows);
         if (!settings.Wireframe) Wire(ctx.Ecs, false);

@@ -47,7 +47,7 @@ internal static class Pages
         new ToggleRow(Render.RayTracingActive ? "Ray-traced lighting, running" : "Ray-traced lighting, from the next start",
             () => S.RayTraced, value => Settings.Change(s => s with { RayTraced = value })),
         new ToggleRow("Ray-traced denoiser", () => Denoiser.On, value => Denoiser.Set(value)),
-        new ChoiceRow<GlobalIllumination>("Global illumination", () => Field.Quality, Field.SetQuality),
+        new ChoiceRow<GlobalIllumination>("Global illumination", () => S.GlobalIllumination, value => Settings.Change(s => s with { GlobalIllumination = value })),
         new ToggleRow(Render.MeshletsActive ? "Meshlets, running" : "Meshlets, from the next start",
             () => S.Meshlets, value => Settings.Change(s => s with { Meshlets = value })),
         new ToggleRow("Old screen", () => ShaderShowcase.OldScreen, value => ShaderShowcase.OldScreen = value),

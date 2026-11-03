@@ -1,46 +1,48 @@
 # Review
 
-Reviewed up to `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run green at
-11:14 on the three systems; it keeps the form and carries the review's files and N 4.10. Before it
-`37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on 2026-11-03, its run
-green at 08:17 on the three systems; it keeps the form and carries the review's files. Before it
-`43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on 2026-11-03, its run green
-at 04:34 on the three systems; it keeps the form and carries the review's files. Before it
-`2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39 on the three
-systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's third commit,
-two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43 on the three
-systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's second commit,
-the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on 2026-11-02, its
-run green at 00:17 on 2026-11-03 on the three systems; it keeps the form and carries the review's
-files. Before it `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on 2026-11-02, its run
-green at 22:55 on the three systems; it keeps the form and carries the review's files. Before it
-`1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02, its run green
-at 21:57 on the three systems, the first with the submodule checked out; it keeps the form and
-carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run
-green at 20:55 on the three systems; it keeps the form and carries the review's files. Before it
-`add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three systems; it
-keeps the form and carries the review's files. Before it `54f985a4`, item 93's first step, pushed at
-17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the form and carries the
-review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50
-on the three systems; it keeps the form and carries the review's files. Before it `b8cc8316`,
-Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in
-about 20 minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the
-drive in 125 minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18
-published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it
-`a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the
-three systems in about 14 minutes; the pack run started from it at 02:26 with publish on, its
-captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100
-minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read at
-04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
-beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
-form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
-pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
-pack run started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its
-drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at
-00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its
-captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the
-run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of
-100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
+Reviewed up to `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28 on 2026-11-03, its run
+green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the review's
+files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at
+10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and carries the
+review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back,
+pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the form and
+carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed
+at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries
+the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run
+green at 02:39 on the three systems; it keeps the form and carries the review's files. Before it
+`04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on 2026-11-03, its
+run green at 01:43 on the three systems; it keeps the form and carries the review's files. Before it
+`a3db9697`, 95's second commit, the reference's sun through the air and gi.compare with GI off,
+pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three systems; it keeps
+the form and carries the review's files. Before it `e6a458b1`, 91's mend of the wind's length,
+pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps the form and
+carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed
+at 21:35 on 2026-11-02, its run green at 21:57 on the three systems, the first with the submodule
+checked out; it keeps the form and carries the review's files. Before it `af54d261`, item 80, pushed
+at 20:36 on 2026-11-02, its run green at 20:55 on the three systems; it keeps the form and carries
+the review's files. Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at
+19:59 on the three systems; it keeps the form and carries the review's files. Before it `54f985a4`,
+item 93's first step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it
+keeps the form and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on
+2026-11-02, its run green at 14:50 on the three systems; it keeps the form and carries the review's
+files. Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at
+11:37 on the three systems in about 20 minutes; the pack run started from it at 11:38 with publish
+on, green at 14:30 with the drive in 125 minutes at its limit's edge, the soak in 21, every captures
+job green and 0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles
+Verdict 51. Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run
+green at 02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with
+publish on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at
+the limit of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was
+published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23
+on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems in about 17 minutes;
+it keeps the form and carries the review's files. Before it `58265110`, item 90's second commit and
+its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15
+minutes; the pack run started from it at 23:22 with publish on, the first since `09fc95dd` of
+2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora
+job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of
+its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50;
+the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit
+of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
 published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
 commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
 their light before any thread branches since llvmpipe faults on the transmittance lookup after a
@@ -542,7 +544,20 @@ from [SHARED.md](SHARED.md).
     forward wall reflecting the same with the check and without since the trace's other paths and
     the field's find the wall, so the check stays with a guard test that a forward wall is
     reflected, its remark and the Reply saying it does not fail without the check, the one case N
-    3.1 allows.
+    3.1 allows. The forward-surfaces commit is 5cafb9a2, pushed at 15:28 on 2026-11-03. The pass
+    passes over the pixels no deferred material drew, read from a surface flag the reflection
+    trace's facing check shares; leaves and grass drawn forward read the probes themselves, the read
+    compiled in only while the probes light the scene since compiled in and never taken it read the
+    forest at 8.1 ms with GI off against 7.6 out; the environment's light from above and each
+    light's air go to the air buffer. Three tests fail without their mends, the forward sheet, the
+    leaf in shade and the leaf letting light through, and the mirror floor's red wall drawn forward
+    stands as a reading. The cost, the forest at 1080p Medium 3.3 ms unread and 6.7 read; the
+    feature test's meadow at 1280 by 720 Medium 2.6 and 5.6, 3.0 over the 2 ms bar, so the per-crown
+    gather is the vegetation's for Low and Medium as recorded, and the meadow is read by its
+    pictures until item 100, the pair 2026-11-03-item-95-forward.webp. The suite 1,999 with the
+    default's work held aside, cargo test 118 and 199, NormTests 18. Next the default, GI Medium
+    with the fill off and GLOBAL_ILLUMINATION=Off for the drive and soak on lavapipe, the drive read
+    on the GPU, then the aisle floor.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -583,7 +598,10 @@ from [SHARED.md](SHARED.md).
     with it the shared row added at 14:40 from the engine's item 141, whether the far cascade
     carries screen probes or a thin-wall test and what they cost in a wood; the engine keeps its
     screen probes in the counted cascades alone, their hold fading across the last counted band, and
-    took 0.75 to 0.85 ms off the grove.
+    took 0.75 to 0.85 ms off the grove. A second row from the engine's 141 to read with it, whether
+    the bridge's screen rays march past their reach where the probes around their end read dark, by
+    a deep cave's cost; the engine marches only where no probe holds light and took 1.1 ms of global
+    illumination off the deep cave at High.
 
 100. **The path-traced reference reads the leaf material's color and its alpha cutout.** From item
     95's meadow reading on 2026-11-03: gi.reference traces the grass cards and the tree impostors as
@@ -2043,3 +2061,35 @@ G-buffer holds as (0, 0, 0, 1) and not as nothing, and a tree's leaves and the g
 read the probes themselves as the pass reads them, the light let through them from the front's
 probes and weights, since the pass read them as black mirrors and with the fill off the meadow lay
 near black. 3DEngine's foliage drawn forward under its cascades is to consider.
+
+Item 95's ninth commit, global illumination on by default in the feature test, in the commit
+carrying this line. A setting of its own, GlobalIllumination, kept for the next run and Medium
+unless set, which the graphics page's row changes, is applied where Solari is not running
+(Applied.Probed). While the probes light the scene the day's ambient light is the sky's own small
+white by day, and the warm fill where global illumination is off or Solari stands in, since the
+probes take the ambient light as the sky's light along each ray that leaves the scene and a warm
+fill of 1000 would light every shade as a warm sky would. The scripted run and the feature test's
+soak take global illumination at the quality GLOBAL_ILLUMINATION names, set before the first
+pipelines are waited for and put back as it was at the end, and the workflow names Off for both,
+since on the working machine's lavapipe on four threads the hub took 3.0 seconds a frame with it at
+Medium and 1.6 without it without the weather, and 3.4 and 1.8 under the weather, so the soak's
+rounds would miss the readings its check judges, its step's comment saying that global
+illumination's memory is read on a GPU and by the suite's cap instead. Where the run's is on, the
+light hall's irradiance volume's bay is taken a second time with it off through the setting the
+graphics page's row changes, 10-hall-east-gi-off, the probes' light standing in for the volume's
+there, and a view waits forty frames while global illumination is on, as while the weather is.
+gi.set holds until a setting changes, which the README says. On the GPU both runs went through the
+course and its views, 242 s at the default and 220 s with it off, the hub 32.8 ms a frame and 30.9,
+the most memory 3.13 GB and 2.98. Read by their pictures, the meadow is lit, the shut room's
+openings are dark, the volume bay shows its probes' pink beside its view with global illumination
+off, and the night's alley wall in the moon's shade is black where the fill left it dark blue, the
+pass taking the night's dim ambient light back where the probes give it little sky, for the review
+to place with the owner's eye. A soak of the feature test at Off for forty seconds put the setting
+back as it found it. The Cornell box's pair is 2026-11-03-item-95-default.webp. The whole suite ran
+with it, 1,999 passed and 3 skipped in 43 m 31 s at the 3 GB cap, none aborted. NormTests passed,
+18. The public listing is unchanged.
+
+Shared: the feature test traces global illumination at Medium by default with the day's fill off
+while the probes light the scene, and its scripted run and its soak on lavapipe at Off by an
+environment value, since global illumination took nearly half of the hub's frame there. 3DEngine's
+feature test's default and its runs on a software device are to consider.

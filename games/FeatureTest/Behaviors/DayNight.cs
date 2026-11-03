@@ -106,6 +106,27 @@ public partial struct DayNight
         new(24f, 20f, 0.55f, 0.65f, 1f),
     ];
 
+    /// <summary>
+    /// The ambient light's brightness and color while global illumination's probes light the scene,
+    /// by the hour.
+    /// </summary>
+    /// <remarks>
+    /// The sky's own small white by day, as it was before the fill, the probes carrying the light
+    /// the walls and floors throw into the shade. Global illumination takes the ambient light back
+    /// from every surface it lights, but its probes take it as the sky's light along each ray that
+    /// leaves the scene, so the fill's warm white of 1000 would light every shade as a warm sky
+    /// would. The night's dim blue is the fill's.
+    /// </remarks>
+    private static readonly Key[] SkyAmbient =
+    [
+        new(0f, 20f, 0.55f, 0.65f, 1f),
+        new(5.5f, 20f, 0.55f, 0.65f, 1f),
+        new(7f, 80f, 1f, 1f, 1f),
+        new(17f, 80f, 1f, 1f, 1f),
+        new(18.5f, 20f, 0.55f, 0.65f, 1f),
+        new(24f, 20f, 0.55f, 0.65f, 1f),
+    ];
+
     // The sky's clock, at the March equinox, the moon half a day short of full at its start.
     private static readonly SkyClock Sky = new() { Hour = 8f, DayOfYear = 79f, MoonAgeAtStart = (SkyClock.SynodicMonth / 2f) - 79.5f };
     private static Entity _moon = Entity.None;
@@ -179,7 +200,7 @@ public partial struct DayNight
         var (moonlight, moonColor) = At(Moonlight, hour);
         Shine(ctx.Ecs, _moon, moon, (moonlight * Sky.MoonLit, moonColor), shadows && sun.Y <= 0f && moon.Y > 0f);
 
-        var (light, color) = At(Ambient, hour);
+        var (light, color) = At(Applied.Probed ? SkyAmbient : Ambient, hour);
         if (MathF.Abs(light - _ambient.Light) > 0.1f)
         {
             Render.SetAmbientLight((color.R, color.G, color.B), light);

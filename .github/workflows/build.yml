@@ -495,12 +495,14 @@ jobs:
 
       # Without the weather, which took nearly a third of each frame on lavapipe and ran the course
       # past the job's limit, the drive's rain and snow at its end running the weather's kernels
-      # here all the same.
+      # here all the same, and without global illumination, which took nearly half of each frame
+      # there.
       - name: Run the feature test's course
         env:
           SHOTS: ${{ runner.temp }}/feature-test
           BCS_STEP_LOGS: ${{ runner.temp }}/feature-test
           WEATHER_QUALITY: "Off"
+          GLOBAL_ILLUMINATION: "Off"
         run: |
           mkdir -p "$SHOTS"
           dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
@@ -566,9 +568,14 @@ jobs:
       - name: Build the feature test
         run: dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
 
+      # Without global illumination, which took nearly half of each frame on lavapipe, so the
+      # rounds reach the readings the check judges inside the soak's time (build/soak.sh). What
+      # global illumination holds is not soaked here, since rounds at twice the frame would miss
+      # those readings, and the course on a GPU and the suite's memory cap read it instead.
       - name: Play the feature test a while and check nothing it holds grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
+          GLOBAL_ILLUMINATION: "Off"
         run: build/soaks.sh 900 feature-test
 
       # The soak's readings, the program's log, the soak's errors and the check's words.

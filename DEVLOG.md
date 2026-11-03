@@ -36,6 +36,13 @@ near black, drawn forward where the light pass does not reach and read by it as 
 sky's reflection taken from them, and on the right lit by the probes they read themselves as the
 pass reads them, the light let through each taken from its front's probes.
 
+![](.github/assets/readings/2026-11-03-item-95-default.webp)
+The feature test's Cornell box from the scripted run's view at eight in the morning under a partly
+cloudy sky on the GPU, on the left as the feature test came, global illumination off and the day's
+warm fill on, the box's walls and blocks lit alike, and on the right at the new default of Medium
+with the fill off, the red and the green walls' light carried onto the blocks and the floor and the
+shade under them deeper.
+
 Done that day
 
 ## 2026-11-02

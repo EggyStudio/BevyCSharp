@@ -27,16 +27,6 @@ public partial struct Field
         Render.SetSceneField(on ? 4 : 0, 0.25f, 1);
     }
 
-    /// <summary>The quality global illumination traces at, from the panel's graphics page.</summary>
-    internal static GlobalIllumination Quality { get; private set; }
-
-    /// <summary>Traces global illumination at a quality, or none.</summary>
-    internal static void SetQuality(GlobalIllumination quality)
-    {
-        Quality = quality;
-        Render.SetGlobalIllumination(quality);
-    }
-
     /// <summary>Draws the field's window while it is on, inside the interface's frame.</summary>
     internal static void Draw()
     {

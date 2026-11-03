@@ -71,7 +71,8 @@ through what you typed before. A few to start with:
   memory                   what the program holds
   feature.field on         the scene's distance field and its window, as the debug page's row
   feature.denoiser off     the ray-traced lighting's grain, unfiltered, as the graphics page's row
-  gi.set high              global illumination through the field, as the graphics page's row
+  gi.set high              global illumination through the field until a setting changes, the
+                           graphics page's row keeping it for the next run
 
 When something goes wrong
 -------------------------

@@ -73,6 +73,16 @@ for _ in $(seq 1 600); do ./bcs status 2>/dev/null | grep -q "ready.*$program" &
 # fast one.
 [ "$name" = stress ] || quiet app.frametime 0.0166667
 quiet frames.wait 60
+# The feature test's global illumination at the quality GLOBAL_ILLUMINATION names, the game's own
+# where it names none, as the scripted run's (build/drive-feature-test.sh), and put back as it was
+# at the end. The workflow names Off, since on the working machine's lavapipe on four threads the
+# hub took 3.4 seconds a frame with it at Medium and 1.8 without it, and rounds of that length would
+# not reach the readings the check judges by the soak's last second.
+illumination_was=""
+if [ "$name" = feature-test ] && [ -n "${GLOBAL_ILLUMINATION:-}" ]; then
+    illumination_was=$(c setting GlobalIllumination | sed -n 's/^GlobalIllumination = //p')
+    quiet setting "GlobalIllumination $GLOBAL_ILLUMINATION"
+fi
 # The feature test's pipelines compiled before its first round, which on lavapipe with no shader
 # cache of Mesa's take minutes and grow what it holds while they do, so its readings are not of
 # compiles.
@@ -150,4 +160,5 @@ while ((SECONDS < end)) || ((readings < fewest && SECONDS < cap)); do
     fi
 done
 grep -q "^\[soak\] the game exited" "$log" && fail "the game stopped while it was played"
+if [ -n "$illumination_was" ]; then quiet setting "GlobalIllumination $illumination_was"; fi
 echo "$name: $rounds rounds in $((SECONDS - end + seconds)) seconds, $readings readings in $out"
