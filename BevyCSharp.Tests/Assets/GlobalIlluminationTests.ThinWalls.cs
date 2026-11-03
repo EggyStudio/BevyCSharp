@@ -11,21 +11,53 @@ public sealed partial class GlobalIlluminationTests
     /// as its reference, which no light reaches, reads nothing.
     /// </summary>
     /// <remarks>
-    /// The field holds a wall thinner than a cell half a cell thick about its middle where a cell lies
-    /// in front of one of its faces with the other straight behind it. The splat took a face as lying
-    /// behind a cell within 25 degrees of straight back, and a wall standing on a floor has a bottom
-    /// face buried against the floor's top, so along the wall's foot that face, its edge 22 degrees off
-    /// straight back from the cells there, lay nearer than the far face and was kept as the face
-    /// behind. Looking down and not against the face in front, it held nothing, those cells kept the
-    /// distance in front, and every probe's ray along the floor passed under the wall, the room's faces
-    /// reading 0.03 to 0.04, as a ceiling laid on the walls let rays over them. The walls are 0.3 thick
-    /// in cells of 0.5, as the feature test's hall's walls stand in its second cascade, each face a
-    /// tenth from the middles of the cells beside it, and the room lies between the probes, every 4
-    /// units, so none stands in a wall. The screen probes are left out, so the room reads the light the
-    /// world's probes bring it, which the field's hold decides.
+    /// The field holds a wall thinner than a cell half a cell thick about its middle where a cell
+    /// lies in front of one of its faces with the other straight behind it. The splat took a face
+    /// as lying behind a cell within 25 degrees of straight back, and a wall standing on a floor
+    /// has a bottom face buried against the floor's top, so along the wall's foot that face, its
+    /// edge 22 degrees off straight back from the cells there, lay nearer than the far face and was
+    /// kept as the face behind. Looking down and not against the face in front, it held nothing,
+    /// those cells kept the distance in front, and every probe's ray along the floor passed under
+    /// the wall, the room's faces reading 0.03 to 0.04, as a ceiling laid on the walls let rays
+    /// over them. The walls are 0.3 thick in cells of 0.5, as the feature test's hall's walls stand
+    /// in its second cascade, each face a tenth from the middles of the cells beside it, and the
+    /// room lies between the probes, every 4 units, so none stands in a wall. The screen probes are
+    /// left out, so the room reads the light the world's probes bring it, which the field's hold
+    /// decides.
     /// </remarks>
     [SkippableFact]
     public void ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls()
+    {
+        var faults = ThinWalledRoomFaces(screen: false).Where(f => f.Light >= 0.005).Select(f => $"the {f.Face} reads {f.Light:0.0000} where its reference reads {f.Reference:0.0000}").ToList();
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// The same room with the screen probes in reads inside under 0.04 on every face, each probe's
+    /// hit beside a wall hiding the lamp beyond it.
+    /// </summary>
+    /// <remarks>
+    /// A probe's hit takes the light of the lamps that cast shadows less what the field hides of
+    /// it, found by a march toward each lamp from a cell and a half off the surface, which was kept
+    /// two cells clear at its start as at the lamp's end, a unit past its point in cells of 0.5, so
+    /// a wall that near the hit was passed over and the lamp outside lit the faces the screen
+    /// probes read inside 0.014 to 0.055. What the floor keeps comes from the screen probes' rays
+    /// that start at a wall's foot and meet the wall at once, the hit's normal from the field's
+    /// slope pointing out through the wall, which is read apart.
+    /// </remarks>
+    [SkippableFact]
+    public void ALampOutsideAThinWalledRoomIsHiddenFromTheHitsBesideItsWalls()
+    {
+        var faults = ThinWalledRoomFaces(screen: true).Where(f => f.Light >= 0.04).Select(f => $"the {f.Face} reads {f.Light:0.0000} where its reference reads {f.Reference:0.0000}").ToList();
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// Each face the camera sees inside the closed room of thin walls (<see
+    /// cref="ThinWalledRoom"/>), its mean light a channel in the picture and in its reference of 64
+    /// paths, the screen probes in or left out as <paramref name="screen"/> says.
+    /// </summary>
+    private List<(string Face, double Light, double Reference)> ThinWalledRoomFaces(bool screen)
     {
         Needs.Shaders();
         var supported = false;
@@ -35,7 +67,7 @@ public sealed partial class GlobalIlluminationTests
             Width = 160,
             Height = 90,
             Frames = 6000,
-            Scene = ThinWalledRoom,
+            Scene = ecs => ThinWalledRoom(ecs, screen),
         }
             .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
             .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
@@ -72,7 +104,7 @@ public sealed partial class GlobalIlluminationTests
 
         var traced = GiReference.Last!;
         var picture = GiReference.LastPicture!.Value.Light;
-        var faults = new List<string>();
+        var faces = new List<(string, double, double)>();
         foreach (var name in traced.Names.OrderBy(n => n.Value))
         {
             var (shown, wanted, pixels) = (0.0, 0.0, 0);
@@ -88,11 +120,11 @@ public sealed partial class GlobalIlluminationTests
             }
             if (pixels <= 50) continue;
             var (light, reference) = (shown / pixels / 3, wanted / pixels / 3);
-            output.WriteLine($"the thin-walled room's {name.Value} reads {light:0.0000} against {reference:0.0000}");
-            if (light >= 0.005) faults.Add($"the {name.Value} reads {light:0.0000} where its reference reads {reference:0.0000}");
+            output.WriteLine($"the thin-walled room's {name.Value} reads {light:0.0000} against {reference:0.0000}, the screen probes {(screen ? "in" : "out")}");
+            faces.Add((name.Value, light, reference));
         }
 
-        Assert.True(faults.Count == 0, string.Join("; ", faults));
+        return faces;
     }
 
     /// <summary>
@@ -100,9 +132,9 @@ public sealed partial class GlobalIlluminationTests
     /// standing on a floor that runs on past them, its ceiling laid on them, the north and south
     /// walls between the east and west walls' ends, lit by a bright lamp outside the east wall half
     /// a unit over the floor, the camera inside looking down toward the east wall, in a field of
-    /// cells half a unit wide and with the screen probes left out.
+    /// cells half a unit wide, the screen probes in or left out as <paramref name="screen"/> says.
     /// </summary>
-    private static void ThinWalledRoom(EcsWorld ecs)
+    private static void ThinWalledRoom(EcsWorld ecs, bool screen)
     {
         var camera = PictureRun.Camera(ecs, new Vec3(-0.4f, 1.6f, 2.4f));
         ecs.Add(camera, Transform.LookingAt(new Vec3(-0.4f, 1.6f, 2.4f), new Vec3(2.8f, 0.2f, -0.2f), Vec3.UnitY));
@@ -129,6 +161,6 @@ public sealed partial class GlobalIlluminationTests
         ecs.Add(lamp, Transform.At(Up + 1.2f, 0.5f, 1f));
         Render.SetSceneField(4, 0.5f);
         Render.SetGlobalIllumination(GlobalIllumination.Medium);
-        Render.SetGlobalIlluminationScreenProbes(false);
+        Render.SetGlobalIlluminationScreenProbes(screen);
     }
 }

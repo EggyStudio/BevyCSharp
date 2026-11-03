@@ -511,18 +511,25 @@ public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldIn
 
 /// The light the lamps that cast shadows would send a surface at `p` facing `n` but for what the
 /// field holds between them, each found by a march toward the lamp from a cell and a half off the
-/// surface, stopping two cells short of the lamp so its own fitting does not hide it.
+/// surface, looking from its first step, and stopping two cells short of the lamp so its own
+/// fitting does not hide it. Kept two cells clear at its start as well, as `seesThrough` keeps both
+/// of its ends, the march began a unit past its point in cells of half a unit and passed over a
+/// wall that near the surface, so a lamp outside a closed room of walls 0.3 thick lit the faces
+/// inside that its screen probes read 0.014 to 0.055 where no light reaches them.
 public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
 {
     float3 hidden = float3(0.0);
     float cell = fieldCell(info, p);
+    float3 from = p + n * (cell * 1.5);
     for (int i = 0; i < min(int(lights.counts.x), 16); i++)
     {
         GiLight light = lights.lights[i];
         if (light.colorAndShadow.w < 0.5)
             continue;
         float result = lampLight(light, p, n);
-        if (result > 0.0 && !seesThrough(field, linear, info, p + n * (cell * 1.5), light.positionAndKind.xyz, cell * 2.0))
+        float3 toward = light.positionAndKind.xyz - from;
+        float length = length(toward);
+        if (result > 0.0 && length > cell * 2.0 && traceField(field, linear, info, from, toward / length, 0.0, length - cell * 2.0) >= 0.0)
             hidden += light.colorAndShadow.rgb * result;
     }
     return hidden;

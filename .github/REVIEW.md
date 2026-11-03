@@ -1,129 +1,131 @@
 # Review
 
-Reviewed up to `f5505a58`, 95's glow-lights commit, pushed at 19:24 on 2026-11-03, its run green at
-19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
-Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off, pushed
-at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form and
-carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its
-run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
-pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
-carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
-taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
-form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
-cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
-form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
-2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
-files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
-2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
-files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
-with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three
-systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of the
-wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps
-the form and carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its
-`fbc385e`, pushed at 21:35 on 2026-11-02, its run green at 21:57 on the three systems, the first
-with the submodule checked out; it keeps the form and carries the review's files. Before it
-`af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the three systems; it
-keeps the form and carries the review's files. Before it `add899da`, item 94, pushed at 19:37 on
-2026-11-02, its run green at 19:59 on the three systems; it keeps the form and carries the review's
-files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on 2026-11-02, its run green at
-17:33 on the three systems; it keeps the form and carries the review's files. Before it `99160868`,
-item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the three systems; it keeps the
-form and carries the review's files. Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on
-2026-11-02, its run green at 11:37 on the three systems in about 20 minutes; the pack run started
-from it at 11:38 with publish on, green at 14:30 with the drive in 125 minutes at its limit's edge,
-the soak in 21, every captures job green and 0.6.18 published, the first package since 09fc95dd of
-2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at
-02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14 minutes; the pack run
-started from it at 02:26 with publish on, its captures jobs green, which settles Verdicts 49 and 50,
-and its drive cancelled at the limit of 100 minutes at 04:23 where the run before took 67, Verdict
-51, so no package was published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its
-end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems
-in about 17 minutes; it keeps the form and carries the review's files. Before it `58265110`, item
-90's second commit and its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three
-systems in about 15 minutes; the pack run started from it at 23:22 with publish on, the first since
-`09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its
-captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict
-49, and two of its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's
-bar, Verdict 50; the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes
-under its limit of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no
-package was published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item
-90's first commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels
-choosing their light before any thread branches since llvmpipe faults on the transmittance lookup
-after a group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01
-with `b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the
-suites in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a
-file of their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451`
-makes pipelines.wait answer after three ready frames running and keep a held clock still between
-commands while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the
-first game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its
-grass or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with
-every shot after it whole; the drive's effects view, which had been missing the level, the spheres'
-board and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still
-through a wait and an app begun on a set clock drawing what comes into view whole; the whole suite
-before the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched
-classes, 78, the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the
-scenes yard, pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's
-site a point in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at
-09:30 with the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it
-`11efeefe`, item 88, pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to
-17 minutes, the run-time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before
-it `60638b01`, item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes,
-the day's fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed
-at 16:58 with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18
-minutes, recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at
-15:52 with the suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the
-binding, recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed
-at 14:08, its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine
-grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed
-at 13:15, its run green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded
-under the item in REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`,
-83's first phase, its run green at 12:42 with the suites in 14 to 17 minutes, the README's line
-verbatim and the three grass cards in the collection, recorded under the items. Before it
-`1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the light-through test at 180 traced
-frames, recorded under the item in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the
-owner's change committed by the reviewer and pushed at 11:42, its run green at 11:59. Before it
-`785a1136`, item 82, pushed at 09:10, its run green at 09:29 with the suites in 13 to 18 minutes,
-the irradiance volume's fallback mended in render/mended.rs, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30, its
-run green at 22:49 with the suites in 12 to 18 minutes, the dark blades gone, recorded under the
-item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30
-after the run of `1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes.
-The march adds an isotropic share for the light scattered more often than the four octaves follow, a
-deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud
-tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the
-lavender going with the gray, the 15:00 sun side keeping its shading and overcast and storm staying
-gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out
-of GPU memory under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher
-panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe`
-and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50`
-green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the
-last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite
-1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c`
-at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
-flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
-phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
-lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
-headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
-High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
-`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
-passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
-shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
-red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
-`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
-level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+Reviewed up to `8583deff`, 95's eleventh commit, the field's hold of a thin wall along its foot and
+head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12 to 18
+minutes; it keeps the form and carries the review's files. Before it `f5505a58`, 95's glow-lights
+commit, pushed at 19:24, its run green at 19:47 on the three systems in 16 to 18 minutes; it keeps
+the form and carries the review's files. Before it `c7eabbb0`, 95's default commit, the feature
+test's GI at Medium with the fill off, pushed at 16:24, its run green at 16:48 on the three systems
+in 16 to 18 minutes; it keeps the form and carries the review's files. Before it `5cafb9a2`, 95's
+forward-surfaces commit, pushed at 15:28, its run green at 15:51 on the three systems in 14 to 18
+minutes; it keeps the form and carries the review's files with the rows for 99, 100 and 141. Before
+it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run green at 11:14 on the
+three systems; it keeps the form and carries the review's files and N 4.10. Before it `37aa4d31`,
+95's hall commit, Bevy's light probes taken back, pushed at 07:59 on 2026-11-03, its run green at
+08:17 on the three systems; it keeps the form and carries the review's files. Before it `43550f11`,
+95's reach commit, Medium in four cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on
+the three systems; it keeps the form and carries the review's files. Before it `2ee206f9`, 95's air
+commit, pushed at 02:20 on 2026-11-03, its run green at 02:39 on the three systems; it keeps the
+form and carries the review's files. Before it `04e6b0c5`, 95's third commit, two more faults of the
+measure, pushed at 01:21 on 2026-11-03, its run green at 01:43 on the three systems; it keeps the
+form and carries the review's files. Before it `a3db9697`, 95's second commit, the reference's sun
+through the air and gi.compare with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on
+2026-11-03 on the three systems; it keeps the form and carries the review's files. Before it
+`e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on
+the three systems; it keeps the form and carries the review's files. Before it `1ea6d865`, item 91,
+Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02, its run green at 21:57 on the three
+systems, the first with the submodule checked out; it keeps the form and carries the review's files.
+Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the three
+systems; it keeps the form and carries the review's files. Before it `add899da`, item 94, pushed at
+19:37 on 2026-11-02, its run green at 19:59 on the three systems; it keeps the form and carries the
+review's files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on 2026-11-02, its run
+green at 17:33 on the three systems; it keeps the form and carries the review's files. Before it
+`99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the three systems; it
+keeps the form and carries the review's files. Before it `b8cc8316`, Verdict 51's mend, pushed at
+11:14 on 2026-11-02, its run green at 11:37 on the three systems in about 20 minutes; the pack run
+started from it at 11:38 with publish on, green at 14:30 with the drive in 125 minutes at its
+limit's edge, the soak in 21, every captures job green and 0.6.18 published, the first package since
+09fc95dd of 2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts 49 and 50's mends,
+pushed at 02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14 minutes; the
+pack run started from it at 02:26 with publish on, its captures jobs green, which settles Verdicts
+49 and 50, and its drive cancelled at the limit of 100 minutes at 04:23 where the run before took
+67, Verdict 51, so no package was published; read at 04:30. Before it `720ec3db`, item 68's fourth
+phase and its end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green at 00:42 on the
+three systems in about 17 minutes; it keeps the form and carries the review's files. Before it
+`58265110`, item 90's second commit and its end, pushed at 23:03 on 2026-11-01, its run green at
+23:22 on the three systems in about 15 minutes; the pack run started from it at 23:22 with publish
+on, the first since `09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's limits
+on the runner; its captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the
+workflow's 26.2.4, Verdict 49, and two of its captures jobs red at 00:43, many_foxes and
+specular_tint past the comparison's bar, Verdict 50; the run ended red at 01:06 on those three jobs
+alone, the drive green in 67 minutes under its limit of 100, the soak in 25 under its 40 and the
+games in 35, the pack job skipped so no package was published, the next pack run after the two
+verdicts' mends. Before it `5fb59903`, item 90's first commit, pushed at 17:57 after 3ee62451's
+green run, its run green at 18:16, the kernels choosing their light before any thread branches since
+llvmpipe faults on the transmittance lookup after a group's threads have parted. Before it
+`3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with `b79314ca` after the run of `3808bd37` went
+green at 10:22, its run green at 12:58 with the suites in 14 to 18 minutes. `b79314ca` moves the
+clock's console commands beside app.hold into a file of their own, ConsoleWorldCommands.cs having
+crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes pipelines.wait answer after three ready
+frames running and keep a held clock still between commands while it waits, through
+ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first game's shots waiting for it;
+in ten of ten fresh sessions the meadow's first shot had lost its grass or its walls' light, and
+pipelines.wait after the look answered 128 to 141 frames later with every shot after it whole; the
+drive's effects view, which had been missing the level, the spheres' board and the clearcoat row, is
+whole, the drive 249 s where 229; two tests, the held clock still through a wait and an app begun on
+a set clock drawing what comes into view whole; the whole suite before the split 1,994 passed with
+the one failure N 1.3's, after it NormTests and the touched classes, 78, the run standing for the
+whole; the public listing unchanged. Before it `3808bd37`, the scenes yard, pushed at 10:04, its run
+green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point in the level. Before it
+`7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with the suites in 12 to 17
+minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88, pushed at 23:27 on
+2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the run-time switch's panic
+mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`, item 87, pushed at
+21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's fill, recorded under
+the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58 with `63aca2f2`, 68's
+gallery court, its run green at 17:17 with the suites in 11 to 18 minutes, recorded under the items.
+Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52 with the suites in 13 to 19
+minutes, the Levels module as a submodule with LevelSpawner the binding, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08, its run green at 14:31 with
+the suites in 14 to 18 minutes, the meadow on the engine grass, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its run green at 13:32
+with the suites in 11 to 14 minutes, the engine grass, recorded under the item in REVIEW-ARCHIVE.md.
+Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase, its run green at
+12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three grass cards in
+the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at 11:02, its run
+green at 11:25, the light-through test at 180 traced frames, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
+09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
+mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
+81's grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
+item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
+green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
+scattered more often than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of
+the light to 0.23 to 0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the
+bases from 146, 146, 154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side
+keeping its shading and overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests
+pass; the suite's 21 BounceRoomsTests failed out of GPU memory under other sessions' apps and pass
+alone, 55 of 55; a lead, Bevy's asset watcher panicking on a send as an app stops. Before it
+`1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after
+the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict
+48 settled; AppLeakTests reads the promoted bytes of the last full blocking collection as 3DEngine's
+does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared
+line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35
+on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
+batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
+mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
+the character climbs and red where it cannot, a wall with two arches parting the course from the
+playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
+green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
+load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
+moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
+with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
+reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
+directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
+Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
+the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
+run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
+`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
+helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
+47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
+Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
+d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
+stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
+from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
+asked that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -694,6 +696,13 @@ from [SHARED.md](SHARED.md).
     alike at both eyes, so the step follows the eye; in the bright state cascade 1 has a probe layer
     at z -22 beyond the doorway seeing into the hall, in the dark state its last layer at -26
     inside, the bright one matching the reference, so the dark state's dropped layer is read first.
+    The eleventh commit is 8583deff, pushed at 23:01 on 2026-11-03, the field's hold of a thin wall
+    along its foot and head, field_splat taking a face as behind a cell only where the cell's
+    nearest point lies inside the face; the lamp-outside room's test holding every face under 0.005
+    with the screen probes out, 0.0001 at most where 0.03 to 0.04; ray-tracing.md and RENDERING.md
+    say so, the pair 2026-11-03-item-95-thin-room.webp; the suite 2,003 in 43 minutes at the 3 GB
+    cap, NormTests 18; the row marked taken. Next the lamp march's clearance as its own commit, then
+    the seam's two states.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -2336,3 +2345,37 @@ buried against a floor hid its far face from the cells along its foot, which the
 a lamp outside a closed room of walls 0.3 thick in cells of 0.5 lit its faces 0.03 to 0.04 where its
 reference reads nothing. 3DEngine's item 193 takes the same mend, its field_splat's rule at line
 386.
+
+Item 95's twelfth commit, the march toward a lamp from a probe's hit looking from its first step, in
+the commit carrying this line. hiddenLampLight marched from a cell and a half off the surface
+through seesThrough, which keeps its clearance at both ends, so the march began two cells past its
+point, a unit in cells of 0.5, a wall that near the hit was passed over and a lamp beyond it never
+hidden. It looks from its first step, the two cells kept at the lamp's end alone.
+GlobalIlluminationTests.ALampOutsideAThinWalledRoomIsHiddenFromTheHitsBesideItsWalls holds the
+junction commit's room with the screen probes in under 0.04 on every face, each channel's mean,
+reading 0.009, 0.024 and 0.000 on the east wall, the floor and the north wall, where on a bridge of
+the committed module it reads 0.055, 0.052 and 0.014. The junction commit's Reply gave the room with
+the screen probes in as 0.04 to 0.16 and 0.07 at most, the three channels' sum, each channel's a
+third of it. What the floor keeps is the screen probes' rays from a wall's foot meeting the wall at
+once, the hit's normal from the field's slope pointing out through it, read with the seam.
+
+The bay's reproduction reads as before, its lamps inside, from z 7 the floor 11.1% under and from
+7.3 3.8% over where 10.9 and 4.0. The hall from the scripted run's eye at Medium reads the floor 17%
+under where 16, the ceiling 17 and the walls facing +z, +x and -x 15, 23 and 28 as before, Low and
+High within a point of their readings, and from -24.8 and -24.9 at Medium the floor 4 and 16% under
+as before, the seam's step unchanged. A trial's copy put back over a native file with cp, its
+content HEAD's, took a time newer than the bridge, so the junction commit's first suite run stopped
+at its build on BCS102 and its tests ran on the bins before, a run that does not count, so a trial's
+file goes back by git checkout or cp -p. The junction commit's test remark and splat comment ran to
+104 and 101 columns and are wrapped at 100 here.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+199 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran with it, 2,004 passed and 3 skipped in 44 m 29 s at the 3 GB cap, none aborted. NormTests
+passed, 18. The public listing is unchanged.
+
+Shared: the march toward a lamp from a probe's hit looks from its first step a cell and a half off
+the surface, its two cells of clearance kept at the lamp's end alone, since kept at both ends it
+began a unit past its point in cells of 0.5 and passed over a wall that near the hit, a lamp outside
+a closed room of walls 0.3 thick lighting the faces its screen probes read inside 0.014 to 0.055.
+3DEngine's hiddenLampLight marches the same way.

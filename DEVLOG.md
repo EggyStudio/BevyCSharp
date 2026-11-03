@@ -58,6 +58,15 @@ held nothing and the probes' rays brought the lamp's light under the walls, the 
 where its path-traced reference is black, and on the right with a face taken as behind a cell only
 where the cell lies straight behind it, the room dark as its reference.
 
+![](.github/assets/readings/2026-11-03-item-95-lamp-march.webp)
+The closed room of walls 0.3 thick standing on a floor in field cells of 0.5, a bright lamp outside
+its east wall, at Medium with the screen probes in, on the left with each probe's hit marching
+toward the lamp from two cells past its point a cell and a half off the surface, a unit in these
+cells, past a wall that near it, so the hits beside the walls saw the lamp and the room's faces read
+gray where its path-traced reference is black, and on the right with the march looking from its
+first step, the room dark but for patches along the east wall's foot, where the screen probes' rays
+meet the wall at once.
+
 Done that day
 
 ## 2026-11-02
