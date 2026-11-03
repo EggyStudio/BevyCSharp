@@ -112,8 +112,8 @@ pub struct RequestedPrepass(pub u32);
 /// this frame's, which does nothing without one of them, and `32` Bevy's depth pyramid, which turns
 /// its GPU occlusion culling on for the camera, and brings depth. A bit left clear takes that
 /// prepass off again, unless something else on the camera needs it, which is temporal antialiasing
-/// for depth and motion, motion blur for motion, and screen-space reflections for depth and the
-/// G-buffer.
+/// for depth and motion, motion blur for motion, ambient occlusion for depth and normals, and
+/// screen-space reflections for depth and the G-buffer.
 ///
 /// A prepass draws the scene a second time, so it is only worth asking for when something reads
 /// what it draws. A multisampled camera draws them multisampled, which a pass cannot bind, so a
@@ -134,7 +134,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                 DeferredPrepass, DeferredPrepassDoubleBuffer, DepthPrepass,
                 DepthPrepassDoubleBuffer, MotionVectorPrepass, NormalPrepass,
             };
-            use bevy::pbr::ScreenSpaceReflections;
+            use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceReflections};
             use bevy::post_process::motion_blur::MotionBlur;
 
             let entity = bevy::ecs::entity::Entity::from_bits(camera);
@@ -158,6 +158,12 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                 let mut camera = world.entity_mut(entity);
                 camera.insert(RequestedPrepass(flags));
                 let reflecting = camera.contains::<ScreenSpaceReflections>();
+                // Bevy's ambient occlusion brings the depth and normal prepasses it reads when it
+                // comes and takes the normals unchecked, so a camera that lost them under it ended
+                // the app, as the feature test did when its effects page turned the occlusion on
+                // beside global illumination. They stay while it is on and go with it
+                // (bcs_render_set_ambient_occlusion).
+                let occluding = camera.contains::<ScreenSpaceAmbientOcclusion>();
 
                 // The pyramid is built from the depth prepass, by Bevy's occlusion culling, without
                 // which it does not exist.
@@ -170,7 +176,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                 // The G-buffer is drawn over the depth the depth prepass leaves, so it brings that.
                 if flags & (1 | 32) != 0 || gbuffer {
                     camera.insert(DepthPrepass);
-                } else if !camera.contains::<TemporalAntiAliasing>() && !reflecting {
+                } else if !camera.contains::<TemporalAntiAliasing>() && !reflecting && !occluding {
                     camera.remove::<DepthPrepass>();
                 }
 
@@ -194,7 +200,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
 
                 if flags & 2 != 0 {
                     camera.insert(NormalPrepass);
-                } else {
+                } else if !occluding {
                     camera.remove::<NormalPrepass>();
                 }
 

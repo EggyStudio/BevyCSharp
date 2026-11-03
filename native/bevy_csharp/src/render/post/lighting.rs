@@ -127,6 +127,7 @@ pub fn keep_deferred_phases(
         &DeferredForMaterials,
         Option<&RequestedPrepass>,
         bevy::ecs::query::Has<bevy::pbr::ScreenSpaceReflections>,
+        bevy::ecs::query::Has<bevy::pbr::ScreenSpaceAmbientOcclusion>,
     )>,
 ) {
     use bevy::core_pipeline::prepass::{DeferredPrepass, DepthPrepass};
@@ -145,7 +146,7 @@ pub fn keep_deferred_phases(
         return;
     }
 
-    for (camera, given, asked, reflecting) in &given {
+    for (camera, given, asked, reflecting, occluding) in &given {
         let mut camera = commands.entity(camera);
         camera.remove::<DeferredForMaterials>();
 
@@ -158,7 +159,9 @@ pub fn keep_deferred_phases(
         camera.remove::<DeferredPrepass>();
         camera.insert(given.msaa);
 
-        if given.depth && !asked.is_some_and(|asked| asked.0 & (1 | 32) != 0) {
+        // Ambient occlusion turned on while the depth was the G-buffer's found it there and brought
+        // none of its own, so it keeps it, where taking it would leave the occlusion out unsaid.
+        if given.depth && !asked.is_some_and(|asked| asked.0 & (1 | 32) != 0) && !occluding {
             camera.remove::<DepthPrepass>();
         }
     }

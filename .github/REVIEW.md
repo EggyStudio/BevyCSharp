@@ -1,6 +1,8 @@
 # Review
 
-Reviewed up to `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
+Reviewed up to `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
+2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
+files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
 2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
 files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
 on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
@@ -477,7 +479,35 @@ from [SHARED.md](SHARED.md).
     volumes reading Bevy's first image where it does not; no define, no new export, no ABI bump; a
     probe whose image lies past the first four keeps its weight in the blend but lends no light, its
     light left as Bevy gave it, said in the comment and RENDERING.md; the mirror itself Bevy's order
-    with the bridge's irradiance fallback mend.
+    with the bridge's irradiance fallback mend. The hall commit is `37aa4d31`, pushed at 07:59; the
+    light pass's header naming pbr_functions' order and the three public bindings, a test of a
+    closed bay with an irradiance volume and a reflection probe against a 256-path reference reading
+    -14.1 and -12.8% with the balance within 1.5% where the volume half read -47% and the probe
+    half's blue went negative, the limit of four images a kind stated in four places, the light pass
+    and the inputs split into files under N 1.3, and a mirror floor's traced reflection taking the
+    share the probes leave where it took none with no environment map; 1,992 in the suite. Under
+    global illumination the volume bay no longer shows its magenta since the probes' light stands in
+    for it, so the bay's purpose is kept by the drive reading it with GI off as well as on in the
+    next commit, the feature test's panel toggle its way. Next GI on by default with the fill off
+    and GI off for the drive on lavapipe through an environment value, then the aisle floor's -14%.
+    At 09:08 the soak takes the drive's GLOBAL_ILLUMINATION value, Off in the workflow, since on
+    lavapipe the hub's frame reads 3,006 ms with global illumination at Medium against 1,605
+    without, about 47% of the frame, and the soak's rounds are counted in frames so at twice the
+    frame it would miss its six readings by its cap; the memory 5.1 GB inside the 8 GB cap; the soak
+    step's comment saying global illumination's memory is not soaked there and why, the GPU drive
+    and the suite's cap covering it. The GPU drive at the new default, read at 09:41, finds two
+    faults before the default. A crash in the effects view with occlusion on, Bevy's occlusion
+    unwrapping the normals prepass that the engine's parts had removed through SetEnginePrepass, and
+    a second path where keep_deferred_phases removed the depth the G-buffer had brought so occlusion
+    went out silently; the mend keeps both prepasses while occlusion is on, in both places, with a
+    test of each path, a commit of its own. And forward-drawn surfaces near black under global
+    illumination, the meadow's grass, ground and leaves at Medium and Low, since the leaf material
+    is always forward and the light pass discards a pixel with an empty G-buffer, so forward
+    surfaces get no probe light and with the fill off their shade is the sky's alone; the mend
+    chosen is the larger one, a forward shader reading the cascades' gather at the surface as the
+    pass does, the leaves with their two normals and the grass, the fill staying off under global
+    illumination as Decision 74 set it, the dark red the leaves keep even with the fill read on the
+    way; then the default with the drive's and the soak's values.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -743,6 +773,14 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     The drawing is each engine's, Bevy's atmosphere, sky fog and clouds here in WGSL and 3DEngine's
     pass in Slang, since neither can be moved and nothing is gained by it. The owner made `Sky`
     under `Modules/` at 13:47 (its Decisions 1 to 6); a SHARED.md row added.
+
+76. **No one is named in a picture.** The owner wrote in the 3DEngine coder's session on 2026-11-03
+    before 08:05, seeing a reading sheet whose label called a reference picture theirs, that
+    pictures and comparisons must not mention the owner, as the rule for documents has it. So N 4.10
+    says a picture's labels, its file name and its captions line name no person and no session, a
+    picture the owner sent being a screenshot and their reference picture the reference; the engine
+    session relabelled the sheet, renamed the dump's files and reworded its captions back to
+    2026-10-31, and read the 59 comparison sheets' labels clean.
 
 ## Replies
 
@@ -1866,3 +1904,27 @@ lighting gave it, a reflection probe's diffuse light and an irradiance volume's,
 the camera's map alone read a reflection probe's bay 35 to 112% over its reference and an irradiance
 volume's bay crimson and 54% under. 3DEngine's reflection probes beside its cascades are to
 consider.
+
+Item 95's seventh commit, the occlusion's prepasses, in the commit carrying this line. The drive on
+the GPU at the new default of Medium ended the feature test at its effects view, which turns ambient
+occlusion on, Bevy panicking at ssao/mod.rs:731 as it unwrapped the camera's normal prepass. Bevy's
+ScreenSpaceAmbientOcclusion requires the depth and normal prepasses and brings them when it comes,
+and bcs_render_set_prepass took off each one its flags left out, so any part of the engine asking
+the camera for depth alone, global illumination's scene field, the clouds or the night sky among
+them, took the normals from under the occlusion. Materials going forward took the depth the G-buffer
+had brought, which an occlusion turned on meanwhile had found there and so brought none of its own,
+and Bevy then leaves the occlusion out with nothing said. Both keep the two prepasses while the
+camera's occlusion is on, which takes them with it as before.
+AmbientOcclusionPrepassTests.APrepassAskedForWithoutNormalsLeavesTheOcclusionItsNormals asks an
+occluded camera for depth alone and holds both prepasses on it, and
+MaterialsGoingForwardLeaveTheOcclusionTheDepthItFound turns deferred rendering on, the occlusion on
+and deferred rendering off and holds both, each failing on a bridge built without the mends, the
+first with the normals gone and the second with the depth. No picture comes with it, the view before
+it a program that ended, and the drive's effects view under global illumination comes with the
+default's pictures. The captions of the readings and the devlog and the dump's lines name no person
+and no session (N 4.10), the meadow's reading of 2026-10-31 saying 3DEngine's apps where it said
+their sessions' apps, and the dump's lines of 2026-10-31 and 11-01 saying a run where they said a
+session and the feature test where they said the owner. cargo check passed on headless, render and
+editor, and cargo test passed, 118 with no feature and 199 with render. The whole suite ran with it,
+1,994 passed and 3 skipped in 48 m 21 s at the 3 GB cap, none aborted, item 95's game work held
+aside. NormTests passed, 18. The public listing is unchanged.
