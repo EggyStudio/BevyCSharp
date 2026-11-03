@@ -40,9 +40,9 @@ public static partial class Render
     /// </para>
     /// <para>
     /// <see cref="GlobalIllumination.Low"/> traces two cascades of 64 directions a probe,
-    /// <see cref="GlobalIllumination.Medium"/> adds a third of 256, and
-    /// <see cref="GlobalIllumination.High"/> traces 64 then 256 in four, no more cascades than the
-    /// field has. A probe nearer a surface than a tenth of its spacing is moved off it, and one inside
+    /// <see cref="GlobalIllumination.Medium"/> four, 64 in the first two and 256 in the others, and
+    /// <see cref="GlobalIllumination.High"/> 64 then 256 in four, no more cascades than the field
+    /// has. A probe nearer a surface than a tenth of its spacing is moved off it, and one inside
     /// a mesh is passed over. The light the probes hold is in the units of the camera's picture, its
     /// exposure applied, and <c>gi.state</c> says what they hold and cost. Nothing is baked, so every
     /// light and mesh may move, a light switched off taking its indirect light with it the frame

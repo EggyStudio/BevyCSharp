@@ -21,7 +21,7 @@ public sealed partial class GlobalIlluminationTests
     public void EachQualityTracesItsCascadesAndDirections()
     {
         Assert.Equal([8, 8], WorldProbes.TexelsAt(GlobalIllumination.Low));
-        Assert.Equal([8, 8, 16], WorldProbes.TexelsAt(GlobalIllumination.Medium));
+        Assert.Equal([8, 8, 16, 16], WorldProbes.TexelsAt(GlobalIllumination.Medium));
         Assert.Equal([8, 16, 16, 16], WorldProbes.TexelsAt(GlobalIllumination.High));
         Assert.Empty(WorldProbes.TexelsAt(GlobalIllumination.Off));
 

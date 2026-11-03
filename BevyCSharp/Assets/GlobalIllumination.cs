@@ -12,7 +12,7 @@ public enum GlobalIllumination
     /// <summary>Two cascades of probes, 64 directions each, for a slow GPU.</summary>
     Low,
 
-    /// <summary>Three cascades, 64, 64 and 256 directions.</summary>
+    /// <summary>Four cascades, 64 directions in the first two and 256 in the two after.</summary>
     Medium,
 
     /// <summary>Four cascades, 64 directions in the first and 256 in each after.</summary>

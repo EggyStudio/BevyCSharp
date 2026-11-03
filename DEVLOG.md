@@ -15,6 +15,12 @@ white and its blue light 0.96 of its red where its path-traced reference reads 0
 right with the probes lit by the sun through the camera's air as Bevy lights the picture, the floor
 0.85.
 
+![](.github/assets/readings/2026-11-03-item-95-reach.webp)
+The feature test's scenes yard at eight in the morning under a clear sky with global illumination at
+Medium, on the left in three cascades of probes, the far wall in shade 58 units off lying past the
+last of them and lit by the sky alone, 42% under its path-traced reference, and on the right in four
+as High's, the wall lit by the sunlit wall and floor, 18% over as High reads it.
+
 Done that day
 
 ## 2026-11-02

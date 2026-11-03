@@ -114,7 +114,13 @@ internal static unsafe partial class WorldProbes
     internal static int[] TexelsAt(GlobalIllumination quality) => quality switch
     {
         GlobalIllumination.Low => [8, 8],
-        GlobalIllumination.Medium => [8, 8, 16],
+        // Medium's four cascades as High's, the fourth of 16 a side, since in three its probes lay
+        // in a box 64 units wide, 0.35 of its width ahead of the eye, which left the feature test's
+        // yard's far wall 58 units off along a diagonal view to the light past the probes, whose
+        // ground a cell in front of a face turned from a low sun lies in the face's own shadow, 42%
+        // under a path-traced reference at eight in the morning where High read 18% over. In four
+        // it reads as High's, at 0.15 ms more of the probes' time in a Cornell box.
+        GlobalIllumination.Medium => [8, 8, 16, 16],
         GlobalIllumination.High => [8, 16, 16, 16],
         _ => [],
     };

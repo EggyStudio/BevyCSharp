@@ -237,11 +237,16 @@ where the probe's share asks for it, since a barrier is reached by every invocat
 RTX 4070 Laptop GPU in the feature test's Cornell box, a cascade's trace takes 0.33 to 0.36 ms, its
 merge 0.04 to 0.10 and its gather 0.03, each the mean of a frame's dispatches of the program as
 `render.timings` gives it, so `Low`'s two cascades take about 0.9 ms and `High`'s four about 1.8,
-the sixteen lamps' marches from each hit among it. The light from all around a ray of the last
-cascade brings back is the ambient light's color and, where the camera has an environment map, the
-map's light along the ray's way, as 3DEngine reads its environment map. The probes are traced before
-the cameras draw, and the map is the camera's, so a dispatch on the camera copies it each frame onto
-an octahedron of 64 texels a side, blurred as a surface of a quarter roughness blurs it, times the
+the sixteen lamps' marches from each hit among it. `Medium` traces four cascades, as 3DEngine's
+`High` does, 8 texels a side in the first two and 16 in the others, since in three its probes
+lay in a box 64 units wide and 0.35 of its width ahead of the eye, which left the feature test's
+yard's far wall 58 units off along a diagonal view to the light past the probes, 42% under a
+path-traced reference at eight in the morning where `High` read 18% over, and the fourth cascade
+costs it 0.15 ms at the least in a Cornell box. The light from all around a ray of the last cascade
+brings back is the ambient light's color and, where the camera has an environment map, the map's
+light along the ray's way, as 3DEngine reads its environment map. The probes are traced before the
+cameras draw, and the map is the camera's, so a dispatch on the camera copies it each frame onto an
+octahedron of 64 texels a side, blurred as a surface of a quarter roughness blurs it, times the
 exposure (`gi_sky.slang`), and the probes read the frame before's.
 
 The light given to Bevy's surfaces is the third part (`gi_light.slang`), an engine draw after the
@@ -261,9 +266,9 @@ share Bevy's ambient term returns from a white surface facing the view (`F_AB(1,
 -0.0024), so an open floor reads as Bevy's own lighting leaves it, which a test holds, and a red
 wall's light tints a white block's side. The pass takes 0.23 ms at its least and 1.1 at its median
 over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take 0.9 ms at
-`Low`, 1.2 at `Medium` and 1.4 at `High`. In the feature test the pass's span reads no GPU time,
-where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
-`Render.SetGlobalIllumination` is public with it.
+`Low` and 1.4 at `High`, and as much at `Medium` in its four cascades. In the feature test the
+pass's span reads no GPU time, where Bevy keeps no more than 256 timestamps a frame, so the pass is
+timed in a scene of its own. `Render.SetGlobalIllumination` is public with it.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
