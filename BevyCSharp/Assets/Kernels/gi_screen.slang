@@ -379,12 +379,17 @@ void writeSeen(uint2 id, uint4 codes, int texel)
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
+    // The sun through the camera's air, as Bevy's lighting gives it the picture, where the lights
+    // give it as it is above the air, read before any thread returns, as the clouds read it.
+    GiLights lights = gi_lights[0];
+    if (lights.sunDirection.w > 0.5)
+        lights.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz);
+
     uint across, down;
     gi_screen_light.GetDimensions(across, down);
     if (id.x >= across || id.y >= down)
         return;
     FieldInfo info = scene_field_info[0];
-    GiLights lights = gi_lights[0];
     // The texel of the depth under the middle of the tile.
     float2 size = float2(passPictureSize());
     float2 middle = min((float2(id.xy) + 0.5) * screen.x, size - 0.5);

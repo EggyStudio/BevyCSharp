@@ -80,6 +80,10 @@ uniform float4 screen;
 // alone, its traced reflection fading out from half of it, as 3DEngine's GlossyRoughness.
 static const float GlossyRoughness = 0.5;
 
+// The most directional lights whose share of the ground's light is added past the probes, Bevy's
+// own most.
+static const uint MostSuns = 10u;
+
 [shader("vertex")]
 FullscreenOutput vertex(uint index : SV_VertexID)
 {
@@ -506,6 +510,16 @@ float3 glowLightsHere(FieldInfo info, float2 position, float3 p, float3 n, float
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
+    // The sun and each directional light through the camera's air, as Bevy's lighting gives them
+    // the picture, where the lights give the sun as it is above the air, read before any pixel is
+    // discarded, as the clouds read the air before any thread parts from the others.
+    GiLights lights = gi_lights[0];
+    if (lights.sunDirection.w > 0.5)
+        lights.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz);
+    float3 through[MostSuns];
+    for (uint i = 0u; i < min(passLights.n_directional_lights, MostSuns); i++)
+        through[i] = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
+
     FieldInfo info = scene_field_info[0];
     int2 pixel = int2(input.position.xy);
     float depth = passLoadDepth(pixel);
@@ -523,7 +537,6 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float NdotV = max(dot(n, V), 0.0001);
     float3 diffuse = surface.base_color * (1.0 - surface.metallic);
     float occlusion = surface.diffuse_occlusion;
-    GiLights lights = gi_lights[0];
 
     // How the surface's point moves from pixel to pixel, and the way it faces as the depth gives it,
     // which weigh the screen probes and the glow lights' texels around the pixel.
@@ -571,14 +584,14 @@ float4 fragment(FullscreenOutput input) : SV_Target
         {
             int c = fieldCoarsestBuilt(info, int(info.counts.x) - 1);
             float3 ground = world + n * (c < 0 ? 0.0 : info.cascades[c].origin_and_cell.w);
-            for (uint i = 0u; i < min(passLights.n_directional_lights, 10u); i++)
+            for (uint i = 0u; i < min(passLights.n_directional_lights, MostSuns); i++)
             {
                 DirectionalLight light = passLights.directional_lights[i];
                 float floor = saturate(light.direction_to_light.y);
                 if (floor <= 0.0)
                     continue;
                 float reached = passDirectionalShadow(i, ground, float3(0.0, 1.0, 0.0), passViewDepth(ground));
-                distant += diffuse * light.color.rgb / Pi * passView.exposure * floor * reached * below;
+                distant += diffuse * light.color.rgb * through[i] / Pi * passView.exposure * floor * reached * below;
             }
         }
     }

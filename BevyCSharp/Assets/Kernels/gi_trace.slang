@@ -40,6 +40,10 @@ Texture3D<uint> faces;
 // The light each cell's surfaces emit, as field_resolve.slang writes it beside the colors.
 Texture3D<float4> glow;
 StructuredBuffer<GiLights> lights;
+// The share of the sun's light the camera's air lets through toward it, as gi_sky.slang wrote it
+// on the camera the frame before, since the probes are traced before the cameras draw and have no
+// air of their own to read. One where no camera has written it.
+StructuredBuffer<float4> air;
 // The small emissive surfaces carried as lights of their own, as many as the lights' fourth count says.
 StructuredBuffer<GlowLight> glow_lights;
 
@@ -173,6 +177,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
 
     FieldInfo fieldInfo = info[0];
     GiLights lit = lights[0];
+    lit.sunColor.rgb *= air[0].rgb;
     float4 oc = probesOf(fieldInfo, int(interval.w)).cascades[c].origin_and_cell;
     float apart = oc.w * interval.z;
     float3 spot = oc.xyz + (float3(at) + 0.5) * apart;

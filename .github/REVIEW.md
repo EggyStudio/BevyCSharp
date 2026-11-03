@@ -1,6 +1,8 @@
 # Review
 
-Reviewed up to `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
+Reviewed up to `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
+2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
+files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
 with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three
 systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of the
 wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps
@@ -416,7 +418,15 @@ from [SHARED.md](SHARED.md).
     deferred every 3D camera keeps the G-buffer and its depth prepass, given back when they go
     forward. The busy hang, the read waiting as long as the console and nothing stepping the job
     once the console gave up, the job giving itself up 10 frames before the console's limit and
-    saying its stage. 1,987 in the suite, the bridge rebuilt.
+    saying its stage. 1,987 in the suite, the bridge rebuilt. The third commit is `04e6b0c5`, pushed
+    at 01:21, two more faults of the measure found reading the hall and the yard against the
+    corrected reference. Where the field lies around no camera the compare fell back to the world's
+    first 3D camera, there one drawing nothing, so the size was asked 147 times and never answered;
+    it takes the bridge's view camera from the scene counts, the active 3D one of the highest order,
+    and refuses where there is none, the failure saying how often it asked. A reference's image held
+    whatever its memory held and the kernel added to it, a second reference of 64 reading 128 and
+    the yard's 260 where 256 were asked; the first share stores and the later ones add, with a test
+    of two references in a row. 1,989 in the suite. The air commit follows.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -1680,3 +1690,32 @@ reads 256 paths and its read with global illumination off answers, the yard 0.22
 at Off, 0.153 at Medium and 0.122 at High. The whole suite ran with it, 1,989 passed and 3 skipped
 in 45 m 31 s at the 3 GB cap, none aborted, the next commit's work and item 95's game work held
 aside. NormTests passed, 18. The public listing is unchanged.
+
+Item 95's fourth commit, the probes' sun through the air, in the commit carrying this line. The
+bridge's lights give the sun as it is above the air, and the probes' rays, the screen's probes and
+the light pass lit their faces by it where Bevy dims and reddens it through the camera's air for the
+picture, and the pass's ground past the probes took each directional light from above the air too.
+The camera's sky copy reads Bevy's transmittance toward the sun before any thread returns and writes
+it for the probes' rays, traced the frame after with no air of their own, and the screen's probes
+and the light pass read it themselves at their start, each directional light's share of the ground
+dimmed with it.
+GlobalIlluminationTests.AWallInShadeTakesTheFloorsLightAsItsReferenceDoesUnderALowSun puts a white
+wall turned from a sun ten degrees up under the camera's air, lit by the white floor before it
+alone, and holds it within 30% of its reference's light and 15% of its blue over its red, reading
+9.8% under and the balance within 0.1%, where it read 152% over and its blue over its red 487% over.
+In the feature test at eight in the morning under a clear sky against the corrected reference, the
+yard lies 0.153 of its light from it at Medium and 0.122 at High where it lay 0.138 and 0.143, its
+sunlit floor 12% under where it read 2% over but its blue over its red 0.85 against the reference's
+0.80 where it read 0.96, the bounce from a sun above the air having stood in for light the probes
+miss, and its far wall in shade at High 18% over where it read 57% over. The hall, lit by its lamps,
+is unchanged, 0.327 at Medium and 0.320 at High. The far wall at Medium, 42% under, is the next
+commit, Medium's reach. The sunlit floor is warmer than it was, as the reference has it, which the
+owner's word on the morning sun may weigh. The yard's pair is 2026-11-03-item-95-air.webp. The whole
+suite ran with it, 1,990 passed and 3 skipped in 57 m 57 s at the 3 GB cap, none aborted, item 95's
+game work held aside. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the cascades' rays, the screen's probes and a light pass's ground past the probes light
+their faces by the sun through the camera's air, as the picture's lighting gives it, since a sun
+taken above the air read a wall in shade under a low sun at two and a half times its reference's
+light and near six times its blue over its red. 3DEngine's cascades and their sky of item 170 are to
+consider.

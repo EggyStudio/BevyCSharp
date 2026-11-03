@@ -6,6 +6,17 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-03
+
+![](.github/assets/readings/2026-11-03-item-95-air.webp)
+The feature test's scenes yard at eight in the morning under a clear sky with global illumination at
+Medium, on the left with the probes lit by the sun as it is above the air, the sunlit floor near
+white and its blue light 0.96 of its red where its path-traced reference reads 0.80, and on the
+right with the probes lit by the sun through the camera's air as Bevy lights the picture, the floor
+0.85.
+
+Done that day
+
 ## 2026-11-02
 
 ![](.github/assets/readings/2026-11-02-verdict-49-solari.webp)

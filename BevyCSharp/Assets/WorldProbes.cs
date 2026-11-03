@@ -88,7 +88,7 @@ internal static unsafe partial class WorldProbes
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
         public AssetHandle[] Radiance = [], Merged = [], Distances = [], Kept = [], MergedSky = [];
-        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, SkyMap, NoSky = AssetHandle.None;
+        public AssetHandle Cubes, Reach, Skies, Held, Partial, Lights, Glows, SkyMap, Air, NoSky = AssetHandle.None;
         public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
         // Whether the traces run the build that crosses surfaces letting light through.
         public bool Crossing = true;
@@ -227,9 +227,10 @@ internal static unsafe partial class WorldProbes
         }
 
         // The camera's environment map copied for the rays by a dispatch on the camera the field lies
-        // around, which the rays read the frame after.
+        // around, with the share of the sun's light the camera's air lets through, which the rays
+        // read the frame after.
         var camera = SceneField.ViewCamera;
-        _sky.SetTexture("sky_map", _made.SkyMap);
+        _sky.SetTexture("sky_map", _made.SkyMap).SetBuffer("gi_lights", _made.Lights).SetBuffer("gi_air", _made.Air);
         if (camera != _skyCamera)
         {
             if (!_skyCamera.IsNone)
@@ -291,6 +292,10 @@ internal static unsafe partial class WorldProbes
         made.Glows = Shaders.CreateBuffer(GlowLights.Most * GlowLights.Bytes);
         made.SkyMap = Shaders.CreateImage(SkySize, SkySize, ShaderImageFormat.Rgba16Float);
 
+        // The share of the sun's light the camera's air lets through, all of it until the camera's
+        // dispatch has written it, and where no camera does.
+        made.Air = Shaders.CreateBuffer<Vector4>([Vector4.One]);
+
         // The last cascade's merge reads no cascade above, and an image of nothing stands in for the
         // share of the sky above it, its own being the one it writes.
         made.NoSky = Shaders.CreateImage(1, 1, ShaderImageFormat.R16Float, 2);
@@ -309,7 +314,7 @@ internal static unsafe partial class WorldProbes
         }
         if (_made is not { } made) return;
         foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.Kept).Concat(made.MergedSky)
-                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.NoSky]))
+                     .Concat([made.Cubes, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.Air, made.NoSky]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -386,7 +391,7 @@ internal static unsafe partial class WorldProbes
             ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, 0];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", info)
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
-                .SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
+                .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("distances", made.Distances[c])
                 .SetTexture("kept", made.Kept[c]).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))
