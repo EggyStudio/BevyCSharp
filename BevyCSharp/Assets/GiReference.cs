@@ -68,7 +68,7 @@ internal static unsafe class GiReference
         public required bool Reference;
         public required Entity Camera;
         public string? Path;
-        public int Samples, Faces, Width, Height, Added, Frames, Steps;
+        public int Samples, Faces, Width, Height, Added, Frames, Steps, SizesAsked, SizesNone;
         public Stage Stage;
         public AssetHandle Size = AssetHandle.None, Picture = AssetHandle.None, Sums = AssetHandle.None, Regions = AssetHandle.None;
         public BufferRead? SizeRead, SumsRead, RegionsRead, PictureRead;
@@ -163,7 +163,7 @@ internal static unsafe class GiReference
         if (++job.Steps > (job.Reference ? job.Samples : 0) + (int)ConsoleHost.LaterFrames - GiveUpSooner)
             return Failed(job, job.Stage switch
             {
-                Stage.Sizing => "the picture's size was never read, its copy not compiling or the camera drawing nothing",
+                Stage.Sizing => $"the picture's size was never read, its copy not compiling or the camera drawing nothing, asked for {job.SizesAsked} times and answered as none {job.SizesNone}",
                 Stage.Copying => "the picture was never read back",
                 _ => "the reference was never read back",
             });
@@ -208,8 +208,15 @@ internal static unsafe class GiReference
     {
         var camera = SceneField.ViewCamera;
         if (!camera.IsNone && ecs.IsAlive(camera)) return camera;
-        var cameras = ecs.All<Camera3dRef>();
-        return cameras.Length > 0 ? cameras[0].Entity : Entity.None;
+
+        // Where the field lies around no camera, the camera the bridge takes for the view, the
+        // active 3D one of the highest order, as the field takes it. The world's first 3D camera
+        // was taken before, which in the feature test's yard was one drawing nothing, so a read
+        // with global illumination off asked for the picture's size until it gave up.
+        NativeSceneCounts counts = default;
+        if (Native.bcs_render_scene_counts(&counts) != NativeStatus.Ok || counts.Camera == 0) return Entity.None;
+        var view = new Entity(counts.Camera);
+        return ecs.IsAlive(view) && ecs.Get<Camera3dRef>(view) is not null ? view : Entity.None;
     }
 
     // Whether the state belongs to the running app, forgetting what belonged to an app before it,
@@ -294,13 +301,18 @@ internal static unsafe class GiReference
         if (job.SizeRead is null)
         {
             // The copy runs once its program has compiled, and its size is read a frame after.
-            if (job.Frames >= 3 && rays.Copy.Program.State == ShaderProgramState.Ready) job.SizeRead = Shaders.BeginBufferRead(job.Size);
+            if (job.Frames >= 3 && rays.Copy.Program.State == ShaderProgramState.Ready)
+            {
+                job.SizeRead = Shaders.BeginBufferRead(job.Size);
+                job.SizesAsked++;
+            }
             return null;
         }
 
         if (!Shaders.TryReadBuffer<uint>(job.SizeRead.Value, out var size) || size is null) return null;
         if (size[0] == 0 || size[1] == 0)
         {
+            job.SizesNone++;
             job.SizeRead = null;
             return null;
         }

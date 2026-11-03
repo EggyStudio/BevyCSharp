@@ -224,5 +224,8 @@ void main(uint3 id : SV_DispatchThreadID)
         float2 uv = (float2(id.xy) + float2(random(state), random(state))) / float2(width, height);
         sum += trace(given, passRayOrigin(uv), passRayDirection(uv), state);
     }
-    sums[id.xy] = sums[id.xy] + float4(sum, float(counts.x));
+    // The first share stores where the rest add, since an image is made holding whatever its memory
+    // held, and a reference traced after another started from the other's paths, 64 a pixel asked
+    // for reading 128 and the two lights averaged.
+    sums[id.xy] = (counts.y == 0u ? float4(0.0) : sums[id.xy]) + float4(sum, float(counts.x));
 }
