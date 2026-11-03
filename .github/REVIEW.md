@@ -1,24 +1,26 @@
 # Review
 
-Reviewed up to `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off,
-pushed at 16:24 on 2026-11-03, its run green at 16:48 on the three systems in 16 to 18 minutes; it
-keeps the form and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit,
-pushed at 15:28, its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form
-and carries the review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's
-occlusion commit, pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it
-keeps the form and carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit,
-Bevy's light probes taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three
-systems; it keeps the form and carries the review's files. Before it `43550f11`, 95's reach commit,
-Medium in four cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems;
-it keeps the form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at
-02:20 on 2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the
-review's files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at
-01:21 on 2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the
-review's files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and
-gi.compare with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the
-three systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of
-the wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it
-keeps the form and carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its
+Reviewed up to `f5505a58`, 95's glow-lights commit, pushed at 19:24 on 2026-11-03, its run green at
+19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
+Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off, pushed
+at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form and
+carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its
+run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
+review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
+pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
+carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
+taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
+form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
+cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
+form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
+2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
+files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
+2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
+files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
+with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three
+systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of the
+wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps
+the form and carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its
 `fbc385e`, pushed at 21:35 on 2026-11-02, its run green at 21:57 on the three systems, the first
 with the submodule checked out; it keeps the form and carries the review's files. Before it
 `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the three systems; it
@@ -627,7 +629,71 @@ from [SHARED.md](SHARED.md).
     inside its 8% as on the committed bridge; BounceRoomsTests and GlobalIlluminationTests ran 92 of
     92 on the far-point bridge, where the bridge with the groups alone ran 90 of 91, the
     light-through slab's Low 5.5 case ending at frame 1,200 still capturing there and passing at all
-    four settings with the far point.
+    four settings with the far point. The glow-lights commit is f5505a58, pushed at 19:24 on
+    2026-11-03, the far point without the estimate's cap; glowLightsAt groups the lights past the
+    marched ones into at most as many groups, each shadowed by a march to its brightest, a light one
+    point at its middle past 8 half-diagonals, the screen probes' faint lights in 4 groups, the
+    reach sqrt(surface over 0.004) relative to the light's own emission. Three tests, the
+    six-emitter room as its reference failing without either half, the one-emitter room keeping its
+    reading, the room of forty's cost printed; RENDERING.md with the room's line and the old reach's
+    exposure note. On the real bridge the six-emitter room -3.3 to +4.5%, the one-emitter room -4.0
+    to +6.3, the room of forty 3.6 ms on the GPU against 2.41 and 392 ms on lavapipe against 273,
+    the meadow within 1% of its picture; the suite 2,002, cargo test 118 and 199, NormTests 18; the
+    pair 2026-11-03-item-95-emitters.webp; the row marked taken. Next the aisle by its own cause,
+    the field at the arches first, then the visibility weights; a white corridor 40 m long read +1%
+    on its near walls, so nothing is lost down a long space. The aisle's cause narrowed at 19:45 to
+    the walls' thinness. By source, the aisle's shortfall is mostly the first west bay's three
+    shadowed coloured lamps' light reaching the aisle (all four of the panel and the coloured lamps
+    off, -2 to +6 and -11%); the probes' kept share, the lamps' handling in a closed room (+11 to
+    +28% against its reference) and field cells of 0.125 (darker still) are ruled out. A
+    reproduction of one bay and its stretch of aisle with the level's measures reads at Medium
+    against 256 paths the aisle floor -16.6% with 0.3 m walls as the level's and -5.2 with 0.6 m,
+    the arch's wall -17.6 against -6.9, the pier faces -45 and -38 either way; so the light falls
+    short where a wall is thinner than about two of the field's 0.25 m cells. The walls stay 0.3 m,
+    the level being content and the owner's, the reproduction the failing test within 10%. Read in
+    order from the engine's mends, the lamp march's start a cell and a half along the normal
+    crossing a 1.2-cell wall (the engine's 142 moved the sun hit's point a cell toward the light),
+    the field's hold of a thin wall about its middle with the hit's normal and albedo from the
+    triangles' side (docs lines 85 and 352), and probeSees at a thin wall judged through the field
+    (docs 198); the pier faces a separate reading. Read again at 21:00, the aisle's shortfall is a
+    probe cascade's far side lying on the hall's front wall behind the eye, not the walls' thinness.
+    In the hall at 8:00 Medium against each eye's own reference, the eye at z -26 (the drive's) has
+    cascades 0, 1 and 2 all ending at -24 on the front wall and reads the floor -14%; at -24.8
+    cascade 1 ends at -20 and the floor reads -2; at -24.9 cascade 1's far side moves back to -24
+    and the floor reads -14 again, the references within 1% (snap 8 cells, lead 0.35), Low and High
+    alike. The reproduction was confounded by two field faults of its own. At a thin wall's foot and
+    head field_splat records the wall's buried bottom or top face as the nearest face behind a cell
+    (0.27 away, 22 degrees off, inside the 25-degree rule) ahead of its far face, so the resolve's
+    thin-wall test fails and the cell keeps its plain +0.10, every column along the bay walls at
+    floor and ceiling level open in cascade 1 with rays passing under and over, the same where two
+    boxes abut; the mend tried, a face counting as behind a cell only where the cell lies straight
+    behind it, its nearest point within the face (0.999 where 0.9), closes every column, the
+    reproduction's bay walls from -7.9 to -1.6% on the floor, 118 field, GI and reference tests with
+    it; and in the shut hall it lets the sunlit level in and reads the hall two points darker at
+    every eye, the leak's removal. The three readings set earlier are not the cause, the lamp
+    march's start, the hit's normal flipped toward the ray (-16.6 to -15.6), probeSees. So the
+    field's foot-and-head mend as its own commit with its failing test (a closed room of thin walls
+    on a floor with a lamp outside, the floor inside near nothing), the hall's figures stated, the
+    engine taking it as its item 193; then the seam by its cause, its failing test the hall's view
+    moved 0.1 m either side of the seam within 10% of each other and of their references, and a box
+    with the eye placed so cascade 1's far side meets a wall behind it. The junction commit in its
+    suite at 21:31, its test the closed room of 0.3 m walls on a floor in 0.5 m cells between the
+    probes with a bright lamp outside, read by the world probes with the screen probes out, since
+    the screen probes carry two leaks of their own; the faces inside from 0.031, 0.039 and 0.030 to
+    under 0.0001 with the mend, held under 0.005. The screen probes' leaks, trialled and not in the
+    commit. The lamp march's clearance, hiddenLampLight marching from a cell and a half along the
+    normal and seesThrough skipping two more cells at the start, a meter in 0.5 m cells, so a lamp
+    beyond a wall that near the hit is never hidden; marching from the start with the clearance at
+    the lamp's end alone reads the room with the screen probes in 0.026, 0.073 and 0.000 where
+    0.164, 0.155 and 0.041, the bay reproduction unchanged, which goes as its own commit next with
+    that room as its failing test. And a screen probe's ray from a wall's foot starting half a cell
+    up in the junction and meeting the wall at once with its hit's normal pointing out through the
+    wall, the normal turned toward the ray's side taking the room to nothing but the closed bay 9%
+    over where 4, so not a mend as it stands, read with the seam. The seam confirmed in the
+    reproduction (eye at z 7 the floor -10.9%, at 7.3 +4.0) and in the hall with GI off reading
+    alike at both eyes, so the step follows the eye; in the bright state cascade 1 has a probe layer
+    at z -22 beyond the doorway seeing into the hall, in the dark state its last layer at -26
+    inside, the bright one matching the reference, so the dark state's dropped layer is read first.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -2216,3 +2282,57 @@ at a surface are taken in groups by their way from it, each shadowed by a march 
 since a reach set at a fiftieth of the picture's unit moved with the exposure and cut dim lights
 short and the rest left out took a room of six emitters 20 to 30% under its reference. 3DEngine's
 item 192 takes the same reading.
+
+Item 95's eleventh commit, the field's hold of a thin wall along its foot and its head, in the
+commit carrying this line. The aisle's cause is a seam and not the walls' thinness, read in the hall
+at 8:00 at Medium before the mend, each view against its own reference of 256 paths. From the
+scripted run's eye at z -26 the first three cascades of probes all end at the hall's front wall
+behind the eye, z -24, and the floor reads 14% under, the ceiling 14 and the walls facing +z, +x and
+-x 15, 20 and 26. From -24.8, the first cascade ending there and the second at -20, the floor reads
+2% under, the ceiling 2 and the walls 1, 2 and 7. From -24.9, 0.1 further in with the second
+cascade's far side back on the wall, they read 14, 14, 19, 16 and 21 again, the references a percent
+apart and the picture's floor 0.480 against 0.563. Shot in one run with global illumination off the
+two views read alike, 176.4 and 176.1 in their pixels' mean, and at Medium 145.5 and 136.1, so the
+step follows the eye. Low and High read as Medium at each eye.
+
+The reproduction's darkening was two faults of its own. Its front wall stood on the same seam. And
+at a thin wall's foot and head the splat took the wall's bottom or top face, buried against the
+floor or the ceiling, as the face behind the cells there, its edge 22 degrees off straight back and
+within the 25 degrees taken, nearer than its far face, so the resolve found no face behind them
+looking against the one before and those cells kept the distance in front. Every column along the
+bay's walls at the floor's and the ceiling's level was open in the second cascade's cells of 0.5,
+and the probes' rays passed under and over the walls. None of the three readings is the cause.
+Hiding no lamp at all from the probes' hits raised every variant alike by about 0.04 and left the
+thin walls' gaps, the hit's normal turned toward the ray moved the floor from 16.6 to 15.6% under,
+and dropping every probe behind a surface's plane in the pass moved nothing at the third decimal.
+
+The splat takes a face as behind a cell only where the cell lies straight behind it, its nearest
+point inside the face and not on an edge, which closes every open column, the reproduction's bay
+walls reading its floor 1.6% under where 7.9.
+GlobalIlluminationTests.ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls holds a closed room of
+walls 0.3 thick standing on a floor in cells of 0.5, a bright lamp outside it and the screen probes
+left out, under 0.005 on every face as its reference reads nothing, reading 0.0001 at most where
+without the mend it reads 0.03 to 0.04. With the screen probes in, the room reads 0.04 to 0.16 with
+the mend and 0.14 to 0.23 without, two leaks of theirs. The march toward a lamp from a hit starts
+two cells past its point a cell and a half off the surface, a meter in these cells, so a lamp beyond
+a wall that near the hit is never hidden. And a screen probe's ray from the floor at a wall's foot
+meets the wall at once, its hit's normal from the field's slope pointing out through the wall toward
+the lamp. The march looking from its point takes the room to 0.07 at most, and the normal turned
+toward the ray as well to nothing, but that reads the bay's reproduction 9% over where 4, so both
+are read with the seam.
+
+In the shut hall the leak let the sunlit level in, so the hall reads about two points darker with
+the mend. From the scripted run's eye at Low the floor reads 16% under where 13, the ceiling 17
+where 13 and the walls 21, 22 and 26 where 22, 18 and 22. At Medium they read 16, 17, 14, 23 and 28
+where 14, 14, 15, 20 and 26, and at High 15, 16, 13, 22 and 27 where 13, 14, 14, 20 and 25. From
+-24.8 and -24.9 at Medium the floor reads 4 and 16% under where 2 and 14. The scene field's, global
+illumination's, the bounce rooms', the reference's and the glow lights' tests passed with the mend,
+118, before the room's test was written. The whole suite ran with it, 2,003 passed and 3 skipped in
+43 m 23 s at the 3 GB cap, none aborted. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the field takes a face as lying behind a cell, for a wall thinner than a cell, only where
+the cell lies straight behind it and not past its edge, since within 25 degrees a wall's bottom face
+buried against a floor hid its far face from the cells along its foot, which then held nothing, and
+a lamp outside a closed room of walls 0.3 thick in cells of 0.5 lit its faces 0.03 to 0.04 where its
+reference reads nothing. 3DEngine's item 193 takes the same mend, its field_splat's rule at line
+386.

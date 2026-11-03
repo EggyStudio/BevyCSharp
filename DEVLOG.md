@@ -50,6 +50,14 @@ of the lights at a surface the brightest few alone taken, the room 20 to 30% und
 reference, and on the right with each light reaching as far as its size gives it and the rest taken
 in groups by their way, the room within 5% of its reference.
 
+![](.github/assets/readings/2026-11-03-item-95-thin-room.webp)
+A closed room of walls 0.3 thick standing on a floor, in field cells of 0.5, a bright lamp outside
+its east wall, at Medium with the screen probes left out, on the left with the field taking a wall's
+bottom face, buried against the floor, as the face behind the cells along its foot, so those cells
+held nothing and the probes' rays brought the lamp's light under the walls, the room's faces gray
+where its path-traced reference is black, and on the right with a face taken as behind a cell only
+where the cell lies straight behind it, the room dark as its reference.
+
 Done that day
 
 ## 2026-11-02

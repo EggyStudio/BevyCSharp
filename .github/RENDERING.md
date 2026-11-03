@@ -214,7 +214,11 @@ thinner than a cell to the cells within a cell of it, times the share of a cell'
 which the resolve writes into an image of light laid out as the field, as 3DEngine's do. After the
 counted cascades the program may ask for a far cascade (`farCascade`), its cells as wide as reaching
 that distance ahead of the camera takes, held to the camera's far plane, which the bridge's gather
-reads from its projection.
+reads from its projection. The splat departs from 3DEngine's in one rule, taking a face as lying
+behind a cell, for a wall thinner than a cell, only where the cell lies straight behind the face
+itself and not past its edge, since within 3DEngine's 25 degrees a wall's bottom face buried against
+a floor hid its far face from the cells along its foot, which then held nothing, and a probe's ray
+passed under the wall (`ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls`).
 
 The cascades of probes are the second (`WorldProbes`, `bcs_gi.slang` and the kernels
 `gi_trace.slang`, `gi_merge.slang` and `gi_ambient.slang`), 3DEngine's world probes with their mends

@@ -235,10 +235,10 @@ least. A build of more goes on over the frames after, its cascade read as it was
 the build ends and the meshes not yet built in stamped as their boxes meanwhile, so hundreds of
 meshes streamed in at once, on a teleport or a first load, are built over several frames rather than
 stalling one. A closed wall thinner than a cell, or a mesh drawn with both its faces, is held half a
-cell thick on either side of its middle, so a ray between the cells on either side of it still meets
-it, and a tunnel one cell wide stays open along its middle. Two blocks that meet along an edge
-alone, as a wall's halves stepped a block apart, hold the cells about the edge inside, so no light
-passes between them.
+cell thick on either side of its middle, along its foot on a floor and its head under a ceiling as
+along the rest of it, so a ray between the cells on either side of it still meets it, and a tunnel
+one cell wide stays open along its middle. Two blocks that meet along an edge alone, as a wall's
+halves stepped a block apart, hold the cells about the edge inside, so no light passes between them.
 
 The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
 a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer
