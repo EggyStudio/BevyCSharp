@@ -1,7 +1,9 @@
 # Review
 
-Reviewed up to `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39 on
-the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
+Reviewed up to `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
+2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
+files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
+on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
 third commit, two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43
 on the three systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's
 second commit, the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on
@@ -438,7 +440,44 @@ from [SHARED.md](SHARED.md).
     where 2% over with its blue over red 0.85 against the reference's 0.80, the shaded far wall at
     High 18% over where 57, the hall unchanged, the far wall at Medium still 42% under, the reach;
     the sunlit floor warmer as the reference has it, which bears on the owner's word on the morning
-    sun; 1,990 in the suite. Next Medium's reach on the far wall, the coverage lead first.
+    sun; 1,990 in the suite. Next Medium's reach on the far wall, the coverage lead first. The reach
+    commit is `43550f11`, pushed at 04:16; Medium traces four cascades, 8, 8, 16 and 16 as
+    3DEngine's High, since the yard's far wall at x 104 stood at or past the side of Medium's last
+    64-unit box lying 0.35 of its width ahead of the eye, and past the probes the pass used its sky
+    over a ground whose point a coarsest cell before the wall lay in the wall's own shadow at 8:00,
+    so the wall got sky alone; three cascades in other shapes, more march steps and longer last rays
+    left it dark; 0.15 ms more of the probes' time at the least and 6.9 MB where 4.2; a test of a
+    yard's far walls 56 units off under a sun 20 degrees up within 0.139 of the reference where
+    three cascades read -0.881; the feature test's yard at 0.119 where 0.153 with the far wall +18%
+    where -42%, the hall 0.308; 1,991 in the suite. Next the hall, its yellow wall at -4% in runs
+    started with GI on where +44% in runs started with it off, standing in the reflection-probe bay
+    whose probe is captured once while the light pass takes back only the camera's environment
+    diffuse and never a light probe's, and the crimson first bay the irradiance-volume bay with its
+    texels magenta toward the door, so the hall commit starts from GI's take-back of Bevy's light
+    probes' diffuse. The hall read at 04:33, the take-back the cause. At Medium against references
+    at 8:00 the probe bay's orange wall reads +58% and the yellow +35% in a run started at Medium
+    and +112 and +86 in one started with GI off since the probe captures the bay once, the volume
+    bay's wall facing +z 0.435, 0.009 and 0.136 against 0.316, 0.220 and 0.180, the crimson, its
+    ceiling -82%, and some metal faces negative in blue from the specular take-back; with both light
+    probes left out the bays come within 12% of their references. Bevy takes diffuse from a
+    lightmap, else from irradiance volumes, else from the reflection probes blended by weight with
+    the view's map filling the rest, plus the ambient, and with any volume visible marks the diffuse
+    found across the whole picture, while gi_light takes back the ambient and the view's map alone.
+    The call is to take the light probes back exactly, the bridge binding Bevy's per-view light
+    probes into the pass, the pass mirroring pbr_functions' choice and taking all of it back, the
+    probes' specular share left as Bevy gave it, the pass's comment naming the order and the three
+    public bindings for a bump past 0.20, a test of a bay with a reflection probe and an irradiance
+    volume against a reference failing without the mend; the volumes held back from the view while
+    GI is on as the fallback if the mirroring proves brittle; the aisle's floor at -15% separate,
+    read after. At 05:23 the take-back's form, since wgpu refuses a binding array beside a
+    dynamically offset buffer or any uniform in one group and Bevy keeps its arrays in a group of
+    their own. The inputs hold Bevy's light probes buffer at the view's offset and the first four
+    reflection probes' diffuse cubes and the first four irradiance volumes' images by Bevy's binding
+    index as single textures, a flag saying whether Bevy reads its reflection probes at all, the
+    volumes reading Bevy's first image where it does not; no define, no new export, no ABI bump; a
+    probe whose image lies past the first four keeps its weight in the blend but lends no light, its
+    light left as Bevy gave it, said in the comment and RENDERING.md; the mirror itself Bevy's order
+    with the bridge's irradiance fallback mend.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -452,7 +491,18 @@ from [SHARED.md](SHARED.md).
     2026-11-02, a dotted seam drawn at High along the base of the feature test's yard wall under
     global illumination; the cause read, the probes' reach or the screen's trace at a wall's foot,
     and mended, read by the base against the reference and the walled map's other feet. One commit,
-    after 95, unless its cause falls out of 95's third commit.
+    after 95, unless its cause falls out of 95's third commit. A reading from 95's reach commit on
+    2026-11-03, the seam showing at Medium in four cascades as at High, so it is the fourth
+    cascade's.
+
+98. **The ground past the probes lies in a face's own shadow at a low sun.** From 95's reach commit
+    on 2026-11-03. Past the probes the light pass lights a surface by its sky over a distant ground,
+    and the ground's point a coarsest cell in front of a wall lies in the wall's own shadow at a low
+    sun, so the wall takes sky alone and reads blue and dark, which Low and any surface past the
+    field still meet after Medium's fourth cascade. The cause named as the ground point's place and
+    its shadow test, then the mend, the ground's light taken from a point the sun reaches or from
+    the sky's share the field holds there, read by a far wall at Low under a sun 20 degrees up
+    against its reference and by the feature test's yard at Low. One commit, after 97.
 
 ## Verdicts
 
@@ -1764,3 +1814,55 @@ eye, left a yard's far wall 58 units off along a diagonal view to the sky over a
 probes, 42% under its reference at a low sun, for 0.15 ms more of the probes' time. 3DEngine's
 Medium of three cascades is to consider, and its sky over a ground, whose ground a cell in front of
 a face turned from a low sun lies in the face's own shadow.
+
+Item 95's sixth commit, Bevy's light probes taken back, in the commit carrying this line. The pass
+took back the light Bevy's ambient term and the camera's environment map gave a surface, and Bevy's
+light probes gave light of their own it never took back. In the light hall's reflection probe's bay
+the probe's light stood beside global illumination's, its orange and yellow walls 58 and 35% over
+their reference at Medium, and 112 and 86% over where the app started with global illumination off,
+since the probe captures its bay once, which put the yellow wall in the aisle's view at 48% over. In
+its irradiance volume's bay Bevy gave the volume's light and no map's diffuse light, the bridge's
+mend of its fallback leaving the map to a surface no volume holds, and the pass took the map's light
+from walls that never had it, the bay crimson and blue with a black ceiling, its back wall 54% under
+and its ceiling 82% under. With both light probes left out in a trial the bays read within 12% of
+their references. The pass takes back what Bevy's lighting gives in the order of bevy_pbr 0.20's
+pbr_functions with the mend, an irradiance volume's light where one holds the surface and elsewhere
+the reflection probes' diffuse light blended with the camera's map by their falloff, and the
+reflection of the camera's map and the traced one in the share of the blend the reflection probes
+leave, all of it where none holds the surface, a reflection probe's left as Bevy gave it. bcs_pass
+reads them in a part of its own, bcs_pass_probes.slang, with passEnvironmentAround and
+passIrradianceVolumesAround for any pass, through LightProbesBuffer at the view's
+ViewLightProbesUniformOffset and RenderViewLightProbes' binding_index_to_textures, which the bridge
+binds among a pass's inputs (views/light_probes.rs), the first four images of each kind as textures
+of their own, since wgpu refuses a group binding an array of images beside a uniform buffer, and the
+scene's information says whether Bevy reads its reflection probes at all. A probe whose image lies
+past the first four keeps its share of the blend and its light is left as Bevy gave it, and the
+pass's comment names pbr_functions' order and the three bindings for a Bevy past 0.20.
+GlobalIlluminationTests.TheLightBevysLightProbesGaveIsTakenBackAsTheyGaveIt closes a room lit by a
+lamp under a camera with a blue environment map, a magenta irradiance volume over its back wall's
+left half and a warm reflection probe over its right half with a chrome block in it, and holds each
+half within 30% of its reference's light and 15% of its blue over its red and the chrome's blue at
+none or more. It reads the halves 14.1 and 12.8% under with their balance within 1.5% and the
+chrome's faces 0.27 to 0.28 blue a pixel, where the volume's half read 47% under at 3083, 1458 and
+133 against 2946 each, the probe's half 4275, 2480 and -203 against 2552 each, and the chrome's
+faces -1.29, -1.11 and -0.40. In the feature test at Medium the probe's bay lies 0.218 of its light
+from its reference where 0.375, its walls 16 and 13% over, and 0.260 started with global
+illumination off where 0.649, its walls 18 and 15% over, the rest the probe's captured reflection,
+which differs as the capture did. The volume's bay lies 0.264 where 0.401, its walls and ceiling 9
+to 12% under, the trial's readings, and the yellow wall in the aisle's view reads 4 and 6% under.
+Under global illumination the volume's bay shows no sign of its volume, the probes' light standing
+in for it, which the hall's purpose for the bay may weigh once global illumination is on by default.
+The aisle's floor at 14% under is the matter after. The light pass and the views' inputs went past
+800 lines with it, and their light probes' parts are files of their own (N 1.3).
+AMirrorFloorReflectsARedWallStandingOnIt caught the traced reflection given in the camera's map's
+share alone, none under a camera with no map, and it is given in the share the probes leave. cargo
+check passed on headless, render and editor, and cargo test passed, 118 with no feature and 199 with
+render. The bay's pair is 2026-11-03-item-95-probes.webp. The whole suite ran with it, 1,992 passed
+and 3 skipped in 47 m 51 s at the 3 GB cap, none aborted, item 95's game work held aside. NormTests
+passed, 18. The public listing is unchanged.
+
+Shared: global illumination's pass takes back the light the engine's own light probes gave as its
+lighting gave it, a reflection probe's diffuse light and an irradiance volume's, since taking back
+the camera's map alone read a reflection probe's bay 35 to 112% over its reference and an irradiance
+volume's bay crimson and 54% under. 3DEngine's reflection probes beside its cascades are to
+consider.

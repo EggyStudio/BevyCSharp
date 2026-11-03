@@ -27,7 +27,7 @@ pub(super) fn run_view_draw_shadows(
         Option<&bevy::pbr::ViewLightEntities>,
         Option<&ViewPrepassTextures>,
         Option<&PreviousViewUniformOffset>,
-        (Option<&ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>),
+        (Option<&ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>, Option<&super::ViewLightProbeTextures>),
     )>,
     light_views: Query<(&bevy::pbr::ShadowView, &ViewUniformOffset)>,
     inputs: Res<ViewInputs>,
@@ -41,7 +41,7 @@ pub(super) fn run_view_draw_shadows(
 ) {
     use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
 
-    let (prepared, lights, prepass, previous, (environment, atmosphere, atmosphere_textures)) = view.into_inner();
+    let (prepared, lights, prepass, previous, (environment, atmosphere, atmosphere_textures, light_probes)) = view.into_inner();
 
     if !prepared.0.iter().any(|draw| draw.shadow_pipeline.is_some()) {
         return;
@@ -60,6 +60,7 @@ pub(super) fn run_view_draw_shadows(
         previous_uniforms.as_deref().zip(previous),
         environment,
         super::inputs::ViewAtmosphere::of(atmosphere, atmosphere_textures),
+        light_probes,
     );
 
     for light in &lights.lights {
@@ -136,7 +137,7 @@ pub(super) fn run_shared_draw_shadows(
         return;
     };
 
-    let sources = ViewInputSources::gather(&inputs, &fallback, None, None, None, None);
+    let sources = ViewInputSources::gather(&inputs, &fallback, None, None, None, None, None);
 
     let Some((group, offsets)) = sources.bind(
         ctx.render_device(),

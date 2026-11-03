@@ -62,6 +62,10 @@ pub const PASS_PRELUDE: &str = include_str!("bcs_pass.slang");
 /// `bcs_pass.slang` includes.
 pub const PASS_DEFERRED: &str = include_str!("bcs_pass_deferred.slang");
 
+/// The part of the pass module about Bevy's light probes as its lighting reads them, which
+/// `bcs_pass.slang` includes.
+pub const PASS_PROBES: &str = include_str!("bcs_pass_probes.slang");
+
 /// What a Slang compute shader can import as `bcs_compute`.
 pub const COMPUTE_PRELUDE: &str = include_str!("bcs_compute.slang");
 
@@ -86,13 +90,14 @@ pub const GI_PRELUDE: &str = include_str!("bcs_gi.slang");
 pub const GLOW_PRELUDE: &str = include_str!("bcs_glow.slang");
 
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 12] = [
+const MODULES: [(&str, &str); 13] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
     ("bcs_sprite.slang", SPRITE_PRELUDE),
     ("bcs_pass.slang", PASS_PRELUDE),
     ("bcs_pass_deferred.slang", PASS_DEFERRED),
+    ("bcs_pass_probes.slang", PASS_PROBES),
     ("bcs_compute.slang", COMPUTE_PRELUDE),
     ("bcs_scene.slang", SCENE_PRELUDE),
     ("bcs_ray.slang", RAY_PRELUDE),

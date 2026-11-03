@@ -214,10 +214,18 @@ exactly as Bevy's own sky and lighting use the same map. Under one of Bevy's atm
 `passAtmosphereTransmittance(world, direction)` is the share of light the air lets through from a
 point to the top of the sky along a way, red at a low sun and none where the planet stands in the
 way, which is how Bevy dims a directional light, and one everywhere when `passHasAtmosphere()` is
-false. And `passBlueNoise(pixel)` is Bevy's spatio-temporal blue noise for this frame, four numbers
-from zero to one whose values are spread evenly across the picture and from frame to frame. A
-technique taking a few random samples a pixel picks them with it, so its noise blurs away rather
-than blotching.
+false. Bevy's light probes the camera sees are there as its lighting reads them, `passLightProbes`
+with each reflection probe's and irradiance volume's box, falloff and intensity, nearest first, and
+the first four of their images by each probe's `cubemap_index`, in `passLightProbeDiffuseMap0` to
+`passLightProbeDiffuseMap3` and `passIrradianceVolume0` to `passIrradianceVolume3`, while
+`passLightProbeArrays()` says whether Bevy reads its reflection probes at all, which it does where
+the device binds arrays of images. `passEnvironmentAround(world, normal, out share)` is the diffuse
+light Bevy's environment maps give a surface there, its reflection probes' blended with the camera's
+map, with the share of the blend the probes leave, and `passIrradianceVolumesAround(world, normal,
+out held)` its irradiance volumes', with whether any holds the point. And `passBlueNoise(pixel)` is
+Bevy's spatio-temporal blue noise for this frame, four numbers from zero to one whose values are
+spread evenly across the picture and from frame to frame. A technique taking a few random samples a
+pixel picks them with it, so its noise blurs away rather than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a

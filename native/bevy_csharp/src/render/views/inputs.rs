@@ -11,7 +11,7 @@ use bevy::ecs::query::With;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::system::{Commands, Query, Res, ResMut, SystemParam};
 use bevy::pbr::{
-    GlobalClusterableObjectMeta, GpuClusteredLight, GpuLights, LightMeta, ShadowSamplers,
+    GlobalClusterableObjectMeta, GpuClusteredLight, GpuLights, LightMeta, LightProbesBuffer, ShadowSamplers,
     ViewLightsUniformOffset, ViewShadowBindings,
 };
 use bevy::render::globals::GlobalsUniform;
@@ -26,6 +26,9 @@ use bevy::render::render_resource::{
 use bevy::render::renderer::RenderDevice;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::view::ViewUniform;
+
+use super::light_probes::{self, ViewLightProbeTextures};
+
 
 /// The group every shader running on a camera reads as its second, and what stands in for what a
 /// camera does not draw.
@@ -54,6 +57,15 @@ pub struct ViewInputs {
     empty_blue_noise: TextureView,
     /// Bound where a camera has no atmosphere, which a shader tells by `passHasAtmosphere`.
     empty_transmittance: TextureView,
+    /// Whether Bevy's lighting reads its reflection probes and more than one irradiance volume,
+    /// which it does where the device binds arrays of images (`light_probe_arrays`), and which a
+    /// shader taking back the light Bevy gave reads out of the scene's information.
+    arrays: bool,
+    /// Bevy's light probes' uniform for a camera that has none, no reflection probe and no
+    /// irradiance volume.
+    empty_light_probes: Buffer,
+    /// Black everywhere, for an irradiance volume a camera does not have.
+    empty_volume: TextureView,
 }
 
 /// Finds Bevy's blue noise on the GPU once, for every shader on a camera to read.
@@ -157,6 +169,7 @@ pub struct SceneLights<'w> {
     meta: Option<Res<'w, LightMeta>>,
     clustered: Option<Res<'w, GlobalClusterableObjectMeta>>,
     samplers: Option<Res<'w, ShadowSamplers>>,
+    light_probes: Option<Res<'w, LightProbesBuffer>>,
 }
 
 /// One view's part of the scene's lights.
@@ -196,7 +209,9 @@ pub(super) fn init_inputs(
         multisampled: false,
     };
 
-    let entries = [
+    let arrays = light_probes::light_probe_arrays(&render_device);
+
+    let mut entries = vec![
         entry(0, float(true)),
         entry(1, BindingType::Sampler(SamplerBindingType::Filtering)),
         entry(
@@ -295,6 +310,9 @@ pub(super) fn init_inputs(
         ),
     ];
 
+    // Bevy's light probes, its uniform and its images after it.
+    entries.extend(light_probes::layout_entries(&entry));
+
     let texture = |label: &'static str, format: TextureFormat| {
         render_device
             .create_texture(&TextureDescriptor {
@@ -344,6 +362,8 @@ pub(super) fn init_inputs(
             mapped_at_creation: false,
         })
     };
+
+    let (empty_light_probes, empty_volume) = light_probes::stand_ins(&render_device);
 
     commands.insert_resource(ViewInputs {
         layout: BindGroupLayoutDescriptor::new("bcs_view_inputs", &entries),
@@ -405,6 +425,9 @@ pub(super) fn init_inputs(
         // Gray, a half everywhere, the average of noise, so a shader running before the real one
         // arrives gets no pattern rather than a wrong one.
         empty_transmittance: texture("bcs_view_empty_transmittance", TextureFormat::Rgba16Float),
+        arrays,
+        empty_light_probes,
+        empty_volume,
         empty_blue_noise: {
             let texture = render_device.create_texture_with_data(
                 &bevy::render::renderer::RenderQueue::clone(&queue),
@@ -450,6 +473,7 @@ pub struct ViewInputSources<'a> {
     pub previous: Option<(&'a PreviousViewUniforms, u32)>,
     pub environment: Option<&'a ViewEnvironmentTextures>,
     pub atmosphere: Option<ViewAtmosphere<'a>>,
+    pub light_probes: Option<&'a ViewLightProbeTextures>,
 }
 
 /// What a camera under one of Bevy's atmospheres hands its shaders of it, the planet's radius and
@@ -480,9 +504,11 @@ impl<'a> ViewAtmosphere<'a> {
 }
 
 /// The size of what binding thirteen holds, counts of the scene's lights, the environment's
-/// intensity, rotation and mip count, which prepass textures are the camera's own, and the planet's
-/// and the atmosphere's radii and the turn into the atmosphere's space, which `SceneInfo` mirrors.
-const SCENE_INFO_BYTES: u64 = 112;
+/// intensity, rotation and mip count, which prepass textures are the camera's own, the planet's and
+/// the atmosphere's radii and the turn into the atmosphere's space, and whether Bevy's lighting
+/// reads its reflection probes, which `SceneInfo` mirrors.
+const SCENE_INFO_BYTES: u64 = 128;
+
 
 impl<'a> ViewInputSources<'a> {
     /// Collects a view's prepass textures, with a stand-in for each it does not have.
@@ -493,6 +519,7 @@ impl<'a> ViewInputSources<'a> {
         previous: Option<(&'a PreviousViewUniforms, &PreviousViewUniformOffset)>,
         environment: Option<&'a ViewEnvironmentTextures>,
         atmosphere: Option<ViewAtmosphere<'a>>,
+        light_probes: Option<&'a ViewLightProbeTextures>,
     ) -> Self {
         // Only a texture drawn once a pixel can be bound as a plain texture. A multisampled
         // camera's prepass draws several samples a pixel, and it is left out rather than failing
@@ -524,6 +551,7 @@ impl<'a> ViewInputSources<'a> {
             previous: previous.map(|(uniforms, offset)| (uniforms, offset.offset)),
             environment,
             atmosphere,
+            light_probes,
         }
     }
 
@@ -578,7 +606,7 @@ impl<'a> ViewInputSources<'a> {
             (environment.mips, environment.intensity, environment.inverse_rotation)
         });
 
-        let mut info = [0u32; 28];
+        let mut info = [0u32; 32];
         info[0] = point_lights;
         info[1] = mips;
         info[2] = intensity.to_bits();
@@ -592,6 +620,8 @@ impl<'a> ViewInputSources<'a> {
             info[10] = 1.0f32.to_bits();
             info[12..28].copy_from_slice(&atmosphere.world_to_atmosphere.to_cols_array().map(f32::to_bits));
         }
+        // Whether Bevy's lighting reads its reflection probes and more than one volume.
+        info[28] = u32::from(inputs.arrays);
 
         let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {
             label: Some("bcs_view_scene_info"),
@@ -617,88 +647,93 @@ impl<'a> ViewInputSources<'a> {
             .as_deref()
             .map_or(&inputs.comparison, |samplers| &samplers.directional_light_comparison_sampler);
 
-        let group = device.create_bind_group(
-            "bcs_view_inputs",
-            &cache.get_bind_group_layout(&inputs.layout),
-            &[
-                BindGroupEntry {
-                    binding: 0,
-                    resource: BindingResource::TextureView(picture),
-                },
-                BindGroupEntry {
-                    binding: 1,
-                    resource: BindingResource::Sampler(&inputs.sampler),
-                },
-                BindGroupEntry {
-                    binding: 2,
-                    resource: globals,
-                },
-                BindGroupEntry {
-                    binding: 3,
-                    resource: view,
-                },
-                BindGroupEntry {
-                    binding: 4,
-                    resource: BindingResource::TextureView(&self.depth),
-                },
-                BindGroupEntry {
-                    binding: 5,
-                    resource: BindingResource::TextureView(&self.normals),
-                },
-                BindGroupEntry {
-                    binding: 6,
-                    resource: BindingResource::TextureView(&self.motion),
-                },
-                BindGroupEntry {
-                    binding: 7,
-                    resource: previous,
-                },
-                BindGroupEntry {
-                    binding: 8,
-                    resource: light_binding,
-                },
-                BindGroupEntry {
-                    binding: 9,
-                    resource: clustered,
-                },
-                BindGroupEntry {
-                    binding: 10,
-                    resource: BindingResource::TextureView(directional_shadows),
-                },
-                BindGroupEntry {
-                    binding: 11,
-                    resource: BindingResource::TextureView(point_shadows),
-                },
-                BindGroupEntry {
-                    binding: 12,
-                    resource: BindingResource::Sampler(comparison),
-                },
-                BindGroupEntry {
-                    binding: 13,
-                    resource: counts.as_entire_binding(),
-                },
-                BindGroupEntry {
-                    binding: 14,
-                    resource: BindingResource::TextureView(environment_diffuse),
-                },
-                BindGroupEntry {
-                    binding: 15,
-                    resource: BindingResource::TextureView(environment_specular),
-                },
-                BindGroupEntry {
-                    binding: 16,
-                    resource: BindingResource::TextureView(
-                        inputs.blue_noise.as_ref().unwrap_or(&inputs.empty_blue_noise),
-                    ),
-                },
-                BindGroupEntry {
-                    binding: 17,
-                    resource: BindingResource::TextureView(
-                        self.atmosphere.as_ref().map_or(&inputs.empty_transmittance, |atmosphere| atmosphere.transmittance),
-                    ),
-                },
-            ],
-        );
+        let mut entries = vec![
+            BindGroupEntry {
+                binding: 0,
+                resource: BindingResource::TextureView(picture),
+            },
+            BindGroupEntry {
+                binding: 1,
+                resource: BindingResource::Sampler(&inputs.sampler),
+            },
+            BindGroupEntry {
+                binding: 2,
+                resource: globals,
+            },
+            BindGroupEntry {
+                binding: 3,
+                resource: view,
+            },
+            BindGroupEntry {
+                binding: 4,
+                resource: BindingResource::TextureView(&self.depth),
+            },
+            BindGroupEntry {
+                binding: 5,
+                resource: BindingResource::TextureView(&self.normals),
+            },
+            BindGroupEntry {
+                binding: 6,
+                resource: BindingResource::TextureView(&self.motion),
+            },
+            BindGroupEntry {
+                binding: 7,
+                resource: previous,
+            },
+            BindGroupEntry {
+                binding: 8,
+                resource: light_binding,
+            },
+            BindGroupEntry {
+                binding: 9,
+                resource: clustered,
+            },
+            BindGroupEntry {
+                binding: 10,
+                resource: BindingResource::TextureView(directional_shadows),
+            },
+            BindGroupEntry {
+                binding: 11,
+                resource: BindingResource::TextureView(point_shadows),
+            },
+            BindGroupEntry {
+                binding: 12,
+                resource: BindingResource::Sampler(comparison),
+            },
+            BindGroupEntry {
+                binding: 13,
+                resource: counts.as_entire_binding(),
+            },
+            BindGroupEntry {
+                binding: 14,
+                resource: BindingResource::TextureView(environment_diffuse),
+            },
+            BindGroupEntry {
+                binding: 15,
+                resource: BindingResource::TextureView(environment_specular),
+            },
+            BindGroupEntry {
+                binding: 16,
+                resource: BindingResource::TextureView(
+                    inputs.blue_noise.as_ref().unwrap_or(&inputs.empty_blue_noise),
+                ),
+            },
+            BindGroupEntry {
+                binding: 17,
+                resource: BindingResource::TextureView(
+                    self.atmosphere.as_ref().map_or(&inputs.empty_transmittance, |atmosphere| atmosphere.transmittance),
+                ),
+            },
+        ];
+
+        // Bevy's light probes, its uniform and its images after it.
+        entries.extend(light_probes::entries(
+            self.light_probes,
+            scene.light_probes.as_deref(),
+            (&inputs.empty_light_probes, &inputs.empty_environment, &inputs.empty_volume),
+        ));
+
+        let group = device.create_bind_group("bcs_view_inputs", &cache.get_bind_group_layout(&inputs.layout), &entries);
 
         Some((group, [view_offset, previous_offset, light_offset]))
     }

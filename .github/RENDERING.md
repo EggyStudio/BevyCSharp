@@ -258,17 +258,27 @@ the surface's diffuse color times the light read between the probes around it, t
 in for that until the indirect input of the table below exists. The diffuse light an environment map
 gave the surface is taken back with the ambient term, as Bevy's environment_map_light works it out,
 the multiple scattering and the diffuse color times what the dielectric's scattering leaves, times
-the map's irradiance, and the probes' light stands in for it as for the ambient. Past the last
-cascade the light from all around is 3DEngine's sky over a ground, the environment map's light from
-above with the ambient light, each directional light's share of the ground's light read through its
-shadow map a coarsest cell along the normal. The ambient light reaches the probes times 0.45, the
-share Bevy's ambient term returns from a white surface facing the view (`F_AB(1, 1)` is 0.4524 and
--0.0024), so an open floor reads as Bevy's own lighting leaves it, which a test holds, and a red
-wall's light tints a white block's side. The pass takes 0.23 ms at its least and 1.1 at its median
-over 600 frames at 1280 by 720 in a Cornell box on the same GPU, where the probes take 0.9 ms at
-`Low` and 1.4 at `High`, and as much at `Medium` in its four cascades. In the feature test the
-pass's span reads no GPU time, where Bevy keeps no more than 256 timestamps a frame, so the pass is
-timed in a scene of its own. `Render.SetGlobalIllumination` is public with it.
+the map's irradiance, and the probes' light stands in for it as for the ambient. Bevy's light probes
+are taken back as its lighting gives them, in the order of bevy_pbr 0.20's pbr_functions with the
+bridge's mend of its fallback, an irradiance volume's light where one holds the surface and
+elsewhere the reflection probes' diffuse light blended with the camera's map, read through three
+things bevy_pbr keeps public, `LightProbesBuffer` at the view's `ViewLightProbesUniformOffset` and
+`RenderViewLightProbes`' `binding_index_to_textures`, the first four images of each kind, which the
+bridge binds among a pass's inputs, each a texture of its own, since wgpu refuses a group binding an
+array of images beside a uniform buffer. A reflection probe's reflection is left as Bevy gave it,
+the camera's map's share of the blend alone taken back and given again. Taken back as the camera's
+map alone, the feature test's reflection probe's bay read 35 to 58% over its reference and its
+irradiance volume's bay crimson and 54% under. Past the last cascade the light from all around is
+3DEngine's sky over a ground, the environment map's light from above with the ambient light, each
+directional light's share of the ground's light read through its shadow map a coarsest cell along
+the normal. The ambient light reaches the probes times 0.45, the share Bevy's ambient term returns
+from a white surface facing the view (`F_AB(1, 1)` is 0.4524 and -0.0024), so an open floor reads as
+Bevy's own lighting leaves it, which a test holds, and a red wall's light tints a white block's
+side. The pass takes 0.23 ms at its least and 1.1 at its median over 600 frames at 1280 by 720 in a
+Cornell box on the same GPU, where the probes take 0.9 ms at `Low` and 1.4 at `High`, and as much at
+`Medium` in its four cascades. In the feature test the pass's span reads no GPU time, where Bevy
+keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
+`Render.SetGlobalIllumination` is public with it.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over

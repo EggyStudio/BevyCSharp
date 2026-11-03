@@ -422,7 +422,7 @@ fn run_passes<const PLACE: u8>(
         Option<&PreviousViewUniformOffset>,
         Option<&bevy::pbr::ViewLightsUniformOffset>,
         Option<&bevy::pbr::ViewShadowBindings>,
-        (Option<&super::views::ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>),
+        (Option<&super::views::ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>, Option<&super::views::ViewLightProbeTextures>),
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -433,7 +433,7 @@ fn run_passes<const PLACE: u8>(
     scene: SceneLights,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures)) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes)) = view.into_inner();
 
     if !prepared
         .0
@@ -479,6 +479,7 @@ fn run_passes<const PLACE: u8>(
         previous_uniforms.as_deref().zip(previous),
         environment,
         super::views::ViewAtmosphere::of(atmosphere, atmosphere_textures),
+        light_probes,
     );
 
     for pass in &prepared.0 {

@@ -17,8 +17,10 @@
 module bcs_pass;
 
 // The deferred buffers as a pass reads them and a draw writes them, and the depth a draw's shadow
-// stage returns, a part of this module kept in a file of its own.
+// stage returns, and Bevy's light probes as its lighting reads them, each a part of this module
+// kept in a file of its own.
 __include bcs_pass_deferred;
+__include bcs_pass_probes;
 
 
 /// Time, in the layout Bevy's `Globals` has.
@@ -177,6 +179,10 @@ public struct SceneInfo
     /// The turn from the world into the atmosphere's space, meters about the planet's middle with
     /// up along y, a column at a time.
     public float4 world_to_atmosphere[4];
+    /// x: 1 where Bevy's lighting reads its reflection probes and more than one irradiance volume,
+    /// which it does where the device binds arrays of images, and 0 where it reads the camera's
+    /// environment map and the first volume alone, which is how `passLightProbeArrays` tells.
+    public uint4 light_probes;
 };
 
 /// A point light casts shadows.

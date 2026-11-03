@@ -56,6 +56,7 @@ mod draw_shadows;
 mod draws;
 mod images;
 mod inputs;
+mod light_probes;
 mod mesh_draws;
 
 pub use dispatches::{BcsViewDispatches, FramePoint, PreparedViewDispatches, ViewDispatch, Workgroups};
@@ -65,6 +66,7 @@ pub use images::{BcsViewImages, ViewImageSpec, ViewImageTextures, scaled, view_n
 pub use inputs::{
     SceneLights, ViewAtmosphere, ViewEnvironment, ViewEnvironmentTextures, ViewInputSources, ViewInputs, ViewLights,
 };
+pub use light_probes::ViewLightProbeTextures;
 
 use dispatches::{ViewComputePipelines, forget_view_dispatches, prepare_view_dispatches, run_view_dispatches};
 use draw_shadows::{run_shared_draw_shadows, run_view_draw_shadows};
@@ -76,6 +78,7 @@ use images::{
     prepare_view_images,
 };
 use inputs::{extract_view_environments, init_inputs, prepare_blue_noise, prepare_view_environments};
+use light_probes::prepare_view_light_probes;
 
 use bevy::app::App;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems};
@@ -158,6 +161,8 @@ pub fn install(app: &mut App) {
                     forget_view_dispatches,
                     prepare_view_draws,
                     forget_view_draws,
+                    // Once Bevy has written its light probes' uniform and each view's place in it.
+                    prepare_view_light_probes,
                 )
                     .in_set(RenderSystems::PrepareBindGroups),
             ),

@@ -570,7 +570,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
         Option<&PreviousViewUniformOffset>,
         Option<&ViewLightsUniformOffset>,
         Option<&ViewShadowBindings>,
-        (Option<&ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>),
+        (Option<&ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>, Option<&super::ViewLightProbeTextures>),
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -583,7 +583,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
 ) {
     use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
 
-    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures)) =
+    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes)) =
         view.into_inner();
 
     if !prepared.0.iter().any(|draw| draw.point as u8 == POINT) {
@@ -603,6 +603,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
         previous_uniforms.as_deref().zip(previous),
         environment,
         super::inputs::ViewAtmosphere::of(atmosphere, atmosphere_textures),
+        light_probes,
     );
 
     // The draw writes into the picture, so it cannot be read in the same pass, and a stand-in is
@@ -622,6 +623,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
             previous: sources.previous,
             environment: sources.environment,
             atmosphere: sources.atmosphere,
+            light_probes: sources.light_probes,
         };
 
         if writes_prepass & 1 != 0 {

@@ -21,6 +21,14 @@ Medium, on the left in three cascades of probes, the far wall in shade 58 units 
 last of them and lit by the sky alone, 42% under its path-traced reference, and on the right in four
 as High's, the wall lit by the sunlit wall and floor, 18% over as High reads it.
 
+![](.github/assets/readings/2026-11-03-item-95-probes.webp)
+The feature test's light hall's irradiance volume's bay at eight in the morning under a clear sky
+with global illumination at Medium, on the left with the pass taking back the camera's environment
+map's light alone, the bay crimson and blue with a black ceiling, the map's light taken from walls
+the volume's light alone had lit, and on the right with Bevy's light probes taken back as its
+lighting gave them, the bay lit by global illumination's probes, 11% under its path-traced reference
+where it read 54% under.
+
 Done that day
 
 ## 2026-11-02

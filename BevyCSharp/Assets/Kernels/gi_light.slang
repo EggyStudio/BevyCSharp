@@ -16,6 +16,21 @@
 // traced below a roughness of a half and times the share of the sky the probes see above it. Bevy's
 // screen-space ambient occlusion is Bevy's and left as it is, so where a camera has it the light
 // taken back differs from the light Bevy gave by as much.
+//
+// Bevy's light probes are taken back as its lighting gives them, in the order of bevy_pbr 0.20's
+// pbr_functions with the bridge's mend of its fallback (mended.rs). An irradiance volume's light
+// comes first where a volume holds the surface, and the environment maps' diffuse light where none
+// does, the reflection probes' blended with the camera's map, and the ambient term comes after
+// either. A reflection probe's reflection is left as Bevy gave it, and the camera's map's share
+// alone is taken back and given again. The pass reads Bevy's light probes as bcs_pass reads them
+// (bcs_pass_probes.slang), through three things bevy_pbr keeps public, `LightProbesBuffer` at the
+// camera's `ViewLightProbesUniformOffset`, and `RenderViewLightProbes`' `binding_index_to_textures`
+// for the reflection probes' cubes and the irradiance volumes' images, the first four of each,
+// which the bridge binds among the pass's inputs (views/light_probes.rs). A Bevy past 0.20 is read
+// against this again, since what is taken back mirrors its code. Taken back as the camera's map
+// alone, the feature test's reflection probe's bay read 35 to 58% over its reference and its
+// irradiance volume's bay crimson and 54% under, the map's light taken from a bay the volume's
+// light alone had lit.
 import bcs_pass;
 import bcs_field;
 import bcs_gi;
@@ -115,14 +130,12 @@ float2 F_AB(float perceptual_roughness, float NdotV)
     return float2(-1.04, 1.04) * a004 + r.zw;
 }
 
-// The diffuse share of the light an environment map gave a surface, as Bevy's environment_map_light
-// works it out, the dielectric's and the metal's multiple scattering mixed by the metalness and the
-// diffuse color times what the dielectric's single and multiple scattering leave, times the map's
-// irradiance facing n, or none where the camera has no environment map.
-float3 environmentGiven(PassSurface surface, float3 n, float NdotV, float3 diffuse)
+// The diffuse share of the light the environment maps gave a surface, as Bevy's
+// environment_map_light works it out, the dielectric's and the metal's multiple scattering mixed by
+// the metalness and the diffuse color times what the dielectric's single and multiple scattering
+// leave, times the maps' irradiance (passEnvironmentAround).
+float3 environmentGiven(PassSurface surface, float NdotV, float3 diffuse, float3 irradiance)
 {
-    if (!passHasEnvironment())
-        return float3(0.0);
     float2 F_ab = F_AB(surface.perceptual_roughness, NdotV);
     float Ems = 1.0 - (F_ab.x + F_ab.y);
     float3 F0[2] = { float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color };
@@ -137,7 +150,7 @@ float3 environmentGiven(PassSurface surface, float3 n, float NdotV, float3 diffu
         if (i == 0)
             left = 1.0 - (FssEss + scattered[i]);
     }
-    return (lerp(scattered[0], scattered[1], surface.metallic) + diffuse * left) * passEnvironmentDiffuse(n);
+    return (lerp(scattered[0], scattered[1], surface.metallic) + diffuse * left) * irradiance;
 }
 
 // The share of the sky a surface at p facing n sees along r, the share its probes' rays reached the
@@ -615,18 +628,27 @@ float4 fragment(FullscreenOutput input) : SV_Target
         added += diffuse * glowing;
     }
 
-    // The diffuse share of the light from all around Bevy's lighting gave the surface, its ambient
-    // term's and its environment map's, taken back.
+    // The diffuse share of the light from all around Bevy's lighting gave the surface, taken back,
+    // in the order bevy_pbr 0.20's pbr_functions takes it with the bridge's mend, the irradiance
+    // volumes' light where one holds the surface and the environment maps' elsewhere, the
+    // reflection probes' blended with the camera's map, then its ambient term's, which it adds
+    // after either.
+    float viewShare;
+    bool inVolume;
+    float3 around = passEnvironmentAround(world, n, viewShare);
+    float3 volumes = passIrradianceVolumesAround(world, n, inVolume);
+    float3 aroundGiven = inVolume ? volumes * diffuse : environmentGiven(surface, NdotV, diffuse, around);
     float2 F_ab = F_AB(1.0, NdotV);
-    float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + environmentGiven(surface, n, NdotV, diffuse))
-        * occlusion * passView.exposure;
+    float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + aroundGiven) * occlusion * passView.exposure;
 
-    // The light from all around a glossy surface reflects, Bevy's from its ambient term and its
-    // environment map along the mirror way, taken back and given again as 3DEngine's model pass
-    // gives it, the reflection traced through the picture and the field as far as it met a surface,
-    // fading out as the surface grows rough, and Bevy's in the rest, times the share of the sky the
-    // probes around the surface see along the mirror way, so a room sealed from the sky reflects
-    // none of it.
+    // The light from all around a glossy surface reflects, Bevy's from its ambient term and the
+    // camera's environment map along the mirror way, taken back and given again as 3DEngine's model
+    // pass gives it, the reflection traced through the picture and the field as far as it met a
+    // surface, fading out as the surface grows rough, and Bevy's in the rest, times the share of
+    // the sky the probes around the surface see along the mirror way, so a room sealed from the sky
+    // reflects none of it. The camera's map's reflection and the traced one are taken in the share
+    // of the blend the reflection probes leave, all of it where none holds the surface, since a
+    // reflection probe's share is the room as its capture saw it and is left as Bevy gave it.
     float3 r = reflect(-V, n);
     float roughness = surface.perceptual_roughness;
     float3 f0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);
@@ -634,11 +656,11 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 specularShare = f0 * F_ab_r.x + F_ab_r.y;
     float3 environment = passHasEnvironment() ? passEnvironmentSpecular(r, roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;
-    float3 bevySpecular = (specularShare * environment + ambientShare) * passView.exposure;
+    float3 bevySpecular = (viewShare * specularShare * environment + ambientShare) * passView.exposure;
     float sky = held > 0.0 ? lerp(1.0, skyAt(info, world, n, r), held) : 1.0;
     float4 traced = tracedReflection(info, lights, world, n, r, roughness);
     float gloss = traced.a * (1.0 - smoothstep(GlossyRoughness * 0.5, GlossyRoughness, roughness));
-    float3 specular = bevySpecular * sky * (1.0 - gloss) + occlusion * traced.rgb * gloss * specularShare;
+    float3 specular = bevySpecular * sky * (1.0 - gloss) + viewShare * occlusion * traced.rgb * gloss * specularShare;
 
     return float4(added - given + specular - bevySpecular, 0.0);
 }
