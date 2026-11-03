@@ -21,6 +21,9 @@ RWStructuredBuffer<float4> gi_air;
 // few rays stand for.
 static const float Blur = 0.25;
 
+// The directional lights whose air is read after the sky's, as many as the light pass reads.
+static const uint AirSuns = 10u;
+
 [shader("compute")]
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
@@ -28,8 +31,22 @@ void main(uint3 id : SV_DispatchThreadID)
     // Read at the camera as Bevy reads it, and before any thread returns, as the clouds read it.
     GiLights lights = gi_lights[0];
     float3 through = lights.sunDirection.w > 0.5 ? passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz) : float3(1.0);
+
+    // The environment map's light from above and the air toward each directional light, as the
+    // light pass reads them at the camera for the light past the probes, which a leaf drawn forward
+    // reads here (forward_probes.rs), the pass reading them itself.
+    float3 above = passEnvironmentDiffuse(float3(0.0, 1.0, 0.0)) * passView.exposure;
+    float3 suns[AirSuns];
+    for (uint i = 0u; i < AirSuns; i++)
+        suns[i] = i < passLights.n_directional_lights ? passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light) : float3(1.0);
+
     if (all(id.xy == uint2(0u)))
+    {
         gi_air[0] = float4(through, 1.0);
+        gi_air[1] = float4(above, 1.0);
+        for (uint i = 0u; i < AirSuns; i++)
+            gi_air[2u + i] = float4(suns[i], 1.0);
+    }
 
     uint width, height;
     sky_map.GetDimensions(width, height);

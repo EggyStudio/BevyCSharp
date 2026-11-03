@@ -67,7 +67,9 @@ public static partial class Render
     /// traced through the picture's depth and the field below a roughness of a half, using the
     /// frame before's picture, and Bevy's own reflection above it times the share of the sky the
     /// probes see along the mirror way, so a room sealed from the sky reflects none of it. Bevy's
-    /// screen-space ambient occlusion is left as Bevy gives it.
+    /// screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the
+    /// G-buffer does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose
+    /// material reads the probes itself as the pass reads them for the G-buffer's surfaces.
     /// </para>
     /// <para>
     /// Beside the world's probes stands a probe for every few pixels of the picture, every 16 at

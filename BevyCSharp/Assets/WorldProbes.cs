@@ -39,6 +39,15 @@ internal static unsafe partial class WorldProbes
     /// <summary>The bytes of the lights' buffer, <c>bcs_gi</c>'s <c>GiLights</c>, the bridge's lights and where each cascade lay the frame before.</summary>
     internal const int LightsBytes = NativeGiLights.Bytes + MostCascades * 16;
 
+    /// <summary>The directional lights whose air the camera's dispatch reads, as many as the light pass's <c>MostSuns</c> and the leaves' (<c>forward_probes.rs</c>).</summary>
+    internal const int AirSuns = 10;
+
+    /// <summary>
+    /// Whether the leaves and the grass are left Bevy's own light rather than given the probes',
+    /// which a test reads their reading's cost against.
+    /// </summary>
+    internal static bool LeavesUnread { get; set; }
+
     // What the program asked for, and the app it asked in, so a new app starts with none.
     private static App? _askedIn;
     private static GlobalIllumination _asked;
@@ -299,8 +308,14 @@ internal static unsafe partial class WorldProbes
         made.SkyMap = Shaders.CreateImage(SkySize, SkySize, ShaderImageFormat.Rgba16Float);
 
         // The share of the sun's light the camera's air lets through, all of it until the camera's
-        // dispatch has written it, and where no camera does.
-        made.Air = Shaders.CreateBuffer<Vector4>([Vector4.One]);
+        // dispatch has written it and where no camera does, then the environment map's light from
+        // above, none until written, and the share each directional light's air lets through, each
+        // read at the camera (gi_sky.slang), the last two for a leaf drawn forward, which reads them
+        // past the probes as the light pass reads them.
+        var air = new Vector4[2 + AirSuns];
+        Array.Fill(air, Vector4.One);
+        air[1] = Vector4.Zero;
+        made.Air = Shaders.CreateBuffer<Vector4>(air);
 
         // The last cascade's merge reads no cascade above, and an image of nothing stands in for the
         // share of the sky above it, its own being the one it writes.
@@ -324,6 +339,9 @@ internal static unsafe partial class WorldProbes
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
+
+        // The leaves read Bevy's lighting alone again.
+        Native.Check(Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0), "taking global illumination's probes from the leaves");
     }
 
     /// <summary>
@@ -442,5 +460,12 @@ internal static unsafe partial class WorldProbes
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
             .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0))
             .Set("reflection", new Vector4(ReflectionStepsAt(made.Quality).Steps, ReflectionStepsAt(made.Quality).Reach, 1, 0));
+
+        // The leaves and the grass, drawn forward where the pass does not reach, read the probes as
+        // it reads them.
+        Native.Check(LeavesUnread
+                ? Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0)
+                : Native.bcs_render_set_forward_probes(made.Cubes.Key, made.Reach.Key, info.Key, made.Lights.Key, made.Air.Key, p, ProbeSpacing, cascades),
+            "handing the leaves global illumination's probes");
     }
 }

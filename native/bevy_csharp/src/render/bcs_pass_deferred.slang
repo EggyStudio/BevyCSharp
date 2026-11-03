@@ -55,6 +55,17 @@ float3 octahedral_decode(float2 encoded)
     return normalize(n);
 }
 
+/// Whether a texel of Bevy's G-buffer holds a surface a deferred material drew. Bevy clears the
+/// G-buffer to black with an alpha of one, which its unsigned texels hold as (0, 0, 0, 1), so a
+/// pixel drawn forward, as a tree's leaves are, or drawn by nothing reads so and not as zero, and a
+/// pass that took it for a surface lit a black mirror there, which global illumination's light pass
+/// did, taking the leaves' reflected sky away and leaving them dark red. All zeros, as a G-buffer
+/// cleared to nothing reads, is no surface either.
+public bool passHasSurface(uint4 texel)
+{
+    return any(texel.xyz != 0u) || texel.w > 1u;
+}
+
 /// Unpacks a texel of Bevy's G-buffer, laid out as Bevy's `deferred_gbuffer_from_pbr_input` writes
 /// it outside WebGL: base color and roughness, emissive, material properties, normal and flags.
 public PassSurface passSurfaceOf(uint4 texel)

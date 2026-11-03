@@ -29,6 +29,13 @@ the volume's light alone had lit, and on the right with Bevy's light probes take
 lighting gave them, the bay lit by global illumination's probes, 11% under its path-traced reference
 where it read 54% under.
 
+![](.github/assets/readings/2026-11-03-item-95-forward.webp)
+The feature test's meadow at eight in the morning under a clear sky from the scripted run's meadow
+view with global illumination at Medium and the day's fill off, on the left the leaves and the grass
+near black, drawn forward where the light pass does not reach and read by it as black mirrors, the
+sky's reflection taken from them, and on the right lit by the probes they read themselves as the
+pass reads them, the light let through each taken from its front's probes.
+
 Done that day
 
 ## 2026-11-02

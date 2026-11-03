@@ -309,7 +309,9 @@ diffuse light is taken back as the ambient light's is, so a closed room under a 
 inside where Bevy's own lighting would light it through the walls. A glossy surface reflects what is
 around it, traced through the picture and the field below a roughness of a half, and reflects the
 sky only as far as the probes see it, so a closed room's polished floor shows no sky. Bevy's
-screen-space ambient occlusion is left as Bevy gives it.
+screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the G-buffer
+does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads
+the probes itself as the pass reads them.
 
 A surface may let a share of the indirect light through each meter of its depth, as a canopy's
 leaves do, which the probes' rays cross where they would stop at a solid surface, keeping that share

@@ -440,6 +440,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_gi_lights(NativeGiLights* lights);
 
+    /// <summary>Hands the leaf materials global illumination's probes by their images' and buffers' keys, or turns their reading off where the faces' key is none.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_set_forward_probes(int cubes, int reach, int field, int lights, int air, float probes, float spacing, float cascades);
+
     /// <summary>Makes an image out of pixels the caller holds, returning its key.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

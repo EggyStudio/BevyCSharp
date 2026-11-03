@@ -277,10 +277,13 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
                     leaps = behindBy - frontBy > max(0.25, 8.0 * (far - near));
                 }
                 // A face the ray meets from behind, its way leaving the surface, is not where it
-                // meets the thing.
+                // meets the thing. A surface drawn forward, which the G-buffer does not hold, is
+                // met, its facing unknown, where the cleared texel's normal had turned away every
+                // ray meeting it along -z.
                 int2 pixel = min(int2(atUv * float2(passPictureSize())), int2(passPictureSize()) - 1);
-                float3 facing = passSurfaceOf(gbuffer.Load(int3(pixel, 0))).normal;
-                if (!leaps && dot(facing, way) < 0.0)
+                uint4 met = gbuffer.Load(int3(pixel, 0));
+                float3 facing = passSurfaceOf(met).normal;
+                if (!leaps && (!passHasSurface(met) || dot(facing, way) < 0.0))
                 {
                     hitUv = atUv;
                     return true;
@@ -537,7 +540,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     int2 pixel = int2(input.position.xy);
     float depth = passLoadDepth(pixel);
     uint4 gpixel = gbuffer.Load(int3(pixel, 0));
-    if (depth <= 0.0 || !fieldOn(info) || all(gpixel == uint4(0u)))
+    if (depth <= 0.0 || !fieldOn(info) || !passHasSurface(gpixel))
         discard;
 
     PassSurface surface = passSurfaceOf(gpixel);

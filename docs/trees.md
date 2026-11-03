@@ -174,14 +174,18 @@ darkens where the sun does not reach. The presets' deepest leaves keep between h
 tenths of their color, and the leaves on a crown's upper rim about nine tenths on average.
 
 The crown is lit as a volume as well. Each leaf carries the way out of the crown at it, the way its
-leaves thin fastest, and `Trees.LeafMaterial` lights the leaf's diffuse light by its normal bent half
-way toward it, so the side of the crown toward the sun stands out from the far side as the crown's
-shape decides, more than three times as far as the leaves' own normals light it in a grazing sun. Its specular
-and the light let through it are lit by the leaf's own normal, so a crown seen from below keeps its
-color rather than mirroring the sky, which a normal bent out of the crown points up at. Lit so twice a
-pixel, the leaves cost more than the standard material's lighting, 7.5 ms of a forest of 24 tupelos'
-opaque pass at 1920 by 1080 against 5.2 lit once on an RTX 4070 Laptop GPU, as
-`TheLeavesLitAsACrownCostIsReadInAForest` prints it, and are drawn forward whatever the camera.
+leaves thin fastest, and `Trees.LeafMaterial` lights the leaf's diffuse light by its normal bent
+half way toward it, so the side of the crown toward the sun stands out from the far side as the
+crown's shape decides, more than three times as far as the leaves' own normals light it in a grazing
+sun. Its specular and the light let through it are lit by the leaf's own normal, so a crown seen
+from below keeps its color rather than mirroring the sky, which a normal bent out of the crown
+points up at. Lit so twice a pixel, the leaves cost more than the standard material's lighting,
+7.5 ms of a forest of 24 tupelos' opaque pass at 1920 by 1080 against 5.2 lit once on an RTX 4070
+Laptop GPU, as `TheLeavesLitAsACrownCostIsReadInAForest` prints it, and are drawn forward whatever
+the camera. Under global illumination, whose pass lights what the G-buffer holds, the leaves and the
+grass read its probes themselves as the pass reads them, the light gathered at the bent normal for
+their diffuse light and from behind for the light let through them, in place of the light from all
+around Bevy gives them.
 
 `Trees.LeafMaterial(species, fall)` draws the leaves from both sides with light showing through
 them by their translucency, and turns them toward the species' `FallColor` by a share from summer to

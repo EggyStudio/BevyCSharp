@@ -693,11 +693,36 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// The forest's opaque pass under global illumination at Medium with the leaves given the
+    /// probes' light and with them left Bevy's own, printed beside each other, the leaves reading
+    /// the probes in their fragment shader since the light pass lights the G-buffer's surfaces
+    /// alone and the leaves are drawn forward.
+    /// </summary>
+    [SkippableFact]
+    public void TheLeavesReadingOfTheProbesCostIsReadInAForest()
+    {
+        Needs.Shaders();
+        double? unread, read;
+        try
+        {
+            WorldProbes.LeavesUnread = true;
+            unread = LeavesOpaquePass(crown: true, GlobalIllumination.Medium);
+        }
+        finally
+        {
+            WorldProbes.LeavesUnread = false;
+        }
+        read = LeavesOpaquePass(crown: true, GlobalIllumination.Medium);
+        Skip.If(unread is null || read is null, "needs a GPU whose passes the app can time");
+        output.WriteLine($"24 black tupelos at 1920 by 1080 under global illumination at Medium, the opaque pass {unread:0.00} ms with the leaves left Bevy's light and {read:0.00} ms with them reading the probes");
+    }
+
+    /// <summary>
     /// The opaque pass's time, smoothed over the frames before, drawing a forest of tupelos at 1080p
     /// with their leaves lit by the standard material, once a pixel, or by the leaf material as a
     /// crown, twice.
     /// </summary>
-    private static double? LeavesOpaquePass(bool crown)
+    private static double? LeavesOpaquePass(bool crown, GlobalIllumination illumination = GlobalIllumination.Off)
     {
         var species = TreeSpecies.BlackTupelo;
         var skeletons = new[] { Trees.Grow(species, 1), Trees.Grow(species, 2), Trees.Grow(species, 3) };
@@ -754,6 +779,8 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
                         ecs.Add(entity, at);
                     }
                 }
+
+                Render.SetGlobalIllumination(illumination);
             },
         };
         run.Wait(10).Until("ready", _ => Render.PipelinesReady()).Wait(240).Do("timings", _ => timings = Render.Timings()).Go();

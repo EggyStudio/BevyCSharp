@@ -1,35 +1,37 @@
 # Review
 
-Reviewed up to `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
-2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
-files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
-2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
-files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
-on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
-third commit, two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43
-on the three systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's
-second commit, the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on
-2026-11-02, its run green at 00:17 on 2026-11-03 on the three systems; it keeps the form and carries
-the review's files. Before it `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on
-2026-11-02, its run green at 22:55 on the three systems; it keeps the form and carries the review's
-files. Before it `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on
-2026-11-02, its run green at 21:57 on the three systems, the first with the submodule checked out;
-it keeps the form and carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on
-2026-11-02, its run green at 20:55 on the three systems; it keeps the form and carries the review's
-files. Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the
-three systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's
-first step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the
-form and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02,
-its run green at 14:50 on the three systems; it keeps the form and carries the review's files.
-Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on
-the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green
-at 14:30 with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green
-and 0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51.
-Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at
-02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with publish
-on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit
-of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read
-at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
+Reviewed up to `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run green at
+11:14 on the three systems; it keeps the form and carries the review's files and N 4.10. Before it
+`37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on 2026-11-03, its run
+green at 08:17 on the three systems; it keeps the form and carries the review's files. Before it
+`43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on 2026-11-03, its run green
+at 04:34 on the three systems; it keeps the form and carries the review's files. Before it
+`2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39 on the three
+systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's third commit,
+two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43 on the three
+systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's second commit,
+the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on 2026-11-02, its
+run green at 00:17 on 2026-11-03 on the three systems; it keeps the form and carries the review's
+files. Before it `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on 2026-11-02, its run
+green at 22:55 on the three systems; it keeps the form and carries the review's files. Before it
+`1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on 2026-11-02, its run green
+at 21:57 on the three systems, the first with the submodule checked out; it keeps the form and
+carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run
+green at 20:55 on the three systems; it keeps the form and carries the review's files. Before it
+`add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the three systems; it
+keeps the form and carries the review's files. Before it `54f985a4`, item 93's first step, pushed at
+17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the form and carries the
+review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50
+on the three systems; it keeps the form and carries the review's files. Before it `b8cc8316`,
+Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on the three systems in
+about 20 minutes; the pack run started from it at 11:38 with publish on, green at 14:30 with the
+drive in 125 minutes at its limit's edge, the soak in 21, every captures job green and 0.6.18
+published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51. Before it
+`a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at 02:25 on the
+three systems in about 14 minutes; the pack run started from it at 02:26 with publish on, its
+captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit of 100
+minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read at
+04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
 beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
 form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
 pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
@@ -507,7 +509,40 @@ from [SHARED.md](SHARED.md).
     chosen is the larger one, a forward shader reading the cascades' gather at the surface as the
     pass does, the leaves with their two normals and the grass, the fill staying off under global
     illumination as Decision 74 set it, the dark red the leaves keep even with the fill read on the
-    way; then the default with the drive's and the soak's values.
+    way; then the default with the drive's and the soak's values. The occlusion commit is
+    `55e07752`, pushed at 10:55; the prepass setter leaving the depth and normal prepasses on while
+    a camera's occlusion is on and keep_deferred_phases leaving the G-buffer's depth when materials
+    go forward under it, two tests one a path each failing on a bridge without the mend, the GPU run
+    at the new default running to its end with the effects view drawn where the app ended before;
+    the readings' captions and the dump's lines reworded under N 4.10, apps where they said
+    sessions; 1,994 in the suite. The forward surfaces next, the leaf material binding the probe
+    cubes, their reach, the field's info, the GI lights and the air with stand-ins while GI is off,
+    its fragment shader porting the gather and the pass's distant model to WESL, Bevy's indirect
+    diffuse taken back on the diffuse lobe through its occlusion and on the transmitted lobe by
+    Bevy's own reckoning through the leaf, the probes' gather given at the bent normal and through
+    the leaf in its place. The forward read, read at 12:13. The dark red was Bevy clearing the
+    G-buffer to a texel of (0, 0, 0, 1), which the light pass's no-surface test of all zero let
+    through, so every forward pixel decoded as a black mirror and the pass took the sky's reflection
+    back with nothing given; mended by a surface test of the first three non-zero or the fourth over
+    1, the reflection trace's facing check at a forward hit mended with it. The leaf material binds
+    the probe cubes, the reach, the field's info, the GI lights and the air, the gather ported to
+    WESL, the diffuse lobe taken back through its occlusion and the transmitted lobe as
+    pbr_functions gives it, three tests each failing without its mend. The cost in a forest of 24
+    tupelos at 1080p at Medium, the opaque pass from 3.0 to 3.5 ms to 9.0 exact on both lobes, the
+    diffuse lobe alone +2.6 and half of each gather the reach's dependent reads; the call is the
+    transmitted lobe taking the diffuse lobe's probes and weights and reading their opposite faces,
+    about +4 in the forest, the meadow's cost at Medium in the feature test read with the commit, a
+    gather a crown or a grass patch recorded as the vegetation's option for Low and Medium if that
+    reads more than two milliseconds over, no gather without visibility. The reference tracing grass
+    cards and impostors as solid black is item 100. At 12:22 the shared probes are in, the forest's
+    opaque pass 6.76 ms against 3.43 without the read, about +3.3 where the exact read cost +5.5,
+    the leaf tests reading as before. The reflection trace's facing check takes a hit with no
+    G-buffer surface as met from the front, the cleared texel's normal having decoded to about (0,
+    0, -1) and turned away every ray meeting a forward surface along -z; no reading shows it, a
+    forward wall reflecting the same with the check and without since the trace's other paths and
+    the field's find the wall, so the check stays with a guard test that a forward wall is
+    reflected, its remark and the Reply saying it does not fail without the check, the one case N
+    3.1 allows.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -533,6 +568,31 @@ from [SHARED.md](SHARED.md).
     its shadow test, then the mend, the ground's light taken from a point the sun reaches or from
     the sky's share the field holds there, read by a far wall at Low under a sun 20 degrees up
     against its reference and by the feature test's yard at Low. One commit, after 97.
+
+99. **The screen probes' tile grows with the picture's height past 1080.** The owner asked on
+    2026-11-03 at 11:20 whether the engine applies the fix that the screen probes' spacing is not
+    hard-coded a tier but scales with the picture as 3DEngine's does. It does not:
+    WorldProbes.Screen's TileAt gives 16, 12 and 8 pixels a side at Low, Medium and High whatever
+    the height, where 3DEngine's TileAt takes those at 1080 and scales them by the height over 1080,
+    8, 8, 8, 11 and 16 for heights 450 to 2160, so the probes' count and the pass's cost hold near
+    1080p's at 1440p and 4K while each probe covers more pixels. The same here, the tile from the
+    view's height with the 1080 figures as the least, the glow texels with it where they stand on
+    the tile, read at 1080p, 1440p and 4K in the hall and the yard at the three qualities by
+    gpu.global_illumination and the distances to the references, the cost holding within a fifth
+    across the sizes and the pictures within their bars; a SHARED.md row. One commit, after 95. Read
+    with it the shared row added at 14:40 from the engine's item 141, whether the far cascade
+    carries screen probes or a thin-wall test and what they cost in a wood; the engine keeps its
+    screen probes in the counted cascades alone, their hold fading across the last counted band, and
+    took 0.75 to 0.85 ms off the grove.
+
+100. **The path-traced reference reads the leaf material's color and its alpha cutout.** From item
+    95's meadow reading on 2026-11-03: gi.reference traces the grass cards and the tree impostors as
+    solid black, so they read 0 and the floor behind them is black in the reference too, the walls
+    70 to 78% under and the sky 39% under what the picture shows, and the meadow cannot be read
+    against it. The reference takes the leaf material's base color and its alpha cutout as the
+    forward pass draws them, the cards and the impostors letting rays through where the alpha is
+    under the cutoff, read by the meadow against its reference with the grass and the leaves lit and
+    by the hall unchanged. One commit, after 95 and before 99.
 
 ## Verdicts
 
@@ -1928,3 +1988,58 @@ session and the feature test where they said the owner. cargo check passed on he
 editor, and cargo test passed, 118 with no feature and 199 with render. The whole suite ran with it,
 1,994 passed and 3 skipped in 48 m 21 s at the 3 GB cap, none aborted, item 95's game work held
 aside. NormTests passed, 18. The public listing is unchanged.
+
+Item 95's eighth commit, the surfaces drawn forward under global illumination, in the commit
+carrying this line. The GPU run at the new default showed the meadow's grass and leaves near black
+at Medium and Low where the bark and the walls were lit, and dark red with the warm fill kept in a
+trial. Two faults. The light pass passes over a pixel no deferred material drew, which it told by a
+texel of nothing, and Bevy clears its G-buffer to black with an alpha of one, (0, 0, 0, 1) in its
+unsigned texels, so every surface drawn forward read as a black mirror and the pass took from it the
+reflection of the sky Bevy gives a mirror at a slant with nothing given, the dark red, told from the
+rest by trials with the field's contact shadows off, with the pass adding nothing and with the pass
+painting the pixels it reached and the fields their texels held. passHasSurface in bcs_pass_deferred
+tells a texel some material drew, which the pass reads, and its reflection trace's facing check with
+it, the cleared texel's normal decoding as facing along -z, which turned away every ray meeting a
+surface drawn forward. And the pass lights the G-buffer's surfaces alone, and a tree's leaves and
+the grass are drawn forward, the G-buffer holding one normal where a leaf is lit by two, so with the
+fill off they took the sky's small ambient light alone. They read the probes themselves
+(forward_probes.rs, the ABI at 315). The managed side hands every leaf material the probes' faces,
+their reach, the field's info, the lights and the air as it binds the pass, and their fragment
+shader, a port of bcs_gi's bouncedAt and bouncedHold and the pass's light past the probes, takes
+back the light Bevy gave them from all around, the diffuse share's through its occlusion and the
+share let through worked out again as bevy_pbr 0.20's pbr_functions gives it at an occlusion of one,
+and gives the probes' at the bent normal and from behind, the light let through read from the
+front's probes with the front's weights at each probe's faces toward the way behind the leaf.
+gi_sky.slang reads the environment map's light from above and the air toward each directional light
+at the camera for them. A reading of its own for the light let through took a forest's opaque pass
+from 6.8 ms to 9.0, half of a reading's time being the probes' reach, and a first port copying the
+field's info into its functions took it to 19.8.
+GlobalIlluminationTests.ASurfaceDrawnForwardKeepsTheLightBevyGaveIt holds a sheet drawn forward and
+seen at a slant to its reading with global illumination off, 238, 183 and 193 where it read 225, 93
+and 83, ALeafInShadeTakesTheProbesLightAsTheSurfaceBesideIt a leaf in shade in a closed room within
+12% of a deferred card beside it, 83, 141 and 82 against 86, 144 and 85 where it read 40, 70 and 40,
+and ALeafGivesBackTheLightBevyLetsThroughItFromAllAround a leaf letting all its light through in a
+closed room with no lamp under an ambient light to under 35% of its reading with global illumination
+off, 2 in red where 71, which read 71 with the light let through left untaken, each failing without
+its mend. AMirrorFloorReflectsARedWallDrawnForward holds a mirror floor reflecting a wall drawn
+forward, 233, 100 and 95, and does not fail without the facing check, 244, 111 and 103, the trace's
+other paths and the field's finding the wall, one thinner than the field's cells as well, a read no
+reading shows wrong. TreeLeavesTests.TheLeavesReadingOfTheProbesCostIsReadInAForest prints a forest
+of 24 tupelos' opaque pass at 1920 by 1080 at Medium, 3.3 ms with the leaves left Bevy's light and
+6.7 with them reading the probes, and the feature test's meadow at 1280 by 720 at Medium read 2.6 ms
+and 5.6 in a timed scene of its level and its grass, 3.0 over, past the two, so the gather per crown
+or per patch is the vegetation's for Low and Medium. The reading is compiled into the leaves' shader
+only while the probes light the scene (LeafKey), since compiled in and passed over it took the
+forest's opaque pass from 7.6 ms to 8.1 with global illumination off,
+TheLeavesLitAsACrownCostIsReadInAForest's reading, which reads 7.4 with it. The meadow is read by
+its pictures until item 100, its reference tracing the grass cards and the impostors as solid black.
+The meadow's pair is 2026-11-03-item-95-forward.webp. cargo check passed on headless, render and
+editor, and cargo test passed, 118 with no feature and 199 with render. The whole suite ran with it,
+1,999 passed and 3 skipped in 46 m 6 s at the 3 GB cap, none aborted, item 95's game work held
+aside. NormTests passed, 18. The public listing is unchanged.
+
+Shared: global illumination's pass passes over a pixel no deferred material drew, which Bevy's
+G-buffer holds as (0, 0, 0, 1) and not as nothing, and a tree's leaves and the grass, drawn forward,
+read the probes themselves as the pass reads them, the light let through them from the front's
+probes and weights, since the pass read them as black mirrors and with the fill off the meadow lay
+near black. 3DEngine's foliage drawn forward under its cascades is to consider.

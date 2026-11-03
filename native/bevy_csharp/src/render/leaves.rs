@@ -28,12 +28,65 @@ use crate::interop::{status, BcsMaterialConfig};
 #[cfg(feature = "render")]
 use crate::state::with_world;
 
-/// What the leaf material adds to the standard material, its shaders and the wind it sways in.
+/// What the leaf material adds to the standard material, its shaders, the wind it sways in and
+/// global illumination's probes, which light it as the light pass lights the G-buffer's surfaces
+/// ([`super::forward_probes`]).
 #[cfg(feature = "render")]
 #[derive(bevy::asset::Asset, bevy::render::render_resource::AsBindGroup, bevy::reflect::Reflect, Debug, Clone, Default)]
+#[bind_group_data(LeafKey)]
 pub struct LeafLighting {
     #[uniform(100)]
     pub wind: super::sway::TreeWind,
+    #[texture(101, dimension = "3d")]
+    pub probe_cubes: bevy::asset::Handle<bevy::image::Image>,
+    #[texture(102, dimension = "3d")]
+    pub probe_reach: bevy::asset::Handle<bevy::image::Image>,
+    #[storage(103, read_only)]
+    pub probe_field: bevy::asset::Handle<bevy::render::storage::ShaderBuffer>,
+    #[storage(104, read_only)]
+    pub probe_lights: bevy::asset::Handle<bevy::render::storage::ShaderBuffer>,
+    #[storage(105, read_only)]
+    pub probe_air: bevy::asset::Handle<bevy::render::storage::ShaderBuffer>,
+    #[uniform(106)]
+    pub probe_counts: bevy::math::Vec4,
+}
+
+/// What a leaf material's pipeline is made for beyond the standard material's, whether it reads
+/// the probes, whose reading is compiled into its fragment shader only then, since compiled in and
+/// passed over it took a forest's opaque pass from 7.6 ms to 8.1 with global illumination off.
+#[cfg(feature = "render")]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
+pub struct LeafKey {
+    probed: bool,
+}
+
+#[cfg(feature = "render")]
+impl From<&LeafLighting> for LeafKey {
+    fn from(lighting: &LeafLighting) -> Self {
+        Self { probed: lighting.probe_counts.w > 0.5 }
+    }
+}
+
+/// Whether a leaf material reads the probes as given.
+#[cfg(feature = "render")]
+pub(crate) fn probed(lighting: &LeafLighting, probes: &super::forward_probes::ForwardProbes) -> bool {
+    lighting.probe_cubes == probes.cubes
+        && lighting.probe_reach == probes.reach
+        && lighting.probe_field == probes.field
+        && lighting.probe_lights == probes.lights
+        && lighting.probe_air == probes.air
+        && lighting.probe_counts == probes.counts
+}
+
+/// Has a leaf material read the probes as given.
+#[cfg(feature = "render")]
+pub(crate) fn probe(lighting: &mut LeafLighting, probes: &super::forward_probes::ForwardProbes) {
+    lighting.probe_cubes = probes.cubes.clone();
+    lighting.probe_reach = probes.reach.clone();
+    lighting.probe_field = probes.field.clone();
+    lighting.probe_lights = probes.lights.clone();
+    lighting.probe_air = probes.air.clone();
+    lighting.probe_counts = probes.counts;
 }
 
 #[cfg(feature = "render")]
@@ -54,8 +107,13 @@ impl bevy::pbr::MaterialExtension for LeafLighting {
         _pipeline: &bevy::pbr::MaterialExtensionPipeline,
         descriptor: &mut bevy::render::render_resource::RenderPipelineDescriptor,
         layout: &bevy::mesh::MeshVertexBufferLayoutRef,
-        _key: bevy::pbr::MaterialExtensionKey<Self>,
+        key: bevy::pbr::MaterialExtensionKey<Self>,
     ) -> Result<(), bevy::render::render_resource::SpecializedMeshPipelineError> {
+        if key.bind_group_data.probed
+            && let Some(fragment) = descriptor.fragment.as_mut()
+        {
+            fragment.shader_defs.push("LEAF_PROBES".into());
+        }
         super::sway::specialize(descriptor, layout)
     }
 }
@@ -69,6 +127,29 @@ pub type LeafMaterial = bevy::pbr::ExtendedMaterial<bevy::pbr::StandardMaterial,
 const LEAF_FRAGMENT: bevy::asset::Handle<bevy::shader::Shader> =
     bevy::asset::uuid_handle!("5b6f2a7e-3c41-4b8e-9d0a-7f1e2c64a913");
 
+/// The leaf's fragment shader's imports, which the probes' reading
+/// ([`super::forward_probes::PROBES`]) and the leaf's lighting after it draw on.
+#[cfg(feature = "render")]
+const LEAF_FRAGMENT_IMPORTS: &str = r#"import bevy_pbr::render::{
+    pbr_functions::{alpha_discard, apply_pbr_lighting, main_pass_post_lighting_processing},
+    pbr_fragment::pbr_input_from_standard_material,
+    forward_io::{VertexOutput, FragmentOutput},
+    pbr_types::PbrInput,
+    mesh_view_bindings as view_bindings,
+    pbr_ambient as ambient,
+    pbr_lighting as lighting,
+    pbr_lighting::{LAYER_BASE, LAYER_CLEARCOAT},
+    clustered_forward as clustering,
+    shadows,
+};
+
+@if(VISIBILITY_RANGE_DITHER)
+import bevy_pbr::render::pbr_functions::visibility_range_dither;
+
+@if(ENVIRONMENT_MAP)
+import bevy_pbr::light_probe::environment_map;
+"#;
+
 /// The leaf's two lightings. The way out is unfolded from the octahedron, the leaf's own normal is
 /// taken on the side of its card the way out is on, and the diffuse light's normal is bent half way
 /// from it to the way out. The first lighting takes the diffuse share of the leaf's color, which
@@ -76,16 +157,18 @@ const LEAF_FRAGMENT: bevy::asset::Handle<bevy::shader::Shader> =
 /// through. The second takes the transmitted share as all it lets through, so no diffuse light, by
 /// the leaf's own normal, with its reflectance for the specular and no emission, which the first
 /// counted. The occlusion and the leaf's gray scale both, as they scale the standard material.
+///
+/// While global illumination's probes light the scene, the leaf takes back the light Bevy's
+/// lighting gave it from all around and gives itself the probes' in its place, as the light pass
+/// does for the G-buffer's surfaces. The first lighting's goes through its occlusion, which Bevy's
+/// ambient term, its environment map and an irradiance volume are times, and the probes' is given
+/// at the bent normal times that occlusion, as the pass gives it. Bevy gives the second its light
+/// from all around through the leaf at an occlusion of one, its ambient term and its environment
+/// map's facing away from the leaf's normal, so that is worked out again as bevy_pbr 0.20's
+/// `apply_pbr_lighting` works it out (`pbr_functions.wesl`) and taken back, and the probes' facing
+/// the same way given, which a Bevy past 0.20 is read against.
 #[cfg(feature = "render")]
-const LEAF_FRAGMENT_SOURCE: &str = r#"import bevy_pbr::render::{
-    pbr_functions::{alpha_discard, apply_pbr_lighting, main_pass_post_lighting_processing},
-    pbr_fragment::pbr_input_from_standard_material,
-    forward_io::{VertexOutput, FragmentOutput},
-};
-
-@if(VISIBILITY_RANGE_DITHER)
-import bevy_pbr::render::pbr_functions::visibility_range_dither;
-
+const LEAF_FRAGMENT_SOURCE: &str = r#"
 fn way_out(folded: vec2<f32>) -> vec3<f32> {
     let f = folded * 2.0 - 1.0;
     var n = vec3<f32>(f.x, 1.0 - abs(f.x) - abs(f.y), f.y);
@@ -93,6 +176,46 @@ fn way_out(folded: vec2<f32>) -> vec3<f32> {
     n.x += select(t, -t, n.x >= 0.0);
     n.z += select(t, -t, n.z >= 0.0);
     return normalize(n);
+}
+
+// What Bevy's lighting gives a share let through of `transmissive` color from all around, exposed.
+fn through_given(in: PbrInput, transmissive: vec3<f32>) -> vec3<f32> {
+    var light = ambient::ambient_light(in.world_position, -in.N, -in.V, 1.0, transmissive, vec3<f32>(0.0), 1.0, vec3<f32>(1.0));
+@if(ENVIRONMENT_MAP) {
+    let view_z = dot(vec4<f32>(
+        view_bindings::view.view_from_world[0].z,
+        view_bindings::view.view_from_world[1].z,
+        view_bindings::view.view_from_world[2].z,
+        view_bindings::view.view_from_world[3].z
+    ), in.world_position);
+    let cluster_index = clustering::view_fragment_cluster_index(in.frag_coord.xy, view_z, in.is_orthographic);
+    var ranges = clustering::unpack_clusterable_object_index_ranges(cluster_index);
+    let perceptual_roughness = in.material.perceptual_roughness;
+    let T = -normalize(in.V + refract(in.V, -in.N, 1.0 / in.material.ior) * in.material.thickness);
+    var input: lighting::LightingInput;
+    input.diffuse_color = vec3(1.0);
+    input.layers[LAYER_BASE].NdotV = 1.0;
+    input.P = in.world_position.xyz;
+    input.layers[LAYER_BASE].N = -in.N;
+    input.V = in.V;
+    input.layers[LAYER_BASE].R = T;
+    input.layers[LAYER_BASE].perceptual_roughness = perceptual_roughness;
+    input.layers[LAYER_BASE].roughness = lighting::perceptualRoughnessToRoughness(perceptual_roughness);
+    input.metallic = 0.0;
+    input.F0_dielectric = vec3<f32>(1.0);
+    input.F0_metallic = vec3<f32>(0.0);
+    input.F_ab = vec2(0.1);
+@if(STANDARD_MATERIAL_CLEARCOAT) {
+    input.clearcoat_strength = 0.0;
+    input.layers[LAYER_CLEARCOAT].NdotV = 0.0;
+    input.layers[LAYER_CLEARCOAT].N = in.N;
+    input.layers[LAYER_CLEARCOAT].R = vec3(0.0);
+    input.layers[LAYER_CLEARCOAT].perceptual_roughness = 0.0;
+    input.layers[LAYER_CLEARCOAT].roughness = 0.0;
+}
+    light += environment_map::environment_map_light(&input, &ranges, false).diffuse * transmissive;
+}
+    return light * view_bindings::view.exposure;
 }
 
 @fragment
@@ -119,8 +242,27 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     rest.material.diffuse_transmission = 1.0;
     rest.material.emissive = vec4<f32>(0.0);
 
+    var given = vec3<f32>(0.0);
+@if(LEAF_PROBES)
+    if probes_light() {
+        let kept = (1.0 - pbr_input.material.metallic) * (1.0 - pbr_input.material.specular_transmission);
+        let occlusion = diffuse.diffuse_occlusion;
+        diffuse.diffuse_occlusion = vec3<f32>(0.0);
+        var behind = diffuse.N;
+        var transmissive = vec3<f32>(0.0);
+@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+        behind = -rest.N;
+        transmissive = rest.material.base_color.rgb * kept;
+}
+        let probed = probes_given(pbr_input.world_position.xyz, diffuse.N, diffuse.material.base_color.rgb * kept, behind, transmissive, pbr_input.frag_coord.xy);
+        given += probed.front * occlusion;
+@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
+        given += probed.through - through_given(rest, transmissive);
+}
+    }
+
     var out: FragmentOutput;
-    out.color = vec4<f32>(apply_pbr_lighting(diffuse).rgb + apply_pbr_lighting(rest).rgb, pbr_input.material.base_color.a);
+    out.color = vec4<f32>(apply_pbr_lighting(diffuse).rgb + apply_pbr_lighting(rest).rgb + given, pbr_input.material.base_color.a);
     out.color = main_pass_post_lighting_processing(pbr_input, out.color);
     return out;
 }
@@ -130,11 +272,12 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 #[cfg(feature = "render")]
 pub(crate) fn install(app: &mut bevy::app::App) {
     app.add_plugins(bevy::pbr::MaterialPlugin::<LeafMaterial>::default());
+    super::forward_probes::install(app);
     if let Some(mut shaders) = app.world_mut().get_resource_mut::<bevy::asset::Assets<bevy::shader::Shader>>() {
         // A UUID handle, whose insertion cannot fail.
         let _ = shaders.insert(
             LEAF_FRAGMENT.id(),
-            bevy::shader::Shader::from_wesl(LEAF_FRAGMENT_SOURCE, "bcs/leaf_fragment.wesl"),
+            bevy::shader::Shader::from_wesl(format!("{LEAF_FRAGMENT_IMPORTS}{}{LEAF_FRAGMENT_SOURCE}", super::forward_probes::PROBES), "bcs/leaf_fragment.wesl"),
         );
     }
 }
@@ -194,7 +337,12 @@ pub unsafe extern "C" fn bcs_material_create_leaf(
                 };
                 base.opaque_render_method = bevy::material::OpaqueRendererMethod::Forward;
                 let wind = super::sway::TreeWind::new(world, trunk, limb, flutter, frequency);
-                let material = LeafMaterial { base, extension: LeafLighting { wind } };
+                let Some(probes) = super::forward_probes::current(world) else {
+                    return status::UNSUPPORTED;
+                };
+                let mut extension = LeafLighting { wind, ..Default::default() };
+                probe(&mut extension, &probes);
+                let material = LeafMaterial { base, extension };
 
                 let Some(mut materials) = world.get_resource_mut::<Assets<LeafMaterial>>() else {
                     return status::UNSUPPORTED;

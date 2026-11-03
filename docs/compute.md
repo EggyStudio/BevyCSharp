@@ -229,15 +229,16 @@ pixel picks them with it, so its noise blurs away rather than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a
-shader on it declares `Texture2D<uint4> gbuffer;` and unpacks a texel with
-`passSurfaceOf`, which gives the base color, roughness, metallic, reflectance, emissive and
-normal the way Bevy's own lighting reads them. That is the albedo a GI result is multiplied by and
-the roughness a reflection trace chooses its rays from, without drawing the scene again to get
-them. Only Bevy's materials are in it; one drawn by a Slang program is drawn forward and leaves its
-pixels empty. With `previous: true` the camera keeps last frame's depth and G-buffer as well, as
-`depth_previous` and `gbuffer_previous`, and comparing a pixel's surface now with what stood at the
-same place last frame is how a temporal technique tells history it can reuse from a pixel that was
-hidden until now.
+shader on it declares `Texture2D<uint4> gbuffer;` and unpacks a texel with `passSurfaceOf`, which
+gives the base color, roughness, metallic, reflectance, emissive and normal the way Bevy's own
+lighting reads them. That is the albedo a GI result is multiplied by and the roughness a reflection
+trace chooses its rays from, without drawing the scene again to get them. Only Bevy's materials are
+in it; one drawn by a Slang program is drawn forward and leaves its pixels empty, and
+`passHasSurface` tells a texel some material drew from an empty one, which Bevy clears to black with
+an alpha of one rather than to nothing. With `previous: true` the camera keeps last frame's depth
+and G-buffer as well, as `depth_previous` and `gbuffer_previous`, and comparing a pixel's surface
+now with what stood at the same place last frame is how a temporal technique tells history it can
+reuse from a pixel that was hidden until now.
 
 With `pyramid: true` the camera builds Bevy's hierarchical depth, and a shader on it declares
 `Texture2D<float> depth_pyramid;` and reads any level with `Load`. Each texel holds the farthest
