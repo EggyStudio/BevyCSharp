@@ -170,8 +170,11 @@ var bumps = AssetServer.LoadImage("textures/tiles-normal.png", TextureSettings.D
 
 `Tiling` repeats and filters linearly; `Data` filters linearly and reads the file as raw values
 rather than as sRGB, as a normal, roughness or occlusion map needs. Individual settings are there
-for anything else, including anisotropy, which is dropped rather than refused if the filters are not
-all linear, because the graphics API treats that pair as a validation failure.
+for anything else. A texture whose three filters are linear, as a file loaded without settings and a
+glTF model's textures are, is filtered anisotropically at sixteen samples, the device's most where
+it offers fewer, so a floor seen at a grazing angle stays sharp to its far end, at every quality.
+One with any filter nearest takes one sample, since the graphics API refuses anisotropy beside a
+nearest filter. A shader's sampler follows the same rule (`SamplerSettings`).
 
 The settings can sit beside the file instead, in a `.meta` file of Bevy's form named for it, as
 `tiles.png.meta`, which Bevy's loader reads whenever it loads the image, so a plain

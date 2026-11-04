@@ -281,15 +281,17 @@ public sealed class MaterialTests
     }
 
     [Fact]
-    public void AnisotropyIsIgnoredRatherThanRefusedWhenFilteringIsNearest()
+    public void ATextureWithOneFilterNearestLoadsAtOneSample()
     {
-        // The graphics API treats the combination as a validation failure rather than something
-        // to overlook, so the bridge drops the anisotropy instead of letting it reach a draw.
+        // The graphics API treats anisotropy beside a nearest filter as a validation failure
+        // rather than something to overlook, so a texture whose other two filters are linear takes
+        // one sample at a slant instead of the sixteen a linear one takes.
         using var harness = new EngineHarness(frames: 40, fps: 240);
         var state = AssetLoadState.Loading;
+        var settings = new TextureSettings { MagFilter = TextureFilter.Nearest, MinFilter = TextureFilter.Linear, MipmapFilter = TextureFilter.Linear };
+        Assert.Equal(1u, settings.Anisotropy);
 
-        harness.OnContext(Stage.Startup, _ => _rough = AssetServer.LoadImage(Texture,
-            new TextureSettings { Anisotropy = 16, MagFilter = TextureFilter.Nearest }));
+        harness.OnContext(Stage.Startup, _ => _rough = AssetServer.LoadImage(Texture, settings));
 
         harness.OnContext(Stage.Update, ctx =>
         {

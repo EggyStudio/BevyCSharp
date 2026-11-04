@@ -332,7 +332,6 @@ public static partial class Trees
                 MagFilter = TextureFilter.Linear,
                 MinFilter = TextureFilter.Linear,
                 MipmapFilter = TextureFilter.Linear,
-                Anisotropy = 4,
                 Srgb = false,
             });
         }

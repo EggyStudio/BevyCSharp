@@ -183,7 +183,7 @@ internal static class Precipitation
             .SetBuffer("drawn", rain.Drawn)
             .SetBuffer("counts", counts)
             .SetBuffer("splashes", rain.SplashBuffer)
-            .SetSampler("cloud_shadow_sampler", SamplerSettings.Linear);
+            .SetSampler("cloud_shadow_sampler", SamplerSettings.LinearTable);
         rain.Drops.SetBuffer("drawn", rain.Drawn);
         rain.Splashes.SetBuffer("splashes", rain.SplashBuffer);
         return rain;

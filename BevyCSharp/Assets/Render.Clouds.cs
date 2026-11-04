@@ -165,7 +165,7 @@ internal static class Clouds
         Feed(clouds, clouds.March, noise);
         if (clouds.Shadow.IsValid) Feed(clouds, clouds.Shadow, noise);
         if (clouds.SkyClouds.IsValid) Feed(clouds, clouds.SkyClouds, noise);
-        clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.Clamped);
+        clouds.Draw.SetSampler("clouds_sampler", SamplerSettings.ClampedTable);
         Turn(camera, clouds, 0f);
         if (standing) return;
 
@@ -220,14 +220,14 @@ internal static class Clouds
                 clouds.SkyMerge = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_merge"));
             }
             clouds.SkyClouds.SetTexture("sky_cloud_cube", small);
-            clouds.SkyCopy.SetTexture("sky_source", cube).SetTexture("sky_held", held).SetSampler("sky_sampler", SamplerSettings.Clamped);
+            clouds.SkyCopy.SetTexture("sky_source", cube).SetTexture("sky_held", held).SetSampler("sky_sampler", SamplerSettings.ClampedTable);
             clouds.SkyMerge.SetTexture("sky_cube", cube).SetTexture("sky_copied", held).SetTexture("sky_cloud_layer", small)
-                .SetSampler("sky_sampler", SamplerSettings.Clamped);
+                .SetSampler("sky_sampler", SamplerSettings.ClampedTable);
             Feed(clouds, clouds.SkyClouds, NoiseFor(clouds.Settings.Seed));
 
             // Both marches read the clear sky from the copy made before them.
             foreach (var marching in new[] { clouds.March, clouds.SkyClouds })
-                marching.SetTexture("sky_copied", held).SetSampler("sky_sampler", SamplerSettings.Clamped).Set("sky_lit", new Vector4(1f, 0f, 0f, 0f));
+                marching.SetTexture("sky_copied", held).SetSampler("sky_sampler", SamplerSettings.ClampedTable).Set("sky_lit", new Vector4(1f, 0f, 0f, 0f));
             Turn(camera, clouds, 0f);
         }
         Submit(camera, clouds);
@@ -243,11 +243,11 @@ internal static class Clouds
             .SetTexture("cloud_shape", noise.Shape)
             .SetTexture("cloud_detail", noise.Detail)
             .SetTexture("cloud_weather", noise.Weather)
-            .SetSampler("cloud_sampler", SamplerSettings.Linear);
+            .SetSampler("cloud_sampler", SamplerSettings.LinearTable);
 
         // Last frame's clouds are the march's alone, which the shadow does not declare, and a
         // value set for what a compiled shader does not declare is refused.
-        if (instance == clouds.March) instance.SetSampler("clouds_previous_sampler", SamplerSettings.Clamped);
+        if (instance == clouds.March) instance.SetSampler("clouds_previous_sampler", SamplerSettings.ClampedTable);
     }
 
     internal static void Clear(Entity camera)

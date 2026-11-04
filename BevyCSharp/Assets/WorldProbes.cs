@@ -414,7 +414,7 @@ internal static unsafe partial class WorldProbes
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 1u : 0u];
             ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, 0];
-            made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", info)
+            made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
                 .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("bounced_at", made.CubesAt).SetTexture("distances", made.Distances[c])
@@ -430,7 +430,7 @@ internal static unsafe partial class WorldProbes
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 0u : (uint)made.Texels[c + 1]];
             ReadOnlySpan<uint> counts = [(uint)cascades, 0, 0, 0];
             made.Merge[c].SetTexture("radiance", made.Radiance[c]).SetTexture("above", c == last ? made.Radiance[c] : made.Merged[c + 1])
-                .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetTexture("albedo", albedo).SetSampler("field_sampler", SamplerSettings.Clamped)
+                .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetTexture("albedo", albedo).SetSampler("field_sampler", SamplerSettings.ClampedTable)
                 .SetBuffer("held", made.Held).SetTexture("merged_sky", made.MergedSky[c]).SetTexture("above_sky", c == last ? made.NoSky : made.MergedSky[c + 1])
                 .SetTexture("reach_above", made.Reach)
                 .SetNumbers("cascade", 4, cascade).Set("spacing", new Vector4(ProbeSpacing, 0, 0, c == last ? 0 : made.Intervals[c + 1].End))
@@ -445,7 +445,7 @@ internal static unsafe partial class WorldProbes
             made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("cubes_at", made.CubesAt).SetTexture("distances", made.Distances[c]).SetTexture("kept", made.Kept[c])
                 .SetTexture("reach", made.Reach).SetBuffer("partial", made.Partial).SetBuffer("held", made.Held)
                 .SetTexture("merged_sky", made.MergedSky[c]).SetTexture("skies", made.Skies)
-                .SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", info)
+                .SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, ProbeSpacing, cascades, 0));
             Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
         }
@@ -456,7 +456,7 @@ internal static unsafe partial class WorldProbes
         var screen = Screen(made, plan, SceneField.ViewCamera, glows);
 
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
-        _light.Set("screen", screen).SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.Clamped).SetBuffer("scene_field_info", info)
+        _light.Set("screen", screen).SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
             .SetBuffer("glow_lights", made.Glows).SetTexture("probe_skies", made.Skies)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)

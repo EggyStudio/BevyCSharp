@@ -742,7 +742,7 @@ pub unsafe extern "C" fn bcs_render_set_sampler(key: i32, config: *const crate::
             if config.is_null() {
                 return status::NULL_ARG;
             }
-            let descriptor = crate::assets::sampler_from(unsafe { &*config });
+            let descriptor = crate::samplers::sampler_from(unsafe { &*config });
 
             with_world(|world| {
                 let handle = match super::image_handle(world, key) {

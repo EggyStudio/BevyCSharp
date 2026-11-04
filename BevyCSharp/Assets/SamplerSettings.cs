@@ -1,6 +1,12 @@
 namespace Bevy;
 
 /// <summary>How a sampler reads a texture. The default is linear and repeating.</summary>
+/// <remarks>
+/// A sampler whose three filters are linear reads a texture seen at a slant with sixteen samples,
+/// the device's most where it offers fewer, as every texture is filtered
+/// (<see cref="TextureSettings"/>). One with any filter nearest takes one, since the graphics API
+/// refuses anisotropy beside a nearest filter as a validation failure.
+/// </remarks>
 public readonly record struct SamplerSettings
 {
     /// <summary>What reading past either side does across.</summary>
@@ -22,10 +28,19 @@ public readonly record struct SamplerSettings
     public SamplerFilter Mipmaps { get; init; }
 
     /// <summary>
-    /// How many samples a texture seen at a slant takes, from one to sixteen. Above one every
-    /// filter has to be linear, and is made so.
+    /// Whether the sampler reads one of the engine's own fields or tables rather than a texture,
+    /// which keeps one sample at a slant where a texture's linear sampler takes sixteen.
     /// </summary>
-    public int Anisotropy { get; init; }
+    internal bool Table { get; init; }
+
+    /// <summary>
+    /// The samples a texture read at a slant takes, <see cref="TextureSettings.SlantSamples"/>
+    /// where the three filters are linear, one where any is nearest or the sampler reads a table.
+    /// </summary>
+    internal int Anisotropy =>
+        !Table && Magnify == SamplerFilter.Linear && Minify == SamplerFilter.Linear && Mipmaps == SamplerFilter.Linear
+            ? (int)TextureSettings.SlantSamples
+            : 1;
 
     /// <summary>Linear and repeating.</summary>
     public static SamplerSettings Linear => default;
@@ -45,4 +60,17 @@ public readonly record struct SamplerSettings
         AddressV = SamplerAddress.Clamp,
         AddressW = SamplerAddress.Clamp,
     };
+
+    /// <summary>
+    /// Linear and clamped to the edge at one sample, for the engine's own fields and tables, the
+    /// scene's distance field, the probes' light, the fog's froxels and the clouds' and sky's
+    /// pictures, which are data rather than textures and keep the filtering they were measured
+    /// with.
+    /// </summary>
+    internal static SamplerSettings ClampedTable => Clamped with { Table = true };
+
+    /// <summary>
+    /// Linear and repeating at one sample, for the engine's own tables that tile.
+    /// </summary>
+    internal static SamplerSettings LinearTable => Linear with { Table = true };
 }

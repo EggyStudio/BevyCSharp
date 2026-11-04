@@ -241,7 +241,7 @@ public static unsafe class ShaderValues
         {
             ArgumentOutOfRangeException.ThrowIfNegative(index);
 
-            var config = new NativeSamplerConfig { Anisotropy = Math.Clamp(settings.Anisotropy, 1, 16) };
+            var config = new NativeSamplerConfig { Anisotropy = settings.Anisotropy };
             config.Address[0] = AddressOf(settings.AddressU);
             config.Address[1] = AddressOf(settings.AddressV);
             config.Address[2] = AddressOf(settings.AddressW);

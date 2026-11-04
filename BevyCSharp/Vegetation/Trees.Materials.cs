@@ -255,7 +255,6 @@ public static partial class Trees
             MagFilter = TextureFilter.Linear,
             MinFilter = TextureFilter.Linear,
             MipmapFilter = TextureFilter.Linear,
-            Anisotropy = 8,
             Srgb = srgb,
         });
         return image;

@@ -69,7 +69,6 @@ public static class Images
             MagFilter = TextureFilter.Linear,
             MinFilter = TextureFilter.Linear,
             MipmapFilter = TextureFilter.Linear,
-            Anisotropy = 16,
         });
         return image;
     }

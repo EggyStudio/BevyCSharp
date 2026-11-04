@@ -44,6 +44,7 @@ pub mod color;
 pub mod assets;
 pub mod diagnostics;
 pub mod removals;
+pub mod samplers;
 pub mod ecs;
 pub mod events;
 pub mod feathers;

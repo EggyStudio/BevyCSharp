@@ -39,6 +39,13 @@ direct 8 to 17% over its path-traced reference, and on the right with each face 
 light the surface it is read for gathers, each patch the probes' rays met turned toward that
 surface, the box a shade darker and 1 to 3% over.
 
+![](.github/assets/readings/2026-11-04-item-103-floors.webp)
+Two checkered floors side by side seen at a grazing angle, the left's texture left at Bevy's default
+sampler and the right's given its settings to tile, on the left with each texture taking one sample
+at a slant, the far floors a flat gray where their checks blur into their mean, and on the right
+with every texture whose filters are linear taking sixteen, the checks kept apart nearly to the
+floors' far end.
+
 ## 2026-11-03
 
 ![](.github/assets/readings/2026-11-03-item-95-air.webp)

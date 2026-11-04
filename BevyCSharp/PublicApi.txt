@@ -12275,7 +12275,6 @@ readonly struct Bevy.SamplerSettings : IEquatable<SamplerSettings>
   SamplerFilter Minify { get; init; }
   SamplerFilter Mipmaps { get; init; }
   bool Equals(SamplerSettings other)
-  int Anisotropy { get; init; }
   override bool Equals(object obj)
   override int GetHashCode()
   override string ToString()
@@ -13152,7 +13151,6 @@ sealed class Bevy.TextureSettings
   bool Srgb { get; set; }
   static TextureSettings Data { get; }
   static TextureSettings Tiling { get; }
-  uint Anisotropy { get; set; }
   uint Layers { get; set; }
 enum Bevy.TextureWrap : int
   Clamp = 0

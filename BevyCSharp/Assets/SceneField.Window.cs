@@ -34,7 +34,7 @@ internal static partial class SceneField
         if (_sliceImage == AssetHandle.None) _sliceImage = Shaders.CreateImage(side, side);
 
         ReadOnlySpan<uint> choice = [(uint)cascade, (uint)axis, (uint)Math.Clamp(cell, 0, SceneFieldPlan.Resolution - 1), SlicePixels];
-        _slice.SetTexture("field", built.Field).SetSampler("field_sampler", SamplerSettings.Clamped).SetBuffer("info", built.Info)
+        _slice.SetTexture("field", built.Field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", built.Info)
             .SetTexture("slice", _sliceImage).SetNumbers("choice", 4, choice);
         Shaders.Dispatch(_slice, side / 8, side / 8);
         return _sliceImage;

@@ -1,26 +1,28 @@
 # Review
 
-Reviewed up to `3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface,
-pushed at 05:32 on 2026-11-04, its run green at 05:55 on the three systems in 11 to 18 minutes; it
-keeps the form and carries the review's files. Before it `9bdb29b3`, 101's first commit, the field's
-contact shadows through the camera's air, pushed at 03:48, its run green at 04:06 on the three
-systems in 10 to 13 minutes; it keeps the form and carries the review's files. Before it `086ac6e7`,
-95's thirteenth commit, the cascades' clearance from the eye, pushed at 02:15, its run green at
-02:38 on the three systems in 13 to 19 minutes; it keeps the form and carries the review's files.
-Before it `accbda6d`, 95's twelfth commit, the lamp march from its first step, pushed at 00:30, its
-run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of a thin wall along
-its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12
-to 18 minutes; it keeps the form and carries the review's files. Before it `f5505a58`, 95's
-glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in 16 to 18
-minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's default
-commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at 16:48
-on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files. Before
-it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its run green at 15:51 on the three
-systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows for 99,
-100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run
-green at 11:14 on the three systems; it keeps the form and carries the review's files and N 4.10.
-Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
+Reviewed up to `46ae797e`, item 102, the faces at their surfaces with the patch's turn, pushed at
+14:12 on 2026-11-04, its run green at 14:30 on the three systems in 11 to 17 minutes; it keeps the
+form and carries the review's files and the devlog. Before it `3723d5ff`, 101's second commit and
+its end, an emitter by its mesh's own surface, pushed at 05:32, its run green at 05:55 on the three
+systems in 11 to 18 minutes; it keeps the form and carries the review's files. Before it `9bdb29b3`,
+101's first commit, the field's contact shadows through the camera's air, pushed at 03:48, its run
+green at 04:06 on the three systems in 10 to 13 minutes; it keeps the form and carries the review's
+files. Before it `086ac6e7`, 95's thirteenth commit, the cascades' clearance from the eye, pushed at
+02:15, its run green at 02:38 on the three systems in 13 to 19 minutes; it keeps the form and
+carries the review's files. Before it `accbda6d`, 95's twelfth commit, the lamp march from its first
+step, pushed at 00:30, its run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the
+form and carries the review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of
+a thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the
+three systems in 12 to 18 minutes; it keeps the form and carries the review's files. Before it
+`f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in
+16 to 18 minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's
+default commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at
+16:48 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
+Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its run green at 15:51 on the
+three systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows
+for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its
+run green at 11:14 on the three systems; it keeps the form and carries the review's files and N
+4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
 2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
 files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
 2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
@@ -1094,7 +1096,15 @@ from [SHARED.md](SHARED.md).
     -x at -9.1% against its 8% bar, every face of that room 2 to 3 points down as the gain goes (the
     right wall -6.0 at HEAD, beside the emitter and lit mostly by the glow light's near light), the
     six-emitter and ball rooms passing; its bar goes to 11% with the cause in the remark, the
-    shortfall recorded under 104 beside the deep bounces as the same kind.
+    shortfall recorded under 104 beside the deep bounces as the same kind. Done at 46ae797e, pushed
+    at 14:12 on 2026-11-04. Every reader of the faces for a surface takes them at the surface, the
+    hits, the screen-probe hits, the pass's read, its edge read and the reflections, the leaves and
+    grass drawn forward keeping the faces at the probes; the rooms test at 15% (the room of 8's wall
+    at 1.117) and the closed Cornell box test at 6% reading 1.01 to 1.03; the bounds by the rule
+    with the lift table and the cause in the remarks, the one-emitter room's bar at 11%; the pair
+    2026-11-04-item-102-faces.webp; the suite 2,011 in 44 minutes at 2,653 MB, cargo test 118 and
+    200, NormTests 18; the gather's span +0.05 to 0.06 ms, the hall's whole GI time unreadable
+    beside another program's draws. Next 103.
 
 103. **Anisotropic filtering at 16 everywhere.** Decision 77 on 2026-11-04. BcsSamplerConfig carries
     an anisotropy clamped to 16 per sampler, and Bevy's default image sampler stands at 1 unless
@@ -1104,6 +1114,17 @@ from [SHARED.md](SHARED.md).
     default sampler and the bridge's own samplers; the shadow, probe and table samplers keep their
     own. Read by the hall's floor and the meadow's ground at a grazing angle against the picture
     before, and by the frame's time, which should not move. After 102's reading pass, before 100.
+    The shape set at 14:15. Bevy's ImagePlugin and GltfPlugin default samplers go linear at an
+    anisotropy of 16, the device clamping lower where it offers less; TextureSettings.Anisotropy and
+    SamplerSettings.Anisotropy leave the surface outright as the engine's filter names did, a linear
+    filter meaning 16 and nearest none, the vegetation's 8 and 4 going with them, the docs, the
+    cheatsheet and TreeTextureSet's summary saying sixteen; the engine's data samplers (clouds, the
+    world probes, froxels, the field, precipitation) keep their own through their settings, the
+    shadow samplers Bevy's comparison ones untouched. A test of a checkered floor seen at a grazing
+    angle keeping its checks' contrast in a far band, failing with the default sampler at 1, and a
+    test of the mapping; the hall's floor and the meadow's ground as the pair; the textured examples
+    seen at a slant captured before and after in the runner's image and those past their allowance
+    retaken in the same commit, so the pack run stays green.
 
 104. **The deep bounces' shortfall.** From item 102 on 2026-11-04, one fault with three faces. A
     high-albedo space whose light is mostly bounces two and later loses a little each bounce, which
@@ -3041,3 +3062,58 @@ read where the probe stands each bounce in a closed room came back about 5% over
 distance alone a patch the probe saw squarely and the surface sees at a slant counted for too much,
 the closed Cornell box's floor reading its first bounce 14% over. 3DEngine's world probes read their
 faces where they stand, so its trial of the reprojection takes the turn with it.
+
+Item 103's commit, every texture whose filters are linear filtered at sixteen samples at a slant, in
+the commit carrying this line. Bevy's image plugin and its glTF plugin are given a default sampler
+linear at sixteen (assets::textured_sampler), so an image left at Bevy's default, a sprite, the
+font's atlas and a model's textures take it, and Bevy's glTF loader keeps the three filters linear
+in place of a file's own wherever the anisotropy is above one, as wgpu asks.
+TextureSettings.Anisotropy and SamplerSettings.Anisotropy are taken out, the public listing with
+them, and a linear filter means sixteen samples and a nearest one a single sample. The guide's
+paragraph on textures, SamplerSettings' and TextureSettings' remarks, TreeTextureSet's summary and
+the cheatsheet say so, and the vegetation's eight and four take the rule. The engine's own samplers
+of its field, probes, froxels, clouds and sky read one sample through SamplerSettings.ClampedTable
+and LinearTable, which are internal, and the shadow samplers are Bevy's comparison samplers, left as
+they are.
+
+TextureFilteringTests.TwoCheckeredFloorsKeepTheirChecksFarOffAtAGrazingAngle draws two checkered
+floors side by side at a grazing angle, the left's texture at Bevy's default sampler and the right's
+given TextureSettings.Tiling, and holds the spread of the green levels in a band about ten units off
+at 14 or more. Both read 21.9 with the batch. On the bridge before it the left reads 6.7, and with
+the settings' sixteen taken back the right reads 6.7.
+TextureFilteringTests.ASamplerTakesSixteenSamplesWhereItsFiltersAreLinearAndOneElsewhere holds both
+settings' mapping, the bridge's
+a_texture_left_at_the_default_takes_sixteen_samples_with_its_filters_linear holds the default
+sampler, and MaterialTests' test of a nearest filter loads a texture with one filter nearest at one
+sample.
+
+The light hall's floor from a low eye along the aisle reads alike to the pixel, since the level's
+grid was filtered at sixteen before the batch, and the meadow from a low eye across its grass
+differs only by the blades' sway between the two runs and its trees' textures at sixteen where
+eight. The frame's time could not be read apart from another program's draws on the GPU, the hall's
+49.3 and 55.4 ms at HEAD and 44.3 and 56.9 with the batch in four runs by turns, the meadow's 56.9
+and 86.4 against 46.8 and 100.1, the runs' spread wider than any difference between the builds.
+
+The 125 examples that draw a texture were captured in four containers of the .NET SDK's Ubuntu 24.04
+image, on its lavapipe at four threads, with a bridge of the render profile as the runner's, and
+compared with their checked-in pictures. Of the 120 compared, 119 match. many_buttons differs in
+2.5% of its pixels against its 2%, its icons drawn at a few pixels from larger pictures without
+mipmaps reading smoother at sixteen samples, so its picture is taken again with its gallery's. The
+six drawn with meshlets, Solari and clustered decals were captured in Fedora 44 with a render bridge
+built with meshlets and Solari, as the fifth capture job takes them, and five match. test_meshlet
+differs in 13.7%, its checkerboard's mipmap levels each a color of its own and the faces at a slant
+reading finer levels at sixteen samples, so it is taken again too. Taken again, both match theirs.
+
+The first suite failed N 1.3 alone, assets.rs at 801 lines, so the two samplers and their test moved
+into samplers.rs of their own, assets.rs at 728. cargo check passed on headless, render and editor,
+and cargo test passed, 118 with no feature and 201 with render. The bridge was built with the editor
+profile, meshlets and Solari. The whole suite ran with it, 2,013 passed and 3 skipped in 44 m 29 s
+at the 3 GB cap, none aborted, its largest process at 2,872 MB. NormTests passed, 18. The public
+listing loses the two Anisotropy properties.
+
+Shared: every texture whose filters are linear is filtered at sixteen samples at a slant, Bevy's
+default sampler and its glTF loader's given it, and the anisotropy knobs are taken out, a linear
+filter meaning sixteen and a nearest one a single sample, as 3DEngine took its anisotropic filters
+out of TextureFilter. The engine's own field and table samplers keep one sample through internal
+settings, and the picture of a checkerboard whose mipmap levels each have a color moves as the
+levels read finer.

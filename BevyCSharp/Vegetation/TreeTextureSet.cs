@@ -64,7 +64,7 @@ public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Al
 
     /// <summary>
     /// Starts loading the set's three images, tiling and filtered between texels and between
-    /// levels with eight anisotropic samples, the albedo as color and the other two as data. Only
+    /// levels with sixteen anisotropic samples, the albedo as color and the other two as data. Only
     /// valid inside a system.
     /// </summary>
     /// <returns>The three images' handles, usable at once, each drawing once it has loaded.</returns>
@@ -81,7 +81,6 @@ public sealed record TreeTextureSet(string Name, TreeTextureKind Kind, string Al
         MagFilter = TextureFilter.Linear,
         MinFilter = TextureFilter.Linear,
         MipmapFilter = TextureFilter.Linear,
-        Anisotropy = 8,
         Srgb = srgb,
     };
 }

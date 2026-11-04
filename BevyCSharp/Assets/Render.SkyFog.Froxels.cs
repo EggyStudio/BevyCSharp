@@ -45,7 +45,7 @@ internal static partial class SkyFog
             if (Froxeled.Remove(camera.Bits)) Shaders.SetEngineViewDispatches(camera, Owner);
             draw.Set("froxels", Vector4.Zero).Set("boxes", new Vector4[MostBoxes * 2])
                 .SetNumbers("counts", 4, (ReadOnlySpan<uint>)[0u, 0u, 0u, 0u])
-                .SetTexture("fog_volume", NoVolume()).SetSampler("fog_volume_sampler", SamplerSettings.Clamped);
+                .SetTexture("fog_volume", NoVolume()).SetSampler("fog_volume_sampler", SamplerSettings.ClampedTable);
             return;
         }
 
@@ -82,7 +82,7 @@ internal static partial class SkyFog
             .Set("color", new Vector4(r * settings.Brightness, g * settings.Brightness, b * settings.Brightness, 1f))
             .Set("boxes", boxes)
             .SetNumbers("counts", 4, (ReadOnlySpan<uint>)[(uint)asked.Boxes.Count, 0u, 0u, 0u])
-            .SetSampler("fog_sampler", SamplerSettings.Clamped);
+            .SetSampler("fog_sampler", SamplerSettings.ClampedTable);
         froxels.Integrate.Set("grid", reach);
         Turn(camera, froxels, 0f);
 
@@ -90,7 +90,7 @@ internal static partial class SkyFog
             .Set("boxes", boxes)
             .SetNumbers("counts", 4, (ReadOnlySpan<uint>)[(uint)asked.Boxes.Count, 0u, 0u, 0u])
             .SetTexture("fog_volume", froxels.Volume)
-            .SetSampler("fog_volume_sampler", SamplerSettings.Clamped);
+            .SetSampler("fog_volume_sampler", SamplerSettings.ClampedTable);
 
         if (froxels.Dispatched) return;
         Shaders.SetEngineViewDispatches(camera, Owner,
@@ -139,7 +139,7 @@ internal static partial class SkyFog
         {
             froxels.Inject.SetTexture("cloud_shadow", NoShadow()).Set("cloud_across", Vector4.Zero);
         }
-        froxels.Inject.SetSampler("cloud_shadow_sampler", SamplerSettings.Linear);
+        froxels.Inject.SetSampler("cloud_shadow_sampler", SamplerSettings.LinearTable);
     }
 
     // The image froxels with no clouds' shadow are bound, which they never read.

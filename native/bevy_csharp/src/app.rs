@@ -197,6 +197,16 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
                     debug_flags: bevy::render::RenderDebugFlags::ALLOW_COPIES_FROM_INDIRECT_PARAMETERS,
                     ..default()
                 })
+                // Every texture left at Bevy's default sampler, and every texture a glTF file
+                // brings, filtered at sixteen samples at a slant (`samplers::textured_sampler`).
+                .set(bevy::image::ImagePlugin {
+                    default_sampler: crate::samplers::textured_sampler(),
+                    ..default()
+                })
+                .set(bevy::gltf::GltfPlugin {
+                    default_sampler: crate::samplers::textured_sampler(),
+                    ..default()
+                })
                 .set(asset_plugin(&asset_root))
                 .set(crate::audio::device_plugin(config));
 
@@ -439,7 +449,13 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         init_asset_once::<bevy::mesh::Mesh>(&mut app);
 
         // `ImagePlugin` registers the asset type itself, and adds the default and transparent
-        // images the renderer's fallbacks rely on.
+        // images the renderer's fallbacks rely on, with the sampler a drawing app's images take.
+        #[cfg(feature = "render")]
+        app.add_plugins(bevy::image::ImagePlugin {
+            default_sampler: crate::samplers::textured_sampler(),
+            ..Default::default()
+        });
+        #[cfg(not(feature = "render"))]
         app.add_plugins(bevy::image::ImagePlugin::default());
 
         // An atlas layout is a list of rectangles, so it is data rather than graphics and a
@@ -503,7 +519,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
         // on the windowed path, so adding it there as well would hit the double-registration
         // described above.
         #[cfg(feature = "render")]
-        app.add_plugins(bevy::gltf::GltfPlugin::default());
+        app.add_plugins(bevy::gltf::GltfPlugin {
+            default_sampler: crate::samplers::textured_sampler(),
+            ..Default::default()
+        });
 
         // A font is a file like any other, and loading one without a window has to work or the
         // load would panic rather than fail. The asset and its loader are all that is registered

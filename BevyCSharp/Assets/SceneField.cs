@@ -297,7 +297,7 @@ internal static unsafe partial class SceneField
         if (shadowsOn)
         {
             _shadows.SetTexture("scene_field", built!.Field).SetBuffer("scene_field_info", built.Info)
-                .SetSampler("scene_field_sampler", SamplerSettings.Clamped)
+                .SetSampler("scene_field_sampler", SamplerSettings.ClampedTable)
                 .Set("shadows", new Vector4(shadows == FieldShadows.Everywhere ? 1f : 0f, wanted.Item3, 0f, 0f));
         }
 
