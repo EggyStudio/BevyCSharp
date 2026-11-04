@@ -6,7 +6,8 @@
 // from half way along it. A ray that meets a surface brings back the light the surface sends along
 // it and stops there. One that meets nothing brings back nothing and lets what lies beyond through,
 // but in the last cascade, where it brings back the light from all around. A probe inside a mesh
-// sends nothing, which the merge reads as a probe to pass over.
+// sends nothing, which the merge reads as a probe to pass over. A probe that sees too little of the
+// cascade above carries its rays on to the field's edge (carried, below).
 //
 // A ray is marched from its probe, since one marched from where its interval begins started under a
 // floor its probe stood a little above and brought back the light under it. One that meets a
@@ -99,7 +100,9 @@ uniform uint4 cascade;
 // cascades.
 uniform float4 interval;
 // x: 1 where each probe's share holds for the probe, its cascade lying where it lay the frame
-// before. y: unused. z: the frame's parity. w: unused.
+// before. y: the bits of the last cascade's interval's end, the field's edge, which a probe that
+// sees too little of the cascade above carries its rays on to. z: the frame's parity. w: 1 where
+// the field holds every mesh in reach, each of its cascades built and no triangle waiting.
 uniform uint4 follow;
 
 // The element of held and partial that holds column x, row y and layer z of their layout.
@@ -122,6 +125,9 @@ groupshared float4 rayLight[64];
 groupshared float4 rayOwn[64];
 groupshared float rayNothing[64];
 groupshared float rayEarly[64];
+// The weight each of the eight probes of the cascade above around this one carries, as the merge
+// weighs it, where this probe sees it standing outside every mesh, and nothing elsewhere.
+groupshared float aboveSeen[8];
 
 // The field's layout with each cascade at the corner it lay at the frame before, where the faces of
 // the indirect light, which the rays read, were gathered. Read at this frame's corners, a cascade
@@ -244,6 +250,49 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     }
 
     float3 origin = spot + place.xyz * apart;
+
+    // A probe below the last cascade that sees none of the eight probes of the cascade above around
+    // it standing outside every mesh, or sees them for under a quarter of their weight, has no
+    // probe to give it what lies past its interval, and its rays go on to the field's edge and
+    // bring the light of what they meet there, the merge finding them met and giving them nothing
+    // more. In the feature test's alley, 5.5 wide, cascade 2's probes stand 8 apart outside its
+    // walls, each hidden from the alley's cascade 1 probes, so no light came from past 16 units,
+    // neither the sky nor the alley's lit ends. Carried, a corridor 5.6 wide read its walls 1.045
+    // and 1.010 of a path-traced reference's light past the direct where 0.700 and 0.651, and the
+    // light hall 3 to 7% under its reference where 9 to 14% (GlobalIlluminationTests.Corridor.cs).
+    // A carried ray that meets nothing brings the sky once the field holds every mesh in reach, and
+    // nothing before, since the sky reached through cascades not yet built lit 3DEngine's closed
+    // room in its first frames at twice what it settles at, and its reach is its interval's end
+    // where it meets nothing. The quarter is 3DEngine's, whose vestibule under Sponza's vault read
+    // 0.889 of its reference where 0.700, and carried under half it read 0.983 with its light
+    // landing in the wrong places. Taken from 3DEngine's carry (its 141 and 194).
+    if (lane < 8u)
+    {
+        float weight = 0.0;
+        if (cascade.w == 0u && oc.w > 0.0 && place.w > 0.5 && walledIn == 0u)
+        {
+            int upperCascade = c + 1;
+            float4 ac = probesOf(fieldInfo, int(interval.w)).cascades[upperCascade].origin_and_cell;
+            float upperApart = ac.w * interval.z;
+            float3 q = (spot - ac.xyz) / upperApart - 0.5;
+            int3 base = int3(floor(q));
+            int3 offset = int3(int(lane & 1u), int((lane >> 1u) & 1u), int(lane >> 2u));
+            int3 neighbor = clamp(base + offset, int3(0), int3(int(probes) - 1));
+            float4 upperPlace = held[heldAt(int3(3 * int(probes) + neighbor.x, neighbor.y, upperCascade * int(probes) + neighbor.z))];
+            float3 upperProbe = ac.xyz + (float3(neighbor) + 0.5 + upperPlace.xyz) * upperApart;
+            float3 f = q - float3(base);
+            float3 lerps = lerp(1.0 - f, f, float3(offset));
+            if (ac.w > 0.0 && upperPlace.w > 0.5 && seesPastLeaves(field, field_sampler, albedo, fieldInfo, origin, upperProbe, oc.w * 0.5))
+                weight = lerps.x * lerps.y * lerps.z;
+        }
+        aboveSeen[lane] = weight;
+    }
+    GroupMemoryBarrierWithGroupSync();
+    float seenAbove = aboveSeen[0] + aboveSeen[1] + aboveSeen[2] + aboveSeen[3] + aboveSeen[4] + aboveSeen[5] + aboveSeen[6] + aboveSeen[7];
+    bool carried = cascade.w == 0u && oc.w > 0.0 && place.w > 0.5 && walledIn == 0u && seenAbove < 0.25;
+    float end = carried ? asfloat(follow.y) : interval.y;
+    bool skyPast = cascade.w != 0u || carried && follow.w != 0u;
+
     float4 light = float4(0.0, 0.0, 0.0, 1.0);
     float3 own = float3(0.0);
     float reached = 0.0;
@@ -265,7 +314,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         // stands for a quarter of the texel it falls in rather than the whole of it.
         float2 within = each == 1u ? float2(0.5) : float2(float(quarter & 1u), float(quarter >> 1u)) * 0.5 + 0.25;
         float3 way = fromOctahedron((float2(texel) + within) / float(texels));
-        float t = traceField(field, field_sampler, fieldInfo, origin, way, 0.0, interval.y);
+        float t = traceField(field, field_sampler, fieldInfo, origin, way, 0.0, end);
         reached = t >= 0.0 ? t : interval.y;
         // A ray that came on a face from behind it stops half a cell or more behind the face, having
         // stepped from a cell no face comes within the band of, which the field holds as the open,
@@ -282,7 +331,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
                 bounced, bounced_at, origin + way * t, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
             through = 0.0;
         }
-        else if (cascade.w != 0u)
+        else if (skyPast)
         {
             float3 sky = skyAlong(lit, way);
             light = float4(sky, 0.25);
@@ -306,7 +355,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             float3 at = origin + way * t;
             float passing = layer < 4 ? lightThroughAt(albedo, fieldInfo, at) : 0.0;
             bool inside = false;
-            float depth = passing > 0.0 ? lightThroughDepth(field, field_sampler, fieldInfo, origin, way, t, interval.y - t, inside) : -1.0;
+            float depth = passing > 0.0 ? lightThroughDepth(field, field_sampler, fieldInfo, origin, way, t, end - t, inside) : -1.0;
             float passes = depth >= 0.0 ? lightThroughKept(passing, depth, fieldCell(fieldInfo, at), inside) : 0.0;
             if (depth >= 0.0 && t < interval.x)
                 keptBefore *= passes;
@@ -323,7 +372,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             if (depth < 0.0)
                 break;
             // A ray still within at its interval's end met nothing past it, its share handed on.
-            t = inside ? -1.0 : traceField(field, field_sampler, fieldInfo, origin, way, t + depth, interval.y);
+            t = inside ? -1.0 : traceField(field, field_sampler, fieldInfo, origin, way, t + depth, end);
         }
         // How far it went is where it stopped, past what it crossed, which the screen's probes read
         // the cascades' light beyond their reach by.
@@ -331,7 +380,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         // Marked by what the ray met first that counts, a surface crossed in its interval or one it
         // stopped at, before its interval began or in it.
         float mark = firstAt >= 0.0 ? (firstAt < interval.x ? 0.5 : 0.0) : 1.0;
-        if (t < 0.0 && cascade.w != 0u)
+        if (t < 0.0 && skyPast)
         {
             float3 sky = skyAlong(lit, way);
             light = float4(crossed + through * sky, firstAt >= 0.0 ? mark : 0.25);

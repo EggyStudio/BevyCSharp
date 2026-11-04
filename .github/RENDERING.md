@@ -226,7 +226,11 @@ to date. A probe is moved off a surface and passed over inside a mesh, a texel o
 ray from the middle of each of its quarters, the merge leans toward where the probe above met a
 surface, the light past the first bounce is read from the probes a hit sees where the probes lay the
 frame before, and each probe's share of that light follows its own light where that fell or rose by
-much. A cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the
+much. A probe that sees the eight probes of the cascade above around it standing outside every mesh
+for under a quarter of their weight, as in an alley narrower than their spacing whose probes stand
+outside its walls, carries its rays on to the field's edge and brings the sky where they meet
+nothing once the field holds every mesh, 3DEngine's carry.
+A cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the
 far cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun,
 the camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,
 each given as the light a white surface facing it returns, a directional light's illuminance over pi

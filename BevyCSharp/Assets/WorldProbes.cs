@@ -444,6 +444,12 @@ internal static unsafe partial class WorldProbes
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
         var parity = (uint)(_frame & 1);
 
+        // Whether the field holds every mesh in reach, each cascade built and no triangle waiting,
+        // where a carried ray that meets nothing brings the sky (gi_trace.slang).
+        var whole = plan.Waiting == 0;
+        for (var c = 0; c < plan.Cascades; c++)
+            whole &= plan.BuiltOrigin(c) is not null;
+
         // The build that crosses surfaces letting light through where any drawn this frame lets some
         // through, and the one that stops at the first surface where none does.
         if (made.Crossing != SceneField.LightThrough)
@@ -456,7 +462,7 @@ internal static unsafe partial class WorldProbes
         {
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 1u : 0u];
-            ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, 0];
+            ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, BitConverter.SingleToUInt32Bits(made.Intervals[last].End), parity, whole ? 1u : 0u];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
                 .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
