@@ -1,21 +1,23 @@
 # Review
 
-Reviewed up to `accbda6d`, 95's twelfth commit, the lamp march from its first step, pushed at 00:30
-on 2026-11-04, its run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the form
-and carries the review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of a
-thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the
-three systems in 12 to 18 minutes; it keeps the form and carries the review's files. Before it
-`f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in
-16 to 18 minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's
-default commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at
-16:48 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
-Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its run green at 15:51 on the
-three systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows
-for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its
-run green at 11:14 on the three systems; it keeps the form and carries the review's files and N
-4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
-2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
-files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
+Reviewed up to `086ac6e7`, 95's thirteenth commit, the cascades' clearance from the eye, pushed at
+02:15 on 2026-11-04, its run green at 02:38 on the three systems in 13 to 19 minutes; it keeps the
+form and carries the review's files. Before it `accbda6d`, 95's twelfth commit, the lamp march from
+its first step, pushed at 00:30, its run green at 00:53 on the three systems in 14 to 18 minutes; it
+keeps the form and carries the review's files. Before it `8583deff`, 95's eleventh commit, the
+field's hold of a thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at
+23:24 on the three systems in 12 to 18 minutes; it keeps the form and carries the review's files.
+Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three
+systems in 16 to 18 minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`,
+95's default commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run
+green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's
+files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its run green at 15:51
+on the three systems in 14 to 18 minutes; it keeps the form and carries the review's files with the
+rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on
+2026-11-03, its run green at 11:14 on the three systems; it keeps the form and carries the review's
+files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at
+07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the
+review's files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
 2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
 files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
 on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
@@ -733,6 +735,36 @@ from [SHARED.md](SHARED.md).
     a few points face by face; the walls' over-reading ahead on a side comes next with the screen
     probes' hit normal at a junction, the box's absolute 10% that commit's test. A row to read for
     the engine, whose cascades are placed on the camera or the program's point with clipmap shifts.
+    The thirteenth commit is 086ac6e7, pushed at 02:15 on 2026-11-04, the cascades' clearance,
+    OriginAround moving a cascade one step further wherever its side would lie within a step of
+    eight cells of the eye, the floor snap otherwise kept, the eye 8 to 17.6 cells from the side
+    behind it; the test holds the box's faces from z 7 within 4 points of z 7.3 against their own
+    references, 2.1 with the mend and up to 17.7 without. The hall from -26 against 256-path
+    references, at Medium the floor -6, the ceiling -6, the walls +1, -7 and -12 where -17, -17,
+    -15, -23 and -28, the distance 0.236 where 0.296, Low and High within a point or two, the -x
+    wall 11 to 12% under at Medium and High, the yellow wall +11 where -6, the two near eyes alike
+    to a point. The suite 2,005 in 45 minutes, its largest process 3,052 MB close under the 3 GB cap
+    where the runs before held 2.8 to 2.9 GB, to watch; the pair 2026-11-04-item-95-seam.webp. Next
+    the walls' over-reading ahead on a side with the screen probes' hit normal at a junction, the
+    box within 10% of its reference as that commit's test; then 101, 100, 99, 96, 66 and 67. The
+    over-reading ahead read at 02:21. The box at eye 7 against its references with the screen probes
+    in and out, the aisle's back wall +32 and +14, the east +16 and +11, the arch wall +12 and +9,
+    the ceiling +12 and +13, the floor +6 both, the bay's back -9 and -6, so the screen probes add
+    about 19 points on the back wall and the world probes alone read the closed room 6 to 16% over,
+    which is the merge's gain past the first bounce in closed rooms, the engine's 142, a hit reading
+    the probe layer whole instead of the irradiance at its surface, taken as item 102. The hit's
+    normal turned toward the ray's side takes the thin room's floor leak with the screen probes in
+    from 0.024 to 0.0002 and the back wall to +26 but the bay's back from -9 to -12 and -17 at the
+    far eye, so it goes narrowed to the screen probes' junction leak, applied where a hit is met
+    from behind its field slope, the bay's loss read first and reported before the commit; the box's
+    10% is 102's test. The junction leak read at 02:33 and held, not mended. Every turn of a
+    screen-probe hit's normal met from behind its slope costs the bay's back wall 5 to 8 points from
+    the far eye (the full turn -17.4 where -9.1, the part along the ray alone -14.8, the turn within
+    a cell of the ray's start -17.0 while closing nothing), since hits met from behind their slope
+    are not all leaks and on a lit wall the turn loses light the reference keeps; the leak it would
+    close is the thin room's floor at 0.024 a channel with the screen probes in, which stands within
+    the lamp march test's bar of 0.04. The junction normal's better form is 102's, where hits on
+    surfaces are read against the reference. The Reply goes in with 101's commit.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
     Vegetation, Trees, TreeSpecies, TreeSkeleton, TreeTextureSet and item 83's grass move with their
@@ -795,7 +827,47 @@ from [SHARED.md](SHARED.md).
     and Moon parts since `a5e474b`, the moon 0.126 lux at 4,100 K in the HDRP reference's recipe),
     with the night's exposure as the reference's, so the alley wall in the moon's shade reads a dim
     blue. Read by the alley's night pair against its fill picture and the reference's night, and
-    placed for the owner's eye in the devlog. After the aisle floor, before 100.
+    placed for the owner's eye in the devlog. After the aisle floor, before 100. Scope set at 02:35.
+    The feature test's moon stays at its 900 lux, bluish, kept that bright so a tester can walk the
+    night, and its exposure stays, a darker night as the reference's being a look for the owner's
+    word; the escaping rays carry the night sky in proportion to that moon as the Sky module gives
+    it, SkyLight's luminance with the moon as the light scaled by this moon over the module's, plus
+    Night's airglow scaled alike, so the shade holds the reference's ratio to the moonlit ground. In
+    the drive's night view the atmosphere draws a pale moonlit sky while the shaded alley wall reads
+    dark blue with GI off and the fill on and black at Medium with the fill off, so the escaping
+    rays carry neither the drawn sky nor more than the ambient. The escaping rays reading the sky as
+    drawn by direction, day and night, as the engine's 189 does, is a later row. The black shade
+    read at 03:00 is negative light from the field's contact shadows, not too little sky. In the
+    drive's night view at 23:00 against a 256-path night reference the shaded wall facing -x read
+    -0.60 a channel where the reference reads 0.06, the wall facing -z -2.0 and the stairs -2.4,
+    negative in proportion to albedo, 0.02 to 0.05 with GI off, the light pass not it, and by hour
+    -3.0 at 19:00, -2.2 at 21:00 and -0.6 at 23:00, positive by day, following the sun, which keeps
+    12,500 lux below the horizon that the atmosphere puts out. field_shadows.slang takes back each
+    directional light's light from the G-buffer where the field closes it off, as the light is above
+    the air, so the field, seeing the ground between a below-horizon sun and every surface facing
+    it, took back all of a light the atmosphere had given none of, and only GI showed it since GI
+    turns the field on. The mend, the light taken back through the camera's air as the light pass
+    reads its throughs; its test a pillar under the atmosphere with a 10,000 lux sun 15 degrees
+    down, 0 of 11,867 lit pixels darker by more than 8 levels with the mend and 534 without against
+    its 1% bar. The night view against a fresh reference at Low, Medium and High, the distance
+    0.231, 0.244 and 0.242 where 4.5, the -x wall -19, -17 and -18%, the +x wall -17, -15 and -16,
+    the -z wall +17, +42 and +42, the stairs -25, -21 and -20, the floor's 0.4% of the view +250 to
+    +280, the drawn sky +28, the shaded wall's blue over red 1.02 where the reference's 1.10. This
+    mend is 101's first commit with the night pair; the night sky on the escaping rays (B) its
+    second, read by the shaded walls toward the reference and its blue, the -z wall's and the
+    floor's excess read in the same pass; the sun's lux under the horizon left as the weather's
+    choice. A row to read for the engine, whose sun comes through its atmosphere's transmittance.
+
+102. **The merge's gain past the first bounce in closed rooms.** From item 95 on 2026-11-04. The
+    world probes alone read the bay-and-aisle box 6 to 16% over its path-traced reference, and a
+    closed white room lit by lamps +1 to +14 before the night's mends, since a hit reads the probe
+    layer whole instead of the irradiance at its surface and in a closed room the probes off a
+    surface hold more light than the surface does, 1.07 to 1.11 a bounce in a room of 4 and 1.15 to
+    1.23 in a room of 8 by the engine's reading, each bounce taking that on; the engine's item 142
+    holds it as a step of its own since its carries failed other rooms' bars. It opens with a
+    bounded reading, the room of 4 and the room of 8 against their references by bounce, then a
+    proposal before any mend; the engine's 142 record is the starting point and SHARED.md holds the
+    row. Test, the box within 10% of its reference face by face. After 101, before 100.
 
 ## Verdicts
 
@@ -2469,3 +2541,56 @@ lay 1.6 cells behind it at least, a wall the eye backed onto then lay past the f
 and read black to the probes before it, and the feature test's hall read 17% under where it reads
 6%. 3DEngine centers its field on the camera or the program's point with clipmap shifts (its 181),
 so it reads whether its cascades' sides meet a wall behind the eye.
+
+Item 95's screen probes' leak at a wall's foot, read at 02:35 and not mended, recorded in the commit
+carrying this line. A screen probe's ray from the floor at a thin wall's foot meets the wall's held
+sheet, the hit's normal from the field's slope there pointing out through the wall, so a lamp
+outside lights the hit, and the thin-walled room with the screen probes in reads its floor 0.024 a
+channel where nothing reaches it. Turning a screen probe's hit met from behind its slope toward the
+ray takes that floor to 0.0002, and reversing the normal's share along the ray alone to 0.0063. But
+every form costs the box's bay back wall, read from z 7.3, 9.1% under its reference before, 17.4%
+under with the turn, 14.8% with the share reversed and 17.0% with the turn on hits within a cell of
+the ray's start alone, which closes nothing of the leak, so the hits met from behind their slope are
+not all leaks. The room's 0.024 stands under the lamp march test's bar of 0.04, and the normal at a
+junction is left to 102, where hits on surfaces are read against the reference.
+
+Item 101's first commit, the field's contact shadows taking a light back through the camera's air,
+in the commit carrying this line. The alley wall in the moon's shade was black at night because its
+light was under nothing, not because the probes gave it little sky. In the scripted run's night view
+at 23:00, against a reference of 256 paths, the shaded wall facing -x read -0.60 a channel at all
+three qualities where its reference reads 0.06, the wall facing -z -2.0 and the orange stairs -2.4,
+-0.5 and -0.09, and with global illumination off 0.02 to 0.05. With the light pass's output zeroed
+the wall still read -0.64. By the hour it read -3.0 at 19:00, -2.2 at 21:00 and -0.6 at 23:00 and
+was lit by day, following the sun, which the weather keeps at 12,500 lux under the horizon for
+Bevy's atmosphere to put out, and with the sun's illuminance set to nothing the three read 0.053,
+0.098 and 0.054 against 0.062, 0.068 and 0.068. field_shadows.slang took back each directional
+light's light where the field closes a surface off from it, as the light is above the air, and the
+field sees the ground between a sun under the horizon and every surface facing it, so it took back
+all of a light Bevy had given none of, which only global illumination showed, since it builds the
+field.
+
+The light is taken back through the camera's air as Bevy dims a directional light, read before any
+pixel is discarded as the light pass reads it.
+SceneFieldShadowTests.ASunUnderTheHorizonHasNoLightTakenBackThroughTheField holds a pillar under
+Bevy's atmosphere, a sun of 10,000 lux 15 degrees under the horizon and an ambient light of 400,
+with the field's shadows everywhere against off, 0 of 11,867 lit pixels darker by more than 8
+levels, where without the mend 534 are, 4.5% against its bar of 1%. The night view reads at Low,
+Medium and High the picture 0.231, 0.244 and 0.242 of its light from its reference where 4.6, the
+shaded wall facing -x 19, 17 and 18% under, the wall facing +x 17, 15 and 16% under, the wall facing
+-z 17, 42 and 42% over, the stairs 25, 21 and 20% under, the floor's 0.4% of the view 252 to 282%
+over and the drawn sky 28% over, the shaded wall 0.053, 0.046 and 0.054 at Medium, its blue over its
+red 1.02 where the reference's is 1.10. The Sun's 12,500 lux under the horizon is the weather's
+choice, the atmosphere putting it out, and is left. The guide's paragraph on the contact shadows
+says the air is taken. The moon's scattered sky on the escaping rays is the second commit, the wall
+facing -z and the floor read in that pass.
+
+The whole suite ran with it, 2,006 passed and 3 skipped in 43 m 27 s at the 3 GB cap, none aborted,
+its largest process at 2,704 MB. The test's remarks were wrapped at 100 after the suite, comments
+alone. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the field's contact shadows take a directional light back through the camera's air as Bevy
+dims it, since taken as the light is above the air, a sun under the horizon, which the atmosphere
+puts out and the field sees the ground stand before, had all its light taken from every surface
+facing it, and the feature test's walls at night read 0.6 to 3 under nothing. 3DEngine's sun comes
+through its atmosphere's transmittance, so it reads whether its contact shadows take the light back
+the same way.

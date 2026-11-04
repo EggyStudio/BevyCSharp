@@ -1,6 +1,7 @@
 using System.Numerics;
 using Bevy;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Bevy.Tests;
 
@@ -11,7 +12,7 @@ namespace Bevy.Tests;
 /// a number rather than as a look.
 /// </summary>
 [Collection("engine")]
-public sealed class SceneFieldShadowTests
+public sealed class SceneFieldShadowTests(ITestOutputHelper output)
 {
     /// <summary>
     /// A slice across a box through its middle is red inside, black at its faces and gray past the
@@ -113,6 +114,88 @@ public sealed class SceneFieldShadowTests
         var (lit, shade, _) = Levels(mapped, both);
         Assert.True(shade.Both == shade.Core, $"{shade.Both} of the map's {shade.Core} pixels of shadow stay dark");
         Assert.True(shade.Mean < 1 && lit.Mean < 1, $"the shadow differs by {shade.Mean:0.0} levels and the lit ground by {lit.Mean:0.0}");
+    }
+
+    /// <summary>
+    /// A sun under the horizon, which Bevy's atmosphere puts out, has no light taken back through
+    /// the field, so a pillar's side facing it reads as it does with the field's shadows off.
+    /// </summary>
+    /// <remarks>
+    /// The field's shadows took back the light a directional light sent a surface as it is above
+    /// the air, and the field sees the ground stand between a sun below the horizon and every
+    /// surface facing it, so they took back all of a light Bevy had given none of and left the
+    /// pillar's side black, as the feature test's walls facing its sun 43 degrees down read 0.6 to
+    /// 3 under nothing at night. The light is taken back through the camera's air as Bevy dims it.
+    /// </remarks>
+    [SkippableFact]
+    public void ASunUnderTheHorizonHasNoLightTakenBackThroughTheField()
+    {
+        Needs.Shaders();
+        var off = UnderTheHorizon(FieldShadows.Off);
+        var on = UnderTheHorizon(FieldShadows.Everywhere);
+
+        var (sum, darker, pixels) = (0.0, 0, 0);
+        for (var y = 0u; y < off.Height; y++)
+        {
+            for (var x = 0u; x < off.Width; x++)
+            {
+                var (a, b) = (off.At(x, y), on.At(x, y));
+                var (levelA, levelB) = ((a.R + a.G + a.B) / 3, (b.R + b.G + b.B) / 3);
+                if (levelA < 8) continue;
+                pixels++;
+                sum += Math.Abs(levelA - levelB);
+                if (levelB < levelA - 8) darker++;
+            }
+        }
+
+        output.WriteLine($"{darker} of {pixels} lit pixels read darker by more than 8 levels with the field's shadows, {sum / pixels:0.0} levels apart on average");
+        Assert.True(pixels > 2000, $"{pixels} pixels lit");
+        Assert.True(darker < pixels / 100, $"{darker} of {pixels} pixels read darker by more than 8 levels with the field's shadows, {sum / pixels:0.0} levels apart on average");
+    }
+
+    /// <summary>
+    /// The pillar on the ground under Bevy's atmosphere, a sun of 10,000 lux fifteen degrees under
+    /// the horizon and an ambient light of 400 lighting it, with the field's shadows as given.
+    /// </summary>
+    private static CapturedImage UnderTheHorizon(FieldShadows shadows)
+    {
+        var run = new PictureRun
+        {
+            Width = 160,
+            Height = 120,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(4f, 3f, 6f), new Vec3(0f, 1f, 0f), Vec3.UnitY));
+                Shaders.SetPrepass(camera, depth: true, deferred: true);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.None });
+                Render.SetAtmosphere(camera, new AtmosphereSettings());
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), 400f);
+
+                var stone = Render.CreateMaterial(0.6f, 0.6f, 0.6f);
+                var ground = ecs.Spawn();
+                Render.SetMesh(ecs, ground, Render.CreateMesh(MeshShape.Cuboid, 20f, 0.2f, 20f));
+                Render.SetMaterial(ecs, ground, stone);
+                ecs.Add(ground, Transform.At(0f, -0.1f, 0f));
+                var pillar = ecs.Spawn();
+                Render.SetMesh(ecs, pillar, Render.CreateMesh(MeshShape.Cuboid, 1f, 2f, 1f));
+                Render.SetMaterial(ecs, pillar, stone);
+                ecs.Add(pillar, Transform.At(0f, 1f, 0f));
+
+                // Fifteen degrees under the horizon, toward the camera's side of the pillar.
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Shadows = false, Intensity = 10_000f });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(1f, -MathF.Tan(15f * MathF.PI / 180f), 1.5f), Vec3.Zero, Vec3.UnitY));
+
+                Render.SetSceneField(1, 0.125f);
+                Render.SetSceneFieldShadows(shadows);
+            },
+        };
+
+        run.Until("settled", _ => SceneField.Plan is { StillCount: 2 } plan && plan.Shapes.Count == 0)
+            .Wait(20)
+            .Capture("under the horizon")
+            .Go();
+        return run.Picture("under the horizon");
     }
 
     /// <summary>

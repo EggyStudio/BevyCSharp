@@ -5,11 +5,15 @@
 // Bevy's lighting takes no share of a directional light from outside, where 3DEngine's model pass
 // multiplies the sun's light by the share its occlusion pass traced, so the light Bevy added is
 // worked out again here from the camera's G-buffer, as Bevy's own `directional_light` works it out
-// (Burley's diffuse, the GGX specular with its multiple scattering, Schlick's Fresnel), and taken
-// back times what the field closes off. The picture before tonemapping holds light as floats, so
-// adding less than nothing takes it away. Bevy's atmosphere, its clearcoat and anisotropy, a light
-// texture and the light's own contact shadows are not worked out again, so where a surface has
-// them the light taken away differs from the light Bevy added by as much.
+// (Burley's diffuse, the GGX specular with its multiple scattering, Schlick's Fresnel), through the
+// camera's air as Bevy dims a directional light by it, and taken back times what the field closes
+// off. The picture before tonemapping holds light as floats, so adding less than nothing takes it
+// away. Taken back as the light is above the air, a sun below the horizon, which Bevy's atmosphere
+// puts out and the field sees the ground stand before, had all its light taken from what faced it,
+// and at night the feature test's walls facing a sun of 12,500 lux 43 degrees down read 0.6 to 3
+// under nothing. Bevy's clearcoat and anisotropy, a light texture and the light's own contact
+// shadows are not worked out again, so where a surface has them the light taken away differs from
+// the light Bevy added by as much.
 //
 // Past the shadow map's reach alone by default, so a shadow the map draws keeps its hard edge and
 // the ground beyond the map is still shadowed, or everywhere the field reaches, the map's shadow
@@ -144,6 +148,12 @@ float3 sent(PassSurface surface, float3 V, float3 L, float3 color)
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
+    // Each directional light through the camera's air, as Bevy's lighting gives it the picture,
+    // read before any pixel is discarded, as the light pass reads it.
+    float3 through[10];
+    for (uint i = 0u; i < min(passLights.n_directional_lights, 10u); i++)
+        through[i] = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
+
     FieldInfo info = scene_field_info[0];
     int2 pixel = int2(input.position.xy);
     float depth = passLoadDepth(pixel);
@@ -177,7 +187,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
 
         // The light Bevy added, its shadow map's share of it included, the light there is to take back.
         float map = passDirectionalShadow(i, world, surface.normal, view_depth);
-        taken += sent(surface, V, L, light.color.rgb) * map * share * (1.0 - shown);
+        taken += sent(surface, V, L, light.color.rgb * through[i]) * map * share * (1.0 - shown);
     }
 
     if (all(taken <= 0.0))

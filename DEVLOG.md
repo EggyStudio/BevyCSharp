@@ -16,6 +16,14 @@ before it, the floor 17% under its path-traced reference, and on the right with 
 step of eight cells or more from the eye on every side, the wall inside the cascades and the aisle
 lighter and warmer throughout, the floor 6% under.
 
+![](.github/assets/readings/2026-11-04-item-101-night.webp)
+The feature test's alley at 23:00 under a full moon from the scripted run's night view with global
+illumination at Medium, on the left with the field's contact shadows taking back the light of the
+sun 43 degrees under the horizon as it is above the air, 12,500 lux Bevy's atmosphere had given none
+of, the walls facing it black at 0.6 to 2.4 under nothing, and on the right with the light taken
+back through the camera's air as Bevy dims it, the walls a dim moonlit gray, the shaded wall 17%
+under its path-traced reference.
+
 Done that day
 
 ## 2026-11-03

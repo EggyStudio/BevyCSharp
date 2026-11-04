@@ -261,8 +261,10 @@ together. Bevy's lighting takes no share of a light from outside, so the light B
 is worked out again from the camera's G-buffer as Bevy works it out and taken back from the lit
 picture before anything transparent is drawn. That needs the G-buffer and a picture in high dynamic
 range, so while the shadows are on the camera the field lies around draws Bevy's materials deferred
-and keeps its picture in floats. A surface's clearcoat and anisotropy, Bevy's atmosphere and a
-light's texture are not worked out again, so where a surface has them the light taken back differs.
+and keeps its picture in floats. The light is taken back through the camera's atmosphere as Bevy
+dims it, so a sun under the horizon, which the atmosphere puts out, has none taken back. A surface's
+clearcoat and anisotropy and a light's texture are not worked out again, so where a surface has them
+the light taken back differs.
 
 `Render.DrawSceneFieldWindow()`, called each frame inside a system while ImGui runs, draws the field
 in a window of its own, with its settings, the contact shadows, a slice across X, Y or Z of a cascade
