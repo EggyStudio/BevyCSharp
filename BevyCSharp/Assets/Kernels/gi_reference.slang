@@ -19,6 +19,13 @@
 // toward most, plus one, or 0 for nothing. Both images start at zero for each reference. Compiled
 // to SPIR-V, since ray queries exist nowhere else. A mesh's vertices' colors are not in the pool,
 // so a face is its material's color alone, and a texture's light is left to its base color.
+//
+// Where counts.w gives an octahedron's texels a side, it traces from a world probe's place instead
+// (`gi.probe`), a texel of the octahedron a thread, the paths of the left half of the image along
+// each texel's middle way and those of the right half each along a way drawn across the texel,
+// every face met lit as the probes light one, and the image of regions holds the first face's
+// distance along the middle way, so what one probe's rays bring can be read against what its
+// texels' ways bring.
 import bcs_pass;
 import bcs_ray;
 import bcs_scene;
@@ -36,8 +43,11 @@ StructuredBuffer<GiLights> lights;
 [format("r32ui")] RWTexture2D<uint> regions;
 
 // x: the samples a pixel this frame adds. y: the number of the first. z: the most faces a path
-// meets. w: unused.
+// meets. w: the texels a side of the probe's octahedron traced from, or 0 for the camera's picture.
 uniform uint4 counts;
+
+// xyz: the place of the probe traced from where counts.w is above 0. w: unused.
+uniform float4 probe;
 
 // How far from a point or spot light its shadows start, as Bevy's shadow maps start a tenth of a
 // unit from the light (PointLight::DEFAULT_SHADOW_MAP_NEAR_Z), so a mesh nearer the light than that,
@@ -143,8 +153,9 @@ float3 normalAt(RayHit hit, float3 way)
     return dot(n, way) > 0.0 ? -n : n;
 }
 
-// The light one path brings back from origin along way.
-float3 trace(GiLights given, float3 origin, float3 way, inout uint state)
+// The light one path brings back from origin along way, its first face lit as Bevy lights it where
+// the path leaves the camera and as the probes light one where it leaves a probe.
+float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout uint state)
 {
     float3 throughput = float3(1.0);
     float3 light = float3(0.0);
@@ -170,7 +181,7 @@ float3 trace(GiLights given, float3 origin, float3 way, inout uint state)
         }
 
         // Emissive light, times the exposure by the share of it its alpha sets, as Bevy shows it.
-        bool first = bounce == 0u;
+        bool first = fromCamera && bounce == 0u;
         float3 emitted = material.emissive.rgb * lerp(1.0, passView.exposure, material.emissive.a);
         light += throughput * (emitted + direct(given, p, n, -way, first, color, material));
 
@@ -209,6 +220,29 @@ void main(uint3 id : SV_DispatchThreadID)
     if (id.x >= width || id.y >= height)
         return;
 
+    if (counts.w > 0u)
+    {
+        uint texels = counts.w;
+        if (id.x >= 2u * texels || id.y >= texels)
+            return;
+        bool drawn = id.x >= texels;
+        uint2 texel = uint2(id.x % texels, id.y);
+        float3 through = fromOctahedron((float2(texel) + 0.5) / float(texels));
+        RayHit first = rayTraceIn(scene, probe.xyz, through, 0.0, 1e5);
+        regions[id.xy] = first.hit ? asuint(first.t) : 0u;
+        float3 brought = float3(0.0);
+        for (uint s = 0u; s < counts.x; s++)
+        {
+            uint index = counts.y + s;
+            uint state = (id.y * width + id.x) * 9781u + index * 6271u + 1u;
+            random(state);
+            float3 way = drawn ? fromOctahedron((float2(texel) + float2(random(state), random(state))) / float(texels)) : through;
+            brought += trace(given, probe.xyz, way, false, state);
+        }
+        sums[id.xy] = (counts.y == 0u ? float4(0.0) : sums[id.xy]) + float4(brought, float(counts.x));
+        return;
+    }
+
     // What the ray through the pixel's middle meets names what the pixel shows.
     float2 middle = (float2(id.xy) + 0.5) / float2(width, height);
     float3 way = passRayDirection(middle);
@@ -222,7 +256,7 @@ void main(uint3 id : SV_DispatchThreadID)
         uint state = (id.y * width + id.x) * 9781u + index * 6271u + 1u;
         random(state);
         float2 uv = (float2(id.xy) + float2(random(state), random(state))) / float2(width, height);
-        sum += trace(given, passRayOrigin(uv), passRayDirection(uv), state);
+        sum += trace(given, passRayOrigin(uv), passRayDirection(uv), true, state);
     }
     // The first share stores where the rest add, since an image is made holding whatever its memory
     // held, and a reference traced after another started from the other's paths, 64 a pixel asked

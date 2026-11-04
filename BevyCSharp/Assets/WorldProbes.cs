@@ -48,6 +48,36 @@ internal static unsafe partial class WorldProbes
     /// </summary>
     internal static bool LeavesUnread { get; set; }
 
+    /// <summary>
+    /// The bounces past the first the probes are held at for a reading (<c>gi.bounces</c>), every
+    /// one where none is given, none at 0, and a count n where the probes add the light of the
+    /// frame before for n frames after one without it and then stand still, so their light holds n
+    /// bounces past the first until the hold changes.
+    /// </summary>
+    /// <remarks>
+    /// A hit adds the light of the probes around it the frame before, so each frame carries the
+    /// probes' light one bounce further, and a frame without it leaves them holding the first
+    /// bounce alone. Standing still, the probes trace, merge and gather nothing, and the picture
+    /// and a probe read from them read the same light frame after frame.
+    /// </remarks>
+    internal static int? HeldBounces { get; private set; }
+
+    // The frame a hold was asked at.
+    private static long _heldFrom;
+
+    /// <summary>Holds the probes at <paramref name="bounces"/> bounces past the first, or every one where it is null (<see cref="HeldBounces"/>).</summary>
+    internal static void HoldBounces(int? bounces) => (HeldBounces, _heldFrom) = (bounces, _frame);
+
+    /// <summary>Whether the probes stand still at a count of bounces they were held at.</summary>
+    internal static bool StandStill => HeldBounces is > 0 and var n && _frame - _heldFrom > n + 1;
+
+    /// <summary>
+    /// Whether the probes hold what they were held at, the first bounce once a frame has traced
+    /// without the light of the frame before and a count once they stand still, and every bounce
+    /// at once, since those come back over many frames.
+    /// </summary>
+    internal static bool HoldReached => HeldBounces switch { null => true, 0 => _frame - _heldFrom > 1, _ => StandStill };
+
     // What the program asked for, and the app it asked in, so a new app starts with none.
     private static App? _askedIn;
     private static GlobalIllumination _asked;
@@ -155,6 +185,16 @@ internal static unsafe partial class WorldProbes
     internal static AssetHandle Cubes => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Cubes : AssetHandle.None;
 
     /// <summary>
+    /// Cascade <paramref name="cascade"/>'s merged light and its rays' distances, laid out as the
+    /// trace and the merge lay them, its octahedron's texels a side, and every cascade's held
+    /// places, which <c>gi.probe</c> reads one probe of, or none where that cascade is not traced.
+    /// </summary>
+    internal static (AssetHandle Merged, AssetHandle Distances, int Texels, AssetHandle Held)? ProbeImages(int cascade) =>
+        ReferenceEquals(_app, App.Running) && _made is { } made && cascade >= 0 && cascade < made.Cascades
+            ? (made.Merged[cascade], made.Distances[cascade], made.Texels[cascade], made.Held)
+            : null;
+
+    /// <summary>
     /// The pass that adds the probes' light to the picture of the camera the field lies around, bound
     /// to this frame's probes, or none where none are traced or it has not compiled
     /// (<c>gi_light.slang</c>).
@@ -179,7 +219,7 @@ internal static unsafe partial class WorldProbes
     {
         if (!ReferenceEquals(_app, App.Running) || _made is not { } made) return Asked == GlobalIllumination.Off ? "Global illumination off" : $"Global illumination {Asked}, waiting for the field and its shaders";
         return FormattableString.Invariant(
-            $"Global illumination {made.Quality}, {made.Cascades} cascades of {Probes} probes a side, {string.Join(", ", made.Texels.Select(n => n * n * RaysAt(n)))} rays a probe, GPU memory {Bytes() / 1048576.0:0.0} MB");
+            $"Global illumination {made.Quality}, {made.Cascades} cascades of {Probes} probes a side, {string.Join(", ", made.Texels.Select(n => n * n * RaysAt(n)))} rays a probe, GPU memory {Bytes() / 1048576.0:0.0} MB{HeldBounces switch { null => "", 0 => ", held at the first bounce", var n => $", held at {n} bounces past the first" }}");
     }
 
     /// <summary>The rays each texel of an octahedron of <paramref name="texels"/> a side sends, as <c>bcs_gi</c>'s <c>RaysAt</c> has them.</summary>
@@ -207,6 +247,7 @@ internal static unsafe partial class WorldProbes
         {
             _app = App.Running;
             (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
+            (HeldBounces, _heldFrom) = (null, 0);
             _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
             (_screenTrace, _screenFilter, _screenGlow, _screenCamera, _screenImages, _screenDispatches) = (default, default, default, Entity.None, null, null);
@@ -369,14 +410,16 @@ internal static unsafe partial class WorldProbes
         }
 
         // The lights, from the bridge, with the frame's number, the indirect light of the frame before
-        // added whole, and where each cascade lay the frame before, which the rays read the faces of
-        // the light that bounced at, since they were gathered there. A cascade lying where it lay the
-        // frame before has the same probes, so a probe's own light of the frame before is its own.
+        // added whole, or none on the first frame of a hold and through a hold at the first bounce,
+        // and where each cascade lay the frame before, which the rays read the faces of the light
+        // that bounced at, since they were gathered there. A cascade lying where it lay the frame
+        // before has the same probes, so a probe's own light of the frame before is its own.
         var bytes = made.LightBytes.AsSpan();
         fixed (byte* lights = bytes)
             Native.Check(Native.bcs_gi_lights((NativeGiLights*)lights), "reading the lights global illumination is lit by");
         var floats = MemoryMarshal.Cast<byte, float>(bytes);
-        (floats[13], floats[14]) = (_frame, 1);
+        (floats[13], floats[14]) = (_frame, HeldBounces == 0 || HeldBounces > 0 && _frame - _heldFrom == 1 ? 0 : 1);
+        var still = StandStill;
 
         // The small emitters carried as lights of their own, the nearest the eye, counted in the
         // lights' fourth count.
@@ -421,7 +464,7 @@ internal static unsafe partial class WorldProbes
                 .SetTexture("kept", made.Kept[c]).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))
                 .SetNumbers("follow", 4, follow);
-            Shaders.Dispatch(made.Trace[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
+            if (!still) Shaders.Dispatch(made.Trace[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
         }
 
         for (var c = last; c >= 0; c--)
@@ -435,7 +478,7 @@ internal static unsafe partial class WorldProbes
                 .SetTexture("reach_above", made.Reach)
                 .SetNumbers("cascade", 4, cascade).Set("spacing", new Vector4(ProbeSpacing, 0, 0, c == last ? 0 : made.Intervals[c + 1].End))
                 .SetNumbers("counts", 4, counts);
-            Shaders.Dispatch(made.Merge[c], (p * p * p * n * n + 63) / 64);
+            if (!still) Shaders.Dispatch(made.Merge[c], (p * p * p * n * n + 63) / 64);
         }
 
         for (var c = 0; c < cascades; c++)
@@ -447,7 +490,7 @@ internal static unsafe partial class WorldProbes
                 .SetTexture("merged_sky", made.MergedSky[c]).SetTexture("skies", made.Skies)
                 .SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, ProbeSpacing, cascades, 0));
-            Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
+            if (!still) Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
         }
 
         // The screen's probes on the camera, which read the faces and the merged light this frame's

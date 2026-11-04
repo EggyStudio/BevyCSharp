@@ -39,7 +39,7 @@ namespace Bevy;
 /// asks once a frame and a test asks from its steps.
 /// </para>
 /// </remarks>
-internal static unsafe class GiReference
+internal static unsafe partial class GiReference
 {
     /// <summary>The most paths a frame traces across the whole picture, so a frame takes tens of milliseconds.</summary>
     private const int PathsAFrame = 1 << 22;
@@ -101,8 +101,8 @@ internal static unsafe class GiReference
     /// <summary>The camera's light read last, in rows from the top, three floats a pixel, with its size.</summary>
     internal static (int Width, int Height, float[] Light)? LastPicture { get; private set; }
 
-    /// <summary>Whether a reference is being traced or the picture read.</summary>
-    internal static bool Busy => Own() && _job is not null;
+    /// <summary>Whether a reference is being traced, the picture read or a probe's ways traced.</summary>
+    internal static bool Busy => Own() && (_job is not null || _probe is not null);
 
     /// <summary>
     /// Starts tracing a reference of the camera's picture with <paramref name="samples"/> paths a

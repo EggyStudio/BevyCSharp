@@ -88,6 +88,49 @@ internal static class ConsoleFieldCommands
         return string.Create(CultureInfo.InvariantCulture, $"tracing the camera's picture at {Math.Max(1, samples)} paths a pixel into {Path.GetFullPath(path)}");
     }
 
+    [Command("gi.probe", "Reads the world probe of a cascade nearest a point against the reference along its texels' ways, each way's light as the probe holds it, along the texel's middle and drawn across the texel, and its ray's distance against the middle way's first face, into a table where one is named, each path meeting as many faces past the first as given or until it ends: gi.probe <x> <y> <z> <cascade> <samples> [bounces] [table]")]
+    internal static string Probe(float x, float y, float z, int cascade, int samples, int bounces = -1, string? table = null)
+    {
+        if (GiReference.BeginProbe(ConsoleHost.Ecs, new System.Numerics.Vector3(x, y, z), cascade, samples, bounces, table) is { } why) return why;
+
+        // A frame traces 64 paths a way, so the reading takes a frame for each 64 asked and a few
+        // to read the probe and the paths back.
+        ConsoleHost.LaterFrom(() => GiReference.StepProbe(ConsoleHost.Ecs), ConsoleHost.Time.FrameCount + (ulong)Math.Max(1, samples / 64));
+        return string.Create(CultureInfo.InvariantCulture, $"reading cascade {cascade}'s probe nearest {x:0.##} {y:0.##} {z:0.##} at {Math.Max(1, samples)} paths a way");
+    }
+
+    [Command("gi.bounces", "Holds global illumination's probes at a count of bounces past the first for a reading, every one as they run, none, or a count and then still, answering once they hold it: gi.bounces <on|off|count>")]
+    internal static string Bounces(string count)
+    {
+        var word = count.Trim().ToLowerInvariant();
+        int? held = word switch
+        {
+            "on" => null,
+            "off" => 0,
+            _ => int.TryParse(word, NumberStyles.None, CultureInfo.InvariantCulture, out var n) ? n : -1,
+        };
+        if (held < 0)
+        {
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{count.Trim()}' is not on, off or a count.");
+            return "gi.bounces <on|off|count>";
+        }
+        if (WorldProbes.TracedFrames == 0) return "global illumination traces no probes";
+        WorldProbes.HoldBounces(held);
+        string Held() => held switch
+        {
+            null => "the probes add every bounce",
+            0 => "the probes hold the first bounce alone",
+            _ => string.Create(CultureInfo.InvariantCulture, $"the probes hold {held} bounces past the first and stand still"),
+        };
+        if (held is null) return Held();
+
+        // A hold at a count is reached that many frames on and one more without the light of the
+        // frame before, and the probes stop with global illumination turned off.
+        ConsoleHost.LaterFrom(() => WorldProbes.TracedFrames == 0 ? "global illumination stopped tracing its probes" : WorldProbes.HoldReached ? Held() : null,
+            ConsoleHost.Time.FrameCount + 1);
+        return string.Create(CultureInfo.InvariantCulture, $"holding the probes at {held} bounces past the first");
+    }
+
     [Command("gi.compare", "The camera's light before tonemapping against a reference gi.reference wrote, how far the view lies from it, each region's share of the view with its mean light and the reference's, and a picture of the difference beside it: gi.compare <png>")]
     internal static string Compare(string path)
     {

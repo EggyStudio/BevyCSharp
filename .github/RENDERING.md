@@ -348,7 +348,13 @@ are kept apart from the program's as its draws are. `gi.reference <png> <samples
 it with its linear light, its regions and their names, and `gi.compare <png>` reads the camera's
 light before tonemapping and says how far the view lies from it, the pixels' differences summed over
 the reference's light, with each region's mean light against the reference's and a picture of the
-difference. A texture counts as its material's base color and a mesh's vertices' colors are left
+difference. `gi.probe <x> <y> <z> <cascade> <samples> [bounces] [table]` traces the same paths from
+one world probe's place along its octahedron's texels, a way through each texel's middle and ways
+drawn across it, against the light the probe holds along them and how far its rays went, and
+`gi.bounces <on|off|count>` holds the probes at a count of bounces past the first for it, the light
+of the frame before added for that many frames after one without it and the probes then standing
+still, so a probe's light at each bounce is read against paths meeting as many faces.
+A texture counts as its material's base color and a mesh's vertices' colors are left
 out, and a path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
 to light the scene, reads apart from its reference. The bounce rooms are a test
