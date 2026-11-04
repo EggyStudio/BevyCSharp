@@ -6,6 +6,18 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-04
+
+![](.github/assets/readings/2026-11-04-item-95-seam.webp)
+The feature test's light hall's aisle at eight in the morning under a clear sky at Medium from the
+scripted run's eye two units inside the front wall, on the left with each cascade snapped down to
+its grid, the first three ending on the front wall behind the eye, which read black to the probes
+before it, the floor 17% under its path-traced reference, and on the right with each cascade kept a
+step of eight cells or more from the eye on every side, the wall inside the cascades and the aisle
+lighter and warmer throughout, the floor 6% under.
+
+Done that day
+
 ## 2026-11-03
 
 ![](.github/assets/readings/2026-11-03-item-95-air.webp)

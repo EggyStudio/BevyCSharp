@@ -220,7 +220,8 @@ finest and 128 in the fourth. A distance is exact within four cells of a surface
 beyond. Each cell is painted the color of its nearest surface, its material's base color times its
 vertices' colors, with the way that surface faces, which global illumination reads a ray's hit by,
 so a cascade takes 5 MB of the GPU's memory. The cascades sit a third of their width ahead of the
-camera and move a few of their cells at a time as it moves. A far cascade after them, where asked,
+camera, eight of their cells behind it at least, and move a few of their cells at a time as it
+moves. A far cascade after them, where asked,
 has cells as wide as reaching its distance ahead of the camera takes, at least twice the last
 counted cascade's, held to the camera's far plane, so a ray or a contact shadow that leaves the
 counted cascades meets what lies far off.

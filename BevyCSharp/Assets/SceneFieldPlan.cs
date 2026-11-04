@@ -22,11 +22,12 @@ namespace Bevy;
 /// one before's, and lies around a point ahead of the eye, by <see cref="Lead"/> of its width the
 /// way the eye looks, so more of it holds what the camera sees, with its corner on a grid of
 /// <see cref="SnapCells"/> of its cells, so it moves only when that point has gone that far and the
-/// cells it keeps stay where they were. After them, where the program asks for one, the far cascade
-/// lies the same way, its cells as wide as reaching a distance ahead of the eye takes
+/// cells it keeps stay where they were, and a step further where the eye would stand within a step
+/// of a side (<see cref="OriginAround"/>). After them, where the program asks for one, the far
+/// cascade lies the same way, its cells as wide as reaching a distance ahead of the eye takes
 /// (<see cref="FarCellFor"/>). A cascade that moves, or that a still mesh came into or left, is
-/// built again, the finest first, as many a frame as the budget says, and until then keeps the place
-/// and the meshes it was built with, which the info the shaders read says.
+/// built again, the finest first, as many a frame as the budget says, and until then keeps the
+/// place and the meshes it was built with, which the info the shaders read says.
 /// </para>
 /// <para>
 /// A mesh drawn the same, by its mesh, its matrix and its sides, for <see cref="SettleFrames"/>
@@ -324,13 +325,33 @@ internal sealed partial class SceneFieldPlan
     /// Where a cascade's corner would lie around <paramref name="eye"/> looking along
     /// <paramref name="ahead"/>, a unit direction, or zero for a cascade around the eye itself.
     /// </summary>
+    /// <remarks>
+    /// The point ahead is snapped down to the grid of <see cref="SnapCells"/> cells, which leaves
+    /// the side behind an eye looking down an axis the negative way 1.6 to 9.6 cells behind it and
+    /// the positive way 9.6 to 17.6, so where a side lies within a step of the eye the cascade
+    /// moves a step further that way. A layer of probes, which stand a step apart, then stands
+    /// behind the eye, and the wall the eye backs onto lies inside the cascade. Snapped down alone,
+    /// an aisle seen down its length from a unit inside its front wall had its first two cascades
+    /// end on that wall, the probes' hits on it lying past their sides and taken through the next
+    /// cascade's cells and probes, so the wall read black to the probes before it, the first
+    /// cascade's probes a unit from it reading their face toward it 0.01 where 0.33, and the aisle
+    /// read 11% under its reference where seen from 0.3 nearer the wall it read 4% over. The
+    /// feature test's hall seen from two units inside its front wall had its first three cascades
+    /// end on it, and its floor read 17% under where it reads 6%.
+    /// </remarks>
     public Vector3 OriginAround(int cascade, Vector3 eye, Vector3 ahead = default)
     {
         var cell = CellOf(cascade);
         var step = cell * SnapCells;
         var middle = eye + ahead * (Lead * Resolution * cell);
         var snapped = new Vector3(MathF.Floor(middle.X / step), MathF.Floor(middle.Y / step), MathF.Floor(middle.Z / step)) * step;
-        return snapped - new Vector3(Resolution / 2 * cell);
+        var corner = snapped - new Vector3(Resolution / 2 * cell);
+        return new Vector3(Clear(corner.X, eye.X), Clear(corner.Y, eye.Y), Clear(corner.Z, eye.Z));
+
+        // The corner along one axis, a step further from the eye where it stands within a step of a
+        // side.
+        float Clear(float low, float at) =>
+            at - low < step ? low - step : low + Resolution * cell - at < step ? low + step : low;
     }
 
     /// <summary>

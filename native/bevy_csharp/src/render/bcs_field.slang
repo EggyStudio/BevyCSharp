@@ -68,10 +68,10 @@ public static const float EyeClear = 6.0;
 
 /// How far into cascade `c`'s outer band a point `cell` lies, in its cells, as a share of the band,
 /// one at the band's inner edge and beyond and zero at the side, `margin` cells off each side. A
-/// cascade lies 0.35 of its width ahead of the eye, so the eye stands 1.6 to 9.6 cells from the
-/// side behind it, inside a band of eight; on a side the eye is that near the band ends `EyeClear`
-/// cells short of it, or is none and the value steps at the side, behind the eye where no surface
-/// it sees lies.
+/// cascade lies 0.35 of its width ahead of the eye and a step of eight cells or more from it on
+/// every side (SceneFieldPlan.OriginAround), so the eye stands 8 to 17.6 cells from the side behind
+/// it, about a band of eight; on a side the eye is that near the band ends `EyeClear` cells short
+/// of it, behind the eye where no surface it sees lies.
 public float bandHold(FieldInfo info, int c, float3 cell, float band, float margin)
 {
     float4 oc = info.cascades[c].origin_and_cell;
