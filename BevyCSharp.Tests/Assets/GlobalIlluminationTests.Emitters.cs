@@ -59,6 +59,47 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// A closed room of the level's white lit by a ball emitting a lamp's warm light reads within
+    /// 10% of its reference on every face, as a block of the ball's box reads.
+    /// </summary>
+    /// <remarks>
+    /// A small emitter is carried as a light from its box. Taken as its box whole, every face
+    /// emitting, a ball, whose surface is about half its box's, was carried twice as bright as it
+    /// is, and the room read 100 to 109% over its reference on every face, where lit by a block of
+    /// the ball's box it reads within 10%. The light takes the share of its box's faces the mesh's
+    /// own surface makes, the area of its triangles the field's gather hands over.
+    /// </remarks>
+    [SkippableFact]
+    public void ARoomLitByABallReadsAsItsReference()
+    {
+        Needs.Shaders();
+        var faults = new List<string>();
+        foreach (var (face, shown, wanted) in EmitterRoom(ecs => BallScene(ecs), name => !name.StartsWith("ball", StringComparison.Ordinal)))
+        {
+            var off = shown / wanted - 1;
+            output.WriteLine($"the room lit by a ball reads its {face} {shown:0.000} against {wanted:0.000}, {off:+0.000;-0.000}");
+            if (Math.Abs(off) >= 0.1) faults.Add($"the {face} reads {off:+0.000;-0.000} of its reference");
+        }
+
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// A closed room of the level's white, eight units across and three high, lit by a ball 0.6 in
+    /// radius emitting a lamp's warm light as the feature test's hub's lamp does, at a tenth of its
+    /// light, 1.2 over the floor.
+    /// </summary>
+    private static void BallScene(EcsWorld ecs)
+    {
+        EmitterScene(ecs, 0, 8f, 3f);
+        var ball = ecs.Spawn();
+        Render.SetMesh(ecs, ball, Render.CreateMesh(MeshShape.Sphere, 0.6f));
+        Render.SetMaterial(ecs, ball, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 0.6f, 0.2f, 1f), Emissive = (1_200f, 500f, 100f, 1f) }));
+        ecs.Add(ball, Transform.At(-1.5f, 1.2f, -1.5f));
+        ecs.SetName(ball, "ball");
+    }
+
+    /// <summary>
     /// Global illumination's passes' time on the GPU in a closed room of the level's white lit by
     /// forty small emitters at <see cref="GlobalIllumination.Medium"/> at 1280 by 720, printed, as
     /// 3DEngine's voxel game's room of forty glowstones reads its frame.
@@ -140,7 +181,15 @@ public sealed partial class GlobalIlluminationTests
     /// (<see cref="EmitterScene"/>), its mean light in the picture and in its reference of 256
     /// paths.
     /// </summary>
-    private static List<(string Face, double Shown, double Wanted)> EmitterRoom(int emitters)
+    private static List<(string Face, double Shown, double Wanted)> EmitterRoom(int emitters) =>
+        EmitterRoom(ecs => EmitterScene(ecs, emitters, 8f, 3f), name => !name.StartsWith("glow", StringComparison.Ordinal));
+
+    /// <summary>
+    /// Each face the camera sees of the room <paramref name="scene"/> makes that
+    /// <paramref name="counted"/> takes by its name, its mean light in the picture and in its
+    /// reference of 256 paths.
+    /// </summary>
+    private static List<(string Face, double Shown, double Wanted)> EmitterRoom(Action<EcsWorld> scene, Func<string, bool> counted)
     {
         var supported = false;
         var (begun, read, ready) = (false, false, 0);
@@ -149,7 +198,7 @@ public sealed partial class GlobalIlluminationTests
             Width = 160,
             Height = 90,
             Frames = 6000,
-            Scene = ecs => EmitterScene(ecs, emitters, 8f, 3f),
+            Scene = scene,
         }
             .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
             .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
@@ -187,7 +236,7 @@ public sealed partial class GlobalIlluminationTests
         var traced = GiReference.Last!;
         var picture = GiReference.LastPicture!.Value.Light;
         var faces = new List<(string, double, double)>();
-        foreach (var name in traced.Names.Where(n => !n.Value.StartsWith("glow", StringComparison.Ordinal)).OrderBy(n => n.Value))
+        foreach (var name in traced.Names.Where(n => counted(n.Value)).OrderBy(n => n.Value))
         {
             var (shown, wanted, pixels) = (0.0, 0.0, 0);
             for (var i = 0; i < traced.Regions.Length; i++)

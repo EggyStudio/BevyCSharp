@@ -22,13 +22,17 @@ namespace Bevy;
 /// cascade's probe spacing (<see cref="SceneField.Carried"/>). Emitters square to the axes that touch
 /// and emit the same light are one light, so a stack of emissive blocks is not four lights each
 /// hidden by the others. The <see cref="Most"/> carried emitters nearest the eye are lights each
-/// frame. Its light reaches as far as it lights a surface by a fiftieth.
+/// frame. Its light reaches as far as it lights a surface by a thousandth of its own light
+/// (<see cref="Faint"/>).
 /// </para>
 /// <para>
-/// 3DEngine takes a mesh's surface over its box's from its vertices and cuts a mesh of many
-/// emitters into its parts, which the field's gather here does not hand over, so each emitter is
-/// its box whole, every face emitting, as a block is. A ball emits from about half its box's
-/// surface, so a round emitter is carried as about twice as bright as it is.
+/// Each emitter is its box, every face emitting, by the share of the box's faces its mesh's own
+/// surface makes, the area of its triangles the field's gather hands over, as 3DEngine takes a
+/// mesh's surface over its box's from its vertices. Taken as its box whole, a ball, whose surface
+/// is about half its box's, was carried twice as bright as it is, and a room of the level's white
+/// lit by a ball read 100 to 109% over its path-traced reference on every face where lit by a block
+/// of its box it read within 10%. 3DEngine cuts a mesh of many emitters into its parts, which the
+/// gather does not, so such a mesh is one light of its box.
 /// </para>
 /// </remarks>
 internal static class GlowLights
@@ -120,20 +124,24 @@ internal static class GlowLights
             var size = box.Max - box.Min;
             var largest = MathF.Max(size.X, MathF.Max(size.Y, size.Z));
             var least = 0.01f * largest;
-            if (largest > 0 && MathF.Min(size.X, MathF.Min(size.Y, size.Z)) < least)
+            var flat = largest > 0 && MathF.Min(size.X, MathF.Min(size.Y, size.Z)) < least;
+            if (flat)
             {
                 var grow = Vector3.Max(Vector3.Zero, new Vector3(least) - size) / 2;
                 box = new SceneFieldPlan.Box(box.Min - grow, box.Max + grow);
             }
+            // The share of its box's faces the mesh's own surface makes, where the bridge worked it
+            // out, so a ball, whose surface is about half its box's, emits as a ball does.
+            var own = !flat && instance.Surface > 0 ? Math.Clamp(instance.Surface / Math.Max(FacesSurface(size), 1e-8f), 0.05f, 1f) : 1f;
             if (Square(w))
             {
                 var world = box.Transformed(w);
-                square.Add((world, glow, FacesSurface(world.Max - world.Min)));
+                square.Add((world, glow, FacesSurface(world.Max - world.Min) * own));
                 continue;
             }
             var half = (box.Max - box.Min) / 2;
             lights.Add(new Light(Vector3.Transform((box.Min + box.Max) / 2, w), new Vector3(w.M11, w.M12, w.M13) * half.X,
-                new Vector3(w.M21, w.M22, w.M23) * half.Y, new Vector3(w.M31, w.M32, w.M33) * half.Z, glow, 1));
+                new Vector3(w.M21, w.M22, w.M23) * half.Y, new Vector3(w.M31, w.M32, w.M33) * half.Z, glow, own));
         }
 
         // The boxes that touch, found through a grid of the largest box's size, and joined.

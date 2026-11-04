@@ -35,7 +35,10 @@ internal unsafe struct NativeFieldDraw
     /// </summary>
     [FieldOffset(64)] public fixed float Color[4];
 
-    /// <summary>The material's emission in linear light.</summary>
+    /// <summary>
+    /// The material's emission in linear light, red, green and blue, and the surface the mesh emits
+    /// from, the area of its triangles in its own space, where it emits.
+    /// </summary>
     [FieldOffset(80)] public fixed float Emission[4];
 
     /// <summary>The least corner of the mesh's bounds in its own space.</summary>

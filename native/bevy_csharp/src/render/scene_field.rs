@@ -44,7 +44,8 @@ pub struct BcsFieldDraw {
     pub color: [f32; 4],
     /// The material's emission in linear light, in the units of the camera's picture as Bevy shows
     /// it, times the camera's exposure by the share of it the material's `emissive_exposure_weight`
-    /// sets.
+    /// sets, and in its fourth channel the surface the mesh emits from, the area of its triangles
+    /// in its own space, where it emits, and none where it does not.
     pub emission: [f32; 4],
     /// The mesh's bounds in its own space, the least corner, then the greatest.
     pub low: [f32; 4],
@@ -265,11 +266,12 @@ mod built {
     use bevy::ecs::resource::Resource;
     use bevy::ecs::system::ResMut;
     use bevy::ecs::world::World;
-    use bevy::mesh::{Indices, Mesh, PrimitiveTopology, VertexAttributeValues};
+    use bevy::mesh::Mesh;
     use bevy::render::storage::ShaderBuffer;
 
     use super::{BcsFieldDraw, BcsFieldEye};
     use crate::interop::status;
+    use crate::render::field_triangles::{bounds_of, corners_of, surface_of, triangles_of};
 
     /// Bytes of one corner in the pool.
     pub const CORNER_BYTES: usize = 16;
@@ -287,6 +289,7 @@ mod built {
         generations: Vec<u32>,
         bounds: Vec<Option<[f32; 6]>>,
         triangles: Vec<Option<u32>>,
+        surfaces: Vec<Option<f32>>,
     }
 
     impl FieldMeshes {
@@ -302,6 +305,7 @@ mod built {
             self.generations.push(0);
             self.bounds.push(None);
             self.triangles.push(None);
+            self.surfaces.push(None);
             number
         }
     }
@@ -336,6 +340,7 @@ mod built {
                 meshes.generations[number as usize] = meshes.generations[number as usize].wrapping_add(1);
                 meshes.bounds[number as usize] = None;
                 meshes.triangles[number as usize] = None;
+                meshes.surfaces[number as usize] = None;
             }
         }
     }
@@ -478,6 +483,14 @@ mod built {
                     [r * shown, g * shown, b * shown, 0.0]
                 });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
+                // The surface an emitter emits from, read once a generation and for an emitter
+                // alone, which global illumination carries as a light from its box by this share of
+                // the box's faces, so a ball emits as a ball does rather than as its box.
+                let surface = if emission[..3].iter().any(|&channel| channel > 0.0) {
+                    *meshes.surfaces[number as usize].get_or_insert_with(|| data.and_then(|data| data.get(&mesh.0)).map_or(0.0, surface_of))
+                } else {
+                    0.0
+                };
 
                 *draw = BcsFieldDraw {
                     mesh: number,
@@ -486,7 +499,7 @@ mod built {
                     triangles,
                     rows: [x.x, y.x, z.x, t.x, x.y, y.y, z.y, t.y, x.z, y.z, z.z, t.z],
                     color: [color[0], color[1], color[2], look.through.clamp(0.0, 1.0)],
-                    emission: [emission[0], emission[1], emission[2], 0.0],
+                    emission: [emission[0], emission[1], emission[2], surface],
                     low: [low[0], low[1], low[2], 0.0],
                     high: [high[0], high[1], high[2], 0.0],
                 };
@@ -619,114 +632,6 @@ mod built {
             crate::render::compute::rebind_buffer(world, handle);
         }
     }
-
-    /// The box around a mesh's places in its own space, or none for a mesh with none the bridge
-    /// can read, as one whose data went to the render world alone.
-    fn bounds_of(mesh: &Mesh) -> Option<[f32; 6]> {
-        let Ok(Some(VertexAttributeValues::Float32x3(positions))) = mesh.try_attribute_option(Mesh::ATTRIBUTE_POSITION) else {
-            return None;
-        };
-
-        let mut b = [f32::MAX, f32::MAX, f32::MAX, f32::MIN, f32::MIN, f32::MIN];
-        for p in positions {
-            for axis in 0..3 {
-                b[axis] = b[axis].min(p[axis]);
-                b[axis + 3] = b[axis + 3].max(p[axis]);
-            }
-        }
-
-        (!positions.is_empty()).then_some(b)
-    }
-
-    /// How many triangles [`corners_of`] reads from a mesh, counted from its indices or its
-    /// vertices alone. An index past the vertices, which leaves a mesh out of the pool, is not
-    /// looked for, so such a mesh is weighed by the triangles it would have had.
-    pub fn triangles_of(mesh: &Mesh) -> u32 {
-        if mesh.primitive_topology() != PrimitiveTopology::TriangleList {
-            return 0;
-        }
-
-        let Ok(Some(VertexAttributeValues::Float32x3(positions))) = mesh.try_attribute_option(Mesh::ATTRIBUTE_POSITION) else {
-            return 0;
-        };
-
-        let corners = match mesh.try_indices_option() {
-            Ok(Some(indices)) => indices.len(),
-            Ok(None) => positions.len(),
-            Err(_) => 0,
-        };
-        (corners / 3) as u32
-    }
-
-    /// A mesh's triangles as the pool's corners, or none for a mesh of no triangles the bridge can
-    /// read. The reads that answer rather than panic, since a mesh whose data went to the render
-    /// world keeps a husk here.
-    pub fn corners_of(mesh: &Mesh) -> Option<Vec<[u32; 4]>> {
-        if mesh.primitive_topology() != PrimitiveTopology::TriangleList {
-            return None;
-        }
-
-        let Ok(Some(VertexAttributeValues::Float32x3(positions))) = mesh.try_attribute_option(Mesh::ATTRIBUTE_POSITION) else {
-            return None;
-        };
-
-        let colors = match mesh.try_attribute_option(Mesh::ATTRIBUTE_COLOR) {
-            Ok(Some(VertexAttributeValues::Float32x4(colors))) if colors.len() == positions.len() => Some(colors),
-            _ => None,
-        };
-
-        let indices: Vec<u32> = match mesh.try_indices_option() {
-            Ok(Some(Indices::U16(indices))) => indices.iter().map(|&index| index as u32).collect(),
-            Ok(Some(Indices::U32(indices))) => indices.clone(),
-            Ok(None) => (0..positions.len() as u32).collect(),
-            Err(_) => return None,
-        };
-
-        let count = indices.len() / 3 * 3;
-        if count == 0 || indices[..count].iter().any(|&index| index as usize >= positions.len()) {
-            return None;
-        }
-
-        let places: Vec<[u32; 3]> = indices[..count].iter().map(|&index| positions[index as usize].map(f32::to_bits)).collect();
-        let open = open_edges(&places);
-
-        Some(
-            (0..count)
-                .map(|i| {
-                    let color = colors.map_or(0x00FF_FFFF, |colors| srgb_bytes(colors[indices[i] as usize]));
-                    let [x, y, z] = places[i];
-                    [x, y, z, color | if open[i] { OPEN_EDGE } else { 0 }]
-                })
-                .collect(),
-        )
-    }
-
-    /// Whether each edge of a mesh's triangles is open, its edge from each corner to the next, which
-    /// no other triangle shares by the places of its ends, so a mesh whose faces keep vertices of
-    /// their own, as a cube's do, is closed where its faces meet and a ground plane open at its rim.
-    pub fn open_edges(places: &[[u32; 3]]) -> Vec<bool> {
-        let edge = |i: usize| {
-            let (a, b) = (places[i], places[i / 3 * 3 + (i % 3 + 1) % 3]);
-            if a <= b { (a, b) } else { (b, a) }
-        };
-
-        let mut shared: HashMap<([u32; 3], [u32; 3]), u32> = HashMap::with_capacity(places.len());
-        for i in 0..places.len() {
-            *shared.entry(edge(i)).or_insert(0) += 1;
-        }
-
-        (0..places.len()).map(|i| shared[&edge(i)] == 1).collect()
-    }
-
-    /// A color in linear light as three sRGB bytes, red lowest.
-    fn srgb_bytes(linear: [f32; 4]) -> u32 {
-        let byte = |l: f32| {
-            let l = l.clamp(0.0, 1.0);
-            let s = if l <= 0.003_130_8 { l * 12.92 } else { 1.055 * l.powf(1.0 / 2.4) - 0.055 };
-            (s * 255.0 + 0.5) as u32
-        };
-        byte(linear[0]) | (byte(linear[1]) << 8) | (byte(linear[2]) << 16)
-    }
 }
 
 #[cfg(test)]
@@ -749,29 +654,5 @@ mod tests {
         assert_eq!(std::mem::offset_of!(BcsFieldEye, far), 28);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, camera), 32);
         assert_eq!(std::mem::size_of::<BcsFieldEye>(), 40);
-    }
-
-    /// A quad of two triangles is open at its four sides and closed along its diagonal, whether
-    /// the triangles share vertices or keep their own.
-    #[cfg(feature = "render")]
-    #[test]
-    fn an_edge_is_open_where_no_other_triangle_shares_its_ends() {
-        let at = |x: f32, z: f32| [x.to_bits(), 0f32.to_bits(), z.to_bits()];
-        let quad = [at(0.0, 0.0), at(1.0, 0.0), at(1.0, 1.0), at(0.0, 0.0), at(1.0, 1.0), at(0.0, 1.0)];
-        assert_eq!(super::open_edges(&quad), [true, true, false, false, true, true]);
-    }
-
-    /// A mesh is weighed by as many triangles as the pool reads from it, with indices or without.
-    #[cfg(feature = "render")]
-    #[test]
-    fn a_mesh_weighs_the_triangles_the_pool_reads() {
-        use bevy::shape::{Cuboid, Sphere};
-        use bevy::mesh::Mesh;
-
-        for mesh in [Mesh::from(Cuboid::default()), Mesh::from(Sphere::default()), Mesh::from(Cuboid::default()).with_duplicated_vertices()] {
-            let read = super::corners_of(&mesh).map_or(0, |corners| corners.len() / 3);
-            assert!(read > 0);
-            assert_eq!(super::triangles_of(&mesh) as usize, read);
-        }
     }
 }

@@ -38,6 +38,8 @@ pub mod leaves;
 pub mod light_counts;
 pub mod scene_counts;
 pub mod scene_field;
+#[cfg(feature = "render")]
+pub mod field_triangles;
 pub mod gi_lights;
 pub mod lights;
 pub mod material;

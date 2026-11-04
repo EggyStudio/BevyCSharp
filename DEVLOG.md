@@ -24,6 +24,13 @@ of, the walls facing it black at 0.6 to 2.4 under nothing, and on the right with
 back through the camera's air as Bevy dims it, the walls a dim moonlit gray, the shaded wall 17%
 under its path-traced reference.
 
+![](.github/assets/readings/2026-11-04-item-101-glow-bay.webp)
+The feature test's light hall's glow bay at eight in the morning at Medium, on the left with each
+emitter carried as a light from its box whole, the cyan ring's box four times its surface and the
+amber ball's twice, the bay's walls, floor and ceiling 111 to 146% over their path-traced reference,
+and on the right with each emitter carried by the share of its box's faces its own surface makes,
+the bay within 9% of its reference but for its dark wall.
+
 Done that day
 
 ## 2026-11-03

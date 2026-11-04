@@ -348,6 +348,13 @@ feature test's Cornell lamp twice under rays, its face gray. `DeferredEmissiveTe
 exposed panel drawn deferred to what forward shows and within 2% of its reference, where unmended
 it read 38,165 against 38.2, and the same panel under rays to what forward shows.
 
+A mesh a shader places in its vertex stage, as the feature test's fireflies are, stands in the
+reference where its mesh's own corners lie and in the picture where it is drawn, so the pixels it is
+drawn over read apart from their reference, and such a mesh is hidden for a reading (`entity.set
+Fireflies Visibility.Mode Hidden`). At night the alley's wall by the arch read 52% over its
+reference and its floor 270% over with the fireflies drawn, and 10% under and 7% over with them
+hidden.
+
 The emitters are 3DEngine's. The gather gives each mesh's emission in the picture's units as Bevy
 shows it, times the camera's exposure by the share of it the emission's alpha sets, the field paints
 it beside the colors, and a probe's ray that meets it brings its light back. An emitter whose box's
@@ -357,17 +364,20 @@ shadowed by a march through the field, the four brightest within reach at each p
 the two brightest at a probe's hit, and the field marks the cells such an emitter paints, so a ray
 that meets it does not take its light twice. Emitters square to the axes that touch and emit the
 same light are one light, and one thinner than a cell that is not carried lends its light to the
-cells near it. Two things depart from 3DEngine's. Each emitter is its box whole, every face
-emitting, since the field's gather hands over no vertices, so a round emitter is carried as about
-twice as bright as it is and a mesh of many emitters is not cut into its parts. And the pass marches
-to the middle of a light, where 3DEngine's pixels with no screen probe near march to the halves of
-its faces, since the halves read alike in the bounce rooms and took the pass from 1.3 ms to 2.0 to
-3.5 at 1280 by 720 with one light over the whole view of a Cornell box. The closed form clips a face
-an edge at a time with its loops unrolled, since with small arrays indexed as rolled loops ran it
-took the pass from 0.19 ms to 2.9 there. With one glow light over the whole view the pass takes 1.3
-ms, and a cascade's trace 0.18 ms at `High`. In the bounce rooms the strip's view reads 0.18 to 0.19
-from its reference where it read 1.00 with no emitter carried, the glowing blocks' 0.05 where 0.30
-and the Cornell box's 0.10 to 0.11 where 0.11, no view wider.
+cells near it. Each emitter is its box, every face emitting, by the share of the box's faces its
+mesh's own surface makes, the area of its triangles the field's gather sums once a generation and
+hands over, as 3DEngine takes a mesh's surface over its box's from its vertices, so a ball emits
+from about half its box's faces and a ring of the feature test's glow bay from a quarter, which as
+their boxes whole read the bay 111 to 146% over its reference where they read it within 9%. Two
+things depart from 3DEngine's. A mesh of many emitters is not cut into its parts. And the pass
+marches to the middle of a light, where 3DEngine's pixels with no screen probe near march to the
+halves of its faces, since the halves read alike in the bounce rooms and took the pass from 1.3 ms
+to 2.0 to 3.5 at 1280 by 720 with one light over the whole view of a Cornell box. The closed form
+clips a face an edge at a time with its loops unrolled, since with small arrays indexed as rolled
+loops ran it took the pass from 0.19 ms to 2.9 there. With one glow light over the whole view the
+pass takes 1.3 ms, and a cascade's trace 0.18 ms at `High`. In the bounce rooms the strip's view
+reads 0.18 to 0.19 from its reference where it read 1.00 with no emitter carried, the glowing
+blocks' 0.05 where 0.30 and the Cornell box's 0.10 to 0.11 where 0.11, no view wider.
 
 The lights past the brightest at a surface are grouped by their way from it into as many groups as
 there are marches, each joining the group whose first light lies nearest its way or opening one

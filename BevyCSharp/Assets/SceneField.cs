@@ -451,9 +451,11 @@ internal static unsafe partial class SceneField
                 draw.Rows[3], draw.Rows[7], draw.Rows[11], 1);
             var bounds = new SceneFieldPlan.Box(new Vector3(draw.Low[0], draw.Low[1], draw.Low[2]), new Vector3(draw.High[0], draw.High[1], draw.High[2]));
             // The color's fourth channel is the share of light the surface lets pass a unit of its
-            // depth, as the bridge writes it.
+            // depth, and the emission's the surface an emitter emits from, as the bridge writes
+            // them.
             var instance = new SceneFieldPlan.Instance(draw.Mesh, draw.Generation, world, (draw.Flags & 1) != 0, bounds,
-                new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]), Math.Clamp(draw.Color[3], 0f, 1f));
+                new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]), Math.Clamp(draw.Color[3], 0f, 1f),
+                Math.Max(draw.Emission[3], 0f));
             through |= instance.Through > 0f;
             if (once && !Once.Add(instance)) continue;
             Drawn.Add((instance, (draw.Flags & 2) != 0));
