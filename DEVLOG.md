@@ -31,7 +31,13 @@ amber ball's twice, the bay's walls, floor and ceiling 111 to 146% over their pa
 and on the right with each emitter carried by the share of its box's faces its own surface makes,
 the bay within 9% of its reference but for its dark wall.
 
-Done that day
+![](.github/assets/readings/2026-11-04-item-102-faces.webp)
+The bounce rooms' Cornell box closed across its front by a white wall and empty of its blocks, in
+their field of three cascades of 0.15 at Medium, read on the world's probes alone, on the left with
+each ray's hit and each pixel reading the probes' faces where the probes stand, its light past the
+direct 8 to 17% over its path-traced reference, and on the right with each face read toward the
+light the surface it is read for gathers, each patch the probes' rays met turned toward that
+surface, the box a shade darker and 1 to 3% over.
 
 ## 2026-11-03
 
@@ -94,8 +100,6 @@ gray where its path-traced reference is black, and on the right with the march l
 first step, the room dark but for patches along the east wall's foot, where the screen probes' rays
 meet the wall at once.
 
-Done that day
-
 ## 2026-11-02
 
 ![](.github/assets/readings/2026-11-02-verdict-49-solari.webp)
@@ -118,6 +122,13 @@ against the variance of its history's mean and keeping that mean as its history,
 checker sharp in both.
 
 Done that day
+
+- Item 68 at `720ec3db`. The feature test's level is remade in the new tools and looks as asked.
+- Item 80 at `af54d261`. The native bridge's freshness is checked at build and run, shaders among
+  its inputs.
+- Item 91 at `1ea6d865`. The sky's clock, weather and looks move to the Sky module.
+- Item 92 at `99160868`. The Cornell lamp under rays, its face and its halo.
+- Item 94 at `add899da`. A scene field shadow test fails once in a suite and passes alone.
 
 ## 2026-11-01
 
@@ -160,6 +171,7 @@ below it and the court's walls round them.
 Done that day
 
 - Item 89 at `3ee62451`. A fresh offscreen session's first frame is whole.
+- Item 90 at `58265110`. The feature test runs on the runner's lavapipe without a crash.
 
 ## 2026-10-31
 

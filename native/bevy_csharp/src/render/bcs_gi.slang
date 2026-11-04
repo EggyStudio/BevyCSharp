@@ -396,8 +396,12 @@ public float bouncedHold(FieldInfo info, float3 p, float3 n, float spacing, floa
 /// probes of cascade `c` around it, each weighed by how near it is, how squarely it stands in front
 /// of the surface and how much of it it sees (`probeSees`), a probe inside a mesh passed over, the
 /// three faces `n` looks toward weighed by the square of `n` along each. A probe it does not see
-/// keeps a twentieth of its weight, so a surface wedged between two meshes is not left dark.
-float3 bouncedIn(Texture3D<float4> cubes, Texture3D<float> reach, FieldInfo info, float3 p, float3 n, float probes, float spacing, int c)
+/// keeps a twentieth of its weight, so a surface wedged between two meshes is not left dark. The
+/// faces are read toward their light at the surfaces they are read for (`cubesAt`) as
+/// `bouncedSeenSum` reads them, since read where the probes stood a closed box with dark side walls
+/// took its floor's first bounce 21% over its reference at four cascades of a quarter meter, where
+/// read so it takes it 8% over.
+float3 bouncedIn(Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float> reach, FieldInfo info, float3 p, float3 n, float probes, float spacing, int c)
 {
     float4 oc = info.cascades[c].origin_and_cell;
     float3 q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, 0.0, probes - 1.0);
@@ -412,17 +416,25 @@ float3 bouncedIn(Texture3D<float4> cubes, Texture3D<float> reach, FieldInfo info
         int3 at = min(base + offset, int3(int(probes) - 1));
         float3 lerps = lerp(1.0 - f, f, float3(offset));
         float3 light = float3(0.0);
+        float3 lightAt = float3(0.0);
+        float3 reachAt = float3(0.0);
         float valid = 1.0;
         float3 moved = float3(0.0);
         for (int axis = 0; axis < 3; axis++)
         {
             int face = axis * 2 + (n[axis] < 0.0 ? 1 : 0);
-            float4 texel = cubes.Load(int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0));
+            int4 where = int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0);
+            float4 texel = cubes.Load(where);
+            float4 texelAt = cubesAt.Load(where);
             light += texel.rgb * n2[axis];
+            lightAt += texelAt.rgb * n2[axis];
+            reachAt[axis] = texelAt.a;
             valid = min(valid, faceHolds(texel.a));
             moved[axis] = faceMove(texel.a);
         }
         float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * spacing);
+        float h = dot(reachAt, n2);
+        light = lerp(light, lightAt, h > 1e-3 ? saturate(dot(probe - p, n) / h) : 0.0);
         float weight = lerps.x * lerps.y * lerps.z * valid * probeFacing(p, n, probe);
         weight *= lerp(0.05, 1.0, probeSees(reach, p, n, probe, at, c, probes, oc.w * spacing));
         sum += light * weight;
@@ -435,7 +447,7 @@ float3 bouncedIn(Texture3D<float4> cubes, Texture3D<float> reach, FieldInfo info
 /// probes that holds it, fading to the next cascade's across its outer band (`cascadeHold`) where
 /// that one is built, or none where no cascade of probes holds `p`. The probes are found where the
 /// field's cascades they stand in lie (`probesOf`).
-public float3 bouncedAt(Texture3D<float4> cubes, Texture3D<float> reach, FieldInfo field, float3 p, float3 n, float probes, float spacing, float cascades)
+public float3 bouncedAt(Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float> reach, FieldInfo field, float3 p, float3 n, float probes, float spacing, float cascades)
 {
     FieldInfo info = probesOf(field, int(cascades));
     int c = fieldCascade(info, p, 1.0);
@@ -448,16 +460,21 @@ public float3 bouncedAt(Texture3D<float4> cubes, Texture3D<float> reach, FieldIn
     {
         float share = k == 0 ? own : 1.0 - own;
         if (share > 0.0)
-            light += bouncedIn(cubes, reach, info, p, n, probes, spacing, c + k) * share;
+            light += bouncedIn(cubes, cubesAt, reach, info, p, n, probes, spacing, c + k) * share;
     }
     return light;
 }
 
 /// The sum `bouncedSeenAt` divides for cascade `c`, the light of the probes seen times their
 /// weights, and the weights, which a reader that takes another light where no probe is seen tells
-/// apart from dark. `gathered` places the probes as `probesOf` does.
-public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> cubes, float3 p, float3 n,
-    float probes, float spacing, int c)
+/// apart from dark. `gathered` places the probes as `probesOf` does. Each probe's faces are read
+/// toward their light at the surfaces they are read for (`cubesAt`, gi_ambient.slang) by how far
+/// `p` lies from the probe along `n` against how far that surface lay, so a hit on the floor a
+/// face's own ray met takes the light the floor gathers rather than the probe's over it, which the
+/// walls and the ceiling are nearer to. Read at the probes, a closed room of the level's white came
+/// back about 5% over its reference at each bounce.
+public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
+    float3 p, float3 n, float probes, float spacing, int c)
 {
     float4 oc = gathered.cascades[c].origin_and_cell;
     float3 q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, 0.0, probes - 1.0);
@@ -473,19 +490,30 @@ public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldI
         int3 at = min(base + offset, int3(int(probes) - 1));
         float3 lerps = lerp(1.0 - f, f, float3(offset));
         float3 light = float3(0.0);
+        float3 lightAt = float3(0.0);
+        float3 reachAt = float3(0.0);
         float valid = 1.0;
         float3 moved = float3(0.0);
         for (int axis = 0; axis < 3; axis++)
         {
             int face = axis * 2 + (n[axis] < 0.0 ? 1 : 0);
-            float4 texel = cubes.Load(int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0));
+            int4 where = int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0);
+            float4 texel = cubes.Load(where);
+            float4 texelAt = cubesAt.Load(where);
             light += texel.rgb * n2[axis];
+            lightAt += texelAt.rgb * n2[axis];
+            reachAt[axis] = texelAt.a;
             valid = min(valid, faceHolds(texel.a));
             moved[axis] = faceMove(texel.a);
         }
         float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * spacing);
         if (valid < 0.5 || dot(probe - p, n) <= 0.0 || !seesThrough(field, linear, info, from, probe, oc.w * 0.5))
             continue;
+        // The whole of the light at the surface for a hit as far from the probe as that surface or
+        // farther, and none of it at the probe.
+        float h = dot(reachAt, n2);
+        float towardSurface = h > 1e-3 ? saturate(dot(probe - p, n) / h) : 0.0;
+        light = lerp(light, lightAt, towardSurface);
         float weight = lerps.x * lerps.y * lerps.z * probeFacing(p, n, probe);
         sum += light * weight;
         weights += weight;
@@ -498,14 +526,14 @@ public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldI
 /// between, so a probe under a floor or beyond a wall lends the light it sees there to no surface on
 /// this side. The faces are read where the probes stood as `gatheredField` says, the frame before's
 /// corners for the world's probes' rays, and the field marched as `info` has it.
-public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, float3 p, float3 n,
+public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float3 p, float3 n,
     float probes, float spacing, float cascades)
 {
     FieldInfo gathered = probesOf(gatheredField, int(cascades));
     int c = fieldCascade(gathered, p, 1.0);
     if (c < 0 || c >= int(cascades))
         return float3(0.0);
-    float4 seen = bouncedSeenSum(field, linear, info, gathered, cubes, p, n, probes, spacing, c);
+    float4 seen = bouncedSeenSum(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, c);
     return seen.w > 1e-5 ? seen.rgb / seen.w : float3(0.0);
 }
 
@@ -547,12 +575,12 @@ public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, Field
 /// the light a white surface facing one returns, and the probes hold the light reaching a face, so
 /// the indirect light is taken over pi.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
-    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, float3 p, float3 way, float probes, float spacing,
-    float cascades, float3 kept, out float3 own)
+    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float3 p, float3 way, float probes,
+    float spacing, float cascades, float3 kept, out float3 own)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 color = surfaceAlbedoFacing(faces, albedo, linear, info, p, n);
-    float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, p, n, probes, spacing, cascades);
+    float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, cascades);
     own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
             + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi)
         + surfaceGlowUncarried(glow, albedo, linear, info, p);
@@ -565,13 +593,13 @@ public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldIn
 /// read between the probes around it (`bouncedAt`), and the two brightest glow lights', with the
 /// light it emits.
 public float3 shadeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> albedo, Texture3D<uint> faces,
-    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float> reach, float3 p, float probes,
-    float spacing, float cascades)
+    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float> reach,
+    float3 p, float probes, float spacing, float cascades)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 color = surfaceAlbedoFacing(faces, albedo, linear, info, p, n);
     float3 arrived = (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)) * Pi
-        + bouncedAt(cubes, reach, info, p, n, probes, spacing, cascades) * lights.counts.z
+        + bouncedAt(cubes, cubesAt, reach, info, p, n, probes, spacing, cascades) * lights.counts.z
         + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, float3(0.0));
     return color / Pi * arrived + surfaceGlowUncarried(glow, albedo, linear, info, p);
 }

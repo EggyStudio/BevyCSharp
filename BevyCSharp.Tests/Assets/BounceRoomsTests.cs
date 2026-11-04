@@ -41,14 +41,28 @@ public sealed class BounceRoomsTests
     /// read the glowing blocks' room 0.06 to 0.07 from its reference where marched at each pixel 0.05.
     /// </summary>
     /// <remarks>
-    /// The views read 0.10 to 0.11 of their light from their references in the Cornell box, 0.12 in
-    /// the thin room, 0.25 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls,
-    /// 0.18 to 0.19 in the strip's, 0.05 to 0.07 on the grazing floor, 0.06 in the carried lamp's and
-    /// 0.05 around the glowing blocks, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to
-    /// 0.30, 0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06. Before the emitters' light was
-    /// carried, the Cornell box read 0.11, the strip's 1.00 and the blocks' 0.30. The strip is thinner
-    /// than a pixel at 160 by 90, so the picture shows none of it where the reference's paths across
-    /// each pixel meet it.
+    /// The views read 0.08 of their light from their references in the Cornell box, 0.07 in the
+    /// thin room, 0.25 to 0.26 in the corridor, 0.10 in the window's, 0.02 among the red walls,
+    /// 0.18 to 0.20 in the strip's, 0.06 to 0.09 on the grazing floor, 0.08 in the carried lamp's
+    /// and 0.05 around the emitting blocks, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24,
+    /// 0.27 to 0.30, 0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06. Before the emitters'
+    /// light was carried, the Cornell box read 0.11, the strip's 1.00 and the blocks' 0.30. The
+    /// strip is thinner than a pixel at 160 by 90, so the picture shows none of it where the
+    /// reference's paths across each pixel meet it.
+    /// <para>
+    /// The grazing floor read 0.05 to 0.07 and the carried lamp's room 0.06 while each bounce came
+    /// back about 5% over, the hits and the pixels reading the probes' faces where the probes
+    /// stood. Read at the surfaces each face is read for, each patch the probes' rays met turned
+    /// toward them, the Cornell box comes to 0.08 from 0.11, the grazing floor's views read 0.09,
+    /// 0.07 and 0.06 at Low, Medium and High and the carried lamp's 0.08, so their bounds were
+    /// measured again. A fixed set of directions read at the layers' heights falls well or badly on
+    /// the grazing room's lamp's bright spot under its low ceiling by where the layers stand, the
+    /// room lifted 0, 0.3, 0.6 and 0.9 against the probes' grid in the field of 0.15 reading 0.89,
+    /// 1.05, 0.92 and 0.91 of its reference's light past the direct on its floor. The carried
+    /// lamp's room reads its back wall 13% under where 7%, its light coming mostly past the first
+    /// bounce, which reads short there as in the feature test's hall and alley, a shortfall the
+    /// gain hid.
+    /// </para>
     /// </remarks>
     [SkippableTheory]
     [InlineData(1, GlobalIllumination.Low, 0.12)]
@@ -69,12 +83,12 @@ public sealed class BounceRoomsTests
     [InlineData(6, GlobalIllumination.Low, 0.21)]
     [InlineData(6, GlobalIllumination.Medium, 0.21)]
     [InlineData(6, GlobalIllumination.High, 0.22)]
-    [InlineData(7, GlobalIllumination.Low, 0.06)]
+    [InlineData(7, GlobalIllumination.Low, 0.10)]
     [InlineData(7, GlobalIllumination.Medium, 0.08)]
     [InlineData(7, GlobalIllumination.High, 0.09)]
-    [InlineData(8, GlobalIllumination.Low, 0.08)]
-    [InlineData(8, GlobalIllumination.Medium, 0.08)]
-    [InlineData(8, GlobalIllumination.High, 0.07)]
+    [InlineData(8, GlobalIllumination.Low, 0.10)]
+    [InlineData(8, GlobalIllumination.Medium, 0.10)]
+    [InlineData(8, GlobalIllumination.High, 0.10)]
     [InlineData(9, GlobalIllumination.Low, 0.06)]
     [InlineData(9, GlobalIllumination.Medium, 0.06)]
     [InlineData(9, GlobalIllumination.High, 0.06)]
@@ -108,10 +122,11 @@ public sealed class BounceRoomsTests
     /// The screen probes stand a tile apart, 16 pixels at Low, 12 at Medium and 8 at High, so at
     /// 160 by 90 the window's room at Low is 10 probes across and 6 down, and their light lies in
     /// blotches a tile wide that the views' distances read, where the size of the picture rather
-    /// than the method sets them. With them the views read 0.10 in the Cornell box, 0.08 in the thin
-    /// room, whose walls' seams the world's probes lit, 0.25 in the corridor, 0.15 to 0.18 in the
-    /// window's, 0.02 among the red walls, 0.20 to 0.24 in the strip's, 0.06 to 0.08 on the grazing
-    /// floor, 0.07 to 0.11 in the carried lamp's and 0.05 to 0.07 around the glowing blocks.
+    /// than the method sets them. With them the views read 0.09 to 0.11 in the Cornell box, 0.03 to
+    /// 0.04 in the thin room, whose walls' seams the world's probes lit, 0.25 to 0.26 in the
+    /// corridor, 0.14 to 0.17 in the window's, 0.02 among the red walls, 0.21 to 0.24 in the
+    /// strip's, 0.06 to 0.08 on the grazing floor, 0.09 to 0.12 in the carried lamp's and 0.05 to
+    /// 0.06 around the emitting blocks.
     /// </remarks>
     [SkippableTheory]
     [InlineData(1, GlobalIllumination.Low, 0.17)]

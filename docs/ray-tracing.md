@@ -301,6 +301,16 @@ its box and shadowed through the field, the brightest few at a surface one by on
 groups by their way from it, so many dim emitters light a room as one of their light together does.
 Nothing is baked, so lights and meshes move freely.
 
+A ray's hit and a pixel take the probes' light as the surface there gathers it, each probe's light
+moved along the probe's own ray to that surface and every patch its rays met turned toward it, so a
+closed room's bounces add up to its path-traced reference's, within 5% on most faces in rooms 4 to
+16 meters across and within 3% in a closed Cornell box, where read at the probes each bounce came
+back about 5% over. How the probes' layers stand against a low room decides some of its light, as
+the tests' grazing floor shows, a room 3 meters high whose lamp hangs under its ceiling reading 89
+to 105% of its reference's indirect light as it is lifted against the probes' grid. A space whose
+light comes mostly from bounces past the first, as a tall white hall or an alley at night, reads its
+light 8 to 49% under its reference.
+
 Bevy's lighting takes no indirect light from outside, so a pass of the library's own after the
 opaque surfaces takes back the diffuse share of the ambient light Bevy gave each surface and adds
 the surface's diffuse color times the light the probes around it hold. Past the last cascade the

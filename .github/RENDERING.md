@@ -253,6 +253,34 @@ cameras draw, and the map is the camera's, so a dispatch on the camera copies it
 octahedron of 64 texels a side, blurred as a surface of a quarter roughness blurs it, times the
 exposure (`gi_sky.slang`), and the probes read the frame before's.
 
+A ray's hit takes the light past the first bounce from the faces of the probes it sees, and a face
+holds the light reaching a surface facing along its axis where the probe stands, a unit or more over
+the floor it is read for and nearer the walls and the ceiling than the floor is, so each bounce came
+back about 5% over its reference, and through them all a closed room's light past the direct 16 to
+27% over. Beside each face the gather writes the light the surface it is read for gathers, the one
+the probe's own ray along the face's opposite way met, every merged direction moved to start from
+that point and each patch it met turned toward it by the field's normal there, and a hit and a pixel
+take each face toward that light by how far they lie from the probe against how far that surface lay
+(`bouncedSeenSum`, `bouncedIn`). Moved by its distance alone, a patch the probe saw squarely and the
+surface sees at a slant, as a wall's band under a ceiling, counted for as much as it did at the
+probe, and a probe's face up moved to the floor a unit below read 14% over the floor's irradiance
+worked out by hand, where turned it reads 2% over. Closed white rooms of 4, 8 and 16 read within 12%
+of their references, most faces within 5%
+(`AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce`), and a closed Cornell box
+on the world's probes alone within 3%, where read at the probes it read 8 to 17% over
+(`AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference`). A face whose ray met
+nothing, as over a drop, keeps its own light, and the leaves and the grass drawn forward read the
+faces where the probes stand. The turn costs the gather 0.05 ms in the light hall at `Medium`, its
+patches' normals sampled from the field. The bounce rooms' grazing floor and carried lamp's room,
+read on the world's probes alone, lie 0.06 to 0.09 and 0.08 from their references where they read
+0.05 to 0.07 and 0.06, and their bounds are 0.10. A fixed set of directions read at the layers'
+heights falls well or badly on a lamp's bright spot under a low ceiling by where the layers stand,
+the grazing room's light past the direct reading 0.89 to 1.05 of its reference's as it is lifted
+against the probes' grid in a field of 0.15. A space whose light comes mostly past the first bounce
+reads under its reference, the light hall's aisle at eight in the morning 8 to 14% at `Medium`, the
+moonless alley 37 to 49% and the carried lamp's room's back wall 13%, a shortfall the gain hid,
+which is read apart.
+
 The light given to Bevy's surfaces is the third part (`gi_light.slang`), an engine draw after the
 opaque surfaces blended by adding beside the contact shadows' draw, which reads the deferred
 prepass's G-buffer, works out the diffuse share of the ambient light Bevy's lighting gave the
@@ -324,11 +352,11 @@ difference. A texture counts as its material's base color and a mesh's vertices'
 out, and a path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
 to light the scene, reads apart from its reference. The bounce rooms are a test
-(`BounceRoomsTests`), the nine views at each quality held within 15% over what they read, 0.10 to
-0.11 in the Cornell box, 0.12 in the thin room, 0.25 in the corridor, 0.11 to 0.12 in the window's,
-0.02 among the red walls, 0.05 to 0.07 on the grazing floor and 0.06 in the carried lamp's, where
+(`BounceRoomsTests`), the nine views at each quality held within 15% over what they read, 0.08 in
+the Cornell box, 0.07 in the thin room, 0.25 to 0.26 in the corridor, 0.10 in the window's, 0.02
+among the red walls, 0.06 to 0.09 on the grazing floor and 0.08 in the carried lamp's, where
 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12,
-the strip's 0.18 to 0.19 where 3DEngine's read 0.22, and the glowing blocks' 0.05 where 0.05 to
+the strip's 0.18 to 0.20 where 3DEngine's read 0.22, and the emitting blocks' 0.05 where 0.05 to
 0.06. A mend that widens no view keeps every bound, 3DEngine's rule. The Cornell box's floor reads
 13.2% over its reference at `High` without the screen probes, and 15.5% over with its lamp panel
 dark in both, so the excess is the probes' indirect light. In the feature test's Cornell box at 1280

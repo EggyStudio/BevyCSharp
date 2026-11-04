@@ -40,6 +40,9 @@ StructuredBuffer<GlowLight> glow_lights;
 // hit takes the light reaching it from and which say where each probe stands, and each probe's reach,
 // which weighs the light from beyond a ray by whether a probe sees where the ray ended.
 Texture3D<float4> probe_cubes;
+// Their faces' light at the surfaces they are read for (gi_ambient.slang), which a screen probe's hit
+// takes as the world's probes' hits do.
+Texture3D<float4> probe_cubes_at;
 Texture3D<float> probe_reach;
 
 // The world's first cascade merged, a tile of octahedron texels a probe, and its second, or the first
@@ -622,7 +625,7 @@ void main(uint3 id : SV_DispatchThreadID)
                 float passes = deep >= 0.0 ? lightThroughKept(passing, deep, fieldCell(info, at), inside) : 0.0;
                 float3 own;
                 light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
-                    probe_cubes, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
+                    probe_cubes, probe_cubes_at, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
                 through *= passes;
                 if (deep < 0.0)
                     break;

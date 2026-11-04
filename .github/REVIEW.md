@@ -1,138 +1,140 @@
 # Review
 
-Reviewed up to `9bdb29b3`, 101's first commit, the field's contact shadows through the camera's air,
-pushed at 03:48 on 2026-11-04, its run green at 04:06 on the three systems in 10 to 13 minutes; it
-keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth commit, the
-cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three systems in 13
-to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`, 95's twelfth
-commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on the three
-systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it `8583deff`,
-95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at 23:01 on
-2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the form and
-carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run
-green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's
-files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off,
-pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form
-and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28,
-its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
-pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
-carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
-taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
-form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
-cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
-form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
-2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
-files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
-2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
-files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
-with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three
-systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of the
-wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps
-the form and carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its
-`fbc385e`, pushed at 21:35 on 2026-11-02, its run green at 21:57 on the three systems, the first
-with the submodule checked out; it keeps the form and carries the review's files. Before it
-`af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the three systems; it
-keeps the form and carries the review's files. Before it `add899da`, item 94, pushed at 19:37 on
-2026-11-02, its run green at 19:59 on the three systems; it keeps the form and carries the review's
-files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on 2026-11-02, its run green at
-17:33 on the three systems; it keeps the form and carries the review's files. Before it `99160868`,
-item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the three systems; it keeps the
-form and carries the review's files. Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on
-2026-11-02, its run green at 11:37 on the three systems in about 20 minutes; the pack run started
-from it at 11:38 with publish on, green at 14:30 with the drive in 125 minutes at its limit's edge,
-the soak in 21, every captures job green and 0.6.18 published, the first package since 09fc95dd of
-2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at
-02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14 minutes; the pack run
-started from it at 02:26 with publish on, its captures jobs green, which settles Verdicts 49 and 50,
-and its drive cancelled at the limit of 100 minutes at 04:23 where the run before took 67, Verdict
-51, so no package was published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its
-end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems
-in about 17 minutes; it keeps the form and carries the review's files. Before it `58265110`, item
-90's second commit and its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three
-systems in about 15 minutes; the pack run started from it at 23:22 with publish on, the first since
-`09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its
-captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict
-49, and two of its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's
-bar, Verdict 50; the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes
-under its limit of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no
-package was published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item
-90's first commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels
-choosing their light before any thread branches since llvmpipe faults on the transmittance lookup
-after a group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01
-with `b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the
-suites in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a
-file of their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451`
-makes pipelines.wait answer after three ready frames running and keep a held clock still between
-commands while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the
-first game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its
-grass or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with
-every shot after it whole; the drive's effects view, which had been missing the level, the spheres'
-board and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still
-through a wait and an app begun on a set clock drawing what comes into view whole; the whole suite
-before the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched
-classes, 78, the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the
-scenes yard, pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's
-site a point in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at
-09:30 with the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it
-`11efeefe`, item 88, pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to
-17 minutes, the run-time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before
-it `60638b01`, item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes,
-the day's fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed
-at 16:58 with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18
-minutes, recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at
-15:52 with the suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the
-binding, recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed
-at 14:08, its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine
-grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed
-at 13:15, its run green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded
-under the item in REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`,
-83's first phase, its run green at 12:42 with the suites in 14 to 17 minutes, the README's line
-verbatim and the three grass cards in the collection, recorded under the items. Before it
-`1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the light-through test at 180 traced
-frames, recorded under the item in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the
-owner's change committed by the reviewer and pushed at 11:42, its run green at 11:59. Before it
-`785a1136`, item 82, pushed at 09:10, its run green at 09:29 with the suites in 13 to 18 minutes,
-the irradiance volume's fallback mended in render/mended.rs, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30, its
-run green at 22:49 with the suites in 12 to 18 minutes, the dark blades gone, recorded under the
-item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30
-after the run of `1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes.
-The march adds an isotropic share for the light scattered more often than the four octaves follow, a
-deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud
-tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the
-lavender going with the gray, the 15:00 sun side keeping its shading and overcast and storm staying
-gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out
-of GPU memory under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher
-panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe`
-and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50`
-green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the
-last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite
-1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c`
-at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
-flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
-phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
-lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
-headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
-High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
-`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
-passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
-shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
-red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
-`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
-level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+Reviewed up to `3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface,
+pushed at 05:32 on 2026-11-04, its run green at 05:55 on the three systems in 11 to 18 minutes; it
+keeps the form and carries the review's files. Before it `9bdb29b3`, 101's first commit, the field's
+contact shadows through the camera's air, pushed at 03:48, its run green at 04:06 on the three
+systems in 10 to 13 minutes; it keeps the form and carries the review's files. Before it `086ac6e7`,
+95's thirteenth commit, the cascades' clearance from the eye, pushed at 02:15, its run green at
+02:38 on the three systems in 13 to 19 minutes; it keeps the form and carries the review's files.
+Before it `accbda6d`, 95's twelfth commit, the lamp march from its first step, pushed at 00:30, its
+run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the form and carries the
+review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of a thin wall along
+its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12
+to 18 minutes; it keeps the form and carries the review's files. Before it `f5505a58`, 95's
+glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in 16 to 18
+minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's default
+commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at 16:48
+on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files. Before
+it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its run green at 15:51 on the three
+systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows for 99,
+100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run
+green at 11:14 on the three systems; it keeps the form and carries the review's files and N 4.10.
+Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
+2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
+files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
+2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
+files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
+on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
+third commit, two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43
+on the three systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's
+second commit, the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on
+2026-11-02, its run green at 00:17 on 2026-11-03 on the three systems; it keeps the form and carries
+the review's files. Before it `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on
+2026-11-02, its run green at 22:55 on the three systems; it keeps the form and carries the review's
+files. Before it `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on
+2026-11-02, its run green at 21:57 on the three systems, the first with the submodule checked out;
+it keeps the form and carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on
+2026-11-02, its run green at 20:55 on the three systems; it keeps the form and carries the review's
+files. Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the
+three systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's
+first step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the
+form and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02,
+its run green at 14:50 on the three systems; it keeps the form and carries the review's files.
+Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on
+the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green
+at 14:30 with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green
+and 0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51.
+Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at
+02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with publish
+on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit
+of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read
+at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
+beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
+form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
+pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
+pack run started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its
+drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at
+00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its
+captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the
+run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of
+100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
+published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
+commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
+their light before any thread branches since llvmpipe faults on the transmittance lookup after a
+group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
+`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
+in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
+their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+pipelines.wait answer after three ready frames running and keep a held clock still between commands
+while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
+game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
+or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with every
+shot after it whole; the drive's effects view, which had been missing the level, the spheres' board
+and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still through
+a wait and an app begun on a set clock drawing what comes into view whole; the whole suite before
+the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched classes, 78,
+the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the scenes yard,
+pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point
+in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with
+the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88,
+pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the
+run-time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`,
+item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's
+fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58
+with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18 minutes,
+recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52
+with the suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the binding,
+recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08,
+its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine grass, recorded
+under the item in REVIEW-ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its
+run green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase,
+its run green at 12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three
+grass cards in the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at
+11:02, its run green at 11:25, the light-through test at 180 traced frames, recorded under the item
+in REVIEW-ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
+09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
+mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
+81's grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
+item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
+green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
+scattered more often than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of
+the light to 0.23 to 0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the
+bases from 146, 146, 154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side
+keeping its shading and overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests
+pass; the suite's 21 BounceRoomsTests failed out of GPU memory under other sessions' apps and pass
+alone, 55 of 55; a lead, Bevy's asset watcher panicking on a send as an app stops. Before it
+`1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after
+the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict
+48 settled; AppLeakTests reads the promoted bytes of the last full blocking collection as 3DEngine's
+does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared
+line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35
+on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
+batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
+mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
+the character climbs and red where it cannot, a wall with two arches parting the course from the
+playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
+green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
+load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
+moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
+with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
+reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
+directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
+Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
+the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
+run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
+`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
+helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
+47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
+Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
+d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
+stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
+from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
+asked that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -906,7 +908,23 @@ from [SHARED.md](SHARED.md).
     walls, +124 on its floor and +130 on its ceiling against its reference where with the mend +3 to
     +9 and the distance 0.243 where 0.860; the aisle had been lit by that excess. Committed with the
     hall's figures as they read and the bay's pair; the aisle's remaining under-reading at the
-    scripted eye goes under 102 beside the closed rooms' over-reading.
+    scripted eye goes under 102 beside the closed rooms' over-reading. The second commit is
+    3723d5ff, pushed at 05:32, a carried emitter emitting by its mesh's own surface, with the ball
+    room's test, RENDERING.md's emitter paragraph and its paragraph on a mesh a shader places in its
+    vertex stage, the guide's gi.compare sentence, the glow bay pair
+    2026-11-04-item-101-glow-bay.webp; the suite 2,007 in 46 minutes with a peak of 2,930 MB, cargo
+    test 118 and 200, NormTests 18; the engine's glow lights hold the same. Next the far walls at
+    night by source with the fireflies hidden, then 102. The far walls read by source at 05:36 on
+    3723d5ff with the fireflies hidden, and the item closes. Moonlit the walls read -20, -17 and
+    -20% with the distance 0.202, the moon's share holding within 3 to 15%; moonless -47 to -53, the
+    world probes carrying it, and by the reference's bounces the -x wall's GI reads +1% against four
+    bounces and -47 against all, the alley's white walls lit mostly by light bounced between them
+    and the reference doubling past four bounces, so GI holds about four bounces' worth and loses
+    the tail, which in this narrow sky-open alley is more than half where the hall at 8:00 read +3
+    against eight. That is 102's per-bounce gain with the other sign, under in an open alley where
+    the closed rooms read over, and the alley is 102's open case beside the rooms of 4 and 8. The
+    drawn moonless sky's +193% is the picture's star field against the reference's environment map,
+    a fault of the measure. Done at 9bdb29b3 and 3723d5ff, the night's shade dim and blue.
 
 102. **The merge's gain past the first bounce in closed rooms.** From item 95 on 2026-11-04. The
     world probes alone read the bay-and-aisle box 6 to 16% over its path-traced reference, and a
@@ -920,7 +938,189 @@ from [SHARED.md](SHARED.md).
     row. Test, the box within 10% of its reference face by face. After 101, before 100. Also the
     hall's aisle under its reference from the scripted eye once the glow bay's excess is gone (101's
     second commit), the floor -8% and the -x wall -14 at Medium, a lit hall reading under where the
-    closed rooms read over, the same question of how a surface reads the probes.
+    closed rooms read over, the same question of how a surface reads the probes. And the alley at
+    night as the open case (101's reading), its white walls lit mostly by light bounced between
+    them, GI at +1% against four bounces and -47 against all, the -x wall by bounce read with the
+    fireflies hidden; one proposal for both signs. The bounded reading at 05:43 on 3723d5ff. The
+    first bounce is right in both cases and the error builds past it, GI's first bounce alone read
+    with a scratch toggle holding the frame before's weight at 0. In closed rooms of the level's
+    white 3 high under a shadowed lamp at Medium, the room of 4 reads 1.07, 0.98 and 1.05 of its
+    reference's light past the direct at the first bounce and 1.195, 1.158 and 1.191 with all, about
+    1.05 a bounce past the first; the room of 8 1.02, 0.99, 1.09 and 1.36 at the first and 1.17 to
+    1.27 with all. The alley's shaded wall with the moon off and the fireflies hidden reads its
+    first bounce at +1% and the whole at -47 against all bounces, the field's cells at 0.125 and 0.5
+    reading alike, so coverage is not it. One cause with two signs, as the engine's 142 reads it, a
+    probe's ray that meets a surface taking the bounce from the probe layer around the hit, which
+    stands a clearance and up to a spacing off the surface and sees more of a lit room, or more of a
+    dark sky, than the surface does, each bounce carrying the ratio on. Trials in order, each read
+    on the rooms of 4 and 8, the alley, the box and the bounce rooms' bars before any commit, the
+    figures reported after each. First the engine's two-way carry within a quarter, the probes in
+    front of a hit carried back toward the surface by their own change along its normal between the
+    layer and the next, read for both signs. Second the hit's bounce from probes nearer the surface,
+    a probe within a spacing of a surface standing at the clearance, which moves every reading and
+    goes only with the full set re-read. Third a per-hit correction by the ratio of the probe's face
+    toward the surface to the hit's own short field march, last. The first trial read at 05:54 and
+    failed, the two-way carry within a quarter, the near layer carried back to the surface by its
+    difference from the layer a spacing further along the hit's normal. The room of 4 from 1.195 to
+    1.330, worse, its light falling away from the walls toward the middle so the carry raised it;
+    the room of 8 from 1.17 to 1.09, better; the alley from -47 to -30%, better; the box worse, the
+    floor from +6 to +14 and the aisle's back wall from +32 to +40; 6 of 59 bounce-room bars
+    failing, the Cornell box at 0.128 to 0.137 against 0.12 to 0.13 and the grazing floor at 0.084
+    to 0.091 against 0.06 to 0.09. So the carry moves each room by the sign of its layer-to-layer
+    change, which is not the sign of its error, the layer's excess not being its distance from the
+    wall, the engine's lesson too. The second trial is skipped for the same reason. Before the
+    third, one check, how the hit reads the layer, whether the read is weighted by the cosine to the
+    hit's own normal and leaves out probes behind its plane; then the third with a cost bound, the
+    ratio per probe face at the probe's update if it can be, the room of forty and the hall's GI at
+    Medium within 0.2 ms of HEAD, a march per hit priced before the rest is built. The check at
+    05:55, the hit's read is right, each probe face pi times the cosine-weighted mean of its rays'
+    light over their solid angles, the hit reading the three faces its normal looks toward blended
+    by the normal's squares, exact for axis-aligned surfaces, probes behind the plane, hidden by the
+    field or inside a mesh left out; so the error is the probe's place. The third trial as set, per
+    face at the probe's update with no march per hit. For each face the probe's own ray along the
+    face's axis gives h, the distance to the surface that face's light is read for; the face's rays
+    are reprojected to that point, each hit seen from it with its solid angle rescaled by the
+    distances squared, a ray that met nothing keeping its way; the cosine-weighted mean gathered
+    there is the surface's irradiance from the probe's own rays, stored in a second image laid out
+    as the faces with h in its alpha; a hit reads the layer's face and the surface's face blended by
+    its distance from the probe over h. The trial takes it for the hits' read alone, the world
+    probes' trace and the screen probes, the pass and the leaves as they are, so the bounce chain is
+    read alone; the cost a distance load and a few operations a texel in the gather and two loads a
+    probe at a hit. Two readings to carry, a hit whose reprojected rays cross geometry between the
+    probe and the surface point, and a face whose own ray met nothing, which falls back to the
+    layer. The third trial read at 06:27, in the tree uncommitted. gi_ambient builds a second image
+    whose faces hold the irradiance at the surface each face's own ray meets, every merged texel
+    reprojected there, h in alpha and the layer kept where the ray met nothing or a back face, the
+    hits' read moving each axis's face toward it by the hit's distance over h, gi_light's read
+    unchanged. The rooms of 4, 8 and 16 from 1.16 to 1.20, 1.17 to 1.27 and 1.07 to 1.13 of their
+    references' light past the direct to 1.02, 1.00 to 1.08 and 0.96 to 1.02; the alley unchanged at
+    -47; the box's aisle back from +32 to +25, its east from +16 to +6, its west from +12 to -8, the
+    ceiling +4, the floor -5, the two eyes within 2.2 points; the bounce rooms 61 of 63, the grazing
+    room (view 7) at 0.090 and 0.093 against 0.06 and 0.08 at Low and Medium where 0.051 and 0.066
+    before; the hall from -26 the floor from -8 to -16 and the walls -9 to -18. The two extra
+    readings move nothing by more than 3 points, and a face with no surface keeps its layer exactly.
+    The cost inside the bound, the room of forty 3.83 to 3.75 ms and the hall's median 3.48 to 3.29.
+    The lead, the grazing room's drop goes with its field, three cascades of 0.15, reading inside
+    every bound on the default field, and the clean room of 16 reads 0.96 to 1.02 on the default
+    field and 0.98 to 1.25 on that one, so a cascade of 0.15 loses light the gain had been
+    offsetting, the hall's 8 points perhaps the same. So the field-tied shortfall first, what a
+    cascade of 0.15 loses that 0.25 keeps, the hall read for the same cause, then one commit with
+    both and no bound widened; the box's aisle back at +25 the reading after it. The grazing room
+    read at 07:12, its shortfall where the probe layers stand against a room 3 high whose lamp hangs
+    0.4 under the ceiling, not the 0.15 cell and none of the four named causes. In the room built
+    alone as the bounce rooms build it, the light past the direct over the reference's reads 0.839
+    on the fine field and 0.926 on the default; the thin-wall hold, the sun, the roughness and the
+    frame make no difference, the placement is deterministic; with the room, lamp and eye lifted
+    against the grid by 0, 0.3, 0.6 and 0.9 the fine field reads 0.839, 0.986, 0.874 and 0.842, over
+    where a layer stands at the lamp's height, and texels of 16 a side widen the spread, so it is
+    the layers' heights against the lamp's hot spot and their interpolation; a sweep of the cell
+    from 0.125 to 0.5 reads 0.87, 0.84, 0.96, 0.93, 0.83 and 0.76 with no finer cell the answer,
+    four cascades as three. The pixel's own world-probe read moved toward the surface faces narrows
+    some fields' spread but leaves the fine one at 0.82, and is not in the trial. The hall from -26
+    reads under at every cell, the default the least under (-16 on the floor, -15 to -18 elsewhere),
+    a systematic shortfall like the alley's open case, smaller. So (c) commits with view 7's Low and
+    Medium bounds measured again and this placement reading as their cause, the old bound having
+    held only through the gain; the hall's and the alley's figures stated as they read; the hall's
+    systematic under-reading the next reading, by bounce and by cell, a proposal before any mend.
+    The lift table is the engine's 199 warning too. View 7's three bounds go to 0.11 by the bounds'
+    rule, High among them since it read 0.0899 against 0.09, a bound held by a ten-thousandth; the
+    rooms test takes the sizes 4, 8 and 16 at a bar of 12%, reading 0.96 to 1.08 with the mend and
+    1.13 to 1.27 without. Held at 07:24, the commit withdrawn before it went in. Read against every
+    bounce room at each quality, two more bounds would be held by less than a thousandth under the
+    mend, the Cornell box at Medium 0.1193 against 0.12 with its floor from +16% to +21% and its
+    back wall from +11 to +13, and the carried lamp at High 0.0691 against 0.07, where the thin room
+    improves to 0.067 and the window's to 0.10; with five bounds widened, the Cornell box worse and
+    the hall 8 points under, and the engine's same trial (199) dropping Sponza's door view 9% while
+    failing four bounds, the mend is one half of two, the half that takes out the excess where
+    probes hold more than the surface, and it waits on the other. The trial stays as a patch, no
+    bound changed; the other half read by source, why the Cornell box's floor rises where the white
+    rooms fall (the tall block's hidden faces, the met-nothing rays kept at infinity across the open
+    front, the back-face rule) and the hall's 8 points the same way, beside the engine's reading of
+    its door view and strip room; one proposal for both engines from the two readings, then both
+    commit together or both close with the figures. The rooms test at 12% and the lift table stay
+    ready for that commit. The Cornell box read by source at 08:25, two things. The mend raises the
+    Cornell floor where the white rooms fall because of the ceiling's faces, a ceiling face moved to
+    the ceiling gathering the walls' upper band the probe's face below leaves out (the reprojection
+    on the ceiling faces alone taking the closed box's floor from 1.171 to 1.256, on the floor faces
+    alone to 1.154), which the white rooms hide since their floor faces' fall outweighs it; not the
+    met-nothing rays, the back-face rule, the tall block, the sun or the lamp's height. And what the
+    mend leaves in the box is its first bounce, right within 3% in the white rooms, the floor taking
+    4 to 5% of its first bounce more than its reference in the lamp's colour whatever the side walls
+    are (white 1.10, black 1.21, coloured 1.11 to 1.21 against the one-bounce reference), the
+    default field holding 8 probes in that box with a layer on the ceiling's plane; not the field's
+    colours at the junctions, and the pixel's faces at the surfaces do not carry it. Next in order,
+    one probe's face at one bounce against the reference's irradiance at the probe's own point, then
+    the first bounce against the box's height and the probes' count, then the hall by bounce and by
+    cell; one proposal after the three with the ceiling-face finding in it. The three readings done
+    at 11:41, the reprojection's own fault found. One probe's face in the black-walled box matches
+    its light worked out by hand to 1 to 3% on every surface, the face's quadrature 1.024 of a fine
+    integral, so the face is right and the first-bounce excess is in the read; the face moved to the
+    floor holds 1.292 where the floor's true irradiance is 1.133, 14% over, a C# copy of the
+    reprojection giving the same, because the method scales a texel's solid angle by the distances
+    squared alone and leaves out the patch's turn, the cosine at the surface point over the cosine
+    at the probe from the hit's field normal; with the turn, 1.1395 by hand against 1.1333 and 1.157
+    on the GPU sampling the field normal at each texel's hit, which is how a ceiling face moved up
+    over-weighted the walls' upper band. The first bounce against the box's height on the candidate
+    (the mend, the turn, and the pixel's world-probe read taken at the surfaces) reads 1.08, 1.08
+    and 0.91 at heights 3, 5 and 8 with black sides where HEAD read 1.29, 1.21 and 1.31, so the
+    carrier was the read at the layers with the missing turn, not the probes' count. On the quick
+    sets the closed coloured box's floor goes 1.263, 1.174 and 1.099 through the three steps (HEAD
+    1.219), the fine-field closed box 1.028 (HEAD 1.171), the open box with blocks 0.966 (HEAD
+    1.093), the white rooms 0.97 to 1.12 with the screen probes in, the grazing room's lifts 0.89,
+    1.05, 0.92 and 0.91. The hall's first bounce is the same in every variant and a fifth of its
+    light, and the rest reads 13% under at HEAD and 13 to 15 under on the candidate at every cell,
+    so the hall's shortfall is in its deep bounces and was there at HEAD, the gain covering it in
+    the closed rooms alone, the alley's kind. The rest of the sets read on the candidate next, every
+    bounce room, the box at both eyes, the seam, thin-wall and rooms tests, the room of forty's
+    time, the alley and the hall's GI time, then the proposal; the turn costs gi_ambient a field
+    normal per texel on faces with a surface. The proposal at 11:58, taken. The mend is the
+    candidate, the faces at their surfaces read by the hits, the turn in gi_ambient (the patch
+    weighed by the cosine at the surface point over the cosine at the probe from the field normal at
+    each texel's hit, the ratio capped at 8, a hit seen back-on or grazing from the probe left out),
+    and the pixel's world-probe read taken toward the surfaces too. The rooms test reads 1.04 to
+    1.05, 1.03 to 1.06 and 0.97 to 1.00 where HEAD fails at 1.16 to 1.27; the Cornell box alone open
+    with blocks 1.093 to 0.966 and closed 1.171 to 1.028; the first bounce against the box's height
+    1.00 to 1.04; the bay-and-aisle box's faces nearer by 5 to 9 points with the seam test holding;
+    the thin-walled rooms' tests holding; the alley's walls from -47 to -37; the hall's floor -8 to
+    -12 with its first bounce the same; the grazing room's lifts 0.89 to 1.05. The cost inside the
+    bound, gi_ambient 0.024 to 0.069 ms in the room of forty and the GI median unchanged, the turn
+    about 0.05 ms of field normals. Four unread-theory bounds are measured again by the 15% rule
+    with the cause stated, the grazing room at Low (0.0855 to 0.10) and the carried-lamp room's
+    three (0.084 to 0.10), the latter under past its first bounce as the hall is, the deep-bounce
+    shortfall the gain hid at HEAD; every other bound holds, with the screen probes read every view
+    inside its bound. The deep bounces are the next item, the hall, the alley and the carried-lamp
+    room by bounce, one fault with three faces. The engine's 199 takes the turn as the same step.
+    The suite at 13:25 on the mend, 2,010 with one failure, the one-emitter room's right wall facing
+    -x at -9.1% against its 8% bar, every face of that room 2 to 3 points down as the gain goes (the
+    right wall -6.0 at HEAD, beside the emitter and lit mostly by the glow light's near light), the
+    six-emitter and ball rooms passing; its bar goes to 11% with the cause in the remark, the
+    shortfall recorded under 104 beside the deep bounces as the same kind.
+
+103. **Anisotropic filtering at 16 everywhere.** Decision 77 on 2026-11-04. BcsSamplerConfig carries
+    an anisotropy clamped to 16 per sampler, and Bevy's default image sampler stands at 1 unless
+    set. Every sampler that reads a texture, the standard material's colour, normal and surface, the
+    level's and the vegetation's, the atlas where there is one, filters anisotropically at 16, the
+    device's most where it offers less, at every quality and with no knob, through the plugin's
+    default sampler and the bridge's own samplers; the shadow, probe and table samplers keep their
+    own. Read by the hall's floor and the meadow's ground at a grazing angle against the picture
+    before, and by the frame's time, which should not move. After 102's reading pass, before 100.
+
+104. **The deep bounces' shortfall.** From item 102 on 2026-11-04, one fault with three faces. A
+    high-albedo space whose light is mostly bounces two and later loses a little each bounce, which
+    the gain past the first bounce hid at HEAD and 102's mend uncovers. The hall from the scripted
+    eye reads its first bounce right and the rest 13 to 15% under at every cell, the alley at night
+    moonless reads +1% against four bounces and -37 to -47 against all, and the bounce rooms'
+    carried-lamp room reads its back wall 12.5% under past its first bounce. The engine's vestibule
+    read the same way until 200 found its cause in the probes' sampling, the four fixed rays a texel
+    never meeting the slivers of light inside a texel, so read that first here, whether the world
+    probes' rays are fixed per texel with no light kept across frames, and what one probe in the
+    alley brings along its ways against the reference at one path through the texel's middle and at
+    many jittered paths; then by bounce at one probe in each of the three spaces, and a proposal
+    before any mend (the engine's 200 trial, the rays moved frame to frame with a history per
+    cascade, is the candidate if the sampling is the cause). After 103, before 100. A fourth face
+    from 102's commit, the one-emitter room's right wall beside its emitter, lit mostly by the glow
+    light's near light, from -6% at HEAD to -9.1 as the gain goes, its bar at 11% with the cause
+    stated.
 
 ## Verdicts
 
@@ -1169,6 +1369,12 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     picture the owner sent being a screenshot and their reference picture the reference; the engine
     session relabelled the sheet, renamed the dump's files and reworded its captions back to
     2026-10-31, and read the 59 comparison sheets' labels clean.
+
+77. **Anisotropic filtering at 16 everywhere.** The owner wrote on 2026-11-04 at 11:07, "Anisotropic
+   filtering is at x16 everywhere because it is cheap and on steep angles it is visually better." So
+   every sampler that reads a texture, colour, normal, surface or atlas, filters anisotropically at
+   16, or at the device's most where it offers less, at every quality and with no knob; the shadow,
+   probe and table samplers that are not textures keep their own filters. Item 103.
 
 ## Replies
 
@@ -2696,3 +2902,142 @@ Shared: a carried emitter takes the share of its box's faces its mesh's own surf
 from its triangles in the field's gather, as 3DEngine takes it from its vertices, since taken as its
 box whole a ball lit a room twice as bright as it is and the feature test's ring of light lit its
 bay 111 to 146% over the reference. 3DEngine's glow lights hold it.
+
+Item 102's commit, each probe face's light read at the surface it is read for, each patch the
+probes' rays met turned toward that surface, in the commit carrying this line. The gain was the
+faces read where the probes stand. A ray's hit takes the light it sends on from the probes around
+it, and a face held the light reaching a surface where the probe stood, a unit or more over the
+floor it is read for and nearer the walls and the ceiling than the floor is, so each bounce came
+back about 5% over its reference and the closed rooms' light past the direct 16 to 27% over through
+the bounces.
+
+Trial (a), the bounce carried both ways within a quarter of the spacing, read as it did. The room of
+4 read 1.30 to 1.33 of its reference's light past the direct and the room of 8 1.09 to 1.19, the
+alley 30% under and the box 14 to 41% over, the Cornell box's view at Low, Medium and High 0.128,
+0.132 and 0.137 from its reference against bounds of 0.12, 0.12 and 0.13, and the grazing floor's
+0.084, 0.090 and 0.091 against 0.06, 0.08 and 0.09. Trial (b) was left out as set.
+
+Trial (c), each face's light reprojected to the surface its own ray along the face's opposite way
+met and a hit reading toward it by how far it lies from the probe along its normal against how far
+that surface lay, read the rooms of 4, 8 and 16 1.02, 1.00 to 1.08 and 0.96 to 1.02 where 1.16 to
+1.20, 1.17 to 1.27 and 1.07 to 1.13. A face whose ray met nothing or a face from behind keeps its
+own light, 1,897 of the box's 3,072 held faces in its first cascade matching their own to the fourth
+decimal, and the hits whose reprojected rays cross what the probe sees past read alike, the bay's
+back wall 9 and 10% under and the Cornell box's tall block 35 and 34% under. It took the grazing
+floor's view to 0.090 and 0.093 from 0.051 and 0.066 at Low and Medium and the light hall's aisle at
+-26 from 8 to 16% under on the floor, so it was held.
+
+The grazing floor's fall is not a fault of the cell of 0.15. Built alone as Rooms.Build makes it and
+read on the world's probes alone, its floor's light past the direct reads over its reference's 0.87
+at cells of 0.125, 0.84 at 0.15, 0.96 at 0.2 where its back wall reads 32% over, 0.93 at 0.25, 0.83
+at 0.3 and 0.76 at 0.5, four cascades as three. Walls 0.6 thicker, the rooms' sun, a roughness of
+0.9 or 1 and eight pictures seven frames apart each read it to 0.01, and intervals twice as long
+raised the fine field 10 points while they lowered the default 9. Lifted 0, 0.3, 0.6 and 0.9 against
+the probes' grid it reads 0.84, 0.99, 0.87 and 0.84 at 0.15, and 0.93 and 0.92 lifted 0 and 0.5 at
+0.25, where 16 texels a side widen the spread to 0.87 to 1.14. A fixed set of directions read at the
+layers' heights falls well or badly on the lamp's bright spot 0.4 under the ceiling by where the
+layers stand, and no finer cell is the answer.
+
+The Cornell box's floor rose under (c), 1.093 to 1.183 of its reference's light past the direct,
+where the white rooms fell. Built alone, its camera inside, its rise came from the ceiling's faces,
+the reprojection on them alone reading the closed box's floor 1.256 where 1.171, on the floor's
+faces alone 1.154 and on the walls' 1.152. The rays that met nothing, the back-face rule, the
+blocks, the sun, the lamp's height, the panel and the lamp's shadows each left it within a point.
+What (c) left was in the box's first bounce. Closed, empty, its lamp at mid-height and shadowed, at
+one bounce against a reference of one, its floor read 1.10 with white side walls, 1.21 with black,
+1.21 to 1.11 with blue and 1.15 to 1.20 with red and green by channel, the same 4 to 5% of the
+floor's first bounce added in the lamp's color whatever the walls hold, and the field's colors kept
+within 25 degrees at the junctions where 60 read the same to the third decimal.
+
+One probe at one bounce was read against its own point, in the closed box with black side walls at
+four cascades of a quarter. Its 64 texels hold their light worked out by hand within 1 to 3% on
+every surface they meet, and its face up holds 2.4% over the irradiance integrated finely at its
+point, so the face is right. Moved to the floor a unit below, the face read 1.292 where the floor's
+irradiance worked out by hand is 1.133, 14% over, and a copy of the reprojection in C# read 1.292
+from the GPU's texels and 1.310 along the texels' middles, so the method was short. It scaled each
+patch's share of the sphere by its distance's square alone, and a patch the probe saw squarely and
+the surface sees at a slant, as a wall's band under a ceiling, counted for as much as it did at the
+probe. Turned by how squarely it faces the surface against how squarely it faced the probe, its
+normal the field's, the copy reads 1.1395 against 1.1333, and on the GPU 1.157, with white side
+walls 1.874 against 1.862.
+
+With the patches turned and each pixel's read of the world's probes taken toward the faces at the
+surfaces as the hits take them, the closed box's floor at one bounce reads 1.00, 1.04 and 1.03 of
+its reference's light past the direct at heights of 3, 5 and 8 in the field of 0.15, where 1.12,
+1.16 and 1.20, and 1.08, 1.08 and 0.91 at four cascades of a quarter, where 1.29, 1.21 and 1.31. So
+the carrier was the read at the layers with the patches' missing turn and not the probes' count.
+
+The mend is the three together. gi_ambient writes beside each face the light its surface gathers,
+every merged direction moved to start there and each patch turned by the field's normal at it, the
+turn capped at 8 and none for a patch the probe met from behind or along its face. A ray's hit, a
+screen probe's hit, a pixel's read, a reflection's hit and the pass's read at a screen probe's edge
+each take a face toward it by how far they lie from the probe against how far that surface lay, and
+the leaves and the grass drawn forward read the faces where the probes stand.
+GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce holds
+the white rooms of 4, 8 and 16 within 15% of their references' light past the direct on every face
+and reads them 1.04 to 1.05, 1.03 to 1.12 and 0.97 to 1.00, where HEAD reads the rooms of 4 and 8
+1.16 to 1.27. The bar is 15%, since the turn raises the room of 8's wall facing -x to 1.117, which a
+bar of 12% would hold by three thousandths.
+GlobalIlluminationTests.AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference
+holds the bounce rooms' Cornell box closed and empty, in their field of 0.15, read on the world's
+probes alone, within 6% on every face and reads it 1.01 to 1.03, where HEAD reads 1.08 to 1.17, the
+faces moved by distance alone 1.09 to 1.21 and turned with the pixels reading at the probes 1.02 to
+1.12.
+
+On the commit the box of a bay and its aisle from z 7 reads its aisle's back wall 26% over where 32,
+its east wall 10 where 16, its west 3 where 12, its ceiling 7 where 12, its floor 1 where 6 and the
+bay's back wall 12% under where 9, z 7.3 within 1.9 points of it. The thin-walled room reads at most
+0.0012 with the screen probes out and 0.029 with them in against bars of 0.005 and 0.04. With the
+screen probes unread, the bounce rooms lie 0.08 from their references in the Cornell box where 0.11,
+0.07 in the thin room, 0.25 to 0.26 in the corridor, 0.10 in the window's, 0.02 among the red walls,
+0.18 to 0.20 in the strip's, 0.06 to 0.09 on the grazing floor, 0.08 in the carried lamp's where
+0.06 and 0.05 around the emitting blocks, and with them every view lies inside its bound by 0.006 or
+more. View 7 at Low reads 0.0855 against 0.06 and view 8 0.0844, 0.0844 and 0.0822 against 0.08,
+0.08 and 0.07, and by the 15% rule their bounds are 0.10, the cause the shortfall past the first
+bounce the gain hid, the carried lamp's back wall reading 13% under where 7% and its floor 5 where
+3, and the grazing room's placement above.
+
+The moonless alley reads its walls 37, 37 and 49% under where 47, 47 and 53. The light hall's aisle
+from -26 reads at Low its floor 11% under, its ceiling 9 and its walls facing +z, +x and -x 9, 10
+and 11, at Medium 12, 10, 9, 12 and 14 and at High 11, 10, 8, 12 and 13, where HEAD reads at Medium
+8, 8, 5, 10 and 14, the floor four points lower with the gain gone. Its first bounce reads alike at
+HEAD and on the commit, the floor 6% under and the ceiling 30% over, and the light past it, four
+fifths of the floor's, reads 13% under at HEAD and 13 to 15% under on the commit. The feature test's
+Cornell box reads its walls and floor within 3%, its ceiling 30% under as at HEAD and its blocks 8
+and 15% over where 6 and 13. The hall's, the alley's and the carried lamp's under-reading past the
+first bounce is the next reading, recorded under 104 as one fault with three faces.
+
+The first suite on the mend failed one test,
+GlobalIlluminationTests.ARoomLitByOneEmitterKeepsItsReading, its wall facing -x beside the emitter
+9.1% under against a bar of 8%. Every face of that room reads 2 to 3 points lower with the gain
+gone, the back wall 0.4% over where 2.4, the ceiling 1.1 where 2.8, the floor 1.1% under where 0.7
+over and the left wall 2.0 under where 1.0 over, and that wall, lit mostly by the glow light's own
+light near it, read 6.0% under at HEAD. Its bar is 11%, the cause in its remark, and the wall's
+shortfall near its emitter is recorded under 104 beside the deep bounces, a shortfall the gain
+covered of the same kind. The room of six emitters reads its left wall 7.8% under where 4.3, inside
+its bar of 10%.
+
+The turn costs gi_ambient a field normal for each texel of a face with a surface. In the room of
+forty emitters at 1280 by 720 the gather takes 0.073 ms where 0.024 and all of global illumination's
+passes 3.78 ms where 3.83, one read each. In the light hall at -26 the gather's mean over 60 samples
+is 0.069 to 0.085 ms where 0.025, and the passes' medians read 3.84 and 6.13 ms on the commit and
+3.50 and 8.67 at HEAD in four runs by turns beside another program's draws on the GPU, a spread
+wider than the bound, which the gather's own span keeps by 0.14 ms.
+
+Item 101's records left for this Reply. The screen probes' junction normal was read and not mended,
+every form of it costing the bay's back wall 5 to 8 points. The drawn moonless sky's 193% over is
+the picture's star field against the reference's environment map, a fault of the measure. Item 101
+closes with its two commits.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+200 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran with it, 2,011 passed and 3 skipped in 44 m 0 s at the 3 GB cap, none aborted, its largest
+process at 2,653 MB, after a first run on the mend failed the one-emitter room's bar as above.
+NormTests passed, 18. The public listing is unchanged.
+
+Shared: a probe face's light is read for a surface at the surface its own ray along the face's
+opposite way met, each patch its rays met turned toward that surface by the field's normal, since
+read where the probe stands each bounce in a closed room came back about 5% over, and moved by
+distance alone a patch the probe saw squarely and the surface sees at a slant counted for too much,
+the closed Cornell box's floor reading its first bounce 14% over. 3DEngine's world probes read their
+faces where they stand, so its trial of the reprojection takes the turn with it.

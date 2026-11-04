@@ -41,8 +41,10 @@ Texture3D<float> scene_field;
 SamplerState scene_field_sampler;
 StructuredBuffer<FieldInfo> scene_field_info;
 
-// Each probe's six faces and its reach, every cascade, as gi_ambient.slang left them this frame.
+// Each probe's six faces and its reach, every cascade, as gi_ambient.slang left them this frame, with
+// the faces' light at the surfaces they are read for, which a pixel takes toward as a hit does.
 Texture3D<float4> probe_cubes;
+Texture3D<float4> probe_cubes_at;
 Texture3D<float> probe_reach;
 
 // The lights the probes are lit by, for the light from all around, and the small emissive surfaces
@@ -323,7 +325,7 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
         hit = start + r * t;
     }
     float3 shaded = shadeHit(scene_field, scene_field_sampler, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights, probe_cubes,
-        probe_reach, hit, probes.x, probes.y, probes.z);
+        probe_cubes_at, probe_reach, hit, probes.x, probes.y, probes.z);
     if (!onPicture || reflection.z < 0.5)
         return float4(shaded, 1.0);
     float2 uv = passPreviousUvOf(hit);
@@ -433,7 +435,7 @@ float3 bouncedSeen(FieldInfo field, float3 p, float3 n)
         float share = k == 0 ? own : 1.0 - own;
         if (share <= 0.0)
             continue;
-        float4 seen = bouncedSeenSum(scene_field, scene_field_sampler, field, info, probe_cubes, p, n, probes.x, probes.y, c + k);
+        float4 seen = bouncedSeenSum(scene_field, scene_field_sampler, field, info, probe_cubes, probe_cubes_at, p, n, probes.x, probes.y, c + k);
         if (seen.w <= 1e-5)
             return float3(-1.0);
         light += seen.rgb / seen.w * share;
@@ -580,7 +582,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
             bool edge = screen.y > 0.5 && near.x < 0.0 && around.near[0] + around.near[1] + around.near[2] + around.near[3] > 0.0;
             float3 far = edge ? bouncedSeen(info, world, n) : float3(-1.0);
             if (far.x < 0.0)
-                far = bouncedAt(probe_cubes, probe_reach, info, world, n, probes.x, probes.y, probes.z) / Pi;
+                far = bouncedAt(probe_cubes, probe_cubes_at, probe_reach, info, world, n, probes.x, probes.y, probes.z) / Pi;
             bounced = lerp(far, bounced, screened);
         }
     }
