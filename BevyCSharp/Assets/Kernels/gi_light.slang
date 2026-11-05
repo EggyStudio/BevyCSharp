@@ -121,24 +121,13 @@ float3 distantAround(float3 sky, float3 n, float3 ground)
     return sky * (above + ground * (1.0 - above));
 }
 
-// The polynomial Bevy takes F_AB from where it reads no table, which its ambient term is worked out
-// with, at a perceptual roughness of one for the diffuse share.
-float2 F_AB(float perceptual_roughness, float NdotV)
-{
-    float4 c0 = float4(-1.0, -0.0275, -0.572, 0.022);
-    float4 c1 = float4(1.0, 0.0425, 1.04, -0.04);
-    float4 r = perceptual_roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
-    return float2(-1.04, 1.04) * a004 + r.zw;
-}
-
 // The diffuse share of the light the environment maps gave a surface, as Bevy's
 // environment_map_light works it out, the dielectric's and the metal's multiple scattering mixed by
 // the metalness and the diffuse color times what the dielectric's single and multiple scattering
 // leave, times the maps' irradiance (passEnvironmentAround).
 float3 environmentGiven(PassSurface surface, float NdotV, float3 diffuse, float3 irradiance)
 {
-    float2 F_ab = F_AB(surface.perceptual_roughness, NdotV);
+    float2 F_ab = passF_AB(surface.perceptual_roughness, NdotV);
     float Ems = 1.0 - (F_ab.x + F_ab.y);
     float3 F0[2] = { float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color };
     float3 scattered[2];
@@ -643,7 +632,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 around = passEnvironmentAround(world, n, viewShare);
     float3 volumes = passIrradianceVolumesAround(world, n, inVolume);
     float3 aroundGiven = inVolume ? volumes * diffuse : environmentGiven(surface, NdotV, diffuse, around);
-    float2 F_ab = F_AB(1.0, NdotV);
+    float2 F_ab = passF_AB(1.0, NdotV);
     float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + aroundGiven) * occlusion * passView.exposure;
 
     // The light from all around a glossy surface reflects, Bevy's from its ambient term and the
@@ -657,7 +646,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 r = reflect(-V, n);
     float roughness = surface.perceptual_roughness;
     float3 f0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);
-    float2 F_ab_r = F_AB(roughness, NdotV);
+    float2 F_ab_r = passF_AB(roughness, NdotV);
     float3 specularShare = f0 * F_ab_r.x + F_ab_r.y;
     float3 environment = passHasEnvironment() ? passEnvironmentSpecular(r, roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;

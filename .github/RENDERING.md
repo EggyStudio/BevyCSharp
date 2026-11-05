@@ -288,8 +288,11 @@ which is read apart.
 The light given to Bevy's surfaces is the third part (`gi_light.slang`), an engine draw after the
 opaque surfaces blended by adding beside the contact shadows' draw, which reads the deferred
 prepass's G-buffer, works out the diffuse share of the ambient light Bevy's lighting gave the
-surface as Bevy works it out, from `F_AB` at a perceptual roughness of one, and adds in its place
-the surface's diffuse color times the light read between the probes around it, times its occlusion.
+surface as Bevy works it out, from `F_AB` at a perceptual roughness of one, read from Bevy's table
+of it as Bevy's lighting reads it (`passF_AB`, the table bound among every engine pass's inputs),
+and adds in its place the surface's diffuse color times the light read between the probes around
+it, times its occlusion. Taken back by the polynomial Bevy uses without the table, a white floor
+under the sky alone read 0.846 of its reference near the eye and 1.334 at a grazing angle.
 3DEngine's model pass reads the probes inside its own lighting, and taking Bevy's term back stands
 in for that until the indirect input of the table below exists. The diffuse light an environment map
 gave the surface is taken back with the ambient term, as Bevy's environment_map_light works it out,

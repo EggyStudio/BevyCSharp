@@ -109,17 +109,6 @@ float3 fresnel(float3 f0, float LdotH)
     return f0 + (f90 - f0) * pow(1.0 - LdotH, 5.0);
 }
 
-// The polynomial Bevy uses where it reads no table of these, which differs from the table only in
-// the energy a rough metal's multiple scattering adds back.
-float2 F_AB(float perceptual_roughness, float NdotV)
-{
-    float4 c0 = float4(-1.0, -0.0275, -0.572, 0.022);
-    float4 c1 = float4(1.0, 0.0425, 1.04, -0.04);
-    float4 r = perceptual_roughness * c0 + c1;
-    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
-    return max(float2(-1.04, 1.04) * a004 + r.zw, float2(0.00005));
-}
-
 // The light a directional light sends toward the eye from a surface, before its shadow and the
 // camera's exposure, as Bevy's `directional_light` works it out for a standard material.
 float3 sent(PassSurface surface, float3 V, float3 L, float3 color)
@@ -138,7 +127,7 @@ float3 sent(PassSurface surface, float3 V, float3 L, float3 color)
     float3 diffuse = diffuse_color * F_Schlick(1.0, f90, NdotL) * F_Schlick(1.0, f90, NdotV) * (1.0 / PI);
 
     float3 F0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);
-    float2 F_ab = F_AB(perceptual, NdotV);
+    float2 F_ab = passF_AB(perceptual, NdotV);
     float3 specular = D_GGX(roughness, NdotH) * V_SmithGGXCorrelated(roughness, NdotV, NdotL) * fresnel(F0, LdotH);
     specular *= 1.0 + F0 * (1.0 / (F_ab.x + F_ab.y) - 1.0);
 

@@ -181,7 +181,8 @@ public struct SceneInfo
     public float4 world_to_atmosphere[4];
     /// x: 1 where Bevy's lighting reads its reflection probes and more than one irradiance volume,
     /// which it does where the device binds arrays of images, and 0 where it reads the camera's
-    /// environment map and the first volume alone, which is how `passLightProbeArrays` tells.
+    /// environment map and the first volume alone, which is how `passLightProbeArrays` tells. y: 1
+    /// where Bevy reads F_AB from its table (`passDfgLut`), which is how `passHasDfgLut` tells.
     public uint4 light_probes;
 };
 
@@ -211,6 +212,12 @@ public static const uint DirectionalLightShadows = 1u << 0u;
 /// How much of the sun's light the camera's atmosphere lets through to a height along a way, Bevy's
 /// own lookup texture, which `passAtmosphereTransmittance` reads.
 [[vk::binding(17, 101)]] public Texture2D passTransmittanceLut;
+
+/// Bevy's table of F_AB, the scale and bias of a specular color by how squarely a surface faces the
+/// eye and its perceptual roughness, which its standard material lights its specular and its
+/// ambient term from where the bridge is built with it, and which `passF_AB` reads. Black where it
+/// is not (`passHasDfgLut`).
+[[vk::binding(27, 101)]] public Texture2D<float2> passDfgLut;
 
 /// How many directional lights the camera sees.
 public uint passDirectionalLightCount()
@@ -571,6 +578,28 @@ public bool passHasNormals()
 public bool passHasMotion()
 {
     return (passSceneInfo.own_inputs & 4u) != 0u;
+}
+
+/// Whether Bevy reads F_AB from its table (`passDfgLut`) rather than from its polynomial.
+public bool passHasDfgLut()
+{
+    return passSceneInfo.light_probes.y != 0u;
+}
+
+/// F_AB as Bevy's lighting works it out for a surface of `perceptual_roughness` facing the eye at
+/// `NdotV`, from its table where it reads one and from its polynomial where it does not, so a
+/// shader taking back the light Bevy gave a surface takes back what Bevy gave. The two differ most
+/// on a rough surface, whose diffuse share of an ambient light Bevy's table gives at 0.32 face on
+/// and 0.92 edge on and the polynomial at 0.45 at every angle.
+public float2 passF_AB(float perceptual_roughness, float NdotV)
+{
+    if (passHasDfgLut())
+        return passDfgLut.SampleLevel(passPictureSampler, float2(NdotV, perceptual_roughness), 0.0);
+    float4 c0 = float4(-1.0, -0.0275, -0.572, 0.022);
+    float4 c1 = float4(1.0, 0.0425, 1.04, -0.04);
+    float4 r = perceptual_roughness * c0 + c1;
+    float a004 = min(r.x * r.x, exp2(-9.28 * NdotV)) * r.x + r.y;
+    return max(float2(-1.04, 1.04) * a004 + r.zw, float2(0.00005));
 }
 
 /// Whether the camera is under one of Bevy's atmospheres, which `Render.SetAtmosphere` gives it.

@@ -222,10 +222,13 @@ the first four of their images by each probe's `cubemap_index`, in `passLightPro
 the device binds arrays of images. `passEnvironmentAround(world, normal, out share)` is the diffuse
 light Bevy's environment maps give a surface there, its reflection probes' blended with the camera's
 map, with the share of the blend the probes leave, and `passIrradianceVolumesAround(world, normal,
-out held)` its irradiance volumes', with whether any holds the point. And `passBlueNoise(pixel)` is
-Bevy's spatio-temporal blue noise for this frame, four numbers from zero to one whose values are
-spread evenly across the picture and from frame to frame. A technique taking a few random samples a
-pixel picks them with it, so its noise blurs away rather than blotching.
+out held)` its irradiance volumes', with whether any holds the point. `passF_AB(roughness, NdotV)`
+is the scale and bias of a specular color Bevy's lighting reads from its table for a surface of that
+roughness facing the eye that squarely, which its ambient term and its environment maps' light are
+worked out with, so a shader taking that light back takes back what Bevy gave. And
+`passBlueNoise(pixel)` is Bevy's spatio-temporal blue noise for this frame, four numbers from zero
+to one whose values are spread evenly across the picture and from frame to frame. A technique taking
+a few random samples a pixel picks them with it, so its noise blurs away rather than blotching.
 
 What each pixel's surface is made of comes from Bevy's G-buffer. A camera asked for it with
 `Shaders.SetPrepass(camera, depth: true, deferred: true)` draws Bevy's materials deferred, and a

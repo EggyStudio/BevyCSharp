@@ -66,6 +66,8 @@ pub struct ViewInputs {
     empty_light_probes: Buffer,
     /// Black everywhere, for an irradiance volume a camera does not have.
     empty_volume: TextureView,
+    /// Bound where Bevy lights with no table of F_AB, which a shader tells by `passHasDfgLut`.
+    empty_dfg: TextureView,
 }
 
 /// Finds Bevy's blue noise on the GPU once, for every shader on a camera to read.
@@ -170,6 +172,10 @@ pub struct SceneLights<'w> {
     clustered: Option<Res<'w, GlobalClusterableObjectMeta>>,
     samplers: Option<Res<'w, ShadowSamplers>>,
     light_probes: Option<Res<'w, LightProbesBuffer>>,
+    /// The table of F_AB Bevy's standard material lights its specular and its ambient term from,
+    /// where the bridge is built with it (`bevy/dfg_lut`), and the images it is one of.
+    dfg: Option<Res<'w, bevy::pbr::DfgLut>>,
+    images: Res<'w, RenderAssets<GpuImage>>,
 }
 
 /// One view's part of the scene's lights.
@@ -313,6 +319,10 @@ pub(super) fn init_inputs(
     // Bevy's light probes, its uniform and its images after it.
     entries.extend(light_probes::layout_entries(&entry));
 
+    // Bevy's table of F_AB by the way a surface faces the eye and its roughness, so a shader taking
+    // back the light Bevy's lighting gave a surface works it out as Bevy did.
+    entries.push(entry(DFG_LUT, float(true)));
+
     let texture = |label: &'static str, format: TextureFormat| {
         render_device
             .create_texture(&TextureDescriptor {
@@ -427,6 +437,7 @@ pub(super) fn init_inputs(
         empty_transmittance: texture("bcs_view_empty_transmittance", TextureFormat::Rgba16Float),
         arrays,
         empty_light_probes,
+        empty_dfg: texture("bcs_view_empty_dfg", TextureFormat::Rg16Float),
         empty_volume,
         empty_blue_noise: {
             let texture = render_device.create_texture_with_data(
@@ -505,9 +516,13 @@ impl<'a> ViewAtmosphere<'a> {
 
 /// The size of what binding thirteen holds, counts of the scene's lights, the environment's
 /// intensity, rotation and mip count, which prepass textures are the camera's own, the planet's and
-/// the atmosphere's radii and the turn into the atmosphere's space, and whether Bevy's lighting
-/// reads its reflection probes, which `SceneInfo` mirrors.
+/// the atmosphere's radii and the turn into the atmosphere's space, whether Bevy's lighting reads
+/// its reflection probes and whether it reads F_AB from its table, which `SceneInfo` mirrors.
 const SCENE_INFO_BYTES: u64 = 128;
+
+/// The binding of Bevy's table of F_AB, after the light probes' images (`bcs_pass.slang`'s
+/// `passDfgLut`).
+const DFG_LUT: u32 = 27;
 
 
 impl<'a> ViewInputSources<'a> {
@@ -620,8 +635,17 @@ impl<'a> ViewInputSources<'a> {
             info[10] = 1.0f32.to_bits();
             info[12..28].copy_from_slice(&atmosphere.world_to_atmosphere.to_cols_array().map(f32::to_bits));
         }
-        // Whether Bevy's lighting reads its reflection probes and more than one volume.
+        // Whether Bevy's lighting reads its reflection probes and more than one volume, and whether
+        // it reads F_AB from its table.
         info[28] = u32::from(inputs.arrays);
+        // A bridge without the table holds Bevy's default image in its place, white, which is no
+        // table of F_AB.
+        let dfg = scene
+            .dfg
+            .as_deref()
+            .filter(|lut| lut.texture.id() != bevy::asset::AssetId::default())
+            .and_then(|lut| scene.images.get(&lut.texture));
+        info[29] = u32::from(dfg.is_some());
 
         let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {
             label: Some("bcs_view_scene_info"),
@@ -732,6 +756,11 @@ impl<'a> ViewInputSources<'a> {
             scene.light_probes.as_deref(),
             (&inputs.empty_light_probes, &inputs.empty_environment, &inputs.empty_volume),
         ));
+
+        entries.push(BindGroupEntry {
+            binding: DFG_LUT,
+            resource: BindingResource::TextureView(dfg.map_or(&inputs.empty_dfg, |image| &image.texture_view)),
+        });
 
         let group = device.create_bind_group("bcs_view_inputs", &cache.get_bind_group_layout(&inputs.layout), &entries);
 
