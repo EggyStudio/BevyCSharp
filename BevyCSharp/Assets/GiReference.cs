@@ -22,10 +22,14 @@ namespace Bevy;
 /// each the entity's name, or its slot where it has none, and the axis.
 /// </para>
 /// <para>
-/// The ray scene holds every shown entity that draws a 3D mesh of triangles, with its standard
+/// The ray scene holds every shown entity that draws a 3D mesh of triangles, a mesh of a visibility
+/// range at the level the camera's distance gives, as the picture draws it, with its standard
 /// material's base color, emissive light, roughness, metallic and reflectance as the engine's
 /// material buffer has them, so a texture counts as its base color and a mesh's vertices' colors are
-/// left out. The lights are those global illumination's probes are lit by, the sun, the light from
+/// left out. What it says when it is done counts the cut-out textures past the material buffer's
+/// masks (<see cref="Shaders.MaterialBufferUnmasked"/>), traced whole by their base color, and the
+/// trees not dressed yet when it began, which neither it nor the picture holds.
+/// The lights are those global illumination's probes are lit by, the sun, the light from
 /// all around and the sixteen point and spot lights nearest the camera, the sun dimmed through the
 /// camera's air as Bevy's lighting dims it for the picture. It needs a GPU that traces
 /// rays (<see cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so the app keeps one,
@@ -74,7 +78,7 @@ internal static unsafe partial class GiReference
         public BufferRead? SizeRead, SumsRead, RegionsRead, PictureRead;
         public byte[]? SumsBytes, RegionsBytes;
         public string[] Slots = [];
-        public int Skipped;
+        public int Skipped, Undressed;
         public long Started;
     }
 
@@ -126,6 +130,7 @@ internal static unsafe partial class GiReference
             Faces = bounces < 0 ? MostFaces : bounces + 1,
             Slots = slots,
             Skipped = skipped,
+            Undressed = Trees.Undressed(ecs),
             Started = Stopwatch.GetTimestamp(),
         };
         AskSize(_job, rays);
@@ -250,17 +255,22 @@ internal static unsafe partial class GiReference
 
     /// <summary>
     /// Puts every shown entity drawing a mesh of triangles in a slot of the ray scene and of the
-    /// instance and material buffers, making them larger where they hold too few, and answers each
-    /// slot's name and how many entities were left out, their meshes not triangles or not loaded.
+    /// instance and material buffers, a mesh of a visibility range where the camera's distance
+    /// gives it (<see cref="InRange"/>), making them larger where they hold too few, and answers
+    /// each slot's name and how many entities were left out, their meshes not triangles or not
+    /// loaded.
     /// </summary>
     private static (string[] Slots, int Skipped) Fill(EcsWorld ecs, Rays rays)
     {
         var placed = new List<(Entity Entity, int Mesh)>();
         var skipped = 0;
+        var camera = CameraOf(ecs);
+        Vec3? eye = !camera.IsNone && ecs.TryGet<GlobalTransform>(camera, out var view) ? view.Translation : null;
         foreach (var drawn in ecs.All<Mesh3dRef>())
         {
             var entity = drawn.Entity;
             if (ecs.Get<InheritedVisibilityRef>(entity) is { } seen && !seen.Value) continue;
+            if (eye is { } at && !InRange(ecs, entity, at)) continue;
             var mesh = Render.MeshOf(ecs, entity);
             if (!mesh.IsValid) continue;
             if (!rays.PoolMeshes.TryGetValue(mesh.Key, out var index))
@@ -302,6 +312,33 @@ internal static unsafe partial class GiReference
         // A mesh changed since it came into the pool is traced as it stands.
         Shaders.RebuildRayScene(rays.Scene);
         return (names, skipped);
+    }
+
+    /// <summary>
+    /// Whether the eye at <paramref name="eye"/> draws a mesh of a visibility range at its
+    /// distance, from the middle of the margin it fades in over up to the middle of the one it
+    /// fades out over, or any mesh of none.
+    /// </summary>
+    /// <remarks>
+    /// Bevy measures the distance to the entity's place, or to the middle of its box where the
+    /// range asks, and over a margin dithers the level fading out and the one fading in each over a
+    /// share of the pixels, so the nearer half of each margin is the nearer level's and the farther
+    /// half the farther one's, and one level of a tree is traced at any distance. The reference
+    /// held every shown mesh, so a tree was traced at every level at once, its leaves, its reduced
+    /// leaves and its far cards over each other, and in the feature test's meadow the cards, their
+    /// textures past the material buffer's masks, stood as planes over the crowns and cast a dark
+    /// shadow over the grass, the camera inside an oak's crown meeting a card and nothing else.
+    /// </remarks>
+    private static bool InRange(EcsWorld ecs, Entity entity, Vec3 eye)
+    {
+        if (ecs.Get<VisibilityRangeRef>(entity) is not { } range) return true;
+        if (!ecs.TryGet<GlobalTransform>(entity, out var global)) return true;
+        var place = global.Translation;
+        if (range.UseAabb && ecs.Get<AabbRef>(entity) is { } box)
+            place += global.XAxis * box.Center.X + global.YAxis * box.Center.Y + global.ZAxis * box.Center.Z;
+        var distance = (place - eye).Length;
+        var (start, end) = (range.StartMargin, range.EndMargin);
+        return distance >= (start.Start + start.End) / 2f && distance < (end.Start + end.End) / 2f;
     }
 
     // Puts the copy on the camera over an image of one texel, which writes the picture's size.
@@ -420,7 +457,10 @@ internal static unsafe partial class GiReference
         Last = traced;
         var seconds = Stopwatch.GetElapsedTime(job.Started).TotalSeconds;
         var skipped = job.Skipped == 0 ? "" : $", {job.Skipped} meshes left out as not triangles or not loaded";
-        var said = $"traced {job.Width} by {job.Height} at {samples} paths a pixel in {seconds:0.0} s, {job.Slots.Length} meshes{skipped}, {names.Count} regions";
+        var past = _rays is { } held ? Shaders.MaterialBufferUnmasked(held.Materials) : 0;
+        var unmasked = past == 0 ? "" : $", {past} cut-out textures past the masks traced by their base color alone";
+        var undressed = job.Undressed == 0 ? "" : $", {job.Undressed} trees not dressed yet";
+        var said = $"traced {job.Width} by {job.Height} at {samples} paths a pixel in {seconds:0.0} s, {job.Slots.Length} meshes{skipped}{unmasked}{undressed}, {names.Count} regions";
         if (job.Path is { } path)
         {
             var full = System.IO.Path.GetFullPath(path);

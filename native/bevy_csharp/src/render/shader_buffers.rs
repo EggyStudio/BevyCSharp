@@ -355,6 +355,26 @@ pub extern "C" fn bcs_shader_material_buffer_mask(buffer: i32, index: i32) -> i3
     })
 }
 
+/// How many cut-out textures the slots of a material buffer from
+/// [`bcs_shader_material_buffer_create`] name past its masks, each traced by its material's base
+/// color alone, as of the frame it was last written, or [`status::NO_COMPONENT`] where the key is
+/// not a material buffer.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_material_buffer_unmasked(buffer: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = buffer;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| super::instances::unmasked(world, buffer))
+        }
+    })
+}
+
 /// Puts an entity in a slot of an instance or material buffer, or empties the slot where `entity`
 /// is zero.
 ///

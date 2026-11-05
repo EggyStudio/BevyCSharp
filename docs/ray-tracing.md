@@ -378,7 +378,10 @@ for it.
 GPU's rays where it has them, and `gi.compare shots/reference.png` says how far the picture lies
 from it, region by region, with a picture of the difference beside it. A mesh a shader places as it
 draws, as particles drawn from a buffer are, is traced where its own corners lie, so it is hidden
-for a reading.
+for a reading. A mesh of a visibility range, a tree's levels among them, is traced at the level the
+camera's distance gives, as the picture draws it, and the reference's answer says how many cut-out
+textures went past the material buffer's masks and how many trees were not dressed yet, since a
+reading taken before a scene's trees stand reads a scene with fewer.
 
 ---
 

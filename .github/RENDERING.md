@@ -372,7 +372,17 @@ roughness texture are masks of the material buffer (`Shaders.MaterialBufferMask`
 face, say how metallic and rough it is and let a path or a shadow ray through where its alpha is
 under the cutoff, as the forward pass discards those texels. A tree's impostor stands in for a far
 tree turned to the eye as it draws, which no ray meets as a shape, so it is passed and the reference
-holds no far trees. In the feature test's meadow at eight in the morning the picture held a mean
+holds no far trees. A mesh of a visibility range is traced at the level the camera's distance gives,
+from the middle of the margin it fades in over to the middle of the one it fades out over, since
+Bevy dithers two levels across a margin, so one level of a tree is traced at any distance. The
+reference held every level of each tree at once, and in the feature test's meadow at eight in the
+morning the far cards, their textures past the material buffer's sixteen masks and traced whole,
+stood as planes over the crowns and the leaves past them as black metal, the walls 63 to 70% under
+the reference and the sky 29%. Taken at the level the camera's distance gives, the meadow's walls
+read 17 and 31% under and the sky 6%, the view's distance 0.525 where 0.688. The reference's answer
+counts the cut-out textures past the masks and the trees not dressed yet, since the feature test's
+28 trees stood 70 of their 166 parts 300 frames after it started, and a reading taken then held no
+oaks. In the feature test's meadow at eight in the morning the picture held a mean
 light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
 reference. A path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map

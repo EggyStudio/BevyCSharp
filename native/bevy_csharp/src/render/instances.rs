@@ -75,6 +75,8 @@ struct Tracked {
     /// A material buffer's masks, the base color textures of its cut-out materials, in the order
     /// their slots give them.
     masks: Vec<Handle<bevy::image::Image>>,
+    /// How many of its slots' cut-out textures there was no room for among the masks.
+    unmasked: usize,
 }
 
 /// Every buffer the engine keeps filled with transforms.
@@ -122,6 +124,7 @@ fn create_kind(world: &mut World, capacity: u32, kind: Kind) -> i32 {
             previous: vec![Mat4::ZERO; slots],
             written: Vec::new(),
             masks: Vec::new(),
+            unmasked: 0,
         },
     );
 
@@ -209,6 +212,7 @@ pub fn write_materials(
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * MATERIAL_SLOT_BYTES);
         let mut masks: Vec<Handle<bevy::image::Image>> = Vec::new();
+        let mut unmasked: Vec<AssetId<bevy::image::Image>> = Vec::new();
 
         for entity in &tracked.slots {
             let base = entity.and_then(|entity| {
@@ -233,11 +237,11 @@ pub fn write_materials(
                     let emissive = material.emissive;
                     let reflectance = material.reflectance;
                     let cutoff = cutoff_of(material.alpha_mode);
-                    let mask = cut_out_texture(material, cutoff).map_or(-1.0, |texture| mask_of(&mut masks, texture));
+                    let mask = cut_out_texture(material, cutoff).map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
                     let surface = (cutoff >= 0.0)
                         .then_some(material.metallic_roughness_texture.as_ref())
                         .flatten()
-                        .map_or(-1.0, |texture| mask_of(&mut masks, texture));
+                        .map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
 
                     [
                         base.red,
@@ -266,6 +270,7 @@ pub fn write_materials(
         }
 
         tracked.masks = masks;
+        tracked.unmasked = unmasked.len();
         upload(tracked, bytes, &mut assets);
     }
 }
@@ -286,12 +291,20 @@ fn cut_out_texture(material: &bevy::pbr::StandardMaterial, cutoff: f32) -> Optio
 }
 
 /// Which of the buffer's masks a texture is, taking the next where it is none yet and there is
-/// room, or -1 where there is none, the material then cut out by its base color's alpha alone.
-fn mask_of(masks: &mut Vec<Handle<bevy::image::Image>>, texture: &Handle<bevy::image::Image>) -> f32 {
+/// room, or -1 where there is none, the material then cut out by its base color's alpha alone and
+/// the texture counted among those left out.
+fn mask_of(
+    masks: &mut Vec<Handle<bevy::image::Image>>,
+    unmasked: &mut Vec<AssetId<bevy::image::Image>>,
+    texture: &Handle<bevy::image::Image>,
+) -> f32 {
     if let Some(index) = masks.iter().position(|mask| mask.id() == texture.id()) {
         return index as f32;
     }
     if masks.len() >= MOST_MASKS {
+        if !unmasked.contains(&texture.id()) {
+            unmasked.push(texture.id());
+        }
         return -1.0;
     }
     masks.push(texture.clone());
@@ -313,6 +326,19 @@ pub fn mask(world: &mut World, key: i32, index: u32) -> i32 {
         Some(texture) => crate::assets::key_for(world, texture.untyped()),
         None => status::NOT_PRESENT,
     }
+}
+
+/// How many cut-out textures the slots of the material buffer `key` name that there was no room
+/// for among its masks, or [`status::NO_COMPONENT`] where it is no material buffer.
+pub fn unmasked(world: &mut World, key: i32) -> i32 {
+    let Some(handle) = super::compute::buffer_handle(world, key) else {
+        return status::NO_COMPONENT;
+    };
+    world
+        .get_resource::<InstanceBuffers>()
+        .and_then(|buffers| buffers.0.get(&handle.id()))
+        .filter(|tracked| tracked.kind == Kind::Materials)
+        .map_or(status::NO_COMPONENT, |tracked| tracked.unmasked as i32)
 }
 
 /// Hands a buffer's new contents to the GPU, if they changed.
@@ -350,20 +376,25 @@ mod tests {
     }
 
     /// A buffer's masks are its cut-out textures in the order their slots give them, a texture met
-    /// again taking its first index, and none past the last there is room for.
+    /// again taking its first index, and none past the last there is room for, each texture left
+    /// out counted once however many slots name it.
     #[test]
     fn a_texture_takes_one_mask_however_many_slots_cut_it_out() {
-        let mut masks = Vec::new();
+        let (mut masks, mut unmasked) = (Vec::new(), Vec::new());
         let textures: Vec<Handle<bevy::image::Image>> =
-            (0..=MOST_MASKS as u128).map(|n| Handle::Uuid(bevy::asset::uuid::Uuid::from_u128(n + 1), Default::default())).collect();
-        assert_eq!(mask_of(&mut masks, &textures[0]), 0.0);
-        assert_eq!(mask_of(&mut masks, &textures[1]), 1.0);
-        assert_eq!(mask_of(&mut masks, &textures[0]), 0.0);
+            (0..=MOST_MASKS as u128 + 1).map(|n| Handle::Uuid(bevy::asset::uuid::Uuid::from_u128(n + 1), Default::default())).collect();
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[0]), 0.0);
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[1]), 1.0);
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[0]), 0.0);
         for texture in &textures[2..MOST_MASKS] {
-            mask_of(&mut masks, texture);
+            mask_of(&mut masks, &mut unmasked, texture);
         }
-        assert_eq!(mask_of(&mut masks, &textures[MOST_MASKS]), -1.0);
+        assert!(unmasked.is_empty());
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[MOST_MASKS]), -1.0);
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[MOST_MASKS]), -1.0);
+        assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[MOST_MASKS + 1]), -1.0);
         assert_eq!(masks.len(), MOST_MASKS);
+        assert_eq!(unmasked.len(), 2);
     }
 
     /// The managed side and `bcs_scene` both read a slot as two column-major matrices.

@@ -12730,6 +12730,7 @@ static class Bevy.Shaders
   static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh)
   static int BufferSize(AssetHandle buffer)
   static int GrowBuffer(AssetHandle buffer, int size)
+  static int MaterialBufferUnmasked(AssetHandle buffer)
   static int ProgramCount { get; }
   static int TexelBytes(ShaderImageFormat format)
   static string LastRenderError { get; }

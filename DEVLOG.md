@@ -17,6 +17,14 @@ roughness textures, the paths and the shadow rays let through where a card's alp
 cutoff, the grass and the crowns lit and cut out, the trees' impostors left out of it so it holds no
 far trees.
 
+![](.github/assets/readings/2026-11-05-item-105-levels.webp)
+The feature test's meadow at eight in the morning under a clear sky, its path-traced reference
+looking back toward the sun from inside the grass, on the left as it traced every level of each tree
+at once, the far cards, their textures past the material buffer's sixteen masks, standing whole as
+gray planes over the crowns and the leaves past them as black squares, and on the right as it traces
+a mesh of a visibility range at the level the eye's distance gives, as the picture draws it, the
+oak's limbs and leaves and the aspens behind it against the wall.
+
 ## 2026-11-04
 
 ![](.github/assets/readings/2026-11-04-item-95-seam.webp)

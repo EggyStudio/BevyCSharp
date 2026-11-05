@@ -307,6 +307,22 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
+    /// How many cut-out textures a material buffer's slots name past its sixteen masks
+    /// (<see cref="MaterialBufferMask"/>), each texture counted once, as of the frame the buffer
+    /// was last written.
+    /// </summary>
+    /// <remarks>
+    /// A slot whose cut-out texture has no mask holds a mask of -1 and is cut out by its base
+    /// color's alpha alone, so a shader reading the masks traces it whole and, where its metallic
+    /// is one for its texture to say where it is metal, as metal. The reference global illumination
+    /// is measured against says this count, since a scene of more cut-out textures than masks reads
+    /// apart from its picture there.
+    /// </remarks>
+    /// <exception cref="BevyNativeException">The handle is not a material buffer.</exception>
+    public static int MaterialBufferUnmasked(AssetHandle buffer) =>
+        Native.Check(Native.bcs_shader_material_buffer_unmasked(buffer.Key), $"counting the textures past the masks of {buffer}");
+
+    /// <summary>
     /// Puts an entity in a slot of an instance or material buffer, or with
     /// <see cref="Entity.None"/> empties the slot. Only valid inside a system.
     /// </summary>

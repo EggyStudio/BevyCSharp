@@ -264,6 +264,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_mask(int buffer, int index);
 
+    /// <summary>How many cut-out textures a material buffer's slots name past its masks.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_material_buffer_unmasked(int buffer);
+
     /// <summary>Whether Bevy's ray-traced lighting is running in this app.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

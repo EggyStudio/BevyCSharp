@@ -333,6 +333,61 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
         Assert.True(Math.Abs(share - 0.5) < 0.1, $"the cut-out card's shadow reads {share:0.000} of the open floor's light");
     }
 
+    /// <summary>
+    /// A mesh of a visibility range is in the reference where the eye's distance from it gives it,
+    /// as the picture draws it, a near level up to the middle of the margin it fades out over and a
+    /// far level from there on, so the reference meets the level the camera draws.
+    /// </summary>
+    /// <remarks>
+    /// The reference held every shown mesh, so a tree was traced at every level at once, its leaves,
+    /// its reduced leaves and its far cards over each other, and in the feature test's meadow its far
+    /// cards stood as planes over the crowns. Here the level not drawn is the larger of two cubes
+    /// about the same middle, so where it was traced the eye met it first, the far level from near
+    /// and the near one from far.
+    /// </remarks>
+    [SkippableTheory]
+    [InlineData(5f, "near")]
+    [InlineData(8.5f, "near")]
+    [InlineData(9.5f, "far")]
+    [InlineData(20f, "far")]
+    public void AReferenceMeetsTheLevelOfAMeshItsDistanceFromTheEyeGives(float distance, string drawn)
+    {
+        Needs.Shaders();
+        var supported = false;
+        string? traced = null;
+        var asked = false;
+        new PictureRun
+        {
+            Width = Width,
+            Height = Height,
+            Frames = 900,
+            Scene = ecs =>
+            {
+                var eye = new Vec3(0f, 0f, distance);
+                var camera = PictureRun.Camera(ecs, eye);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                foreach (var (name, start, end) in new[] { ("near", new FloatRange(0f, 0f), new FloatRange(8f, 10f)), ("far", new FloatRange(8f, 10f), new FloatRange(100f, 120f)) })
+                {
+                    var level = PictureRun.Cube(ecs, Render.CreateMaterial(0.8f, 0.8f, 0.8f), name == drawn ? 1f : 2f, Vec3.Zero);
+                    ecs.SetName(level, name);
+                    var range = ecs.Insert<VisibilityRangeRef>(level);
+                    (range.StartMargin, range.EndMargin, range.UseAabb) = (start, end, false);
+                }
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(1f, 2f, 3f), Vec3.Zero, Vec3.UnitY));
+            },
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("ready", _ => !supported || Render.PipelinesReady())
+            .Until("traced", world => !supported || Read(world.Resource<EcsWorld>(), ref asked, ref traced, ecs => GiReference.BeginReference(ecs, null, 1, bounces: 0)))
+            .Go();
+        Needs.RayQueries(supported);
+
+        var met = GiReference.Last!.Regions.Where(region => region != 0).Select(region => GiReference.Last.Names[region].Split(' ')[0]).Distinct().ToArray();
+        output.WriteLine($"from {distance} the reference meets {string.Join(" and ", met)}: {traced}");
+        Assert.Equal([drawn], met);
+    }
+
     // Whether a pixel's region is the card's, facing either way.
     private static bool IsCard(GiReference.Traced traced, uint region) => traced.Names.TryGetValue(region, out var name) && name.StartsWith("card");
 

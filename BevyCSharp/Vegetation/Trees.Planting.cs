@@ -182,6 +182,25 @@ public static partial class Trees
     }
 
     /// <summary>
+    /// How many of the world's trees are not dressed yet, their variant growing or its far levels
+    /// being pictured, a tree left bare by a fault the log names not among them.
+    /// </summary>
+    /// <remarks>
+    /// The feature test's 28 trees stood 70 of their 166 parts 300 frames after it started and all
+    /// of them by 1,500, so a reading of a scene of trees taken before they stand reads a scene
+    /// with fewer, which the reference global illumination is measured against says.
+    /// </remarks>
+    internal static int Undressed(EcsWorld ecs)
+    {
+        if (App.Running is not { } app) return 0;
+        var dressed = Dressed.GetOrCreateValue(app);
+        var count = 0;
+        foreach (var row in ecs.Query<Tree>(markChanged: false))
+            if (!dressed.TryGetValue(row.Entity, out var dressing) || (dressing.Body == Entity.None && !dressing.Warned)) count++;
+        return count;
+    }
+
+    /// <summary>
     /// Dresses every tree whose variant has grown, starting the growth of those whose have not, and
     /// dresses again a tree whose species or seed changed. Called once a frame.
     /// </summary>

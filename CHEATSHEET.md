@@ -1061,6 +1061,7 @@ static void SetRaySceneInstance(RayScene scene, int slot, Entity entity, int mes
 static void RebuildRayScene(RayScene scene, int? mesh = null);  // Builds a ray scene's pool mesh again from what the pool's buffers hold now, or every mesh with null
 static AssetHandle CreateMaterialBuffer(int capacity);          // Makes a buffer with capacity slots that the engine fills every frame with what the entities put in them are made of, from their standard materials
 static AssetHandle MaterialBufferMask(AssetHandle buffer, int index);  // Mask index of a material buffer, the base color texture or the metallic and roughness texture of a cut-out material its slots hold, which a slot's mask or surface_mask names, or None where it has no such mask
+static int MaterialBufferUnmasked(AssetHandle buffer);          // How many cut-out textures a material buffer's slots name past its sixteen masks (MaterialBufferMask), each texture counted once, as of the frame the buffer was last written
 static void SetInstance(AssetHandle buffer, int slot, Entity entity);  // Puts an entity in a slot of an instance or material buffer, or with None empties the slot
 static int BufferSize(AssetHandle buffer);                      // A buffer's size in bytes
 static BufferRead BeginBufferRead(AssetHandle buffer);          // Starts copying a buffer back from the GPU. Only valid inside a system

@@ -99,9 +99,10 @@ hit with that. Textures are not in it, and the base color is the factor the mate
 by, but for a material cut out under an alpha, whose slot holds its cutoff and names which of the
 buffer's masks its base color texture and its metallic and roughness texture are.
 `Shaders.MaterialBufferMask(buffer, index)` gives each mask, and a shader that binds them reads at a
-hit, from the pool's texture coordinates, whether a ray passes there and what the surface is. A
-tree's impostor holds a cutoff above any alpha, since it is turned to the eye as it draws and is no
-shape a ray meets.
+hit, from the pool's texture coordinates, whether a ray passes there and what the surface is. There
+are sixteen, and `Shaders.MaterialBufferUnmasked(buffer)` says how many cut-out textures its slots
+name past them, each traced whole by its base color. A tree's impostor holds a cutoff above any
+alpha, since it is turned to the eye as it draws and is no shape a ray meets.
 
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:
