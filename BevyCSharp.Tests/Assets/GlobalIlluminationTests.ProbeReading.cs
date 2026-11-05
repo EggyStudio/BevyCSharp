@@ -81,4 +81,71 @@ public sealed partial class GlobalIlluminationTests
             faults.Add($"held at two bounces the probe read {read[1].Reading.Probe:0.000000} and then {read[2].Reading.Probe:0.000000}");
         Assert.True(faults.Count == 0, string.Join("; ", faults));
     }
+
+    /// <summary>
+    /// A screen probe on the floor of a closed room of 8 sums its sixteen rays' light within 10% of
+    /// the reference's along the same ways (<c>gi.screenprobe</c>), held at its first bounce and at
+    /// every one, each ray met somewhere.
+    /// </summary>
+    /// <remarks>
+    /// The screen kernel writes the probe's rays as it traces them, and the reference traces from
+    /// where they leave along each, so a ray logged or read back wrong, a reference traced from the
+    /// wrong place, or a probe summing its rays as it does not reads off the reference by more than
+    /// its paths' noise. The probe on the floor under the picture's lower middle reads 0.5% under
+    /// its reference along its ways at the first bounce and 2.7% over at every one, and with its
+    /// ways handed to the reference in the reverse order it read 12.6% under at the first.
+    /// </remarks>
+    [SkippableFact]
+    public void AScreenProbeInAClosedRoomSumsItsReferencesLightAlongItsWays()
+    {
+        Needs.Shaders();
+        var supported = false;
+        var ready = 0;
+        var read = new List<(string Held, (double Probe, double Along, double Drawn, int OnPicture, int InField, int Beyond, int PastReach) Reading)>();
+        var run = new PictureRun
+        {
+            Width = 160,
+            Height = 90,
+            Frames = 12000,
+            Scene = ecs => ClosedRoom(ecs, 8f),
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
+                && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
+            .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 300)
+            .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3);
+        foreach (var (held, faces, label) in new (int?, int, string)[] { (0, 0, "the first bounce"), (null, -1, "every bounce") })
+        {
+            var (waited, begun) = (0, false);
+            run = run.Do($"holding at {label}", _ => { if (supported) WorldProbes.HoldBounces(held); })
+                .Until($"held at {label}", _ => !supported || ++waited >= (held is null ? 400 : 30))
+                .Until($"read at {label}", world =>
+                {
+                    if (!supported) return true;
+                    var ecs = world.Resource<EcsWorld>();
+                    if (!begun)
+                    {
+                        begun = true;
+                        Assert.Null(GiReference.BeginScreenProbe(ecs, 80, 70, 256, faces));
+                        return false;
+                    }
+                    if (GiReference.StepScreenProbe(ecs) is null) return false;
+                    read.Add((label, GiReference.LastScreenProbe!.Value));
+                    return true;
+                });
+        }
+        run.Go();
+        Needs.RayQueries(supported);
+
+        var faults = new List<string>();
+        foreach (var (label, reading) in read)
+        {
+            var off = reading.Probe / reading.Along - 1;
+            var met = reading.OnPicture + reading.InField + reading.Beyond + reading.PastReach;
+            output.WriteLine($"at {label} the screen probe sums {reading.Probe:0.0000} against {reading.Along:0.0000} along its ways and {reading.Drawn:0.0000} drawn across them, {off:+0.000;-0.000}, its rays met {reading.OnPicture} on the picture, {reading.InField} in the field, {reading.Beyond} beyond and {reading.PastReach} past their reach");
+            if (Math.Abs(off) > 0.1) faults.Add($"at {label} the screen probe sums {off:+0.000;-0.000} of its reference's light along its ways");
+            if (met != 16) faults.Add($"at {label} {met} of the screen probe's sixteen rays were met");
+        }
+        Assert.True(read.Count == 2 && faults.Count == 0, string.Join("; ", faults));
+    }
 }

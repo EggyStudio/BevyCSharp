@@ -38,6 +38,7 @@ internal static partial class WorldProbes
     // The screen probes' programs, the camera they run on, what its images and dispatches were set for,
     // and the frame they were set in, the next frame reading the history they keep.
     private static ShaderInstance _screenTrace, _screenFilter, _screenGlow;
+    private static AssetHandle _screenRayLog;
     private static Entity _screenCamera = Entity.None;
     private static (int Tile, bool GlowOnly)? _screenImages;
     private static (bool GlowOnly, bool Glows)? _screenDispatches;
@@ -68,6 +69,23 @@ internal static partial class WorldProbes
 
     /// <summary>One more than the screen probe whose light is written as a value that is not a number, as a test feeds it, or 0 for none.</summary>
     internal static int FedScreenProbe { get; set; }
+
+    /// <summary>
+    /// One more than the pixel whose screen probe's rays are written to <see cref="ScreenRayLog"/>,
+    /// its x in the low sixteen bits and its y in the high, or 0 for none, as <c>gi.screenprobe</c>
+    /// asks.
+    /// </summary>
+    internal static uint LoggedScreenPixel { get; set; }
+
+    /// <summary>The values of <see cref="ScreenRayLog"/>, four of the probe and four for each of its sixteen rays.</summary>
+    internal const int ScreenRayLogValues = 4 + 16 * 4;
+
+    /// <summary>
+    /// The rays of the screen probe <see cref="LoggedScreenPixel"/> names, as
+    /// <c>gi_screen.slang</c>'s <c>ray_log</c> lays them out, or none where the screen's probes are
+    /// not traced.
+    /// </summary>
+    internal static AssetHandle ScreenRayLog => ReferenceEquals(_app, App.Running) && _screenTrace.IsValid ? _screenRayLog : AssetHandle.None;
 
     /// <summary>The pixels along each side of the tile a screen probe stands in, at a quality, as 3DEngine's TileAt.</summary>
     internal static int TileAt(GlobalIllumination quality) => quality switch
@@ -157,6 +175,7 @@ internal static partial class WorldProbes
             _screenTrace = Shaders.CreateInstance(SceneField.KernelProgram("gi_screen.slang"));
             _screenFilter = Shaders.CreateInstance(SceneField.KernelProgram("gi_screen_filter.slang"));
             _screenGlow = Shaders.CreateInstance(SceneField.KernelProgram("gi_screen_glow.slang"));
+            _screenRayLog = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenRayLogValues]);
         }
 
         // The images a texel a probe, the probes' blend and surfaces and the glow lights' light kept
@@ -199,10 +218,10 @@ internal static partial class WorldProbes
         var reach = 2 * ProbeSpacing * plan.CellSize;
         var jitter = JitterAt(_frame, tile);
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
-        ReadOnlySpan<uint> texels = [(uint)made.Texels[0], cascades > 1 ? (uint)made.Texels[1] : 0, SceneField.LightThrough ? 1u : 0u, 0];
+        ReadOnlySpan<uint> texels = [(uint)made.Texels[0], cascades > 1 ? (uint)made.Texels[1] : 0, SceneField.LightThrough ? 1u : 0u, LoggedScreenPixel];
         _screenTrace.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
-            .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows)
+            .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows).SetBuffer("ray_log", _screenRayLog)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach)
             .SetTexture("merged_first", made.Merged[0]).SetTexture("merged_second", made.Merged[Math.Min(1, cascades - 1)])
             .Set("screen", new Vector4(tile, reach, glowOnly ? 1 : 0, FedScreenProbe))

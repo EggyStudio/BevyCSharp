@@ -361,6 +361,11 @@ drawn across it, against the light the probe holds along them and how far its ra
 `gi.bounces <on|off|count>` holds the probes at a count of bounces past the first for it, the light
 of the frame before added for that many frames after one without it and the probes then standing
 still, so a probe's light at each bounce is read against paths meeting as many faces.
+`gi.screenprobe <x> <y> <samples> [bounces] [table]` reads the screen probe under a pixel the same
+way, the screen kernel writing its sixteen rays as it traces them, each ray's light, way and weight,
+where it was met, on the picture, through the field, by the world's light beyond its reach or
+through the field past it, and the light of what it met, and the reference tracing from where they
+leave along each way and along ways drawn across each ray's texel of the hemisphere.
 A texture counts as its material's base color and a mesh's vertices' colors are left
 out, and a path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map

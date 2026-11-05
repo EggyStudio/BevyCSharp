@@ -75,10 +75,24 @@ uniform float4 screen;
 // w: unused.
 uniform float4 probes;
 
-// x: the world's first cascade's octahedron's texels along each side. y: its second's, or 0 where it
-// has none. z: 1 where some surface lets light through this frame (lightThroughAt), whose check a
-// frame of none skips. w: unused.
+// x: the world's first cascade's octahedron's texels along each side. y: its second's, or 0 where
+// it has none. z: 1 where some surface lets light through this frame (lightThroughAt), whose check
+// a frame of none skips. w: one more than the pixel whose probe's rays are written to ray_log, its
+// x in the low sixteen bits and its y in the high, or 0 for none.
 uniform uint4 texels;
+
+// The rays of the one probe `gi.screenprobe` asks about (GiReference.ScreenProbe.cs). 0: the
+// probe's point and its field's cell there. 1: its normal and 1 where it reads the world's second
+// cascade beyond its rays. 2: where its rays leave from and how far they go. 3: the light it sums,
+// irradiance, and its rays' weights summed. Then four for each of its sixteen rays: the light it
+// brought and how it was met (the Met values below), its way and its weight, where it met a surface
+// or ended and how far that is, and the light the surface it met sends of its own, before its
+// bounce.
+RWStructuredBuffer<float4> ray_log;
+
+// How a screen probe's ray was met, as ray_log writes it: on the picture, through the field within
+// its reach, by the world's light from beyond it, through the field past its reach, or not at all.
+static const float MetOnPicture = 1.0, MetInField = 2.0, MetBeyond = 3.0, MetPastReach = 4.0;
 
 // xy: how far from its tile's middle each probe marches to the glow lights from this frame, in
 // pixels, the same for every probe and moved from frame to frame so a probe's points cover its tile.
@@ -555,6 +569,13 @@ void main(uint3 id : SV_DispatchThreadID)
     float length = screen.y;
     float3 sum = float3(0.0);
     float weights = 0.0;
+    bool logged = texels.w != 0u && all(id.xy == uint2((texels.w - 1u) & 0xFFFFu, (texels.w - 1u) >> 16u) / uint(screen.x));
+    if (logged)
+    {
+        ray_log[0] = float4(p, cell);
+        ray_log[1] = float4(n, float(around));
+        ray_log[2] = float4(start, length);
+    }
     [loop]
     for (uint v = 0u; v < Rays; v++)
         [loop]
@@ -586,6 +607,9 @@ void main(uint3 id : SV_DispatchThreadID)
             float through = 1.0;
             float3 hit;
             float leftAt;
+            float met = 0.0;
+            float3 metAt = start + way * length;
+            float3 metOwn = float3(0.0);
             bool onScreen = traceScreen(start, way, length, 12, hit, leftAt);
             float t = onScreen ? distance(start, hit) : leftAt < length ? traceField(scene_field, scene_field_sampler, info, start, way, leftAt, length) : -1.0;
             bool far = false;
@@ -608,16 +632,23 @@ void main(uint3 id : SV_DispatchThreadID)
                     if (luminance(past) > 1e-6)
                     {
                         light += past * through;
+                        met = met > 0.0 ? met : MetBeyond;
                         break;
                     }
                     t = traceFieldWithin(scene_field, scene_field_sampler, info, start, way, length, 4.0 * length, fieldCascade(info, start, 1.0) + 1);
                     if (t < 0.0)
                     {
                         light += past * through;
+                        met = met > 0.0 ? met : MetBeyond;
                         break;
                     }
                 }
                 float3 at = onScreen ? hit : start + way * t;
+                if (met == 0.0)
+                {
+                    met = onScreen ? MetOnPicture : far ? MetPastReach : MetInField;
+                    metAt = at;
+                }
                 onScreen = false;
                 float passing = !far && layer < 4 && texels.z != 0u ? lightThroughAt(scene_albedo, info, at) : 0.0;
                 bool inside = false;
@@ -626,6 +657,8 @@ void main(uint3 id : SV_DispatchThreadID)
                 float3 own;
                 light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
                     probe_cubes, probe_cubes_at, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
+                if (layer == 0)
+                    metOwn = own;
                 through *= passes;
                 if (deep < 0.0)
                     break;
@@ -633,7 +666,17 @@ void main(uint3 id : SV_DispatchThreadID)
             }
             sum += light * weight;
             weights += weight;
+            if (logged)
+            {
+                uint at = 4u + (v * Rays + u) * 4u;
+                ray_log[at] = float4(light, met);
+                ray_log[at + 1u] = float4(way, weight);
+                ray_log[at + 2u] = float4(metAt, distance(start, metAt));
+                ray_log[at + 3u] = float4(metOwn, 0.0);
+            }
         }
+    if (logged)
+        ray_log[3] = float4(sum * (Pi / max(weights, 1e-6)), weights);
     // The weights scaled to sum to pi, the light reaching the surface under a sky of 1. The glow
     // lights' light straight to the surface, which the rays that meet one leave out, the pass takes at
     // each pixel.

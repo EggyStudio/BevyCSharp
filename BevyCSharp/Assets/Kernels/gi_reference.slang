@@ -46,8 +46,23 @@ StructuredBuffer<GiLights> lights;
 // meets. w: the texels a side of the probe's octahedron traced from, or 0 for the camera's picture.
 uniform uint4 counts;
 
-// xyz: the place of the probe traced from where counts.w is above 0. w: unused.
+// xyz: the place of the probe traced from where counts.w is above 0. w: 1 where it is a screen
+// probe's, traced along the ways given in `ways`, and 0 where it is a world probe's.
 uniform float4 probe;
+
+// A screen probe's sixteen ways (gi.screenprobe), then the hemisphere's two ways across its surface
+// and its normal, as gi_screen.slang lays its rays out, read where probe.w is 1.
+StructuredBuffer<float4> ways;
+
+// The way of the hemisphere's square at uv, and how far its point lies from the middle, as
+// gi_screen.slang's hemisphere.
+float4 hemisphereAt(float2 uv)
+{
+    float2 a = uv * 2.0 - 1.0;
+    float x = (a.x + a.y) * 0.5, y = (a.x - a.y) * 0.5;
+    float3 d = float3(x, y, 1.0 - abs(x) - abs(y));
+    return float4(normalize(d), length(d));
+}
 
 // How far from a point or spot light its shadows start, as Bevy's shadow maps start a tenth of a
 // unit from the light (PointLight::DEFAULT_SHADOW_MAP_NEAR_Z), so a mesh nearer the light than that,
@@ -219,6 +234,32 @@ void main(uint3 id : SV_DispatchThreadID)
     sums.GetDimensions(width, height);
     if (id.x >= width || id.y >= height)
         return;
+
+    if (counts.w > 0u && probe.w > 0.5)
+    {
+        // A screen probe's rays, those of the left half along its sixteen ways and those of the
+        // right half each along a way drawn across its texel of the hemisphere's square, four by
+        // four.
+        if (id.x >= 32u || id.y > 0u)
+            return;
+        bool drawn = id.x >= 16u;
+        uint ray = id.x % 16u;
+        float3 along = ways[ray].xyz;
+        RayHit first = rayTraceIn(scene, probe.xyz, along, 0.0, 1e5);
+        regions[id.xy] = first.hit ? asuint(first.t) : 0u;
+        float3 brought = float3(0.0);
+        for (uint s = 0u; s < counts.x; s++)
+        {
+            uint index = counts.y + s;
+            uint state = id.x * 9781u + index * 6271u + 1u;
+            random(state);
+            float4 local = hemisphereAt((float2(float(ray % 4u), float(ray / 4u)) + float2(random(state), random(state))) / 4.0);
+            float3 way = drawn ? normalize(ways[16].xyz * local.x + ways[17].xyz * local.y + ways[18].xyz * local.z) : along;
+            brought += trace(given, probe.xyz, way, false, state);
+        }
+        sums[id.xy] = (counts.y == 0u ? float4(0.0) : sums[id.xy]) + float4(brought, float(counts.x));
+        return;
+    }
 
     if (counts.w > 0u)
     {

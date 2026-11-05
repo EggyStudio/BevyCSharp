@@ -251,6 +251,7 @@ internal static unsafe partial class WorldProbes
             _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
             (_screenTrace, _screenFilter, _screenGlow, _screenCamera, _screenImages, _screenDispatches) = (default, default, default, Entity.None, null, null);
+            (_screenRayLog, LoggedScreenPixel) = (AssetHandle.None, 0);
             Places.Forget();
         }
 

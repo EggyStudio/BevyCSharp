@@ -99,6 +99,17 @@ internal static class ConsoleFieldCommands
         return string.Create(CultureInfo.InvariantCulture, $"reading cascade {cascade}'s probe nearest {x:0.##} {y:0.##} {z:0.##} at {Math.Max(1, samples)} paths a way");
     }
 
+    [Command("gi.screenprobe", "Reads the screen probe under a pixel of the camera's picture against the reference along each of its rays' ways and drawn across each ray's texel, where each ray was met, on the picture, through the field, beyond its reach or through the field past it, and the light the probe sums against the reference's, into a table where one is named, each path meeting as many faces past the first as given or until it ends: gi.screenprobe <x> <y> <samples> [bounces] [table]")]
+    internal static string ScreenProbe(int x, int y, int samples, int bounces = -1, string? table = null)
+    {
+        if (GiReference.BeginScreenProbe(ConsoleHost.Ecs, x, y, samples, bounces, table) is { } why) return why;
+
+        // The probe's rays are read a few frames on, those in flight when they were asked for
+        // having been built without them, and then a frame traces 64 paths a way.
+        ConsoleHost.LaterFrom(() => GiReference.StepScreenProbe(ConsoleHost.Ecs), ConsoleHost.Time.FrameCount + 1);
+        return string.Create(CultureInfo.InvariantCulture, $"reading the screen probe under {x}, {y} at {Math.Max(1, samples)} paths a way");
+    }
+
     [Command("gi.bounces", "Holds global illumination's probes at a count of bounces past the first for a reading, every one as they run, none, or a count and then still, answering once they hold it: gi.bounces <on|off|count>")]
     internal static string Bounces(string count)
     {

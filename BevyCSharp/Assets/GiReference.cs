@@ -85,7 +85,7 @@ internal static unsafe partial class GiReference
         public GeometryPool Pool;
         public RayScene Scene;
         public int Capacity;
-        public AssetHandle Instances = AssetHandle.None, Materials = AssetHandle.None, Lights = AssetHandle.None;
+        public AssetHandle Instances = AssetHandle.None, Materials = AssetHandle.None, Lights = AssetHandle.None, Ways = AssetHandle.None;
         public ShaderInstance Trace, Copy;
         public readonly Dictionary<int, int> PoolMeshes = [];
         public readonly byte[] LightBytes = new byte[WorldProbes.LightsBytes];
@@ -101,8 +101,8 @@ internal static unsafe partial class GiReference
     /// <summary>The camera's light read last, in rows from the top, three floats a pixel, with its size.</summary>
     internal static (int Width, int Height, float[] Light)? LastPicture { get; private set; }
 
-    /// <summary>Whether a reference is being traced, the picture read or a probe's ways traced.</summary>
-    internal static bool Busy => Own() && (_job is not null || _probe is not null);
+    /// <summary>Whether a reference is being traced, the picture read or a probe's or a screen probe's ways traced.</summary>
+    internal static bool Busy => Own() && (_job is not null || _probe is not null || _screenProbe is not null);
 
     /// <summary>
     /// Starts tracing a reference of the camera's picture with <paramref name="samples"/> paths a
@@ -198,6 +198,8 @@ internal static unsafe partial class GiReference
         {
             _rays.Pool = Shaders.CreateGeometryPool();
             _rays.Lights = Shaders.CreateBuffer(WorldProbes.LightsBytes);
+            // A screen probe's ways, which the tracer reads only where it traces from one.
+            _rays.Ways = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenWays]);
             _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV));
         }
         return null;
@@ -326,7 +328,7 @@ internal static unsafe partial class GiReference
             job.Picture = AssetHandle.None;
             rays.Trace.SetRayScene("scene", rays.Scene).SetBuffer("vertices", rays.Pool.Vertices).SetBuffer("indices", rays.Pool.Indices)
                 .SetBuffer("meshes", rays.Pool.Meshes).SetBuffer("instances", rays.Instances).SetBuffer("materials", rays.Materials)
-                .SetBuffer("lights", rays.Lights).SetTexture("sums", job.Sums).SetTexture("regions", job.Regions);
+                .SetBuffer("lights", rays.Lights).SetBuffer("ways", rays.Ways).SetTexture("sums", job.Sums).SetTexture("regions", job.Regions);
             Shaders.SetEngineViewDispatches(job.Camera, Owner, ViewDispatch.PerPixel(rays.Trace, FramePoint.BeforeTonemapping));
             job.Stage = Stage.Tracing;
         }

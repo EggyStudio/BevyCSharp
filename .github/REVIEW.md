@@ -1,38 +1,40 @@
 # Review
 
-Reviewed up to `98dad7f7`, 104's carry, the engine's carried ray in its two steps, pushed at 23:37
-on 2026-11-04, its run green at 23:54 on the three systems in 11 to 17 minutes; it keeps the form
-and carries the review's files. Before it `eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces,
-pushed at 20:10, its run green at 20:27 on the three systems in 15 to 17 minutes; it keeps the form
-and carries the review's files. Before it `1774aa0c`, item 103, every linear texture sampler at 16,
-pushed at 18:34, its run green at 18:52 on the three systems in 12 to 15 minutes; it keeps the form
-and carries the review's files. Before it `46ae797e`, item 102, the faces at their surfaces with the
-patch's turn, pushed at 14:12, its run green at 14:30 on the three systems in 11 to 17 minutes; it
-keeps the form and carries the review's files and the devlog. Before it `3723d5ff`, 101's second
-commit and its end, an emitter by its mesh's own surface, pushed at 05:32, its run green at 05:55 on
-the three systems in 11 to 18 minutes; it keeps the form and carries the review's files. Before it
-`9bdb29b3`, 101's first commit, the field's contact shadows through the camera's air, pushed at
-03:48, its run green at 04:06 on the three systems in 10 to 13 minutes; it keeps the form and
-carries the review's files. Before it `086ac6e7`, 95's thirteenth commit, the cascades' clearance
-from the eye, pushed at 02:15, its run green at 02:38 on the three systems in 13 to 19 minutes; it
-keeps the form and carries the review's files. Before it `accbda6d`, 95's twelfth commit, the lamp
-march from its first step, pushed at 00:30, its run green at 00:53 on the three systems in 14 to 18
-minutes; it keeps the form and carries the review's files. Before it `8583deff`, 95's eleventh
-commit, the field's hold of a thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its
-run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the form and carries the
-review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at
-19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
-Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off, pushed
-at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form and
-carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28, its
-run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
-pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
-carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
-taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
-form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
-cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
-form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
+Reviewed up to `ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image, pushed at
+02:17 on 2026-11-05, its run green at 02:39 on the three systems in 10 to 17 minutes; it keeps the
+form and carries the review's files. Before it `98dad7f7`, 104's carry, the engine's carried ray in
+its two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the three systems in 11 to
+17 minutes; it keeps the form and carries the review's files. Before it `eeb74e2b`, 104's
+diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on the three systems in
+15 to 17 minutes; it keeps the form and carries the review's files. Before it `1774aa0c`, item 103,
+every linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on the three systems in
+12 to 15 minutes; it keeps the form and carries the review's files. Before it `46ae797e`, item 102,
+the faces at their surfaces with the patch's turn, pushed at 14:12, its run green at 14:30 on the
+three systems in 11 to 17 minutes; it keeps the form and carries the review's files and the devlog.
+Before it `3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface, pushed
+at 05:32, its run green at 05:55 on the three systems in 11 to 18 minutes; it keeps the form and
+carries the review's files. Before it `9bdb29b3`, 101's first commit, the field's contact shadows
+through the camera's air, pushed at 03:48, its run green at 04:06 on the three systems in 10 to 13
+minutes; it keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth
+commit, the cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three
+systems in 13 to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`,
+95's twelfth commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on
+the three systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it
+`8583deff`, 95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at
+23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the
+form and carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24,
+its run green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the
+review's files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the
+fill off, pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps
+the form and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed
+at 15:28, its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and
+carries the review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion
+commit, pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the
+form and carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light
+probes taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it
+keeps the form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in
+four cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps
+the form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
 2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
 files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
 2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
@@ -1232,7 +1234,32 @@ from [SHARED.md](SHARED.md).
     ambient take-back, environmentGiven, the specular shares and field_shadows, with a white floor
     under an ambient sky as the test failing at HEAD both ways, the corridor, the hall and the alley
     re-read and the corridor's bars re-stated, the Reply and the test's remarks corrected in the
-    same commit; then the carried room's screen-probe first bounce by source.
+    same commit; then the carried room's screen-probe first bounce by source. The table's commit is
+    ee0b59e1, pushed at 02:17 on 2026-11-05, the pass binding bevy_pbr's DFG image with the scene
+    info saying whether it is the table or a stand-in, passF_AB reading it as Bevy does with the
+    polynomial where there is none, gi_light's ambient take-back, environmentGiven and the specular
+    shares and field_shadows reading it with their polynomials gone; a white floor under a sky reads
+    0.998 near and 1.000 far where 0.846 and 1.334, bar 5%; the open-floor ambient test's eye moved
+    to 60 degrees where the table gives the polynomial's value, with the reason; the corridor's
+    floor and walls re-stated at 0.826, 0.831 and 0.795 with the carry (0.377 to 0.480 before it),
+    the bar 25%, 98dad7f7's cause corrected in the Reply and the remarks. The hall re-read, the
+    floor -9%, the ceiling -6, the walls -3 to -7; the alley's walls -33 and -37, its floor -9, its
+    probe varying by a third from one program start to the next, left unread and said. The suite
+    2,016 in 45 minutes, cargo test 118 and 201, NormTests 18. Next the carried room's screen-probe
+    first bounce by source. The carried room's back wall read by source at 02:26, its first bounce
+    0.708 and the rest 0.884 with the screen probes at Medium. Not the glow lights, marched per
+    pixel the same 0.708; the world probes read in the screen probes' place give 0.900, so the
+    screen probes bring its first bounce 21% less than the world faces; the more the screen rays'
+    own hits count the lower the wall reads (every ray taking the world's merged light from beyond
+    at once 0.856, half the reach 0.704, twice 0.635), so the hits within the screen rays' reach
+    bring too little though both kinds of probe shade hits alike; not where the hit is (the field
+    alone 0.706, depth hits moved to the field's surface 0.716); and the rays started 2 or 4 cells
+    off the surface read 0.630 and 0.509, lower the further off, unexplained, pointing at the
+    surfaces the ways meet near the lamp or at how beyond weighs the world's probes at the rays'
+    ends. The engine's gi.screenprobe is ported as its own diagnostic commit, one screen probe's
+    rays under a pixel logged against the reference along each with where each was met, to read the
+    back wall's probe way by way before any proposal. The alley probe's variation by a third from
+    one program start to the next is a line of its own for the sampling.
 
 ## Verdicts
 
@@ -3414,3 +3441,48 @@ Shared: the corridor's floor of 98dad7f7 read over its reference from Bevy's amb
 by the polynomial F_AB where Bevy reads its table, not from the read under an opening, and with the
 take-back reading the table the corridor reads its floor and walls 0.80 to 0.83 of their reference's
 light past the direct with the carry, 0.38 to 0.48 without it.
+
+Item 104's reading of the carried lamp's room's back wall, (iii), with its diagnostic in the commit
+carrying this line. `gi.screenprobe <x> <y> <samples> [bounces] [table]` reads the screen probe
+under a pixel as 3DEngine's own does. The screen kernel writes the probe's sixteen rays as it traces
+them (ray_log), each ray's light, way and weight, where it was met, on the picture, through the
+field within its reach, by the world's light beyond it or through the field past it, and the light
+of what it met, and the reference traces from where they leave along each way and along ways drawn
+across each ray's texel of the hemisphere's square.
+GlobalIlluminationTests.AScreenProbeInAClosedRoomSumsItsReferencesLightAlongItsWays reads the probe
+on the floor of the closed room of 8, held at its first bounce and at every one, 0.5% under its
+reference along its ways and 2.7% over, the bar 10%, and with the ways handed to the reference in
+the reverse order it read 12.6% under at the first. RENDERING.md and BCS.md's table say the command.
+
+With the screen probes read, the back wall reads its first bounce 0.708 of its reference where the
+world's probes read in their place give 0.900. Marching each glow light per pixel in place of the
+screen's glow read gives the same 0.708. Every screen ray taking the world's light from beyond at
+once gives 0.856, half the reach 0.704, twice 0.635, rays traced through the field alone with no hit
+on the picture 0.706, hits on the picture moved to the field's surface 0.716, and the rays leaving
+two and four cells off the surface 0.630 and 0.509.
+
+Read way by way at the first bounce, 43 screen probes on the back wall sum 0.98 of their reference
+along their own ways and 0.75 of the reference drawn across their rays' texels. The 34 above 1.2
+units sum 1.06 and 0.99, and the 9 below sum 0.68 and 0.31, their own ways' reference 0.46 of the
+drawn one. The green panel stands between the lamp and the back wall's half beyond it, and that
+half's light comes through the gap of 0.75 between the panel and the wall, from the lamp's bright
+patches on the red wall and the floor, in a few of each probe's sixteen texels, and one ray a texel
+meets the panel's dark face or misses the patch where the drawn ways meet it. The probe at 281.5,
+0.47, -3, its ray toward the gap meeting the panel at 2.05, reads that texel 0 where the drawn ways
+read 0.646. At every bounce the 43 sum 0.94 of their own ways' reference and 0.83 of the drawn one,
+the lower 9 0.79 and 0.60. So the hits' light and the light from beyond read right on average, and
+the back wall's shortfall is the screen probes' sampling of a few bright ways, as the world probes'
+slivers are 104's sampling. Why the rays leaving further off the surface read lower is not read way
+by way here.
+
+Proposed: the screen probes' sampling joins the world probes' as 104's open part, the sampling,
+taken together, with the back wall's 43 probes, the bounce rooms and the cost as its measure, before
+any mend.
+
+The whole suite ran with it, 2,017 passed and 3 skipped in 43 m 24 s at the 3 GB cap, none aborted,
+its largest process at 2,955 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: gi.screenprobe here is 3DEngine's reading of a screen probe, and in the bounce rooms'
+carried lamp's room it finds the back wall's first bounce short from the screen probes' sixteen ways
+missing the lamp's patches through a gap, their own ways' reference within 2% of their sum and the
+reference drawn across their texels a third higher.

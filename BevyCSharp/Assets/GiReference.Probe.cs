@@ -123,7 +123,7 @@ internal static unsafe partial class GiReference
                 job.Regions = Shaders.CreateImage(wide, high, ShaderImageFormat.R32UInt);
                 rays.Trace.SetRayScene("scene", rays.Scene).SetBuffer("vertices", rays.Pool.Vertices).SetBuffer("indices", rays.Pool.Indices)
                     .SetBuffer("meshes", rays.Pool.Meshes).SetBuffer("instances", rays.Instances).SetBuffer("materials", rays.Materials)
-                    .SetBuffer("lights", rays.Lights).SetTexture("sums", job.Sums).SetTexture("regions", job.Regions)
+                    .SetBuffer("lights", rays.Lights).SetBuffer("ways", rays.Ways).SetTexture("sums", job.Sums).SetTexture("regions", job.Regions)
                     .Set("probe", new Vector4(job.Origin, 0f));
                 Shaders.SetEngineViewDispatches(job.Camera, Owner, ViewDispatch.PerPixel(rays.Trace, FramePoint.BeforeTonemapping));
                 (job.Stage, job.Frames) = (ProbeStage.Tracing, 0);
