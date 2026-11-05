@@ -85,7 +85,7 @@ internal static unsafe partial class GiReference
         public GeometryPool Pool;
         public RayScene Scene;
         public int Capacity;
-        public AssetHandle Instances = AssetHandle.None, Materials = AssetHandle.None, Lights = AssetHandle.None, Ways = AssetHandle.None;
+        public AssetHandle Instances = AssetHandle.None, Materials = AssetHandle.None, Lights = AssetHandle.None, Ways = AssetHandle.None, White = AssetHandle.None;
         public ShaderInstance Trace, Copy;
         public readonly Dictionary<int, int> PoolMeshes = [];
         public readonly byte[] LightBytes = new byte[WorldProbes.LightsBytes];
@@ -200,10 +200,28 @@ internal static unsafe partial class GiReference
             _rays.Lights = Shaders.CreateBuffer(WorldProbes.LightsBytes);
             // A screen probe's ways, which the tracer reads only where it traces from one.
             _rays.Ways = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenWays]);
+            // The mask a slot past the material buffer's masks reads, letting nothing through.
+            _rays.White = Render.CreateImage([255, 255, 255, 255], 1, 1, srgb: false, mipmaps: false);
             _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV));
         }
         return null;
     }
+
+    // Binds the material buffer's masks, the cut-out materials' base color textures and metallic
+    // and roughness textures, as the frame before's slots gave them, a white texel for each it has
+    // none of.
+    private static void BindMasks(Rays rays)
+    {
+        for (var i = 0; i < Masks; i++)
+        {
+            var mask = Shaders.MaterialBufferMask(rays.Materials, i);
+            rays.Trace.SetTexture($"mask{i}", mask.IsValid ? mask : rays.White);
+        }
+        rays.Trace.SetSampler("mask_sampler", SamplerSettings.Linear);
+    }
+
+    // How many masks the tracer binds, as many as a material buffer keeps.
+    private const int Masks = 16;
 
     // The camera the field lies around, or the first 3D camera where there is none.
     private static Entity CameraOf(EcsWorld ecs)
@@ -361,6 +379,7 @@ internal static unsafe partial class GiReference
         var share = Math.Clamp(PathsAFrame / Math.Max(1, job.Width * job.Height), 1, MostAFrame);
         share = Math.Min(share, job.Samples - job.Added);
         ReadOnlySpan<uint> counts = [(uint)share, (uint)job.Added, (uint)job.Faces, 0];
+        BindMasks(rays);
         rays.Trace.SetNumbers("counts", 4, counts);
         job.Added += share;
     }

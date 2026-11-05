@@ -151,6 +151,7 @@ internal static unsafe partial class GiReference
                 Shaders.WriteBuffer<byte>(rays.Lights, rays.LightBytes);
                 var share = Math.Min(MostAFrame, job.Samples - job.Added);
                 ReadOnlySpan<uint> counts = [(uint)share, (uint)job.Added, (uint)job.Faces, 16];
+                BindMasks(rays);
                 rays.Trace.SetNumbers("counts", 4, counts);
                 job.Added += share;
                 return null;

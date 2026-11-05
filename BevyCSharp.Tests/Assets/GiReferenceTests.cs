@@ -11,7 +11,7 @@ namespace Bevy.Tests;
 /// alone, and the reference lit by the sun as Bevy lights the picture, through the camera's air.
 /// </summary>
 [Collection("engine")]
-public sealed class GiReferenceTests
+public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output)
 {
     private const uint Width = 64, Height = 36;
 
@@ -245,6 +245,159 @@ public sealed class GiReferenceTests
         for (var c = 0; c < 3; c++)
             Assert.True(Math.Abs(wanted[c] / shown[c] - 1) < 0.08, $"the reference's floor reads {wanted[0] / shown[0]:0.000}, {wanted[1] / shown[1]:0.000} and {wanted[2] / shown[2]:0.000} of the picture's, red, green and blue");
         Assert.True(shown[2] < shown[0] * 0.9, $"the low sun reaches the floor {shown[0]:0}, {shown[1]:0}, {shown[2]:0}, which the air should redden");
+    }
+
+    /// <summary>
+    /// A card cut out by a checkered texture, seen from above under a sun straight overhead, shows
+    /// the lit floor through its cut-out half in the reference and its texture's green in the
+    /// other, where an opaque card covers the floor beneath it whole.
+    /// </summary>
+    /// <remarks>
+    /// The reference read the material buffer's base color alone, so a cut-out card, a leaf or a
+    /// grass card, was traced whole, and a material the buffer did not know, a leaf's, as black,
+    /// and the meadow's grass and its crowns read nothing and hid the floor behind them. The card
+    /// read the whole of its footprint and the floor through it none, and reads 0.500 of it, the
+    /// floor through it 1.049 of the open floor's light, the floor's highlight under the eye and
+    /// the sun overhead.
+    /// </remarks>
+    [SkippableFact]
+    public void ACutOutCardLetsTheReferencesPathsThroughWhereItsAlphaIsUnderTheCutoff()
+    {
+        Needs.Shaders();
+        var footprint = Looked(cutOut: false, standing: false, out var supported);
+        Needs.RayQueries(supported);
+        var cut = Looked(cutOut: true, standing: false, out _);
+
+        var (card, holes, open) = (0, 0.0, 0.0);
+        var (inside, outside, green) = (0, 0, 0.0);
+        for (var i = 0; i < footprint.Regions.Length; i++)
+        {
+            if (IsCard(footprint, footprint.Regions[i]))
+            {
+                inside++;
+                if (IsCard(cut, cut.Regions[i]))
+                {
+                    card++;
+                    green += cut.Light[i * 3 + 1] - cut.Light[i * 3];
+                }
+                else holes += cut.Light[i * 3 + 1];
+            }
+            else if (cut.Regions[i] != 0)
+            {
+                outside++;
+                open += cut.Light[i * 3 + 1];
+            }
+        }
+        var filled = (double)card / inside;
+        var through = holes / Math.Max(1, inside - card) / (open / Math.Max(1, outside));
+        output.WriteLine($"the cut-out card fills {filled:0.000} of its footprint of {inside} pixels, the floor through it {through:0.000} of the open floor's light, its own green {green / Math.Max(1, card):0.000} over its red");
+        Assert.True(inside > 300, $"the opaque card covers {inside} pixels");
+        Assert.True(Math.Abs(filled - 0.5) < 0.1, $"the cut-out card fills {filled:0.000} of its footprint");
+        Assert.True(Math.Abs(through - 1) < 0.1, $"the floor through the card reads {through:0.000} of the open floor's light");
+        Assert.True(green > 0, "the cut-out card reads no green of its texture's");
+    }
+
+    /// <summary>
+    /// A cut-out card standing between a low sun and a floor lets half the sun through to the floor
+    /// in its shadow in the reference, a checkered shadow, where an opaque card's shadow is dark.
+    /// </summary>
+    /// <remarks>
+    /// The shadow rays meet the card as the paths do, so the card cut out where its leaves are not
+    /// lets the sun through there. The cut-out card's shadow read 0.001 of the open floor's light
+    /// as the opaque card's does, and reads 0.501.
+    /// </remarks>
+    [SkippableFact]
+    public void ACutOutCardLetsTheSunThroughToItsShadowWhereItsAlphaIsUnderTheCutoff()
+    {
+        Needs.Shaders();
+        var solid = Looked(cutOut: false, standing: true, out var supported);
+        Needs.RayQueries(supported);
+        var cut = Looked(cutOut: true, standing: true, out _);
+
+        // The open floor is read where the opaque card's shadow does not reach, and its shadow
+        // where the floor reads under a tenth of that.
+        var open = Enumerable.Range(0, solid.Regions.Length).Where(i => solid.Regions[i] != 0).Max(i => solid.Light[i * 3 + 1]);
+        var (shadowed, opaqueLight, cutLight, lit, litLight) = (0, 0.0, 0.0, 0, 0.0);
+        for (var i = 0; i < solid.Regions.Length; i++)
+        {
+            if (solid.Regions[i] == 0) continue;
+            if (solid.Light[i * 3 + 1] < 0.1 * open)
+                (shadowed, opaqueLight, cutLight) = (shadowed + 1, opaqueLight + solid.Light[i * 3 + 1], cutLight + cut.Light[i * 3 + 1]);
+            else
+                (lit, litLight) = (lit + 1, litLight + cut.Light[i * 3 + 1]);
+        }
+        var mean = litLight / Math.Max(1, lit);
+        var share = cutLight / Math.Max(1, shadowed) / mean;
+        output.WriteLine($"the cut-out card's shadow of {shadowed} pixels reads {share:0.000} of the open floor's light, the opaque card's {opaqueLight / Math.Max(1, shadowed) / mean:0.000}");
+        Assert.True(shadowed > 200, $"the opaque card shades {shadowed} pixels");
+        Assert.True(Math.Abs(share - 0.5) < 0.1, $"the cut-out card's shadow reads {share:0.000} of the open floor's light");
+    }
+
+    // Whether a pixel's region is the card's, facing either way.
+    private static bool IsCard(GiReference.Traced traced, uint region) => traced.Names.TryGetValue(region, out var name) && name.StartsWith("card");
+
+    /// <summary>
+    /// The reference of a white floor and a card of a checkered texture, green where it is whole
+    /// and cut out where its alpha is none, or whole everywhere, lying a twentieth of a unit over
+    /// the floor, so the eye sees through each hole what lies under it, under a sun straight
+    /// overhead and seen from above, or standing two units tall at x -2 under a sun 45 degrees up
+    /// from -x and seen from above its shadow, the direct light alone.
+    /// </summary>
+    private static GiReference.Traced Looked(bool cutOut, bool standing, out bool supported)
+    {
+        var rays = false;
+        string? traced = null;
+        var asked = false;
+        new PictureRun
+        {
+            Width = 96,
+            Height = 96,
+            Frames = 900,
+            Scene = ecs =>
+            {
+                var (eye, at) = standing ? (new Vec3(-1f, 6f, 0f), new Vec3(-1f, 0f, 0f)) : (new Vec3(0f, 5f, 0f), Vec3.Zero);
+                var camera = PictureRun.Camera(ecs, eye);
+                ecs.Add(camera, Transform.LookingAt(eye, at, -Vec3.UnitZ));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);
+                var floor = PictureRun.Cube(ecs, Render.CreateMaterial(0.8f, 0.8f, 0.8f), 40f, new Vec3(0f, -20f, 0f));
+                ecs.SetName(floor, "floor");
+
+                var pixels = new byte[64 * 64 * 4];
+                for (var y = 0; y < 64; y++)
+                    for (var x = 0; x < 64; x++)
+                    {
+                        var whole = (x / 8 + y / 8) % 2 == 0;
+                        var i = (y * 64 + x) * 4;
+                        (pixels[i], pixels[i + 1], pixels[i + 2], pixels[i + 3]) = (0, 255, 0, whole ? (byte)255 : (byte)0);
+                    }
+                var texture = Render.CreateImage(pixels, 64, 64, srgb: true, mipmaps: false);
+                var card = ecs.Spawn();
+                Render.SetMesh(ecs, card, Render.CreateMesh(MeshShape.Plane, 2f, 2f));
+                Render.SetMaterial(ecs, card, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColorTexture = texture,
+                    AlphaMode = cutOut ? AlphaMode.Mask : AlphaMode.Opaque,
+                    AlphaCutoff = 0.5f,
+                    DoubleSided = true,
+                }));
+                ecs.Add(card, standing
+                    ? new Transform(new Vec3(-2f, 1f, 0f), Quat.FromRotationZ(MathF.PI / 2f), Vec3.One)
+                    : Transform.At(0f, 0.05f, 0f));
+                ecs.SetName(card, "card");
+
+                var toSun = standing ? new Vec3(-1f, 1f, 0f) : new Vec3(0f, 1f, 0.001f);
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(toSun, Vec3.Zero, Vec3.UnitY));
+            },
+        }
+            .Do("asking for rays", _ => rays = Shaders.SupportsRayQueries)
+            .Until("ready", _ => !rays || Render.PipelinesReady())
+            .Wait(3)
+            .Until("traced", world => !rays || Read(world.Resource<EcsWorld>(), ref asked, ref traced, ecs => GiReference.BeginReference(ecs, null, 16, bounces: 0)))
+            .Go();
+        supported = rays;
+        return rays ? GiReference.Last! : null!;
     }
 
     // Asks for a read or a reference once, then moves it on a frame at a time until it answers.

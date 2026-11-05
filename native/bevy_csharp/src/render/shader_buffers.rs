@@ -330,6 +330,31 @@ pub extern "C" fn bcs_shader_material_buffer_create(capacity: i32) -> i32 {
     })
 }
 
+/// The asset key of mask `index` of a material buffer from [`bcs_shader_material_buffer_create`],
+/// the base color texture of the cut-out materials its slots hold, in the order their slots give
+/// them, or [`status::NOT_PRESENT`] where it has no such mask.
+///
+/// See [`super::instances`] for which textures are masks.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_material_buffer_mask(buffer: i32, index: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (buffer, index);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            if index < 0 {
+                return status::NOT_PRESENT;
+            }
+
+            crate::state::with_world(|world| super::instances::mask(world, buffer, index as u32))
+        }
+    })
+}
+
 /// Puts an entity in a slot of an instance or material buffer, or empties the slot where `entity`
 /// is zero.
 ///

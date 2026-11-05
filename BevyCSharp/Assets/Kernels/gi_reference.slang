@@ -18,7 +18,12 @@
 // what it met into the image of regions, the slot's number times eight and the axis its face turns
 // toward most, plus one, or 0 for nothing. Both images start at zero for each reference. Compiled
 // to SPIR-V, since ray queries exist nowhere else. A mesh's vertices' colors are not in the pool,
-// so a face is its material's color alone, and a texture's light is left to its base color.
+// so a face is its material's color alone, and a texture's light is left to its base color, but for
+// a cut-out material's, a leaf's or a grass card's, whose base color texture is one of the material
+// buffer's masks, which colors the face and lets a path or a shadow ray through where its alpha is
+// under the cutoff, as the forward pass discards those texels, its metallic and roughness texture
+// another mask. A tree's impostor, which stands in
+// for a far tree turned to the eye as it draws, is passed, so the reference holds no far trees.
 //
 // Where counts.w gives an octahedron's texels a side, it traces from a world probe's place instead
 // (`gi.probe`), a texel of the octahedron a thread, the paths of the left half of the image along
@@ -53,6 +58,132 @@ uniform float4 probe;
 // A screen probe's sixteen ways (gi.screenprobe), then the hemisphere's two ways across its surface
 // and its normal, as gi_screen.slang lays its rays out, read where probe.w is 1.
 StructuredBuffer<float4> ways;
+
+// The material buffer's masks (Shaders.MaterialBufferMask), the base color textures and the
+// metallic and roughness textures of the cut-out materials its slots hold, a white texel where it
+// has fewer.
+Texture2D mask0;
+Texture2D mask1;
+Texture2D mask2;
+Texture2D mask3;
+Texture2D mask4;
+Texture2D mask5;
+Texture2D mask6;
+Texture2D mask7;
+Texture2D mask8;
+Texture2D mask9;
+Texture2D mask10;
+Texture2D mask11;
+Texture2D mask12;
+Texture2D mask13;
+Texture2D mask14;
+Texture2D mask15;
+SamplerState mask_sampler;
+
+// The most cut-out faces a ray passes before it is taken as meeting the next, as through a forest's
+// crowns, where each card it crosses lets it through where its leaves are cut out.
+static const uint MostCutouts = 32u;
+
+// Mask `index` read at uv, at its largest level.
+float4 maskAt(int index, float2 uv)
+{
+    switch (index)
+    {
+    case 0: return mask0.SampleLevel(mask_sampler, uv, 0.0);
+    case 1: return mask1.SampleLevel(mask_sampler, uv, 0.0);
+    case 2: return mask2.SampleLevel(mask_sampler, uv, 0.0);
+    case 3: return mask3.SampleLevel(mask_sampler, uv, 0.0);
+    case 4: return mask4.SampleLevel(mask_sampler, uv, 0.0);
+    case 5: return mask5.SampleLevel(mask_sampler, uv, 0.0);
+    case 6: return mask6.SampleLevel(mask_sampler, uv, 0.0);
+    case 7: return mask7.SampleLevel(mask_sampler, uv, 0.0);
+    case 8: return mask8.SampleLevel(mask_sampler, uv, 0.0);
+    case 9: return mask9.SampleLevel(mask_sampler, uv, 0.0);
+    case 10: return mask10.SampleLevel(mask_sampler, uv, 0.0);
+    case 11: return mask11.SampleLevel(mask_sampler, uv, 0.0);
+    case 12: return mask12.SampleLevel(mask_sampler, uv, 0.0);
+    case 13: return mask13.SampleLevel(mask_sampler, uv, 0.0);
+    case 14: return mask14.SampleLevel(mask_sampler, uv, 0.0);
+    case 15: return mask15.SampleLevel(mask_sampler, uv, 0.0);
+    default: return float4(1.0);
+    }
+}
+
+// The texture coordinates where a ray met its face, from its corners.
+float2 uvAt(RayHit hit)
+{
+    PoolMesh mesh = meshes[hit.mesh];
+    float3 weights = float3(1.0 - hit.barycentrics.x - hit.barycentrics.y, hit.barycentrics);
+    float2 uv = float2(0.0);
+    for (uint corner = 0u; corner < 3u; corner++)
+        uv += poolCorner(vertices, indices, mesh, hit.triangle, corner).uv.xy * weights[corner];
+    return uv;
+}
+
+// The color a ray met, its material's base color times its mask's where it has one.
+float3 colorAt(RayHit hit, Material material)
+{
+    int index = int(material.mask);
+    return material.base_color.rgb * (material.alpha_cutoff >= 0.0 && index >= 0 ? maskAt(index, uvAt(hit)).rgb : float3(1.0));
+}
+
+// The material a ray met as its metallic and roughness texture says it is there, its green scaling
+// the roughness and its blue the metallic as Bevy reads it, a leaf's and a grass card's metallic of
+// one their texture's to say.
+Material surfacedAt(RayHit hit, Material material)
+{
+    int index = int(material.surface_mask);
+    if (material.alpha_cutoff < 0.0 || index < 0)
+        return material;
+    float4 surface = maskAt(index, uvAt(hit));
+    material.perceptual_roughness *= surface.g;
+    material.metallic *= surface.b;
+    return material;
+}
+
+// Whether a ray passes the face it met, a cut-out material's where its alpha is under the cutoff,
+// as the forward pass discards a leaf's or a grass card's texel, and a tree's impostor's
+// everywhere, since an impostor turned to the eye as it draws is no shape a ray meets.
+bool passesAt(RayHit hit)
+{
+    Material material = materials[hit.instance];
+    if (material.alpha_cutoff < 0.0)
+        return false;
+    if (material.alpha_cutoff > 1.0)
+        return true;
+    int index = int(material.mask);
+    float alpha = material.base_color.a * (index >= 0 ? maskAt(index, uvAt(hit)).a : 1.0);
+    return alpha < material.alpha_cutoff;
+}
+
+// What a ray meets from origin along way between tMin and tMax, passing the faces cut out where it
+// met them (passesAt), up to MostCutouts of them.
+RayHit traceThrough(float3 origin, float3 way, float tMin, float tMax)
+{
+    float t = tMin;
+    RayHit hit;
+    for (uint passed = 0u; passed <= MostCutouts; passed++)
+    {
+        hit = rayTraceIn(scene, origin, way, t, tMax);
+        if (!hit.hit || !passesAt(hit))
+            return hit;
+        t = hit.t + 1e-4 * (1.0 + hit.t);
+    }
+    hit.hit = false;
+    hit.t = tMax;
+    return hit;
+}
+
+// Whether nothing between two points stops a shadow ray, the faces cut out where it met them
+// passed as a path passes them.
+bool visibleThrough(float3 from, float3 to)
+{
+    float3 offset = to - from;
+    float distance = length(offset);
+    if (distance <= 0.0)
+        return true;
+    return !traceThrough(from, offset / distance, 0.001, distance * 0.999).hit;
+}
 
 // The way of the hemisphere's square at uv, and how far its point lies from the middle, as
 // gi_screen.slang's hemisphere.
@@ -132,7 +263,7 @@ float3 direct(GiLights given, float3 p, float3 n, float3 v, bool first, float3 c
     {
         float3 l = given.sunDirection.xyz;
         float nl = dot(n, l);
-        if (nl > 0.0 && (given.sunColor.w < 0.5 || rayVisibleIn(scene, start, start + l * 1e5)))
+        if (nl > 0.0 && (given.sunColor.w < 0.5 || visibleThrough(start, start + l * 1e5)))
             sum += given.sunColor.rgb * nl * (first ? bevyReflected(n, v, l, diffuse, f0, roughness) : diffuse);
     }
     for (int i = 0; i < min(int(given.counts.x), 16); i++)
@@ -142,7 +273,7 @@ float3 direct(GiLights given, float3 p, float3 n, float3 v, bool first, float3 c
         if (arrived <= 0.0)
             continue;
         float3 l = normalize(lamp.positionAndKind.xyz - p);
-        if (lamp.colorAndShadow.w > 0.5 && !rayVisibleIn(scene, start, lamp.positionAndKind.xyz - l * NearShadow))
+        if (lamp.colorAndShadow.w > 0.5 && !visibleThrough(start, lamp.positionAndKind.xyz - l * NearShadow))
             continue;
         sum += lamp.colorAndShadow.rgb * arrived * (first ? bevyReflected(n, v, l, diffuse, f0, roughness) : diffuse);
     }
@@ -177,7 +308,7 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
 
     for (uint bounce = 0u; bounce < counts.z; bounce++)
     {
-        RayHit hit = rayTraceIn(scene, origin, way, 0.0, 1e5);
+        RayHit hit = traceThrough(origin, way, 0.0, 1e5);
         if (!hit.hit)
         {
             light += throughput * (given.sky.rgb + passEnvironmentSpecular(way, 0.0) * passView.exposure);
@@ -187,8 +318,8 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         float3 n = normalAt(hit, way);
         float3 p = origin + way * hit.t;
 
-        Material material = materials[hit.instance];
-        float3 color = material.base_color.rgb;
+        Material material = surfacedAt(hit, materials[hit.instance]);
+        float3 color = colorAt(hit, material);
         if (material.unlit > 0.5)
         {
             light += throughput * color;
@@ -245,7 +376,7 @@ void main(uint3 id : SV_DispatchThreadID)
         bool drawn = id.x >= 16u;
         uint ray = id.x % 16u;
         float3 along = ways[ray].xyz;
-        RayHit first = rayTraceIn(scene, probe.xyz, along, 0.0, 1e5);
+        RayHit first = traceThrough(probe.xyz, along, 0.0, 1e5);
         regions[id.xy] = first.hit ? asuint(first.t) : 0u;
         float3 brought = float3(0.0);
         for (uint s = 0u; s < counts.x; s++)
@@ -269,7 +400,7 @@ void main(uint3 id : SV_DispatchThreadID)
         bool drawn = id.x >= texels;
         uint2 texel = uint2(id.x % texels, id.y);
         float3 through = fromOctahedron((float2(texel) + 0.5) / float(texels));
-        RayHit first = rayTraceIn(scene, probe.xyz, through, 0.0, 1e5);
+        RayHit first = traceThrough(probe.xyz, through, 0.0, 1e5);
         regions[id.xy] = first.hit ? asuint(first.t) : 0u;
         float3 brought = float3(0.0);
         for (uint s = 0u; s < counts.x; s++)
@@ -287,7 +418,7 @@ void main(uint3 id : SV_DispatchThreadID)
     // What the ray through the pixel's middle meets names what the pixel shows.
     float2 middle = (float2(id.xy) + 0.5) / float2(width, height);
     float3 way = passRayDirection(middle);
-    RayHit met = rayTraceIn(scene, passRayOrigin(middle), way, 0.0, 1e5);
+    RayHit met = traceThrough(passRayOrigin(middle), way, 0.0, 1e5);
     regions[id.xy] = met.hit ? met.instance * 8u + axisOf(normalAt(met, way)) + 1u : 0u;
 
     float3 sum = float3(0.0);

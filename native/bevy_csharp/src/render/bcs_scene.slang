@@ -18,10 +18,12 @@ public struct Instance
     public float4 previous_world_from_local[4];
 };
 
-/// One slot of a material buffer, what an entity's standard material says it is made of.
+/// One slot of a material buffer, what an entity's standard material says it is made of, a leaf's,
+/// a grass card's and a bark's the standard material each extends.
 ///
 /// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
-/// not in it; The material multiplies its texture by `base_color`.
+/// not in it, but a cut-out material's base color texture and its metallic and roughness texture,
+/// which are among the buffer's masks, and the material multiplies its texture by `base_color`.
 public struct Material
 {
     /// Linear, with alpha.
@@ -35,6 +37,17 @@ public struct Material
     public float reflectance;
     /// One for an unlit material, which shows its color whatever lights it.
     public float unlit;
+    /// The alpha its base color texture's alpha times its base color's is cut out under, as Bevy
+    /// draws a masked material, -1 for one drawn whole, and above one for a tree's impostor, which
+    /// a ray passes.
+    public float alpha_cutoff;
+    /// Which of the buffer's masks its base color texture is (`Shaders.MaterialBufferMask`), or -1
+    /// for none, its cutout then its base color's alpha alone.
+    public float mask;
+    /// Which of the buffer's masks its metallic and roughness texture is, its green scaling the
+    /// roughness and its blue the metallic as Bevy reads it, or -1 for none.
+    public float surface_mask;
+    public float unused;
 };
 
 /// Multiplies a matrix held as four columns by a vector.

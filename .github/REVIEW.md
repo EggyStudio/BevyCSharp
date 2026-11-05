@@ -1,40 +1,42 @@
 # Review
 
-Reviewed up to `ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image, pushed at
-02:17 on 2026-11-05, its run green at 02:39 on the three systems in 10 to 17 minutes; it keeps the
-form and carries the review's files. Before it `98dad7f7`, 104's carry, the engine's carried ray in
-its two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the three systems in 11 to
-17 minutes; it keeps the form and carries the review's files. Before it `eeb74e2b`, 104's
-diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on the three systems in
-15 to 17 minutes; it keeps the form and carries the review's files. Before it `1774aa0c`, item 103,
-every linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on the three systems in
-12 to 15 minutes; it keeps the form and carries the review's files. Before it `46ae797e`, item 102,
-the faces at their surfaces with the patch's turn, pushed at 14:12, its run green at 14:30 on the
-three systems in 11 to 17 minutes; it keeps the form and carries the review's files and the devlog.
-Before it `3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface, pushed
-at 05:32, its run green at 05:55 on the three systems in 11 to 18 minutes; it keeps the form and
-carries the review's files. Before it `9bdb29b3`, 101's first commit, the field's contact shadows
-through the camera's air, pushed at 03:48, its run green at 04:06 on the three systems in 10 to 13
-minutes; it keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth
-commit, the cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three
-systems in 13 to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`,
-95's twelfth commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on
-the three systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it
-`8583deff`, 95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at
-23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the
-form and carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24,
-its run green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the
-review's files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the
-fill off, pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps
-the form and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed
-at 15:28, its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and
-carries the review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion
-commit, pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the
-form and carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light
-probes taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it
-keeps the form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in
-four cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps
-the form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
+Reviewed up to `817fc176`, 104's screen-probe log, pushed at 03:22 on 2026-11-05, its run green at
+03:44 on the three systems in 13 to 18 minutes; it keeps the form and carries the review's files.
+Before it `ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image, pushed at 02:17,
+its run green at 02:39 on the three systems in 10 to 17 minutes; it keeps the form and carries the
+review's files. Before it `98dad7f7`, 104's carry, the engine's carried ray in its two steps, pushed
+at 23:37 on 2026-11-04, its run green at 23:54 on the three systems in 11 to 17 minutes; it keeps
+the form and carries the review's files. Before it `eeb74e2b`, 104's diagnostic, gi.probe and
+gi.bounces, pushed at 20:10, its run green at 20:27 on the three systems in 15 to 17 minutes; it
+keeps the form and carries the review's files. Before it `1774aa0c`, item 103, every linear texture
+sampler at 16, pushed at 18:34, its run green at 18:52 on the three systems in 12 to 15 minutes; it
+keeps the form and carries the review's files. Before it `46ae797e`, item 102, the faces at their
+surfaces with the patch's turn, pushed at 14:12, its run green at 14:30 on the three systems in 11
+to 17 minutes; it keeps the form and carries the review's files and the devlog. Before it
+`3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface, pushed at 05:32,
+its run green at 05:55 on the three systems in 11 to 18 minutes; it keeps the form and carries the
+review's files. Before it `9bdb29b3`, 101's first commit, the field's contact shadows through the
+camera's air, pushed at 03:48, its run green at 04:06 on the three systems in 10 to 13 minutes; it
+keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth commit, the
+cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three systems in 13
+to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`, 95's twelfth
+commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on the three
+systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it `8583deff`,
+95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at 23:01 on
+2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the form and
+carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run
+green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's
+files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off,
+pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form
+and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28,
+its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
+review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
+pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
+carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
+taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
+form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
+cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
+form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
 2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
 files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
 2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
@@ -833,7 +835,20 @@ from [SHARED.md](SHARED.md).
     against it. The reference takes the leaf material's base color and its alpha cutout as the
     forward pass draws them, the cards and the impostors letting rays through where the alpha is
     under the cutoff, read by the meadow against its reference with the grass and the leaves lit and
-    by the hall unchanged. One commit, after 95 and before 99.
+    by the hall unchanged. One commit, after 95 and before 99. The shape set at 03:25 on 2026-11-05.
+    The reference reads the cards black because its material buffer reads StandardMaterial alone
+    while leaves, bark, grass cards and impostors are extended materials, their slots zeros and no
+    textures in the slot. The slot grows from 48 to 64 bytes with the alpha cutoff (-1 for opaque)
+    and a mask index, write_materials reading each extended material's base and giving the first
+    eight distinct base-colour textures of masked materials a mask, handed to the reference as masks
+    0 to 7; a hit shades by base colour times texture, and where the texture's alpha times the
+    base's is under the cutoff the ray goes on past the hit, the shadow rays too, the uv from the
+    pool's vertices; tests of a card whose alpha cuts out half letting half the light through to the
+    floor behind against an opaque card, and the meadow and the hall read. The impostors are left
+    out of the reference's scene in this commit, said in the Reply and the reference's docs, and the
+    meadow read with and without them drawn against the same reference so the far trees' share of
+    its light is a number; past the meadow's bar their frame read in the reference becomes its own
+    item, else a row.
 
 101. **The night's shade takes the night sky's light.** With the fill off, 95's default commit, the
     alley wall in the moon's shade goes black at night where the warm fill left it dark blue, since
@@ -1259,7 +1274,20 @@ from [SHARED.md](SHARED.md).
     ends. The engine's gi.screenprobe is ported as its own diagnostic commit, one screen probe's
     rays under a pixel logged against the reference along each with where each was met, to read the
     back wall's probe way by way before any proposal. The alley probe's variation by a third from
-    one program start to the next is a line of its own for the sampling.
+    one program start to the next is a line of its own for the sampling. The screen-probe log is
+    817fc176, pushed at 03:22, gi.screenprobe with the reference traced from the rays' start along
+    each way and across each way's texel, a test on the room of 8's floor probe within 3% at the
+    first and every bounce failing at -12.6 with the ways reversed; the suite 2,017 in 43 minutes.
+    Read over 43 screen probes on the carried room's back wall at the first bounce, they sum 0.98 of
+    their own ways' reference and 0.75 of the reference drawn across their texels, the 34 above y
+    1.2 at 1.06 and 0.99 and the 9 below at 0.68 and 0.31, since the green panel shadows that half
+    from the lamp and its light comes through the 0.75 gap between the panel and the wall in a few
+    texels, one ray a texel meeting the panel's dark face or missing the patch; so the hits' light
+    and the light from beyond are right on average and the wall's shortfall is the screen probes'
+    sampling, the start-offset reading unexplained way by way. The item closes with its sampling
+    part open, the world probes' slivers (the alley, the hall's first bounce) and the screen probes'
+    texels (the carried room's back wall, its 43 probes as the measure) together with the alley
+    probe's per-start variation, the engine's 200 the same question; next 100.
 
 ## Verdicts
 
@@ -3486,3 +3514,62 @@ Shared: gi.screenprobe here is 3DEngine's reading of a screen probe, and in the 
 carried lamp's room it finds the back wall's first bounce short from the screen probes' sixteen ways
 missing the lamp's patches through a gap, their own ways' reference within 2% of their sum and the
 reference drawn across their texels a third higher.
+
+Item 100's commit, the path-traced reference reading the leaf material's color and its alpha cutout,
+in the commit carrying this line. The material buffer read each slot's standard material alone, so a
+tree's leaves, its bark and the grass cards, whose materials extend the standard material (the
+bridge's LeafMaterial and BarkMaterial), held zeros and traced black and whole, and the trees' cards
+stood as black quads in the meadow's reference with the grass hiding the floor. A slot is 64 bytes
+where 48 and holds the standard material each of those extends, with the alpha its texture is cut
+out under, -1 for a material drawn whole, and which of the buffer's masks its base color texture and
+its metallic and roughness texture are, the first sixteen such textures in the order the slots give
+them. bcs_shader_material_buffer_mask, the ABI at 317, and Shaders.MaterialBufferMask give each
+mask, bcs_scene's Material names the three, and the public listing says the slot's 64 bytes and the
+new call. The reference binds the masks, shades a face its base color times its mask's, and lets a
+path, its first ray through the pixel and a shadow ray through where the alpha is under the cutoff,
+as the forward pass discards those texels, past up to 32 such faces. The grass and the leaves set
+their metallic to one for their metallic and roughness texture's blue to say where a surface is
+metal, and read without that texture the reference took them as green metal, so the face's metallic
+and roughness are its factors times that mask's blue and green, as Bevy reads them.
+
+A tree's impostor is left out of the reference's scene, as decided, its slot's cutoff above any
+alpha so every ray passes it, since it stands in for a far tree turned to the eye as it draws, which
+no ray meets as a shape, and the reference holds no far trees, which its comment, the material
+buffer's docs and RENDERING.md say. In the feature test's meadow at eight in the morning at Medium,
+against the same reference of 256 paths, the picture's 24 largest regions, 89% of the view, hold a
+mean light of 0.2401 with the 27 impostors drawn and 0.2402 with them hidden, the grass's largest
+patch 0.206 and 0.176 against its reference's 0.174 and the walls 0.36 and 0.40 against 1.09, so the
+far trees' share of the picture's light is nil, regions moving by 16% at most, and the impostors'
+frames read along a ray stay a row.
+
+GiReferenceTests.ACutOutCardLetsTheReferencesPathsThroughWhereItsAlphaIsUnderTheCutoff draws a card
+of a checkered texture, green where whole and cut out where its alpha is none, over a white floor
+under a sun overhead, seen from above, and holds the card at half its footprint within a tenth, the
+floor through it within 10% of the open floor's light and the card green. It reads 0.500, 1.049 and
+green, where before the mend 1.000, none and white.
+GiReferenceTests.ACutOutCardLetsTheSunThroughToItsShadowWhereItsAlphaIsUnderTheCutoff stands the
+card between a sun 45 degrees up and the floor and holds its shadow at half the open floor's light
+within a tenth, 0.501, where before 0.001 as under an opaque card. The bridge's
+a_material_slot_is_four_rows_of_four_floats and
+a_texture_takes_one_mask_however_many_slots_cut_it_out hold the slot's size and the masks' order.
+
+The meadow's grass's largest patch reads its reference within 15% with the impostors drawn and alike
+with them hidden, where the reference read it black before, and its crowns 36 to 46% over and their
+reduced levels 129 to 148%, the reference leaving out the light a leaf lets through it (its diffuse
+transmission). The meadow's walls still read 63 to 70% under their reference, its floor 75% and its
+sky 29%, as 95's reading found before the cutouts, and the reference holds a long shadow across the
+right half of the grass that the picture does not, so the meadow as a whole is no measure yet, a
+reading of its own beside the impostors' row. The light hall reads as before, the picture 0.222 of
+its light from its reference where 0.223, the reference alike to three places. The pair
+2026-11-05-item-100-meadow.webp shows the meadow's reference before and with the mend.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran with it, 2,019 passed and 3 skipped in 45 m 47 s at the 3 GB cap, none aborted, its largest
+process at 2,865 MB. NormTests passed, 18. The public listing's MaterialSlotBytes reads 64 where 48
+and gains MaterialBufferMask, and the cheatsheet its line.
+
+Shared: the bridge's reference reads a cut-out card's base color and its metallic and roughness
+textures through the material buffer's masks and lets its paths and shadow rays through where the
+card's alpha is under its cutoff, a tree's impostor passed so it holds no far trees, the far trees'
+share of the meadow's picture nil.

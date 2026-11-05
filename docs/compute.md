@@ -92,10 +92,16 @@ transforms, this frame's and the previous frame's, once transforms have been wor
 voxelizing a scene, or giving geometry a shader placed its motion all build on it.
 `Shaders.CreateMaterialBuffer(capacity)` does the same for what entities are made of. Each slot
 holds the base color, emissive color, roughness, metallic and reflectance of the entity's standard
-material, as `Material`, written when they change. Put an entity in the same slot of both
-and a shader reaching it by index has where it is and what color the indirect light it passes on
-takes, and a GI ray shades its hit with that. Textures are not in it, and the base color is the
-factor the material multiplies them by.
+material, as `Material`, written when they change, a tree's leaves', its bark's and the grass's the
+standard material theirs extends. Put an entity in the same slot of both and a shader reaching it by
+index has where it is and what color the indirect light it passes on takes, and a GI ray shades its
+hit with that. Textures are not in it, and the base color is the factor the material multiplies them
+by, but for a material cut out under an alpha, whose slot holds its cutoff and names which of the
+buffer's masks its base color texture and its metallic and roughness texture are.
+`Shaders.MaterialBufferMask(buffer, index)` gives each mask, and a shader that binds them reads at a
+hit, from the pool's texture coordinates, whether a ray passes there and what the surface is. A
+tree's impostor holds a cutoff above any alpha, since it is turned to the eye as it draws and is no
+shape a ray meets.
 
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:

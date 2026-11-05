@@ -12695,13 +12695,14 @@ sealed class Bevy.ShaderValues.<G>$1F5D8E7E16C2308A4467A29445EB97C6<$T0> where $
 static class Bevy.ShaderValues.<G>$1F5D8E7E16C2308A4467A29445EB97C6<$T0>.<M>$FA493E53D575589CAD617380575EEABD where T : struct, IShaderValues
 static class Bevy.Shaders
   const int InstanceSlotBytes = 128
-  const int MaterialSlotBytes = 48
+  const int MaterialSlotBytes = 64
   static AssetHandle CreateBuffer(int size)
   static AssetHandle CreateBuffer<T>(ReadOnlySpan<T> items, int size = 0) where T : unmanaged
   static AssetHandle CreateImage(uint width, uint height, ShaderImageFormat format = ShaderImageFormat.Rgba8, uint depth = 1u, uint mips = 1u)
   static AssetHandle CreateImage<T>(uint width, uint height, ShaderImageFormat format, ReadOnlySpan<T> texels, uint depth = 1u) where T : unmanaged
   static AssetHandle CreateInstanceBuffer(int capacity)
   static AssetHandle CreateMaterialBuffer(int capacity)
+  static AssetHandle MaterialBufferMask(AssetHandle buffer, int index)
   static AssetHandle Watch(Entity camera, string name, uint width = 320u, uint height = 180u, float scale = 1f, float offset = 0f)
   static BufferRead BeginBufferRead(AssetHandle buffer)
   static BufferRead BeginImageRead(AssetHandle image)

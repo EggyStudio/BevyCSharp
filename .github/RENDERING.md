@@ -366,10 +366,18 @@ way, the screen kernel writing its sixteen rays as it traces them, each ray's li
 where it was met, on the picture, through the field, by the world's light beyond its reach or
 through the field past it, and the light of what it met, and the reference tracing from where they
 leave along each way and along ways drawn across each ray's texel of the hemisphere.
-A texture counts as its material's base color and a mesh's vertices' colors are left
-out, and a path that meets nothing brings back the ambient light as the probes have it and the
+A texture counts as its material's base color and a mesh's vertices' colors are left out, but for a
+cut-out material's, a leaf's, a bark's or a grass card's, whose base color texture and metallic and
+roughness texture are masks of the material buffer (`Shaders.MaterialBufferMask`), which color the
+face, say how metallic and rough it is and let a path or a shadow ray through where its alpha is
+under the cutoff, as the forward pass discards those texels. A tree's impostor stands in for a far
+tree turned to the eye as it draws, which no ray meets as a shape, so it is passed and the reference
+holds no far trees. In the feature test's meadow at eight in the morning the picture held a mean
+light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
+reference. A path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
-to light the scene, reads apart from its reference. The bounce rooms are a test
+to light the scene, reads apart from its reference.
+The bounce rooms are a test
 (`BounceRoomsTests`), the nine views at each quality held within 15% over what they read, 0.08 in
 the Cornell box, 0.07 in the thin room, 0.25 to 0.26 in the corridor, 0.10 in the window's, 0.02
 among the red walls, 0.06 to 0.09 on the grazing floor and 0.08 in the carried lamp's, where
@@ -566,7 +574,7 @@ means Bevy provides it and the bridge does not reach it yet; **Missing** means n
 | Transforms per instance, current and previous | Has (`Shaders.CreateInstanceBuffer`, `Instance`) for the entities put in its slots |
 | Lights and shadow maps readable from compute | Has, for compute and passes on a camera (`passLights`, `passPointLights`, `passDirectionalShadow`, `passPointShadow` for point and spot lights, `passPointLightRadiance`) |
 | The sky as a cube map or spherical harmonics | Has, as the camera's environment map, for compute and passes on a camera (`passEnvironmentSpecular`, `passEnvironmentDiffuse`) |
-| Material data by object | Has, as constants from each entity's standard material (`Shaders.CreateMaterialBuffer`, `Material`). Textures and per-triangle data are missing |
+| Material data by object | Has, as constants from each entity's standard material (`Shaders.CreateMaterialBuffer`, `Material`), a leaf's, a bark's and a grass card's the standard material it extends, with a cut-out material's cutoff and its base color and metallic and roughness textures as masks (`Shaders.MaterialBufferMask`). Other textures and per-triangle data are missing |
 | Geometry and material pools addressable at a ray hit | Has (`Shaders.CreateGeometryPool`, `AddToGeometryPool`, `PoolVertex`, `intersectTriangle`), with material constants by slot. An acceleration structure over the pool is left to the package, in compute |
 
 ### GPU-driven work

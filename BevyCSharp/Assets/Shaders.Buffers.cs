@@ -249,9 +249,10 @@ public static unsafe partial class Shaders
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
     /// <remarks>
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
-    /// one for unlit.
+    /// one for unlit, then the alpha cutoff, the masks of its base color texture and of its
+    /// metallic and roughness texture (<see cref="MaterialBufferMask"/>), and one unused.
     /// </remarks>
-    public const int MaterialSlotBytes = 48;
+    public const int MaterialSlotBytes = 64;
 
     /// <summary>
     /// Makes a buffer with <paramref name="capacity"/> slots that the engine fills every frame with
@@ -268,9 +269,15 @@ public static unsafe partial class Shaders
     /// material by one index.
     /// </para>
     /// <para>
-    /// A shader reads it as a <c>StructuredBuffer&lt;Material&gt;</c>. Textures are not
-    /// in it, since the base color is the factor the material multiplies its texture by, and an
-    /// entity drawn by a shader program, or with no material, holds zeros.
+    /// A shader reads it as a <c>StructuredBuffer&lt;Material&gt;</c>. Textures are not in it,
+    /// since the base color is the factor the material multiplies its texture by, and an entity
+    /// drawn by a shader program, or with no material, holds zeros. A tree's leaves, its bark and
+    /// the grass hold the standard material theirs extends. A material cut out under an alpha
+    /// (<see cref="MaterialSettings.AlphaMode"/>) holds its cutoff, and its base color texture and
+    /// its metallic and roughness texture are among the buffer's masks
+    /// (<see cref="MaterialBufferMask"/>), so a ray reads at a hit whether it is cut out there and
+    /// what the surface is there. A tree's impostor holds a cutoff above any alpha, since it stands
+    /// in for a far tree turned to the eye as it draws, and a ray passes it.
     /// </para>
     /// </remarks>
     public static AssetHandle CreateMaterialBuffer(int capacity)
@@ -279,6 +286,24 @@ public static unsafe partial class Shaders
         return new AssetHandle(Native.Check(
             Native.bcs_shader_material_buffer_create(capacity),
             $"making a material buffer of {capacity} slots"));
+    }
+
+    /// <summary>
+    /// Mask <paramref name="index"/> of a material buffer, the base color texture or the metallic
+    /// and roughness texture of a cut-out material its slots hold, which a slot's <c>mask</c> or
+    /// <c>surface_mask</c> names, or <see cref="AssetHandle.None"/> where it has no such mask.
+    /// </summary>
+    /// <remarks>
+    /// The masks are the first sixteen such textures in the order the buffer's slots give them, a
+    /// texture several slots use one mask, and a slot past the sixteenth holds a mask of -1, its
+    /// cutout its base color's alpha alone. A shader binds them as textures of its own and reads
+    /// one at a hit's texture coordinates, as the reference global illumination is measured against
+    /// does to let a ray through a leaf's cutout.
+    /// </remarks>
+    public static AssetHandle MaterialBufferMask(AssetHandle buffer, int index)
+    {
+        var key = Native.bcs_shader_material_buffer_mask(buffer.Key, index);
+        return key == NativeStatus.NotPresent ? AssetHandle.None : new AssetHandle(Native.Check(key, $"reading mask {index} of {buffer}"));
     }
 
     /// <summary>
