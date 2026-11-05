@@ -42,10 +42,11 @@ var saved = Settings.Current;
 
 // Three ways to run the same behaviors, onto a screen, into an image, or with no renderer at all. A
 // machine with no display can still see the picture from the middle one.
+var (width, height) = ParseSize(args);
 var config = windowed
-    ? Config.Windowed(Settings.GameName, 1280, 720, ParseBackend(args, Backend))
+    ? Config.Windowed(Settings.GameName, width, height, ParseBackend(args, Backend))
     : offscreen
-        ? Config.OffscreenFor(1280, 720, ParseFrames(args))
+        ? Config.OffscreenFor(width, height, ParseFrames(args))
         : new Config { Headless = true, HeadlessFrames = ParseFrames(args), HeadlessFps = 60 };
 
 // Bevy looks beside the running executable otherwise, which for a .NET app is whichever host
@@ -118,6 +119,18 @@ static uint ParseFrames(string[] arguments)
            && uint.TryParse(arguments[index + 1], out var value)
         ? value
         : 120u;
+}
+
+// Reads --size WIDTHxHEIGHT, the picture's pixels, 1280 by 720 where it is not given, so a cost or
+// a reading that changes with the picture's size is read at 1080p, 1440p or 4K.
+static (uint Width, uint Height) ParseSize(string[] arguments)
+{
+    var index = Array.IndexOf(arguments, "--size");
+    if (index < 0 || index + 1 >= arguments.Length) return (1280, 720);
+    var parts = arguments[index + 1].Split('x');
+    return parts.Length == 2 && uint.TryParse(parts[0], out var width) && uint.TryParse(parts[1], out var height) && width > 0 && height > 0
+        ? (width, height)
+        : (1280, 720);
 }
 
 // Reads --backend NAME, falling back to the compiled-in default.

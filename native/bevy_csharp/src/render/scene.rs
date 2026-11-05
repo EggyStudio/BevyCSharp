@@ -515,6 +515,50 @@ pub unsafe extern "C" fn bcs_render_world_to_viewport(
     })
 }
 
+/// The camera's viewport's size in physical pixels, its width then its height, the whole picture's
+/// where it has no viewport of its own, written to `out`.
+///
+/// Reports [`status::NOT_PRESENT`] where the camera has not been given a size yet, before the frame
+/// its target is first measured in.
+///
+/// # Safety
+/// `out` must be writable for two `u32`s.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_render_viewport_size(camera: u64, out: *mut u32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = (camera, out);
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            use bevy::camera::Camera;
+
+            if out.is_null() {
+                return status::NULL_ARG;
+            }
+
+            with_world(|world| {
+                let Ok(entity_ref) = world.get_entity(crate::ecs::entity_from(camera)) else {
+                    return status::NO_ENTITY;
+                };
+                let Some(size) = entity_ref.get::<Camera>().and_then(Camera::physical_viewport_size) else {
+                    return status::NOT_PRESENT;
+                };
+
+                unsafe {
+                    out.write(size.x);
+                    out.add(1).write(size.y);
+                }
+
+                status::OK
+            })
+        }
+    })
+}
+
 /// Turns a point on the viewport into a ray, origin `x, y, z` then direction `x, y, z`.
 ///
 /// The other half of [`bcs_render_world_to_viewport`], and what makes dragging a gizmo handle

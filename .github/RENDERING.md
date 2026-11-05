@@ -480,14 +480,17 @@ glow light, then its light blended with the probes around and with the frame bef
 camera keeps with its history, then the glow lights' light on images half the picture's size. The
 pass blends the four probes around a pixel that stand on a surface like its own, fading to the
 world's probes across the second cascade's outer band, and reads the glow lights' texels around it
-where some are lit. Five things depart from 3DEngine's. The camera's depth is read whole, where
+where some are lit. A probe stands every 16, 12 or 8 pixels at `Low`, `Medium` and `High` up to a
+picture of 1080 rows and every tile that grows with the height past it, as 3DEngine's TileAt grows
+it, 11 pixels at `High` at 1440p and 16 at 4K, so the probes' count and their trace's cost hold near
+1080p's. Four things depart from 3DEngine's. The camera's depth is read whole, where
 3DEngine reads a depth half the window's size, each probe on the texel under its tile's middle. What
 a probe sees of each glow light is four images of four codes a texel and an image of the fainter
 lights' light, where 3DEngine keeps a buffer of twenty codes a probe, since the camera's images take
 the picture's size. The march through the depth finds a face's way from the depth, since a dispatch
 reads no G-buffer. The pass finds how the surface moves from pixel to pixel from its nearer
-neighbors in the depth, since a pass over the whole view has no derivative of a mesh's position. And
-3DEngine's command that reads one probe's rays is not taken. In the bounce rooms the Cornell box's
+neighbors in the depth, since a pass over the whole view has no derivative of a mesh's position. In
+the bounce rooms the Cornell box's
 floor reads 3.5% over its reference with them where 12.8% without, and the thin walls' seams, which
 the world's probes lit, go dark. At 160 by 90 their tiles are few, ten across at `Low`, and their
 light lies in blotches a tile wide, which widen the window's, the strip's and the carried lamp's

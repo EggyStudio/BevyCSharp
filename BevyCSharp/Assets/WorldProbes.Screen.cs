@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bevy.Interop;
 
 namespace Bevy;
 
@@ -87,13 +88,36 @@ internal static partial class WorldProbes
     /// </summary>
     internal static AssetHandle ScreenRayLog => ReferenceEquals(_app, App.Running) && _screenTrace.IsValid ? _screenRayLog : AssetHandle.None;
 
-    /// <summary>The pixels along each side of the tile a screen probe stands in, at a quality, as 3DEngine's TileAt.</summary>
-    internal static int TileAt(GlobalIllumination quality) => quality switch
+    /// <summary>
+    /// The pixels along each side of the tile a screen probe stands in, at a quality, for a picture
+    /// <paramref name="height"/> pixels high, the same up to 1080 and growing with the height past
+    /// it, so a probe stands for about the same share of the picture on any screen, as 3DEngine's
+    /// TileAt.
+    /// </summary>
+    /// <remarks>
+    /// The probes' cost grows with how many there are, and every 8 pixels at High whatever the
+    /// screen, 3DEngine's voxel game's room of forty glowstones took 8.3 ms of global illumination
+    /// at 1280 by 720 and 35.9 at 3840 by 2160, the Cornell box 3.3 and 7.2. Scaled past 1080, the
+    /// tile is 8, 11 and 16 pixels at High at 1080p, 1440p and 4K, so the probes' count and their
+    /// cost hold near 1080p's.
+    /// </remarks>
+    internal static int TileAt(GlobalIllumination quality, uint height = 1080)
     {
-        GlobalIllumination.Low => 16,
-        GlobalIllumination.Medium => 12,
-        _ => 8,
-    };
+        var at1080 = quality switch
+        {
+            GlobalIllumination.Low => 16,
+            GlobalIllumination.Medium => 12,
+            _ => 8,
+        };
+        return Math.Max(at1080, (int)MathF.Round(at1080 * height / 1080f));
+    }
+
+    /// <summary>The height of a camera's picture in physical pixels, its viewport's where it has one, or 1080 before its target is first measured.</summary>
+    private static unsafe uint HeightOf(Entity camera)
+    {
+        var size = stackalloc uint[2];
+        return Native.bcs_render_viewport_size(camera.Bits, size) == NativeStatus.Ok ? size[1] : 1080u;
+    }
 
     /// <summary>
     /// How far from its tile's middle each screen probe marches to the glow lights from in frame
@@ -164,7 +188,7 @@ internal static partial class WorldProbes
     {
         var glowOnly = GlowOnly(glows);
         var on = (ScreenAsked || glowOnly) && !camera.IsNone;
-        var tile = TileAt(made.Quality);
+        var tile = TileAt(made.Quality, camera.IsNone ? 1080u : HeightOf(camera));
         if (!on || camera != _screenCamera)
             ReleaseScreen();
         if (!on)

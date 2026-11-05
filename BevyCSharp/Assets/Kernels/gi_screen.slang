@@ -18,10 +18,11 @@
 // each light written and no ray traced.
 //
 // Taken from 3DEngine's gi_screen.slang. 3DEngine reads a depth of half the window's size, and here
-// the camera's depth is read whole, a probe on the texel under its tile's middle; 3DEngine keeps the
-// probe's view in a buffer, and here the camera's view comes through bcs_pass. Its log of one
-// probe's rays for its gi.screenprobe command is not taken. The march through the depth is the
-// pass's (gi_light.slang) with a face's way found from the depth, since a dispatch reads no G-buffer.
+// the camera's depth is read whole, a probe on the texel under its tile's middle; 3DEngine keeps
+// the probe's view in a buffer, and here the camera's view comes through bcs_pass. Its log of one
+// probe's rays for its gi.screenprobe command is taken as ray_log. The march through the depth is
+// the pass's (gi_light.slang) with a face's way found from the depth, since a dispatch reads no
+// G-buffer.
 import bcs_pass;
 import bcs_field;
 import bcs_gi;

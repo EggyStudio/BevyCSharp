@@ -1,42 +1,44 @@
 # Review
 
-Reviewed up to `817fc176`, 104's screen-probe log, pushed at 03:22 on 2026-11-05, its run green at
-03:44 on the three systems in 13 to 18 minutes; it keeps the form and carries the review's files.
-Before it `ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image, pushed at 02:17,
-its run green at 02:39 on the three systems in 10 to 17 minutes; it keeps the form and carries the
-review's files. Before it `98dad7f7`, 104's carry, the engine's carried ray in its two steps, pushed
-at 23:37 on 2026-11-04, its run green at 23:54 on the three systems in 11 to 17 minutes; it keeps
-the form and carries the review's files. Before it `eeb74e2b`, 104's diagnostic, gi.probe and
-gi.bounces, pushed at 20:10, its run green at 20:27 on the three systems in 15 to 17 minutes; it
-keeps the form and carries the review's files. Before it `1774aa0c`, item 103, every linear texture
-sampler at 16, pushed at 18:34, its run green at 18:52 on the three systems in 12 to 15 minutes; it
-keeps the form and carries the review's files. Before it `46ae797e`, item 102, the faces at their
-surfaces with the patch's turn, pushed at 14:12, its run green at 14:30 on the three systems in 11
-to 17 minutes; it keeps the form and carries the review's files and the devlog. Before it
-`3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface, pushed at 05:32,
-its run green at 05:55 on the three systems in 11 to 18 minutes; it keeps the form and carries the
-review's files. Before it `9bdb29b3`, 101's first commit, the field's contact shadows through the
-camera's air, pushed at 03:48, its run green at 04:06 on the three systems in 10 to 13 minutes; it
-keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth commit, the
-cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three systems in 13
-to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`, 95's twelfth
-commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on the three
-systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it `8583deff`,
-95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at 23:01 on
-2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the form and
-carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run
-green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's
-files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off,
-pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form
-and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed at 15:28,
-its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
-pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
-carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
-taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
-form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
-cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
-form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
+Reviewed up to `faadbfbd`, item 100, the reference's leaf cutout, pushed at 04:54 on 2026-11-05, its
+run green at 05:18 on the three systems in 13 to 18 minutes; it keeps the form and carries the
+review's files and the devlog. Before it `817fc176`, 104's screen-probe log, pushed at 03:22, its
+run green at 03:44 on the three systems in 13 to 18 minutes; it keeps the form and carries the
+review's files. Before it `ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image,
+pushed at 02:17, its run green at 02:39 on the three systems in 10 to 17 minutes; it keeps the form
+and carries the review's files. Before it `98dad7f7`, 104's carry, the engine's carried ray in its
+two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the three systems in 11 to 17
+minutes; it keeps the form and carries the review's files. Before it `eeb74e2b`, 104's diagnostic,
+gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on the three systems in 15 to 17
+minutes; it keeps the form and carries the review's files. Before it `1774aa0c`, item 103, every
+linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on the three systems in 12 to
+15 minutes; it keeps the form and carries the review's files. Before it `46ae797e`, item 102, the
+faces at their surfaces with the patch's turn, pushed at 14:12, its run green at 14:30 on the three
+systems in 11 to 17 minutes; it keeps the form and carries the review's files and the devlog. Before
+it `3723d5ff`, 101's second commit and its end, an emitter by its mesh's own surface, pushed at
+05:32, its run green at 05:55 on the three systems in 11 to 18 minutes; it keeps the form and
+carries the review's files. Before it `9bdb29b3`, 101's first commit, the field's contact shadows
+through the camera's air, pushed at 03:48, its run green at 04:06 on the three systems in 10 to 13
+minutes; it keeps the form and carries the review's files. Before it `086ac6e7`, 95's thirteenth
+commit, the cascades' clearance from the eye, pushed at 02:15, its run green at 02:38 on the three
+systems in 13 to 19 minutes; it keeps the form and carries the review's files. Before it `accbda6d`,
+95's twelfth commit, the lamp march from its first step, pushed at 00:30, its run green at 00:53 on
+the three systems in 14 to 18 minutes; it keeps the form and carries the review's files. Before it
+`8583deff`, 95's eleventh commit, the field's hold of a thin wall along its foot and head, pushed at
+23:01 on 2026-11-03, its run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the
+form and carries the review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24,
+its run green at 19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the
+review's files. Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the
+fill off, pushed at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps
+the form and carries the review's files. Before it `5cafb9a2`, 95's forward-surfaces commit, pushed
+at 15:28, its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and
+carries the review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion
+commit, pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the
+form and carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light
+probes taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it
+keeps the form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in
+four cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps
+the form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
 2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
 files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
 2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
@@ -848,7 +850,23 @@ from [SHARED.md](SHARED.md).
     out of the reference's scene in this commit, said in the Reply and the reference's docs, and the
     meadow read with and without them drawn against the same reference so the far trees' share of
     its light is a number; past the meadow's bar their frame read in the reference becomes its own
-    item, else a row.
+    item, else a row. Done at faadbfbd, pushed at 04:54. The material slot is 64 bytes holding the
+    standard material the leaf and bark materials extend, the alpha cutoff and two mask indices (the
+    base colour and the metallic-roughness textures), a buffer of up to 16 masks (ABI 317,
+    Shaders.MaterialBufferMask); the reference shades a face by colour times mask and its paths,
+    first rays and shadow rays pass faces under the cutoff, up to 32, metallic and roughness scaled
+    by the mask's blue and green, the grass and leaves having read as green metal before since they
+    set metallic to 1 for their texture to scale. Each impostor's cutoff is 2 so every ray passes
+    it, said in the docs; the meadow's 24 largest regions read 0.2401 of mean light with the 27
+    impostors drawn and 0.2402 hidden, so the far trees' share is nil and their frame read stays a
+    row. Two reference tests, a cut-out card letting the paths and the sun through where its alpha
+    is under the cutoff (the floor seen through it 1.049 of the open floor, its shadow 0.501, where
+    1.000 and 0.001), and two Rust tests; the suite 2,019 in 46 minutes, cargo test 118 and 203,
+    NormTests 18. The meadow's largest grass patch reads +15% where the reference read it black, the
+    crowns +36 to +46 and their reduced levels +129 to +148 since the reference leaves out diffuse
+    transmission; the meadow as a whole is not a measure yet, its walls 63 to 70% under the
+    reference, its floor 75 and its sky 29 as 95 found, and the reference holding a long shadow over
+    the right half of the grass the picture lacks, item 105. The hall unchanged at 0.222.
 
 101. **The night's shade takes the night sky's light.** With the fill off, 95's default commit, the
     alley wall in the moon's shade goes black at night where the warm fill left it dark blue, since
@@ -1288,6 +1306,16 @@ from [SHARED.md](SHARED.md).
     part open, the world probes' slivers (the alley, the hall's first bounce) and the screen probes'
     texels (the carried room's back wall, its 43 probes as the measure) together with the alley
     probe's per-start variation, the engine's 200 the same question; next 100.
+
+105. **The meadow against its reference.** From item 100 on 2026-11-05. The feature test's meadow is
+    not a measure yet. Against the reference its walls read 63 to 70% under, its floor 75 and its
+    sky 29 (95's reading), and the reference holds a long shadow over the right half of the grass
+    that the picture lacks, so the two differ in what they draw before they differ in light. Read
+    first what the reference traces that the picture does not and the other way, the shadow's caster
+    (a wall, a tree or an impostor the reference drops), the sun's place and the sky's units by
+    region, the reference's air (101's reference air) and the picture's fog; then the light by
+    source as the hall was read, a proposal before any mend, so the meadow can be a measure for the
+    vegetation's items. After 99, before 96.
 
 ## Verdicts
 
@@ -3573,3 +3601,49 @@ Shared: the bridge's reference reads a cut-out card's base color and its metalli
 textures through the material buffer's masks and lets its paths and shadow rays through where the
 card's alpha is under its cutoff, a tree's impostor passed so it holds no far trees, the far trees'
 share of the meadow's picture nil.
+
+Item 99's commit, the screen probes' tile growing with the picture's height past 1080, in the commit
+carrying this line. WorldProbes.Screen's TileAt takes the camera's picture's height, read through
+bcs_render_viewport_size, a camera's viewport's size in physical pixels, the ABI at 318, and gives
+the 1080 figures, 16, 12 and 8 pixels at Low, Medium and High, as its least, scaled by the height
+over 1080 past it, as 3DEngine's TileAt does, 21, 16 and 11 at 1440p and 32, 24 and 16 at 4K. The
+probes' images, their glow texels a probe each and their jitter follow the tile as they did. The
+feature test takes `--size WIDTHxHEIGHT` for its picture, which the reading needed. RENDERING.md and
+the guide say the tile, and RENDERING.md's line that 3DEngine's command reading one screen probe's
+rays is not taken goes, since 817fc176 took it, as does gi_screen.slang's.
+
+GlobalIlluminationTests.TheScreenProbesTileHoldsUpTo1080RowsAndGrowsWithTheHeightPastThem holds the
+figures, and APicturesScreenProbesStandEveryTileItsHeightGives holds a picture of 720 rows at High
+at 8 pixels and one of 1440 at 11, where before every picture stood its probes every 8.
+
+In a box at 1080p, 1440p and 4K the screen probes' trace takes 9.22, 9.46 and 9.84 ms at High with
+the tile grown, 4.67, 4.82 and 4.91 at Medium and 2.24, 2.57 and 2.50 at Low, within 15% across the
+sizes, where with the tile held it took 9.21, 16.58 and 37.53, 4.67, 7.90 and 17.07, and 2.25, 4.87
+and 9.85. The light pass takes 1.6, 2.7 and 6.0 at every quality, growing with the pixels as a pass
+over each does. These are the medians of 600 frames read with the GPU free, an earlier pair beside
+3DEngine's examples reading the same proportions higher, and they are render.timings' spans in a
+scene of their own, since in the feature test the camera's dispatches read no span.
+
+The light hall's aisle and the scenes yard at 8:00, against references of 128 paths at each size,
+read alike with the tile grown and held, the hall 0.280 to 0.284 of its light from its reference at
+every size and quality and the yard 0.113 to 0.116 at Medium and High and 0.183 to 0.184 at Low,
+each pair within a thousandth. A first run at 4K with the tile grown ran out of the GPU's memory
+beside another program's 2.1 GB and read whole again.
+
+The two rows from 3DEngine's 141, read with it. The bridge's screen probes stand in the world's
+first two cascades alone, the first where it holds the surface and the second elsewhere, their light
+fading to the world's across the second's outer band, so the far cascade carries none and has no
+thin-wall test to cost. A screen ray past its reach marches on through the field only where the
+world's probes around its end hold no light, its luminance under a millionth, the engine's rule, so
+the deep cave's 1.1 ms has no counterpart to take here.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran with it, 2,022 passed and 3 skipped in 44 m 52 s at the 3 GB cap, none aborted, its largest
+process at 2,850 MB, after a first run as green whose last change, three comments rewrapped, it ran
+again for. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the screen probes' tile here grows with the picture's height past 1080 as 3DEngine's does,
+their trace holding within 15% from 1080p to 4K at every quality where it grew 4.1 times at High,
+and the bridge's screen probes stand in the first two cascades alone and march past their reach only
+where no probe holds light, as the engine's 141 sets both.

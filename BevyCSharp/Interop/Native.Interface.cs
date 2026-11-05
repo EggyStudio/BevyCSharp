@@ -120,6 +120,11 @@ internal static unsafe partial class Native
     internal static partial int bcs_render_viewport_to_world(
         ulong camera, float x, float y, float* ray);
 
+    /// <summary>A camera's viewport's size in physical pixels, its width then its height.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_render_viewport_size(ulong camera, uint* size);
+
     /// <summary>Writes an entity's world-space bounds, min x, y, z then max x, y, z.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

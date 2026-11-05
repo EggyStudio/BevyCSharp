@@ -345,7 +345,9 @@ nothing drawn lets light through traces with a build that leaves the crossing ou
 what it was before any surface let light through. A planted tree's leaves let half through a meter.
 
 Beside the probes in cascades stands a probe for every few pixels of the picture, every 16 at `Low`,
-12 at `Medium` and 8 at `High`, on the surface the camera's depth shows there. Each sends sixteen
+12 at `Medium` and 8 at `High` up to a picture of 1080 rows and further apart as the picture grows
+past it, 11 at `High` at 1440p and 16 at 4K, on the surface the camera's depth shows there, so their
+count and their cost hold near 1080p's on a larger screen. Each sends sixteen
 rays through the depth and the field as far as twice the first cascade's probes are apart and takes
 the cascades' light past that, so the light under a table, in a corner or where a wall meets the
 floor is seen at the size the picture draws it. Their light is blended with the probes around on
