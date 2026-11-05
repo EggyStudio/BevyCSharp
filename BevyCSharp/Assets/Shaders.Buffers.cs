@@ -178,6 +178,12 @@ public static unsafe partial class Shaders
     public static bool SupportsRayQueries => Native.bcs_shader_ray_queries_supported() != 0;
 
     /// <summary>
+    /// How many sampled textures one stage of a shader may bind on this device, or 0 before it has
+    /// one.
+    /// </summary>
+    internal static int SampledTexturesPerStage => Native.bcs_shader_sampled_textures_per_stage();
+
+    /// <summary>
     /// Whether this device runs mesh shaders, which a program's <see cref="ShaderProgramSettings.DrawMesh"/>
     /// draws with, which takes Vulkan, DirectX 12 or Metal on hardware that has them. Only valid
     /// inside a system.
@@ -250,9 +256,11 @@ public static unsafe partial class Shaders
     /// <remarks>
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
     /// one for unlit, then the alpha cutoff, the masks of its base color texture and of its
-    /// metallic and roughness texture (<see cref="MaterialBufferMask"/>), and one unused.
+    /// metallic and roughness texture (<see cref="MaterialBufferMask"/>) and one unused, then its
+    /// diffuse transmission, the mask of that share's texture, one where its diffuse share is lit
+    /// by its mesh's way out of a crown as a leaf material's is, and one unused.
     /// </remarks>
-    public const int MaterialSlotBytes = 64;
+    public const int MaterialSlotBytes = 80;
 
     /// <summary>
     /// Makes a buffer with <paramref name="capacity"/> slots that the engine fills every frame with
@@ -273,11 +281,14 @@ public static unsafe partial class Shaders
     /// since the base color is the factor the material multiplies its texture by, and an entity
     /// drawn by a shader program, or with no material, holds zeros. A tree's leaves, its bark and
     /// the grass hold the standard material theirs extends. A material cut out under an alpha
-    /// (<see cref="MaterialSettings.AlphaMode"/>) holds its cutoff, and its base color texture and
-    /// its metallic and roughness texture are among the buffer's masks
-    /// (<see cref="MaterialBufferMask"/>), so a ray reads at a hit whether it is cut out there and
-    /// what the surface is there. A tree's impostor holds a cutoff above any alpha, since it stands
-    /// in for a far tree turned to the eye as it draws, and a ray passes it.
+    /// (<see cref="MaterialSettings.AlphaMode"/>) holds its cutoff, and its base color texture, its
+    /// metallic and roughness texture and its diffuse transmission texture are among the buffer's
+    /// masks (<see cref="MaterialBufferMask"/>), so a ray reads at a hit whether it is cut out
+    /// there and what the surface is there. A slot holds its diffuse transmission, the share of its
+    /// light a face lets through from behind, and a leaf's and a grass card's say their diffuse
+    /// share is lit by the way out of the crown their meshes carry in their second texture
+    /// coordinates, as the leaf material lights them. A tree's impostor holds a cutoff above any
+    /// alpha, since it stands in for a far tree turned to the eye as it draws, and a ray passes it.
     /// </para>
     /// </remarks>
     public static AssetHandle CreateMaterialBuffer(int capacity)
@@ -289,13 +300,14 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// Mask <paramref name="index"/> of a material buffer, the base color texture or the metallic
-    /// and roughness texture of a cut-out material its slots hold, which a slot's <c>mask</c> or
-    /// <c>surface_mask</c> names, or <see cref="AssetHandle.None"/> where it has no such mask.
+    /// Mask <paramref name="index"/> of a material buffer, the base color texture, the metallic and
+    /// roughness texture, the diffuse transmission texture or the normal map of a cut-out material
+    /// its slots hold, which a slot's <c>mask</c>, <c>surface_mask</c>, <c>transmission_mask</c> or
+    /// <c>normal_mask</c> names, or <see cref="AssetHandle.None"/> where it has no such mask.
     /// </summary>
     /// <remarks>
-    /// The masks are the first sixteen such textures in the order the buffer's slots give them, a
-    /// texture several slots use one mask, and a slot past the sixteenth holds a mask of -1, its
+    /// The masks are the first 32 such textures in the order the buffer's slots give them, a
+    /// texture several slots use one mask, and a slot past the last holds a mask of -1, its
     /// cutout its base color's alpha alone. A shader binds them as textures of its own and reads
     /// one at a hit's texture coordinates, as the reference global illumination is measured against
     /// does to let a ray through a leaf's cutout.
@@ -307,7 +319,7 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// How many cut-out textures a material buffer's slots name past its sixteen masks
+    /// How many cut-out textures a material buffer's slots name past its 32 masks
     /// (<see cref="MaterialBufferMask"/>), each texture counted once, as of the frame the buffer
     /// was last written.
     /// </summary>

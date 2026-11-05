@@ -1637,7 +1637,7 @@ a batch.
     test holding both; a manifest textures.json with each entry's name, kind, size, source folder
     and recipe; a lookup in the library by name that a TreeSpecies names for its bark and its
     leaves, the generated bark and leaf masks of item 70's dressing standing where no entry is
-    named. The first entries are the sorted folder's, bark for birch, grey willow, hornbeam, silver
+    named. The first entries are the sorted folder's, bark for birch, gray willow, hornbeam, silver
     maple, Scots pine, Monterey cypress, acacia, linden and red maple, leaves for birch, hornbeam,
     silver maple, the three maples in fall, pine and cypress needles, and atlases cut from the
     alder, sycamore and fall leaf scans, the aspen preset taking the birch, the tupelo the alder
@@ -2015,7 +2015,7 @@ a batch.
     illumination's screen probes or the cascades' merge changing with the view, the clustered lights
     cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
     percent from either side, with a pair at the owner's settings. After item 81. Read at 08:02 on
-    2026-10-31, the cause Bevy 0.20's. The floor two metres ahead, swept every 15 degrees, reads
+    2026-10-31, the cause Bevy 0.20's. The floor two meters ahead, swept every 15 degrees, reads
     0.24 to 0.27 and 0.14 to 0.17 from 165 to 315 degrees, the same at 15:00 and gone at night;
     without the bay's irradiance volume no jump, with the probe alone none, with the volume alone
     the jump, the dark arc where the volume is in the view's frustum. pbr_functions.wesl at 702 to
@@ -2028,7 +2028,7 @@ a batch.
     `785a1136`, read at 09:12 on 2026-10-31. The mend goes through render/mended.rs as one shader,
     bits 4 and 5 and Render.IrradianceFallbackMended, diffuse indirect marked found only where a
     volume holds the point, the comment naming pbr_functions.wesl 702 to 711 so the mend is dropped
-    when a Bevy release has it; the floor two metres ahead reads 0.24 to 0.27 at every 15 degrees of
+    when a Bevy release has it; the floor two meters ahead reads 0.24 to 0.27 at every 15 degrees of
     the turn where it read 0.14 to 0.17 from 165 to 315; LightProbeTests holds the outside floor
     within 3%, the floor inside the volume dark and the mend made; the sheet
     2026-10-31-item-82-hall.webp with four labeled frames, box A alone, the plot of the floor

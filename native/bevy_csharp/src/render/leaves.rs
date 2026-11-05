@@ -151,12 +151,15 @@ import bevy_pbr::light_probe::environment_map;
 "#;
 
 /// The leaf's two lightings. The way out is unfolded from the octahedron, the leaf's own normal is
-/// taken on the side of its card the way out is on, and the diffuse light's normal is bent half way
-/// from it to the way out. The first lighting takes the diffuse share of the leaf's color, which
-/// Bevy's diffuse transmission leaves it, with no reflectance, so no specular, and nothing let
-/// through. The second takes the transmitted share as all it lets through, so no diffuse light, by
-/// the leaf's own normal, with its reflectance for the specular and no emission, which the first
-/// counted. The occlusion and the leaf's gray scale both, as they scale the standard material.
+/// taken on the side of its card the way out is on, the eye's where the way lies along the card,
+/// and the diffuse light's normal is bent half way from it to the way out. A grass blade's way out
+/// is straight up and its card stands upright, so the side was a rounding error's sign and lit many
+/// blades from behind, the grass under a sun at the eye's back 32% under its path-traced reference.
+/// The first lighting takes the diffuse share of the leaf's color, which Bevy's diffuse
+/// transmission leaves it, with no reflectance, so no specular, and nothing let through. The second
+/// takes the transmitted share as all it lets through, so no diffuse light, by the leaf's own
+/// normal, with its reflectance for the specular and no emission, which the first counted. The
+/// occlusion and the leaf's gray scale both, as they scale the standard material.
 ///
 /// While global illumination's probes light the scene, the leaf takes back the light Bevy's
 /// lighting gave it from all around and gives itself the probes' in its place, as the light pass
@@ -230,7 +233,9 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     var diffuse = pbr_input;
 @if(VERTEX_UVS_B) {
     let way = way_out(in.uv_b);
-    let face = select(-pbr_input.N, pbr_input.N, dot(pbr_input.N, way) >= 0.0);
+    // The side the way out is on, or the eye's where the way lies along the card, as a grass
+    // blade's straight up does, whose dot is a rounding error's sign either way.
+    let face = select(-pbr_input.N, pbr_input.N, dot(pbr_input.N, way) >= -1e-3);
     diffuse.N = normalize(mix(face, way, 0.5));
 }
     diffuse.material.base_color = vec4<f32>(pbr_input.material.base_color.rgb * (1.0 - through), pbr_input.material.base_color.a);

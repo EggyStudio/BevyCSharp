@@ -15,18 +15,22 @@
 //! A material buffer is the same thing for what an entity is made of. Each slot holds its standard
 //! material's base color, emissive color, roughness, metallic, reflectance and whether it is unlit,
 //! with the alpha its texture's is cut out under and which of the buffer's masks that texture and
-//! its metallic and roughness texture are, as `Material`, 64 bytes. A ray that hits something in
-//! world-space GI has to know its color for the indirect light it passes on, and an engine can read
-//! it from the material where a package guessing from property names cannot. Put the same entity in
-//! the same slot of both buffers and a shader has transform and material by one index. A leaf's, a
-//! grass card's and a bark's material are the standard material they extend. A cut-out material's
-//! base color texture and its metallic and roughness texture are among the buffer's masks, the
-//! first [`MOST_MASKS`] such textures among its slots, which a shader binds to read the cutout, the
-//! color and how metallic and rough the surface is at a hit, a leaf's metal its texture's to say
-//! where the material's own is one. Other textures are not in it, since a texture's average color
-//! is work on the GPU, and the material multiplies them by the base color. A tree's impostor stands
-//! in for a far tree, turned to the eye as it draws, and its slot's cutoff is above any alpha, so a
-//! ray passes it.
+//! its metallic and roughness texture are, the share of its light it lets through (its diffuse
+//! transmission), which mask that share's texture is, how it reads its diffuse share and its normal
+//! map, by its mesh's way out of a crown where it is a leaf's or a grass card's, and which mask its
+//! normal map is, as `Material`, 80 bytes. A ray that hits something in world-space GI has to know
+//! its color for the indirect light it passes on, and an engine can read it from the material where
+//! a package guessing from property names cannot. Put the same entity in the same slot of both
+//! buffers and a shader has transform and material by one index. A leaf's, a grass card's and a
+//! bark's material are the standard material they extend. A cut-out material's base color texture,
+//! its metallic and roughness texture, its diffuse transmission texture and its normal map are
+//! among the buffer's masks, the first [`MOST_MASKS`] such textures among its slots, which a shader
+//! binds to read the cutout, the color, how metallic and rough the surface is, how much it lets
+//! through and which way it faces at a hit, a leaf's metal its texture's to say where the
+//! material's own is one. Other textures are not in it, since a texture's average color is work on
+//! the GPU, and the material multiplies them by the base color. A tree's impostor stands in for a
+//! far tree, turned to the eye as it draws, and its slot's cutoff is above any alpha, so a ray
+//! passes it.
 
 #![cfg(feature = "render")]
 
@@ -47,11 +51,12 @@ use crate::interop::status;
 pub const SLOT_BYTES: usize = 128;
 
 /// How many bytes one slot of a material buffer takes.
-pub const MATERIAL_SLOT_BYTES: usize = 64;
+pub const MATERIAL_SLOT_BYTES: usize = 80;
 
-/// How many of cut-out materials' base color and metallic and roughness textures a material buffer
-/// keeps as masks.
-pub const MOST_MASKS: usize = 16;
+/// How many of cut-out materials' textures a material buffer keeps as masks, each leaf set bringing
+/// its base color, its metallic and roughness and its normal map, so a meadow of five species and
+/// its grass needs eighteen.
+pub const MOST_MASKS: usize = 32;
 
 /// The cutoff of a slot no ray stops at, a tree's impostor's.
 pub const PASSED: f32 = 2.0;
@@ -201,13 +206,14 @@ pub fn write_materials(
         bevy::ecs::system::Res<Assets<bevy::pbr::StandardMaterial>>,
         bevy::ecs::system::Res<Assets<super::leaves::LeafMaterial>>,
         bevy::ecs::system::Res<Assets<super::sway::BarkMaterial>>,
+        bevy::ecs::system::Res<Assets<bevy::image::Image>>,
     ),
     mut assets: ResMut<Assets<ShaderBuffer>>,
 ) {
     let Some(mut buffers) = buffers else {
         return;
     };
-    let (standards, leaf_materials, bark_materials) = materials;
+    let (standards, leaf_materials, bark_materials, images) = materials;
 
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * MATERIAL_SLOT_BYTES);
@@ -224,14 +230,15 @@ pub fn write_materials(
                     .or_else(|| barks.get(entity).ok().and_then(|carried| bark_materials.get(&carried.0)).map(|bark| &bark.base))
             });
             let passed = entity.is_some_and(|entity| impostors.contains(entity));
+            let leaf = entity.is_some_and(|entity| leaves.contains(entity));
 
-            let slot: [f32; 16] = match base {
+            let slot: [f32; 20] = match base {
                 _ if passed => {
-                    let mut slot = [0.0; 16];
-                    (slot[12], slot[13]) = (PASSED, -1.0);
+                    let mut slot = [0.0; 20];
+                    (slot[12], slot[13], slot[14], slot[17]) = (PASSED, -1.0, -1.0, -1.0);
                     slot
                 }
-                None => [0.0; 16],
+                None => [0.0; 20],
                 Some(material) => {
                     let base = material.base_color.to_linear();
                     let emissive = material.emissive;
@@ -242,6 +249,14 @@ pub fn write_materials(
                         .then_some(material.metallic_roughness_texture.as_ref())
                         .flatten()
                         .map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
+                    let through = (cutoff >= 0.0)
+                        .then_some(material.diffuse_transmission_texture.as_ref())
+                        .flatten()
+                        .map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
+                    let normal_map = (cutoff >= 0.0).then_some(material.normal_map_texture.as_ref()).flatten();
+                    let bumps = normal_map.map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
+                    let two = normal_map.and_then(|texture| images.get(texture)).is_some_and(|image| two_component(image.texture_descriptor.format));
+                    let flags = (if leaf { WAY_OUT } else { 0 }) | (if two { TWO_COMPONENT } else { 0 }) | (if material.flip_normal_map_y { FLIP_Y } else { 0 });
 
                     [
                         base.red,
@@ -262,6 +277,12 @@ pub fn write_materials(
                         mask,
                         surface,
                         0.0,
+                        // The share let through, its texture's alpha scaling it as Bevy reads it,
+                        // how its diffuse share and its normal map are read, and its normal map.
+                        material.diffuse_transmission,
+                        through,
+                        flags as f32,
+                        bumps,
                     ]
                 }
             };
@@ -273,6 +294,30 @@ pub fn write_materials(
         tracked.unmasked = unmasked.len();
         upload(tracked, bytes, &mut assets);
     }
+}
+
+/// A slot's flag where its diffuse share is lit by the way out the leaf material reads from the
+/// mesh's second texture coordinates.
+pub const WAY_OUT: u32 = 1;
+
+/// A slot's flag where its normal map holds two channels, its third worked out from them, as Bevy
+/// reads a map of a two-channel format.
+pub const TWO_COMPONENT: u32 = 2;
+
+/// A slot's flag where its normal map's green is flipped, as for a map made for DirectX.
+pub const FLIP_Y: u32 = 4;
+
+/// Whether Bevy reads a normal map of this format as two channels, as `StandardMaterial` decides.
+fn two_component(format: bevy::render::render_resource::TextureFormat) -> bool {
+    use bevy::render::render_resource::{AstcChannel, TextureFormat};
+    matches!(
+        format,
+        TextureFormat::Rg8Unorm
+            | TextureFormat::Rg16Unorm
+            | TextureFormat::Bc5RgUnorm
+            | TextureFormat::EacRg11Unorm
+            | TextureFormat::Astc { channel: AstcChannel::Unorm, .. }
+    )
 }
 
 /// The alpha a material is cut out under as Bevy draws it, the cutoff of a masked material and a
@@ -365,11 +410,14 @@ fn upload(tracked: &mut Tracked, bytes: Vec<u8>, assets: &mut Assets<ShaderBuffe
 mod tests {
     use super::*;
 
-    /// `bcs_scene`'s `Material` is four of four floats, its cutoff and its two masks the fourth's
-    /// first three.
+    /// `bcs_scene`'s `Material` is five rows of four floats, its cutoff and its two masks the
+    /// fourth's first three and its share let through, that share's mask, its flags and its normal
+    /// map's mask the fifth's, and a two-channel map is read as Bevy reads one.
     #[test]
-    fn a_material_slot_is_four_rows_of_four_floats() {
-        assert_eq!(MATERIAL_SLOT_BYTES, 4 * 4 * 4);
+    fn a_material_slot_is_five_rows_of_four_floats() {
+        assert_eq!(MATERIAL_SLOT_BYTES, 5 * 4 * 4);
+        assert!(two_component(bevy::render::render_resource::TextureFormat::Bc5RgUnorm));
+        assert!(!two_component(bevy::render::render_resource::TextureFormat::Rgba8Unorm));
         assert_eq!(cutoff_of(bevy::material::AlphaMode::Mask(0.3)), 0.3);
         assert_eq!(cutoff_of(bevy::material::AlphaMode::Opaque), -1.0);
         assert!(PASSED > 1.0);

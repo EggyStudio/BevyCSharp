@@ -388,6 +388,97 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
         Assert.Equal([drawn], met);
     }
 
+    /// <summary>
+    /// A patch of grass under a sun behind the eye reads in the reference the light the picture
+    /// gives it, the first face's light alone in both, since the reference lights a grass card as
+    /// the leaf material does, its normal map bending it, and its shadow rays pass the blades,
+    /// which cast no shadow.
+    /// </summary>
+    /// <remarks>
+    /// The reference lit each card by its own flat normal, the whole of its color diffuse, and its
+    /// shadow rays met the blades around it, where the picture's blades cast no shadow and the leaf
+    /// material lights the share of a blade's color it keeps by its mapped normal bent half way up
+    /// to its way out of the crown, straight up for grass, and lets the rest through from behind,
+    /// so in the feature test's meadow the reference's grass in the room wall's shadow read 0.009
+    /// to 0.04 and the picture's 0.17 to 0.19. The leaf material took the card's side by the sign
+    /// of its normal's dot with the way out, a rounding error's for an upright card under a way
+    /// straight up, and lit many blades from behind, reading 32% under the reference here, where
+    /// with the way out tilted six degrees toward the eye the two read alike.
+    /// </remarks>
+    [SkippableFact]
+    public void AGrassPatchReadsInTheReferenceTheLightThePictureGivesIt()
+    {
+        Needs.Shaders();
+        var supported = false;
+        string? traced = null, read = null;
+        var (askedTrace, askedRead) = (false, false);
+        var wind = Trees.Wind;
+        Trees.Wind = Vec3.Zero;
+        try
+        {
+            new PictureRun
+            {
+                Width = 96,
+                Height = 64,
+                Frames = 1200,
+                Scene = ecs =>
+                {
+                    var eye = new Vec3(0f, 0.9f, 2.4f);
+                    var camera = PictureRun.Camera(ecs, eye);
+                    ecs.Set(camera, Transform.LookingAt(eye, new Vec3(0f, 0.2f, 0f), Vec3.UnitY));
+                    Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                    Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);
+                    var floor = PictureRun.Cube(ecs, Render.CreateMaterial(0.5f, 0.5f, 0.5f), 40f, new Vec3(0f, -20f, 0f));
+                    ecs.SetName(floor, "floor");
+                    var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                    ecs.Add(sun, Transform.LookingAt(new Vec3(0.4f, 2f, 3f), Vec3.Zero, Vec3.UnitY));
+                    Grass.Plant(ecs, Vec3.Zero, new Vec2(3f, 3f), new GrassSettings { Density = 12f, Height = 0.6f });
+                },
+            }
+                .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+                .Until("ready", _ => !supported || Render.PipelinesReady())
+                .Wait(ShaderMaterialTests.Settled)
+                .Until("traced", world => !supported || Read(world.Resource<EcsWorld>(), ref askedTrace, ref traced, ecs => GiReference.BeginReference(ecs, null, 32, bounces: 0)))
+                .Until("read", world => !supported || Read(world.Resource<EcsWorld>(), ref askedRead, ref read, ecs => GiReference.BeginPicture(ecs, null)))
+                .Go();
+        }
+        finally
+        {
+            Trees.Wind = wind;
+        }
+        Needs.RayQueries(supported);
+
+        var reference = GiReference.Last!;
+        var picture = GiReference.LastPicture!.Value.Light;
+        var (pixels, seen, met) = (0, 0.0, 0.0);
+        for (var i = 0; i < reference.Regions.Length; i++)
+        {
+            if (!reference.Names.TryGetValue(reference.Regions[i], out var name) || !name.StartsWith("Grass patch")) continue;
+            pixels++;
+            seen += 0.2126 * picture[i * 3] + 0.7152 * picture[i * 3 + 1] + 0.0722 * picture[i * 3 + 2];
+            met += 0.2126 * reference.Light[i * 3] + 0.7152 * reference.Light[i * 3 + 1] + 0.0722 * reference.Light[i * 3 + 2];
+        }
+        output.WriteLine($"the grass's {pixels} pixels read {seen / Math.Max(1, pixels):0.0000} in the picture and {met / Math.Max(1, pixels):0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
+        Assert.True(pixels > reference.Regions.Length / 4, $"the grass covers {pixels} pixels");
+        Assert.InRange(seen / met, 0.85, 1.15);
+    }
+
+    /// <summary>
+    /// The reference binds 32 masks where the device's shaders sample room for them and its other
+    /// textures a stage, and 16 or 8 where they sample fewer, as wgpu's lowest default of 16 does,
+    /// so a smaller device still makes the tracer.
+    /// </summary>
+    [Fact]
+    public void TheReferenceBindsTheMasksTheDevicesTexturesAStageLeaveRoomFor()
+    {
+        Assert.Equal(32, GiReference.MasksFor(128));
+        Assert.Equal(32, GiReference.MasksFor(40));
+        Assert.Equal(16, GiReference.MasksFor(39));
+        Assert.Equal(16, GiReference.MasksFor(24));
+        Assert.Equal(8, GiReference.MasksFor(16));
+        Assert.Equal(8, GiReference.MasksFor(0));
+    }
+
     // Whether a pixel's region is the card's, facing either way.
     private static bool IsCard(GiReference.Traced traced, uint region) => traced.Names.TryGetValue(region, out var name) && name.StartsWith("card");
 

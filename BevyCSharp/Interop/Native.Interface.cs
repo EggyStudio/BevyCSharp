@@ -269,6 +269,11 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_unmasked(int buffer);
 
+    /// <summary>How many sampled textures one stage of a shader may bind on this device.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_sampled_textures_per_stage();
+
     /// <summary>Whether Bevy's ray-traced lighting is running in this app.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

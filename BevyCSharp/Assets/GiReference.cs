@@ -25,14 +25,18 @@ namespace Bevy;
 /// The ray scene holds every shown entity that draws a 3D mesh of triangles, a mesh of a visibility
 /// range at the level the camera's distance gives, as the picture draws it, with its standard
 /// material's base color, emissive light, roughness, metallic and reflectance as the engine's
-/// material buffer has them, so a texture counts as its base color and a mesh's vertices' colors are
-/// left out. What it says when it is done counts the cut-out textures past the material buffer's
-/// masks (<see cref="Shaders.MaterialBufferUnmasked"/>), traced whole by their base color, and the
-/// trees not dressed yet when it began, which neither it nor the picture holds.
-/// The lights are those global illumination's probes are lit by, the sun, the light from
+/// material buffer has them, so a texture counts as its base color and a mesh's vertices' colors
+/// are left out. What it says when it is done counts the cut-out textures past the material
+/// buffer's masks (<see cref="Shaders.MaterialBufferUnmasked"/>), traced whole by their base color,
+/// and the trees not dressed yet when it began, which neither it nor the picture holds. It honors
+/// the materials' own models rather than a physical surface's, a face's diffuse transmission let
+/// through from behind and a leaf's or a grass card's diffuse share lit by its normal bent toward
+/// its way out of the crown as the leaf material lights it, and a mesh Bevy draws no shadow of is
+/// met by the camera's own rays alone, as Bevy's shadow maps and the scene's distance field leave
+/// it out. The lights are those global illumination's probes are lit by, the sun, the light from
 /// all around and the sixteen point and spot lights nearest the camera, the sun dimmed through the
-/// camera's air as Bevy's lighting dims it for the picture. It needs a GPU that traces
-/// rays (<see cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so the app keeps one,
+/// camera's air as Bevy's lighting dims it for the picture. It needs a GPU that traces rays
+/// (<see cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so the app keeps one,
 /// with its geometry pool, from one reference to the next, and makes a larger one where a scene has
 /// more meshes than it holds.
 /// </para>
@@ -91,6 +95,7 @@ internal static unsafe partial class GiReference
         public int Capacity;
         public AssetHandle Instances = AssetHandle.None, Materials = AssetHandle.None, Lights = AssetHandle.None, Ways = AssetHandle.None, White = AssetHandle.None;
         public ShaderInstance Trace, Copy;
+        public int Masks, Limit;
         public readonly Dictionary<int, int> PoolMeshes = [];
         public readonly byte[] LightBytes = new byte[WorldProbes.LightsBytes];
     }
@@ -207,17 +212,17 @@ internal static unsafe partial class GiReference
             _rays.Ways = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenWays]);
             // The mask a slot past the material buffer's masks reads, letting nothing through.
             _rays.White = Render.CreateImage([255, 255, 255, 255], 1, 1, srgb: false, mipmaps: false);
-            _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV));
+            (_rays.Limit, _rays.Masks) = (Shaders.SampledTexturesPerStage, MasksFor(Shaders.SampledTexturesPerStage));
+            _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV, defines: new Dictionary<string, ShaderDefine> { ["MASKS"] = (uint)_rays.Masks }));
         }
         return null;
     }
 
-    // Binds the material buffer's masks, the cut-out materials' base color textures and metallic
-    // and roughness textures, as the frame before's slots gave them, a white texel for each it has
-    // none of.
+    // Binds the material buffer's masks, the cut-out materials' textures, as the frame before's
+    // slots gave them, a white texel for each it has none of.
     private static void BindMasks(Rays rays)
     {
-        for (var i = 0; i < Masks; i++)
+        for (var i = 0; i < rays.Masks; i++)
         {
             var mask = Shaders.MaterialBufferMask(rays.Materials, i);
             rays.Trace.SetTexture($"mask{i}", mask.IsValid ? mask : rays.White);
@@ -225,8 +230,21 @@ internal static unsafe partial class GiReference
         rays.Trace.SetSampler("mask_sampler", SamplerSettings.Linear);
     }
 
-    // How many masks the tracer binds, as many as a material buffer keeps.
-    private const int Masks = 16;
+    // The most masks the tracer binds, as many as a material buffer keeps, and the sampled
+    // textures a stage it leaves for its others, the environment map and the air's tables.
+    private const int Masks = 32, Others = 8;
+
+    /// <summary>
+    /// How many masks the tracer binds on a device whose shaders may sample
+    /// <paramref name="limit"/> textures a stage, 32, or 16 or 8 where those and its other
+    /// textures fit and 32 do not.
+    /// </summary>
+    /// <remarks>
+    /// wgpu's lowest default is 16 textures a stage, and the adapters the workflow runs on report
+    /// 128, so the masks are bound in steps a smaller device can make the tracer with, and the
+    /// reference says when it holds fewer.
+    /// </remarks>
+    internal static int MasksFor(int limit) => limit >= Masks + Others ? Masks : limit >= 16 + Others ? 16 : 8;
 
     // The camera the field lies around, or the first 3D camera where there is none.
     private static Entity CameraOf(EcsWorld ecs)
@@ -457,10 +475,18 @@ internal static unsafe partial class GiReference
         Last = traced;
         var seconds = Stopwatch.GetElapsedTime(job.Started).TotalSeconds;
         var skipped = job.Skipped == 0 ? "" : $", {job.Skipped} meshes left out as not triangles or not loaded";
-        var past = _rays is { } held ? Shaders.MaterialBufferUnmasked(held.Materials) : 0;
+        var past = 0;
+        var fewer = "";
+        if (_rays is { } held)
+        {
+            past = Shaders.MaterialBufferUnmasked(held.Materials);
+            for (var i = held.Masks; i < Masks; i++)
+                if (Shaders.MaterialBufferMask(held.Materials, i).IsValid) past++;
+            if (held.Masks < Masks) fewer = $", {held.Masks} masks bound of {Masks}, the device sampling {held.Limit} textures a stage";
+        }
         var unmasked = past == 0 ? "" : $", {past} cut-out textures past the masks traced by their base color alone";
         var undressed = job.Undressed == 0 ? "" : $", {job.Undressed} trees not dressed yet";
-        var said = $"traced {job.Width} by {job.Height} at {samples} paths a pixel in {seconds:0.0} s, {job.Slots.Length} meshes{skipped}{unmasked}{undressed}, {names.Count} regions";
+        var said = $"traced {job.Width} by {job.Height} at {samples} paths a pixel in {seconds:0.0} s, {job.Slots.Length} meshes{skipped}{unmasked}{fewer}{undressed}, {names.Count} regions";
         if (job.Path is { } path)
         {
             var full = System.IO.Path.GetFullPath(path);

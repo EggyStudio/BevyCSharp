@@ -181,6 +181,27 @@ pub extern "C" fn bcs_shader_ray_queries_supported() -> i32 {
     })
 }
 
+/// How many sampled textures one stage of a shader may bind on this device, or 0 before it has one.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_sampled_textures_per_stage() -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            0
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world_opt(|world| {
+                world
+                    .get_resource::<bevy::render::renderer::RenderDevice>()
+                    .map_or(0, |device| device.limits().max_sampled_textures_per_shader_stage.min(i32::MAX as u32) as i32)
+            })
+            .unwrap_or(0)
+        }
+    })
+}
+
 /// Whether this device runs mesh shaders, which a draw on a camera can be made with.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_shader_mesh_shaders_supported() -> i32 {

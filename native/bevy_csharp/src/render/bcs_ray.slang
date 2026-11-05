@@ -84,6 +84,13 @@ public struct RayDirectionalLight
 };
 
 public static const uint RayNoTexture = 0xFFFFFFFF;
+
+/// The bit of an instance's mask of a ray scene of the game's own that its entity holds where it
+/// casts shadows, so a ray asking for it alone meets those meshes and passes one Bevy draws no
+/// shadow of (`NotShadowCaster`), as its shadow maps and the scene's distance field leave it out.
+public static const uint RayCastsShadows = 0x01;
+/// Every bit of an instance's mask, which a ray meeting every instance asks for.
+public static const uint RayEveryInstance = 0xFF;
 public static const uint RayLightEmissiveMesh = 0;
 public static const uint RayLightDirectional = 1;
 
@@ -136,6 +143,13 @@ public RayHit rayTrace(float3 origin, float3 direction, float t_min, float t_max
 /// Traces a ray against `scene`, and answers the nearest triangle it meets.
 public RayHit rayTraceIn(RaytracingAccelerationStructure scene, float3 origin, float3 direction, float t_min, float t_max)
 {
+    return rayTraceIn(scene, origin, direction, t_min, t_max, RayEveryInstance);
+}
+
+/// Traces a ray against the instances of `scene` whose mask shares a bit with `mask`, such as
+/// `RayCastsShadows`, and answers the nearest triangle it meets.
+public RayHit rayTraceIn(RaytracingAccelerationStructure scene, float3 origin, float3 direction, float t_min, float t_max, uint mask)
+{
     RayDesc ray;
     ray.Origin = origin;
     ray.Direction = direction;
@@ -143,7 +157,7 @@ public RayHit rayTraceIn(RaytracingAccelerationStructure scene, float3 origin, f
     ray.TMax = t_max;
 
     RayQuery<RAY_FLAG_NONE> query;
-    query.TraceRayInline(scene, RAY_FLAG_NONE, 0xFF, ray);
+    query.TraceRayInline(scene, RAY_FLAG_NONE, mask, ray);
 
     // Every candidate is a triangle built opaque, which the query commits on its own.
     while (query.Proceed()) {}
@@ -171,6 +185,13 @@ public bool rayVisible(float3 from, float3 to)
 /// answers the question.
 public bool rayVisibleIn(RaytracingAccelerationStructure scene, float3 from, float3 to)
 {
+    return rayVisibleIn(scene, from, to, RayEveryInstance);
+}
+
+/// Whether nothing among the instances of `scene` whose mask shares a bit with `mask` is in the
+/// way between two points, `RayCastsShadows` for what casts a shadow.
+public bool rayVisibleIn(RaytracingAccelerationStructure scene, float3 from, float3 to, uint mask)
+{
     let offset = to - from;
     let distance = length(offset);
 
@@ -186,7 +207,7 @@ public bool rayVisibleIn(RaytracingAccelerationStructure scene, float3 from, flo
     ray.TMax = distance * 0.999;
 
     RayQuery<RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH> query;
-    query.TraceRayInline(scene, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, 0xFF, ray);
+    query.TraceRayInline(scene, RAY_FLAG_ACCEPT_FIRST_HIT_AND_END_SEARCH, mask, ray);
 
     while (query.Proceed()) {}
 

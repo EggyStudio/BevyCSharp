@@ -382,7 +382,16 @@ the reference and the sky 29%. Taken at the level the camera's distance gives, t
 read 17 and 31% under and the sky 6%, the view's distance 0.525 where 0.688. The reference's answer
 counts the cut-out textures past the masks and the trees not dressed yet, since the feature test's
 28 trees stood 70 of their 166 parts 300 frames after it started, and a reading taken then held no
-oaks. In the feature test's meadow at eight in the morning the picture held a mean
+oaks. The reference honors the materials' own models rather than a physical surface's. A cut-out
+material's normal map bends its face's normal as Bevy's does, in the frame the triangle's texture
+coordinates give, a face lets through from behind the share its diffuse transmission gives and
+keeps the rest as its diffuse share, and a leaf's or a grass card's diffuse share is lit by its
+mapped normal bent half way to its way out of the crown, as the leaf material lights it. A mesh
+Bevy draws no shadow of, as the meadow's grass, is met by the camera's own rays alone, every other
+ray passing it through its instance's mask, as Bevy's shadow maps and the scene's distance field
+leave it out. The material buffer keeps 32 masks, and the reference binds 32, or 16 or 8 on a
+device whose shaders sample too few textures a stage for them and says so.
+In the feature test's meadow at eight in the morning the picture held a mean
 light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
 reference. A path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map

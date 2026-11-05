@@ -4,7 +4,7 @@
 //! A ray traced in a compute shader, or a scene voxelized by one, meets triangles of whatever mesh
 //! is there, so every mesh it might meet has to be in memory it can index, not in the vertex
 //! buffers only a draw of that mesh binds. A pool is three buffers, every vertex, as
-//! `PoolVertex` (a position, a normal and texture coordinates, 48 bytes); every
+//! `PoolVertex` (a position, a normal and two sets of texture coordinates, 48 bytes); every
 //! triangle's three vertex numbers, counted from the start of its mesh; and a table of the meshes,
 //! as `PoolMesh`, saying where each one's vertices and indices start, how many there
 //! are, and its bounds. Adding a mesh appends it, growing the buffers as needed and having
@@ -211,16 +211,26 @@ fn flatten(mesh: &Mesh) -> Option<(Vec<f32>, Vec<u32>, [f32; 6])> {
         _ => None,
     };
 
+    // A leaf's way out of its crown, folded onto a square, which the leaf material lights its
+    // diffuse share by (super::leaves).
+    let ways = match mesh.attribute(Mesh::ATTRIBUTE_UV_1) {
+        Some(VertexAttributeValues::Float32x2(ways)) => Some(ways),
+        _ => None,
+    };
+
     let mut vertices = Vec::with_capacity(positions.len() * 12);
     let mut bounds = [f32::MAX, f32::MAX, f32::MAX, f32::MIN, f32::MIN, f32::MIN];
 
     for (index, position) in positions.iter().enumerate() {
         let normal = normals.and_then(|normals| normals.get(index)).copied().unwrap_or([0.0, 0.0, 0.0]);
         let uv = uvs.and_then(|uvs| uvs.get(index)).copied().unwrap_or([0.0, 0.0]);
+        let way = ways.and_then(|ways| ways.get(index)).copied();
+        let carried = if way.is_some() { 1.0 } else { 0.0 };
+        let way = way.unwrap_or([0.0, 0.0]);
 
         vertices.extend_from_slice(&[position[0], position[1], position[2], 1.0]);
-        vertices.extend_from_slice(&[normal[0], normal[1], normal[2], 0.0]);
-        vertices.extend_from_slice(&[uv[0], uv[1], 0.0, 0.0]);
+        vertices.extend_from_slice(&[normal[0], normal[1], normal[2], carried]);
+        vertices.extend_from_slice(&[uv[0], uv[1], way[0], way[1]]);
 
         for axis in 0..3 {
             bounds[axis] = bounds[axis].min(position[axis]);

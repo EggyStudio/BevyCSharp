@@ -13,6 +13,12 @@
 //! instance buffer or a material buffer with the same entities in the same slots describes it, and
 //! its instance ID is the pool mesh, which `bcs_scene` reads the triangle's corners from.
 //!
+//! An instance's mask holds every bit but where its entity casts no shadow (Bevy's
+//! `NotShadowCaster`), which leaves out the lowest, [`CASTS_SHADOWS`], so a ray asking for that bit
+//! alone (`RayCastsShadows` in `bcs_ray`) meets the meshes that cast shadows and passes the rest,
+//! as Bevy's shadow maps and the scene's distance field leave them out, and a ray asking for every
+//! bit meets them all.
+//!
 //! **Where it is built.** The render world, which holds the device, builds each new mesh's
 //! structure once the pool's buffers are on the GPU, and the top-level structure again every
 //! frame from where the entities are. The result is kept in a table outside the world, which the
@@ -48,6 +54,9 @@ use bevy::render::{ExtractSchedule, MainWorld, Render, RenderApp, RenderSystems}
 use bevy::transform::components::GlobalTransform;
 
 use crate::interop::status;
+
+/// The bit of an instance's mask its entity holds where it casts shadows.
+pub const CASTS_SHADOWS: u8 = 0x01;
 
 /// Whether the device can build acceleration structures and trace rays through them.
 pub fn supported(world: &World) -> bool {
@@ -185,8 +194,9 @@ struct Extracted {
     /// Where each pool mesh's vertices and indices start and how many there are.
     meshes: Vec<[u32; 4]>,
     capacity: u32,
-    /// A slot, the pool mesh in it, and its transform as the first three rows of its matrix.
-    instances: Vec<(u32, u32, [f32; 12])>,
+    /// A slot, the pool mesh in it, its transform as the first three rows of its matrix, and its
+    /// mask.
+    instances: Vec<(u32, u32, [f32; 12], u8)>,
     /// Pool meshes to build again.
     rebuild: Vec<u32>,
 }
@@ -239,7 +249,7 @@ fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<Extra
         .map(|(key, scene)| (*key, scene.pool, scene.slots.clone(), std::mem::take(&mut scene.rebuild)))
         .collect();
 
-    let mut transforms = world.query::<&GlobalTransform>();
+    let mut transforms = world.query::<(&GlobalTransform, bevy::ecs::query::Has<bevy::light::NotShadowCaster>)>();
 
     for (key, pool, slots, rebuild) in described {
         let Some((vertices, indices, meshes)) = super::pools::geometry(world, pool) else {
@@ -258,8 +268,9 @@ fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<Extra
                     return None;
                 }
 
-                let transform = transforms.get(world, entity).ok()?.to_matrix();
-                Some((slot as u32, mesh, rows(&transform)))
+                let (transform, casts_none) = transforms.get(world, entity).ok()?;
+                let mask = if casts_none { !CASTS_SHADOWS } else { 0xFF };
+                Some((slot as u32, mesh, rows(&transform.to_matrix()), mask))
             })
             .collect();
 
@@ -405,13 +416,13 @@ fn build_scenes(
             entry.tlas[slot] = stand_in.as_ref().map(|blas| TlasInstance::new(blas, IDENTITY, 0, 0));
         }
 
-        for (slot, mesh, transform) in &scene.instances {
+        for (slot, mesh, transform, mask) in &scene.instances {
             let Some(Some(blas)) = entry.blas.get(*mesh as usize) else {
                 continue;
             };
 
             // The pool mesh as the instance's ID, where a shader finds which triangles it hit.
-            entry.tlas[*slot as usize] = Some(TlasInstance::new(blas, *transform, *mesh, 0xFF));
+            entry.tlas[*slot as usize] = Some(TlasInstance::new(blas, *transform, *mesh, *mask));
         }
 
         encoder.build_acceleration_structures(&entries, [&entry.tlas]);

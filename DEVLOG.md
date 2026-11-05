@@ -25,6 +25,15 @@ gray planes over the crowns and the leaves past them as black squares, and on th
 a mesh of a visibility range at the level the eye's distance gives, as the picture draws it, the
 oak's limbs and leaves and the aspens behind it against the wall.
 
+![](.github/assets/readings/2026-11-05-item-105-grass.webp)
+The feature test's meadow at eight in the morning under a clear sky, its path-traced reference on
+the left as it lit each grass card and leaf by its flat face, the whole of its color diffuse, and
+met the blades with every ray, the grass in the room wall's shadow nearly black, and on the right as
+it lights them as their materials define, their normal maps bending each face, a blade's diffuse
+share by its normal bent half way up to its way out and the share it lets through from behind, the
+grass passed by every ray but the camera's own as Bevy's shadow maps and the scene's field leave it
+out, the shaded grass three times lighter and the crowns' leaves shaded across each card.
+
 ## 2026-11-04
 
 ![](.github/assets/readings/2026-11-04-item-95-seam.webp)

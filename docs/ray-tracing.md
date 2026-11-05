@@ -182,7 +182,10 @@ occlusion.SetRayScene("scene", scene);
 The shader declares `RaytracingAccelerationStructure scene;` and traces it with
 `rayTraceIn(scene, ...)` or `rayVisibleIn`. A hit's `instance` is the slot and its `mesh` is
 the pool mesh, so an instance buffer or a material buffer with the same entities in the same slots
-describes what was hit, and `poolCorner` reads the triangle. A mesh a compute shader
+describes what was hit, and `poolCorner` reads the triangle. Both take a mask after their two
+distances, and an entity that casts no shadow leaves out `RayCastsShadows` from its instance's, so a
+ray asking for that bit alone meets the meshes that cast shadows, as Bevy's shadow maps hold them,
+and one given no mask meets them all. A mesh a compute shader
 deforms in the pool is traced as it was until `Shaders.RebuildRayScene(scene, mesh)` builds it
 again. `Shaders.SupportsRayQueries`
 says whether the device can build one, which takes ray tracing hardware on Vulkan.

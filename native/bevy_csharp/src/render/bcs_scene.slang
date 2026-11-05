@@ -22,8 +22,9 @@ public struct Instance
 /// a grass card's and a bark's the standard material each extends.
 ///
 /// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
-/// not in it, but a cut-out material's base color texture and its metallic and roughness texture,
-/// which are among the buffer's masks, and the material multiplies its texture by `base_color`.
+/// not in it, but a cut-out material's base color texture, its metallic and roughness texture, its
+/// diffuse transmission texture and its normal map, which are among the buffer's masks, and the
+/// material multiplies its texture by `base_color`.
 public struct Material
 {
     /// Linear, with alpha.
@@ -48,6 +49,19 @@ public struct Material
     /// roughness and its blue the metallic as Bevy reads it, or -1 for none.
     public float surface_mask;
     public float unused;
+    /// The share of its diffuse light it lets through from behind, Bevy's diffuse transmission.
+    public float diffuse_transmission;
+    /// Which of the buffer's masks its diffuse transmission texture is, its alpha scaling the
+    /// share let through as Bevy reads it, or -1 for none.
+    public float transmission_mask;
+    /// How it reads its diffuse share and its normal map, as bits: 1 where it lights its diffuse
+    /// share by its mesh's way out of a crown, the second texture coordinates folded onto a square
+    /// (`PoolVertex.uv`'s `zw`), as the leaf material lights a leaf's and a grass card's, 2 where
+    /// its normal map holds two channels and its third is worked out from them, and 4 where the
+    /// map's green is flipped.
+    public float flags;
+    /// Which of the buffer's masks its normal map is, or -1 for none.
+    public float normal_mask;
 };
 
 /// Multiplies a matrix held as four columns by a vector.
@@ -128,9 +142,11 @@ public struct PoolVertex
 {
     /// Where it is on its mesh, with one in `w`.
     public float4 position;
-    /// Which way its surface faces, with zero in `w`; all zero for a mesh that had no normals.
+    /// Which way its surface faces, with one in `w` where its mesh has second texture coordinates
+    /// and zero where not; all zero for a mesh that had no normals.
     public float4 normal;
-    /// Its texture coordinates in `xy`.
+    /// Its texture coordinates in `xy`, and its second ones in `zw`, a leaf's way out of its crown
+    /// folded onto a square as the leaf material reads it.
     public float4 uv;
 };
 
