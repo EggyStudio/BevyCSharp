@@ -406,7 +406,23 @@ and 23% over at 96 by 64, where the reference read at its masks' third level rea
 picture's mipped normal map smoother than the reference's own.
 In the feature test's meadow at eight in the morning the picture held a mean
 light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
-reference. A path that meets nothing brings back the ambient light as the probes have it and the
+reference.
+A camera's path scatters at every face by its material, a way drawn by the cosine about its normal
+or from its GGX lobe's visible normals, one drawn by their weights, the lobe's its Fresnel at the
+face's roughness as Bevy's table gives it, so the sky a gloss reflects at a grazing view and the
+light a glossy wall carries between bounces come in, a smooth metal plane under a sky of one light
+reading 0.953 of it and a rough gray dielectric at a grazing view 0.667, its diffuse 0.5 and
+Fresnel's share. The probes hold no gloss, so a test of their diffuse transport reads a reference
+whose paths go on by the diffuse share alone, the first face's gloss taking the lights' light alone
+(`gi.reference <png> <samples> [bounces] diffuse`), and the whole reference's gain over it past the
+direct is the gloss global illumination's diffuse probes cannot carry, 21 to 28% in the closed rooms
+of 4, 8 and 16, 23 to 44% in the closed Cornell box, the green wall most, and 12 to 13% in the
+narrow corridor. A first face's gloss reflecting the room was tried for those tests and read the
+Cornell box's colored walls 12 to 19% over the picture, whose first face reflects Bevy's environment
+alone. In the meadow at eight in the morning the whole reference reads the view's distance 0.345 and
+the diffuse one 0.356, the walls 20 and 34% under where 18 and 32, and the lit grass 6 to 24% over
+where 12 to 29.
+A path that meets nothing brings back the ambient light as the probes have it and the
 camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
 to light the scene, reads apart from its reference.
 The bounce rooms are a test

@@ -602,6 +602,96 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     }
 
     /// <summary>
+    /// A smooth metal plane under a sky of one light reads in the reference that light times its
+    /// Fresnel, as a mirror of its color shows the sky.
+    /// </summary>
+    /// <remarks>
+    /// The reference's paths went on by the cosine about a face alone, the diffuse share past its
+    /// metal, so a metal under the sky read black, and the light a gloss reflects, the sky at a
+    /// grazing view off grass and walls, came into the picture and not the reference. The paths go
+    /// on by the GGX lobe as well, one or the other drawn by their weights.
+    /// </remarks>
+    [SkippableFact]
+    public void ASmoothMetalPlaneReflectsTheSkyInTheReference()
+    {
+        var (plane, sky) = PlaneUnderTheSky(color: 0.9f, metallic: 1f, roughness: 0.05f);
+        output.WriteLine($"the metal plane reads {plane / sky:0.000} of the sky");
+        Assert.InRange(plane / sky, 0.85, 1.05);
+    }
+
+    /// <summary>
+    /// A rough gray dielectric plane seen at a grazing view under a sky of one light reads in the
+    /// reference its diffuse share of the sky and Fresnel's share over it, 0.5 and about 0.15.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's table gives a dielectric of a reflectance of a half at a roughness of a half and a
+    /// grazing view of a tenth a gloss of about 0.15 of the light around it, which the reference's
+    /// paths missed, reading the diffuse share's 0.5 alone.
+    /// </remarks>
+    [SkippableFact]
+    public void ARoughDielectricAtAGrazingViewReadsFresnelsShareOfTheSkyOverItsDiffuse()
+    {
+        var (plane, sky) = PlaneUnderTheSky(color: 0.5f, metallic: 0f, roughness: 0.5f);
+        output.WriteLine($"the gray plane reads {plane / sky:0.000} of the sky");
+        Assert.InRange(plane / sky, 0.59, 0.72);
+    }
+
+    /// <summary>
+    /// The reference's mean light over a plane four units a side lying at the origin, seen from six
+    /// units off and a little over it at a grazing view, under a sky of one light and no sun, and
+    /// over the sky beyond it, paths meeting the plane and going on once.
+    /// </summary>
+    private (double Plane, double Sky) PlaneUnderTheSky(float color, float metallic, float roughness)
+    {
+        Needs.Shaders();
+        var supported = false;
+        string? traced = null;
+        var asked = false;
+        new PictureRun
+        {
+            Width = 128,
+            Height = 128,
+            Frames = 1200,
+            Scene = ecs =>
+            {
+                var eye = new Vec3(0f, 0.6f, 6f);
+                var camera = PictureRun.Camera(ecs, eye);
+                ecs.Set(camera, Transform.LookingAt(eye, new Vec3(0f, 0.3f, 0f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), 500f);
+                var plane = ecs.Spawn();
+                Render.SetMesh(ecs, plane, Render.CreateMesh(MeshShape.Plane, 4f, 4f));
+                Render.SetMaterial(ecs, plane, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (color, color, color, 1f),
+                    Metallic = metallic,
+                    Roughness = roughness,
+                }));
+                ecs.Add(plane, Transform.Identity);
+                ecs.SetName(plane, "plane");
+            },
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("ready", _ => !supported || Render.PipelinesReady())
+            .Until("traced", world => !supported || Read(world.Resource<EcsWorld>(), ref asked, ref traced, ecs => GiReference.BeginReference(ecs, null, 256, bounces: 1)))
+            .Go();
+        Needs.RayQueries(supported);
+
+        var reference = GiReference.Last!;
+        var (planePixels, planeLight, skyPixels, skyLight) = (0, 0.0, 0, 0.0);
+        for (var i = 0; i < reference.Regions.Length; i++)
+        {
+            var light = reference.Light[i * 3 + 1];
+            if (reference.Regions[i] == 0)
+                (skyPixels, skyLight) = (skyPixels + 1, skyLight + light);
+            else if (reference.Names.TryGetValue(reference.Regions[i], out var name) && name.StartsWith("plane"))
+                (planePixels, planeLight) = (planePixels + 1, planeLight + light);
+        }
+        Assert.True(planePixels > 200 && skyPixels > 200, $"the plane covers {planePixels} pixels and the sky {skyPixels}");
+        return (planeLight / planePixels, skyLight / skyPixels);
+    }
+
+    /// <summary>
     /// The reference binds 32 masks where the device's shaders sample room for them and its other
     /// textures a stage, and 16 or 8 where they sample fewer, as wgpu's lowest default of 16 does,
     /// so a smaller device still makes the tracer.

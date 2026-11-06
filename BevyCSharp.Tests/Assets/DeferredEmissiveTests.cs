@@ -114,7 +114,7 @@ public sealed class DeferredEmissiveTests
                 {
                     begun = true;
                     supported = Shaders.SupportsRayQueries;
-                    if (supported) Assert.Null(GiReference.BeginReference(ecs, null, 64));
+                    if (supported) Assert.Null(GiReference.BeginReference(ecs, null, 64, gloss: GiReference.Gloss.LightsAlone));
                     return !supported;
                 }
                 return GiReference.Step(ecs) is not null;

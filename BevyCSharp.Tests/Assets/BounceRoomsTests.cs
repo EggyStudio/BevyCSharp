@@ -248,7 +248,7 @@ public sealed class BounceRoomsTests
                     if (!begun)
                     {
                         begun = true;
-                        Assert.Null(GiReference.BeginReference(ecs, null, samples));
+                        Assert.Null(GiReference.BeginReference(ecs, null, samples, gloss: GiReference.Gloss.LightsAlone));
                         return false;
                     }
                     return GiReference.Step(ecs) is not null;

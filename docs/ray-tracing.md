@@ -378,7 +378,9 @@ hold, `gi.set` changes the quality on a running app, and the feature test's grap
 for it.
 
 `./bcs command gi.reference shots/reference.png 256` path traces the camera's picture through the
-GPU's rays where it has them, and `gi.compare shots/reference.png` says how far the picture lies
+GPU's rays where it has them, every face scattering by its gloss and its diffuse share, or by its
+diffuse share alone with `diffuse` after the bounces, as the probes' own tests read it, and
+`gi.compare shots/reference.png` says how far the picture lies
 from it, region by region, with a picture of the difference beside it. A mesh a shader places as it
 draws, as particles drawn from a buffer are, is traced where its own corners lie, so it is hidden
 for a reading. A mesh of a visibility range, a tree's levels among them, is traced at the level the

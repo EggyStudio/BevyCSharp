@@ -3,12 +3,15 @@
 //
 // From each pixel it traces paths through the ray scene (`Shaders.CreateRayScene`), each face a
 // path meets its material's base color, from the material buffer the engine fills, and its emissive
-// light. The first face is lit as Bevy's lighting lights it, each light's diffuse share by Burley's
-// term and its specular share by the material's roughness, metallic and reflectance, and every face
-// after it as global illumination's probes light one, its color times what arrives. A light that
-// casts shadows reaches a face only where a ray toward it gets through. A path goes on in a
-// direction drawn by the cosine about the face's normal, ends at what Russian roulette draws after
-// its third bounce, and brings back the light from all around where it meets nothing, the ambient
+// light. Every face a camera's path meets is lit as Bevy's lighting lights it, each light's diffuse
+// share by Burley's term and its specular share by the material's roughness, metallic and
+// reflectance, and a probe's as global illumination's probes light one, its color times what
+// arrives. A light that casts shadows reaches a face only where a ray toward it gets through. A
+// camera's path goes on by the material's scattering, a way drawn by the cosine about the face's
+// normal or from the GGX lobe's visible normals, one drawn by their weights, so the sky a face's
+// gloss reflects comes in as the sky its diffuse share takes, and a probe's by the cosine alone. A
+// path ends at what Russian roulette draws after its third bounce, and brings back the light from
+// all around where it meets nothing, the ambient
 // light as the probes have it and the camera's environment map's along its way. The lights are the probes' own (bcs_gi_lights), the light a white surface facing
 // one returns times the camera's exposure, so a face's diffuse light is its color times what
 // arrives, with no pi, in the units of the picture before tonemapping.
@@ -59,6 +62,11 @@ StructuredBuffer<GiLights> lights;
 // x: the samples a pixel this frame adds. y: the number of the first. z: the most faces a path
 // meets. w: the texels a side of the probe's octahedron traced from, or 0 for the camera's picture.
 uniform uint4 counts;
+
+// x: 1 where every face of a camera's path scatters by its material's gloss, and 0 where every path
+// goes on by its diffuse share, the first face's gloss taking the lights' light alone and every
+// face after it lit as the probes light one (GiReference.Gloss).
+uniform uint4 scatter;
 
 // xyz: the place of the probe traced from where counts.w is above 0. w: 1 where it is a screen
 // probe's, traced along the ways given in `ways`, and 0 where it is a world probe's.
@@ -482,6 +490,41 @@ float3 direct(GiLights given, float3 p, float3 n, float3 v, bool first, float3 c
     return sum;
 }
 
+// Smith's masking term for GGX of roughness alpha along a way at cosine c to the normal, its
+// Lambda.
+float smithLambda(float c, float alpha)
+{
+    float c2 = max(c * c, 1e-6);
+    float tan2 = max(1.0 - c2, 0.0) / c2;
+    return 0.5 * (-1.0 + sqrt(1.0 + alpha * alpha * tan2));
+}
+
+// A half way drawn from the normals of the GGX lobe of roughness alpha about n that the eye along v
+// sees, by Heitz's sampling of the visible normals, so a way reflected about it carries the lobe's
+// light weighted by its Fresnel and its masking alone.
+float3 visibleHalfAbout(float3 n, float3 v, float alpha, inout uint state)
+{
+    float3 side = abs(n.y) < 0.99 ? normalize(cross(n, float3(0.0, 1.0, 0.0))) : float3(1.0, 0.0, 0.0);
+    float3 up = cross(n, side);
+    float3 seen = float3(dot(v, side), dot(v, up), dot(v, n));
+    float3 stretched = normalize(float3(alpha * seen.x, alpha * seen.y, seen.z));
+    float across = stretched.x * stretched.x + stretched.y * stretched.y;
+    float3 t1 = across > 0.0 ? float3(-stretched.y, stretched.x, 0.0) * rsqrt(across) : float3(1.0, 0.0, 0.0);
+    float3 t2 = cross(stretched, t1);
+    float r = sqrt(random(state)), phi = 2.0 * Pi * random(state);
+    float p1 = r * cos(phi);
+    float s = 0.5 * (1.0 + stretched.z);
+    float p2 = (1.0 - s) * sqrt(max(0.0, 1.0 - p1 * p1)) + s * r * sin(phi);
+    float3 drawn = p1 * t1 + p2 * t2 + sqrt(max(0.0, 1.0 - p1 * p1 - p2 * p2)) * stretched;
+    float3 h = normalize(float3(alpha * drawn.x, alpha * drawn.y, max(0.0, drawn.z)));
+    return normalize(side * h.x + up * h.y + n * h.z);
+}
+
+float luma(float3 c)
+{
+    return dot(c, float3(0.2126, 0.7152, 0.0722));
+}
+
 // The axis a face facing n turns toward most, +x, -x, +y, -y, +z and -z in turn.
 uint axisOf(float3 n)
 {
@@ -530,16 +573,56 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         }
 
         // Emissive light, times the exposure by the share of it its alpha sets, as Bevy shows it.
-        bool first = fromCamera && bounce == 0u;
+        // Every face of the camera's paths is lit as Bevy's lighting lights it, or the first alone
+        // where the reference is asked for the probes' tests, and a probe's as the probes light
+        // one.
+        bool shaded = fromCamera && (scatter.x != 0u || bounce == 0u);
+        bool lobed = shaded && scatter.x != 0u;
         Lit lit = litAt(hit, material, n);
         uint2 face = uint2(hit.instance, hit.triangle);
         float3 emitted = material.emissive.rgb * lerp(1.0, passView.exposure, material.emissive.a);
-        light += throughput * (emitted + direct(given, p, n, -way, first, color, material, lit, face));
+        light += throughput * (emitted + direct(given, p, n, -way, shaded, color, material, lit, face));
 
-        // The diffuse share goes on about its normal and the share let through about the face's
-        // back, one drawn by how much each is, the first face's past its metal, as the indirect
-        // light reaching a pixel lights it.
-        throughput *= first ? color * (1.0 - saturate(material.metallic)) : color;
+        // The camera's paths go on by the material's own scattering, its diffuse share past its
+        // metal or the GGX lobe about its mapped normal, one drawn by their weights, the lobe's its
+        // Fresnel at the face's roughness as Bevy's table gives it, and the path's light divided by
+        // the draw, so the sky a lobe reflects at a grazing view, a wall's gloss and a metal's
+        // reflections come in by the same rule. The diffuse share goes on about its normal and the
+        // share let through about the face's back, one drawn by how much each is. A probe's paths
+        // go on by the diffuse share alone, its color whole, as the probes hold no gloss.
+        bool glossy = false;
+        float3 reflected = float3(0.0);
+        if (lobed)
+        {
+            float metallic = saturate(material.metallic);
+            float rough = clamp(material.perceptual_roughness, 0.089, 1.0);
+            float3 f0 = 0.16 * material.reflectance * material.reflectance * (1.0 - metallic) + color * metallic;
+            float3 v = -way;
+            float nv = max(dot(lit.shadingNormal, v), 1e-4);
+            float2 ab = passF_AB(rough, nv);
+            float3 diffuseShare = color * (1.0 - metallic);
+            float weighed = luma(diffuseShare) + luma(f0 * ab.x + ab.y);
+            if (weighed <= 0.0)
+                break;
+            float drawGloss = luma(f0 * ab.x + ab.y) / weighed;
+            if (random(state) < drawGloss)
+            {
+                float alpha = rough * rough;
+                float3 h = visibleHalfAbout(lit.shadingNormal, v, alpha, state);
+                reflected = reflect(-v, h);
+                float nl = dot(lit.shadingNormal, reflected);
+                if (nl <= 0.0 || dot(reflected, n) <= 0.0)
+                    break;
+                float3 fresnel = schlick(f0, saturate(dot(f0, float3(50.0 * 0.33))), saturate(dot(v, h)));
+                float lv = smithLambda(nv, alpha);
+                throughput *= fresnel * (1.0 + lv) / (1.0 + lv + smithLambda(nl, alpha)) / drawGloss;
+                glossy = true;
+            }
+            else
+                throughput *= diffuseShare / (1.0 - drawGloss);
+        }
+        else
+            throughput *= shaded ? color * (1.0 - saturate(material.metallic)) : color;
         if (bounce >= 3u)
         {
             float keep = clamp(max(throughput.r, max(throughput.g, throughput.b)), 0.05, 0.95);
@@ -549,9 +632,9 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         }
         if (all(throughput <= float3(0.0)))
             break;
-        bool behind = lit.through > 0.0 && random(state) < lit.through;
+        bool behind = !glossy && lit.through > 0.0 && random(state) < lit.through;
         origin = behind ? p - n * 1e-3 : p + n * 1e-3;
-        way = cosineAbout(behind ? -lit.shadingNormal : lit.diffuseNormal, state);
+        way = glossy ? reflected : cosineAbout(behind ? -lit.shadingNormal : lit.diffuseNormal, state);
         leaving = face;
     }
     return light;

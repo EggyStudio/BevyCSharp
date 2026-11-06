@@ -93,7 +93,7 @@ public sealed partial class GlobalIlluminationTests
                 if (!begun)
                 {
                     begun = true;
-                    Assert.Null(GiReference.BeginReference(ecs, null, 256));
+                    Assert.Null(GiReference.BeginReference(ecs, null, 256, gloss: GiReference.Gloss.LightsAlone));
                     return false;
                 }
                 return GiReference.Step(ecs) is not null;
