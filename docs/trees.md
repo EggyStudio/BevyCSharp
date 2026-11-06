@@ -174,8 +174,9 @@ darkens where the sun does not reach. The presets' deepest leaves keep between h
 tenths of their color, and the leaves on a crown's upper rim about nine tenths on average.
 
 The crown is lit as a volume as well. Each leaf carries the way out of the crown at it, the way its
-leaves thin fastest, and `Trees.LeafMaterial` lights the leaf's diffuse light by its normal bent
-half way toward it, so the side of the crown toward the sun stands out from the far side as the
+leaves thin fastest, turned with the tree as its normals are, and `Trees.LeafMaterial` lights the
+leaf's diffuse light by its normal bent half way toward it, so the side of the crown toward the sun
+stands out from the far side as the
 crown's shape decides, more than three times as far as the leaves' own normals light it in a grazing
 sun. Its specular and the light let through it are lit by the leaf's own normal, so a crown seen
 from below keeps its color rather than mirroring the sky, which a normal bent out of the crown

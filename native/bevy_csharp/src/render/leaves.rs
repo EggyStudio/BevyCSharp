@@ -114,6 +114,8 @@ impl bevy::pbr::MaterialExtension for LeafLighting {
         {
             fragment.shader_defs.push("LEAF_PROBES".into());
         }
+        // The vertex stage turns a leaf's way out into the world, which the bark's leaves alone.
+        descriptor.vertex.shader_defs.push("LEAF_WAY_OUT".into());
         super::sway::specialize(descriptor, layout)
     }
 }

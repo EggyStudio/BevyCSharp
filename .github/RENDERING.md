@@ -404,6 +404,13 @@ levels, which average to nothing, so the leaf material takes the card's normal w
 has no length. The grass under a sun at the eye's back reads its reference within 6% at 384 by 256
 and 23% over at 96 by 64, where the reference read at its masks' third level reads it within 1%, the
 picture's mipped normal map smoother than the reference's own.
+A leaf's way out of its crown is its mesh's, and the leaf material read it as the world's, so every
+tree its seed or a level yawed lit its crown as if unturned, the side toward the sun shaded as the
+side its yaw had carried there. The tree's vertex stage turns the way as the mesh's normals are
+turned, an aspen and its eye and sun turned a quarter round reading as the unturned ones within a
+thousandth where 0.395 apart, and in the meadow at eight in the morning the aspens' crowns read 12
+and 6% and 1 and 7% from their reference where 30 and 25% and 8 and 2%, the near oak's reduced level
+48 and 50% under where 61 and 59, the view's distance 0.341 where 0.345.
 In the feature test's meadow at eight in the morning the picture held a mean
 light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
 reference.

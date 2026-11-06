@@ -147,6 +147,26 @@ struct TreeVertex {
     @location(9) sway_own: vec4<f32>,
 }
 
+// A leaf's way out of its crown folded onto a square as the mesh carries it, unfolded, and a way
+// folded back, the octahedron the leaf material unfolds (leaves.rs).
+fn tree_way_unfolded(folded: vec2<f32>) -> vec3<f32> {
+    let f = folded * 2.0 - 1.0;
+    var n = vec3<f32>(f.x, 1.0 - abs(f.x) - abs(f.y), f.y);
+    let t = max(-n.y, 0.0);
+    n.x += select(t, -t, n.x >= 0.0);
+    n.z += select(t, -t, n.z >= 0.0);
+    return normalize(n);
+}
+
+fn tree_way_folded(way: vec3<f32>) -> vec2<f32> {
+    let n = way / (abs(way.x) + abs(way.y) + abs(way.z));
+    var f = vec2<f32>(n.x, n.z);
+    if n.y < 0.0 {
+        f = vec2<f32>((1.0 - abs(n.z)) * select(-1.0, 1.0, n.x >= 0.0), (1.0 - abs(n.x)) * select(-1.0, 1.0, n.z >= 0.0));
+    }
+    return f * 0.5 + 0.5;
+}
+
 @vertex
 fn vertex(vertex: TreeVertex) -> VertexOutput {
     var out: VertexOutput;
@@ -162,6 +182,11 @@ fn vertex(vertex: TreeVertex) -> VertexOutput {
     out.uv = vertex.uv;
 @if(VERTEX_UVS_B)
     out.uv_b = vertex.uv_b;
+    // A leaf's way out is the mesh's, so it is turned as the mesh's normals are, which the leaf
+    // material reads as the world's. A yawed tree read its crown's ways unturned, the side of the
+    // crown toward the sun lit as the side its yaw had carried there.
+@if(VERTEX_UVS_B && LEAF_WAY_OUT)
+    out.uv_b = tree_way_folded(mesh_functions::mesh_normal_local_to_world(tree_way_unfolded(vertex.uv_b), vertex.instance_index));
 @if(VERTEX_TANGENTS)
     out.world_tangent = mesh_functions::mesh_tangent_local_to_world(world_from_local, vertex.tangent, vertex.instance_index);
 @if(VERTEX_COLORS)

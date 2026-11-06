@@ -17,6 +17,18 @@ the grass given its tangents and each card's side taken by its own normal, the r
 shadow and the trees' shadows lying across the grass and its sunlit blades bright, as the path-
 traced reference draws them.
 
+![](.github/assets/readings/2026-11-06-item-109-crowns.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, an oak and an aspen
+against the room's far wall, on the left with each leaf's way out of its crown read in its mesh's
+space as the world's, so a tree yawed by its seed lit its crown as if unturned, the side toward the
+sun shaded as the side its yaw had carried there, and on the right with the way turned as the mesh's
+normals are, the oak's crown lit on its sunlit side and the aspen's leaves across its crown, each
+nearer its path-traced reference.
+
+Done that day
+
+- Item 105 at `18f226eb`. The meadow against its reference.
+
 ## 2026-11-05
 
 ![](.github/assets/readings/2026-11-05-item-100-meadow.webp)
