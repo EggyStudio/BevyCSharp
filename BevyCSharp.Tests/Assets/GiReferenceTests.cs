@@ -389,10 +389,10 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     }
 
     /// <summary>
-    /// A patch of grass under a sun behind the eye reads in the reference the light the picture
-    /// gives it, the first face's light alone in both, since the reference lights a grass card as
-    /// the leaf material does, its normal map bending it, and its shadow rays pass the blades,
-    /// which cast no shadow.
+    /// A patch of grass under a sun behind the eye, and under one before it lighting its blades
+    /// from behind, reads in the reference the light the picture gives it, the first face's light
+    /// alone in both, since the reference lights a grass card as the leaf material does, its normal
+    /// map bending it, and its shadow rays pass the blades, which cast no shadow.
     /// </summary>
     /// <remarks>
     /// The reference lit each card by its own flat normal, the whole of its color diffuse, and its
@@ -400,13 +400,18 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// material lights the share of a blade's color it keeps by its mapped normal bent half way up
     /// to its way out of the crown, straight up for grass, and lets the rest through from behind,
     /// so in the feature test's meadow the reference's grass in the room wall's shadow read 0.009
-    /// to 0.04 and the picture's 0.17 to 0.19. The leaf material took the card's side by the sign
-    /// of its normal's dot with the way out, a rounding error's for an upright card under a way
-    /// straight up, and lit many blades from behind, reading 32% under the reference here, where
-    /// with the way out tilted six degrees toward the eye the two read alike.
+    /// to 0.04 and the picture's 0.17 to 0.19. The grass was planted without the tangents its
+    /// normal map is read along, so Bevy left a blade seen from behind facing away from the eye,
+    /// and the leaf material took a card's side by its mapped normal, which a way straight up
+    /// leaves to a rounding error and a normal map to its lean, so the card's own normal turned to
+    /// the eye takes it. The picture smooths the normal map through its mips where the reference
+    /// reads its own size, so a coarser picture reads the grass over its reference, 23% at 96 by
+    /// 64, and this one 6%.
     /// </remarks>
-    [SkippableFact]
-    public void AGrassPatchReadsInTheReferenceTheLightThePictureGivesIt()
+    [SkippableTheory]
+    [InlineData(3f)]
+    [InlineData(-3f)]
+    public void AGrassPatchReadsInTheReferenceTheLightThePictureGivesIt(float sunZ)
     {
         Needs.Shaders();
         var supported = false;
@@ -418,8 +423,8 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
         {
             new PictureRun
             {
-                Width = 96,
-                Height = 64,
+                Width = 384,
+                Height = 256,
                 Frames = 1200,
                 Scene = ecs =>
                 {
@@ -431,7 +436,7 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
                     var floor = PictureRun.Cube(ecs, Render.CreateMaterial(0.5f, 0.5f, 0.5f), 40f, new Vec3(0f, -20f, 0f));
                     ecs.SetName(floor, "floor");
                     var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
-                    ecs.Add(sun, Transform.LookingAt(new Vec3(0.4f, 2f, 3f), Vec3.Zero, Vec3.UnitY));
+                    ecs.Add(sun, Transform.LookingAt(new Vec3(0.4f, 2f, sunZ), Vec3.Zero, Vec3.UnitY));
                     Grass.Plant(ecs, Vec3.Zero, new Vec2(3f, 3f), new GrassSettings { Density = 12f, Height = 0.6f });
                 },
             }
@@ -461,6 +466,139 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
         output.WriteLine($"the grass's {pixels} pixels read {seen / Math.Max(1, pixels):0.0000} in the picture and {met / Math.Max(1, pixels):0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
         Assert.True(pixels > reference.Regions.Length / 4, $"the grass covers {pixels} pixels");
         Assert.InRange(seen / met, 0.85, 1.15);
+    }
+
+    /// <summary>
+    /// The feature test's meadow's grass, seen from where its scripted run's eye stands over it at
+    /// Medium, draws every pixel a number.
+    /// </summary>
+    /// <remarks>
+    /// A blade seen edge on reads its normal map's smallest levels, which average its normals to
+    /// nothing, and normalizing nothing gives no number, so with the grass given its tangents 18 of
+    /// the meadow's values were none, at the bottom of the view, and made the comparison's sums
+    /// none, as 30 are here. The leaf material takes the card's own normal where the mapped one has
+    /// no length, and the normal bent toward the way out where that has none.
+    /// </remarks>
+    [SkippableFact]
+    public void TheMeadowsGrassDrawsEveryPixelANumber()
+    {
+        Needs.Shaders();
+        string? read = null;
+        var asked = false;
+        var wind = Trees.Wind;
+        Trees.Wind = Vec3.Zero;
+        try
+        {
+            new PictureRun
+            {
+                Width = 1280,
+                Height = 720,
+                Frames = 1200,
+                Scene = ecs =>
+                {
+                    var eye = new Vec3(12f, 2.66f, 7f);
+                    var camera = PictureRun.Camera(ecs, eye);
+                    ecs.Set(camera, Transform.LookingAt(eye, new Vec3(0f, 1.66f, -3f), Vec3.UnitY));
+                    Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                    PictureRun.Cube(ecs, Render.CreateMaterial(0.5f, 0.5f, 0.5f), 40f, new Vec3(0f, -20f, 0f));
+                    var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                    ecs.Add(sun, Transform.LookingAt(new Vec3(2f, 1f, 2f), Vec3.Zero, Vec3.UnitY));
+                    Grass.Plant(ecs, Vec3.Zero, new Vec2(30f, 30f), new GrassSettings { Density = 3f, Height = 0.6f, Seed = 70 });
+                    Render.SetSceneField(2, 0.25f);
+                    Render.SetGlobalIllumination(GlobalIllumination.Medium);
+                },
+            }
+                .Until("ready", _ => Render.PipelinesReady())
+                .Wait(ShaderMaterialTests.Settled)
+                .Until("read", world => Read(world.Resource<EcsWorld>(), ref asked, ref read, ecs => GiReference.BeginPicture(ecs, null)))
+                .Go();
+        }
+        finally
+        {
+            Trees.Wind = wind;
+        }
+
+        var light = GiReference.LastPicture!.Value.Light;
+        var none = light.Count(value => !float.IsFinite(value));
+        output.WriteLine($"{none} of the picture's {light.Length} values are no number");
+        Assert.Equal(0, none);
+    }
+
+    /// <summary>
+    /// A cut-out card's normal map turns its light in the reference as in the picture, a map that
+    /// leans every normal 45 degrees lighting a card lying flat under a low sun as both draw it.
+    /// </summary>
+    /// <remarks>
+    /// The reference lit a face by its flat normal, so a cut-out material's normal map, a grass
+    /// set's and a leaf set's, which lean a blade's normal across its width, held no light of its
+    /// own there. A uniform map is the same at every mip, so the two read alike however far the
+    /// card lies, where a blade's map is smoothed by the picture's mips and read at its own size by
+    /// the reference.
+    /// </remarks>
+    [SkippableFact]
+    public void ACutOutCardsNormalMapTurnsItsLightInTheReferenceAsInThePicture()
+    {
+        Needs.Shaders();
+        var supported = false;
+        string? traced = null, read = null;
+        var (askedTrace, askedRead) = (false, false);
+        new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Frames = 1200,
+            Scene = ecs =>
+            {
+                var eye = new Vec3(0f, 4f, 0.01f);
+                var camera = PictureRun.Camera(ecs, eye);
+                ecs.Set(camera, Transform.LookingAt(eye, Vec3.Zero, -Vec3.UnitZ));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);
+                var white = new byte[16 * 16 * 4];
+                Array.Fill(white, (byte)255);
+                var leaning = new byte[16 * 16 * 4];
+                for (var i = 0; i < leaning.Length; i += 4)
+                    (leaning[i], leaning[i + 1], leaning[i + 2], leaning[i + 3]) = (218, 128, 218, 255);
+                var mesh = Render.CreateMesh(MeshShape.Plane, 2f, 2f);
+                Render.GenerateTangents(mesh);
+                var card = ecs.Spawn();
+                Render.SetMesh(ecs, card, mesh);
+                Render.SetMaterial(ecs, card, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0.8f, 0.8f, 0.8f, 1f),
+                    BaseColorTexture = Render.CreateImage(white, 16, 16, srgb: true, mipmaps: false),
+                    NormalMap = Render.CreateImage(leaning, 16, 16, srgb: false, mipmaps: false),
+                    Roughness = 1f,
+                    AlphaMode = AlphaMode.Mask,
+                    DoubleSided = true,
+                }));
+                ecs.Add(card, Transform.Identity);
+                ecs.SetName(card, "card");
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(3f, 1f, 0f), Vec3.Zero, Vec3.UnitY));
+            },
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("ready", _ => !supported || Render.PipelinesReady())
+            .Wait(ShaderMaterialTests.Settled)
+            .Until("traced", world => !supported || Read(world.Resource<EcsWorld>(), ref askedTrace, ref traced, ecs => GiReference.BeginReference(ecs, null, 16, bounces: 0)))
+            .Until("read", world => !supported || Read(world.Resource<EcsWorld>(), ref askedRead, ref read, ecs => GiReference.BeginPicture(ecs, null)))
+            .Go();
+        Needs.RayQueries(supported);
+
+        var reference = GiReference.Last!;
+        var picture = GiReference.LastPicture!.Value.Light;
+        var (pixels, seen, met) = (0, 0.0, 0.0);
+        for (var i = 0; i < reference.Regions.Length; i++)
+        {
+            if (!IsCard(reference, reference.Regions[i])) continue;
+            pixels++;
+            seen += picture[i * 3 + 1];
+            met += reference.Light[i * 3 + 1];
+        }
+        output.WriteLine($"the card's {pixels} pixels read {seen / Math.Max(1, pixels):0.0000} in the picture and {met / Math.Max(1, pixels):0.0000} in the reference");
+        Assert.True(pixels > reference.Regions.Length / 4, $"the card covers {pixels} pixels");
+        Assert.InRange(seen / met, 0.9, 1.1);
     }
 
     /// <summary>

@@ -391,6 +391,19 @@ Bevy draws no shadow of, as the meadow's grass, is met by the camera's own rays 
 ray passing it through its instance's mask, as Bevy's shadow maps and the scene's distance field
 leave it out. The material buffer keeps 32 masks, and the reference binds 32, or 16 or 8 on a
 device whose shaders sample too few textures a stage for them and says so.
+The grass was planted without the tangents its normal map is read along, so Bevy read no map and,
+since a material with a normal map leaves the double-sided turn to the map, left a blade seen from
+behind facing away from the eye, its face unlit by a sun at the eye's back and that sun taken as
+light let through it. In the meadow at eight in the morning its first lighting gave 0.01 in the sun
+and its second 0.18 in shade and sun alike, the grass reading 86 to 224% over the reference where
+lit and six times it in the room wall's shadow, the wall's shadow drawn on the bare ground and not
+on the blades. Given its tangents and with a card's side taken by its own normal turned to the eye,
+a mapped normal leaning up and down with its map, the lit grass reads 10 to 37% over and the shaded
+26 to 56%, the view's distance 0.347 where 0.481. A blade seen edge on reads its map's smallest
+levels, which average to nothing, so the leaf material takes the card's normal where the mapped one
+has no length. The grass under a sun at the eye's back reads its reference within 6% at 384 by 256
+and 23% over at 96 by 64, where the reference read at its masks' third level reads it within 1%, the
+picture's mipped normal map smoother than the reference's own.
 In the feature test's meadow at eight in the morning the picture held a mean
 light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
 reference. A path that meets nothing brings back the ambient light as the probes have it and the

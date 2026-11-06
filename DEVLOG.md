@@ -6,6 +6,17 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-06
+
+![](.github/assets/readings/2026-11-06-item-105-grass-sides.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, on the left with the
+grass made without the tangents its normal map is read along, so Bevy read no map and left a blade
+seen from behind facing away from the eye, its face unlit by the sun at the eye's back and the sun
+taken as light let through it, the grass an even olive with no shadow on it, and on the right with
+the grass given its tangents and each card's side taken by its own normal, the room wall's long
+shadow and the trees' shadows lying across the grass and its sunlit blades bright, as the path-
+traced reference draws them.
+
 ## 2026-11-05
 
 ![](.github/assets/readings/2026-11-05-item-100-meadow.webp)
@@ -33,6 +44,13 @@ it lights them as their materials define, their normal maps bending each face, a
 share by its normal bent half way up to its way out and the share it lets through from behind, the
 grass passed by every ray but the camera's own as Bevy's shadow maps and the scene's field leave it
 out, the shaded grass three times lighter and the crowns' leaves shaded across each card.
+
+Done that day
+
+- Item 99 at `03bc102f`. The screen probes' tile grows with the picture's height past 1080.
+- Item 100 at `faadbfbd`. The path-traced reference reads the leaf material's color and its alpha
+  cutout.
+- Item 108 at `4ad66505`. The README's last top link is 3DEngine.
 
 ## 2026-11-04
 
@@ -73,6 +91,11 @@ sampler and the right's given its settings to tile, on the left with each textur
 at a slant, the far floors a flat gray where their checks blur into their mean, and on the right
 with every texture whose filters are linear taking sixteen, the checks kept apart nearly to the
 floors' far end.
+
+Done that day
+
+- Item 102 at `46ae797e`. The merge's gain past the first bounce in closed rooms.
+- Item 103 at `1774aa0c`. Anisotropic filtering at 16 everywhere.
 
 ## 2026-11-03
 

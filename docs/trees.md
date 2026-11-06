@@ -256,8 +256,9 @@ var meadow = Grass.Plant(ctx.Ecs, new Vec3(0f, 0f, 70f), new Vec2(60f, 70f), new
 
 The stretch is cut into square patches, eight meters unless `PatchSize` says otherwise, each a mesh
 of its own under the entity returned, so the camera culls a patch out of view as one and a meadow
-is a draw a patch. A patch's mesh is made as it is planted and the wind moves it in the shader, so
-nothing is built again while it sways. A card's roots stand still in the wind and its blades swing
+is a draw a patch. A patch's mesh is made as it is planted, with the tangents its set's normal map
+is read along, and the wind moves it in the shader, so nothing is built again while it sways.
+A card's roots stand still in the wind and its blades swing
 and flutter about them, each clump in a phase of its own. The blades cast no shadows unless
 `CastsShadows` asks, which many small cut-out cards cost more than they show, and they receive them
 either way. The same settings over the same stretch plant the same grass, and a run with no renderer

@@ -90,6 +90,40 @@ public sealed class GrassTests(ITestOutputHelper output)
     }
 
     /// <summary>
+    /// Each patch's mesh carries the tangents its set's normal map is read along, as a tree's do,
+    /// so Bevy reads the map and turns a card seen from behind to face the eye.
+    /// </summary>
+    /// <remarks>
+    /// The patches were made without tangents, so Bevy read no normal map and left a card seen from
+    /// behind facing away from the eye, and under a sun at the eye's back the feature test's meadow
+    /// lit its blades' backs by the sun let through them and their faces by none.
+    /// </remarks>
+    [SkippableFact]
+    public void EachPatchCarriesTheTangentsItsNormalMapIsReadAlong()
+    {
+        Needs.Renderer();
+        var (patches, tangents) = (0, 0);
+        new PictureRun
+        {
+            Width = 32,
+            Height = 32,
+            Scene = ecs =>
+            {
+                PictureRun.Camera(ecs, new Vec3(0f, 1f, 3f));
+                var grass = Grass.Plant(ecs, Vec3.Zero, new Vec2(10f, 4f));
+                foreach (var patch in ecs.ChildrenOf(grass))
+                {
+                    patches++;
+                    if (Render.TryGetMeshInfo(Render.MeshOf(ecs, patch), out var info) && info.Attributes.HasFlag(MeshAttributes.Tangents)) tangents++;
+                }
+            },
+        }.Until("made", _ => true).Go();
+
+        Assert.Equal(2, patches);
+        Assert.Equal(patches, tangents);
+    }
+
+    /// <summary>
     /// A patch of grass with the sun behind it, seen from the shade side, glows through its blades
     /// as a crown's leaves do, its blades at least a quarter as bright as with the sun at the eye's
     /// back, where a solid card lit from behind takes the ambient light alone.

@@ -224,7 +224,10 @@ float3 mappedAt(RayHit hit, Material material, float3 n)
         nt.z = sqrt(saturate(1.0 - dot(nt.xy, nt.xy)));
     if ((flags & 4u) != 0u)
         nt.y = -nt.y;
-    float3 mapped = normalize(nt.x * tangent + nt.y * bitangent + nt.z * front);
+    float3 mapped = nt.x * tangent + nt.y * bitangent + nt.z * front;
+    if (dot(mapped, mapped) < 1e-8)
+        return n;
+    mapped = normalize(mapped);
     return dot(front, n) < 0.0 ? -mapped : mapped;
 }
 
@@ -267,14 +270,15 @@ Lit litAt(RayHit hit, Material material, float3 n)
     if (through > 0.0 && material.alpha_cutoff >= 0.0 && index >= 0)
         through *= maskAt(index, uvAt(hit)).a;
     lit.through = saturate(through);
-    // The side the way out is on, or the eye's where the way lies along the card, as a grass
-    // blade's straight up does, the leaf material taking the same.
+    // The side the way out is on, by the face's own normal, or the eye's where the way lies along
+    // the card, as a grass blade's straight up does, the leaf material taking the same.
     if ((uint(material.flags + 0.5) & 1u) != 0u)
     {
         float3 way = wayOutAt(hit);
         float3 face = lit.shadingNormal;
+        float3 bent = lerp(dot(n, way) >= -1e-3 ? face : -face, way, 0.5);
         if (dot(way, way) > 0.5)
-            lit.diffuseNormal = normalize(lerp(dot(face, way) >= -1e-3 ? face : -face, way, 0.5));
+            lit.diffuseNormal = dot(bent, bent) > 1e-8 ? normalize(bent) : way;
     }
     return lit;
 }

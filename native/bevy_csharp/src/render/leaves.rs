@@ -151,15 +151,15 @@ import bevy_pbr::light_probe::environment_map;
 "#;
 
 /// The leaf's two lightings. The way out is unfolded from the octahedron, the leaf's own normal is
-/// taken on the side of its card the way out is on, the eye's where the way lies along the card,
-/// and the diffuse light's normal is bent half way from it to the way out. A grass blade's way out
-/// is straight up and its card stands upright, so the side was a rounding error's sign and lit many
-/// blades from behind, the grass under a sun at the eye's back 32% under its path-traced reference.
-/// The first lighting takes the diffuse share of the leaf's color, which Bevy's diffuse
-/// transmission leaves it, with no reflectance, so no specular, and nothing let through. The second
-/// takes the transmitted share as all it lets through, so no diffuse light, by the leaf's own
-/// normal, with its reflectance for the specular and no emission, which the first counted. The
-/// occlusion and the leaf's gray scale both, as they scale the standard material.
+/// taken on the side of its card the way out is on, by the card's own normal, the eye's where the
+/// way lies along the card, and the diffuse light's normal is bent half way from it to the way out.
+/// A grass blade's way out is straight up and its card stands upright, so the side was a rounding
+/// error's sign and lit many blades from behind, the grass under a sun at the eye's back 32% under
+/// its path-traced reference. The first lighting takes the diffuse share of the leaf's color, which
+/// Bevy's diffuse transmission leaves it, with no reflectance, so no specular, and nothing let
+/// through. The second takes the transmitted share as all it lets through, so no diffuse light, by
+/// the leaf's own normal, with its reflectance for the specular and no emission, which the first
+/// counted. The occlusion and the leaf's gray scale both, as they scale the standard material.
 ///
 /// While global illumination's probes light the scene, the leaf takes back the light Bevy's
 /// lighting gave it from all around and gives itself the probes' in its place, as the light pass
@@ -228,15 +228,25 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
 
     var pbr_input = pbr_input_from_standard_material(in, is_front);
     pbr_input.material.base_color = alpha_discard(pbr_input.material.flags, pbr_input.material.alpha_cutoff, pbr_input.material.base_color);
+    // The card's own normal turned to the eye. A blade seen edge on near the eye reads its normal
+    // map's smallest levels, which average its normals to nothing, and Bevy's normalizing nothing
+    // gives no number, which spread a few black pixels through the picture, so the card's normal
+    // stands in where the mapped one has no length.
+    let card = select(-pbr_input.world_normal, pbr_input.world_normal, is_front);
+    pbr_input.N = select(card, pbr_input.N, dot(pbr_input.N, pbr_input.N) > 0.5);
     let through = pbr_input.material.diffuse_transmission;
 
     var diffuse = pbr_input;
 @if(VERTEX_UVS_B) {
     let way = way_out(in.uv_b);
-    // The side the way out is on, or the eye's where the way lies along the card, as a grass
-    // blade's straight up does, whose dot is a rounding error's sign either way.
-    let face = select(-pbr_input.N, pbr_input.N, dot(pbr_input.N, way) >= -1e-3);
-    diffuse.N = normalize(mix(face, way, 0.5));
+    // The side the way out is on, by the card's own normal, or the eye's where the way lies along
+    // the card, as a grass blade's straight up does, whose dot is a rounding error's sign, and
+    // whose mapped normal leans up and down with its normal map.
+    let face = select(-pbr_input.N, pbr_input.N, dot(card, way) >= -1e-3);
+    // A normal its map turns straight against the way out bends to nothing, which normalized is no
+    // number and spreads through the picture, so it takes the way out itself.
+    let bent = mix(face, way, 0.5);
+    diffuse.N = select(way, normalize(bent), dot(bent, bent) > 1e-8);
 }
     diffuse.material.base_color = vec4<f32>(pbr_input.material.base_color.rgb * (1.0 - through), pbr_input.material.base_color.a);
     diffuse.material.reflectance = vec3<f32>(0.0);

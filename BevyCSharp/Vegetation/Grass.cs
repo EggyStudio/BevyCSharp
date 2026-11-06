@@ -87,7 +87,12 @@ public static class Grass
                 ecs.SetName(patch, $"Grass patch {column}, {row}");
                 if (!draws) continue;
 
-                Render.SetMesh(ecs, patch, Render.CreateMesh(Patch(settings, aspect, width, depth, PatchSeed(settings.Seed, column, row)), kept: false));
+                // The tangents the set's normal map is read along, without which Bevy reads no map
+                // and leaves a card seen from behind facing away from the eye, so a blade's back
+                // took a sun at the eye's back as light let through it and none on its face.
+                var mesh = Render.CreateMesh(Patch(settings, aspect, width, depth, PatchSeed(settings.Seed, column, row)), kept: false);
+                Render.GenerateTangents(mesh);
+                Render.SetMesh(ecs, patch, mesh);
                 Render.SetMaterial(ecs, patch, material);
                 if (!settings.CastsShadows) Render.SetMeshFlags(ecs, patch, MeshFlags.NoShadowCasting);
             }
