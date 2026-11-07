@@ -168,10 +168,13 @@ along its whole length as wide as `LeafScale`, so a fern's fronds bend as their 
 
 A leaf deep in a crown takes less of the sky than one on its rim. The leaves' area is gathered into
 a grid over the crown, and each leaf takes the share of the sky that reaches it through the leaves
-round it by Beer and Lambert's law, drawn as a gray its vertices carry, from the leaf's whole color
-where the sky reaches it to half of it deep in a dense crown and never darker, since the shadow map
-darkens where the sun does not reach. The presets' deepest leaves keep between half and seven
-tenths of their color, and the leaves on a crown's upper rim about nine tenths on average.
+round it by Beer and Lambert's law, carried as a gray in its vertices, from whole where the sky
+reaches it to half deep in a dense crown and never darker. The gray darkens the light the leaf
+takes from all around and its reflection, and twice the light let through it from all around,
+which comes from inside the crown, and leaves the sun to the shadow map, which darkens it where the
+leaves between a leaf and the sun shut it out. The presets' deepest leaves keep between half and
+seven tenths of the light from all around, and the leaves on a crown's upper rim about nine tenths
+on average.
 
 The crown is lit as a volume as well. Each leaf carries the way out of the crown at it, the way its
 leaves thin fastest, turned with the tree as its normals are, and `Trees.LeafMaterial` lights the

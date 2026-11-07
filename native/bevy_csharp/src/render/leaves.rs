@@ -166,7 +166,15 @@ import bevy_pbr::light_probe::environment_map;
 /// Bevy's diffuse transmission leaves it, with no reflectance, so no specular, and nothing let
 /// through. The second takes the transmitted share as all it lets through, so no diffuse light, by
 /// the leaf's own normal, with its reflectance for the specular and no emission, which the first
-/// counted. The occlusion and the leaf's gray scale both, as they scale the standard material.
+/// counted. The occlusion scales both, as it scales the standard material. The leaf's gray, the
+/// share of the sky the crown's leaves leave it, which Bevy multiplies into the base color, is
+/// taken out of the color and into the occlusions, so it darkens the light from all around and its
+/// reflection and leaves the sun to the shadow map, and it darkens the share let through from all
+/// around twice, that light coming from inside the crown. In the base color it darkened the sun
+/// the shadow map darkens as well, and the light let through from behind no more than the front's,
+/// and a lone aspen under a uniform sky read its leaves 34% over their path-traced reference leaf
+/// by leaf, where it reads them 16% over, the probes at a quarter meter's spacing not holding the
+/// shadow inside a crown that the gray stands in for.
 ///
 /// While global illumination's probes light the scene, the leaf takes back the light Bevy's
 /// lighting gave it from all around and gives itself the probes' in its place, as the light pass
@@ -263,6 +271,16 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     let card = select(-pbr_input.world_normal, pbr_input.world_normal, is_front);
     pbr_input.N = select(card, pbr_input.N, dot(pbr_input.N, pbr_input.N) > 0.5);
     let through = pbr_input.material.diffuse_transmission;
+    // The crown's gray, the sky its leaves leave a leaf, which Bevy multiplies into the base color,
+    // taken out of it and into the occlusions, so it darkens the light from all around and the
+    // reflection of it and leaves the sun's light to the shadow map, which darkens it where the
+    // leaves between a leaf and the sun shut it out.
+    var gray = vec3<f32>(1.0);
+@if(VERTEX_COLORS)
+    gray = max(in.color.rgb, vec3<f32>(1e-3));
+    pbr_input.material.base_color = vec4<f32>(pbr_input.material.base_color.rgb / gray, pbr_input.material.base_color.a);
+    pbr_input.diffuse_occlusion *= gray;
+    pbr_input.specular_occlusion *= gray.g;
 
     var diffuse = pbr_input;
 @if(VERTEX_UVS_B) {
@@ -286,8 +304,13 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
     rest.material.emissive = vec4<f32>(0.0);
 
     var given = vec3<f32>(0.0);
+    // The light let through from all around comes from behind the leaf, into the crown, where
+    // less of the sky reaches than the gray says for its front, so it takes the gray twice.
+    let behind_gray = gray * gray;
+    var probing = false;
 @if(LEAF_PROBES)
     if probes_light() {
+        probing = true;
         let kept = (1.0 - pbr_input.material.metallic) * (1.0 - pbr_input.material.specular_transmission);
         let occlusion = diffuse.diffuse_occlusion;
         diffuse.diffuse_occlusion = vec3<f32>(0.0);
@@ -312,8 +335,15 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
             rest.diffuse_occlusion *= 1.0 - probed.held;
         }
 @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
-        given += probed.through - through_given(rest, transmissive);
+        given += probed.through * behind_gray - through_given(rest, transmissive);
 }
+    }
+    // Bevy lights the share let through from all around at an occlusion of one, so without the
+    // probes its gray is laid on here.
+@if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION)
+    if !probing {
+        let kept = (1.0 - rest.material.metallic) * (1.0 - rest.material.specular_transmission);
+        given += through_given(rest, rest.material.base_color.rgb * kept) * (behind_gray - 1.0);
     }
 
     var out: FragmentOutput;
@@ -341,11 +371,17 @@ pub(crate) fn install(app: &mut bevy::app::App) {
 ///
 /// The asset table holds handles untyped, so an attach that is not of the standard material asks
 /// each kind it might be, and this is one.
+///
+/// The entity takes Bevy's `TransmittedShadowReceiver` with it, since Bevy shadows the light a
+/// surface lets through from behind only for a mesh that carries it, and without it every leaf of
+/// a crown and every blade in a wall's shadow let through the whole sun, a lone aspen lit from
+/// behind reading its leaves 39% over its path-traced reference, whose shadow rays meet the leaves
+/// between a leaf and the sun.
 #[cfg(feature = "render")]
 pub fn attach(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::asset::UntypedHandle) -> bool {
     match material.clone().try_typed::<LeafMaterial>() {
         Ok(handle) => {
-            entity.insert(bevy::pbr::MeshMaterial3d(handle));
+            entity.insert((bevy::pbr::MeshMaterial3d(handle), bevy::light::TransmittedShadowReceiver));
             true
         }
         Err(_) => false,

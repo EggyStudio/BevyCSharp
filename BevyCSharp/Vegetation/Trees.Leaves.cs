@@ -381,12 +381,15 @@ public static partial class Trees
         /// A crown's leaves each lit by their own card read as a heap of flat cards, the deep ones
         /// as bright as those on the rim. Lit as a volume, a leaf deep in the crown takes less of
         /// the sky's light, as the crown's shape and not each card's way decides. The sky a leaf
-        /// sees, from <see cref="CrownVolume"/>, is written as its vertices' color, which Bevy
-        /// multiplies into the base color, from the whole of it for a leaf the sky reaches to
-        /// <see cref="LeafShadeLeast"/> of it for one it does not, so it darkens the ambient and
-        /// the indirect light the leaf takes and the light let through it. The direct sun it
-        /// darkens a little too, which the shadow map darkens as well, and so the darkening is
-        /// gentle, the deepest leaf at half and never black. The normal each card is lit by stays
+        /// sees, from <see cref="CrownVolume"/>, is written as its vertices' color, from the whole
+        /// of it for a leaf the sky reaches to <see cref="LeafShadeLeast"/> of it for one it does
+        /// not, which <see cref="LeafMaterial"/> takes out of the base color Bevy multiplies it
+        /// into and lays on the light the leaf takes from all around, Bevy's ambient light or
+        /// global illumination's probes, which do not hold the shadow inside a crown, and its
+        /// reflection, and twice on the light let through it from all around, which comes from
+        /// inside the crown. The sun it leaves to the shadow map, which darkens it where the leaves
+        /// between a leaf and the sun shut it out. The darkening is gentle, the deepest leaf at half
+        /// and never black. The normal each card is lit by stays
         /// its own, turned round to face the eye from either side, and the way out of the crown,
         /// from <see cref="CrownVolume"/>, is written in the second texture coordinates folded onto
         /// a square octahedrally, which <see cref="LeafMaterial"/> bends the normal toward for the

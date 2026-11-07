@@ -63,8 +63,14 @@ StructuredBuffer<GiLights> lights;
 // meets. w: the texels a side of the probe's octahedron traced from, or 0 for the camera's picture.
 uniform uint4 counts;
 
-// x: the seed the camera's paths draw from (GiReference.BeginReference).
+// x: the seed the camera's paths draw from (GiReference.BeginReference). y: 1 where a camera's
+// path counts only when its first face is a leaf's or a grass card's, the count of those kept in
+// alpha in place of every path's, so a pixel's light is its leaves' alone and the sky and what lies
+// past them between its leaves is left out (GiReference.BeginReference's leaves).
 uniform uint4 seed;
+
+// Whether the camera's path traced last met a leaf's or a grass card's face first.
+static bool metLeaf = false;
 
 // xyz: the place of the probe traced from where counts.w is above 0. w: 1 where it is a screen
 // probe's, traced along the ways given in `ways`, and 0 where it is a world probe's.
@@ -551,6 +557,14 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
     for (uint bounce = 0u; bounce < counts.z; bounce++)
     {
         RayHit hit = traceThrough(origin, way, 0.0, 1e5, fromCamera && bounce == 0u ? RayEveryInstance : PastTheEye, leaving);
+        if (fromCamera && bounce == 0u)
+        {
+            metLeaf = false;
+            if (hit.hit)
+                metLeaf = (uint(materials[hit.instance].flags + 0.5) & 1u) != 0u;
+            if (seed.y == 1u && !metLeaf)
+                break;
+        }
         if (!hit.hit)
         {
             light += throughput * (given.sky.rgb + passEnvironmentSpecular(way, 0.0) * passView.exposure);
@@ -699,6 +713,7 @@ void main(uint3 id : SV_DispatchThreadID)
     regions[id.xy] = met.hit ? met.instance * 8u + axisOf(normalAt(met, way)) + 1u : 0u;
 
     float3 sum = float3(0.0);
+    float counted = 0.0;
     for (uint s = 0u; s < counts.x; s++)
     {
         uint index = counts.y + s;
@@ -706,9 +721,10 @@ void main(uint3 id : SV_DispatchThreadID)
         random(state);
         float2 uv = (float2(id.xy) + float2(random(state), random(state))) / float2(width, height);
         sum += trace(given, passRayOrigin(uv), passRayDirection(uv), true, state);
+        counted += seed.y == 1u ? (metLeaf ? 1.0 : 0.0) : 1.0;
     }
     // The first share stores where the rest add, since an image is made holding whatever its memory
     // held, and a reference traced after another started from the other's paths, 64 a pixel asked
     // for reading 128 and the two lights averaged.
-    sums[id.xy] = (counts.y == 0u ? float4(0.0) : sums[id.xy]) + float4(sum, float(counts.x));
+    sums[id.xy] = (counts.y == 0u ? float4(0.0) : sums[id.xy]) + float4(sum, counted);
 }

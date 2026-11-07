@@ -67,8 +67,19 @@ internal static unsafe partial class GiReference
     /// <summary>The name the reference's dispatches on a camera are kept under beside the engine's others.</summary>
     private const string Owner = "gi.reference";
 
-    /// <summary>A reference as traced, its light in rows from the top, three floats a pixel, what each pixel shows, and the names of those regions.</summary>
-    internal sealed record Traced(int Width, int Height, float[] Light, uint[] Regions, int Samples, IReadOnlyDictionary<uint, string> Names);
+    /// <summary>
+    /// A reference as traced, its light in rows from the top, three floats a pixel, what each pixel
+    /// shows, and the names of those regions, and where it was traced leaf by leaf the share of each
+    /// pixel's paths that met a leaf first.
+    /// </summary>
+    internal sealed record Traced(int Width, int Height, float[] Light, uint[] Regions, int Samples, IReadOnlyDictionary<uint, string> Names, float[]? Leaves = null);
+
+    /// <summary>
+    /// The share of a pixel's paths that met a leaf first past which <see cref="Compare"/> counts it
+    /// against a reference traced leaf by leaf, the pixel all leaf but for its edges, which the
+    /// picture draws a leaf at where the reference's paths spread over it meet the sky beside one.
+    /// </summary>
+    internal const float WholeLeaf = 0.95f;
 
     private enum Stage { Sizing, Tracing, Reading, Copying }
 
@@ -87,6 +98,7 @@ internal static unsafe partial class GiReference
         public byte[]? SumsBytes, RegionsBytes;
         public string[] Slots = [];
         public int Seed, Skipped, Undressed;
+        public bool Leaves;
         public long Started;
     }
 
@@ -122,10 +134,14 @@ internal static unsafe partial class GiReference
     /// pixel, each meeting <paramref name="bounces"/> faces past the first at most, or until Russian
     /// roulette ends it where that is negative, written to <paramref name="path"/> and its files beside
     /// it where a path is given, its paths' draws started from <paramref name="seed"/>, so a test can
-    /// read how far a reference moves from one draw of its paths to another. Answers why it cannot,
-    /// or nothing.
+    /// read how far a reference moves from one draw of its paths to another. Where
+    /// <paramref name="leaves"/> says so, a pixel's light is that of its paths that meet a leaf's or a
+    /// grass card's face first, the share of them kept beside it (<see cref="Traced.Leaves"/>), so a
+    /// crown's leaves are read without the sky between them, which a far crown's pixels hold more of
+    /// in the reference than in the picture, whose leaves keep their share of a card in the distance.
+    /// Answers why it cannot, or nothing.
     /// </summary>
-    internal static string? BeginReference(EcsWorld ecs, string? path, int samples, int bounces = -1, int seed = 0)
+    internal static string? BeginReference(EcsWorld ecs, string? path, int samples, int bounces = -1, int seed = 0, bool leaves = false)
     {
         if (Refused(ecs, rays: true) is { } why) return why;
         var rays = _rays!;
@@ -140,6 +156,7 @@ internal static unsafe partial class GiReference
             Samples = Math.Max(1, samples),
             Faces = bounces < 0 ? MostFaces : bounces + 1,
             Seed = seed,
+            Leaves = leaves,
             Slots = slots,
             Skipped = skipped,
             Undressed = Trees.Undressed(ecs),
@@ -441,7 +458,7 @@ internal static unsafe partial class GiReference
         var share = Math.Clamp(PathsAFrame / Math.Max(1, job.Width * job.Height), 1, MostAFrame);
         share = Math.Min(share, job.Samples - job.Added);
         ReadOnlySpan<uint> counts = [(uint)share, (uint)job.Added, (uint)job.Faces, 0];
-        ReadOnlySpan<uint> seed = [(uint)job.Seed, 0, 0, 0];
+        ReadOnlySpan<uint> seed = [(uint)job.Seed, job.Leaves ? 1u : 0u, 0, 0];
         BindMasks(rays);
         rays.Trace.SetNumbers("counts", 4, counts);
         rays.Trace.SetNumbers("seed", 4, seed);
@@ -464,13 +481,15 @@ internal static unsafe partial class GiReference
         var pixels = job.Width * job.Height;
         var texels = MemoryMarshal.Cast<byte, Vector4>(job.SumsBytes);
         var light = new float[pixels * 3];
-        var samples = int.MaxValue;
+        var leaves = job.Leaves ? new float[pixels] : null;
+        var samples = job.Leaves ? job.Samples : int.MaxValue;
         for (var i = 0; i < pixels; i++)
         {
             var sum = texels[i];
             var count = Math.Max(sum.W, 1f);
             (light[i * 3], light[i * 3 + 1], light[i * 3 + 2]) = (sum.X / count, sum.Y / count, sum.Z / count);
-            samples = Math.Min(samples, (int)sum.W);
+            if (leaves is not null) leaves[i] = sum.W / job.Samples;
+            else samples = Math.Min(samples, (int)sum.W);
         }
         var shown = MemoryMarshal.Cast<byte, uint>(job.RegionsBytes)[..pixels].ToArray();
         var names = new Dictionary<uint, string>();
@@ -480,7 +499,7 @@ internal static unsafe partial class GiReference
             names[region] = $"{(slot < job.Slots.Length ? job.Slots[slot] : $"mesh {slot}")} {Axes[(region - 1) % 8]}";
         }
 
-        var traced = new Traced(job.Width, job.Height, light, shown, samples, names);
+        var traced = new Traced(job.Width, job.Height, light, shown, samples, names, leaves);
         Last = traced;
         var seconds = Stopwatch.GetElapsedTime(job.Started).TotalSeconds;
         var skipped = job.Skipped == 0 ? "" : $", {job.Skipped} meshes left out as not triangles or not loaded";
@@ -504,7 +523,8 @@ internal static unsafe partial class GiReference
             WritePfm(full + ".pfm", light, job.Width, job.Height);
             File.WriteAllBytes(full + ".regions", MemoryMarshal.AsBytes(shown.AsSpan()).ToArray());
             File.WriteAllLines(full + ".regions.txt", names.OrderBy(n => n.Key).Select(n => $"{n.Key}\t{n.Value}"));
-            said += $", into {full} with its .pfm, .regions and .regions.txt";
+            if (leaves is not null) File.WriteAllBytes(full + ".leaves", MemoryMarshal.AsBytes(leaves.AsSpan()).ToArray());
+            said += leaves is null ? $", into {full} with its .pfm, .regions and .regions.txt" : $", leaf by leaf, into {full} with its .pfm, .regions, .regions.txt and .leaves";
         }
         Finish(job);
         return said;
@@ -548,7 +568,8 @@ internal static unsafe partial class GiReference
     /// from it as its pixels' differences summed over the reference's light, and each region's
     /// share of the picture, its mean light and the reference's, the largest first, with a picture of
     /// the difference written beside the reference, red where the picture is brighter and blue where
-    /// darker.
+    /// darker. Against a reference traced leaf by leaf it reads only the pixels whose paths met a
+    /// leaf first at <see cref="WholeLeaf"/> or more.
     /// </summary>
     internal static string Compare(float[] light, int width, int height, string path)
     {
@@ -562,16 +583,24 @@ internal static unsafe partial class GiReference
                 .ToDictionary(p => uint.Parse(p[0], CultureInfo.InvariantCulture), p => p[1])
             : [];
 
+        // A reference traced leaf by leaf holds its leaves' light alone, so only the pixels its paths
+        // found all leaf are read against it.
+        var leaves = File.Exists(full + ".leaves") ? MemoryMarshal.Cast<byte, float>(File.ReadAllBytes(full + ".leaves")).ToArray() : null;
+        bool Counted(int i) => leaves is null || (i < leaves.Length && leaves[i] >= WholeLeaf);
+
         var each = new Dictionary<uint, (int Pixels, Vector3 Picture, Vector3 Reference)>();
         for (var i = 0; i < width * height; i++)
         {
+            if (!Counted(i)) continue;
             var region = i < regions.Length ? regions[i] : 0u;
             var (pixels, seen, traced) = each.GetValueOrDefault(region);
             each[region] = (pixels + 1, seen + At(light, i), traced + At(reference, i));
         }
 
         var text = new StringBuilder();
-        text.Append(CultureInfo.InvariantCulture, $"the picture lies {Distance(light, reference):0.000} of its light from the reference, {width} by {height}");
+        var (seenLight, tracedLight) = leaves is null ? (light, reference) : (Only(light, Counted), Only(reference, Counted));
+        text.Append(CultureInfo.InvariantCulture, $"the picture lies {Distance(seenLight, tracedLight):0.000} of its light from the reference, {width} by {height}");
+        if (leaves is not null) text.Append(CultureInfo.InvariantCulture, $", leaf by leaf over the pixels whose paths met a leaf first at {WholeLeaf:0.##} or more");
         foreach (var (region, (pixels, seen, traced)) in each.OrderByDescending(e => e.Value.Pixels).Take(24))
         {
             var name = region == 0 ? "nothing" : names.GetValueOrDefault(region, $"region {region}");
@@ -586,6 +615,15 @@ internal static unsafe partial class GiReference
         return text.ToString();
 
         static string Rgb(Vector3 v) => string.Create(CultureInfo.InvariantCulture, $"{v.X:0.000} {v.Y:0.000} {v.Z:0.000}");
+
+        // A light with every pixel the test leaves out made dark.
+        static float[] Only(float[] light, Func<int, bool> counted)
+        {
+            var kept = (float[])light.Clone();
+            for (var i = 0; i < kept.Length / 3; i++)
+                if (!counted(i)) (kept[i * 3], kept[i * 3 + 1], kept[i * 3 + 2]) = (0f, 0f, 0f);
+            return kept;
+        }
     }
 
     /// <summary>How far one light lies from another, the pixels' differences in each channel summed over the second's light.</summary>

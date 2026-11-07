@@ -377,12 +377,27 @@ over, and in the meadow the crowns read 3 to 13 points lower, from 28% under to 
 levels having hidden a shortfall under the sun the uniform sky does not show. The probes at a
 quarter meter's spacing do not hold the shadow inside a crown, their light at the aspen's leaves
 0.68 at the front and 0.53 behind where the reference's is 0.43 and 0.26, and 0.64 and 0.46 with
-the crown solid in the field, which the leaf's gray stands in for. The reading takes a forest of 24
-tupelos' opaque pass at 1920 by 1080 from 3.3 ms to 6.7, 7.6 with the reflection, and the feature
-test's meadow's at 1280 by 720 from 2.6 ms to 5.6 on the RTX 4070 Laptop GPU, and is compiled into
-the leaves' shader only while the probes light the scene, since compiled in and passed over it took
-the forest from 7.6 ms to 8.1 with global illumination off. Any other material drawn forward keeps
-Bevy's own light.
+the crown solid in the field, which the leaf's gray stands in for. The gray was the leaf's vertex
+color, which Bevy multiplies into the base color, so it darkened the sun the shadow map darkens as
+well, and the light let through from all around, which comes from inside the crown, no more than the
+front's. It is taken out of the color and laid on the light from all around and its reflection, and
+twice on the light let through from all around. Bevy lights the light a surface lets through from
+behind unshadowed but for a mesh that carries `TransmittedShadowReceiver`, which the leaf material
+gives its mesh, so every leaf and blade let through the whole sun. Read leaf by leaf, over the
+pixels whose reference paths all meet a leaf first (`gi.reference`'s `leaves`), the lone aspen under
+the uniform sky reads 19% over where 37%, and lit from behind 5% over where 57%, 16% with its
+let-through shadowed alone. A far crown's region reads its coverage as well as its light, the
+picture's leaves keeping their share of a card in the distance where the reference's paths meet the
+sky between them, so a crown is read leaf by leaf. In the meadow at eight in the morning the crowns
+read 2 to 6 points nearer their reference region by region, from 25% under to 2% under, and leaf by
+leaf from 19% under to 12% over where from 23% under to 5% over, the oak's reduced level 50 and 51%
+under, and the grass in the room wall's shadow steps down from 7% under and 4% over to 46 and 31%
+under, the sun the wall shuts out having hidden a shortfall in the light it takes from all around
+there. The reading takes a forest of 24 tupelos' opaque pass at 1920 by 1080 from 3.3 ms to 6.7, 7.6
+with the reflection, and the feature test's meadow's at 1280 by 720 from 2.6 ms to 5.6 on the RTX
+4070 Laptop GPU, and is compiled into the leaves' shader only while the probes light the scene,
+since compiled in and passed over it took the forest from 7.6 ms to 8.1 with global illumination
+off. Any other material drawn forward keeps Bevy's own light.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
@@ -393,10 +408,10 @@ around where a path meets nothing, the sun dimmed through the camera's air as Be
 picture, and a point light's shadow starts a tenth of a unit from it as Bevy's shadow maps do. It
 runs as a dispatch on the camera, compiled to SPIR-V for its ray queries, a share of the paths each
 frame, and the engine's dispatches on a camera are kept apart from the program's as its draws are.
-`gi.reference <png> <samples> [bounces]` writes it with its linear light, its regions and their
-names, and `gi.compare <png>` reads the camera's light before tonemapping and says how far the view
-lies from it, the pixels' differences summed over the reference's light, with each region's mean
-light against the reference's and a picture of the difference. `gi.probe <x> <y> <z> <cascade>
+`gi.reference <png> <samples> [bounces] [leaves]` writes it with its linear light, its regions and
+their names, and `gi.compare <png>` reads the camera's light before tonemapping and says how far the
+view lies from it, the pixels' differences summed over the reference's light, with each region's
+mean light against the reference's and a picture of the difference. `gi.probe <x> <y> <z> <cascade>
 <samples> [bounces] [table]` traces the same paths from one world probe's place along its
 octahedron's texels, a way through each texel's middle and ways drawn across it, against the light
 the probe holds along them and how far its rays went, and `gi.bounces <on|off|count>` holds the

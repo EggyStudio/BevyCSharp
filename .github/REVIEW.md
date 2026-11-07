@@ -1,10 +1,12 @@
 # Review
 
-Reviewed up to `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see
-along their mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06 on
-2026-11-07, its run green at 16:24 on the three systems in 15 to 18 minutes; it keeps the form and
-carries the review's files. Nothing is pushed after it. Before it `7bd61bcc`, 110's second step, the
-field holding each face's gloss and the probes' rays lighting their hits by it, with the one
+Reviewed up to `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the
+leaves' cover, pushed at 17:55 on 2026-11-07, its run green at 18:12 on the three systems in 10 to
+17 minutes; it keeps the form and carries the review's files and the devlog. Nothing is pushed after
+it. Before it `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see
+along their mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06, its run
+green at 16:24 on the three systems in 15 to 18 minutes. Before it `7bd61bcc`, 110's second step,
+the field holding each face's gloss and the probes' rays lighting their hits by it, with the one
 reference, pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before
 it `e0014da4`, 110's first step, the specular share read from the probes' directions along the
 mirror way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before
@@ -2036,7 +2038,83 @@ from [SHARED.md](SHARED.md).
     direct light left to the shadow map, the let-through share and the reflection darkened by the
     crown's depth as the probes cannot hold it, measured on the lone aspen under a sun with the
     reference's shadow rays and then the meadow's crowns, so the crowns come back by the right light
-    rather than a brighter albedo.
+    rather than a brighter albedo. The first part is `4034da31`, pushed at 17:55 on 2026-11-07,
+    build/textures.py and the nine sets imported again at the manifest's sizes, the albedos changed
+    below the top level alone with the normal maps, the bark sets and the tests' sample byte-
+    identical, a bark's surface no longer bled in four channels after the sample's bytes test caught
+    a first draft, UniformSky.cs with both cases clearing to the reference's sky and the aspen at
+    +4% (+17 and failing on the head's textures), RENDERING.md and docs/trees.md, the pair
+    2026-11-07-item-112-leaves.webp captioned as a step down with the textures right that comes back
+    when the gray leaves the sun to the shadow map; no native change, the suite 2,040 in 47 minutes
+    at the 3 GB cap, NormTests 18, the listing unchanged. The second part next on the lone aspen
+    under a sun with the reference's shadow rays, the gray moved from the base color into the
+    diffuse occlusion so Bevy's direct sun takes the shadow map alone and the light from all around
+    keeps the gray, the probes' let-through taking it twice (behind needing 0.50 against a gray-
+    squared mean of about 0.52) and the reflection once (about 0.63, as the front), measured in sun
+    and under the uniform sky, then the meadow's crowns. Read at 18:30, the second part trialed on
+    the lone aspen with the mended sets, with a fault outside the gray and a change to how the
+    crowns are measured. A far crown's region measures its coverage, since in the pixels the picture
+    draws as leaf 9.4% of the reference's samples miss the leaves and meet what lies past them while
+    the picture keeps each leaf's share at its small levels (item 70's fill, Decision 78) and draws
+    a denser crown, so over a bright sky the region reads under where every leaf reads over, the
+    uniform sky's region +4% with the leaves +33 and front sun's region -12 with the leaves -8; the
+    crowns are measured leaf by leaf from here, the reference's mode for it, whole paths from its
+    first leaf hits with a camera's miss adding nothing, in the trial copy. The new fault, Bevy
+    shadowing the light let through a surface only where the mesh carries TransmittedShadowReceiver
+    (the transmitted-shadow-receiver flag in pbr_functions' directional, point and spot arms), which
+    the bridge never adds, so every leaf and blade lets through the full sun from behind, a leaf
+    deep in a crown or a blade in a wall's shadow included, the direct light let through in sun from
+    behind the tree 0.035 against the reference's 0.008, 4.2 times. The direct sun leaf by leaf in
+    sun from the eye's side with the gray in, the front diffuse 0.033 against 0.055 (-39%), the gray
+    of 0.71 times the shadow map's reach of 0.46 against the shadow rays' 0.57, the gloss 0.015
+    against 0.019. Leaf by leaf, the picture against the reference under the uniform sky, in sun
+    from the eye's side and in sun from behind, the head +34, -8 and +39%, the let-through shadowed
+    +34, -8 and +7, and with the gray moved as well +16, -8 and -2; the grass under the uniform sky
+    at +0.5, the uniform-sky aspen as a region -2.8 with the gray moved, inside the test's 10%. In
+    front sun the gray's move cancels, the direct front rising as the light from all around falls,
+    and the -8 is the shadow map reaching less than the shadow rays, the fill's denser casters, left
+    with Decision 78; the +16 under the sky is the probes' light at the front, +12 after the gray.
+    Decided, one commit for the second part, TransmittedShadowReceiver on every mesh a leaf material
+    is attached to, the grass included, native with the ABI unchanged and the bridge rebuilt; the
+    gray moved as trialed; a test of the light let through from behind, the lone aspen backlit leaf
+    by leaf against the reference (+39% at the head) and the sentence naming both; the meadow read
+    as regions in the same table with the coverage note beside a leaf-by-leaf line. Read at 18:59,
+    the second part built in the main tree and measured. TransmittedShadowReceiver goes on in
+    leaves::attach, the gray moves in the fragment with Bevy's ambient let-through taking it twice
+    when the probes are off, GiReference has a first-leaf mode (BeginReference's leaves,
+    gi.reference's fourth argument, a .leaves file gi.compare reads over the pixels whose paths met
+    a leaf first at 0.95 or more), and the two aspen cases read leaf by leaf over 2,381 such pixels,
+    the sky case bounded at 25% and the backlit at 10, each part's absence failing a case, neither
+    part +37 and +57%, the let-through shadowed alone +37 and +16, both +19 and +5. The meadow at
+    eight at Medium with 128 paths, regions then leaf by leaf, 4034da31 to the second part, the view
+    0.317 to 0.312, oak 77 -27 to -25% (leaf -23 to -19) and -23 to -21, aspen 74 -18 to -12 (leaf
+    -4 to +4) and -7 to -2 (leaf +5 to +12), aspen 76 -27 to -23 (leaf -16 to -9) and -28 to -23,
+    oak 75's reduced level -54 and -56 to -53 and -54 (leaf -50 and -51), the grass in the sun
+    within 2 to 5 points, and the grass in the wall's shadow stepping down hard, patch 3,2 +z -7 to
+    -46, 3,1 +z +4 to -31, 3,2 +x -33 to -46 and 3,1 -x leaf by leaf +59 to -33, the bare ground's
+    +y -31 to -42; the crowns come back 2 to 7 points either way and the aspens leaf by leaf sit
+    within -9 to +12. The shaded grass carries the leaf material and so the transmitted shadow, its
+    blades in the wall's shadow no longer letting through the sun the wall shuts out, as the
+    reference's back-side shadow ray agrees, and that unshadowed sun had hidden a shortfall of 30 to
+    45% in the light the shaded blades take from all around, the probes' light next to the wall,
+    which the grass having no gray leaves untouched. Decided, it lands as built, the same shape as
+    the first part, patch 3's step down recorded as the shortfall the unshadowed sun hid and item
+    113 opened for the probes' light on shaded grass beside a wall, after 111 since the wall is a
+    thin one.
+
+113. **Shaded grass beside a wall takes 30 to 45% less light from all around than the reference.**
+    From item 112 on 2026-11-07. With the light let through a blade shadowed as Bevy shadows it, the
+    meadow's grass in the +x wall's shadow at eight in the morning reads 31 to 46% under the
+    reference as regions and 33 leaf by leaf (patches 3,1 and 3,2), where the sunlit patches read
+    within 2 to 5 points and the bare ground's +y 42 under; before, the sun let through the wall by
+    every blade had hidden it. The blades have no gray, so the shortfall is the probes' light next
+    to the wall, the world probes the forward fragment reads through probe_lights and probe_air, and
+    the wall is a thin one, so item 111's reading of the probes beside thin walls bears on it. Read
+    a shaded blade's light by its parts against the reference at the same blade, the probes' light
+    along the normal and from behind and the sky's share the probes hold there, with the probes' own
+    faces next to the wall against the reference from their places and their seen share as the
+    diffuse read weighs them; then a mend measured on patch 3, the sunlit patches and the bare
+    ground, the crowns unchanged. After 111, before 107.
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 51 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
@@ -5003,3 +5081,66 @@ each texel they cover, where the box's mean with the transparent texels round a 
 crown's leaves half as bright again and let through 0.094 of the light behind them where they let
 through 0.235, and a crown's pixel against a path-traced reference is partly the sky between its
 leaves, so the picture's background is the reference's sky.
+
+Item 112's second part's commit, the leaves' gray laid on the light from all around and the light a
+leaf lets through from behind shadowed, in the commit carrying this line. The leaf material takes
+the crown's gray, the vertex color Bevy multiplies into the base color, out of the color and into
+the occlusions, so it darkens the light from all around and its reflection, Bevy's or the probes',
+and leaves the sun to the shadow map, and it darkens the light let through from all around twice,
+that light coming from inside the crown, Bevy's own share let through, which Bevy lights at an
+occlusion of one, taking it where the probes do not light the scene. Bevy lights the light a surface
+lets through from behind unshadowed but for a mesh that carries TransmittedShadowReceiver, in
+pbr_functions.wesl's directional, point and spot arms, which the bridge gave no mesh, so every leaf
+and blade let through the whole sun, and leaves::attach gives it to every mesh a leaf material is
+attached to, the grass's among them. GiReference traces leaf by leaf where BeginReference's leaves
+says so, gi.reference's [leaves], a pixel's light that of its paths meeting a leaf's or a grass
+card's face first and the share of them kept beside it, Traced.Leaves and a .leaves file, which
+gi.compare reads over the pixels whose paths met a leaf first at 0.95 or more (WholeLeaf). The ABI
+is unchanged. RENDERING.md, BCS.md, the guide's trees and ray tracing pages and Trees.Leaves's
+remarks say it.
+
+GlobalIlluminationTests.ALoneAspensLeavesUnderAUniformSkyReadTheirReference reads the aspen's leaves
+leaf by leaf over 2,381 pixels within 25% of their reference, 19% over where 37% over with the gray
+in their color, and ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes the same aspen lit from
+behind by a sun that casts shadows within 10%, 5% over where 57% over and 16% over with the light
+let through shadowed alone. So the sky's case fails without the gray's move and the backlit case
+without the shadowed light let through. The grass patch reads 1% over as it did.
+
+The reading that decided it. With the first part's sets, the aspen in sun from the eye's side read
+its front's direct light 0.033 against 0.055 leaf by leaf, the gray of 0.71 times the shadow map's
+reach of 0.46 where the reference's shadow rays reach 0.57, and in sun from behind its light let
+through 0.035 against 0.008. Over the pixels the picture draws as leaves against the reference's
+paths from their first leaf hits, its whole light read 34% over under the sky, 8% under in sun from
+the eye's side and 39% over in sun from behind, the last 7% over with the light let through
+shadowed, and with the gray moved as well 16% over, 8% under and 2% under. In sun from the eye's
+side the gray's move takes the sun's light up and the light from all around down by about as much,
+and the 8% left is the shadow map reaching less of the crown than the reference's shadow rays, the
+crown's fill casting denser shadows (Decision 78). A far crown's region reads its coverage as well
+as its light, 9.4% of the reference's paths in a pixel the picture draws as leaf meeting the sky
+between the leaves where the picture's leaves keep their share of a card in the distance, so under
+the sky the aspen's leaves read 4% over as a region and 33% over leaf by leaf. What remains under
+the sky is the probes' light at the front, 12% over with the gray laid on.
+
+The meadow at eight in the morning at Medium against its reference, the first part and the second
+each read in one start, reads the view 0.312 from its reference where 0.317. Region by region the
+oak's crown reads 25 and 21% under where 27 and 23%, the aspens' 12 and 2% under where 18 and 7% and
+23 and 23% under where 27 and 28%, and the oak's reduced level 53 and 54% under where 54 and 56%.
+Leaf by leaf the oak's crown reads 19% under where 23%, the aspens' 4 and 12% over where 4% under
+and 5% over and 9% under where 16%, and the oak's reduced level 50 and 51% under where 52 and 54%.
+The grass in the sun reads 0 to 9 points lower, and the grass in the room wall's shadow, patch 3,
+reads 46, 31 and 46% under where 7% under, 4% over and 33% under, the sun the wall shuts out, which
+its blades let through, having hidden a shortfall in the light they take from all around beside the
+wall, item 113. The pair 2026-11-07-item-112-shadow.webp shows the meadow with the first part and
+with the second.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran, 2,041 passed and 3 skipped in 49 m 19 s at the 3 GB cap, none aborted, its largest process at
+2,843 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a leaf's crown gray darkens the light from all around, its reflection and twice the light
+let through from all around, and leaves the sun to the shadow map, Bevy shadows the light a surface
+lets through from behind only for a mesh that carries TransmittedShadowReceiver, without which a
+lone aspen lit from behind read its leaves 57% over its reference where 5%, and a far crown is read
+against a path-traced reference leaf by leaf, over the pixels whose paths meet a leaf first, since
+its region holds its coverage as well as its light.

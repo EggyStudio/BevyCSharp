@@ -44,6 +44,14 @@ deeper green and darker, from 28 to 7% under their path-traced reference where 2
 It is a step down with the textures right, the bright levels having hidden a shortfall under the
 sun, which comes back when the leaves' gray leaves the sun's light to the shadow map.
 
+![](.github/assets/readings/2026-11-07-item-112-shadow.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, on the left with the
+leaves' gray in their color and every leaf and blade letting through the whole sun from behind, and
+on the right with the gray laid on the light from all around and the light let through shadowed, the
+crowns lighter, 2 to 6 points nearer their path-traced reference, and the grass in the room wall's
+shadow darker, from 7% under to 46% under. It is a step with the sun's shadow right, the light the
+shaded grass takes from all around beside the wall being the next item.
+
 Done that day
 
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.
