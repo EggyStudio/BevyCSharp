@@ -6,6 +6,19 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-07
+
+![](.github/assets/readings/2026-11-07-item-106-walls.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, the room's far walls
+and stairs the sun grazes behind an oak and an aspen, on the left with the sun's normal bias at 0.6
+texels, the bridge's old value for every light, so each face the sun grazes fell under its own
+shadow over part of the filter, and on the right at Bevy's 1.8 for a directional light, the +z wall
+and the stairs lighter where the sun grazes them, nearer their path-traced reference.
+
+Done that day
+
+- Item 109 at `5a8b4182`. A planted tree's leaves bend their normals in mesh space.
+
 ## 2026-11-06
 
 ![](.github/assets/readings/2026-11-06-item-105-grass-sides.webp)

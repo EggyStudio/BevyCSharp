@@ -195,8 +195,10 @@ public static unsafe partial class Render
             Shadows = (settings.Shadows ? 1 : 0) | (settings.ContactShadows ? 2 : 0),
             InnerAngle = settings.InnerAngle,
             OuterAngle = settings.OuterAngle,
-            ShadowDepthBias = settings.ShadowDepthBias,
-            ShadowNormalBias = settings.ShadowNormalBias,
+            // Bevy's defaults by kind, since a point light's cube map and a cascade's texels need
+            // the biases apart, and one pair for every kind left a wall the sun grazes in shadow.
+            ShadowDepthBias = settings.ShadowDepthBias ?? (settings.Kind == LightKind.Point ? 0.08f : 0.02f),
+            ShadowNormalBias = settings.ShadowNormalBias ?? (settings.Kind == LightKind.Point ? 0.6f : 1.8f),
         };
 
         return new Entity(Native.bcs_render_spawn_light(&native));

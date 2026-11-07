@@ -72,7 +72,12 @@ public sealed class TreeWindTests(ITestOutputHelper output)
 
         // Two aspens of one seed, so of one variant, turn and size, ten meters apart, seen from 25
         // meters, first in still air and then in a wind of 20 meters a second blowing to the right,
-        // each crown's middle read from the pixels unlike the sky on its half of the picture.
+        // each crown's middle read from the pixels unlike the sky on its half of the picture. The
+        // captures are taken on a set clock of sixty frames a second, half a second apart over 3.5
+        // seconds, half the period a trunk sways in, so at one of them the two trees' phases part
+        // them however many frames the trees took to be dressed. On the machine's own clock six
+        // captures eleven frames apart took a second or less, and a suite run whose captures fell
+        // as the two crowns crossed read them 0.19 pixels apart at most.
         var height = Trees.Grow(TreeSpecies.QuakingAspen, 0x7E57_0003u).Bounds.High.Y;
         IReadOnlyList<Entity> trees = [];
         var run = new PictureRun
@@ -80,6 +85,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
             Width = 640,
             Height = 480,
             Frames = 3000,
+            Configure = config => config.FrameSeconds = 1.0 / 60.0,
             Scene = ecs =>
             {
                 var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 30f, Far = 1000f });
@@ -93,7 +99,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
             },
         };
 
-        string[] blown = ["blown 0", "blown 1", "blown 2", "blown 3", "blown 4", "blown 5"];
+        var blown = Enumerable.Range(0, 8).Select(i => $"blown {i}").ToArray();
         Trees.Wind = Vec3.Zero;
         try
         {
@@ -105,7 +111,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
                 .Capture("still later")
                 .Do("blow", _ => Trees.Wind = new Vec3(20f, 0f, 0f))
                 .Wait(30);
-            foreach (var name in blown) run.Capture(name).Wait(11);
+            foreach (var name in blown) run.Capture(name).Wait(30);
             run.Go();
         }
         finally

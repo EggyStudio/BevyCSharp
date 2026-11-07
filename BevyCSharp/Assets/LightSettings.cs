@@ -50,22 +50,28 @@ public sealed class LightSettings
     public float OuterAngle { get; set; } = MathF.PI / 8f;
 
     /// <summary>
-    /// How far a surface is pushed away before it is tested against this light's shadow map.
+    /// How far a surface is pushed away before it is tested against this light's shadow map, or
+    /// <see langword="null"/> for Bevy's default for the kind of light.
     /// </summary>
     /// <remarks>
     /// The fix for shadow acne, the stippled self-shadowing a surface shows when the shadow map
     /// is too coarse to tell it apart from itself. Raising it trades that for a shadow that
-    /// starts slightly away from what casts it. Bevy's default is 0.02.
+    /// starts slightly away from what casts it. Bevy's default is 0.02 for a directional light and
+    /// a spot light and 0.08 for a point light.
     /// </remarks>
-    public float ShadowDepthBias { get; set; } = 0.02f;
+    public float? ShadowDepthBias { get; set; }
 
     /// <summary>
-    /// The same, measured along the surface normal.
+    /// The same, measured along the surface normal in texels of the shadow map, or
+    /// <see langword="null"/> for Bevy's default for the kind of light.
     /// </summary>
     /// <remarks>
     /// Handles what depth bias alone does not, a surface lit at a glancing angle, where a
-    /// small depth error covers a long distance. Bevy's default is 0.6 for a directional light
-    /// and 0.6 for the others.
+    /// small depth error covers a long distance. Bevy's default is 1.8 for a directional light and
+    /// a spot light and 0.6 for a point light. A sun at 0.6 leaves a wall it grazes in a far
+    /// cascade under its own shadow over a share of its filter, 19% under the light the path-traced
+    /// reference's sun gives it at 70 degrees from its normal, where at Bevy's 1.8 it reads within
+    /// 1%.
     /// </remarks>
-    public float ShadowNormalBias { get; set; } = 0.6f;
+    public float? ShadowNormalBias { get; set; }
 }

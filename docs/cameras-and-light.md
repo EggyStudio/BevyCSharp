@@ -151,11 +151,16 @@ Render.SpawnLight(new LightSettings
 {
     Kind = LightKind.Directional,
     ShadowDepthBias = 0.05f,     // against shadow acne
-    ShadowNormalBias = 1.2f,     // against acne on glancing surfaces
+    ShadowNormalBias = 2.4f,     // against acne on glancing surfaces
 });
 
 Render.SetShadowMapSize(directional: 4096);
 ```
+
+Left unset, each bias is Bevy's default for the kind of light, a depth bias of 0.02 and a normal
+bias of 1.8 for a directional or spot light and 0.08 and 0.6 for a point light. A normal bias much
+under 1.8 leaves a wall the sun grazes in its own shadow over part of the filter, a fifth darker at
+0.6 than the sun lights it.
 
 Bias is per light because one light's acne is another's floating shadow. Size is one number for
 every directional light and one for every point and spot light, because that is how Bevy keeps it,

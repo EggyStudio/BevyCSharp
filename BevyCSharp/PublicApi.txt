@@ -4195,8 +4195,8 @@ sealed class Bevy.LightSettings
   float OuterAngle { get; set; }
   float Radius { get; set; }
   float Range { get; set; }
-  float ShadowDepthBias { get; set; }
-  float ShadowNormalBias { get; set; }
+  float? ShadowDepthBias { get; set; }
+  float? ShadowNormalBias { get; set; }
 readonly struct Bevy.LightningStrike : IEquatable<LightningStrike>
   LightningStrike(Vec3 Position, float Distance, float ThunderDelay, bool ToGround)
   Vec3 Position { get; init; }
