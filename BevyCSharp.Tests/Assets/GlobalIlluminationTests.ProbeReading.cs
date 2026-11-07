@@ -16,9 +16,14 @@ public sealed partial class GlobalIlluminationTests
     /// the first, drawn across each texel at 256 paths a way. The room's light is mostly its lamp's
     /// first bounce and the bounces after it, the white walls taking 0.787 of what reaches them, so
     /// a probe that lost a share at each bounce, or a hold that carried the light a bounce too far
-    /// or too short, reads off its reference by more than the reference's noise. The probe reads
-    /// 1.8% under, 0.1% over and 1.6% over, and stood still a frame early it read two bounces past
-    /// the first 20% under, so the bar is 10%.
+    /// or too short, reads off its reference by more than the reference's noise. The probe read
+    /// 1.8% under, 0.1% over and 1.6% over against paths lit as the probes light a face, its color
+    /// times what arrives, and stood still a frame early it read two bounces past the first 20%
+    /// under, so the bar is 10%. The reference's paths are lit as Bevy's lighting lights a face and
+    /// scatter by its gloss, as the probes' rays carry the gloss of what they meet, and the probe
+    /// reads 5.0% under, 3.1% under and 4.3% under, the probes lighting a face by Lambert's term
+    /// and its gloss's share as though even (shadeProbeHit) where the reference lights it by
+    /// Burley's term and the GGX lobe toward the probe.
     /// </remarks>
     [SkippableFact]
     public void AProbeInAClosedRoomHoldsItsReferencesLightAtEachBounceItIsHeldAt()
@@ -91,9 +96,12 @@ public sealed partial class GlobalIlluminationTests
     /// The screen kernel writes the probe's rays as it traces them, and the reference traces from
     /// where they leave along each, so a ray logged or read back wrong, a reference traced from the
     /// wrong place, or a probe summing its rays as it does not reads off the reference by more than
-    /// its paths' noise. The probe on the floor under the picture's lower middle reads 0.5% under
-    /// its reference along its ways at the first bounce and 2.7% over at every one, and with its
-    /// ways handed to the reference in the reverse order it read 12.6% under at the first.
+    /// its paths' noise. The probe on the floor under the picture's lower middle read 0.5% under
+    /// its reference along its ways at the first bounce and 2.7% over at every one while the
+    /// reference's paths were lit as the probes light a face, and with its ways handed to the
+    /// reference in the reverse order it read 12.6% under at the first. With the reference's paths
+    /// lit as Bevy's lighting lights a face and scattering by its gloss it reads 3.1% under at the
+    /// first bounce and 1.6% under at every one.
     /// </remarks>
     [SkippableFact]
     public void AScreenProbeInAClosedRoomSumsItsReferencesLightAlongItsWays()

@@ -50,6 +50,11 @@ pub struct BcsFieldDraw {
     /// The mesh's bounds in its own space, the least corner, then the greatest.
     pub low: [f32; 4],
     pub high: [f32; 4],
+    /// The material's gloss, its perceptual roughness, its metallic share and its reflectance,
+    /// Bevy's defaults of 0.5, 0 and 0.5 for a material the bridge cannot read, which the field
+    /// paints beside each face so a probe's ray lights what it meets by its gloss as well as its
+    /// color.
+    pub gloss: [f32; 4],
 }
 
 /// The camera the field lies around, as [`bcs_scene_field_gather`] writes it.
@@ -482,6 +487,7 @@ mod built {
                     let shown = 1.0 + (exposure - 1.0) * standard.emissive_exposure_weight;
                     [r * shown, g * shown, b * shown, 0.0]
                 });
+                let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| [standard.perceptual_roughness, standard.metallic, standard.reflectance, 0.0]);
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
                 // The surface an emitter emits from, read once a generation and for an emitter
                 // alone, which global illumination carries as a light from its box by this share of
@@ -502,6 +508,7 @@ mod built {
                     emission: [emission[0], emission[1], emission[2], surface],
                     low: [low[0], low[1], low[2], 0.0],
                     high: [high[0], high[1], high[2], 0.0],
+                    gloss,
                 };
             }
 
@@ -648,7 +655,8 @@ mod tests {
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, emission), 80);
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, low), 96);
         assert_eq!(std::mem::offset_of!(BcsFieldDraw, high), 112);
-        assert_eq!(std::mem::size_of::<BcsFieldDraw>(), 128);
+        assert_eq!(std::mem::offset_of!(BcsFieldDraw, gloss), 128);
+        assert_eq!(std::mem::size_of::<BcsFieldDraw>(), 144);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, found), 12);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, forward), 16);
         assert_eq!(std::mem::offset_of!(BcsFieldEye, far), 28);

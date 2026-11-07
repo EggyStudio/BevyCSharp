@@ -23,9 +23,11 @@ RWStructuredBuffer<uint> albedo;
 [format("rgba8")] RWTexture3D<float4> albedo_field;
 [format("rgba8")] RWTexture3D<float4> still_paint;
 
-// The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, into the
-// image the passes read and the still meshes' own, so a ray's hit takes its color from cells its own
-// face painted (surfaceAlbedoFacing).
+// The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, and its
+// gloss as field_splat.slang painted it, in the bits faceBits and glossBits in bcs_field.slang lay
+// out, into the image the passes read and the still meshes' own, so a ray's hit takes its color and
+// its gloss from cells its own face painted (surfaceFacing).
+RWStructuredBuffer<uint> gloss;
 [format("r32ui")] RWTexture3D<uint> face_field;
 [format("r32ui")] RWTexture3D<uint> still_faces;
 
@@ -74,6 +76,7 @@ void main(uint3 id : SV_DispatchThreadID)
     cells[index] = (uint(cascade.w) * 1024u << 10) | (1u << 8);
     behind[index] = 0xFFFFFFFFu;
     albedo[index] = 0u;
+    gloss[index] = 0u;
     glow[index] = float4(0.0);
     for (uint i = 0u; i < 6u; i++)
         emitted[e + i] = 0u;
@@ -149,8 +152,9 @@ void resolve(uint3 id, uint index, uint e)
     float4 paint = float4(float(color & 255u), float((color >> 8) & 255u), float((color >> 16) & 255u), float(color >> 24)) / 255.0;
     still_paint[at] = paint;
     albedo_field[at] = paint;
-    still_faces[at] = code & 255u;
-    face_field[at] = code & 255u;
+    uint face = (code & 255u) | gloss[index];
+    still_faces[at] = face;
+    face_field[at] = face;
 
     // The lent light times the share of the cell's face the emitters cover along the axis they cover
     // most of, a whole face at most, as the faces of a strip along a wall lend a cell beside it what

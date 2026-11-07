@@ -83,8 +83,8 @@ internal static unsafe partial class SceneField
     {
         public readonly (int Cascades, float CellSize, int Budget, float FarCell, int Triangles) Made = made;
         public readonly SceneFieldPlan Plan = plan;
-        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, Emission, Lent, Instances, Shapes, Bricks,
-            Pool = AssetHandle.None;
+        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, Gloss, Emission, Lent, Instances, Shapes,
+            Bricks, Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
         // Whether a build's parts were splatted into the buffers and no resolve has read and cleared
         // them since, which the next build's first part clears where that build was left unfinished.
@@ -143,8 +143,10 @@ internal static unsafe partial class SceneField
     internal static AssetHandle Glow => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Glow : AssetHandle.None;
 
     /// <summary>
-    /// The way each cell's nearest face looks, eight bits as <c>bcs_field</c>'s <c>faceWay</c> reads
-    /// them laid out as the field, or none where no field is built.
+    /// The face each cell's nearest surface paints it, laid out as the field, or none where no field
+    /// is built, 32 bits a cell, the way the face looks in bits 0 to 7 as <c>bcs_field</c>'s
+    /// <c>faceWay</c> reads them, and its gloss in bits 8 to 31, its perceptual roughness, metallic
+    /// share and reflectance a byte each in 255ths, as <c>faceGloss</c> reads them.
     /// </summary>
     internal static AssetHandle Faces => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Faces : AssetHandle.None;
 
@@ -178,9 +180,9 @@ internal static unsafe partial class SceneField
 
     /// <summary>
     /// The bytes of GPU memory the field holds, its two images of half floats, its two of colors and
-    /// two of faces, four bytes a cell each, its image of light in four half floats, a cascade's
-    /// cells' codes, faces behind and colors, four bytes a cell each, their light in four floats and
-    /// what thin emitters lend them in six codes, and the pool of triangles.
+    /// two of faces with their gloss, four bytes a cell each, its image of light in four half floats,
+    /// a cascade's cells' codes, faces behind, colors and gloss, four bytes a cell each, their light
+    /// in four floats and what thin emitters lend them in six codes, and the pool of triangles.
     /// </summary>
     internal static long Bytes()
     {
@@ -188,7 +190,7 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(Native.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (3 * 4 + 16 + 6 * 4) * cells + pool;
+        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (4 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
     /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
@@ -386,6 +388,7 @@ internal static unsafe partial class SceneField
         built.Behind = Shaders.CreateBuffer<uint>(cleared);
         Array.Clear(cleared);
         built.Paint = Shaders.CreateBuffer<uint>(cleared);
+        built.Gloss = Shaders.CreateBuffer<uint>(cleared);
         built.Emission = Shaders.CreateBuffer(size * size * size * 16);
         built.Lent = Shaders.CreateBuffer(size * size * size * 6 * sizeof(uint));
 
@@ -394,9 +397,9 @@ internal static unsafe partial class SceneField
         built.Shapes = Shaders.CreateBuffer(ShapeBytes * 16);
         built.Bricks = Shaders.CreateBuffer(16 * 64);
 
-        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("instances", built.Instances)
-            .SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent);
-        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint)
+        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("gloss", built.Gloss)
+            .SetBuffer("instances", built.Instances).SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent);
+        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("gloss", built.Gloss)
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
             .SetTexture("albedo_field", built.Albedo).SetTexture("still_paint", built.StillPaint)
             .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces)
@@ -415,7 +418,7 @@ internal static unsafe partial class SceneField
         _drawFor = (null, Entity.None);
         DrawEngine(ecs, null, Entity.None);
         foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Glow,
-                     built.Info, built.Cells, built.Behind, built.Paint, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
+                     built.Info, built.Cells, built.Behind, built.Paint, built.Gloss, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
     }
@@ -455,7 +458,7 @@ internal static unsafe partial class SceneField
             // them.
             var instance = new SceneFieldPlan.Instance(draw.Mesh, draw.Generation, world, (draw.Flags & 1) != 0, bounds,
                 new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]), Math.Clamp(draw.Color[3], 0f, 1f),
-                Math.Max(draw.Emission[3], 0f));
+                Math.Max(draw.Emission[3], 0f), new Vector3(draw.Gloss[0], draw.Gloss[1], draw.Gloss[2]));
             through |= instance.Through > 0f;
             if (once && !Once.Add(instance)) continue;
             Drawn.Add((instance, (draw.Flags & 2) != 0));
@@ -476,7 +479,7 @@ internal static unsafe partial class SceneField
     internal const int InfoBytes = (1 + MostCascades + 1) * 16;
 
     // Bytes of an instance as field_splat.slang reads it, a shape as field_stamp.slang reads it.
-    private const int InstanceBytes = 96, ShapeBytes = 96;
+    private const int InstanceBytes = 112, ShapeBytes = 112;
 
     /// <summary>Where each cascade lies as it was last built, as <c>FieldInfo</c>.</summary>
     internal static float[] InfoValues(SceneFieldPlan plan)
@@ -551,7 +554,8 @@ internal static unsafe partial class SceneField
                 records.AddRange([BitConverter.UInt32BitsToSingle(start), BitConverter.UInt32BitsToSingle(many),
                     BitConverter.UInt32BitsToSingle(sides), BitConverter.UInt32BitsToSingle((uint)triangles)]);
                 records.AddRange([instance.Color.X, instance.Color.Y, instance.Color.Z, Carried(instance, plan.CellSize) ? 2 : 1,
-                    instance.Emission.X, instance.Emission.Y, instance.Emission.Z, instance.Emission == Vector3.Zero ? 0 : Thinnest(instance)]);
+                    instance.Emission.X, instance.Emission.Y, instance.Emission.Z, instance.Emission == Vector3.Zero ? 0 : Thinnest(instance),
+                    instance.Gloss.X, instance.Gloss.Y, instance.Gloss.Z, 0]);
                 triangles += (int)many;
                 count++;
             }
@@ -644,9 +648,9 @@ internal static unsafe partial class SceneField
         var shapes = _shapes.AsSpan(0, floats);
         for (var s = 0; s < plan.Shapes.Count; s++)
         {
-            var (m, center, extents, scale, color, through) = plan.Shapes[s];
+            var (m, center, extents, scale, color, through, gloss) = plan.Shapes[s];
             ReadOnlySpan<float> values = [m.M11, m.M21, m.M31, m.M41, m.M12, m.M22, m.M32, m.M42, m.M13, m.M23, m.M33, m.M43,
-                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, through];
+                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, through, gloss.X, gloss.Y, gloss.Z, 0];
             values.CopyTo(shapes[(s * (ShapeBytes / 4))..]);
         }
 

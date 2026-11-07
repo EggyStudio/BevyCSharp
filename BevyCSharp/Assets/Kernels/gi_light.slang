@@ -676,15 +676,16 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // (reflectedAlong), the light reaching the surface standing in for the probes it does not see,
     // times the share Bevy's table gives the surface's gloss, and Bevy's own past the probes.
     // Bevy's times the share of the sky the probes saw along the mirror way gave a closed room's
-    // walls no reflection at all, which left a closed Cornell box's green wall at 0.809 of its
-    // reference's light past the direct where the reference's first face reflects the room, and
-    // read so it reads 1.023. A cosine lobe about the mirror way read from the probes' faces reads
-    // the box as well, but took a sunlit floor's reflection in the light of the walls and blocks
-    // around it, the bounce rooms' floor among red walls 2.5% over the light its reference holds,
-    // where its reference's gloss adds 0.1% and the directions read it 0.9% over. The camera's
-    // map's reflection and the traced one are taken in the share of the blend the reflection probes
-    // leave, all of it where none holds the surface, since a reflection probe's share is the room
-    // as its capture saw it and is left as Bevy gave it.
+    // walls no reflection at all, which left a closed Cornell box's green wall at 0.809 of the
+    // light past the direct of a reference reflecting by its first face's gloss alone, and read so
+    // it read 1.023 of that, and with the probes' rays carrying the gloss of what they meet
+    // (shadeProbeHit), 1.024 of the whole reference. A cosine lobe about the mirror way read from
+    // the probes' faces reads the box as well, but took a sunlit floor's reflection in the light of
+    // the walls and blocks around it, the bounce rooms' floor among red walls 2.5% over the light
+    // its reference holds, where its reference's gloss adds 0.1% and the directions read it 0.9%
+    // over. The camera's map's reflection and the traced one are taken in the share of the blend
+    // the reflection probes leave, all of it where none holds the surface, since a reflection
+    // probe's share is the room as its capture saw it and is left as Bevy gave it.
     float3 r = reflect(-V, n);
     float roughness = surface.perceptual_roughness;
     float3 f0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);

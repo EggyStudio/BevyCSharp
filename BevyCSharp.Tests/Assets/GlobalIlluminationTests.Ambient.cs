@@ -19,8 +19,8 @@ public sealed partial class GlobalIlluminationTests
     /// 0.846 of its reference near the eye and 1.334 far off. Taken back by the table it read 0.998
     /// and 1.000. Its reflectance is 0, since while the reference's first face took the diffuse
     /// share alone of the light from all around, the sky's reflection on a floor of the default
-    /// reflectance read it 4 and 6% over, and with the reference's first face reflecting by its
-    /// gloss as the picture's reflects the probes' light, it reads 1.000 and 1.017.
+    /// reflectance read it 4 and 6% over, and with the reference's faces reflecting by their gloss
+    /// as the picture's reflects the probes' light, it reads 1.000 and 1.017.
     /// </remarks>
     [SkippableFact]
     public void AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle()
@@ -48,7 +48,7 @@ public sealed partial class GlobalIlluminationTests
                 if (!begun)
                 {
                     begun = true;
-                    Assert.Null(GiReference.BeginReference(ecs, null, 256, gloss: GiReference.Gloss.FirstFace));
+                    Assert.Null(GiReference.BeginReference(ecs, null, 256));
                     return false;
                 }
                 return GiReference.Step(ecs) is not null;

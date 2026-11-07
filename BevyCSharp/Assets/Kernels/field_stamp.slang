@@ -26,6 +26,8 @@ struct FieldShape
     // rgb: the mesh's color, linear. w: the share of light that passes a unit of its depth
     // (lightThroughPaint in bcs_field.slang).
     float4 color;
+    // xyz: the mesh's perceptual roughness, metallic share and reflectance.
+    float4 gloss;
 };
 
 // x: the cascade. y: the brick's place in it, in bricks, a byte an axis. z: where its run of boxes
@@ -92,7 +94,7 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
             // The box's face nearest the cell, the axis it lies furthest out along, in the world.
             int axis = q.x >= q.y && q.x >= q.z ? 0 : q.y >= q.z ? 1 : 2;
             float3 outward = float3(axis == 0 ? sign(own.x) : 0.0, axis == 1 ? sign(own.y) : 0.0, axis == 2 ? sign(own.z) : 0.0);
-            face = faceBits(normalize(shape.row0.xyz * outward.x + shape.row1.xyz * outward.y + shape.row2.xyz * outward.z));
+            face = faceBits(normalize(shape.row0.xyz * outward.x + shape.row1.xyz * outward.y + shape.row2.xyz * outward.z)) | glossBits(shape.gloss.xyz);
         }
     }
     field[at] = d;

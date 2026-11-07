@@ -170,6 +170,11 @@ public float fieldCell(FieldInfo info, float3 p)
 /// The way a face looks in eight bits, four along each side of the octahedron the sphere is folded
 /// onto, as the field's build keeps it in each cell's word, enough to tell faces that look apart
 /// from faces that meet square.
+/// A cell of the field's faces image holds the face that won it in 32 bits. Bits 0 to 7 are the way
+/// it looks (`faceBits`, `faceWay`), four bits along each side of the octahedron, and bits 8 to 31
+/// its gloss (`glossBits`, `faceGloss`), its perceptual roughness in bits 8 to 15, its metallic
+/// share in bits 16 to 23 and its reflectance in bits 24 to 31, each in 255ths, all painted by the
+/// triangle that painted the cell's color. A reader masks the bits it reads.
 public uint faceBits(float3 n)
 {
     n /= abs(n.x) + abs(n.y) + abs(n.z);
@@ -186,6 +191,21 @@ public float3 faceWay(uint bits)
     if (n.z < 0.0)
         n.xy = (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
     return normalize(n);
+}
+
+/// A face's gloss, its perceptual roughness, metallic share and reflectance, in bits 8 to 31 of a
+/// cell of the faces image, where the way it looks takes bits 0 to 7 (`faceBits`).
+public uint glossBits(float3 gloss)
+{
+    uint3 bytes = uint3(saturate(gloss) * 255.0 + 0.5);
+    return (bytes.x << 8) | (bytes.y << 16) | (bytes.z << 24);
+}
+
+/// The gloss a cell of the faces image holds (`glossBits`), its perceptual roughness, metallic
+/// share and reflectance.
+public float3 faceGloss(uint bits)
+{
+    return float3(float((bits >> 8) & 255u), float((bits >> 16) & 255u), float(bits >> 24)) / 255.0;
 }
 
 /// A color of the field at `p`, the cells' colors blended and divided by how much of them a surface
@@ -231,6 +251,16 @@ public float3 surfaceGlow(Texture3D<float4> glow, Texture3D<float4> albedo, Samp
 /// reads.
 public float3 surfaceAlbedoFacing(Texture3D<uint> faces, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p, float3 n)
 {
+    float3 gloss;
+    return surfaceFacing(faces, albedo, linear, info, p, n, gloss);
+}
+
+/// The color of the field at `p` on a surface facing `n` as `surfaceAlbedoFacing` gives it, with in
+/// `gloss` the gloss of the same cells blended the same way (`faceGloss`), or Bevy's default gloss
+/// of a roughness of 0.5, no metal and a reflectance of 0.5 where none of them looks the hit's way.
+public float3 surfaceFacing(Texture3D<uint> faces, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p, float3 n, out float3 gloss)
+{
+    gloss = float3(0.5, 0.0, 0.5);
     int c = fieldCascade(info, p, 1.0);
     if (c < 0)
         return float3(0.5);
@@ -240,16 +270,23 @@ public float3 surfaceAlbedoFacing(Texture3D<uint> faces, Texture3D<float4> albed
     int3 base = int3(floor(q));
     float3 f = q - float3(base);
     float4 sum = float4(0.0);
+    float3 glossSum = float3(0.0);
     for (int corner = 0; corner < 8; corner++)
     {
         int3 offset = int3(corner & 1, (corner >> 1) & 1, corner >> 2);
         int3 at = min(base + offset, int3(size - 1));
         int3 texel = int3(at.xy, at.z + c * size);
         float3 lerps = lerp(1.0 - f, f, float3(offset));
-        float facing = dot(faceWay(faces.Load(int4(texel, 0))), n) >= 0.5 ? 1.0 : 0.0;
-        sum += albedo.Load(int4(texel, 0)) * (lerps.x * lerps.y * lerps.z * facing);
+        uint bits = faces.Load(int4(texel, 0));
+        float facing = dot(faceWay(bits), n) >= 0.5 ? 1.0 : 0.0;
+        float4 paint = albedo.Load(int4(texel, 0)) * (lerps.x * lerps.y * lerps.z * facing);
+        sum += paint;
+        glossSum += faceGloss(bits) * paint.a;
     }
-    return sum.a > 0.01 ? sum.rgb / sum.a : surfaceAlbedo(albedo, linear, info, p);
+    if (sum.a <= 0.01)
+        return surfaceAlbedo(albedo, linear, info, p);
+    gloss = glossSum / sum.a;
+    return sum.rgb / sum.a;
 }
 
 /// The alpha a cell of the field's colors is painted with by a surface that lets `through` of the

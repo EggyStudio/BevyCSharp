@@ -23,6 +23,12 @@ reflecting the light the probes it sees hold along its mirror way, read from eac
 eight directions, the green and red walls lighter by each other's light and the red wall showing the
 tall block's reflection soft.
 
+![](.github/assets/readings/2026-11-07-item-110-probe-gloss.webp)
+A Cornell box open toward the camera at 1280 by 720 with global illumination at High, its walls at a
+roughness of 0.5 lit by a lamp under the ceiling, on the left with the probes' rays lighting what
+they meet by its color alone and on the right by its gloss as well, the walls 3 to 4% and the floor
+6% brighter in the picture's levels, the light a wall's gloss carries between bounces.
+
 Done that day
 
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.

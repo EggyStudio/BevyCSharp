@@ -64,12 +64,14 @@ public sealed partial class GlobalIlluminationTests
     /// much as it did at the probe, which a probe's face up moved to the floor a unit below read
     /// 14% over the floor's irradiance worked out by hand and turned by the field's normal there 2%
     /// over. Turned, the box reads 2 to 12% over, and with each pixel's read of the probes taken
-    /// toward the faces at the surfaces as a ray's hit takes them, 1 to 3%. The reference's first
-    /// face reflects the box by its gloss, the walls at a roughness of 0.5, which the picture gave
-    /// as Bevy's reflection times the share of the sky the probes saw along the mirror way, none in
-    /// a closed box, so the green wall read 0.809 of its reference's light past the direct. Read
-    /// from the eight by eight directions of the probes the wall sees along the mirror way, it
-    /// reads 1.023.
+    /// toward the faces at the surfaces as a ray's hit takes them, 1 to 3%. The reference's faces
+    /// reflect the box by their gloss, the walls at a roughness of 0.5. The picture gave a wall's
+    /// gloss Bevy's reflection times the share of the sky the probes saw along the mirror way, none
+    /// in a closed box, so the green wall read 0.809 of the light past the direct a reference
+    /// reflecting by its first face's gloss alone holds, and read from the eight by eight
+    /// directions of the probes the wall sees along the mirror way, 1.023. Against the whole
+    /// reference that read 0.885, the gloss between bounces left out, and with the probes' rays
+    /// carrying the gloss of what they meet it reads 1.024.
     /// </remarks>
     [SkippableFact]
     public void AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference()
@@ -121,7 +123,7 @@ public sealed partial class GlobalIlluminationTests
                     if (!begun)
                     {
                         begun = true;
-                        Assert.Null(GiReference.BeginReference(ecs, null, 256, direct is null ? 0 : -1, GiReference.Gloss.FirstFace));
+                        Assert.Null(GiReference.BeginReference(ecs, null, 256, direct is null ? 0 : -1));
                         return false;
                     }
                     if (GiReference.Step(ecs) is null) return false;

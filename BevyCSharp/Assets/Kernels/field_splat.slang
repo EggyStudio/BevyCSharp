@@ -27,6 +27,7 @@
 // codes are kept through Slang's Atomic<uint>, which compiles to WGSL's atomics where InterlockedMin
 // does not, and the emission is kept as four floats a cell where 3DEngine packs it in halves, by an
 // instruction of SPIR-V's alone.
+import bcs_field;
 
 struct FieldInstance
 {
@@ -47,6 +48,8 @@ struct FieldInstance
     // thinnest extent in world units, its mesh's bounds along each of its own axes scaled into the
     // world.
     float4 emission;
+    // xyz: the surface's perceptual roughness, metallic share and reflectance.
+    float4 gloss;
 };
 
 // Each triangle of every mesh the field is built from, three corners in the mesh's own space, each
@@ -72,6 +75,10 @@ RWStructuredBuffer<uint> albedo;
 // illumination carries the emitter as a glow light, which the painting dispatch writes and
 // field_resolve.slang reads.
 RWStructuredBuffer<float4> glow;
+
+// The gloss of a cell's nearest surface in the bits a cell of the faces image keeps it in
+// (glossBits), which the painting dispatch writes and field_resolve.slang puts beside the face.
+RWStructuredBuffer<uint> gloss;
 
 // What the emitters thinner than a cell lend each cell they lie near, six codes a cell, the most
 // light any of them emits, red, green and blue in 256ths, and the area of their faces near the cell
@@ -366,6 +373,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
             float3 painted = instance.color.rgb * (weights.x * cornerColor(ca.w) + weights.y * cornerColor(cb.w) + weights.z * cornerColor(cc.w));
             uint4 bytes = uint4(uint3(saturate(painted * coverage) * 255.0 + 0.5), uint(coverage * 255.0 + 0.5));
             albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (bytes.a << 24);
+            gloss[index] = glossBits(instance.gloss.xyz);
             // Alpha 1 where global illumination carries the emitter as a glow light, which a probe's
             // ray that meets it leaves out (surfaceGlowUncarried).
             float3 e = max(instance.emission.rgb, 0.0);

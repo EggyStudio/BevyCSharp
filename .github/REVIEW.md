@@ -1,36 +1,38 @@
 # Review
 
-Reviewed up to `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed
-at 06:07 on 2026-11-07, its run green at 06:24 on the three systems in 12 to 16 minutes; it keeps
-the form and carries the review's files. Nothing is pushed after it. Before it `5a8b4182`, item 109,
-a leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23 on the three systems
-in 12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference tracing the GGX lobe,
-pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in 13 to 15 minutes.
-Before it `06108b8b`, 105's third commit, the grass's tangents, the card's side from its own normal
-and the shader's guards, pushed at 21:10, its run green at 21:28 on the three systems in 13 to 18
-minutes. Before it `4ad66505`, 105's second commit, the reference's shadow mask, leaf lighting,
-normal maps and 32 masks with the README's 3DEngine link, pushed at 13:25 on 2026-11-05, its run
-green at 13:44 on the three systems in 14 to 18 minutes. Before it `1920d85b`, 105's first commit,
-the reference at the eye's level with its counts, pushed at 10:33, its run green at 10:55 on the
-three systems in 11 to 18 minutes. Before it `03bc102f`, item 99, the screen probes' tile by the
-picture's height, pushed at 08:22, its run green at 08:39 on the three systems in 13 to 16 minutes;
-it keeps the form and carries the review's files. Before it `faadbfbd`, item 100, the reference's
-leaf cutout, pushed at 04:54, its run green at 05:18 on the three systems in 13 to 18 minutes; it
-keeps the form and carries the review's files and the devlog. Before it `817fc176`, 104's screen-
-probe log, pushed at 03:22, its run green at 03:44 on the three systems in 13 to 18 minutes; it
-keeps the form and carries the review's files. Before it `ee0b59e1`, 104's table, the ambient's F_AB
-from Bevy's own DFG image, pushed at 02:17, its run green at 02:39 on the three systems in 10 to 17
-minutes; it keeps the form and carries the review's files. Before it `98dad7f7`, 104's carry, the
-engine's carried ray in its two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the
-three systems in 11 to 17 minutes; it keeps the form and carries the review's files. Before it
-`eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on
-the three systems in 15 to 17 minutes; it keeps the form and carries the review's files. Before it
-`1774aa0c`, item 103, every linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on
-the three systems in 12 to 15 minutes; it keeps the form and carries the review's files. Before it
-`46ae797e`, item 102, the faces at their surfaces with the patch's turn, pushed at 14:12, its run
-green at 14:30 on the three systems in 11 to 17 minutes; it keeps the form and carries the review's
-files and the devlog. Before it `3723d5ff`, 101's second commit and its end, an emitter by its
-mesh's own surface, pushed at 05:32, its run green at 05:55 on the three systems in 11 to 18
+Reviewed up to `e0014da4`, 110's first step, the specular share read from the probes' directions
+along the mirror way, pushed at 09:26 on 2026-11-07, its run green at 09:44 on the three systems in
+12 to 17 minutes; it keeps the form and carries the review's files and the devlog. Nothing is pushed
+after it. Before it `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind,
+pushed at 06:07, its run green at 06:24 on the three systems in 12 to 16 minutes. Before it
+`5a8b4182`, item 109, a leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23
+on the three systems in 12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference
+tracing the GGX lobe, pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in
+13 to 15 minutes. Before it `06108b8b`, 105's third commit, the grass's tangents, the card's side
+from its own normal and the shader's guards, pushed at 21:10, its run green at 21:28 on the three
+systems in 13 to 18 minutes. Before it `4ad66505`, 105's second commit, the reference's shadow mask,
+leaf lighting, normal maps and 32 masks with the README's 3DEngine link, pushed at 13:25 on
+2026-11-05, its run green at 13:44 on the three systems in 14 to 18 minutes. Before it `1920d85b`,
+105's first commit, the reference at the eye's level with its counts, pushed at 10:33, its run green
+at 10:55 on the three systems in 11 to 18 minutes. Before it `03bc102f`, item 99, the screen probes'
+tile by the picture's height, pushed at 08:22, its run green at 08:39 on the three systems in 13 to
+16 minutes; it keeps the form and carries the review's files. Before it `faadbfbd`, item 100, the
+reference's leaf cutout, pushed at 04:54, its run green at 05:18 on the three systems in 13 to 18
+minutes; it keeps the form and carries the review's files and the devlog. Before it `817fc176`,
+104's screen- probe log, pushed at 03:22, its run green at 03:44 on the three systems in 13 to 18
+minutes; it keeps the form and carries the review's files. Before it `ee0b59e1`, 104's table, the
+ambient's F_AB from Bevy's own DFG image, pushed at 02:17, its run green at 02:39 on the three
+systems in 10 to 17 minutes; it keeps the form and carries the review's files. Before it `98dad7f7`,
+104's carry, the engine's carried ray in its two steps, pushed at 23:37 on 2026-11-04, its run green
+at 23:54 on the three systems in 11 to 17 minutes; it keeps the form and carries the review's files.
+Before it `eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at
+20:27 on the three systems in 15 to 17 minutes; it keeps the form and carries the review's files.
+Before it `1774aa0c`, item 103, every linear texture sampler at 16, pushed at 18:34, its run green
+at 18:52 on the three systems in 12 to 15 minutes; it keeps the form and carries the review's files.
+Before it `46ae797e`, item 102, the faces at their surfaces with the patch's turn, pushed at 14:12,
+its run green at 14:30 on the three systems in 11 to 17 minutes; it keeps the form and carries the
+review's files and the devlog. Before it `3723d5ff`, 101's second commit and its end, an emitter by
+its mesh's own surface, pushed at 05:32, its run green at 05:55 on the three systems in 11 to 18
 minutes; it keeps the form and carries the review's files. Before it `9bdb29b3`, 101's first commit,
 the field's contact shadows through the camera's air, pushed at 03:48, its run green at 04:06 on the
 three systems in 10 to 13 minutes; it keeps the form and carries the review's files. Before it
@@ -1750,7 +1752,51 @@ from [SHARED.md](SHARED.md).
     0.09 where (i) reads 0.073 to 0.091, the remarks giving the method. The cost waits for a free
     GPU, a rough read beside the engine's tests putting gi_ambient at 0.146 ms where 0.058 and
     gi_light about 0.1 over the faces' lobe. Taken, (i) lands as (a) with those bounds once the GI
-    set passes and the cost is read quiet.
+    set passes and the cost is read quiet. (a) is `e0014da4`, pushed at 09:26 on 2026-11-07, the
+    read along the mirror way from the probes' 8 by 8 directions with the faces as the rough end of
+    the mix and probeSeesBlended for the sight, the sky share's machinery gone, Gloss.FirstFace for
+    the ten transport tests with the bounce rooms' references traced again, BeginReference's seed
+    and views 3 and 9's bounds by the rule, the glossy thin-wall test, the green wall 1.023 where
+    0.809 at HEAD; the quiet cost gi_light 1.023 to 1.039 ms where 0.852 to 0.866, gi_ambient 0.146
+    where 0.057 and gi_merge 0.030 where 0.032, the directions' image 1.56 MiB where the sky images
+    held 0.83; the GI set 111, the suite 2,037 in 49 minutes, NormTests 18. Next view 5 with the
+    screen probes, then (b). (b)'s design is taken. The field's faces image is r32ui with its low 8
+    bits alone used for the winning triangle's octahedral normal, every reader masking them, so the
+    gloss goes in bits 8 to 31, the perceptual roughness, the metallic share and the reflectance at
+    8 bits each for the same triangle, one more one-cascade buffer the splat paints into at 1 MiB
+    where two Rgba8 images beside the albedo and its still copy would take about 8 at four cascades;
+    BcsFieldDraw gains gloss[4] from the StandardMaterial it holds (144 bytes, ABI 321, both layout
+    tests), SceneFieldPlan.Instance and Shape, FieldInstance and FieldShape carry it, the splat's
+    painting pass writes it packed, the resolve and the stamp OR it into the face,
+    surfaceGlossFacing blends it over the eight cells as surfaceAlbedoFacing blends the color, and
+    shadeProbeHit lights the hit as color times one less metallic plus f0 times A plus B, f0 the
+    lerp of 0.16 r squared and the color by the metallic and A and B from Karis's fit at the hit's
+    roughness and the ray's angle, the trial's form with the face's own values; shadeHit, the traced
+    reflection's hit, unchanged in this step. View 5 with the screen probes read first once it
+    builds, then the GI set against the whole reference. Read at 10:48, (b) built and measured. The
+    gloss is packed in the faces image, TheFieldKeepsEachCellsNearestSurfacesGlossBesideItsFace
+    holding a metal block and a rough dielectric a meter apart at the winner's gloss and face way
+    exactly, the word's layout said once in SceneField.Faces and RENDERING.md's field paragraph, the
+    ten transport tests reading the whole reference and the bounce rooms' whole references traced on
+    four seeds. Against the whole reference, (a) to (b), the closed box 0.860 to 0.885 to 1.003 to
+    1.024, the rooms of 4, 8 and 16 0.875 to 0.891 to 0.984 to 1.001, 0.850 to 0.921 to 0.958 to
+    1.032 and 0.798 to 0.839 to 0.904 to 0.943, the corridor 0.721 to 0.765 to 0.749 to 0.788; view
+    5 with the screen probes 0.020 to 0.024 inside its 0.03, the trial's move having come from the
+    faces' lobe; the bounce rooms' largest distance over the seeds without and with the screen
+    probes, the thin room 0.211 to 0.070 and 0.188 to 0.039, the strip 0.329 to 0.223 and 0.341 to
+    0.234, the grazing floor 0.243 to 0.077 and 0.214 to 0.070, the carried lamp 0.150 to 0.081 and
+    0.175 to 0.112, the Cornell box 0.108 to 0.092, the corridor 0.390 to 0.388, the red walls 0.017
+    and 0.022 to 0.024, the emitting blocks 0.083 to 0.074. Decided, the bounds are the lower of the
+    rule's bound and 15% over (b)'s largest over the seeds, which only tightens, so a view (b)
+    narrows is held to it as the class's remark says, the thin room at 0.09 and 0.05, the grazing
+    floor 0.07 to 0.09, the strip 0.25 to 0.27 and the corridor 0.43 to 0.48; the probe references,
+    which never shaded or lobed a probe's paths since the probes held no gloss, take Bevy's lighting
+    and the gloss's scatter on every path as the camera's do, the two probe tests failing at +13.1
+    and +12.6% against the gloss-less one, so the scatter mode, the Gloss enum and the console's
+    word go, one reference as the truth; and the corridor test's bar moves with the reference by the
+    rule, the reference taking HEAD's right wall from 0.770 to 0.721, to within 30% with the remark
+    naming the gloss between bounces past the probes above, which hold little, the corridor the
+    named remainder.
 
 111. **A lit face outside a thin wall lights the room inside.** From item 110 on 2026-11-07. The
     diffuse read's thin-walled room, walls 0.3 thick in cells of 0.5 with its lamp outside the east
@@ -4533,3 +4579,76 @@ along its mirror way as 3DEngine's roughreflect.slang reads them, its sight of e
 between the reach's texels over half the spacing where 3DEngine's takes an eighth, which here left a
 block's reflection scalloped, and a cosine lobe read from the six faces took a sunlit floor's
 reflection 2.5% over its reference where the directions read it 0.9%.
+
+Item 110 (b)'s commit, a probe's ray lighting what it meets by its gloss as well as its color, and
+one reference for every test, in the commit carrying this line. The bridge's BcsFieldDraw carries
+the material's perceptual roughness, metallic share and reflectance beside its color, Bevy's
+defaults of 0.5, 0 and 0.5 for a material it cannot read, at 144 bytes and the ABI at 321, with both
+layout tests. The splat paints them for the triangle that wins the cell into a buffer of one cascade
+beside the color's, and the resolve and the stamp keep them in bits 8 to 31 of the faces image
+beside the face's way in bits 0 to 7, which every reader masks. The layout of the 32 bits is said
+once beside faceBits in bcs_field.slang, on SceneField.Faces and in RENDERING.md's field paragraph.
+surfaceFacing blends the gloss over the eight cells as it blends the color, and shadeProbeHit sends
+on the color's diffuse share past its metal and the gloss's share toward the ray, its f0 from its
+reflectance and its color by its metal, at the face's own roughness by Karis's fit of the split
+sum's table (splitSum), as though the face reflected the light from all around evenly.
+
+The reference lights every face of every path, a camera's or a probe's, as Bevy's lighting lights
+it, and every path scatters there by its gloss and its diffuse share, so the scatter mode,
+GiReference.Gloss and the console's word go, gi.reference taking a picture, its paths and its
+bounces, and BCS.md and the guide's ray tracing page say so. The ten transport tests read it, and
+the bounce rooms' references are traced again with it on four seeds.
+
+GlobalIlluminationTests.TheFieldKeepsEachCellsNearestSurfacesGlossBesideItsFace lays a metal block
+of roughness 0.2 and a rough dielectric of 0.9 and a reflectance of 0.35 a meter apart and reads
+back the faces image, the cell nearer each holding its way and its gloss within a 255th, the
+winner's and no blend, where without the commit the bits above the way read 0.
+
+Against the whole reference HEAD reads the closed Cornell box 0.860 to 0.885 of its light past the
+direct and the commit 1.003 to 1.024, the closed rooms of 4, 8 and 16 0.875 to 0.891, 0.850 to 0.921
+and 0.798 to 0.839 where 0.984 to 1.001, 0.958 to 1.032 and 0.904 to 0.943, the open floor 1.000 and
+1.017 as before, and the corridor 0.721 to 0.765 where 0.749 to 0.788. A world probe in a closed
+room read its reference, which lit a probe's paths as the probes light a face, 13.1% over at every
+bounce, and reads the one reference 5.0, 3.1 and 4.3% under at its first bounce, two past it and
+every one, the screen probe 3.1 and 1.6% under where 12.6% over, the probes lighting a face by
+Lambert's term and their gloss's share evenly where the reference takes Burley's term and the GGX
+lobe toward the probe. The bounce rooms at High without the screen probes read from HEAD against the
+whole references, their farthest over four seeds, and from the commit the thin room 0.211 and 0.070,
+the strip's 0.329 and 0.223, the grazing floor 0.206 and 0.057, the carried lamp's 0.149 and 0.080,
+the Cornell box 0.108 and 0.092, the window's 0.142 and 0.106, the red walls 0.016 and 0.017, the
+emitting blocks 0.083 and 0.074 and the corridor 0.390 and 0.388, the other qualities and the screen
+probes' cases alike. The red walls with the screen probes read 0.020 to 0.024 against their 0.03,
+the view the trial moved over by 0.001 to 0.002, inside its bound once (a) read the probes'
+directions.
+
+Each bounce room's bound is the lower of the rule's, HEAD's farthest over the four seeds plus the
+margin the bound kept over HEAD's reading before, and 15% over the commit's farthest, so the bound
+moves with the reference and a view the commit narrows is held to it. The thin room's are 0.09 and
+0.04 to 0.05 with the screen probes, the strip's 0.25 to 0.27, the grazing floor's 0.06 to 0.09, the
+carried lamp's 0.10 to 0.13, the Cornell box's 0.11 to 0.13, the window's 0.13 and 0.16 to 0.19, the
+red walls' 0.02 to 0.03, the emitting blocks' 0.09 to 0.11 and the corridor's 0.43 to 0.46. The
+corridor test's bar moves with its reference by the rule, from 25% to 30%, the reference taking
+HEAD's picture from 0.770 to 0.721 on its right wall, and its remark names what is left, the gloss
+carried between bounces past the probes above it, which stand outside its walls and hold little of
+it, 110's remainder.
+
+The cost at High in a Cornell box at 1280 by 720 with the GPU free, three runs each way alternated,
+is gi_trace's median 0.458 to 0.461 ms where HEAD's 0.457 to 0.461, gi_screen's 5.27 to 5.35 where
+5.27 to 5.37, and the splat, the resolve and the stamp 0.025 to 0.032, 0.067 to 0.082 and 0.015 to
+0.018 where 0.026 to 0.032, 0.062 to 0.083 and 0.015 to 0.017. The gloss takes the splat's buffer of
+1 MiB, where images of their own beside the colors would take 8 MiB at four cascades, and
+SceneField.Bytes counts it. The pair 2026-11-07-item-110-probe-gloss.webp shows the box with the
+probes' rays lighting a hit by its color alone and by its gloss as well, the walls 3 to 4% and the
+floor 6% brighter in the picture's levels.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The global
+illumination tests, the bounce rooms, the deferred emitters and the reference's own tests ran first,
+132 passed. The whole suite ran, 2,038 passed and 3 skipped in 47 m 51 s at the 3 GB cap, none
+aborted, its largest process at 2,934 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a probe's ray lights what it meets by its gloss as well as its color, the field keeping each
+face's roughness, metallic share and reflectance in the faces image's bits above the face's way, and
+the one reference lights every face of every path by Bevy's lighting and scatters it by its gloss, a
+closed Cornell box reading 1.003 to 1.024 of that reference's light past the direct where 0.860 to
+0.885, at no cost the trace's timing shows and 1 MiB.

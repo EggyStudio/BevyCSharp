@@ -599,23 +599,43 @@ public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, Field
     return hidden;
 }
 
-/// The light a surface the field holds at `p` sends back along a probe's ray that met it, its color
-/// times the light that reaches it from the sun and the lights, the lamps that cast shadows hidden
-/// where the field stands between, so a lamp's light is not reflected off the far side of a wall,
-/// and its color over pi times the indirect light reaching it from the probes it sees
-/// (`bouncedSeenAt`), at `kept`'s share of it, from the faces where `gathered` says the probes
-/// stood, with the light it emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`),
-/// and the light of the two brightest glow lights, the ray along `way`. `own` holds the light the
-/// surface sends on of what reaches it straight from the sun, the lights and the glow lights, with
-/// its emission, which a probe weighs the frame before's light by. The sun and the lights are given as
-/// the light a white surface facing one returns, and the probes hold the light reaching a face, so
-/// the indirect light is taken over pi.
+/// The share of the light from all around that a face of perceptual roughness `roughness` reflects
+/// toward a way at a cosine of `nv` from its normal, as the scale on its f0 and the bias added to
+/// it, Karis's fit of the split sum's table, which a probe's ray reads a face's gloss by where the
+/// field keeps no table.
+public float2 splitSum(float roughness, float nv)
+{
+    float4 r = roughness * float4(-1.0, -0.0275, -0.572, 0.022) + float4(1.0, 0.0425, 1.04, -0.04);
+    float a004 = min(r.x * r.x, exp2(-9.28 * nv)) * r.x + r.y;
+    return float2(-1.04, 1.04) * a004 + r.zw;
+}
+
+/// The light a surface the field holds at `p` sends back along a probe's ray that met it, what it
+/// reflects of the light that reaches it from the sun and the lights, the lamps that cast shadows
+/// hidden where the field stands between, so a lamp's light is not reflected off the far side of a
+/// wall, and over pi of the indirect light reaching it from the probes it sees (`bouncedSeenAt`),
+/// at `kept`'s share of it, from the faces where `gathered` says the probes stood, with the light
+/// it emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`), and the light of
+/// the two brightest glow lights, the ray along `way`. What it reflects is its color's diffuse
+/// share past its metal and its gloss's share toward the ray (`splitSum`), its f0 from its
+/// reflectance and its color by its metal as Bevy's lighting works it out, taken at the face's own
+/// roughness as though it reflected the light from all around evenly, so the gloss of a wall a
+/// probe's ray meets carries light between bounces as its diffuse share does, the share the
+/// path-traced reference's paths carry at every face. `own` holds the light the surface sends on of
+/// what reaches it straight from the sun, the lights and the glow lights, with its emission, which
+/// a probe weighs the frame before's light by. The sun and the lights are given as the light a
+/// white surface facing one returns, and the probes hold the light reaching a face, so the indirect
+/// light is taken over pi.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
     Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float3 p, float3 way, float probes,
     float spacing, float cascades, float3 kept, out float3 own)
 {
     float3 n = fieldNormal(field, linear, info, p);
-    float3 color = surfaceAlbedoFacing(faces, albedo, linear, info, p, n);
+    float3 gloss;
+    float3 paint = surfaceFacing(faces, albedo, linear, info, p, n, gloss);
+    float2 ab = splitSum(gloss.x, saturate(dot(n, -way)));
+    float3 f0 = lerp(float3(0.16 * gloss.z * gloss.z), paint, gloss.y);
+    float3 color = paint * (1.0 - gloss.y) + f0 * ab.x + ab.y;
     float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, cascades);
     own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
             + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi)

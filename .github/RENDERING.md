@@ -208,7 +208,13 @@ whole, and `bcs_field.slang` holds the layout a shader reads the field through. 
 the same triangles paints each cell the color of the triangle whose code it kept, the material's
 base color times the vertices' colors at its nearest point, and the resolve writes that color and
 the way the face looks into images laid out as the field, with the still meshes' own beside them for
-the stamp, which paints a box's cells its color and its face. The paint dispatch writes each cell's
+the stamp, which paints a box's cells its color and its face. The faces image keeps each cell's face
+in 32 bits, the way it looks in bits 0 to 7, four along each side of the octahedron (`faceBits`),
+and its gloss in bits 8 to 31, its perceptual roughness, metallic share and reflectance a byte each
+(`glossBits`), which the paint dispatch writes beside the color from the material's own and a
+probe's ray lights what it meets by (`shadeProbeHit`), a reader masking the bits it reads. Kept
+there, the gloss takes a buffer of 1 MiB the paint dispatch writes a cascade into, where images of
+their own beside the colors would take 8 MiB at four cascades. The paint dispatch writes each cell's
 emission beside its color, and a third dispatch over the triangles lends the light of an emitter
 thinner than a cell to the cells within a cell of it, times the share of a cell's face it covers,
 which the resolve writes into an image of light laid out as the field, as 3DEngine's do. After the
@@ -256,6 +262,19 @@ light along the ray's way, as 3DEngine reads its environment map. The probes are
 cameras draw, and the map is the camera's, so a dispatch on the camera copies it each frame onto an
 octahedron of 64 texels a side, blurred as a surface of a quarter roughness blurs it, times the
 exposure (`gi_sky.slang`), and the probes read the frame before's.
+
+A ray's hit sends on its color's diffuse share past its metal and its gloss's share toward the ray,
+its f0 from its reflectance and its color by its metal as Bevy works it out, at the roughness and
+the f0 the field keeps beside its face, taken as though it reflected the light from all around
+evenly (`shadeProbeHit`, `splitSum`, Karis's fit of the split sum's table), so a wall's gloss
+carries light between bounces as the path-traced reference's paths carry it. Lit by its color alone,
+the closed Cornell box read 0.860 to 0.885 of the whole reference's light past the direct and the
+closed rooms of 4, 8 and 16 0.88 to 0.89, 0.85 to 0.92 and 0.80 to 0.84, where they read 1.003 to
+1.024, 0.98 to 1.00, 0.96 to 1.03 and 0.90 to 0.94, and the trace takes what it took, 0.46 ms at
+`High` in a Cornell box at 1280 by 720, the field's paint the 1 MiB buffer its gloss is painted
+into. The probes read 3 to 5% under a reference whose every face is lit by Bevy's lighting, since
+they light a face by Lambert's term and their gloss's share evenly where the reference takes
+Burley's term and the GGX lobe toward the probe.
 
 A ray's hit takes the light past the first bounce from the faces of the probes it sees, and a face
 holds the light reaching a surface facing along its axis where the probe stands, a unit or more over
@@ -344,118 +363,116 @@ other material drawn forward keeps Bevy's own light.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over
-a geometry pool with the engine's instance and material buffers. It lights the first face a path
-meets as Bevy's lighting does, Burley's diffuse term and the specular lobe by the material's
-roughness, metallic and reflectance, and every face after as the probes do, with the probes' own
-lights and the light from all around where a path meets nothing, the sun dimmed through the camera's
-air as Bevy dims it for the picture, and a point light's shadow starts a tenth of a unit from it as
-Bevy's shadow maps do. It runs as a dispatch on the camera, compiled to
-SPIR-V for its ray queries, a share of the paths each frame, and the engine's dispatches on a camera
-are kept apart from the program's as its draws are. `gi.reference <png> <samples> [bounces]` writes
-it with its linear light, its regions and their names, and `gi.compare <png>` reads the camera's
-light before tonemapping and says how far the view lies from it, the pixels' differences summed over
-the reference's light, with each region's mean light against the reference's and a picture of the
-difference. `gi.probe <x> <y> <z> <cascade> <samples> [bounces] [table]` traces the same paths from
-one world probe's place along its octahedron's texels, a way through each texel's middle and ways
-drawn across it, against the light the probe holds along them and how far its rays went, and
-`gi.bounces <on|off|count>` holds the probes at a count of bounces past the first for it, the light
-of the frame before added for that many frames after one without it and the probes then standing
-still, so a probe's light at each bounce is read against paths meeting as many faces.
-`gi.screenprobe <x> <y> <samples> [bounces] [table]` reads the screen probe under a pixel the same
-way, the screen kernel writing its sixteen rays as it traces them, each ray's light, way and weight,
-where it was met, on the picture, through the field, by the world's light beyond its reach or
-through the field past it, and the light of what it met, and the reference tracing from where they
-leave along each way and along ways drawn across each ray's texel of the hemisphere.
-A texture counts as its material's base color and a mesh's vertices' colors are left out, but for a
-cut-out material's, a leaf's, a bark's or a grass card's, whose base color texture and metallic and
-roughness texture are masks of the material buffer (`Shaders.MaterialBufferMask`), which color the
-face, say how metallic and rough it is and let a path or a shadow ray through where its alpha is
-under the cutoff, as the forward pass discards those texels. A tree's impostor stands in for a far
-tree turned to the eye as it draws, which no ray meets as a shape, so it is passed and the reference
-holds no far trees. A mesh of a visibility range is traced at the level the camera's distance gives,
-from the middle of the margin it fades in over to the middle of the one it fades out over, since
-Bevy dithers two levels across a margin, so one level of a tree is traced at any distance. The
-reference held every level of each tree at once, and in the feature test's meadow at eight in the
-morning the far cards, their textures past the material buffer's sixteen masks and traced whole,
-stood as planes over the crowns and the leaves past them as black metal, the walls 63 to 70% under
-the reference and the sky 29%. Taken at the level the camera's distance gives, the meadow's walls
-read 17 and 31% under and the sky 6%, the view's distance 0.525 where 0.688. The reference's answer
-counts the cut-out textures past the masks and the trees not dressed yet, since the feature test's
-28 trees stood 70 of their 166 parts 300 frames after it started, and a reading taken then held no
-oaks. The reference honors the materials' own models rather than a physical surface's. A cut-out
-material's normal map bends its face's normal as Bevy's does, in the frame the triangle's texture
-coordinates give, a face lets through from behind the share its diffuse transmission gives and
-keeps the rest as its diffuse share, and a leaf's or a grass card's diffuse share is lit by its
-mapped normal bent half way to its way out of the crown, as the leaf material lights it. A mesh
-Bevy draws no shadow of, as the meadow's grass, is met by the camera's own rays alone, every other
-ray passing it through its instance's mask, as Bevy's shadow maps and the scene's distance field
-leave it out. The material buffer keeps 32 masks, and the reference binds 32, or 16 or 8 on a
-device whose shaders sample too few textures a stage for them and says so.
-The grass was planted without the tangents its normal map is read along, so Bevy read no map and,
-since a material with a normal map leaves the double-sided turn to the map, left a blade seen from
-behind facing away from the eye, its face unlit by a sun at the eye's back and that sun taken as
-light let through it. In the meadow at eight in the morning its first lighting gave 0.01 in the sun
-and its second 0.18 in shade and sun alike, the grass reading 86 to 224% over the reference where
-lit and six times it in the room wall's shadow, the wall's shadow drawn on the bare ground and not
-on the blades. Given its tangents and with a card's side taken by its own normal turned to the eye,
-a mapped normal leaning up and down with its map, the lit grass reads 10 to 37% over and the shaded
-26 to 56%, the view's distance 0.347 where 0.481. A blade seen edge on reads its map's smallest
-levels, which average to nothing, so the leaf material takes the card's normal where the mapped one
-has no length. The grass under a sun at the eye's back reads its reference within 6% at 384 by 256
-and 23% over at 96 by 64, where the reference read at its masks' third level reads it within 1%, the
-picture's mipped normal map smoother than the reference's own.
-A leaf's way out of its crown is its mesh's, and the leaf material read it as the world's, so every
-tree its seed or a level yawed lit its crown as if unturned, the side toward the sun shaded as the
-side its yaw had carried there. The tree's vertex stage turns the way as the mesh's normals are
-turned, an aspen and its eye and sun turned a quarter round reading as the unturned ones within a
-thousandth where 0.395 apart, and in the meadow at eight in the morning the aspens' crowns read 12
-and 6% and 1 and 7% from their reference where 30 and 25% and 8 and 2%, the near oak's reduced level
-48 and 50% under where 61 and 59, the view's distance 0.341 where 0.345.
-In the feature test's meadow at eight in the morning the picture held a mean
-light of 0.2401 with the trees' impostors drawn and 0.2402 with them hidden against the same
-reference.
-A camera's path scatters at every face by its material, a way drawn by the cosine about its normal
-or from its GGX lobe's visible normals, one drawn by their weights, the lobe's its Fresnel at the
-face's roughness as Bevy's table gives it, so the sky a gloss reflects at a grazing view and the
-light a glossy wall carries between bounces come in, a smooth metal plane under a sky of one light
-reading 0.953 of it and a rough gray dielectric at a grazing view 0.667, its diffuse 0.5 and
-Fresnel's share. The probes hold no gloss, so a test of their diffuse transport reads a reference
-whose paths go on by the diffuse share alone, the first face's gloss taking the lights' light alone
-(`gi.reference <png> <samples> [bounces] diffuse`), and the whole reference's gain over it past the
-direct is the gloss global illumination's diffuse probes cannot carry, 21 to 28% in the closed rooms
-of 4, 8 and 16, 23 to 44% in the closed Cornell box, the green wall most, and 12 to 13% in the
-narrow corridor. A first face's gloss reflecting the room was tried for those tests and read the
-Cornell box's colored walls 12 to 19% over the picture, whose first face reflects Bevy's environment
-alone. In the meadow at eight in the morning the whole reference reads the view's distance 0.345 and
-the diffuse one 0.356, the walls 20 and 34% under where 18 and 32, and the lit grass 6 to 24% over
-where 12 to 29.
-A path that meets nothing brings back the ambient light as the probes have it and the
-camera's environment map along its way, so a textured ground, or a sky drawn with no environment map
-to light the scene, reads apart from its reference.
-The bounce rooms are a test
-(`BounceRoomsTests`), the nine views at each quality held within 15% over what they read, 0.08 in
-the Cornell box, 0.07 in the thin room, 0.25 to 0.26 in the corridor, 0.10 in the window's, 0.02
-among the red walls, 0.06 to 0.09 on the grazing floor and 0.08 in the carried lamp's, where
-3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12,
-the strip's 0.18 to 0.20 where 3DEngine's read 0.22, and the emitting blocks' 0.05 where 0.05 to
-0.06. A mend that widens no view keeps every bound, 3DEngine's rule. The Cornell box's floor reads
-13.2% over its reference at `High` without the screen probes, and 15.5% over with its lamp panel
-dark in both, so the excess is the probes' indirect light. In the feature test's Cornell box at 1280
-by 720, 256 paths a pixel take 3.5 s through 14,260 meshes, and the walls read from 5% under to 17%
-over the reference, the lamp panel's light carried as a glow light. A material's emissive alpha is
-Bevy's `emissive_exposure_weight`, the share of the camera's exposure its light takes, 0 by default
-as in Bevy, which the bridge gives Bevy's own field, since Bevy reads the weight there and not from
-the color's alpha, and which the field's gather and the reference take as Bevy shows it. Bevy's
-deferred G-buffer keeps the emissive color and not the weight, so a camera the field's shadows or
-global illumination make deferred showed an exposed emissive unexposed. The bridge mends Bevy's
-`deferred/functions.wesl` in the text Bevy ships (`render/mended.rs`), as the anisotropy mend does
-in `pbr_fragment.wesl`, carrying the weight to the lighting pass in the G-buffer's flags, in the
-five bits above Bevy's three, where the pass reads it back as the emissive's alpha. The emissive
-stays as Bevy writes it, since Solari and the bridge's denoiser read it from the G-buffer and
-expose all of it themselves, and a mend that exposed it as the G-buffer was written exposed the
-feature test's Cornell lamp twice under rays, its face gray. `DeferredEmissiveTests` holds an
-exposed panel drawn deferred to what forward shows and within 2% of its reference, where unmended
-it read 38,165 against 38.2, and the same panel under rays to what forward shows.
+a geometry pool with the engine's instance and material buffers. It lights every face a path meets,
+a camera's or a probe's, as Bevy's lighting does, Burley's diffuse term and the specular lobe by the
+material's roughness, metallic and reflectance, with the probes' own lights and the light from all
+around where a path meets nothing, the sun dimmed through the camera's air as Bevy dims it for the
+picture, and a point light's shadow starts a tenth of a unit from it as Bevy's shadow maps do. It
+runs as a dispatch on the camera, compiled to SPIR-V for its ray queries, a share of the paths each
+frame, and the engine's dispatches on a camera are kept apart from the program's as its draws are.
+`gi.reference <png> <samples> [bounces]` writes it with its linear light, its regions and their
+names, and `gi.compare <png>` reads the camera's light before tonemapping and says how far the view
+lies from it, the pixels' differences summed over the reference's light, with each region's mean
+light against the reference's and a picture of the difference. `gi.probe <x> <y> <z> <cascade>
+<samples> [bounces] [table]` traces the same paths from one world probe's place along its
+octahedron's texels, a way through each texel's middle and ways drawn across it, against the light
+the probe holds along them and how far its rays went, and `gi.bounces <on|off|count>` holds the
+probes at a count of bounces past the first for it, the light of the frame before added for that
+many frames after one without it and the probes then standing still, so a probe's light at each
+bounce is read against paths meeting as many faces. `gi.screenprobe <x> <y> <samples> [bounces]
+[table]` reads the screen probe under a pixel the same way, the screen kernel writing its sixteen
+rays as it traces them, each ray's light, way and weight, where it was met, on the picture, through
+the field, by the world's light beyond its reach or through the field past it, and the light of what
+it met, and the reference tracing from where they leave along each way and along ways drawn across
+each ray's texel of the hemisphere. A texture counts as its material's base color and a mesh's
+vertices' colors are left out, but for a cut-out material's, a leaf's, a bark's or a grass card's,
+whose base color texture and metallic and roughness texture are masks of the material buffer
+(`Shaders.MaterialBufferMask`), which color the face, say how metallic and rough it is and let a
+path or a shadow ray through where its alpha is under the cutoff, as the forward pass discards those
+texels. A tree's impostor stands in for a far tree turned to the eye as it draws, which no ray meets
+as a shape, so it is passed and the reference holds no far trees. A mesh of a visibility range is
+traced at the level the camera's distance gives, from the middle of the margin it fades in over to
+the middle of the one it fades out over, since Bevy dithers two levels across a margin, so one level
+of a tree is traced at any distance. The reference held every level of each tree at once, and in the
+feature test's meadow at eight in the morning the far cards, their textures past the material
+buffer's sixteen masks and traced whole, stood as planes over the crowns and the leaves past them as
+black metal, the walls 63 to 70% under the reference and the sky 29%. Taken at the level the
+camera's distance gives, the meadow's walls read 17 and 31% under and the sky 6%, the view's
+distance 0.525 where 0.688. The reference's answer counts the cut-out textures past the masks and
+the trees not dressed yet, since the feature test's 28 trees stood 70 of their 166 parts 300 frames
+after it started, and a reading taken then held no oaks. The reference honors the materials' own
+models rather than a physical surface's. A cut-out material's normal map bends its face's normal as
+Bevy's does, in the frame the triangle's texture coordinates give, a face lets through from behind
+the share its diffuse transmission gives and keeps the rest as its diffuse share, and a leaf's or a
+grass card's diffuse share is lit by its mapped normal bent half way to its way out of the crown, as
+the leaf material lights it. A mesh Bevy draws no shadow of, as the meadow's grass, is met by the
+camera's own rays alone, every other ray passing it through its instance's mask, as Bevy's shadow
+maps and the scene's distance field leave it out. The material buffer keeps 32 masks, and the
+reference binds 32, or 16 or 8 on a device whose shaders sample too few textures a stage for them
+and says so. The grass was planted without the tangents its normal map is read along, so Bevy read
+no map and, since a material with a normal map leaves the double-sided turn to the map, left a blade
+seen from behind facing away from the eye, its face unlit by a sun at the eye's back and that sun
+taken as light let through it. In the meadow at eight in the morning its first lighting gave 0.01 in
+the sun and its second 0.18 in shade and sun alike, the grass reading 86 to 224% over the reference
+where lit and six times it in the room wall's shadow, the wall's shadow drawn on the bare ground and
+not on the blades. Given its tangents and with a card's side taken by its own normal turned to the
+eye, a mapped normal leaning up and down with its map, the lit grass reads 10 to 37% over and the
+shaded 26 to 56%, the view's distance 0.347 where 0.481. A blade seen edge on reads its map's
+smallest levels, which average to nothing, so the leaf material takes the card's normal where the
+mapped one has no length. The grass under a sun at the eye's back reads its reference within 6% at
+384 by 256 and 23% over at 96 by 64, where the reference read at its masks' third level reads it
+within 1%, the picture's mipped normal map smoother than the reference's own. A leaf's way out of
+its crown is its mesh's, and the leaf material read it as the world's, so every tree its seed or a
+level yawed lit its crown as if unturned, the side toward the sun shaded as the side its yaw had
+carried there. The tree's vertex stage turns the way as the mesh's normals are turned, an aspen and
+its eye and sun turned a quarter round reading as the unturned ones within a thousandth where 0.395
+apart, and in the meadow at eight in the morning the aspens' crowns read 12 and 6% and 1 and 7% from
+their reference where 30 and 25% and 8 and 2%, the near oak's reduced level 48 and 50% under where
+61 and 59, the view's distance 0.341 where 0.345. In the feature test's meadow at eight in the
+morning the picture held a mean light of 0.2401 with the trees' impostors drawn and 0.2402 with them
+hidden against the same reference. Every path, a camera's or a probe's, scatters at every face by
+its material, a way drawn by the cosine about its normal or from its GGX lobe's visible normals, one
+drawn by their weights, the lobe's its Fresnel at the face's roughness as Bevy's table gives it, so
+the sky a gloss reflects at a grazing view and the light a glossy wall carries between bounces come
+in, a smooth metal plane under a sky of one light reading 0.953 of it and a rough gray dielectric at
+a grazing view 0.667, its diffuse 0.5 and Fresnel's share. Every test of global illumination reads
+it, since the probes' rays carry the gloss of what they meet (`shadeProbeHit`) and the light pass
+reflects the light the probes hold along a face's mirror way. Its gain past the direct over a
+reference whose paths went on by the diffuse share alone, the gloss carried between bounces, is 21
+to 28% in the closed rooms of 4, 8 and 16, 23 to 44% in the closed Cornell box, the green wall most,
+and 12 to 13% in the narrow corridor, which such a reference left to the tests of the probes'
+diffuse transport until the probes carried it. The closed box reads 0.860 to 0.885 of the whole
+reference's light past the direct with the probes' rays carrying no gloss and 1.003 to 1.024 with
+them, the rooms of 4, 8 and 16 0.98 to 1.00, 0.96 to 1.03 and 0.90 to 0.94, and the corridor 0.75 to
+0.79, short by the gloss between bounces past the probes above it. In the meadow at eight in the
+morning the whole reference read the view's distance 0.345 and the diffuse one 0.356, the walls 20
+and 34% under where 18 and 32, and the lit grass 6 to 24% over where 12 to 29. A path that meets
+nothing brings back the ambient light as the probes have it and the camera's environment map along
+its way, so a textured ground, or a sky drawn with no environment map to light the scene, reads
+apart from its reference. The bounce rooms are a test (`BounceRoomsTests`), the nine views at each
+quality held within 15% over what they read, 0.08 in the Cornell box, 0.07 in the thin room, 0.25 to
+0.26 in the corridor, 0.10 in the window's, 0.02 among the red walls, 0.06 to 0.09 on the grazing
+floor and 0.08 in the carried lamp's, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27
+to 0.30, 0.02, 0.11 to 0.12 and 0.11 to 0.12, the strip's 0.18 to 0.20 where 3DEngine's read 0.22,
+and the emitting blocks' 0.05 where 0.05 to 0.06. A mend that widens no view keeps every bound,
+3DEngine's rule. The Cornell box's floor reads 13.2% over its reference at `High` without the screen
+probes, and 15.5% over with its lamp panel dark in both, so the excess is the probes' indirect
+light. In the feature test's Cornell box at 1280 by 720, 256 paths a pixel take 3.5 s through 14,260
+meshes, and the walls read from 5% under to 17% over the reference, the lamp panel's light carried
+as a glow light. A material's emissive alpha is Bevy's `emissive_exposure_weight`, the share of the
+camera's exposure its light takes, 0 by default as in Bevy, which the bridge gives Bevy's own field,
+since Bevy reads the weight there and not from the color's alpha, and which the field's gather and
+the reference take as Bevy shows it. Bevy's deferred G-buffer keeps the emissive color and not the
+weight, so a camera the field's shadows or global illumination make deferred showed an exposed
+emissive unexposed. The bridge mends Bevy's `deferred/functions.wesl` in the text Bevy ships
+(`render/mended.rs`), as the anisotropy mend does in `pbr_fragment.wesl`, carrying the weight to the
+lighting pass in the G-buffer's flags, in the five bits above Bevy's three, where the pass reads it
+back as the emissive's alpha. The emissive stays as Bevy writes it, since Solari and the bridge's
+denoiser read it from the G-buffer and expose all of it themselves, and a mend that exposed it as
+the G-buffer was written exposed the feature test's Cornell lamp twice under rays, its face gray.
+`DeferredEmissiveTests` holds an exposed panel drawn deferred to what forward shows and within 2% of
+its reference, where unmended it read 38,165 against 38.2, and the same panel under rays to what
+forward shows.
 
 A mesh a shader places in its vertex stage, as the feature test's fireflies are, stands in the
 reference where its mesh's own corners lie and in the picture where it is drawn, so the pixels it is
@@ -523,9 +540,10 @@ across the octahedron's folds, read filtered and mixed toward its faces as the s
 past a half, the light reaching the surface standing in for the probes it does not see, times the
 share Bevy's table gives its gloss, and Bevy's reflection past the probes. The pass took Bevy's
 reflection times the share of the sky the probes saw along the mirror way, so a closed room's rough
-walls reflected none of one another's light and a closed Cornell box's green wall read 0.809 of its
-reference's light past the direct, where the reference's first face reflects the room, and reads
-1.023. A cosine lobe read from the faces alone took a sunlit floor's reflection in the light of the
+walls reflected none of one another's light and a closed Cornell box's green wall read 0.809 of the
+light past the direct of a reference reflecting by its first face's gloss alone, and read so 1.023
+of that, and 1.024 of the whole reference with the probes' rays carrying the gloss of what they
+meet. A cosine lobe read from the faces alone took a sunlit floor's reflection in the light of the
 walls and blocks around it, the bounce rooms' floor among red walls 2.5% over its reference where
 the directions read it 0.9% over and the picture before 0.2%. Each probe's sight of the surface is
 blended between its reach's texels over half the spacing (`probeSeesBlended`), since read from one

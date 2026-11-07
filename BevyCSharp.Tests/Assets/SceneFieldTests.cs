@@ -31,7 +31,8 @@ public sealed partial class SceneFieldTests
         Assert.Equal(80, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Emission)).ToInt32());
         Assert.Equal(96, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Low)).ToInt32());
         Assert.Equal(112, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.High)).ToInt32());
-        Assert.Equal(128, Marshal.SizeOf<NativeFieldDraw>());
+        Assert.Equal(128, Marshal.OffsetOf<NativeFieldDraw>(nameof(NativeFieldDraw.Gloss)).ToInt32());
+        Assert.Equal(144, Marshal.SizeOf<NativeFieldDraw>());
         Assert.Equal(12, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.Found)).ToInt32());
         Assert.Equal(16, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.ForwardX)).ToInt32());
         Assert.Equal(28, Marshal.OffsetOf<NativeFieldEye>(nameof(NativeFieldEye.Far)).ToInt32());

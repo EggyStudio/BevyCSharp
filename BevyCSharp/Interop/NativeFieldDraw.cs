@@ -5,13 +5,13 @@ namespace Bevy.Interop;
 /// <summary>
 /// The bridge's <c>BcsFieldDraw</c>, a mesh drawn that casts shadows as the scene's distance field
 /// reads it, its mesh's number and generation, its sides, its triangles, its matrix, its material's
-/// color and emission, and its bounds in its own space.
+/// color and emission, its bounds in its own space and its material's gloss.
 /// </summary>
 /// <remarks>
 /// The offsets are the bridge's, written out, so a field reordered on one side cannot read another
 /// field on the other, and a test on each side holds them to the same numbers.
 /// </remarks>
-[StructLayout(LayoutKind.Explicit, Size = 128)]
+[StructLayout(LayoutKind.Explicit, Size = 144)]
 internal unsafe struct NativeFieldDraw
 {
     /// <summary>The mesh's number, the same for every entity drawing it.</summary>
@@ -46,6 +46,12 @@ internal unsafe struct NativeFieldDraw
 
     /// <summary>The greatest corner of the mesh's bounds in its own space.</summary>
     [FieldOffset(112)] public fixed float High[4];
+
+    /// <summary>
+    /// The material's perceptual roughness, metallic share and reflectance, Bevy's defaults of 0.5,
+    /// 0 and 0.5 where the bridge cannot read the material.
+    /// </summary>
+    [FieldOffset(128)] public fixed float Gloss[4];
 }
 
 /// <summary>The bridge's <c>BcsFieldEye</c>, the camera the scene's distance field lies around.</summary>
