@@ -32,11 +32,16 @@ The encoders are written here, BC7's mode 6 with each block's endpoints along it
 fitted again by least squares, and BC4 twice for BC5, so the import needs Python 3.14, whose own
 compression module has zstd, and Pillow, and nothing else. Each level is made from the one above by a
 box filter, and the color under a cut-out leaf's transparent texels is the color of the leaf nearest,
-so no dark rim shows as it shrinks. A leaf atlas's opacity is scaled at each level so the share of
-each leaf's box past one half, read between the level's texels as a card samples it, stays the top
-level's on average, so a leaf holds in the distance until its box is about a texel across. Keeping
-the share of the whole atlas's texels instead loses the leaves a level sooner, where a box two
-texels across is averaged with the transparent texels round it.
+so no dark rim shows as it shrinks. A leaf atlas's color and its surface's four channels are each
+level's means weighted by how much of each texel the leaves cover, and the surface's texels outside
+the leaves take the nearest leaf's as the color's do, since averaged with the transparent texels
+round it a leaf two texels across took their light color and their translucency of none, a silver
+birch's leaves half as bright again and letting through half what they do where a card's distance
+had it sampled at eight texels across. A leaf atlas's opacity is scaled at each level so the share
+of each leaf's box past one half, read between the level's texels as a card samples it, stays the
+top level's on average, so a leaf holds in the distance until its box is about a texel across.
+Keeping the share of the whole atlas's texels instead loses the leaves a level sooner, where a box
+two texels across is averaged with the transparent texels round it.
 
 A grass entry is a card of blades whose roots stand along its bottom edge, cut out as a leaf atlas is,
 its levels keeping the share of the whole card past one half, since its blades are one cluster rather
@@ -490,8 +495,10 @@ def write_entry(maps, folder, kind, boxes=None):
     """
     os.makedirs(folder, exist_ok=True)
     report = {}
+    cut = kind in ("leaves", "grass")
     for name, image in maps.items():
-        levels = mip_chain(image, boxes if name == "albedo" and kind in ("leaves", "grass") else None)
+        cover = maps["albedo"].getchannel("A").resize(image.size, Image.Resampling.BOX) if cut and name in ("albedo", "surface") else None
+        levels = mip_chain(image, boxes if name == "albedo" and cut else None, cover, cut and name == "surface")
         format, blocks, error = encode(name, levels)
         data = ktx2(format, levels, blocks)
         path = os.path.join(folder, f"{name}.ktx2")
@@ -502,13 +509,16 @@ def write_entry(maps, folder, kind, boxes=None):
     return report
 
 
-def mip_chain(image, boxes=None):
+def mip_chain(image, boxes=None, cover=None, whole=False):
     """
     The image and each level under it, half the size of the one above, down to a texel, a leaf
     atlas's opacity scaled at each level to keep the share of its leaves' boxes past one half.
+    Where cover gives how much of each texel the leaves cover, a leaf atlas's opacity at the image's
+    size, the color, or every channel where whole says so, as the surface's, is each level's mean
+    weighted by it (covered()), and the texels it leaves bare are bled from it.
     """
     if image.mode == "RGBA":
-        image = bleed(image)
+        image = bleed(image, cover, whole)
     levels = [image]
     rects = [placed(box, image.size) for box in boxes] if boxes else None
     share = sampled_share(image.getchannel("A"), rects, image.size) if rects else None
@@ -516,6 +526,9 @@ def mip_chain(image, boxes=None):
         above = levels[-1]
         size = (max(above.width // 2, 1), max(above.height // 2, 1))
         level = resized(above, size, Image.Resampling.BOX)
+        if cover is not None:
+            level = covered(above, cover, size, level, 4 if whole else 3)
+            cover = cover.resize(size, Image.Resampling.BOX)
         if share is not None:
             alpha = level.getchannel("A")
             scale = sampled_scale(alpha, rects, image.size, share)
@@ -524,18 +537,40 @@ def mip_chain(image, boxes=None):
     return levels
 
 
-def bleed(image):
+def covered(above, cover, size, plain, bands):
+    """
+    A level of size from the level above, its first bands the means of the above's weighted by
+    cover, how much of each of its texels the leaves cover, and the plain box's where they cover
+    none, its other bands the plain box's, so a leaf a texel or two across keeps its own color and
+    surface rather than taking the transparent texels' round it.
+    """
+    weight = cover.convert("F")
+    total = weight.resize(size, Image.Resampling.BOX)
+    result = []
+    for index, band in enumerate(above.split()):
+        if index >= bands:
+            result.append(plain.getchannel(index))
+            continue
+        summed = ImageMath.lambda_eval(lambda image: image["b"] * image["w"], b=band.convert("F"), w=weight).resize(size, Image.Resampling.BOX)
+        mean = ImageMath.lambda_eval(lambda image: (image["s"] + image["p"] * 0.001) / (image["t"] + 0.001) + 0.5, s=summed, p=plain.getchannel(index).convert("F"), t=total)
+        result.append(mean.convert("L"))
+    return Image.merge(above.mode, result)
+
+
+def bleed(image, cover=None, whole=False):
     """
     An image whose transparent texels take the color of the opaque ones nearest them, the
     opaque texels' colors averaged at each size from a texel up to the whole image and the
-    finest average that reaches a texel taken for it.
+    finest average that reaches a texel taken for it. Where cover is given it says which texels are
+    opaque in place of the image's own alpha, and where whole says so every channel is bled, the
+    surface's alpha being its translucency rather than its opacity.
     """
-    alpha = image.getchannel("A")
+    alpha = image.getchannel("A") if cover is None else cover
     if alpha.getextrema()[0] == 255:
         return image
-    color = image.convert("RGB")
+    color = image if whole else image.convert("RGB")
     mask = alpha.point(lambda value: 255 if value > 0 else 0)
-    premultiplied = Image.composite(color, Image.new("RGB", color.size), mask)
+    premultiplied = Image.composite(color, Image.new(color.mode, color.size), mask)
 
     sizes = []
     size = color.size
@@ -546,15 +581,19 @@ def bleed(image):
     filled = color
     for size in reversed(sizes):
         weight = mask.resize(size, Image.Resampling.BOX).resize(color.size, Image.Resampling.BILINEAR)
-        summed = premultiplied.resize(size, Image.Resampling.BOX).resize(color.size, Image.Resampling.BILINEAR)
-        average = Image.merge("RGB", [
+        if whole:
+            summed = resized(resized(premultiplied, size, Image.Resampling.BOX), color.size, Image.Resampling.BILINEAR)
+        else:
+            summed = premultiplied.resize(size, Image.Resampling.BOX).resize(color.size, Image.Resampling.BILINEAR)
+        average = Image.merge(color.mode, [
             ImageMath.lambda_eval(lambda image: image["c"] * 255.0 / (image["w"] + 0.001), c=channel.convert("F"), w=weight.convert("F")).convert("L")
             for channel in summed.split()])
         reached = weight.point(lambda value: 255 if value > 0 else 0)
         filled = Image.composite(average, filled, reached)
 
     result = Image.composite(color, filled, mask)
-    result.putalpha(alpha)
+    if not whole:
+        result.putalpha(alpha)
     return result
 
 

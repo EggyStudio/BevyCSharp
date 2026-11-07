@@ -365,7 +365,19 @@ ambient light's whole color where the probes' sky and the reference hold it at 0
 patch under a uniform sky read its blades 40% over the reference and reads them 1% over, and in the
 feature test's meadow at eight in the morning the far grass reads 7% under to 2% under where 42 to
 45% over and the near grass 16% under where 6% over, the crowns from 23% under to 2% over, their
-light from the probes short beneath the gloss that was over. The reading takes a forest of 24
+light from the probes short beneath the gloss that was over. A leaf set's smaller levels took the
+box's mean of a leaf and the transparent texels round it, the photograph's light background and a
+translucency of none, so where a leaf was a texel or two across its color was half as bright again
+as its own and it let through 0.094 of the light behind it where it lets through 0.235. A lone
+aspen under a uniform sky seen from 16 m at 320 by 180 read its leaves 37% under its reference over
+a black background, the sky between them which the reference's paths bring back being most of a
+pixel's light, and 17% over with the reference's sky behind them. With each level's color and
+surface weighted by how much of each texel the leaves cover (`build/textures.py`) it reads them 4%
+over, and in the meadow the crowns read 3 to 13 points lower, from 28% under to 7% under, the bright
+levels having hidden a shortfall under the sun the uniform sky does not show. The probes at a
+quarter meter's spacing do not hold the shadow inside a crown, their light at the aspen's leaves
+0.68 at the front and 0.53 behind where the reference's is 0.43 and 0.26, and 0.64 and 0.46 with
+the crown solid in the field, which the leaf's gray stands in for. The reading takes a forest of 24
 tupelos' opaque pass at 1920 by 1080 from 3.3 ms to 6.7, 7.6 with the reflection, and the feature
 test's meadow's at 1280 by 720 from 2.6 ms to 5.6 on the RTX 4070 Laptop GPU, and is compiled into
 the leaves' shader only while the probes light the scene, since compiled in and passed over it took

@@ -203,7 +203,10 @@ with, `BarkSet` and `LeafSet`, which `TreeTextures` finds by name, each an albed
 surface of occlusion, roughness and translucency in the formats a desktop GPU samples as they are. A
 leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf, and its smaller
 levels keep the share of each box a card sees past the cut, so a crown keeps its leaves as it
-stands further off, until a leaf is about a texel of the level it is drawn from. Where the
+stands further off, until a leaf is about a texel of the level it is drawn from. Each smaller
+level's color and surface are means weighted by how much of each texel the leaves cover, so a far
+leaf keeps its own color and lets through as much light as a near one, rather than taking on the
+transparent texels round it. Where the
 collection has no set of the name a species gives, the bark is drawn from ridged noise in its
 `BarkColor` and the leaves from a generated atlas of its `LeafShape` in its `LeafColor`. The
 collection carries cards of grass as well, `wheat-grass`, `grass-tuft-a` and `grass-tuft-b`, of the

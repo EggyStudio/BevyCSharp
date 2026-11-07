@@ -36,10 +36,19 @@ the light the probes they see hold along their mirror way, the grass's bluish sh
 gone, the far grass at its path-traced reference where it read 42 to 45% over, and the near grass
 and the crowns darker, their light from the probes short beneath the reflection that was over.
 
+![](.github/assets/readings/2026-11-07-item-112-leaves.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, on the left with each
+smaller level of the leaves' and the grass's textures the mean of a leaf and the transparent texels
+round it, and on the right weighted by how much of each texel the leaves cover, the far crowns a
+deeper green and darker, from 28 to 7% under their path-traced reference where 21% under to 2% over.
+It is a step down with the textures right, the bright levels having hidden a shortfall under the
+sun, which comes back when the leaves' gray leaves the sun's light to the shadow map.
+
 Done that day
 
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.
 - Item 109 at `5a8b4182`. A planted tree's leaves bend their normals in mesh space.
+- Item 110 at `2adbe701`. The specular share of the bounce light from the cascades.
 
 ## 2026-11-06
 

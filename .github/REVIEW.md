@@ -1,174 +1,176 @@
 # Review
 
-Reviewed up to `7bd61bcc`, 110's second step, the field holding each face's gloss and the probes'
-rays lighting their hits by it, with the one reference, pushed at 12:00 on 2026-11-07, its run green
-at 12:17 on the three systems in 14 to 17 minutes; it keeps the form and carries the review's files
-and the devlog. Nothing is pushed after it. Before it `e0014da4`, 110's first step, the specular
-share read from the probes' directions along the mirror way, pushed at 09:26, its run green at 09:44
-on the three systems in 12 to 17 minutes. Before it `b576bf3f`, item 106, the shadow biases nullable
-with Bevy's defaults by kind, pushed at 06:07, its run green at 06:24 on the three systems in 12 to
-16 minutes. Before it `5a8b4182`, item 109, a leaf's way out turned with its tree, pushed at 00:06,
-its run green at 00:23 on the three systems in 12 to 17 minutes. Before it `18f226eb`, 105's fourth
-commit, the reference tracing the GGX lobe, pushed at 22:39 on 2026-11-06, its run green at 22:54 on
-the three systems in 13 to 15 minutes. Before it `06108b8b`, 105's third commit, the grass's
-tangents, the card's side from its own normal and the shader's guards, pushed at 21:10, its run
-green at 21:28 on the three systems in 13 to 18 minutes. Before it `4ad66505`, 105's second commit,
-the reference's shadow mask, leaf lighting, normal maps and 32 masks with the README's 3DEngine
-link, pushed at 13:25 on 2026-11-05, its run green at 13:44 on the three systems in 14 to 18
-minutes. Before it `1920d85b`, 105's first commit, the reference at the eye's level with its counts,
-pushed at 10:33, its run green at 10:55 on the three systems in 11 to 18 minutes. Before it
-`03bc102f`, item 99, the screen probes' tile by the picture's height, pushed at 08:22, its run green
-at 08:39 on the three systems in 13 to 16 minutes; it keeps the form and carries the review's files.
-Before it `faadbfbd`, item 100, the reference's leaf cutout, pushed at 04:54, its run green at 05:18
-on the three systems in 13 to 18 minutes; it keeps the form and carries the review's files and the
-devlog. Before it `817fc176`, 104's screen- probe log, pushed at 03:22, its run green at 03:44 on
-the three systems in 13 to 18 minutes; it keeps the form and carries the review's files. Before it
-`ee0b59e1`, 104's table, the ambient's F_AB from Bevy's own DFG image, pushed at 02:17, its run
-green at 02:39 on the three systems in 10 to 17 minutes; it keeps the form and carries the review's
-files. Before it `98dad7f7`, 104's carry, the engine's carried ray in its two steps, pushed at 23:37
-on 2026-11-04, its run green at 23:54 on the three systems in 11 to 17 minutes; it keeps the form
-and carries the review's files. Before it `eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces,
-pushed at 20:10, its run green at 20:27 on the three systems in 15 to 17 minutes; it keeps the form
-and carries the review's files. Before it `1774aa0c`, item 103, every linear texture sampler at 16,
-pushed at 18:34, its run green at 18:52 on the three systems in 12 to 15 minutes; it keeps the form
-and carries the review's files. Before it `46ae797e`, item 102, the faces at their surfaces with the
-patch's turn, pushed at 14:12, its run green at 14:30 on the three systems in 11 to 17 minutes; it
-keeps the form and carries the review's files and the devlog. Before it `3723d5ff`, 101's second
-commit and its end, an emitter by its mesh's own surface, pushed at 05:32, its run green at 05:55 on
-the three systems in 11 to 18 minutes; it keeps the form and carries the review's files. Before it
-`9bdb29b3`, 101's first commit, the field's contact shadows through the camera's air, pushed at
-03:48, its run green at 04:06 on the three systems in 10 to 13 minutes; it keeps the form and
-carries the review's files. Before it `086ac6e7`, 95's thirteenth commit, the cascades' clearance
-from the eye, pushed at 02:15, its run green at 02:38 on the three systems in 13 to 19 minutes; it
-keeps the form and carries the review's files. Before it `accbda6d`, 95's twelfth commit, the lamp
-march from its first step, pushed at 00:30, its run green at 00:53 on the three systems in 14 to 18
-minutes; it keeps the form and carries the review's files. Before it `8583deff`, 95's eleventh
-commit, the field's hold of a thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its
-run green at 23:24 on the three systems in 12 to 18 minutes; it keeps the form and carries the
-review's files. Before it `f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at
-19:47 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
-Before it `c7eabbb0`, 95's default commit, the feature test's GI at Medium with the fill off, pushed
-at 16:24, its run green at 16:48 on the three systems in 16 to 18 minutes; it keeps the form and
-carries the review's files. Before it `5cafb9a2`, 95's forward- surfaces commit, pushed at 15:28,
-its run green at 15:51 on the three systems in 14 to 18 minutes; it keeps the form and carries the
-review's files with the rows for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit,
-pushed at 10:55 on 2026-11-03, its run green at 11:14 on the three systems; it keeps the form and
-carries the review's files and N 4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes
-taken back, pushed at 07:59 on 2026-11-03, its run green at 08:17 on the three systems; it keeps the
-form and carries the review's files. Before it `43550f11`, 95's reach commit, Medium in four
-cascades, pushed at 04:16 on 2026-11-03, its run green at 04:34 on the three systems; it keeps the
-form and carries the review's files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on
-2026-11-03, its run green at 02:39 on the three systems; it keeps the form and carries the review's
-files. Before it `04e6b0c5`, 95's third commit, two more faults of the measure, pushed at 01:21 on
-2026-11-03, its run green at 01:43 on the three systems; it keeps the form and carries the review's
-files. Before it `a3db9697`, 95's second commit, the reference's sun through the air and gi.compare
-with GI off, pushed at 23:54 on 2026-11-02, its run green at 00:17 on 2026-11-03 on the three
-systems; it keeps the form and carries the review's files. Before it `e6a458b1`, 91's mend of the
-wind's length, pushed at 22:36 on 2026-11-02, its run green at 22:55 on the three systems; it keeps
-the form and carries the review's files. Before it `1ea6d865`, item 91, Sky a submodule at its
-`fbc385e`, pushed at 21:35 on 2026-11-02, its run green at 21:57 on the three systems, the first
-with the submodule checked out; it keeps the form and carries the review's files. Before it
-`af54d261`, item 80, pushed at 20:36 on 2026-11-02, its run green at 20:55 on the three systems; it
-keeps the form and carries the review's files. Before it `add899da`, item 94, pushed at 19:37 on
-2026-11-02, its run green at 19:59 on the three systems; it keeps the form and carries the review's
-files. Before it `54f985a4`, item 93's first step, pushed at 17:15 on 2026-11-02, its run green at
-17:33 on the three systems; it keeps the form and carries the review's files. Before it `99160868`,
-item 92, pushed at 14:32 on 2026-11-02, its run green at 14:50 on the three systems; it keeps the
-form and carries the review's files. Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on
-2026-11-02, its run green at 11:37 on the three systems in about 20 minutes; the pack run started
-from it at 11:38 with publish on, green at 14:30 with the drive in 125 minutes at its limit's edge,
-the soak in 21, every captures job green and 0.6.18 published, the first package since 09fc95dd of
-2026-10-21, which settles Verdict 51. Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at
-02:11 on 2026-11-02, its run green at 02:25 on the three systems in about 14 minutes; the pack run
-started from it at 02:26 with publish on, its captures jobs green, which settles Verdicts 49 and 50,
-and its drive cancelled at the limit of 100 minutes at 04:23 where the run before took 67, Verdict
-51, so no package was published; read at 04:30. Before it `720ec3db`, item 68's fourth phase and its
-end, pushed at 00:23 on 2026-11-02 beside the pack run, its run green at 00:42 on the three systems
-in about 17 minutes; it keeps the form and carries the review's files. Before it `58265110`, item
-90's second commit and its end, pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three
-systems in about 15 minutes; the pack run started from it at 23:22 with publish on, the first since
-`09fc95dd` of 2026-10-21, its drive and soak jobs the proof of item 90's limits on the runner; its
-captures-fedora job red at 00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict
-49, and two of its captures jobs red at 00:43, many_foxes and specular_tint past the comparison's
-bar, Verdict 50; the run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes
-under its limit of 100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no
-package was published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item
-90's first commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels
-choosing their light before any thread branches since llvmpipe faults on the transmittance lookup
-after a group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01
-with `b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the
-suites in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a
-file of their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451`
-makes pipelines.wait answer after three ready frames running and keep a held clock still between
-commands while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the
-first game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its
-grass or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with
-every shot after it whole; the drive's effects view, which had been missing the level, the spheres'
-board and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still
-through a wait and an app begun on a set clock drawing what comes into view whole; the whole suite
-before the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched
-classes, 78, the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the
-scenes yard, pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's
-site a point in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at
-09:30 with the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it
-`11efeefe`, item 88, pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to
-17 minutes, the run- time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md.
-Before it `60638b01`, item 87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18
-minutes, the day's fill, recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item
-86, pushed at 16:58 with `63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in
-11 to 18 minutes, recorded under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run
-green at 15:52 with the suites in 13 to 19 minutes, the Levels module as a submodule with
-LevelSpawner the binding, recorded under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item
-83's end, pushed at 14:08, its run green at 14:31 with the suites in 14 to 18 minutes, the meadow on
-the engine grass, recorded under the item in REVIEW- ARCHIVE.md. Before it `1099cb35`, 83's second
-phase, pushed at 13:15, its run green at 13:32 with the suites in 11 to 14 minutes, the engine
-grass, recorded under the item in REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23
-with `d92ac690`, 83's first phase, its run green at 12:42 with the suites in 14 to 17 minutes, the
-README's line verbatim and the three grass cards in the collection, recorded under the items. Before
-it `1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the light-through test at 180
-traced frames, recorded under the item in REVIEW- ARCHIVE.md. Before it `391d6b85`, the version to
-0.6, the owner's change committed by the reviewer and pushed at 11:42, its run green at 11:59.
-Before it `785a1136`, item 82, pushed at 09:10, its run green at 09:29 with the suites in 13 to 18
-minutes, the irradiance volume's fallback mended in render/mended.rs, recorded under the item in
-REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30, its
-run green at 22:49 with the suites in 12 to 18 minutes, the dark blades gone, recorded under the
-item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30
-after the run of `1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes.
-The march adds an isotropic share for the light scattered more often than the four octaves follow, a
-deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud
-tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the
-lavender going with the gray, the 15:00 sun side keeping its shading and overcast and storm staying
-gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out
-of GPU memory under other sessions' apps and pass alone, 55 of 55; a lead, Bevy's asset watcher
-panicking on a send as an app stops. Before it `1226ff50`, Verdict 48's mend, pushed with `169d5afe`
-and `3417d612` at 19:55 on 2026-10-30 after the red run of `7e35f94b` ended, the run of `1226ff50`
-green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests reads the promoted bytes of the
-last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite
-1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c`
-at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
-flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
-phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
-lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
-headless bridge, the suite 1,998 passed with one failure read as a flake, the light-through floor at
-High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
-`7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
-passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
-shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
-red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
-`bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
-level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+Reviewed up to `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see
+along their mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06 on
+2026-11-07, its run green at 16:24 on the three systems in 15 to 18 minutes; it keeps the form and
+carries the review's files. Nothing is pushed after it. Before it `7bd61bcc`, 110's second step, the
+field holding each face's gloss and the probes' rays lighting their hits by it, with the one
+reference, pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before
+it `e0014da4`, 110's first step, the specular share read from the probes' directions along the
+mirror way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before
+it `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed at 06:07,
+its run green at 06:24 on the three systems in 12 to 16 minutes. Before it `5a8b4182`, item 109, a
+leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23 on the three systems in
+12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference tracing the GGX lobe,
+pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in 13 to 15 minutes.
+Before it `06108b8b`, 105's third commit, the grass's tangents, the card's side from its own normal
+and the shader's guards, pushed at 21:10, its run green at 21:28 on the three systems in 13 to 18
+minutes. Before it `4ad66505`, 105's second commit, the reference's shadow mask, leaf lighting,
+normal maps and 32 masks with the README's 3DEngine link, pushed at 13:25 on 2026-11-05, its run
+green at 13:44 on the three systems in 14 to 18 minutes. Before it `1920d85b`, 105's first commit,
+the reference at the eye's level with its counts, pushed at 10:33, its run green at 10:55 on the
+three systems in 11 to 18 minutes. Before it `03bc102f`, item 99, the screen probes' tile by the
+picture's height, pushed at 08:22, its run green at 08:39 on the three systems in 13 to 16 minutes;
+it keeps the form and carries the review's files. Before it `faadbfbd`, item 100, the reference's
+leaf cutout, pushed at 04:54, its run green at 05:18 on the three systems in 13 to 18 minutes; it
+keeps the form and carries the review's files and the devlog. Before it `817fc176`, 104's screen-
+probe log, pushed at 03:22, its run green at 03:44 on the three systems in 13 to 18 minutes; it
+keeps the form and carries the review's files. Before it `ee0b59e1`, 104's table, the ambient's F_AB
+from Bevy's own DFG image, pushed at 02:17, its run green at 02:39 on the three systems in 10 to 17
+minutes; it keeps the form and carries the review's files. Before it `98dad7f7`, 104's carry, the
+engine's carried ray in its two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the
+three systems in 11 to 17 minutes; it keeps the form and carries the review's files. Before it
+`eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on
+the three systems in 15 to 17 minutes; it keeps the form and carries the review's files. Before it
+`1774aa0c`, item 103, every linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on
+the three systems in 12 to 15 minutes; it keeps the form and carries the review's files. Before it
+`46ae797e`, item 102, the faces at their surfaces with the patch's turn, pushed at 14:12, its run
+green at 14:30 on the three systems in 11 to 17 minutes; it keeps the form and carries the review's
+files and the devlog. Before it `3723d5ff`, 101's second commit and its end, an emitter by its
+mesh's own surface, pushed at 05:32, its run green at 05:55 on the three systems in 11 to 18
+minutes; it keeps the form and carries the review's files. Before it `9bdb29b3`, 101's first commit,
+the field's contact shadows through the camera's air, pushed at 03:48, its run green at 04:06 on the
+three systems in 10 to 13 minutes; it keeps the form and carries the review's files. Before it
+`086ac6e7`, 95's thirteenth commit, the cascades' clearance from the eye, pushed at 02:15, its run
+green at 02:38 on the three systems in 13 to 19 minutes; it keeps the form and carries the review's
+files. Before it `accbda6d`, 95's twelfth commit, the lamp march from its first step, pushed at
+00:30, its run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the form and
+carries the review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of a thin
+wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the three
+systems in 12 to 18 minutes; it keeps the form and carries the review's files. Before it `f5505a58`,
+95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in 16 to 18
+minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's default
+commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at 16:48
+on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files. Before
+it `5cafb9a2`, 95's forward- surfaces commit, pushed at 15:28, its run green at 15:51 on the three
+systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows for 99,
+100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run
+green at 11:14 on the three systems; it keeps the form and carries the review's files and N 4.10.
+Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
+2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
+files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
+2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
+files. Before it `2ee206f9`, 95's air commit, pushed at 02:20 on 2026-11-03, its run green at 02:39
+on the three systems; it keeps the form and carries the review's files. Before it `04e6b0c5`, 95's
+third commit, two more faults of the measure, pushed at 01:21 on 2026-11-03, its run green at 01:43
+on the three systems; it keeps the form and carries the review's files. Before it `a3db9697`, 95's
+second commit, the reference's sun through the air and gi.compare with GI off, pushed at 23:54 on
+2026-11-02, its run green at 00:17 on 2026-11-03 on the three systems; it keeps the form and carries
+the review's files. Before it `e6a458b1`, 91's mend of the wind's length, pushed at 22:36 on
+2026-11-02, its run green at 22:55 on the three systems; it keeps the form and carries the review's
+files. Before it `1ea6d865`, item 91, Sky a submodule at its `fbc385e`, pushed at 21:35 on
+2026-11-02, its run green at 21:57 on the three systems, the first with the submodule checked out;
+it keeps the form and carries the review's files. Before it `af54d261`, item 80, pushed at 20:36 on
+2026-11-02, its run green at 20:55 on the three systems; it keeps the form and carries the review's
+files. Before it `add899da`, item 94, pushed at 19:37 on 2026-11-02, its run green at 19:59 on the
+three systems; it keeps the form and carries the review's files. Before it `54f985a4`, item 93's
+first step, pushed at 17:15 on 2026-11-02, its run green at 17:33 on the three systems; it keeps the
+form and carries the review's files. Before it `99160868`, item 92, pushed at 14:32 on 2026-11-02,
+its run green at 14:50 on the three systems; it keeps the form and carries the review's files.
+Before it `b8cc8316`, Verdict 51's mend, pushed at 11:14 on 2026-11-02, its run green at 11:37 on
+the three systems in about 20 minutes; the pack run started from it at 11:38 with publish on, green
+at 14:30 with the drive in 125 minutes at its limit's edge, the soak in 21, every captures job green
+and 0.6.18 published, the first package since 09fc95dd of 2026-10-21, which settles Verdict 51.
+Before it `a18496c3`, Verdicts 49 and 50's mends, pushed at 02:11 on 2026-11-02, its run green at
+02:25 on the three systems in about 14 minutes; the pack run started from it at 02:26 with publish
+on, its captures jobs green, which settles Verdicts 49 and 50, and its drive cancelled at the limit
+of 100 minutes at 04:23 where the run before took 67, Verdict 51, so no package was published; read
+at 04:30. Before it `720ec3db`, item 68's fourth phase and its end, pushed at 00:23 on 2026-11-02
+beside the pack run, its run green at 00:42 on the three systems in about 17 minutes; it keeps the
+form and carries the review's files. Before it `58265110`, item 90's second commit and its end,
+pushed at 23:03 on 2026-11-01, its run green at 23:22 on the three systems in about 15 minutes; the
+pack run started from it at 23:22 with publish on, the first since `09fc95dd` of 2026-10-21, its
+drive and soak jobs the proof of item 90's limits on the runner; its captures-fedora job red at
+00:13 on 2026-11-02 on Mesa 26.2.5 against the workflow's 26.2.4, Verdict 49, and two of its
+captures jobs red at 00:43, many_foxes and specular_tint past the comparison's bar, Verdict 50; the
+run ended red at 01:06 on those three jobs alone, the drive green in 67 minutes under its limit of
+100, the soak in 25 under its 40 and the games in 35, the pack job skipped so no package was
+published, the next pack run after the two verdicts' mends. Before it `5fb59903`, item 90's first
+commit, pushed at 17:57 after 3ee62451's green run, its run green at 18:16, the kernels choosing
+their light before any thread branches since llvmpipe faults on the transmittance lookup after a
+group's threads have parted. Before it `3ee62451`, item 89, pushed at 12:40 on 2026-11-01 with
+`b79314ca` after the run of `3808bd37` went green at 10:22, its run green at 12:58 with the suites
+in 14 to 18 minutes. `b79314ca` moves the clock's console commands beside app.hold into a file of
+their own, ConsoleWorldCommands.cs having crossed N 1.3 at 817 lines, 737 after. `3ee62451` makes
+pipelines.wait answer after three ready frames running and keep a held clock still between commands
+while it waits, through ConsoleHost.LaterStill and CliRequest.Still, the drive's and the first
+game's shots waiting for it; in ten of ten fresh sessions the meadow's first shot had lost its grass
+or its walls' light, and pipelines.wait after the look answered 128 to 141 frames later with every
+shot after it whole; the drive's effects view, which had been missing the level, the spheres' board
+and the clearcoat row, is whole, the drive 249 s where 229; two tests, the held clock still through
+a wait and an app begun on a set clock drawing what comes into view whole; the whole suite before
+the split 1,994 passed with the one failure N 1.3's, after it NormTests and the touched classes, 78,
+the run standing for the whole; the public listing unchanged. Before it `3808bd37`, the scenes yard,
+pushed at 10:04, its run green at 10:22 with the suites in 12 to 18 minutes, the pack's site a point
+in the level. Before it `7332bc50`, the meadow court, pushed at 09:12, its run green at 09:30 with
+the suites in 12 to 17 minutes, the meadow's trees as level entities. Before it `11efeefe`, item 88,
+pushed at 23:27 on 2026-10-31, its run green at 23:45 with the suites in 10 to 17 minutes, the run-
+time switch's panic mended, recorded under the item in REVIEW-ARCHIVE.md. Before it `60638b01`, item
+87, pushed at 21:07, its run green at 21:29 with the suites in 15 to 18 minutes, the day's fill,
+recorded under the item in REVIEW-ARCHIVE.md. Before it `26763e87`, item 86, pushed at 16:58 with
+`63aca2f2`, 68's gallery court, its run green at 17:17 with the suites in 11 to 18 minutes, recorded
+under the items. Before it `f4e99658`, item 85, pushed at 15:29, its run green at 15:52 with the
+suites in 13 to 19 minutes, the Levels module as a submodule with LevelSpawner the binding, recorded
+under the item in REVIEW-ARCHIVE.md. Before it `219142e2`, item 83's end, pushed at 14:08, its run
+green at 14:31 with the suites in 14 to 18 minutes, the meadow on the engine grass, recorded under
+the item in REVIEW- ARCHIVE.md. Before it `1099cb35`, 83's second phase, pushed at 13:15, its run
+green at 13:32 with the suites in 11 to 14 minutes, the engine grass, recorded under the item in
+REVIEW-ARCHIVE.md. Before it `c5d9cd20`, item 78, pushed at 12:23 with `d92ac690`, 83's first phase,
+its run green at 12:42 with the suites in 14 to 17 minutes, the README's line verbatim and the three
+grass cards in the collection, recorded under the items. Before it `1c9b6baf`, item 84, pushed at
+11:02, its run green at 11:25, the light-through test at 180 traced frames, recorded under the item
+in REVIEW- ARCHIVE.md. Before it `391d6b85`, the version to 0.6, the owner's change committed by the
+reviewer and pushed at 11:42, its run green at 11:59. Before it `785a1136`, item 82, pushed at
+09:10, its run green at 09:29 with the suites in 13 to 18 minutes, the irradiance volume's fallback
+mended in render/mended.rs, recorded under the item in REVIEW-ARCHIVE.md. Before it `de14e311`, item
+81's grass mend, pushed at 22:31 on 2026-10-30, its run green at 22:49 with the suites in 12 to 18
+minutes, the dark blades gone, recorded under the item in REVIEW-ARCHIVE.md. Before it `e3ddec48`,
+item 79's cloud mend, pushed at 21:13 on 2026-10-30 after the run of `1226ff50` went green, its run
+green at 21:30 with the suites in 12 to 17 minutes. The march adds an isotropic share for the light
+scattered more often than the four octaves follow, a deep front-lit cloud going from 0.09 to 0.11 of
+the light to 0.23 to 0.25, the owner's view's cloud tops from 166, 163, 160 to 216, 209, 195 and the
+bases from 146, 146, 154 to 181, 177, 172, the lavender going with the gray, the 15:00 sun side
+keeping its shading and overcast and storm staying gray; 49 cloud, weather, atmosphere and sky tests
+pass; the suite's 21 BounceRoomsTests failed out of GPU memory under other sessions' apps and pass
+alone, 55 of 55; a lead, Bevy's asset watcher panicking on a send as an app stops. Before it
+`1226ff50`, Verdict 48's mend, pushed with `169d5afe` and `3417d612` at 19:55 on 2026-10-30 after
+the red run of `7e35f94b` ended, the run of `1226ff50` green at 20:14 on the three suites, Verdict
+48 settled; AppLeakTests reads the promoted bytes of the last full blocking collection as 3DEngine's
+does, 19.82 to 19.83 MB over a hundred apps, the suite 1,999 passed; it carries N 7.8 and a Shared
+line. Reviewed up to `7e35f94b`, pushed with `0ed9073c` at 18:15 on 2026-10-30, its run red at 18:35
+on macOS alone, Verdict 48. After it `169d5afe`, AGENTS.md's REVIEW.md line reading the head, the
+batch's items and the Replies by the owner's word in the coder's session, held for Verdict 48's
+mend, and after it `3417d612`, item 68's course court (the still stations as brushes, orange where
+the character climbs and red where it cannot, a wall with two arches parting the course from the
+playground, the terrain gone for a terraced mound with the drive's check on its top, the drive
+green, 1,998 passed with the denoiser's 1080p time read as a flake under the other sessions' GPU
+load), the three to go together. `0ed9073c` is item 68's third phase's first zone, the light hall at
+the north corridor's end with arched bays off the aisle, the lights and the drive's eight bay views
+moved and none gone, the drive green, 23 level tests on the headless bridge, the suite 1,998 passed
+with one failure read as a flake, the light-through floor at High 5.5 up at 0.17 against 0.2 that
+reads 0.24 alone and in its class, a lead if it fails again; `7e35f94b` points the tests' user
+directory from a module initializer so SaveGameTests' FixedLevel passes alone, the detail under
+Replies. build/version.txt stands changed in the tree from 0.5 to 0.6 by no session's hand, left for
+the owner's word. Before it `7e082be1`, item 68's second phase, pushed at 14:33 on 2026-10-26, its
+run green at 14:52. Before it on 2026-10-26, each green but where said: `c5cb4888` (65's hub);
+`c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's zone check, the level
+helpers); `1092b434` and `ce142f8a` (65's second phase), red at the shipped-pictures test, Verdict
+47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase), red on the renderer-less bridge,
+Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and `bc5559d2` (77); `929a1cf7` (70
+d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far level). Each commit's detail
+stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own words. The sessions were paused
+from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the README's new words (item 78) and
+asked that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is
@@ -1901,7 +1903,26 @@ from [SHARED.md](SHARED.md).
     -23 and -15, one aspen +4 and +10, -8 and +4, -10 and +2, the other -13 and -5, -16 and -11, -19
     and -15, the oak's reduced level -46 and -49, -51 and -52, -51 and -53; the nine leaf and
     forward tests pass, the crowns where 112 starts. The suite, the docs and the pair next, then the
-    commit.
+    commit. The third step is `2adbe701`, pushed at 16:06 on 2026-11-07, the bridge at ABI 322 built
+    with the editor profile, meshlets and Solari, cargo check on the three profiles, cargo test 118
+    and 203, the suite 2,039 in 47 minutes at the 3 GB cap, NormTests 18, the listing unchanged, the
+    grass test's remark set to the final form's 1% after the run; the forest 7.60 ms against 6.87
+    and 6.88, the unexplained gap in the Bevy-only pass 1.0 to 1.2 ms kept beside it, the pair
+    2026-11-07-item-110-leaves.webp. Done at `2adbe701` in its three steps, the closed rooms within
+    a few percent of the one reference where a quarter under, the corridor's grazing floor the named
+    remainder and the crowns' diffuse shortfall item 112. Next 112. A remainder from 112 on
+    2026-11-07: the leaves' and the blades' gloss reads over the reference by half once the mips
+    hold the roughness, the picture's split-sum taking f90 as 1 where the reference's Fresnel takes
+    Bevy's 0.66 for an f0 of 0.04, which counts at grazing views; read which f90 Bevy's own direct
+    lighting gives the leaf, so the reference keeps Bevy's own convention and the picture's split-
+    sum is read against it, a figure before any mend. Corrected the same day, f90 is 1 on all three
+    sides, Bevy's direct lighting taking the saturated dot of f0 with 50 times 0.33 over three
+    channels (1.98 for an f0 of 0.04), the reference's Schlick the same expression and the split-
+    sum's F_ab assuming 1, so f90 is not the cause. The aspen's gloss at +59% is the same ratio as
+    the probes' unshaded light at the leaf (0.677 against 0.427), the gray scaling the base color
+    alone and not the gloss, so the reflection takes the light from inside the crown at the probes'
+    brightness, 112's second part's cause; the grass's gloss at +42% (0.031 against 0.022) with its
+    probes' light 5% under stays unexplained, 110's remainder beside the corridor.
 
 111. **A lit face outside a thin wall lights the room inside.** From item 110 on 2026-11-07. The
     diffuse read's thin-walled room, walls 0.3 thick in cells of 0.5 with its lamp outside the east
@@ -1926,7 +1947,96 @@ from [SHARED.md](SHARED.md).
     fragment's probe_lights and probe_air against the probes' faces the model pass reads, since a
     leaf drawn forward reads its own images; then a mend measured on the lone aspen, the grass patch
     and the meadow's crowns against the reference, the grass within its figure, so the crowns come
-    back to the reference's brightness by the right light. Before 111.
+    back to the reference's brightness by the right light. Before 111. Read at 16:43, and the
+    premise turns round, since leaf by leaf the lone aspen's leaves read about 60% over their
+    reference, the 40% under having been the region's mean, the picture's dark background against
+    the sky the reference sees through the gaps. Read on a trial copy at 2adbe701 with scratch debug
+    modes on both sides, the picture writing each part of the leaf's light and the reference each
+    part at the camera's first leaf hit, under the uniform sky (ambient 2000, no sun, Medium, 320 by
+    180, 16 m off) over the 4,223 pixels the picture draws as leaf, the reference's sums cleared of
+    the sky from samples passing between leaves (about 6% at a radiance of 1.06), the reference then
+    reading the birch set exactly, its albedo (0.064, 0.102, 0.022) against the set's linear mean
+    (0.066, 0.103, 0.023) and its let-through 0.231 against 0.235. In luma the front's light reads
+    0.058 against 0.029, the light let through 0.0046 against 0.0054, the gloss 0.017 against 0.015,
+    the sum 0.079 against 0.049; within that the probes' light at the bent normal 0.68 against 0.43
+    and from behind 0.53 against 0.26, the probes seeing past the crown with the leaf's gray (mean
+    0.71), item 76's stand-in for the crown's shadow, giving +13% at the front and +44 behind; the
+    region's 0.105 in the reference is mostly sky, 5.5% of samples at 1.06 giving 0.058, and the 395
+    pixels where the picture shows no leaf read 0.03 against 0.27. Two faults in build/textures.py's
+    mips, confirmed offline by rebuilding the birch set's levels with the script's own functions,
+    each figure the mean over the texels the alpha test keeps, the albedo's color holding to 32 by
+    32 and then reading 1.1 times at 16 and 1.5 at 8 and 4, the picture's albedo at Bevy's levels
+    for the aspen 0.132 in luma where full size is 0.088, and the translucency, the surface's alpha,
+    which bleed takes as its own mask and keeps, being 0 outside the leaves (the fill 255, 255, 0,
+    0) so the box filter averages it with nothing, 0.235 at full size, 0.216 at 32, 0.194 at 16,
+    0.114 at 8 and 0.075 at 4, the picture reading 0.094 where the leaf holds 0.20. The grass patch
+    seen 2.4 m off reads within 5% in every part, its albedo at Bevy's level equal to full size and
+    its let-through 0.320 against 0.346 at full size and 0.351 in the reference. The mend, taken,
+    each level of the albedo's color and the surface's four channels a mean weighted by the albedo's
+    opacity, a fully transparent block keeping the bled color, the alpha's own levels as item 70
+    built them unchanged; every leaf and grass set imported again from .vegetation with the sample's
+    bytes kept in the tests, bark unchanged having no opacity; the uniform-sky test's picture given
+    a background equal to the reference's sky so a region compares like with like; measured on the
+    lone aspen, the grass patch and the meadow's crowns against the reference. Then, before the
+    meadow, the probes' light beside the gray on the same lone aspen, the front's +13% and the
+    back's +44, whether the probes at a leaf should see the crown's own shadow through the field's
+    cells that pass a share, since the gray is a stand-in and the figure behind is the larger. Read
+    at 16:56, the mend measured in the trial copy. The color and the surface's four channels
+    opacity-weighted at each level, the surface bled by the albedo's opacity in all four and the
+    alpha's levels as item 70 built them, the nine leaf and grass sets in again in 13 s with the
+    normal maps byte-identical, the albedos changed below the top level alone and the bark sets and
+    the tests' sample unchanged; offline the birch set's levels hold color within 7% at every level
+    and translucency 0.228 to 0.235 where they rose to 1.5 times and fell to 0.075. Under the
+    uniform sky at Medium with the picture's background set to the reference's sky (0.891 where its
+    paths meet nothing), the aspen's leaves as a region read +4.2% where +16.7 at the head and the
+    grass patch -1.0 where +1.5, the albedo at Bevy's level 0.091 in luma against 0.088 at full size
+    (0.132 before) and the let-through 0.232 against 0.235 (0.094 before). Leaf by leaf, mended,
+    with the reference's sky samples taken out, the front and let-through colors match within 4%,
+    the front's light reads +18%, the light let through +44 and the gloss +59 (0.024 against 0.015),
+    the sum +33 where +61; the grass's gloss reads over too, 0.031 against 0.022, the roughness no
+    longer drifting toward 1 at a distance, the picture's split-sum gloss taking f90 as 1 where the
+    reference's Fresnel takes Bevy's 0.66 for an f0 of 0.04, which counts at the grazing views of
+    leaves and blades, placed under 110 as the reflection's remainder. The gray, the probes' light
+    at the leaf front and behind with the leaves' field share at 1 (the crown as air) 0.758 and
+    0.793, at 0.5 as shipped 0.677 and 0.529, at 0 (solid) 0.637 and 0.465, the reference 0.427 and
+    0.262: the probes see part of the crown's shadow through the field's cells that pass a share,
+    air to half dropping the front 11% and the back 33, and even a solid crown leaves them at 0.64
+    and 0.46 at a leaf inside it, so the probes at a quarter-meter spacing do not hold the crown's
+    inside and the gray stands in for what they cannot, the front at +12% and the back at +43 with
+    it. Decided, the mend lands in the main tree with the sets in again at the manifest's sizes, the
+    grass test clearing to the reference's sky from its own paths, a new case holding the lone aspen
+    under the uniform sky within 10% of its reference (+16.7 at the head), then the meadow's crowns,
+    the suite, the docs and the pair; and the back's +43 is 112's second part after it, the let-
+    through share's own darkening by the crown's depth from behind as item 76's gray darkens the
+    front, measured on the same aspen, since the light from behind looks into the crown where the
+    reference is darkest. The mend is in the main tree, the nine sets imported with the manifest's
+    sizes, the surface's BC7 error over the leaves' own texels equal or better (the shingle oak 46.6
+    to 46.8 dB, the weeping willow 45.1 to 45.6, the silver birch 44.1 to 44.8) while the manifest's
+    whole-texture figures fall since they count the bled texels outside the leaves, which hold the
+    leaves' values rather than a flat fill; the two uniform-sky cases share
+    GlobalIlluminationTests.UniformSky.cs, the Grass file renamed, the picture clearing to the
+    reference's sky from its own paths, the grass at +1% (0.2031 against 0.2020) and the aspen's
+    leaves at +4 (0.1236 against 0.1186) passing, the aspen at +17 and failing on the head's
+    textures. The gloss's excess on the leaves is the second part's cause too, the gray scaling the
+    base color and not the reflection, so the second part darkens the let-through share and the
+    reflection by the crown's depth alike. The meadow reading next, head and mended. Read at 17:04,
+    the meadow head and mended at eight in the morning at Medium, 1280 by 720, the reference at 128
+    paths, each in one start, the view 0.316 and 0.317, oak 77's leaves -21 and -16% to -27 and -23,
+    aspen 74's -9 and +2 to -18 and -7, aspen 76's -19 and -15 to -27 and -28, oak 75's reduced
+    level -51 and -53 to -54 and -56, grass patch 2,2 -15 and -16 to -19 and -20, the other patches
+    2 to 9 points lower. So under the sun the albedo at the distant levels, 1.5 times too bright,
+    had hidden a shortfall the uniform sky does not show, and the let-through's rise does not make
+    it up; the reading of it, not yet measured, is that the gray is the vertex color multiplying the
+    base color, so it darkens the sun's direct light on a leaf as well, which item 76 chose gently
+    since the shadow map darkens what the sun does not reach, while the reference darkens the sun by
+    its shadow rays through the leaves alone, the picture darkening the sunlit crowns twice.
+    Decided, the mend lands as it stands, the textures right by every reading, with the meadow's
+    crowns recorded as 3 to 13 points lower, from -16 to -28%, the bright mips having hidden it; and
+    the second part follows at once, the gray's reach, what it should scale and what not, the sun's
+    direct light left to the shadow map, the let-through share and the reflection darkened by the
+    crown's depth as the probes cannot hold it, measured on the lone aspen under a sun with the
+    reference's shadow rays and then the meadow's crowns, so the crowns come back by the right light
+    rather than a brighter albedo.
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 51 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
@@ -4834,3 +4944,62 @@ alone, and take Bevy's reflection back by Bevy's own occlusions, which scale not
 share let through, where working it out again came out an eighth short, a grass patch under a
 uniform sky reading 1% over its reference where 40% over, at 0.7 ms in a forest of 24 trees at
 1080p.
+
+Item 112's first part's commit, the leaf and grass sets' smaller texture levels weighted by how much
+of each texel the leaves cover, in the commit carrying this line. build/textures.py made each level
+of a leaf atlas's color and of its surface's four channels the box's mean of a leaf and the
+transparent texels round it, and bled the surface by its own alpha, which is its translucency, so
+the texels outside the leaves kept a translucency of none. A leaf a texel or two across took the
+photograph's light background and let through less, the silver birch's leaves half as bright again
+at the level of eight texels across and letting through 0.114 there and 0.075 at four, where they
+let through 0.235. Each level's color and surface are the means weighted by the albedo's opacity,
+the surface's texels outside the leaves take the nearest leaf's four channels, and the alpha's
+levels are as item 70 built them. The nine leaf and grass sets came in again, their normal maps the
+same bytes and their albedos changed below the top level, and the bark sets and the tests' sample
+are as they were. Over the leaves' own texels the surface's encoding error is the same or less, 46.6
+dB to 46.8 for the shingle oak, 45.1 to 45.6 for the weeping willow and 44.1 to 44.8 for the silver
+birch, where the manifest's figures over every texel fall, the texels outside the leaves holding the
+leaves' values in place of one fill. RENDERING.md and the guide's trees page say it.
+
+GlobalIlluminationTests.UniformSky.cs, which was GlobalIlluminationTests.Grass.cs, holds the grass
+patch's case and a lone aspen's, ALoneAspensLeavesUnderAUniformSkyReadTheirReference, which reads
+the aspen's leaves seen from 16 m at 320 by 180 within 10% of their reference, 4% over where 17%
+over at the head. Both clear the picture to the reference's sky, read where its pixels meet nothing,
+since a pixel of a crown is partly the sky between its leaves, which the reference's paths spread
+over the pixel bring back and the picture shows only where it draws no leaf. The grass reads 1% over
+as it did.
+
+The reading that decided it. Over the picture's black background the aspen's leaves read 37% under
+their reference, the sky the reference's paths meet between the leaves being most of a pixel's
+light, and with the reference's sky behind them 17% over. A scratch diagnostic writing each part of
+a leaf's light at the picture's leaf fragments and at the reference's first leaf hits read the
+reference holding the birch set's own color and translucency, 0.064, 0.102 and 0.022 and 0.231
+against the set's 0.066, 0.103 and 0.023 and 0.235, once the sky its paths reach between the leaves
+was taken out, and the picture's leaves 61% over it leaf by leaf, 33% with the mend, their front's
+light 18% over, the light let through 44% and the gloss 59%. The probes' light at the aspen's leaves
+reads 0.68 at the front and 0.53 behind where the reference's is 0.43 and 0.26, 0.76 and 0.79 with
+the crown as air in the field and 0.64 and 0.46 with it solid, so the probes at a quarter meter's
+spacing do not hold the shadow inside a crown, which the leaf's gray stands in for, the gray times
+the probes' light reading 12% over at the front and 43% behind. The leaves' gloss is over by the
+probes' unshaded light at the leaf, the gray scaling the base color alone. Bevy's direct lighting,
+the reference and the split sum take f90 at 1 for a leaf's f0 of 0.04, so that is not it.
+
+The meadow at eight in the morning at Medium against its reference, the head and the mend each read
+in one start, reads the view 0.317 from its reference where 0.316. The oak's crown reads 27 and 23%
+under where 21 and 16%, the aspens' 18 and 7% under where 9% under and 2% over and 27 and 28% under
+where 19 and 15%, the oak's reduced level 54 and 56% under where 51 and 53%, and the grass from 5
+points higher to 10 lower, patch 2 2's +x and +z 19 and 20% under where 15 and 16%. The bright
+levels hid a shortfall under the sun the uniform sky does not show, which the second part takes up,
+the gray left off the sun's light, which the shadow map darkens, and laid on the light let through
+and the reflection by the crown's depth. The pair 2026-11-07-item-112-leaves.webp shows the meadow
+at the head and with the mend.
+
+No native code changed, so the bridge was the head's. The whole suite ran, 2,040 passed and 3
+skipped in 46 m 35 s at the 3 GB cap, none aborted, its largest process at 2,876 MB. NormTests
+passed, 18. The public listing is unchanged.
+
+Shared: a leaf atlas's smaller levels take the leaves' color and surface weighted by how much of
+each texel they cover, where the box's mean with the transparent texels round a leaf made a far
+crown's leaves half as bright again and let through 0.094 of the light behind them where they let
+through 0.235, and a crown's pixel against a path-traced reference is partly the sky between its
+leaves, so the picture's background is the reference's sky.
