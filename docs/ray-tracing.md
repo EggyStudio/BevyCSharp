@@ -329,7 +329,8 @@ light the probes around it hold along its mirror way, so a closed room's rough w
 another and its polished floor shows no sky. Bevy's
 screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the G-buffer
 does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads
-the probes itself as the pass reads them.
+the probes itself as the pass reads them, their light and their gloss's reflection along the mirror
+way.
 
 A surface may let a share of the indirect light through each meter of its depth, as a canopy's
 leaves do, which the probes' rays cross where they would stop at a solid surface, keeping that share

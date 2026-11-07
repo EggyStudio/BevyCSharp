@@ -49,6 +49,9 @@ pub struct LeafLighting {
     pub probe_air: bevy::asset::Handle<bevy::render::storage::ShaderBuffer>,
     #[uniform(106)]
     pub probe_counts: bevy::math::Vec4,
+    #[texture(107, dimension = "3d")]
+    #[sampler(108)]
+    pub probe_ways: bevy::asset::Handle<bevy::image::Image>,
 }
 
 /// What a leaf material's pipeline is made for beyond the standard material's, whether it reads
@@ -72,6 +75,7 @@ impl From<&LeafLighting> for LeafKey {
 pub(crate) fn probed(lighting: &LeafLighting, probes: &super::forward_probes::ForwardProbes) -> bool {
     lighting.probe_cubes == probes.cubes
         && lighting.probe_reach == probes.reach
+        && lighting.probe_ways == probes.ways
         && lighting.probe_field == probes.field
         && lighting.probe_lights == probes.lights
         && lighting.probe_air == probes.air
@@ -83,6 +87,7 @@ pub(crate) fn probed(lighting: &LeafLighting, probes: &super::forward_probes::Fo
 pub(crate) fn probe(lighting: &mut LeafLighting, probes: &super::forward_probes::ForwardProbes) {
     lighting.probe_cubes = probes.cubes.clone();
     lighting.probe_reach = probes.reach.clone();
+    lighting.probe_ways = probes.ways.clone();
     lighting.probe_field = probes.field.clone();
     lighting.probe_lights = probes.lights.clone();
     lighting.probe_air = probes.air.clone();
@@ -133,7 +138,7 @@ const LEAF_FRAGMENT: bevy::asset::Handle<bevy::shader::Shader> =
 /// ([`super::forward_probes::PROBES`]) and the leaf's lighting after it draw on.
 #[cfg(feature = "render")]
 const LEAF_FRAGMENT_IMPORTS: &str = r#"import bevy_pbr::render::{
-    pbr_functions::{alpha_discard, apply_pbr_lighting, main_pass_post_lighting_processing},
+    pbr_functions::{alpha_discard, apply_pbr_lighting, calculate_F0, main_pass_post_lighting_processing},
     pbr_fragment::pbr_input_from_standard_material,
     forward_io::{VertexOutput, FragmentOutput},
     pbr_types::PbrInput,
@@ -172,6 +177,22 @@ import bevy_pbr::light_probe::environment_map;
 /// map's facing away from the leaf's normal, so that is worked out again as bevy_pbr 0.20's
 /// `apply_pbr_lighting` works it out (`pbr_functions.wesl`) and taken back, and the probes' facing
 /// the same way given, which a Bevy past 0.20 is read against.
+///
+/// The second lighting's gloss reflects Bevy's ambient term and its environment map along the
+/// mirror way, which its occlusions scale and nothing else of it, its diffuse color being none and
+/// its share let through lit at an occlusion of one, so both are scaled by how much of the light
+/// from all around the probes give, and the light the probes it sees hold along its mirror way is
+/// given in that share's place, as the light pass reflects it for the G-buffer's surfaces
+/// (`reflectedAlong`), the light reaching the leaf's front standing in for the probes it does not
+/// see. Worked out again as `apply_pbr_lighting` works it out and taken back, with every
+/// roughness's directions sampled, Bevy's reflection came out an eighth short of Bevy's own and the
+/// forest of `TreeLeavesTests` took 8.1 ms at 1080p, where it takes 7.6. The environment map's
+/// reflection is taken back whole, a reflection probe's share with the camera's map's, since Bevy
+/// gives them as one, where the pass leaves a reflection probe's share as Bevy gave it. Bevy's
+/// ambient term reflects the ambient light's whole color, where the probes' sky and the path-traced
+/// reference's hold it as Bevy returns it from a surface facing the view, a share of 0.45, so a
+/// grass patch under a uniform sky read its blades 40% over the reference reflecting Bevy's and
+/// reads them 1% over reflecting the probes' light.
 #[cfg(feature = "render")]
 const LEAF_FRAGMENT_SOURCE: &str = r#"
 fn way_out(folded: vec2<f32>) -> vec3<f32> {
@@ -183,10 +204,8 @@ fn way_out(folded: vec2<f32>) -> vec3<f32> {
     return normalize(n);
 }
 
-// What Bevy's lighting gives a share let through of `transmissive` color from all around, exposed.
-fn through_given(in: PbrInput, transmissive: vec3<f32>) -> vec3<f32> {
-    var light = ambient::ambient_light(in.world_position, -in.N, -in.V, 1.0, transmissive, vec3<f32>(0.0), 1.0, vec3<f32>(1.0));
-@if(ENVIRONMENT_MAP) {
+// The clusterable objects, the environment maps among them, that light the fragment `in` is lit at.
+fn leaf_ranges(in: PbrInput) -> clustering::ClusterableObjectIndexRanges {
     let view_z = dot(vec4<f32>(
         view_bindings::view.view_from_world[0].z,
         view_bindings::view.view_from_world[1].z,
@@ -194,7 +213,14 @@ fn through_given(in: PbrInput, transmissive: vec3<f32>) -> vec3<f32> {
         view_bindings::view.view_from_world[3].z
     ), in.world_position);
     let cluster_index = clustering::view_fragment_cluster_index(in.frag_coord.xy, view_z, in.is_orthographic);
-    var ranges = clustering::unpack_clusterable_object_index_ranges(cluster_index);
+    return clustering::unpack_clusterable_object_index_ranges(cluster_index);
+}
+
+// What Bevy's lighting gives a share let through of `transmissive` color from all around, exposed.
+fn through_given(in: PbrInput, transmissive: vec3<f32>) -> vec3<f32> {
+    var light = ambient::ambient_light(in.world_position, -in.N, -in.V, 1.0, transmissive, vec3<f32>(0.0), 1.0, vec3<f32>(1.0));
+@if(ENVIRONMENT_MAP) {
+    var ranges = leaf_ranges(in);
     let perceptual_roughness = in.material.perceptual_roughness;
     let T = -normalize(in.V + refract(in.V, -in.N, 1.0 / in.material.ior) * in.material.thickness);
     var input: lighting::LightingInput;
@@ -271,8 +297,20 @@ fn fragment(in: VertexOutput, @builtin(front_facing) is_front: bool) -> Fragment
         behind = -rest.N;
         transmissive = rest.material.base_color.rgb * kept;
 }
-        let probed = probes_given(pbr_input.world_position.xyz, diffuse.N, diffuse.material.base_color.rgb * kept, behind, transmissive, pbr_input.frag_coord.xy);
+        let mirror = reflect(-rest.V, rest.N);
+        let probed = probes_given(pbr_input.world_position.xyz, diffuse.N, diffuse.material.base_color.rgb * kept, behind, transmissive, mirror, rest.material.perceptual_roughness, pbr_input.frag_coord.xy);
         given += probed.front * occlusion;
+        // The gloss's reflection of the light the probes it sees hold along its mirror way, the
+        // light reaching the front standing in for those it does not see, at the specular occlusion
+        // Bevy reflects its environment map at, where the diffuse one holds the leaf's gray scale,
+        // in place of the share of Bevy's the probes hold, which the occlusions scale away.
+        if probed.held > 0.0 {
+            let F0 = calculate_F0(rest.material.base_color.rgb, rest.material.metallic, rest.material.reflectance);
+            let share = lighting::EnvBRDFApprox(F0, lighting::F_AB(rest.material.perceptual_roughness, max(dot(rest.N, rest.V), 0.0001)));
+            given += probed.held * share * probed.reflected * rest.specular_occlusion;
+            rest.specular_occlusion *= 1.0 - probed.held;
+            rest.diffuse_occlusion *= 1.0 - probed.held;
+        }
 @if(STANDARD_MATERIAL_DIFFUSE_TRANSMISSION) {
         given += probed.through - through_given(rest, transmissive);
 }

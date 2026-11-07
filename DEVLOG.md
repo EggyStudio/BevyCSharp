@@ -29,6 +29,13 @@ roughness of 0.5 lit by a lamp under the ceiling, on the left with the probes' r
 they meet by its color alone and on the right by its gloss as well, the walls 3 to 4% and the floor
 6% brighter in the picture's levels, the light a wall's gloss carries between bounces.
 
+![](.github/assets/readings/2026-11-07-item-110-leaves.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, on the left with the
+grass and the crowns reflecting Bevy's environment map and ambient light and on the right reflecting
+the light the probes they see hold along their mirror way, the grass's bluish sheen of the open sky
+gone, the far grass at its path-traced reference where it read 42 to 45% over, and the near grass
+and the crowns darker, their light from the probes short beneath the reflection that was over.
+
 Done that day
 
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.

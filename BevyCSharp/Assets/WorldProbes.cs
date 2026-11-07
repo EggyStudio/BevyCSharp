@@ -381,7 +381,7 @@ internal static unsafe partial class WorldProbes
         _origins = [];
 
         // The leaves read Bevy's lighting alone again.
-        Native.Check(Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0), "taking global illumination's probes from the leaves");
+        Native.Check(Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0), "taking global illumination's probes from the leaves");
     }
 
     /// <summary>
@@ -512,8 +512,8 @@ internal static unsafe partial class WorldProbes
         // The leaves and the grass, drawn forward where the pass does not reach, read the probes as
         // it reads them.
         Native.Check(LeavesUnread
-                ? Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0)
-                : Native.bcs_render_set_forward_probes(made.Cubes.Key, made.Reach.Key, info.Key, made.Lights.Key, made.Air.Key, p, ProbeSpacing, cascades),
+                ? Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0)
+                : Native.bcs_render_set_forward_probes(made.Cubes.Key, made.Reach.Key, made.Ways.Key, info.Key, made.Lights.Key, made.Air.Key, p, ProbeSpacing, cascades),
             "handing the leaves global illumination's probes");
     }
 }

@@ -355,11 +355,22 @@ time being its probes' reach. Past the probes they take the light from all aroun
 the environment map's light from above and the camera's air toward each directional light read once
 by `gi_sky.slang`. A leaf in shade in a closed room reads within 3% of a card of a standard material
 beside it, and a leaf letting all its light through gives back the ambient light the room shuts out,
-2 where it read 71 in red. The reading takes a forest of 24 tupelos' opaque pass at 1920 by 1080
-from 3.3 ms to 6.7 and the feature test's meadow's at 1280 by 720 from 2.6 ms to 5.6 on the RTX 4070
-Laptop GPU, and is compiled into the leaves' shader only while the probes light the scene, since
-compiled in and passed over it took the forest from 7.6 ms to 8.1 with global illumination off. Any
-other material drawn forward keeps Bevy's own light.
+2 where it read 71 in red. Their gloss reflects the light the probes they see hold along the mirror
+way, read in the same walk over the same probes from the finest cascade that holds them, each
+probe's eight by eight directions mixed toward its faces as the surface grows rough past a half, the
+light reaching the front standing in for the probes it does not see, and Bevy's reflection of its
+ambient term and its environment map is taken back by its own occlusions, which scale nothing else
+of the share let through, scaled by how much the probes give. Bevy's ambient term reflects the
+ambient light's whole color where the probes' sky and the reference hold it at 0.45, so a grass
+patch under a uniform sky read its blades 40% over the reference and reads them 1% over, and in the
+feature test's meadow at eight in the morning the far grass reads 7% under to 2% under where 42 to
+45% over and the near grass 16% under where 6% over, the crowns from 23% under to 2% over, their
+light from the probes short beneath the gloss that was over. The reading takes a forest of 24
+tupelos' opaque pass at 1920 by 1080 from 3.3 ms to 6.7, 7.6 with the reflection, and the feature
+test's meadow's at 1280 by 720 from 2.6 ms to 5.6 on the RTX 4070 Laptop GPU, and is compiled into
+the leaves' shader only while the probes light the scene, since compiled in and passed over it took
+the forest from 7.6 ms to 8.1 with global illumination off. Any other material drawn forward keeps
+Bevy's own light.
 
 The reference global illumination is measured against is 3DEngine's (`GiReference`,
 `gi_reference.slang`), a path tracer through a ray scene of the meshes the camera draws, built over

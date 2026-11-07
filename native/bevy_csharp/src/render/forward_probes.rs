@@ -12,13 +12,16 @@
 //! The managed side hands the probes over as it binds them to the pass each frame
 //! ([`bcs_render_set_forward_probes`]), and every leaf material takes them, or stand-ins that leave
 //! Bevy's lighting as it is while global illumination is off. The shader's reading of the probes is
-//! [`PROBES`], a port of `bcs_gi.slang`'s `bouncedAt` and `bouncedHold` and of the light pass's
-//! light past the probes, which `GlobalIlluminationTests` holds to the pass's reading of a deferred
+//! [`PROBES`], a port of `bcs_gi.slang`'s `bouncedAt` and `bouncedHold`, of the light pass's light
+//! past the probes and of its reflection of the light the probes hold along a face's mirror way
+//! (`reflectedAlong`), which `GlobalIlluminationTests` holds to the pass's reading of a deferred
 //! surface beside it. The light let through a leaf is read from the probes its front reads, with
 //! the front's weights, each probe's faces toward the way behind the leaf, since a reading of its
 //! own took the forest of `TreeLeavesTests` from 6.8 ms to 9.0 at 1080p, half of a reading's time
-//! being its probes' reach. In the feature test's meadow at 1280 by 720 at `Medium` the reading
-//! takes the opaque pass from 2.6 ms to 5.6.
+//! being its probes' reach, and the light along the leaf's mirror way from the same probes in the
+//! same walk. In the feature test's meadow at 1280 by 720 at `Medium` the reading takes the opaque
+//! pass from 2.6 ms to 5.6, and with the reflection the forest's opaque pass takes 7.6 ms where it
+//! took 6.9.
 
 use crate::interop::status;
 
@@ -33,6 +36,10 @@ pub struct ForwardProbes {
     pub cubes: Handle<Image>,
     /// How far each probe's rays reached, eight by eight directions a probe.
     pub reach: Handle<Image>,
+    /// Every cascade's probes' light along eight by eight directions, a block of ten by ten texels
+    /// a probe with a texel's border across the octahedron's edges, as `gi_ambient.slang` gathers
+    /// it.
+    pub ways: Handle<Image>,
     /// Where the scene's distance field's cascades lie this frame, `bcs_field`'s `FieldInfo`.
     pub field: Handle<ShaderBuffer>,
     /// The lights the probes are lit by, `bcs_gi`'s `GiLights`, whose light from all around stands
@@ -72,12 +79,15 @@ struct ProbeField {
 @group(constants::MATERIAL_BIND_GROUP) @binding(104) var<storage, read> probe_lights: array<vec4<f32>>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(105) var<storage, read> probe_air: array<vec4<f32>>;
 @group(constants::MATERIAL_BIND_GROUP) @binding(106) var<uniform> probe_counts: vec4<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(107) var probe_ways: texture_3d<f32>;
+@group(constants::MATERIAL_BIND_GROUP) @binding(108) var probe_ways_sampler: sampler;
 
 const PROBE_PI: f32 = 3.14159265358979;
 const EYE_CLEAR: f32 = 6.0;
 const CASCADE_BAND: f32 = 8.0;
 const LEAN: f32 = 0.5;
 const REACH_TEXELS: i32 = 8;
+const WAYS_TEXELS: i32 = 10;
 const MOST_SUNS: u32 = 10u;
 
 // The field's cascades the probes stand in, as `probesOf` places them, read from the buffer
@@ -172,23 +182,40 @@ fn cascade_hold(c: i32, p: vec3<f32>) -> f32 {
 struct ProbesLight {
     front: vec3<f32>,
     through: vec3<f32>,
+    reflected: vec4<f32>,
 }
 
 // `bouncedIn` for a surface at `p` facing `n`, and the light from `t` read from the same probes
-// with the same weights, each probe's faces toward `t` in place of those toward `n`, a face
-// loaded again only where `t` lies on its other side, so the light let through a leaf costs no
-// second reading of the probes' reach, which is half of a reading's time.
-fn bounced_in(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, probes: f32, spacing: f32, c: i32) -> ProbesLight {
+// with the same weights, each probe's faces toward `t` in place of those toward `n`, a face loaded
+// again only where `t` lies on its other side, so the light let through a leaf costs no second
+// reading of the probes' reach, which is half of a reading's time. Where `reflecting`, with them
+// the light along the mirror way `r` of a surface of `roughness` the probes it sees hold, times how
+// much of the probes' weight those hold, and that share, as the light pass reads it
+// (`reflectedIn`), from the same probes and the same reading of their reach, each probe's eight by
+// eight directions read filtered about `r` and mixed toward its faces as the surface grows rough
+// past a half, and its faces alone at a roughness of one, the faces toward `r` loaded again only
+// where `r` lies on another side than `n` and `t`. Read in a walk of its own, each probe's reach
+// blended between its texels as the pass reads it, it took the forest of `TreeLeavesTests` from 6.9
+// ms to 10.2 at 1080p, and read here 8.1.
+fn bounced_in(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, r: vec3<f32>, roughness: f32, reflecting: bool, probes: f32, spacing: f32, c: i32) -> ProbesLight {
     let oc = probe_cascade(c);
     let q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, vec3<f32>(0.0), vec3<f32>(probes - 1.0));
     let base = vec3<i32>(floor(q));
     let f = q - vec3<f32>(base);
     let n2 = n * n;
     let t2 = t * t;
+    let r2 = r * r;
     let faces = vec3<i32>(0, 2, 4) + select(vec3<i32>(0), vec3<i32>(1), n < vec3<f32>(0.0));
     let behind = vec3<i32>(0, 2, 4) + select(vec3<i32>(0), vec3<i32>(1), t < vec3<f32>(0.0));
-    var sum = ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0));
+    let mirror = vec3<i32>(0, 2, 4) + select(vec3<i32>(0), vec3<i32>(1), r < vec3<f32>(0.0));
+    let wide = saturate((roughness - 0.5) * 2.0);
+    let along = octahedron(r) * f32(WAYS_TEXELS - 2) + 1.0;
+    let across = vec2<f32>(probes * f32(WAYS_TEXELS));
+    let deep = probes * probe_counts.z;
+    var sum = ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0), vec4<f32>(0.0));
     var weights = 0.0;
+    var seen = 0.0;
+    var whole = 0.0;
     for (var corner = 0; corner < 8; corner++) {
         let offset = vec3<i32>(corner & 1, (corner >> 1u) & 1, corner >> 2u);
         let at = min(base + offset, vec3<i32>(i32(probes) - 1));
@@ -214,32 +241,65 @@ fn bounced_in(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, probes: f32, spacing: f3
         let valid = select(0.0, 1.0, all(held));
         let moved = select(vec3<f32>(0.0), alphas - 2.0, held);
         let probe = oc.xyz + (vec3<f32>(at) + 0.5 + moved) * (oc.w * spacing);
-        var weight = lerps.x * lerps.y * lerps.z * valid * probe_facing(p, n, probe);
-        weight *= mix(0.05, 1.0, probe_sees(p, n, probe, at, c, probes, oc.w * spacing));
+        let near = lerps.x * lerps.y * lerps.z * valid * probe_facing(p, n, probe);
+        let sees = probe_sees(p, n, probe, at, c, probes, oc.w * spacing);
+        let weight = near * mix(0.05, 1.0, sees);
         sum.front += (x.rgb * n2.x + y.rgb * n2.y + z.rgb * n2.z) * weight;
         sum.through += (tx.rgb * t2.x + ty.rgb * t2.y + tz.rgb * t2.z) * weight;
         weights += weight;
+        if reflecting {
+            var rx = select(tx, x, mirror.x == faces.x);
+            var ry = select(ty, y, mirror.y == faces.y);
+            var rz = select(tz, z, mirror.z == faces.z);
+            if mirror.x != faces.x && mirror.x != behind.x {
+                rx = textureLoad(probe_cubes, vec3<i32>(mirror.x * i32(probes) + at.x, row), 0);
+            }
+            if mirror.y != faces.y && mirror.y != behind.y {
+                ry = textureLoad(probe_cubes, vec3<i32>(mirror.y * i32(probes) + at.x, row), 0);
+            }
+            if mirror.z != faces.z && mirror.z != behind.z {
+                rz = textureLoad(probe_cubes, vec3<i32>(mirror.z * i32(probes) + at.x, row), 0);
+            }
+            let uvw = vec3<f32>((vec2<f32>(at.xy * WAYS_TEXELS) + along) / across, (f32(c * i32(probes) + at.z) + 0.5) / deep);
+            let face = (rx.rgb * r2.x + ry.rgb * r2.y + rz.rgb * r2.z) / PROBE_PI;
+            var light = face;
+            if wide < 1.0 {
+                light = mix(textureSampleLevel(probe_ways, probe_ways_sampler, uvw, 0.0).rgb, face, wide);
+            }
+            sum.reflected += vec4<f32>(light * near * sees, 0.0);
+            seen += near * sees;
+            whole += near;
+        }
     }
-    if weights <= 1e-5 {
-        return ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0));
+    var light = ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0), vec4<f32>(0.0));
+    if weights > 1e-5 {
+        light.front = sum.front / weights;
+        light.through = sum.through / weights;
     }
-    return ProbesLight(sum.front / weights, sum.through / weights);
+    if seen > 1e-5 {
+        let share = saturate(seen / max(0.05 * whole, 1e-5));
+        light.reflected = vec4<f32>(sum.reflected.rgb / seen * share, share);
+    }
+    return light;
 }
 
-fn bounced_at(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>) -> ProbesLight {
+// The probes' light at `p` from the finest cascade that holds it, faded to the next across its
+// outer band, and the light along `r` from the finest alone, as 3DEngine's `reflectedAt` reads it,
+// since a band's second reading of it costs as much again where it falls.
+fn bounced_at(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, r: vec3<f32>, roughness: f32) -> ProbesLight {
     let cascades = i32(probe_counts.z);
     let c = field_cascade(p, 1.0);
     if c < 0 || c >= cascades {
-        return ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0));
+        return ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0), vec4<f32>(0.0));
     }
     var own = 1.0;
     if c + 1 < cascades && probe_cascade(c + 1).w > 0.0 {
         own = cascade_hold(c, p);
     }
-    let first = bounced_in(p, n, t, probe_counts.x, probe_counts.y, c);
-    var light = ProbesLight(first.front * own, first.through * own);
+    let first = bounced_in(p, n, t, r, roughness, true, probe_counts.x, probe_counts.y, c);
+    var light = ProbesLight(first.front * own, first.through * own, first.reflected);
     if own < 1.0 {
-        let next = bounced_in(p, n, t, probe_counts.x, probe_counts.y, c + 1);
+        let next = bounced_in(p, n, t, r, roughness, false, probe_counts.x, probe_counts.y, c + 1);
         light.front += next.front * (1.0 - own);
         light.through += next.through * (1.0 - own);
     }
@@ -299,18 +359,31 @@ fn distant_around(p: vec3<f32>, n: vec3<f32>, color: vec3<f32>, frag_coord: vec2
     return distant;
 }
 
+// What the probes give a leaf, its front's light and the light let through it, how much of the
+// light from all around the probes give rather than what lies past them, and the light its gloss
+// reflects along its mirror way from the probes it sees, the light reaching its front, irradiance
+// over pi, standing in for those it does not see.
+struct ProbesGiven {
+    front: vec3<f32>,
+    through: vec3<f32>,
+    held: f32,
+    reflected: vec3<f32>,
+}
+
 // The light the probes give a leaf at `p`, its front of `front` color facing `n` and the share of
 // `through` color let through it from `t`, irradiance over pi times the color, as the light pass
 // gives the G-buffer's surfaces (`added`), the world's probes around it, faded across the last
 // cascade's outer band to the light past them, both shares weighed by the front's view of the
-// probes (`bounced_in`).
-fn probes_given(p: vec3<f32>, n: vec3<f32>, front: vec3<f32>, t: vec3<f32>, through: vec3<f32>, frag_coord: vec2<f32>) -> ProbesLight {
+// probes (`bounced_in`), and the light along the mirror way `r` its gloss of `roughness` reflects
+// from them.
+fn probes_given(p: vec3<f32>, n: vec3<f32>, front: vec3<f32>, t: vec3<f32>, through: vec3<f32>, r: vec3<f32>, roughness: f32, frag_coord: vec2<f32>) -> ProbesGiven {
     let held = bounced_hold(p, n);
-    var bounced = ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0));
+    var bounced = ProbesLight(vec3<f32>(0.0), vec3<f32>(0.0), vec4<f32>(0.0));
     if held > 0.0 {
-        bounced = bounced_at(p, n, t);
+        bounced = bounced_at(p, n, t, r, roughness);
     }
-    var given = ProbesLight(front * bounced.front / PROBE_PI * held, through * bounced.through / PROBE_PI * held);
+    let reflected = bounced.reflected.rgb + bounced.front / PROBE_PI * (1.0 - bounced.reflected.a);
+    var given = ProbesGiven(front * bounced.front / PROBE_PI * held, through * bounced.through / PROBE_PI * held, held, reflected);
     if held < 1.0 {
         given.front += front * distant_around(p, n, front, frag_coord) * (1.0 - held);
         given.through += through * distant_around(p, t, through, frag_coord) * (1.0 - held);
@@ -320,13 +393,15 @@ fn probes_given(p: vec3<f32>, n: vec3<f32>, front: vec3<f32>, t: vec3<f32>, thro
 "#;
 
 /// Hands the leaf materials global illumination's probes, as the light pass reads them: the faces
-/// image, the reach image, the field's info buffer, the lights buffer and the air buffer, by their
-/// asset keys, the probes along each side of a cascade, their spacing in cells and how many
-/// cascades. A faces key of zero or less turns their reading off, Bevy's lighting left as it is.
+/// image, the reach image, the image of their light by way, the field's info buffer, the lights
+/// buffer and the air buffer, by their asset keys, the probes along each side of a cascade, their
+/// spacing in cells and how many cascades. A faces key of zero or less turns their reading off,
+/// Bevy's lighting left as it is.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_forward_probes(
     cubes: i32,
     reach: i32,
+    ways: i32,
     field: i32,
     lights: i32,
     air: i32,
@@ -337,7 +412,7 @@ pub extern "C" fn bcs_render_set_forward_probes(
     crate::interop::guard(|| {
         #[cfg(not(feature = "render"))]
         {
-            let _ = (cubes, reach, field, lights, air, probes, spacing, cascades);
+            let _ = (cubes, reach, ways, field, lights, air, probes, spacing, cascades);
             status::UNSUPPORTED
         }
 
@@ -351,14 +426,14 @@ pub extern "C" fn bcs_render_set_forward_probes(
                     off
                 } else {
                     let image = |key| crate::assets::clone_handle(world, key).and_then(|handle| handle.try_typed::<Image>().ok());
-                    let (Some(cubes), Some(reach)) = (image(cubes), image(reach)) else {
+                    let (Some(cubes), Some(reach), Some(ways)) = (image(cubes), image(reach), image(ways)) else {
                         return status::NO_COMPONENT;
                     };
                     let buffer = |key| super::compute::buffer_handle(world, key);
                     let (Some(field), Some(lights), Some(air)) = (buffer(field), buffer(lights), buffer(air)) else {
                         return status::NO_COMPONENT;
                     };
-                    ForwardProbes { cubes, reach, field, lights, air, counts: Vec4::new(probes, spacing, cascades, 1.0) }
+                    ForwardProbes { cubes, reach, ways, field, lights, air, counts: Vec4::new(probes, spacing, cascades, 1.0) }
                 };
 
                 if world.get_resource::<ForwardProbes>() != Some(&given) {
@@ -395,6 +470,7 @@ fn stand_ins(world: &mut bevy::ecs::world::World) -> Option<ForwardProbes> {
     let mut images = world.get_resource_mut::<bevy::asset::Assets<Image>>()?;
     let cubes = images.add(image(TextureFormat::Rgba16Float, 8));
     let reach = images.add(image(TextureFormat::R16Float, 2));
+    let ways = images.add(image(TextureFormat::Rgba16Float, 8));
 
     // The field's info, its counts first, then nine cascades and the eye, a vector each.
     let buffer = |bytes: usize| {
@@ -407,7 +483,7 @@ fn stand_ins(world: &mut bevy::ecs::world::World) -> Option<ForwardProbes> {
     let lights = buffers.add(buffer(4 * 16));
     let air = buffers.add(buffer(AIR_ENTRIES * 16));
 
-    let made = ForwardProbes { cubes, reach, field, lights, air, counts: Vec4::ZERO };
+    let made = ForwardProbes { cubes, reach, ways, field, lights, air, counts: Vec4::ZERO };
     world.insert_resource(StandIns(made.clone()));
     Some(made)
 }
