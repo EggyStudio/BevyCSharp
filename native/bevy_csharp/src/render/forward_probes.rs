@@ -34,7 +34,7 @@ use bevy::{asset::Handle, ecs::resource::Resource, image::Image, math::Vec4, ren
 pub struct ForwardProbes {
     /// Every cascade's probes' six faces, as `gi_ambient.slang` gathers them.
     pub cubes: Handle<Image>,
-    /// How far each probe's rays reached, eight by eight directions a probe.
+    /// How far each probe's rays reached, sixteen by sixteen directions a probe, a ray each.
     pub reach: Handle<Image>,
     /// Every cascade's probes' light along eight by eight directions, a block of ten by ten texels
     /// a probe with a texel's border across the octahedron's edges, as `gi_ambient.slang` gathers
@@ -86,7 +86,7 @@ const PROBE_PI: f32 = 3.14159265358979;
 const EYE_CLEAR: f32 = 6.0;
 const CASCADE_BAND: f32 = 8.0;
 const LEAN: f32 = 0.5;
-const REACH_TEXELS: i32 = 8;
+const REACH_TEXELS: i32 = 16;
 const WAYS_TEXELS: i32 = 10;
 const MOST_SUNS: u32 = 10u;
 

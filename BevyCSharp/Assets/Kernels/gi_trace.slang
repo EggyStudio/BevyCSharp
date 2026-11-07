@@ -73,9 +73,19 @@ Texture3D<float4> bounced;
 Texture3D<float4> bounced_at;
 
 // How far each ray went before it met a surface, or its interval's end where it met none, below zero
-// where it met a face from behind, which gi_ambient.slang lays out as each probe's reach and counts
-// to find a probe inside a solid.
+// where it met a face from behind, a texel's rays taken together, which gi_ambient.slang counts to
+// find a probe inside a solid.
 [format("r16f")] RWTexture3D<float> distances;
+
+// Every cascade's probes' reach, how far each of their rays went before a surface stopped it, or
+// its interval's end where it met none, a texel a ray of sixteen by sixteen a probe (ReachTexels),
+// the cascades one after another along z, which a surface is weighed by whether a probe sees it by.
+// Each ray keeps its own, since four rays a texel taken together gave a texel of eight a side the
+// reach of the one of them that passed beside a thin-walled room's corner, 5.8 where the wall stood
+// at 2.6 along the texel's other ways, and a probe beyond the wall saw an eighth of the floor inside.
+// A ray's reach stands for a cell of ways about 15 degrees wide, so an edge narrower than that seen
+// from a probe can still let one cell read long.
+[format("r16f")] RWTexture3D<float> reach;
 
 // The share of light each ray kept across surfaces that let light through before its interval
 // began, which the probe's own faces take its light times (gi_ambient.slang), where the cascade
@@ -412,6 +422,9 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     rayLight[lane] = light;
     rayOwn[lane] = float4(own, behind ? -reached : reached);
     rayNothing[lane] = nothingShare;
+    uint2 itsTexel = texel * (uint(ReachTexels) / texels) + (each == 4u ? uint2(quarter & 1u, quarter >> 1u) : uint2(0u));
+    if (live)
+        reach[uint3(at.xy * uint(ReachTexels) + itsTexel, uint(c) * probes + at.z)] = reached;
     rayEarly[lane] = keptBefore;
     GroupMemoryBarrierWithGroupSync();
     float4 texelLight = float4(0.0);
@@ -419,7 +432,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     if (quarter == 0u)
     {
         float3 met = float3(0.0);
-        float reach = 0.0;
+        float texelReach = 0.0;
         // How many met a surface, one before their interval began and the sky, and the share that
         // met nothing, fractions of a ray where one crossed surfaces letting light through.
         uint surfaces = 0u, early = 0u, skies = 0u, behinds = 0u;
@@ -435,17 +448,17 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             before += rayEarly[lane + q];
             met += one.a < 0.75 ? one.rgb : float3(0.0);
             texelOwn += itsOwn.rgb;
-            reach += abs(itsOwn.w);
+            texelReach += abs(itsOwn.w);
             behinds += itsOwn.w < 0.0 ? 1u : 0u;
         }
         float most = nothing * 2.0 > float(each) ? 1.0 : early > surfaces && early >= skies ? 0.5 : skies > surfaces ? 0.25 : 0.0;
         texelLight = float4(met / float(each), texelMark(most, nothing, each));
         texelOwn /= float(each);
-        reach /= float(each);
+        texelReach /= float(each);
         if (live)
         {
             radiance.Store(written, texelLight);
-            distances[written] = behinds * 2u > each ? -reach : reach;
+            distances[written] = behinds * 2u > each ? -texelReach : texelReach;
             kept[written] = before / float(each);
         }
     }

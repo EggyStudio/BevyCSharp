@@ -33,8 +33,8 @@ SamplerState field_sampler;
 // frame before's, laid out as gi_trace.slang lays it.
 StructuredBuffer<float4> held;
 
-// The cascade above's probes' reach, the nearest ray's distance along each of their eight by eight
-// directions, as the gather wrote it the frame before.
+// The cascade above's probes' reach, each of their rays' distance, sixteen by sixteen a probe, as
+// its trace wrote it this frame.
 Texture3D<float> reach_above;
 
 // x: the cascade. y: the probes along each side. z: this cascade's octahedron's texels along each

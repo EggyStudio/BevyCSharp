@@ -277,8 +277,9 @@ public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3
     return false;
 }
 
-/// The directions each probe's reach is kept along, eight by eight of its octahedron.
-public static const int ReachTexels = 8;
+/// The directions each probe's reach is kept along, sixteen by sixteen of its octahedron, a ray's
+/// own each (gi_trace.slang).
+public static const int ReachTexels = 16;
 
 /// The texels along each side of a probe's block of its light by way, eight by eight directions
 /// with a texel's border, each border texel the one across the octahedron's edge from it, as DDGI

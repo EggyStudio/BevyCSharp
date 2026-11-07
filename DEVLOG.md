@@ -52,11 +52,21 @@ crowns lighter, 2 to 6 points nearer their path-traced reference, and the grass 
 shadow darker, from 7% under to 46% under. It is a step with the sun's shadow right, the light the
 shaded grass takes from all around beside the wall being the next item.
 
+![](.github/assets/readings/2026-11-07-item-111-reach.webp)
+The closed room of thin walls with a lamp outside its east wall and a white board standing past the
+lamp, its picture's light twenty times over, on the left with each probe's reach along a texel of
+its octahedron the mean of the texel's four rays, the floor along the walls and the east wall's foot
+lit by the probe beyond the wall, which a ray of a texel passing beside the room's corner let see
+the floor, and on the right with each ray's reach its own, the floor reading 0.0037 where 0.0119,
+against a reference which no light reaches.
+
 Done that day
 
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.
 - Item 109 at `5a8b4182`. A planted tree's leaves bend their normals in mesh space.
 - Item 110 at `2adbe701`. The specular share of the bounce light from the cascades.
+- Item 112 at `80f75e53`. A crown's leaves take 40% less diffuse light from the probes than the
+  reference gives them.
 
 ## 2026-11-06
 

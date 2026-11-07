@@ -235,7 +235,19 @@ frame before, and each probe's share of that light follows its own light where t
 much. A probe that sees the eight probes of the cascade above around it standing outside every mesh
 for under a quarter of their weight, as in an alley narrower than their spacing whose probes stand
 outside its walls, carries its rays on to the field's edge and brings the sky where they meet
-nothing once the field holds every mesh, 3DEngine's carry.
+nothing once the field holds every mesh, 3DEngine's carry. Each ray keeps its own reach, how far it
+went before a surface stopped it, in an image of sixteen texels a probe a side, a ray each, by which
+a surface is weighed for whether a probe sees it, where 3DEngine and the bridge before kept each
+texel of eight a side the mean of its four rays. A texel whose one ray of four passed beside a
+thin-walled room's corner and met nothing read 5.8 units where the wall stood at 2.6 along its other
+ways, so the probe beyond the east wall, lit by a white board past the lamp, saw an eighth of the
+floor inside, which read 0.0119 against a bar of 0.005 and reads 0.0037
+(`ALitBoardOutsideAThinWalledRoomLightsNothingInside`), and the same room's glossy floor 0.0046
+where 0.0123. The image takes 1 MB at four cascades where it took 256 KB, and the trace writes it in
+place of the gather, at no cost the trace's timing shows at High in the feature test's Cornell box,
+2.25 to 2.31 ms where 2.26 to 2.33, the gather 0.149 ms where 0.153, and the probes' memory 11.1 MB
+where 10.4. A ray's reach stands for a cell of ways about 15 degrees wide, so an edge narrower than
+that seen from a probe can still let one cell read long.
 A cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the
 far cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun,
 the camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,

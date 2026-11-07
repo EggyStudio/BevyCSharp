@@ -3,9 +3,8 @@
 // direction weighed by how squarely it falls on that surface and by the share of the sphere its
 // texel spans, which a pass and the next frame's rays read, blended between probes. The weights are
 // scaled to sum to pi, the light reaching a face under a sky of 1, so a uniform sky reads alike on
-// every face at any number of texels. Each probe's reach is laid out beside, how far its rays went
-// along each of eight by eight directions before a surface stopped them, from this cascade's rays,
-// each face's thread a sixth of the directions, which a probe is weighed by.
+// every face at any number of texels. Each probe's reach, how far each of its rays went, the trace
+// writes itself (gi_trace.slang).
 //
 // Beside each face it writes the light the surface the face is read for gathers, the one the probe's
 // own ray along the face's opposite way met, which a ray's hit on that surface and a pixel on it take
@@ -52,10 +51,6 @@ StructuredBuffer<FieldInfo> info;
 // The share of light this cascade's rays kept across surfaces that let light through before their
 // interval began, as gi_trace.slang wrote it, which the probe's faces take their light times.
 Texture3D<float> kept;
-
-// Every cascade's probes' reach, eight by eight directions a probe, the cascades one after another
-// along z.
-[format("r16f")] RWTexture3D<float> reach;
 
 // Every cascade's probes' light along eight by eight directions, each the merged directions about
 // it weighed by the lobe a surface of roughness 0.5 spreads its reflection over, a block of ten by
@@ -240,20 +235,6 @@ void main(uint3 id : SV_DispatchThreadID)
     cubes_at.Store(into, float4(atSurface, h));
     if (face == 0u)
         follow(at, probes, texels, shares, walledIn(at, texels));
-
-    // This probe's reach, the nearest ray's distance along each direction where the cascade has as
-    // many directions or fewer, and the mean of the rays inside it where it has more.
-    uint step = max(texels / uint(ReachTexels), 1u);
-    for (uint k = face; k < uint(ReachTexels * ReachTexels); k += 6u)
-    {
-        uint2 texel = uint2(k % uint(ReachTexels), k / uint(ReachTexels));
-        uint2 first = texels >= uint(ReachTexels) ? texel * step : uint2((float2(texel) + 0.5) / float(ReachTexels) * float(texels));
-        float reached = 0.0;
-        for (uint v = 0u; v < step; v++)
-            for (uint u = 0u; u < step; u++)
-                reached += abs(distances.Load(int4(int2(at.xy * texels + first + uint2(u, v)), int(at.z), 0)));
-        reach[uint3(at.xy * uint(ReachTexels) + texel, cascade.x * probes + at.z)] = reached / float(step * step);
-    }
 
     // The probe's light by way, eight by eight directions in a block with a texel's border.
     uint along = uint(WaysTexels) - 2u;
