@@ -280,6 +280,12 @@ public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3
 /// The directions each probe's reach is kept along, eight by eight of its octahedron.
 public static const int ReachTexels = 8;
 
+/// The texels along each side of a probe's block of its light by way, eight by eight directions
+/// with a texel's border, each border texel the one across the octahedron's edge from it, as DDGI
+/// borders its probes, so a filtered read across a fold blends the directions on either side of it,
+/// which gi_ambient.slang gathers and the light pass reads a rough face's reflection from.
+public static const int WaysTexels = 10;
+
 /// How near a surface a probe may stand, and the most it is moved from its spot in the grid to stand
 /// so far off one or out of a mesh, in its spacing, so a probe in the plane of a wall or a ceiling
 /// stands in the room before it rather than inside it, as DDGI moves its probes. A probe moved stays
@@ -347,6 +353,36 @@ public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe,
     int2 texel = min(int2(octahedron(toward / d) * float(ReachTexels)), int2(ReachTexels - 1));
     float reached = reach.Load(int4(int3(at.xy * ReachTexels + texel, c * int(probes) + at.z), 0));
     float slack = 0.125 * apart;
+    return saturate((reached + slack - d) / slack);
+}
+
+/// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
+/// `n`, as `probeSees` weighs it, with the probe's reach blended between the four texels nearest
+/// the way to the surface and falling to 0 over half the probes' spacing past it, so a probe the
+/// surface stops seeing fades out over about the angle a texel spans. The light a rough face
+/// reflects reads its probes so (`reflectedIn` in gi_light.slang), since along the mirror way the
+/// probes on either side of a mesh see unlike light, and weighed by `probeSees` they drew a Cornell
+/// box's tall block on its red wall, at a roughness of 0.5, with the straight edges of the probes'
+/// texels, where the reference blurs it. A quarter of the spacing left the edges scalloped. The
+/// texels are clamped at the octahedron's edges rather than folded across them.
+public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
+{
+    float3 toward = p + n * (0.3 * apart) - probe;
+    float d = length(toward);
+    if (d < 1e-4)
+        return 1.0;
+    float2 t = octahedron(toward / d) * float(ReachTexels) - 0.5;
+    int2 base = int2(floor(t));
+    float2 f = t - float2(base);
+    float reached = 0.0;
+    for (int corner = 0; corner < 4; corner++)
+    {
+        int2 offset = int2(corner & 1, corner >> 1);
+        int2 texel = clamp(base + offset, int2(0), int2(ReachTexels - 1));
+        float2 lerps = lerp(1.0 - f, f, float2(offset));
+        reached += lerps.x * lerps.y * reach.Load(int4(int3(at.xy * ReachTexels + texel, c * int(probes) + at.z), 0));
+    }
+    float slack = 0.5 * apart;
     return saturate((reached + slack - d) / slack);
 }
 

@@ -63,9 +63,11 @@ StructuredBuffer<GiLights> lights;
 // meets. w: the texels a side of the probe's octahedron traced from, or 0 for the camera's picture.
 uniform uint4 counts;
 
-// x: 1 where every face of a camera's path scatters by its material's gloss, and 0 where every path
-// goes on by its diffuse share, the first face's gloss taking the lights' light alone and every
-// face after it lit as the probes light one (GiReference.Gloss).
+// x: 1 where every face of a camera's path scatters by its material's gloss, 2 where its first face
+// does and every face after it goes on by its diffuse share, lit as the probes light one, and 0
+// where every path goes on by its diffuse share, the first face's gloss taking the lights' light
+// alone and every face after it lit as the probes light one (GiReference.Gloss). y: the seed the
+// camera's paths draw from.
 uniform uint4 scatter;
 
 // xyz: the place of the probe traced from where counts.w is above 0. w: 1 where it is a screen
@@ -576,7 +578,7 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         // Every face of the camera's paths is lit as Bevy's lighting lights it, or the first alone
         // where the reference is asked for the probes' tests, and a probe's as the probes light
         // one.
-        bool shaded = fromCamera && (scatter.x != 0u || bounce == 0u);
+        bool shaded = fromCamera && (scatter.x == 1u || bounce == 0u);
         bool lobed = shaded && scatter.x != 0u;
         Lit lit = litAt(hit, material, n);
         uint2 face = uint2(hit.instance, hit.triangle);
@@ -716,7 +718,7 @@ void main(uint3 id : SV_DispatchThreadID)
     for (uint s = 0u; s < counts.x; s++)
     {
         uint index = counts.y + s;
-        uint state = (id.y * width + id.x) * 9781u + index * 6271u + 1u;
+        uint state = (id.y * width + id.x) * 9781u + index * 6271u + scatter.y * 7919u + 1u;
         random(state);
         float2 uv = (float2(id.xy) + float2(random(state), random(state))) / float2(width, height);
         sum += trace(given, passRayOrigin(uv), passRayDirection(uv), true, state);

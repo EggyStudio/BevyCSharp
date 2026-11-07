@@ -53,11 +53,38 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// The same room with its faces at a roughness of 0.5 and the screen probes left out reads
+    /// inside under 0.005 on every face, the light about each face's mirror way, which crosses the
+    /// east wall toward the lamp from the floor before it, kept to the probes inside the room.
+    /// </summary>
+    /// <remarks>
+    /// A face's gloss reflects the light the probes it sees hold along its mirror way, each probe
+    /// weighed by how much of the face it sees with its reach blended between its texels and a
+    /// slack of half the probes' spacing (<c>probeSeesBlended</c>) and left out where it sees none,
+    /// where the light about its normal takes a slack of an eighth, so this room reads whether that
+    /// slack lets a probe past the wall lend the light it sees there. The floor reads 0.0012. With
+    /// a white board standing outside past the lamp, which the probes beyond the wall see along the
+    /// floor's mirror way, the floor read 0.0123, against 0.0135 with each probe weighed by
+    /// <c>probeSees</c>, 0.0122 with no weight for sight at all and 0.0106 with no light along the
+    /// mirror way, the probes beyond the wall weighed a hundredfold reading 0.0258, so those probes
+    /// are among the ones read and the slack lends the reflection nothing <c>probeSees</c> keeps
+    /// out. What passes 0.005 there is the light about the normal, which the board brings through
+    /// the wall.
+    /// </remarks>
+    [SkippableFact]
+    public void ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside()
+    {
+        var faults = ThinWalledRoomFaces(screen: false, roughness: 0.5f).Where(f => f.Light >= 0.005).Select(f => $"the {f.Face} reads {f.Light:0.0000} where its reference reads {f.Reference:0.0000}").ToList();
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
     /// Each face the camera sees inside the closed room of thin walls (<see
     /// cref="ThinWalledRoom"/>), its mean light a channel in the picture and in its reference of 64
-    /// paths, the screen probes in or left out as <paramref name="screen"/> says.
+    /// paths, the screen probes in or left out as <paramref name="screen"/> says, its faces at
+    /// <paramref name="roughness"/>.
     /// </summary>
-    private List<(string Face, double Light, double Reference)> ThinWalledRoomFaces(bool screen)
+    private List<(string Face, double Light, double Reference)> ThinWalledRoomFaces(bool screen, float roughness = 0.9f)
     {
         Needs.Shaders();
         var supported = false;
@@ -67,7 +94,7 @@ public sealed partial class GlobalIlluminationTests
             Width = 160,
             Height = 90,
             Frames = 6000,
-            Scene = ecs => ThinWalledRoom(ecs, screen),
+            Scene = ecs => ThinWalledRoom(ecs, screen, roughness),
         }
             .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
             .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
@@ -82,7 +109,7 @@ public sealed partial class GlobalIlluminationTests
                 if (!begun)
                 {
                     begun = true;
-                    Assert.Null(GiReference.BeginReference(ecs, null, 64, gloss: GiReference.Gloss.LightsAlone));
+                    Assert.Null(GiReference.BeginReference(ecs, null, 64, gloss: GiReference.Gloss.FirstFace));
                     return false;
                 }
                 return GiReference.Step(ecs) is not null;
@@ -120,7 +147,7 @@ public sealed partial class GlobalIlluminationTests
             }
             if (pixels <= 50) continue;
             var (light, reference) = (shown / pixels / 3, wanted / pixels / 3);
-            output.WriteLine($"the thin-walled room's {name.Value} reads {light:0.0000} against {reference:0.0000}, the screen probes {(screen ? "in" : "out")}");
+            output.WriteLine($"the thin-walled room's {name.Value} reads {light:0.0000} against {reference:0.0000}, the screen probes {(screen ? "in" : "out")}, its faces at {roughness}");
             faces.Add((name.Value, light, reference));
         }
 
@@ -132,15 +159,16 @@ public sealed partial class GlobalIlluminationTests
     /// standing on a floor that runs on past them, its ceiling laid on them, the north and south
     /// walls between the east and west walls' ends, lit by a bright lamp outside the east wall half
     /// a unit over the floor, the camera inside looking down toward the east wall, in a field of
-    /// cells half a unit wide, the screen probes in or left out as <paramref name="screen"/> says.
+    /// cells half a unit wide, the screen probes in or left out as <paramref name="screen"/> says,
+    /// every face at <paramref name="roughness"/>.
     /// </summary>
-    private static void ThinWalledRoom(EcsWorld ecs, bool screen)
+    private static void ThinWalledRoom(EcsWorld ecs, bool screen, float roughness)
     {
         var camera = PictureRun.Camera(ecs, new Vec3(-0.4f, 1.6f, 2.4f));
         ecs.Add(camera, Transform.LookingAt(new Vec3(-0.4f, 1.6f, 2.4f), new Vec3(2.8f, 0.2f, -0.2f), Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
         Render.SetAmbientLight((1f, 1f, 1f), 0f);
-        var white = Render.CreateMaterial(0.787f, 0.787f, 0.787f, roughness: 0.9f);
+        var white = Render.CreateMaterial(0.787f, 0.787f, 0.787f, roughness: roughness);
         void Box(string name, float x0, float x1, float y0, float y1, float z0, float z1)
         {
             var box = ecs.Spawn();

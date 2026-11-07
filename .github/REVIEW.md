@@ -1,53 +1,55 @@
 # Review
 
-Reviewed up to `5a8b4182`, item 109, a leaf's way out turned with its tree, pushed at 00:06 on
-2026-11-07, its run green at 00:23 on the three systems in 12 to 17 minutes; it keeps the form and
-carries the review's files. Nothing is pushed after it. Before it `18f226eb`, 105's fourth commit,
-the reference tracing the GGX lobe, pushed at 22:39 on 2026-11-06, its run green at 22:54 on the
-three systems in 13 to 15 minutes. Before it `06108b8b`, 105's third commit, the grass's tangents,
-the card's side from its own normal and the shader's guards, pushed at 21:10, its run green at 21:28
-on the three systems in 13 to 18 minutes. Before it `4ad66505`, 105's second commit, the reference's
-shadow mask, leaf lighting, normal maps and 32 masks with the README's 3DEngine link, pushed at
-13:25 on 2026-11-05, its run green at 13:44 on the three systems in 14 to 18 minutes. Before it
-`1920d85b`, 105's first commit, the reference at the eye's level with its counts, pushed at 10:33,
-its run green at 10:55 on the three systems in 11 to 18 minutes. Before it `03bc102f`, item 99, the
-screen probes' tile by the picture's height, pushed at 08:22, its run green at 08:39 on the three
-systems in 13 to 16 minutes; it keeps the form and carries the review's files. Before it `faadbfbd`,
-item 100, the reference's leaf cutout, pushed at 04:54, its run green at 05:18 on the three systems
-in 13 to 18 minutes; it keeps the form and carries the review's files and the devlog. Before it
-`817fc176`, 104's screen- probe log, pushed at 03:22, its run green at 03:44 on the three systems in
-13 to 18 minutes; it keeps the form and carries the review's files. Before it `ee0b59e1`, 104's
-table, the ambient's F_AB from Bevy's own DFG image, pushed at 02:17, its run green at 02:39 on the
-three systems in 10 to 17 minutes; it keeps the form and carries the review's files. Before it
-`98dad7f7`, 104's carry, the engine's carried ray in its two steps, pushed at 23:37 on 2026-11-04,
-its run green at 23:54 on the three systems in 11 to 17 minutes; it keeps the form and carries the
-review's files. Before it `eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces, pushed at 20:10,
-its run green at 20:27 on the three systems in 15 to 17 minutes; it keeps the form and carries the
-review's files. Before it `1774aa0c`, item 103, every linear texture sampler at 16, pushed at 18:34,
-its run green at 18:52 on the three systems in 12 to 15 minutes; it keeps the form and carries the
-review's files. Before it `46ae797e`, item 102, the faces at their surfaces with the patch's turn,
-pushed at 14:12, its run green at 14:30 on the three systems in 11 to 17 minutes; it keeps the form
-and carries the review's files and the devlog. Before it `3723d5ff`, 101's second commit and its
-end, an emitter by its mesh's own surface, pushed at 05:32, its run green at 05:55 on the three
-systems in 11 to 18 minutes; it keeps the form and carries the review's files. Before it `9bdb29b3`,
-101's first commit, the field's contact shadows through the camera's air, pushed at 03:48, its run
-green at 04:06 on the three systems in 10 to 13 minutes; it keeps the form and carries the review's
-files. Before it `086ac6e7`, 95's thirteenth commit, the cascades' clearance from the eye, pushed at
-02:15, its run green at 02:38 on the three systems in 13 to 19 minutes; it keeps the form and
-carries the review's files. Before it `accbda6d`, 95's twelfth commit, the lamp march from its first
-step, pushed at 00:30, its run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the
-form and carries the review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of
-a thin wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the
-three systems in 12 to 18 minutes; it keeps the form and carries the review's files. Before it
-`f5505a58`, 95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in
-16 to 18 minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's
-default commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at
-16:48 on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files.
-Before it `5cafb9a2`, 95's forward- surfaces commit, pushed at 15:28, its run green at 15:51 on the
-three systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows
-for 99, 100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its
-run green at 11:14 on the three systems; it keeps the form and carries the review's files and N
-4.10. Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
+Reviewed up to `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed
+at 06:07 on 2026-11-07, its run green at 06:24 on the three systems in 12 to 16 minutes; it keeps
+the form and carries the review's files. Nothing is pushed after it. Before it `5a8b4182`, item 109,
+a leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23 on the three systems
+in 12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference tracing the GGX lobe,
+pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in 13 to 15 minutes.
+Before it `06108b8b`, 105's third commit, the grass's tangents, the card's side from its own normal
+and the shader's guards, pushed at 21:10, its run green at 21:28 on the three systems in 13 to 18
+minutes. Before it `4ad66505`, 105's second commit, the reference's shadow mask, leaf lighting,
+normal maps and 32 masks with the README's 3DEngine link, pushed at 13:25 on 2026-11-05, its run
+green at 13:44 on the three systems in 14 to 18 minutes. Before it `1920d85b`, 105's first commit,
+the reference at the eye's level with its counts, pushed at 10:33, its run green at 10:55 on the
+three systems in 11 to 18 minutes. Before it `03bc102f`, item 99, the screen probes' tile by the
+picture's height, pushed at 08:22, its run green at 08:39 on the three systems in 13 to 16 minutes;
+it keeps the form and carries the review's files. Before it `faadbfbd`, item 100, the reference's
+leaf cutout, pushed at 04:54, its run green at 05:18 on the three systems in 13 to 18 minutes; it
+keeps the form and carries the review's files and the devlog. Before it `817fc176`, 104's screen-
+probe log, pushed at 03:22, its run green at 03:44 on the three systems in 13 to 18 minutes; it
+keeps the form and carries the review's files. Before it `ee0b59e1`, 104's table, the ambient's F_AB
+from Bevy's own DFG image, pushed at 02:17, its run green at 02:39 on the three systems in 10 to 17
+minutes; it keeps the form and carries the review's files. Before it `98dad7f7`, 104's carry, the
+engine's carried ray in its two steps, pushed at 23:37 on 2026-11-04, its run green at 23:54 on the
+three systems in 11 to 17 minutes; it keeps the form and carries the review's files. Before it
+`eeb74e2b`, 104's diagnostic, gi.probe and gi.bounces, pushed at 20:10, its run green at 20:27 on
+the three systems in 15 to 17 minutes; it keeps the form and carries the review's files. Before it
+`1774aa0c`, item 103, every linear texture sampler at 16, pushed at 18:34, its run green at 18:52 on
+the three systems in 12 to 15 minutes; it keeps the form and carries the review's files. Before it
+`46ae797e`, item 102, the faces at their surfaces with the patch's turn, pushed at 14:12, its run
+green at 14:30 on the three systems in 11 to 17 minutes; it keeps the form and carries the review's
+files and the devlog. Before it `3723d5ff`, 101's second commit and its end, an emitter by its
+mesh's own surface, pushed at 05:32, its run green at 05:55 on the three systems in 11 to 18
+minutes; it keeps the form and carries the review's files. Before it `9bdb29b3`, 101's first commit,
+the field's contact shadows through the camera's air, pushed at 03:48, its run green at 04:06 on the
+three systems in 10 to 13 minutes; it keeps the form and carries the review's files. Before it
+`086ac6e7`, 95's thirteenth commit, the cascades' clearance from the eye, pushed at 02:15, its run
+green at 02:38 on the three systems in 13 to 19 minutes; it keeps the form and carries the review's
+files. Before it `accbda6d`, 95's twelfth commit, the lamp march from its first step, pushed at
+00:30, its run green at 00:53 on the three systems in 14 to 18 minutes; it keeps the form and
+carries the review's files. Before it `8583deff`, 95's eleventh commit, the field's hold of a thin
+wall along its foot and head, pushed at 23:01 on 2026-11-03, its run green at 23:24 on the three
+systems in 12 to 18 minutes; it keeps the form and carries the review's files. Before it `f5505a58`,
+95's glow-lights commit, pushed at 19:24, its run green at 19:47 on the three systems in 16 to 18
+minutes; it keeps the form and carries the review's files. Before it `c7eabbb0`, 95's default
+commit, the feature test's GI at Medium with the fill off, pushed at 16:24, its run green at 16:48
+on the three systems in 16 to 18 minutes; it keeps the form and carries the review's files. Before
+it `5cafb9a2`, 95's forward- surfaces commit, pushed at 15:28, its run green at 15:51 on the three
+systems in 14 to 18 minutes; it keeps the form and carries the review's files with the rows for 99,
+100 and 141. Before it `55e07752`, 95's occlusion commit, pushed at 10:55 on 2026-11-03, its run
+green at 11:14 on the three systems; it keeps the form and carries the review's files and N 4.10.
+Before it `37aa4d31`, 95's hall commit, Bevy's light probes taken back, pushed at 07:59 on
 2026-11-03, its run green at 08:17 on the three systems; it keeps the form and carries the review's
 files. Before it `43550f11`, 95's reach commit, Medium in four cascades, pushed at 04:16 on
 2026-11-03, its run green at 04:34 on the three systems; it keeps the form and carries the review's
@@ -1525,7 +1527,11 @@ from [SHARED.md](SHARED.md).
     of a trunk's 7-second sway by the machine's clock, falling in the suite as the two crowns
     crossed; the test captures on a set clock of 60 frames a second, eight captures half a second
     apart over 3.5 seconds, half a period, and reads 0.46 to 0.50 over three runs, in 106's commit
-    with a reply.
+    with a reply. Done at `b576bf3f`, pushed at 06:07 on 2026-11-07, the nullable biases with Bevy's
+    defaults by kind, SunShadowTests reading +1% where -19 at 0.6, many_foxes retaken from the
+    runner-image run with its gallery picture at 2.1% before, the nine pictures that moved 0.1% or
+    more within their allowance named in the reply, the wind test on its set clock; the suite 2,036
+    in 47 minutes on its second run, NormTests 18. Next 110 (a).
 
 107. **The crowns' fill, the picture's against the reference's.** From Decision 78 on 2026-11-05. At
     the measure's view the picture at Medium fills its crowns and the reference at the same level,
@@ -1664,7 +1670,98 @@ from [SHARED.md](SHARED.md).
     with GI on, reads the room's probes under the lobe and runs in (a)'s suite, and TreeLeavesTests'
     MirrorsNoSky is the leaf material's own specular. WorldProbes.Bytes() counted the faces' sky
     image and never the per-cascade merged sky images, about 0.81 MB at High, which go with (a)
-    along with the faces' 24 KB.
+    along with the faces' 24 KB. A find at 06:34 from (a)'s pictures before it lands. The cosine
+    lobe is the right width, as the engine's figure says, but its probe weights drew a hard edge,
+    the tall block's reflection on a Cornell box's red wall at 1280 by 720 a pentagon with straight
+    sharp edges, since probeSees reads each probe's reach from one texel of its 8 by 8 octahedron
+    and falls to nothing over an eighth of the spacing, so a probe drops out of the lobe along the
+    texels' edges, which the diffuse read never shows since the probes' faces agree about the normal
+    while along the mirror way the probes on either side of the block see unlike light; without
+    probeSees the edge goes, which would let light through thin walls, and with the reach blended
+    between the four nearest texels and a slack of half the spacing the reflection comes out soft
+    with the readings hardly moved against the first-face reference, the green wall 1.003 where
+    1.005, the rooms within 0.004 and the corridor 0.768 to 0.805 where 0.764 to 0.802. So (a) lands
+    with a probeSeesBlended in bcs_gi.slang for the lobe read alone, the diffuse read keeping
+    probeSees, its cost in the figures once the GPU is free, the pair showing HEAD and the landed
+    read. The thin-wall check is a permanent test,
+    ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside, the diffuse read's thin-walled
+    room with every face at a roughness of 0.5 and the screen probes out under the same bar of 0.005
+    on every face, the walls 0.3 thick in cells of 0.5, the lamp outside the east wall and the
+    floor's mirror way crossing it; on the hard lobe read the floor reads 0.0015, the east wall
+    0.0000 and the north wall 0.0001 against 0.0013, 0.0000 and 0.0001 at 0.9, the blended read's
+    figure to follow, and where it leaks the slack comes down toward an eighth of a spacing with the
+    texels still blended and the edge read again. The thin-wall check at 07:03: the glossy thin-
+    walled room at 0.5 with the screen probes out reads its floor 0.0016 on the blended lobe and
+    0.0015 on probeSees, every face under the 0.005 bar, but that room cannot tell the two apart,
+    reading the same with no visibility weight at all; with a white board outside past the lamp,
+    which the probes beyond the wall see along the floor's mirror way, the floor reads 0.0124
+    blended, 0.0127 on probeSees, 0.0127 with no visibility weight and 0.0106 with no lobe at all,
+    and with the probes past the wall weighed a hundredfold 0.0246, so they are among the eight read
+    and the half-spacing slack lends nothing probeSees keeps out, the remarks carrying the figures;
+    a quarter spacing's slack leaves the block's reflection scalloped as an eighth does, so (a)
+    keeps half. The board stays out of the permanent test since what fails the bar there is the
+    diffuse read on its own, item 111. Read at 07:33, the bounce rooms against the first-face
+    references, each view's distance at High without the screen probes as HEAD against LightsAlone,
+    HEAD against FirstFace, (a) against LightsAlone and (a) against FirstFace, the Cornell view
+    0.082, 0.123, 0.118 and 0.092 at a bound of 0.13, the thin room 0.071, 0.113, 0.051 and 0.069 at
+    0.14, the corridor 0.256, 0.324, 0.266 and 0.325 at 0.30, the window 0.100, 0.115, 0.135 and
+    0.112 at 0.14, the red walls in the sun 0.011, 0.012, 0.033 and 0.033 at 0.03, the strip 0.199,
+    0.240, 0.177 and 0.210 at 0.22, the grazing floor 0.054, 0.123, 0.065 and 0.062 at 0.09, the
+    carried lamp 0.073, 0.093, 0.117 and 0.084 at 0.10 and the glowing blocks 0.047, 0.077, 0.049
+    and 0.074 at 0.06, Low, Medium and the screen-probe cases the same way; views 3, 5 and 9 are
+    over at every quality and the six others hold. Views 3 and 9 are moved by the reference, its
+    first-face gloss holding what the faces do not give, the corridor's grazing floor where the
+    probes above hold little and the glowing blocks' own reflection, which the probes do not carry
+    as light, (a) moving them 0.001 to 0.003. View 5 is moved by (a), 0.011 to 0.033 against either
+    reference, its sunlit floor over 7,353 pixels reading 0.7719 where HEAD reads 0.7531 and the
+    references 0.7513 and 0.7507, so the reference's first-face gloss adds 0.08% there and (a) 2.5,
+    the red walls gaining toward their references (wall 1 0.0477 to 0.0550 where 0.0655); the
+    dominant direction reads 0.7692 and each face weighed by its hemisphere's share above the
+    surface 0.7699, the rooms and the box unchanged under both, so it is the lobe's width, a cosine
+    lobe about a mirror way 25 degrees up taking in the sunlit walls and blocks where a GGX lobe at
+    0.5 sees mostly the black sky, the octahedra question with view 5 as its measure. Decided, (i),
+    (a) reads the cascades' merged octahedra about the mirror way by the GGX lobe's width at the
+    surface's roughness in place of the faces, with the engine's probesReflected read for the model,
+    its bindings for the merged images and its cost measured before any figure, view 5 and the rooms
+    its measure, the faces' read kept in the tree as the fallback the record compares against; the
+    bounds of views 3 and 9, moved by the reference and not the picture, are taken again from the
+    reference's spread plus the old allowance, and view 5's bound stands since the picture moved.
+    Nothing lands until the octahedra read is measured. Read at 08:16, (i) built and measured. Each
+    probe's light along 8 by 8 directions is gathered in gi_ambient under a cos^8 lobe, as the
+    engine's ways are, into a block of 10 by 10 texels with a border folded across the octahedron's
+    edges, and the pass samples it filtered along the mirror way, mixed toward the faces from
+    roughness 0.5 to 1, probes the surface does not see left out with the light reaching the surface
+    standing in for their share, fading across cascades as bouncedAt does; nothing reads the faces'
+    bouncedAlong, so bcs_gi.slang is HEAD's plus probeSeesBlended and WaysTexels, the faces' lobe
+    the rough end of the mix and the record's comparison. Against the first-face references view 5
+    is back in bound at every quality, 0.016 to 0.022 against 0.03 where the faces read 0.029 to
+    0.039, its sunlit floor 0.7584 against 0.7513 (+0.9%) where the faces read +2.5 and the red
+    walls keeping their gain (wall 1 0.0543, faces 0.0550, HEAD 0.0477, the reference 0.0655); views
+    1, 2, 4, 6, 7 and 8 hold, mostly a little closer; the rooms and the box read as with the faces,
+    the green wall 1.023, the rooms 0.99 to 1.11, the corridor 0.770 to 0.807; the glossy thin-
+    walled room 0.0012, with the board 0.0123 blended, 0.0135 on probeSees, 0.0122 with no weight
+    for sight and 0.0258 with the probes past the wall a hundredfold, the slack lending nothing. The
+    bounds of views 3 and 9 by the rule, the largest distance HEAD's unchanged picture reads against
+    the first-face reference traced on four seeds plus the margin the old bound had over HEAD's old
+    reading, rounded up to the hundredth, the seeds from a new optional seed of
+    GiReference.BeginReference in the camera paths' starting state moving the reference 0.001 at
+    most, view 3 at 0.36, 0.37 and 0.37 at Low, Medium and High and 0.37, 0.39 and 0.39 with the
+    screen probes where (i) reads 0.317 to 0.324, view 9 at 0.09, 0.09 and 0.10 and 0.11, 0.11 and
+    0.09 where (i) reads 0.073 to 0.091, the remarks giving the method. The cost waits for a free
+    GPU, a rough read beside the engine's tests putting gi_ambient at 0.146 ms where 0.058 and
+    gi_light about 0.1 over the faces' lobe. Taken, (i) lands as (a) with those bounds once the GI
+    set passes and the cost is read quiet.
+
+111. **A lit face outside a thin wall lights the room inside.** From item 110 on 2026-11-07. The
+    diffuse read's thin-walled room, walls 0.3 thick in cells of 0.5 with its lamp outside the east
+    wall, reads its floor 0.0013 against a bar of 0.005, but with a white board standing outside
+    past the lamp, which the probes beyond the wall see, the floor reads 0.0106 with the lobe off,
+    twice the bar, light about the normal brought through the wall into a closed room. Read which
+    probes bring it, the ones past the wall through probeSees's reach at an eighth of the spacing or
+    the room's own through their rays meeting the board past a wall the field holds thinner than its
+    cell, with the board's light by probe and the field's distance across the wall; then a mend
+    measured on that room with the board and on the thin-wall tests both engines keep (the thin-wall
+    foot, the lamp march), the bounce rooms unchanged. After 110, before 107.
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 51 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
@@ -4348,3 +4445,91 @@ Shared: the bridge gives each light Bevy's own shadow biases for its kind, a nor
 texels for a directional light and a spot light where it gave every light 0.6, under which a wall
 the sun grazed at 70 degrees from its normal read 19% under the reference's sun and reads within 1%,
 and the meadow's grazed walls and stairs read 22 and 16% under where 34 and 30.
+
+Item 110 (a)'s commit, a rough face reflecting the light the probes it sees hold along its mirror
+way, read from each probe's eight by eight directions, the choice (i), in the commit carrying this
+line. The light pass gave a wall's gloss Bevy's reflection of its environment map and ambient light
+times the share of the sky the probes saw along the mirror way, so a closed room's rough walls
+reflected none of one another's light. gi_ambient.slang gathers each probe's light along eight by
+eight directions under the lobe a roughness of 0.5 spreads, every merged direction weighed by its
+cosine to the direction to the eighth power, into a block of ten by ten texels with a border folded
+across the octahedron's edges, as 3DEngine's gi_ambient.slang gathers its probes' ways. The pass
+reads the block filtered along the mirror way and mixes it toward the probe's faces as the surface
+grows rough past 0.5, the faces the rough end of the mix (reflectedIn and reflectedAlong in
+gi_light.slang, after 3DEngine's roughreflect.slang). A probe the surface does not see is left out
+and the light reaching the surface stands in for its share, and the read fades across the cascades'
+bands as the diffuse read does. Each probe's sight of the surface is its reach blended between the
+four nearest texels over half the probes' spacing (probeSeesBlended in bcs_gi.slang, beside
+WaysTexels), the diffuse read keeping probeSees. The probes' share of sky goes with its last reader,
+gi_merge's merged_sky, gi_ambient's skies, the pass's skyAt and the images WorldProbes made for
+them, the merged ones 0.81 MiB at High that its count of memory left out. Nothing outside that chain
+read them, the leaves' and the grass's forward fragment and the diagnostics among what was searched.
+
+GiReference.Gloss.FirstFace traces a camera path's first face by its gloss and every face after it
+by its diffuse share, lit as the probes light one, and the ten transport tests read it in place of
+LightsAlone, which the console's diffuse keeps until (b), the console taking first beside it.
+BeginReference takes a seed the camera's paths draw from. The bounce rooms' references are traced
+again with the first face's gloss, and BCS.md, the guide's ray tracing page and RENDERING.md say the
+read.
+
+GlobalIlluminationTests.AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference
+reads the first-face reference, its green wall 0.809 of the reference's light past the direct at
+HEAD, past its 6%, and 1.023 with the commit, the box 1.007 to 1.030. The closed rooms read 0.99 to
+1.11 and the corridor 0.770 to 0.807 against the same reference.
+
+The read first built was the proposal's trial (a), a cosine lobe about the mirror way from the
+probes' six faces. Weighed by probeSees, its probes drew a tall block's reflection on a Cornell
+box's red wall with the straight edges of their reach's texels, which blending the reach over half
+the spacing softened and a quarter left scalloped, the comparison
+07-03-item-110-reflection-edges.png in the day's dump. Against the first-face references it read the
+bounce rooms' red walls in the sun 0.029 to 0.039 from theirs where HEAD 0.012 to 0.017, over the
+view's 0.03, its sunlit floor 2.5% over the light its reference holds where the reference's first
+face adds 0.1%, the lobe taking in the sunlit walls and blocks around it. Frostbite's dominant
+direction read that floor 0.7692 and the faces weighed by the share of their hemisphere above the
+surface 0.7699, where the faces read 0.7719, HEAD 0.7531 and the reference 0.7513. Read from the
+directions it is 0.7584, the view 0.016 to 0.022, and the red walls keep the faces' gain, the
+nearest's +x face 0.0543 where 0.0550 with the faces, 0.0477 at HEAD and 0.0655 in the reference.
+
+The bounce rooms at High without the screen probes read from HEAD against the references before,
+HEAD against the first-face ones and the commit against those, the Cornell box 0.082, 0.123 and
+0.093, the thin room 0.071, 0.113 and 0.069, the corridor 0.256, 0.324 and 0.320, the window's
+0.100, 0.115 and 0.104, the red walls 0.011, 0.012 and 0.016, the strip's 0.199, 0.240 and 0.208,
+the grazing floor 0.054, 0.123 and 0.053, the carried lamp's 0.073, 0.093 and 0.077 and the emitting
+blocks 0.047, 0.077 and 0.073, the other qualities and the screen probes alike. The corridor and the
+emitting blocks are moved by the reference and not the picture, by gloss the probes do not give
+there, the corridor's grazing floor's and the blocks' own reflection, so their bounds are taken
+again as decided, HEAD's picture's farthest from references traced from four seeds, which differ by
+0.001 at most, plus the margin the bound kept over HEAD's reading before, rounded up. The corridor's
+are 0.36, 0.37 and 0.37 at Low, Medium and High and 0.37, 0.39 and 0.39 with the screen probes,
+where the commit reads 0.317 to 0.324, and the emitting blocks' 0.09, 0.09 and 0.10 and 0.11, 0.11
+and 0.09, where it reads 0.073 to 0.091. The red walls' bound stands at 0.03.
+
+GlobalIlluminationTests.ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside takes the
+diffuse read's thin-walled room with its faces at a roughness of 0.5, the floor's mirror way
+crossing the wall toward the lamp, every face under 0.005 as the room at 0.9 is, its floor 0.0012.
+With a white board standing outside past the lamp the floor read 0.0123, against 0.0135 with the
+probes weighed by probeSees, 0.0122 with no weight for sight and 0.0106 with no light along the
+mirror way, and the probes beyond the wall weighed a hundredfold read it 0.0258, so they are among
+the ones read and the slack lends nothing probeSees keeps out. The 0.0106 is the diffuse read's own,
+item 111.
+
+The cost at High in a Cornell box at 1280 by 720 with timings on and the GPU free, three runs each
+way alternated, is gi_light's median 1.023 to 1.039 ms where HEAD's 0.852 to 0.866, gi_ambient's
+0.146 where 0.057 and gi_merge's 0.030 where 0.032. The directions' image is 1.56 MiB at High, where
+the sky's share and its merged images held 0.83. A polished metal floor's sunlit red wall reads 246,
+121, 112 where HEAD 246, 120, 111, and a closed room's rough metal floor under an environment map 0,
+12, 0 as HEAD, RENDERING.md's figures for them read again. The pair 2026-11-07-item-110-gloss.webp
+shows the box at HEAD and with the commit. The leaves and the grass, drawn forward, keep Bevy's
+reflection, the third step.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The global
+illumination tests, the bounce rooms and the deferred emitters ran first, 111 passed. The whole
+suite ran, 2,037 passed and 3 skipped in 48 m 30 s at the 3 GB cap, none aborted, its largest
+process at 2,870 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the light pass reads a rough face's reflection from each probe's eight by eight directions
+along its mirror way as 3DEngine's roughreflect.slang reads them, its sight of each probe blended
+between the reach's texels over half the spacing where 3DEngine's takes an eighth, which here left a
+block's reflection scalloped, and a cosine lobe read from the six faces took a sunlit floor's
+reflection 2.5% over its reference where the directions read it 0.9%.

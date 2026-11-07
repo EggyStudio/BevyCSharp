@@ -324,8 +324,9 @@ and a picture in floats, so the camera draws Bevy's materials deferred while it 
 environment map lights the probes too, its light along each ray that leaves the scene, and its
 diffuse light is taken back as the ambient light's is, so a closed room under a bright sky is dark
 inside where Bevy's own lighting would light it through the walls. A glossy surface reflects what is
-around it, traced through the picture and the field below a roughness of a half, and reflects the
-sky only as far as the probes see it, so a closed room's polished floor shows no sky. Bevy's
+around it, traced through the picture and the field below a roughness of a half, and above it the
+light the probes around it hold along its mirror way, so a closed room's rough walls reflect one
+another and its polished floor shows no sky. Bevy's
 screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the G-buffer
 does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads
 the probes itself as the pass reads them.
@@ -378,8 +379,9 @@ hold, `gi.set` changes the quality on a running app, and the feature test's grap
 for it.
 
 `./bcs command gi.reference shots/reference.png 256` path traces the camera's picture through the
-GPU's rays where it has them, every face scattering by its gloss and its diffuse share, or by its
-diffuse share alone with `diffuse` after the bounces, as the probes' own tests read it, and
+GPU's rays where it has them, every face scattering by its gloss and its diffuse share, or the
+first face alone by its gloss and every face after it by its diffuse share with `first` after the
+bounces, as the probes' own tests read it, or every face by its diffuse share with `diffuse`, and
 `gi.compare shots/reference.png` says how far the picture lies
 from it, region by region, with a picture of the difference beside it. A mesh a shader places as it
 draws, as particles drawn from a buffer are, is traced where its own corners lie, so it is hidden

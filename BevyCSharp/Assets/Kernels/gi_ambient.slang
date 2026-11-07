@@ -57,6 +57,13 @@ Texture3D<float> kept;
 // along z.
 [format("r16f")] RWTexture3D<float> reach;
 
+// Every cascade's probes' light along eight by eight directions, each the merged directions about
+// it weighed by the lobe a surface of roughness 0.5 spreads its reflection over, a block of ten by
+// ten texels a probe, its border each texel across the octahedron's edge, the cascades one after
+// another along z, which the light pass reads a rough surface's reflection from (reflectedAt in
+// gi_light.slang), as 3DEngine's gi_ambient.slang gathers its probes' ways.
+[format("rgba16f")] WTexture3D<float4> ways;
+
 // What each workgroup of a probe's rays brought back straight from the sun and the lights, and the
 // luminance of all they brought back, summed, as gi_trace.slang wrote it.
 StructuredBuffer<float4> partial;
@@ -66,12 +73,6 @@ StructuredBuffer<float4> partial;
 // where the probe is judged by the probes around it, with in w a 1 where its rays met more faces
 // from behind than from in front, and after that where the trace moved each probe to, every cascade.
 RWStructuredBuffer<float4> held;
-
-// The share of each merged direction that reaches the sky, as gi_merge.slang wrote it, and every
-// cascade's probes' faces' share of sky, laid out as the faces are, each direction weighed as the
-// light is.
-Texture3D<float> merged_sky;
-[format("r16f")] RWTexture3D<float> skies;
 
 // x: the cascade. y: the probes along each side. z: the octahedron's texels along each side. w: the
 // frame's parity, plus 2 where the cascade lies where it lay the frame before, so the frame before's
@@ -156,7 +157,6 @@ void main(uint3 id : SV_DispatchThreadID)
     uint3 at = uint3(probe % probes, (probe / probes) % probes, probe / (probes * probes));
     float3 axis = Axes[face];
     float3 sum = float3(0.0);
-    float sky = 0.0;
     float weights = 0.0;
     float shares = 0.0;
     float valid = 0.0;
@@ -171,7 +171,6 @@ void main(uint3 id : SV_DispatchThreadID)
             float before = kept.Load(from);
             shares += share;
             sum += light.rgb * before * weight;
-            sky += merged_sky.Load(from) * before * weight;
             weights += weight;
             // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or 1.
             valid = max(valid, light.a > 0.25 ? 1.0 : 0.0);
@@ -239,7 +238,6 @@ void main(uint3 id : SV_DispatchThreadID)
             atSurface = sumAt * (Pi / weightsAt);
     }
     cubes_at.Store(into, float4(atSurface, h));
-    skies[into] = sky / max(weights, 1e-6);
     if (face == 0u)
         follow(at, probes, texels, shares, walledIn(at, texels));
 
@@ -255,5 +253,57 @@ void main(uint3 id : SV_DispatchThreadID)
             for (uint u = 0u; u < step; u++)
                 reached += abs(distances.Load(int4(int2(at.xy * texels + first + uint2(u, v)), int(at.z), 0)));
         reach[uint3(at.xy * uint(ReachTexels) + texel, cascade.x * probes + at.z)] = reached / float(step * step);
+    }
+
+    // The probe's light by way, eight by eight directions in a block with a texel's border.
+    uint along = uint(WaysTexels) - 2u;
+    uint stride = max(texels / along, 1u);
+    for (uint k = face; k < along * along; k += 6u)
+    {
+        uint2 texel = uint2(k % along, k / along);
+        // Its light along the direction, every merged direction weighed by its share of the sphere
+        // and by its cosine to the direction to the power of 8, the lobe a surface of roughness 0.5
+        // spreads its reflection over, so the eight by eight directions hold the light blurred as
+        // that surface reflects it and read smoothly between them. A cascade of more directions is
+        // read at one in each stride by stride of them.
+        float3 toward = fromOctahedron((float2(texel) + 0.5) / float(along));
+        float3 light = float3(0.0);
+        float weights = 0.0;
+        for (uint v = stride / 2u; v < texels; v += stride)
+            for (uint u = stride / 2u; u < texels; u += stride)
+            {
+                float2 uv = (float2(u, v) + 0.5) / float(texels);
+                float lobe = saturate(dot(fromOctahedron(uv), toward));
+                lobe *= lobe;
+                lobe *= lobe;
+                float weight = lobe * lobe * octahedronShare(uv);
+                if (weight <= 0.0)
+                    continue;
+                int4 from = int4(int2(at.xy * texels + uint2(u, v)), int(at.z), 0);
+                light += merged.Load(from).rgb * kept.Load(from) * weight;
+                weights += weight;
+            }
+        float4 way = float4(light / max(weights, 1e-6), 1.0);
+        uint3 block = uint3(at.xy * uint(WaysTexels), cascade.x * probes + at.z);
+        ways.Store(block + uint3(texel + 1u, 0u), way);
+        // The border texels across the octahedron's edges that stand for this direction, an edge's
+        // texels mirrored along it and each corner's the opposite corner's.
+        uint last = along - 1u;
+        if (texel.y == 0u)
+            ways.Store(block + uint3(last + 1u - texel.x, 0u, 0u), way);
+        if (texel.y == last)
+            ways.Store(block + uint3(last + 1u - texel.x, last + 2u, 0u), way);
+        if (texel.x == 0u)
+            ways.Store(block + uint3(0u, last + 1u - texel.y, 0u), way);
+        if (texel.x == last)
+            ways.Store(block + uint3(last + 2u, last + 1u - texel.y, 0u), way);
+        if (all(texel == uint2(last, last)))
+            ways.Store(block, way);
+        if (all(texel == uint2(0u, last)))
+            ways.Store(block + uint3(last + 2u, 0u, 0u), way);
+        if (all(texel == uint2(last, 0u)))
+            ways.Store(block + uint3(0u, last + 2u, 0u), way);
+        if (all(texel == uint2(0u, 0u)))
+            ways.Store(block + uint3(last + 2u, last + 2u, 0u), way);
     }
 }

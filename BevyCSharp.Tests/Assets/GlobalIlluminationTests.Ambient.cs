@@ -16,10 +16,11 @@ public sealed partial class GlobalIlluminationTests
     /// where the bridge is built with it, as every bridge that draws is. Taken back by the
     /// polynomial Bevy uses without the table, which gives a rough surface's diffuse share at 0.45
     /// at every angle where the table gives it from 0.32 face on to 0.92 edge on, the floor read
-    /// 0.846 of its reference near the eye and 1.334 far off. Taken back by the table it reads
-    /// 0.998 and 1.000. The floor reflects nothing (its reflectance 0), since the reference's first
-    /// face takes the diffuse share alone of the light from all around, and the sky's reflection on
-    /// a floor of the default reflectance read it 4 and 6% over.
+    /// 0.846 of its reference near the eye and 1.334 far off. Taken back by the table it read 0.998
+    /// and 1.000. Its reflectance is 0, since while the reference's first face took the diffuse
+    /// share alone of the light from all around, the sky's reflection on a floor of the default
+    /// reflectance read it 4 and 6% over, and with the reference's first face reflecting by its
+    /// gloss as the picture's reflects the probes' light, it reads 1.000 and 1.017.
     /// </remarks>
     [SkippableFact]
     public void AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle()
@@ -47,7 +48,7 @@ public sealed partial class GlobalIlluminationTests
                 if (!begun)
                 {
                     begun = true;
-                    Assert.Null(GiReference.BeginReference(ecs, null, 256, gloss: GiReference.Gloss.LightsAlone));
+                    Assert.Null(GiReference.BeginReference(ecs, null, 256, gloss: GiReference.Gloss.FirstFace));
                     return false;
                 }
                 return GiReference.Step(ecs) is not null;

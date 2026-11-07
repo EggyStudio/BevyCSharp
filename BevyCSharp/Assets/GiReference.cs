@@ -35,8 +35,8 @@ namespace Bevy;
 /// met by the camera's own rays alone, as Bevy's shadow maps and the scene's distance field leave
 /// it out. A camera's path scatters at every face by its material, its diffuse share or its GGX
 /// lobe drawn by their weights, so the sky a gloss reflects and the light a glossy wall carries
-/// between bounces come in, or by its diffuse share alone where a test of the probes' diffuse
-/// transport asks (<see cref="Gloss"/>). The lights are those global illumination's probes are lit
+/// between bounces come in, or by its diffuse share alone past the first face where a test of the
+/// probes' diffuse transport asks (<see cref="Gloss"/>). The lights are those global illumination's probes are lit
 /// by, the sun, the light from all around and the sixteen point and spot lights nearest the camera,
 /// the sun dimmed through the camera's air as Bevy's lighting dims it for the picture. It needs a
 /// GPU that traces rays (<see cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so
@@ -57,12 +57,10 @@ internal static unsafe partial class GiReference
     /// A path meeting every face as its material scatters is the reference a picture's light is
     /// measured against, the gloss of a wall carrying light between bounces as its diffuse share
     /// does. Global illumination's probes hold no gloss, so a test of their diffuse transport reads
-    /// a reference whose paths go on by the diffuse share alone, its first face's gloss taking the
-    /// lights' light alone and every face after it lit as the probes light one, which in a closed
-    /// room of walls of half a reflectance reads 15 to 25% less light past the direct than the
-    /// whole. A first face's gloss reflecting the room was tried and read the closed Cornell box's
-    /// colored walls 12 to 19% over the picture, whose first face reflects Bevy's environment
-    /// alone.
+    /// a reference whose first face scatters by its gloss, as the picture reflects the light the
+    /// probes hold about the mirror way, and whose paths go on by the diffuse share alone past it,
+    /// every face after the first lit as the probes light one, which in a closed room of walls of
+    /// half a reflectance reads 15 to 18% less light past the direct than the whole.
     /// </remarks>
     internal enum Gloss
     {
@@ -70,8 +68,14 @@ internal static unsafe partial class GiReference
         EveryFace,
 
         /// <summary>
+        /// The first face scatters by its gloss and its diffuse share and every face after it by its
+        /// diffuse share alone, lit as the probes light one, as the probes' tests read it.
+        /// </summary>
+        FirstFace,
+
+        /// <summary>
         /// Every path goes on by its diffuse share, the first face's gloss taking the lights' light
-        /// alone and every face after it lit as the probes light one, as the probes' tests read it.
+        /// alone and every face after it lit as the probes light one.
         /// </summary>
         LightsAlone,
     }
@@ -110,7 +114,7 @@ internal static unsafe partial class GiReference
         public byte[]? SumsBytes, RegionsBytes;
         public string[] Slots = [];
         public Gloss Glossed;
-        public int Skipped, Undressed;
+        public int Seed, Skipped, Undressed;
         public long Started;
     }
 
@@ -146,9 +150,11 @@ internal static unsafe partial class GiReference
     /// pixel, each meeting <paramref name="bounces"/> faces past the first at most, or until Russian
     /// roulette ends it where that is negative, written to <paramref name="path"/> and its files beside
     /// it where a path is given, every face of its paths scattering by its material's gloss or its
-    /// diffuse share alone (<paramref name="gloss"/>). Answers why it cannot, or nothing.
+    /// diffuse share alone (<paramref name="gloss"/>), its paths' draws started from
+    /// <paramref name="seed"/>, so a test can read how far a reference moves from one draw of its
+    /// paths to another. Answers why it cannot, or nothing.
     /// </summary>
-    internal static string? BeginReference(EcsWorld ecs, string? path, int samples, int bounces = -1, Gloss gloss = Gloss.EveryFace)
+    internal static string? BeginReference(EcsWorld ecs, string? path, int samples, int bounces = -1, Gloss gloss = Gloss.EveryFace, int seed = 0)
     {
         if (Refused(ecs, rays: true) is { } why) return why;
         var rays = _rays!;
@@ -163,6 +169,7 @@ internal static unsafe partial class GiReference
             Samples = Math.Max(1, samples),
             Faces = bounces < 0 ? MostFaces : bounces + 1,
             Glossed = gloss,
+            Seed = seed,
             Slots = slots,
             Skipped = skipped,
             Undressed = Trees.Undressed(ecs),
@@ -464,7 +471,7 @@ internal static unsafe partial class GiReference
         var share = Math.Clamp(PathsAFrame / Math.Max(1, job.Width * job.Height), 1, MostAFrame);
         share = Math.Min(share, job.Samples - job.Added);
         ReadOnlySpan<uint> counts = [(uint)share, (uint)job.Added, (uint)job.Faces, 0];
-        ReadOnlySpan<uint> scatter = [job.Glossed == Gloss.EveryFace ? 1u : 0u, 0, 0, 0];
+        ReadOnlySpan<uint> scatter = [job.Glossed switch { Gloss.EveryFace => 1u, Gloss.FirstFace => 2u, _ => 0u }, (uint)job.Seed, 0, 0];
         BindMasks(rays);
         rays.Trace.SetNumbers("counts", 4, counts);
         rays.Trace.SetNumbers("scatter", 4, scatter);

@@ -13,7 +13,7 @@
 // it away. The probes' light is in the picture's units, the camera's exposure applied, and Bevy's
 // ambient term and its diffuse light from an environment map are taken back times the exposure as
 // Bevy applies it. Bevy's reflection of the light from all around is taken back and given again,
-// traced below a roughness of a half and times the share of the sky the probes see above it. Bevy's
+// traced below a roughness of a half and read from the probes about the mirror way above it. Bevy's
 // screen-space ambient occlusion is Bevy's and left as it is, so where a camera has it the light
 // taken back differs from the light Bevy gave by as much.
 //
@@ -47,6 +47,11 @@ Texture3D<float4> probe_cubes;
 Texture3D<float4> probe_cubes_at;
 Texture3D<float> probe_reach;
 
+// Each probe's light along eight by eight directions, every cascade, a block of ten by ten texels a
+// probe with a texel's border across the octahedron's edges (gi_ambient.slang), read filtered.
+Texture3D<float4> probe_ways;
+SamplerState probe_ways_sampler;
+
 // The lights the probes are lit by, for the light from all around, and the small emissive surfaces
 // carried as lights of their own, as many as the lights' fourth count says.
 StructuredBuffer<GiLights> gi_lights;
@@ -55,10 +60,6 @@ StructuredBuffer<GlowLight> glow_lights;
 // x: the probes along each side of a cascade. y: their spacing in cells. z: how many cascades of
 // probes. w: unused.
 uniform float4 probes;
-
-// The share of the sky each face of each probe saw, every cascade (gi_ambient.slang), which says how
-// much of the sky a glossy surface reflects.
-Texture3D<float> probe_skies;
 
 // The field's colors, the way each cell's nearest face looks and its light, which a reflection that
 // leaves the picture is shaded by (shadeHit).
@@ -144,46 +145,77 @@ float3 environmentGiven(PassSurface surface, float NdotV, float3 diffuse, float3
     return (lerp(scattered[0], scattered[1], surface.metallic) + diffuse * left) * irradiance;
 }
 
-// The share of the sky a surface at p facing n sees along r, the share its probes' rays reached the
-// sky by, blended between the eight probes around it as bouncedAt blends their light, the three
-// faces r looks toward weighed by the square of r along each, or the whole sky where no cascade of
-// probes holds p, as 3DEngine's skyAt.
-float skyAt(FieldInfo field, float3 p, float3 n, float3 r)
+// The light along r the eight probes of cascade c around p hold that a surface facing n sees, each
+// weighed as bouncedIn weighs it with its sight of the surface blended between its texels
+// (probeSeesBlended), times how much of the probes' weight those hold, and that share, whole at a
+// twentieth of the weight. A probe's light along r is read from its eight by eight directions,
+// blended between the four whose middles lie about r, so it spans the 25 degrees or so a texel
+// does, as a surface of roughness 0.5 spreads its reflection, and from its faces r looks toward,
+// which spread it as widely as a fully rough surface does, the two mixed by the roughness from 0.5
+// to 1, as 3DEngine's reflectedIn reads them. The directions are sampled within each probe's
+// block, its border holding the directions across each fold, at its slice's middle, so no probe
+// lends its neighbor's light. A probe the surface does not see is left out, since along a mirror
+// way it lends the light of that one way.
+float4 reflectedIn(FieldInfo info, float3 p, float3 n, float3 r, float roughness, float count, float spacing, int c, float cascades)
 {
-    FieldInfo info = probesOf(field, int(probes.z));
-    int c = fieldCascade(info, p, 1.0);
-    if (c < 0 || c >= int(probes.z))
-        return 1.0;
     float4 oc = info.cascades[c].origin_and_cell;
-    float3 q = clamp((p - oc.xyz) / (oc.w * probes.y) - 0.5, 0.0, probes.x - 1.0);
+    float3 q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, 0.0, count - 1.0);
     int3 base = int3(floor(q));
     float3 f = q - float3(base);
     float3 r2 = r * r;
-    float sum = 0.0, weights = 0.0;
+    float wide = saturate((roughness - 0.5) * 2.0);
+    float2 along = octahedron(r) * float(WaysTexels - 2) + 1.0;
+    float2 across = float2(count * float(WaysTexels));
+    float deep = count * cascades;
+    float3 sum = float3(0.0);
+    float weights = 0.0, all = 0.0;
     for (int corner = 0; corner < 8; corner++)
     {
         int3 offset = int3(corner & 1, (corner >> 1) & 1, corner >> 2);
-        int3 at = min(base + offset, int3(int(probes.x) - 1));
+        int3 at = min(base + offset, int3(int(count) - 1));
         float3 lerps = lerp(1.0 - f, f, float3(offset));
-        float sky = 0.0, valid = 1.0;
+        float3 faces = float3(0.0);
+        float valid = 1.0;
         float3 moved = float3(0.0);
-        [unroll]
         for (int axis = 0; axis < 3; axis++)
         {
             int face = axis * 2 + (r[axis] < 0.0 ? 1 : 0);
-            int4 texel = int4(face * int(probes.x) + at.x, at.y, c * int(probes.x) + at.z, 0);
-            float alpha = probe_cubes.Load(texel).a;
-            sky += probe_skies.Load(texel) * r2[axis];
-            valid = min(valid, faceHolds(alpha));
-            moved[axis] = faceMove(alpha);
+            float4 texel = probe_cubes.Load(int4(face * int(count) + at.x, at.y, c * int(count) + at.z, 0));
+            faces += texel.rgb * r2[axis];
+            valid = min(valid, faceHolds(texel.a));
+            moved[axis] = faceMove(texel.a);
         }
-        float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * probes.y);
+        float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * spacing);
         float weight = lerps.x * lerps.y * lerps.z * valid * probeFacing(p, n, probe);
-        weight *= lerp(0.05, 1.0, probeSees(probe_reach, p, n, probe, at, c, probes.x, oc.w * probes.y));
-        sum += sky * weight;
-        weights += weight;
+        float sees = probeSeesBlended(probe_reach, p, n, probe, at, c, count, oc.w * spacing);
+        float3 uvw = float3((float2(at.xy * WaysTexels) + along) / across, (float(c * int(count) + at.z) + 0.5) / deep);
+        sum += lerp(probe_ways.SampleLevel(probe_ways_sampler, uvw, 0.0).rgb, faces / Pi, wide) * weight * sees;
+        weights += weight * sees;
+        all += weight;
     }
-    return weights > 1e-5 ? sum / weights : 1.0;
+    float share = saturate(weights / max(0.05 * all, 1e-5));
+    return weights > 1e-5 ? float4(sum / weights * share, share) : float4(0.0);
+}
+
+// The light a rough surface at p facing n reflects along r from the probes it sees, times their
+// share, and that share (reflectedIn), from the finest cascade of probes that holds p, fading to the
+// next cascade's across its outer band as bouncedAt fades, or none where no cascade holds p.
+float4 reflectedAlong(FieldInfo field, float3 p, float3 n, float3 r, float roughness, float count, float spacing, float cascades)
+{
+    FieldInfo info = probesOf(field, int(cascades));
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0 || c >= int(cascades))
+        return float4(0.0);
+    float own = c + 1 < int(cascades) && info.cascades[c + 1].origin_and_cell.w > 0.0 ? cascadeHold(info, c, p) : 1.0;
+    float4 light = float4(0.0);
+    [loop]
+    for (int k = 0; k < 2; k++)
+    {
+        float share = k == 0 ? own : 1.0 - own;
+        if (share > 0.0)
+            light += reflectedIn(info, p, n, r, roughness, count, spacing, c + k, cascades) * share;
+    }
+    return light;
 }
 
 // Where q falls on the picture, its depth there and the depth the picture holds there, or false
@@ -638,11 +670,21 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // The light from all around a glossy surface reflects, Bevy's from its ambient term and the
     // camera's environment map along the mirror way, taken back and given again as 3DEngine's model
     // pass gives it, the reflection traced through the picture and the field as far as it met a
-    // surface, fading out as the surface grows rough, and Bevy's in the rest, times the share of
-    // the sky the probes around the surface see along the mirror way, so a room sealed from the sky
-    // reflects none of it. The camera's map's reflection and the traced one are taken in the share
-    // of the blend the reflection probes leave, all of it where none holds the surface, since a
-    // reflection probe's share is the room as its capture saw it and is left as Bevy gave it.
+    // surface, fading out as the surface grows rough. In the rest, where the probes hold the
+    // surface, it is the light the probes it sees hold along the mirror way, read from each one's
+    // eight by eight directions and toward its faces as the surface grows rough past a half
+    // (reflectedAlong), the light reaching the surface standing in for the probes it does not see,
+    // times the share Bevy's table gives the surface's gloss, and Bevy's own past the probes.
+    // Bevy's times the share of the sky the probes saw along the mirror way gave a closed room's
+    // walls no reflection at all, which left a closed Cornell box's green wall at 0.809 of its
+    // reference's light past the direct where the reference's first face reflects the room, and
+    // read so it reads 1.023. A cosine lobe about the mirror way read from the probes' faces reads
+    // the box as well, but took a sunlit floor's reflection in the light of the walls and blocks
+    // around it, the bounce rooms' floor among red walls 2.5% over the light its reference holds,
+    // where its reference's gloss adds 0.1% and the directions read it 0.9% over. The camera's
+    // map's reflection and the traced one are taken in the share of the blend the reflection probes
+    // leave, all of it where none holds the surface, since a reflection probe's share is the room
+    // as its capture saw it and is left as Bevy gave it.
     float3 r = reflect(-V, n);
     float roughness = surface.perceptual_roughness;
     float3 f0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);
@@ -651,10 +693,12 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 environment = passHasEnvironment() ? passEnvironmentSpecular(r, roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;
     float3 bevySpecular = (viewShare * specularShare * environment + ambientShare) * passView.exposure;
-    float sky = held > 0.0 ? lerp(1.0, skyAt(info, world, n, r), held) : 1.0;
     float4 traced = tracedReflection(info, lights, world, n, r, roughness);
     float gloss = traced.a * (1.0 - smoothstep(GlossyRoughness * 0.5, GlossyRoughness, roughness));
-    float3 specular = bevySpecular * sky * (1.0 - gloss) + viewShare * occlusion * traced.rgb * gloss * specularShare;
+    float4 along = held > 0.0 ? reflectedAlong(info, world, n, r, roughness, probes.x, probes.y, probes.z) : float4(0.0);
+    float3 lobe = along.rgb + bounced * (1.0 - along.a);
+    float3 fromAround = lerp(bevySpecular, viewShare * occlusion * specularShare * lobe, held);
+    float3 specular = fromAround * (1.0 - gloss) + viewShare * occlusion * traced.rgb * gloss * specularShare;
 
     return float4(added - given + specular - bevySpecular, 0.0);
 }

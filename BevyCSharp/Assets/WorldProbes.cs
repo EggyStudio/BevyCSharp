@@ -42,6 +42,9 @@ internal static unsafe partial class WorldProbes
     /// <summary>The directional lights whose air the camera's dispatch reads, as many as the light pass's <c>MostSuns</c> and the leaves' (<c>forward_probes.rs</c>).</summary>
     internal const int AirSuns = 10;
 
+    /// <summary>The texels along each side of a probe's block of its light by way, eight by eight directions with a texel's border, as <c>bcs_gi</c>'s <c>WaysTexels</c>.</summary>
+    internal const int WaysTexels = 10;
+
     /// <summary>
     /// Whether the leaves and the grass are left Bevy's own light rather than given the probes',
     /// which a test reads their reading's cost against.
@@ -126,8 +129,8 @@ internal static unsafe partial class WorldProbes
     {
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
-        public AssetHandle[] Radiance = [], Merged = [], Distances = [], Kept = [], MergedSky = [];
-        public AssetHandle Cubes, CubesAt, Reach, Skies, Held, Partial, Lights, Glows, SkyMap, Air, NoSky = AssetHandle.None;
+        public AssetHandle[] Radiance = [], Merged = [], Distances = [], Kept = [];
+        public AssetHandle Cubes, CubesAt, Reach, Ways, Held, Partial, Lights, Glows, SkyMap, Air = AssetHandle.None;
         public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
         // Whether the traces run the build that crosses surfaces letting light through.
         public bool Crossing = true;
@@ -234,7 +237,8 @@ internal static unsafe partial class WorldProbes
         foreach (var n in made.Texels) bytes += p * n * p * n * p * (8 + 8 + 2 + 2);
         var cascades = (long)made.Cascades;
         bytes += 4 * p * p * p * cascades * 16 * 2;
-        bytes += 6 * p * p * p * cascades * (8 + 8 + 2);
+        bytes += 6 * p * p * p * cascades * (8 + 8);
+        bytes += WaysTexels * p * WaysTexels * p * p * cascades * 8;
         bytes += 8 * p * 8 * p * p * cascades * 2;
         return bytes + LightsBytes;
     }
@@ -316,7 +320,7 @@ internal static unsafe partial class WorldProbes
         const uint p = Probes;
         var made = new Made(quality, texels);
         var cascades = (uint)texels.Length;
-        (made.Radiance, made.Merged, made.Distances, made.MergedSky) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
+        (made.Radiance, made.Merged, made.Distances) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
         made.Kept = new AssetHandle[cascades];
         (made.Trace, made.Merge, made.Ambient) = (new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades]);
         for (var c = 0; c < cascades; c++)
@@ -326,7 +330,6 @@ internal static unsafe partial class WorldProbes
             made.Merged[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Distances[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
             made.Kept[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
-            made.MergedSky[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
             (made.Trace[c], made.Merge[c], made.Ambient[c]) =
                 (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
         }
@@ -338,14 +341,12 @@ internal static unsafe partial class WorldProbes
         made.Partial = Shaders.CreateBuffer((int)(4 * p * p * p * cascades * 16));
         made.Cubes = Shaders.CreateImage(6 * p, p, ShaderImageFormat.Rgba16Float, p * cascades);
         made.CubesAt = Shaders.CreateImage(6 * p, p, ShaderImageFormat.Rgba16Float, p * cascades);
+        made.Ways = Shaders.CreateImage(WaysTexels * p, WaysTexels * p, ShaderImageFormat.Rgba16Float, p * cascades);
 
-        // Every probe sees every way, and every face the whole sky, until its rays have first been traced.
+        // Every probe sees every way until its rays have first been traced.
         var far = new Half[8 * p * 8 * p * p * cascades];
         Array.Fill(far, (Half)10000f);
         made.Reach = Shaders.CreateImage<Half>(8 * p, 8 * p, ShaderImageFormat.R16Float, far, p * cascades);
-        var open = new Half[6 * p * p * p * cascades];
-        Array.Fill(open, Half.One);
-        made.Skies = Shaders.CreateImage<Half>(6 * p, p, ShaderImageFormat.R16Float, open, p * cascades);
         made.Lights = Shaders.CreateBuffer(LightsBytes);
         made.Glows = Shaders.CreateBuffer(GlowLights.Most * GlowLights.Bytes);
         made.SkyMap = Shaders.CreateImage(SkySize, SkySize, ShaderImageFormat.Rgba16Float);
@@ -359,10 +360,6 @@ internal static unsafe partial class WorldProbes
         Array.Fill(air, Vector4.One);
         air[1] = Vector4.Zero;
         made.Air = Shaders.CreateBuffer<Vector4>(air);
-
-        // The last cascade's merge reads no cascade above, and an image of nothing stands in for the
-        // share of the sky above it, its own being the one it writes.
-        made.NoSky = Shaders.CreateImage(1, 1, ShaderImageFormat.R16Float, 2);
         return made;
     }
 
@@ -377,8 +374,8 @@ internal static unsafe partial class WorldProbes
             _skyCamera = Entity.None;
         }
         if (_made is not { } made) return;
-        foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.Kept).Concat(made.MergedSky)
-                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.Skies, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.Air, made.NoSky]))
+        foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.Kept)
+                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.Ways, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.Air]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -481,8 +478,7 @@ internal static unsafe partial class WorldProbes
             ReadOnlySpan<uint> counts = [(uint)cascades, 0, 0, 0];
             made.Merge[c].SetTexture("radiance", made.Radiance[c]).SetTexture("above", c == last ? made.Radiance[c] : made.Merged[c + 1])
                 .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetTexture("albedo", albedo).SetSampler("field_sampler", SamplerSettings.ClampedTable)
-                .SetBuffer("held", made.Held).SetTexture("merged_sky", made.MergedSky[c]).SetTexture("above_sky", c == last ? made.NoSky : made.MergedSky[c + 1])
-                .SetTexture("reach_above", made.Reach)
+                .SetBuffer("held", made.Held).SetTexture("reach_above", made.Reach)
                 .SetNumbers("cascade", 4, cascade).Set("spacing", new Vector4(ProbeSpacing, 0, 0, c == last ? 0 : made.Intervals[c + 1].End))
                 .SetNumbers("counts", 4, counts);
             if (!still) Shaders.Dispatch(made.Merge[c], (p * p * p * n * n + 63) / 64);
@@ -493,8 +489,7 @@ internal static unsafe partial class WorldProbes
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, parity + (lying[c] ? 2u : 0u)];
             made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("cubes_at", made.CubesAt).SetTexture("distances", made.Distances[c]).SetTexture("kept", made.Kept[c])
-                .SetTexture("reach", made.Reach).SetBuffer("partial", made.Partial).SetBuffer("held", made.Held)
-                .SetTexture("merged_sky", made.MergedSky[c]).SetTexture("skies", made.Skies)
+                .SetTexture("reach", made.Reach).SetTexture("ways", made.Ways).SetBuffer("partial", made.Partial).SetBuffer("held", made.Held)
                 .SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, ProbeSpacing, cascades, 0));
             if (!still) Shaders.Dispatch(made.Ambient[c], (p * p * p * 6 + 63) / 64);
@@ -508,7 +503,8 @@ internal static unsafe partial class WorldProbes
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
         _light.Set("screen", screen).SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach).SetBuffer("gi_lights", made.Lights)
-            .SetBuffer("glow_lights", made.Glows).SetTexture("probe_skies", made.Skies)
+            .SetTexture("probe_ways", made.Ways).SetSampler("probe_ways_sampler", SamplerSettings.ClampedTable)
+            .SetBuffer("glow_lights", made.Glows)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
             .Set("probes", new Vector4(p, ProbeSpacing, cascades, 0))
             .Set("reflection", new Vector4(ReflectionStepsAt(made.Quality).Steps, ReflectionStepsAt(made.Quality).Reach, 1, 0));

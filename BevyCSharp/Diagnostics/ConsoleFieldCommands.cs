@@ -77,19 +77,20 @@ internal static class ConsoleFieldCommands
         return asked == GlobalIllumination.Off ? "global illumination is off" : $"tracing global illumination at {asked}";
     }
 
-    [Command("gi.reference", "Path traces the camera's picture through the GPU's rays, the reference global illumination is measured against, into a PNG with its linear light, what each pixel shows and the names of those regions beside it, each path meeting as many faces past the first as given or until it ends, every face scattering by its gloss, or by its diffuse share alone as the probes' tests read it: gi.reference <png> <samples> [bounces] [gloss|diffuse]")]
+    [Command("gi.reference", "Path traces the camera's picture through the GPU's rays, the reference global illumination is measured against, into a PNG with its linear light, what each pixel shows and the names of those regions beside it, each path meeting as many faces past the first as given or until it ends, every face scattering by its gloss, or the first alone by its gloss as the probes' tests read it, or every one by its diffuse share alone: gi.reference <png> <samples> [bounces] [gloss|first|diffuse]")]
     internal static string Reference(string path, int samples, int bounces = -1, string scatter = "gloss")
     {
         var faces = scatter.Trim().ToLowerInvariant() switch
         {
             "gloss" => GiReference.Gloss.EveryFace,
+            "first" => GiReference.Gloss.FirstFace,
             "diffuse" => GiReference.Gloss.LightsAlone,
             _ => (GiReference.Gloss?)null,
         };
         if (faces is null)
         {
-            ConsoleHost.Fail("BAD_ARGUMENT", $"'{scatter}' is not gloss or diffuse.");
-            return "gi.reference <png> <samples> [bounces] [gloss|diffuse]";
+            ConsoleHost.Fail("BAD_ARGUMENT", $"'{scatter}' is not gloss, first or diffuse.");
+            return "gi.reference <png> <samples> [bounces] [gloss|first|diffuse]";
         }
         if (GiReference.BeginReference(ConsoleHost.Ecs, path, samples, bounces, faces.Value) is { } why) return why;
 

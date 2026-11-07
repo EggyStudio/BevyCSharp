@@ -33,12 +33,6 @@ SamplerState field_sampler;
 // frame before's, laid out as gi_trace.slang lays it.
 StructuredBuffer<float4> held;
 
-// The share of each merged direction that reaches the sky, 1 where a ray of the last cascade met
-// nothing, carried down as the light from beyond is, and the cascade above's, read where this
-// cascade's ray met nothing; the last cascade reads none.
-[format("r16f")] RWTexture3D<float> merged_sky;
-Texture3D<float> above_sky;
-
 // The cascade above's probes' reach, the nearest ray's distance along each of their eight by eight
 // directions, as the gather wrote it the frame before.
 Texture3D<float> reach_above;
@@ -125,21 +119,17 @@ void main(uint3 id : SV_DispatchThreadID, uint3 local : SV_GroupThreadID)
     if (oc.w <= 0.0 || here.w < 0.5)
     {
         merged.Store(written, float4(0.0));
-        merged_sky[written] = 0.0;
         return;
     }
     float4 own = radiance.Load(int4(int3(written), 0));
     // What most of the texel's rays met, and the share that met nothing, which takes the light from
     // beyond, the light of the rest in own's color (gi_trace.slang).
     float nothing = float(texelNothing(own.a, RaysAt(texels))) / float(RaysAt(texels));
-    // Rays of the last cascade that met nothing, the sky's.
-    float ownSky = abs(own.a - 0.25) < 0.1 ? 1.0 : 0.0;
     // A ray that met a surface keeps its light, marked a half where most met it before its interval.
     float kept = own.a > 0.25 && own.a < 0.75 ? 0.5 : 1.0;
     if (upper == 0u || nothing <= 0.0)
     {
         merged.Store(written, float4(own.rgb, own.a < 0.75 ? kept : 1.0));
-        merged_sky[written] = ownSky;
         return;
     }
 
@@ -149,7 +139,6 @@ void main(uint3 id : SV_DispatchThreadID, uint3 local : SV_GroupThreadID)
     uint factor = upper / texels;
     float3 d = fromOctahedron((float2(texel) + 0.5) / float(texels));
     float3 sum = float3(0.0);
-    float sky = 0.0;
     float weights = 0.0;
     for (int corner = 0; corner < 8; corner++)
     {
@@ -182,7 +171,6 @@ void main(uint3 id : SV_DispatchThreadID, uint3 local : SV_GroupThreadID)
                 if (child.a > 0.75)
                 {
                     sum += child.rgb * weight;
-                    sky += above_sky.Load(from) * weight;
                     weights += weight;
                 }
                 else if (child.a > 0.25)
@@ -191,5 +179,4 @@ void main(uint3 id : SV_DispatchThreadID, uint3 local : SV_GroupThreadID)
     }
     float3 beyond = weights > 1e-4 ? sum / weights : float3(0.0);
     merged.Store(written, float4(own.rgb + beyond * nothing, own.a < 0.75 ? kept : 1.0));
-    merged_sky[written] = weights > 1e-4 ? sky / weights * nothing : 0.0;
 }

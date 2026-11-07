@@ -15,8 +15,17 @@ texels, the bridge's old value for every light, so each face the sun grazes fell
 shadow over part of the filter, and on the right at Bevy's 1.8 for a directional light, the +z wall
 and the stairs lighter where the sun grazes them, nearer their path-traced reference.
 
+![](.github/assets/readings/2026-11-07-item-110-gloss.webp)
+A Cornell box open toward the camera at 1280 by 720 with global illumination at High, its walls at a
+roughness of 0.5 lit by a lamp under the ceiling, on the left as the light pass gave a rough wall's
+gloss Bevy's reflection times the share of the sky the probes saw, none in the box, and on the right
+reflecting the light the probes it sees hold along its mirror way, read from each probe's eight by
+eight directions, the green and red walls lighter by each other's light and the red wall showing the
+tall block's reflection soft.
+
 Done that day
 
+- Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.
 - Item 109 at `5a8b4182`. A planted tree's leaves bend their normals in mesh space.
 
 ## 2026-11-06

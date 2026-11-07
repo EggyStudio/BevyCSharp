@@ -515,18 +515,36 @@ picture's depth in steps that lengthen as they go, 12 over 8 units at `Low`, 16 
 and 24 over 16 at `High`, and past the picture through the field, a surface met on the picture
 reflecting the light the frame before's picture showed where it was, which the camera keeps copied
 before tonemapping as an image of its own, and one past it the light the probes shade a hit with,
-fading to Bevy's reflection from a quarter of the roughness to a half. What is not traced is Bevy's
-reflection times the share of the sky the probes around the surface see along the mirror way
-(`skyAt`), so a room sealed from the sky reflects none of it. Two things depart from 3DEngine's.
+fading to Bevy's reflection from a quarter of the roughness to a half. What is not traced is, where
+the probes hold the surface, the light the probes it sees hold along the mirror way, as 3DEngine's
+model pass reads it (`reflectedAlong`), each probe's eight by eight directions gathered from its
+merged light under the lobe a roughness of 0.5 spreads, a block of ten by ten texels with a border
+across the octahedron's folds, read filtered and mixed toward its faces as the surface grows rough
+past a half, the light reaching the surface standing in for the probes it does not see, times the
+share Bevy's table gives its gloss, and Bevy's reflection past the probes. The pass took Bevy's
+reflection times the share of the sky the probes saw along the mirror way, so a closed room's rough
+walls reflected none of one another's light and a closed Cornell box's green wall read 0.809 of its
+reference's light past the direct, where the reference's first face reflects the room, and reads
+1.023. A cosine lobe read from the faces alone took a sunlit floor's reflection in the light of the
+walls and blocks around it, the bounce rooms' floor among red walls 2.5% over its reference where
+the directions read it 0.9% over and the picture before 0.2%. Each probe's sight of the surface is
+blended between its reach's texels over half the spacing (`probeSeesBlended`), since read from one
+texel a tall block's reflection on a wall took the texels' straight edges. A room sealed from the
+sky reflects none of it, since its probes hold none. Two things depart from 3DEngine's trace.
 Whether the frame before's picture showed the surface the reflection met is not asked, which needs
 the frame before's depth, so a reflection of a surface the moving camera uncovered takes what stood
 there before. And the picture is read at its own size, where 3DEngine blurs it down its mips as the
-surface is rough. A metal floor polished to a mirror shows a sunlit red wall standing on it at 244,
-115, 107 with global illumination on and 2, 2, 2 off, and a rough metal floor in a closed room under
-an environment map reflects 0, 0, 14 on where 78, 58, 119 off. In the Cornell box at 1280 by 720
-with one glow light the pass takes 1.5 ms with a metal floor polished to a mirror where it takes 1.3
-with every surface rough, as before the glossy term. The bounce rooms read as they did, their
-surfaces at a roughness of 0.5 and lit by no sky.
+surface is rough. A metal floor polished to a mirror shows a sunlit red wall standing on it at 246,
+121, 112 with global illumination on and 2, 2, 2 off, and a rough metal floor in a closed room under
+an environment map reflects 0, 12, 0 on where 80, 60, 118 off, as the pass read both before the
+probes' directions. In the Cornell box at 1280 by 720 with one glow light the pass takes 1.5 ms with
+a metal floor polished to a mirror where it takes 1.3 with every surface rough, as before the glossy
+term, and the probes' directions take 0.17 ms more at `High` in a Cornell box at 1280 by 720 on the
+development machine's GPU, the pass 1.03 where 0.86, and their gather 0.09 more, 0.146 where 0.057,
+their image of 1.56 MiB at `High` where the sky's share and its merged images held 0.83. The bounce
+rooms' surfaces, at a roughness of 0.5, reflect the room's light with it, which reads the Cornell
+box's view 0.09 to 0.10 from its reference, the thin room's 0.07 and the grazing floor's 0.05 to
+0.08, where the picture before read them 0.12, 0.11 and 0.12 to 0.16 from the same references.
 
 The screen probes are 3DEngine's (`WorldProbes.Screen.cs` and the kernels `gi_screen.slang`,
 `gi_screen_filter.slang` and `gi_screen_glow.slang`), dispatches on the camera after its prepass
