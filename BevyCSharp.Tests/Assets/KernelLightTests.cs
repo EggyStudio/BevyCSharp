@@ -11,10 +11,9 @@ namespace Bevy.Tests;
 /// <remarks>
 /// Mesa's llvmpipe, the software Vulkan the workflow's runners draw with, faults on the
 /// transmittance read in that function's loop where the loop runs once a group's threads have
-/// parted. The clouds' march chose its light inside its branches from item 69's third phase on, and
-/// the feature test ended within a minute of its start there. A GPU draws the kernel either way, so
-/// a suite run on one would never see the call move back inside a branch, and the test reads the
-/// sources instead.
+/// parted, and a march that chooses its light inside its branches ends the feature test within a
+/// minute of its start there. A GPU draws the kernel either way, so a suite run on one would never
+/// see the call move back inside a branch, and the test reads the sources instead.
 /// </remarks>
 public sealed class KernelLightTests
 {

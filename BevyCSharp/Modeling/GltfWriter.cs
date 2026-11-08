@@ -5,7 +5,7 @@ namespace Bevy;
 /// <summary>
 /// Writes an edit mesh, built with its modifiers, as a glTF 2.0 file, the JSON with its buffer
 /// beside it or inside it, a primitive for each material slot, so a model blocked out in the game
-/// is opened in Blender or any program that reads glTF.
+/// is opened in any program that reads glTF.
 /// </summary>
 /// <remarks>
 /// <para>

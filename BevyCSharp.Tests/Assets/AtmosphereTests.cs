@@ -135,7 +135,7 @@ public sealed class AtmosphereTests
             // The sky is asked for once every pipeline has been ready for ten frames together, as well
             // as past the settled frame, since the air's tables and the sky drawn from them compile
             // away from the frame. Asked for at the settled frame alone, earth's sky read 1 red and 1
-            // blue in a whole run while another engine's tests held the GPU, and its picture had not
+            // blue in a whole run while another app's tests held the GPU, and its picture had not
             // arrived 40 frames later on one core with the driver's shader cache off.
             ready = Render.PipelinesReady() ? ready + 1 : 0;
             if (capture is null && world.Resource<Time>().FrameCount >= Settled && ready >= 10) capture = Render.BeginCapture();

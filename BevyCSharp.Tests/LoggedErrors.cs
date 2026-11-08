@@ -9,7 +9,7 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// Fails a test during which the engine logged an error the test did not say it expects, as N 3.7
-/// of NORM.md has it, taken from 3DEngine's hook of the same name.
+/// of NORM.md has it.
 /// </summary>
 /// <remarks>
 /// <para>

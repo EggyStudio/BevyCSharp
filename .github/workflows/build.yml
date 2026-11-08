@@ -7,10 +7,10 @@
 # captured in Fedora (captures-fedora), a window stormed (storm) and the README walked in a
 # container (readme), and the pack run packs only once every job here passed.
 #
-# The jobs show their ids, as 3DEngine's do, and only the suite's carries a name. GitHub skips a
-# matrix job before it expands the matrix and prints a name holding an expression as written, so a
-# push's page showed the pack-only jobs with their names' expressions unexpanded, where a job with
-# no name shows its id alone when skipped and its matrix entry's values beside it when it runs.
+# The jobs show their ids, and only the suite's carries a name. GitHub skips a matrix job before it
+# expands the matrix and prints a name holding an expression as written, so a pack-only job with a
+# name would show its expression unexpanded on a push's page, where a job with no name shows its id
+# alone when skipped and its matrix entry's values beside it when it runs.
 name: build
 
 # Documents and captures are left out, apart from the README, the guide and BUILDING.md, whose links
@@ -117,8 +117,8 @@ jobs:
           # Only the pack run's own jobs read them, so they need not outlive it by much.
           retention-days: 3
 
-  # Each named for its system, as 3DEngine's suite jobs are, through its entry, since this job is
-  # never skipped and its name's expression always expands.
+  # Each named for its system through its entry, since this job is never skipped and its name's
+  # expression always expands.
   test:
     name: ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
@@ -176,7 +176,7 @@ jobs:
 
       # dotnet-gcdump, at the version tried, with which the leak test counts the heap's objects by
       # type after its twentieth app and its hundredth, since the heap grew on macOS's runner and
-      # nowhere else, so a failure there names the types that grew (REVIEW.md, Verdict 9).
+      # nowhere else, so a failure there names the types that grew.
       - name: Install dotnet-gcdump for the leak test
         if: runner.os == 'macOS'
         run: |

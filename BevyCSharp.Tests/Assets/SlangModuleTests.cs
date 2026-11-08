@@ -4,9 +4,9 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The bridge's Slang modules, read as files, giving their names plainly, as 3DEngine's modules do,
-/// with no namespace for a shader to name before them, and each name of one module unlike every
-/// other module's, so a shader importing two meets no name twice.
+/// The bridge's Slang modules, read as files, giving their names plainly, with no namespace for a
+/// shader to name before them, and each name of one module unlike every other module's, so a shader
+/// importing two meets no name twice.
 /// </summary>
 public sealed partial class SlangModuleTests
 {

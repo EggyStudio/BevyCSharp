@@ -37,7 +37,8 @@ public static partial class Modeling
     /// The texture, or the grid where there is none, is tinted by the color, white where none is
     /// given, and a color with an alpha below one draws the faces blended. A slot with neither a
     /// texture nor a roughness is as rough as a prototype material, so the light shows the grid's
-    /// lines, and one with a texture as rough as Bevy's default.
+    /// lines, and one with a texture is at a half, the roughness Bevy gives a material that names
+    /// none, so a texture reads as it does on the engine's other materials.
     /// </para>
     /// <para>
     /// Every texture is loaded once for the app, repeating, the picture and the emissive map as

@@ -4,8 +4,8 @@ using Xunit.Abstractions;
 
 namespace Bevy.Tests;
 
-// A surface that lets a share of global illumination's light through, as a canopy's leaves, held to
-// what 3DEngine's tests read of its own, the floor under a slab two and five units up.
+// A surface that lets a share of global illumination's light through, as a canopy's leaves, read on
+// the floor under a slab two and five units up.
 public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
 {
     /// <summary>
@@ -15,10 +15,9 @@ public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
     /// at Low through the cascades' rays and at High through the screen's probes' too. A ray keeps
     /// half its light a meter of slab, and one at a slant crosses more of it, so the half slab lets
     /// through the share of the sky's light the solid one holds back that the slab's depth along each
-    /// way the floor's sky comes from gives, 0.36 two units up and 0.41 five, as 3DEngine's test works
-    /// it out, which its engine read at 0.36 and 0.40 two up and 0.37 and 0.32 five up, and a slab
-    /// letting all of it through holds back next to none. This engine's floor takes from a fifth to a
-    /// half of it, and holds back up to a tenth under a slab letting all of it through five up.
+    /// way the floor's sky comes from gives, 0.36 two units up and 0.41 five, and a slab letting all
+    /// of it through holds back next to none. The floor takes from a fifth to a half of it, and holds
+    /// back up to a tenth under a slab letting all of it through five up.
     /// </summary>
     [SkippableTheory]
     [InlineData(GlobalIllumination.Low, 2.5f)]
@@ -45,9 +44,9 @@ public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
                 ambient: 400f,
                 traced: true,
                 // Traced for three seconds' frames rather than one's, since with the GPU drawing for
-                // another app beside the suite, as 3DEngine's sessions do, the floors read after 60
-                // came out short of where they settle, the half slab's at 0.0303 where it settles at
-                // 0.0329 five units up, and at 180 they read as they do with the GPU to the suite.
+                // another app beside the suite the floors read after 60 came out short of where they
+                // settle, the half slab's at 0.0303 where it settles at 0.0329 five units up, and at
+                // 180 they read as they do with the GPU to the suite.
                 frames: 180);
             return Luminance(r, g, b);
         }

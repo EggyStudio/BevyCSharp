@@ -284,8 +284,8 @@ fn bounced_in(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, r: vec3<f32>, roughness:
 }
 
 // The probes' light at `p` from the finest cascade that holds it, faded to the next across its
-// outer band, and the light along `r` from the finest alone, as 3DEngine's `reflectedAt` reads it,
-// since a band's second reading of it costs as much again where it falls.
+// outer band, and the light along `r` from the finest alone, since a band's second reading of it
+// costs as much again where it falls.
 fn bounced_at(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, r: vec3<f32>, roughness: f32) -> ProbesLight {
     let cascades = i32(probe_counts.z);
     let c = field_cascade(p, 1.0);

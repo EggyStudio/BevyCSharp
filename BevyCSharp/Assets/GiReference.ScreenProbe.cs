@@ -8,8 +8,7 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// One screen probe's rays read against the reference along each, as <c>gi.screenprobe</c> runs
-/// it, 3DEngine's own reading of a screen probe.
+/// One screen probe's rays read against the reference along each, as <c>gi.screenprobe</c> runs it.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -6,8 +6,7 @@ namespace Bevy;
 /// <summary>
 /// Global illumination's screen probes, a probe on the surface the camera's depth holds every few
 /// pixels, traced, blended and held over the frames by dispatches on the camera the field lies around
-/// before its opaque surfaces are lit, as 3DEngine's screen probes are
-/// (<see cref="Render.SetGlobalIlluminationScreenProbes"/>).
+/// before its opaque surfaces are lit (<see cref="Render.SetGlobalIlluminationScreenProbes"/>).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -63,8 +62,7 @@ internal static partial class WorldProbes
 
     /// <summary>
     /// Whether the pass leaves the screen's probes it traced unread, every pixel reading the world's
-    /// probes and marching to the glow lights itself, as 3DEngine's <c>gi.toggle screen off</c> sets
-    /// it, which a test compares the probes' reading with.
+    /// probes and marching to the glow lights itself, which a test compares the probes' reading with.
     /// </summary>
     internal static bool ScreenUnread { get; set; }
 
@@ -90,16 +88,14 @@ internal static partial class WorldProbes
 
     /// <summary>
     /// The pixels along each side of the tile a screen probe stands in, at a quality, for a picture
-    /// <paramref name="height"/> pixels high, the same up to 1080 and growing with the height past
-    /// it, so a probe stands for about the same share of the picture on any screen, as 3DEngine's
-    /// TileAt.
+    /// <paramref name="height"/> pixels high, the same up to 1080 and growing with the height past it,
+    /// so a probe stands for about the same share of the picture on any screen.
     /// </summary>
     /// <remarks>
-    /// The probes' cost grows with how many there are, and every 8 pixels at High whatever the
-    /// screen, 3DEngine's voxel game's room of forty glowstones took 8.3 ms of global illumination
-    /// at 1280 by 720 and 35.9 at 3840 by 2160, the Cornell box 3.3 and 7.2. Scaled past 1080, the
-    /// tile is 8, 11 and 16 pixels at High at 1080p, 1440p and 4K, so the probes' count and their
-    /// cost hold near 1080p's.
+    /// The probes' cost grows with how many there are, and at a tile of 8 pixels at High whatever the
+    /// screen, a picture of 3840 by 2160 would hold nine times the probes of one of 1280 by 720.
+    /// Scaled past 1080, the tile is 8, 11 and 16 pixels at High at 1080p, 1440p and 4K, so the
+    /// probes' count and their cost hold near 1080p's.
     /// </remarks>
     internal static int TileAt(GlobalIllumination quality, uint height = 1080)
     {
@@ -121,14 +117,14 @@ internal static partial class WorldProbes
 
     /// <summary>
     /// How far from its tile's middle each screen probe marches to the glow lights from in frame
-    /// <paramref name="frame"/>, in pixels, the same for every probe, the middles of the tile's four by
-    /// four cells in the order of Bayer's matrix, sixteen frames a round, so a round visits each cell
-    /// once and each frame's cell lies far from the last, as 3DEngine's JitterAt.
+    /// <paramref name="frame"/>, in pixels, the same for every probe, the middles of the tile's four
+    /// by four cells in the order of Bayer's matrix, sixteen frames a round, so a round visits each
+    /// cell once and each frame's cell lies far from the last.
     /// </summary>
     /// <remarks>
-    /// The Halton points of bases 2 and 3 fell on one row of a tile's cells five times a round in
-    /// 3DEngine and on another three, and the floor along a lamp's penumbra moved with turns of one to
-    /// eight pixels by 0.64 to 1.27% of its light, where by 0.45 to 0.94% with these.
+    /// The Halton points of bases 2 and 3 fall on one row of a tile's cells five times a round and on
+    /// another three, so the cells are visited unevenly and the light along a lamp's penumbra moves
+    /// further as the view turns than in Bayer's order.
     /// </remarks>
     internal static Vector2 JitterAt(long frame, int tile)
     {
@@ -142,11 +138,9 @@ internal static partial class WorldProbes
     /// program left them out and some glow light is lit.
     /// </summary>
     /// <remarks>
-    /// Without them each pixel marches to the four brightest glow lights itself, which in 3DEngine
-    /// took the model pass from 0.31 to 1.01 ms at Low on the Cornell box's four small emitters at 800
-    /// by 450, and its voxel game's from 1.8 to 12.9 ms with forty glowstones in view, so they are
-    /// marched to once a tile and a pixel reads the texels around it, its cost the same however many
-    /// lights there are.
+    /// Without them each pixel marches to the four brightest glow lights itself, four marches at every
+    /// pixel, so they are marched to once a tile and a pixel reads the texels around it, its cost the
+    /// same however many lights there are.
     /// </remarks>
     private static bool GlowOnly(int glows) => !ScreenAsked && glows > 0;
 

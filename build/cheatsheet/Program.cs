@@ -220,8 +220,8 @@ void Write(string title, string page, IEnumerable<string> keys)
         output.AppendLine($"The guide's page is [{page}](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/{page}).");
     }
 
-    // One block a group, as 3DEngine's page has, each type's methods set apart by a blank line under
-    // a comment naming the type, since a group holds the methods of several.
+    // One block a group, each type's methods set apart by a blank line under a comment naming the
+    // type, since a group holds the methods of several.
     output.AppendLine();
     output.AppendLine("```csharp");
     var first = true;

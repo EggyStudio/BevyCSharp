@@ -192,13 +192,12 @@ public sealed class ScriptHost(App app, string directory)
     /// app's own among them, each read once for the process.
     /// </summary>
     /// <remarks>
-    /// A reference holds its file's whole image in native memory that only its finalizer gives back,
-    /// while the GC's heap stays small and a full collection comes late. Read again at every
-    /// compilation, a host compiling on each save gathered them, a hundred compilations taking the
-    /// test host from 495 MB to 841 MB, as 3DEngine's test job reached the runner's 16 GB that way.
-    /// Each file is read the first time a compilation needs it and shared by every compilation
-    /// after, an assembly loaded since the last being read at the next, and the editor's evaluation
-    /// compiles against the same.
+    /// A reference holds its file's whole image in native memory that only its finalizer gives
+    /// back, while the GC's heap stays small and a full collection comes late. Read again at every
+    /// compilation, they gather in a host compiling on each save, a hundred compilations taking the
+    /// test host from 495 MB to 841 MB. Each file is read the first time a compilation needs it and
+    /// shared by every compilation after, an assembly loaded since the last being read at the next,
+    /// and the editor's evaluation compiles against the same.
     /// </remarks>
     public static MetadataReference[] References() => [.. AppDomain.CurrentDomain
         .GetAssemblies()

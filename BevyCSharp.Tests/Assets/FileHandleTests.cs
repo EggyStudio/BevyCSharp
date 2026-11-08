@@ -11,8 +11,8 @@ namespace Bevy.Tests;
 /// <remarks>
 /// <para>
 /// A file read and left open is a file a game cannot save over while it runs, and on Windows one a
-/// child process started meanwhile inherits, which ended a run of 3DEngine's. Linux deletes an open
-/// file without complaint, so the test asks the system which files are open, under
+/// child process started meanwhile inherits and holds open for as long as it runs. Linux deletes an
+/// open file without complaint, so the test asks the system which files are open, under
 /// <c>/proc/self/fd</c>, and on Windows opens each for writing with no sharing, which fails while
 /// anything holds it.
 /// </para>

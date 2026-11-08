@@ -65,9 +65,8 @@ public static class EditorSurface
     /// their fill, and the gap only has to be wide enough to be read as deliberate. Two gaps of
     /// different widths in one picture read as an arrangement that has slipped.
     /// <para>
-    /// Narrow, the way Blender keeps its areas apart, since every pixel of gap is taken from the
-    /// scene and the panels on both sides of it, and a step in fill says where one surface ends
-    /// as clearly at a few pixels as at a dozen.
+    /// Narrow, since every pixel of gap is taken from the scene and the panels on both sides of it,
+    /// and a step in fill says where one surface ends as clearly at a few pixels as at a dozen.
     /// </para>
     /// </remarks>
     internal const float Gutter = 6f;

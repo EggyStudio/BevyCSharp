@@ -221,10 +221,10 @@ public partial struct DayNight
     /// </summary>
     /// <remarks>
     /// <para>
-    /// The vivid look was graded for a block game's grass and roofs, where saturation deepens a
-    /// color. Over a level of near white walls and floors there is little color to deepen, and the
-    /// saturation deepens the light's own instead, the sky's blue in the shade and a low sun's
-    /// yellow, so a white wall reads tinted where it should read white.
+    /// The vivid look deepens the color of a surface that has one, such as grass or a roof. Over a
+    /// level of near white walls and floors there is little color to deepen, and the saturation
+    /// deepens the light's own instead, the sky's blue in the shade and a low sun's yellow, so a
+    /// white wall reads tinted where it should read white.
     /// </para>
     /// <para>
     /// The sun reaches the ground through Bevy's air a little yellow, a sunlit white floor's blue

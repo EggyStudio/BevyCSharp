@@ -213,8 +213,8 @@ public static class LevelSpawner
 
     /// <summary>
     /// The turn an entity's angles give, the file's turn carried onto Y up and then a quarter about Y,
-    /// so the entity's minus Z looks along the file's X turned by the angles, as Quake faces an
-    /// entity along X.
+    /// so the entity's minus Z looks along the file's X turned by the angles, since a map file faces
+    /// an entity at no angle along X.
     /// </summary>
     private static Quat Turn(LevelEntity source, int index)
     {

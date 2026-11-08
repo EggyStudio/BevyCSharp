@@ -10,7 +10,7 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// The file is written as an editor or a text editor writes it, while the engine runs with the
-/// asset root watched, as 3DEngine's test of the same writes its model (its <c>5b2234d2</c>).
+/// asset root watched, so the level is spawned again by the watcher, as it is for a person saving.
 /// </remarks>
 [Collection("engine")]
 public sealed class SubsceneReloadTests : IDisposable

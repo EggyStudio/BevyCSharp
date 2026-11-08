@@ -2,9 +2,9 @@
 // structs Bevy's own vertex shader hands a fragment shader.
 //
 // A shader reaches it with `import bcs;` and uses its names plainly, each helper named `mesh` and
-// then its work, as 3DEngine's modules name theirs, so none meets a name of the shader's own. The
-// bridge writes this file out before every compile, so it always describes the bridge the shader is
-// about to run against rather than whichever one was installed last.
+// then its work, so none meets a name of the shader's own. The bridge writes this file out before
+// every compile, so it always describes the bridge the shader is about to run against rather than
+// whichever one was installed last.
 //
 // What the material itself carries is not here, because it is whatever the shader declares. Every
 // global a shader declares without a binding of its own (numbers, arrays, structs, textures and

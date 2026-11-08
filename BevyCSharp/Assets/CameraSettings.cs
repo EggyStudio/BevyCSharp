@@ -20,8 +20,9 @@ public sealed class CameraSettings
 
     /// <summary>Vertical field of view in degrees. Perspective only.</summary>
     /// <remarks>
-    /// Bevy's default is 45. Larger sees more and exaggerates depth; much larger distorts at the
-    /// edges of the picture.
+    /// 45 unless set, the field Bevy's perspective takes, so a camera given settings that leave it
+    /// alone frames a scene as one spawned with none does. Larger sees more and exaggerates depth,
+    /// and much larger distorts at the edges of the picture.
     /// </remarks>
     public float FieldOfView { get; set; } = 45f;
 

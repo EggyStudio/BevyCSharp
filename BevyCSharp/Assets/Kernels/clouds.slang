@@ -1,18 +1,18 @@
 // The clouds a camera sees, marched through a shell of the sky above the planet at half the
 // picture's size across and down (Render.SetClouds), which clouds_draw.slang lays over the sky.
 //
-// The shell's density follows Schneider's clouds for Horizon Zero Dawn (Nubis). A weather map says
-// where the sky has cloud and what kind, a height profile rounds each cloud's base and lifts its
-// top by its kind, the shape noise cuts the body and the detail noise wears its edges, all carried
-// on the wind. Its light follows Hillaire's for Frostbite and his 2020 atmosphere. The sun's light
-// reaches a point through Bevy's atmosphere, red at a low sun, dimmed through the cloud toward the
-// sun by a short march, and scattered toward the eye by two lobes, a strong one forward that
-// silvers a cloud's edge against the sun and a weak one back, with Wrenninge's octaves standing in
-// for the light a cloud scatters many times over and an even share for what they leave out, so a
-// thick cloud lit from the eye's side reads white. The sky's own light reaches each point from above
-// at the cloud's top and from below at its base. The light is added up as it fades through the
-// cloud, a step at a time in closed form, so a thick step does not brighten it past what its light
-// could give.
+// The shell's density follows Schneider's Nubis clouds. A weather map says where the sky has cloud
+// and what kind, a height profile rounds each cloud's base and lifts its top by its kind, the shape
+// noise cuts the body and the detail noise wears its edges, all carried on the wind. Its light
+// follows Hillaire's physically based clouds and his 2020 atmosphere. The sun's light reaches a
+// point through Bevy's atmosphere, red at a low sun, dimmed through the cloud toward the sun by a
+// short march, and scattered toward the eye by two lobes, a strong one forward that silvers a
+// cloud's edge against the sun and a weak one back, with Wrenninge's octaves standing in for the
+// light a cloud scatters many times over and an even share for what they leave out, so a thick
+// cloud lit from the eye's side reads white. The sky's own light reaches each point from above at
+// the cloud's top and from below at its base. The light is added up as it fades through the cloud,
+// a step at a time in closed form, so a thick step does not brighten it past what its light could
+// give.
 //
 // The air between the eye and the cloud fades a far cloud into the sky's color along the way, read
 // from the camera's environment map, which holds no sun disc, so the disc does not burn through a

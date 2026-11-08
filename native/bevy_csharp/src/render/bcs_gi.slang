@@ -11,9 +11,7 @@
 // `Render.SetGlobalIllumination`). The light is in the units of the camera's picture, its exposure
 // applied.
 //
-// Taken from 3DEngine's `gi.slang` and `cascades.slang`, its names kept where it has them, each
-// reader taking the field and its sampler apart as this bridge binds them, and its glow lights and
-// emissive surfaces coming with the emitters.
+// Each reader takes the field and its sampler apart, as this bridge binds them.
 
 module bcs_gi;
 
@@ -24,9 +22,9 @@ public static const float Pi = 3.14159265358979;
 
 /// A surface's normal from the cross of its ways along two axes of a camera's depth, or facing the
 /// eye along `toEye` where the cross has no length or none a float holds. Far from the world's
-/// origin a far texel's neighbor read back from the depth falls on the same point, and in 3DEngine
-/// the normal made from the two was a value that is not a number, which the screen's probes carried
-/// and their history spread over the land.
+/// origin a far texel's neighbor read back from the depth falls on the same point, and the normal
+/// made from the two would be a value that is not a number, which the screen's probes would carry
+/// and their history spread over the picture.
 public float3 surfaceNormal(float3 crossed, float3 toEye)
 {
     float length2 = dot(crossed, crossed);
@@ -73,8 +71,7 @@ public float octahedronShare(float2 uv)
 /// The rays a texel of a cascade's octahedron of `texels` along each side sends, four where it has
 /// 8, one from the middle of each quarter of the texel, and one from its middle where it has 16, so
 /// every probe sends 256. A texel of 8 a side spans a sixty-fourth of the sphere, which one ray takes
-/// a lamp's bright spot under a ceiling or misses it for, and in 3DEngine a Cornell box's probe read
-/// 93% over a path-traced reference with one ray and 18% with four.
+/// a lamp's bright spot under a ceiling or misses it for.
 public uint RaysAt(uint texels)
 {
     return texels <= 8u ? 4u : 1u;
@@ -251,8 +248,7 @@ public bool seesThrough(Texture3D<float> field, SamplerState linear, FieldInfo i
 /// Whether nothing the field holds stands between `a` and `b` but surfaces that let light through,
 /// four of them at most, as `seesThrough` asks, the light a ray crossing them keeps being its own to
 /// take. The merge asks it of the probes of the cascade above, which a canopy hides from those under
-/// it, and in 3DEngine the floor under one four units up took no sky through the screen's probes
-/// however much of it the leaves let through until the merge asked it so.
+/// it, so the floor under a canopy takes the sky the leaves let through.
 public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 a, float3 b, float clearance)
 {
     float3 toward = b - a;
@@ -388,8 +384,8 @@ public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3
 }
 
 /// How far off a surface along its normal the blend toward the light past the probes is weighed
-/// from (`probesHold`), in the probes' spacing. With none, in 3DEngine a wall in the outer band of
-/// `Low`'s last cascade took a closed room's absent ambient light, 46% under.
+/// from (`probesHold`), in the probes' spacing. With none, a wall in the outer band of the last
+/// cascade would take the light past the probes, which a closed room lacks, and read dark.
 public static const float Lean = 0.5;
 
 /// The cells of a cascade's outer band, a probes' spacing, across which the indirect light fades

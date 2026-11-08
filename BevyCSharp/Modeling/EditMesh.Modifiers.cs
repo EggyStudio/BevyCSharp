@@ -1,9 +1,9 @@
 namespace Bevy;
 
 // The modifiers, operations kept in a list and run in order on a copy of the mesh each time it is
-// built, so the mesh itself, the base, stays editable under them, as Blender's modifier stack
-// leaves an object's mesh. Each is a line in the words its operation takes, added, moved, removed
-// and applied by lines of the recipe like any other change.
+// built, so the mesh itself, the base, stays editable under them. Each is a line in the words its
+// operation takes, added, moved, removed and applied by lines of the recipe like any other
+// change.
 public sealed partial class EditMesh
 {
     /// <summary>The most levels a subdivision modifier takes, six.</summary>
@@ -28,7 +28,8 @@ public sealed partial class EditMesh
     /// A modifier changes what is drawn and collided with, <see cref="Built"/>, and leaves the
     /// mesh's own vertices and faces, the base, as they are, so the base is shaped under a stack
     /// of them and each is reordered, taken away or applied after. Each is run on everything,
-    /// whatever is selected, as Blender's modifiers are.
+    /// whatever is selected, so a selection made to edit the base changes nothing a modifier
+    /// builds.
     /// </para>
     /// <list type="table">
     /// <listheader><term>Line</term><description>What it does</description></listheader>
@@ -105,9 +106,9 @@ public sealed partial class EditMesh
     /// <param name="index">Its place, from zero.</param>
     /// <returns>This mesh, for the next operation.</returns>
     /// <remarks>
-    /// The modifier runs on the base as it stands, whatever is before it in the stack, as Blender
-    /// applies a modifier that is not the first, so applying the first keeps what is built the
-    /// same. Everything is selected after, as the modifier's operation leaves it.
+    /// The modifier runs on the base as it stands, whatever is before it in the stack, so
+    /// applying the first keeps what is built the same. Everything is selected after, as the
+    /// modifier's operation leaves it.
     /// </remarks>
     public EditMesh ApplyModifier(int index)
     {

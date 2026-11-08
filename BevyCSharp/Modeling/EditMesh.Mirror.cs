@@ -1,10 +1,10 @@
 namespace Bevy;
 
 // The operations that cut or copy across a plane or about an axis, and the one that eases the
-// vertices toward their neighbors, as Blender's bisect, mirror, spin and smooth vertices do.
+// vertices toward their neighbors.
 public sealed partial class EditMesh
 {
-    /// <summary>How near the mirror's plane a vertex is to be put on it and shared by both halves, a millimeter, as Blender's mirror merges.</summary>
+    /// <summary>How near the mirror's plane a vertex is to be put on it and shared by both halves, a millimeter, finer than the detail a level is modeled at and coarser than the rounding of a vertex placed on the plane.</summary>
     public const float MirrorMerge = 0.001f;
 
     /// <summary>The most steps a spin takes, 256.</summary>

@@ -4,8 +4,8 @@ using Bevy;
 namespace BevyCSharp.Editor.Framework;
 
 /// <summary>
-/// Plays the game in a window of its own, as Godot does, and builds it. The project is built and
-/// run as a process beside the editor, controlled from the Play tab.
+/// Plays the game in a window of its own, and builds it. The project is built and run as a process
+/// beside the editor, controlled from the Play tab.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -130,10 +130,11 @@ public static class EditorPlay
     /// <summary>Plays the scene being edited, or stops what is playing.</summary>
     /// <remarks>
     /// <para>
-    /// Godot's "Run Current Scene" beside its "Run Project". The scene is written as it is now,
-    /// unsaved changes and all, to <see cref="PlayedScene"/>, and <c>BevyCSharp.Player</c> plays it
-    /// in a window of its own against the editor's asset folder, compiling the same scripts the
-    /// editor runs. A scene with no camera of its own is seen from where the editor's camera is.
+    /// Plays what is open in the editor, where <see cref="Toggle"/> runs the project's own Main.
+    /// The scene is written as it is at that moment, unsaved changes and all, to
+    /// <see cref="PlayedScene"/>, and <c>BevyCSharp.Player</c> plays it in a window of its own
+    /// against the editor's asset folder, compiling the same scripts the editor runs. A scene with
+    /// no camera of its own is seen from where the editor's camera is.
     /// </para>
     /// <para>
     /// The player is found in the checkout the editor runs from, as the sample is, and run through

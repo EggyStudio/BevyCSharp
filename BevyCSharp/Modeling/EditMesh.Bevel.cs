@@ -1,8 +1,9 @@
 namespace Bevy;
 
 // The bevel, which cuts the selected edges off by a width, each edge becoming a strip of faces
-// across its profile, and closes the corners where beveled edges meet. Blender's edge bevel is the
-// model, its offset width, its count of segments and its round profile.
+// across its profile, and closes the corners where beveled edges meet. It is set by how far each
+// face's edge moves in, how many faces cross the strip and a round profile, so one operation makes
+// a chamfer at one segment and a rounded edge at more.
 public sealed partial class EditMesh
 {
     /// <summary>The most segments a bevel's profile is cut into, sixty-four.</summary>
@@ -23,13 +24,13 @@ public sealed partial class EditMesh
     /// <para>
     /// The profile across an edge runs from where one face's edge went to where the other's went,
     /// bulging toward the edge it replaced, a quarter circle where the faces meet square and an
-    /// ellipse's quarter where they meet at another angle, as Blender's round profile is. A corner
-    /// where three or more beveled edges meet is closed by a patch, one face at one segment, four
-    /// sided faces round its middle at two, and triangles round its middle at more. Where two
-    /// beveled edges meet and every face round the corner is beside one, the two strips run into
-    /// each other, as the top's edges of a box beveled turn its corners. A corner of a face no
-    /// beveled edge reaches stays where it is, and an edge that is not beveled at a corner keeps its
-    /// faces joined along it, their moved corners put on it at one point.
+    /// ellipse's quarter where they meet at another angle, so the strip leaves each face tangent
+    /// to it. A corner where three or more beveled edges meet is closed by a patch, one face at
+    /// one segment, four sided faces round its middle at two, and triangles round its middle at
+    /// more. Where two beveled edges meet and every face round the corner is beside one, the two
+    /// strips run into each other, as the top's edges of a box beveled turn its corners. A corner
+    /// of a face no beveled edge reaches stays where it is, and an edge that is not beveled at a
+    /// corner keeps its faces joined along it, their moved corners put on it at one point.
     /// </para>
     /// <para>
     /// The strips and the patches are selected after, each in the slot of the first face beside
@@ -277,8 +278,9 @@ public sealed partial class EditMesh
 
             if (segments == 2 && walk.Count % 2 == 0)
             {
-                // A four sided face from the middle across each corner of a face, as Blender's
-                // patch of two segments is, the walk alternating corners and profiles' middles.
+                // A four sided face from the middle across each corner of a face, so the patch is
+                // four sided faces as the strips beside it are, the walk alternating corners and
+                // profiles' middles.
                 var offset = ring.Any(face => moved[(face, vertex)] == walk[0]) ? 1 : 0;
                 for (var i = offset; i < walk.Count + offset; i += 2)
                 {

@@ -14,7 +14,6 @@ namespace Bevy.Tests;
 /// The fixes an editor offers for the behavior and command generators' diagnostics, each applied as
 /// an editor applies it, after which the generator reports nothing on the code.
 /// </summary>
-/// <remarks>Taken from 3DEngine's tests of its own fixes (its <c>c6b529d4</c>).</remarks>
 public sealed class GeneratorCodeFixTests
 {
     // Runs a generator over source as an editor would hold it, applies the fix of the given title

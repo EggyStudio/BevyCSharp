@@ -369,9 +369,9 @@ public static class AssetsTab
     /// the ground plane where the pointer is over nothing, or nowhere in particular above the horizon.
     /// </summary>
     /// <remarks>
-    /// On what is under the pointer, as Unity and Godot place a dragged model, so a lamp dropped on
-    /// a table stands on the table rather than under it on the floor. The surface is met by its
-    /// triangles (<see cref="Picking.TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)"/>), and the model's own origin is put there.
+    /// On what is under the pointer, so a lamp dropped on a table stands on the table rather than
+    /// under it on the floor. The surface is met by its triangles
+    /// (<see cref="Picking.TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)"/>), and the model's own origin is put there.
     /// </remarks>
     private static Vec3? Under(float x, float y)
     {

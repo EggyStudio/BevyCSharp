@@ -34,8 +34,7 @@ public sealed partial class PhysicsWorld
     /// <para>
     /// A body is moved by the velocity that brings it to its aim by the end of the step and is never
     /// put anywhere, so what it meets on the way is pushed at the speed it moved and Bepu sees no
-    /// jump. 3DEngine does the same for a body under a moving parent, in its <c>ParentFollowers</c>,
-    /// where this was measured first.
+    /// jump.
     /// </para>
     /// </remarks>
     private sealed class Follower

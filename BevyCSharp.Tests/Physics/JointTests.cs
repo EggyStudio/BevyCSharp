@@ -7,7 +7,7 @@ namespace Bevy.Tests;
 /// <summary>Covers a ball joint kept within a cone, a distance joint whose range changes after it is made and the force it holds with, and a slider driven along its travel.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
-/// with 3DEngine's own cases for them (its <c>c5227118</c> and <c>979c97be</c>).
+/// so a joint is read after a known number of steps.
 /// </remarks>
 [Collection("engine")]
 public sealed class JointTests
@@ -85,7 +85,7 @@ public sealed class JointTests
     /// first step, with slack in it, or once it is gone.
     /// </summary>
     /// <remarks>
-    /// 3DEngine's case (its <c>fdcfd435</c>), at the one substep this world solves a step in.
+    /// Read at the one substep this world solves a step in.
     /// </remarks>
     [Fact]
     public void ARopeReadsTheWeightOfTheBoxHangingOnIt()

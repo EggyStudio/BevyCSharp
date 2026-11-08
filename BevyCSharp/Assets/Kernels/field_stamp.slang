@@ -8,8 +8,8 @@
 // so indirect light from a moving mesh takes its color, and a cell a box painted takes the still
 // meshes' color again once the box has left.
 //
-// Taken from 3DEngine's field_stamp.slang. The still images are read as textures, since an image of
-// half floats or of bytes is written here and not read and written at once.
+// The still images are read as textures, since an image of half floats or of bytes is written here
+// and not read and written at once.
 import bcs_field;
 
 struct FieldShape

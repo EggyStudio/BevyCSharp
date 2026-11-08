@@ -5,8 +5,8 @@
 //
 // Each slice's light is added as the fog's own light fades through the slice, worked out in closed
 // form for the slice's depth rather than as though the slice were a point, so a thick slice near
-// the eye does not brighten the fog past what its light could give, which Hillaire's account of
-// Frostbite's volumetric fog calls energy conserving.
+// the eye does not brighten the fog past what its light could give, the energy-conserving
+// integration of Hillaire's volumetric fog.
 import bcs_pass;
 
 // fog_froxels.slang's froxels, the light scattered a meter in the rgb and the light a meter takes

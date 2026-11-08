@@ -7,15 +7,15 @@
 // the light global illumination's world probes hold is added in its place. Where a cascade of
 // probes holds the surface, that is the light reaching it read between the probes around it
 // (bouncedAt), and across the last cascade's outer band and past it, the light from beyond the
-// probes, a sky over a ground, as 3DEngine's model pass takes it (distantAround), each directional
-// light adding its share of the ground's light through its shadow map at the ground the surface
-// looks at. The picture before tonemapping holds light as floats, so adding less than nothing takes
-// it away. The probes' light is in the picture's units, the camera's exposure applied, and Bevy's
-// ambient term and its diffuse light from an environment map are taken back times the exposure as
-// Bevy applies it. Bevy's reflection of the light from all around is taken back and given again,
-// traced below a roughness of a half and read from the probes about the mirror way above it. Bevy's
-// screen-space ambient occlusion is Bevy's and left as it is, so where a camera has it the light
-// taken back differs from the light Bevy gave by as much.
+// probes, a sky over a ground (distantAround), each directional light adding its share of the
+// ground's light through its shadow map at the ground the surface looks at. The picture before
+// tonemapping holds light as floats, so adding less than nothing takes it away. The probes' light is
+// in the picture's units, the camera's exposure applied, and Bevy's ambient term and its diffuse
+// light from an environment map are taken back times the exposure as Bevy applies it. Bevy's
+// reflection of the light from all around is taken back and given again, traced below a roughness of
+// a half and read from the probes about the mirror way above it. Bevy's screen-space ambient
+// occlusion is Bevy's and left as it is, so where a camera has it the light taken back differs from
+// the light Bevy gave by as much.
 //
 // Bevy's light probes are taken back as its lighting gives them, in the order of bevy_pbr 0.20's
 // pbr_functions with the bridge's mend of its fallback (mended.rs). An irradiance volume's light
@@ -95,7 +95,8 @@ Texture2D<float4> gi_glow_normal;
 uniform float4 screen;
 
 // The roughness from which a surface traces no reflection, the probes and the environment reflecting
-// alone, its traced reflection fading out from half of it, as 3DEngine's GlossyRoughness.
+// alone, its traced reflection fading out from half of it, since a probe's ways spread a reflection
+// as widely as a surface of this roughness does (reflectedIn).
 static const float GlossyRoughness = 0.5;
 
 // The most directional lights whose share of the ground's light is added past the probes, Bevy's
@@ -115,7 +116,7 @@ FullscreenOutput vertex(uint index : SV_VertexID)
 // The light from all around a surface facing n that the probes leave to what lies past them, as a
 // sky over a ground, the sky's light from above on the share of the sphere above the surface's
 // horizon, (1 + n.y) / 2 of it, and below its horizon the light the ground sends back, the ground's
-// color taken as the surface's own times the sky's light on it, as 3DEngine's model pass has it.
+// color taken as the surface's own times the sky's light on it.
 float3 distantAround(float3 sky, float3 n, float3 ground)
 {
     float above = saturate(n.y * 0.5 + 0.5);
@@ -152,10 +153,9 @@ float3 environmentGiven(PassSurface surface, float NdotV, float3 diffuse, float3
 // blended between the four whose middles lie about r, so it spans the 25 degrees or so a texel
 // does, as a surface of roughness 0.5 spreads its reflection, and from its faces r looks toward,
 // which spread it as widely as a fully rough surface does, the two mixed by the roughness from 0.5
-// to 1, as 3DEngine's reflectedIn reads them. The directions are sampled within each probe's
-// block, its border holding the directions across each fold, at its slice's middle, so no probe
-// lends its neighbor's light. A probe the surface does not see is left out, since along a mirror
-// way it lends the light of that one way.
+// to 1. The directions are sampled within each probe's block, its border holding the directions
+// across each fold, at its slice's middle, so no probe lends its neighbor's light. A probe the
+// surface does not see is left out, since along a mirror way it lends the light of that one way.
 float4 reflectedIn(FieldInfo info, float3 p, float3 n, float3 r, float roughness, float count, float spacing, int c, float cascades)
 {
     float4 oc = info.cascades[c].origin_and_cell;
@@ -238,11 +238,11 @@ bool onScreen(float3 q, out float2 uv, out float depth, out float held)
 }
 
 // A ray from p along way traced through the picture's depth in steps that lengthen as they go,
-// as 3DEngine's traceScreen, meeting a surface where it first passes behind the depth within two
-// steps of it, or a quarter of a unit, the step halved five times to find where, the ray met only
-// where the depth does not leap between the halving's ends and the surface there turns toward the
-// ray. A ray that passed behind the depth so, or went off the picture, is left at the last point it
-// stood in front of it in `left`, for the field to find what it passed behind.
+// meeting a surface where it first passes behind the depth within two steps of it, or a quarter of
+// a unit, the step halved five times to find where, the ray met only where the depth does not leap
+// between the halving's ends and the surface there turns toward the ray. A ray that passed behind
+// the depth so, or went off the picture, is left at the last point it stood in front of it in
+// `left`, for the field to find what it passed behind.
 bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, out float2 hitUv, out float left)
 {
     hit = p;
@@ -322,12 +322,12 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
 }
 
 // The light a glossy surface at p facing n reflects along r, traced through the picture's depth and
-// past it through the field, with in a how much of it is known, 1 where the ray met a surface, and 0
-// where it met nothing or the surface is too rough to trace for, where the probes and the
-// environment reflect alone, as 3DEngine's tracedReflection. A surface met on the picture reflects
-// the light the frame before's picture showed where it was, faded to its shading by the field at
-// the picture's edge, and one past the picture or hidden from it its color times the light reaching
-// it, as the probes shade a hit (shadeHit).
+// past it through the field, with in a how much of it is known, 1 where the ray met a surface, and
+// 0 where it met nothing or the surface is too rough to trace for, where the probes and the
+// environment reflect alone. A surface met on the picture reflects the light the frame before's
+// picture showed where it was, faded to its shading by the field at the picture's edge, and one
+// past the picture or hidden from it its color times the light reaching it, as the probes shade a
+// hit (shadeHit).
 float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, float3 r, float roughness)
 {
     if (roughness >= GlossyRoughness)
@@ -384,7 +384,7 @@ struct ScreenProbes
 // Each probe weighed by how near it is, how alike its normal is to the surface's, and how near its
 // distance from the eye is to the distance the surface's own plane lies at under the probe, found from
 // how the surface's point moves from pixel to pixel, so a floor seen at a slant takes the probes up
-// and down its slope as well as those beside it, as 3DEngine's model pass weighs them.
+// and down its slope as well as those beside it.
 ScreenProbes screenProbesHere(float2 position, float3 toEye, float3 facing, float3 acrossOne, float3 downOne)
 {
     ScreenProbes probes;
@@ -434,13 +434,12 @@ float3 screenBounced(ScreenProbes probes)
 }
 
 // The indirect light reaching a surface at p facing n, irradiance over pi, from those of the world's
-// probes around it it sees with nothing the field holds between, faded to the next cascade across
-// this one's outer band, or -1 where it sees none, which the caller reads from them all as bouncedAt
-// reads them, since read here as well bouncedAt's code was in the pass twice. A pixel no
-// screen probe on a surface like its own stands near, as where two walls meet, reads it, since a
-// probe beyond a wall thinner than the probes' spacing is seen by bouncedAt's reach where the point
-// it judges from lies in the other wall's cells, and in 3DEngine lent a thin room's corner the
-// lamp's light outside, 3.25 times the wall beside it where its reference reads 1.10, and 1.02 so.
+// probes around it it sees with nothing the field holds between, faded to the next cascade across this
+// one's outer band, or -1 where it sees none, which the caller reads from them all as bouncedAt reads
+// them, since read here as well, bouncedAt's code would be in the pass twice. A pixel no screen probe
+// on a surface like its own stands near, as where two walls meet, reads it, since a probe beyond a
+// wall thinner than the probes' spacing is seen by bouncedAt's reach where the point it judges from
+// lies in the other wall's cells, and would lend a thin room's corner the light of a lamp outside.
 float3 bouncedSeen(FieldInfo field, float3 p, float3 n)
 {
     int cascades = int(probes.z);
@@ -472,10 +471,9 @@ float3 bouncedSeen(FieldInfo field, float3 p, float3 n)
 // how near its point's distance from the eye is to the distance the surface's own plane lies at
 // there, as the screen probes are weighed. A pixel whose like texels no probe around holds marches to
 // the lights' middles itself, which this asks for with -1, the march's code in the pass once, and one
-// no texel around holds a point like its own, as along a thin
-// mesh, takes the texels around on any surface by how near each is, since marching from those few
-// pixels cost 3DEngine's model pass 1.1 ms in a room of 64 lamps at 1280 by 720, each group of pixels
-// the GPU runs together waiting on its slowest.
+// no texel around holds a point like its own, as along a thin mesh, takes the texels around on any
+// surface by how near each is, since a march from those few pixels holds back each group of pixels
+// the GPU runs together, every group waiting on its slowest.
 float3 glowLightsHere(FieldInfo info, float2 position, float3 p, float3 n, float3 toEye, float3 facing, float3 acrossOne, float3 downOne)
 {
     int count = min(int(gi_lights[0].counts.w), MostGlowLights);
@@ -537,8 +535,8 @@ float3 glowLightsHere(FieldInfo info, float2 position, float3 p, float3 n, float
     if (onLight && askWeight <= 1e-3)
         return float3(0.0);
     // A pixel on a lamp's own side, whose half-sized texels lie across its edge, takes no other light's
-    // either, where marched the sides of a room of sixteen lamps cost 3DEngine's model pass 0.9 ms at
-    // 1280 by 720.
+    // either, where marching would cost the pass a march at every pixel along the sides of a room's
+    // lamps.
     [loop]
     for (int i = 0; i < count; i++)
         if (glowLightNear(glow_lights[i], p) > 0.0 && glowLightOn(glow_lights[i], p, n, margin))
@@ -588,7 +586,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // How much of the light from all around the probes give, all of it inside the last cascade and
     // none past its outer band, and the light they hold here, irradiance over pi, the screen's probes'
     // within the world's second cascade, fading to the world's across its outer band, since switched
-    // there a canyon's floor stepped by 14% in 3DEngine. A pixel the screen's probes stand around on
+    // there, a floor across the band would show a step. A pixel the screen's probes stand around on
     // no surface like its own, as at a corner, reads the world's probes it sees through the field.
     float held = bouncedHold(info, world, n, probes.y, probes.z);
     float3 bounced = float3(0.0);
@@ -615,8 +613,8 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 distant = float3(0.0);
     if (held < 1.0)
     {
-        // The environment map's light from above with the ambient light, as 3DEngine's sky over a
-        // ground reads its environment's irradiance facing up.
+        // The environment map's light from above with the ambient light, the sky over a ground reading
+        // the environment's irradiance facing up.
         distant = distantAround(lights.sky.rgb + passEnvironmentDiffuse(float3(0.0, 1.0, 0.0)) * passView.exposure, n, diffuse);
         float below = saturate(0.5 - n.y * 0.5);
         if (below > 0.0)
@@ -639,11 +637,9 @@ float4 fragment(FullscreenOutput input) : SV_Target
 
     // The glow lights' light straight to the surface, the four brightest within reach shadowed by a
     // march through the field to the middle of each, the probes' rays leaving a carried emitter's
-    // light to them. 3DEngine's pixels where no screen probe stands near march to the halves of each
-    // face a light shows, which in the bounce rooms read as the middle does, the Cornell box's floor
-    // 13.4% over its reference against 13.2%, and took the pass from 1.3 ms to 2.0 to 3.5 at 1280 by
-    // 720 with one light over the whole view of a Cornell box on the development machine's GPU,
-    // where without the glow lights it takes 0.19.
+    // light to them. A march to the halves of each face a light shows reads as the march to its middle
+    // does and costs a march for each half at every pixel, so a pixel where no screen probe stands
+    // near marches to the middle alone.
     // Where the screen's probes are traced, or stand for the glow lights alone, a pixel reads their
     // texels instead, at a cost the lights do not change (glowLightsHere).
     if (lights.counts.w > 0.5)
@@ -668,13 +664,13 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + aroundGiven) * occlusion * passView.exposure;
 
     // The light from all around a glossy surface reflects, Bevy's from its ambient term and the
-    // camera's environment map along the mirror way, taken back and given again as 3DEngine's model
-    // pass gives it, the reflection traced through the picture and the field as far as it met a
-    // surface, fading out as the surface grows rough. In the rest, where the probes hold the
-    // surface, it is the light the probes it sees hold along the mirror way, read from each one's
-    // eight by eight directions and toward its faces as the surface grows rough past a half
-    // (reflectedAlong), the light reaching the surface standing in for the probes it does not see,
-    // times the share Bevy's table gives the surface's gloss, and Bevy's own past the probes.
+    // camera's environment map along the mirror way, taken back and given again, the reflection
+    // traced through the picture and the field as far as it met a surface, fading out as the
+    // surface grows rough. In the rest, where the probes hold the surface, it is the light the
+    // probes it sees hold along the mirror way, read from each one's eight by eight directions and
+    // toward its faces as the surface grows rough past a half (reflectedAlong), the light reaching
+    // the surface standing in for the probes it does not see, times the share Bevy's table gives
+    // the surface's gloss, and Bevy's own past the probes.
     // Bevy's times the share of the sky the probes saw along the mirror way gave a closed room's
     // walls no reflection at all, which left a closed Cornell box's green wall at 0.809 of the
     // light past the direct of a reference reflecting by its first face's gloss alone, and read so

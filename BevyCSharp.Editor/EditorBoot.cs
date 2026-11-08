@@ -74,9 +74,9 @@ public partial struct EditorBoot
     /// </summary>
     private static Entity Scene(BehaviorContext ctx)
     {
-        // The scene's own background, which is Bevy's default gray, so it looks as it did when it
-        // cleared to the world's color. The world's color is the theme's ground instead, which is
-        // what fills the window round a docked scene, and the scene frame keeps it in step.
+        // The scene's own background, a dark neutral gray under which a model's colors read
+        // without a cast. The world's color is the theme's ground, which fills the window round a
+        // docked scene, and the scene frame keeps it in step.
         var camera = Render.SpawnCamera3d(new CameraSettings
         {
             FieldOfView = 50f,
@@ -184,7 +184,7 @@ public partial struct EditorBoot
     /// Drops the console into the window, or puts it away.
     /// </summary>
     /// <remarks>
-    /// The key under Escape, which is where every game has put this since Quake. It works while
+    /// The key under Escape, the one games conventionally open their console with. It works while
     /// something is being typed into as well, because what is usually being typed into when
     /// somebody reaches for it is the console itself.
     /// </remarks>
@@ -193,7 +193,7 @@ public partial struct EditorBoot
     {
         if (!ctx.Input.KeyPressed(Key.Backquote)) return;
 
-        // The console tab, raised or put away. Where every game has put this since Quake.
+        // The console tab, raised or put away.
         EditorShell.Show("Console");
     }
 

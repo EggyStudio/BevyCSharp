@@ -24,7 +24,7 @@
 // went out goes with it rather than fading over the frames each bounce takes; where its own light
 // is less, it is a mark that the probe is judged by the probes around it.
 //
-// Taken from 3DEngine's gi_ambient.slang, the held light a buffer as gi_trace.slang lays it out.
+// The held light is a buffer as gi_trace.slang lays it out.
 import bcs_field;
 import bcs_gi;
 
@@ -57,7 +57,7 @@ Texture3D<float4> kept;
 // it weighed by the lobe a surface of roughness 0.5 spreads its reflection over, a block of ten by
 // ten texels a probe, its border each texel across the octahedron's edge, the cascades one after
 // another along z, which the light pass reads a rough surface's reflection from (reflectedAt in
-// gi_light.slang), as 3DEngine's gi_ambient.slang gathers its probes' ways.
+// gi_light.slang).
 [format("rgba16f")] WTexture3D<float4> ways;
 
 // What each workgroup of a probe's rays brought back straight from the sun and the lights, and the

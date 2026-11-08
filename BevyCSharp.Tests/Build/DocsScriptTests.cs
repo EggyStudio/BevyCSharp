@@ -16,16 +16,15 @@ namespace Bevy.Tests;
 /// A guide shows code a reader copies into a game, and a block that stopped compiling, a call
 /// renamed or made internal since it was written, teaches what the package no longer does. The page
 /// here holds a block that builds after the lines its comment gives, one calling what the library
-/// has not got, and one marked as not compiled, which is left out. Taken from 3DEngine's test of
-/// its script (its <c>a4f31573</c>).
+/// has not got, and one marked as not compiled, which is left out.
 /// </para>
 /// <para>
 /// The links are followed here on every system, so a page moved or a heading renamed without the
 /// links to it fails the suite rather than a reader. The build workflow's docs job ran the script
-/// on every push with <c>--external</c>, which asks each link off this repository as well; those are
-/// asked by a run by hand before a package, since a site that does not answer for a minute is no
-/// fault of a commit. 3DEngine follows its links in C#, in its <c>DocumentLinkTests</c>; this runs
-/// the script a writer of the guide runs, so the two cannot disagree.
+/// on every push with <c>--external</c>, which asks each link off this repository as well. Those
+/// are asked by a run by hand before a package, since a site that does not answer for a minute is
+/// no fault of a commit. The test runs the script a writer of the guide runs, rather than following
+/// the links in C# of its own, so the two cannot disagree.
 /// </para>
 /// </remarks>
 public sealed class DocsScriptTests : IDisposable

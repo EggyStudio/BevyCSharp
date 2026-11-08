@@ -17,12 +17,9 @@
 // glow light is lit, the probes stand for the glow lights alone, their surfaces and what they see of
 // each light written and no ray traced.
 //
-// Taken from 3DEngine's gi_screen.slang. 3DEngine reads a depth of half the window's size, and here
-// the camera's depth is read whole, a probe on the texel under its tile's middle; 3DEngine keeps
-// the probe's view in a buffer, and here the camera's view comes through bcs_pass. Its log of one
-// probe's rays for its gi.screenprobe command is taken as ray_log. The march through the depth is
-// the pass's (gi_light.slang) with a face's way found from the depth, since a dispatch reads no
-// G-buffer.
+// The camera's depth is read whole, a probe on the texel under its tile's middle, and the camera's
+// view comes through bcs_pass. The march through the depth is the pass's (gi_light.slang) with a
+// face's way found from the depth, since a dispatch reads no G-buffer.
 import bcs_pass;
 import bcs_field;
 import bcs_gi;
@@ -122,9 +119,9 @@ float3 pointAt(int2 pixel)
 
 // The way the surface at p, at `pixel`, runs along an axis of the depth, a texel `step` long, toward
 // the side whose next two texels go on in a line from p, so a probe at the foot of a wall takes its
-// floor's way and not the way up the wall, and away from the depth's edge and from the sky. Toward
-// the nearer texel, a floor seen at a slant took the wall's in 3DEngine, and its probe, its normal
-// tilted, saw a lamp past the wall that the floor does not.
+// floor's way and not the way up the wall, and away from the depth's edge and from the sky. Taken
+// toward the nearer texel, a floor seen at a slant would take the wall's, and its probe, its normal
+// tilted, would see a lamp past the wall that the floor does not.
 float3 wayAlong(int2 pixel, float3 p, int2 step)
 {
     int2 size = int2(passPictureSize());
@@ -319,13 +316,13 @@ float probeReaches(float3 q, float3 probe, int3 at, uint c, float apart)
 // by whether its rays reached the point the ray passed half their spacing before its end the frame
 // before (probeReaches), a probe inside a mesh passed over and one that does not reach the point kept
 // only where none does, or blended around the point the ray left from where its end lies past both
-// cascades. Read around the point on the surface the ray left from, in 3DEngine the probes there saw
-// along the ray's way what the ray itself passed by, and a Cornell box's block's front read 97% over
-// its reference across the ways its rays stood for, where read here 3% over. Each probe's light along
-// way is blended between the four texels of its octahedron around it, as near as way lies to each,
-// since read from the texel way falls in, a ray on the border between two flipped from one to the
-// other as the normal from the depth wavered by a degree or two, and a probe's light changed as the
-// camera moved.
+// cascades. Read around the point on the surface the ray left from, the probes there would see along
+// the ray's way what the ray itself passed by, and a Cornell box's block's front would read far over
+// its reference across the ways its rays stand for, where read around the point the ray reached it
+// reads 3% over. Each probe's light along way is blended between the four texels of its octahedron
+// around it, as near as way lies to each, since read from the texel way falls in, a ray on the border
+// between two flipped from one to the other as the normal from the depth wavered by a degree or two,
+// and a probe's light changed as the camera moved.
 float3 beyond(FieldInfo world, float3 start, float3 normal, float3 way, float reached, uint around)
 {
     float3 end = start + way * reached;
@@ -438,16 +435,15 @@ void main(uint3 id : SV_DispatchThreadID)
     // of the glow lights' light or more is marched to by the halves of its faces, and its byte says
     // how much of it the surface sees. A fainter one is marched to at its middle alone, as a ray's hit
     // is, its light added to the fainter ones' at the probe and its byte left none, so a pixel reads
-    // the light of at most eight at a probe. Every light marched to by its faces and read at each
-    // pixel, a room of 64 lamps at 1280 by 720 cost 3DEngine's global illumination 5.3 ms and its
-    // model pass 2.3 more than none, where so they cost 1.8 and 0.3. The fainter ones are grouped by
-    // their way from the surface into four groups at most, as glowLightsAt groups the lights past its
-    // brightest, each group's light taken by how much of its brightest light the surface sees, since
-    // marched to one by one, forty dim emitters that reach as far as one bright one took the probes
-    // from 1.4 ms to 3.6 at 1280 by 720. The glow lights take the
-    // surface's normal from its way along each axis of the depth, which holds at a wall's foot where
-    // the nearer texel's does not; tilted up the wall, a probe's normal on the floor beside it saw a
-    // lamp past the wall that the floor does not.
+    // the light of at most eight at a probe, where every light marched to by its faces and read at each
+    // pixel would cost a room of many lamps a march and a read for each of them. The fainter ones are
+    // grouped by their way from the surface into four groups at most, as glowLightsAt groups the lights
+    // past its brightest, each group's light taken by how much of its brightest light the surface sees,
+    // since marched to one by one, forty dim emitters that reach as far as one bright one took the
+    // probes from 1.4 ms to 3.6 at 1280 by 720. The glow lights take the surface's normal from its way
+    // along each axis of the depth, which holds at a wall's foot where the nearer texel's does not.
+    // Tilted up the wall, a probe's normal on the floor beside it would see a lamp past the wall that
+    // the floor does not.
     float3 gn = surfaceNormal(cross(wayAlong(pixel, p, int2(1, 0)), wayAlong(pixel, p, int2(0, 1))), eye - p);
     if (dot(gn, eye - p) < 0.0)
         gn = -gn;
@@ -464,10 +460,10 @@ void main(uint3 id : SV_DispatchThreadID)
     // Which share of each light the surface sees is found from a point of it moved about the tile from
     // frame to frame, the light's tier from the probe's own, so the picture's light that
     // gi_screen_glow.slang takes from the probes around a point, held over the frames, is the same
-    // wherever the grid lies over the surface. Marched to from the tile's middle alone, a turn of a
-    // few pixels moved 3DEngine's floor's light across a glow light's penumbra by up to nine tenths of
-    // it, as the grid moved over the floor. The point is kept on the probe's plane with the depth
-    // halfway to it, so a point on the floor past a wall the probe stands before is not taken.
+    // wherever the grid lies over the surface. Marched to from the tile's middle alone, a turn of a few
+    // pixels would move a floor's light across a glow light's penumbra as the grid moved over the
+    // floor. The point is kept on the probe's plane with the depth halfway to it, so a point on the
+    // floor past a wall the probe stands before is not taken.
     float2 moved = clamp(middle + jitter.xy, 0.5, size - 0.5);
     int2 movedPixel = int2(moved);
     float3 q = depthAt(movedPixel) > 0.0 ? pointAt(movedPixel) : p;
@@ -551,7 +547,7 @@ void main(uint3 id : SV_DispatchThreadID)
 
     // The world's first cascade's probes give the light from beyond the rays, or past it its second's,
     // so the screen's probes reach as far as the second cascade does. Ending at the first, a surface
-    // past it took the world's probes alone in 3DEngine, and a step showed along that edge.
+    // past it would take the world's probes alone, and a step would show along that edge.
     FieldInfo world = probesOf(info, int(probes.z));
     int3 base;
     float3 f;
@@ -586,10 +582,10 @@ void main(uint3 id : SV_DispatchThreadID)
         for (uint u = 0u; u < Rays; u++)
         {
             // A tile's rays leave from one of sixteen places in their texels of the hemisphere's
-            // square, every four tiles by four holding each place once, so the filter blends the
-            // ways of every place across the tiles around a pixel. Sent from their texels' middles
-            // alone, every probe on a surface sent the same sixteen ways, which read the hemisphere
-            // 15% under in 3DEngine's room and 41% under on its voxel game's birch trunk.
+            // square, every four tiles by four holding each place once, so the filter blends the ways
+            // of every place across the tiles around a pixel. Sent from their texels' middles alone,
+            // every probe on a surface would send the same sixteen ways, and a light falling between
+            // them would be missed by every probe alike, which no blend of the probes around makes up.
             float4 local = hemisphere((float2(u, v) + (float2(id.xy & 3u) + 0.5) / 4.0) / float(Rays));
             float3 way = normalize(side * local.x + along * local.y + n * local.z);
             // How squarely the ray falls on the surface times the share of the hemisphere its texel
@@ -628,11 +624,11 @@ void main(uint3 id : SV_DispatchThreadID)
                     float3 past = beyond(world, start, n, way, length, around);
                     // A ray past its reach whose world probes hold nothing along its way goes on
                     // through the field, as far as four times its reach and within the cascade it
-                    // starts in and the next coarser one, and takes the light of what it meets, since
-                    // a corridor narrower than the coarser probes' spacing holds none of them, and its
-                    // walls read 78% under their reference in 3DEngine where 67% so. Into the coarser
-                    // cascades the march passed walls thinner than their cells, and a closed room took
-                    // the sky's light.
+                    // starts in and the next coarser one, and takes the light of what it meets, since a
+                    // corridor narrower than the coarser probes' spacing holds none of them, and its
+                    // walls would take no light from beyond their rays. Marched further into the
+                    // coarser cascades, the ray passes walls thinner than their cells, and a closed
+                    // room takes the sky's light.
                     if (luminance(past) > 1e-6)
                     {
                         light += past * through;

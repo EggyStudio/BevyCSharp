@@ -12,9 +12,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <remarks>
 /// <para>
 /// The platform's title bar is a band of somebody else's color across the top of a picture that is
-/// otherwise the editor's, and it spends a row on a name the taskbar already shows. So the editor
-/// asks for a window without one and does its work itself, the way Blender and most editors on
-/// every platform do.
+/// otherwise the editor's, and it spends a row on a name the taskbar shows as well. So the editor
+/// asks for a window without one and does its work itself.
 /// </para>
 /// <para>
 /// None of it is visible. The title row along the top is a gap above the panels that is there to

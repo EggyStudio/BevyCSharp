@@ -1,8 +1,7 @@
 namespace Bevy;
 
-// The cuts that add vertices along edges and divide faces through them without changing the shape,
-// a loop cut round a ring of four sided faces and the selected faces subdivided into a grid, as
-// Blender's loop cut and subdivide are.
+// The cuts that add vertices along edges and divide faces through them without changing the shape, a
+// loop cut round a ring of four sided faces and the selected faces subdivided into a grid.
 public sealed partial class EditMesh
 {
     /// <summary>The most cuts <see cref="Subdivide"/> makes along each edge, sixteen.</summary>
@@ -15,10 +14,10 @@ public sealed partial class EditMesh
     /// <para>
     /// The ring starts at the selected edge and goes on through each four sided face to the edge
     /// across it, both ways, until it comes back to where it started, meets a face of another count
-    /// or reaches a hole's rim, as Blender's loop cut runs, so a vertical edge of a box cut at half
-    /// makes a loop round its four sides at half its height. Each face of the ring is cut in two
-    /// through the points the loop puts on its two edges, and a face beyond the ring's end that
-    /// shares a cut edge takes the point as a corner, so the mesh stays closed.
+    /// or reaches a hole's rim, so a vertical edge of a box cut at half makes a loop round its four
+    /// sides at half its height. Each face of the ring is cut in two through the points the loop
+    /// puts on its two edges, and a face beyond the ring's end that shares a cut edge takes the
+    /// point as a corner, so the mesh stays closed.
     /// </para>
     /// <para>
     /// The fraction runs from the selected edge's end of the lower index, and from the end the ring
@@ -98,9 +97,9 @@ public sealed partial class EditMesh
     /// <para>
     /// A four sided face becomes a grid of one more face than cuts a side, a triangle a triangle of
     /// triangles as many a side, and a face of more corners a face for each corner, from its middle
-    /// to the points nearest the middles of its two edges, as Blender's subdivision of a face of
-    /// many corners makes a fan of them. A box's six faces subdivided once are 24 faces on 26
-    /// vertices, the corners, a point on each edge and one in each face.
+    /// to the points nearest the middles of its two edges, so every piece is four sided as a grid's
+    /// are. A box's six faces subdivided once are 24 faces on 26 vertices, the corners, a point on
+    /// each edge and one in each face.
     /// </para>
     /// <para>
     /// The shape is the same, every new point lying on a face it was. A face not selected that shares

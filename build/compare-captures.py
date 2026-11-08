@@ -6,8 +6,8 @@ the run that changed it.
 
 A pixel differs where one of its channels is further than STEP from the checked-in picture's, and a
 picture differs where more than SHARE of its pixels do, which the edges, text and filtering of two
-devices take between them, as 3DEngine's reference frames are held. A failure is said with its
-share and the box its differing pixels lie in. An example that prints is compared as text, by how
+devices take between them. A failure is said with its share and the box its differing pixels lie
+in. An example that prints is compared as text, by how
 many times it prints each line with every number set apart, since what it prints holds frame times
 and counts measured as it ran and an entity's id that differs between builds, and its systems with
 no order between them print in whichever order the executor runs them, which differs between

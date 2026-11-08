@@ -1,9 +1,9 @@
 // The light the camera's environment map sends along each way, times the camera's exposure, folded
 // onto an octahedron as the probes' directions are, which global illumination's probes read where a
-// ray of their last cascade meets nothing, as 3DEngine's read its environment map. A dispatch on the
-// camera writes it, since the environment map is the camera's, and the probes, which are traced
-// before the cameras draw, read the frame before's. Alpha 1 where the camera has an environment map,
-// 0 where it has none, so the probes take the ambient light alone there.
+// ray of their last cascade meets nothing. A dispatch on the camera writes it, since the
+// environment map is the camera's, and the probes, which are traced before the cameras draw, read
+// the frame before's. Alpha 1 where the camera has an environment map, 0 where it has none, so the
+// probes take the ambient light alone there.
 import bcs_pass;
 import bcs_gi;
 

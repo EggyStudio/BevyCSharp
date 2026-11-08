@@ -2,18 +2,17 @@
 // picture once its opaque surfaces are lit and blended by adding, as the light each directional
 // light sent a pixel's surface taken away where the field says it is closed off from that light.
 //
-// Bevy's lighting takes no share of a directional light from outside, where 3DEngine's model pass
-// multiplies the sun's light by the share its occlusion pass traced, so the light Bevy added is
-// worked out again here from the camera's G-buffer, as Bevy's own `directional_light` works it out
-// (Burley's diffuse, the GGX specular with its multiple scattering, Schlick's Fresnel), through the
-// camera's air as Bevy dims a directional light by it, and taken back times what the field closes
-// off. The picture before tonemapping holds light as floats, so adding less than nothing takes it
-// away. Taken back as the light is above the air, a sun below the horizon, which Bevy's atmosphere
-// puts out and the field sees the ground stand before, had all its light taken from what faced it,
-// and at night the feature test's walls facing a sun of 12,500 lux 43 degrees down read 0.6 to 3
-// under nothing. Bevy's clearcoat and anisotropy, a light texture and the light's own contact
-// shadows are not worked out again, so where a surface has them the light taken away differs from
-// the light Bevy added by as much.
+// Bevy's lighting takes no share of a directional light from outside, so no pass can hand it the
+// share the field traces, and the light Bevy added is worked out again here from the camera's
+// G-buffer, as Bevy's own `directional_light` works it out (Burley's diffuse, the GGX specular with
+// its multiple scattering, Schlick's Fresnel), through the camera's air as Bevy dims a directional
+// light by it, and taken back times what the field closes off. The picture before tonemapping holds
+// light as floats, so adding less than nothing takes it away. Taken back as the light is above the
+// air, a sun below the horizon, which Bevy's atmosphere puts out and the field sees the ground
+// stand before, had all its light taken from what faced it, and at night the feature test's walls
+// facing a sun of 12,500 lux 43 degrees down read 0.6 to 3 under nothing. Bevy's clearcoat and
+// anisotropy, a light texture and the light's own contact shadows are not worked out again, so
+// where a surface has them the light taken away differs from the light Bevy added by as much.
 //
 // Past the shadow map's reach alone by default, so a shadow the map draws keeps its hard edge and
 // the ground beyond the map is still shadowed, or everywhere the field reaches, the map's shadow
@@ -45,7 +44,7 @@ FullscreenOutput vertex(uint index : SV_VertexID)
 // The share of a directional light reaching p on a surface facing n, traced toward it through the
 // field from a cell and a half out, darkened by how near a surface the ray passes as a share of how
 // far along it is, as Quilez's soft shadows have it, so a shadow is soft where its caster is far and
-// hard where it meets what it falls on. Taken from 3DEngine's ao.slang.
+// hard where it meets what it falls on.
 float reaching(FieldInfo info, float3 p, float3 n, float3 l, float reach)
 {
     float cell = fieldCell(info, p);

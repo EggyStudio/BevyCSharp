@@ -15,8 +15,8 @@ internal sealed record RemoteEntity(string Id, string Name, string Components);
 internal sealed record RemoteField(string Field, string Value);
 
 /// <summary>
-/// The world of the game the Play tab started, read while it runs, as Godot's remote scene tree
-/// shows the running game beside the edited one.
+/// The world of the game the Play tab started, read while it runs and shown beside the edited one,
+/// so what the running game holds is seen without leaving the editor.
 /// </summary>
 /// <remarks>
 /// <para>

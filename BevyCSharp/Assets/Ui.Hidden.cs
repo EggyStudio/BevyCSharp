@@ -1,8 +1,8 @@
 namespace Bevy;
 
-// The hidden scope, the part of a program's interface F1 hides, as Minecraft hides its HUD while
-// the player's view shows and never a screen drawn over it, so a pause menu or an inventory drawn
-// outside the scope stays whatever F1 says, and the engine's debug overlay stays too.
+// The hidden scope, the part of a program's interface F1 hides so the player's view is seen alone.
+// A screen drawn over the view, such as a pause menu or an inventory, is drawn outside the scope
+// and stays whatever F1 says, and the engine's debug overlay stays too.
 public static unsafe partial class Ui
 {
     /// <summary>A node made inside the scope, and what its visibility was before the scope hid it.</summary>

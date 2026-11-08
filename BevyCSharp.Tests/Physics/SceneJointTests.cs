@@ -12,7 +12,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// Each writes its level to a scene file from one engine and loads it in another, so the two
 /// entities a joint names reach it as the file numbered them, then steps a world of its own by
-/// hand, as 3DEngine's test of the same does (its <c>e46058fc</c>).
+/// hand.
 /// </remarks>
 [Collection("engine")]
 public sealed class SceneJointTests : IDisposable

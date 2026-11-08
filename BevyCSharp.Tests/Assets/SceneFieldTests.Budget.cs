@@ -4,16 +4,15 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-// The builds' budget of triangles a frame, 3DEngine's tests of its item 74, hundreds of meshes
-// arriving in one frame built over as many frames as it takes, nearest the eye first, each frame
-// under the budget on the plan's counts and the splat's time on the GPU under the frame that built
-// them all at once, the field built in parts holding the distances of the field built whole, and a
-// build in progress taking in a mesh that came and starting again for one that left.
+// The builds' budget of triangles a frame, hundreds of meshes arriving in one frame built over as
+// many frames as it takes, nearest the eye first, each frame under the budget on the plan's counts
+// and the splat's time on the GPU under the frame that built them all at once, the field built in
+// parts holding the distances of the field built whole, and a build in progress taking in a mesh
+// that came and starting again for one that left.
 public sealed partial class SceneFieldTests
 {
-    // The sections a voxel game streams in at once, as the reading that stalled a frame in 3DEngine
-    // had them, 500 of 1,024 triangles each, flat boxes four meters a side on a grid of 25 by 20
-    // about the eye.
+    // The sections a voxel world streams in at once, 500 of 1,024 triangles each, nearly eight
+    // times a budget of 65,536, flat boxes four meters a side on a grid of 25 by 20 about the eye.
     private const int Sections = 500, SectionTriangles = 1024;
 
     private static readonly SceneFieldPlan.Box SectionBounds = new(Vector3.Zero, new Vector3(4, 1, 4));

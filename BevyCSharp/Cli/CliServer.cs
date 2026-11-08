@@ -274,8 +274,8 @@ internal sealed class CliServer : IDisposable
     /// <remarks>
     /// <para>
     /// A connection's thread waits on its read for as long as the caller keeps it open, so one left
-    /// alone would outlive the app, which is how 3DEngine found the same leak on macOS. Every thread
-    /// the server started has ended by the time this returns.
+    /// alone would outlive the app. Every thread the server started has ended by the time this
+    /// returns.
     /// </para>
     /// <para>
     /// A request answered in the app's last frame, as <c>app.quit</c>'s is, may not be written yet

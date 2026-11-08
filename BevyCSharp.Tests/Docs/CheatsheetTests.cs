@@ -15,7 +15,7 @@ namespace Bevy.Tests;
 /// apart without spelling the cheatsheet's types the way reflection names them. A type is the
 /// comment its lines sit under in its group's block, by its name in <c>Bevy</c>, with
 /// <c>Physics.</c> before one in <c>Bevy.Physics</c> and its outer type before a nested one. The
-/// page's form is 3DEngine's, a group a heading, its guide's link and one block.
+/// page's form is a group a heading, its guide's link and one block.
 /// </para>
 /// <para>
 /// The page leaves out what a reader never calls by name, which is delegates, enums, the types the
@@ -43,7 +43,7 @@ public sealed partial class CheatsheetTests
 
     /// <summary>
     /// The page is a heading and a paragraph, then a group a plain heading with one C# block, and
-    /// no heading a type, as 3DEngine's page is.
+    /// no heading a type, so the page reads by area and a type is found in its area's block.
     /// </summary>
     [Fact]
     public void EachGroupIsAHeadingAGuidesLinkAndOneBlock()

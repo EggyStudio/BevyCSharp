@@ -9,7 +9,7 @@ namespace Bevy;
 
 /// <summary>
 /// One world probe's rays read against the reference along its texels' ways, as <c>gi.probe</c>
-/// runs it, 3DEngine's own reading of a probe.
+/// runs it.
 /// </summary>
 /// <remarks>
 /// <para>

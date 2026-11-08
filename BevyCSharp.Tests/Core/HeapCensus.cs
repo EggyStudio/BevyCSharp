@@ -10,12 +10,11 @@ namespace Bevy.Tests;
 /// has says which types a closed app left behind.
 /// </summary>
 /// <remarks>
-/// Taken from 3DEngine's census of the same name (its <c>596535ce</c>), which the macOS job's
-/// leak tests read where a heap rose and fell back by several megabytes every few dozen apps.
-/// The tool's report gives each type an object's size and a count, and an array's size is one of
-/// its objects' where they differ, so the bytes a type grew by are a guess and its count is not.
-/// A census taken first is alive at the second, so the types it is kept in are named for it and
-/// left out of what grew, and the strings that grew count its names, a few dozen KB.
+/// The macOS job's leak tests read it where a heap rose and fell back by several megabytes every
+/// few dozen apps. The tool's report gives each type an object's size and a count, and an array's
+/// size is one of its objects' where they differ, so the bytes a type grew by are a guess and its
+/// count is not. A census taken first is alive at the second, so the types it is kept in are named
+/// for it and left out of what grew, and the strings that grew count its names, a few dozen KB.
 /// </remarks>
 internal sealed partial class HeapCensus
 {

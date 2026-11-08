@@ -28,7 +28,8 @@ public sealed class PhysicsSettings
     /// A kinematic body is moved after its entity by a velocity, so it pushes what it meets on the
     /// way. A move this long is a placing, a door put back or a level begun again, and carried there
     /// it would fling whatever it passed through. A placing shorter than this is said with
-    /// <see cref="PhysicsWorld.MarkPlaced"/>. 100 units, as in 3DEngine.
+    /// <see cref="PhysicsWorld.MarkPlaced"/>. 100 units, six thousand units a second at sixty frames
+    /// a second, far past the speed a game moves a body at, so only a placing goes past it.
     /// </remarks>
     public float PlaceBeyond { get; set; } = 100f;
 }

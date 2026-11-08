@@ -4,9 +4,9 @@
 // the shaders read, with the color and the emission it painted and the way the cell's nearest face
 // looks, a thread a cell, or clears the codes for the next build.
 //
-// Taken from 3DEngine's field_resolve.slang. 3DEngine clears the codes before each build with a
-// fill of the buffer, which a dispatch here has no call for, so a dispatch of this that clears alone
-// follows each resolve, which reads its neighbors' codes, and the buffers start cleared.
+// The codes are cleared for the next build by a dispatch of this that clears alone, since a
+// dispatch here has no call that fills a buffer. It follows each resolve, whose cells read their
+// neighbors' codes, and the buffers start cleared.
 
 import bcs_field;
 
@@ -95,12 +95,12 @@ float resolvedAt(uint3 c, uint size)
     uint index = (c.z * size + c.y) * size + c.x;
     uint code = cells[index];
     float d = min(float(code >> 10) / 1024.0, cascade.w) * cascade.z;
-    // A cell in front of one face and straight behind another that looks the other way, less than
-    // a cell beyond it, lies against a wall thinner than a cell, which is held as a double-sided
-    // sheet is, half a cell thick on either side of the wall's middle, so a ray between the cells on
-    // either side still meets it, where the faces of a box's edge, which meet square, do not make
-    // one. Held so only below half a cell, a wall of two thirds of a cell lay between two cells'
-    // middles, each a sixth of a cell outside it, which a trace stepped over, as 3DEngine found.
+    // A cell in front of one face and straight behind another that looks the other way, less than a
+    // cell beyond it, lies against a wall thinner than a cell, which is held as a double-sided sheet
+    // is, half a cell thick on either side of the wall's middle, so a ray between the cells on either
+    // side still meets it, where the faces of a box's edge, which meet square, do not make one. Held
+    // so only below half a cell, a wall of two thirds of a cell would lie between two cells' middles,
+    // each a sixth of a cell outside it, which a trace steps over.
     uint hidden = behind[index];
     float beyond = float(hidden >> 8) / 1024.0 * cascade.z;
     bool thin = (code & 0x300u) == 0x100u && hidden != 0xFFFFFFFFu && beyond - d < cascade.z
@@ -145,10 +145,9 @@ void resolve(uint3 id, uint index, uint e)
     uint size = uint(cascade.y);
     uint code = cells[index];
     // A cell pinched between two blocks that meet along an edge is held inside at its distance, so a
-    // march through the edge meets the field there, where between the four cells about the edge the
-    // distance never fell below zero, and in 3DEngine a march from the floor east of a wall whose
-    // halves met along one edge saw half of a glowstone west of it, the floor about the edge 21 sRGB
-    // levels where its reference reads none.
+    // march through the edge meets the field there. Between the four cells about the edge the
+    // distance would otherwise stay above zero, and a march from the floor beside a wall whose halves
+    // meet along one edge would pass through the edge and see the light beyond the wall.
     float d = resolvedAt(id, size);
     if (d > 0.0 && pinched(id, size))
         d = -d;

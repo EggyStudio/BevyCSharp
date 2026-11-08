@@ -1,9 +1,12 @@
 # Review
 
-Reviewed up to `a5f277d5`, 116, a crossing lit where its leaves stop the ray and the early
-crossing's light to the probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08, its run
-green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps the form and
-carries the review's files. Nothing is pushed after it. Before it `69d97fec`, 107's shadow mend, one
+Reviewed up to `8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the ray's
+mirror way by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at 20:35 with
+Linux in 11 minutes, macOS in 15 and Windows in 17; it keeps the form and carries the review's
+files. Nothing is pushed after it. Before it `a5f277d5`, 116, a crossing lit where its leaves stop
+the ray and the early crossing's light to the probe's faces, with 117's documents, pushed at 16:26
+on 2026-11-08, its run green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it
+keeps the form and carries the review's files. Before it `69d97fec`, 107's shadow mend, one
 visibility level casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its
 run green at 11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the
 review's files and the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its
@@ -2400,7 +2403,18 @@ from [SHARED.md](SHARED.md).
     as the measure and the rough rooms and the Cornell box held; then its cost per hit at High in
     the Cornell box and the meadow, since the engine's same read, each light's reflection and a lobe
     of its probes' faces at the hit, parked under its budget at about half a millisecond, and land
-    or park by the cost. After 107.
+    or park by the cost. After 107. Done at `8b16bd71`, pushed at 20:17 on 2026-11-08. A hit
+    reflects the indirect light by its gloss along the ray's mirror way, read from the probes' 8 by
+    8 ways, the world and screen probes alike through the one shading; the smooth room's second
+    bounce reads 11.1% over where 12.5, the third 15.7 where 16.3, every bounce 9.2 where 9.8, the
+    first 0.3; a second read placed the larger part of what remains in the lights' even gloss at the
+    hit, since the rays leave along fixed ways and miss a highlight as sharp as roughness 0.1, the
+    first bounce reading 6.4% under with each light's own highlight and 4.2 with the ray's
+    footprint; the step from the first bounce to the second stays 10 to 12% over in every form and
+    is recorded by Decision 81, not chased, the lead being each light's highlight with ray ways
+    jittered frame to frame. The trace costs 0.45 ms in the box and 3.7 to 3.9 in the meadow, as
+    before within a tenth. A test holds the smooth room's second bounce within 12%, which the head
+    failed. The reading is a triptych at a gain of 80.
 
 115. **The air's sky test captures before its sky is drawn under load.** From item 110's suite on
     2026-11-08. AtmosphereTests.AnAirOfTheGamesOwnDrawsItsOwnSky captures at a set frame and waits
@@ -2472,7 +2486,10 @@ from [SHARED.md](SHARED.md).
     EditMesh.cs are said in words or with the word dot, the test string in TestScriptTests.cs that
     quotes the tool's own three dots is read, kept where it is the tool's output and said so in a
     comment, and STYLE.md's Punctuation gains the sentence that the middle dot is not used, a row of
-    links separated by a space, a list by commas and a product said in words. In 114's batch.
+    links separated by a space, a list by commas and a product said in words. In 114's batch. Done
+    at `8b16bd71`, pushed at 20:17 on 2026-11-08; the two dot products say dot and cross, the test
+    tool's three dots stay as escapes with a comment, STYLE.md carries the sentence, the README's
+    first line as changed.
 
 119. **The bridge as projects.** Decision 85 on 2026-11-08. The C# side over the native crate
     becomes one solution of projects, each an area with its own public surface and its own plugin,
@@ -2495,7 +2512,12 @@ from [SHARED.md](SHARED.md).
     words of which the widgets' owner is not one, rewritten in the bridge's terms with its numbers
     kept and their reason said, the comparison tests' naming of the reference they compare against
     left where the test is the comparison; STYLE.md's Register gains the sentence and its Checks the
-    search, read rather than counted. After 114, before 96.
+    search, read rather than counted. After 114, before 96. The sibling engine is in the sweep as
+    well, a comment that gives 3DEngine's measurement or its process as the explanation, as "in
+    3DEngine the floor read so much where so much", says this repository's own figure and reason or
+    goes, since a reader here has neither the sibling's readings nor the sessions' comparison, which
+    SHARED.md holds; the sibling is named once, where a rule or a model was taken from it, as the
+    API's names are from raylib, and nowhere else.
 
 ## Verdicts
 
@@ -6097,3 +6119,34 @@ reference, and read along the ray's mirror way from the probes' eight by eight d
 11.1% at about the same cost, where each light's highlight at the hit took the second to 3.0% and
 the first from 0.3% over to 6.4% under, the probes' rays leaving along the same ways each frame and
 missing a sharp highlight.
+
+Item 121, comments on the code's own terms, in the commit carrying this line. Every comment in the
+sources, kernels, scripts and examples that explained a choice by another product, by the sibling
+engine's readings or its process, by Bevy's default given as the only reason, by the owner, by the
+sessions' work or by an outside asset is rewritten in the bridge's terms, 143 files with 733 lines
+written and 811 taken out, the scripts' docstrings with them. A comment that gave the sibling's
+figure keeps this engine's reason and its own figures and loses the sibling's, as the probes' carry
+under a quarter of the cascade above keeps its reason and loses the vestibule it was read in, and a
+sentence that was only the sibling's history goes. The editor's keys, panels and fly camera say why
+each is chosen rather than whose editor it follows, the modeling's bevel, mirror merge and smoothing
+angle say what their measures do to a mesh, thirty degrees smoothing a cylinder of twelve sides or
+more and keeping a box's corners sharp, and the debug overlay, the capture key and the console give
+the reason for their lengths, colors, names and keys. Every changed line is a comment line, read by
+a script that compares each file's lines outside its comments with the head's.
+
+Left, as N 4.11 has it. The comparison tests' naming of the reference they compare against, the
+bounce rooms' bounds and the look's curve figures, the recipe's words shared with the sibling, the
+tonemapper that is Blender's filmic curve by name, Bevy's defaults where a comment says what a
+setting left out does or the bridge mirrors Bevy, the feature test's own Sponza pack, the command
+line's sessions and a widget's or a menu's owner. STYLE.md's Register gains the rule's sentence and
+its Checks the search, case-sensitive, since with the case ignored the word Unity matches UnitY and
+the word URP purpose, its hits read rather than counted.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+204 with render. The bridge was built with the editor profile, meshlets and Solari. The whole run
+gave 2,054 passed and 3 skipped in 51 m 39 s at the 3 GB cap, none aborted, its largest process at
+3,268 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the sweep of N 4.11 here took 143 files, most of the lines the sibling's readings and
+processes given as a comment's reason, and STYLE.md's search is written case-sensitive, since with
+the case ignored Unity matches UnitY in every vector and URP matches purpose, some 600 false hits.

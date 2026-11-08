@@ -23,7 +23,7 @@ internal static class Repo
 
     /// <summary>
     /// The folder a project is in from the checkout's root, which is its name, but for the feature
-    /// test's, which lives beside the games as 3DEngine's does.
+    /// test's, which lives in the games folder.
     /// </summary>
     public static string FolderOf(string project) =>
         project.Equals("BevyCSharp.FeatureTest", StringComparison.OrdinalIgnoreCase) ? "games/FeatureTest" : project;

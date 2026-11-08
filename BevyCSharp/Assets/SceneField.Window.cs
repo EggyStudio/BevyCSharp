@@ -4,8 +4,8 @@ using ImGuiNET;
 namespace Bevy;
 
 // The field's window, what gi.state says, its settings, and a slice across a cascade painted by a
-// compute shader into an image ImGui shows, as 3DEngine's global illumination window shows its
-// parts.
+// compute shader into an image ImGui shows, so a cascade's cells are seen as the shaders read
+// them.
 internal static partial class SceneField
 {
     /// <summary>The pixels a cell takes along each side of the slice's image.</summary>

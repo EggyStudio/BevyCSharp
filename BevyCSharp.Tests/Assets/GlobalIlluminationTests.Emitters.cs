@@ -104,8 +104,8 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// Global illumination's passes' time on the GPU in a closed room of the level's white lit by
-    /// forty small emitters at <see cref="GlobalIllumination.Medium"/> at 1280 by 720, printed, as
-    /// 3DEngine's voxel game's room of forty glowstones reads its frame.
+    /// forty small emitters at <see cref="GlobalIllumination.Medium"/> at 1280 by 720, printed, so
+    /// the glow lights' cost is read where many of them share one room.
     /// </summary>
     [SkippableFact]
     public void TheGlowLightsCostIsReadInARoomOfFortyEmitters()

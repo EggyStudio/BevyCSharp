@@ -4,10 +4,10 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-// Global illumination's screen probes as 3DEngine's tests hold them, the cascades' light read alone
-// and the glow lights read from probes standing for them alone where the probes are left out, a
-// probe fed a value that is not a number leaving the light it blends into finite, and the land far
-// from the world's origin lit as near it.
+// Global illumination's screen probes, the cascades' light read alone and the glow lights read from
+// probes standing for them alone where the probes are left out, a probe fed a value that is not a
+// number leaving the light it blends into finite, and the land far from the world's origin lit as
+// near it.
 public sealed partial class GlobalIlluminationTests
 {
     /// <summary>
@@ -157,9 +157,9 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// The middle screen probe's light a value that is not a number for three frames, as 3DEngine's
-    /// voxel game's desert village fed its probes one where their normals were, and then its own
-    /// again, leaves no pixel the blends carried it to black.
+    /// The middle screen probe's light a value that is not a number for three frames, as a normal
+    /// that is not a number gives a probe, and then its own again, leaves no pixel the blends
+    /// carried it to black.
     /// </summary>
     [SkippableFact]
     public void AScreenProbeFedAValueThatIsNotANumberLeavesTheLightItBlendsIntoFinite()
@@ -225,12 +225,12 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// 3DEngine's voxel game's desert village at a field of view of 40 degrees, sand, houses and 56
-    /// torches under a low sun, drawn 10,000 units from the world's origin and at it, leaves no more of
-    /// the land black far from the origin than near it, where in 3DEngine a far texel's neighbor read
-    /// back from the depth fell on the same point and its normal was a value that is not a number,
-    /// which the glow lights' light at the screen's probes carried and their history spread, 26,258
-    /// pixels black at 640 by 360 where 6,570 at the origin.
+    /// A desert village at a field of view of 40 degrees, sand, houses and 56 torches under a low
+    /// sun, drawn 10,000 units from the world's origin and at it, leaves no more of the land black
+    /// far from the origin than near it. Far from the origin a texel's neighbor read back from the
+    /// depth can fall on the same point, which makes the texel's normal a value that is not a
+    /// number, and the glow lights' light at the screen's probes would carry it and their history
+    /// spread it.
     /// </summary>
     [SkippableFact]
     public void FarFromTheWorldsOriginGlowLightsLeaveNoMoreOfTheLandBlackThanNearIt()

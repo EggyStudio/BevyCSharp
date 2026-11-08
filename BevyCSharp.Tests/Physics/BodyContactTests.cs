@@ -7,8 +7,7 @@ namespace Bevy.Tests;
 /// <summary>Covers where and how hard two bodies meet, carried on the contact's message, how hard two touching bodies press, the push alone, and a fast body swept so it meets a thin wall.</summary>
 /// <remarks>
 /// Each steps a <see cref="PhysicsWorld"/> of its own by hand at Bevy's sixty-four steps a second,
-/// gathering the contacts each step sends, as 3DEngine's own test of the speed a pair closed at does
-/// (its <c>c5227118</c>).
+/// gathering the contacts each step sends, so a contact is read on the step that made it.
 /// </remarks>
 [Collection("engine")]
 public sealed class BodyContactTests

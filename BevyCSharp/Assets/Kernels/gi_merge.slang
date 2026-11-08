@@ -11,8 +11,6 @@
 // point of this probe's ray nearest where its own ray along the way met a surface the frame before
 // (its reach), and not along the same way, so a probe above standing elsewhere lends the light of
 // what this ray would meet and not of what it sees from where it stands, the merge's parallax.
-//
-// Taken from 3DEngine's gi_merge.slang.
 import bcs_field;
 import bcs_gi;
 

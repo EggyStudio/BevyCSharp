@@ -416,7 +416,8 @@ def main():
     for node in gltf.get('nodes', []):
         node.pop('camera', None)
 
-    # Lights out where asked, as Sponza's are, every one of them at an intensity of nothing.
+    # Lights out where asked, for a scene whose punctual lights are all at an intensity of nothing,
+    # so the frame spends nothing on lights that light nothing.
     if args.no_lights:
         for holder in [gltf] + gltf.get('nodes', []):
             extensions = holder.get('extensions', {})

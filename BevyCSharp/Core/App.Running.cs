@@ -139,10 +139,10 @@ public sealed unsafe partial class App : IDisposable
 
     /// <summary>Handles an exception that escaped a system, per <see cref="Config"/>.</summary>
     /// <remarks>
-    /// A system that throws in every frame wrote its whole trace sixty times a second, into a
+    /// A system that throws in every frame would write its whole trace sixty times a second, into a
     /// player's log as into a test's, so the first of each type a system throws is logged whole, and
     /// after it a line at the 10th, the 100th, the 1,000th and so on, and how many in all as the run
-    /// ends, as 3DEngine's schedule does.
+    /// ends.
     /// </remarks>
     internal void OnSystemException(SystemDescriptor descriptor, Exception exception)
     {

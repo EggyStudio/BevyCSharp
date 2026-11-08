@@ -3,7 +3,7 @@ namespace Bevy;
 // The operations that change which vertices and faces there are, rather than where they are.
 public sealed partial class EditMesh
 {
-    /// <summary>The angle a face is smoothed across when <see cref="Shade"/> names none, thirty degrees, as Blender's is.</summary>
+    /// <summary>The angle a face is smoothed across when <see cref="Shade"/> names none, thirty degrees, so a cylinder of twelve sides or more is round and a box's corners stay sharp.</summary>
     public const float DefaultSmoothAngle = 30f;
 
     // How many recipes a join is reading inside one another, so a model that joins itself is

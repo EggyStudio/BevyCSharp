@@ -14,9 +14,8 @@ namespace BevyCSharp.Editor.Framework;
 /// <para>
 /// The scene view's camera is the editor's, not the game's, so what it looks like is a working
 /// preference rather than part of the scene, and it is set here rather than on a component in the
-/// world list, where it is not listed. Unity's scene view keeps the same things behind a button in
-/// its toolbar, the field of view and the clip planes, how fast the camera flies and how it eases,
-/// and whether the view shows the scene's effects.
+/// world list, where it is not listed. The card holds the field of view and the clip planes, how
+/// fast the camera flies and how it eases, and whether the view shows the scene's effects.
 /// </para>
 /// <para>
 /// The look is the editor's own plain one unless it is overridden, since a view to work in needs

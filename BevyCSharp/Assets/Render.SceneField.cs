@@ -11,18 +11,17 @@ public static partial class Render
     /// <remarks>
     /// <para>
     /// The field holds how far each cell of a cascade is from the nearest surface of the meshes
-    /// drawn that cast shadows, below zero inside a mesh that culls its back faces, which is the
-    /// first of the three parts 3DEngine's global illumination is built from, and what a shader
-    /// tracing a ray through the scene steps through. Each cascade is 64 cells a side, twice as
-    /// coarse and as wide as the one before, so the default cells of a quarter of a unit reach 16
-    /// units across in the first and 128 in the fourth. A distance is exact within four cells of a
-    /// surface and held at four beyond. A closed wall thinner than a cell is held half a cell thick
-    /// on either side of its middle, as a mesh drawn with both its faces is, so a ray between the
-    /// cells on either side of it still meets it. Each cell is painted the color of its nearest
-    /// surface, its material's base color times its vertices' colors, with the way that surface's
-    /// face looks, which global illumination reads a ray's hit by. A cascade takes 5 MB of the GPU's
-    /// memory, its distances, its colors and its faces with the still meshes' own beside them, apart
-    /// from the pool of the meshes' triangles.
+    /// drawn that cast shadows, below zero inside a mesh that culls its back faces, which a shader
+    /// tracing a ray through the scene steps through, global illumination's among them. Each cascade
+    /// is 64 cells a side, twice as coarse and as wide as the one before, so the default cells of a
+    /// quarter of a unit reach 16 units across in the first and 128 in the fourth. A distance is
+    /// exact within four cells of a surface and held at four beyond. A closed wall thinner than a
+    /// cell is held half a cell thick on either side of its middle, as a mesh drawn with both its
+    /// faces is, so a ray between the cells on either side of it still meets it. Each cell is
+    /// painted the color of its nearest surface, its material's base color times its vertices'
+    /// colors, with the way that surface's face looks, which global illumination reads a ray's hit
+    /// by. A cascade takes 5 MB of the GPU's memory, its distances, its colors and its faces with
+    /// the still meshes' own beside them, apart from the pool of the meshes' triangles.
     /// </para>
     /// <para>
     /// With <paramref name="farCascade"/> above nought a far cascade follows the counted ones, its
@@ -57,8 +56,9 @@ public static partial class Render
     /// <param name="budget">How many cascades are built again in one frame at most.</param>
     /// <param name="farCascade">How far ahead of the camera the far cascade reaches, in world units, or 0 for none.</param>
     /// <param name="triangleBudget">
-    /// How many triangles the builds splat a frame at most, a mesh at least, 32,768 by default, the
-    /// least power of two above the most 3DEngine's voxel game splats in a frame.
+    /// How many triangles the builds splat a frame at most, a mesh at least, 32,768 by default,
+    /// which holds a frame's ordinary builds whole and spreads a burst of streamed meshes over the
+    /// frames after.
     /// </param>
     /// <exception cref="InvalidOperationException">No app is running.</exception>
     /// <example>

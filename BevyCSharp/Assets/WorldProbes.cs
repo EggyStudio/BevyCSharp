@@ -7,7 +7,7 @@ namespace Bevy;
 /// <summary>
 /// Global illumination's world probes, cascades of light probes over the scene's distance field,
 /// traced, merged and gathered on the GPU each frame through the library's compute shaders
-/// (<see cref="Render.SetGlobalIllumination"/>), as 3DEngine's global illumination renderer does.
+/// (<see cref="Render.SetGlobalIllumination"/>).
 /// </summary>
 /// <remarks>
 /// <para>
@@ -111,7 +111,7 @@ internal static unsafe partial class WorldProbes
 
     /// <summary>
     /// The steps a glossy surface's reflection is traced through the picture's depth in, and how far
-    /// in world units, at a quality, as 3DEngine's ReflectionStepsAt.
+    /// in world units, at a quality.
     /// </summary>
     internal static (int Steps, float Reach) ReflectionStepsAt(GlobalIllumination quality) => quality switch
     {

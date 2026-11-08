@@ -3,15 +3,13 @@
 // distance field that say how much of it a point sees, which any Slang shader can import as
 // `bcs_glow` (GlowLights.cs on the managed side writes them).
 //
-// Taken from 3DEngine's glow.slang and the glow lights' sum of its gi.slang, the field read
-// through a texture and a sampler where 3DEngine reads it through a volume, and the lights in a
-// buffer of their own, counted in the fourth of `GiLights.counts`, where 3DEngine keeps them in its
-// lights' buffer. 3DEngine keeps its loops from unrolling, since unrolled, with each caller's copies
-// inlined apart, they made its model pass compile four times as long on lavapipe. Here a loop over a
-// small array is unrolled, so the array is indexed by constants, and a square is clipped an edge at
-// a time with no array of corners, since with the arrays indexed as the loops ran the closed form
-// alone took global illumination's pass from 0.19 ms to 2.9 at 1280 by 720 in a Cornell box with
-// one light on the development machine's GPU, and unrolled 0.29. The marches' loops stay rolled.
+// The field is read through a texture and a sampler, and the lights lie in a buffer of their own,
+// counted in the fourth of `GiLights.counts`. A loop over a small array is unrolled, so the array
+// is indexed by constants, and a square is clipped an edge at a time with no array of corners,
+// since with the arrays indexed as the loops ran the closed form alone took global illumination's
+// pass from 0.19 ms to 2.9 at 1280 by 720 in a Cornell box with one light, and unrolled 0.29. The
+// marches' loops stay rolled, since unrolled, with each caller's copies inlined apart, they
+// multiply the time a pass takes to compile.
 
 module bcs_glow;
 
@@ -173,14 +171,13 @@ public float3 glowLightPoint(GlowLight light, float3 x, float3 n)
 
 /// The light reaching a point x facing n from a glow light, unhidden, the light from each face of
 /// its box that x lies before, three at most, in closed form within four of the box's half
-/// diagonals, which a path-traced floor beside an emissive block reads to within 3% in 3DEngine from
-/// one block out to four, and past them each face's as points, its area by the two cosines over the
-/// square of its distance, the face cut along its longer side into pieces about as long as its
-/// shorter, and past eight of them the box as one point at its middle, each face it shows by its area
-/// and its cosine, where the error lies under the reach's own fade and a light costs a few sums, since
-/// forty dim emitters reaching six times as far as they did took global illumination's passes in a
-/// room of them from 2.4 ms to 4.5 at 1280 by 720 face by face. None where x lies on the light's own
-/// surface, as glowLightOn finds it within margin.
+/// diagonals, and past them each face's as points, its area by the two cosines over the square of its
+/// distance, the face cut along its longer side into pieces about as long as its shorter, and past
+/// eight of them the box as one point at its middle, each face it shows by its area and its cosine,
+/// where the error lies under the reach's own fade and a light costs a few sums, since forty dim
+/// emitters reaching six times as far as they did took global illumination's passes in a room of them
+/// from 2.4 ms to 4.5 at 1280 by 720 face by face. None where x lies on the light's own surface, as
+/// glowLightOn finds it within margin.
 public float3 glowLightIrradiance(GlowLight light, float3 x, float3 n, float margin)
 {
     float3 middle = light.middleAndReach.xyz;
@@ -235,10 +232,8 @@ public float3 glowLightIrradiance(GlowLight light, float3 x, float3 n, float mar
 /// texel of the window's glow light holds its share of and a pixel scales back up by its own, so the
 /// light falls away from the lamp at each pixel as it does. Its faces that emit taken as one patch
 /// of their surface at the box's distance from p, past which the light falls as the square, softened
-/// by the box's thinnest side, and by how far p's plane rises over the box. A strip of six hundredths
-/// of a block thick read 3.4 to 4% further from its reference in 3DEngine with each pixel's own light
-/// in place of this, softened by the box's whole size 3.4 to 3.5%, and with this 1.7 to 2%. None
-/// where p lies on the light's own surface, as glowLightIrradiance gives.
+/// by the box's thinnest side, and by how far p's plane rises over the box. None where p lies on the
+/// light's own surface, as glowLightIrradiance gives.
 public float3 glowLightRough(GlowLight light, float3 p, float3 n, float margin)
 {
     if (glowLightOn(light, p, n, margin))
@@ -352,9 +347,8 @@ public bool glowLightPassed(GlowLight light, float3 p, float3 way, float within)
 // plane p lies on and the light's own box. Between two steps the way's nearest pass is found as a
 // sphere tracer's is, from the two distances. Inside a surface the share is half and less by how far
 // under its edge the way passes, read once after the march by stepping out along p's normal and
-// across the field's slope from the step that lay deepest inside, since read at each step it lost
-// the device on 3DEngine's development GPU. Where nothing stands nearer, or the field does not hold
-// p, all of it.
+// across the field's slope from the step that lay deepest inside, since read at each step the march
+// can lose the device. Where nothing stands nearer, or the field does not hold p, all of it.
 float glowMarch(Texture3D<float> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell, float3 target,
     float radius, float lift)
 {
@@ -403,7 +397,7 @@ float glowMarch(Texture3D<float> field, SamplerState linear, FieldInfo info, Glo
             else
             {
                 // It ends by its own condition, `t` set to its end, since left by a break there the
-                // march lost the device on 3DEngine's development GPU.
+                // march can lose the device.
                 seen = min(seen, saturate(0.5 + 0.5 * d / cone));
                 if (seen <= 0.0)
                     t = end;
@@ -484,9 +478,8 @@ public float glowLightSeen(Texture3D<float> field, SamplerState linear, FieldInf
 /// by each face of its box p lies before, two or three, halved across the face's axis that rises
 /// most from p's surface, and a march from a tenth of a cell off the surface to the middle of each
 /// half, the cone the half's own rise, each half's share by its own light at p. Past a wall half as
-/// high as a lamp beside it the floor read a path-traced reference to within a tenth of its light in
-/// 3DEngine, where one march to the box's middle found the lamp hidden from the whole floor past the
-/// wall. Where the field does not hold p, all of it.
+/// high as a lamp beside it, one march to the box's middle would find the lamp hidden from the whole
+/// floor past the wall, which sees the lamp's upper half. Where the field does not hold p, all of it.
 public float glowLightShown(Texture3D<float> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
 {
     if (cell <= 0.0)

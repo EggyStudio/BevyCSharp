@@ -8,8 +8,8 @@ namespace BevyCSharp.Editor.Behaviors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The controls follow Unity's scene view, because that is the arrangement most people already
-/// have in their hands:
+/// The camera looks and steers only while the right button is held, so W, A, S and D move it then
+/// and are free for the window's other keys the rest of the time:
 /// </para>
 /// <list type="bullet">
 /// <item>Hold the right button to look around, and steer with W, A, S, D while it is held. Q lowers

@@ -23,8 +23,7 @@ any repeat. It ends the log between two marking lines, and is written to TestRes
 job's summary, with each cause, whole, an error annotation. What the processes print goes to
 TestResults/output*.txt. It exits 0 when every test passed and no process was lost.
 
-This is 3DEngine's build/test.py, its parts here the three processes from the start, as NORM.md's
-N 6.7 and N 6.8 have it.
+Its parts are the three processes from the start, as NORM.md's N 6.7 and N 6.8 have it.
 """
 
 import argparse
@@ -269,8 +268,8 @@ def parts_of(names, held_to=None):
     """
     The suite in parts, each a run of its test classes in order holding PART_SIZE tests or more, and
     a last part for whatever no other part names. The tests here share one namespace, so a class is
-    the unit a part is made of, as a namespace is in 3DEngine's. A filter the run was given holds
-    every part to it, so a part runs the tests of its classes the filter takes and no others.
+    the unit a part is made of. A filter the run was given holds every part to it, so a part runs
+    the tests of its classes the filter takes and no others.
     """
     counts = Counter(segment(name) for name in names if segment(name))
     parts, current, held = [], [], 0

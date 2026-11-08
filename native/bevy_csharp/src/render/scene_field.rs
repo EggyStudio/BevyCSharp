@@ -3,9 +3,9 @@
 //! and emission, whether it has an inside and its bounds in its own space, the camera the field
 //! lies around, and a pool of the meshes' triangles in one shader buffer.
 //!
-//! The managed side works out which cascades to build and from which meshes, as 3DEngine's
-//! `SceneFieldPlan` does, and runs the field's compute shaders over this pool, so the bridge holds
-//! only what it alone can read, the meshes' data and the entities drawing them.
+//! The managed side works out which cascades to build and from which meshes (`SceneFieldPlan`), and
+//! runs the field's compute shaders over this pool, so the bridge holds only what it alone can
+//! read, the meshes' data and the entities drawing them.
 //!
 //! A mesh is a number the bridge gives it the first time it is gathered, with a generation that
 //! moves on each time Bevy says its data changed, so a mesh written again in place is another mesh

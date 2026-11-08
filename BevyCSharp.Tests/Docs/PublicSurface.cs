@@ -11,10 +11,6 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Taken from 3DEngine's of the same name (its <c>fc5aef49</c>), since what a signature is does not
-/// differ between the two engines.
-/// </para>
-/// <para>
 /// A type is a line of its own, with what it derives from, and its members follow it indented,
 /// each with the modifiers, types, names and default values a caller depends on. Types are named
 /// without their namespace inside a signature, since the header line names it once. Protected

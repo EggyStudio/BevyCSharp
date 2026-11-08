@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 // The screen probes' tile, the same up to a picture of 1080 rows and growing with its height past
-// that, as 3DEngine's TileAt grows it.
+// that, so a taller picture holds as many probes down as one of 1080 rows, at the same cost.
 public sealed partial class GlobalIlluminationTests
 {
     /// <summary>

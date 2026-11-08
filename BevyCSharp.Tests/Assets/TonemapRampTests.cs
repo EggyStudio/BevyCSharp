@@ -7,8 +7,7 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// SHARED.md's ramp drawn through each of Bevy's eight tonemappers and held to the picture kept for
-/// it under <c>BevyCSharp.Tests/references/tonemapping</c>, which 3DEngine's tonemappers are held
-/// to as well.
+/// it under <c>BevyCSharp.Tests/references/tonemapping</c>.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -23,7 +22,7 @@ namespace Bevy.Tests;
 /// <c>BCS_WRITE_TONEMAP_REFERENCES</c> set, once Bevy or the bridge changes what a tonemapper draws
 /// and the change is meant. Otherwise each is held to its reference within two levels of 255 for a
 /// tonemapper worked out by a formula and four for the three Bevy draws through lookup tables,
-/// which a GPU filters with a precision of its own, as 3DEngine holds its pictures to them.
+/// which a GPU filters with a precision of its own.
 /// </para>
 /// </remarks>
 [Collection("engine")]

@@ -11,7 +11,7 @@ namespace Bevy;
 // frames' times under the first lines, an image drawn again every frame while it shows.
 public static unsafe partial class Debug
 {
-    /// <summary>The frames the strip holds, four seconds at sixty a second, as Minecraft's graph holds.</summary>
+    /// <summary>The frames the strip holds, four seconds at sixty a second, so a hitch stays in view for a few seconds after it.</summary>
     internal const int StripFrames = 240;
 
     /// <summary>The strip's height in pixels, a bar's pixel for each millisecond and a bit.</summary>
@@ -131,11 +131,11 @@ public static unsafe partial class Debug
 
     /// <summary>
     /// The key let go alone, which shows or hides the overlay, or with Shift the profiler, showing
-    /// the overlay with it, as Minecraft's Shift+F3 opens its debug screen with the profiler's chart.
+    /// the overlay with it.
     /// </summary>
     /// <remarks>
     /// The key alone hides the profiler with the overlay, so the overlay shown again by it alone
-    /// comes back without it, as Minecraft's does.
+    /// comes back without it.
     /// </remarks>
     private static void Turn(bool shift)
     {
@@ -242,8 +242,8 @@ public static unsafe partial class Debug
 
         if (counted && scene.Camera != 0)
         {
-            // Minecraft's north is minus Z, as this engine's forward is, and the heading turns from it
-            // toward plus X, east.
+            // North is minus Z, this engine's forward, and the heading turns from it toward plus X,
+            // east.
             // The pitch rounded to a tenth and added to zero, so a level view reads 0.0 and not -0.0.
             var heading = (MathF.Atan2(scene.ForwardX, -scene.ForwardZ) * 180f / MathF.PI + 360f) % 360f;
             var pitch = MathF.Round(MathF.Asin(Math.Clamp(scene.ForwardY, -1f, 1f)) * 180f / MathF.PI, 1) + 0f;
@@ -467,7 +467,8 @@ public static unsafe partial class Debug
     {
         while (lines.Count < says.Count)
         {
-            // Minecraft's look, light gray text on a backing of black at half.
+            // Light gray text on a backing of black at half, so a line reads over a bright scene and
+            // a dark one alike.
             var backing = Ui.SpawnNode(new UiSettings { Color = (0f, 0f, 0f, 0.5f), Padding = new Sides(Length.Px(3f), Length.Px(1f), Length.Px(3f), Length.Px(0f)) });
             var text = Ui.SpawnText("", new UiSettings { Color = (0.88f, 0.88f, 0.88f, 1f) }, 15f);
             ecs.SetParent(text, backing);
@@ -562,7 +563,7 @@ public static unsafe partial class Debug
     internal static string Compass(float heading) =>
         new[] { "north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest" }[(int)MathF.Round(heading / 45f) % 8];
 
-    /// <summary>The axis and its sign a heading faces nearest along the ground, as Minecraft names it.</summary>
+    /// <summary>The axis and its sign a heading faces nearest along the ground, as the coordinate that moves most as the camera moves ahead and the way it moves.</summary>
     private static string Towards(float x, float z) =>
         MathF.Abs(x) > MathF.Abs(z) ? (x > 0f ? "positive X" : "negative X") : (z > 0f ? "positive Z" : "negative Z");
 

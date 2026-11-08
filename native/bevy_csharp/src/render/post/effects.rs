@@ -86,9 +86,9 @@ pub unsafe extern "C" fn bcs_render_set_grading(
 /// Sets the exposure a camera meters the scene at, in EV-100.
 ///
 /// The number a photographer would set, and the base an auto exposure pass corrects rather than an
-/// alternative to it. Bevy's own default matches what a Blender scene assumes; sunlight is around
-/// 15, an overcast day around 12 and an interior around 7, so a scene lit in physical units and
-/// metered wrongly is far too bright or far too dark rather than subtly off.
+/// alternative to it. Bevy's own default is 9.7. Sunlight is around 15, an overcast day around 12
+/// and an interior around 7, so a scene lit in physical units and metered wrongly is far too bright
+/// or far too dark rather than subtly off.
 ///
 /// # Safety
 /// `camera` must be a live camera entity.

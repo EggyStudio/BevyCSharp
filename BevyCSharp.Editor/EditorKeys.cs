@@ -90,13 +90,14 @@ public partial struct EditorKeys
         // programs.
         if (input.KeyPressed(Key.Delete)) Run(ctx, "Entity/Delete");
 
-        // Where Godot, Visual Studio and most engines put running the game.
+        // The key most editors and IDEs run a program with.
         if (input.KeyPressed(Key.F5)) Run(ctx, "Project/Play");
 
-        // Godot's key for adding a node, which is the editor this window is modeled on.
+        // A for add. Nothing in the editor selects everything, so the key is free for this while
+        // nothing is being typed.
         if (control && input.KeyPressed(Key.A)) Run(ctx, "Entity/Add");
 
-        // The key Godot, Unity and Unreal all duplicate with.
+        // D for duplicate, the key most editors duplicate with.
         if (control && input.KeyPressed(Key.D)) Run(ctx, "Entity/Duplicate");
 
         // The menu, which is otherwise only reachable through a button on a panel that can be

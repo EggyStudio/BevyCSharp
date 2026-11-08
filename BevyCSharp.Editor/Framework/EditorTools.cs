@@ -53,9 +53,10 @@ public enum ToolPivot
 /// keys change it. A tool is a mode of the viewport rather than a mode of any panel.
 /// </para>
 /// <para>
-/// The keys are Unity's, Q, W, E, R along the top row of the keyboard, in the order a hand finds
-/// them. Q and E do something else while the right button is held, because that is the camera
-/// flying and a person flying is not choosing a tool.
+/// The keys are Q, W, E and R, side by side along the top row in the tools' order, under the left
+/// hand where it rests to fly the camera, so a tool is chosen without looking. Q and E do something
+/// else while the right button is held, because that is the camera flying and a person flying is
+/// not choosing a tool.
 /// </para>
 /// </remarks>
 public static class EditorTools

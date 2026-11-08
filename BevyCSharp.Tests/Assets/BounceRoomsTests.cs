@@ -4,8 +4,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// 3DEngine's bounce rooms at each quality of global illumination against references path-traced
-/// through the GPU's rays (<c>gi_reference.slang</c>), each view's picture held within its measured
+/// The bounce rooms at each quality of global illumination against references path-traced through
+/// the GPU's rays (<c>gi_reference.slang</c>), each view's picture held within its measured
 /// distance from its reference, and a lit room's floor within the bound of its own.
 /// </summary>
 /// <remarks>
@@ -33,12 +33,12 @@ public sealed class BounceRoomsTests
 
     /// <summary>
     /// Each view at each quality with the screen probes traced and left unread, the world's probes
-    /// and each pixel's march to the glow lights alone as before the screen probes came, the method's
-    /// own guard, bound 15% over what it read on the development machine's GPU, as 3DEngine bounds its
-    /// own, so a mend that widens no view keeps every bound and one that narrows a view is held to it
-    /// by measuring again. Left out, the probes stand for the glow lights alone where any is lit, as
-    /// in every view here, whose texels half the picture's size are two pixels wide at 160 by 90 and
-    /// read the glowing blocks' room 0.06 to 0.07 from its reference where marched at each pixel 0.05.
+    /// and each pixel's march to the glow lights alone as before the screen probes came, the
+    /// method's own guard, bound 15% over what it read on the development machine's GPU, so a mend
+    /// that widens no view keeps every bound and one that narrows a view is held to it by measuring
+    /// again. Left out, the probes stand for the glow lights alone where any is lit, as in every
+    /// view here, whose texels half the picture's size are two pixels wide at 160 by 90 and read
+    /// the emissive blocks' room 0.06 to 0.07 from its reference where marched at each pixel 0.05.
     /// </summary>
     /// <remarks>
     /// The references' paths are lit at every face as Bevy's lighting lights it and scatter there
@@ -48,11 +48,9 @@ public sealed class BounceRoomsTests
     /// views read 0.09 to 0.10 of their light from their references in the Cornell box, 0.05 in the
     /// thin room, 0.35 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls,
     /// 0.20 to 0.21 in the strip's, 0.05 to 0.07 on the grazing floor, 0.08 in the carried lamp's
-    /// and 0.07 around the emitting blocks, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24,
-    /// 0.27 to 0.30, 0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06 against its own.
-    /// Before the emitters' light was carried, the Cornell box read 0.11, the strip's 1.00 and the
-    /// blocks' 0.30. The strip is thinner than a pixel at 160 by 90, so the picture shows none of
-    /// it where the reference's paths across each pixel meet it.
+    /// and 0.07 around the emitting blocks. Before the emitters' light was carried, the Cornell box
+    /// read 0.11, the strip's 1.00 and the blocks' 0.30. The strip is thinner than a pixel at 160 by
+    /// 90, so the picture shows none of it where the reference's paths across each pixel meet it.
     /// <para>
     /// The grazing floor read 0.05 to 0.07 and the carried lamp's room 0.06 while each bounce came
     /// back about 5% over, the hits and the pixels reading the probes' faces where the probes
@@ -299,11 +297,11 @@ public sealed class BounceRoomsTests
     }
 
     /// <summary>
-    /// 3DEngine's bounce rooms, each a view of a way light bounces that global illumination is
-    /// measured by, in turn the Cornell box, a room of thin walls with a bright lamp outside, a
-    /// corridor open at one end, a room lit through a window, red walls at three distances from white
-    /// blocks in the sun, a room with a glowing strip, a large room's floor seen at a grazing angle, a
-    /// room with a carried lamp, and a dim room lit by glowing blocks alone.
+    /// The bounce rooms, each a view of a way light bounces that global illumination is measured
+    /// by, in turn the Cornell box, a room of thin walls with a bright lamp outside, a corridor
+    /// open at one end, a room lit through a window, red walls at three distances from white blocks
+    /// in the sun, a room with an emissive strip, a large room's floor seen at a grazing angle, a
+    /// room with a carried lamp, and a dim room lit by emissive blocks alone.
     /// </summary>
     private static class Rooms
     {
@@ -428,8 +426,9 @@ public sealed class BounceRoomsTests
             ecs.SetName(box, name);
         }
 
-        // A material of an sRGB color, rough as 3DEngine's are by default, glowing at a multiple of
-        // white where an emission is given.
+        // A material of an sRGB color at a roughness of a half, as the rooms' materials are in
+        // 3DEngine, whose bound the views with the screen probes are held to, and emissive at a
+        // multiple of white where an emission is given.
         private static AssetHandle Material(EcsWorld ecs, (int R, int G, int B) color, (int R, int G, int B)? emission = null, float intensity = 0f)
         {
             var (r, g, b) = Linear(color);

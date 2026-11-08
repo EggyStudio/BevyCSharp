@@ -1,8 +1,7 @@
 namespace Bevy;
 
-// The operations that join faces or close the space between them, bridging two loops with a band
-// of faces, filling a hole with one face and dissolving faces into one, as Blender's bridge edge
-// loops, fill and dissolve do.
+// The operations that join faces or close the space between them, bridging two loops with a band of
+// faces, filling a hole with one face and dissolving faces into one.
 public sealed partial class EditMesh
 {
     /// <summary>Takes away the two selected faces, or two regions of them, and joins their rims with a band of four sided faces.</summary>

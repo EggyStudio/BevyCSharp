@@ -1,5 +1,5 @@
 // A path-traced reference of the camera's picture, which global illumination is measured against,
-// 3DEngine's gi_reference.slang over a ray scene of the meshes the camera draws.
+// traced over a ray scene of the meshes the camera draws.
 //
 // From each pixel it traces paths through the ray scene (`Shaders.CreateRayScene`), each face a
 // path meets its material's base color, from the material buffer the engine fills, and its emissive

@@ -6,8 +6,8 @@ namespace Bevy.Tests;
 
 /// <summary>Covers bodies on collision layers, which pairs collide and which pass through, and what contacts, sensors, characters and rays follow.</summary>
 /// <remarks>
-/// Each steps a <see cref="PhysicsWorld"/> of its own by hand at sixty steps a second, with 3DEngine's
-/// own cases for layers (its <c>8520dbe1</c>), a body made from components synced before each step.
+/// Each steps a <see cref="PhysicsWorld"/> of its own by hand at sixty steps a second, a body made
+/// from components synced before each step.
 /// </remarks>
 [Collection("engine")]
 public sealed class LayerTests

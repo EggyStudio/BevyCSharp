@@ -326,10 +326,10 @@ internal static class EditorDrawn
     /// <para>
     /// Bevy spawns a glTF mesh as an entity for the node and a child for each of its primitives,
     /// each drawn with its own mesh and material and named after them, so a model whose hull and
-    /// glass are one mesh in the modeling tool is two entities here. Selecting the node showed
-    /// nothing drawn, and changing the glass meant finding the right child in the hierarchy. This
-    /// lists the children that are drawn, a material row each under the child's name, as a
-    /// renderer with several materials lists them in Unity.
+    /// glass are one mesh in the modeling tool is two entities here. The node draws nothing itself,
+    /// and the glass's material is on a child further down the hierarchy, so this lists the
+    /// children that are drawn, a material row each under the child's name, and every material of
+    /// the model is changed from the node.
     /// </para>
     /// <para>
     /// The material differs from part to part, so it is the row. A part's mesh and its card

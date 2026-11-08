@@ -10,27 +10,25 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// SHARED.md's row on an app's whole life, which 3DEngine's <c>AppLeakTests</c> holds (its
-/// <c>c06ec659</c>), where every app read the runtime's assemblies for a script compiler and held
-/// them in native memory until a full collection came. Resident memory is read before any
-/// collection, since memory a closed app gives back only to a finalizer is held until one comes,
-/// and the heap after one. The first twenty warm what stays for the process, the pools and the
-/// threads, which the next eighty should not add to.
+/// SHARED.md's row on an app's whole life. An app that reads the runtime's assemblies for a script
+/// compiler can hold them in native memory until a full collection comes. Resident memory is read
+/// before any collection, since memory a closed app gives back only to a finalizer is held until
+/// one comes, and the heap after one. The first twenty warm what stays for the process, the pools
+/// and the threads, which the next eighty should not add to.
 /// </para>
 /// <para>
 /// The heap is read after every tenth app as the bytes the last full blocking collection kept, its
 /// live objects, and judged by how far its floor rose, the least reading from the seventieth app to
-/// the hundredth against the greater of the twentieth's and the thirtieth's, as 3DEngine's resident
-/// memory is judged from the greatest of its early readings. <see cref="GC.GetTotalMemory"/> counts
-/// with the live objects what a collection left on the heap where it did not compact, which on
-/// macOS rose and fell back by several megabytes every few dozen apps. On the macOS suite of
-/// <c>5f051299</c>, build run 39547498414, it read 101.10 and 103.34 MB at the twentieth app and the
-/// thirtieth, fell to 90.84 at the fortieth and climbed back 2 MB every ten apps, while its census
-/// found 0.3 MB more alive, and on <c>7e35f94b</c>'s, build run 41097236243, it climbed 1.5 MB every
-/// ten apps from 108.33 at the twentieth to 119.07 at the hundredth with no trough between, its
-/// floor rising 5.9 while its census found 0.4 MB more alive, as 3DEngine's test found it swing (its
-/// <c>1398ed24</c>). A leak of an eighth of a megabyte an app still fails, over the forty apps from
-/// the thirtieth to the seventieth.
+/// the hundredth against the greater of the twentieth's and the thirtieth's, so a heap that swings
+/// is judged against the top of its early swing. <see cref="GC.GetTotalMemory"/> counts with the
+/// live objects what a collection left on the heap where it did not compact, which on macOS rose
+/// and fell back by several megabytes every few dozen apps. On the macOS suite of <c>5f051299</c>,
+/// build run 39547498414, it read 101.10 and 103.34 MB at the twentieth app and the thirtieth, fell
+/// to 90.84 at the fortieth and climbed back 2 MB every ten apps, while its census found 0.3 MB
+/// more alive, and on <c>7e35f94b</c>'s, build run 41097236243, it climbed 1.5 MB every ten apps
+/// from 108.33 at the twentieth to 119.07 at the hundredth with no trough between, its floor rising
+/// 5.9 while its census found 0.4 MB more alive. A leak of an eighth of a megabyte an app still
+/// fails, over the forty apps from the thirtieth to the seventieth.
 /// </para>
 /// <para>
 /// Where <c>BCS_GCDUMP</c> names <c>dotnet-gcdump</c>, as the macOS job has it, the heap's types are

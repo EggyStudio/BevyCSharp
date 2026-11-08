@@ -10,9 +10,6 @@ namespace Bevy.Tests;
 /// so the page cannot show code the build does not. The README's first program is held the same
 /// way to the game its template makes, <c>templates/content/game</c>.
 /// </summary>
-/// <remarks>
-/// Taken from 3DEngine's test of its own first game (its <c>d5d2578d</c>).
-/// </remarks>
 public sealed partial class FirstGameTests
 {
     private static string Root => CheatsheetTests.RepositoryRoot();

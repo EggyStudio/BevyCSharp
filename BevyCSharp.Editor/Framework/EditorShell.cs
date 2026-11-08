@@ -9,10 +9,10 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The scene fills the window and the panels float over it, spaced from the window's edges and
-/// from each other, the way Unity's editor arranges itself. A button on the panel docks it, and
-/// then the margins go, the panel meets the window's edge, and the camera is told to draw into what
-/// is left rather than behind it.
+/// The scene fills the window and the panels float over it, spaced from the window's edges and from
+/// each other, so the scene shows around and between them. A button on the panel docks it, and then
+/// the margins go, the panel meets the window's edge, and the camera is told to draw into what is
+/// left rather than behind it.
 /// </para>
 /// <para>
 /// Everything here is worked out from three numbers a person can change (whether it is docked, how

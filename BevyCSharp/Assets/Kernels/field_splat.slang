@@ -22,11 +22,9 @@
 // its vertices' colors blended at the cell's nearest point, as a material blends them across a face.
 // A third lends the light of an emitter thinner than a cell to the cells near it.
 //
-// Taken from 3DEngine's field_splat.slang, the dispatch that paints again the cells of a mesh whose
-// colors were written left out. Its values are named globals where 3DEngine pushes constants, the
-// codes are kept through Slang's Atomic<uint>, which compiles to WGSL's atomics where InterlockedMin
-// does not, and the emission is kept as four floats a cell where 3DEngine packs it in halves, by an
-// instruction of SPIR-V's alone.
+// The codes are kept through Slang's Atomic<uint>, which compiles to WGSL's atomics where
+// InterlockedMin does not, and the emission is kept as four floats a cell, since the instruction
+// that packs it in halves is SPIR-V's alone.
 import bcs_field;
 
 struct FieldInstance
@@ -368,13 +366,12 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
             cells[index].min(code);
             // Straight behind, its nearest point inside the face and not on an edge, as a wall's
             // far face lies behind a cell by its near one, where a cell beside a box's edge lies 45
-            // degrees behind the face round it. Taken within 25 degrees, as 3DEngine's splat takes
-            // it, a wall thinner than a cell standing on a floor had its bottom face, buried
-            // against the floor's top, nearer the cells along its foot than its far face, its edge
-            // 22 degrees off straight back from them, so the resolve found no face behind them
-            // looking against the one before, held none of them, and a probe's ray passed under the
-            // wall, a lamp outside a closed room of walls 0.3 thick in cells of 0.5 lighting its
-            // faces inside 0.03 to 0.04 where no light reaches them.
+            // degrees behind the face round it. Taken within 25 degrees, a wall thinner than a cell
+            // standing on a floor had its bottom face, buried against the floor's top, nearer the cells
+            // along its foot than its far face, its edge 22 degrees off straight back from them, so the
+            // resolve found no face behind them looking against the one before, held none of them, and
+            // a probe's ray passed under the wall, a lamp outside a closed room of walls 0.3 thick in
+            // cells of 0.5 lighting its faces inside 0.03 to 0.04 where no light reaches them.
             if (front == 0u && dot(p - q, face) < -0.999 * d * faceLength)
                 behind[index].min((uint(d / cell * 1024.0) << 8) | way);
         }

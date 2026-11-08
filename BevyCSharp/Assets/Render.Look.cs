@@ -53,9 +53,9 @@ public static partial class Render
         if (!numbers.All(float.IsFinite))
             throw new ArgumentOutOfRangeException(nameof(look), "A setting of the look is not a number.");
 
-        // Held where the curves are defined, as 3DEngine holds them, the curve's own numbers off
-        // zero so its powers and its white stay finite. A camera whose look is on keeps its pass,
-        // and only the numbers move, so a look changed every frame costs the values alone.
+        // Held where the curves are defined, the curve's own numbers off zero so its powers and its
+        // white stay finite. A camera whose look is on keeps its pass, and only the numbers move, so
+        // a look changed every frame costs the values alone.
         var on = Looks.IsOn(camera);
         var pass = Looks.PassFor(camera, look);
         pass.Set("curve", new Vector4(look.Curve == LookCurve.Numbered ? 1f : 0f, Math.Max(0f, look.Exposure),

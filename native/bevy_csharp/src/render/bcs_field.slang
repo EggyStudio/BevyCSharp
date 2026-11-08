@@ -8,9 +8,6 @@
 // They lie one after another along z in one 3D image of half floats, so a shader binds the field
 // once, with a buffer holding one `FieldInfo` that says where each cascade lies, and a cascade not
 // yet built has a cell width of zero and is passed over (see `Render.SetSceneField`).
-//
-// Taken from 3DEngine's `scenefield.slang`, its names written as this bridge's modules write
-// theirs.
 
 module bcs_field;
 
@@ -246,9 +243,8 @@ public float3 surfaceGlow(Texture3D<float4> glow, Texture3D<float4> albedo, Samp
 /// each kept only where the face whose color it holds, as `faces` keeps its way (`faceWay`), looks
 /// the hit's way, within 60 degrees of `n`, or `surfaceAlbedo`'s blend where none of them does, as
 /// at a thin edge, so the hit is not left dark. A cell on a corner's diagonal lies as far from
-/// either wall and holds whichever painted it, so in 3DEngine a red wall's hit within a cell of the
-/// white wall it meets blended the white in and sent on twice the light a path-traced reference
-/// reads.
+/// either wall and holds whichever painted it, so a red wall's hit within a cell of the white wall
+/// it meets would blend the white in and send on light the red wall does not reflect.
 public float3 surfaceAlbedoFacing(Texture3D<uint> faces, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p, float3 n)
 {
     float3 gloss;
@@ -293,9 +289,8 @@ public float3 surfaceFacing(Texture3D<uint> faces, Texture3D<float4> albedo, Sam
 /// light pass a unit of its depth (`MaterialSettings.LightThrough`), its color painted times it, 1
 /// for a solid surface down to a half for one that lets all of it through, so a reader that divides
 /// a blend of the colors by their alphas takes the colors back and weighs such a cell less, and one
-/// that reads a cell as it is takes the share back (`lightThroughOf`), as 3DEngine's field paints it.
-/// Its byte is even below a solid's, the lowest bit kept for a crown's leaf cards
-/// (`lightThroughCards`).
+/// that reads a cell as it is takes the share back (`lightThroughOf`). Its byte is even below a
+/// solid's, the lowest bit kept for a crown's leaf cards (`lightThroughCards`).
 public float lightThroughPaint(float through)
 {
     uint painted = uint((1.0 - 0.5 * saturate(through)) * 255.0 + 0.5);

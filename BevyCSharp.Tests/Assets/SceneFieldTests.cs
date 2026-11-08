@@ -7,10 +7,10 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The scene's distance field, where its cascades lie and what each frame builds and stamps, on the
-/// CPU as 3DEngine's tests hold its plan, and the distances the GPU builds read back against the
-/// meshes they were built from, a box's at every cell, a tunnel one cell wide, a moving box's stamp
-/// and the budget a frame keeps to.
+/// The scene's distance field, where its cascades lie and what each frame builds and stamps, read
+/// from its plan on the CPU, and the distances the GPU builds read back against the meshes they
+/// were built from, a box's at every cell, a tunnel one cell wide, a moving box's stamp and the
+/// budget a frame keeps to.
 /// </summary>
 [Collection("engine")]
 public sealed partial class SceneFieldTests

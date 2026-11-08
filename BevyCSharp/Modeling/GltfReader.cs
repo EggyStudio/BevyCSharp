@@ -12,9 +12,9 @@ namespace Bevy;
 /// <para>
 /// The default scene's nodes are walked down from the root, each node's transform, a matrix or a
 /// translation, rotation and scale, put on its children's, and every primitive of every node's
-/// mesh read in the space of the scene, so a model of parts placed in Blender comes in as it was
-/// placed. Triangles, strips and fans are read, and points and lines are left, since they make no
-/// faces.
+/// mesh read in the space of the scene, so a model of parts placed in a modeling program comes in
+/// as it was placed. Triangles, strips and fans are read, and points and lines are left, since
+/// they make no faces.
 /// </para>
 /// <para>
 /// A material keeps its name and what of its look a slot takes, its color, metalness and roughness,

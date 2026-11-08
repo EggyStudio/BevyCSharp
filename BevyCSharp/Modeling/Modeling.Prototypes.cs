@@ -11,13 +11,11 @@ public static partial class Modeling
     /// material slots a level's faces are sorted into.
     /// </summary>
     /// <remarks>
-    /// After Unreal's level prototyping palette, a floor and a wall nearly white, a ceiling whiter
-    /// still and stairs, ramps and the parts that move the prototyping orange, with a door green, a
-    /// window blue and a hazard red, as sRGB colors, as the prototype textures of the engines of the
-    /// 2000s told a reader of a level what each surface was for. The floors and walls are near white
-    /// rather than Unreal's dark and middle grays, which read as dull and muddy under the sky, a wall
-    /// parting from the floor it stands on by the light on each. The same names in 3DEngine, whose
-    /// palette is this one but for its grayer floors, walls and ceilings.
+    /// A floor and a wall nearly white, a ceiling whiter still, and stairs, ramps and the moving
+    /// parts orange, with a door green, a window blue and a hazard red, as sRGB colors, so a reader
+    /// of a level tells what each surface is for by its color. The floors and walls are near white
+    /// rather than gray, which reads as dull under the sky, and a wall parts from the floor it
+    /// stands on by the light on each.
     /// </remarks>
     public static IReadOnlyDictionary<string, Color> PrototypeColors { get; } = new Dictionary<string, Color>(StringComparer.Ordinal)
     {

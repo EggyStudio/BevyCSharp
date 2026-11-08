@@ -1,9 +1,9 @@
 namespace Bevy;
 
 /// <summary>
-/// The engine's debug overlay, which F3 shows over every program as the newest Minecraft's shows
-/// over its world, the engine, the frame, the camera and the world in a column on the left and the
-/// system, the GPU, the display and the renderer in one on the right.
+/// The engine's debug overlay, which F3 shows over every program, the engine, the frame, the camera
+/// and the world in a column on the left and the system, the GPU, the display and the renderer in
+/// one on the right.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -2,9 +2,9 @@ using System.Numerics;
 
 namespace Bevy;
 
-// The cascades' builds under the budgets, 3DEngine's, a build of more triangles than a frame's budget
-// splatted over as many frames as it takes, nearest the eye first, and the still meshes that come and
-// go while it runs taken in.
+// The cascades' builds under the budgets, a build of more triangles than a frame's budget splatted
+// over as many frames as it takes, nearest the eye first, and the still meshes that come and go while
+// it runs taken in.
 internal sealed partial class SceneFieldPlan
 {
     // A cascade's build that runs over frames, its corner and reach, the still meshes left to splat

@@ -7,12 +7,11 @@ namespace Bevy.Tests;
 
 /// <summary>A script compiled a hundred times holds what it held after ten.</summary>
 /// <remarks>
-/// Each compilation read every assembly the process had loaded as a reference, and each reference
-/// holds its file's whole image in native memory that only its finalizer gives back, while the GC's
-/// heap stays small and a full collection comes late, so a host compiling on each save gathered
-/// them. 3DEngine's test job reached the runner's 16 GB that way (its <c>c06ec659</c>). The process's
-/// resident memory is read before any collection, as a program that allocates little on the heap
-/// would hold it.
+/// A reference holds its file's whole image in native memory that only its finalizer gives back,
+/// while the GC's heap stays small and a full collection comes late, so a host that read every
+/// loaded assembly again at each compilation would gather them with each save. The host reads each
+/// file once for the process, and the test holds it to that. The process's resident memory is read
+/// before any collection, as a program that allocates little on the heap would hold it.
 /// </remarks>
 [Collection("engine")]
 public sealed class ScriptCompilationMemoryTests(ITestOutputHelper output) : IDisposable

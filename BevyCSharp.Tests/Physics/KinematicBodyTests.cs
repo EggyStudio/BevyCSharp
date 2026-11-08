@@ -27,9 +27,9 @@ public sealed class KinematicBodyTests
     /// of frames of each length and of two lengths taking turns.
     /// </summary>
     /// <remarks>
-    /// Before the body followed its entity's speed, the crate rode at 1.795 at 144 frames a second,
-    /// 1.714 at 75, 2.129 at 60, 2.287 at 50 and 0.021 at 30, and at 0.078 and 0.835 over the two
-    /// uneven runs, as REVIEW.md's model of one dimension put it.
+    /// A body that did not follow its entity's speed would carry the crate at 1.795 at 144 frames a
+    /// second, 1.714 at 75, 2.129 at 60, 2.287 at 50 and 0.021 at 30, and at 0.078 and 0.835 over
+    /// the two uneven runs, by a model of the step in one dimension.
     /// </remarks>
     [Theory]
     [InlineData(144.0, 144.0)]

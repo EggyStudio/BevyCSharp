@@ -245,9 +245,9 @@ public sealed partial class PhysicsWorld
     /// entity's transform stay where they are. A ball does not stretch and keeps its size.
     /// </para>
     /// <para>
-    /// Room overhead across the head is looked for from inside the body before it grows, as
-    /// 3DEngine looks for it, and a height there is no room for is asked for again at the next
-    /// step, which is how a character crouched under a ledge stands once it is out.
+    /// Room overhead across the head is looked for from inside the body before it grows, and a
+    /// height there is no room for is asked for again at the next step, which is how a character
+    /// crouched under a ledge stands once it is out.
     /// </para>
     /// </remarks>
     private void Resize(Entity entity, float height)

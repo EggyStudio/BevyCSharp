@@ -9,8 +9,8 @@ the JSON envelope with the code and the sentence that exit code stands for, goin
 reads, as the Windows jobs' opening of the sample did for three runs (NORM.md, N 6.7). This reads
 the answer the step kept and says, as an error annotation and on the job's summary, the command,
 its exit code, the answer's code and sentence, and the last lines of the program's log, at the path
-the answer names or the one bcs keeps under build/sessions for the program named, as 3DEngine's
-drive-game.sh says a game that did not open. It exits with the command's exit code.
+the answer names or the one bcs keeps under build/sessions for the program named. It exits with the
+command's exit code.
 """
 
 import json

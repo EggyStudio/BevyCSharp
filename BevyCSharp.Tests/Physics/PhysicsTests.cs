@@ -148,7 +148,7 @@ public sealed class PhysicsTests
 
     /// <summary>
     /// A ray down through a sensor meets the floor under it, as a wheel's ray or a ground check
-    /// under a trigger volume has to, which 3DEngine found its rays did not.
+    /// under a trigger volume has to.
     /// </summary>
     [Fact]
     public void ARayPassesThroughASensorToTheFloorBelow()

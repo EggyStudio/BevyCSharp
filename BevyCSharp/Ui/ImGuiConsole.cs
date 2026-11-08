@@ -22,13 +22,13 @@ namespace Bevy;
 /// ImGuiRuntime.End();
 /// </code>
 /// <para>
-/// It lies along the top of the window, the way a game's console has since Quake, over a share of
-/// its height (<see cref="Height"/>). The up and down arrows walk back through what was typed, the
-/// tab key takes the command a half-typed name completes to, and the hint under the line says what
-/// the command takes. A command is run with the frame's world lent to it, so one that reads or
-/// changes an entity works as it does in the editor, and one whose answer waits on the GPU is
-/// answered in a later frame. While it is open the interface takes the keyboard, which a game's
-/// bindings read from <see cref="ImGuiRuntime.Typing"/>.
+/// It lies along the top of the window, over a share of its height (<see cref="Height"/>), so the
+/// scene stays in view below it. The up and down arrows walk back through what was typed, the tab
+/// key takes the command a half-typed name completes to, and the hint under the line says what the
+/// command takes. A command is run with the frame's world lent to it, so one that reads or changes
+/// an entity works as it does in the editor, and one whose answer waits on the GPU is answered in
+/// a later frame. While it is open the interface takes the keyboard, which a game's bindings read
+/// from <see cref="ImGuiRuntime.Typing"/>.
 /// </para>
 /// </remarks>
 public static unsafe class ImGuiConsole

@@ -7,7 +7,7 @@ using ImGuiNET;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// How the player moves, cycled with F3 held and F4, as Minecraft cycles its modes.
+/// How the player moves, cycled with F3 held and F4, since F4 alone opens the panel.
 /// </summary>
 public enum PlayerMode
 {
@@ -236,7 +236,8 @@ public partial struct Player
             body.Move = (wish * (input.KeyDown(Key.ControlLeft) ? FlySpeed * 2.5f : FlySpeed)) + new Vec3(0f, rise * FlySpeed, 0f);
             body.Height = 0f;
 
-            // Touching ground while sinking lands, as Minecraft's flight does.
+            // Touching ground while sinking lands, so coming down onto a floor ends the flight
+            // without a second double tap.
             if (body.Grounded && rise < 0f) body.Fly = false;
         }
         else

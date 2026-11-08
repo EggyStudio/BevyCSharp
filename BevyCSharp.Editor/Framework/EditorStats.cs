@@ -12,12 +12,11 @@ namespace BevyCSharp.Editor.Framework;
 /// </summary>
 /// <remarks>
 /// <para>
-/// The card every engine's viewport has, Unity's statistics and Unreal's <c>stat</c> readouts among
-/// them, because the question somebody tuning a scene asks most is whether it is fast enough and
-/// what it is spending its frame on. A graph of the last few seconds of frames comes first, since a
-/// hitch is a spike in a line and invisible in an average, and the numbers under it are the ones a
-/// person reads off such a card, frames a second, the frame in milliseconds at its best, typical
-/// and worst, and the render passes that took longest on the GPU.
+/// A card over the viewport, because the question somebody tuning a scene asks most is whether it
+/// is fast enough and what it is spending its frame on. A graph of the last few seconds of frames
+/// comes first, since a hitch is a spike in a line and invisible in an average, and the numbers
+/// under it are the ones a person reads off such a card, frames a second, the frame in milliseconds
+/// at its best, typical and worst, and the render passes that took longest on the GPU.
 /// </para>
 /// <para>
 /// Everything is read from what the engine already reports, and nothing is measured for the card's

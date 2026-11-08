@@ -1,8 +1,7 @@
 // A camera's look, the pass that turns its linear picture into the one the screen shows in the place
 // of Bevy's tonemapper (Render.SetLook). It multiplies the light by an exposure, brings light past
 // white under a curve, saturates and tints it in linear light, and sets its contrast about the
-// middle of what is shown once encoded, in the order 3DEngine's composite runs them, so a look set
-// here and there with the same numbers shows the same picture.
+// middle of what is shown once encoded, in that order.
 //
 // The pass runs after Bevy's bloom, effects and auto exposure have done their work on the linear
 // picture, with Bevy's tonemapper doing nothing, and before Bevy's antialiasing, which smooths the

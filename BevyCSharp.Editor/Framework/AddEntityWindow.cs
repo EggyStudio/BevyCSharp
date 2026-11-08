@@ -13,8 +13,8 @@ namespace BevyCSharp.Editor.Framework;
 /// </para>
 /// <para>
 /// What is added goes under the entity selected when the window opened, and keeps its place in the
-/// world, as a child added in Godot does. With nothing selected it goes at the top of the world.
-/// Undoing it takes it away, as one step.
+/// world, so it stands where its spawn put it whatever its parent's transform. With nothing
+/// selected it goes at the top of the world. Undoing it takes it away, as one step.
 /// </para>
 /// </remarks>
 public static class AddEntityWindow

@@ -173,6 +173,14 @@ slider, a body that bounces off another and a path tracer's bounces do. A name o
 keeps its spelling, such as `PhysicsMaterial.Bounce` and `SolariLightingRef.MaxBounces`, and an
 identifier keeps its name, as `build/drive-feature-test.sh` and the workflow's `drive` job do.
 
+A comment stands on the code's own terms, what the code does and why in the engine's words. A
+number taken from elsewhere stands with the reason it is right here, what it makes the frame or the
+program do, and its source is named once in the documents' references and not in the comment. The
+file names of outside assets, another product or the sibling engine given as the explanation, its
+measurements, and the facts of the sessions' work are not written in a comment, since a reader of
+the source has none of them. A comparison test names the reference it compares against, since the
+comparison is the test.
+
 ## Self-reference
 
 Prose states what is true. It does not describe its own history, and it does not narrate the work
@@ -267,6 +275,11 @@ grep -rniE "\b(is|are|was|were) what\b|which is what|that is what|this is what|\
 
 # Prose about earlier revisions.
 grep -rniE "contrary to what|this (file|document|entry) (said|used to)|the (old|previous) (entry|version)|at the time .* was written" --include=*.md .
+
+# Comments that lean on another product, the sibling engine, the owner or the sessions rather than
+# on the code's own terms. A comparison test's reference, a widget's owner, the command line's
+# session and Bevy's behavior the bridge mirrors are left, so each hit is read.
+git grep -n -E "^\s*(///?|//!|#|\*).*(3DEngine|HDRP|URP|Unity|Unreal|Godot|Blender|Minecraft|Quake|Frostbite|[Tt]he owner|[Tt]he reviewer|reference picture|Bevy's (own )?default)" -- '*.cs' '*.rs' '*.slang' '*.wgsl' '*.sh' '*.py' '*.yml'
 
 # References to paths that are not checked in.
 grep -rn "\.ref/" --include=*.cs --include=*.rs --include=*.md . | grep -v "^\./\.ref/"

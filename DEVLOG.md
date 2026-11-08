@@ -54,9 +54,11 @@ Done that day
 - Item 107 at `69d97fec`. The crowns' fill, the picture's against the reference's.
 - Item 113 at `01951f29`. Shaded grass beside a wall takes 30 to 45% less light from all around than
   the reference.
+- Item 114 at `8b16bd71`. A probe ray's hit reflects along its mirror way.
 - Item 115 at `571174fc`. The air's sky test captures before its sky is drawn under load.
 - Item 116 at `a5f277d5`. The probes' rays gather the light a crown's leaves scatter between them.
 - Item 117 at `a5f277d5`. The version and its tags in the documents.
+- Item 118 at `8b16bd71`. The middle dot out.
 
 ## 2026-11-07
 

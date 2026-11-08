@@ -16,7 +16,7 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed partial class GlobalIlluminationTests
 {
-    /// <summary>Each quality traces 3DEngine's cascades and directions, no more than the field's counted cascades, and one more in its far cascade.</summary>
+    /// <summary>Each quality traces its cascades and directions, no more than the field's counted cascades, and one more in its far cascade.</summary>
     [Fact]
     public void EachQualityTracesItsCascadesAndDirections()
     {
@@ -159,11 +159,10 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// A first-cascade probe looking at a black wall 200 units wide forty units ahead of the eye, past
-    /// the field's counted cascades, gathers the sky through the wall without the far cascade and under
-    /// half of it with the far cascade, which holds the wall, as 3DEngine's probe read 1.14 of a sky of
-    /// pi with it and 3.14 without. The wall stands ahead, where the far cascade lies a third of its
-    /// width beyond the eye, since one beside the eye passes the far cascade's side within the probe's
-    /// view.
+    /// the field's counted cascades, gathers the sky through the wall without the far cascade and
+    /// under half of it with the far cascade, which holds the wall. The wall stands ahead, where the
+    /// far cascade lies a third of its width beyond the eye, since one beside the eye passes the far
+    /// cascade's side within the probe's view.
     /// </summary>
     [SkippableFact]
     public void AFarCascadeHoldsAWallPastTheCountedOnes()

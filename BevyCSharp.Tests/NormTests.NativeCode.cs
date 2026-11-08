@@ -15,12 +15,13 @@ public sealed partial class NormTests
     /// <remarks>
     /// A function pointer the bridge is given can only point at a method marked to be called from
     /// native code, so the mark finds every callback of the bridge, ImGui's among them. A delegate
-    /// handed over by the marshaller is found by its type, which none is today and which 3DEngine's
-    /// test finds the same way. A binding whose own callback calls a virtual method, which a class
-    /// here overrides, reaches the override from native code as well, so the overrides of what each
+    /// handed over by the marshaller is found by its type, though the library and the editor hand
+    /// none over. A binding whose own callback calls a virtual method, which a class here
+    /// overrides, reaches the override from native code as well, so the overrides of what each
     /// binding's callbacks call are taken too, the bindings being the assemblies a class here
-    /// derives from. None is today, ImGui's binding calling no override of ours and BepuPhysics
-    /// being managed throughout, and 3DEngine's test found Assimp's this way.
+    /// derives from. ImGui's binding calls no override of ours and BepuPhysics is managed
+    /// throughout, so none is found, and a binding referenced later that does call one is found the
+    /// same way.
     /// </remarks>
     private static List<MethodBase> HandedToNativeCode()
     {

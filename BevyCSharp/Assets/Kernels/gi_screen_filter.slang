@@ -11,8 +11,8 @@
 // carried or lit, the blend follows it within a frame or two, and where it holds still the frame
 // before's light lies inside that spread and keeps its calm.
 //
-// Taken from 3DEngine's gi_screen_filter.slang, the camera's views through bcs_pass and the frame
-// before's images the camera keeps with their history.
+// The camera's views are read through bcs_pass, and the frame before's images are those the camera
+// keeps with their history.
 import bcs_pass;
 import bcs_gi;
 
@@ -39,9 +39,9 @@ static const float Spread = 2.0;
 
 // Whether a light is one a float holds, neither a value that is not a number nor one past the largest.
 // A light that is not is taken as none, by the blend of the probes around and by the frame before's,
-// and written as none, so a fault anywhere that gives one darkens a probe for a frame where the blends
-// had carried it to every probe around and every frame after, as a non-number at the glow lights'
-// light turned 215,459 pixels of 3DEngine's desert village black.
+// and written as none, so a fault anywhere that gives one darkens a probe for a frame, where otherwise
+// the blends would carry it to every probe around and every frame after, and every pixel it reached
+// would turn black.
 bool lightHeld(float3 light)
 {
     return all(abs(light) < 1e30);
@@ -72,11 +72,11 @@ float3 eyeBefore()
 }
 
 // The spatial blend of a probe's light with its like neighbors', or its own where it holds none, and in
-// spread how far the light of those neighbors lies from that blend, each channel's standard deviation
-// by the same weights. A neighbor counts by how near the plane of the probe's surface its own point
-// lies, so a floor seen at a slant blends along its slope; weighed by how alike their distances from
-// the eye were, in 3DEngine the probes in rows apart on such a floor lay further apart than the 2%
-// allowed, each row kept its own noise, and the floor showed bands.
+// in spread how far the light of those neighbors lies from that blend, each channel's standard
+// deviation by the same weights. A neighbor counts by how near the plane of the probe's surface its
+// own point lies, so a floor seen at a slant blends along its slope. Weighed by how alike their
+// distances from the eye are, the probes in rows apart on such a floor lie too far apart to blend,
+// each row keeps its own noise, and the floor shows bands.
 float4 spatial(int2 id, int2 grid, float4 surface, out float3 spread)
 {
     float4 sum = float4(0.0);

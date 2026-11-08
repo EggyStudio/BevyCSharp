@@ -100,7 +100,7 @@ pub unsafe extern "C" fn bcs_render_spawn_light(config: *const BcsLightConfig) -
 ///
 /// One number for every directional light and one for every point and spot light, because Bevy
 /// keeps these as global settings rather than per light. Larger is sharper and costs memory and
-/// fill rate on every shadow-casting light at once; Bevy's defaults are 2048 and 1024.
+/// fill rate on every shadow-casting light at once. Bevy's defaults are 2048 and 1024.
 ///
 /// A size of `0` leaves that kind alone, so one can be changed without knowing the other.
 #[unsafe(no_mangle)]

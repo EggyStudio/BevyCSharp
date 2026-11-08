@@ -13,8 +13,8 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class LookTests
 {
-    // The curve 3DEngine's block game is graded by, at lights of 0.05, 0.1, 0.25, 0.5, 1, 2 and 4,
-    // as its TonemapCurveTests read it, levels shown from 0 to 1.
+    // The figures 3DEngine's tests hold its curve to at lights of 0.05, 0.1, 0.25, 0.5, 1, 2 and 4,
+    // levels shown from 0 to 1.
     [Theory]
     [InlineData(0.05, 0.230)]
     [InlineData(0.1, 0.317)]
@@ -63,8 +63,8 @@ public sealed class LookTests
     [Fact]
     public void TheVividLookDeepensTheSkysBlue()
     {
-        // A middle gray and 3DEngine's noon zenith through the vivid look, the gray a little
-        // brighter and the blue deeper, as its block game shows them.
+        // A middle gray and a noon zenith's blue through the vivid look, the gray a little brighter
+        // and the blue deeper.
         var vivid = LookSettings.Vivid();
         var gray = Shown(vivid, 0.18, 0.18, 0.18);
         var zenith = Shown(vivid, Decode(78 / 255.0), Decode(134 / 255.0), Decode(222 / 255.0));

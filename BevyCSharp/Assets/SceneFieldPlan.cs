@@ -11,11 +11,9 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Taken from 3DEngine's <c>SceneFieldPlan</c>, where a mesh is its array of vertices, and here a
-/// mesh is the number the bridge gives it with a generation that moves on when Bevy says its data
-/// changed, which is what tells one mesh from another in both. 3DEngine's parts, a skinned mesh's
-/// joints and a rigid mesh's triangles cut into up to eight boxes, are not taken, so a mesh that
-/// moves is stamped as the box around all of it.
+/// A mesh is the number the bridge gives it with a generation that moves on when Bevy says its data
+/// changed, which tells one mesh from another. A mesh that moves is stamped as the box around all of
+/// it, a skinned mesh as well, rather than as boxes around its joints or its parts.
 /// </para>
 /// <para>
 /// A cascade is <see cref="Resolution"/> cells a side, each cascade's cells twice as wide as the
@@ -60,8 +58,8 @@ internal sealed partial class SceneFieldPlan
     /// A mesh that settles marks the cascades around it to be built again, and one that leaves marks
     /// them again, a few milliseconds of the GPU each time, where stamping its box costs half a
     /// microsecond a frame, so a figure that stopped after walking is stamped on until it has stood
-    /// this long. 3DEngine's voxel game measured it with figures standing one to eight seconds
-    /// between walks.
+    /// this long, about seventeen seconds at sixty frames a second, longer than it stands between one
+    /// walk and the next.
     /// </remarks>
     public const int MobileSettleFrames = 1024;
 
@@ -153,9 +151,9 @@ internal sealed partial class SceneFieldPlan
     // Still meshes that left, kept in the field for the meshes replacing them, by the frame they left.
     private readonly Dictionary<Instance, long> _kept = new(Keys.Shared);
     // Still meshes that replaced a kept one in place and wait for cascades built since, which still
-    // hold the one they replaced and so are not stamped. Stamped as their boxes, a voxel game's
-    // section of ground filled the air above it in the cascades a budget of two left for the next
-    // frame, which 3DEngine measured.
+    // hold the one they replaced and so are not stamped. Stamped as its box, a section of a voxel
+    // game's ground would fill the air above it in the cascades a budget of two leaves for the next
+    // frame.
     private readonly HashSet<Instance> _replacing = new(Keys.Shared);
     private readonly Vector3?[] _built;
     private readonly long[] _builtFrame;
@@ -234,11 +232,9 @@ internal sealed partial class SceneFieldPlan
 
     /// <summary>The triangles the builds splat a frame where a program gives no budget.</summary>
     /// <remarks>
-    /// 3DEngine's, read from the field's counts of the two scenes its readings are taken in. Its
-    /// voxel game splats 18,824 triangles in a frame at its budget of two cascades and its Cornell box
-    /// 180, and this is the least power of two above the voxel game's, so both build as they did,
-    /// where 500 sections of 1,024 triangles arriving in one frame, 512,000 at once, are built over
-    /// sixteen frames or more.
+    /// A power of two that holds a frame's ordinary builds whole, so a scene that changes a few
+    /// meshes at a time builds them in the frame they change, where 500 sections of 1,024 triangles
+    /// arriving in one frame, 512,000 at once, are built over sixteen frames or more.
     /// </remarks>
     public const int DefaultTriangleBudget = 32_768;
 

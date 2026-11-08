@@ -9,8 +9,7 @@
 // sky beside it. Where the camera has no environment map, the color given stands in for it. The fog
 // thickens as an exponential layer over the ground, the light a ray loses through it worked out in
 // closed form between the eye's height and the point's, so a hill's top stands clear of a valley's
-// haze. 3DEngine draws below its horizon a color the day's sky sets and leaves the fog to a program;
-// here both are the sky's along each way.
+// haze.
 import bcs_pass;
 
 // x: how far the fog takes away 95% of a point's light at the layer's base, in world units. y: how

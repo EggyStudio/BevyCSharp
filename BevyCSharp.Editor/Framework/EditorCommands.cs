@@ -370,11 +370,11 @@ public static class EditorCommands
 
         SceneCamera.Register();
 
-        // Plays the game in a window of its own, as Godot does. The Play tab is where it is started
-        // and watched, and the menu and F5 reach it without opening the tab. Nothing goes on the
-        // scene's toolbar, which holds what acts on the scene. F5 plays the scene being edited,
-        // where a change made in the editor is seen, and the project's own Main is a menu row and
-        // a button.
+        // Plays the game in a window and a process of its own, so a crash in the game ends that
+        // process and not the editor's. The Play tab is where it is started and watched, and the
+        // menu and F5 reach it without opening the tab. Nothing goes on the scene's toolbar, which
+        // holds what acts on the scene. F5 plays the scene being edited, where a change made in the
+        // editor is seen, and the project's own Main is a menu row and a button.
         EditorMenu.Command("Project/Play scene", static _ => Refused(EditorPlay.PlayScene()), 3, EditorIcons.Play, "F5");
         EditorMenu.Command("Project/Play project", static _ => EditorPlay.Toggle(), 3);
 

@@ -692,7 +692,7 @@ public static unsafe partial class Render
     /// </remarks>
     /// <param name="camera">The camera.</param>
     /// <param name="entries">Each entry's column and row, zero to three, and its value.</param>
-    /// <param name="fieldOfView">The vertical field of view, in radians, Bevy's default an eighth of a turn.</param>
+    /// <param name="fieldOfView">The vertical field of view, in radians, an eighth of a turn unless given, as a camera spawned without settings sees.</param>
     /// <param name="near">The nearest distance drawn.</param>
     /// <param name="far">The farthest distance drawn.</param>
     /// <exception cref="ArgumentOutOfRangeException">A column or row is past three.</exception>

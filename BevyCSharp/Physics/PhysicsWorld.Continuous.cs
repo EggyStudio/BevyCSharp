@@ -19,11 +19,11 @@ public sealed partial class PhysicsWorld
     /// </para>
     /// <para>
     /// A contact stops a body over a step rather than at once, so a wall has to be thicker the faster
-    /// the body, a fifth of a unit at 100 units a second and half a unit at 300, as 3DEngine measured
-    /// it with a ball a tenth of a unit across. A shot faster than that is a ray cast each frame
+    /// the body. A shot too fast for the walls it meets is a ray cast each frame
     /// (<see cref="Raycast(Vec3, Vec3, float, Entity)"/>) rather than a body. A static never moves, so
     /// it is left as it is, and the sweep is the body's, so one made again is not swept unless asked,
-    /// or unless it is made from a <see cref="RigidBody"/> whose <see cref="RigidBody.Continuous"/> is set.
+    /// or unless it is made from a <see cref="RigidBody"/> whose <see cref="RigidBody.Continuous"/> is
+    /// set.
     /// </para>
     /// </remarks>
     /// <exception cref="KeyNotFoundException">The entity has no body.</exception>

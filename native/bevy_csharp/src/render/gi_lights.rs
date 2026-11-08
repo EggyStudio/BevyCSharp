@@ -1,13 +1,13 @@
 //! The lights global illumination's probes are lit by, which the managed side reads each frame and
 //! writes into the buffer the probes' compute shaders read as `bcs_gi`'s `GiLights`.
 //!
-//! Each light is given as the light a white surface facing it returns, as 3DEngine's renderer gives
-//! the probes a light, which in Bevy's units is a directional light's illuminance over pi, a point or
-//! spot light's intensity, Bevy's luminous power over four pi, over pi again, and an ambient light's
-//! brightness times the share Bevy's ambient term returns ([`AMBIENT_RETURNED`]), each times the
-//! camera's exposure, as Bevy's lighting applies it before the picture's half floats. The probes'
-//! light then lies in the units of the picture they are added to, where a sun of a hundred thousand
-//! lux taken unexposed would pass the largest half float.
+//! Each light is given as the light a white surface facing it returns, which in Bevy's units is a
+//! directional light's illuminance over pi, a point or spot light's intensity, Bevy's luminous
+//! power over four pi, over pi again, and an ambient light's brightness times the share Bevy's
+//! ambient term returns ([`AMBIENT_RETURNED`]), each times the camera's exposure, as Bevy's
+//! lighting applies it before the picture's half floats. The probes' light then lies in the units
+//! of the picture they are added to, where a sun of a hundred thousand lux taken unexposed would
+//! pass the largest half float.
 
 use crate::interop::status;
 

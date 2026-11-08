@@ -6,9 +6,8 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// An enemy's stats, a weapon, a dialogue, a loot table, values many entities share, edited in one
-/// place, and changed without recompiling. Unity calls this a ScriptableObject and Godot a
-/// Resource. A component refers to one through a <see cref="DataRef{T}"/> field and reads it with
-/// <see cref="DataAssets.Get{T}"/>.
+/// place, and changed without recompiling. A component refers to one through a
+/// <see cref="DataRef{T}"/> field and reads it with <see cref="DataAssets.Get{T}"/>.
 /// </para>
 /// <para>
 /// It lives on the managed side rather than in Bevy's storage, so it may hold strings, lists and

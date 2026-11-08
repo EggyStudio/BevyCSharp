@@ -3,11 +3,11 @@
 //
 // A full-screen pass, a compute shader dispatched on a camera and geometry a camera draws all reach
 // it with `import bcs_pass;` and use its names plainly, each helper named `pass` and then its work,
-// as 3DEngine's modules name theirs, so none meets a name of the shader's own. The shader itself
-// carries whatever it declares. Every global without a binding of its own belongs to it and is set
-// from C# by its name, and an image the camera owns is bound by the name the camera gave it. The
-// inputs below are in space 101, which the bridge moves to group one after the compile, so the
-// shader's own globals keep group zero to themselves whatever they are.
+// so none meets a name of the shader's own. The shader itself carries whatever it declares. Every
+// global without a binding of its own belongs to it and is set from C# by its name, and an image
+// the camera owns is bound by the name the camera gave it. The inputs below are in space 101, which
+// the bridge moves to group one after the compile, so the shader's own globals keep group zero to
+// themselves whatever they are.
 //
 // A pass's entry point is a fragment shader taking `FullscreenOutput`, which Bevy's full-screen
 // triangle writes, and returning the pixel. A compute shader works in pixels, and the helpers

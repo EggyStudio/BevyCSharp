@@ -22,9 +22,8 @@ namespace Bevy;
 /// where each cascade lies.
 /// </para>
 /// <para>
-/// The meshes are those of last frame's transforms, since the engine's tick runs before the
-/// program's systems and Bevy works the transforms out after them, so a box follows its mesh a frame
-/// behind, which 3DEngine's field, built in its renderer, does not.
+/// The meshes are those of last frame's transforms, since the engine's tick runs before the program's
+/// systems and Bevy works the transforms out after them, so a box follows its mesh a frame behind.
 /// </para>
 /// <para>
 /// Nothing is built before the three compute programs have compiled, and the plan does not move on
@@ -43,7 +42,7 @@ internal static unsafe partial class SceneField
     /// <summary>The distance a cell holds before its cascade is built, which reads as nothing near, in world units.</summary>
     internal const float Far = 10000f;
 
-    /// <summary>How far toward a light a surface is traced for its contact shadows, in cells of the finest cascade, as 3DEngine traces it.</summary>
+    /// <summary>How far toward a light a surface is traced for its contact shadows, in cells of the finest cascade, half its width, so the length grows with the cell the field is built at.</summary>
     internal const int ContactCells = 32;
 
     // What the program asked for, and the app it asked in, so a new app starts with none.
@@ -116,7 +115,7 @@ internal static unsafe partial class SceneField
     /// <summary>
     /// The field the running app's settings build, those it asked for, or where it asked for none and
     /// global illumination is on, four cascades of a quarter of a unit, which the probes are traced
-    /// through, as 3DEngine turns its field on.
+    /// through.
     /// </summary>
     private static (int Cascades, float CellSize, int Budget, float FarCascade, int Triangles) Wanted =>
         Asked.Cascades > 0 || WorldProbes.Asked == GlobalIllumination.Off ? Asked : (4, 0.25f, 1, 0f, SceneFieldPlan.DefaultTriangleBudget);
@@ -616,9 +615,9 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>
-    /// Whether global illumination carries an instance's emission as a glow light, as 3DEngine's
-    /// GlowLights carries one, an emitter whose bounds' longest side in the world is no more than
-    /// twice the first cascade's probes' spacing, given its first cascade's cell.
+    /// Whether global illumination carries an instance's emission as a glow light, an emitter whose
+    /// bounds' longest side in the world is no more than twice the first cascade's probes' spacing,
+    /// given its first cascade's cell.
     /// </summary>
     internal static bool Carried(in SceneFieldPlan.Instance instance, float firstCell)
     {
@@ -658,7 +657,7 @@ internal static unsafe partial class SceneField
 
         // Each brick, its cascade, its place a byte an axis, where its run of boxes begins and how
         // long it is, then the runs, made up to a whole element of four, since the shader reads four
-        // places at a time, as 3DEngine's validation found it reading past the end.
+        // places at a time and would read past the end of a shorter buffer.
         var (bricks, ranges, runs) = (plan.Bricks, plan.BrickRanges, plan.BrickShapes);
         var length = bricks.Count * 4 + (runs.Count + 3) / 4 * 4;
         if (_words.Length < length) _words = new uint[length * 2];

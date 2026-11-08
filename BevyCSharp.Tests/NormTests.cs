@@ -77,7 +77,7 @@ public sealed partial class NormTests
     public void N_1_3()
     {
         // The Slang shaders count as the C# and the Rust beside them do, in the library, the tests,
-        // the examples and the bridge, as 3DEngine's test counts its own.
+        // the examples and the bridge.
         var found = Sources("BevyCSharp/", ".cs", ".slang")
             .Concat(Sources("BevyCSharp.Tests/", ".cs", ".slang"))
             .Concat(Sources("BevyCSharp.Examples/", ".cs", ".slang"))

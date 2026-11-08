@@ -65,10 +65,12 @@ public readonly record struct Capture(int Id)
     /// F2 unless set, or nothing for none.
     /// </summary>
     /// <remarks>
-    /// As Minecraft's F2, a picture named by the time, so a player or a tester takes one without a
-    /// tool, and the log says where it went. The press is read and left alone, so a program reading
-    /// the key itself sees it too, and a program using it for something else of its own moves this
-    /// to another key or turns it off. A run that draws nothing, headless, takes none.
+    /// F2 saves a picture named by the time, so a player or a tester takes one without a tool, and
+    /// the log says where it went. It sits between F1, which hides the interface, and F3, which
+    /// shows the debug overlay, so the engine's own keys are together. The press is read and left
+    /// alone, so a program reading the key itself sees it too, and a program using it for something
+    /// else of its own moves this to another key or turns it off. A run that draws nothing,
+    /// headless, takes none.
     /// </remarks>
     public static Key? ScreenshotKey { get; set; } = Key.F2;
 
@@ -78,10 +80,10 @@ public readonly record struct Capture(int Id)
     /// <summary>Saves a picture of the frame being drawn into <see cref="ScreenshotFolder"/>, as the key does. Only valid inside a system.</summary>
     /// <returns>The file's full path, where the picture is written a frame or two later, once it is back off the GPU.</returns>
     /// <remarks>
-    /// Named by the local time as Minecraft names its own, <c>2026-10-21_03.45.12.png</c>, then
-    /// <c>2026-10-21_03.45.12_2.png</c> and <c>_3</c> for a second and a third taken in the same
-    /// second, counting the first as one as Minecraft does, the names given out remembered, since a
-    /// file is not there until its picture is written. The capture is the one
+    /// Named by the local time, <c>2026-10-21_03.45.12.png</c>, so the pictures sort in the order
+    /// they were taken, then <c>2026-10-21_03.45.12_2.png</c> and <c>_3</c> for a second and a
+    /// third taken in the same second, the first counted as one, and the names given out are
+    /// remembered, since a file is not there until its picture is written. The capture is the one
     /// <c>shot</c> and <see cref="Render.Screenshot(string)"/> take.
     /// </remarks>
     public static string Screenshot()

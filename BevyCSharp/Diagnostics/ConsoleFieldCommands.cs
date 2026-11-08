@@ -7,10 +7,10 @@ namespace Bevy;
 /// the editor's console alike.
 /// </summary>
 /// <remarks>
-/// Named as 3DEngine names its own, where <c>gi.state</c> says the cascades of probes and the
-/// field they are traced through, built by <see cref="Render.SetSceneField"/> and
-/// <see cref="Render.SetGlobalIllumination"/>, with the lighting beside them, Solari's rays where the
-/// program asked for them.
+/// Named under <c>gi</c> and <c>field</c>, so each area's commands are listed together.
+/// <c>gi.state</c> says the cascades of probes and the field they are traced through, built by
+/// <see cref="Render.SetSceneField"/> and <see cref="Render.SetGlobalIllumination"/>, with the
+/// lighting beside them, Solari's rays where the program asked for them.
 /// </remarks>
 internal static class ConsoleFieldCommands
 {

@@ -24,11 +24,10 @@
 // lights fell by a fifth or rose by a quarter, so the indirect light from light that went out goes
 // with it rather than over the frames each bounce takes to fade.
 //
-// Taken from 3DEngine's gi_trace.slang, its glow lights and emissive surfaces coming with the
-// emitters. Each probe's held light and the partial sums are buffers, which a dispatch here reads
-// and writes at once where an image of half floats is only written, and the sum of the probes
-// around one is taken by every workgroup and kept where its probe's share asks for it, since a
-// barrier is reached by every invocation alike or by none.
+// Each probe's held light and the partial sums are buffers, which a dispatch here reads and writes
+// at once where an image of half floats is only written, and the sum of the probes around one is
+// taken by every workgroup and kept where its probe's share asks for it, since a barrier is reached
+// by every invocation alike or by none.
 import bcs_field;
 import bcs_gi;
 import bcs_glow;
@@ -147,9 +146,9 @@ groupshared float aboveSeen[8];
 
 // The field's layout with each cascade at the corner it lay at the frame before, where the faces of
 // the indirect light, which the rays read, were gathered. Read at this frame's corners, a cascade
-// that moved with the eye read each probe's faces from the probe a step or more beside it, and in
-// 3DEngine the light past the first bounce took ten frames and more to find itself again after a
-// turn moved every cascade.
+// that moved with the eye would read each probe's faces from the probe a step or more beside it, and
+// the light past the first bounce would take many frames to settle again after a turn moved every
+// cascade.
 FieldInfo gatheredAt(FieldInfo fieldInfo, GiLights lit)
 {
     int cascades = int(interval.w);
@@ -283,11 +282,11 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     // and 1.010 of a path-traced reference's light past the direct where 0.700 and 0.651, and the
     // light hall 3 to 7% under its reference where 9 to 14% (GlobalIlluminationTests.Corridor.cs).
     // A carried ray that meets nothing brings the sky once the field holds every mesh in reach, and
-    // nothing before, since the sky reached through cascades not yet built lit 3DEngine's closed
-    // room in its first frames at twice what it settles at, and its reach is its interval's end
-    // where it meets nothing. The quarter is 3DEngine's, whose vestibule under Sponza's vault read
-    // 0.889 of its reference where 0.700, and carried under half it read 0.983 with its light
-    // landing in the wrong places. Taken from 3DEngine's carry (its 141 and 194).
+    // nothing before, since the sky reached through cascades not yet built would light a closed
+    // room in its first frames, and its reach is its interval's end where it meets nothing. The
+    // share is a quarter, since a probe that sees more of the cascade above takes the light past
+    // its interval better from those probes, and carried, its rays bring light that lands in the
+    // wrong places.
     if (lane < 8u)
     {
         float weight = 0.0;
@@ -364,14 +363,14 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
 #else
         // A surface that lets a share of light through, as a canopy's leaves, is crossed, the ray
         // keeping that share for each unit of its depth and the rest taking the surface's light as
-        // a solid's would, up to four of them before the ray stops at the next as a solid, as
-        // 3DEngine's rays cross them. One crossed before the interval began is the cascade below's,
-        // whose ray takes this one's light from the interval on whole where it met nothing, so its
-        // light and its share go to the probe's own faces alone (kept), since a probe past every
-        // cascade below, as one by a crown far from the eye, has nothing else to read them from,
-        // and taking only its share, a probe in an oak's front half read its ways into the crown
-        // 63% under its reference. A solid surface is shaded in the same place as a crossed one,
-        // keeping none, so the build holds one copy of the shading.
+        // a solid's would, up to four of them before the ray stops at the next as a solid. One
+        // crossed before the interval began is the cascade below's, whose ray takes this one's
+        // light from the interval on whole where it met nothing, so its light and its share go to
+        // the probe's own faces alone (kept), since a probe past every cascade below, as one by a
+        // crown far from the eye, has nothing else to read them from, and taking only its share, a
+        // probe in an oak's front half read its ways into the crown 63% under its reference. A
+        // solid surface is shaded in the same place as a crossed one, keeping none, so the build
+        // holds one copy of the shading.
         float3 crossed = float3(0.0), crossedOwn = float3(0.0);
         float firstAt = -1.0;
         [loop]

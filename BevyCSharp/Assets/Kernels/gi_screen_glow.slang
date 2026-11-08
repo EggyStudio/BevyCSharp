@@ -6,12 +6,7 @@
 // frame before where its surface was. Over a round of the probes' points the blend is their mean,
 // each frame counting alike, so a penumbra a probe's tile cuts across reads as the probes standing at
 // every place in their tiles would read it, and a turn moves it with the world and not with the
-// picture's grid. In 3DEngine the floor across a lamp's penumbra moved with turns of one to eight
-// pixels by 0.45 to 0.94% of its light, where a pixel that marches itself moved by 0.69 to 0.91%, and
-// read at the tiles' middles by 3.1 to 7.9%.
-//
-// Taken from 3DEngine's gi_screen_glow.slang, whose texels are those of a depth half the window's
-// size, and here of an image half the picture's, each reading the camera's depth under its middle.
+// picture's grid. Each texel reads the camera's depth under its middle.
 import bcs_pass;
 import bcs_field;
 import bcs_gi;
@@ -55,8 +50,8 @@ Texture2D<float4> gi_glow_far_previous;
 // surface, 1 for one whose share is of no light, 2 and on for the glow light the share is of, counted
 // from 2, GlowOnLight for one on a glow light's own surface, and GlowAsk for one no probe around
 // holds. The pass weighs the texels around a pixel by the normal, since at a wall's foot the floor's
-// texels lie as far from the eye as the wall's, and in 3DEngine the floor beside a lamp lent the
-// lamp's face its light.
+// texels lie as far from the eye as the wall's, and weighed by their distance alone the floor beside a
+// lamp would lend the lamp's face its light.
 [format("rgba8")] WTexture2D<float4> gi_glow_normal;
 
 // x: a tile's pixels along each side. y: 1 where the frame before's images may be read. zw: unused.
@@ -77,10 +72,10 @@ uniform float4 changed_max;
 
 // The frames of a round of the probes' points (JitterAt), after which the blend counts every frame's
 // light alike and may be dropped. The least share of this frame's light in the blend after a round
-// where the view holds still, a thirty-second, since at a sixty-fourth what the first frames of an
-// app saw before the field held the wall stayed in 3DEngine's blend under its shadow twice as long.
-// And where the view moves, when each frame's blend is read between four texels of the frame before's
-// and spreads a little further over the surface.
+// where the view holds still, a thirty-second, since at a sixty-fourth what the first frames of an app
+// see before the field holds a wall stays in the blend under its shadow twice as long. And where the
+// view moves, when each frame's blend is read between four texels of the frame before's and spreads a
+// little further over the surface.
 static const float GlowRound = 16.0;
 static const float GlowStill = 1.0 / 32.0;
 static const float GlowMoving = 1.0 / 8.0;
@@ -177,8 +172,8 @@ float probeLike(int2 probe, int2 grid, float2 at, float3 p, float3 n, float alik
 // The light the glow lights send p facing n this frame, irradiance, each by as much of it as the
 // probes around see, blended by weight, the dominant light's as near p as it is (glowLightNear) given
 // back and the rest in far with the fainter lights' light the probes summed. Each probe's code of four
-// lights is read once for its four, rather than kept in an array indexed by the light, which lavapipe
-// keeps in memory of its own and crashed on in 3DEngine.
+// lights is read once for its four, rather than kept in an array indexed by the light, since lavapipe
+// keeps such an array in memory of its own and can crash on it.
 float3 glowFromProbes(GiLights lights, FieldInfo info, float3 p, float3 n, int2 at[4], float4 weight, float total, int dominant, out float3 far)
 {
     int count = min(int(lights.counts.w), MostGlowLights);
@@ -307,8 +302,8 @@ void main(uint3 id : SV_DispatchThreadID)
     // it is and how alike its surface is to the point's (probeLike). Where none of the four by four
     // around stands on a surface like the point's, the point is marked for the pass's pixels on it to
     // march to the lights' faces' halves themselves, as a probe does. Taken from the probes on any
-    // surface by how near each is, the floor along a wall's foot in 3DEngine took the light its top
-    // saw.
+    // surface by how near each is, the floor along a wall's foot would take the light the wall's top
+    // sees.
     uint across, down;
     gi_screen_surfaces.GetDimensions(across, down);
     int2 grid = int2(int(across), int(down));
@@ -370,8 +365,8 @@ void main(uint3 id : SV_DispatchThreadID)
     // as far from the frame before's eye as this one does on a surface facing as this one's does. A
     // texel holds its light as a share of its own surface's rough light, and at a corner the other
     // surface's texels lie as far from the eye, so taken by their distance alone the floor along the
-    // walls of a room in 3DEngine took the walls' shares times its own rough light, a line of light a
-    // texel apart along each corner.
+    // walls of a room would take the walls' shares times its own rough light, a line of light a texel
+    // apart along each corner.
     float3 before = float3(0.0), farBefore = float3(0.0);
     float furthest = 0.0, held = 0.0, still = 0.0, frames = 1.0 / GlowStill;
     if (screen.y > 0.5)
@@ -426,9 +421,9 @@ void main(uint3 id : SV_DispatchThreadID)
     // the blend's than the frames' has. A blend still in its first round is dropped too where the
     // field's cascade under the point was built this frame as meshes came or went around the point, or
     // for the first time, since what the probes saw before the field held what stands between is no
-    // part of what they see; held whole, the frames of an app before the field built its meshes in
-    // place of their boxes lay in 3DEngine's blend under a wall's shadow, and the floor across a
-    // lamp's penumbra strayed from where it settles by 13% a round after the app began.
+    // part of what they see. Held whole, the frames of an app before the field builds its meshes in
+    // place of their boxes would stay in the blend under a wall's shadow, and the floor across a lamp's
+    // penumbra would still lie off where it settles a round after the app begins.
     float lit = luminance(now * rough + far), litBefore = luminance(before * rough + farBefore);
     float apart = abs(lit - litBefore);
     int under = fieldCascade(info, p, 1.0);

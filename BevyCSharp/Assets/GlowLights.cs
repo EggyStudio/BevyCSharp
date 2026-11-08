@@ -4,9 +4,8 @@ using System.Runtime.InteropServices;
 namespace Bevy;
 
 /// <summary>
-/// The small emissive surfaces, which global illumination carries as lights of their own rather
-/// than by the rays that meet them, as <c>bcs_glow</c>'s <c>GlowLight</c> reads them, 3DEngine's
-/// GlowLights.
+/// The small emissive surfaces, which global illumination carries as lights of their own rather than
+/// by the rays that meet them, as <c>bcs_glow</c>'s <c>GlowLight</c> reads them.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -27,12 +26,11 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Each emitter is its box, every face emitting, by the share of the box's faces its mesh's own
-/// surface makes, the area of its triangles the field's gather hands over, as 3DEngine takes a
-/// mesh's surface over its box's from its vertices. Taken as its box whole, a ball, whose surface
-/// is about half its box's, was carried twice as bright as it is, and a room of the level's white
-/// lit by a ball read 100 to 109% over its path-traced reference on every face where lit by a block
-/// of its box it read within 10%. 3DEngine cuts a mesh of many emitters into its parts, which the
-/// gather does not, so such a mesh is one light of its box.
+/// surface makes, the area of its triangles the field's gather hands over. Taken as its box whole, a
+/// ball, whose surface is about half its box's, was carried twice as bright as it is, and a room of
+/// the level's white lit by a ball read 100 to 109% over its path-traced reference on every face
+/// where lit by a block of its box it read within 10%. The gather does not cut a mesh of many
+/// emitters into its parts, so such a mesh is one light of its box.
 /// </para>
 /// </remarks>
 internal static class GlowLights
@@ -105,10 +103,10 @@ internal static class GlowLights
     /// covers.
     /// </summary>
     /// <remarks>
-    /// Four emissive blocks stacked two by two were four lights in 3DEngine, each marched to through
-    /// the others and each emitting from the faces the others cover, so the stack threw a ring of
-    /// light that came and went around it. As one light of a box two blocks wide its light is the
-    /// stack's.
+    /// Four emissive blocks stacked two by two, taken as four lights, would each be marched to
+    /// through the others and each emit from the faces the others cover, so a ring of light around
+    /// the stack would come and go from frame to frame. As one light of a box two blocks wide its
+    /// light is the stack's.
     /// </remarks>
     internal static List<Light> Gather(IReadOnlyList<(SceneFieldPlan.Instance Instance, bool Skinned)> drawn, float firstCell)
     {
@@ -232,9 +230,9 @@ internal static class GlowLights
 }
 
 /// <summary>
-/// The place each glow light is written in, kept from frame to frame, as 3DEngine's. A light among the
-/// frame before's keeps its place and a new one takes the first that is free, so what the screen's
-/// probes saw of a light the frame before is found in its place as the lights move nearer the eye and
+/// The place each glow light is written in, kept from frame to frame. A light among the frame
+/// before's keeps its place and a new one takes the first that is free, so what the screen's probes
+/// saw of a light the frame before is found in its place as the lights move nearer the eye and
 /// farther in the order they are taken in.
 /// </summary>
 internal sealed class GlowPlaces

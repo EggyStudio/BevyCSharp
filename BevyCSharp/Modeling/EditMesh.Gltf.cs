@@ -1,8 +1,8 @@
 namespace Bevy;
 
-// The model as a glTF file, written for Blender and any program that reads glTF, and read from one
-// into faces again, so a level blocked out in the game is finished elsewhere and a model made
-// elsewhere is cut and shaped in the game.
+// The model as a glTF file, written for any program that reads glTF, and read from one into faces
+// again, so a level blocked out in the game is finished elsewhere and a model made elsewhere is cut
+// and shaped in the game.
 public sealed partial class EditMesh
 {
     /// <summary>Writes the mesh, built with its modifiers, and its slots' materials as a glTF 2.0 file.</summary>
@@ -13,9 +13,10 @@ public sealed partial class EditMesh
     /// <para>
     /// One mesh of a primitive for each slot with faces, of positions, normals, texture coordinates
     /// and indices as the engine draws them, and a material for each slot, its color, metalness,
-    /// roughness and emissive color, and its textures named by their paths from the file's folder,
-    /// so Blender opens the model with its textures where the files are where the game has them.
-    /// The engine's own writer, in managed code, so a game exports with nothing but the library.
+    /// roughness and emissive color, and its textures named by their paths from the file's folder, so
+    /// a program that reads glTF opens the model with its textures where the files are where the game
+    /// has them. The engine's own writer, in managed code, so a game exports with nothing but the
+    /// library.
     /// </para>
     /// <para>
     /// The recipe is unchanged, and writing the file is no line of it, as saving is not. A slot drawn
@@ -36,8 +37,8 @@ public sealed partial class EditMesh
     /// The file's triangles are read in its scene's space, their corners within a hundredth of a
     /// millimeter of one another made one vertex, and each two triangles that share an edge, lie in
     /// one plane, are in one material and meet with the same texture coordinates along the edge
-    /// joined into one face, so a box from Blender is six faces of four corners again. A region that
-    /// would join into a face with a hole in it stays triangles.
+    /// joined into one face, so a box written as triangles is six faces of four corners again. A
+    /// region that would join into a face with a hole in it stays triangles.
     /// </para>
     /// <para>
     /// Each material becomes a slot of its name, with its color, factors and textures where the

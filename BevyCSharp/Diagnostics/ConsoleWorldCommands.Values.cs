@@ -8,8 +8,7 @@ internal static partial class ConsoleWorldCommands
     /// <remarks>
     /// <c>Enum.TryParse</c> takes a number as well, and names joined by commas, either of which can
     /// give a value no member has, as a gamepad button of 100, which nothing reading buttons was
-    /// written for and which stopped 3DEngine's program as a mouse button. A command names a member,
-    /// so a word naming none is refused.
+    /// written for. A command names a member, so a word naming none is refused.
     /// </remarks>
     internal static bool TryName<T>(string word, out T value)
         where T : struct, Enum

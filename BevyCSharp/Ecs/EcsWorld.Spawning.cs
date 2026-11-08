@@ -22,8 +22,9 @@ public sealed partial class EcsWorld
     }
 
     /// <summary>
-    /// Spawns a point light at a place, as Bevy's default one is, a million lumens reaching twenty
-    /// units and casting no shadow unless asked.
+    /// Spawns a point light at a place, a million lumens reaching twenty units and casting no
+    /// shadow unless asked, as Bevy's own point light is, bright enough at a camera's default
+    /// exposure to light a room.
     /// </summary>
     /// <param name="at">Where the light is.</param>
     /// <param name="shadows">Whether it casts shadows.</param>

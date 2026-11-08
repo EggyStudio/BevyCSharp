@@ -11,8 +11,7 @@ namespace Bevy.Tests;
 /// <para>
 /// A job's <c>env</c> that read <c>runner.temp</c>, which GitHub gives to steps alone, had both
 /// workflows refused on the push of <c>a31e3b3</c>, each ending within a minute with no job and no
-/// word of why (REVIEW.md, Verdict 4). The file parsed as YAML, and nothing that runs here reads
-/// it as GitHub does.
+/// word of why. The file parsed as YAML, and nothing that runs here reads it as GitHub does.
 /// </para>
 /// <para>
 /// The places and what each allows are GitHub's table of context availability. A place the table

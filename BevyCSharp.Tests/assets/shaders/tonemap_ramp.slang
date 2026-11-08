@@ -1,5 +1,5 @@
-// The ramp each tonemapper is drawn through, as SHARED.md defines it for this engine and 3DEngine
-// alike, on a picture 1024 pixels wide and 8 high.
+// The ramp each tonemapper is drawn through, as SHARED.md defines it, on a picture 1024 pixels wide
+// and 8 high.
 //
 // Column x holds the linear value 2 to the power of (20 x / 1023 - 12), from a four thousandth to
 // 256, so the picture runs from black through every exposure a tonemapper bends to far past white.

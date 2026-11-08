@@ -17,9 +17,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// A sidecar rather than a <c>.meta</c> file, because Bevy reads a <c>.meta</c> beside an asset as
-/// its loader's settings, and one of these there would be read as a malformed one. Unity keeps
-/// GUIDs in <c>.meta</c> files and Godot 4.4 keeps <c>uid://</c> ids in <c>.uid</c> files, and the
-/// second is the arrangement taken here.
+/// its loader's settings, and one of these there would be read as a malformed one.
 /// </para>
 /// <para>
 /// Only something that edits the project writes a sidecar, the editor and

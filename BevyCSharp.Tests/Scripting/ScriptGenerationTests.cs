@@ -12,9 +12,7 @@ namespace Bevy.Tests;
 /// A generation is an assembly in a context that can be unloaded, and anything of the process's or
 /// the app's that keeps one of its types, methods or delegates keeps the whole of it, so a host
 /// compiling on every save would gather every generation for as long as the app lives, and a
-/// registration the process kept would run a stale one in every app made after. Taken from
-/// 3DEngine's test of the same name (its <c>d7e370ed</c>), where the process's list of
-/// registrations held each one.
+/// registration the process kept would run a stale one in every app made after.
 /// </para>
 /// <para>
 /// Each script holds a kind of thing a game's module initializers and systems put in the process's

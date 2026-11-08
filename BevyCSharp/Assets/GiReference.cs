@@ -10,9 +10,9 @@ namespace Bevy;
 
 /// <summary>
 /// The measure of global illumination, a path-traced reference of the camera's picture
-/// (<c>gi_reference.slang</c>) and the camera's own light before tonemapping compared with it over
-/// named regions of the view, as <c>gi.reference</c> and <c>gi.compare</c> run them, 3DEngine's
-/// BounceReference over a ray scene of the meshes the camera draws.
+/// (<c>gi_reference.slang</c>) over a ray scene of the meshes the camera draws, and the camera's own
+/// light before tonemapping compared with it over named regions of the view, as <c>gi.reference</c>
+/// and <c>gi.compare</c> run them.
 /// </summary>
 /// <remarks>
 /// <para>

@@ -4,18 +4,18 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-// The field about an edge two blocks meet along, 3DEngine's test of its edge leak's mend.
+// The field about an edge two blocks meet along, held closed so no light leaks through it.
 public sealed partial class GlobalIlluminationTests
 {
     /// <summary>
-    /// 3DEngine's voxel game's room of stone whose wall steps a block east halfway, its two halves
-    /// meeting along one edge alone, with a glowstone west of the edge and the eye east of it, so no
-    /// ray from the glowstone reaches what the eye sees but through the edge itself. The field's cells
-    /// about the edge lay inside the blocks on one diagonal and outside them on the other, the
-    /// distance between them never below zero along the edge, and in 3DEngine the march from the floor
-    /// to the glowstone saw half of it through the edge, the floor about the edge's foot 10 sRGB levels
-    /// at 640 by 360 where 7 with the edge closed by a block and none in a path-traced reference. With
-    /// the cells about such an edge held inside, the floor reads as with the edge closed.
+    /// A room of stone blocks whose wall steps a block east halfway, its two halves meeting along one
+    /// edge alone, with a glowstone west of the edge and the eye east of it, so no ray from the
+    /// glowstone reaches what the eye sees but through the edge itself. The field's cells about the
+    /// edge lie inside the blocks on one diagonal and outside them on the other, so the distance
+    /// between them is never below zero along the edge, and a march from the floor to the glowstone
+    /// would see half of it through the edge and light the floor about the edge's foot, where a
+    /// path-traced reference has no light. With the cells about such an edge held inside, the floor
+    /// reads as with the edge closed.
     /// </summary>
     [SkippableFact]
     public void TwoBlocksMeetingAlongAnEdgeCloseItToAGlowLightsLight()
@@ -26,14 +26,14 @@ public sealed partial class GlobalIlluminationTests
     }
 
     // The brightest luminance about the foot of the edge in the room, the wall's halves meeting along
-    // it or a block closing it, at 640 by 360 at High with the screen's probes left out, as 3DEngine
-    // reads it, where the light through the edge fanned over the floor.
+    // it or a block closing it, at 640 by 360 at High with the screen's probes left out, so the
+    // floor's light is the field's alone, where light through the edge would fan over the floor.
     private static int BrightestAboutTheEdge(bool closed)
     {
         const uint Width = 640, Height = 360;
         const float Fov = 70f;
         var glowstone = (X: 15, Y: 5, Z: -14);
-        // The game's eye 1.62 over the block it stands on, facing 225 degrees and 32 down.
+        // A standing player's eye, 1.62 over the block it stands on, facing 225 degrees and 32 down.
         var eye = new Vector3(21.2f, 6.62f, -20.2f);
         float heading = 225 * MathF.PI / 180, pitch = -32 * MathF.PI / 180;
         var forward = new Vector3(MathF.Sin(heading) * MathF.Cos(pitch), MathF.Sin(pitch), -MathF.Cos(heading) * MathF.Cos(pitch));

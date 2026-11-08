@@ -34,9 +34,9 @@ public sealed record PickerItem(
 /// </summary>
 /// <remarks>
 /// <para>
-/// A window rather than a flyout by the button, the way Godot adds a node. A list that grows with a
-/// project needs room and a search box, which a flyout hanging off a corner has neither of, and two
-/// ways of adding something in one editor that look different read as two kinds of thing.
+/// A window rather than a flyout by the button. A list that grows with a project needs room and a
+/// search box, which a flyout hanging off a corner has neither of, and two ways of adding something
+/// in one editor that look different read as two kinds of thing.
 /// </para>
 /// <para>
 /// Keys do what they do in any list with a search box over it. Typing narrows it, the arrows move

@@ -220,8 +220,8 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
                 // denoiser to clean the picture instead. Bevy's denoiser is DLSS's, which the
                 // bridge does not build, and the bridge's own in `denoiser` is left less noise to
                 // take away with it on. Before that denoiser, ReSTIR halved the noise between two
-                // frames of a Cornell box lit by a panel, for 1.3 ms more of the GPU at 1280 by
-                // 720 on the development machine's laptop GPU.
+                // frames of a Cornell box lit by a panel, for 1.3 ms more of a laptop's GPU at 1280
+                // by 720.
                 camera.insert((SolariLighting { restir: true, ..SolariLighting::default() }, usage));
 
                 status::OK

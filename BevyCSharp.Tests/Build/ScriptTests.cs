@@ -11,7 +11,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// <para>
 /// A script written on Linux passes every Linux run and fails the first on macOS on a form only
-/// GNU's tools read, as 3DEngine's pack did on <c>sed -i</c>, whose BSD reading took the first file's
+/// GNU's tools read, such as <c>sed -i</c> with no suffix, whose BSD reading takes the first file's
 /// name as its script. Windows runs the scripts in Git's bash, whose tools are GNU's, so macOS is
 /// the system that tells, and the test reads for it on every system.
 /// </para>

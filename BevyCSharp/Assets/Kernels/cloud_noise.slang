@@ -3,7 +3,7 @@
 //
 // The shape volume holds in red Perlin noise made billowy by Worley noise, the low frequency a
 // cloud's body is cut from, and in green, blue and alpha Worley noise at three rising frequencies,
-// which round the body into heaps, as Schneider's clouds for Horizon Zero Dawn (Nubis) shape theirs.
+// which round the body into heaps, as Schneider's Nubis clouds shape theirs.
 // The detail volume holds Worley noise at three higher frequencies, which wears a cloud's edges
 // into wisps. The weather map holds where the sky has cloud in red and what kind in green, from
 // the flat heaps of fair weather at none to towering ones at one, the same in both its slices.
