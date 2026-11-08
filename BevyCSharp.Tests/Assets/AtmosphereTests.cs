@@ -115,8 +115,9 @@ public sealed class AtmosphereTests
         const ulong Settled = 60;
         CapturedImage? picture = null;
         Capture? capture = null;
+        var ready = 0;
 
-        using var app = new App(Config.OffscreenFor(32, 32, frames: (uint)Settled + 40));
+        using var app = new App(Config.OffscreenFor(32, 32, frames: 600));
         app.AddPlugin(new EnginePlugin());
         app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
         {
@@ -131,8 +132,15 @@ public sealed class AtmosphereTests
         }, "Test.Sky"));
         app.AddSystem(Stage.Update, new SystemDescriptor(world =>
         {
-            if (world.Resource<Time>().FrameCount == Settled) capture = Render.BeginCapture();
+            // The sky is asked for once every pipeline has been ready for ten frames together, as well
+            // as past the settled frame, since the air's tables and the sky drawn from them compile
+            // away from the frame. Asked for at the settled frame alone, earth's sky read 1 red and 1
+            // blue in a whole run while another engine's tests held the GPU, and its picture had not
+            // arrived 40 frames later on one core with the driver's shader cache off.
+            ready = Render.PipelinesReady() ? ready + 1 : 0;
+            if (capture is null && world.Resource<Time>().FrameCount >= Settled && ready >= 10) capture = Render.BeginCapture();
             if (picture is null && capture is { } asked && Render.TryReadCapture(asked, out var arrived)) picture = arrived;
+            if (picture is not null) new BehaviorContext(world).Exit();
         }, "Test.Read"));
 
         Assert.Equal(0, app.Run());

@@ -1,13 +1,15 @@
 # Review
 
-Reviewed up to `01951f29`, item 113, the field holding a crown's leaves cell by cell, pushed at
-03:54 on 2026-11-08, its run green at 04:10 on the three systems in 11 to 16 minutes; it keeps the
-form and carries the review's files and the devlog. Nothing is pushed after it. Before it
-`e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at 22:47 on
-2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests the
-shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray on
-the light from all around and the let-through shadowed, with the reference reading a crown leaf by
-leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
+Reviewed up to `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for
+their diffuse share what their gloss leaves, pushed at 07:22 on 2026-11-08, its run green at 07:40
+on the three systems in 12 to 18 minutes; it keeps the form and carries the review's files and the
+devlog. Nothing is pushed after it. Before it `01951f29`, item 113, the field holding a crown's
+leaves cell by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16
+minutes. Before it `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at
+22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests
+the shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray
+on the light from all around and the let-through shadowed, with the reference reading a crown leaf
+by leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
 `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the leaves' cover,
 pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes. Before it
 `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see along their
@@ -1570,7 +1572,36 @@ from [SHARED.md](SHARED.md).
     between the two is the masks' mip filtering, the normal map's above all, the picture's mips
     against the reference's mip 0; the test moves to 384 by 256 where the bar holds and no sampling
     changes. The crowns' read takes that as its first figure, the mip the eye's distance gives at
-    each of the four distances.
+    each of the four distances. Read at 08:42 on 2026-11-08, no mend. The fill, the lone oak 75 seen
+    level as the share of the crown's disc its leaves cover, picture against reference at 640 by
+    360, 0.750 against 0.751 at 5 m, 0.407 against 0.413 at 15, 0.334 against 0.341 at 30 and 0.340
+    against 0.327 at 60, the picture's fill the leaves' own within 2% to 30 m and 4 over at 60; the
+    atlas of 512 by 256 with two 256-texel leaves gives 1,310 texels a meter on the full level's
+    cards and 926 on the reduced, build/textures.py keeping each leaf's box share until the box is
+    about a texel across; at 320 by 180 the picture reads +5 and +18% at 30 and 60 m and the
+    reference's masks at a set mip hold below about mip 6 and rise past it, so the mips add fill
+    only where a leaf's box comes to about a texel, which at 1280 by 720 never happens before the
+    reduced level gives way to the cards. The first case, oak 75's reduced level at -47 and -49:
+    across the dither band Bevy draws both levels whole into the sun's shadow map, bevy_camera's
+    range testing a light's view over the whole band and specialize_shadows never adding the dither
+    key, the lone oak side-lit with GI off reading -3% at 22 m and +8 at 33 with one level and -16,
+    -17 and -12 in the band at 26.5, 29.5 and 30.3 m against +8, 0 and +5 with the other level's
+    leaves not casting, the doubled cast costing the meadow's oak 5 to 6 points; the rest is not
+    shadow, the oak reading -53 and -52 with every tree's casting away on both sides and 0 and -8
+    against the reference's direct sun alone, and the lone oak lit from behind the eye -22 and -16%
+    against the whole reference with GI on as with it off, the probes adding 0.001 of 0.114, so the
+    light a crown's leaves scatter between them, about a fifth there, reaches them through no probe.
+    Small findings, the oak alone keeping a gray of 0.012 against the reference's 0.002 with the sun
+    off under the meadow's reflection probe and irradiance volume, and a reference of a scene with
+    nothing drawn failing on an unregistered component type. Decided, (a) one level casts at any
+    distance, NotShadowCaster on the level whose half of the band the eye is not in by the rule
+    GiReference.InRange uses, the shadow stepping at the band's middle within a frame, a mend since
+    it is a fault and not the owner's look; (b) the fill stands as the leaves' own, which is the
+    owner's look (Decision 78) and the reference's alike, no sampling moves, and the crown tests
+    read at 640 by 360 or more as 105's grass test did; (c) the light a crown's leaves scatter
+    between them is item 116, before 114, since it brightens the crowns by the right light; the two
+    small findings mend in passing in 116's commit. The pictures 08-11-item-107-measure.png and
+    08-11-item-107-band.png in the day's dump, sent to the owner.
 
 108. **The README's last top link is 3DEngine.** Decision 79 on 2026-11-05. The row over the
     README's title, Devlog and Cheat sheet, ends with a third link, 3DEngine, to
@@ -1978,7 +2009,17 @@ from [SHARED.md](SHARED.md).
     even gloss as the cause and 0.5 for the 0.95 walls as the run-away guard named as such, and the
     hit's gloss along its mirror way is item 114, with the smooth room's second bounce at +12.6% as
     its measure and the cost per hit in the trace beside it, since the engine's same read parked at
-    half a millisecond.
+    half a millisecond. The energy check is `443dad1f`, pushed at 07:22 on 2026-11-08, a probe ray's
+    hit and the reference's faces past the first keeping for their diffuse share what their gloss
+    leaves, the smooth room's test at 0.20 for the 0.787 walls (1.08 to 1.16) naming the hit's even
+    gloss and 0.5 for the 0.95 walls (1.35 to 1.38 where the head ran to 1,195) as the run-away
+    guard, the bounce rooms' references from four seeds with their bounds by the rule and view 6 at
+    15% over its conserving reading, the reading 2026-11-08-item-110-smooth.webp; check95 on the
+    three profiles, the ABI at 322, the suite 2,044 passed and 1 failed in 65 minutes while the
+    engine's tests held the GPU, the air's sky test reading a sky not yet drawn at its set frame
+    under load and passing five of five alone, its second such failure in 88 runs here, item 115;
+    NormTests 18, the listing unchanged. 110 stands done in its three steps with 114 holding the
+    hit's mirror way.
 
 111. **A lit face outside a thin wall lights the room inside.** From item 110 on 2026-11-07. The
     diffuse read's thin-walled room, walls 0.3 thick in cells of 0.5 with its lamp outside the east
@@ -2316,7 +2357,6 @@ from [SHARED.md](SHARED.md).
     the suite 2,043 in 51 minutes, NormTests 18, the listing unchanged, the pair
     2026-11-08-item-113-crowns.webp. Next 107.
 
-
 114. **A probe ray's hit reflects along its mirror way.** From item 110 on 2026-11-08. shadeProbeHit
     gives a hit's gloss share, f0 times A plus B at the ray's angle, times the irradiance over pi as
     if the gloss reflected the light from all around evenly, where the reference reflects the
@@ -2330,6 +2370,27 @@ from [SHARED.md](SHARED.md).
     the Cornell box and the meadow, since the engine's same read, each light's reflection and a lobe
     of its probes' faces at the hit, parked under its budget at about half a millisecond, and land
     or park by the cost. After 107.
+
+115. **The air's sky test captures before its sky is drawn under load.** From item 110's suite on
+    2026-11-08. AtmosphereTests.AnAirOfTheGamesOwnDrawsItsOwnSky captures at a set frame and waits
+    on no pipeline, so under another engine's load on the GPU it read earth's sky at 1 red and 1
+    blue, a picture nearly black at frame 60, and at 80f75e53 45 red and 49 blue, twice in 88 whole
+    runs kept here, passing five of five alone each time. Wait for Render.PipelinesReady before the
+    capture, as the captures that read a drawn frame do, with the test's remark naming the load that
+    showed it; a small commit of its own or in 107's, whichever comes first. Before 107's commit.
+
+116. **The probes' rays gather the light a crown's leaves scatter between them.** From item 107 on
+    2026-11-08. A lone oak lit from behind the eye reads 22 and 16% under the whole reference with
+    GI on as with it off, the probes adding 0.001 of its 0.114, since a probe's ray crossing a
+    crown's cells keeps the share they let through (item 113) and gathers nothing of the light the
+    leaves scatter, about a fifth of a leaf's light in that crown. Read what a ray crossing a crown
+    should gather, the cells' leaf area times the leaves' color times the light the probes hold
+    there, as a slab's surface is gathered at a hit, against the reference's paths through the same
+    crown; then a mend measured on the lone oak front-lit, the lone aspen under the uniform sky and
+    the meadow's crowns leaf by leaf, the canopy floor and 113's figures held. In its commit, in
+    passing, the oak's gray of 0.012 against 0.002 with the sun off under the reflection probe and
+    the irradiance volume, read and mended or named, and a reference of a scene with nothing drawn
+    failing on an unregistered component type, mended. After 107, before 114.
 
 ## Verdicts
 
@@ -2602,6 +2663,22 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
    engine's name and linking to it. So the row of links over each engine's README title ends with
    the other engine's name linked to its repository, BevyCSharp's with 3DEngine and 3DEngine's with
    BevyCSharp, as the game's row ends with 3DEngine. Item 108.
+
+80. **No millisecond budget.** The owner wrote on 2026-11-08 at 08:50, "There is no ms limit budget.
+   We first make it work and performant and focus on crunching the numbers after or along the way as
+   much as possible." So a mend that brings a view to its reference lands by its figures, its cost
+   measured and recorded beside them and cut after or along the way where a cut holds the readings;
+   item 114 and the rest land or stay by their figures, the cost a figure and not a gate, and the
+   forest's and the meadow's milliseconds stay in each record.
+
+81. **A stop rule and one target.** The owner wrote on 2026-11-08 at 08:5x, asked why the light
+   leaking had moved little in days, that the review should do what it thinks right and tell them
+   for approval. The owner approved at 08:49 on 2026-11-08 ("Do it"), so a view inside its band
+   lands and a figure that remains is recorded and not chased unless it lies in a scene the owner
+   looks at, the meadow here and Sponza's named views in the engine; one bounded read places a cause
+   and a second is the last before a mend is tried or the figure recorded. The meadow at eight in
+   the morning is the bridge's one target scene, its crowns and its grass against the one reference,
+   the rooms the guard.
 
 ## Replies
 
@@ -5557,3 +5634,93 @@ gloss sent on 1.57 of what reached a smooth white face at a grazing ray and a cl
 walls as white as 0.95 ran away to over a thousand times its reference, and against the conserving
 reference a room of the level's white reads 1.08 to 1.16, the hit's gloss taken as though the light
 reached it evenly, each bounce past the first 12 to 16% over, item 114.
+
+Item 107, the crowns' fill against the reference, read and proposed with no mend, in the commit
+carrying this line beside item 115.
+
+The fill. The lone oak 75 seen level at 640 by 360, the measure's size, the share of its crown's
+disc its leaves cover reads 0.750, 0.407, 0.334 and 0.340 in the picture at 5, 15, 30 and 60 meters
+against 0.751, 0.413, 0.341 and 0.327 in the reference, the full level at the first two and the
+reduced one at the others in both, so the picture's fill is the leaves' within 2% to 30 meters and
+4% over at 60. Its atlas is 512 by 256, two leaves of 256 texels, at 1,310 texels a meter on the
+full level's cards and 926 on the reduced one's, and build/textures.py keeps each leaf's share of
+its box at every level until the box is about a texel across. At 320 by 180 the picture reads 0.749
+and 0.408 at 5 and 15 meters against 0.751 and 0.413, and 0.357 and 0.386 at 30 and 60 against 0.341
+and 0.327, 5 and 18% over. With the reference's masks read at a set level its cover holds below
+about mip 6, 0.749, 0.411, 0.340 and 0.325 at 5.5, and rises past it, 0.779, 0.432, 0.356 and 0.341
+at 7.1 and 0.882, 0.501, 0.407 and 0.388 at 7.6 and at 8.6 alike, so the picture at 30 meters there
+reads as at mip 7.1 and at 60 as past 7.6, where each card is drawn as its whole box. The level each
+distance gives by the cards' slant, weighted by the pixels they cover, is 5.5, 7.1, 8.1 and 9.1 on
+the full level and 5.0, 6.6, 7.6 and 8.6 on the reduced at 320 by 180 and one less at 640 by 360,
+half a level to a level over what the reads give. So the fill past the leaves' own is the mips',
+where a leaf's box comes to about a texel, at 320 by 180 from about 60 meters and at 640 by 360 past
+it, and at 1280 by 720 never before the reduced level gives way to the cards at six of its heights.
+08-11-item-107-measure.png in the dump shows the meadow at the measure's view, the reference in its
+leaf-by-leaf mode keeping the cut-out faces alone, so the pair shows where each crown stands rather
+than how it looks.
+
+The first case, the near oak's reduced level at -47 and -49%. In the band where a tree's full level
+is dithered into its reduced one, from 2.5 to 3 of its heights, Bevy draws both levels whole into
+the sun's shadow map, since the range a light's view tests spans the whole band (bevy_camera's
+range.rs, the camera the shadow's origin) and the shadow pass's pipelines never take the dither
+(specialize_shadows in bevy_pbr's light.rs). The lone oak under a sun 21 degrees up from the side
+with global illumination off, read leaf by leaf against the reference's direct light, reads 3% under
+at 22 meters with its full level alone and 8% over at 33 with its reduced one alone, and in the band
+16% under at 26.5 meters, 17% at 29.5 and 12% at 30.3, where with the other level's leaves casting
+nothing it reads 8% over, even and 5% over. Its stems casting nothing moves nothing, and turned by
+each quarter it reads within 5% under and 8% over outside the band. In the meadow oak 75 at 29.5
+meters reads 42 and 43% under with its full level's leaves casting nothing, 08-11-item-107-band.png.
+The meadow's figure of 14 and 18% with the full level hidden was the dither's, a fifth of the pixels
+there the full level's and showing the sky behind it once hidden.
+
+The rest of it is the light from all around. Taking each tree's shadow away in the picture and the
+reference alike, the reference traced again at each step, aspen 74's moves nothing, every other
+tree's leaves the oak 34 and 38% under, and the oak's own 53 and 52% under, 0.122 and 0.142 against
+0.260 and 0.292, so no shadow holds the gap. Against the reference's direct sun alone the oak reads
+even and 8% under, the picture's whole light the reference's direct alone, and with the probes held
+at their first bounce 36 and 38% under the reference meeting one face past the first. The lone oak
+lit from behind the eye reads 23% under the whole reference at 22 meters and 17% at 33 with global
+illumination off and 22 and 16% with it on, the probes adding 0.001 to 0.114, so the light a crown's
+leaves scatter between them, about a fifth of the reference's there, reaches none of them through
+the probes, and under the meadow's sky the sky's share through the crown adds the rest, item 112's
+ground. The clouds, at none of the sky, move nothing.
+
+The proposal. For the shadow, one level of a tree casts at any distance, the nearer half of the band
+the full level's and the farther half the reduced one's, the rule GiReference.InRange traces one
+level by, NotShadowCaster put on the level whose half the eye is not in as a tree crosses the band's
+middle, from the camera Bevy takes as the shadow's origin. The shadow then changes at the band's
+middle in a frame where the picture fades, the two levels' covers within a sixth of each other
+there. Dithering Bevy's shadow pass would keep the fade and is a patch of bevy_pbr's code rather
+than of a shader. Its test reads the lone oak in the band within its figures either side, the
+meadow's oak gaining its 5 or 6 points. For the fill neither of the item's choices is needed at the
+measure's size, the leaves covering the crown as the reference's do at close range and the mips
+adding fill only where a box is a texel across. The tests that read a crown take it at 640 by 360 or
+more, as 105 moved the grass test to 384 by 256, with no sampling changed, or where a small picture
+is wanted the reference's camera rays read the masks at their footprint's level. The fill's choice
+is the owner's. The light between a crown's leaves is a third, the probes' rays crossing a crown's
+cells gathering the light its leaves scatter as well as keeping the share they let through, read on
+the lone oak lit from behind the eye with its 22 and 16% as the measure.
+
+Two small findings beside it. With the sun off the oak's leaves keep 0.012 of a gray light where the
+reference reads 0.002 and the aspen beside it 0.001, under the meadow's reflection probe and
+irradiance volume, not read further. A reference asked of a scene with nothing drawn fails with "the
+component type was never registered", RebuildRayScene asking for a scene that was never made.
+
+Item 115, the air's sky test waiting for its pipelines, in the same commit.
+AnAirOfTheGamesOwnDrawsItsOwnSky asks for its picture once every pipeline has been ready for ten
+frames together and the settled frame has passed, and leaves once it arrives within 600 frames,
+where it asked at frame 60 and ran 100. With the driver's shader cache off
+(__GL_SHADER_DISK_CACHE=0) on one core the test before read no picture in 40 frames three times of
+three, and the test after passes three of three in 7 s, 4 s as before alone. Its remark names the
+whole run's load that showed it.
+
+The change is the test's alone, so no bridge was built. The whole suite ran, 2,045 passed and 3
+skipped in 49 m 27 s at the 3 GB cap, none aborted, its largest process at 3,334 MB, the air's sky
+test among those passing. NormTests passed, 18. The public listing is unchanged.
+
+Shared: Bevy draws both levels of a tree whole into the sun's shadow map across the band they are
+dithered over, a lone oak's leaves there 12 to 17% under the reference where either level alone
+reads within 5% under and 8% over, and the probes gather none of the light a crown's leaves scatter
+between them, about a fifth of a front-lit crown's in the reference, while the leaves' fill matches
+the reference's at close range, the atlas's mips filling a crown only where a leaf's box comes to a
+texel.
