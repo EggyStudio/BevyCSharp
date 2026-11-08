@@ -14,7 +14,9 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// A probe's texel holds the light its rays brought along the texel's ways, four fixed rays a texel
-/// of eight a side and one of sixteen, merged with the cascade above where they met nothing. The
+/// of eight a side and one of sixteen, merged with the cascade above where they met nothing, and is
+/// read as the probe's faces take it, times the share the rays kept across surfaces letting light
+/// through before their interval began, with the light those surfaces scattered along them. The
 /// reference traces from the probe's place, moved off a surface as the trace moves it, along each
 /// texel's middle way and along ways drawn across the texel, every face met lit as the probes light
 /// one, and gives the first face's distance along the middle way beside the probe's ray's. Where
@@ -37,7 +39,7 @@ internal static unsafe partial class GiReference
         public required int Cascade, Samples, Faces, Texels, X, Y, Z;
         public required Vector3 Spot;
         public required float Apart;
-        public required (AssetHandle Merged, AssetHandle Distances, int Texels, AssetHandle Held) Images;
+        public required (AssetHandle Merged, AssetHandle Kept, AssetHandle Distances, int Texels, AssetHandle Held) Images;
         public string? Path;
         public Vector3 Origin;
         public bool Inside;
@@ -45,8 +47,8 @@ internal static unsafe partial class GiReference
         public int Added, Frames, Steps;
         public long Started;
         public AssetHandle Sums = AssetHandle.None, Regions = AssetHandle.None;
-        public BufferRead? HeldRead, SumsRead, RegionsRead, MergedRead, DistancesRead;
-        public byte[]? SumsBytes, RegionsBytes, MergedBytes, DistancesBytes;
+        public BufferRead? HeldRead, SumsRead, RegionsRead, MergedRead, KeptRead, DistancesRead;
+        public byte[]? SumsBytes, RegionsBytes, MergedBytes, KeptBytes, DistancesBytes;
     }
 
     private static ProbeJob? _probe;
@@ -159,20 +161,24 @@ internal static unsafe partial class GiReference
             job.SumsRead = Shaders.BeginImageRead(job.Sums);
             job.RegionsRead = Shaders.BeginImageRead(job.Regions);
             job.MergedRead = Shaders.BeginImageRead(job.Images.Merged);
+            job.KeptRead = Shaders.BeginImageRead(job.Images.Kept);
             job.DistancesRead = Shaders.BeginImageRead(job.Images.Distances);
         }
-        if (job.SumsRead is not { } sums || job.RegionsRead is not { } regions || job.MergedRead is not { } merged || job.DistancesRead is not { } distances) return null;
+        if (job.SumsRead is not { } sums || job.RegionsRead is not { } regions || job.MergedRead is not { } merged || job.KeptRead is not { } keptRead
+            || job.DistancesRead is not { } distances) return null;
         if (job.SumsBytes is null && Shaders.TryReadBuffer(sums, out var a)) job.SumsBytes = a;
         if (job.RegionsBytes is null && Shaders.TryReadBuffer(regions, out var b)) job.RegionsBytes = b;
         if (job.MergedBytes is null && Shaders.TryReadBuffer(merged, out var c)) job.MergedBytes = c;
+        if (job.KeptBytes is null && Shaders.TryReadBuffer(keptRead, out var k)) job.KeptBytes = k;
         if (job.DistancesBytes is null && Shaders.TryReadBuffer(distances, out var d)) job.DistancesBytes = d;
-        if (job.SumsBytes is null || job.RegionsBytes is null || job.MergedBytes is null || job.DistancesBytes is null) return null;
+        if (job.SumsBytes is null || job.RegionsBytes is null || job.MergedBytes is null || job.KeptBytes is null || job.DistancesBytes is null) return null;
 
         var n = job.Texels;
         const int p = WorldProbes.Probes;
         var traced = MemoryMarshal.Cast<byte, Vector4>(job.SumsBytes);
         var first = MemoryMarshal.Cast<byte, uint>(job.RegionsBytes);
         var held = MemoryMarshal.Cast<byte, Half>(job.MergedBytes);
+        var kept = MemoryMarshal.Cast<byte, Half>(job.KeptBytes);
         var reached = MemoryMarshal.Cast<byte, Half>(job.DistancesBytes);
         var table = new StringBuilder();
         table.AppendLine("texel\tway\tprobe\tmiddle\tdrawn\tprobe's distance\tmiddle's distance");
@@ -185,7 +191,10 @@ internal static unsafe partial class GiReference
                 var share = 1.0 / Math.Pow(point.Length(), 3);
                 var way = Vector3.Normalize(point);
                 var at = ((job.Z * (p * n) + job.Y * n + v) * (p * n) + job.X * n + u);
-                var probeLight = new Vector3((float)held[at * 4], (float)held[at * 4 + 1], (float)held[at * 4 + 2]);
+                // As the probe's faces take it, the merged light times the share kept before the
+                // interval began, with the light gathered there.
+                var probeLight = new Vector3((float)held[at * 4], (float)held[at * 4 + 1], (float)held[at * 4 + 2]) * (float)kept[at * 4 + 3]
+                    + new Vector3((float)kept[at * 4], (float)kept[at * 4 + 1], (float)kept[at * 4 + 2]);
                 var middle = Mean(traced[v * 2 * n + u]);
                 var drawn = Mean(traced[v * 2 * n + n + u]);
                 var probeDistance = Math.Abs((float)reached[at]);

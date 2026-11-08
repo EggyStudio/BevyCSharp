@@ -331,6 +331,9 @@ internal static unsafe partial class GiReference
             placed.Add((entity, index));
         }
 
+        // With nothing drawn there is nothing to fill, and the caller refuses a scene of no meshes,
+        // where a scene never made built again failed on a component type never registered.
+        if (placed.Count == 0) return ([], skipped);
         if (placed.Count > rays.Capacity)
         {
             rays.Capacity = Math.Max(placed.Count, rays.Capacity * 2);

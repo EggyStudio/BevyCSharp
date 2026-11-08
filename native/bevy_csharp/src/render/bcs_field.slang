@@ -399,6 +399,18 @@ public float lightThroughKept(float passing, float depth, float cell, bool insid
 /// surface keeps the share of the cell it was met in for its whole depth (`lightThroughKept`).
 public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept)
 {
+    float stopped;
+    return lightThroughCrossedAt(field, linear, albedo, info, origin, way, t, most, inside, kept, stopped);
+}
+
+/// `lightThroughCrossed`, and in `stopped` how far past `t` the light the crossing stops is stopped
+/// on average, each step's share at the step's middle, where it crossed a crown's leaf cards, or 0
+/// where it met any other surface, so a probe's ray lights what a crown stops where its leaves
+/// stopped it rather than where the ray met the crown.
+public float lightThroughCrossedAt(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept,
+    out float stopped)
+{
+    stopped = 0.0;
     float3 met = origin + way * t;
     float alpha = paintAlphaAt(albedo, info, met);
     if (!lightThroughCards(alpha))
@@ -408,7 +420,7 @@ public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Te
         return depth;
     }
     // Each step finds the cascade it lies in once, for its cell, its distance and its paint.
-    float depth = 0.0, lost = 0.0;
+    float depth = 0.0, lost = 0.0, keptHere = 1.0, stoppedSum = 0.0;
     int size = int(info.counts.y);
     inside = true;
     [loop]
@@ -432,7 +444,13 @@ public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Te
         float painted = albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a;
         float share = lightThroughCards(painted) ? lightThroughOf(painted) : d < -0.5 * oc.w ? 0.0 : 1.0;
         if (share < 1.0)
-            lost -= log(max(share, 1e-6)) * min(0.5 * oc.w, most - depth);
+        {
+            float length = min(0.5 * oc.w, most - depth);
+            lost -= log(max(share, 1e-6)) * length;
+            float keptPast = exp(-lost);
+            stoppedSum += (depth + 0.5 * length) * (keptHere - keptPast);
+            keptHere = keptPast;
+        }
         depth += 0.5 * oc.w;
         if (depth >= most)
         {
@@ -441,5 +459,6 @@ public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Te
         }
     }
     kept = exp(-lost);
+    stopped = kept < 1.0 - 1e-6 ? stoppedSum / (1.0 - kept) : 0.0;
     return depth;
 }

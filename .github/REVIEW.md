@@ -1,8 +1,10 @@
 # Review
 
-Reviewed up to `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's
-reading in the replies, pushed at 09:32 on 2026-11-08, its run green at 09:48 on the three systems
-in 10 to 16 minutes; it keeps the form and carries the review's files. Nothing is pushed after it.
+Reviewed up to `69d97fec`, 107's shadow mend, one visibility level casting at any distance by Bevy's
+shadow origin, pushed at 11:22 on 2026-11-08, its run green at 11:36 on the three systems in 12 to
+14 minutes; it keeps the form and carries the review's files and the devlog. Nothing is pushed after
+it. Before it `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's reading
+in the replies, pushed at 09:32, its run green at 09:48 on the three systems in 10 to 16 minutes.
 Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for their
 diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the three systems
 in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's leaves cell by
@@ -1612,6 +1614,22 @@ from [SHARED.md](SHARED.md).
     trees alone, no ABI change; the test the lone oak at 26.5, 29.5 and 30.3 m against the
     reference's direct light failing at the head, the guide's components page corrected where it
     says the shadow fades by the same distance, the meadow's oak 75 and the cost read beside it.
+    Done at `69d97fec`, pushed at 11:22 on 2026-11-08. The native system cast_one_level in
+    render/shadow_origin.rs takes Bevy's shadow origin after transform propagation and before the
+    lights' visibility check and gives NotShadowCaster with an OutOfItsHalf marker to any mesh of a
+    visibility range outside InRange's span, a game's own NotShadowCaster staying, the ABI unchanged
+    at 322; TreeLevelShadowTests reads the lone oak side-lit against the reference's direct light at
+    26.5, 27.85, 28.05, 29.5 and 30.3 m at 8, 4, 3, 1 and 7% over where the head read 16, 19, 15, 17
+    and 12 under, the bar 0.92 to 1.15, and a capture a frame either side of the band's middle reads
+    0.0000 apart from the picture taken once the eye stood on that side (0.1682 and 0.1679 against
+    0.1659 with both levels casting and 0.1807 casting nothing), with a native unit test for the
+    rule; the meadow's oak 75 -42 and -43% where -47 and -49, the aspens +10 and +16, the shaded
+    grass -3; 33, 77 and 357 microseconds a frame for 1,000, 10,000 and 50,000 meshes in a release
+    build; the components page, the trees page and RENDERING.md corrected, the reading
+    2026-11-08-item-107-band.webp; check95 passed, cargo test 118 and 204 after two flaky native
+    tests passed in both reruns, the suite 2,051 in 59 minutes, NormTests 18. 107 is done, the fill
+    the leaves' own by the owner's look, the band's shadow mended and the crowns' scattered light
+    item 116. Next 116.
 
 108. **The README's last top link is 3DEngine.** Decision 79 on 2026-11-05. The row over the
     README's title, Devlog and Cheat sheet, ends with a third link, 3DEngine, to
@@ -2404,7 +2422,39 @@ from [SHARED.md](SHARED.md).
     the meadow's crowns leaf by leaf, the canopy floor and 113's figures held. In its commit, in
     passing, the oak's gray of 0.012 against 0.002 with the sun off under the reflection probe and
     the irradiance volume, read and mended or named, and a reference of a scene with nothing drawn
-    failing on an unregistered component type, mended. After 107, before 114.
+    failing on an unregistered component type, mended. After 107, before 114. Read at 11:36 on
+    2026-11-08, the two reads placing the cause. The lone oak at 22 m front-lit at Medium with the
+    field in four cascades at 0.25 m reads its leaves 0.1139 against 0.1455, 22% under; the crown
+    lies past cascade 0, which sits around the eye to z 8 m, so its leaves read cascade 1's probes 4
+    m apart whose rays' interval starts at 4 m. Two of the 36 cascade-1 probes in the crown's box,
+    the two in its core, are held inside a mesh, placed() finding the field below zero there and the
+    gather's share 0, the middle probe reading 0 against the reference's 0.065 and the leaves
+    weighing it at nothing; the probe in the crown's front half reads 0.0079 against 0.0189, its 13
+    ways into the crown 0.0345 against 0.092, every crossing there beginning at the probe before its
+    ray's interval and such a crossing only multiplying keptBefore and gathering no light, the faces
+    taking merged times kept, so the leaves' probes treat the near crown as an absorber; the probe 2
+    m before the front reads 0.0155 against 0.0062, its ways into the crown 118 to 160% over, a
+    crossing taking shadeProbeHit at its sunlit entry times the whole share it stops with the shaded
+    interior standing in for none of it. The mend, taken, measured on the lone oak front-lit, the
+    lone aspen under the uniform sky and the meadow's crowns with the canopy floor and 113's figures
+    held: (1) a crossing gathers what its leaves scatter along it, shadeProbeHit at points set at
+    equal steps of the share it stops, each weighed by that step, the integral of the kept share
+    times the density times the light along the crossing in place of the entry's light times all it
+    stops; (2) a crossing begun before the interval gives its light to the probe's own faces through
+    an image of its own, which gi_ambient adds to merged times kept, the merge left as it is so the
+    cascade below still takes the light past the crown; (3) a probe standing in a crown's card cells
+    counts as outside every mesh. The two small findings go in passing, the cost measured and
+    recorded. Its reading is a pair with the difference panel at a gain of 40 (Decision 82), the
+    wall and the ground behind the oak's crown taking a little more of the crown's scattered light,
+    the leaves changing by about one point.
+
+117. **The version and its tags in the documents.** Decision 83 on 2026-11-08. COMMITS.md gains a
+    section on the version, `build/version.txt`'s major and minor raised by this session in a commit
+    of its own when a step is done and the changes behind it are meaningful, the major at a step the
+    size of a release, and the tags of the letter v and the version that the reviewer sets on that
+    commit and on the commit a package was published from, no other; BUILDING.md's paragraph on the
+    version says the same of the tags. The session judges whether the reference's completion and the
+    probes' specular are 0.7 and says so in the Replies, raising the minor or not. In 116's batch.
 
 ## Verdicts
 
@@ -2693,6 +2743,28 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
    and a second is the last before a mend is tried or the figure recorded. The meadow at eight in
    the morning is the bridge's one target scene, its crowns and its grass against the one reference,
    the rooms the guard.
+
+82. **The difference beside a pair.** The owner wrote to the BevyCSharp session at about 13:50 on
+    2026-11-08, on item 116's meadow pair, that they saw no visible changes in the comparison, the
+    crossing among them, as in the times before, and asked that where there is a difference a third
+    image to the right show it. From here a reading's pair carries a third panel, the after's
+    luminance less the before's at a gain the caption names, brighter in orange and darker in blue
+    on black, in both engines (N 4.9); the earlier readings stand as they are. The change 116 makes
+    is small, about one point in the leaves and a little more of the crown's scattered light on the
+    wall and the ground behind it, which the panel shows at a gain of 40, and the owner hears it so.
+
+83. **Version tags.** The owner wrote at about 14:00 on 2026-11-08, having tagged every commit of
+    the Unity Essentials repositories as `v2.0.30` and the like, that the three projects take tags
+    too, and answered the review's questions at 14:1x. The form is `v6.0.91`, the letter v before
+    `build/version.sh`'s number. Tags go on each major or minor change and on the commits packages
+    were built from, since "doing every commit clutters it and is unnecessary as we want to focus
+    the version tags to releases time apart with meaningful changes and not commits apart". The
+    major and the minor are the sessions' to raise, "each session working on the project can decide
+    when the time is right to rise that number in minor or major as each commit counts as patch",
+    with "full liberty" when "a step is done and meaningful changes were done". N 6.3 holds the rule
+    and the reviewer sets the tags as it pushes. `v0.6.0` marks the commit that set 0.6 and
+    `v0.6.18` the commit `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set
+    at 14:12.
 
 ## Replies
 
@@ -5785,3 +5857,101 @@ dithered over, a lone oak's leaves there 12 to 19% under the reference, and a me
 NotShadowCaster outside the span from the middle of its first margin to the middle of its last,
 measured from the shadow origin, lets one level cast at any distance, the oak 1 to 8% over and the
 step taken in the frame the eye crosses.
+
+Item 116, the probes' rays gathering the light a crown's leaves scatter between them, with its two
+small findings, in the commit carrying this line. Three parts, as the two reads placed the cause. A
+probe's ray crossing a crown lights what the crown stops where its leaves stop it on average, each
+half cell's share at the half cell's middle, the depth the field's march gives beside the share kept
+(lightThroughCrossedAt in bcs_field.slang, lightThroughCrossed keeping its form for the screen
+probes, which are left as they were), where it lit all the crown stops at the place it met it. A
+crossing begun before the ray's interval gives its light to the probe's own faces beside its share,
+the kept image rgba16f with that light in its color, which gi_ambient adds to the merged light times
+the share, the merge handing the cascade below none of it as before. And a probe in a cell a crown's
+cards painted stands outside every mesh unless it lies deeper than half a cell, so a limb's or a
+trunk's inside keeps its solid test. gi.probe reads a way's light as the faces take it, the merged
+light times the share with the light gathered before the interval, the same number where nothing
+lets light through. The ABI is unchanged.
+
+The bound. A crossing is lit once, as at the head, at the depth its own march gives, 64 half cells
+at most, so a ray lights four crossings and a solid at most, as it did. Lit at four places along a
+crossing, where it lost each quarter of what it stops, the trace took 9.0 to 12.2 ms at High in the
+meadow at eight where 3.5 to 3.6, at two 5.8 to 5.9 and at one found by a second march 4.1 to 4.2,
+the probes reading no nearer at four than at one. Lit at its mean depth the trace takes 3.6 to 4.5
+ms where the head's 3.5 to 3.6, another program on the GPU in each run. The image the share is kept
+in holds four channels where it held one, 3 MB more at High, and the probes' count of their memory
+says so.
+
+GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter reads the lone oak 75
+at 22 meters lit from behind the eye at Medium, past the first cascade so its leaves read the
+second's probes 4 meters apart, three probes along their ways against 64 paths a way. Two meters
+before the crown's front it reads 2% under where 151% over, in its front half 11% over where 58%
+under, and among its core's cards 46% under where it stood inside a mesh and held nothing, its bars
+25% for the first two and 0.4 of the reference or more for the third, so it fails at the head on all
+three. AReferenceOfASceneWithNothingDrawnIsRefused asks a reference of a camera with nothing drawn
+and is told the camera draws no meshes for the rays to meet, where the head threw on building a ray
+scene it never made, the component type never registered, the fill returning before it builds one.
+
+What remains, recorded and not chased by Decision 81. The core's probe reads under looking away from
+the sun, its face toward the crown's back 0.008 where its reference's 0.27, a place deep in a crown
+lit as a surface facing out of it by the field's normal and letting nothing through, where the
+reference lights a leaf by its normal bent half way to the way out and lets its translucent share
+through. The lone oak's leaves read 20% under their reference where 22%, their direct light 9% under
+the reference's direct light, 0.113 with global illumination off as read for 107 against 0.1237, and
+the light the leaves scatter between them 0.003 where the reference's is 0.022, the probes about the
+crown holding their reference's light along their ways within 2 and 11%, so what the leaves lack is
+the light between near leaves, which probes 4 meters apart in a crown 14 across do not hold, with
+the leaves' gray, 0.748 on average, taking a quarter of what reaches a leaf's front and two fifths
+of what it lets through again.
+
+In the meadow at eight in the morning the view lies 0.288 from its reference where 0.289, each
+region within two points of where it read, oak 75's leaves 41 and 42% under where 42 and 42, aspen
+74's 10 and 17% over where 9 and 16, the shaded grass 5% under where 4, the walls 13 and 16% under
+where 13 and 17 and the bare ground 25% under where 23. Under the uniform sky the lone aspen's
+leaves read 24% over where 23, lit from behind 9% over where 8, the forest floor 26% under where 25
+and the grass 1% over as it did. The canopy floor takes 0.0969 under leaves letting half through a
+meter where 0.0977, the slab's four floors pass as they did, and 107's band reads 1 to 8% over as it
+did. Run once while two of 3DEngine's examples held 3.8 GB of the GPU, every app after the second
+was refused a device for want of memory, and the run was taken again once they had gone. The reading
+2026-11-08-item-116-crossing.webp shows the meadow's oak at the head, with the mend and their
+difference forty times over, in three panels as the owner asked at 13:50 where a pair's change does
+not show, the wall and the ground behind the crown taking a little more of the light it scatters and
+the leaves changing a pixel here and there either way.
+
+The two small findings. The oak's gray with the sun off is named, not mended. At 29.5 meters, in the
+band where its full level is dithered into its reduced one, its leaves keep 0.012 with global
+illumination on and 0.015 with it off where the reference reads 0.002, the moon at none and turning
+it off moving nothing, and at 22 meters, its full level alone, they read 0.002 against 0.002, so the
+gray is the band's and not the probes', a lead for an item. The reference of a scene with nothing
+drawn is mended as above.
+
+Item 117, the version and its tags in the documents, in the same commit. COMMITS.md gains a section
+on the version, the major or the minor raised by a working session or the reviewer in a commit that
+changes build/version.txt alone when a step is done and the changes behind it are meaningful, the
+major at a step the size of a release, such a commit's message left out of N 7.2's test, and the
+tags of the letter v and the version on the commit that raises the major or the minor and on the
+commit a package was published from and no other, set and pushed by the reviewer. BUILDING.md's
+paragraph on the version says the same of the tags, and its version moves in a commit of its own. In
+my judgment the reference's completion and the probes' specular are 0.7 once the probes' specular is
+whole, item 114's hit reflecting along its mirror way landing beside the leaves' and the grass's
+reflection of 110's third step, with the reference completed by 110's energy check and 112 and 113's
+leaves. So the minor is not raised at 116, a mend within the probes' crossing of crowns, and is
+raised in a commit of its own after 114's.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+204 with render. The bridge was built with the editor profile, meshlets and Solari. A first whole
+run, 2,047 passed with 6 failed, failed five of the bounce rooms' cases with the screen probes, the
+GPU out of memory while one of 3DEngine's examples held it, and an audio test on a buffer underrun,
+and all six passed run again with the GPU at 3.9 GB, the 28 cases of the two tests together. The run
+was taken again once the probes' count of their memory took the kept image's four channels. The
+whole run taken again gave 2,050 passed with 3 failed and 3 skipped in 52 m 30 s at the 3 GB cap,
+none aborted, its largest process at 2,890 MB, the three, a planted tree waiting to be dressed, the
+thousand trees' memory and the forest floor, failing while the GPU held 5.9 GB of its 8 with one of
+3DEngine's examples on it, two of them out of its memory, and all three passed run again alone with
+the GPU at 2.9 GB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a probe's ray crossing a crown lit all the crown stops at the place it met it and gave the
+probe's faces none of a crossing begun before its interval, a probe two meters before a front-lit
+oak reading 151% over its reference and one in its front half 58% under, and lit where the crown's
+leaves stop it on average, the field's march giving that depth beside the share it keeps, with an
+early crossing's light kept for the faces beside its share, they read 2% under and 11% over at about
+the head's cost, where four places along a crossing took three times as long.

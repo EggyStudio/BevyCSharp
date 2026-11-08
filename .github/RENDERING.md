@@ -252,6 +252,28 @@ codes, and at High in the meadow the trace takes 7.0 to 9.2 ms where 6.8 to 9.8,
 cards finding its cascade once for its cell, its distance and its paint, with one of 3DEngine's
 examples on the GPU.
 
+A probe's ray crossing a crown lights what the crown stops where its leaves stop it on average, each
+half cell's share at the half cell's middle (`lightThroughCrossedAt`), where it lit all the crown
+stops at the place it met it, and a crossing begun before the ray's interval gives its light to the
+probe's own faces beside its share, in the color of the image the share is kept in, where it gave
+the share alone. A probe in a cell a crown's cards painted stands outside every mesh unless it lies
+deeper than half a cell, as the crossing holds a limb's inside. A lone oak 22 meters off lit from
+behind the eye lies past the first cascade, so its leaves read the second's probes 4 meters apart,
+and read along their ways as their faces take them the probe two meters before the crown's front
+reads 2% under its reference where 151% over, the one in its front half 11% over where 58% under,
+and the one among the core's cards 46% under where it stood inside a mesh
+(`ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter`). The core's probe reads under looking away
+from the sun, a place deep in a crown lit as a surface facing out of it by the field's normal and
+letting nothing through, where the reference lights a leaf by its normal bent toward the way out and
+lets its translucent share through. The oak's leaves read 20% under their reference where 22%, their
+direct light 9% under and the light the leaves scatter between them 0.003 where the reference's is
+0.022, which probes 4 meters apart in a crown 14 across do not hold leaf by leaf. Lit at four places
+along a crossing, where it lost each quarter of what it stops, the probes read no nearer and the
+trace took 9.0 to 12.2 ms at High in the meadow where 3.5 to 3.6, and lit at one it takes 3.6 to
+4.5, the image the share is kept in holding four channels where it held one, 3 MB more at High. The
+meadow at eight in the morning reads its view 0.288 from its reference where 0.289, each region
+within two points of where it read, oak 75's leaves 41 and 42% under where 42.
+
 The cascades of probes are the second (`WorldProbes`, `bcs_gi.slang` and the kernels
 `gi_trace.slang`, `gi_merge.slang` and `gi_ambient.slang`), 3DEngine's world probes with their mends
 to date. A probe is moved off a surface and passed over inside a mesh, a texel of 8 a side sends a

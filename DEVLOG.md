@@ -30,8 +30,19 @@ levels casting whole into the sun's shadow map, its leaves 47 and 49% under its 
 reference, and on the right with one level casting at any distance, 42 and 43% under, more of the
 leaves at the crown's edge in the sun.
 
+![](.github/assets/readings/2026-11-08-item-116-crossing.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, its near oak 29.5
+meters off, on the left with a probe's ray lighting all a crown stops at the place it met the crown
+and giving none of the light of a crossing begun before its interval to the probe's faces, in the
+middle lighting it where the crown's leaves stop it and giving the faces that light, and on the
+right the middle's light less the left's forty times over, brighter in orange and darker in blue,
+the wall and the ground behind the crown's lower side taking a little more of the light the crown
+scatters and the leaves changing a pixel here and there either way, the oak's leaves 41 and 42%
+under their path-traced reference where 42.
+
 Done that day
 
+- Item 107 at `69d97fec`. The crowns' fill, the picture's against the reference's.
 - Item 113 at `01951f29`. Shaded grass beside a wall takes 30 to 45% less light from all around than
   the reference.
 - Item 115 at `571174fc`. The air's sky test captures before its sky is drawn under load.
@@ -1259,13 +1270,9 @@ Done that day
 ## 2026-10-24
 
 ![](.github/assets/readings/2026-10-24-denoiser-checker-crops.webp)
-Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
-opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
-diffuse color times the probes' light, with a sky over a ground past the last cascade, the probes'
-sky at the 0.45 of an ambient light that Bevy's ambient term returns, Render.SetGlobalIllumination
-public, a row on the feature test's graphics page, tests of a red wall tinting a white block's side
-and an open floor reading as Bevy's ambient light leaves it, the costs read in a Cornell box, and
-the denoiser's picture in the ray tracing guide beside the review's readings. (`07863068`)
+The checkered ground far off in three crops, the reference mean, the denoiser's frame and a grainy
+one, the reading that moved the demodulation to the diffuse color plus the specular reflectance
+(item 54).
 
 ![](.github/assets/readings/2026-10-24-item-51-bounce-before-glossy.webp)
 The nine bounce rooms at High beside their references once the environment's sky had come in and
@@ -1395,14 +1402,10 @@ Done that day
 ## 2026-10-23
 
 ![](.github/assets/readings/2026-10-23-field-pair.webp)
+The scene's distance field read as a pair, a box's field mapped and traced (item 50).
+
 ![](.github/assets/readings/2026-10-23-field-window.webp)
-Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
-opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
-diffuse color times the probes' light, with a sky over a ground past the last cascade, the probes'
-sky at the 0.45 of an ambient light that Bevy's ambient term returns, Render.SetGlobalIllumination
-public, a row on the feature test's graphics page, tests of a red wall tinting a white block's side
-and an open floor reading as Bevy's ambient light leaves it, the costs read in a Cornell box, and
-the denoiser's picture in the ray tracing guide beside the review's readings. (`07863068`)
+The field's window in the feature test, the cascades' cells over the room (item 50).
 
 ![](.github/assets/scene-field.webp)
 The scene's distance field darkens each directional light where it closes a surface off, past the
@@ -1429,20 +1432,29 @@ Done that day
 ## 2026-10-21
 
 ![](.github/assets/readings/2026-10-21-edit-mesh-primitives.webp)
+The edit mesh's primitives in the drive, a box, a sphere, a cylinder, a cone, a wedge and an arch
+(item 38).
+
 ![](.github/assets/readings/2026-10-21-grid-room.webp)
+A room blocked out in the prototype materials with the grid image of a meter's cell (item 39).
+
 ![](.github/assets/readings/2026-10-21-modeling-window.webp)
+The modeling window in the editor with its picking, its drag and the Model tab (item 40).
+
 ![](.github/assets/readings/2026-10-21-overlay-f3.webp)
+The F3 overlay over the feature test, the frame's strip and its sections (item 49).
+
 ![](.github/assets/readings/2026-10-21-swarm-waves.webp)
+Swarm's arena across three waves, the game played by its script.
+
 ![](.github/assets/readings/2026-10-21-terminal-room.webp)
+The room built through the model commands from the terminal alone (item 40).
+
 ![](.github/assets/readings/2026-10-21-texture-coordinates.webp)
+Texture coordinates by projection on a checker and a wood grain (item 41).
+
 ![](.github/assets/readings/2026-10-21-textured-cube-editor.webp)
-Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
-opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
-diffuse color times the probes' light, with a sky over a ground past the last cascade, the probes'
-sky at the 0.45 of an ambient light that Bevy's ambient term returns, Render.SetGlobalIllumination
-public, a row on the feature test's graphics page, tests of a red wall tinting a white block's side
-and an open floor reading as Bevy's ambient light leaves it, the costs read in a Cornell box, and
-the denoiser's picture in the ray tracing guide beside the review's readings. (`07863068`)
+A textured cube in the modeling window after the texture coordinates landed (item 41).
 
 ![](.github/assets/blockout.webp)
 Blockout, a level of three rooms, a corridor and stairs between two floors blocked out from one
@@ -1471,13 +1483,7 @@ Done that day
 ## 2026-10-20
 
 ![](.github/assets/readings/2026-10-20-hub-particles.webp)
-Item 51's second part adds global illumination's light to Bevy's surfaces through a pass after the
-opaque geometry that takes back Bevy's ambient diffuse from the G-buffer and adds the surface's
-diffuse color times the probes' light, with a sky over a ground past the last cascade, the probes'
-sky at the 0.45 of an ambient light that Bevy's ambient term returns, Render.SetGlobalIllumination
-public, a row on the feature test's graphics page, tests of a red wall tinting a white block's side
-and an open floor reading as Bevy's ambient light leaves it, the costs read in a Cornell box, and
-the denoiser's picture in the ray tracing guide beside the review's readings. (`07863068`)
+The feature test's hub under its particles, driven offscreen for the readings.
 
 Done that day
 

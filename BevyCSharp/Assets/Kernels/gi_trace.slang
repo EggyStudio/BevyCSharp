@@ -88,9 +88,12 @@ Texture3D<float4> bounced_at;
 [format("r16f")] RWTexture3D<float> reach;
 
 // The share of light each ray kept across surfaces that let light through before its interval
-// began, which the probe's own faces take its light times (gi_ambient.slang), where the cascade
-// below, whose interval that is, takes the light from the interval on whole.
-[format("r16f")] RWTexture3D<float> kept;
+// began, in w, which the probe's own faces take its light times (gi_ambient.slang), where the cascade
+// below, whose interval that is, takes the light from the interval on whole, and in rgb the light
+// those surfaces scattered along it, which the faces add, since the cascade below's ray gathers it
+// for the merge and a probe beyond every cascade below, as one by a crown far from the eye, has
+// nothing else to read it from.
+[format("rgba16f")] WTexture3D<float4> kept;
 
 // Each probe's own light as gi_ambient.slang left it, the frame before's and the one before that side
 // by side, the share of the indirect light each probe takes, and where this trace moved each probe
@@ -134,7 +137,7 @@ groupshared float4 brought[64];
 groupshared float4 rayLight[64];
 groupshared float4 rayOwn[64];
 groupshared float rayNothing[64];
-groupshared float rayEarly[64];
+groupshared float4 rayEarly[64];
 // The weight each of the eight probes of the cascade above around this one carries, as the merge
 // weighs it, where this probe sees it standing outside every mesh, and nothing elsewhere.
 groupshared float aboveSeen[8];
@@ -170,7 +173,13 @@ float4 placed(FieldInfo fieldInfo, float3 at, float apart)
         if (length > MostMoved * apart)
             p = at + move * (MostMoved * apart / length);
     }
-    return float4((p - at) / apart, fieldDistance(field, field_sampler, fieldInfo, p) >= 0.0 ? 1.0 : 0.0);
+    // A crown's leaf cards run together where they lie closer than a cell and read below zero there,
+    // as a solid's inside does, though light crosses them (lightThroughCrossed), so a probe in a cell
+    // the cards painted stands outside unless it lies deeper than half a cell, as the crossing holds
+    // a trunk's or a limb's inside.
+    float d = fieldDistance(field, field_sampler, fieldInfo, p);
+    bool cards = lightThroughCards(paintAlphaAt(albedo, fieldInfo, p)) && d >= -0.5 * fieldCell(fieldInfo, p);
+    return float4((p - at) / apart, d >= 0.0 || cards ? 1.0 : 0.0);
 }
 
 [shader("compute")]
@@ -312,6 +321,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     // across those before its interval began, which its probe's own faces alone take.
     float through = 1.0;
     float keptBefore = 1.0;
+    float3 earlyLight = float3(0.0);
     if (oc.w <= 0.0)
     {
     }
@@ -353,10 +363,12 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         // keeping that share for each unit of its depth and the rest taking the surface's light as
         // a solid's would, up to four of them before the ray stops at the next as a solid, as
         // 3DEngine's rays cross them. One crossed before the interval began is the cascade below's,
-        // whose ray takes this one's light from the interval on whole where it met nothing, so it
-        // takes nothing of the light and keeps its share for the probe's own faces alone. A solid
-        // surface is shaded in the same place as a crossed one, keeping none, so the build holds
-        // one copy of the shading.
+        // whose ray takes this one's light from the interval on whole where it met nothing, so its
+        // light and its share go to the probe's own faces alone (kept), since a probe past every
+        // cascade below, as one by a crown far from the eye, has nothing else to read them from,
+        // and taking only its share, a probe in an oak's front half read its ways into the crown
+        // 63% under its reference. A solid surface is shaded in the same place as a crossed one,
+        // keeping none, so the build holds one copy of the shading.
         float3 crossed = float3(0.0), crossedOwn = float3(0.0);
         float firstAt = -1.0;
         [loop]
@@ -366,16 +378,28 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             float passing = layer < 4 ? lightThroughAt(albedo, fieldInfo, at) : 0.0;
             bool inside = false;
             float passes = 0.0;
-            float depth = passing > 0.0 ? lightThroughCrossed(field, field_sampler, albedo, fieldInfo, origin, way, t, end - t, inside, passes) : -1.0;
+            float stopped = 0.0;
+            float depth = passing > 0.0 ? lightThroughCrossedAt(field, field_sampler, albedo, fieldInfo, origin, way, t, end - t, inside, passes, stopped) : -1.0;
+            // The light the surface sends along the ray of all it stops, lit where it stops it on
+            // average, so a crown's cards are lit where their leaves stop the ray and not where the
+            // ray met the crown, whose sunlit edge taken for all a crown stops read a probe's ways
+            // into a front-lit oak 118 to 160% over its reference, and any other surface where the
+            // ray met it. Lit at four places, where it lost each quarter of what it stops, the trace
+            // took 9.0 to 12.2 ms in the meadow at High where 3.5 to 3.6, for no nearer a reading.
+            float3 itsOwn;
+            float lost = 1.0 - passes;
+            float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
+                bounced, bounced_at, origin + way * (t + stopped), way, float(probes), interval.z, interval.w, share, itsOwn) * lost;
+            itsOwn *= lost;
             if (depth >= 0.0 && t < interval.x)
+            {
+                earlyLight += itsLight * keptBefore;
                 keptBefore *= passes;
+            }
             else
             {
-                float3 itsOwn;
-                float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
-                    bounced, bounced_at, at, way, float(probes), interval.z, interval.w, share, itsOwn);
-                crossed += itsLight * (through * (1.0 - passes));
-                crossedOwn += itsOwn * (through * (1.0 - passes));
+                crossed += itsLight * through;
+                crossedOwn += itsOwn * through;
                 through *= passes;
                 firstAt = firstAt < 0.0 ? t : firstAt;
             }
@@ -410,6 +434,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     {
         light = float4(0.0);
         own = float3(0.0);
+        earlyLight = float3(0.0);
     }
 
     // A ray that met nothing at all, and one that crossed surfaces letting light through and met
@@ -425,7 +450,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     uint2 itsTexel = texel * (uint(ReachTexels) / texels) + (each == 4u ? uint2(quarter & 1u, quarter >> 1u) : uint2(0u));
     if (live)
         reach[uint3(at.xy * uint(ReachTexels) + itsTexel, uint(c) * probes + at.z)] = reached;
-    rayEarly[lane] = keptBefore;
+    rayEarly[lane] = float4(earlyLight, keptBefore);
     GroupMemoryBarrierWithGroupSync();
     float4 texelLight = float4(0.0);
     float3 texelOwn = float3(0.0);
@@ -436,7 +461,8 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         // How many met a surface, one before their interval began and the sky, and the share that
         // met nothing, fractions of a ray where one crossed surfaces letting light through.
         uint surfaces = 0u, early = 0u, skies = 0u, behinds = 0u;
-        float nothing = 0.0, before = 0.0;
+        float nothing = 0.0;
+        float4 before = float4(0.0);
         for (uint q = 0u; q < each; q++)
         {
             float4 one = rayLight[lane + q];
@@ -459,7 +485,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         {
             radiance.Store(written, texelLight);
             distances[written] = behinds * 2u > each ? -texelReach : texelReach;
-            kept[written] = before / float(each);
+            kept.Store(written, before / float(each));
         }
     }
 

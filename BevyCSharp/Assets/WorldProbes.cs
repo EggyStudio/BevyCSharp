@@ -188,13 +188,14 @@ internal static unsafe partial class WorldProbes
     internal static AssetHandle Cubes => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Cubes : AssetHandle.None;
 
     /// <summary>
-    /// Cascade <paramref name="cascade"/>'s merged light and its rays' distances, laid out as the
-    /// trace and the merge lay them, its octahedron's texels a side, and every cascade's held
-    /// places, which <c>gi.probe</c> reads one probe of, or none where that cascade is not traced.
+    /// Cascade <paramref name="cascade"/>'s merged light, what its rays kept and gathered before
+    /// their interval began and their distances, laid out as the trace and the merge lay them, its
+    /// octahedron's texels a side, and every cascade's held places, which <c>gi.probe</c> reads one
+    /// probe of, or none where that cascade is not traced.
     /// </summary>
-    internal static (AssetHandle Merged, AssetHandle Distances, int Texels, AssetHandle Held)? ProbeImages(int cascade) =>
+    internal static (AssetHandle Merged, AssetHandle Kept, AssetHandle Distances, int Texels, AssetHandle Held)? ProbeImages(int cascade) =>
         ReferenceEquals(_app, App.Running) && _made is { } made && cascade >= 0 && cascade < made.Cascades
-            ? (made.Merged[cascade], made.Distances[cascade], made.Texels[cascade], made.Held)
+            ? (made.Merged[cascade], made.Kept[cascade], made.Distances[cascade], made.Texels[cascade], made.Held)
             : null;
 
     /// <summary>
@@ -234,7 +235,7 @@ internal static unsafe partial class WorldProbes
         if (!ReferenceEquals(_app, App.Running) || _made is not { } made) return 0;
         const long p = Probes;
         long bytes = 0;
-        foreach (var n in made.Texels) bytes += p * n * p * n * p * (8 + 8 + 2 + 2);
+        foreach (var n in made.Texels) bytes += p * n * p * n * p * (8 + 8 + 2 + 8);
         var cascades = (long)made.Cascades;
         bytes += 4 * p * p * p * cascades * 16 * 2;
         bytes += 6 * p * p * p * cascades * (8 + 8);
@@ -329,7 +330,7 @@ internal static unsafe partial class WorldProbes
             made.Radiance[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Merged[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Distances[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
-            made.Kept[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
+            made.Kept[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             (made.Trace[c], made.Merge[c], made.Ambient[c]) =
                 (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
         }

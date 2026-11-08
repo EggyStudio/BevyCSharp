@@ -49,8 +49,9 @@ SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 
 // The share of light this cascade's rays kept across surfaces that let light through before their
-// interval began, as gi_trace.slang wrote it, which the probe's faces take their light times.
-Texture3D<float> kept;
+// interval began, as gi_trace.slang wrote it, in w, which the probe's faces take their light times,
+// and in rgb the light those surfaces scattered along the rays, which the faces add.
+Texture3D<float4> kept;
 
 // Every cascade's probes' light along eight by eight directions, each the merged directions about
 // it weighed by the lobe a surface of roughness 0.5 spreads its reflection over, a block of ten by
@@ -163,9 +164,9 @@ void main(uint3 id : SV_DispatchThreadID)
             float2 uv = (float2(float(u), float(v)) + 0.5) / float(texels);
             float share = octahedronShare(uv);
             float weight = max(dot(fromOctahedron(uv), axis), 0.0) * share;
-            float before = kept.Load(from);
+            float4 before = kept.Load(from);
             shares += share;
-            sum += light.rgb * before * weight;
+            sum += (light.rgb * before.a + before.rgb) * weight;
             weights += weight;
             // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or 1.
             valid = max(valid, light.a > 0.25 ? 1.0 : 0.0);
@@ -225,8 +226,8 @@ void main(uint3 id : SV_DispatchThreadID)
                     float seenThere = max(-dot(w, normal), 0.0);
                     solid *= seenHere > 0.05 ? min(seenThere / seenHere, 8.0) : 0.0;
                 }
-                float before = kept.Load(from);
-                sumAt += light.rgb * before * cosine * solid;
+                float4 before = kept.Load(from);
+                sumAt += (light.rgb * before.a + before.rgb) * cosine * solid;
                 weightsAt += cosine * solid;
             }
         if (weightsAt > 1e-6)
@@ -261,7 +262,8 @@ void main(uint3 id : SV_DispatchThreadID)
                 if (weight <= 0.0)
                     continue;
                 int4 from = int4(int2(at.xy * texels + uint2(u, v)), int(at.z), 0);
-                light += merged.Load(from).rgb * kept.Load(from) * weight;
+                float4 before = kept.Load(from);
+                light += (merged.Load(from).rgb * before.a + before.rgb) * weight;
                 weights += weight;
             }
         float4 way = float4(light / max(weights, 1e-6), 1.0);

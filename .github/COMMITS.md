@@ -75,6 +75,24 @@ git commit -F /tmp/msg
 A message that reads right in `git log --format='%B' | cat -v` shows `M-bM-^@M-^N` three times on
 the first line, an empty second line and the sentence on the third.
 
+## The version
+
+The package's version is `build/version.sh`'s, its major and minor `build/version.txt`'s and its
+patch the number of commits since that file last changed, so each commit is a patch
+([BUILDING.md](BUILDING.md)). A working session or the session that writes REVIEW.md raises the
+major or the minor in a commit that changes `build/version.txt` alone, when a step is done and the
+changes behind it are meaningful, the major at a step the size of a release, and no other commit's
+message decides a release. Such a commit keeps the message's form, the marks and one sentence saying
+where the version moves, as `The version moves to 0.6.` did, and the messages' test leaves it out
+whatever it says (NORM.md, N 7.2).
+
+Tags mark releases time apart with meaningful changes between them, not commits. A tag is the letter
+v and the version, as `v0.6.18`, lightweight and with no message, and it goes on two kinds of commit
+and no other, the one that raises the major or the minor, as `v0.6.0` marks `391d6b85`, and the one
+a package was published from, as `v0.6.18` marks `b8cc8316`. The session that writes REVIEW.md sets
+it as it pushes that commit or once a pack run has published, and pushes the tag by itself, so a
+working session sets no tag (NORM.md, N 6.3).
+
 ## A batch that shares a file with another
 
 When two batches touch one file, only the first batch's hunks are staged, so each commit holds one

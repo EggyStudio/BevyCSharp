@@ -501,10 +501,14 @@ Swarm and the stress program at once for ten minutes, and the feature test alone
 job beside its course run, since lavapipe plays a round of each in a minute or two, and a
 ten-minute run of each game holds level here.
 
-The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand,
-and its patch is the number of commits since that file last changed, so each commit raises it by
-one and a new minor starts it again at 0. To move to `0.4.x`, change `build/version.txt` and
-commit. The script counts commits, so it needs the whole history, which the workflow fetches.
+The version is `build/version.sh`'s. Its major and minor are `build/version.txt`'s, set by hand, and
+its patch is the number of commits since that file last changed, so each commit raises it by one and
+a new minor starts it again at 0. To move to `0.4.x`, change `build/version.txt` and commit it
+alone. The script counts commits, so it needs the whole history, which the workflow fetches. A tag
+of the letter v and the version, as `v0.6.18`, marks the commit that raised the major or the minor
+and the commit a package was published from, and no other, so the tags mark releases and not commits
+(`git tag -l 'v*'`), each set as that commit is pushed or once its package is published
+([COMMITS.md](COMMITS.md)).
 
 ```bash
 build/version.sh            # 0.3.12, say
