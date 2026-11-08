@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -63,7 +64,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
     {
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak })
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var plan = Trees.PlanImpostorLevel(skeleton, species, 2)!;
             var stems = Modeling.Build(Trees.Build(skeleton, TreeDetail.Full))[0];
             var leaves = Trees.BuildLeaves(skeleton, species, 2);
@@ -87,7 +88,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
         }
 
         // A fern's fronds are its whole leaves and it has no far levels.
-        Assert.Null(Trees.PlanImpostorLevel(Trees.Grow(TreeSpecies.Fern, 2), TreeSpecies.Fern, 2));
+        Assert.Null(Trees.PlanImpostorLevel(TreeSkeleton.Grow(TreeSpecies.Fern, 2), TreeSpecies.Fern, 2));
     }
 
     [SkippableTheory]
@@ -103,7 +104,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
         // cards and limbs drawn there in its place, in the sun under a pale sky. The impostor covers
         // the crown within a fifth and is as bright within a fifth.
         var species = Trees.Species(name)!;
-        var height = Trees.Grow(species, 0x7E57_0003u).Bounds.High.Y;
+        var height = TreeSkeleton.Grow(species, 0x7E57_0003u).Bounds.High.Y;
         var middle = new Vec3(0f, height * 0.5f, 0f);
         Entity camera = default, planted = default;
         var run = new PictureRun
@@ -165,7 +166,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
         // its half, some fifteen meters apart, drawn as impostors, then the same trees as their
         // limbs and cards, at 1920 by 1080. The sun's shadow does not reach so far.
         var species = TreeSpecies.BlackTupelo;
-        var height = Enumerable.Range(0, Trees.Variants).Max(variant => Trees.Grow(species, (uint)(0x7E57_0000 + variant)).Bounds.High.Y) * 1.1f;
+        var height = Enumerable.Range(0, Trees.Variants).Max(variant => TreeSkeleton.Grow(species, (uint)(0x7E57_0000 + variant)).Bounds.High.Y) * 1.1f;
         IReadOnlyList<PassTiming> impostors = [], cards = [];
         IReadOnlyList<Entity> trees = [];
         var run = new PictureRun

@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 // The bark and the leaves the generator makes where a species names no set of the collection, small

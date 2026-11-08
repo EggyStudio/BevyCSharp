@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Vegetation;
 
 namespace Bevy;
 
@@ -44,7 +45,7 @@ public static partial class Trees
         ArgumentNullException.ThrowIfNull(species);
         var set = species.BarkSet is { } name && TreeTextures.Find(name) is { Kind: TreeTextureKind.Bark } found ? found : null;
         var stiffness = Stiffness(species);
-        var key = set is null ? $"bark {Key(species.BarkColor)} {stiffness}" : $"bark {set.Name} {stiffness}";
+        var key = set is null ? $"bark {Key(ColorOf(species.BarkColor))} {stiffness}" : $"bark {set.Name} {stiffness}";
         return Once(key, () =>
         {
             if (set is not null)
@@ -64,7 +65,7 @@ public static partial class Trees
             }
 
             var (color, bumps, depth) = BarkPictures();
-            var tint = species.BarkColor;
+            var tint = ColorOf(species.BarkColor);
             return Render.CreateBarkMaterial(Deep(new MaterialSettings
             {
                 BaseColor = (tint.R, tint.G, tint.B, 1f),
@@ -119,8 +120,8 @@ public static partial class Trees
         var set = species.LeafSet is { } name && TreeTextures.Find(name) is { Kind: TreeTextureKind.Leaves } found ? found : null;
         var stiffness = Stiffness(species);
         var key = set is null
-            ? $"leaves {species.LeafShape} {species.LeafScaleX} {Key(species.LeafColor)} {Key(species.FallColor)} {fall} {stiffness}"
-            : $"leaves {set.Name} {Key(species.FallColor)} {fall} {stiffness}";
+            ? $"leaves {species.LeafShape} {species.LeafScaleX} {Key(ColorOf(species.LeafColor))} {Key(ColorOf(species.FallColor))} {fall} {stiffness}"
+            : $"leaves {set.Name} {Key(ColorOf(species.FallColor))} {fall} {stiffness}";
 
         return Once(key, () =>
         {
@@ -128,7 +129,7 @@ public static partial class Trees
             {
                 var (albedo, normal, surface) = set.Load();
                 var mean = set.MeanColor;
-                (float, float, float, float) tint = (Toward(1f, species.FallColor.R / MathF.Max(mean.R, 1e-3f), fall), Toward(1f, species.FallColor.G / MathF.Max(mean.G, 1e-3f), fall), Toward(1f, species.FallColor.B / MathF.Max(mean.B, 1e-3f), fall), 1f);
+                (float, float, float, float) tint = (Toward(1f, species.FallColor.X / MathF.Max(mean.R, 1e-3f), fall), Toward(1f, species.FallColor.Y / MathF.Max(mean.G, 1e-3f), fall), Toward(1f, species.FallColor.Z / MathF.Max(mean.B, 1e-3f), fall), 1f);
                 var made = Render.CreateLeafMaterial(new MaterialSettings
                 {
                     BaseColor = tint,
@@ -149,7 +150,7 @@ public static partial class Trees
             }
 
             var atlas = LeafPictures(species);
-            var (summer, autumn) = (species.LeafColor, species.FallColor);
+            var (summer, autumn) = (ColorOf(species.LeafColor), ColorOf(species.FallColor));
             return Render.CreateLeafMaterial(new MaterialSettings
             {
                 BaseColor = (Toward(summer.R, autumn.R, fall), Toward(summer.G, autumn.G, fall), Toward(summer.B, autumn.B, fall), 1f),

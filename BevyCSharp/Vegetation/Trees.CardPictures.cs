@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using Vegetation;
 
 namespace Bevy;
 
@@ -355,7 +356,7 @@ public static partial class Trees
         else
         {
             leaves = LeafPictures(species);
-            leafTint = (species.LeafColor.R, species.LeafColor.G, species.LeafColor.B, 1f);
+            leafTint = (species.LeafColor.X, species.LeafColor.Y, species.LeafColor.Z, 1f);
         }
 
         if (species.BarkSet is { } barkSet && TreeTextures.Find(barkSet) is { Kind: TreeTextureKind.Bark } barkFound)
@@ -366,7 +367,7 @@ public static partial class Trees
         else
         {
             bark = BarkPictures().Color;
-            barkTint = (species.BarkColor.R, species.BarkColor.G, species.BarkColor.B, 1f);
+            barkTint = (species.BarkColor.X, species.BarkColor.Y, species.BarkColor.Z, 1f);
         }
 
         return (leaves, leafTint, bark, barkTint);

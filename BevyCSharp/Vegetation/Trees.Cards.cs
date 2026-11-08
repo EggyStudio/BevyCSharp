@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 // The far level of a planted tree, its trunk and thickest limbs as tubes and the foliage each limb

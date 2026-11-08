@@ -1,8 +1,9 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -18,8 +19,8 @@ public sealed class TreeWindTests(ITestOutputHelper output)
     {
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.CaliforniaBlackOak })
         {
-            var skeleton = Trees.Grow(species, 2);
-            var places = skeleton.Nodes.Select(node => node.Place).ToHashSet();
+            var skeleton = TreeSkeleton.Grow(species, 2);
+            var places = skeleton.Nodes.Select(node => new Vec3(node.Place.X, node.Place.Y, node.Place.Z)).ToHashSet();
             var (stems, leaves, far) = Trees.Swayed(skeleton, species, 2);
 
             // Every stem vertex swings about a point of the skeleton where its limb leaves its
@@ -78,7 +79,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
         // them however many frames the trees took to be dressed. On the machine's own clock six
         // captures eleven frames apart took a second or less, and a suite run whose captures fell
         // as the two crowns crossed read them 0.19 pixels apart at most.
-        var height = Trees.Grow(TreeSpecies.QuakingAspen, 0x7E57_0003u).Bounds.High.Y;
+        var height = TreeSkeleton.Grow(TreeSpecies.QuakingAspen, 0x7E57_0003u).Bounds.High.Y;
         IReadOnlyList<Entity> trees = [];
         var run = new PictureRun
         {

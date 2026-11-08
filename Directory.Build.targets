@@ -18,10 +18,13 @@
         <_BevyCSharpReference Include="@(ProjectReference->WithMetadataValue('Filename', 'BevyCSharp'))"/>
         <_LevelsReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Levels'))"/>
         <_SkyReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Sky'))"/>
+        <_VegetationReference Include="@(ProjectReference->WithMetadataValue('Filename', 'Vegetation'))"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Levels/Levels/Levels.csproj"
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_LevelsReference)' == ''"/>
         <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Sky/Sky/Sky.csproj"
                           Condition="'@(_BevyCSharpReference)' != '' And '@(_SkyReference)' == ''"/>
+        <ProjectReference Include="$(MSBuildThisFileDirectory)modules/Vegetation/Vegetation/Vegetation.csproj"
+                          Condition="'@(_BevyCSharpReference)' != '' And '@(_VegetationReference)' == ''"/>
     </ItemGroup>
 
 </Project>

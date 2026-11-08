@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Bevy.Physics;
+using Vegetation;
 
 namespace Bevy;
 
@@ -107,7 +108,7 @@ public static partial class Trees
             throw new ArgumentException($"A species' name is one word of lower-case letters, digits and hyphens, and {name} is not.", nameof(name));
         }
 
-        Check(species);
+        species.Check();
         lock (Registry) Named[name] = species;
     }
 
@@ -263,7 +264,7 @@ public static partial class Trees
     /// <summary>Grows a variant of a species and finds its capsules, on whatever thread runs it.</summary>
     private static Grown GrowVariant(TreeSpecies species, int variant)
     {
-        var skeleton = Grow(species, VariantSeed(variant));
+        var skeleton = TreeSkeleton.Grow(species, VariantSeed(variant));
         return new Grown(skeleton, skeleton.Bounds.High.Y, Capsules(skeleton));
     }
 
@@ -420,13 +421,13 @@ public static partial class Trees
             var widest = 0f;
             while (node >= 0 && nodes[node].Radius >= ThinnestCollider && capsules.Count < MostCapsules)
             {
-                var way = (nodes[node].Place - nodes[from].Place).Normalized;
+                var way = Of(nodes[node].Place - nodes[from].Place).Normalized;
                 var next = carried[node];
-                var turns = next >= 0 && Vec3.Dot((nodes[next].Place - nodes[node].Place).Normalized, way) < MathF.Cos(MathF.PI / 10f);
+                var turns = next >= 0 && Vec3.Dot(Of(nodes[next].Place - nodes[node].Place).Normalized, way) < MathF.Cos(MathF.PI / 10f);
                 widest = MathF.Max(widest, nodes[node].Radius);
                 if (next < 0 || turns || nodes[next].Radius < ThinnestCollider)
                 {
-                    if (node != from) capsules.Add((nodes[from].Place, nodes[node].Place, widest));
+                    if (node != from) capsules.Add((Of(nodes[from].Place), Of(nodes[node].Place), widest));
                     from = node;
                     widest = 0f;
                 }

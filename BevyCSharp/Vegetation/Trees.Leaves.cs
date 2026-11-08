@@ -1,4 +1,5 @@
 using System.Numerics;
+using Vegetation;
 
 namespace Bevy;
 
@@ -19,7 +20,7 @@ public static partial class Trees
     private const float LeafShadeLeast = 0.5f;
 
     /// <summary>Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds.</summary>
-    /// <param name="skeleton">The tree, as <see cref="Grow(TreeSpecies, uint)"/> grew it.</param>
+    /// <param name="skeleton">The tree, as <see cref="TreeSkeleton.Grow(TreeSpecies, uint)"/> grew it.</param>
     /// <param name="species">Its species, whose leaves' count, size, angles and set the cards follow.</param>
     /// <param name="seed">The seed the tree grew from, which places the leaves the same way each time.</param>
     /// <returns>The cards' mesh, drawn with <see cref="LeafMaterial"/>, with no positions where the species has no leaves.</returns>
@@ -49,7 +50,7 @@ public static partial class Trees
     public static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed) => BuildLeaves(skeleton, species, seed, TreeDetail.Full);
 
     /// <summary>Makes the leaves of a grown tree at a level of detail.</summary>
-    /// <param name="skeleton">The tree, as <see cref="Grow(TreeSpecies, uint)"/> grew it.</param>
+    /// <param name="skeleton">The tree, as <see cref="TreeSkeleton.Grow(TreeSpecies, uint)"/> grew it.</param>
     /// <param name="species">Its species, whose leaves' count, size, angles and set the cards follow.</param>
     /// <param name="seed">The seed the tree grew from, which places the leaves the same way each time.</param>
     /// <param name="detail">The level, every leaf, or the reduced one a tree further off is drawn in.</param>
@@ -66,7 +67,7 @@ public static partial class Trees
     {
         ArgumentNullException.ThrowIfNull(skeleton);
         ArgumentNullException.ThrowIfNull(species);
-        Check(species);
+        species.Check();
         if (!Enum.IsDefined(detail)) throw new ArgumentOutOfRangeException(nameof(detail), detail, "A level of detail is one of TreeDetail's.");
 
         var cards = MakeCards(skeleton, species, seed);
@@ -185,11 +186,11 @@ public static partial class Trees
         for (var tip = 1; tip < nodes.Count; tip++)
         {
             if (children[tip] != 0) continue;
-            var points = new List<Vec3> { nodes[tip].Place };
+            var points = new List<Vec3> { Of(nodes[tip].Place) };
             var at = nodes[tip].Parent;
             while (true)
             {
-                points.Add(nodes[at].Place);
+                points.Add(Of(nodes[at].Place));
                 if (at == 0 || children[at] != 1) break;
                 at = nodes[at].Parent;
             }

@@ -1,18 +1,19 @@
 # Trees
 
 A tree is grown from a species and a seed and built into meshes, its stems as tubes and its leaves
-as cards, so a forest is a few numbers and no models. `Trees.Grow` grows a tree's skeleton,
+as cards, so a forest is a few numbers and no models. `TreeSkeleton.Grow` grows a tree's skeleton,
 the points its stems pass through, `Trees.Build` makes the stems into an edit mesh and
-`Trees.BuildLeaves` makes the leaves, and the bark and the leaves are drawn with materials made
-from the species:
+`Trees.BuildLeaves` makes the leaves, and the bark and the leaves are drawn with materials made from
+the species:
 
 <!-- compiled with:
+using Vegetation;
 Entity stems = default;
 Entity crown = default;
 -->
 ```csharp
 var species = TreeSpecies.QuakingAspen;
-var skeleton = Trees.Grow(species, seed: 7);                  // the same tree for the same seed
+var skeleton = TreeSkeleton.Grow(species, seed: 7);           // the same tree for the same seed
 
 Render.SetMesh(ctx.Ecs, stems, Modeling.Meshes(Trees.Build(skeleton))[0]);
 Render.SetMaterial(ctx.Ecs, stems, Trees.BarkMaterial(species));
@@ -22,6 +23,12 @@ Render.SetMaterial(ctx.Ecs, crown, Trees.LeafMaterial(species));
 
 The growth runs on the thread that calls it and touches nothing of the app's, so it runs on a
 worker while a level loads, and the two meshes are made in a system as any mesh is.
+
+The species and the growth are the Vegetation module's, a library both engines share, checked out
+under `modules/Vegetation` and named in the namespace `Vegetation`, which the package carries beside
+the engine, so a species and a seed grow the same skeleton in both. Its places are System.Numerics'
+`Vector3`, and its bark's and leaves' colors are linear sRGB in a `Vector3`, as the Sky module's
+colors are.
 
 ## Planting and forests
 
@@ -150,9 +157,12 @@ A tree grows round boxes given to it, a wall or a neighbor's crown in the tree's
 no stem grows into and which take the sky from the side next to them, so the tree stands away from
 them toward the light:
 
+<!-- compiled with:
+using System.Numerics;
+-->
 ```csharp
-var wall = (Low: new Vec3(1f, 0f, -6f), High: new Vec3(1.6f, 18f, 6f));
-var besideTheWall = Trees.Grow(TreeSpecies.QuakingAspen, seed: 5, [wall]);
+var wall = (Low: new Vector3(1f, 0f, -6f), High: new Vector3(1.6f, 18f, 6f));
+var besideTheWall = TreeSkeleton.Grow(TreeSpecies.QuakingAspen, seed: 5, [wall]);
 ```
 
 ## Leaves

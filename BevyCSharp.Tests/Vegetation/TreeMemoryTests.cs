@@ -1,7 +1,8 @@
 using System.Runtime.CompilerServices;
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 

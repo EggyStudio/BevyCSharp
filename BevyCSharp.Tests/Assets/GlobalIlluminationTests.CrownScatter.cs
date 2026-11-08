@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Vegetation;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -34,7 +35,7 @@ public sealed partial class GlobalIlluminationTests
     {
         Needs.Shaders();
         var species = TreeSpecies.CaliforniaBlackOak;
-        var cards = Trees.BuildLeaves(Trees.Grow(species, 75), species, 75).Positions;
+        var cards = Trees.BuildLeaves(TreeSkeleton.Grow(species, 75), species, 75).Positions;
         var (low, high) = (new Vec3(float.MaxValue), new Vec3(float.MinValue));
         foreach (var p in cards)
             (low, high) = (new Vec3(MathF.Min(low.X, p.X), MathF.Min(low.Y, p.Y), MathF.Min(low.Z, p.Z)), new Vec3(MathF.Max(high.X, p.X), MathF.Max(high.Y, p.Y), MathF.Max(high.Z, p.Z)));

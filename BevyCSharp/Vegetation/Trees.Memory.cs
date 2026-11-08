@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 // What the trees hold, read by species, variant and part, for the readings of what a variant and a

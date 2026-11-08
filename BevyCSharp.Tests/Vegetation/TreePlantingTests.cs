@@ -1,5 +1,6 @@
-using Bevy;
 using Bevy.Physics;
+using Bevy;
+using Vegetation;
 using Xunit;
 
 namespace Bevy.Tests;

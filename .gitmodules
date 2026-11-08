@@ -4,3 +4,6 @@
 [submodule "modules/Sky"]
 	path = modules/Sky
 	url = https://github.com/EggyStudio/Sky.git
+[submodule "modules/Vegetation"]
+	path = modules/Vegetation
+	url = https://github.com/EggyStudio/Vegetation.git

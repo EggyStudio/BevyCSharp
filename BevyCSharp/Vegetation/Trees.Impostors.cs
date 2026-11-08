@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 // A planted tree's furthest level, an octahedral impostor, the whole tree pictured once a variant

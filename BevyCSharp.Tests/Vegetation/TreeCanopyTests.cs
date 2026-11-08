@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -20,7 +21,7 @@ public sealed class TreeCanopyTests(ITestOutputHelper output)
         // law with half a leaf's area facing a ray, against the share the leaves are given.
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak })
         {
-            var leaves = Trees.BuildLeaves(Trees.Grow(species, 0x7E57_0003u), species, 0x7E57_0003u);
+            var leaves = Trees.BuildLeaves(TreeSkeleton.Grow(species, 0x7E57_0003u), species, 0x7E57_0003u);
             var held = new Dictionary<(int, int, int), float>();
             for (var card = 0; card < leaves.Positions.Length / 4; card++)
             {

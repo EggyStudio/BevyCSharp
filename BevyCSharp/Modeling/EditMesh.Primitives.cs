@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 // The primitives, each added to what the mesh holds and selected, so the operation after it acts on

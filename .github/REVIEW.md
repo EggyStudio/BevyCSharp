@@ -1,36 +1,39 @@
 # Review
 
-Reviewed up to `8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the ray's
-mirror way by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at 20:35 with
-Linux in 11 minutes, macOS in 15 and Windows in 17; it keeps the form and carries the review's
-files. Nothing is pushed after it. Before it `a5f277d5`, 116, a crossing lit where its leaves stop
-the ray and the early crossing's light to the probe's faces, with 117's documents, pushed at 16:26
-on 2026-11-08, its run green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it
-keeps the form and carries the review's files. Before it `69d97fec`, 107's shadow mend, one
-visibility level casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its
-run green at 11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the
-review's files and the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its
-pipelines, with 107's reading in the replies, pushed at 09:32, its run green at 09:48 on the three
-systems in 10 to 16 minutes. Before it `443dad1f`, 110's energy check, a hit and the reference's
-later faces keeping for their diffuse share what their gloss leaves, pushed at 07:22, its run green
-at 07:40 on the three systems in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding
-a crown's leaves cell by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to
-16 minutes. Before it `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed
-at 22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two
-tests the shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the
-leaves' gray on the light from all around and the let-through shadowed, with the reference reading a
-crown leaf by leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15
-minutes. Before it `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by
-the leaves' cover, pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes.
-Before it `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see
-along their mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06, its run
-green at 16:24 on the three systems in 15 to 18 minutes. Before it `7bd61bcc`, 110's second step,
-the field holding each face's gloss and the probes' rays lighting their hits by it, with the one
-reference, pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before
-it `e0014da4`, 110's first step, the specular share read from the probes' directions along the
-mirror way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before
-it `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed at 06:07,
-its run green at 06:24 on the three systems in 12 to 16 minutes. Before it `5a8b4182`, item 109, a
+Reviewed up to `652bdd65`, 121, the comments on the code's own terms, 143 source files with every
+changed line a comment line, pushed at 21:46 on 2026-11-08, its run green at 22:06 with Linux and
+macOS in 13 minutes and Windows in 19; it keeps the form and carries the review's files. Nothing is
+pushed after it. Before it `8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the
+ray's mirror way by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at
+20:35 with Linux in 11 minutes, macOS in 15 and Windows in 17; it keeps the form and carries the
+review's files. Before it `a5f277d5`, 116, a crossing lit where its leaves stop the ray and the
+early crossing's light to the probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08,
+its run green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps the form
+and carries the review's files. Before it `69d97fec`, 107's shadow mend, one visibility level
+casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its run green at
+11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the review's files and
+the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's
+reading in the replies, pushed at 09:32, its run green at 09:48 on the three systems in 10 to 16
+minutes. Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for
+their diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the three
+systems in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's leaves cell
+by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16 minutes. Before it
+`e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at 22:47 on
+2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests the
+shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray on
+the light from all around and the let-through shadowed, with the reference reading a crown leaf by
+leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
+`4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the leaves' cover,
+pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes. Before it
+`2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see along their
+mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06, its run green at
+16:24 on the three systems in 15 to 18 minutes. Before it `7bd61bcc`, 110's second step, the field
+holding each face's gloss and the probes' rays lighting their hits by it, with the one reference,
+pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before it
+`e0014da4`, 110's first step, the specular share read from the probes' directions along the mirror
+way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before it
+`b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed at 06:07, its
+run green at 06:24 on the three systems in 12 to 16 minutes. Before it `5a8b4182`, item 109, a
 leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23 on the three systems in
 12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference tracing the GGX lobe,
 pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in 13 to 15 minutes.
@@ -2517,7 +2520,24 @@ from [SHARED.md](SHARED.md).
     3DEngine the floor read so much where so much", says this repository's own figure and reason or
     goes, since a reader here has neither the sibling's readings nor the sessions' comparison, which
     SHARED.md holds; the sibling is named once, where a rule or a model was taken from it, as the
-    API's names are from raylib, and nowhere else.
+    API's names are from raylib, and nowhere else. Done at `652bdd65`, pushed at 21:46 on
+    2026-11-08; 143 source files, 733 comment lines written and 811 taken out with no line of code
+    changed, read by a script against the head; the sibling named in the comparison tests and the
+    shared recipe format alone, the tonemapper's curve, Bevy's defaults where a comment says what an
+    omitted setting does, the feature test's pack, the command line's sessions and the widgets'
+    owner left as they are; STYLE.md's Register has the sentence and its Checks a case-sensitive
+    search, since ignoring case gave some 600 false hits.
+
+122. **The drive's memory on the GPU.** From the session's reading at 23:07 on 2026-11-08 under item
+    96, recorded by Decision 81 and not chased there. On this machine's 8 GB GPU with about 2.5 GB
+    held by the desktop, the drive at the head and with the module's move alike runs out of memory,
+    at the game's defaults when the player is put at the ramps as the directional light's shadow map
+    is made, with the GPU at 5.2 to 5.6 GB, and at the workflow's settings after the course and the
+    views through the tenth hall's east at the next view's point light shadow map; the last drive
+    that passed here was on 2026-11-03, so what the lighting work since then holds on the GPU is
+    read, station by station against that day's figures, the growth placed, and mended where it is
+    the bridge's and not the desktop's share. The CI drive on lavapipe judges the pushes meanwhile.
+    After 96's parts, before 97.
 
 ## Verdicts
 
@@ -6150,3 +6170,40 @@ gave 2,054 passed and 3 skipped in 51 m 39 s at the 3 GB cap, none aborted, its 
 Shared: the sweep of N 4.11 here took 143 files, most of the lines the sibling's readings and
 processes given as a comment's reason, and STYLE.md's search is written case-sensitive, since with
 the case ignored Unity matches UnitY in every vector and URP matches purpose, some 600 false hits.
+
+Item 96's first part, the species and the skeleton, in the commit carrying this line, after the
+Vegetation module's c2149be, its item 5. The module is a submodule under modules/Vegetation,
+referenced as Sky is, by the library with PrivateAssets all, by the pack target's filter and by
+Directory.Build.targets for every project here that references the library, so the package carries
+Vegetation.dll and Vegetation.xml beside the library's. TreeSpecies with its presets, TreeLevel,
+TreeShape, TreeLeafShape, TreeNode, TreeSkeleton, the growth and Pcg are out of
+BevyCSharp/Vegetation, and what used them reads the module through its namespace. Trees.Grow is
+TreeSkeleton.Grow and the species' check is TreeSpecies.Check, which the leaves and the planting
+call as they called the private one, and the module's places and colors become the bridge's Vec3 and
+Color through a conversion of Trees' own at each use, in the stems' tubes, the twigs, the capsules
+and the materials' tints and keys. Pcg is public in the module, since the leaves, the grass and the
+planting here draw from it until their parts move.
+
+The growth is the head's to the bit, the six presets at four seeds each and two trees grown round
+boxes giving the same 72,137 lines of points, parents and radii in the module as in the head. The
+tree guide grows its trees with TreeSkeleton.Grow and names the module, its namespace, its vectors
+and its colors, and the cheat sheet loses the two Grow lines, written again with SpawnPointLight's
+summary as item 121 reworded it, which the cheat sheet had not taken. TreeTests keeps the three
+cases that build meshes and the kept skeleton's mesh, split from the refusal that moved, as
+AKeptSkeletonBuildsAsOneGrownDoes. The table of areas in AGENTS.md names TreeSpecies and
+TreeSkeleton in the BevyCSharp/Vegetation row, which are the module's after this commit, and the row
+stands as it is until the owner's word, since AGENTS.md adds a row the table lacks by N 1.5 and
+changes nothing else without that word, as the Levels row waited for it on 2026-10-31.
+
+No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
+run gave 2,040 passed and 3 skipped in 50 m 13 s at the 3 GB cap, none aborted, its largest process
+at 3,220 MB, fourteen fewer than item 121's run, the growth's cases passing among the module's own
+ten. The scripted run of the feature test stops on the GPU's memory with this commit as with the
+head on a quiet GPU, at the defaults on the directional light's shadow map after the course's start
+and at Off and Off on a point light's after 10-hall-east, which is item 122. NormTests passed, 18.
+The public listing is 102 lines fewer, the six types and the two Grow overloads out.
+
+Shared: the Vegetation module holds the species and the skeleton from its c2149be, and this engine
+takes it under modules/Vegetation as it takes Sky, its growth the same to the bit. A species' colors
+are linear sRGB in a Vector3 as Sky's are, and the species' check and Pcg are public, so an engine's
+binding checks a species it keeps and draws its leaves and its planting from the same numbers.

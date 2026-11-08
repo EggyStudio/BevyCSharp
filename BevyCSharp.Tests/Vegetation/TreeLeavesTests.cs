@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -17,7 +18,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     [Fact]
     public void ASeedPlacesTheSameLeavesEachTime()
     {
-        var skeleton = Trees.Grow(Aspen, 4);
+        var skeleton = TreeSkeleton.Grow(Aspen, 4);
         var first = Trees.BuildLeaves(skeleton, Aspen, 4);
         var again = Trees.BuildLeaves(skeleton, Aspen, 4);
         Assert.Equal(first.Positions, again.Positions);
@@ -28,7 +29,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     [Fact]
     public void AReducedCrownIsEveryOtherLeafAtItsPlaceTwiceTheArea()
     {
-        var skeleton = Trees.Grow(Aspen, 4);
+        var skeleton = TreeSkeleton.Grow(Aspen, 4);
         var full = Trees.BuildLeaves(skeleton, Aspen, 4);
         var reduced = Trees.BuildLeaves(skeleton, Aspen, 4, TreeDetail.Reduced);
         var cards = full.Positions.Length / 4;
@@ -46,7 +47,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         }
 
         // A fern's fronds are its whole leaves and are kept.
-        var fern = Trees.Grow(TreeSpecies.Fern, 4);
+        var fern = TreeSkeleton.Grow(TreeSpecies.Fern, 4);
         Assert.Equal(Trees.BuildLeaves(fern, TreeSpecies.Fern, 4).Positions, Trees.BuildLeaves(fern, TreeSpecies.Fern, 4, TreeDetail.Reduced).Positions);
         Assert.Throws<ArgumentOutOfRangeException>(() => Trees.BuildLeaves(skeleton, Aspen, 4, (TreeDetail)7));
     }
@@ -56,7 +57,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     {
         foreach (var species in new[] { Aspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
         {
-            var leaves = Trees.BuildLeaves(Trees.Grow(species, 2), species, 2);
+            var leaves = Trees.BuildLeaves(TreeSkeleton.Grow(species, 2), species, 2);
             var cards = leaves.Positions.Length / 4;
             var middles = Enumerable.Range(0, cards).Select(card => (leaves.Positions[card * 4] + leaves.Positions[card * 4 + 1] + leaves.Positions[card * 4 + 2] + leaves.Positions[card * 4 + 3]) * 0.25f).ToArray();
             var low = middles.Aggregate((a, b) => new Vec3(MathF.Min(a.X, b.X), MathF.Min(a.Y, b.Y), MathF.Min(a.Z, b.Z)));
@@ -90,14 +91,14 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     public void ATreeCarriesThePapersLeavesUpToTheirBound()
     {
         // The aspen's paper carries 25 leaves on each of its 50 branches' 30 twigs, at six tenths.
-        var aspen = Trees.BuildLeaves(Trees.Grow(Aspen, 3), Aspen, 3);
+        var aspen = Trees.BuildLeaves(TreeSkeleton.Grow(Aspen, 3), Aspen, 3);
         Assert.InRange(aspen.Indices!.Length / 6, 0.8 * 25 * 50 * 30 * 0.6, 1.2 * 25 * 50 * 30 * 0.6);
 
         // The willow's paper carries many more than a tree's cards hold, which are drawn larger.
-        var willow = Trees.BuildLeaves(Trees.Grow(TreeSpecies.WeepingWillow, 3), TreeSpecies.WeepingWillow, 3);
+        var willow = Trees.BuildLeaves(TreeSkeleton.Grow(TreeSpecies.WeepingWillow, 3), TreeSpecies.WeepingWillow, 3);
         Assert.InRange(willow.Indices!.Length / 6, 20_000, 31_000);
 
-        var bare = Trees.BuildLeaves(Trees.Grow(Aspen with { Leaves = 0 }, 3), Aspen with { Leaves = 0 }, 3);
+        var bare = Trees.BuildLeaves(TreeSkeleton.Grow(Aspen with { Leaves = 0 }, 3), Aspen with { Leaves = 0 }, 3);
         Assert.Empty(bare.Positions);
     }
 
@@ -108,7 +109,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         output.WriteLine("|---|---|---|---|---|---|");
         foreach (var (name, species) in new[] { ("quaking aspen", TreeSpecies.QuakingAspen), ("black tupelo", TreeSpecies.BlackTupelo), ("weeping willow", TreeSpecies.WeepingWillow), ("California black oak", TreeSpecies.CaliforniaBlackOak), ("bush", TreeSpecies.Bush), ("fern", TreeSpecies.Fern) })
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var leaves = Trees.BuildLeaves(skeleton, species, 2);
             var nodes = skeleton.Nodes;
             var children = new int[nodes.Count];
@@ -126,9 +127,9 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     [Fact]
     public void LeavesStandOnTheTwigsAndFaceUpAndOut()
     {
-        var skeleton = Trees.Grow(Aspen, 2);
+        var skeleton = TreeSkeleton.Grow(Aspen, 2);
         var leaves = Trees.BuildLeaves(skeleton, Aspen, 2);
-        var points = skeleton.Nodes.Select(node => node.Place).ToArray();
+        var points = skeleton.Nodes.Select(node => new Vec3(node.Place.X, node.Place.Y, node.Place.Z)).ToArray();
 
         // A card's stalk, the middle of its first two corners, stands within the spread and a leaf's
         // length, at the most enlarged, of a point of the tree.
@@ -156,7 +157,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     public void AFernsFrondsRunTheLengthOfItsStems()
     {
         var fern = TreeSpecies.Fern;
-        var skeleton = Trees.Grow(fern, 1);
+        var skeleton = TreeSkeleton.Grow(fern, 1);
         var nodes = skeleton.Nodes;
         var children = new int[nodes.Count];
         for (var i = 1; i < nodes.Count; i++) children[nodes[i].Parent]++;
@@ -175,18 +176,18 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     [Fact]
     public void LeafControlsOutOfRangeAreRefused()
     {
-        var skeleton = Trees.Grow(Aspen, 1);
+        var skeleton = TreeSkeleton.Grow(Aspen, 1);
         Assert.Throws<ArgumentOutOfRangeException>(() => Trees.BuildLeaves(skeleton, Aspen with { LeafScale = 0f }, 1));
         Assert.Throws<ArgumentOutOfRangeException>(() => Trees.BuildLeaves(skeleton, Aspen with { LeafBend = 2f }, 1));
         Assert.Throws<ArgumentOutOfRangeException>(() => Trees.BuildLeaves(skeleton, Aspen with { LeafShape = (TreeLeafShape)99 }, 1));
-        Assert.Throws<ArgumentOutOfRangeException>(() => Trees.Grow(Aspen with { LeafLevel = new TreeLevel { Rotate = float.NaN } }, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => TreeSkeleton.Grow(Aspen with { LeafLevel = new TreeLevel { Rotate = float.NaN } }, 1));
     }
 
     [SkippableFact]
     public void ATreeInLeafCoversItsCrownWithItsSetsOrTheGeneratedLooks()
     {
         Needs.Renderer();
-        var skeleton = Trees.Grow(Aspen, 2);
+        var skeleton = TreeSkeleton.Grow(Aspen, 2);
         var leaves = Trees.BuildLeaves(skeleton, Aspen, 2);
         var generated = Aspen with { BarkSet = null, LeafSet = "no-such-leaves", LeafShape = TreeLeafShape.ThreeLobeMaple };
         var generatedLeaves = Trees.BuildLeaves(skeleton, generated, 2);
@@ -257,7 +258,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush, TreeSpecies.Fern];
         var crowns = presets.Select(species =>
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var leaves = Trees.BuildLeaves(skeleton, species, 2);
             var low = leaves.Positions.Aggregate((a, b) => new Vec3(MathF.Min(a.X, b.X), MathF.Min(a.Y, b.Y), MathF.Min(a.Z, b.Z)));
             var high = leaves.Positions.Aggregate((a, b) => new Vec3(MathF.Max(a.X, b.X), MathF.Max(a.Y, b.Y), MathF.Max(a.Z, b.Z)));
@@ -357,7 +358,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
         var trees = presets.Select(species =>
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var height = skeleton.Bounds.High.Y;
             return (Species: species, Skeleton: skeleton, Middle: new Vec3(0f, height * 0.55f, 0f), Distance: 2.5f * height);
         }).ToArray();
@@ -460,7 +461,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo];
         var crowns = presets.Select(species =>
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var shaded = Trees.BuildLeaves(skeleton, species, 2);
             var plain = new MeshData { Positions = shaded.Positions, Normals = shaded.Normals, Uvs = shaded.Uvs, Indices = shaded.Indices };
             var (low, high) = skeleton.Bounds;
@@ -575,7 +576,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.CaliforniaBlackOak];
         var crowns = presets.Select(species =>
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var bent = Trees.BuildLeaves(skeleton, species, 2);
             var own = new MeshData { Positions = bent.Positions, Normals = bent.Normals, Uvs = bent.Uvs, Colors = bent.Colors, Indices = bent.Indices };
             var (low, high) = skeleton.Bounds;
@@ -725,7 +726,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     private static double? LeavesOpaquePass(bool crown, GlobalIllumination illumination = GlobalIllumination.Off)
     {
         var species = TreeSpecies.BlackTupelo;
-        var skeletons = new[] { Trees.Grow(species, 1), Trees.Grow(species, 2), Trees.Grow(species, 3) };
+        var skeletons = new[] { TreeSkeleton.Grow(species, 1), TreeSkeleton.Grow(species, 2), TreeSkeleton.Grow(species, 3) };
         IReadOnlyList<PassTiming> timings = [];
         var run = new PictureRun
         {

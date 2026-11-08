@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -76,7 +77,7 @@ public sealed class BarkDepthTests(ITestOutputHelper output)
     private static double? OpaquePass(bool deep)
     {
         var species = TreeSpecies.BlackTupelo;
-        var skeletons = new[] { Trees.Grow(species, 1), Trees.Grow(species, 2), Trees.Grow(species, 3) };
+        var skeletons = new[] { TreeSkeleton.Grow(species, 1), TreeSkeleton.Grow(species, 2), TreeSkeleton.Grow(species, 3) };
         IReadOnlyList<PassTiming> timings = [];
         var run = new PictureRun
         {

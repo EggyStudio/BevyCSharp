@@ -254,7 +254,7 @@ IEnumerable<Entity> RelationAncestors<TRelation>(Entity entity);  // What entity
 List<Entity> Removed<T>();                                      // The entities that lost T, by a removal or a despawn, since the running system last asked, oldest first
 List<Entity> RemovedById(int componentId);                      // The entities that lost the component with this id since the running system last asked, as Removed lists them
 Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spawns an entity drawn with a mesh and a material, placed by a transform, as Bevy's (Mesh3d(mesh), MeshMaterial3d(material), transform) bundle does
-Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, as Bevy's default one is, a million lumens reaching twenty units and casting no shadow unless asked
+Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, a million lumens reaching twenty units and casting no shadow unless asked, as Bevy's own point light is, bright enough at a camera's default exposure to light a room
 Entity SpawnCamera3d(Transform at, CameraSettings? settings = null);  // Spawns a 3D camera placed by a transform, with Bevy's defaults or the settings given
 IEnumerable<Entity> Descendants(Entity root);                   // Every entity under root, nearer ones first, as Bevy's iter_descendants walks them
 
@@ -1018,8 +1018,6 @@ The guide's page is [trees.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 
 ```csharp
 // Trees
-static TreeSkeleton Grow(TreeSpecies species, uint seed);       // Grows a tree of a species from a seed
-static TreeSkeleton Grow(TreeSpecies species, uint seed, IReadOnlyList<(Vec3, Vec3)> blockers);  // Grows a tree of a species from a seed, round boxes it does not grow into and that shade it
 static EditMesh Build(TreeSkeleton skeleton);                   // Makes a tree's skeleton into a mesh of its stems
 static EditMesh Build(TreeSkeleton skeleton, TreeDetail detail);  // Makes a tree's skeleton into a mesh of its stems at a level of detail
 static MeshData BuildLeaves(TreeSkeleton skeleton, TreeSpecies species, uint seed);  // Makes the leaves of a grown tree, a card a leaf along its twigs, or a frond along each where its species' leaves are fronds

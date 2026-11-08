@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -17,7 +18,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
     {
         foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.CaliforniaBlackOak })
         {
-            var skeleton = Trees.Grow(species, 2);
+            var skeleton = TreeSkeleton.Grow(species, 2);
             var leaves = Trees.BuildLeaves(skeleton, species, 2);
             var plan = Trees.PlanFarLevel(skeleton, species, 2)!;
             var cards = plan.Cards;
@@ -50,7 +51,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
         }
 
         // A fern's fronds are its whole leaves and it has no far level.
-        Assert.Null(Trees.PlanFarLevel(Trees.Grow(TreeSpecies.Fern, 2), TreeSpecies.Fern, 2));
+        Assert.Null(Trees.PlanFarLevel(TreeSkeleton.Grow(TreeSpecies.Fern, 2), TreeSpecies.Fern, 2));
     }
 
     [SkippableTheory]
@@ -66,7 +67,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
         // sky. The cards cover the crown within a quarter and are as bright within a fifth.
         var species = Trees.Species(name)!;
         var seed = 0x7E57_0003u;
-        var skeleton = Trees.Grow(species, seed);
+        var skeleton = TreeSkeleton.Grow(species, seed);
         var height = skeleton.Bounds.High.Y;
         Entity camera = default, planted = default;
         var reduced = new List<Entity>();
@@ -160,7 +161,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
         for (var variant = 0; variant < Trees.Variants; variant++)
         {
             var seed = (uint)(0x7E57_0000 + variant);
-            var skeleton = Trees.Grow(species, seed);
+            var skeleton = TreeSkeleton.Grow(species, seed);
             reducedOf[variant] = (Modeling.Build(Trees.Build(skeleton, TreeDetail.Reduced))[0], Trees.BuildLeaves(skeleton, species, seed, TreeDetail.Reduced));
         }
 

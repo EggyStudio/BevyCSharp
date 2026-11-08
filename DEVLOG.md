@@ -59,6 +59,7 @@ Done that day
 - Item 116 at `a5f277d5`. The probes' rays gather the light a crown's leaves scatter between them.
 - Item 117 at `a5f277d5`. The version and its tags in the documents.
 - Item 118 at `8b16bd71`. The middle dot out.
+- Item 121 at `652bdd65`. Comments on the code's own terms.
 
 ## 2026-11-07
 

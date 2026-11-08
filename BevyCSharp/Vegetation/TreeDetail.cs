@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 /// <summary>

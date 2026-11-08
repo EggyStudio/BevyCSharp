@@ -1,6 +1,7 @@
 using Bevy;
-using Xunit;
+using Vegetation;
 using Xunit.Abstractions;
+using Xunit;
 
 namespace Bevy.Tests;
 
@@ -38,7 +39,7 @@ public sealed class TreeLevelShadowTests(ITestOutputHelper output)
         Needs.Shaders();
         var species = TreeSpecies.CaliforniaBlackOak;
         var (low, high) = (float.MaxValue, float.MinValue);
-        foreach (var p in Trees.BuildLeaves(Trees.Grow(species, 75), species, 75).Positions) (low, high) = (MathF.Min(low, p.Y), MathF.Max(high, p.Y));
+        foreach (var p in Trees.BuildLeaves(TreeSkeleton.Grow(species, 75), species, 75).Positions) (low, high) = (MathF.Min(low, p.Y), MathF.Max(high, p.Y));
         var middle = (low + high) / 2f;
 
         // The eye at the distance from the tree's foot Bevy measures its levels by, level with the
@@ -121,7 +122,7 @@ public sealed class TreeLevelShadowTests(ITestOutputHelper output)
         Needs.Renderer();
         var species = TreeSpecies.CaliforniaBlackOak;
         var (low, high) = (float.MaxValue, float.MinValue);
-        foreach (var p in Trees.BuildLeaves(Trees.Grow(species, 75), species, 75).Positions) (low, high) = (MathF.Min(low, p.Y), MathF.Max(high, p.Y));
+        foreach (var p in Trees.BuildLeaves(TreeSkeleton.Grow(species, 75), species, 75).Positions) (low, high) = (MathF.Min(low, p.Y), MathF.Max(high, p.Y));
         var at = new Vec3(0f, (low + high) / 2f, 0f);
         Vec3 Eye(float distance) => new(0f, at.Y, MathF.Sqrt(distance * distance - at.Y * at.Y));
 
