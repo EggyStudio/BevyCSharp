@@ -23,10 +23,18 @@ direct run away to more than a thousand times its reference's, and on the right 
 share keeping what the gloss leaves, the walls and the lamp's reflection on the smooth ceiling
 showing, 35 to 38% over its reference.
 
+![](.github/assets/readings/2026-11-08-item-107-band.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, its near oak 29.5
+meters off in the band where its full level is dithered into its reduced one, on the left with both
+levels casting whole into the sun's shadow map, its leaves 47 and 49% under its path-traced
+reference, and on the right with one level casting at any distance, 42 and 43% under, more of the
+leaves at the crown's edge in the sun.
+
 Done that day
 
 - Item 113 at `01951f29`. Shaded grass beside a wall takes 30 to 45% less light from all around than
   the reference.
+- Item 115 at `571174fc`. The air's sky test captures before its sky is drawn under load.
 
 ## 2026-11-07
 

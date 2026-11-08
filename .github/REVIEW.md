@@ -1,15 +1,17 @@
 # Review
 
-Reviewed up to `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for
-their diffuse share what their gloss leaves, pushed at 07:22 on 2026-11-08, its run green at 07:40
-on the three systems in 12 to 18 minutes; it keeps the form and carries the review's files and the
-devlog. Nothing is pushed after it. Before it `01951f29`, item 113, the field holding a crown's
-leaves cell by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16
-minutes. Before it `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at
-22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests
-the shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray
-on the light from all around and the let-through shadowed, with the reference reading a crown leaf
-by leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
+Reviewed up to `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's
+reading in the replies, pushed at 09:32 on 2026-11-08, its run green at 09:48 on the three systems
+in 10 to 16 minutes; it keeps the form and carries the review's files. Nothing is pushed after it.
+Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for their
+diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the three systems
+in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's leaves cell by
+cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16 minutes. Before it
+`e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at 22:47 on
+2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests the
+shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray on
+the light from all around and the let-through shadowed, with the reference reading a crown leaf by
+leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
 `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the leaves' cover,
 pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes. Before it
 `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see along their
@@ -1601,7 +1603,15 @@ from [SHARED.md](SHARED.md).
     read at 640 by 360 or more as 105's grass test did; (c) the light a crown's leaves scatter
     between them is item 116, before 114, since it brightens the crowns by the right light; the two
     small findings mend in passing in 116's commit. The pictures 08-11-item-107-measure.png and
-    08-11-item-107-band.png in the day's dump, sent to the owner.
+    08-11-item-107-band.png in the day's dump, sent to the owner. 107's reading rides in
+    `571174fc`'s replies. The shadow mend goes on as a native system in shadow_origin.rs, each frame
+    taking Bevy's own shadow origin and giving NotShadowCaster to any mesh of a visibility range
+    while the origin lies outside the span from the middle of its fade-in margin to the middle of
+    its fade-out, InRange's rule, with a marker of its own so only the NotShadowCaster it gave is
+    taken off and a game's own stays, which mends Bevy's doubled cast for every level group and not
+    trees alone, no ABI change; the test the lone oak at 26.5, 29.5 and 30.3 m against the
+    reference's direct light failing at the head, the guide's components page corrected where it
+    says the shadow fades by the same distance, the meadow's oak 75 and the cost read beside it.
 
 108. **The README's last top link is 3DEngine.** Decision 79 on 2026-11-05. The row over the
     README's title, Devlog and Cheat sheet, ends with a third link, 3DEngine, to
@@ -2378,6 +2388,10 @@ from [SHARED.md](SHARED.md).
     runs kept here, passing five of five alone each time. Wait for Render.PipelinesReady before the
     capture, as the captures that read a drawn frame do, with the test's remark naming the load that
     showed it; a small commit of its own or in 107's, whichever comes first. Before 107's commit.
+    Done at `571174fc`, pushed at 09:32 on 2026-11-08, the test asking for the picture once every
+    pipeline has been ready for ten frames together past the settled frame and leaving when it
+    arrives within 600 frames, its remark naming the whole run's load; test-only, no bridge built,
+    the suite 2,045 in 49 minutes with no failure, NormTests 18, the listing unchanged.
 
 116. **The probes' rays gather the light a crown's leaves scatter between them.** From item 107 on
     2026-11-08. A lone oak lit from behind the eye reads 22 and 16% under the whole reference with
@@ -5724,3 +5738,50 @@ reads within 5% under and 8% over, and the probes gather none of the light a cro
 between them, about a fifth of a front-lit crown's in the reference, while the leaves' fill matches
 the reference's at close range, the atlas's mips filling a crown only where a leaf's box comes to a
 texel.
+
+Item 107's shadow mend, one level of a tree casting at any distance, in the commit carrying this
+line. A mesh of a visibility range carries NotShadowCaster while Bevy's shadow origin stands outside
+the span from the middle of the margin it fades in over to the middle of the one it fades out over,
+InRange's rule, given by a system in render/shadow_origin.rs that takes the origin Bevy measures
+every cascade from (get_shadow_lod_origin), after transforms are propagated and before the lights'
+visibility is checked, with a marker of its own beside it, so it takes off only the NotShadowCaster
+it gave and a game's own stays. It mends the doubled cast for every group of levels, not trees
+alone. The ABI is unchanged. The guide's components page said a mesh's shadow fades by the same
+distance, which it did not, and says what it does, with the trees page and RENDERING.md beside it.
+
+TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes reads the lone oak 75 lit
+from the side by a sun 21 degrees up and nothing else, leaf by leaf against the reference meeting no
+face past the first, at 26.5, 27.85, 28.05, 29.5 and 30.3 meters, the band's middle at 27.94. It
+reads 8, 4, 3, 1 and 7% over where the head read 16, 19, 15, 17 and 12% under, within 0.92 and 1.15
+of it, so it fails without the mend. TheShadowChangesLevelInTheFrameTheEyeCrossesTheBandsMiddle
+stands the eye 5 centimeters short of the middle and crosses to 5 centimeters past it between one
+frame and the next, the frame before and the frame after each captured and set against the picture
+taken once the eye has stood on its side. The pairs read as one, 0.0000 apart, a mean light of
+0.1682 and 0.1679 where the head read 0.1659 and 0.1660 with both levels casting and the tree read
+0.1807 casting nothing, so the shadow changes in the frame the eye crosses and is one level's on
+either side of it. The native test a_mesh_casts_over_the_half_of_each_margin_nearer_its_own_distance
+holds the rule and a game's own NotShadowCaster staying as its mesh comes into the span and leaves
+it.
+
+In the meadow at eight in the morning oak 75's reduced level at 29.5 meters reads 42 and 43% under
+its reference where 47 and 49, the aspen beside it 10 and 16% over where 9 and 16, and the shaded
+grass 3% under. The rest of the oak's shortfall is item 116's ground. The pair
+2026-11-08-item-107-band.webp shows the oak at the head and with the mend.
+
+The cost. The system reads each mesh of a visibility range once a frame, 33 microseconds a frame for
+a thousand such meshes, 77 for ten thousand and 357 for fifty thousand with none crossing, in a
+release build of the bridge timed over 200 frames by a test in the trial copy, not committed, each
+crossing a component given or taken.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+204 with render, its first run failing a memory counter's test and a crash writer's that passed in
+both runs after it. The bridge was built with the editor profile, meshlets and Solari. The whole
+suite ran, 2,051 passed and 3 skipped in 58 m 37 s at the 3 GB cap, none aborted, its largest
+process at 2,942 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: Bevy 0.20 draws a mesh of a visibility range into a light's shadow map over both of its
+margins whole and with no dither, so two levels of a tree cast together across the band they are
+dithered over, a lone oak's leaves there 12 to 19% under the reference, and a mesh carrying
+NotShadowCaster outside the span from the middle of its first margin to the middle of its last,
+measured from the shadow origin, lets one level cast at any distance, the oak 1 to 8% over and the
+step taken in the frame the eye crosses.

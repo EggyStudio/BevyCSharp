@@ -129,9 +129,13 @@ range.StartMargin = new FloatRange(3f, 4f);              // fades in from 3 to 4
 range.EndMargin = new FloatRange(8f, 9f);                // and out from 8 to 9
 ```
 
-The mesh's shadow fades by the same distance from the 3D camera drawing the game's picture, to the
-window or offscreen, which the library gives Bevy's `ShadowLodOrigin` until the game gives an
-entity of its own the component, as a splitscreen game does for the camera it measures from.
+The mesh casts its shadow by the same distance from the 3D camera drawing the game's picture, to the
+window or offscreen, which the library gives Bevy's `ShadowLodOrigin` until the game gives an entity
+of its own the component, as a splitscreen game does for the camera it measures from. It casts from
+the middle of the margin it fades in over to the middle of the one it fades out over, since a shadow
+takes no dither and two levels casting whole across a margin would shade it twice, so one level of a
+group casts at any distance. The library gives the mesh `NotShadowCaster` outside that span and
+takes off only the one it gave, so a game's own stays.
 
 An enum inside a variant is a record of its own there, as an orthographic projection holds its
 `ScalingMode` and a sprite's slicer its two `SliceScaleMode`s, or a plain C# enum where none of its

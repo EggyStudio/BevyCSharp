@@ -54,8 +54,9 @@ the three pictures of the whole tree taken nearest the way it is seen from, of s
 ways spread over the upper half of the sphere into an atlas of their own with the same camera, so a
 forest on a far hillside costs two triangles a tree. It casts its shadow and takes none. A tree is
 dressed once its variant's meshes are made and its pictures taken, some seconds after it has grown.
-Each level's shadow is drawn the same way, measured from the scene's camera. `Trees.Build` and
-`Trees.BuildLeaves` take the level for a tree built by hand.
+Each level casts its shadow over the half of each margin nearer its own distance, measured from the
+scene's camera, so one level shades the tree at any distance and the shadow changes level at a
+margin's middle. `Trees.Build` and `Trees.BuildLeaves` take the level for a tree built by hand.
 
 A planted tree sways in the wind. Its trunk bends downwind, each limb swings about where it leaves
 its parent, and each leaf flutters about its stalk, each limb and leaf in a phase of its own and

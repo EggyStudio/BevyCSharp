@@ -482,7 +482,11 @@ texels. A tree's impostor stands in for a far tree turned to the eye as it draws
 as a shape, so it is passed and the reference holds no far trees. A mesh of a visibility range is
 traced at the level the camera's distance gives, from the middle of the margin it fades in over to
 the middle of the one it fades out over, since Bevy dithers two levels across a margin, so one level
-of a tree is traced at any distance. The reference held every level of each tree at once, and in the
+of a tree is traced at any distance. A mesh casts its shadow over the same span
+(render/shadow_origin.rs), since Bevy draws both levels whole into a light's shadow map across a
+margin, its shadow pass taking no dither, and a lone oak's leaves there read 12 to 19% under the
+reference where either level alone reads within 5% under and 8% over. The reference held every level
+of each tree at once, and in the
 feature test's meadow at eight in the morning the far cards, their textures past the material
 buffer's sixteen masks and traced whole, stood as planes over the crowns and the leaves past them as
 black metal, the walls 63 to 70% under the reference and the sky 29%. Taken at the level the
