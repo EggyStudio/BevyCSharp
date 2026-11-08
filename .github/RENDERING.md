@@ -314,6 +314,19 @@ into. The probes read 3 to 5% under a reference whose every face is lit by Bevy'
 they light a face by Lambert's term and their gloss's share evenly where the reference takes
 Burley's term and the GGX lobe toward the probe.
 
+Its diffuse share keeps what its gloss's share leaves, and the reference's faces past a camera's
+first keep the same, the first lit as the picture lights it. With the diffuse share at its whole
+color beside the gloss, a smooth white face met at a grazing ray sent on half as much light again as
+reached it at a roughness of 0.1 and a reflectance of 0.5, and a closed room of 8 of such walls as
+white as 0.95 ran away, its light past the direct 1,136 to 1,195 times its reference's
+(`AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference`). Kept so, it reads 1.35 to
+1.38 and walls of the level's white 1.08 to 1.16, the hit's gloss still taken as though the light
+reached it evenly from all around where the reference's reflects the light along its mirror way, a
+probe in the room holding its first bounce within 0.3% of its reference and each bounce past it 12
+to 16% over. The bounce rooms' references hold 0.1 to 14.5% less light with their faces past the
+first kept so, and their bounds were taken again, and the closed rooms of 4, 8 and 16 read 1.00 to
+1.02, 0.97 to 1.05 and 0.93 to 0.96 and the closed Cornell box 1.02 to 1.04.
+
 A ray's hit takes the light past the first bounce from the faces of the probes it sees, and a face
 holds the light reaching a surface facing along its axis where the probe stands, a unit or more over
 the floor it is read for and nearer the walls and the ceiling than the floor is, so each bounce came
@@ -508,11 +521,12 @@ their reference where 30 and 25% and 8 and 2%, the near oak's reduced level 48 a
 morning the picture held a mean light of 0.2401 with the trees' impostors drawn and 0.2402 with them
 hidden against the same reference. Every path, a camera's or a probe's, scatters at every face by
 its material, a way drawn by the cosine about its normal or from its GGX lobe's visible normals, one
-drawn by their weights, the lobe's its Fresnel at the face's roughness as Bevy's table gives it, so
-the sky a gloss reflects at a grazing view and the light a glossy wall carries between bounces come
-in, a smooth metal plane under a sky of one light reading 0.953 of it and a rough gray dielectric at
-a grazing view 0.667, its diffuse 0.5 and Fresnel's share. Every test of global illumination reads
-it, since the probes' rays carry the gloss of what they meet (`shadeProbeHit`) and the light pass
+drawn by their weights, the lobe's its Fresnel at the face's roughness as Bevy's table gives it,
+each face past a camera's first keeping for its diffuse share what its gloss leaves, so the sky a
+gloss reflects at a grazing view and the light a glossy wall carries between bounces come in, a
+smooth metal plane under a sky of one light reading 0.953 of it and a rough gray dielectric at a
+grazing view 0.667, its diffuse 0.5 and Fresnel's share. Every test of global illumination reads it,
+since the probes' rays carry the gloss of what they meet (`shadeProbeHit`) and the light pass
 reflects the light the probes hold along a face's mirror way. Its gain past the direct over a
 reference whose paths went on by the diffuse share alone, the gloss carried between bounces, is 21
 to 28% in the closed rooms of 4, 8 and 16, 23 to 44% in the closed Cornell box, the green wall most,

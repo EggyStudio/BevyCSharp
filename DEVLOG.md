@@ -15,6 +15,19 @@ with each cell holding the share the leaf cards in it let through, the grass in 
 shadow lighter, from 46% under its path-traced reference to 18% under, the sunlit grass from 22%
 under to 10% under, and the walls and the ground 3 to 18 points nearer.
 
+![](.github/assets/readings/2026-11-08-item-110-smooth.webp)
+A closed room of 8 of smooth walls as white as 0.95 at a roughness of 0.1, lit by a lamp under its
+ceiling at Medium, its light before tonemapping mapped alike in both, on the left with a probe's
+ray's hit sending on its diffuse share at its whole color beside its gloss, the light past the
+direct run away to more than a thousand times its reference's, and on the right with the diffuse
+share keeping what the gloss leaves, the walls and the lamp's reflection on the smooth ceiling
+showing, 35 to 38% over its reference.
+
+Done that day
+
+- Item 113 at `01951f29`. Shaded grass beside a wall takes 30 to 45% less light from all around than
+  the reference.
+
 ## 2026-11-07
 
 ![](.github/assets/readings/2026-11-07-item-106-walls.webp)

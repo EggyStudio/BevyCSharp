@@ -29,7 +29,9 @@ public sealed partial class GlobalIlluminationTests
     /// reference's light past the direct, its whole light 9% under where the gain left it 5%
     /// under, and the room lifted 0.3 against the probes' grid reads 1.05, the layers' heights
     /// against the lamp's bright spot under its ceiling deciding it
-    /// (<see cref="BounceRoomsTests"/>).
+    /// (<see cref="BounceRoomsTests"/>). With each face past the first keeping for its diffuse share
+    /// what its gloss leaves, at a probe's ray's hit and in the reference, the rooms of 4, 8 and 16
+    /// read 0 to 2% over, 3% under to 5% over and 4 to 7% under.
     /// </remarks>
     [SkippableTheory]
     [InlineData(4f)]
@@ -43,6 +45,40 @@ public sealed partial class GlobalIlluminationTests
         {
             output.WriteLine($"the room of {size}'s {face} reads {past:0.000} of its reference's light past the direct");
             if (Math.Abs(past - 1) >= 0.15) faults.Add($"the {face} reads {past:0.000} of its reference's light past the direct");
+        }
+
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// A closed room of 8 of smooth walls, at a roughness of 0.1 and a reflectance of 0.5, lit by one
+    /// shadowed lamp under its ceiling, reads the light past the direct on every face within the
+    /// bound of its reference's through all the bounces, the level's white within 20% and walls as
+    /// white as 0.95 within half, the guard that their light does not run away.
+    /// </summary>
+    /// <remarks>
+    /// A probe's ray's hit sent on its color's diffuse share at its whole color beside its gloss's
+    /// share toward the ray, so a smooth white face met at a grazing ray sent on more light than
+    /// reached it, and the walls as white as 0.95 ran away, the light past the direct 1,136 to 1,195
+    /// times its reference's, where the level's white read 1.00 to 1.04. Its diffuse share keeps
+    /// what its gloss leaves, and the reference's faces past the first keep the same, and the walls
+    /// as white as 0.95 read 1.35 to 1.38 and the level's white 1.08 to 1.16. What is left is the
+    /// hit's gloss taken as though the light reached it evenly from all around, a probe there holding
+    /// its first bounce within 0.3% of its reference and each bounce past it 12 to 16% over, where
+    /// the reference's gloss reflects the light along its mirror way, dimmer past the first bounce
+    /// at a grazing ray than the light from all around.
+    /// </remarks>
+    [SkippableTheory]
+    [InlineData(0.787f, 0.2)]
+    [InlineData(0.95f, 0.5)]
+    public void AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference(float white, double bound)
+    {
+        Needs.Shaders();
+        var faults = new List<string>();
+        foreach (var (face, past) in PastTheDirect(ecs => ClosedRoom(ecs, 8f, 0.1f, white), screen: true))
+        {
+            output.WriteLine($"the smooth room of {white}'s {face} reads {past:0.000} of its reference's light past the direct");
+            if (Math.Abs(past - 1) >= bound) faults.Add($"the {face} reads {past:0.000} of its reference's light past the direct");
         }
 
         Assert.True(faults.Count == 0, string.Join("; ", faults));
@@ -71,7 +107,8 @@ public sealed partial class GlobalIlluminationTests
     /// reflecting by its first face's gloss alone holds, and read from the eight by eight
     /// directions of the probes the wall sees along the mirror way, 1.023. Against the whole
     /// reference that read 0.885, the gloss between bounces left out, and with the probes' rays
-    /// carrying the gloss of what they meet it reads 1.024.
+    /// carrying the gloss of what they meet 1.024, its faces reading 1.02 to 1.04 with each face
+    /// past the first keeping for its diffuse share what its gloss leaves.
     /// </remarks>
     [SkippableFact]
     public void AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference()
@@ -175,23 +212,25 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// A closed room of the level's white <paramref name="size"/> units across and three high, its
-    /// walls, floor and ceiling 0.4 thick, lit by a shadowed lamp half a unit under its ceiling
-    /// near its middle, its light growing with the floor's area from 60,000 in a room of 4, the
-    /// camera in one corner looking across to the far one.
+    /// faces at <paramref name="roughness"/> as white as <paramref name="white"/>, its walls, floor
+    /// and ceiling 0.4 thick, lit by a
+    /// shadowed lamp half a unit under its ceiling near its middle, its light growing with the
+    /// floor's area from 60,000 in a room of 4, the camera in one corner looking across to the far
+    /// one.
     /// </summary>
-    private static void ClosedRoom(EcsWorld ecs, float size)
+    private static void ClosedRoom(EcsWorld ecs, float size, float roughness = 0.9f, float white = 0.787f)
     {
         var h = size / 2f;
         var camera = PictureRun.Camera(ecs, new Vec3(-h + 0.4f, 1.6f, h - 0.4f));
         ecs.Add(camera, Transform.LookingAt(new Vec3(-h + 0.4f, 1.6f, h - 0.4f), new Vec3(h, 0.8f, -h), Vec3.UnitY));
         Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
         Render.SetAmbientLight((1f, 1f, 1f), 0f);
-        var white = Render.CreateMaterial(0.787f, 0.787f, 0.787f, roughness: 0.9f);
+        var walls = Render.CreateMaterial(white, white, white, roughness: roughness);
         void Slab(string name, Vec3 at, Vec3 extent)
         {
             var slab = ecs.Spawn();
             Render.SetMesh(ecs, slab, Render.CreateMesh(MeshShape.Cuboid, extent.X, extent.Y, extent.Z));
-            Render.SetMaterial(ecs, slab, white);
+            Render.SetMaterial(ecs, slab, walls);
             ecs.Add(slab, Transform.At(at.X, at.Y, at.Z));
             ecs.SetName(slab, name);
         }

@@ -42,16 +42,17 @@ public sealed class BounceRoomsTests
     /// </summary>
     /// <remarks>
     /// The references' paths are lit at every face as Bevy's lighting lights it and scatter there
-    /// by its gloss and its diffuse share, as the probes' rays carry the gloss of what they meet
-    /// and the picture reflects the light the probes it sees hold along the mirror way. The views
-    /// read 0.09 of their light from their references in the Cornell box, 0.07 in the thin room,
-    /// 0.38 to 0.39 in the corridor, 0.11 in the window's, 0.02 among the red walls, 0.21 to 0.22
-    /// in the strip's, 0.06 to 0.08 on the grazing floor, 0.08 in the carried lamp's and 0.07
-    /// around the emitting blocks, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24, 0.27 to
-    /// 0.30, 0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06 against its own. Before the
-    /// emitters' light was carried, the Cornell box read 0.11, the strip's 1.00 and the blocks'
-    /// 0.30. The strip is thinner than a pixel at 160 by 90, so the picture shows none of it where
-    /// the reference's paths across each pixel meet it.
+    /// by its gloss and its diffuse share, each face past the first keeping for its diffuse share
+    /// what its gloss leaves, as the probes' rays carry the gloss of what they meet and keep the
+    /// same, and the picture reflects the light the probes it sees hold along the mirror way. The
+    /// views read 0.09 to 0.10 of their light from their references in the Cornell box, 0.05 in the
+    /// thin room, 0.35 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls,
+    /// 0.20 to 0.21 in the strip's, 0.05 to 0.07 on the grazing floor, 0.08 in the carried lamp's
+    /// and 0.07 around the emitting blocks, where 3DEngine's read 0.12 to 0.14, 0.09, 0.20 to 0.24,
+    /// 0.27 to 0.30, 0.02, 0.22, 0.11 to 0.12, 0.11 to 0.12 and 0.05 to 0.06 against its own.
+    /// Before the emitters' light was carried, the Cornell box read 0.11, the strip's 1.00 and the
+    /// blocks' 0.30. The strip is thinner than a pixel at 160 by 90, so the picture shows none of
+    /// it where the reference's paths across each pixel meet it.
     /// <para>
     /// The grazing floor read 0.05 to 0.07 and the carried lamp's room 0.06 while each bounce came
     /// back about 5% over, the hits and the pixels reading the probes' faces where the probes
@@ -68,7 +69,7 @@ public sealed class BounceRoomsTests
     /// </para>
     /// <para>
     /// Each bound is taken with its reference, the farthest the picture of before read from
-    /// references traced from four seeds, which differ by 0.001 at most, plus the margin the bound
+    /// references traced from four seeds, which differ by 0.004 at most, plus the margin the bound
     /// kept over its reading before, so the bound moves with the reference and the picture is held
     /// to what it was, or 15% over the farthest the picture reads where that is less, so a view the
     /// picture narrows is held to it. The references' faces past the first went on by their diffuse
@@ -76,31 +77,36 @@ public sealed class BounceRoomsTests
     /// reference the picture of before read the thin room 0.21 from it, the strip's 0.32 to 0.33,
     /// the grazing floor 0.21 to 0.24 and the carried lamp's 0.15, where it reads 0.07, 0.21 to
     /// 0.22, 0.06 to 0.08 and 0.08. The corridor reads 0.38 to 0.39 where it read 0.39, by gloss
-    /// the probes above it do not carry.
+    /// the probes above it do not carry. The faces past the first took their diffuse share at its
+    /// whole color beside their gloss before they kept what the gloss leaves, and the references'
+    /// light is 0.1 to 14.5% less since, so the bounds were taken again, the strip's held 15% over
+    /// its reading, 0.24 to 0.25, since against the new references the picture of before read it
+    /// 0.17 from them, its probes' hits sending on more than reached them having hidden a shortfall
+    /// of a fifth of its light.
     /// </para>
     /// </remarks>
     [SkippableTheory]
     [InlineData(1, GlobalIllumination.Low, 0.11)]
-    [InlineData(1, GlobalIllumination.Medium, 0.11)]
+    [InlineData(1, GlobalIllumination.Medium, 0.12)]
     [InlineData(1, GlobalIllumination.High, 0.11)]
-    [InlineData(2, GlobalIllumination.Low, 0.09)]
-    [InlineData(2, GlobalIllumination.Medium, 0.09)]
-    [InlineData(2, GlobalIllumination.High, 0.09)]
-    [InlineData(3, GlobalIllumination.Low, 0.43)]
-    [InlineData(3, GlobalIllumination.Medium, 0.44)]
-    [InlineData(3, GlobalIllumination.High, 0.44)]
-    [InlineData(4, GlobalIllumination.Low, 0.13)]
-    [InlineData(4, GlobalIllumination.Medium, 0.13)]
-    [InlineData(4, GlobalIllumination.High, 0.13)]
+    [InlineData(2, GlobalIllumination.Low, 0.06)]
+    [InlineData(2, GlobalIllumination.Medium, 0.06)]
+    [InlineData(2, GlobalIllumination.High, 0.06)]
+    [InlineData(3, GlobalIllumination.Low, 0.40)]
+    [InlineData(3, GlobalIllumination.Medium, 0.41)]
+    [InlineData(3, GlobalIllumination.High, 0.41)]
+    [InlineData(4, GlobalIllumination.Low, 0.14)]
+    [InlineData(4, GlobalIllumination.Medium, 0.14)]
+    [InlineData(4, GlobalIllumination.High, 0.14)]
     [InlineData(5, GlobalIllumination.Low, 0.03)]
     [InlineData(5, GlobalIllumination.Medium, 0.03)]
     [InlineData(5, GlobalIllumination.High, 0.02)]
-    [InlineData(6, GlobalIllumination.Low, 0.25)]
-    [InlineData(6, GlobalIllumination.Medium, 0.25)]
-    [InlineData(6, GlobalIllumination.High, 0.26)]
-    [InlineData(7, GlobalIllumination.Low, 0.09)]
-    [InlineData(7, GlobalIllumination.Medium, 0.07)]
-    [InlineData(7, GlobalIllumination.High, 0.07)]
+    [InlineData(6, GlobalIllumination.Low, 0.24)]
+    [InlineData(6, GlobalIllumination.Medium, 0.24)]
+    [InlineData(6, GlobalIllumination.High, 0.25)]
+    [InlineData(7, GlobalIllumination.Low, 0.08)]
+    [InlineData(7, GlobalIllumination.Medium, 0.06)]
+    [InlineData(7, GlobalIllumination.High, 0.06)]
     [InlineData(8, GlobalIllumination.Low, 0.10)]
     [InlineData(8, GlobalIllumination.Medium, 0.10)]
     [InlineData(8, GlobalIllumination.High, 0.10)]
@@ -138,41 +144,41 @@ public sealed class BounceRoomsTests
     /// The screen probes stand a tile apart, 16 pixels at Low, 12 at Medium and 8 at High, so at
     /// 160 by 90 the window's room at Low is 10 probes across and 6 down, and their light lies in
     /// blotches a tile wide that the views' distances read, where the size of the picture rather
-    /// than the method sets them. With them the views read 0.09 to 0.11 in the Cornell box, 0.03 to
-    /// 0.04 in the thin room, whose walls' seams the world's probes lit, 0.40 in the corridor, 0.14
-    /// to 0.16 in the window's, 0.02 among the red walls, 0.22 to 0.23 in the strip's, 0.05 to 0.07
+    /// than the method sets them. With them the views read 0.09 to 0.11 in the Cornell box, 0.02 to
+    /// 0.03 in the thin room, whose walls' seams the world's probes lit, 0.36 in the corridor, 0.15
+    /// to 0.17 in the window's, 0.02 among the red walls, 0.22 to 0.23 in the strip's, 0.05 to 0.07
     /// on the grazing floor, 0.09 to 0.11 in the carried lamp's and 0.08 to 0.09 around the
     /// emitting blocks. Their bounds are taken with their references as without the screen probes
     /// (<see cref="EachRoomLiesWithinItsMeasuredDistanceFromItsReference"/>).
     /// </remarks>
     [SkippableTheory]
-    [InlineData(1, GlobalIllumination.Low, 0.13)]
+    [InlineData(1, GlobalIllumination.Low, 0.12)]
     [InlineData(1, GlobalIllumination.Medium, 0.13)]
     [InlineData(1, GlobalIllumination.High, 0.11)]
-    [InlineData(2, GlobalIllumination.Low, 0.05)]
-    [InlineData(2, GlobalIllumination.Medium, 0.05)]
-    [InlineData(2, GlobalIllumination.High, 0.04)]
-    [InlineData(3, GlobalIllumination.Low, 0.45)]
-    [InlineData(3, GlobalIllumination.Medium, 0.46)]
-    [InlineData(3, GlobalIllumination.High, 0.46)]
-    [InlineData(4, GlobalIllumination.Low, 0.19)]
-    [InlineData(4, GlobalIllumination.Medium, 0.17)]
-    [InlineData(4, GlobalIllumination.High, 0.16)]
+    [InlineData(2, GlobalIllumination.Low, 0.04)]
+    [InlineData(2, GlobalIllumination.Medium, 0.04)]
+    [InlineData(2, GlobalIllumination.High, 0.03)]
+    [InlineData(3, GlobalIllumination.Low, 0.41)]
+    [InlineData(3, GlobalIllumination.Medium, 0.42)]
+    [InlineData(3, GlobalIllumination.High, 0.42)]
+    [InlineData(4, GlobalIllumination.Low, 0.20)]
+    [InlineData(4, GlobalIllumination.Medium, 0.19)]
+    [InlineData(4, GlobalIllumination.High, 0.17)]
     [InlineData(5, GlobalIllumination.Low, 0.03)]
     [InlineData(5, GlobalIllumination.Medium, 0.03)]
     [InlineData(5, GlobalIllumination.High, 0.03)]
-    [InlineData(6, GlobalIllumination.Low, 0.26)]
+    [InlineData(6, GlobalIllumination.Low, 0.27)]
     [InlineData(6, GlobalIllumination.Medium, 0.26)]
-    [InlineData(6, GlobalIllumination.High, 0.27)]
-    [InlineData(7, GlobalIllumination.Low, 0.08)]
+    [InlineData(6, GlobalIllumination.High, 0.26)]
+    [InlineData(7, GlobalIllumination.Low, 0.07)]
     [InlineData(7, GlobalIllumination.Medium, 0.06)]
     [InlineData(7, GlobalIllumination.High, 0.09)]
     [InlineData(8, GlobalIllumination.Low, 0.12)]
-    [InlineData(8, GlobalIllumination.Medium, 0.13)]
+    [InlineData(8, GlobalIllumination.Medium, 0.14)]
     [InlineData(8, GlobalIllumination.High, 0.10)]
     [InlineData(9, GlobalIllumination.Low, 0.11)]
-    [InlineData(9, GlobalIllumination.Medium, 0.11)]
-    [InlineData(9, GlobalIllumination.High, 0.10)]
+    [InlineData(9, GlobalIllumination.Medium, 0.10)]
+    [InlineData(9, GlobalIllumination.High, 0.09)]
     public void WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(int view, GlobalIllumination quality, double bound)
     {
         Needs.Shaders();

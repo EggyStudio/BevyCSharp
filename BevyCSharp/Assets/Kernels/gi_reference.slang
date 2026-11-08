@@ -455,13 +455,14 @@ float3 litBy(float3 l, float3 n, float3 v, Lit lit, float3 diffuse, float3 throu
 }
 
 // The light the sun and the lamps send back from p on a face facing n, which a ray left from at
-// face, toward v, lit as Bevy lights it, the share it lets through lit from behind.
-float3 direct(GiLights given, float3 p, float3 n, float3 v, float3 color, Material material, Lit lit, uint2 face)
+// face, toward v, lit as Bevy lights it, the share it lets through lit from behind, its diffuse
+// share and the share it lets through times kept.
+float3 direct(GiLights given, float3 p, float3 n, float3 v, float3 color, Material material, Lit lit, uint2 face, float3 kept)
 {
     float metallic = saturate(material.metallic);
     float roughness = clamp(material.perceptual_roughness, 0.089, 1.0);
     roughness *= roughness;
-    float3 base = color * (1.0 - metallic);
+    float3 base = color * (1.0 - metallic) * kept;
     float3 diffuse = base * (1.0 - lit.through), through = base * lit.through;
     float reflectance = material.reflectance;
     float3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) + color * metallic;
@@ -587,7 +588,19 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         Lit lit = litAt(hit, material, n);
         uint2 face = uint2(hit.instance, hit.triangle);
         float3 emitted = material.emissive.rgb * lerp(1.0, passView.exposure, material.emissive.a);
-        light += throughput * (emitted + direct(given, p, n, -way, color, material, lit, face));
+        float metallic = saturate(material.metallic);
+        float rough = clamp(material.perceptual_roughness, 0.089, 1.0);
+        float3 f0 = 0.16 * material.reflectance * material.reflectance * (1.0 - metallic) + color * metallic;
+        float3 v = -way;
+        float nv = max(dot(lit.shadingNormal, v), 1e-4);
+        float2 ab = passF_AB(rough, nv);
+        // A face past the camera's first, and every face a probe's path meets, keeps for its
+        // diffuse share and the share it lets through what its gloss leaves, as a probe's ray's hit
+        // does (shadeProbeHit), so a smooth white face met at a grazing ray sends on no more than
+        // reaches it. The camera's first face is lit as the picture lights it, its diffuse share at
+        // its whole color beside its gloss.
+        float3 kept = fromCamera && bounce == 0u ? float3(1.0) : saturate(1.0 - (f0 * ab.x + ab.y));
+        light += throughput * (emitted + direct(given, p, n, -way, color, material, lit, face, kept));
 
         // A path goes on by the material's own scattering, its diffuse share past its metal or the
         // GGX lobe about its mapped normal, one drawn by their weights, the lobe's its Fresnel at
@@ -597,13 +610,7 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
         // through about the face's back, one drawn by how much each is.
         bool glossy = false;
         float3 reflected = float3(0.0);
-        float metallic = saturate(material.metallic);
-        float rough = clamp(material.perceptual_roughness, 0.089, 1.0);
-        float3 f0 = 0.16 * material.reflectance * material.reflectance * (1.0 - metallic) + color * metallic;
-        float3 v = -way;
-        float nv = max(dot(lit.shadingNormal, v), 1e-4);
-        float2 ab = passF_AB(rough, nv);
-        float3 diffuseShare = color * (1.0 - metallic);
+        float3 diffuseShare = color * (1.0 - metallic) * kept;
         float weighed = luma(diffuseShare) + luma(f0 * ab.x + ab.y);
         if (weighed <= 0.0)
             break;

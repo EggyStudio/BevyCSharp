@@ -617,12 +617,15 @@ public float2 splitSum(float roughness, float nv)
 /// wall, and over pi of the indirect light reaching it from the probes it sees (`bouncedSeenAt`),
 /// at `kept`'s share of it, from the faces where `gathered` says the probes stood, with the light
 /// it emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`), and the light of
-/// the two brightest glow lights, the ray along `way`. What it reflects is its color's diffuse
-/// share past its metal and its gloss's share toward the ray (`splitSum`), its f0 from its
-/// reflectance and its color by its metal as Bevy's lighting works it out, taken at the face's own
-/// roughness as though it reflected the light from all around evenly, so the gloss of a wall a
-/// probe's ray meets carries light between bounces as its diffuse share does, the share the
-/// path-traced reference's paths carry at every face. `own` holds the light the surface sends on of
+/// the two brightest glow lights, the ray along `way`. What it reflects is its gloss's share toward
+/// the ray (`splitSum`) and its color's diffuse share past its metal of what its gloss leaves, its
+/// f0 from its reflectance and its color by its metal as Bevy's lighting works it out, taken at the
+/// face's own roughness as though it reflected the light from all around evenly, so the gloss of a
+/// wall a probe's ray meets carries light between bounces as its diffuse share does, the share the
+/// path-traced reference's paths carry at every face past the first. With the diffuse share at its
+/// whole color beside the gloss, a smooth white face met at a grazing ray sent on more light than
+/// reached it, half as much again at a roughness of 0.1, and a closed room of smooth walls as white
+/// as 0.95 ran away, its light past the direct 1,136 to 1,195 times its reference's. `own` holds the light the surface sends on of
 /// what reaches it straight from the sun, the lights and the glow lights, with its emission, which
 /// a probe weighs the frame before's light by. The sun and the lights are given as the light a
 /// white surface facing one returns, and the probes hold the light reaching a face, so the indirect
@@ -636,7 +639,8 @@ public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldIn
     float3 paint = surfaceFacing(faces, albedo, linear, info, p, n, gloss);
     float2 ab = splitSum(gloss.x, saturate(dot(n, -way)));
     float3 f0 = lerp(float3(0.16 * gloss.z * gloss.z), paint, gloss.y);
-    float3 color = paint * (1.0 - gloss.y) + f0 * ab.x + ab.y;
+    float3 glossy = f0 * ab.x + ab.y;
+    float3 color = paint * (1.0 - gloss.y) * saturate(1.0 - glossy) + glossy;
     float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, cascades);
     own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
             + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi)
