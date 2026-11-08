@@ -71,6 +71,11 @@ RWStructuredBuffer<Atomic<uint>> behind;
 // dispatch writes and field_resolve.slang reads.
 RWStructuredBuffer<uint> albedo;
 
+// The area of a crown's leaf cards, double-sided triangles letting light through, whose middles lie
+// in each cell, in 65536ths of a square meter, which field_resolve.slang turns into the share of
+// light a meter of the cell lets through (lightThroughCardsPaint in bcs_field.slang).
+RWStructuredBuffer<Atomic<uint>> leaf_area;
+
 // The light a cell's nearest surface emits, in the picture's units, its alpha 1 where global
 // illumination carries the emitter as a glow light, which the painting dispatch writes and
 // field_resolve.slang reads.
@@ -271,6 +276,15 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
     bool sided = (instance.triangles.z & 1u) == 0u && dot(face, face) > 1e-20;
     uint way = dot(face, face) > 1e-20 ? way8(face) : 0u;
     float faceLength = length(face);
+
+    // A leaf card adds its area to the cell its middle lies in, once, in the dispatch that writes
+    // the distances.
+    if (groups.z == 0u && lane == 0u && !sided && ((instance.triangles.z >> 8u) & 255u) != 0u)
+    {
+        int3 middle = int3(floor(((a + b + c) / 3.0 - origin_and_cell.xyz) / origin_and_cell.w));
+        if (all(middle >= int3(0)) && all(middle < int3(int(counts.x))))
+            leaf_area[(uint(middle.z) * counts.x + uint(middle.y)) * counts.x + uint(middle.x)].add(uint(faceLength * 0.5 * 65536.0 + 0.5));
+    }
 
     float cell = origin_and_cell.w;
     float band = float(counts.w);

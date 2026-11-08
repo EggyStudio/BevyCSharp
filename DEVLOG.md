@@ -6,6 +6,15 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-08
+
+![](.github/assets/readings/2026-11-08-item-113-crowns.webp)
+The feature test's meadow at eight in the morning under a clear sky at Medium, on the left with the
+scene's distance field holding each crown's leaves at one share of light a meter and on the right
+with each cell holding the share the leaf cards in it let through, the grass in the room wall's
+shadow lighter, from 46% under its path-traced reference to 18% under, the sunlit grass from 22%
+under to 10% under, and the walls and the ground 3 to 18 points nearer.
+
 ## 2026-11-07
 
 ![](.github/assets/readings/2026-11-07-item-106-walls.webp)
@@ -65,6 +74,7 @@ Done that day
 - Item 106 at `b576bf3f`. The sun's shadow map shades grazing walls under their reference.
 - Item 109 at `5a8b4182`. A planted tree's leaves bend their normals in mesh space.
 - Item 110 at `2adbe701`. The specular share of the bounce light from the cascades.
+- Item 111 at `e074525f`. A lit face outside a thin wall lights the room inside.
 - Item 112 at `80f75e53`. A crown's leaves take 40% less diffuse light from the probes than the
   reference gives them.
 

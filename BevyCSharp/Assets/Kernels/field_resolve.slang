@@ -8,6 +8,8 @@
 // fill of the buffer, which a dispatch here has no call for, so a dispatch of this that clears alone
 // follows each resolve, which reads its neighbors' codes, and the buffers start cleared.
 
+import bcs_field;
+
 // The codes of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
 // lies behind, in 1024ths of a cell.
 RWStructuredBuffer<uint> cells;
@@ -21,6 +23,10 @@ RWStructuredBuffer<uint> behind;
 // 1 where a surface painted the cell and 0 where none did, so a read blending cells divides by it.
 RWStructuredBuffer<uint> albedo;
 [format("rgba8")] RWTexture3D<float4> albedo_field;
+
+// The area of the leaf cards whose middles lie in each cell, as field_splat.slang summed it, in
+// 65536ths of a square meter.
+RWStructuredBuffer<uint> leaf_area;
 [format("rgba8")] RWTexture3D<float4> still_paint;
 
 // The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, and its
@@ -76,6 +82,7 @@ void main(uint3 id : SV_DispatchThreadID)
     cells[index] = (uint(cascade.w) * 1024u << 10) | (1u << 8);
     behind[index] = 0xFFFFFFFFu;
     albedo[index] = 0u;
+    leaf_area[index] = 0u;
     gloss[index] = 0u;
     glow[index] = float4(0.0);
     for (uint i = 0u; i < 6u; i++)
@@ -150,6 +157,19 @@ void resolve(uint3 id, uint index, uint e)
     field[at] = d;
     uint color = albedo[index];
     float4 paint = float4(float(color & 255u), float((color >> 8) & 255u), float((color >> 16) & 255u), float(color >> 24)) / 255.0;
+    // A cell a surface letting light through painted takes the share a meter of it lets through
+    // again, a crown's leaf cards, whose nearest triangle is double-sided, the share their material
+    // lets through a meter at a preset crown's density raised to the cell's own card area a cubic
+    // meter over it, so a crown's sparse edge lets more through than its core, and any other surface
+    // its material's share, the color staying the color over the alpha.
+    if (paint.a > 0.25 && paint.a < 1.0)
+    {
+        float through = lightThroughOf(paint.a);
+        float alpha = (code & 0x200u) != 0u
+            ? lightThroughCardsPaint(through, float(leaf_area[index]) / 65536.0 / (cascade.z * cascade.z * cascade.z))
+            : lightThroughPaint(through);
+        paint = float4(paint.rgb * (alpha / paint.a), alpha);
+    }
     still_paint[at] = paint;
     albedo_field[at] = paint;
     uint face = (code & 255u) | gloss[index];

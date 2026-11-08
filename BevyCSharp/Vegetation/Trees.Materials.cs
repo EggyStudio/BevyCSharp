@@ -11,7 +11,10 @@ public static partial class Trees
     // The share of global illumination's light a crown lets through a meter of it, which Beer and
     // Lambert's law gives a crown of about one and a half square meters of leaf a cubic meter, the
     // presets' crowns lying about it, as ACrownLetsAboutHalfTheLightThroughAMeter reads them, so a
-    // forest floor takes the share of the sky's light its canopy lets through.
+    // forest floor takes the share of the sky's light its canopy lets through. The field holds it
+    // for a crown as dense as that and raises it to each cell's own density over that, from the
+    // area of the leaf cards in the cell (lightThroughCardsPaint in bcs_field.slang), so a crown's
+    // sparse edge lets more through than its core.
     internal const float LeafLightThrough = 0.5f;
 
     /// <summary>The material a species' bark is drawn with. Only valid inside a system.</summary>
@@ -102,10 +105,11 @@ public static partial class Trees
     /// their stalks, by the species' height and leaf length, the stiffness the material is made with.
     /// </para>
     /// <para>
-    /// The crown lets half of global illumination's light through a meter of it
-    /// (<see cref="MaterialSettings.LightThrough"/>), and the scene's distance field paints it the
-    /// leaf set's mean color, so the floor under a forest takes the share of the sky's light its
-    /// canopy lets through, tinted by the leaves.
+    /// A crown as dense as a preset's lets half of global illumination's light through a meter of it
+    /// (<see cref="MaterialSettings.LightThrough"/>), the scene's distance field holding each cell's
+    /// share by the area of the leaf cards in it, so a crown's sparse edge lets more through than
+    /// its core, and the field paints it the leaf set's mean color, so the floor under a forest
+    /// takes the share of the sky's light its canopy lets through, tinted by the leaves.
     /// </para>
     /// </remarks>
     public static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)

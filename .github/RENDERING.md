@@ -226,6 +226,32 @@ itself and not past its edge, since within 3DEngine's 25 degrees a wall's bottom
 a floor hid its far face from the cells along its foot, which then held nothing, and a probe's ray
 passed under the wall (`ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls`).
 
+A surface that lets light through (`MaterialSettings.LightThrough`) is painted with its share a
+meter in the colors' alpha, and a probe's ray that meets it keeps that share for each meter of its
+depth, the whole depth at the share of the cell it was met in, as 3DEngine's field holds it. A
+crown's leaf cards, double-sided triangles letting light through, are held cell by cell. The splat
+sums the area of the cards whose middles lie in each cell, and the resolve paints a cell of cards
+the share their material lets through a meter at a preset crown's density, 2.31 square meters of
+card a cubic meter, raised to the cell's own density over that (`lightThroughCardsPaint`), with the
+lowest bit of its alpha's byte set, so a ray crossing cards keeps at each half cell the share its
+own cell lets through (`lightThroughCrossed`), a cell no card's middle lies in keeping all and a
+solid's inside past half a cell none. Held at one share a crown, the few cards at a crown's edge
+stood as dense as its core, and along the ways the meadow's probes beside its shaded grass lose, the
+field crossed 0.9 to 3.1 m of crown keeping 0.17 to 0.43 where the reference's paths crossed 0.2 to
+0.6 cards and stayed 0.63 to 0.78 open, the leaves stopping 2.2 to 3.2 times what the reference's
+do. Cell by cell they stop 0.9 to 1.1 times as much, and with every cell inside a solid stopping a
+ray 1.5 to 2.7 times, a limb thinner than a cell standing half a cell either side of it in the
+field. The meadow at eight in the morning at Medium reads its grass in the room wall's shadow 18, 5
+and 17% under its reference where 46, 31 and 45%, its sunlit grass within 10% where from 24% under,
+its walls 14 and 19% under where 20 and 22%, its bare ground 24% under where 42% and its crowns 1 to
+6 points nearer, the view 0.292 from its reference where 0.313. The floor under nine tupelos under a
+uniform sky reads 25% under its reference where 41%
+(`AForestFloorUnderAUniformSkyReadsItsReference`), and a lone aspen's leaves 23% over where 19%, the
+probes inside its crown holding more of the sky. The splat's sum takes 1 MiB beside the cascade's
+codes, and at High in the meadow the trace takes 7.0 to 9.2 ms where 6.8 to 9.8, a step through
+cards finding its cascade once for its cell, its distance and its paint, with one of 3DEngine's
+examples on the GPU.
+
 The cascades of probes are the second (`WorldProbes`, `bcs_gi.slang` and the kernels
 `gi_trace.slang`, `gi_merge.slang` and `gi_ambient.slang`), 3DEngine's world probes with their mends
 to date. A probe is moved off a surface and passed over inside a mesh, a texel of 8 a side sends a

@@ -365,8 +365,8 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             float3 at = origin + way * t;
             float passing = layer < 4 ? lightThroughAt(albedo, fieldInfo, at) : 0.0;
             bool inside = false;
-            float depth = passing > 0.0 ? lightThroughDepth(field, field_sampler, fieldInfo, origin, way, t, end - t, inside) : -1.0;
-            float passes = depth >= 0.0 ? lightThroughKept(passing, depth, fieldCell(fieldInfo, at), inside) : 0.0;
+            float passes = 0.0;
+            float depth = passing > 0.0 ? lightThroughCrossed(field, field_sampler, albedo, fieldInfo, origin, way, t, end - t, inside, passes) : -1.0;
             if (depth >= 0.0 && t < interval.x)
                 keptBefore *= passes;
             else

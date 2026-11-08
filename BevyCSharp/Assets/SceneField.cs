@@ -83,7 +83,7 @@ internal static unsafe partial class SceneField
     {
         public readonly (int Cascades, float CellSize, int Budget, float FarCell, int Triangles) Made = made;
         public readonly SceneFieldPlan Plan = plan;
-        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, Gloss, Emission, Lent, Instances, Shapes,
+        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, LeafArea, Gloss, Emission, Lent, Instances, Shapes,
             Bricks, Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
         // Whether a build's parts were splatted into the buffers and no resolve has read and cleared
@@ -181,8 +181,9 @@ internal static unsafe partial class SceneField
     /// <summary>
     /// The bytes of GPU memory the field holds, its two images of half floats, its two of colors and
     /// two of faces with their gloss, four bytes a cell each, its image of light in four half floats,
-    /// a cascade's cells' codes, faces behind, colors and gloss, four bytes a cell each, their light
-    /// in four floats and what thin emitters lend them in six codes, and the pool of triangles.
+    /// a cascade's cells' codes, faces behind, colors, leaf cards' area and gloss, four bytes a cell
+    /// each, their light in four floats and what thin emitters lend them in six codes, and the pool
+    /// of triangles.
     /// </summary>
     internal static long Bytes()
     {
@@ -190,7 +191,7 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(Native.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (4 * 4 + 16 + 6 * 4) * cells + pool;
+        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
     /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
@@ -388,6 +389,7 @@ internal static unsafe partial class SceneField
         built.Behind = Shaders.CreateBuffer<uint>(cleared);
         Array.Clear(cleared);
         built.Paint = Shaders.CreateBuffer<uint>(cleared);
+        built.LeafArea = Shaders.CreateBuffer<uint>(cleared);
         built.Gloss = Shaders.CreateBuffer<uint>(cleared);
         built.Emission = Shaders.CreateBuffer(size * size * size * 16);
         built.Lent = Shaders.CreateBuffer(size * size * size * 6 * sizeof(uint));
@@ -397,9 +399,9 @@ internal static unsafe partial class SceneField
         built.Shapes = Shaders.CreateBuffer(ShapeBytes * 16);
         built.Bricks = Shaders.CreateBuffer(16 * 64);
 
-        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("gloss", built.Gloss)
+        _splat.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("leaf_area", built.LeafArea).SetBuffer("gloss", built.Gloss)
             .SetBuffer("instances", built.Instances).SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent);
-        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("gloss", built.Gloss)
+        _resolve.SetBuffer("cells", built.Cells).SetBuffer("behind", built.Behind).SetBuffer("albedo", built.Paint).SetBuffer("leaf_area", built.LeafArea).SetBuffer("gloss", built.Gloss)
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
             .SetTexture("albedo_field", built.Albedo).SetTexture("still_paint", built.StillPaint)
             .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces)
@@ -418,7 +420,7 @@ internal static unsafe partial class SceneField
         _drawFor = (null, Entity.None);
         DrawEngine(ecs, null, Entity.None);
         foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Glow,
-                     built.Info, built.Cells, built.Behind, built.Paint, built.Gloss, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
+                     built.Info, built.Cells, built.Behind, built.Paint, built.LeafArea, built.Gloss, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
     }

@@ -653,8 +653,8 @@ void main(uint3 id : SV_DispatchThreadID)
                 onScreen = false;
                 float passing = !far && layer < 4 && texels.z != 0u ? lightThroughAt(scene_albedo, info, at) : 0.0;
                 bool inside = false;
-                float deep = passing > 0.0 ? lightThroughDepth(scene_field, scene_field_sampler, info, start, way, t, length - t, inside) : -1.0;
-                float passes = deep >= 0.0 ? lightThroughKept(passing, deep, fieldCell(info, at), inside) : 0.0;
+                float passes = 0.0;
+                float deep = passing > 0.0 ? lightThroughCrossed(scene_field, scene_field_sampler, scene_albedo, info, start, way, t, length - t, inside, passes) : -1.0;
                 float3 own;
                 light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
                     probe_cubes, probe_cubes_at, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));

@@ -347,7 +347,10 @@ floor takes 0.32 to 0.44 of the sky's light a solid slab holds back, and 0.24 fi
 up, where the slab's depth along each way gives 0.36 and 0.41, as
 `AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough` reads it. A frame where
 nothing drawn lets light through traces with a build that leaves the crossing out, so its light is
-what it was before any surface let light through. A planted tree's leaves let half through a meter.
+what it was before any surface let light through. A planted tree's leaves let half through a meter
+of a crown as dense as the presets', and a double-sided surface letting light through, as leaf cards
+are, is held cell by cell by the area of its cards in each, so a crown's sparse edge passes more of
+the sky than its core.
 
 Beside the probes in cascades stands a probe for every few pixels of the picture, every 16 at `Low`,
 12 at `Medium` and 8 at `High` up to a picture of 1080 rows and further apart as the picture grows

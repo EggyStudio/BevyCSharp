@@ -294,9 +294,38 @@ public float3 surfaceFacing(Texture3D<uint> faces, Texture3D<float4> albedo, Sam
 /// for a solid surface down to a half for one that lets all of it through, so a reader that divides
 /// a blend of the colors by their alphas takes the colors back and weighs such a cell less, and one
 /// that reads a cell as it is takes the share back (`lightThroughOf`), as 3DEngine's field paints it.
+/// Its byte is even below a solid's, the lowest bit kept for a crown's leaf cards
+/// (`lightThroughCards`).
 public float lightThroughPaint(float through)
 {
-    return 1.0 - 0.5 * saturate(through);
+    uint painted = uint((1.0 - 0.5 * saturate(through)) * 255.0 + 0.5);
+    return float(painted < 255u ? painted & ~1u : painted) / 255.0;
+}
+
+/// The card area a cubic meter at which a crown's leaf cards let their material's share through a
+/// meter: by Beer and Lambert's law with half a leaf's area facing a ray, a leaf covering 0.6 of its
+/// card, as `ACrownLetsAboutHalfTheLightThroughAMeter` reads a preset's crown, a meter of cards
+/// 2.31 square meters a cubic meter lets half through, the presets' crowns lying about it.
+public static const float CrownCardDensity = 2.31;
+
+/// The alpha a cell of a crown's leaf cards, a double-sided surface letting `through` of the light
+/// through a meter at a preset crown's density, is painted with where its cards hold `density`
+/// square meters a cubic meter of it, the share raised to that density over a preset crown's, so a
+/// crown's sparse edge lets more through than its core, its byte odd (`lightThroughCards`) and a
+/// cell with no card's middle in it letting all of it through.
+public float lightThroughCardsPaint(float through, float density)
+{
+    float passing = pow(saturate(through), max(density, 0.0) / CrownCardDensity);
+    uint painted = uint((1.0 - 0.5 * passing) * 255.0 + 0.5);
+    return float((max(painted, 1u) - 1u) | 1u) / 255.0;
+}
+
+/// Whether a cell painted `alpha` is a crown's leaf cards', a share letting light through with the
+/// lowest bit of its byte set (`lightThroughCardsPaint`).
+public bool lightThroughCards(float alpha)
+{
+    uint painted = uint(alpha * 255.0 + 0.5);
+    return painted < 255u && painted > 64u && (painted & 1u) != 0u;
 }
 
 /// The share of light a cell painted with `alpha` lets pass a unit of its surface's depth, 0 for a
@@ -310,13 +339,19 @@ public float lightThroughOf(float alpha)
 /// lies in as it is, 0 for a solid surface's cell or one no surface painted.
 public float lightThroughAt(Texture3D<float4> albedo, FieldInfo info, float3 p)
 {
+    return lightThroughOf(paintAlphaAt(albedo, info, p));
+}
+
+/// The alpha the cell `p` lies in is painted with, 0 where no cascade holds it.
+public float paintAlphaAt(Texture3D<float4> albedo, FieldInfo info, float3 p)
+{
     int c = fieldCascade(info, p, 1.0);
     if (c < 0)
         return 0.0;
     float4 oc = info.cascades[c].origin_and_cell;
     int size = int(info.counts.y);
     int3 cell = clamp(int3(floor((p - oc.xyz) / oc.w)), int3(0), int3(size - 1));
-    return lightThroughOf(albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a);
+    return albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a;
 }
 
 /// How far a ray along `way` from `origin` that met such a surface at `t` runs before it has left
@@ -352,4 +387,59 @@ public float lightThroughDepth(Texture3D<float> field, SamplerState linear, Fiel
 public float lightThroughKept(float passing, float depth, float cell, bool inside)
 {
     return pow(passing, inside ? depth : max(depth - 0.75 * cell, 0.0));
+}
+
+/// How far a ray along `way` from `origin` that met a surface letting light through at `t` runs
+/// before it has left it, as `lightThroughDepth` gives it, and in `kept` the share of light it keeps
+/// across it. A crown's leaf cards (`lightThroughCards`) are crossed half a cell a step, each step at
+/// the share its own cell lets through, so a ray through a crown's sparse edge keeps what the edge's
+/// few cards let past and one through its core what the core's, a cell holding no card's middle
+/// keeping all and a solid's inside past half a cell none, so a trunk stops the ray and a limb
+/// thinner than a cell, which the field holds half a cell either side of it, does not. Any other
+/// surface keeps the share of the cell it was met in for its whole depth (`lightThroughKept`).
+public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept)
+{
+    float3 met = origin + way * t;
+    float alpha = paintAlphaAt(albedo, info, met);
+    if (!lightThroughCards(alpha))
+    {
+        float depth = lightThroughDepth(field, linear, info, origin, way, t, most, inside);
+        kept = lightThroughKept(lightThroughOf(alpha), depth, fieldCell(info, met), inside);
+        return depth;
+    }
+    // Each step finds the cascade it lies in once, for its cell, its distance and its paint.
+    float depth = 0.0, lost = 0.0;
+    int size = int(info.counts.y);
+    inside = true;
+    [loop]
+    for (int step = 0; step < 64; step++)
+    {
+        float3 p = origin + way * (t + depth);
+        int c = fieldCascade(info, p, 1.0);
+        if (c < 0)
+        {
+            inside = false;
+            break;
+        }
+        float4 oc = info.cascades[c].origin_and_cell;
+        float d = fieldDistanceIn(field, linear, info, c, p);
+        if (depth > 0.0 && d > 0.5 * oc.w)
+        {
+            inside = false;
+            break;
+        }
+        int3 cell = clamp(int3(floor((p - oc.xyz) / oc.w)), int3(0), int3(size - 1));
+        float painted = albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a;
+        float share = lightThroughCards(painted) ? lightThroughOf(painted) : d < -0.5 * oc.w ? 0.0 : 1.0;
+        if (share < 1.0)
+            lost -= log(max(share, 1e-6)) * min(0.5 * oc.w, most - depth);
+        depth += 0.5 * oc.w;
+        if (depth >= most)
+        {
+            depth = most;
+            break;
+        }
+    }
+    kept = exp(-lost);
+    return depth;
 }

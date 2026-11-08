@@ -25,7 +25,7 @@ public sealed partial class GlobalIlluminationTests
             ecs =>
             {
                 Grass.Plant(ecs, Vec3.Zero, new Vec2(3f, 3f), new GrassSettings { Density = 12f, Height = 0.6f });
-                return null;
+                return [];
             },
             name => name.StartsWith("Grass patch", StringComparison.Ordinal));
         output.WriteLine($"the grass's {pixels} pixels read {seen:0.0000} in the picture and {met:0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
@@ -57,7 +57,7 @@ public sealed partial class GlobalIlluminationTests
     public void ALoneAspensLeavesUnderAUniformSkyReadTheirReference()
     {
         var (pixels, seen, met) = ReadUnderUniformSky(new Vec3(0f, 5f, 16f), new Vec3(0f, 5f, 0f),
-            ecs => Trees.Plant(ecs, "quaking-aspen", 3, Vec3.Zero),
+            ecs => [Trees.Plant(ecs, "quaking-aspen", 3, Vec3.Zero)],
             name => name.Contains(", leaves", StringComparison.Ordinal), leaves: true);
         output.WriteLine($"the aspen's leaves' {pixels} pixels read {seen:0.0000} in the picture and {met:0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
         Assert.InRange(seen / met, 0.75, 1.25);
@@ -79,10 +79,31 @@ public sealed partial class GlobalIlluminationTests
     public void ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes()
     {
         var (pixels, seen, met) = ReadUnderUniformSky(new Vec3(0f, 5f, 16f), new Vec3(0f, 5f, 0f),
-            ecs => Trees.Plant(ecs, "quaking-aspen", 3, Vec3.Zero),
+            ecs => [Trees.Plant(ecs, "quaking-aspen", 3, Vec3.Zero)],
             name => name.Contains(", leaves", StringComparison.Ordinal), leaves: true, sunFrom: new Vec3(-4f, 9f, -10f));
         output.WriteLine($"the backlit aspen's leaves' {pixels} pixels read {seen:0.0000} in the picture and {met:0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
         Assert.InRange(seen / met, 0.9, 1.1);
+    }
+
+    /// <summary>
+    /// The floor under nine black tupelos seven meters apart, under a uniform sky and no sun, global
+    /// illumination at Medium, read from beside the middle trunk within 30% of its reference's.
+    /// </summary>
+    /// <remarks>
+    /// The probes' rays cross the crowns in the scene's distance field, keeping a share of their
+    /// light for each meter of leaves. Held at one share for a whole crown, the share a crown as
+    /// dense as a preset's lets through, the few cards at a crown's edge stood as dense as its core,
+    /// and the floor read 41% under its reference. Each cell holds the share the area of the leaf
+    /// cards in it gives, a ray crossing the crown at each cell's own, and it reads 25% under.
+    /// </remarks>
+    [SkippableFact]
+    public void AForestFloorUnderAUniformSkyReadsItsReference()
+    {
+        var (pixels, seen, met) = ReadUnderUniformSky(new Vec3(1.5f, 1.6f, 1.5f), new Vec3(3f, 0f, 3f),
+            ecs => [.. Enumerable.Range(0, 9).Select(i => Trees.Plant(ecs, "black-tupelo", (uint)(i + 1), new Vec3((i % 3 - 1) * 7f, 0f, (i / 3 - 1) * 7f)))],
+            name => name.StartsWith("floor", StringComparison.Ordinal));
+        output.WriteLine($"the forest floor's {pixels} pixels read {seen:0.0000} in the picture and {met:0.0000} in the reference, {(seen / met - 1) * 100:+0;-0}%");
+        Assert.InRange(seen / met, 0.7, 1.3);
     }
 
     /// <summary>
@@ -100,13 +121,13 @@ public sealed partial class GlobalIlluminationTests
     /// which the reference's paths spread across the pixel bring back and the picture shows only
     /// where it draws no leaf.
     /// </remarks>
-    private (int Pixels, double Seen, double Met) ReadUnderUniformSky(Vec3 eye, Vec3 at, Func<EcsWorld, Entity?> plant, Func<string, bool> counted, bool leaves = false, Vec3? sunFrom = null)
+    private (int Pixels, double Seen, double Met) ReadUnderUniformSky(Vec3 eye, Vec3 at, Func<EcsWorld, IReadOnlyList<Entity>> plant, Func<string, bool> counted, bool leaves = false, Vec3? sunFrom = null)
     {
         Needs.Shaders();
         var supported = false;
         string? traced = null, read = null;
         var (askedTrace, askedRead) = (false, false);
-        Entity? planted = null;
+        IReadOnlyList<Entity> planted = [];
         var wind = Trees.Wind;
         Trees.Wind = Vec3.Zero;
         try
@@ -137,7 +158,7 @@ public sealed partial class GlobalIlluminationTests
             }
                 .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
                 .Until("ready", _ => !supported || Render.PipelinesReady())
-                .Until("dressed", world => planted is not { } tree || world.Resource<EcsWorld>().ChildrenOf(tree).Length > 0)
+                .Until("dressed", world => planted.All(tree => world.Resource<EcsWorld>().ChildrenOf(tree).Length > 0))
                 .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 240)
                 .Until("drawn", _ => Render.PipelinesReady())
                 .Wait(120)

@@ -1,9 +1,11 @@
 # Review
 
-Reviewed up to `80f75e53`, 112's second part, the leaves' gray on the light from all around and the
-let-through shadowed, with the reference reading a crown leaf by leaf, pushed at 19:50 on
-2026-11-07, its run green at 20:06 on the three systems in 10 to 15 minutes; it keeps the form and
-carries the review's files and the devlog. Nothing is pushed after it. Before it `4034da31`, 112's
+Reviewed up to `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at
+22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests
+the shared GPU had failed at home passing; it keeps the form and carries the review's files. Nothing
+is pushed after it. Before it `80f75e53`, 112's second part, the leaves' gray on the light from all
+around and the let-through shadowed, with the reference reading a crown leaf by leaf, pushed at
+19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it `4034da31`, 112's
 first part, the leaf and grass sets' smaller levels weighted by the leaves' cover, pushed at 17:55,
 its run green at 18:12 on the three systems in 10 to 17 minutes. Before it `2adbe701`, 110's third
 step, the leaves and the grass reflecting the probes they see along their mirror way with Bevy's
@@ -1993,7 +1995,20 @@ from [SHARED.md](SHARED.md).
     that seen from a probe can still let a whole cell read long, though no longer one of four, and a
     finer field does not move it; a doorway's edge is passed rightly since a ray through it meets
     what lies past and keeps its own reach; the wall's own side the further step. The engine lays
-    out its probes' reach the same way, a SHARED.md row following the figures.
+    out its probes' reach the same way, a SHARED.md row following the figures. Done at `e074525f`,
+    pushed at 22:47 on 2026-11-07, the reach image at 16 texels a side a probe with one ray each
+    where 8 held the mean of four, gi_trace writing it and gi_ambient's reach layout gone,
+    ReachTexels 16 in bcs_gi and forward_probes, the ABI unchanged at 322; the new
+    ALitBoardOutsideAThinWalledRoomLightsNothingInside reads the floor 0.0037 where the head reads
+    0.0119 at a bar of 0.005, the floor without the board 0.0006 where 0.0013, the glossy room with
+    the board 0.0046 where 0.0123, the screen-probe floor 0.0303 as at the head, the 59 thin-wall
+    and bounce-room cases passing; the trace at High in the Cornell box 2.25 to 2.31 ms where 2.26
+    to 2.33, the gather 0.149 where 0.152, the merge unchanged, the probes' memory 11.1 MB where
+    10.4, the 15-degree limit in the trace's comment and RENDERING.md. check95 on the three
+    profiles, cargo test 118 and 203, NormTests 18, the listing unchanged; the suite 2,040 passed
+    and 2 failed in 96 minutes while the engine's examples held the GPU, the closed room under an
+    environment map running out of frames still capturing and the game's air reading earth's sky off
+    by a few levels, both passing alone afterward, the run on the three systems the gate. Next 113.
 
 112. **A crown's leaves take 40% less diffuse light from the probes than the reference gives them.**
     From item 110 on 2026-11-07. Under a uniform white sky with no sun at Medium a lone aspen's
@@ -2182,7 +2197,46 @@ from [SHARED.md](SHARED.md).
     along the normal and from behind and the sky's share the probes hold there, with the probes' own
     faces next to the wall against the reference from their places and their seen share as the
     diffuse read weighs them; then a mend measured on patch 3, the sunlit patches and the bare
-    ground, the crowns unchanged. After 111, before 107.
+    ground, the crowns unchanged. After 111, before 107. Read at 23:58 on 2026-11-07 at e074525f,
+    unchanged by 111, patch 3 at -46, -31 and -45% as regions and -45, -30 and -45 leaf by leaf. The
+    shortfall is the probes' light from all around, about half over the whole meadow, the sun hiding
+    it on the lit patches and the wall's shade uncovering it, a shaded blade's diffuse at the front
+    0.014 against 0.029 (-52%) and its let-through 0.010 against 0.016 (-36), a sunlit blade's -50
+    and -49 with the direct 0.053 against 0.053; the eight cascade-0 probes around a shaded blade
+    hold a mean of 0.060 to 0.085 against 0.141 to 0.164, their +y faces -42 to -61%, the x faces
+    -42 to -67, +z -67 to -79 and -z -24 to -42. The seen share is not the cause, a debug write in a
+    trial merge on two dark texels finding the four cascade-2 probes at y 4 seen exactly with none
+    turned by the parallax and no dark weight, the blend 0.367 and 0.377, while the texels hold
+    0.003 and 0.001 and their rays' share that met nothing 0.0019 and 0.0001, the share the rays
+    kept through leaves crossed in the field; every probe above counted seen reads -72, dark texels
+    passed over -44 and the visibility tolerance at a fifth of a cell no change. The field's kept
+    sky against the leaves', a trial merge mode holding each texel's share of the sky through the
+    cascades against a reference mode counting the paths that pass every face, the probe at 11,1,75
+    beside the shade 0.091 at the head's 0.5 a meter, 0.145 at 0.8 and 0.300 with the leaves letting
+    everything through against 0.204, the probe at 13,1,77 0.070 against 0.207, mid-meadow 0.183 and
+    0.188 against 0.256 and 0.255, cascade 2's 12,4,68 0.303 against 0.285; the meadow by region at
+    LeafLightThrough 0.5, 0.8 and 0.9, patch 3 -46, -25 and -3, -31, -9 and +12 and -45, -25 and -4,
+    patch 2,2 -22, -14 and -4, the bare ground -42, -26 and -12, the walls -20, -17 and -13, oak 77
+    -25, -22 and -19, the view 0.313, 0.294 and 0.283. A lone aspen under a uniform sky keeps about
+    its share from beside and under at 0.25 m cells (0.557 against 0.560, 0.496 against 0.513), -28%
+    at the crown's edge with 0.5 m cells and -2 to -7 at 7 m, so the 0.5 a meter stands for a
+    crown's core; beside the shaded grass the lost ways run near the zenith and east, the
+    reference's middle ways meeting leaves 4.9 to 9.5 m out on aspen 72's side where the field reads
+    0.231, 0.195 and 0.093 against 0.766, 0.766 and 0.594, the probes standing under a crown's
+    sparse edge that the field fills at the crown's one density a meter while the reference's leaves
+    there let three quarters of the sky through. A tool fault beside it, an app's first gi.probe
+    tracing before the meshes it put in the ray scene have their structures built, so a lone aspen
+    read first showed no crown, the camera's reference waiting through its sizing stage where the
+    probe reading has no wait; the meadow's figures primed with a first reading are the same to the
+    last digit, the fix a few frames' wait in BeginProbe. Decided, the read of the field's density
+    first, along the lost ways at 11,1,75 and at a few probes under the crowns' edges, the depth
+    crossed and the share kept against the leaf cards the reference's way crosses; then the mend,
+    the field holding a crown's density cell by cell from the leaf area in each cell by the law of a
+    crown letting about half the light through a meter, a sparse edge passing more than the core and
+    a lone crown keeping its share, measured on patch 3, the sunlit patches, the ground, the walls
+    and the crowns with the forest floor's canopy test held; the 0.5 stays, since 0.8 to 0.9 brings
+    the meadow near and opens a lone crown too far; the gi.probe wait rides with 113.
+
 ## Verdicts
 
 Verdicts 33 to 42 and 44 to 51 are settled, said under each in REVIEW-ARCHIVE.md; 2 and 43 are open,
@@ -5264,3 +5318,81 @@ Shared: a probe's reach kept a ray a texel, sixteen a side, where a texel of eig
 the mean of its four rays let one ray passing beside a thin-walled room's corner give the texel 5.8
 where the wall stood at 2.6, and the probe beyond the wall lit the floor inside 0.0119 where it
 reads 0.0037, at no cost the trace's timing shows and 0.75 MB more.
+
+Item 113's commit, a crown's leaves held in the scene's distance field cell by cell, in the commit
+carrying this line. A surface letting light through was painted with its share a meter, and a
+probe's ray crossing it kept that share for each meter of its depth at the share of the cell it met
+it in, so a crown's leaves stood at one share for the whole crown, the share a crown as dense as a
+preset's lets through. The splat sums the area of the leaf cards, double-sided triangles letting
+light through, whose middles lie in each cell, and the resolve paints a cell of cards its material's
+share raised to the cell's card area a cubic meter over a preset crown's 2.31, with the lowest bit
+of its alpha's byte set and every other share painted on an even byte. A ray crossing cards keeps at
+each half cell the share its own cell lets through, a cell no card's middle lies in keeping all and
+a solid's inside past half a cell none (lightThroughCrossed in bcs_field.slang, which gi_trace.slang
+and gi_screen.slang cross with), and a slab keeps its share a meter as it did. The 0.5 stands as the
+share a meter of a crown as dense as a preset's. RENDERING.md, the guide's trees and ray tracing
+pages and Trees.Materials's remarks say it. The ABI is unchanged.
+
+GlobalIlluminationTests.AForestFloorUnderAUniformSkyReadsItsReference reads the floor under nine
+tupelos seven meters apart under a uniform sky from beside the middle trunk within 30% of its
+reference, 25% under where 41% under with one share a crown, so it fails without the mend.
+ReadUnderUniformSky waits for every tree it plants to be dressed, where it waited for one. The lone
+aspen's leaves read 23% over where 19% under the sky and 8% over where 5% lit from behind, within
+their 25 and 10%, the probes inside its crown holding more of the sky, the grass patch 1% over as it
+did, the floor under the tupelos at High 0.30 of what solid leaves hold back where 0.21, and the
+slabs as before.
+
+The reading that decided it. A shaded blade of patch 3, 2 read leaf by leaf by its parts, against
+the reference's paths split by how they leave its face, takes the light from all around at its front
+0.014 against 0.029 and let through from behind 0.010 against 0.016, its gloss 0.004 against 0.003
+and no sun, and a sunlit blade of patch 2, 2 its front's and let-through light 50 and 49% under and
+its sun 0.053 against 0.053, so the light from all around is about half over the whole meadow, which
+the sun hides. The eight probes of the first cascade around a shaded blade hold 0.060 to 0.085
+against 0.141 to 0.164, their faces 24 to 79% under. Their seen share is not it, the blend at a dark
+texel seeing the four probes above at four meters, those under the meadow's floor unseen, none
+turned by the parallax and no weight dark, and blending 0.367 and 0.377 where the texels hold 0.003
+and 0.001, their rays' share that met nothing, the share they kept through the leaves they crossed,
+0.0019 and 0.0001. Over each probe's ways the field's share of the sky against the share of the
+reference's paths passing every face reads 0.091 against 0.204 beside the shaded grass and 0.183
+against 0.256 in the meadow's middle, 0.300 beside the grass with the leaves letting all through.
+Along the ways it loses most, the field crossed 0.9 to 3.1 m of crown keeping 0.17 to 0.43 where the
+reference's paths crossed 0.2 to 0.6 cards and stayed 0.63 to 0.78 open, the sparse edges of the
+crowns over the probes, so its leaves stopped 2.2 to 3.2 times what the reference's do. Cell by cell
+they stop 0.9 to 1.1 times as much, and 1.5 to 2.7 times with every cell inside a solid stopping a
+ray, a limb thinner than a cell standing half a cell either side of it in the field. A lone aspen
+seen from beside at cells of a quarter meter kept the reference's share at the head, 0.557 against
+0.560, and keeps it.
+
+The meadow at eight in the morning at Medium, the head and the mend each read in one start against
+its own reference, reads its view 0.292 from its reference where 0.313. Region by region the grass
+in the room wall's shadow, patch 3, reads 18, 5 and 17% under where 46, 31 and 45%, the sunlit grass
+from 10% under to 10% over where from 24% under to 2% over, the walls 14 and 19% under where 20 and
+22%, the bare ground 24% under where 42%, the oak's crown 19 and 15% under where 25 and 21%, the
+aspens' 8% under and 1% over and 20 and 19% under where 12 and 2% under and 22 and 22%, and the
+oak's reduced level 50 and 52% under where 53 and 55%. Leaf by leaf patch 3 reads 17, 5 and 17%
+under where 45, 30 and 45%, the oak's crown 11% under where 21%, and the aspens' 9 and 16% over and
+5% under where 4 and 12% over and 9% under. The pair 2026-11-08-item-113-crowns.webp shows the
+meadow at the head and with the mend.
+
+The cost at High in the feature test's meadow at eight in the morning, the head and the mend each
+started twice in turn on bridges built alike, with one of 3DEngine's examples on the GPU throughout.
+The trace takes 7.0 to 9.2 ms where 6.8 to 9.8, a step through cards finding its cascade once for
+its cell, its distance and its paint, where the first build found it three times and took 9.0 to
+13.8 ms, the resolve 0.10 to 0.11 ms where 0.10, and the splat's sum 1 MiB, the field's memory 48.5
+MB where 47.5.
+
+The gi.probe wait is not taken. A probe read first in a run missed the crown with the trial's debug
+modes on, and in plain light a probe read first beside the lone aspen and in the meadow reads as one
+read after a first does, to the digit, so no case fails without a wait.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+203 with render. The bridge was built with the editor profile, meshlets and Solari. The whole suite
+ran, 2,043 passed and 3 skipped in 51 m 14 s at the 3 GB cap, none aborted, its largest process at
+2,969 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a crown's leaf cards held in the distance field cell by cell, each cell's share a meter the
+material's share at a preset crown's density raised to the cell's own card area over it, a ray
+crossing them at each half cell's own share and passing a solid's inside within half a cell, where
+one share a crown held its sparse edges as dense as its core and its leaves stopped 2.2 to 3.2 times
+the rays a path-traced reference's stop, the meadow's shaded grass reading 18% under where 46% and a
+forest floor under a uniform sky 25% under where 41%.
