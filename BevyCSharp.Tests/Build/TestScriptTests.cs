@@ -216,7 +216,9 @@ public sealed class TestScriptTests : IDisposable
     public void CasesCutToOneNameAreCountedApart()
     {
         var python = Needs.Python();
-        const string cut = "Bevy.Tests.ScriptTests.Compiles(script: &quot;[Behavior] public partial struct&quot;···)";
+        // xUnit cuts a long argument with three middle dots, its own output as a results file
+        // carries it, kept so and written as escapes.
+        const string cut = "Bevy.Tests.ScriptTests.Compiles(script: &quot;[Behavior] public partial struct&quot;\u00B7\u00B7\u00B7)";
         var cases = $"<UnitTestResult testName=\"{cut}\" outcome=\"Passed\" /><UnitTestResult testName=\"{cut}\" outcome=\"Passed\" />";
 
         foreach (var file in new[] { "results-the-suite.trx", "results-ScriptTests.trx" })

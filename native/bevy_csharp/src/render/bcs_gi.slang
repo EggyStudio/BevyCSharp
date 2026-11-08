@@ -502,6 +502,42 @@ public float3 bouncedAt(Texture3D<float4> cubes, Texture3D<float4> cubesAt, Text
     return light;
 }
 
+/// The light the probe of cascade `c` at `at` around a surface at `p` facing `n` lends it, as
+/// `bouncedSeenSum` reads it, and how much it counts there besides how near it is, none where it
+/// stands inside a mesh, behind the surface's plane or past what the field holds between. `oc` is
+/// the cascade's corner and cell where the probes stood.
+float probeSeenFrom(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float4 oc, int3 at, int c,
+    float3 p, float3 n, float probes, float spacing, out float3 light)
+{
+    float3 n2 = n * n;
+    light = float3(0.0);
+    float3 lightAt = float3(0.0);
+    float3 reachAt = float3(0.0);
+    float valid = 1.0;
+    float3 moved = float3(0.0);
+    for (int axis = 0; axis < 3; axis++)
+    {
+        int face = axis * 2 + (n[axis] < 0.0 ? 1 : 0);
+        int4 where = int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0);
+        float4 texel = cubes.Load(where);
+        float4 texelAt = cubesAt.Load(where);
+        light += texel.rgb * n2[axis];
+        lightAt += texelAt.rgb * n2[axis];
+        reachAt[axis] = texelAt.a;
+        valid = min(valid, faceHolds(texel.a));
+        moved[axis] = faceMove(texel.a);
+    }
+    float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * spacing);
+    if (valid < 0.5 || dot(probe - p, n) <= 0.0 || !seesThrough(field, linear, info, p + n * oc.w, probe, oc.w * 0.5))
+        return 0.0;
+    // The whole of the light at the surface for a hit as far from the probe as that surface or
+    // farther, and none of it at the probe.
+    float h = dot(reachAt, n2);
+    float towardSurface = h > 1e-3 ? saturate(dot(probe - p, n) / h) : 0.0;
+    light = lerp(light, lightAt, towardSurface);
+    return probeFacing(p, n, probe);
+}
+
 /// The sum `bouncedSeenAt` divides for cascade `c`, the light of the probes seen times their
 /// weights, and the weights, which a reader that takes another light where no probe is seen tells
 /// apart from dark. `gathered` places the probes as `probesOf` does. Each probe's faces are read
@@ -517,8 +553,6 @@ public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldI
     float3 q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, 0.0, probes - 1.0);
     int3 base = int3(floor(q));
     float3 f = q - float3(base);
-    float3 n2 = n * n;
-    float3 from = p + n * oc.w;
     float3 sum = float3(0.0);
     float weights = 0.0;
     for (int corner = 0; corner < 8; corner++)
@@ -526,52 +560,74 @@ public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldI
         int3 offset = int3(corner & 1, (corner >> 1) & 1, corner >> 2);
         int3 at = min(base + offset, int3(int(probes) - 1));
         float3 lerps = lerp(1.0 - f, f, float3(offset));
-        float3 light = float3(0.0);
-        float3 lightAt = float3(0.0);
-        float3 reachAt = float3(0.0);
-        float valid = 1.0;
-        float3 moved = float3(0.0);
-        for (int axis = 0; axis < 3; axis++)
-        {
-            int face = axis * 2 + (n[axis] < 0.0 ? 1 : 0);
-            int4 where = int4(face * int(probes) + at.x, at.y, c * int(probes) + at.z, 0);
-            float4 texel = cubes.Load(where);
-            float4 texelAt = cubesAt.Load(where);
-            light += texel.rgb * n2[axis];
-            lightAt += texelAt.rgb * n2[axis];
-            reachAt[axis] = texelAt.a;
-            valid = min(valid, faceHolds(texel.a));
-            moved[axis] = faceMove(texel.a);
-        }
-        float3 probe = oc.xyz + (float3(at) + 0.5 + moved) * (oc.w * spacing);
-        if (valid < 0.5 || dot(probe - p, n) <= 0.0 || !seesThrough(field, linear, info, from, probe, oc.w * 0.5))
-            continue;
-        // The whole of the light at the surface for a hit as far from the probe as that surface or
-        // farther, and none of it at the probe.
-        float h = dot(reachAt, n2);
-        float towardSurface = h > 1e-3 ? saturate(dot(probe - p, n) / h) : 0.0;
-        light = lerp(light, lightAt, towardSurface);
-        float weight = lerps.x * lerps.y * lerps.z * probeFacing(p, n, probe);
+        float3 light;
+        float weight = lerps.x * lerps.y * lerps.z * probeSeenFrom(field, linear, info, cubes, cubesAt, oc, at, c, p, n, probes, spacing, light);
         sum += light * weight;
         weights += weight;
     }
     return float4(sum, weights);
 }
 
+/// The light the probe of cascade `c` at `at` holds along `r`, read from its eight by eight
+/// directions (`ways`, gi_ambient.slang) blended between the four whose middles lie about `r`, and
+/// toward its faces `r` looks toward over pi as `roughness` grows from a half to 1, as the light
+/// pass reads a rough face's reflection (`reflectedIn` in gi_light.slang). The directions are
+/// sampled within the probe's block, its border holding the directions across each fold, at its
+/// slice's middle, so no probe lends its neighbor's light.
+public float3 probeAlong(Texture3D<float4> ways, Texture3D<float4> cubes, SamplerState linear, int3 at, int c, float3 r, float roughness, float probes, float cascades)
+{
+    float2 along = octahedron(r) * float(WaysTexels - 2) + 1.0;
+    float3 uvw = float3((float2(at.xy * WaysTexels) + along) / (probes * float(WaysTexels)), (float(c * int(probes) + at.z) + 0.5) / (probes * cascades));
+    float3 light = ways.SampleLevel(linear, uvw, 0.0).rgb;
+    float wide = saturate((roughness - 0.5) * 2.0);
+    if (wide <= 0.0)
+        return light;
+    float3 r2 = r * r;
+    float3 faces = float3(0.0);
+    for (int axis = 0; axis < 3; axis++)
+        faces += cubes.Load(int4((axis * 2 + (r[axis] < 0.0 ? 1 : 0)) * int(probes) + at.x, at.y, c * int(probes) + at.z, 0)).rgb * r2[axis];
+    return lerp(light, faces / Pi, wide);
+}
+
 /// The indirect light reaching a surface at `p` facing `n`, as `bouncedAt` gives it, from those of
 /// the eight probes around it the surface sees, in front of its plane with nothing the field holds
 /// between, so a probe under a floor or beyond a wall lends the light it sees there to no surface on
-/// this side. The faces are read where the probes stood as `gatheredField` says, the frame before's
-/// corners for the world's probes' rays, and the field marched as `info` has it.
-public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float3 p, float3 n,
-    float probes, float spacing, float cascades)
+/// this side, and in `along` the light the same probes hold along `r` at the same weights
+/// (`probeAlong`), which a face of perceptual roughness `roughness` reflects. The faces and the
+/// directions are read where the probes stood as `gatheredField` says, the frame before's corners
+/// for the world's probes' rays, and the field marched as `info` has it.
+public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
+    Texture3D<float4> ways, float3 p, float3 n, float3 r, float roughness, float probes, float spacing, float cascades, out float3 along)
 {
+    along = float3(0.0);
     FieldInfo gathered = probesOf(gatheredField, int(cascades));
     int c = fieldCascade(gathered, p, 1.0);
     if (c < 0 || c >= int(cascades))
         return float3(0.0);
-    float4 seen = bouncedSeenSum(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, c);
-    return seen.w > 1e-5 ? seen.rgb / seen.w : float3(0.0);
+    float4 oc = gathered.cascades[c].origin_and_cell;
+    float3 q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, 0.0, probes - 1.0);
+    int3 base = int3(floor(q));
+    float3 f = q - float3(base);
+    float3 sum = float3(0.0);
+    float3 alongSum = float3(0.0);
+    float weights = 0.0;
+    for (int corner = 0; corner < 8; corner++)
+    {
+        int3 offset = int3(corner & 1, (corner >> 1) & 1, corner >> 2);
+        int3 at = min(base + offset, int3(int(probes) - 1));
+        float3 lerps = lerp(1.0 - f, f, float3(offset));
+        float3 light;
+        float weight = lerps.x * lerps.y * lerps.z * probeSeenFrom(field, linear, info, cubes, cubesAt, oc, at, c, p, n, probes, spacing, light);
+        if (weight <= 0.0)
+            continue;
+        sum += light * weight;
+        alongSum += probeAlong(ways, cubes, linear, at, c, r, roughness, probes, cascades) * weight;
+        weights += weight;
+    }
+    if (weights <= 1e-5)
+        return float3(0.0);
+    along = alongSum / weights;
+    return sum / weights;
 }
 
 /// The light the lamps that cast shadows would send a surface at `p` facing `n` but for what the
@@ -614,25 +670,32 @@ public float2 splitSum(float roughness, float nv)
 /// The light a surface the field holds at `p` sends back along a probe's ray that met it, what it
 /// reflects of the light that reaches it from the sun and the lights, the lamps that cast shadows
 /// hidden where the field stands between, so a lamp's light is not reflected off the far side of a
-/// wall, and over pi of the indirect light reaching it from the probes it sees (`bouncedSeenAt`),
-/// at `kept`'s share of it, from the faces where `gathered` says the probes stood, with the light
-/// it emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`), and the light of
+/// wall, and of the indirect light the probes it sees hold (`bouncedSeenAt`), at `kept`'s share of
+/// it, from the faces and the directions where `gathered` says the probes stood, with the light it
+/// emits as `glow` holds it, less a carried emitter's (`surfaceGlowUncarried`), and the light of
 /// the two brightest glow lights, the ray along `way`. What it reflects is its gloss's share toward
 /// the ray (`splitSum`) and its color's diffuse share past its metal of what its gloss leaves, its
-/// f0 from its reflectance and its color by its metal as Bevy's lighting works it out, taken at the
-/// face's own roughness as though it reflected the light from all around evenly, so the gloss of a
-/// wall a probe's ray meets carries light between bounces as its diffuse share does, the share the
-/// path-traced reference's paths carry at every face past the first. With the diffuse share at its
-/// whole color beside the gloss, a smooth white face met at a grazing ray sent on more light than
-/// reached it, half as much again at a roughness of 0.1, and a closed room of smooth walls as white
-/// as 0.95 ran away, its light past the direct 1,136 to 1,195 times its reference's. `own` holds the light the surface sends on of
-/// what reaches it straight from the sun, the lights and the glow lights, with its emission, which
-/// a probe weighs the frame before's light by. The sun and the lights are given as the light a
-/// white surface facing one returns, and the probes hold the light reaching a face, so the indirect
-/// light is taken over pi.
+/// f0 from its reflectance and its color by its metal as Bevy's lighting works it out, at the
+/// face's own roughness, so the gloss of a wall a probe's ray meets carries light between bounces
+/// as its diffuse share does, the share the path-traced reference's paths carry at every face past
+/// the first. The diffuse share takes the indirect light reaching the face over pi, and the gloss
+/// the light the probes hold along the ray's mirror way (`probeAlong`), as the reference's paths
+/// reflect it. Taken as though that light reached the face evenly from all around, a probe in a
+/// closed room of smooth walls of the level's white read its second bounce 12.5% over its
+/// reference, and read so 11.1%. The sun's and the lights' light is reflected as though it came
+/// evenly, since a probe's rays leave along the same ways every frame and a highlight as sharp as a
+/// roughness of 0.1 gives is caught or missed by where they fall. Lit by each light's highlight,
+/// the same probe read its first bounce 6.4% under its reference where 0.3% over. With the diffuse
+/// share at its whole color beside the gloss, a smooth white face met at a grazing ray sent on more
+/// light than reached it, half as much again at a roughness of 0.1, and a closed room of smooth
+/// walls as white as 0.95 ran away, its light past the direct 1,136 to 1,195 times its reference's.
+/// `own` holds the light the surface sends on of what reaches it straight from the sun, the lights
+/// and the glow lights, with its emission, which a probe weighs the frame before's light by. The
+/// sun and the lights are given as the light a white surface facing one returns, and the probes
+/// hold the light reaching a face, so the indirect light reaching it is taken over pi.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
-    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float3 p, float3 way, float probes,
-    float spacing, float cascades, float3 kept, out float3 own)
+    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p,
+    float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 gloss;
@@ -640,12 +703,13 @@ public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldIn
     float2 ab = splitSum(gloss.x, saturate(dot(n, -way)));
     float3 f0 = lerp(float3(0.16 * gloss.z * gloss.z), paint, gloss.y);
     float3 glossy = f0 * ab.x + ab.y;
-    float3 color = paint * (1.0 - gloss.y) * saturate(1.0 - glossy) + glossy;
-    float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, p, n, probes, spacing, cascades);
-    own = color * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
+    float3 diffuse = paint * (1.0 - gloss.y) * saturate(1.0 - glossy);
+    float3 along;
+    float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, ways, p, n, reflect(way, n), gloss.x, probes, spacing, cascades, along);
+    own = (diffuse + glossy) * (directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
             + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi)
         + surfaceGlowUncarried(glow, albedo, linear, info, p);
-    return own + color / Pi * bounced * (lights.counts.z * kept);
+    return own + (diffuse / Pi * bounced + glossy * along) * (lights.counts.z * kept);
 }
 
 /// The light a surface the field holds at `p` sends back along a ray that met it, its color over pi

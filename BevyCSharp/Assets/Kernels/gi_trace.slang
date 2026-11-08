@@ -71,6 +71,9 @@ Texture3D<float4> bounced;
 // The same faces' light at the surfaces they are read for, which a ray's hit takes the light it sends
 // on from (bouncedSeenSum).
 Texture3D<float4> bounced_at;
+// Each probe's light along eight by eight directions the frame before, as gi_ambient.slang left it,
+// which a ray's hit reflects by its gloss along the ray's mirror way (probeAlong).
+Texture3D<float4> ways;
 
 // How far each ray went before it met a surface, or its interval's end where it met none, below zero
 // where it met a face from behind, a texel's rays taken together, which gi_ambient.slang counts to
@@ -348,7 +351,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         if (t >= 0.0)
         {
             light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
-                bounced, bounced_at, origin + way * t, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
+                bounced, bounced_at, ways, origin + way * t, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
             through = 0.0;
         }
         else if (skyPast)
@@ -389,7 +392,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             float3 itsOwn;
             float lost = 1.0 - passes;
             float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
-                bounced, bounced_at, origin + way * (t + stopped), way, float(probes), interval.z, interval.w, share, itsOwn) * lost;
+                bounced, bounced_at, ways, origin + way * (t + stopped), way, float(probes), interval.z, interval.w, share, itsOwn) * lost;
             itsOwn *= lost;
             if (depth >= 0.0 && t < interval.x)
             {

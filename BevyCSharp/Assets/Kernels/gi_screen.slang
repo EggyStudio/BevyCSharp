@@ -45,6 +45,9 @@ Texture3D<float4> probe_cubes;
 // takes as the world's probes' hits do.
 Texture3D<float4> probe_cubes_at;
 Texture3D<float> probe_reach;
+// Each world probe's light along eight by eight directions, as gi_ambient.slang left it this frame,
+// which a ray's hit reflects by its gloss along the ray's mirror way (probeAlong).
+Texture3D<float4> probe_ways;
 
 // The world's first cascade merged, a tile of octahedron texels a probe, and its second, or the first
 // again where it has one, which a probe on a surface past the first cascade takes the light from
@@ -657,7 +660,7 @@ void main(uint3 id : SV_DispatchThreadID)
                 float deep = passing > 0.0 ? lightThroughCrossed(scene_field, scene_field_sampler, scene_albedo, info, start, way, t, length - t, inside, passes) : -1.0;
                 float3 own;
                 light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
-                    probe_cubes, probe_cubes_at, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
+                    probe_cubes, probe_cubes_at, probe_ways, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
                 if (layer == 0)
                     metOwn = own;
                 through *= passes;

@@ -56,6 +56,74 @@ public sealed partial class GlobalIlluminationTests
         Assert.True(Vector3.Distance(rough.Gloss, new Vector3(0.9f, 0f, 0.35f)) < 0.01f, $"a cell beside the rough block's face holds the gloss {rough.Gloss}");
     }
 
+    /// <summary>
+    /// A probe in a closed room of 8 of smooth walls of the level's white, at a roughness of 0.1,
+    /// reads the light its second bounce adds within 12% of its reference's, the walls its rays meet
+    /// reflecting by their gloss the light the probes around them hold along each ray's mirror way.
+    /// </summary>
+    /// <remarks>
+    /// The probe stands at (1, 1.5, 1) in the first cascade, held at its first bounce and at its
+    /// second (<c>WorldProbes.HoldBounces</c>), against 256 paths a way of one face and of two past
+    /// the first. A ray's hit reflected the indirect light by its gloss as though it reached the face
+    /// evenly from all around, and the second bounce read 12.5% over its reference, where read along
+    /// the mirror way it reads 11.1%, the first 0.3% over either way. What is left is the sun's and
+    /// the lights' light, which a hit reflects evenly by its gloss. Lit by each light's highlight,
+    /// the second bounce read 3.0% over and the first 6.4% under, the probe's rays leaving along the
+    /// same ways each frame and catching or missing a highlight as sharp as a roughness of 0.1 gives.
+    /// </remarks>
+    [SkippableFact]
+    public void ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay()
+    {
+        Needs.Shaders();
+        var supported = false;
+        var ready = 0;
+        var at = new Vector3(1f, 1.5f, 1f);
+        var read = new List<(double Probe, double Drawn)>();
+        var run = new PictureRun
+        {
+            Width = 160,
+            Height = 90,
+            Frames = 12000,
+            Scene = ecs => ClosedRoom(ecs, 8f, 0.1f),
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
+                && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
+            .Until("traced", _ => !supported || WorldProbes.TracedFrames >= 300)
+            .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3);
+        foreach (var bounces in new[] { 0, 1 })
+        {
+            var begun = false;
+            run = run.Do($"holding at {bounces}", _ =>
+                {
+                    if (supported) WorldProbes.HoldBounces(bounces);
+                })
+                .Until($"held at {bounces}", _ => !supported || WorldProbes.HoldReached)
+                .Until($"read at {bounces}", world =>
+                {
+                    if (!supported) return true;
+                    var ecs = world.Resource<EcsWorld>();
+                    if (!begun)
+                    {
+                        begun = true;
+                        Assert.Null(GiReference.BeginProbe(ecs, at, 0, 256, bounces));
+                        return false;
+                    }
+                    if (GiReference.StepProbe(ecs) is not { } said) return false;
+                    output.WriteLine($"held at {bounces} past the first: {said}");
+                    var (probe, _, drawn, _) = GiReference.LastProbe!.Value;
+                    read.Add((probe, drawn));
+                    return true;
+                });
+        }
+        run.Go();
+        Needs.RayQueries(supported);
+
+        var second = (read[1].Probe - read[0].Probe) / (read[1].Drawn - read[0].Drawn) - 1;
+        output.WriteLine($"the second bounce reads {second:+0.0%;-0.0%} against its reference");
+        Assert.True(Math.Abs(second) < 0.12, $"the second bounce reads {second:+0.0%;-0.0%} against its reference");
+    }
+
     /// <summary>A cube two meters a side of <paramref name="material"/> standing with its middle at <paramref name="at"/>.</summary>
     private static void Glossy(EcsWorld ecs, MaterialSettings material, Vec3 at)
     {

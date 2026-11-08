@@ -40,12 +40,23 @@ the wall and the ground behind the crown's lower side taking a little more of th
 scatters and the leaves changing a pixel here and there either way, the oak's leaves 41 and 42%
 under their path-traced reference where 42.
 
+![](.github/assets/readings/2026-11-08-item-114-mirror.webp)
+A closed room of 8 of smooth walls of the level's white at a roughness of 0.1, lit by a lamp under
+its ceiling at Medium, on the left with a probe's ray's hit reflecting by its gloss the light the
+probes hold as though it reached the hit evenly from all around, in the middle reflecting the light
+the probes hold along the ray's mirror way, and on the right the middle's light less the left's
+eighty times over, brighter in orange and darker in blue, the walls and the floor a level or less of
+255 darker in the bands the picture's eight bits step by, the mean 0.06% darker, a probe in the room
+reading its second bounce 11.1% over its path-traced reference where 12.5%.
+
 Done that day
 
 - Item 107 at `69d97fec`. The crowns' fill, the picture's against the reference's.
 - Item 113 at `01951f29`. Shaded grass beside a wall takes 30 to 45% less light from all around than
   the reference.
 - Item 115 at `571174fc`. The air's sky test captures before its sky is drawn under load.
+- Item 116 at `a5f277d5`. The probes' rays gather the light a crown's leaves scatter between them.
+- Item 117 at `a5f277d5`. The version and its tags in the documents.
 
 ## 2026-11-07
 

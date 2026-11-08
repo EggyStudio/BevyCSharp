@@ -349,6 +349,25 @@ to 16% over. The bounce rooms' references hold 0.1 to 14.5% less light with thei
 first kept so, and their bounds were taken again, and the closed rooms of 4, 8 and 16 read 1.00 to
 1.02, 0.97 to 1.05 and 0.93 to 0.96 and the closed Cornell box 1.02 to 1.04.
 
+A ray's hit reflects by its gloss the indirect light the probes it sees hold along the ray's mirror
+way, read from each one's eight by eight directions and toward its faces as its roughness grows past
+a half (`probeAlong`), as the light pass reads a rough face's reflection, at the weights its diffuse
+share takes the light reaching it from their faces, the world's probes reading the frame before's
+directions and the screen probes this frame's. The probe in the room of the level's white reads its
+second bounce 11.1% over its reference where 12.5%, its third 15.7% where 16.3% and every bounce
+9.2% where 9.8%, its first as it was, and the room's faces 1.07 to 1.15 where 1.08 to 1.16
+(`ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay`), so the indirect light's even
+gloss was the smaller part of the excess. The larger part is the sun's and the lights' light, which
+a hit reflects by its gloss evenly. Lit by each light's GGX highlight as the reference lights a
+face, the probe read its second bounce 3.0% over and every bounce 0.9%, but its first 6.4% under
+where 0.3% over, since a probe's rays leave along the same ways each frame and a highlight as sharp
+as a roughness of 0.1 gives is caught or missed by where they fall, and with each highlight widened
+by a quarter of the solid angle a ray stands for, its first read 4.2% under, its second 6.8% over
+and its third 11.4%. In each the light the second bounce adds to the first stays 10 to 12% over its
+reference's, so what is left lies in how the hits read the first bounce's light. The trace takes
+0.457 ms at `High` in a Cornell box at 1280 by 720 where 0.467 and 3.7 to 3.9 in the meadow at eight
+where 3.7, and the screen probes 4.6 to 4.9 where 4.4 to 4.7.
+
 A ray's hit takes the light past the first bounce from the faces of the probes it sees, and a face
 holds the light reaching a surface facing along its axis where the probe stands, a unit or more over
 the floor it is read for and nearer the walls and the ceiling than the floor is, so each bounce came

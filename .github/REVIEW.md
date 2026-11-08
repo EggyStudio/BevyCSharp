@@ -1,30 +1,33 @@
 # Review
 
-Reviewed up to `69d97fec`, 107's shadow mend, one visibility level casting at any distance by Bevy's
-shadow origin, pushed at 11:22 on 2026-11-08, its run green at 11:36 on the three systems in 12 to
-14 minutes; it keeps the form and carries the review's files and the devlog. Nothing is pushed after
-it. Before it `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's reading
-in the replies, pushed at 09:32, its run green at 09:48 on the three systems in 10 to 16 minutes.
-Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for their
-diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the three systems
-in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's leaves cell by
-cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16 minutes. Before it
-`e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at 22:47 on
-2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests the
-shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray on
-the light from all around and the let-through shadowed, with the reference reading a crown leaf by
-leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
-`4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the leaves' cover,
-pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes. Before it
-`2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see along their
-mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06, its run green at
-16:24 on the three systems in 15 to 18 minutes. Before it `7bd61bcc`, 110's second step, the field
-holding each face's gloss and the probes' rays lighting their hits by it, with the one reference,
-pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before it
-`e0014da4`, 110's first step, the specular share read from the probes' directions along the mirror
-way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before it
-`b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed at 06:07, its
-run green at 06:24 on the three systems in 12 to 16 minutes. Before it `5a8b4182`, item 109, a
+Reviewed up to `a5f277d5`, 116, a crossing lit where its leaves stop the ray and the early
+crossing's light to the probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08, its run
+green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps the form and
+carries the review's files. Nothing is pushed after it. Before it `69d97fec`, 107's shadow mend, one
+visibility level casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its
+run green at 11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the
+review's files and the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its
+pipelines, with 107's reading in the replies, pushed at 09:32, its run green at 09:48 on the three
+systems in 10 to 16 minutes. Before it `443dad1f`, 110's energy check, a hit and the reference's
+later faces keeping for their diffuse share what their gloss leaves, pushed at 07:22, its run green
+at 07:40 on the three systems in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding
+a crown's leaves cell by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to
+16 minutes. Before it `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed
+at 22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two
+tests the shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the
+leaves' gray on the light from all around and the let-through shadowed, with the reference reading a
+crown leaf by leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15
+minutes. Before it `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by
+the leaves' cover, pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes.
+Before it `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see
+along their mirror way with Bevy's reflection taken back by its occlusions, pushed at 16:06, its run
+green at 16:24 on the three systems in 15 to 18 minutes. Before it `7bd61bcc`, 110's second step,
+the field holding each face's gloss and the probes' rays lighting their hits by it, with the one
+reference, pushed at 12:00, its run green at 12:17 on the three systems in 14 to 17 minutes. Before
+it `e0014da4`, 110's first step, the specular share read from the probes' directions along the
+mirror way, pushed at 09:26, its run green at 09:44 on the three systems in 12 to 17 minutes. Before
+it `b576bf3f`, item 106, the shadow biases nullable with Bevy's defaults by kind, pushed at 06:07,
+its run green at 06:24 on the three systems in 12 to 16 minutes. Before it `5a8b4182`, item 109, a
 leaf's way out turned with its tree, pushed at 00:06, its run green at 00:23 on the three systems in
 12 to 17 minutes. Before it `18f226eb`, 105's fourth commit, the reference tracing the GGX lobe,
 pushed at 22:39 on 2026-11-06, its run green at 22:54 on the three systems in 13 to 15 minutes.
@@ -2446,7 +2449,13 @@ from [SHARED.md](SHARED.md).
     counts as outside every mesh. The two small findings go in passing, the cost measured and
     recorded. Its reading is a pair with the difference panel at a gain of 40 (Decision 82), the
     wall and the ground behind the oak's crown taking a little more of the crown's scattered light,
-    the leaves changing by about one point.
+    the leaves changing by about one point. Done at `a5f277d5`, pushed at 16:26 on 2026-11-08; a
+    crossing lit once at the mean depth where its leaves stop the ray, an early crossing's light to
+    the probe's faces through the kept image, a probe in a card cell outside unless deeper than half
+    a cell, the probes before the front, in the front half and in the core within 2, 11 and 46
+    points where the head read 151, 58 and inside a mesh, the meadow's view 0.288 against 0.289 with
+    every region within two points, the trace 3.6 to 4.5 ms at High against 3.5; the core probe
+    looking from the sun and the scattered light below the probes' spacing recorded, not chased.
 
 117. **The version and its tags in the documents.** Decision 83 on 2026-11-08. COMMITS.md gains a
     section on the version, `build/version.txt`'s major and minor raised by this session in a commit
@@ -2455,6 +2464,38 @@ from [SHARED.md](SHARED.md).
     commit and on the commit a package was published from, no other; BUILDING.md's paragraph on the
     version says the same of the tags. The session judges whether the reference's completion and the
     probes' specular are 0.7 and says so in the Replies, raising the minor or not. In 116's batch.
+    Done at `a5f277d5`, pushed at 16:26 on 2026-11-08; the session's judgment is 0.7 after 114's
+    commit, in a commit of its own.
+
+118. **The middle dot out.** Decision 84 on 2026-11-08. The README's first line, changed in the
+    tree, goes in the next commit. The dot products in the comments of EditMesh.Topology.cs and
+    EditMesh.cs are said in words or with the word dot, the test string in TestScriptTests.cs that
+    quotes the tool's own three dots is read, kept where it is the tool's output and said so in a
+    comment, and STYLE.md's Punctuation gains the sentence that the middle dot is not used, a row of
+    links separated by a space, a list by commas and a product said in words. In 114's batch.
+
+119. **The bridge as projects.** Decision 85 on 2026-11-08. The C# side over the native crate
+    becomes one solution of projects, each an area with its own public surface and its own plugin,
+    packed as its own package at the bridge's one version, along the lines of the engine's (3DEngine
+    item 225), the native crate one package the others depend on and the dependency direction held
+    by project references and a norm test; the public API held identical before and after, the
+    documents' tables redrawn, the pack workflow packing every package at the one version. One
+    mechanical batch, planned in the Replies before it starts. After 67.
+
+120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
+    changed texture, model, scene or shader reloaded in the running program, is exposed and read,
+    and a changed behavior script is recompiled into the running world through the bridge's runtime
+    compiler, each change said in the log and reachable through the CLI, so a running program is
+    edited and seen without a restart; the bridge's own code stays a restart. After 119.
+
+121. **Comments on the code's own terms.** Decision 86 on 2026-11-08. A sweep, a commit of its own,
+    every comment in the sources, kernels, scripts and examples that explains by HDRP, Unity, Bevy's
+    own defaults where they are given as the reason, a profile, an outside asset's file name, the
+    owner, a reference picture or a session's doing, some 100 lines by a first search for those
+    words of which the widgets' owner is not one, rewritten in the bridge's terms with its numbers
+    kept and their reason said, the comparison tests' naming of the reference they compare against
+    left where the test is the comparison; STYLE.md's Register gains the sentence and its Checks the
+    search, read rather than counted. After 114, before 96.
 
 ## Verdicts
 
@@ -2766,6 +2807,44 @@ each in full under Decisions in REVIEW-ARCHIVE.md.
     `v0.6.18` the commit `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set
     at 14:12.
 
+84. **No middle dot.** The owner wrote at 17:57 and 18:00 on 2026-11-08 that the middle dot is not
+    used, the README's top links separated by a space alone and the dot nowhere else; the reviewer
+    changed the README's first line in the tree on their word, for the next commit to carry, and
+    every other middle dot in the repository is item 118's. The rule goes into STYLE.md's
+    Punctuation as the shared text has it everywhere.
+
+85. **One repository, many projects.** The owner wrote at about 18:20 on 2026-11-08, thinking with
+    the review about the engines' future after Unity Essentials, where every feature is a repository
+    of its own, that the engines feel "a bit cluttered" and should be "modulated extendable and
+    stable and easy to use", that splitting everything into repositories "clutters" and makes
+    commits "weird", that the shared modules' repositories are right, that the engine's own content
+    could be modulated the same way inside its repository, and that a "one process approach", one
+    running process edited and seen as it changes, is worth thinking about; at 18:30 they approved
+    the review's recommendation. The direction is that each engine stays one repository and becomes
+    one solution of many projects, each an area with its own public surface and its own plugin,
+    packed as its own package at one version for all, as Bevy's crates are in Bevy's one repository;
+    the dependency direction is held by project references and a norm test over them; the flat API
+    stays unchanged on top and a game names the packages it needs; the names are dotted .NET names
+    and not com.; there is no editor, and the live path is a watcher that recompiles a changed
+    shader, reloads a changed asset or scene and recompiles a changed behavior into the running
+    process, the engine's own code by restart. It is scheduled after the current items and done as
+    one mechanical batch per engine with the public API held identical before and after and the
+    documents' tables redrawn. Items 119 and 120, 3DEngine Decision 102.
+
+86. **Comments on the code's own terms.** The owner read a comment of scenes_sponza at about 19:00
+    on 2026-11-08, "The frame graded as that scene's HDRP profile grades it, by the look of its AgX
+    - Powerful.exr, a lookup build/unity-lut.py writes from that strip, a gamma of w 0.225, and a
+    bloom of intensity 0.25, threshold 0.333 and scatter 0.7, worked out as HDRP works them out",
+    and wrote that it "sounds just bad", reads as an em dash, and "is taking too much liberty of
+    outside knowledge and in-process session knowledge", in scenes_sponza explicitly and probably
+    everywhere else. The rule from it, in STYLE.md's Register and as N 4.11, is that a comment
+    stands on the code's own terms. It says what the code does and why in the engine's words; a
+    number taken from elsewhere stands with the reason it is right here, what it makes the frame or
+    the program do, and the source is named once in the documents' references and not in the
+    comment; the file names of outside assets, another product's profile or process as the
+    explanation, "as X works it out", and the facts of the sessions' work are not written in a
+    comment. Item 121, 3DEngine Decision 103.
+
 ## Replies
 
 Shared: a set clock held still while an asset the app asked for is loading and between the commands
@@ -2839,8 +2918,8 @@ for each edge of the outline in order, `[i, i+1, n+i+1, n+i]`, and an outline wh
 clockwise about the axis is reversed first. The outlines are given as (first, second) coordinates, a
 box about Y in (z, x) from (0, 0), (Z, 0), (Z, X), (0, X); a cylinder about Y in (z, x) with point i at
 radius times (cos a, sin a), a = 360° (i + ½) / SIDES; a wedge about X in (y, z) from (0, 0), (0,
-Z), (Y, Z), which is reversed; a flight about X in (y, z) from (0, 0), then (k+1)·RISE, k·RUN and
-(k+1)·RISE, (k+1)·RUN for each step k, then (0, STEPS·RUN); an arch about Z in (x, y), the outside
+Z), (Y, Z), which is reversed; a flight about X in (y, z) from (0, 0), then (k+1) times RISE, k times RUN and
+(k+1) times RISE, (k+1) times RUN for each step k, then (0, STEPS times RUN); an arch about Z in (x, y), the outside
 at radius times (cos a, sin a), a = 180° i / SIDES for i from 0 to SIDES, then the inside from
 SIDES down to 0. A cone is a cylinder's outline at the base, numbered first, its point last at the
 height over the middle, the base the first face (the outline backwards) and then `[i, i+1, point]`.
@@ -5955,3 +6034,66 @@ oak reading 151% over its reference and one in its front half 58% under, and lit
 leaves stop it on average, the field's march giving that depth beside the share it keeps, with an
 early crossing's light kept for the faces beside its share, they read 2% under and 11% over at about
 the head's cost, where four places along a crossing took three times as long.
+
+Item 114, a probe ray's hit reflecting along its mirror way, in the commit carrying this line. A
+ray's hit reflects by its gloss the indirect light the probes it sees hold along the ray's mirror
+way, read from each one's eight by eight directions blended toward its faces as its roughness grows
+past a half (probeAlong in bcs_gi.slang), as the light pass reads a rough face's reflection, at the
+weights its diffuse share takes the light reaching it from their faces (bouncedSeenAt, its probe by
+probe read shared with bouncedSeenSum in probeSeenFrom), where it reflected that light as though it
+reached the hit evenly from all around. The world's probes' rays read the frame before's directions
+beside the faces they read, and the screen probes' rays this frame's, both through shadeProbeHit.
+The ABI is unchanged.
+
+The read. The probe at 1, 1.5, 1 in the closed room of 8 of smooth walls of the level's white,
+against 256 paths a way, reads its second bounce 11.1% over its reference where 12.5%, its third
+15.7% where 16.3% and every bounce 9.2% where 9.8%, its first 0.3% over as it was. So the even read
+of the indirect light was the smaller part of the excess, and a second read placed the larger part
+in the sun's and the lights' light, which a hit reflects by its gloss evenly. Lit by each light's
+GGX highlight as the reference lights a face, the second bounce read 3.0% over, the third 6.3% and
+every bounce 0.9%, but the first 6.4% under where 0.3% over, since a probe's rays leave along the
+same ways every frame and a highlight as sharp as a roughness of 0.1 gives is caught or missed by
+where they fall. With each highlight widened by a quarter of the solid angle a ray stands for, the
+first read 4.2% under, the second 6.8% over and the third 11.4%. In every form the light the second
+bounce adds to the first stays 10 to 12% over its reference's, so what is left lies in how the hits
+read the first bounce's light and not in the way the gloss reflects it. The highlights are recorded
+and not landed by Decision 81, a form that takes 6.4 points from the first bounce to give 9 to the
+rest, and a lead for an item, each light's highlight at a hit with the rays' ways turned from frame
+to frame so a sharp highlight is caught on average.
+
+The cost. The trace takes 0.451 to 0.457 ms at High in a Cornell box at 1280 by 720 where 0.461 to
+0.467, 3.72 to 3.86 ms in the meadow at eight where 3.67 to 3.72, and the screen probes in the box
+4.61 to 4.87 where 4.42 to 4.72, the least and the median of 600 frames, so it lands.
+
+GlobalIlluminationTests.ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay holds that
+probe at its first bounce and at its second and reads the light the second adds within 12% of its
+reference's, 11.1% where 12.5% at the head, so it fails there. The smooth room's faces read 1.07 to
+1.15 of their reference's light past the direct where 1.08 to 1.16, those as white as 0.95 1.34 to
+1.37 where 1.35 to 1.38, the rough rooms of 4, 8 and 16 1.00 to 1.02, 0.97 to 1.05 and 0.93 to 0.96
+and the closed Cornell box 1.03 to 1.04 as they did, and the crown's probes of 116 pass. The reading
+2026-11-08-item-114-mirror.webp shows the smooth room with the hit's even gloss, with its gloss
+along the mirror way and their difference eighty times over, the walls and the floor a level or less
+of 255 darker, the mean 0.06% darker.
+
+Item 118, the middle dot out, in the same commit. The README's first line as the reviewer changed
+it. The dot products in EditMesh.Topology.cs and EditMesh.cs said with the words dot and cross, the
+test string in TestScriptTests.cs that quotes xUnit's three dots kept, since it is the tool's own
+output, written as escapes and said so in a comment, and STYLE.md's Punctuation gaining the sentence
+as 3DEngine's has it. git grep finds the middle dot in no text file but that sentence and the
+review's files.
+
+The version. 117's judgment named 0.7 at 114's commit with the probes' specular whole. A hit's gloss
+still reflects the sun's and the lights' light evenly, so the probes' specular is not whole and the
+minor is not raised at this commit. It waits for the highlights' item or for the reviewer's word.
+
+cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
+204 with render. The bridge was built with the editor profile, meshlets and Solari. The whole run
+gave 2,054 passed and 3 skipped in 51 m 5 s at the 3 GB cap, none aborted, its largest process at
+2,977 MB. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a probe ray's hit reflected the indirect light by its gloss as though it came evenly from
+all around, a probe in a smooth room of the level's white reading its second bounce 12.5% over its
+reference, and read along the ray's mirror way from the probes' eight by eight directions it reads
+11.1% at about the same cost, where each light's highlight at the hit took the second to 3.0% and
+the first from 0.3% over to 6.4% under, the probes' rays leaving along the same ways each frame and
+missing a sharp highlight.

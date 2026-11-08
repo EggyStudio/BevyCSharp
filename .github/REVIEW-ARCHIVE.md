@@ -3352,9 +3352,9 @@ copies numbered after the last vertex in the order the rim meets them, an edge's
 end; the region's faces take the copies, a corner inside the region moves itself, and each rim edge
 (a, b) takes a side face [a, b, b', a'] appended in rim order in its face's slot. By a distance, a
 corner moves so each distinct normal of the region's faces round it is met at the distance, d n for
-one, d (n1 + n2) / (1 + n1 · n2) for two, and for more the least squares answer by Cramer's rule,
+one, d (n1 + n2) / (1 + n1 dot n2) for two, and for more the least squares answer by Cramer's rule,
 the mean normal where that is singular. An inset goes face by face in index order, each corner
-moved in by d (a + b) / (1 + a · b), a and b the inward normals of its two edges (the face's normal
+moved in by d (a + b) / (1 + a dot b), a and b the inward normals of its two edges (the face's normal
 crossed with the edge), its new corners numbered in the face's order, the face taking them and a
 band face [c_i, c_i+1, q_i+1, q_i] appended for each edge. A delete takes the selected faces, or with
 none the faces using a selected vertex; a fill follows the rim, the taken faces' edges a kept face
@@ -3451,7 +3451,7 @@ a face released within 4 pixels of it, counted as the sum of the two axes, write
 drag, whose distance is the point of the face's normal line through its middle nearest the ray, in
 the mesh's space, rounded to the grid step with halves away from zero and shown beside the pointer
 as `<d> m`. On release a distance of 0 writes nothing, and otherwise the face is selected first
-where it is not and the line is `extrude <d>`, or `move <nx·d> <ny·d> <nz·d>` where alt was held in
+where it is not and the line is `extrude <d>`, or `move <nx times d> <ny times d> <nz times d>` where alt was held in
 the last frame the button was down. The outlines are drawn from the frame's tick, the selection in
 orange (1, 0.55, 0.1), the face under the pointer in yellow (1, 0.95, 0.2) and the dragged face at
 its distance in cyan (0.3, 0.85, 1). `Modeling.WantsPointer` is true where a window's pointer was

@@ -196,7 +196,7 @@ public sealed partial class EditMesh
                     var b = _positions[corners[i]];
                     var c = _positions[corners[i + 1]];
 
-                    // a · (b × c), the six times the signed solid of the origin and the triangle.
+                    // a dot (b cross c), the six times the signed solid of the origin and the triangle.
                     sum += a.X * ((double)b.Y * c.Z - (double)b.Z * c.Y)
                          + a.Y * ((double)b.Z * c.X - (double)b.X * c.Z)
                          + a.Z * ((double)b.X * c.Y - (double)b.Y * c.X);

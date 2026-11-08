@@ -246,7 +246,7 @@ internal static partial class WorldProbes
         _screenTrace.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
             .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows).SetBuffer("ray_log", _screenRayLog)
-            .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach)
+            .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach).SetTexture("probe_ways", made.Ways)
             .SetTexture("merged_first", made.Merged[0]).SetTexture("merged_second", made.Merged[Math.Min(1, cascades - 1)])
             .Set("screen", new Vector4(tile, reach, glowOnly ? 1 : 0, FedScreenProbe))
             .Set("probes", new Vector4(Probes, ProbeSpacing, cascades, 0))
