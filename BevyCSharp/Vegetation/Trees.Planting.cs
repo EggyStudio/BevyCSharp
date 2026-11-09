@@ -10,9 +10,6 @@ namespace Bevy;
 // colliders once its variant has grown.
 public static partial class Trees
 {
-    /// <summary>How many variants a species grows, which the trees planted from it share, each turned and sized by its own seed.</summary>
-    public const int Variants = 8;
-
     // The radius of the thinnest stem a capsule stands round, twelve centimeters across, and the
     // most capsules a variant has, the thickest stems' first, so a tree stops the player at its
     // trunk and its low limbs and no more.
@@ -148,38 +145,17 @@ public static partial class Trees
     /// <param name="count">How many trees, fewer where they do not fit apart.</param>
     /// <returns>The trees' entities.</returns>
     /// <remarks>
-    /// Each tree is drawn at random in the disc and kept where it stands seven tenths of an even
-    /// spread's spacing from every tree before it, Poisson disk sampling by trial, so the forest is
-    /// neither a grid nor a heap, and the seed grows the same forest each time.
+    /// The trees stand where the Vegetation module's <see cref="TreePlanting.Forest"/> spreads them,
+    /// each with the seed it draws, so the seed grows the same forest each time and a level written
+    /// in code places the same forest as its trees one by one.
     /// </remarks>
     public static IReadOnlyList<Entity> PlantForest(EcsWorld ecs, string species, uint seed, Vec3 middle, float radius, int count)
     {
         ArgumentNullException.ThrowIfNull(ecs);
-        if (!(radius > 0f) || !float.IsFinite(radius)) throw new ArgumentOutOfRangeException(nameof(radius), radius, "A forest's radius is a finite number above zero.");
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
+        var spread = TreePlanting.Forest(seed, new System.Numerics.Vector3(middle.X, middle.Y, middle.Z), radius, count);
         if (Species(species) is null) throw new ArgumentException($"No species is registered as {species}, of {string.Join(", ", SpeciesNames)}.", nameof(species));
 
-        return [.. ForestPlaces(seed, middle, radius, count).Select(tree => Plant(ecs, species, tree.Seed, tree.Place))];
-    }
-
-    /// <summary>
-    /// Where the trees of a forest stand and the seed of each, as <see cref="PlantForest"/> plants
-    /// them, so a level written in code places the same forest as its trees one by one.
-    /// </summary>
-    internal static IReadOnlyList<(Vec3 Place, uint Seed)> ForestPlaces(uint seed, Vec3 middle, float radius, int count)
-    {
-        var random = new Pcg((ulong)seed);
-        var apart = 0.7f * MathF.Sqrt(MathF.PI * radius * radius / MathF.Max(count, 1));
-        var places = new List<Vec3>();
-        for (var tries = 0; places.Count < count && tries < count * 30; tries++)
-        {
-            var reach = radius * MathF.Sqrt(random.Unit());
-            var angle = random.Unit() * MathF.Tau;
-            var place = middle + new Vec3(reach * MathF.Cos(angle), 0f, reach * MathF.Sin(angle));
-            if (places.All(other => (other - place).LengthSquared >= apart * apart)) places.Add(place);
-        }
-
-        return [.. places.Select(place => (place, random.Next()))];
+        return [.. spread.Select(tree => Plant(ecs, species, tree.Seed, Of(tree.Place)))];
     }
 
     /// <summary>
@@ -242,7 +218,7 @@ public static partial class Trees
                 continue;
             }
 
-            var variant = (int)(seed % Variants);
+            var variant = TreePlanting.Stance(seed).Variant;
             var growing = Growing.GetOrAdd((species, variant), key => new Lazy<Task<Grown>>(() => Task.Run(() => GrowVariant(key.Species, key.Variant)))).Value;
             if (growing.IsFaulted)
             {
@@ -264,15 +240,9 @@ public static partial class Trees
     /// <summary>Grows a variant of a species and finds its capsules, on whatever thread runs it.</summary>
     private static Grown GrowVariant(TreeSpecies species, int variant)
     {
-        var skeleton = TreeSkeleton.Grow(species, VariantSeed(variant));
+        var skeleton = TreeSkeleton.Grow(species, TreePlanting.VariantSeed(variant));
         return new Grown(skeleton, skeleton.Bounds.High.Y, Capsules(skeleton));
     }
-
-    /// <summary>
-    /// A variant's own seed, apart from any seed a game gives, so the same species grows the same
-    /// eight in every game.
-    /// </summary>
-    private static uint VariantSeed(int variant) => (uint)(0x7E57_0000 + variant);
 
     /// <summary>
     /// Shapes what a variant is drawn from out of its skeleton, its stems and leaves built and its
@@ -280,7 +250,7 @@ public static partial class Trees
     /// </summary>
     private static Shapes ShapeVariant(TreeSpecies species, int variant, TreeSkeleton skeleton)
     {
-        var seed = VariantSeed(variant);
+        var seed = TreePlanting.VariantSeed(variant);
         var limbs = PlanLimbs(skeleton);
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];
         var stems = levels.Select(level => SwayingStems(skeleton, level, limbs)).ToArray();
@@ -299,9 +269,9 @@ public static partial class Trees
     private static Entity Dress(EcsWorld ecs, Entity tree, string name, TreeSpecies species, uint seed, Grown grown, bool draws, CardPictures? pictures)
     {
         // A turn and a size of a tenth either way, from the seed.
-        var random = new Pcg((ulong)seed * 0x9E3779B97F4A7C15ul + 1);
-        var turn = Quat.FromRotationY(random.Unit() * MathF.Tau);
-        var size = 0.9f + 0.2f * random.Unit();
+        var stance = TreePlanting.Stance(seed);
+        var turn = Quat.FromRotationY(stance.Turn);
+        var size = stance.Size;
 
         // The tree's own entity takes part in Bevy's visibility, as the parent of a mesh has to, or
         // Bevy warns (B0004) that what is drawn under it is shown inconsistently. Plant's entity and

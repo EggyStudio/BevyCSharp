@@ -6,8 +6,9 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// Trees planted by name and seed, the registry of species, a forest spread over a disc, and the
-/// system that dresses each tree in its variant's stems, leaves and colliders once it has grown.
+/// Trees planted by name and seed, the registry of species, a forest planted where the Vegetation
+/// module spreads it, and the system that dresses each tree in its variant's stems, leaves and
+/// colliders once it has grown.
 /// </summary>
 [Collection("engine")]
 public sealed class TreePlantingTests
@@ -26,35 +27,28 @@ public sealed class TreePlantingTests
         Assert.Throws<ArgumentOutOfRangeException>(() => Trees.Register("broken-aspen", tall with { Scale = -1f }));
     }
 
+    /// <summary>
+    /// A forest's trees stand where the Vegetation module spreads them, each of the species with the
+    /// seed the module draws for it, and a species not registered is refused.
+    /// </summary>
     [Fact]
-    public void AForestIsSpreadOverItsDiscTheSameForTheSameSeed()
+    public void AForestIsPlantedWhereTheModuleSpreadsIt()
     {
-        var middle = new Vec3(10f, 2f, -5f);
-        Vec3[] places = [], again = [];
-        var named = new List<string?>();
+        var planted = new List<(Vec3 Place, uint Seed, string? Species)>();
         using var harness = new EngineHarness(frames: 2);
         harness.OnContext(Stage.Startup, ctx =>
         {
             var ecs = ctx.Ecs;
-            var forest = Trees.PlantForest(ecs, "quaking-aspen", 4, middle, 12f, 15);
-            places = [.. forest.Select(tree => ecs.GetOrDefault<Transform>(tree).Translation)];
-            named.AddRange(forest.Select(tree => ecs.GetOrDefault<Tree>(tree).Species.Value));
-            again = [.. Trees.PlantForest(ecs, "quaking-aspen", 4, middle, 12f, 15).Select(tree => ecs.GetOrDefault<Transform>(tree).Translation)];
+            foreach (var tree in Trees.PlantForest(ecs, "quaking-aspen", 4, new Vec3(10f, 2f, -5f), 12f, 15))
+                planted.Add((ecs.GetOrDefault<Transform>(tree).Translation, ecs.GetOrDefault<Tree>(tree).Seed, ecs.GetOrDefault<Tree>(tree).Species.Value));
             Assert.Throws<ArgumentException>(() => Trees.Plant(ecs, "no-such-tree", 1, Vec3.Zero));
+            Assert.Throws<ArgumentException>(() => Trees.PlantForest(ecs, "no-such-tree", 1, Vec3.Zero, 4f, 4));
         });
         harness.Run();
 
-        // An even spread puts each tree in a fifteenth of the disc, and none stands nearer another
-        // than seven tenths of that spacing.
-        var apart = 0.7f * MathF.Sqrt(MathF.PI * 12f * 12f / 15f);
-        Assert.InRange(places.Length, 10, 15);
-        Assert.All(places, place => Assert.True((place - middle).Length <= 12.001f && place.Y == middle.Y, $"a tree stands at {place}"));
-        for (var i = 0; i < places.Length; i++)
-            for (var j = i + 1; j < places.Length; j++)
-                Assert.True((places[i] - places[j]).Length >= apart - 1e-3f, $"two trees stand {(places[i] - places[j]).Length} apart");
-
-        Assert.All(named, name => Assert.Equal("quaking-aspen", name));
-        Assert.Equal(places, again);
+        var spread = TreePlanting.Forest(4, new System.Numerics.Vector3(10f, 2f, -5f), 12f, 15);
+        Assert.NotEmpty(spread);
+        Assert.Equal(spread.Select(tree => (new Vec3(tree.Place.X, tree.Place.Y, tree.Place.Z), tree.Seed, (string?)"quaking-aspen")), planted);
     }
 
     [SkippableFact]

@@ -1,5 +1,6 @@
 using Bevy;
 using Levels;
+using Vegetation;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -156,7 +157,7 @@ public sealed class FeatureTestLevelTests
         trees.Add(("bush", 82, X + 7, Z - 3));
         trees.Add(("fern", 83, X + 2, Z + 11));
         foreach (var (species, seed, east, count) in new[] { ("black-tupelo", 84u, -11f, 6), ("quaking-aspen", 85u, 11f, 9) })
-        foreach (var (place, own) in Trees.ForestPlaces(seed, new Vec3(east, 0f, (float)Z + 33f), 10f, count))
+        foreach (var (place, own) in TreePlanting.Forest(seed, new System.Numerics.Vector3(east, 0f, (float)Z + 33f), 10f, count))
             trees.Add((species, own, place.X, place.Z));
 
         // Each at a whole unit, as an editor snaps an entity, a sixty-fourth of a meter from the

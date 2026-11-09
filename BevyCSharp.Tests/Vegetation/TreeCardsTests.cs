@@ -158,7 +158,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
         // hand at the same places, turns and sizes, at 1920 by 1080.
         var species = TreeSpecies.BlackTupelo;
         var reducedOf = new Dictionary<int, (MeshData Stems, MeshData Leaves)>();
-        for (var variant = 0; variant < Trees.Variants; variant++)
+        for (var variant = 0; variant < TreePlanting.Variants; variant++)
         {
             var seed = (uint)(0x7E57_0000 + variant);
             var skeleton = TreeSkeleton.Grow(species, seed);
@@ -199,7 +199,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
                 {
                     var body = ecs.GetOrDefault<Transform>(ecs.ChildrenOf(tree)[0]);
                     var at = new Transform(ecs.GetOrDefault<Transform>(tree).Translation, body.Rotation, body.Scale);
-                    var (stems, crown) = reducedOf[(int)(ecs.GetOrDefault<Tree>(tree).Seed % Trees.Variants)];
+                    var (stems, crown) = reducedOf[(int)(ecs.GetOrDefault<Tree>(tree).Seed % TreePlanting.Variants)];
                     foreach (var (data, material) in new[] { (stems, bark), (crown, leaves) })
                     {
                         var part = ecs.Spawn();

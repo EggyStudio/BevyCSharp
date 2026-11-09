@@ -41,6 +41,10 @@ Trees.Plant(ctx.Ecs, "quaking-aspen", seed: 12, new Vec3(4f, 0f, -10f));
 Trees.PlantForest(ctx.Ecs, "black-tupelo", seed: 3, middle: new Vec3(0f, 0f, -60f), radius: 20f, count: 25);
 ```
 
+Where a forest's trees stand and the variant, turn and size a seed gives a tree are the Vegetation
+module's, in `TreePlanting`, so a level written in code reads a forest's places and seeds from
+`TreePlanting.Forest` and places its trees one by one where `PlantForest` would plant them.
+
 Each species grows eight variants on a worker the first time a tree of it is asked for, and every
 tree shares the variant its seed picks, turned and sized by the seed under a child of its entity, so
 a forest of a hundred trees grows eight and the entity's own transform stays where it was put. The

@@ -13324,7 +13324,6 @@ static class Bevy.TreeTextureAssets
   static (AssetHandle, AssetHandle, AssetHandle) Load(this TreeTextureSet set)
   static AssetHandle LoadDepth(this TreeTextureSet set)
 static class Bevy.Trees
-  const int Variants = 8
   const string BarkSlot = "bark"
   static AssetHandle BarkMaterial(TreeSpecies species)
   static AssetHandle LeafMaterial(TreeSpecies species, float fall = 0f)

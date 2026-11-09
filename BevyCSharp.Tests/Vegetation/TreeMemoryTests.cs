@@ -23,14 +23,14 @@ public sealed class TreeMemoryTests(ITestOutputHelper output)
         // variants' shapes, some tens of megabytes each, are held at once.
         TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush, TreeSpecies.Fern];
         string[] names = ["quaking-aspen", "black-tupelo", "weeping-willow", "california-black-oak", "bush", "fern"];
-        var held = new IReadOnlyList<(string Part, bool Lasting, long Bytes)>[presets.Length, Trees.Variants];
-        Parallel.For(0, presets.Length * Trees.Variants, new ParallelOptions { MaxDegreeOfParallelism = 4 },
-            at => held[at / Trees.Variants, at % Trees.Variants] = Trees.HeldBy(presets[at / Trees.Variants], at % Trees.Variants));
+        var held = new IReadOnlyList<(string Part, bool Lasting, long Bytes)>[presets.Length, TreePlanting.Variants];
+        Parallel.For(0, presets.Length * TreePlanting.Variants, new ParallelOptions { MaxDegreeOfParallelism = 4 },
+            at => held[at / TreePlanting.Variants, at % TreePlanting.Variants] = Trees.HeldBy(presets[at / TreePlanting.Variants], at % TreePlanting.Variants));
 
         for (var species = 0; species < presets.Length; species++)
         {
             var parts = new Dictionary<(string, bool), long>();
-            for (var variant = 0; variant < Trees.Variants; variant++)
+            for (var variant = 0; variant < TreePlanting.Variants; variant++)
                 foreach (var (part, lasting, bytes) in held[species, variant])
                     parts[(part, lasting)] = parts.GetValueOrDefault((part, lasting)) + bytes;
 
@@ -39,7 +39,7 @@ public sealed class TreeMemoryTests(ITestOutputHelper output)
             output.WriteLine($"{names[species]}'s eight variants keep {kept / Megabyte:0.00} MB, {Said(true)}, and are drawn from {drawn / Megabyte:0.0} MB, {Said(false)}");
 
             // A willow's skeleton, the largest, is some seven thousand points of twenty bytes.
-            Assert.True(kept < Trees.Variants * 256 * 1024, $"{names[species]}'s variants keep {kept / Megabyte:0.00} MB for the process");
+            Assert.True(kept < TreePlanting.Variants * 256 * 1024, $"{names[species]}'s variants keep {kept / Megabyte:0.00} MB for the process");
         }
 
         // What shaping a variant allocates beside what it keeps, its first variant shaped again on

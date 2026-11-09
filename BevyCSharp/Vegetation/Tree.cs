@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 /// <summary>
@@ -8,7 +10,7 @@ namespace Bevy;
 /// <para>
 /// A component, so a level or a scene places a tree by its species and seed alone, and an editor
 /// shows the two fields. The library grows the tree on a worker the first time its species' variant
-/// is asked for, one of <see cref="Trees.Variants"/> a species grows, which every tree of that
+/// is asked for, one of <see cref="TreePlanting.Variants"/> a species grows, which every tree of that
 /// variant shares, and dresses the entity once it has, under a child turned and sized by the seed,
 /// so the entity's own transform stays where the level put it. A tree whose species or seed changes
 /// is dressed again, and one whose species is not registered is left bare with a warning in the log.

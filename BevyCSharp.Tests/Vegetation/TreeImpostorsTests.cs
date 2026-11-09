@@ -166,7 +166,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
         // its half, some fifteen meters apart, drawn as impostors, then the same trees as their
         // limbs and cards, at 1920 by 1080. The sun's shadow does not reach so far.
         var species = TreeSpecies.BlackTupelo;
-        var height = Enumerable.Range(0, Trees.Variants).Max(variant => TreeSkeleton.Grow(species, (uint)(0x7E57_0000 + variant)).Bounds.High.Y) * 1.1f;
+        var height = Enumerable.Range(0, TreePlanting.Variants).Max(variant => TreeSkeleton.Grow(species, (uint)(0x7E57_0000 + variant)).Bounds.High.Y) * 1.1f;
         IReadOnlyList<PassTiming> impostors = [], cards = [];
         IReadOnlyList<Entity> trees = [];
         var run = new PictureRun
