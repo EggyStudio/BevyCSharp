@@ -33,10 +33,19 @@ the right the middle's light less the left's ten times over, brighter in orange 
 the far wall in shade lit smoothly down to its foot where it was dark and blue, 10% under its path-
 traced reference where 44%.
 
+![](.github/assets/readings/2026-11-09-item-128-foot-read.webp)
+The shaded yard wall's foot in the feature test's far view at eight in the morning under a clear sky
+at High with the screen probes left out, a band from the corner to the view's right edge at twice
+its size, above as drawn and below with its contrast three times over, the pixels whose blend of the
+light pass was read ringed in orange on a warm triangle and in blue on the wall beside one, each
+with how much the fourth cascade's probe under the floor on the wall's line sees of it, about a half
+on every triangle and none beside them.
+
 Done that day
 
 - Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
 - Item 97 at `5d575d5e`. A dotted seam at High along the yard wall's base.
+- Item 98 at `074645e3`. The ground past the probes lies in a face's own shadow at a low sun.
 - Item 122 at `fbf47d59`. The drive's memory on the GPU.
 - Item 123 at `710911f8`. Comments without readings and costs.
 - Item 124 at `d969c312`. The shadow map's request at the stop.
@@ -260,6 +269,7 @@ floors' far end.
 
 Done that day
 
+- Item 101 at `9bdb29b3`. The night's shade takes the night sky's light.
 - Item 102 at `46ae797e`. The merge's gain past the first bounce in closed rooms.
 - Item 103 at `1774aa0c`. Anisotropic filtering at 16 everywhere.
 

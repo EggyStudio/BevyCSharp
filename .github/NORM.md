@@ -400,6 +400,14 @@ offscreen or headless as they do; a window is opened on the owner's machine for 
 questions, the swapchain and its format, the modes and sizes, a screenshot read against an offscreen
 capture, and closed when read. By review.
 
+**N 7.9 The machine has one GPU, and a session holds it only while it reads from it.** A program
+served or run for a reading is stopped as soon as its pictures and numbers are taken, and the files
+are read with it stopped; a program left drawing while a session reasons takes the memory and the
+load another session's timing or traced reference needs, which has spoiled readings in both engines
+and the game. Before a timing or a traced reference a session reads `nvidia-smi`, and where another
+session's program holds the GPU it waits and tells the reviewing session in a line, which asks the
+holder to stop and gives the order, an engine's illumination read first. By review.
+
 ## Conformance
 
 `checked` names what checks the rule. `listed` is checked with that many places to mend on the
@@ -459,6 +467,9 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 7.4 | by review | by review |
 | N 7.5 | by review | by review |
 | N 7.6 | by review | by review |
+| N 7.7 | by review | by review |
+| N 7.8 | by review | by review |
+| N 7.9 | by review | by review |
 | B 1 | | checked, `NativeLoader` at load |
 | B 2 | | by review |
 | B 3 | | checked, `NormTests`, 15 left out |
