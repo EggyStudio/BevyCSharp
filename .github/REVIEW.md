@@ -1,45 +1,48 @@
 # Review
 
-Reviewed up to `fbf47d59`, 122, the drive's stop on the GPU's memory read against the commit that
-passed on 2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09, its run green
-at 07:51 with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form and carries the
-review's files. Nothing is pushed after it. Before it `da5e4ec2`, 96's fourth part, the trees
-standing where the Vegetation module's planting places them at its 2fba808, the public listing one
-line fewer, pushed at 06:07 on 2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in
-18 and Windows in 18; it keeps the form and carries the review's files. Before it `904a291a`, 96's
-third part, the grass planted from the Vegetation module's scatter at its d604e4d, the patches and
-clumps the same to the bit and the public listing 15 lines fewer, pushed at 04:13 on 2026-11-09, its
-run green at 04:31 with Linux in 11 minutes, macOS in 13 and Windows in 17; it keeps the form and
-carries the review's files. Before it `fe279b8e`, 96's second part, the texture sets the Vegetation
-module's at its f18a993, read under the asset root and loaded with their samplers through the
-bridge, the public listing 25 lines fewer, pushed at 02:39 on 2026-11-09, its run green at 02:57
-with macOS in 11 minutes, Linux in 15 and Windows in 18; it keeps the form and carries the review's
-files. Before it `47c0bf5d`, 96's first part, the tree species and skeleton moved to the Vegetation
-module taken as a submodule at its c2149be, the public listing 102 lines fewer, pushed at 00:36 on
-2026-11-09, its run green at 00:51 with Linux in 11 minutes, macOS in 10 and Windows in 15; it keeps
-the form and carries the review's files. Before it `652bdd65`, 121, the comments on the code's own
-terms, 143 source files with every changed line a comment line, pushed at 21:46 on 2026-11-08, its
-run green at 22:06 with Linux and macOS in 13 minutes and Windows in 19; it keeps the form and
-carries the review's files. Before it `8b16bd71`, 114, a probe ray's hit reflecting the probes'
-light along the ray's mirror way by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its
-run green at 20:35 with Linux in 11 minutes, macOS in 15 and Windows in 17; it keeps the form and
-carries the review's files. Before it `a5f277d5`, 116, a crossing lit where its leaves stop the ray
-and the early crossing's light to the probe's faces, with 117's documents, pushed at 16:26 on
-2026-11-08, its run green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps
-the form and carries the review's files. Before it `69d97fec`, 107's shadow mend, one visibility
-level casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its run green
-at 11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the review's files
-and the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its pipelines, with
-107's reading in the replies, pushed at 09:32, its run green at 09:48 on the three systems in 10 to
-16 minutes. Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping
-for their diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the
-three systems in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's
-leaves cell by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16
-minutes. Before it `e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at
-22:47 on 2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests
-the shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray
-on the light from all around and the let-through shadowed, with the reference reading a crown leaf
-by leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
+Reviewed up to `710911f8`, item 123, the comments rewritten to their reasons, about 190 in 94 files
+with only comment lines changed, pushed at 09:00 on 2026-11-09, its run green at 09:18 with Linux in
+11 minutes, macOS in 16 and Windows in 18; it keeps the form and carries the review's files. Nothing
+is pushed after it. Before it `fbf47d59`, 122, the drive's stop on the GPU's memory read against the
+commit that passed on 2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09,
+its run green at 07:51 with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form
+and carries the review's files. Before it `da5e4ec2`, 96's fourth part, the trees standing where the
+Vegetation module's planting places them at its 2fba808, the public listing one line fewer, pushed
+at 06:07 on 2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in 18 and Windows in
+18; it keeps the form and carries the review's files. Before it `904a291a`, 96's third part, the
+grass planted from the Vegetation module's scatter at its d604e4d, the patches and clumps the same
+to the bit and the public listing 15 lines fewer, pushed at 04:13 on 2026-11-09, its run green at
+04:31 with Linux in 11 minutes, macOS in 13 and Windows in 17; it keeps the form and carries the
+review's files. Before it `fe279b8e`, 96's second part, the texture sets the Vegetation module's at
+its f18a993, read under the asset root and loaded with their samplers through the bridge, the public
+listing 25 lines fewer, pushed at 02:39 on 2026-11-09, its run green at 02:57 with macOS in 11
+minutes, Linux in 15 and Windows in 18; it keeps the form and carries the review's files. Before it
+`47c0bf5d`, 96's first part, the tree species and skeleton moved to the Vegetation module taken as a
+submodule at its c2149be, the public listing 102 lines fewer, pushed at 00:36 on 2026-11-09, its run
+green at 00:51 with Linux in 11 minutes, macOS in 10 and Windows in 15; it keeps the form and
+carries the review's files. Before it `652bdd65`, 121, the comments on the code's own terms, 143
+source files with every changed line a comment line, pushed at 21:46 on 2026-11-08, its run green at
+22:06 with Linux and macOS in 13 minutes and Windows in 19; it keeps the form and carries the
+review's files. Before it `8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the
+ray's mirror way by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at
+20:35 with Linux in 11 minutes, macOS in 15 and Windows in 17; it keeps the form and carries the
+review's files. Before it `a5f277d5`, 116, a crossing lit where its leaves stop the ray and the
+early crossing's light to the probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08,
+its run green at 16:43 with Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps the form
+and carries the review's files. Before it `69d97fec`, 107's shadow mend, one visibility level
+casting at any distance by Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its run green at
+11:36 on the three systems in 12 to 14 minutes; it keeps the form and carries the review's files and
+the devlog. Before it `571174fc`, item 115, the air's sky test waiting for its pipelines, with 107's
+reading in the replies, pushed at 09:32, its run green at 09:48 on the three systems in 10 to 16
+minutes. Before it `443dad1f`, 110's energy check, a hit and the reference's later faces keeping for
+their diffuse share what their gloss leaves, pushed at 07:22, its run green at 07:40 on the three
+systems in 12 to 18 minutes. Before it `01951f29`, item 113, the field holding a crown's leaves cell
+by cell, pushed at 03:54, its run green at 04:10 on the three systems in 11 to 16 minutes. Before it
+`e074525f`, item 111, each ray's own reach in the probes' reach image, pushed at 22:47 on
+2026-11-07, its run green at 23:04 on the three systems in 13 to 17 minutes, the two tests the
+shared GPU had failed at home passing. Before it `80f75e53`, 112's second part, the leaves' gray on
+the light from all around and the let-through shadowed, with the reference reading a crown leaf by
+leaf, pushed at 19:50, its run green at 20:06 on the three systems in 10 to 15 minutes. Before it
 `4034da31`, 112's first part, the leaf and grass sets' smaller levels weighted by the leaves' cover,
 pushed at 17:55, its run green at 18:12 on the three systems in 10 to 17 minutes. Before it
 `2adbe701`, 110's third step, the leaves and the grass reflecting the probes they see along their
@@ -2595,7 +2598,16 @@ from [SHARED.md](SHARED.md).
     the review where they stand already; no comment is named first here, the far cascade's being the
     engine's. STYLE.md's Register gains the sentence and its Checks a search for milliseconds, times
     its reference, where it read and from so much to so much in comments, read rather than counted.
-    One commit, after 96's parts and 122, before 97.
+    One commit, after 96's parts and 122, before 97. Done at `710911f8`, pushed at 09:00 on
+    2026-11-09; about 190 comments in 94 files are the reason alone, only comment lines changed
+    across the diff, and STYLE.md's Register and Checks say so. Of the four the session offered as
+    they stand, two stay: RayTracingTests' bound with the frame it holds, the bound being the
+    test's, and soak-check.py's slacks with the soak's figures, which N 3.5 asks for. Two go with
+    later commits that build what they touch anyway, nothing rebuilt for a comment: Packs.cs's
+    reason for the meshlet twin says what Bevy does with no release named, after a check that 0.20
+    does it still, else the twin is read on its own, in item 124's commit or the next that touches
+    C#; the ImGui pass's module comment in native imgui/render.rs says what the pass does and likens
+    it to nothing outside, with the next commit that rebuilds the bridge.
 
 124. **The shadow map's request at the stop.** From item 122 on 2026-11-09, the third read Decision
     81 leaves to the review, opened as one read. The drive stops on the creation of the directional
@@ -6443,3 +6455,34 @@ Shared: Decision 87's sweep, comments carrying no reading of before and after, n
 a run and no account of the trials, a number standing only where the code's choice depends on it
 with its reason, with STYLE.md's sentence in its Register and its search in its Checks, which the
 sibling's style guide may take as they are.
+
+Item 124, the shadow map's request at the stop, read once and recorded as the machine's, in the
+commit carrying this line. A trial bridge of the head, never committed, set wgpu's check of each
+allocation against the heap's budget at the whole budget and logged each view's shadow maps as Bevy
+made them, with the allocator's blocks, and the scripted run at the defaults stopped where it stops,
+after the course's start. The request it stopped on is the directional lights' map of 2048 by 2048
+in seven layers of Depth32Float, 112 MB, the directional lights' cascades and the spot lights' maps
+together, beside the point lights' of 1024 by 1024 in 24 layers, 96 MB, four lights' cubes, Bevy's
+default sizes, so the request is not large and nothing is sized down.
+
+The allocator held 1,302 MB allocated of 2,112 MB reserved in ten blocks of 256 MB at most, the most
+free in one 231 MB, and wgpu's check of the heap's budget let the request through, so by the budget
+the driver reports the request fit. The GPU held 5,146 MB of its 8,188 MB a second before, the
+program 2,567 MB of it. The driver refused the allocation all the same, the budget unspent and some
+3,000 MB of the GPU free, so the bound is the driver's or the heap's fragmentation, which the
+program cannot read, and it is recorded as the machine's, the scripted run staying a CI judgment
+here.
+
+Two things the read showed beside it are left for the review. At the course's start the main view's
+maps change between four layers and seven and between 6 and 24 from one frame to the next as the
+lights in view change, so a new texture is made at each change while the cache holds the other for
+its frames. The views not drawn in a frame keep the maps of an earlier frame, 2048 by 2048 by 7 and
+1024 by 1024 by 30, which stay alive while they hold them.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: this machine's driver refused a depth texture of 112 MB with the heap's budget unspent and
+some 3,000 MB of the GPU free, so a stop on the GPU's memory in either engine's scripted run here is
+read against the budget before it is taken as the program's, wgpu's memory_budget_thresholds logging
+the request and the heap wherever the budget would be passed.
