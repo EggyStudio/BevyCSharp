@@ -178,10 +178,14 @@ float4 placed(FieldInfo fieldInfo, float3 at, float apart)
     // A crown's leaf cards run together where they lie closer than a cell and read below zero there,
     // as a solid's inside does, though light crosses them (lightThroughCrossed), so a probe in a cell
     // the cards painted stands outside unless it lies deeper than half a cell, as the crossing holds
-    // a trunk's or a limb's inside.
+    // a trunk's or a limb's inside. A probe the moves leave at nothing stands inside, since a wall
+    // thinner than a cell whose middle lies on the boundary between two cells, as a probe's place
+    // does, reads nothing in both (field_resolve.slang), so a probe on it has no slope across the
+    // wall to leave by and is moved up the wall, the normal's way where it has none, and taken as
+    // outside it would hold the light of both sides and lend it to the wall's shaded foot.
     float d = fieldDistance(field, field_sampler, fieldInfo, p);
     bool cards = lightThroughCards(paintAlphaAt(albedo, fieldInfo, p)) && d >= -0.5 * fieldCell(fieldInfo, p);
-    return float4((p - at) / apart, d >= 0.0 || cards ? 1.0 : 0.0);
+    return float4((p - at) / apart, d > 0.0 || cards ? 1.0 : 0.0);
 }
 
 [shader("compute")]

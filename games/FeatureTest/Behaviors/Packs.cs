@@ -32,8 +32,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// time and kept in the scene packs' folder beside the pack, which is mounted for the runs after.
 /// The pack's page switches them back to plain meshes and says the GPU's time for each, and where
 /// meshlets do not run the plain meshes are all there is. Each heavy mesh has a twin beside it
-/// drawing the meshlet mesh with the same material, one of the two hidden, since in Bevy 0.19 an
-/// entity that has drawn a meshlet mesh draws nothing given its mesh back.
+/// drawing the meshlet mesh with the same material, one of the two hidden, since an entity that has
+/// drawn a meshlet mesh draws nothing given its mesh back.
 /// </para>
 /// </remarks>
 [Behavior]

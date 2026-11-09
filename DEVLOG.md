@@ -8,10 +8,19 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 ## 2026-11-09
 
+![](.github/assets/readings/2026-11-09-item-97-wall-probe.webp)
+The feature test's scenes yard at eight in the morning under a clear sky at High, seen from near its
+far corner, on the left with a probe its moves leave on the middle of a yard wall thinner than the
+field's cell taken as outside the wall, the sunlit side's light lent to the shaded wall in curved
+streaks, and on the right with such a probe taken as inside and passed over, the wall even, the
+third panel darker where the streaks were.
+
 Done that day
 
 - Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
 - Item 122 at `fbf47d59`. The drive's memory on the GPU.
+- Item 123 at `710911f8`. Comments without readings and costs.
+- Item 124 at `d969c312`. The shadow map's request at the stop.
 
 ## 2026-11-08
 

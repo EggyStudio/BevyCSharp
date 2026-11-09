@@ -241,8 +241,10 @@ meshes streamed in at once, on a teleport or a first load, are built over severa
 stalling one. A closed wall thinner than a cell, or a mesh drawn with both its faces, is held half a
 cell thick on either side of its middle, along its foot on a floor and its head under a ceiling as
 along the rest of it, so a ray between the cells on either side of it still meets it, and a tunnel
-one cell wide stays open along its middle. Two blocks that meet along an edge alone, as a wall's
-halves stepped a block apart, hold the cells about the edge inside, so no light passes between them.
+one cell wide stays open along its middle. A probe left on the middle of such a wall, where the
+field reads nothing on either side of it, is taken as inside the wall and passed over, so it lends
+neither side's light to the other. Two blocks that meet along an edge alone, as a wall's halves
+stepped a block apart, hold the cells about the edge inside, so no light passes between them.
 
 The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
 a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer

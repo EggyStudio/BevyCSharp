@@ -1,3 +1,4 @@
+using System.Numerics;
 using Bevy;
 using Xunit;
 
@@ -91,6 +92,104 @@ public sealed partial class GlobalIlluminationTests
     {
         var faults = ThinWalledRoomFaces(screen: false, board: true).Where(f => f.Light >= 0.005).Select(f => $"the {f.Face} reads {f.Light:0.0000} where its reference reads {f.Reference:0.0000}").ToList();
         Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// A probe of the last cascade whose place falls on the middle of a wall thinner than a cell,
+    /// the sun lighting the wall's far side and the floor beyond it, holds no more light than its
+    /// reference, which from inside the wall meets nothing but the wall, where the probe a place
+    /// beyond the wall holds the sunlit side's light.
+    /// </summary>
+    /// <remarks>
+    /// The field holds a wall thinner than a cell as a sheet half a cell thick about its middle, and
+    /// a wall whose middle lies on the boundary between two cells, as every probe's place does,
+    /// reads nothing in both, so a probe there finds neither a distance above zero nor a way out of
+    /// the sheet across the wall, the field's normal straight up where its slope is none. Moved up
+    /// the wall by as much as a move takes, it stays in the sheet, and taken as standing outside
+    /// every mesh it would hold the sunlit side's light, which the last cascade's rays bring from
+    /// past the wall, and lend it to the wall's shaded foot, a bright mark along the foot at each
+    /// probe in its plane. A probe the moves leave in the sheet is taken as inside the wall, which
+    /// the merge passes over. The wall is placed once the field is built, on a plane of the last
+    /// cascade's probes ahead of the camera, a quarter of that cascade's cell thick and its top half
+    /// the probes' spacing above the probe, so it lies on one whatever the cascade's corner.
+    /// </remarks>
+    [SkippableFact]
+    public void AProbeOnTheMiddleOfAWallThinnerThanACellHoldsNoLight()
+    {
+        Needs.Shaders();
+        var supported = false;
+        var (stage, ready, walled) = (0, 0, 0L);
+        var (spot, beyond, apart) = (Vector3.Zero, Vector3.Zero, 0f);
+        var read = new List<(double Probe, double Middle, double Drawn, int Within)>();
+        new PictureRun
+        {
+            Width = 160,
+            Height = 90,
+            Frames = 6000,
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs, new Vec3(0f, 1.7f, 0f));
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1.7f, 0f), new Vec3(10f, 1.7f, 0f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAmbientLight((1f, 1f, 1f), 0f);
+                ecs.SetName(PictureRun.Cube(ecs, Render.CreateMaterial(0.8f, 0.8f, 0.8f), 400f, new Vec3(0f, -200f, 0f)), "floor");
+                var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = true });
+                ecs.Add(sun, Transform.LookingAt(new Vec3(0.9f, 0.35f, 0.2f), Vec3.Zero, Vec3.UnitY));
+                Render.SetSceneField(4, 0.25f);
+                Render.SetGlobalIllumination(GlobalIllumination.High);
+                Render.SetGlobalIlluminationScreenProbes(false);
+            },
+        }
+            .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
+            .Until("settled", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
+                && Enumerable.Range(0, plan.Cascades).All(c => plan.BuiltOrigin(c) is not null))
+            .Do("walled", world =>
+            {
+                if (!supported) return;
+                // The last cascade's probe nearest a point fifty units ahead and eight up, and the
+                // wall about its place.
+                var plan = SceneField.Plan!;
+                var last = plan.Cascades - 1;
+                var corner = plan.BuiltOrigin(last)!.Value;
+                apart = WorldProbes.ProbeSpacing * plan.CellOf(last);
+                float Place(float low, float near) => low + (MathF.Round((near - low) / apart - 0.5f) + 0.5f) * apart;
+                spot = new Vector3(Place(corner.X, 50f), Place(corner.Y, 8f), Place(corner.Z, 0f));
+                beyond = spot + new Vector3(apart, 0f, 0f);
+                var top = spot.Y + apart / 2;
+                var ecs = world.Resource<EcsWorld>();
+                var wall = ecs.Spawn();
+                Render.SetMesh(ecs, wall, Render.CreateMesh(MeshShape.Cuboid, 0.25f * plan.CellOf(last), top, 3 * apart));
+                Render.SetMaterial(ecs, wall, Render.CreateMaterial(0.8f, 0.8f, 0.8f));
+                ecs.Add(wall, Transform.At(spot.X, top / 2, spot.Z));
+                ecs.SetName(wall, "wall");
+                walled = WorldProbes.TracedFrames;
+            })
+            .Until("rebuilt", _ => !supported || SceneField.Plan is { } plan && plan.Shapes.Count == 0
+                && WorldProbes.TracedFrames >= walled + 240)
+            .Until("ready", _ => !supported || (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3)
+            .Until("read", world =>
+            {
+                if (!supported) return true;
+                var ecs = world.Resource<EcsWorld>();
+                var last = SceneField.Plan!.Cascades - 1;
+                if (stage % 2 == 0)
+                {
+                    Assert.Null(GiReference.BeginProbe(ecs, stage == 0 ? spot : beyond, last, 64));
+                    stage++;
+                    return false;
+                }
+                if (GiReference.StepProbe(ecs) is null) return false;
+                read.Add(GiReference.LastProbe!.Value);
+                stage++;
+                return read.Count == 2;
+            })
+            .Go();
+        Needs.RayQueries(supported);
+
+        var (inWall, past) = (read[0], read[1]);
+        output.WriteLine($"the probe at {spot} holds {inWall.Probe:0.0000} against {inWall.Middle:0.0000} along its middles, the one at {beyond} {past.Probe:0.0000} against {past.Middle:0.0000}");
+        Assert.True(past.Probe > 0.05, $"the probe beyond the wall holds {past.Probe:0.0000}, so the sun lights nothing it sees");
+        Assert.True(inWall.Probe <= inWall.Middle + 0.01, $"the probe on the wall's middle holds {inWall.Probe:0.0000} where its reference holds {inWall.Middle:0.0000}");
     }
 
     /// <summary>
