@@ -16,8 +16,11 @@ name: build
 # Documents and captures are left out, apart from the README, the guide and BUILDING.md, whose links
 # and headings a test of the suite holds to each other (DocsScriptTests). A later pattern overrides
 # an earlier one, so BUILDING.md comes after the rule leaving out the other Markdown under .github.
+# A push runs on its branches alone, since a trigger that names branches and no tags leaves the tags
+# out, so a tag set on a commit its branch's push has built starts no second run of that commit.
 on:
   push:
+    branches: ['**']
     paths: ['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md', '!games/**.md', '!.github/assets/**']
   pull_request:
     paths: ['**', '!.github/**.md', '.github/BUILDING.md', '!AGENTS.md', '!games/**.md', '!.github/assets/**']

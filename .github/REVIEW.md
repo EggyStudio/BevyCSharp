@@ -340,3 +340,15 @@ Shared: a probe of the coarsest cascade under a floor, on the line of a wall sta
 wall's foot through the slack of its reach test, an eighth of the spacing, and lent it the warm
 light under the floor in triangles the texels of its reach drew, for the sibling to read where its
 coarsest probes stand under a floor.
+
+Item 129, the build on branch pushes alone, in the commit carrying this line. The push trigger of
+build.yml names every branch beside its paths, and a trigger that names branches and no tags leaves
+the tags out, so the push of a tag such as v0.6.18 starts no build run of its own beside the run of
+its commit's push to main. The pull request trigger and the pack workflow are unchanged, the
+sibling's item 236 the model.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: the build workflow's push trigger names the branches as the sibling's does, so in both a
+commit that a tag marks is built once.
