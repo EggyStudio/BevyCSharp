@@ -319,16 +319,18 @@ light 8 to 49% under its reference.
 Bevy's lighting takes no indirect light from outside, so a pass of the library's own after the
 opaque surfaces takes back the diffuse share of the ambient light Bevy gave each surface and adds
 the surface's diffuse color times the light the probes around it hold. Past the last cascade the
-light from all around is the ambient light over a ground lit by the sun. The ambient light reaches
-the probes as Bevy's lighting returns it from a surface facing the view, so an open floor reads as
-it does without global illumination. As the contact shadows above do, the pass needs the G-buffer
-and a picture in floats, so the camera draws Bevy's materials deferred while it is on. An
-environment map lights the probes too, its light along each ray that leaves the scene, and its
-diffuse light is taken back as the ambient light's is, so a closed room under a bright sky is dark
-inside where Bevy's own lighting would light it through the walls. A glossy surface reflects what is
-around it, traced through the picture and the field below a roughness of a half, and above it the
-light the probes around it hold along its mirror way, so a closed room's rough walls reflect one
-another and its polished floor shows no sky. Bevy's
+light from all around is the ambient light over a ground lit by the sun, as much of it as the sun
+lights along the surface's normal short of the next surface, so a far wall in shade under a low sun
+takes the sunlit ground past its own shadow. The ambient light reaches the probes as Bevy's lighting
+returns it from a surface facing the view, so an open floor reads as it does without global
+illumination. As the contact shadows above do, the pass needs the G-buffer and a picture in floats,
+so the camera draws Bevy's materials deferred while it is on. An environment map lights the probes
+too, its light along each ray that leaves the scene, and its diffuse light is taken back as the
+ambient light's is, so a closed room under a bright sky is dark inside where Bevy's own lighting
+would light it through the walls. A glossy surface reflects what is around it, traced through the
+picture and the field below a roughness of a half, and above it the light the probes around it hold
+along its mirror way, so a closed room's rough walls reflect one another and its polished floor
+shows no sky. Bevy's
 screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the G-buffer
 does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads
 the probes itself as the pass reads them, their light and their gloss's reflection along the mirror

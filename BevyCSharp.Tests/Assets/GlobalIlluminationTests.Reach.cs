@@ -11,16 +11,44 @@ public sealed partial class GlobalIlluminationTests
     /// probes reaching it as High's do.
     /// </summary>
     /// <remarks>
-    /// Medium's probes lie in three cascades, the last in a box 64 units wide lying 0.35 of its
-    /// width ahead of the eye, which a wall 56 units off along each axis of a diagonal view lies
-    /// past. The light past the probes, a sky over a ground, takes its ground from a cell in front
-    /// of the wall, which lies in the wall's own shadow at a low sun, so a wall lit by it alone
-    /// takes none of the sunlit wall's and floor's light, as the feature test's yard's far wall at
-    /// eight in the morning. The ambient light is none and the camera has no environment map, so
-    /// the wall's light comes from the yard's sunlit faces alone.
+    /// Medium's probes lie in four cascades, as High's do, and reach a wall 56 units off along each
+    /// axis of a diagonal view, which in three would lie past the last cascade's box, 64 units wide
+    /// lying 0.35 of its width ahead of the eye, as the feature test's yard's far wall at eight in
+    /// the morning does. The ambient light is none and the camera has no environment map, so the
+    /// wall's light comes from the yard's sunlit faces alone.
     /// </remarks>
     [SkippableFact]
     public void AFarWallInShadeTakesTheYardsLightAtMedium()
+    {
+        var light = FarWallInShade(GlobalIllumination.Medium);
+        Assert.True(Math.Abs(light) < 0.3, $"the far wall reads {light:+0.000;-0.000} of its reference's light");
+    }
+
+    /// <summary>
+    /// A wall in shade on the far side of a yard seen along its diagonal, 56 units off along each
+    /// axis, whose other wall the sun lights, reads at Low, past its probes, the light its reference
+    /// gives it.
+    /// </summary>
+    /// <remarks>
+    /// Low's probes lie in two cascades and leave the wall to the light past them, a sky over a
+    /// ground, the sun's share of the ground's light, as much of it as the sun lights along the
+    /// wall's normal. The point a cell of the field's coarsest cascade out lies in the wall's own
+    /// shadow under a sun twenty degrees up, and read there alone the wall would take none of the
+    /// sunlit floor's light. The ambient light is none and the camera has no environment map, so
+    /// the wall's light comes from the yard's sunlit faces alone.
+    /// </remarks>
+    [SkippableFact]
+    public void AFarWallInShadeTakesTheYardsLightAtLow()
+    {
+        var light = FarWallInShade(GlobalIllumination.Low);
+        Assert.True(Math.Abs(light) < 0.3, $"the far wall reads {light:+0.000;-0.000} of its reference's light");
+    }
+
+    /// <summary>
+    /// The light the wall in shade of <see cref="AFarWallInShadeTakesTheYardsLightAtMedium"/> reads
+    /// at <paramref name="quality"/> against its reference's, as the share it lies over it.
+    /// </summary>
+    private double FarWallInShade(GlobalIllumination quality)
     {
         Needs.Shaders();
         var supported = false;
@@ -50,7 +78,7 @@ public sealed partial class GlobalIlluminationTests
                 Wall("shaded", new Vec3(56.25f, 8f, -28f), new Vec3(0.5f, 16f, 56f));
                 var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 10_000f, Shadows = true });
                 ecs.Add(sun, Transform.LookingAt(new Vec3(0.45f, 0.35f, 0.82f), Vec3.Zero, Vec3.UnitY));
-                Render.SetGlobalIllumination(GlobalIllumination.Medium);
+                Render.SetGlobalIllumination(quality);
             },
         }
             .Do("asking for rays", _ => supported = Shaders.SupportsRayQueries)
@@ -101,7 +129,7 @@ public sealed partial class GlobalIlluminationTests
         }
 
         var light = shown / wanted - 1;
-        output.WriteLine($"the far wall reads {light:+0.000;-0.000} of its reference's light");
-        Assert.True(Math.Abs(light) < 0.3, $"the far wall reads {light:+0.000;-0.000} of its reference's light");
+        output.WriteLine($"the far wall reads {light:+0.000;-0.000} of its reference's light at {quality}");
+        return light;
     }
 }

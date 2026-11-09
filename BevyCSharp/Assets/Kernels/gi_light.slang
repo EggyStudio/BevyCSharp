@@ -8,14 +8,14 @@
 // probes holds the surface, that is the light reaching it read between the probes around it
 // (bouncedAt), and across the last cascade's outer band and past it, the light from beyond the
 // probes, a sky over a ground (distantAround), each directional light adding its share of the
-// ground's light through its shadow map at the ground the surface looks at. The picture before
-// tonemapping holds light as floats, so adding less than nothing takes it away. The probes' light is
-// in the picture's units, the camera's exposure applied, and Bevy's ambient term and its diffuse
-// light from an environment map are taken back times the exposure as Bevy applies it. Bevy's
-// reflection of the light from all around is taken back and given again, traced below a roughness of
-// a half and read from the probes about the mirror way above it. Bevy's screen-space ambient
-// occlusion is Bevy's and left as it is, so where a camera has it the light taken back differs from
-// the light Bevy gave by as much.
+// ground's light as far as its shadow map lights the way along the surface's normal (sunAlong). The
+// picture before tonemapping holds light as floats, so adding less than nothing takes it away. The
+// probes' light is in the picture's units, the camera's exposure applied, and Bevy's ambient term
+// and its diffuse light from an environment map are taken back times the exposure as Bevy applies
+// it. Bevy's reflection of the light from all around is taken back and given again, traced below a
+// roughness of a half and read from the probes about the mirror way above it. Bevy's screen-space
+// ambient occlusion is Bevy's and left as it is, so where a camera has it the light taken back
+// differs from the light Bevy gave by as much.
 //
 // Bevy's light probes are taken back as its lighting gives them, in the order of bevy_pbr 0.20's
 // pbr_functions with the bridge's mend of its fallback (mended.rs). An irradiance volume's light
@@ -102,6 +102,62 @@ static const float GlossyRoughness = 0.5;
 // The most directional lights whose share of the ground's light is added past the probes, Bevy's
 // own most.
 static const uint MostSuns = 10u;
+
+// The points along a surface's normal a directional light's shadow map is first read at for its
+// share of the ground's light past the probes, the first a cell of the field's coarsest cascade out
+// and each twice as far as the one before, so the last lies thirty-two cells out, past the shadow a
+// wall eleven cells high throws straight out from it under a sun twenty degrees up.
+static const uint ReachSteps = 6u;
+
+// Whether directional light i reaches the point t along n from p, through its shadow map.
+bool sunAt(uint i, float3 p, float3 n, float t)
+{
+    float3 at = p + n * t;
+    return passDirectionalShadow(i, at, float3(0.0, 1.0, 0.0), passViewDepth(at)) > 0.5;
+}
+
+// The share of directional light i's light on the ground past the probes a surface at p facing n
+// takes, the share of the way along n out to farthest that lies past the first point the light
+// reaches and short of the first surface along it, free, which is below zero where the field holds
+// none. The ground a face sees at its shallow angles lies past the shadow the face's own mesh
+// throws where the sun is low, and the further out the light begins, the less of that ground it
+// lights. Read along the one line, the share changes across a face as sharply as the shadows and
+// edges the line passes, where reading the whole ground the face sees would soften it.
+float sunAlong(uint i, float3 p, float3 n, float cell, float farthest, float free)
+{
+    // With no field built there is no cell to step by, and the light is read at the surface itself.
+    if (cell <= 0.0)
+        return sunAt(i, p, n, 0.0) ? 1.0 : 0.0;
+    float reach = free >= 0.0 ? min(free, farthest) : farthest;
+    // Where the light reaches the point a cell out, the face takes the whole share, the ground
+    // before it lit.
+    if (sunAt(i, p, n, cell))
+        return 1.0;
+    float shaded = cell, lit = -1.0;
+    for (float t = 2.0 * cell; t <= reach; t *= 2.0)
+    {
+        if (sunAt(i, p, n, t))
+        {
+            lit = t;
+            break;
+        }
+        shaded = t;
+    }
+    if (lit < 0.0)
+        return 0.0;
+    // Four halvings narrow the first point lit to a sixteenth of the step it lies in, so the share
+    // moves across a face in steps of a thirty-second at most, where the doubling alone leaves
+    // bands.
+    for (int halving = 0; halving < 4; halving++)
+    {
+        float middle = 0.5 * (shaded + lit);
+        if (sunAt(i, p, n, middle))
+            lit = middle;
+        else
+            shaded = middle;
+    }
+    return saturate((reach - 0.5 * (shaded + lit)) / farthest);
+}
 
 [shader("vertex")]
 FullscreenOutput vertex(uint index : SV_VertexID)
@@ -607,9 +663,12 @@ float4 fragment(FullscreenOutput input) : SV_Target
     }
 
     // Past the probes, the sky over a ground and each directional light's share of the ground's
-    // light, read through its shadow map where the ground the surface looks at lies, a cell of the
-    // field's coarsest cascade along its normal, so a face turned from the sun, which lies behind
-    // its own mesh as the sun sees it, takes the sunlit ground before it.
+    // light, read through its shadow map along the surface's normal (sunAlong) short of the first
+    // surface the field holds along the way, which keeps a wall across a narrow alley from lending
+    // the face the ground past it. A face turned from the sun lies behind its own mesh as the sun
+    // sees it, and the points near it along its normal lie in its own shadow where the sun is low,
+    // though past that shadow lies the lit ground the face sees at its shallow angles, as a yard's
+    // wall in shade sees its sunlit floor.
     float3 distant = float3(0.0);
     if (held < 1.0)
     {
@@ -620,14 +679,16 @@ float4 fragment(FullscreenOutput input) : SV_Target
         if (below > 0.0)
         {
             int c = fieldCoarsestBuilt(info, int(info.counts.x) - 1);
-            float3 ground = world + n * (c < 0 ? 0.0 : info.cascades[c].origin_and_cell.w);
+            float cell = c < 0 ? 0.0 : info.cascades[c].origin_and_cell.w;
+            float farthest = cell * float(1u << (ReachSteps - 1u));
+            float free = traceField(scene_field, scene_field_sampler, info, world, n, cell, farthest);
             for (uint i = 0u; i < min(passLights.n_directional_lights, MostSuns); i++)
             {
                 DirectionalLight light = passLights.directional_lights[i];
                 float floor = saturate(light.direction_to_light.y);
                 if (floor <= 0.0)
                     continue;
-                float reached = passDirectionalShadow(i, ground, float3(0.0, 1.0, 0.0), passViewDepth(ground));
+                float reached = sunAlong(i, world, n, cell, farthest, free);
                 distant += diffuse * light.color.rgb * through[i] / Pi * passView.exposure * floor * reached * below;
             }
         }

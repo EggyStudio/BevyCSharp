@@ -1,9 +1,14 @@
 # Review
 
-Reviewed up to `26e541ef`, item 126's record and its Reply with NORM.md's N 1.1 and N 1.6 row and
-the devlog, documents alone, pushed at 13:53 on 2026-11-09 with a run on it, the devlog's path not
-among those the workflow leaves out, green at 14:11 with Linux in 12 minutes, macOS in 14 and
-Windows in 18; it keeps the form. Nothing is pushed after it. Before it `5d575d5e`, item 97, a probe
+Reviewed up to `bacb6e2d`, item 127's record, read and left out, with its picture, the captions and
+the devlog, documents alone, pushed at 14:47 on 2026-11-09 with a run on it, green at 15:06 with
+Linux and macOS in 14 minutes and Windows in 18; it keeps the form. Nothing is pushed after it. The
+owner published the release scene-packs with intel-sponza.pack, the bridge's own at 208,923,293
+bytes with the manifest's hash, at 17:57 on 2026-11-09, so ./bcs scenes fetch works for the first
+time; the engine's pack is made from it. Before it `26e541ef`, item 126's record and its Reply with
+NORM.md's N 1.1 and N 1.6 row and the devlog, documents alone, pushed at 13:53 on 2026-11-09 with a
+run on it, the devlog's path not among those the workflow leaves out, green at 14:11 with Linux in
+12 minutes, macOS in 14 and Windows in 18; it keeps the form. Before it `5d575d5e`, item 97, a probe
 left on the middle of a wall thinner than a cell taken as inside, pushed at 13:31 on 2026-11-09, its
 run green at 13:49 with Linux and Windows in 14 minutes and macOS in 19; it keeps the form and
 carries the review's files and N 1.6. Before it `710911f8`, item 123, the comments rewritten to
@@ -2692,7 +2697,36 @@ from [SHARED.md](SHARED.md).
     other feet, with the pair and its difference panel; where the far foot's dashes go and the other
     feet move by a few pixels at most, it stands, and where they do not, the commit is left out and
     the reading is recorded under 126. After 126, before 98, since the read is fresh; the read126
-    worktree stays until it is done.
+    worktree stays until it is done. Read and left out at `bacb6e2d`, pushed at 14:47 on 2026-11-09,
+    the mend kept as a patch, by the rule above, since the far foot's dashes do not go. The mend
+    works on its own probe, its test with 97's wall and its top 0.6 of a cell below the boundary
+    failing before at 0.41 against nothing and passing after at nothing, the guard probe and 97's
+    test holding; the yard's probe at (104, 14.4, -72) is taken as inside and holds nothing against
+    the reference's 0.0003 in the far view without screen probes, and the large shapes up the shaded
+    wall darkened; and the warm sawtooth along the foot stands in the same places without screen
+    probes and with them, the yard at 0.077 from its reference both ways, so the dashes come from
+    other probes or another pass, item 128. The near view lost the curved streak 97 left on the
+    shaded part of the sunlit wall; the gallery and hall moved by two levels of 255 at most; the
+    before set stopped after the hall on the GPU's refusal, so the meadow and plaza have no pair.
+    The far view without screen probes with its difference panel is in the readings with its
+    caption, and 97's caption's middle panel is named right.
+
+128. **Which probes or pass draw the yard's far foot dashes.** From item 127 on 2026-11-09. The
+    dashes along the yard wall's far foot stand with the screen probes and without them and with the
+    wall's midplane probe passed over, so they are other probes' or another pass's. One read with
+    the probe diagnostic of item 104 at a dash's pixel and at the undashed pixel beside it in the
+    far view, the probes each pixel blends and the cascade, place and light of each, and the passes
+    that touch the foot's pixels with the dashes' share from each; where one probe or pass carries
+    the dashes, the mend is its own item, and where the read finds them spread across the fourth
+    cascade's probes at the wall, they are recorded as the method's at High's coarsest cells with
+    126. After 98, under Decision 81's one read.
+
+129. **The build workflow runs on branch pushes alone.** From 3DEngine's item 236 on 2026-11-09. The
+    workflow runs on any push, so the pushes of the tags v0.6.0 and v0.6.18 each started a build run
+    of the tag's ref beside the run of the same commit's push to main, two runs of one commit; a tag
+    marks a commit whose push already runs, so the push trigger names the branches and leaves the
+    tags out, the pack workflow unchanged. A workflow change alone, with the next commit that
+    touches the workflows or on its own after 98.
 
 ## Verdicts
 
@@ -6675,3 +6709,52 @@ unchanged.
 Shared: passing over a probe that begins on a thin wall's middle unless its moves carry it clear
 left the yard's warm foot as it was at High, so the sibling's placing gains nothing for such a foot
 by it.
+
+Item 98, the ground past the probes in a face's own shadow at a low sun, in the commit carrying this
+line. The light pass read each directional light's share of the ground's light past the probes
+through its shadow map at one point, a coarsest cell along the surface's normal, which for a face
+turned from a sun 20 degrees up lies in the face's own shadow, so a far wall in shade took the sky
+alone. AFarWallInShadeTakesTheYardsLightAtLow, the Medium test's yard at Low, read the wall 87%
+under its reference at the head and 21% over with the share forced whole, which places the cause in
+the point's shadow test rather than in the sky or the ground's color.
+
+The pass's sunAlong in gi_light.slang reads the shadow map at points along the normal from a cell
+out, each twice as far as the one before out to 32 coarsest cells, narrows the first point lit by
+four halvings, and takes as the share the way past it out to the last point, short of the first
+surface the field holds along the normal, as a share of the 32 cells. A face whose point a cell out
+the sun reaches takes the whole share, as it did. The Low test reads 2.4% over and the Medium test
+20.2% over, as it did. In the feature test's yard at Low at eight in the morning the far wall in
+shade reads 10% under its path-traced reference where 44%, smooth down to its foot, its floor and
+its sunlit wall 14% and 19% under in both, the picture 0.131 of its light from its reference where
+0.152, the pair 2026-11-09-item-98-far-wall.webp.
+
+Three other forms were read on the way, each against the head in the dump. The first of five
+doubling points the sun reaches, taken whole, read the test 16.5% over and the yard's far wall level
+with its reference, but stepped hard across a face where its first lit point changed. The share of
+eight points evenly out to 16 cells read the test 5.4% under and the far wall 21% under in eight
+bands up from its foot. The share of the way out to 16 cells read the test 11.8% under and the far
+wall 23% under, smooth and dark at its foot, where the wall, eight cells high, throws its shadow
+past 16 cells under the sun at 20 degrees.
+
+Read along one line, the share changes across a face as sharply as the shadows and edges the line
+passes. On the court seen through the gallery's orange arch at Low the shaded wall takes the sun's
+share in wedges with hard edges, at 16 and 32 cells as with the first lit point, where its normal's
+line crosses the edge of a shadow. Reading the ground a face sees along a spread of ways would
+soften it at the cost of as many lines, which is left for the review. The hall reads the same to a
+level of 255, and 0.6% of the gallery's pixels change by 8 levels or more. The meadow and the plaza
+were read with the mend alone, the head's set stopping after the hall on the machine's refusal of
+item 124. Past the probes a pixel reads one trace of the field and up to ten reads of each
+directional light's shadow map where one.
+
+The guide's line, RENDERING.md's paragraph and Medium's comment in WorldProbes.cs say so.
+
+No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
+suite ran with the mend, 2,034 passed and 3 skipped in 51 m 1 s at the 3 GB cap, none aborted, its
+largest process at 3,297 MB, one more than item 97's run, the Low far wall's test. NormTests passed,
+18. The public listing and the cheat sheet are unchanged.
+
+Shared: a face turned from a low sun reads the ground's sun past the probes as the share of the way
+along its normal out to 32 coarsest cells past the first point the sun reaches, short of the field's
+first surface, where read a coarsest cell out it lay in the face's own shadow, which the sibling's
+groundReached in lights.slang, read a cell along the normal as this was, may take for a far wall in
+shade.

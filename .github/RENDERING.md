@@ -421,14 +421,22 @@ the camera's map's share of the blend alone taken back and given again. Taken ba
 map alone, the feature test's reflection probe's bay read 35 to 58% over its reference and its
 irradiance volume's bay crimson and 54% under. Past the last cascade the light from all around is
 3DEngine's sky over a ground, the environment map's light from above with the ambient light, each
-directional light's share of the ground's light read through its shadow map a coarsest cell along
-the normal. The ambient light reaches the probes times 0.45, the share Bevy's ambient term returns
-from a white surface facing the view (`F_AB(1, 1)` is 0.4524 and -0.0024), so an open floor reads as
-Bevy's own lighting leaves it, which a test holds, and a red wall's light tints a white block's
-side. The pass takes 0.23 ms at its least and 1.1 at its median over 600 frames at 1280 by 720 in a
-Cornell box on the same GPU, where the probes take 0.9 ms at `Low` and 1.4 at `High`, and as much at
-`Medium` in its four cascades. In the feature test the pass's span reads no GPU time, where Bevy
-keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
+directional light's share of the ground's light read through its shadow map as the share of the way
+along the normal out to 32 coarsest cells that lies past the first point it lights, found among
+points each twice as far as the one before from a coarsest cell out and narrowed by four halvings,
+short of the first surface the field holds along the way. Read a coarsest cell out alone, which lies
+in a face's own shadow where the face is turned from a low sun, a wall in shade at `Low` under a sun
+20 degrees up read 87% under its reference and reads 2.4% over
+(`AFarWallInShadeTakesTheYardsLightAtLow`), and the feature test's yard's far wall at `Low` at eight
+in the morning read 44% under and reads 10% under. Read along the one line, a face's share changes
+as sharply as the shadows and edges the line passes, as on the wall seen through the gallery's
+orange arch at `Low`. The ambient light reaches the probes times 0.45, the share Bevy's ambient term
+returns from a white surface facing the view (`F_AB(1, 1)` is 0.4524 and -0.0024), so an open floor
+reads as Bevy's own lighting leaves it, which a test holds, and a red wall's light tints a white
+block's side. The pass takes 0.23 ms at its least and 1.1 at its median over 600 frames at 1280 by
+720 in a Cornell box on the same GPU, where the probes take 0.9 ms at `Low` and 1.4 at `High`, and
+as much at `Medium` in its four cascades. In the feature test the pass's span reads no GPU time,
+where Bevy keeps no more than 256 timestamps a frame, so the pass is timed in a scene of its own.
 `Render.SetGlobalIllumination` is public with it.
 
 The pass passes over a pixel no deferred material drew, which Bevy's G-buffer holds as black with an

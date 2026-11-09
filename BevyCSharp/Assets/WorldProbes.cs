@@ -158,10 +158,9 @@ internal static unsafe partial class WorldProbes
         GlobalIllumination.Low => [8, 8],
         // Medium's four cascades as High's, the fourth of 16 a side, since in three its probes lie
         // in a box 64 units wide, 0.35 of its width ahead of the eye, which leaves a wall a little
-        // past that along a diagonal view to the light past the probes, whose ground a cell in
-        // front of a face turned from a low sun lies in the face's own shadow, so the ground before
-        // such a wall reads far darker than it is lit. In four it reads as High's, for a little
-        // more of the probes' time.
+        // past that along a diagonal view to the light past the probes, a sky over a ground that
+        // holds none of the light the yard's own faces send it. In four it reads as High's, for a
+        // little more of the probes' time.
         GlobalIllumination.Medium => [8, 8, 16, 16],
         GlobalIllumination.High => [8, 16, 16, 16],
         _ => [],

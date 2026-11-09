@@ -24,6 +24,15 @@ ten times over, brighter in orange and darker in blue, the large shapes up the s
 and the sawtooth of warm triangles along its foot in the same places in both, so the mend was left
 out.
 
+![](.github/assets/readings/2026-11-09-item-98-far-wall.webp)
+The feature test's scenes yard at eight in the morning under a clear sky at Low, its far view, on
+the left with a directional light's share of the ground's light past the probes read a coarsest cell
+along a surface's normal, in the face's own shadow, in the middle read as the share of the way along
+the normal out to thirty-two coarsest cells that lies past the first point the sun reaches, and on
+the right the middle's light less the left's ten times over, brighter in orange and darker in blue,
+the far wall in shade lit smoothly down to its foot where it was dark and blue, 10% under its path-
+traced reference where 44%.
+
 Done that day
 
 - Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
@@ -31,6 +40,7 @@ Done that day
 - Item 122 at `fbf47d59`. The drive's memory on the GPU.
 - Item 123 at `710911f8`. Comments without readings and costs.
 - Item 124 at `d969c312`. The shadow map's request at the stop.
+- Item 126 at `26e541ef`. The far view's dashes along the yard wall's foot.
 
 ## 2026-11-08
 
