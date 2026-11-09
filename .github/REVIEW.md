@@ -4,12 +4,14 @@ Reviewed up to `710911f8`, item 123, the comments rewritten to their reasons, ab
 with only comment lines changed, pushed at 09:00 on 2026-11-09, its run green at 09:18 with Linux in
 11 minutes, macOS in 16 and Windows in 18; it keeps the form and carries the review's files. After
 it `d969c312`, item 124's record and its Reply, the review's file alone, pushed at 09:31 on
-2026-11-09 with no run, as a documents-only push starts none; it keeps the form. Before it
-`fbf47d59`, 122, the drive's stop on the GPU's memory read against the commit that passed on
-2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09, its run green at 07:51
-with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form and carries the review's
-files. Before it `da5e4ec2`, 96's fourth part, the trees standing where the Vegetation module's
-planting places them at its 2fba808, the public listing one line fewer, pushed at 06:07 on
+2026-11-09 with no run, as a documents-only push starts none; it keeps the form. After it
+`5d575d5e`, item 97, a probe left on the middle of a wall thinner than a cell taken as inside,
+pushed at 13:31 on 2026-11-09 with a run on it; it keeps the form and carries the review's files and
+N 1.6. Before it `fbf47d59`, 122, the drive's stop on the GPU's memory read against the commit that
+passed on 2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09, its run green
+at 07:51 with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form and carries the
+review's files. Before it `da5e4ec2`, 96's fourth part, the trees standing where the Vegetation
+module's planting places them at its 2fba808, the public listing one line fewer, pushed at 06:07 on
 2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in 18 and Windows in 18; it keeps
 the form and carries the review's files. Before it `904a291a`, 96's third part, the grass planted
 from the Vegetation module's scatter at its d604e4d, the patches and clumps the same to the bit and
@@ -896,7 +898,10 @@ from [SHARED.md](SHARED.md).
     passing after with the probe beyond the wall keeping its light, a sentence in
     docs/ray-tracing.md and RENDERING.md and the near view's pair with its difference panel; it
     takes the warm streaks off the shaded wall by the corner, and the far view's dashes along the
-    foot stay, item 126. The commit is this item's.
+    foot stay, item 126. The commit is this item's. Done at `5d575d5e`, pushed at 13:31 on
+    2026-11-09; the suite 2,033 passed and 3 skipped at the 3 GB cap, the Packs.cs comment giving
+    the meshlet twin's reason as Bevy does it with no release named after a check on 0.20, and the
+    far foot's dashes left to item 126.
 
 98. **The ground past the probes lies in a face's own shadow at a low sun.** From 95's reach commit
     on 2026-11-03. Past the probes the light pass lights a surface by its sky over a distant ground,
@@ -6570,3 +6575,45 @@ Shared: a probe whose place lies on the middle of a wall thinner than a cell, wh
 of a thin wall reads nothing on either side and its normal falls back to up, is taken as inside
 where its moves leave it at nothing, so it lends neither side's light to the other, which the
 sibling's placing of its probes may take wherever a wall's middle lies on a cell boundary.
+
+Item 126, the far view's dashes along the yard wall's foot, read once and recorded as the method's
+at this cell size, in the commit carrying this line. A trial build of the head in a worktree, never
+committed, had the trace write down the moves of the fourth cascade's probe at 104 8 -72 in the
+yard's far view at High with the screen probes and the weather's kernels off, as item 97 read it,
+the field's distance and slope at each move, and the eight cells each read blends with the way of
+the face each cell's distance came from. The probe held 0.671917 against the reference's 0.000326,
+as under item 97.
+
+The feature test sets its level 1.2 below the ground's zero (GroundHeight in Scene.cs), so the
+yard's east wall, 0.5 thick between 103.75 and 104.25, rises from -1.2 to 14.8. The fourth cascade's
+cells are 2 wide, the middles of their rows at odd heights. Every row whose middles lie within the
+wall's height, up to the row at 13, reads 0 on both sides of the wall, each cell's distance from the
+side facing it, the thin wall's hold. The row at 15, whose middles lie 0.2 above the wall's top,
+reads 0.7754 on both sides, the distance to the near side's top edge kept in 1024ths of a cell, and
+the far side's nearest point lies on that side's top edge rather than straight behind the cell, so
+the hold does not take it and the row stands outside. The field holds the wall as nothing up to 13
+and above nothing past it, 1.8 below the wall's top.
+
+The probe's moves read 0 with no slope at 8, 9.6 and 11.2, so each went up by the clearance, 1.6,
+along the normal that falls back to up, and 0 at 12.8, rising by 0.31 across the cell around it, and
+the fourth ended at 14.4, 0.4 below the wall's top inside it, where the field blends 0.3 of the row
+at 13 with 0.7 of the row at 15 and reads 0.545. Item 97's mend takes a probe its moves leave at
+nothing, and these leave it above nothing, so it is taken as outside and holds the sunlit side's
+light.
+
+The placing cannot be judged by the wall's own thickness, which the field does not keep for a wall
+thinner than a cell, holding it as nothing rather than inside, and such a wall's top reads as low as
+the last row whose middles lie within its height, up to a cell below the true top. It is the field's
+resolution at a quarter-cell wall, recorded as the method's at High's coarsest cells of 2, where a
+probe moved up a thin wall's middle past that row is taken as outside. Item 97's test passes since
+its wall's top lies on a cell boundary, which the yard's lowered level does not give. A mend, not
+tried, would take a probe whose moves begin at nothing with no slope across as outside only where
+they carry it clear of every surface by the clearance, which is left for the review.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: a wall thinner than a cell, held as nothing between the cells on either side, reads its top
+as low as the last row of cells whose middles lie within its height, up to a cell below the true
+top, so a probe moved up its middle past that row is taken as outside, which the sibling's field may
+share wherever it holds a thin wall as a sheet.

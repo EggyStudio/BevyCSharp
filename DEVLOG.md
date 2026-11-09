@@ -18,6 +18,7 @@ third panel darker where the streaks were.
 Done that day
 
 - Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
+- Item 97 at `5d575d5e`. A dotted seam at High along the yard wall's base.
 - Item 122 at `fbf47d59`. The drive's memory on the GPU.
 - Item 123 at `710911f8`. Comments without readings and costs.
 - Item 124 at `d969c312`. The shadow map's request at the stop.
