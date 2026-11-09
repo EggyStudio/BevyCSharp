@@ -10,7 +10,7 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 Done that day
 
-- Item 96 at `904a291a`. The vegetation moves to the Vegetation module.
+- Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
 
 ## 2026-11-08
 
