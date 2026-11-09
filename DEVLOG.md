@@ -12,8 +12,17 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 The feature test's scenes yard at eight in the morning under a clear sky at High, seen from near its
 far corner, on the left with a probe its moves leave on the middle of a yard wall thinner than the
 field's cell taken as outside the wall, the sunlit side's light lent to the shaded wall in curved
-streaks, and on the right with such a probe taken as inside and passed over, the wall even, the
-third panel darker where the streaks were.
+streaks, in the middle with such a probe taken as inside and passed over, the wall even, and on the
+right the middle's light less the left's ten times over, darker where the streaks were.
+
+![](.github/assets/readings/2026-11-09-item-127-far-foot.webp)
+The feature test's scenes yard at eight in the morning under a clear sky at High with the screen
+probes left out, its far view, on the left with a probe that begins on the middle of a yard wall
+thinner than the field's cell taken as outside where its moves leave it above nothing, in the middle
+taken as outside only where they carry it clear, and on the right the middle's light less the left's
+ten times over, brighter in orange and darker in blue, the large shapes up the shaded wall darker
+and the sawtooth of warm triangles along its foot in the same places in both, so the mend was left
+out.
 
 Done that day
 
