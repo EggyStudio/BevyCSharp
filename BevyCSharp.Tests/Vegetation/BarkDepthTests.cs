@@ -7,39 +7,12 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The bark's depth for parallax occlusion, a fourth file of each bark set in BC4 at half the
-/// albedo's size, the sample's derived from its normal, loaded through Bevy, and its cost read in a
-/// forest at 1080p.
+/// albedo's size, loaded through Bevy, and its cost read in a forest at 1080p, the files' own checks
+/// being the Vegetation module's.
 /// </summary>
 [Collection("engine")]
 public sealed class BarkDepthTests(ITestOutputHelper output)
 {
-    private static readonly string Collection = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Vegetation", "Textures");
-
-    [Fact]
-    public void EveryBarkCarriesItsDepthAndNoLeafOrGrassSetDoes()
-    {
-        foreach (var set in TreeTextures.All.Where(set => set.Albedo.StartsWith($"{TreeTextures.Folder}/{set.Name}/", StringComparison.Ordinal)))
-        {
-            // Leaves and grass are cut-out cards, which carry no depth.
-            if (set.Kind != TreeTextureKind.Bark)
-            {
-                Assert.Null(set.Depth);
-                continue;
-            }
-
-            Assert.Equal($"{TreeTextures.Folder}/{set.Name}/depth.ktx2", set.Depth);
-            var albedo = File.ReadAllBytes(Path.Combine(Collection, set.Name, "albedo.ktx2"));
-            var depth = File.ReadAllBytes(Path.Combine(Collection, set.Name, "depth.ktx2"));
-            Assert.Equal(139u, BitConverter.ToUInt32(depth, 12));
-            Assert.Equal(BitConverter.ToUInt32(albedo, 20) / 2, BitConverter.ToUInt32(depth, 20));
-            Assert.Equal(BitConverter.ToUInt32(albedo, 24) / 2, BitConverter.ToUInt32(depth, 24));
-        }
-
-        // The sample's depth, derived from its normal map, is half its 64 square, in BC4 under zstd.
-        var sample = File.ReadAllBytes(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp.Tests", "references", "textures", "sample", "depth.ktx2"));
-        Assert.Equal((139u, 32u, 32u, 2u), (BitConverter.ToUInt32(sample, 12), BitConverter.ToUInt32(sample, 20), BitConverter.ToUInt32(sample, 24), BitConverter.ToUInt32(sample, 44)));
-    }
-
     [SkippableFact]
     public void ABarksDepthLoadsAtHalfItsAlbedo()
     {

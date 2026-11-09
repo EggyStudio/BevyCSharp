@@ -210,7 +210,7 @@ public static partial class Trees
                     LightThrough = LeafLightThrough,
                 }, Stiffness(species));
                 if (species.LeafSet is { } leafSet && TreeTextures.Find(leafSet) is { Kind: TreeTextureKind.Leaves } leafLook)
-                    Render.SetFieldTint(pictures.Material, (leafLook.MeanColor.R, leafLook.MeanColor.G, leafLook.MeanColor.B));
+                    Render.SetFieldTint(pictures.Material, (leafLook.MeanColor.X, leafLook.MeanColor.Y, leafLook.MeanColor.Z));
                 pictures.Limbs = Created(shaped.Cards!.Limbs);
                 pictures.Quads = Created(shaped.Cards.Quads);
 

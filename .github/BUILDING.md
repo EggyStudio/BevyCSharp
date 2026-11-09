@@ -204,22 +204,24 @@ dump written again.
 
 ## The vegetation's textures
 
-`BevyCSharp/Vegetation/Textures` holds the bark and leaf sets the library carries in its assembly,
-which `TreeTextures` finds by name, each three KTX2 files in BC7 and BC5 with their mipmaps and zstd
-over each level, and a bark a fourth, its depth in BC4. `build/textures.py` makes them from the sources sorted under `.vegetation/`, which
-the repository leaves out, by the recipe the collection's `textures.json` gives each set, the crop,
-the size, the maps packed into each file and any change of color, so a set is made again from its
-source byte for byte. It needs Python 3.14, whose own modules have zstd, and Pillow:
+The bark, leaf and grass sets are the Vegetation module's, under
+`modules/Vegetation/Vegetation/Textures` and carried in its assembly, which `TreeTextures` finds by
+name, each three KTX2 files in BC7 and BC5 with their mipmaps and zstd over each level, and a bark a
+fourth, its depth in BC4. The module's `build/textures.py` makes them from the sources sorted under
+`.vegetation/` here, which the repository leaves out, by the recipe the collection's
+`textures.json` gives each set, the crop, the size, the maps packed into each file and any change of
+color, so a set is made again from its source byte for byte. It needs Python 3.14, whose own modules
+have zstd, and Pillow, and runs from the module's folder with the sources named:
 
 ```bash
-build/textures.py                # import every set whose source is here
-build/textures.py fern-leaves    # import one
+cd modules/Vegetation
+build/textures.py --sources ../../.vegetation                # import every set whose source is here
+build/textures.py --sources ../../.vegetation fern-leaves    # import one
 ```
 
-A set the manifest marks waiting is imported into `waiting/`, which the repository and the build
-leave out, and `TreeTextures.Add` reads it there for a look on the machine that imported it. A set
-is at most 1024 square, a species' bark and leaves at most 3 MB together and the collection at most
-32 MB, which `TreeTexturesTests` holds.
+A set imported into the collection is committed in the module, as any change of the module's is,
+before the commit here that moves the pointer to it. The module's README has the rest, the sets the
+manifest marks waiting and the bounds its `TreeTexturesTests` holds.
 
 ## Platforms
 

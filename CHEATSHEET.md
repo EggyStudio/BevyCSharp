@@ -1029,13 +1029,9 @@ static TreeSpecies? Species(string name);                       // The species r
 static Entity Plant(EcsWorld ecs, string species, uint seed, Vec3 place);  // Plants a tree, an entity at a place with a Tree component naming its species and seed
 static IReadOnlyList<Entity> PlantForest(EcsWorld ecs, string species, uint seed, Vec3 middle, float radius, int count);  // Plants a forest, trees of a species spread over a disc on level ground, none nearer another than an even spread allows
 
-// TreeTextures
-static TreeTextureSet? Find(string name);                       // The set of a name, or nothing where the collection has none
-static IReadOnlyList<TreeTextureSet> Add(string directory);     // Adds the sets of a folder on this machine, each in a folder of its name beside a textures.json naming them
-
-// TreeTextureSet
-AssetHandle LoadDepth();                                        // Starts loading the set's depth as data, tiling and filtered as Load's images are, or answers nothing for a set without one
-(AssetHandle Albedo, AssetHandle Normal, AssetHandle Surface) Load();  // Starts loading the set's three images, tiling and filtered between texels and between levels with sixteen anisotropic samples, the albedo as color and the other two as data
+// TreeTextureAssets
+static AssetHandle LoadDepth(TreeTextureSet set);               // Starts loading a set's depth as data, tiling and filtered as Load's images are, or answers nothing for a set without one
+static (AssetHandle Albedo, AssetHandle Normal, AssetHandle Surface) Load(TreeTextureSet set);  // Starts loading a set's three images, tiling and filtered between texels and between levels with sixteen anisotropic samples, the albedo as color and the other two as data
 
 // Grass
 static Entity Plant(EcsWorld ecs, Vec3 center, Vec2 size, GrassSettings? settings = null);  // Plants grass over a stretch of ground and returns the entity its patches stand under

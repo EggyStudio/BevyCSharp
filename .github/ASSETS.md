@@ -8,10 +8,11 @@ described below, so send the largest and cleanest source you have and let the im
 
 ## What the engine makes of a texture
 
-The collection is `BevyCSharp/Vegetation/Textures` in the library, embedded in its assembly, built
-by `build/textures.py` from a manifest that names each source under `.ref/` and the recipe applied
-to it, so the import is repeatable. Every entry is a set of three files, each a KTX2 with mipmaps,
-block-compressed for the GPU and supercompressed with zstd, read by Bevy's own loader.
+The collection is `Vegetation/Textures` in the Vegetation module under `modules/Vegetation`,
+embedded in the module's assembly, built by the module's `build/textures.py`, run with `--sources`
+pointing at `.vegetation` here, from a manifest that names each source under `.ref/` and the recipe
+applied to it, so the import is repeatable. Every entry is a set of three files, each a KTX2 with
+mipmaps, block-compressed for the GPU and supercompressed with zstd, read by Bevy's own loader.
 
 | File | Channels | Encoding |
 |---|---|---|

@@ -60,7 +60,7 @@ public static partial class Trees
                     Roughness = 1f,
                     Metallic = 1f,
                 }, set.LoadDepth()), stiffness);
-                Render.SetFieldTint(made, (set.MeanColor.R, set.MeanColor.G, set.MeanColor.B));
+                Render.SetFieldTint(made, (set.MeanColor.X, set.MeanColor.Y, set.MeanColor.Z));
                 return made;
             }
 
@@ -129,7 +129,7 @@ public static partial class Trees
             {
                 var (albedo, normal, surface) = set.Load();
                 var mean = set.MeanColor;
-                (float, float, float, float) tint = (Toward(1f, species.FallColor.X / MathF.Max(mean.R, 1e-3f), fall), Toward(1f, species.FallColor.Y / MathF.Max(mean.G, 1e-3f), fall), Toward(1f, species.FallColor.Z / MathF.Max(mean.B, 1e-3f), fall), 1f);
+                (float, float, float, float) tint = (Toward(1f, species.FallColor.X / MathF.Max(mean.X, 1e-3f), fall), Toward(1f, species.FallColor.Y / MathF.Max(mean.Y, 1e-3f), fall), Toward(1f, species.FallColor.Z / MathF.Max(mean.Z, 1e-3f), fall), 1f);
                 var made = Render.CreateLeafMaterial(new MaterialSettings
                 {
                     BaseColor = tint,
@@ -145,7 +145,7 @@ public static partial class Trees
                     DoubleSided = true,
                     LightThrough = LeafLightThrough,
                 }, stiffness);
-                Render.SetFieldTint(made, (mean.R, mean.G, mean.B));
+                Render.SetFieldTint(made, (mean.X, mean.Y, mean.Z));
                 return made;
             }
 
@@ -187,7 +187,7 @@ public static partial class Trees
             DoubleSided = true,
             LightThrough = LeafLightThrough,
         }, Grass.Stiffness);
-        Render.SetFieldTint(made, (set.MeanColor.R, set.MeanColor.G, set.MeanColor.B));
+        Render.SetFieldTint(made, (set.MeanColor.X, set.MeanColor.Y, set.MeanColor.Z));
         return made;
     });
 

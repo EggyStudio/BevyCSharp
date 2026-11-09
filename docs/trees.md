@@ -213,10 +213,12 @@ var autumn = Trees.LeafMaterial(TreeSpecies.QuakingAspen, fall: 0.8f);   // in a
 
 ## Bark and leaf textures
 
-A species names the sets of the library's texture collection its bark and its leaves are drawn
-with, `BarkSet` and `LeafSet`, which `TreeTextures` finds by name, each an albedo, a normal map and a
-surface of occlusion, roughness and translucency in the formats a desktop GPU samples as they are. A
-leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf, and its smaller
+A species names the sets of the Vegetation module's texture collection its bark and its leaves are
+drawn with, `BarkSet` and `LeafSet`, which `TreeTextures` finds by name, each an albedo, a normal
+map and a surface of occlusion, roughness and translucency in the formats a desktop GPU samples as
+they are. The module carries the sets in its own assembly, and the library reads their files under
+`TreeTextureAssets.Folder` of the asset root, so a game ships no folder for them.
+A leaf set's atlas comes with the box of each leaf in it, so a card shows one leaf, and its smaller
 levels keep the share of each box a card sees past the cut, so a crown keeps its leaves as it
 stands further off, until a leaf is about a texel of the level it is drawn from. Each smaller
 level's color and surface are means weighted by how much of each texel the leaves cover, so a far
@@ -228,9 +230,9 @@ collection carries cards of grass as well, `wheat-grass`, `grass-tuft-a` and `gr
 kind `TreeTextureKind.Grass`, each a card of blades rooted along its bottom edge whose smaller levels
 keep the share of the whole card past the cut.
 
-A set's three images load with the samplers they are meant for, and its surface is the occlusion,
-the metallic-roughness and the diffuse transmission texture at once, as `Trees.BarkMaterial` binds
-them:
+A set's three images load with the samplers they are meant for through `Load`, which
+`TreeTextureAssets` adds to a set, and its surface is the occlusion, the metallic-roughness and the
+diffuse transmission texture at once, as `Trees.BarkMaterial` binds them:
 
 ```csharp
 if (TreeTextures.Find("weeping-willow-bark") is { } set)               // in a system
@@ -249,7 +251,8 @@ if (TreeTextures.Find("weeping-willow-bark") is { } set)               // in a s
 ```
 
 A game adds a folder of its own sets with `TreeTextures.Add(directory)`, made by the import the
-library's are made by, and a set of the same name stands in place of the library's.
+module's are made by, its `build/textures.py`, and a set of the same name stands in place of the
+module's.
 
 A bark set carries its depth too, and `Trees.BarkMaterial` gives the bark depth by Bevy's parallax
 occlusion, its grooves a fortieth of a stem's circumference deep through twelve layers, so its ridges

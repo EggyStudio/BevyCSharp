@@ -1,3 +1,5 @@
+using Vegetation;
+
 namespace Bevy;
 
 /// <summary>What a stretch of grass is planted with and how thick it stands (<see cref="Grass.Plant"/>).</summary>

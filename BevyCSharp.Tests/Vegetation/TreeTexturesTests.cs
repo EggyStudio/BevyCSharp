@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Text.Json;
 using System.Text;
 using Bevy;
 using Vegetation;
@@ -8,109 +7,39 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The vegetation's texture collection, its import by <c>build/textures.py</c> the same byte for
-/// byte, its bounds, its lookup by name and a set loaded as the GPU samples it.
+/// The Vegetation module's texture collection as this engine reads it, its recipe making the same
+/// bytes the module holds, every file read under the engine's folder of the asset root and a set
+/// loaded as the GPU samples it.
 /// </summary>
 [Collection("engine")]
 public sealed class TreeTexturesTests
 {
-    private static readonly string Collection = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Vegetation", "Textures");
+    private static readonly string Module = Path.Combine(CheatsheetTests.RepositoryRoot(), "modules", "Vegetation");
 
-    // A set of 64 square made from no source by build/textures.py --sample, kept with the tests so a
-    // machine without the import's Python still loads one.
-    private static readonly string Sample = Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp.Tests", "references", "textures");
+    private static readonly string Collection = Path.Combine(Module, "Vegetation", "Textures");
+
+    // A set of 64 square made from no source by the module's build/textures.py --sample, which its
+    // tests keep, so a machine without the import's Python still loads one.
+    private static readonly string Sample = Path.Combine(Module, "Vegetation.Tests", "references", "textures");
+
+    // The sorted sources the sets are imported from, which this repository's root keeps on the
+    // machine that imports them.
+    private static readonly string Sources = Path.Combine(CheatsheetTests.RepositoryRoot(), ".vegetation");
 
     [Fact]
-    public void AFolderOfSetsIsAddedAndFoundByName()
+    public void EveryFileOfTheCollectionIsReadUnderItsFolder()
     {
         var added = Assert.Single(TreeTextures.Add(Sample));
-        Assert.Equal("sample", added.Name);
-        Assert.Equal(TreeTextureKind.Bark, added.Kind);
-        Assert.StartsWith($"{TreeTextures.Folder}/added/", added.Albedo, StringComparison.Ordinal);
-        Assert.EndsWith("/sample/albedo.ktx2", added.Albedo, StringComparison.Ordinal);
-        Assert.Same(added, TreeTextures.Find("sample"));
-        Assert.Contains(added, TreeTextures.All);
-        Assert.Null(TreeTextures.Find("no-such-bark"));
-    }
-
-    [Fact]
-    public void AFolderMissingAFileOfASetIsRefused()
-    {
-        using var folder = new TestFolder("bcs-textures-");
-        Directory.CreateDirectory(folder.File("game-bark"));
-        foreach (var file in new[] { "albedo.ktx2", "surface.ktx2" })
+        TreeTextureAssets.Carry();
+        var files = TreeTextures.Files;
+        Assert.Contains(added.Albedo, files);
+        Assert.Contains("weeping-willow-bark/depth.ktx2", files);
+        foreach (var file in files)
         {
-            File.Copy(Path.Combine(Sample, "sample", file), Path.Combine(folder.File("game-bark"), file));
-        }
-
-        File.WriteAllText(folder.File("textures.json"), """{ "entries": [ { "name": "game-bark", "kind": "bark" } ] }""");
-        Assert.Throws<InvalidDataException>(() => TreeTextures.Add(folder.Path));
-        Assert.Throws<InvalidDataException>(() => TreeTextures.Add(folder.File("game-bark")));
-    }
-
-    [Fact]
-    public void EveryCarriedSetKeepsToItsBounds()
-    {
-        using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(Collection, "textures.json")));
-        var entries = manifest.RootElement.GetProperty("entries").EnumerateArray().ToDictionary(entry => entry.GetProperty("name").GetString()!);
-
-        long total = 0;
-        var sizes = new Dictionary<string, long>();
-        foreach (var set in TreeTextures.All.Where(set => set.Albedo.StartsWith($"{TreeTextures.Folder}/{set.Name}/", StringComparison.Ordinal)))
-        {
-            var entry = entries[set.Name];
-            long size = 0;
-            foreach (var file in new[] { "albedo.ktx2", "normal.ktx2", "surface.ktx2" })
-            {
-                var bytes = File.ReadAllBytes(Path.Combine(Collection, set.Name, file));
-                Assert.Equal(entry.GetProperty("files").GetProperty(file).GetInt64(), bytes.Length);
-                var (_, width, height, _, _) = Header(bytes);
-                Assert.True(width <= 1024 && height <= 1024, $"{set.Name}/{file} is {width} by {height}");
-                size += bytes.Length;
-            }
-
-            sizes[set.Name] = size;
-            total += size;
-        }
-
-        // A species' bark and leaves together, and the whole collection.
-        Assert.True(total <= 32L << 20, $"the collection is {total} bytes");
-        foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush, TreeSpecies.Fern })
-        {
-            var size = sizes.GetValueOrDefault(species.BarkSet ?? "") + sizes.GetValueOrDefault(species.LeafSet ?? "");
-            Assert.True(size <= 3L << 20, $"a species' sets are {size} bytes");
-        }
-    }
-
-    [Fact]
-    public void EveryPresetFindsItsBarkAndItsLeaves()
-    {
-        foreach (var species in new[] { TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush })
-        {
-            Assert.Equal(TreeTextureKind.Bark, TreeTextures.Find(species.BarkSet!)?.Kind);
-            Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(species.LeafSet!)?.Kind);
-        }
-
-        Assert.Null(TreeSpecies.Fern.BarkSet);
-        Assert.Equal(TreeTextureKind.Leaves, TreeTextures.Find(TreeSpecies.Fern.LeafSet!)?.Kind);
-    }
-
-    [Fact]
-    public void TheGrassCardsAreCarriedAsGrass()
-    {
-        foreach (var name in new[] { "wheat-grass", "grass-tuft-a", "grass-tuft-b" })
-            Assert.Equal(TreeTextureKind.Grass, TreeTextures.Find(name)?.Kind);
-    }
-
-    [Fact]
-    public void ALeafSetsManifestGivesEachLeafsBoxInItsAtlas()
-    {
-        using var manifest = JsonDocument.Parse(File.ReadAllText(Path.Combine(Collection, "textures.json")));
-        foreach (var entry in manifest.RootElement.GetProperty("entries").EnumerateArray().Where(entry => entry.GetProperty("kind").GetString() == "leaves"))
-        {
-            var boxes = entry.GetProperty("leaves").EnumerateArray().Select(box => box.EnumerateArray().Select(value => value.GetSingle()).ToArray()).ToArray();
-            Assert.NotEmpty(boxes);
-            Assert.All(boxes, box => Assert.True(box[0] >= 0f && box[1] >= 0f && box[2] > 0f && box[3] > 0f && box[0] + box[2] <= 1.0001f && box[1] + box[3] <= 1.0001f, $"{entry.GetProperty("name")} has a leaf at {string.Join(", ", box)}"));
+            using var stream = TreeTextures.Open(file)!;
+            using var bytes = new MemoryStream();
+            stream.CopyTo(bytes);
+            Assert.Equal(bytes.ToArray(), AssetFiles.ReadAllBytes($"{TreeTextureAssets.Folder}/{file}"));
         }
     }
 
@@ -118,9 +47,9 @@ public sealed class TreeTexturesTests
     public void ASetImportsAsTheCollectionHoldsIt()
     {
         var python = Textures();
-        Needs.Folder(Path.Combine(CheatsheetTests.RepositoryRoot(), ".vegetation", "leaves", "shingle-oak"), "the shingle oak leaves' source");
+        Needs.Folder(Path.Combine(Sources, "leaves", "shingle-oak"), "the shingle oak leaves' source");
         using var folder = new TestFolder("bcs-textures-");
-        Run(python, "--out", folder.Path, "shingle-oak-leaves");
+        Run(python, "--sources", Sources, "--out", folder.Path, "shingle-oak-leaves");
 
         foreach (var file in new[] { "albedo.ktx2", "normal.ktx2", "surface.ktx2" })
         {
@@ -141,16 +70,6 @@ public sealed class TreeTexturesTests
         }
 
         Assert.Equal(File.ReadAllText(Path.Combine(Sample, "textures.json")), File.ReadAllText(Path.Combine(folder.Path, "textures.json")));
-    }
-
-    [Fact]
-    public void ASetsFilesAreKtx2InTheirFormatsWithEveryLevel()
-    {
-        // The sample's albedo, 64 square with its levels to a texel, in BC7 as sRGB, each level
-        // compressed with zstd, its normal half the size in BC5 and its surface in BC7 as data.
-        Assert.Equal((146u, 64u, 64u, 7u, 2u), Header(File.ReadAllBytes(Path.Combine(Sample, "sample", "albedo.ktx2"))));
-        Assert.Equal((141u, 32u, 32u, 6u, 2u), Header(File.ReadAllBytes(Path.Combine(Sample, "sample", "normal.ktx2"))));
-        Assert.Equal((145u, 32u, 32u, 6u, 2u), Header(File.ReadAllBytes(Path.Combine(Sample, "sample", "surface.ktx2"))));
     }
 
     [SkippableFact]
@@ -200,7 +119,7 @@ public sealed class TreeTexturesTests
     {
         var start = new ProcessStartInfo(python)
         {
-            WorkingDirectory = CheatsheetTests.RepositoryRoot(),
+            WorkingDirectory = Module,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             StandardOutputEncoding = Encoding.UTF8,
@@ -215,14 +134,5 @@ public sealed class TreeTexturesTests
         var errors = script.StandardError.ReadToEndAsync();
         Assert.True(script.WaitForExit(300_000), "an import of one entry ends within minutes");
         Assert.True(script.ExitCode == 0, output.Result + errors.Result);
-    }
-
-    /// <summary>A KTX2 file's format, width, height, levels and supercompression, from its header.</summary>
-    private static (uint Format, uint Width, uint Height, uint Levels, uint Supercompression) Header(byte[] file)
-    {
-        byte[] identifier = [0xAB, 0x4B, 0x54, 0x58, 0x20, 0x32, 0x30, 0xBB, 0x0D, 0x0A, 0x1A, 0x0A];
-        Assert.Equal(identifier, file[..12]);
-        uint At(int offset) => BitConverter.ToUInt32(file, offset);
-        return (At(12), At(20), At(24), At(40), At(44));
     }
 }

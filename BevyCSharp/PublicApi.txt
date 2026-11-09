@@ -13334,35 +13334,10 @@ struct Bevy.Tree
 enum Bevy.TreeDetail : int
   Full = 0
   Reduced = 1
-enum Bevy.TreeTextureKind : int
-  Bark = 0
-  Grass = 2
-  Leaves = 1
-sealed class Bevy.TreeTextureSet : IEquatable<TreeTextureSet>
-  (AssetHandle, AssetHandle, AssetHandle) Load()
-  (int, int)? Size { get; init; }
-  AssetHandle LoadDepth()
-  Color MeanColor { get; init; }
-  IReadOnlyList<(float, float, float, float)> LeafBoxes { get; init; }
-  TreeTextureKind Kind { get; init; }
-  TreeTextureSet(string Name, TreeTextureKind Kind, string Albedo, string Normal, string Surface)
-  bool Equals(TreeTextureSet? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  static bool op_Equality(TreeTextureSet? left, TreeTextureSet? right)
-  static bool op_Inequality(TreeTextureSet? left, TreeTextureSet? right)
-  string Albedo { get; init; }
-  string Name { get; init; }
-  string Normal { get; init; }
-  string Surface { get; init; }
-  string? Depth { get; init; }
-  void Deconstruct(out string Name, out TreeTextureKind Kind, out string Albedo, out string Normal, out string Surface)
-static class Bevy.TreeTextures
+static class Bevy.TreeTextureAssets
   const string Folder = "bevycsharp/vegetation"
-  static IReadOnlyList<TreeTextureSet> Add(string directory)
-  static IReadOnlyList<TreeTextureSet> All { get; }
-  static TreeTextureSet? Find(string name)
+  static (AssetHandle, AssetHandle, AssetHandle) Load(this TreeTextureSet set)
+  static AssetHandle LoadDepth(this TreeTextureSet set)
 static class Bevy.Trees
   const int Variants = 8
   const string BarkSlot = "bark"

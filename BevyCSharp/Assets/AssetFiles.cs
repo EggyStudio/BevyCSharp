@@ -171,21 +171,11 @@ public static unsafe class AssetFiles
     }
 
     /// <summary>
-    /// Reads an assembly's resources whose names start with a prefix under a folder of the asset
-    /// root until the next app, each by the rest of its name, as the library's own texture
-    /// collection is read.
+    /// Reads the files a list names under a folder of the asset root until the next app, each
+    /// opened by its path in the list, as the Vegetation module's texture collection is read.
     /// </summary>
-    internal static void Mount(string folder, Assembly assembly, string prefix)
-    {
-        var names = new Dictionary<string, string>(StringComparer.Ordinal);
-        foreach (var name in assembly.GetManifestResourceNames())
-        {
-            var normal = name.Replace('\\', '/');
-            if (normal.StartsWith(prefix, StringComparison.Ordinal)) names[normal[prefix.Length..]] = name;
-        }
-
-        Mount(folder, new Mounted([.. names.Keys.Order(StringComparer.Ordinal)], file => names.TryGetValue(file, out var name) ? assembly.GetManifestResourceStream(name) : null, null));
-    }
+    internal static void Mount(string folder, IReadOnlyList<string> files, Func<string, Stream?> open) =>
+        Mount(folder, new Mounted([.. files.Order(StringComparer.Ordinal)], open, null));
 
     private static void Mount(string folder, Mounted mounted)
     {
