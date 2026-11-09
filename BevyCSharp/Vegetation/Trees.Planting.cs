@@ -51,12 +51,11 @@ public static partial class Trees
         ["fern"] = TreeSpecies.Fern,
     };
 
-    // The variants grown, by species and variant, for the whole process, since a skeleton belongs to
-    // no app. A variant keeps its skeleton and the capsules it stands as, a hundred kilobytes at
+    // The variants grown, by species and variant, for the whole process, since a skeleton belongs
+    // to no app. A variant keeps its skeleton and the capsules it stands as, a hundred kilobytes at
     // most, and not its meshes' data, some tens of megabytes, which each app that draws it shapes
-    // from its skeleton and lets go once its meshes are made and its far levels pictured. Kept, the meshes'
-    // data of every variant the suite plants came to a gigabyte that no app read again, and a forest
-    // of three species held 621 MB of it after its trees were dressed.
+    // from its skeleton and lets go once its meshes are made and its far levels pictured, since
+    // kept, the meshes' data of every variant planted would stay in memory that no app reads again.
     private static readonly ConcurrentDictionary<(TreeSpecies Species, int Variant), Lazy<Task<Grown>>> Growing = new();
 
     // Each app's dressed trees.
@@ -163,9 +162,9 @@ public static partial class Trees
     /// being pictured, a tree left bare by a fault the log names not among them.
     /// </summary>
     /// <remarks>
-    /// The feature test's 28 trees stood 70 of their 166 parts 300 frames after it started and all
-    /// of them by 1,500, so a reading of a scene of trees taken before they stand reads a scene
-    /// with fewer, which the reference global illumination is measured against says.
+    /// A forest's trees stand over many frames after it is planted, each once its variant is grown
+    /// and its far levels pictured, so a reading of a scene of trees taken before they stand reads
+    /// a scene with fewer, which the reference global illumination is measured against says.
     /// </remarks>
     internal static int Undressed(EcsWorld ecs)
     {

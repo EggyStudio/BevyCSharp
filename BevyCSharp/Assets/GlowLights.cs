@@ -26,11 +26,10 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Each emitter is its box, every face emitting, by the share of the box's faces its mesh's own
-/// surface makes, the area of its triangles the field's gather hands over. Taken as its box whole, a
-/// ball, whose surface is about half its box's, was carried twice as bright as it is, and a room of
-/// the level's white lit by a ball read 100 to 109% over its path-traced reference on every face
-/// where lit by a block of its box it read within 10%. The gather does not cut a mesh of many
-/// emitters into its parts, so such a mesh is one light of its box.
+/// surface makes, the area of its triangles the field's gather hands over, since taken as its box
+/// whole, a ball, whose surface is about half its box's, would be carried twice as bright as it is.
+/// The gather does not cut a mesh of many emitters into its parts, so such a mesh is one light of
+/// its box.
 /// </para>
 /// </remarks>
 internal static class GlowLights
@@ -44,11 +43,10 @@ internal static class GlowLights
     // The light a surface at the reach takes from one, a thousandth of the light it emits, past
     // which the light is let go, over a quarter of the box's surface as the box's mean face seen
     // from afar. A share of its own, so every light keeps the same share of its light whatever its
-    // brightness, where let go at a fiftieth of the picture's unit a dim light reached less far
-    // than a bright one of its size, and six emitters of a sixth of one's light each reached two
-    // and a half times less far, which took a room of them 9 to 17% further under its reference. A
-    // thousandth keeps the reach of the one emitter of 20,000 under a camera's exposure of 9.7
-    // there.
+    // brightness, where let go at a share of the picture's unit a dim light would reach less far
+    // than a bright one of its size, and several emitters splitting one's light would each reach
+    // less far than the one. A thousandth keeps the reach of one bright emitter as far as a camera
+    // exposed for the room it lights sees it.
     private const float Faint = 0.001f;
 
     /// <summary>A light as it is written, the middle of its box, half its side along each of the box's axes, its light and its surface over its box's.</summary>

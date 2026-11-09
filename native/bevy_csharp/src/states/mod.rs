@@ -11,9 +11,9 @@
 //! The slot count is fixed because the types have to exist at compile time, and each one costs
 //! compile time rather than runtime. `insert_state` is generic, so a slot brings its own copy of
 //! the state resources, the transition schedules and the systems that despawn what a state owns,
-//! whether or not a game ever adds it. Eight covers an app state, a pause, a menu page, a phase
-//! and room to spare, at about four seconds of build time each. Raising it is this list and a
-//! rebuild; nothing else, because the managed side asks how many there are.
+//! whether or not a game ever adds it. Eight covers an app state, a pause, a menu page, a phase and
+//! room to spare. Raising it is this list and a rebuild and nothing else, because the managed side
+//! asks how many there are.
 
 use core::sync::atomic::{AtomicI32, Ordering};
 

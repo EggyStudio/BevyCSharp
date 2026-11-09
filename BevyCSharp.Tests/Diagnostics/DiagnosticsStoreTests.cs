@@ -111,9 +111,8 @@ public sealed class DiagnosticsStoreTests
     /// <remarks>
     /// Bevy builds sysinfo on macOS with its <c>apple-app-store</c> feature, whose sandboxed build
     /// refreshes no process, so Bevy finds none and gives the process's memory and CPU as zero. The
-    /// macOS runner read the process's memory as 0 GiB. The zeros are held there, so a release of
-    /// Bevy that measures the process on macOS fails this, and the documents saying it does not are
-    /// read again.
+    /// zeros are held there, so a release of Bevy that measures the process on macOS fails this,
+    /// and the documents saying it does not are read again.
     /// </remarks>
     [SkippableFact]
     public void TheMachinesAndTheProcesssCpuAndMemoryAreMeasured()

@@ -208,8 +208,8 @@ public sealed class ModifierTests
     public void AStackOfFourBuildsWithinItsBudget()
     {
         // A half mirrored, arrayed four times, beveled in two segments and subdivided twice, 5,760
-        // faces. It built in 13 ms once warm and 70 ms the first time on four cores, and 200 ms is
-        // the budget a level's model is built within when the window changes it.
+        // faces, built within 200 ms, the budget a level's model is built within when the window
+        // changes it.
         EditMesh Stack() => new EditMesh().Box(new Vec3(1f, 2f, 2f)).AddModifier("mirror x").AddModifier("array 4 3 0 0").AddModifier("bevel 0.05 2").AddModifier("subdivision 2");
 
         Modeling.Build(Stack());

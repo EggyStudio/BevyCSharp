@@ -90,8 +90,8 @@ public sealed class ShadowTests
     /// </summary>
     /// <remarks>
     /// A spot light, since the size of one is its radius in world units, while a directional
-    /// light's penumbra is worked out in its shadow map's depth and showed none in a scene this
-    /// small at any size tried.
+    /// light's penumbra is worked out in its shadow map's depth and shows next to none in a scene
+    /// this small.
     /// </remarks>
     [SkippableFact]
     public void ASoftShadowFadesWhereAHardOneCuts()

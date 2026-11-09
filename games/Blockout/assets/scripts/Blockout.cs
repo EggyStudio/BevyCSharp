@@ -284,8 +284,8 @@ internal static class Autopilot
     private static readonly Vec3[] Across = [Game.Home, new(11f, 0f, 4f), new(19f, 0f, 4f), new(19f, 0f, 1.5f), new(19f, 0f, 4f), new(11f, 0f, 4f), Game.Home];
 
     // Two meters out from the middle of the hall and back, a second of the game, which a soak's
-    // round walks. A loop of the hall of fifteen meters made the round some 164 seconds on lavapipe
-    // held to four processors beside three other games, five rounds where the soak's check judges six.
+    // round walks, short enough that a soak beside three other games on lavapipe reaches the six
+    // readings its check judges, where a loop of the whole hall would not.
     private static readonly Vec3[] Loop = [new(7f, 0f, 4f), Game.Home];
 
     /// <summary>The routes by name, each walked from where the one before it ends, the tour and the loop from the middle of the hall.</summary>

@@ -21,23 +21,18 @@ namespace Bevy.Tests;
 /// live objects, and judged by how far its floor rose, the least reading from the seventieth app to
 /// the hundredth against the greater of the twentieth's and the thirtieth's, so a heap that swings
 /// is judged against the top of its early swing. <see cref="GC.GetTotalMemory"/> counts with the
-/// live objects what a collection left on the heap where it did not compact, which on macOS rose
-/// and fell back by several megabytes every few dozen apps. On the macOS suite of <c>5f051299</c>,
-/// build run 39547498414, it read 101.10 and 103.34 MB at the twentieth app and the thirtieth, fell
-/// to 90.84 at the fortieth and climbed back 2 MB every ten apps, while its census found 0.3 MB
-/// more alive, and on <c>7e35f94b</c>'s, build run 41097236243, it climbed 1.5 MB every ten apps
-/// from 108.33 at the twentieth to 119.07 at the hundredth with no trough between, its floor rising
-/// 5.9 while its census found 0.4 MB more alive. A leak of an eighth of a megabyte an app still
-/// fails, over the forty apps from the thirtieth to the seventieth.
+/// live objects what a collection left on the heap where it did not compact, which on macOS rises
+/// and falls back by megabytes every few dozen apps, and on a run climbs by megabytes over the
+/// hundred apps while the census finds well under a megabyte more alive. A leak of an eighth of a
+/// megabyte an app still fails, over the forty apps from the thirtieth to the seventieth.
 /// </para>
 /// <para>
-/// Where <c>BCS_GCDUMP</c> names <c>dotnet-gcdump</c>, as the macOS job has it, the heap's types are
-/// counted after the twentieth app and the hundredth, so a failure names what grew, and the output
-/// says it on a pass. The census's own session makes the runtime's event source build its manifest
-/// by reflection once, some 683 parameter infos, 253 method infos and its table of events, which a
-/// census added at the sixtieth app found grown from the twentieth and not from the sixtieth to the
-/// hundredth, on Linux with <c>BCS_GCDUMP</c> set and this test alone run, so those are the census's
-/// and no app's.
+/// Where <c>BCS_GCDUMP</c> names <c>dotnet-gcdump</c>, as the macOS job has it, the heap's types
+/// are counted after the twentieth app and the hundredth, so a failure names what grew, and the
+/// output says it on a pass. The census's own session makes the runtime's event source build its
+/// manifest by reflection once, its parameter and method infos and its table of events, which grow
+/// the heap between the first census and the next and not after, so those are the census's and no
+/// app's.
 /// </para>
 /// </remarks>
 [Collection("engine")]

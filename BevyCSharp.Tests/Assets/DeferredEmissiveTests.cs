@@ -51,7 +51,7 @@ public sealed class DeferredEmissiveTests
     /// <summary>
     /// The lamp panel on a camera drawn deferred reads within 2% of a path-traced reference of the
     /// same view (<c>gi.reference</c>), whose panel emits its light exposed as Bevy shows it, where
-    /// unmended it read 40,053 against the reference's 49 in the feature test's Cornell box.
+    /// Bevy's deferred G-buffer unmended reads the panel hundreds of times brighter.
     /// </summary>
     [SkippableFact]
     public void ALampPanelOnADeferredCameraReadsWithinItsReference()

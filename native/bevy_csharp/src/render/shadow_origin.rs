@@ -21,13 +21,12 @@
 //! A mesh of a visibility range casts over the half of each margin nearer its own distance. Bevy
 //! draws a mesh into a light's shadow map wherever its range holds the origin, both margins whole,
 //! and its shadow pass takes no dither, so where two levels of a tree cross over a margin both
-//! cast whole and the crown shades itself twice, a lone oak's leaves there 12 to 19% under the
-//! path-traced reference where either level alone reads within 5% under and 8% over. So a mesh
-//! carries `NotShadowCaster` while the origin stands outside the span from the middle of the
-//! margin it fades in over to the middle of the one it fades out over, the span the reference
-//! traces it on, and one level casts at any distance, the shadow changing level at the margin's
-//! middle in the frame the origin crosses it. One given here is taken off as the origin comes back
-//! into the span, and a game's own is left as it is.
+//! would cast whole and the crown would shade itself twice. So a mesh carries `NotShadowCaster`
+//! while the origin stands outside the span from the middle of the margin it fades in over to the
+//! middle of the one it fades out over, the span in which the dither draws it more than the level
+//! beside it, and one level casts at any distance, the shadow changing level at the margin's middle
+//! in the frame the origin crosses it. One given here is taken off as the origin comes back into
+//! the span, and a game's own is left as it is.
 
 use bevy::app::App;
 use bevy::camera::primitives::Aabb;

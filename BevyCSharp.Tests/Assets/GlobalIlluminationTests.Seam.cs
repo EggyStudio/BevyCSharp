@@ -13,16 +13,14 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Snapped down to its grid alone, a cascade's side behind an eye looking down an axis the
-    /// negative way lay 1.6 to 9.6 of its cells behind it, and from z 7 the first two cascades
-    /// ended on the front wall at z 8. The probes' hits on that wall lay past their sides, the wall
-    /// read black to the probes before it, the first cascade's probes a unit from it reading their
-    /// face toward it 0.01 where 0.33, and through the bounces the aisle's floor read 11% under its
-    /// reference and its arch's wall 11% under, where from z 7.3, the second cascade reaching four
-    /// units past the wall, they read 4% and 7% over. A cascade kept a step of eight cells or more
-    /// from the eye on every side (<see cref="SceneFieldPlan.OriginAround"/>) has a layer of probes
-    /// behind the eye and the wall inside it, and the two views read their faces within 2.1 points
-    /// of each other. What each reads over its reference, 6 to 16% on the aisle's faces and 32% on
-    /// its back wall, lying on a cascade's side ahead of the eye, is read apart.
+    /// negative way lies 1.6 to 9.6 of its cells behind it, so from z 7 the first two cascades
+    /// would end on the front wall at z 8, the probes' hits on that wall lying past their sides and
+    /// the wall reading black to the probes before it, a shortfall the bounces carry to the aisle's
+    /// floor and its arch's wall. A cascade kept a step of eight cells or more from the eye on
+    /// every side (<see cref="SceneFieldPlan.OriginAround"/>) has a layer of probes behind the eye
+    /// and the wall inside it, so the two views read their faces alike, within the bar of four
+    /// points. What each reads over its reference, lying on a cascade's side ahead of the eye, is
+    /// read apart.
     /// </remarks>
     [SkippableFact]
     public void AnAisleReadsAlikeWithACascadesSideOnTheWallBehindTheEye()

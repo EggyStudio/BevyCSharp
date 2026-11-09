@@ -12,22 +12,16 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Cascade 2's probes stand 8 apart at x -4 and 4, outside the corridor's walls, each hidden
-    /// from the corridor's cascade 1 probes at x -2 and 2, so the merge's weights summed to nothing
-    /// and no light came from past 16 units, neither the sky above nor the lamp's end of the
-    /// corridor, as in the feature test's alley at night, and the floor and the walls read 0.377,
-    /// 0.480 and 0.431 of their reference's light past the direct. With a probe that sees too
-    /// little of the cascade above carrying its rays on to the field's edge (gi_trace.slang) they
-    /// read 0.826, 0.831 and 0.795, the first bounce near its reference and the bounces after it
-    /// short. The light pass took back Bevy's ambient term by the polynomial Bevy uses without its
-    /// table of F_AB, so a surface seen at a grazing angle kept a share of it, and the carried
-    /// floor and walls read 1.285, 1.045 and 1.010 until the pass read the table (the floor of
-    /// AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle). The bar was 25% while
-    /// the reference's faces past the first went on by their diffuse share. The whole reference,
-    /// every face scattering by its gloss, took the picture as it stood from 0.770 to 0.721 on the
-    /// right wall, from 0.807 to 0.754 on the left and from 0.805 to 0.765 on the floor, so the bar
-    /// moved with the reference to 30%. With the probes' rays carrying the gloss of what they meet
-    /// the corridor reads 0.749 to 0.788, short by the gloss carried between bounces past the
-    /// probes above, which stand outside its walls and hold little of it.
+    /// from the corridor's cascade 1 probes at x -2 and 2, so the merge's weights would sum to
+    /// nothing and no light would come from past 16 units, neither the sky above nor the lamp's end
+    /// of the corridor, as in the feature test's alley at night. A probe that sees too little of
+    /// the cascade above carries its rays on to the field's edge (gi_trace.slang), so the first
+    /// bounce reads near its reference. The light pass takes back Bevy's ambient term by Bevy's
+    /// table of F_AB, so a surface seen at a grazing angle keeps none of it (the floor of
+    /// AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle). The corridor reads
+    /// about a quarter short of its reference's light past the direct, by the gloss carried between
+    /// bounces past the probes above, which stand outside its walls and hold little of it, so the
+    /// bar is 30%.
     /// </remarks>
     [SkippableFact]
     public void ACorridorNarrowerThanTheProbesAboveReadsItsLightPastTheDirectAsItsReference()

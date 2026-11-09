@@ -11,6 +11,7 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 Done that day
 
 - Item 96 at `da5e4ec2`. The vegetation moves to the Vegetation module.
+- Item 122 at `fbf47d59`. The drive's memory on the GPU.
 
 ## 2026-11-08
 

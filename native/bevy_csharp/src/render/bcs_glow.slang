@@ -6,10 +6,9 @@
 // The field is read through a texture and a sampler, and the lights lie in a buffer of their own,
 // counted in the fourth of `GiLights.counts`. A loop over a small array is unrolled, so the array
 // is indexed by constants, and a square is clipped an edge at a time with no array of corners,
-// since with the arrays indexed as the loops ran the closed form alone took global illumination's
-// pass from 0.19 ms to 2.9 at 1280 by 720 in a Cornell box with one light, and unrolled 0.29. The
-// marches' loops stay rolled, since unrolled, with each caller's copies inlined apart, they
-// multiply the time a pass takes to compile.
+// since an array indexed as a loop runs is kept in the GPU's slow local memory, which every light's
+// closed form would read through. The marches' loops stay rolled, since unrolled, with each
+// caller's copies inlined apart, they multiply the time a pass takes to compile.
 
 module bcs_glow;
 
@@ -171,13 +170,13 @@ public float3 glowLightPoint(GlowLight light, float3 x, float3 n)
 
 /// The light reaching a point x facing n from a glow light, unhidden, the light from each face of
 /// its box that x lies before, three at most, in closed form within four of the box's half
-/// diagonals, and past them each face's as points, its area by the two cosines over the square of its
-/// distance, the face cut along its longer side into pieces about as long as its shorter, and past
-/// eight of them the box as one point at its middle, each face it shows by its area and its cosine,
-/// where the error lies under the reach's own fade and a light costs a few sums, since forty dim
-/// emitters reaching six times as far as they did took global illumination's passes in a room of them
-/// from 2.4 ms to 4.5 at 1280 by 720 face by face. None where x lies on the light's own surface, as
-/// glowLightOn finds it within margin.
+/// diagonals, and past them each face's as points, its area by the two cosines over the square of
+/// its distance, the face cut along its longer side into pieces about as long as its shorter, and
+/// past eight of them the box as one point at its middle, each face it shows by its area and its
+/// cosine, where the error lies under the reach's own fade and a light costs a few sums, since a
+/// room of many dim emitters reaching far would otherwise take each light face by face in closed
+/// form at every point it lights. None where x lies on the light's own surface, as glowLightOn
+/// finds it within margin.
 public float3 glowLightIrradiance(GlowLight light, float3 x, float3 n, float margin)
 {
     float3 middle = light.middleAndReach.xyz;
@@ -311,8 +310,8 @@ public float glowLightFade(GlowLight light, float3 p, float3 n)
 /// Whether a ray along `way` that met the field at p passed through a glow light's box within
 /// `within` before it, as a ray passes a light thinner than a cell, which the field holds about its
 /// middle, and meets the wall behind it, where the light reaches it from no distance. Such a hit
-/// takes none of that light, as a path-traced reference's path stops at the light and leaves its
-/// emission to the light's own count at each surface.
+/// takes none of that light, since a ray that meets a light ends there, and the light's emission
+/// reaches each surface through the light's own count.
 public bool glowLightPassed(GlowLight light, float3 p, float3 way, float within)
 {
     float3 offset = p - light.middleAndReach.xyz;
@@ -524,21 +523,20 @@ public float glowLightShown(Texture3D<float> field, SamplerState linear, FieldIn
 }
 
 /// The light reaching a surface at p facing n from the glow lights, irradiance, each light's in
-/// closed form faded by its reach, and the `marches` brightest of them, four at most, by how much of
-/// each the surface sees through the field, by the halves of its faces where `halves` asks
-/// (glowLightShown) and by its middle otherwise (glowLightSeen). The others are grouped by their way
-/// from p into as many groups as there are marches, each joining the group whose first light lies
-/// nearest its way, or opening one while fewer stand, and each group's light is taken by how much of
-/// its brightest light the surface sees, so a surface lit by many lights takes all their light for
-/// twice the marches at most, where the rest left out took a room of six emitters' light 20 to 30%
-/// under its reference, and a group a wall parts is the one light that takes another's sight of it,
-/// as far as its share of the group. Where no more lights than marches reach p, nothing is grouped.
-/// At a probe's ray's
-/// hit, the ray along `way` (zero elsewhere), a light the ray passed through right before it met the
-/// field gives the hit none of its light (glowLightPassed), and a hit within a cell of a light's box
-/// takes the light as its mean over a square a cell wide about the hit on its plane, since a light
-/// thinner than a cell lights the wall it stands against within a few hundredths of its box, a patch
-/// one probe's ray meets and the next probe's misses.
+/// closed form faded by its reach, and the `marches` brightest of them, four at most, by how much
+/// of each the surface sees through the field, by the halves of its faces where `halves` asks
+/// (glowLightShown) and by its middle otherwise (glowLightSeen). The others are grouped by their
+/// way from p into as many groups as there are marches, each joining the group whose first light
+/// lies nearest its way, or opening one while fewer stand, and each group's light is taken by how
+/// much of its brightest light the surface sees, so a surface lit by many lights takes all their
+/// light for twice the marches at most, where leaving the rest out would darken a room of many
+/// emitters, and a group a wall parts is the one light that takes another's sight of it, as far as
+/// its share of the group. Where no more lights than marches reach p, nothing is grouped. At a
+/// probe's ray's hit, the ray along `way` (zero elsewhere), a light the ray passed through right
+/// before it met the field gives the hit none of its light (glowLightPassed), and a hit within a
+/// cell of a light's box takes the light as its mean over a square a cell wide about the hit on its
+/// plane, since a light thinner than a cell lights the wall it stands against within a few
+/// hundredths of its box, a patch one probe's ray meets and the next probe's misses.
 public float3 glowLightsAt(Texture3D<float> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows, uint lights,
     float3 p, float3 n, int marches, bool halves, float3 way)
 {

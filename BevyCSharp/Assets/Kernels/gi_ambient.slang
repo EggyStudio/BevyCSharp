@@ -6,15 +6,14 @@
 // every face at any number of texels. Each probe's reach, how far each of its rays went, the trace
 // writes itself (gi_trace.slang).
 //
-// Beside each face it writes the light the surface the face is read for gathers, the one the probe's
-// own ray along the face's opposite way met, which a ray's hit on that surface and a pixel on it take
-// their light from. Read where the probe stands, a face a unit over a floor gathered the walls and
-// the ceiling nearer than the floor sees them, and in a closed room of the level's white each bounce
-// came back about 5% over its reference, the light past the direct 16 to 27% over through them all.
-// Each patch the rays met is turned toward the surface by the field's normal there, since moved by
-// its distance alone a patch the probe saw squarely and the surface sees at a slant, as a wall's
-// band under a ceiling, counted for as much as it did at the probe, and a closed box with dark side
-// walls took its first bounce 14% over at its floor, where turned it reads 2% over.
+// Beside each face it writes the light the surface the face is read for gathers, the one the
+// probe's own ray along the face's opposite way met, which a ray's hit on that surface and a pixel
+// on it take their light from. Read where the probe stands, a face a unit over a floor would gather
+// the walls and the ceiling nearer than the floor sees them, and each bounce of a closed room would
+// come back brighter than the room makes it. Each patch the rays met is turned toward the surface
+// by the field's normal there, since moved by its distance alone a patch the probe saw squarely and
+// the surface sees at a slant, as a wall's band under a ceiling, would count for as much as it did
+// at the probe, and a floor between dark walls would take more of its first bounce than reaches it.
 //
 // The first face's thread also adds up the light the probe's rays brought straight from the sun and
 // the lights, its own light, and all they brought, as the trace summed them a workgroup at a time,

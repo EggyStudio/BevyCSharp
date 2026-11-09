@@ -27,8 +27,7 @@ namespace Bevy.Tests;
 /// Windows also refuses to delete a file marked read-only, as git marks every object it writes, so
 /// a folder holding a repository, as <c>ReleaseNotesTests</c> makes one, is refused where Linux and
 /// macOS delete it with the rest. A refused delete clears the mark from each file and tries again,
-/// which the Windows suites of the pack run 39324217456 and the push run of e7ea1a06 found, 17 files
-/// left in a repository's objects.
+/// so a repository's objects go with the rest on Windows.
 /// </para>
 /// </remarks>
 internal sealed class TestFolder : IDisposable

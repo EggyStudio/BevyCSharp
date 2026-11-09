@@ -60,8 +60,9 @@ public sealed class ScriptCompilationMemoryTests(ITestOutputHelper output) : IDi
             host.Retire();
         }
 
-        // 346 MB more after a hundred than after ten, each compilation reading the references again,
-        // and 20 MB more once they were read once, which is the heap no full collection has come for.
+        // A compilation reading the references again each time grows the process by hundreds of
+        // megabytes over ninety compilations, where read once they leave a few tens of megabytes,
+        // the heap no full collection has come for, under the bound of 48.
         Assert.True(atHundred - atTen < 48, $"the process held {atTen:0} MB after ten compilations and {atHundred:0} MB after a hundred");
     }
 }

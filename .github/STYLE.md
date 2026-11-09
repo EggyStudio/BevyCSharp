@@ -181,6 +181,12 @@ measurements, and the facts of the sessions' work are not written in a comment, 
 the source has none of them. A comparison test names the reference it compares against, since the
 comparison is the test.
 
+A comment carries no reading of before and after a change, no cost in milliseconds, seconds or bytes
+measured from a run, no count of triangles or frames from a trial and no account of what was tried,
+since a comment is not a record and those are the review's and RENDERING.md's. A number stands in a
+comment only where the code's choice depends on it, with its reason, as a test's bound does with the
+reading it holds, a timeout with the wait it covers and a size with what it holds.
+
 ## Self-reference
 
 Prose states what is true. It does not describe its own history, and it does not narrate the work
@@ -280,6 +286,11 @@ grep -rniE "contrary to what|this (file|document|entry) (said|used to)|the (old|
 # on the code's own terms. A comparison test's reference, a widget's owner, the command line's
 # session and Bevy's behavior the bridge mirrors are left, so each hit is read.
 git grep -n -E "^\s*(///?|//!|#|\*).*(3DEngine|HDRP|URP|Unity|Unreal|Godot|Blender|Minecraft|Quake|Frostbite|[Tt]he owner|[Tt]he reviewer|reference picture|Bevy's (own )?default)" -- '*.cs' '*.rs' '*.slang' '*.wgsl' '*.sh' '*.py' '*.yml'
+
+# Readings and costs in comments, a time or a size measured from a run, a reading against a
+# reference and a reading from one value to another. A number the code's choice depends on stays
+# with its reason, so each hit is read rather than counted.
+git grep -n -i -E "^\s*(///?|//!|#|\*).*([0-9][0-9.,]* ?(ms|milliseconds?|µs|seconds?|minutes?|[KMG]i?B|bytes)\b|times (its|the) reference|where it read|from [0-9][0-9.,]* to [0-9])" -- '*.cs' '*.rs' '*.slang' '*.wgsl' '*.sh' '*.py' '*.yml'
 
 # References to paths that are not checked in.
 grep -rn "\.ref/" --include=*.cs --include=*.rs --include=*.md . | grep -v "^\./\.ref/"

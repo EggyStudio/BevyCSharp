@@ -7,11 +7,11 @@
 #   build/games-on-defaults.sh <version this run pushed>
 #
 # The wait is bounded, ninety minutes unless GAMES_WAIT_MINUTES says otherwise, since nuget.org
-# validates and indexes a package after its push, and the pack run of 3eaa0a44 found the engine's
-# 0.5.149 listed 47 minutes after it, the templates within twenty, so the wait is nearly twice what
-# it took. A wait that ends with the package unlisted says the package was pushed and stands, so a
-# run red here is not read as one that published nothing. A game whose default does not build is
-# named in an error with the version this run pushed as the one to raise it to, which is a commit of
+# validates and indexes a package after its push, which can take most of an hour, so the wait is
+# nearly twice that. A wait that ends with the package unlisted says the package was pushed and
+# stands, so a run red here is not read as one that published nothing. A game whose default does not
+# build is named in an error with the version this run pushed as the one to raise it to, which is a
+# commit of one line a game (BUILDING.md).
 # one line a game (BUILDING.md).
 set -uo pipefail
 cd "$(dirname "$0")/.."

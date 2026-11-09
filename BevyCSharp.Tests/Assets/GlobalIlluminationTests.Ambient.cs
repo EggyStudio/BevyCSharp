@@ -13,14 +13,12 @@ public sealed partial class GlobalIlluminationTests
     /// <remarks>
     /// The light pass takes back the share of the ambient light Bevy's lighting gave a surface and
     /// adds the probes' light in its place, and Bevy works that share out from F_AB, from its table
-    /// where the bridge is built with it, as every bridge that draws is. Taken back by the
-    /// polynomial Bevy uses without the table, which gives a rough surface's diffuse share at 0.45
-    /// at every angle where the table gives it from 0.32 face on to 0.92 edge on, the floor read
-    /// 0.846 of its reference near the eye and 1.334 far off. Taken back by the table it read 0.998
-    /// and 1.000. Its reflectance is 0, since while the reference's first face took the diffuse
-    /// share alone of the light from all around, the sky's reflection on a floor of the default
-    /// reflectance read it 4 and 6% over, and with the reference's faces reflecting by their gloss
-    /// as the picture's reflects the probes' light, it reads 1.000 and 1.017.
+    /// where the bridge is built with it, as every bridge that draws is, so the pass takes it back
+    /// by the table too. The polynomial Bevy uses without the table gives a rough surface's diffuse
+    /// share at 0.45 at every angle where the table gives it from 0.32 face on to 0.92 edge on, so
+    /// taken back by the polynomial the floor would read under its reference near the eye and well
+    /// over it far off. Its reflectance is 0, so the floor's light is its diffuse share of the sky
+    /// alone, which the table decides.
     /// </remarks>
     [SkippableFact]
     public void AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle()

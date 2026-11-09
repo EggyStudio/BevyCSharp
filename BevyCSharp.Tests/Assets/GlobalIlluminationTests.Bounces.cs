@@ -11,27 +11,17 @@ public sealed partial class GlobalIlluminationTests
     /// 15% of its reference's through all the bounces.
     /// </summary>
     /// <remarks>
-    /// A ray's hit takes the light it sends on from the faces of the probes around it, and a face
-    /// held the light reaching a surface where the probe stood, a unit or more over the floor it
-    /// was read for, nearer the walls and the ceiling than the floor is. Each bounce came back
-    /// about 5% over its reference, and through them all the light past the direct read 16 to 20%
-    /// over in a room of 4, 17 to 27% in one of 8 and 7 to 13% in one of 16, where the first bounce
-    /// alone read as its reference. The faces' light is read toward the light the surface each is
-    /// read for gathers, the probe's rays moved to start from where its own ray along the face's
-    /// opposite way met one and each patch they met turned toward it (gi_ambient.slang), and the
-    /// rooms read 4 to 5% over, 3 to 12% over and 3% under to even. The bar is 15%, since the
-    /// patches' turn raises the room of 8's wall facing -x to 12% over, where the faces moved by
-    /// their patches' distance alone read it 8%. In the box of a bay and its aisle
-    /// (<see cref="BayAndAisle"/>) seen from z 7 the aisle's east wall read 16% over its reference
-    /// and reads 10%, its ceiling 12% and 7%, its back wall 32% and 26%, its west wall 12% and 3%,
-    /// its floor 6% and 1%, and the bay's back wall 9% under and 12% under. The bounce rooms'
-    /// grazing floor, read on the world's probes alone in a field of 0.15, comes back 0.89 of its
-    /// reference's light past the direct, its whole light 9% under where the gain left it 5%
-    /// under, and the room lifted 0.3 against the probes' grid reads 1.05, the layers' heights
-    /// against the lamp's bright spot under its ceiling deciding it
-    /// (<see cref="BounceRoomsTests"/>). With each face past the first keeping for its diffuse share
-    /// what its gloss leaves, at a probe's ray's hit and in the reference, the rooms of 4, 8 and 16
-    /// read 0 to 2% over, 3% under to 5% over and 4 to 7% under.
+    /// A ray's hit takes the light it sends on from the faces of the probes around it, and a
+    /// probe's face holds the light reaching a surface where the probe stands, a unit or more over
+    /// the floor it is read for, nearer the walls and the ceiling than the floor is. So the faces'
+    /// light is read toward the light the surface each is read for gathers, the probe's rays moved
+    /// to start from where its own ray along the face's opposite way met one and each patch they
+    /// met turned toward it (gi_ambient.slang), and each face past the first keeps for its diffuse
+    /// share what its gloss leaves, at a probe's ray's hit and in the reference. The rooms of 4, 8
+    /// and 16 read within 7% of their references, so the bar of 15% fails a face that leaves its
+    /// reference by twice that. In the bounce rooms' grazing floor the layers' heights against the
+    /// lamp's bright spot under its ceiling decide how near its reference the floor reads
+    /// (<see cref="BounceRoomsTests"/>).
     /// </remarks>
     [SkippableTheory]
     [InlineData(4f)]
@@ -57,16 +47,15 @@ public sealed partial class GlobalIlluminationTests
     /// white as 0.95 within half, the guard that their light does not run away.
     /// </summary>
     /// <remarks>
-    /// A probe's ray's hit sent on its color's diffuse share at its whole color beside its gloss's
-    /// share toward the ray, so a smooth white face met at a grazing ray sent on more light than
-    /// reached it, and the walls as white as 0.95 ran away, the light past the direct 1,136 to 1,195
-    /// times its reference's, where the level's white read 1.00 to 1.04. Its diffuse share keeps
-    /// what its gloss leaves, and the reference's faces past the first keep the same, and the walls
-    /// as white as 0.95 read 1.35 to 1.38 and the level's white 1.08 to 1.16. What is left is the
-    /// hit's gloss taken as though the light reached it evenly from all around, a probe there holding
-    /// its first bounce within 0.3% of its reference and each bounce past it 12 to 16% over, where
-    /// the reference's gloss reflects the light along its mirror way, dimmer past the first bounce
-    /// at a grazing ray than the light from all around.
+    /// A probe's ray's hit sends on its color's diffuse share keeping what its gloss leaves, beside
+    /// its gloss's share toward the ray, so a smooth white face met at a grazing ray sends on no
+    /// more light than reached it, and the reference's faces past the first keep the same. What is
+    /// left is the hit's gloss taken as though the light reached it evenly from all around, a probe
+    /// there holding its first bounce as its reference and each bounce past it over, where the
+    /// reference's gloss reflects the light along its mirror way, dimmer past the first bounce at a
+    /// grazing ray than the light from all around. The whiter the walls, the more that excess
+    /// gathers, so the walls as white as 0.95 read up to 1.38 of their reference's light past the
+    /// direct and the level's white up to 1.16, which the bounds of half and a fifth hold.
     /// </remarks>
     [SkippableTheory]
     [InlineData(0.787f, 0.2)]
@@ -92,23 +81,16 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// The box is five units high and its lamp hangs 0.8 under its ceiling. A probe's face is right
-    /// at its own point, its texels within 3% of their light worked out by hand at one bounce and
-    /// the face within 2.4%, so the excess lay in reading the faces for a surface. Read where the
-    /// probes stand, the faces read the box's light past the direct 8 to 17% over. Moved to the
-    /// surfaces by each patch's distance alone they read 9 to 21% over, since a patch the probe saw
-    /// squarely and the surface sees at a slant, as a wall's band under the ceiling, counted for as
-    /// much as it did at the probe, which a probe's face up moved to the floor a unit below read
-    /// 14% over the floor's irradiance worked out by hand and turned by the field's normal there 2%
-    /// over. Turned, the box reads 2 to 12% over, and with each pixel's read of the probes taken
-    /// toward the faces at the surfaces as a ray's hit takes them, 1 to 3%. The reference's faces
-    /// reflect the box by their gloss, the walls at a roughness of 0.5. The picture gave a wall's
-    /// gloss Bevy's reflection times the share of the sky the probes saw along the mirror way, none
-    /// in a closed box, so the green wall read 0.809 of the light past the direct a reference
-    /// reflecting by its first face's gloss alone holds, and read from the eight by eight
-    /// directions of the probes the wall sees along the mirror way, 1.023. Against the whole
-    /// reference that read 0.885, the gloss between bounces left out, and with the probes' rays
-    /// carrying the gloss of what they meet 1.024, its faces reading 1.02 to 1.04 with each face
-    /// past the first keeping for its diffuse share what its gloss leaves.
+    /// at its own point, so what the box reads past its reference lies in reading the faces for a
+    /// surface. Moved to the surfaces by each patch's distance alone, a patch the probe saw
+    /// squarely and the surface sees at a slant, as a wall's band under the ceiling, would count
+    /// for as much as it did at the probe, so each patch is turned by the field's normal there, and
+    /// each pixel's read of the probes is taken toward the faces at the surfaces as a ray's hit
+    /// takes them. The reference's faces reflect the box by their gloss, the walls at a roughness
+    /// of 0.5, and the picture reads a wall's gloss from the eight by eight directions of the
+    /// probes the wall sees along the mirror way, with the probes' rays carrying the gloss of what
+    /// they meet and each face past the first keeping for its diffuse share what its gloss leaves,
+    /// so the box's faces read up to 4% over their reference, under the bound of 6%.
     /// </remarks>
     [SkippableFact]
     public void AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference()

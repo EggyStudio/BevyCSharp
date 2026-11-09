@@ -28,7 +28,8 @@ public sealed class MemoryGuardTests
         // takes, and aggressive, so the collector decommits what it freed now rather than over the
         // seconds after. Then no collection runs until the second reading, since one in between
         // would give pages back while this counts them in, and on macOS, whose allocator returns
-        // freed blocks to the system at once, the footprint read 186.6 megabytes of growth that way.
+        // freed blocks to the system at once, the footprint would read the growth short by what it
+        // gave back.
         for (var pass = 0; pass < 2; pass++)
         {
             GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
@@ -44,10 +45,10 @@ public sealed class MemoryGuardTests
             // array pages it kept resident from earlier tests, so the growth read would be what it
             // held back rather than what the guard reads. A byte a page written, so its pages are
             // the machine's and not only promised. Read on Windows as the private bytes committed,
-            // which Windows cannot trim as it trimmed a working set that read this as 64 megabytes
-            // more, and on macOS as the physical footprint, which counts the pages the system
-            // compressed under pressure where the resident size read this as 189 megabytes more on
-            // a runner short of memory.
+            // which Windows cannot trim as it trims a working set, which can read a fraction of
+            // this, and on macOS as the physical footprint, which counts the pages the system
+            // compressed under pressure, which the resident size leaves out on a runner short of
+            // memory.
             var held = (byte*)NativeMemory.Alloc(size);
             try
             {

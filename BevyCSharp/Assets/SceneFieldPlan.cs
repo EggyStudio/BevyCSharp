@@ -276,9 +276,9 @@ internal sealed partial class SceneFieldPlan
     /// </summary>
     /// <remarks>
     /// Two entities drawing one mesh where each other is add nothing to the field, so the field
-    /// gathers the frames after without the second once this is set, and those are read by place.
-    /// One such pair among the feature test's 261 meshes read every frame whole, the plan taking
-    /// 0.68 ms a frame in a build that is not optimized, and 0.18 ms read by place.
+    /// gathers the frames after without the second once this is set, and those are read by place,
+    /// since one such pair would have every frame read whole, which costs the plan several times
+    /// what a frame read by place does.
     /// </remarks>
     public bool DrewTwice { get; private set; }
 
@@ -330,13 +330,9 @@ internal sealed partial class SceneFieldPlan
     /// the positive way 9.6 to 17.6, so where a side lies within a step of the eye the cascade
     /// moves a step further that way. A layer of probes, which stand a step apart, then stands
     /// behind the eye, and the wall the eye backs onto lies inside the cascade. Snapped down alone,
-    /// an aisle seen down its length from a unit inside its front wall had its first two cascades
-    /// end on that wall, the probes' hits on it lying past their sides and taken through the next
-    /// cascade's cells and probes, so the wall read black to the probes before it, the first
-    /// cascade's probes a unit from it reading their face toward it 0.01 where 0.33, and the aisle
-    /// read 11% under its reference where seen from 0.3 nearer the wall it read 4% over. The
-    /// feature test's hall seen from two units inside its front wall had its first three cascades
-    /// end on it, and its floor read 17% under where it reads 6%.
+    /// a cascade could end on a wall a unit behind the eye, the probes' hits on it lying past their
+    /// sides and taken through the next cascade's cells and probes, so the wall would read black to
+    /// the probes before it and the floor before it would be lit too dark.
     /// </remarks>
     public Vector3 OriginAround(int cascade, Vector3 eye, Vector3 ahead = default)
     {

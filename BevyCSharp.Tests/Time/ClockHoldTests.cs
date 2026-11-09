@@ -23,11 +23,11 @@ public sealed class ClockHoldTests
     /// stands still however fast the load is.
     /// </para>
     /// <para>
-    /// The load runs on Bevy's threads for loading and is taken in before each frame's systems, with
-    /// no step of the clock in it, so a held clock holds nothing the load waits on. Its length is the
-    /// machine's, so the frames are paced at sixty a second for as long as ten seconds, the run
-    /// ending three frames after the load, where twenty seven frames as fast as they ran had ended
-    /// before it on a macOS runner of the pack run 39324217456.
+    /// The load runs on Bevy's threads for loading and is taken in before each frame's systems,
+    /// with no step of the clock in it, so a held clock holds nothing the load waits on. Its length
+    /// is the machine's, so the frames are paced at sixty a second for as long as ten seconds, the
+    /// run ending three frames after the load, where a set count of frames run as fast as they go
+    /// can end before a slow runner's load does.
     /// </para>
     /// </remarks>
     [Fact]

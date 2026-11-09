@@ -277,9 +277,9 @@ internal static unsafe partial class GiReference
         if (!camera.IsNone && ecs.IsAlive(camera)) return camera;
 
         // Where the field lies around no camera, the camera the bridge takes for the view, the
-        // active 3D one of the highest order, as the field takes it. The world's first 3D camera
-        // was taken before, which in the feature test's yard was one drawing nothing, so a read
-        // with global illumination off asked for the picture's size until it gave up.
+        // active 3D one of the highest order, as the field takes it, since the world's first 3D
+        // camera can be one drawing nothing, and a read with global illumination off would ask for
+        // that camera's picture size until it gave up.
         NativeSceneCounts counts = default;
         if (Native.bcs_render_scene_counts(&counts) != NativeStatus.Ok || counts.Camera == 0) return Entity.None;
         var view = new Entity(counts.Camera);
@@ -368,11 +368,11 @@ internal static unsafe partial class GiReference
     /// Bevy measures the distance to the entity's place, or to the middle of its box where the
     /// range asks, and over a margin dithers the level fading out and the one fading in each over a
     /// share of the pixels, so the nearer half of each margin is the nearer level's and the farther
-    /// half the farther one's, and one level of a tree is traced at any distance. The reference
-    /// held every shown mesh, so a tree was traced at every level at once, its leaves, its reduced
-    /// leaves and its far cards over each other, and in the feature test's meadow the cards, their
-    /// textures past the material buffer's masks, stood as planes over the crowns and cast a dark
-    /// shadow over the grass, the camera inside an oak's crown meeting a card and nothing else.
+    /// half the farther one's, and one level of a tree is traced at any distance. Holding every
+    /// shown mesh, the reference would trace a tree at every level at once, its leaves, its reduced
+    /// leaves and its far cards over each other, the cards, their textures past the material
+    /// buffer's masks, standing as planes over the crowns and casting a dark shadow over the ground
+    /// below, and a camera inside a crown meeting a card and nothing else.
     /// </remarks>
     private static bool InRange(EcsWorld ecs, Entity entity, Vec3 eye)
     {

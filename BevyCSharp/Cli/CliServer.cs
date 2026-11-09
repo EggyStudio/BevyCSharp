@@ -88,11 +88,11 @@ internal sealed class CliServer : IDisposable
     /// <summary>Takes calls until the listener is closed.</summary>
     /// <remarks>
     /// A call is waited for by polling the listener, which pins nothing, and accepted only once one
-    /// is waiting. A blocking accept keeps the buffer it writes the caller's address into pinned for
-    /// as long as it waits, a new one after each call, so a young object sat pinned in the newest
-    /// generation whenever a collection ran and held the space in front of it, which left the heap
-    /// a full collection compacts megabytes larger from one reading to the next with nothing
-    /// growing, as a soak of the stress program showed.
+    /// is waiting. A blocking accept keeps the buffer it writes the caller's address into pinned
+    /// for as long as it waits, a new one after each call, so a young object would sit pinned in
+    /// the newest generation whenever a collection ran and hold the space in front of it, which
+    /// would leave the heap a full collection compacts larger from one reading to the next with
+    /// nothing growing.
     /// </remarks>
     private void Accept()
     {

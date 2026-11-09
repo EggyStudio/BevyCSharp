@@ -9,10 +9,10 @@
 // light by it, and taken back times what the field closes off. The picture before tonemapping holds
 // light as floats, so adding less than nothing takes it away. Taken back as the light is above the
 // air, a sun below the horizon, which Bevy's atmosphere puts out and the field sees the ground
-// stand before, had all its light taken from what faced it, and at night the feature test's walls
-// facing a sun of 12,500 lux 43 degrees down read 0.6 to 3 under nothing. Bevy's clearcoat and
-// anisotropy, a light texture and the light's own contact shadows are not worked out again, so
-// where a surface has them the light taken away differs from the light Bevy added by as much.
+// stand before, would have all its light taken from what faced it, and at night the walls facing it
+// would be taken below nothing. Bevy's clearcoat and anisotropy, a light texture and the light's
+// own contact shadows are not worked out again, so where a surface has them the light taken away
+// differs from the light Bevy added by as much.
 //
 // Past the shadow map's reach alone by default, so a shadow the map draws keeps its hard edge and
 // the ground beyond the map is still shadowed, or everywhere the field reaches, the map's shadow

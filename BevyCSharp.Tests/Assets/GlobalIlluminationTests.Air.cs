@@ -11,11 +11,11 @@ public sealed partial class GlobalIlluminationTests
     /// lighting the floor they bounce from by the sun through the air, as Bevy lights the picture.
     /// </summary>
     /// <remarks>
-    /// The probes were lit by the sun as it is above the air, so at a low sun the light they
-    /// bounced was brighter than the floor the picture showed and near white where the picture's
-    /// floor was reddened, and a wall in shade read brighter and bluer than its reference. The
-    /// ambient light is none and the camera has no environment map, so the wall's light is the
-    /// floor's alone.
+    /// The probes are lit by the sun through the air, as the picture's floor is, since lit by the
+    /// sun as it is above the air, at a low sun the light they bounce would be brighter than the
+    /// floor the picture shows and near white where the picture's floor is reddened, and a wall in
+    /// shade would read brighter and bluer than its reference. The ambient light is none and the
+    /// camera has no environment map, so the wall's light is the floor's alone.
     /// </remarks>
     [SkippableFact]
     public void AWallInShadeTakesTheFloorsLightAsItsReferenceDoesUnderALowSun()

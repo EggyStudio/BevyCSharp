@@ -16,21 +16,17 @@ import sys
 #
 # The live figure is the bytes the managed heap holds alive, those kept by the full compacting
 # collection memory.collect makes, as build/soak.sh reads it after each round, and the heap's size
-# is its size after that collection, what is alive and the free space pinned objects hold apart.
-# A compacting collection leaves no other free space, so a heap that climbs while the live bytes
-# stand still is space held by a pin that should have let go. On a ten-minute soak of Courtyard,
-# the stress program and Swarm on lavapipe before memory.collect compacted, the heap moved by as
-# much as 3,726,064 bytes, the stress program's, with nothing climbing, and compacting alone left
-# it moving by 3,330,864, held by the buffer a blocking accept of the command line's server kept
-# pinned in the newest generation, which the server's polling before it accepts lets go of.
+# is its size after that collection, what is alive and the free space pinned objects hold apart. A
+# compacting collection leaves no other free space, so a heap that climbs while the live bytes stand
+# still is space held by a pin that should have let go, as a buffer a blocking accept keeps pinned
+# in the newest generation would be, which is why the command line's server polls before it accepts.
 SLACK = {
-    # A ten-minute soak of Courtyard, the stress program and Swarm on lavapipe held what each kept
-    # alive within 60,712 bytes of where it settled, Courtyard's 2,191,664 to 2,253,432, so a
-    # quarter of a megabyte past the first half's most is four times that.
+    # A ten-minute soak of Courtyard, the stress program and Swarm on lavapipe holds what each keeps
+    # alive within 60,712 bytes of where it settles, so a quarter of a megabyte past the first
+    # half's most is four times that.
     "live": (0.05, 256 << 10),
-    # The same soak after both mends held each heap within 8,672 bytes of its live bytes, and
-    # each moved by 23,416 bytes at most, Courtyard's, so an eighth of a megabyte past the first
-    # half's most is five times that.
+    # The same soak holds each heap within 8,672 bytes of its live bytes, and each moves by 23,416
+    # bytes at most, so an eighth of a megabyte past the first half's most is five times that.
     "heap": (0.05, 128 << 10),
     # The rest are each twice the most the figure moved, from its least to its most, over a soak of
     # Courtyard, the stress program and Swarm (build/soaks.sh 600 courtyard stress swarm) and one of

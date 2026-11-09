@@ -87,10 +87,9 @@ public partial struct DayNight
     /// By day a warm white of 1000, the color of sunlit white, rising with the sun from the night's
     /// dim blue and falling with it, in place of the light the level's near white walls and floors
     /// would throw into the shade, which nothing draws while the map's global illumination is off.
-    /// Lit by the sky alone, the gallery's shaded floor in the drive's view at eight in the morning
-    /// read blue, its blue light 2.3 times its red, and with this fill and the day's look reads
-    /// 1.17. It lights every surface alike, so the shading is a little flatter and a shut room, as
-    /// the light hall is, a little brighter.
+    /// Lit by the sky alone, a shaded floor reads blue, and with this fill and the day's look it
+    /// reads near white. It lights every surface alike, so the shading is a little flatter and a
+    /// shut room, as the light hall is, a little brighter.
     /// </remarks>
     private static readonly Key[] Ambient =
     [
@@ -228,12 +227,12 @@ public partial struct DayNight
     /// </para>
     /// <para>
     /// The sun reaches the ground through Bevy's air a little yellow, a sunlit white floor's blue
-    /// light 0.88 of its red at eight in the morning under a clear sky, so the day's looks take a
-    /// little red out and add a little blue, as a camera balances its white to the light it is in,
-    /// which brings that floor to 0.92, the warm fill keeping the shade from going blue with it. The
-    /// looks below eight degrees keep their warmth, the sunset's own. In the drive's view along the
-    /// course at eight, toward the sun through the morning's haze, the floor goes from 0.58 to 0.79,
-    /// the haze lit from in front by a low sun keeping some of its gold.
+    /// light short of its red in the morning under a clear sky, so the day's looks take a little
+    /// red out and add a little blue, as a camera balances its white to the light it is in, which
+    /// brings that floor nearer white, the warm fill keeping the shade from going blue with it. The
+    /// looks below eight degrees keep their warmth, the sunset's own. Toward a low sun through the
+    /// morning's haze the floor whitens as well, the haze lit from in front keeping some of its
+    /// gold.
     /// </para>
     /// </remarks>
     private static LookCycle Calmer(LookCycle cycle)

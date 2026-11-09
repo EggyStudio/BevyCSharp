@@ -419,12 +419,12 @@ public sealed class Config
     /// </para>
     /// <para>
     /// Bevy runs every meshlet pass in every shadow view, six for each point light that casts
-    /// shadows and one for each cascade of a directional light, whether or not a meshlet mesh is
-    /// in it. On an NVIDIA driver each such view came to hold a few hundred megabytes of the
-    /// driver's own memory over its first quarter of a minute, wgpu's resources standing still,
-    /// so a scene lit by many shadowed lights holds gigabytes more with meshlets than without, and
-    /// its lights are better left without shadows while they run. The <c>memory</c> command's
-    /// <c>gpu.</c> pairs beside the process's size tell this apart from a leak of the game's own.
+    /// shadows and one for each cascade of a directional light, whether or not a meshlet mesh is in
+    /// it. On an NVIDIA driver each such view comes to hold a share of the driver's own memory over
+    /// its first seconds, wgpu's resources standing still, so a scene lit by many shadowed lights
+    /// holds far more with meshlets than without, and its lights are better left without shadows
+    /// while they run. The <c>memory</c> command's <c>gpu.</c> pairs beside the process's size tell
+    /// this apart from a leak of the game's own.
     /// </para>
     /// </remarks>
     public uint MeshletClusters { get; set; }
@@ -461,8 +461,8 @@ public sealed class Config
     /// <remarks>
     /// Off by default, as Bevy leaves the plugins out of its defaults, which its own wireframe
     /// examples add. Each plugin looks at every mesh of its kind in the render's prepare and queue
-    /// phases on every frame, whether or not any is drawn as edges, which costs about 8 ms a frame
-    /// at a hundred thousand sprite meshes. An editor outlining what is selected turns it on.
+    /// phases on every frame, whether or not any is drawn as edges, so a scene of many sprite
+    /// meshes pays for it on every frame. An editor outlining what is selected turns it on.
     /// </remarks>
     public bool Wireframes { get; set; }
 

@@ -35,10 +35,10 @@ case "$name" in
 esac
 if [ "$name" = feature-test ]; then
     folder="${3:-games/FeatureTest/bin/Release/net10.0}"
-    # Eight gigabytes where the environment names none, as the drive gives it, since on lavapipe
-    # with no shader cache of Mesa's, as the soak's job of its own starts, the feature test reached
-    # the cap it is given otherwise, a quarter of the runner's 15.6 gigabytes, while its pipelines
-    # compiled.
+    # Eight gigabytes where the environment names none, as the scripted run gives it, since on
+    # lavapipe with no shader cache of Mesa's, as the soak's job of its own starts, the feature test
+    # reaches the cap it is given otherwise, a quarter of the runner's 15.6 gigabytes, while its
+    # pipelines compile.
     export BCS_MEMORY_CAP_GB="${BCS_MEMORY_CAP_GB:-8}"
 else
     folder="${3:-games/$program/bin/Debug/net10.0}"
@@ -61,10 +61,10 @@ trap 'code=$?; echo "FAILED: $name: $BASH_COMMAND ended with $code on line $LINE
 trap './bcs stop --name "$program" >/dev/null 2>&1 || true' EXIT
 (cd "$folder" && { BCS_OFFSCREEN=1 BCS_SERVE=1 "./$program" "${args[@]}"; echo "[soak] the game exited with $?"; } >"$log" 2>&1 &)
 # Ten minutes for the game to answer, as long as each command is given, and its answer taken once
-# rather than asked for again. On lavapipe with no shader cache of Mesa's, as the feature test's soak
-# in a job of its own starts, the game says it is ready at its first frame and then answers nothing
-# for minutes while its pipelines compile, so a second asking read it unreachable, and two minutes
-# of asking ran out on the working machine.
+# rather than asked for again. On lavapipe with no shader cache of Mesa's, as the feature test's
+# soak in a job of its own starts, the game says it is ready at its first frame and then answers
+# nothing for minutes while its pipelines compile, so a second asking reads it unreachable, and two
+# minutes of asking is too short there.
 answered=0
 for _ in $(seq 1 600); do ./bcs status 2>/dev/null | grep -q "ready.*$program" && { answered=1; break; }; sleep 1; done
 [ "$answered" = 1 ] || fail "the game never answered"
@@ -75,9 +75,9 @@ for _ in $(seq 1 600); do ./bcs status 2>/dev/null | grep -q "ready.*$program" &
 quiet frames.wait 60
 # The feature test's global illumination at the quality GLOBAL_ILLUMINATION names, the game's own
 # where it names none, as the scripted run's (build/drive-feature-test.sh), and put back as it was
-# at the end. The workflow names Off, since on the working machine's lavapipe on four threads the
-# hub took 3.4 seconds a frame with it at Medium and 1.8 without it, and rounds of that length would
-# not reach the readings the check judges by the soak's last second.
+# at the end. The workflow names Off, since its tracing takes a large share of each frame on
+# lavapipe, and rounds that long would not reach the readings the check judges by the soak's last
+# second.
 illumination_was=""
 if [ "$name" = feature-test ] && [ -n "${GLOBAL_ILLUMINATION:-}" ]; then
     illumination_was=$(c setting GlobalIllumination | sed -n 's/^GlobalIllumination = //p')
@@ -138,8 +138,9 @@ round() {
     esac
 }
 
-# Six readings, as build/soak-check.py judges no fewer, which Swarm's rounds of two minutes on
-# lavapipe held to four processors of the working machine missed by one in ten minutes.
+# Six readings, as build/soak-check.py judges no fewer, which a slow game's rounds on lavapipe can
+# fall short of in the seconds given, so the soak plays on past them until it has six, for half the
+# seconds again at most.
 fewest=$(python3 build/soak-check.py --fewest)
 rounds=0
 readings=0

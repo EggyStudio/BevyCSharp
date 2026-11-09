@@ -359,11 +359,9 @@ internal static partial class ConsoleWorldCommands
     /// <para>
     /// What a capture of a scene waits for, rather than a number of frames, since Bevy compiles a
     /// pipeline off the main thread over a time no count of frames promises, and what is drawn with
-    /// one still compiling is left out of the picture. A capture of every example taken a hundred
-    /// and twenty frames in drew the transmission example black once, which the same capture taken
-    /// again did not, and the feature test's meadow, first seen forty frames before its shot, lost
-    /// its grass or its walls' light in ten fresh sessions of ten, its pipelines compiling five
-    /// seconds more. A run that draws nothing answers at once, having nothing to compile.
+    /// one still compiling is left out of the picture, so a capture taken a number of frames in
+    /// draws what has compiled by then, a scene's newest materials missing from one run and drawn
+    /// in the next. A run that draws nothing answers at once, having nothing to compile.
     /// </para>
     /// <para>
     /// Ready for three frames running, since a pipeline is asked for as the frame that needs it is

@@ -40,8 +40,8 @@ public sealed class SceneFieldShadowTests(ITestOutputHelper output)
 
         AssetHandle image = AssetHandle.None;
         // The slice's program compiles beside the three the field is built with and can come after
-        // them, and until it has the slice is no image, which the whole suite once read back a second
-        // into the run, so it is asked for each frame until it answers one.
+        // them, and until it has the slice is no image, for as long as a second where other tests
+        // share the GPU, so it is asked for each frame until it answers one.
         run.Until("settled", _ => SceneField.Plan is { StillCount: 1 } plan && plan.Shapes.Count == 0)
             .Until("slicing across y through the box's middle", _ =>
             {
@@ -121,11 +121,11 @@ public sealed class SceneFieldShadowTests(ITestOutputHelper output)
     /// the field, so a pillar's side facing it reads as it does with the field's shadows off.
     /// </summary>
     /// <remarks>
-    /// The field's shadows took back the light a directional light sent a surface as it is above
-    /// the air, and the field sees the ground stand between a sun below the horizon and every
-    /// surface facing it, so they took back all of a light Bevy had given none of and left the
-    /// pillar's side black, as the feature test's walls facing its sun 43 degrees down read 0.6 to
-    /// 3 under nothing at night. The light is taken back through the camera's air as Bevy dims it.
+    /// The field sees the ground stand between a sun below the horizon and every surface facing it,
+    /// so shadows that took back the light a directional light sends a surface as it is above the
+    /// air would take back all of a light Bevy gives none of and leave the pillar's side black, as
+    /// the feature test's walls facing its sun at night. The light is taken back through the
+    /// camera's air as Bevy dims it.
     /// </remarks>
     [SkippableFact]
     public void ASunUnderTheHorizonHasNoLightTakenBackThroughTheField()

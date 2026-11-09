@@ -64,12 +64,12 @@ public sealed partial class GlobalIlluminationTests
     /// <remarks>
     /// The probe stands at (1, 1.5, 1) in the first cascade, held at its first bounce and at its
     /// second (<c>WorldProbes.HoldBounces</c>), against 256 paths a way of one face and of two past
-    /// the first. A ray's hit reflected the indirect light by its gloss as though it reached the face
-    /// evenly from all around, and the second bounce read 12.5% over its reference, where read along
-    /// the mirror way it reads 11.1%, the first 0.3% over either way. What is left is the sun's and
-    /// the lights' light, which a hit reflects evenly by its gloss. Lit by each light's highlight,
-    /// the second bounce read 3.0% over and the first 6.4% under, the probe's rays leaving along the
-    /// same ways each frame and catching or missing a highlight as sharp as a roughness of 0.1 gives.
+    /// the first. A ray's hit reflects the indirect light by its gloss along the ray's mirror way,
+    /// rather than as though it reached the face evenly from all around. What is left is the sun's
+    /// and the lights' light, which a hit reflects evenly by its gloss, since the probe's rays
+    /// leave along the same ways each frame and would catch or miss a highlight as sharp as a
+    /// roughness of 0.1 gives. The second bounce reads about 11% over its reference, which the
+    /// bound of 12% holds.
     /// </remarks>
     [SkippableFact]
     public void ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay()

@@ -303,8 +303,7 @@ public sealed partial class NormTests
 
         // The natives staged for the pack, a system a folder, each in its runtime's folder. The
         // folders named as a runtime are read alone, and the files in them a level deep, since a
-        // file beside them is no library. The pack run of 292eead2 wrote its release notes into
-        // build/artifacts, and this read them as the natives of a runtime called artifacts.
+        // file beside them, as the release notes a pack writes into build/artifacts, is no library.
         var staged = Path.Combine(Root, "build", "artifacts");
         var runtime = new Regex(@"^(?:linux|linux-musl|win|osx)-(?:x64|arm64)$");
         if (Directory.Exists(staged))

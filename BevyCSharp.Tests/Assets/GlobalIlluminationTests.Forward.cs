@@ -12,10 +12,10 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// The light pass lights the G-buffer's surfaces and is to pass over a pixel no deferred
-    /// material drew, which it told by a texel of nothing. Bevy clears the G-buffer to black with
-    /// an alpha of one, so a pixel drawn forward read as a black mirror, and the pass took the
-    /// reflection of the sky Bevy gives a mirror at a slant from it with nothing given, which left
-    /// the feature test's meadow's leaves dark red.
+    /// material drew, telling it apart from Bevy's clear of the G-buffer, black with an alpha of
+    /// one, which reads as a black mirror, so a pixel drawn forward taken for a surface would take
+    /// the reflection of the sky Bevy gives a mirror at a slant with nothing given, leaving the
+    /// feature test's meadow's leaves dark red.
     /// </remarks>
     [SkippableFact]
     public void ASurfaceDrawnForwardKeepsTheLightBevyGaveIt()
@@ -77,12 +77,11 @@ public sealed partial class GlobalIlluminationTests
     /// <remarks>
     /// The reflection is traced through the picture's depth and passes over a face it meets from
     /// behind, which it reads from the G-buffer's normal. A wall drawn forward has no texel there
-    /// but Bevy's clear, whose normal decodes as facing along -z, so the trace turned away every
-    /// ray from the floor meeting the wall, and it takes such a texel as met. The floor read 244,
-    /// 111 and 103 with the check reverted where it reads 233, 100 and 95, the trace's other paths
-    /// and the field's finding the wall all the same, a wall thinner than the field's cells as
-    /// well, so this does not fail without the check and holds that a wall drawn forward is
-    /// reflected.
+    /// but Bevy's clear, whose normal decodes as facing along -z, so a ray from the floor meeting
+    /// the wall would be turned away, and the trace takes such a texel as met. The trace's other
+    /// paths and the field find the wall all the same, a wall thinner than the field's cells as
+    /// well, so the floor reflects it nearly as brightly without the check, and this holds that a
+    /// wall drawn forward is reflected rather than the check itself.
     /// </remarks>
     [SkippableFact]
     public void AMirrorFloorReflectsARedWallDrawnForward()

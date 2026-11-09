@@ -11,13 +11,13 @@ public sealed partial class GlobalIlluminationTests
     /// probes reaching it as High's do.
     /// </summary>
     /// <remarks>
-    /// Medium's probes lay in three cascades, the last in a box 64 units wide lying 0.35 of its
+    /// Medium's probes lie in three cascades, the last in a box 64 units wide lying 0.35 of its
     /// width ahead of the eye, which a wall 56 units off along each axis of a diagonal view lies
-    /// past. The pass gave it the light past the probes, a sky over a ground whose ground a cell in
-    /// front of the wall lies in the wall's own shadow at a low sun, so the wall took none of the
-    /// sunlit wall's and floor's light, as the feature test's yard's far wall read 42% under its
-    /// reference at eight in the morning. The ambient light is none and the camera has no
-    /// environment map, so the wall's light comes from the yard's sunlit faces alone.
+    /// past. The light past the probes, a sky over a ground, takes its ground from a cell in front
+    /// of the wall, which lies in the wall's own shadow at a low sun, so a wall lit by it alone
+    /// takes none of the sunlit wall's and floor's light, as the feature test's yard's far wall at
+    /// eight in the morning. The ambient light is none and the camera has no environment map, so
+    /// the wall's light comes from the yard's sunlit faces alone.
     /// </remarks>
     [SkippableFact]
     public void AFarWallInShadeTakesTheYardsLightAtMedium()

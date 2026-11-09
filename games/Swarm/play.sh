@@ -22,11 +22,11 @@ fail() { echo "FAILED: $*" >&2; grep -h "^\[swarm\]\|^\[play\]" "$shots/game.log
 
 # Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since
 # most of them wait for frames, a hold of 80, a profile of 120, and a software device, as the
-# workflow's runner has, draws the game's hundreds of creatures a few frames a second. The pack run
-# of 292eead2 ended on a command's timeout with nothing said but bcs's exit code, so one that fails
-# says its words, its code and the first line bcs gave of why, and anything else that fails is
-# named by the trap below. bcs writes why a command failed to its output, as it writes the answer,
-# so the output is kept in a file and passed on once the command has worked.
+# workflow's runner has, draws the game's hundreds of creatures a few frames a second. A command
+# that fails would say nothing of itself but bcs's exit code, so one that fails says its words, its
+# code and the first line bcs gave of why, and anything else that fails is named by the trap below.
+# bcs writes why a command failed to its output, as it writes the answer, so the output is kept in a
+# file and passed on once the command has worked.
 c() { ./bcs command "$@" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
 shot() { ./bcs shot "$1" --timeout 600 >"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }

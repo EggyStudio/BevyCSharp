@@ -66,12 +66,10 @@ public sealed class LightSettings
     /// <see langword="null"/> for Bevy's default for the kind of light.
     /// </summary>
     /// <remarks>
-    /// Handles what depth bias alone does not, a surface lit at a glancing angle, where a
-    /// small depth error covers a long distance. Bevy's default is 1.8 for a directional light and
-    /// a spot light and 0.6 for a point light. A sun at 0.6 leaves a wall it grazes in a far
-    /// cascade under its own shadow over a share of its filter, 19% under the light the path-traced
-    /// reference's sun gives it at 70 degrees from its normal, where at Bevy's 1.8 it reads within
-    /// 1%.
+    /// Handles what depth bias alone does not, a surface lit at a glancing angle, where a small
+    /// depth error covers a long distance. Bevy's default is 1.8 for a directional light and a spot
+    /// light and 0.6 for a point light. A sun at 0.6 leaves a wall it grazes in a far cascade under
+    /// its own shadow over a share of its filter, which Bevy's 1.8 lights whole.
     /// </remarks>
     public float? ShadowNormalBias { get; set; }
 }

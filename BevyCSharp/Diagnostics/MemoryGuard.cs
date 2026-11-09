@@ -76,27 +76,26 @@ public static partial class MemoryGuard
     /// <para>
     /// On Linux, the anonymous pages the process holds in the machine's memory, <c>RssAnon</c> of
     /// <c>/proc/self/status</c>, its heaps and stacks and a software device's memory, without the
-    /// pages of the files it maps, its code among them, which the system drops and reads again as it
-    /// needs, or the memory it shares with a graphics driver, which the driver holds. The whole
-    /// resident set, which counts both, moved by megabytes from one reading of a soak to the next
-    /// with nothing the process held climbing. The resident set is read where the system does not
+    /// pages of the files it maps, its code among them, which the system drops and reads again as
+    /// it needs, or the memory it shares with a graphics driver, which the driver holds. The whole
+    /// resident set, which counts both, moves as the system drops and reads those pages again, with
+    /// nothing the process holds climbing. The resident set is read where the system does not
     /// answer.
     /// </para>
     /// <para>
     /// On macOS, the physical footprint, which Activity Monitor shows as a process's memory, its
     /// resident pages and those the system's memory compressor holds for it compressed. Short of
     /// memory, macOS compresses pages a process has not touched lately, which stay the process's
-    /// and leave its resident size, so a resident size read 189 megabytes more for a quarter of a
-    /// gigabyte written a byte a page on a runner short of memory, where the footprint counts it
-    /// all. The resident size is read where the system does not answer.
+    /// and leave its resident size, so on a machine short of memory a resident size reads less than
+    /// the process holds, where the footprint counts it all. The resident size is read where the
+    /// system does not answer.
     /// </para>
     /// <para>
     /// On Windows, the private bytes the process has committed, its commit charge, rather than its
     /// working set. Windows trims a working set as it pleases, moving pages the process has not
     /// touched lately to its standby list while they are still the process's, so a working set can
-    /// read far less than the process holds, and read as a quarter of a gigabyte written a byte a
-    /// page grew by 64 megabytes. What runs a Windows machine out is its commit limit, which the
-    /// private bytes count toward until they are freed, whatever is trimmed.
+    /// read far less than the process holds. What runs a Windows machine out is its commit limit,
+    /// which the private bytes count toward until they are freed, whatever is trimmed.
     /// </para>
     /// <para>Each reading is kept toward the peak the <c>memory</c> command says.</para>
     /// </remarks>

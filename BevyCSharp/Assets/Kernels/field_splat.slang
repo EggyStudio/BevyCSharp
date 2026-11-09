@@ -364,14 +364,14 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
         if (groups.z == 0u)
         {
             cells[index].min(code);
-            // Straight behind, its nearest point inside the face and not on an edge, as a wall's
-            // far face lies behind a cell by its near one, where a cell beside a box's edge lies 45
-            // degrees behind the face round it. Taken within 25 degrees, a wall thinner than a cell
-            // standing on a floor had its bottom face, buried against the floor's top, nearer the cells
-            // along its foot than its far face, its edge 22 degrees off straight back from them, so the
-            // resolve found no face behind them looking against the one before, held none of them, and
-            // a probe's ray passed under the wall, a lamp outside a closed room of walls 0.3 thick in
-            // cells of 0.5 lighting its faces inside 0.03 to 0.04 where no light reaches them.
+            // Straight behind, its nearest point inside the face and not on an edge, as a wall's far
+            // face lies behind a cell by its near one, where a cell beside a box's edge lies 45 degrees
+            // behind the face round it. Taken within a wider angle, a wall thinner than a cell standing
+            // on a floor would have its bottom face, buried against the floor's top, nearer the cells
+            // along its foot than its far face, its edge a little off straight back from them, so the
+            // resolve would find no face behind them looking against the one before and hold none of
+            // them, and a probe's ray would pass under the wall, a lamp outside a closed room lighting
+            // its faces inside where no light reaches them.
             if (front == 0u && dot(p - q, face) < -0.999 * d * faceLength)
                 behind[index].min((uint(d / cell * 1024.0) << 8) | way);
         }

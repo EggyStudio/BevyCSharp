@@ -20,11 +20,10 @@ public sealed class TextureFilteringTests(ITestOutputHelper output)
     /// <remarks>
     /// A texture seen at a slant is squeezed along the view, and with one sample the level of its
     /// mipmaps is chosen by the squeezed way, so the far floor reads as the checks' gray mean.
-    /// Bevy's default sampler takes one unless set and a texture's settings took one unless asked,
-    /// so each floor read its far band's checks at a spread of 6.7 levels of green. The bridge
-    /// gives Bevy's default sampler and a glTF file's textures sixteen samples, and a texture whose
-    /// three filters are linear takes sixteen from its settings, and both floors read 21.9, the bar
-    /// at 14.
+    /// Bevy's default sampler takes one unless set, so the bridge gives Bevy's default sampler and
+    /// a glTF file's textures sixteen samples, and a texture whose three filters are linear takes
+    /// sixteen from its settings. Both floors then keep their far band's checks at a spread of
+    /// about 22 levels of green, which the bar of 14 holds above the gray mean one sample leaves.
     /// </remarks>
     [SkippableFact]
     public void TwoCheckeredFloorsKeepTheirChecksFarOffAtAGrazingAngle()

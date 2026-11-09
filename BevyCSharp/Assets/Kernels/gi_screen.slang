@@ -314,15 +314,15 @@ float probeReaches(float3 q, float3 probe, int3 at, uint c, float apart)
 // The light from beyond a ray's reach along way, the world's merged light blended between the eight
 // probes of the finest cascade around the point the ray reached, each weighed by how near it is and
 // by whether its rays reached the point the ray passed half their spacing before its end the frame
-// before (probeReaches), a probe inside a mesh passed over and one that does not reach the point kept
-// only where none does, or blended around the point the ray left from where its end lies past both
-// cascades. Read around the point on the surface the ray left from, the probes there would see along
-// the ray's way what the ray itself passed by, and a Cornell box's block's front would read far over
-// its reference across the ways its rays stand for, where read around the point the ray reached it
-// reads 3% over. Each probe's light along way is blended between the four texels of its octahedron
-// around it, as near as way lies to each, since read from the texel way falls in, a ray on the border
-// between two flipped from one to the other as the normal from the depth wavered by a degree or two,
-// and a probe's light changed as the camera moved.
+// before (probeReaches), a probe inside a mesh passed over and one that does not reach the point
+// kept only where none does, or blended around the point the ray left from where its end lies past
+// both cascades. Read around the point on the surface the ray left from, the probes there would see
+// along the ray's way what the ray itself passed by, and a block's lit front would take its own
+// light back across the ways its rays stand for, which the point the ray reached does not see. Each
+// probe's light along way is blended between the four texels of its octahedron around it, as near
+// as way lies to each, since read from the texel way falls in, a ray on the border between two
+// flipped from one to the other as the normal from the depth wavered by a degree or two, and a
+// probe's light changed as the camera moved.
 float3 beyond(FieldInfo world, float3 start, float3 normal, float3 way, float reached, uint around)
 {
     float3 end = start + way * reached;
@@ -432,18 +432,17 @@ void main(uint3 id : SV_DispatchThreadID)
     gi_screen_surfaces.Store(id.xy, float4(n, distance(eye, p)));
 
     // How much of each glow light in reach the surface sees. A light that gives the surface an eighth
-    // of the glow lights' light or more is marched to by the halves of its faces, and its byte says
-    // how much of it the surface sees. A fainter one is marched to at its middle alone, as a ray's hit
-    // is, its light added to the fainter ones' at the probe and its byte left none, so a pixel reads
-    // the light of at most eight at a probe, where every light marched to by its faces and read at each
+    // of the glow lights' light or more is marched to by the halves of its faces, and its byte says how
+    // much of it the surface sees. A fainter one is marched to at its middle alone, as a ray's hit is,
+    // its light added to the fainter ones' at the probe and its byte left none, so a pixel reads the
+    // light of at most eight at a probe, where every light marched to by its faces and read at each
     // pixel would cost a room of many lamps a march and a read for each of them. The fainter ones are
     // grouped by their way from the surface into four groups at most, as glowLightsAt groups the lights
     // past its brightest, each group's light taken by how much of its brightest light the surface sees,
-    // since marched to one by one, forty dim emitters that reach as far as one bright one took the
-    // probes from 1.4 ms to 3.6 at 1280 by 720. The glow lights take the surface's normal from its way
-    // along each axis of the depth, which holds at a wall's foot where the nearer texel's does not.
-    // Tilted up the wall, a probe's normal on the floor beside it would see a lamp past the wall that
-    // the floor does not.
+    // since marched to one by one, many dim emitters that reach as far as one bright one would cost the
+    // probes a march for each. The glow lights take the surface's normal from its way along each axis
+    // of the depth, which holds at a wall's foot where the nearer texel's does not. Tilted up the wall,
+    // a probe's normal on the floor beside it would see a lamp past the wall that the floor does not.
     float3 gn = surfaceNormal(cross(wayAlong(pixel, p, int2(1, 0)), wayAlong(pixel, p, int2(0, 1))), eye - p);
     if (dot(gn, eye - p) < 0.0)
         gn = -gn;

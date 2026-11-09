@@ -132,21 +132,18 @@ public sealed class RayTracingTests
     /// diagnostics measure them, the least of 600 frames' measurements.
     /// </summary>
     /// <remarks>
-    /// A pass's time on the GPU counts the time the GPU spent on another program's work between
-    /// its two timestamps, and the suite once read 8 ms here, smoothed over frames as
-    /// <c>render.timings</c> gives it, beside a game drawing on the same GPU. A frame's own
-    /// measurement taken between the other program's is the node's alone, so the test takes the
-    /// least of many.
+    /// A pass's time on the GPU counts the time the GPU spent on another program's work between its
+    /// two timestamps, so a reading smoothed over frames, as <c>render.timings</c> gives it, runs
+    /// high beside a game drawing on the same GPU. A frame's own measurement taken between the
+    /// other program's is the node's alone, so the test takes the least of many.
     /// </remarks>
     [SkippableFact]
     public void TheDenoiserKeepsToItsBudgetAt1080p()
     {
         Needs.Renderer();
 
-        // It took 2.5 ms of the development machine's RTX 4070 Laptop GPU here in six runs, the
-        // least of each run's frames, and 1.9 ms in Bevy's own Solari scene at the same size, whose
-        // sky it passes over, smoothed, down from 5.7 and 3.6 before its stages moved fewer bytes.
-        // The budget is the reading with a quarter more, so a change that makes it slower fails.
+        // The budget is the stages' least frame on an RTX 4070 Laptop GPU, 2.5 ms, with a quarter
+        // more, so a change that makes them slower fails.
         const double Budget = 3.2;
 
         var active = false;
@@ -402,8 +399,9 @@ public sealed class RayTracingTests
     /// though taking motion blur and occlusion off takes away prepasses of their own.
     /// </summary>
     /// <remarks>
-    /// The feature test turned the rays on and then set its lens, which took the motion vectors
-    /// away with a motion blur that was never on, and its whole map was drawn unlit.
+    /// The rays read the motion vectors, so a lens set after them that takes off a motion blur
+    /// never on keeps the motion vectors the rays ask for, where taking them away with it would
+    /// leave a scene such as the feature test's map drawn unlit.
     /// </remarks>
     [SkippableFact]
     public void EffectsSetAfterTheRaysLeaveThemLighting()

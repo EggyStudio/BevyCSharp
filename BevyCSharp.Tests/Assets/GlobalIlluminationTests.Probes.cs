@@ -12,13 +12,13 @@ public sealed partial class GlobalIlluminationTests
     /// the wall, and the chrome block's faces read their blue light at none or more.
     /// </summary>
     /// <remarks>
-    /// The pass took back the camera's environment map's light alone. Bevy's lighting gave the
-    /// volume's light where the volume holds a surface and no map's diffuse light there, and the
-    /// reflection probe's light, diffuse and reflected, in place of the map's where the probe holds
-    /// a surface. So the volume's half took the volume's light and lost the blue map's, and the
-    /// probe's half kept the probe's warm light beside the probes', and the chrome lost the blue
-    /// map's reflection it never had, as the feature test's light hall's probe's bay read 35 to 58%
-    /// over its reference and its volume's bay crimson. The room is closed, so the reference's
+    /// Bevy's lighting gives the volume's light where the volume holds a surface and no map's
+    /// diffuse light there, and the reflection probe's light, diffuse and reflected, in place of
+    /// the map's where the probe holds a surface, so the pass takes back the light each of them
+    /// gave where it gave it. Taking back the camera's environment map's light alone would leave
+    /// the volume's half with the volume's light and without the blue map's, the probe's half with
+    /// the probe's warm light beside the probes', and the chrome without a blue reflection it never
+    /// had, as in the feature test's light hall's bays. The room is closed, so the reference's
     /// light is the lamp's and what bounces from it.
     /// </remarks>
     [SkippableFact]

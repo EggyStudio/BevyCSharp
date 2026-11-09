@@ -357,9 +357,9 @@ impl ClockHold {
     /// The first clip played on a scene reads the file the scene came from again, for the clips'
     /// names, since Bevy freed the file's own asset once the scene had loaded. The read spans as
     /// many frames as the device's loading takes against its drawing, so a clip started once it
-    /// arrives would start at another moment of the clock on each device, as the foxes of
-    /// many_foxes did on a capture shard of the pack run of d0e58c56, each a step along in its run.
-    /// Only the render profile plays clips, so only it has a read to wait for.
+    /// arrives would start at another moment of the clock on each device, and a capture of it would
+    /// differ from one device to the next. Only the render profile plays clips, so only it has a
+    /// read to wait for.
     #[cfg(feature = "render")]
     pub(crate) fn wait_for(&mut self, read: bevy::asset::UntypedAssetId) {
         if self.holds & hold::LOADS != 0 && !self.reads.contains(&read) {

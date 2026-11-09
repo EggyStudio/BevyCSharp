@@ -42,9 +42,8 @@ public static class CliSessionFile
     /// <para>
     /// On Windows a move over a file that something else has open is refused with access denied,
     /// where Linux and macOS let it through, and a reader listing the sessions opens each file for
-    /// the moment it takes to read it. The app's first ready file met one of those reads in the
-    /// suite on a Windows runner and its system logged the refusal, so the move is tried again a
-    /// few times ten milliseconds apart before the refusal goes to the caller.
+    /// the moment it takes to read it. An app's ready file can meet one of those reads, so the move
+    /// is tried again a few times ten milliseconds apart before the refusal goes to the caller.
     /// </para>
     /// </remarks>
     public static void Write(CliSession session)

@@ -22,8 +22,8 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// </summary>
     /// <remarks>
     /// Global illumination asks for Bevy's G-buffer, which draws every material deferred, and
-    /// leaves them so when it is turned off. The camera then drew no prepass, and Bevy draws a
-    /// deferred material in its G-buffer alone, so the picture was black from then on.
+    /// leaves them so when it is turned off, and Bevy draws a deferred material in its G-buffer
+    /// alone, so a camera left drawing no prepass would show a black picture from then on.
     /// </remarks>
     [SkippableTheory]
     [InlineData(false)]
@@ -117,9 +117,9 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// camera of the highest order, as the field takes it, past a 3D camera that draws nothing.
     /// </summary>
     /// <remarks>
-    /// The world's first 3D camera was taken where the field lay around none, which in the feature
-    /// test's yard was a camera drawing nothing, so a read with global illumination off asked for
-    /// the picture's size until it gave up.
+    /// With no field the view's camera is taken as the field takes it, since the world's first 3D
+    /// camera, which in the feature test's yard is a camera drawing nothing, would leave a read
+    /// with global illumination off asking for the picture's size until it gave up.
     /// </remarks>
     [SkippableFact]
     public void WithNoFieldThePictureIsReadFromTheCameraTheViewIsDrawnBy()
@@ -196,9 +196,10 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// in both.
     /// </summary>
     /// <remarks>
-    /// The reference was lit by the sun as it is above the air, the light's own color and strength,
-    /// so every sunlit face of the feature test's yard at eight in the morning read 30 to 45% over
-    /// the picture and whiter, whatever global illumination gave the faces in shade.
+    /// The reference lights a face by the sun through the air, the light the picture's faces take,
+    /// since lit by the sun as it is above the air, its own color and strength, every sunlit face
+    /// of the feature test's yard at a low sun would read well over the picture and whiter,
+    /// whatever global illumination gave the faces in shade.
     /// </remarks>
     [SkippableFact]
     public void TheReferencesSunIsDimmedThroughTheAirAsThePictures()
@@ -254,12 +255,12 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// other, where an opaque card covers the floor beneath it whole.
     /// </summary>
     /// <remarks>
-    /// The reference read the material buffer's base color alone, so a cut-out card, a leaf or a
-    /// grass card, was traced whole, and a material the buffer did not know, a leaf's, as black,
-    /// and the meadow's grass and its crowns read nothing and hid the floor behind them. The card
-    /// read the whole of its footprint and the floor through it none, and reads 0.500 of it, the
-    /// floor through it 1.049 of the open floor's light, the floor's highlight under the eye and
-    /// the sun overhead.
+    /// The reference takes a card's cut-out and a leaf's material into its paths, since the
+    /// material buffer's base color alone would trace a cut-out card, a leaf or a grass card,
+    /// whole, and a leaf's material as black, and the meadow's grass and its crowns would read
+    /// nothing and hide the floor behind them. The card fills half its footprint, as its checkered
+    /// texture is cut out, and the floor through it reads about the open floor's light, the floor's
+    /// highlight under the eye and the sun overhead.
     /// </remarks>
     [SkippableFact]
     public void ACutOutCardLetsTheReferencesPathsThroughWhereItsAlphaIsUnderTheCutoff()
@@ -304,8 +305,8 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// </summary>
     /// <remarks>
     /// The shadow rays meet the card as the paths do, so the card cut out where its leaves are not
-    /// lets the sun through there. The cut-out card's shadow read 0.001 of the open floor's light
-    /// as the opaque card's does, and reads 0.501.
+    /// lets the sun through there, half its shadow's light, where an opaque card's shadow lets none
+    /// through.
     /// </remarks>
     [SkippableFact]
     public void ACutOutCardLetsTheSunThroughToItsShadowWhereItsAlphaIsUnderTheCutoff()
@@ -340,11 +341,11 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// far level from there on, so the reference meets the level the camera draws.
     /// </summary>
     /// <remarks>
-    /// The reference held every shown mesh, so a tree was traced at every level at once, its leaves,
-    /// its reduced leaves and its far cards over each other, and in the feature test's meadow its far
-    /// cards stood as planes over the crowns. Here the level not drawn is the larger of two cubes
-    /// about the same middle, so where it was traced the eye met it first, the far level from near
-    /// and the near one from far.
+    /// The reference holds the mesh of each visibility range the eye's distance gives, since every
+    /// shown mesh traced at once would hold a tree at every level, its leaves, its reduced leaves
+    /// and its far cards over each other, the far cards standing as planes over the crowns. Here
+    /// the level not drawn is the larger of two cubes about the same middle, so where it is traced
+    /// the eye meets it first, the far level from near and the near one from far.
     /// </remarks>
     [SkippableTheory]
     [InlineData(5f, "near")]
@@ -396,18 +397,18 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// map bending it, and its shadow rays pass the blades, which cast no shadow.
     /// </summary>
     /// <remarks>
-    /// The reference lit each card by its own flat normal, the whole of its color diffuse, and its
-    /// shadow rays met the blades around it, where the picture's blades cast no shadow and the leaf
-    /// material lights the share of a blade's color it keeps by its mapped normal bent half way up
-    /// to its way out of the crown, straight up for grass, and lets the rest through from behind,
-    /// so in the feature test's meadow the reference's grass in the room wall's shadow read 0.009
-    /// to 0.04 and the picture's 0.17 to 0.19. The grass was planted without the tangents its
-    /// normal map is read along, so Bevy left a blade seen from behind facing away from the eye,
-    /// and the leaf material took a card's side by its mapped normal, which a way straight up
-    /// leaves to a rounding error and a normal map to its lean, so the card's own normal turned to
-    /// the eye takes it. The picture smooths the normal map through its mips where the reference
-    /// reads its own size, so a coarser picture reads the grass over its reference, 23% at 96 by
-    /// 64, and this one 6%.
+    /// The reference lights each card as the leaf material does, the share of a blade's color it
+    /// keeps by its mapped normal bent half way up to its way out of the crown, straight up for
+    /// grass, and the rest let through from behind, and its shadow rays pass the blades, as the
+    /// picture's blades cast no shadow, since a card lit by its own flat normal, the whole of its
+    /// color diffuse, with shadow rays meeting the blades around it, reads the meadow's grass in a
+    /// wall's shadow far darker than the picture's. The grass is planted without the tangents its
+    /// normal map is read along, so Bevy leaves a blade seen from behind facing away from the eye,
+    /// and its mapped normal, which a way straight up leaves to a rounding error and a normal map
+    /// to its lean, cannot tell a card's side, so the leaf material takes it by the card's own
+    /// normal turned to the eye. The picture smooths the normal map through its mips where the
+    /// reference reads its own size, so a coarser picture reads the grass farther over its
+    /// reference than this one does.
     /// </remarks>
     [SkippableTheory]
     [InlineData(3f)]
@@ -627,7 +628,7 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// <remarks>
     /// Bevy's table gives a dielectric of a reflectance of a half at a roughness of a half and a
     /// grazing view of a tenth a gloss of about 0.15 of the light around it, which the reference's
-    /// paths missed, reading the diffuse share's 0.5 alone.
+    /// paths take beside the diffuse share's 0.5.
     /// </remarks>
     [SkippableFact]
     public void ARoughDielectricAtAGrazingViewReadsFresnelsShareOfTheSkyOverItsDiffuse()

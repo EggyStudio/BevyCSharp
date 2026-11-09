@@ -20,8 +20,8 @@ namespace Bevy.Tests;
 /// hang, grow, die, fail or do not build where asked, so they need no suite and no bridge.
 /// </para>
 /// <para>
-/// The pack run of 421d4e1 ended its game job with an exit code and nothing else, what stopped
-/// Courtyard being in the game's log, which no reader of the run's annotations sees. The lines
+/// A job that ends with an exit code alone leaves what stopped it in the program's log, which no
+/// reader of the run's annotations sees, so both scripts say on their page what was lost. The lines
 /// both scripts write are cut to the page's width by <c>build/page.py</c>, which they share.
 /// </para>
 /// </remarks>
@@ -130,9 +130,8 @@ public sealed class TestScriptTests : IDisposable
     }
 
     // The hang case's memory limit is a terabyte, which no process of a runner holds, so the time
-    // limit alone ends it. The stand-in sleeping holds 10 MB on Linux, and on the Windows runner of
-    // the push of dd2149ee the tree the script read under it once passed the 200 MB the other cases
-    // are held to before its six seconds did.
+    // limit alone ends it, since the tree the script reads under the sleeping stand-in can pass the
+    // 200 MB the other cases are held to on a Windows runner before its six seconds do.
     [SkippableTheory]
     [InlineData("hang", "ended at its time limit", 1 << 20)]
     [InlineData("grow", "ended at its memory limit, its largest process read at", 200)]

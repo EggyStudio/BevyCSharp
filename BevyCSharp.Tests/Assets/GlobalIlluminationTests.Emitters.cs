@@ -11,12 +11,10 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Global illumination carries a small emitter as a glow light, whose light a surface takes in
-    /// closed form. A light was let go past a reach where the light it sent a white surface fell to
-    /// a fiftieth of the picture's unit, so a dim one reached less far than a bright one of its
-    /// size, and six emitters of a sixth of one's light each reached two and a half times less far,
-    /// and of the lights reaching a surface the brightest two at a probe's ray's hit and four at a
-    /// pixel were taken and the rest left out. The room read 20 to 30% under its reference where
-    /// one emitter of their light read 4 to 12% over.
+    /// closed form, each light let go past a reach set by its own light. A reach set by a fixed
+    /// share of the picture's unit lets a dim light go nearer than a bright one of its size, so six
+    /// emitters of a sixth of one's light each would reach less far than the one, and the room
+    /// would read under its reference where they stop short.
     /// </remarks>
     [SkippableFact]
     public void ARoomLitBySixEmittersReadsAsItsReference()
@@ -35,16 +33,14 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// The same room lit by one emitter of the six's light together reads within 11% of its
-    /// reference on every face, as it read with the reach a fiftieth of the picture's unit set,
-    /// -4.4 to +6.5%.
+    /// reference on every face.
     /// </summary>
     /// <remarks>
-    /// The reach is a thousandth of each light's own light, set so this emitter keeps the reach it
-    /// had, so a reach set shorter reads this room under as the six emitters' read under, and the
-    /// constant is held where it is. The bar was 8%. The wall facing -x beside the emitter, lit
-    /// mostly by the glow light's own light near it, read 6% under while each bounce came back
-    /// about 5% over, and with the probes' faces read at the surfaces they are read for every face
-    /// reads 2 to 3 points lower, that wall 9% under, a shortfall the gain covered.
+    /// The reach is a thousandth of each light's own light, which keeps this emitter's reach where
+    /// the room reads as its reference, so a reach set shorter reads this room under as it reads
+    /// the six emitters' under, and the constant is held where it is. The wall facing -x beside the
+    /// emitter, lit mostly by the glow light's own light near it, reads the farthest under, about
+    /// 9%, which the bar of 11% holds.
     /// </remarks>
     [SkippableFact]
     public void ARoomLitByOneEmitterKeepsItsReading()
@@ -66,11 +62,10 @@ public sealed partial class GlobalIlluminationTests
     /// 10% of its reference on every face, as a block of the ball's box reads.
     /// </summary>
     /// <remarks>
-    /// A small emitter is carried as a light from its box. Taken as its box whole, every face
-    /// emitting, a ball, whose surface is about half its box's, was carried twice as bright as it
-    /// is, and the room read 100 to 109% over its reference on every face, where lit by a block of
-    /// the ball's box it reads within 10%. The light takes the share of its box's faces the mesh's
-    /// own surface makes, the area of its triangles the field's gather hands over.
+    /// A small emitter is carried as a light from its box, which takes the share of its box's faces
+    /// the mesh's own surface makes, the area of its triangles the field's gather hands over, since
+    /// a ball's surface is about half its box's, and taken as its box whole, every face emitting, a
+    /// ball would be carried twice as bright as it is.
     /// </remarks>
     [SkippableFact]
     public void ARoomLitByABallReadsAsItsReference()

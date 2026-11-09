@@ -122,9 +122,9 @@ jobs:
   test:
     name: ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
-    # An hour, where the three took 11 to 14 minutes on the push of 5e01491e with their caches, so
-    # a headless bridge built with no cache and a lost suite run again in parts (build/test.py) both
-    # fit, and a test that hangs ends the job within it rather than at GitHub's six hours.
+    # An hour, several times what the three take with their caches, so a headless bridge built with
+    # no cache and a lost suite run again in parts (build/test.py) both fit, and a test that hangs
+    # ends the job within it rather than at GitHub's six hours.
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -174,8 +174,8 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev pkg-config
 
-      # dotnet-gcdump, at the version tried, with which the leak test counts the heap's objects by
-      # type after its twentieth app and its hundredth, since the heap grew on macOS's runner and
+      # dotnet-gcdump, at a version held still, with which the leak test counts the heap's objects
+      # by type after its twentieth app and its hundredth, since the heap grew on macOS's runner and
       # nowhere else, so a failure there names the types that grew.
       - name: Install dotnet-gcdump for the leak test
         if: runner.os == 'macOS'
@@ -303,20 +303,17 @@ jobs:
   games:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # An hour, where it was half of one, since Swarm alone played for eleven minutes on lavapipe held
-    # to four processors, two frames a second with its creatures in their hundreds, and the job
-    # plays three games after it builds the guide and every example, Blockout's play taking 270
-    # seconds on that lavapipe (games/Blockout/play.sh under LP_NUM_THREADS=4 taskset -c 0-3), then
-    # soaks four for ten minutes, or fifteen where a game's rounds are too slow for six readings in
-    # ten, and publishes.
+    # An hour, since Swarm plays slowly on lavapipe held to four processors, a few frames a second
+    # with its creatures in their hundreds, and the job plays three games after it builds the guide
+    # and every example, then soaks four for ten minutes, or fifteen where a game's rounds are too
+    # slow for six readings in ten, and publishes.
     timeout-minutes: 60
     needs: [native]
     # Each step through build/step.py, which gives one that fails having said nothing an error
-    # naming the step, the command that failed with its exit code, its last lines and the last
-    # lines at a warning or worse of the game's logs (NORM.md, N 6.7). The play of 421d4e1 ended
-    # this job with an exit code alone, what stopped the game being in its log. The plays name
-    # their logs' folder in their own env, since a job's env cannot read the runner's context and
-    # GitHub refuses a workflow whose job's env does.
+    # naming the step, the command that failed with its exit code, its last lines and the last lines
+    # at a warning or worse of the game's logs (NORM.md, N 6.7), since what stops a game is in its
+    # log and not in its exit code. The plays name their logs' folder in their own env, since a
+    # job's env cannot read the runner's context and GitHub refuses a workflow whose job's env does.
     defaults:
       run:
         shell: python3 build/step.py {0}
@@ -397,17 +394,14 @@ jobs:
         run: mkdir -p "$SHOTS" && games/Blockout/play.sh
 
       # Courtyard, the stress program, Swarm and Blockout built on the package played at once a
-      # round at a time, while what each holds is read after its rounds (build/soak.sh), failing when
-      # any of it climbs without leveling off (build/soak-check.py), as a leak does, with an error
-      # naming each game's failure and each value that climbed (build/soaks.sh). Ten minutes, since
-      # lavapipe held to four processors of the working machine played a round of each in 67 to 100
-      # seconds with the feature test beside them, and the two and a half minutes the pack run of
-      # 5e01491e gave them read each two or three times where the check judges six; ten minutes read
-      # the three seven to ten times there, nothing climbing. With Blockout the fourth, its round two
-      # meters walked by its autopilot, a window cut and taken back and its modeling window opened
-      # and closed, the four read six to eight times in 784 seconds there (build/soaks.sh 600
-      # courtyard stress swarm blockout under LP_NUM_THREADS=4 taskset -c 0-3), Swarm's six past
-      # the ten minutes. The feature test is soaked in a job of its own, alone on its runner.
+      # round at a time, while what each holds is read after its rounds (build/soak.sh), failing
+      # when any of it climbs without leveling off (build/soak-check.py), as a leak does, with an
+      # error naming each game's failure and each value that climbed (build/soaks.sh). Ten minutes,
+      # since on lavapipe held to four processors a round of each takes a minute or more with the
+      # feature test beside them, and the check judges six readings of each, which a shorter soak
+      # does not reach. Blockout's round is two meters walked by its autopilot, a window cut and
+      # taken back and its modeling window opened and closed. The feature test is soaked in a job of
+      # its own, alone on its runner.
       - name: Play the games a while and check nothing they hold grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
@@ -451,14 +445,10 @@ jobs:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
     # A hundred and twenty-five minutes. The runners differ in their processor, and the course's
-    # holds and waits are counted in frames of a second or more each on their lavapipe. The job took
-    # 67 minutes on an AMD EPYC 9V45 at 58265110, its hub drawn in 701 ms a frame, and 125 on an
-    # EPYC 7763 at b8cc8316, ten seconds inside the limit, that processor drawing the course 1.11
-    # times as slowly as the working machine's lavapipe on four threads in the runner's image. There
-    # the step takes 97 minutes, so about 108 on the 7763. A hundred and twenty-five holds the slower
-    # processor with room for its own variance, and a hang is found sooner by each command's bound in
-    # build/drive-feature-test.sh (NORM.md, N 6.8). The soak runs in a job of its own beside this
-    # one.
+    # holds and waits are counted in frames of a second or more each on their lavapipe, so the limit
+    # holds the course on the slower of the runners' processors with room for its own variance, and
+    # a hang is found sooner by each command's bound in build/drive-feature-test.sh
+    # (NORM.md, N 6.8). The soak runs in a job of its own beside this one.
     timeout-minutes: 125
     needs: [native]
     # Each step through build/step.py, as the games job has it.
@@ -493,10 +483,9 @@ jobs:
       - name: Pack
         run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
-      # Without the weather, which took nearly a third of each frame on lavapipe and ran the course
-      # past the job's limit, the drive's rain and snow at its end running the weather's kernels
-      # here all the same, and without global illumination, which took nearly half of each frame
-      # there.
+      # Without the weather and without global illumination, each a large share of each frame on
+      # lavapipe, so the course finishes within the job's limit, the run's rain and snow at its end
+      # running the weather's kernels here all the same.
       - name: Run the feature test's course
         env:
           SHOTS: ${{ runner.temp }}/feature-test
@@ -525,13 +514,11 @@ jobs:
   feature-test-soak:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # Forty minutes. On the working machine's lavapipe on four threads in the runner's image, from
-    # no shader cache of Mesa's as the job starts, the feature test answered its first commands
-    # after nine minutes of compiling and then played six rounds of 194 seconds, past its fifteen
-    # minutes to be read six times, 29 minutes in all, which at the runner's pace, about 1.48 times
-    # as fast, is about 20, with some four for the steps before it. The longest the soak plays, its
-    # fifteen minutes and half of them again, comes to about 35 there, and forty still finds a hang
-    # (NORM.md, N 6.8).
+    # Forty minutes. On lavapipe from no shader cache of Mesa's, as the job starts, the feature test
+    # compiles for minutes before it answers its first commands, and then plays rounds slow enough
+    # that its six readings take it past its fifteen minutes. The longest the soak plays, its
+    # fifteen minutes and half of them again, with the compiles and the steps before it, fits within
+    # forty, which still finds a hang (NORM.md, N 6.8).
     timeout-minutes: 40
     needs: [native]
     # Each step through build/step.py, as the games job has it.
@@ -568,10 +555,10 @@ jobs:
       - name: Build the feature test
         run: dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
 
-      # Without global illumination, which took nearly half of each frame on lavapipe, so the
-      # rounds reach the readings the check judges inside the soak's time (build/soak.sh). What
-      # global illumination holds is not soaked here, since rounds at twice the frame would miss
-      # those readings, and the course on a GPU and the suite's memory cap read it instead.
+      # Without global illumination, a large share of each frame on lavapipe, so the rounds reach
+      # the readings the check judges inside the soak's time (build/soak.sh). What global
+      # illumination holds is not soaked here, since its slower rounds would miss those readings,
+      # and the course on a GPU and the suite's memory cap read it instead.
       - name: Play the feature test a while and check nothing it holds grows
         env:
           BCS_STEP_LOGS: ${{ github.workspace }}/build/soak
@@ -594,12 +581,10 @@ jobs:
   captures:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # An hour each. The whole list took 56 minutes on the pack run of d2a20b6a, some ten seconds an
-    # example on lavapipe with none of Bevy's files there to load and no slangc to compile with, and
-    # past the 90 minutes of one job on the pack run of 5e01491e with both in place, so a quarter of
-    # it should take half an hour or less. The script's budget is twenty minutes under the limit,
-    # which leaves the setup, the build and the comparison their time, and a shard past it names how
-    # far it got.
+    # An hour each. The whole list takes longer than one job's limit on lavapipe with Bevy's files
+    # to load and slangc to compile with, so it is cut into four, and a quarter of it should take
+    # half an hour or less. The script's budget is twenty minutes under the limit, which leaves the
+    # setup, the build and the comparison their time, and a shard past it names how far it got.
     timeout-minutes: 60
     needs: [native]
     strategy:
@@ -627,8 +612,8 @@ jobs:
 
       # Lavapipe, as the games job has it, since the runner has no graphics card, libwebp's tools,
       # which write and read the captures where ImageMagick has no WebP, and ImageMagick, which
-      # scales a shot of another shape to 1280 by 720 before it is written. The runner has none, so
-      # on the pack run of b178ae3f resizing and window_settings kept their windows' sizes.
+      # scales a shot of another shape to 1280 by 720 before it is written. The runner has none, and
+      # without it a shot of resizing or window_settings keeps its window's size.
       - name: Install a software Vulkan, ALSA, WebP and ImageMagick
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev webp imagemagick
 
@@ -665,8 +650,8 @@ jobs:
   captures-fedora:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # Forty-five minutes, where the six took twenty five on lavapipe held to four cores, solari's
-    # four hundred frames of rays thirteen of them, beside the image, its packages and the build.
+    # Forty-five minutes, which holds the six on lavapipe held to four cores, solari's four hundred
+    # frames of rays the longest of them, beside the image, its packages and the build.
     timeout-minutes: 45
     needs: [native]
     defaults:
@@ -692,8 +677,8 @@ jobs:
         run: build/fetch-bevy-assets.sh && build/fetch-slang.sh
 
       # libwebp's tools and ImageMagick on the runner, which the compare reads the six with, as the
-      # shards' job has them. The container that captures them installs its own inside it, so on the
-      # pack run of d0e58c56 the compare, which runs here, found neither and read nothing.
+      # shards' job has them, since the container that captures them installs its own inside it and
+      # the compare runs here.
       - name: Install WebP and ImageMagick
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends webp imagemagick
 
@@ -719,8 +704,8 @@ jobs:
   storm:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
-    # Twenty minutes, where the tests' build takes a few and the storm took a minute and a half on
-    # the pack run of 5e01491e, so a window that never comes back fails within the run.
+    # Twenty minutes, several times what the tests' build and the storm take, so a window that never
+    # comes back fails within the run.
     timeout-minutes: 20
     needs: [native]
     defaults:
@@ -743,10 +728,8 @@ jobs:
 
       # Lavapipe to draw with, ALSA, which the bridge's audio links against, an X server of the
       # runner's own for the window, and the libraries winit opens as it runs on X11 that none of
-      # those brings, the cursors', the input extension's and the keyboard map's. Without them winit
-      # makes no event loop and the app's constructor throws, as the storm of d2a20b6a did. An
-      # Ubuntu 24.04 container holding this job's packages alone failed so for each of the three
-      # in turn, and stormed once it had them.
+      # those brings, the cursors', the input extension's and the keyboard map's. Without any of the
+      # three winit makes no event loop and the app's constructor throws.
       - name: Install a software Vulkan, ALSA, Xvfb and the libraries winit opens on X11
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev xvfb libxcursor1 libxi6 libxkbcommon-x11-0
 
@@ -754,13 +737,13 @@ jobs:
         run: dotnet build BevyCSharp.Tests -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       # The loader takes the bridge beside the tests before any other, so the one there is held to
-      # be the bridge downloaded above and named, since the tests of 292eead2 had none beside them
-      # and the step said only that the call for the bridge's version threw.
+      # be the bridge downloaded above and named, since tests with none beside them say only that
+      # the call for the bridge's version threw.
       #
       # A failed test is said whole, the test host's standard error after it, where the bridge says
       # why it made no app. dotnet test leaves that out of what it prints and writes it to its log
-      # of diagnostics alone, so the step's page for d2a20b6a held the stack's last lines and no
-      # cause. The folder is kept as the run's artifact.
+      # of diagnostics alone, so the step's page would hold the stack's last lines and no cause. The
+      # folder is kept as the run's artifact.
       - name: Storm a window
         run: |
           loaded=BevyCSharp.Tests/bin/Debug/net10.0/libbevy_csharp.so

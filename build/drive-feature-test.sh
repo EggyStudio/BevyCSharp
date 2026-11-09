@@ -16,17 +16,17 @@
 # station is left in the folder SHOTS names, or a temporary one.
 #
 # WEATHER_QUALITY names the weather's quality for the run, the game's own where it names none. The
-# workflow names Off, since its software device spent nearly a third of each frame on the weather
-# and the drive ran past the job's limit under it, and without the weather each view waits five
-# frames for its shot where forty let the clouds settle. Rain and snow over the playground at the
-# end run the weather's kernels on that device all the same, since llvmpipe once ended the feature
-# test in them where a GPU drew them whole.
+# workflow names Off, since the weather's kernels take a large share of each frame on its software
+# device and the course would not finish within the job's limit under them, and without the weather
+# each view waits five frames for its shot where forty let the clouds settle. Rain and snow over the
+# playground at the end run the weather's kernels on that device all the same, so a fault of theirs
+# on a software device fails the run there.
 #
 # GLOBAL_ILLUMINATION names global illumination's quality for the run in the same way, the game's
-# own where it names none, Medium unless a tester set another. The workflow names Off, since on the
-# working machine's lavapipe on four threads the hub took 3.0 seconds a frame with it at Medium and
-# 1.6 without it, without the weather. Where the run's is on, the light hall's irradiance volume's
-# bay is taken a second time with it off.
+# own where it names none, Medium unless a tester set another. The workflow names Off, since its
+# tracing takes a large share of each frame on the runner's software device, as the weather's
+# kernels do. Where the run's is on, the light hall's irradiance volume's bay is taken a second time
+# with it off.
 set -eEuo pipefail
 cd "$(dirname "$0")/.."
 
@@ -49,9 +49,8 @@ fail() {
 
 # Each station and view says its name as it ends, with the time it took and the time the run has
 # taken, so a job ended at its limit says in its log how far the run went and where the time went.
-# The processor is said first, since the pack run of a18496c3 drew a runner whose lavapipe drew the
-# course 1.6 times as slowly as the run before it, and the job reached its limit with nothing to
-# say for it but the captures it had uploaded.
+# The processor is said first, since a software device's pace follows the processor the runner
+# draws, which differs from run to run, so a run that reaches the job's limit says which one it had.
 since=$SECONDS
 clock() { printf '%d:%02d' $(($1 / 60)) $(($1 % 60)); }
 took() {
@@ -61,26 +60,24 @@ took() {
 processor=$(sed -n 's/^model name[[:space:]]*: //p' /proc/cpuinfo 2> /dev/null | head -n 1 || true)
 echo "[course] on ${processor:-a processor that does not name itself}, $(getconf _NPROCESSORS_ONLN) threads"
 
-# Each command is given as long as its kind takes on the working machine's lavapipe on four threads
-# in the runner's image, whose hub draws at about the pace of the runner's slower processor, and
-# twice that or more, so one that never answers fails the run where it stands, where ten minutes
-# for every command would let a hang read as slowness up to the job's limit. A wait for frames in
-# the course, and a key held for frames, which answers once they have passed, is given three
-# seconds a frame and a minute more, where a frame there took at most 1.9 seconds. A wait for
-# frames in a view, a wait for pipelines and the load of a scene are given fifteen minutes, where
-# the gallery's sixty frames took 326 seconds, the meadow's five 188 and its pipelines 95. A shot is
-# given five minutes, where the meadow's took 94 seconds, three of its frames, and any other
-# command two minutes, where each answered within a frame, 32 seconds at the meadow. Every command
-# before the first wait for pipelines has answered is given fifteen minutes too, since with no
-# shader cache of Mesa's, as the runner starts, the start's compiles draw a frame in about twelve
-# seconds, and the hub's thirty took 357.
+# Each command is given as long as its kind takes on lavapipe at the pace of the runner's slower
+# processor, and twice that or more, so one that never answers fails the run where it stands, where
+# ten minutes for every command would let a hang read as slowness up to the job's limit. A wait for
+# frames in the course, and a key held for frames, which answers once they have passed, is given
+# three seconds a frame and a minute more, above the longest a frame of the course takes there. A
+# wait for frames in a view, a wait for pipelines and the load of a scene are given fifteen minutes,
+# since a view's frames and its pipelines' compiles take minutes there. A shot is given five
+# minutes, a few of the slowest view's frames, and any other command two minutes, since each answers
+# within a frame. Every command before the first wait for pipelines has answered is given fifteen
+# minutes too, since with no shader cache of Mesa's, as the runner starts, the start's compiles hold
+# each frame for seconds and the hub's first frames take minutes.
 #
-# The pack run of d2a20b6a ended here on a command's timeout with nothing said but bcs's exit code,
-# so one that fails says its words, its code, its bound and the first line bcs gave of why, as
-# Swarm's play does, and anything else that fails is named by the trap below. bcs writes why to its
-# output, as it writes the answer, so the output is kept in a file and passed on once the command
-# has worked. The timeout comes before the command's words, since bcs passes on whatever follows a
-# `--` as it is. Each command's time is written to commands.txt beside the captures.
+# A command that fails would say nothing of itself but bcs's exit code, so one that fails says its
+# words, its code, its bound and the first line bcs gave of why, as Swarm's play does, and anything
+# else that fails is named by the trap below. bcs writes why to its output, as it writes the answer,
+# so the output is kept in a file and passed on once the command has worked. The timeout comes
+# before the command's words, since bcs passes on whatever follows a `--` as it is. Each command's
+# time is written to commands.txt beside the captures.
 cold=1
 views=0
 bound() {
@@ -115,9 +112,8 @@ holds() { awk "BEGIN { exit !(($1) $2 ($3)) }"; }
 # Puts the player at a station's start and waits for it to settle.
 at() { quiet player.put "$1" "$2" "$3"; quiet frames.wait 20; }
 # A shot once every pipeline its view asked for has compiled, the clock held still while they do,
-# since what is drawn with one compiling is left out of the picture, and the effects view, taken
-# forty frames after its page switched the dusk and the occlusion on, drew the dusk with the level's
-# walls and floor and the spheres' board missing.
+# since what is drawn with one compiling is left out of the picture, a view's walls, floor or
+# objects missing from it.
 shot() {
   quiet pipelines.wait
   ./bcs shot "$shots/$1.png" --timeout 300 > "$said" || fail "./bcs shot $1 ended with $? within its 300 seconds, $(head -n 1 "$said")"
@@ -183,7 +179,7 @@ took "the hub's shot"
 # The hub, with a walk north that the turning cube stops, and a jump. A held key answers once its
 # frames have passed, the clock held still between commands, so the wait after each hold is the
 # settling alone, where a wait of the hold's frames again would run the course's walking frames
-# twice, about twenty minutes of the drive job's on the runner's EPYC 7763.
+# twice, a large share of the job's time on the runner's software device.
 read -r _ y z < <(where)
 quiet input.hold W 60
 quiet frames.wait 10
@@ -225,7 +221,8 @@ took "the course's start"
 # The ramps, each walked east into as far as its landing's middle, three climbed to their landings
 # and the one at 60 degrees not. The frames are the landing's distance at the run's 4.5 a second.
 # The steep one is read fifty frames after the push, since a character pushed up a slope steeper
-# than it stands on slides back down over them, and five read it partway up at y -0.11.
+# than it stands on slides back down over them, and a reading soon after the push finds it partway
+# up.
 lanes=(-19 -15.8 -12.6 -9.4)
 frames=(108 68 53 45)
 for i in 0 1 2 3; do
@@ -310,8 +307,8 @@ took "the pit"
 # place ranged over a count of frames, read every fifteen, long enough that the swing covers more
 # than a meter wherever in it the run comes to it, the platform's 3.5 meters each way at 0.6 a
 # second over 180 frames and the elevator's 3.4 at 0.5 over 240. Two readings a set count of frames
-# apart, which the run once took, read the swing at the point the run came to it, which every wait
-# before them moves, and 90 frames there read 0.35 about a turn, the player at x 60.96 and 61.00.
+# apart would read the swing at whatever point the run came to it, which every wait before them
+# moves, and can find the player back where it stood at a turn of the swing.
 ranged() {
   local axis=$1 x y z low high
   read -r x y z < <(where) || return 1
@@ -379,9 +376,9 @@ quiet frames.wait 90
 # illumination where it names none. The effects view names sixty, since five leave its floor and its
 # spheres streaked after the page switched the dusk and the occlusion on. The view's pipelines are
 # waited for before its frames, the clock still while they compile, as well as before its shot, so
-# the frames it settles over draw all it holds, and the compile's time, a frame of about twelve
-# seconds on lavapipe while one runs, falls in the wait given for it. From here each wait for frames
-# is a view's, given a view's bound (above).
+# the frames it settles over draw all it holds, and the compile's time, a frame of seconds on
+# lavapipe while one runs, falls in the wait given for it. From here each wait for frames is a
+# view's, given a view's bound (above).
 views=1
 settle() { if [ -z "$1" ] && [ "$quality" = Off ] && [ "$illumination" = Off ]; then echo 5; else echo "${1:-40}"; fi; }
 view() {
@@ -415,8 +412,8 @@ if [ "$illumination" != Off ]; then
 fi
 view 15-meadow 12 1.5 80 0 0.5 70
 
-# The effects page's ambient occlusion and dusk sky through the setting command, each put back as
-# it was after, so a run on the working machine leaves its settings as it found them.
+# The effects page's ambient occlusion and dusk sky through the setting command, each put back as it
+# was after, so a run leaves the settings of the machine it runs on as it found them.
 occlusion=$(setting AmbientOcclusion)
 backdrop=$(setting Backdrop)
 quiet setting "AmbientOcclusion true"

@@ -74,8 +74,9 @@ public enum Quality
 public enum WeatherQuality
 {
     /// <summary>
-    /// No clouds, fog or rain, the atmosphere's sky alone, which the workflow's drive asks for on
-    /// its software device, where the weather took nearly a third of each frame.
+    /// No clouds, fog or rain, the atmosphere's sky alone, which the workflow's scripted run of the
+    /// feature test asks for on its software device, where the weather takes a large share of each
+    /// frame.
     /// </summary>
     Off,
 

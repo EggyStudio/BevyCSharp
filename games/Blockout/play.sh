@@ -3,8 +3,8 @@
 # the level made from its recipe with the walker on the ground floor, the walk up the stairs to the
 # room over the hall, a window cut in that room by a command with the counts read and the collider
 # made again, the modeling window opened on Tab, the recipe saved on F5 and the walk back down. The
-# autopilot's tour of every room is not walked here, since on lavapipe held to four processors the
-# play took 583 seconds with it, about a thousand of its frames the tour's.
+# autopilot's tour of every room is not walked here, since on lavapipe held to four processors it
+# would take most of the play's time.
 #
 #   dotnet build games/Blockout -p:BevyCSharpVersion=<the version of a package of the checkout>
 #   games/Blockout/play.sh [folder the game was built or exported to]

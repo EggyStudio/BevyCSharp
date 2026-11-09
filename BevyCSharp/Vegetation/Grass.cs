@@ -34,12 +34,11 @@ namespace Bevy;
 /// </remarks>
 public static class Grass
 {
-    // How stiff a clump stands in the wind, as the leaf material reads it (render/sway.rs): the
+    // How stiff a clump stands in the wind, as the leaf material reads it (render/sway.rs). The
     // patch's blades lean together by their height squared, each card swings along the wind by its
     // reach from its root squared and flutters across it, five radians a second. A blade 0.7 m tall
-    // moves its tip about a third of its height in a wind of 15 meters a second and about 6 cm in
-    // the feature test's 4.3, as far as the meadow's old blades swayed; softer, the tips swing down
-    // past the roots in a gale.
+    // moves its tip about a third of its height in a wind of 15 meters a second and about 6 cm in a
+    // breeze of 4.3, and softer, the tips would swing down past the roots in a gale.
     internal static readonly Trees.TreeStiffness Stiffness = new(0.15f, 0.6f, 0.15f, 5f);
 
     /// <summary>Plants grass over a stretch of ground and returns the entity its patches stand under.</summary>

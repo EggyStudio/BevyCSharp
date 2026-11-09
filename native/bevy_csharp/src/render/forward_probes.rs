@@ -3,11 +3,12 @@
 //! The light pass (`gi_light.slang`) lights what the G-buffer holds, taking back the light Bevy's
 //! lighting gave a surface from all around and adding the probes' in its place, and passes over a
 //! pixel no deferred material drew. A tree's leaves and the grass are drawn forward, since the
-//! G-buffer holds one normal and a leaf is lit by two ([`super::leaves`]), so with the day's fill
-//! off under global illumination they took the sky's small ambient light alone and the meadow lay
-//! near black in its shade. The leaf material binds the probes as the pass reads them and does in
-//! its own fragment shader what the pass does for the G-buffer's surfaces, taking back Bevy's
-//! light from all around and giving the probes' gathered at the surface.
+//! G-buffer holds one normal and a leaf is lit by two ([`super::leaves`]), so lit by Bevy's
+//! lighting, with the day's fill off under global illumination, they would take the sky's small
+//! ambient light alone and a meadow would lie near black in its shade. The leaf material binds the
+//! probes as the pass reads them and does in its own fragment shader what the pass does for the
+//! G-buffer's surfaces, taking back Bevy's light from all around and giving the probes' gathered at
+//! the surface.
 //!
 //! The managed side hands the probes over as it binds them to the pass each frame
 //! ([`bcs_render_set_forward_probes`]), and every leaf material takes them, or stand-ins that leave
@@ -16,12 +17,9 @@
 //! past the probes and of its reflection of the light the probes hold along a face's mirror way
 //! (`reflectedAlong`), which `GlobalIlluminationTests` holds to the pass's reading of a deferred
 //! surface beside it. The light let through a leaf is read from the probes its front reads, with
-//! the front's weights, each probe's faces toward the way behind the leaf, since a reading of its
-//! own took the forest of `TreeLeavesTests` from 6.8 ms to 9.0 at 1080p, half of a reading's time
-//! being its probes' reach, and the light along the leaf's mirror way from the same probes in the
-//! same walk. In the feature test's meadow at 1280 by 720 at `Medium` the reading takes the opaque
-//! pass from 2.6 ms to 5.6, and with the reflection the forest's opaque pass takes 7.6 ms where it
-//! took 6.9.
+//! the front's weights, each probe's faces toward the way behind the leaf, and the light along the
+//! leaf's mirror way from the same probes in the same walk, since the probes' reach is much of a
+//! reading's time and a reading of its own would read it again for every leaf.
 
 use crate::interop::status;
 
@@ -90,10 +88,9 @@ const REACH_TEXELS: i32 = 16;
 const WAYS_TEXELS: i32 = 10;
 const MOST_SUNS: u32 = 10u;
 
-// The field's cascades the probes stand in, as `probesOf` places them, read from the buffer
-// where they are needed rather than copied, since an array copied into a function's variables and
-// indexed as it runs is kept in the GPU's slow local memory, which took the forest's opaque pass
-// from 3.0 ms to 19.8.
+// The field's cascades the probes stand in, as `probesOf` places them, read from the buffer where
+// they are needed rather than copied, since an array copied into a function's variables and indexed
+// as it runs is kept in the GPU's slow local memory, which every leaf's reading would go through.
 fn probe_cascades() -> i32 {
     return min(i32(probe_counts.z), i32(probe_field[0].counts.x));
 }
@@ -188,15 +185,16 @@ struct ProbesLight {
 // `bouncedIn` for a surface at `p` facing `n`, and the light from `t` read from the same probes
 // with the same weights, each probe's faces toward `t` in place of those toward `n`, a face loaded
 // again only where `t` lies on its other side, so the light let through a leaf costs no second
-// reading of the probes' reach, which is half of a reading's time. Where `reflecting`, with them
+// reading of the probes' reach, which is much of a reading's time. Where `reflecting`, with them
 // the light along the mirror way `r` of a surface of `roughness` the probes it sees hold, times how
 // much of the probes' weight those hold, and that share, as the light pass reads it
 // (`reflectedIn`), from the same probes and the same reading of their reach, each probe's eight by
 // eight directions read filtered about `r` and mixed toward its faces as the surface grows rough
 // past a half, and its faces alone at a roughness of one, the faces toward `r` loaded again only
-// where `r` lies on another side than `n` and `t`. Read in a walk of its own, each probe's reach
-// blended between its texels as the pass reads it, it took the forest of `TreeLeavesTests` from 6.9
-// ms to 10.2 at 1080p, and read here 8.1.
+// where `r` lies on another side than `n` and `t`. The reflection shares this walk and its reading
+// of the probes' reach rather than taking a walk of its own with each probe's reach blended between
+// its texels as the pass reads it, since that would read the probes' reach a second time for every
+// leaf.
 fn bounced_in(p: vec3<f32>, n: vec3<f32>, t: vec3<f32>, r: vec3<f32>, roughness: f32, reflecting: bool, probes: f32, spacing: f32, c: i32) -> ProbesLight {
     let oc = probe_cascade(c);
     let q = clamp((p - oc.xyz) / (oc.w * spacing) - 0.5, vec3<f32>(0.0), vec3<f32>(probes - 1.0));

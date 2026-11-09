@@ -19,14 +19,13 @@ public sealed class TreeLevelShadowTests(ITestOutputHelper output)
     /// <remarks>
     /// Bevy draws a mesh into a light's shadow map over the whole of its visibility range, both of
     /// its margins included, and the shadow pass takes no dither, so in the band from 2.5 to 3 of a
-    /// tree's heights both levels cast whole and the crown shades itself twice. The oak read leaf by
-    /// leaf against the reference's light at its first faces, which traces the level of the camera's
-    /// distance alone, read 16, 19, 15, 17 and 12% under at 26.5, 27.85, 28.05, 29.5 and 30.3
-    /// meters, the band's middle at 27.94, and 3% under at 22 meters and 8% over at 33 with either
-    /// level alone. A mesh of a visibility range casts from the middle of the margin it fades in
-    /// over to the middle of the one it fades out over, the half of each margin the reference traces
-    /// it on, and the oak reads 8, 4, 3, 1 and 7% over. The bar fails the least of the shortfalls
-    /// and holds the largest excess with 7 points to spare.
+    /// tree's heights both levels would cast whole and the crown would shade itself twice. A mesh
+    /// of a visibility range casts from the middle of the margin it fades in over to the middle of
+    /// the one it fades out over, the half of each margin the reference traces it on, the reference
+    /// tracing the level of the camera's distance alone, so the oak read leaf by leaf takes the sun
+    /// as its reference's first faces do. The bar, from 8% under to 15% over, fails a crown shading
+    /// itself twice, which reads more than a tenth under, and holds the oak's excess, under a tenth
+    /// over.
     /// </remarks>
     [SkippableTheory]
     [InlineData(26.5f)]
@@ -110,10 +109,9 @@ public sealed class TreeLevelShadowTests(ITestOutputHelper output)
     /// </summary>
     /// <remarks>
     /// The eye stands 5 centimeters short of the band's middle, then crosses to 5 centimeters past
-    /// it between one frame and the next, each frame captured and set against the picture taken once
-    /// the eye has stood on its side of the middle. The two pairs read as one, a mean light of
-    /// 0.1682 and 0.1679 where the head read 0.1659 and 0.1660 with both levels casting and the tree
-    /// read 0.1807 casting nothing, so the shadow changes in the frame the eye crosses and is one
+    /// it between one frame and the next, each frame captured and set against the picture taken
+    /// once the eye has stood on its side of the middle. The two pairs read as one, each frame as
+    /// the picture of its side, so the shadow changes in the frame the eye crosses and is one
     /// level's on either side of it.
     /// </remarks>
     [SkippableFact]

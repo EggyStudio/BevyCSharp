@@ -1,9 +1,12 @@
 # Review
 
-Reviewed up to `da5e4ec2`, 96's fourth part, the trees standing where the Vegetation module's
-planting places them at its 2fba808, the public listing one line fewer, pushed at 06:07 on
-2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in 18 and Windows in 18; it keeps
-the form and carries the review's files. Nothing is pushed after it. Before it `904a291a`, 96's
+Reviewed up to `fbf47d59`, 122, the drive's stop on the GPU's memory read against the commit that
+passed on 2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09, its run green
+at 07:51 with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form and carries the
+review's files. Nothing is pushed after it. Before it `da5e4ec2`, 96's fourth part, the trees
+standing where the Vegetation module's planting places them at its 2fba808, the public listing one
+line fewer, pushed at 06:07 on 2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in
+18 and Windows in 18; it keeps the form and carries the review's files. Before it `904a291a`, 96's
 third part, the grass planted from the Vegetation module's scatter at its d604e4d, the patches and
 clumps the same to the bit and the public listing 15 lines fewer, pushed at 04:13 on 2026-11-09, its
 run green at 04:31 with Linux in 11 minutes, macOS in 13 and Windows in 17; it keeps the form and
@@ -2572,18 +2575,38 @@ from [SHARED.md](SHARED.md).
     After 96's parts, before 97. Begun at 06:07 on 2026-11-09; the passing runs of 2026-11-03 left
     only the end-of-run memory line, 1.89 GB allocated of 3.02 reserved, so that day's commit runs
     again in a worktree with the memory read at each view, beside the head on the same desktop load.
+    Done at `fbf47d59`, pushed at 07:33 on 2026-11-09, placed and not mended; the commit that passed
+    on 2026-11-03, built in a worktree and run beside the head under the same desktop load of 2,570
+    MB on the GPU, stops at the same places, and its allocation stands within 5 MB of the head's at
+    every station, 1,293 against 1,288 MB through the course and 1,509 against 1,504 by the
+    fourteenth hall, so nothing of the lighting work since grew; a second read sampling every
+    program's GPU memory each second found the desktop holding 2,570 MB throughout, 1,276 in
+    programs the driver lists and 1,303 in none, the program 2,765 MB and the whole GPU 5,351 of
+    8,188 at the stop, the failing call the directional lights' shadow map, with the program's
+    budget of 5,132 MB about 2.4 GB from spent; whether the request is that large or the budget is
+    not the bound is item 124's one read. A head run begun with the desktop at 3,256 MB stopped
+    earlier, after the sixth hall.
 
 123. **Comments without readings and costs.** Decision 87 on 2026-11-09. A second sweep after the
     first (item 121), every comment in the sources, shaders, scripts and examples that carries a
     reading before and after a mend, a figure in milliseconds, seconds or bytes, a count of
     triangles or frames from a trial, or an account of what was tried, rewritten to the reason alone
     with the numbers the code's choice depends on, the readings and costs left to RENDERING.md and
-    the review where they stand already; scenes_sponza's far cascade comment first, saying that the
-    building's size against the cascades' reach puts the main door past the near cascades from the
-    lion's end, where a ray took the sky, so a far cascade of 100 holds the whole building from
-    anywhere in it. STYLE.md's Register gains the sentence and its Checks a search for milliseconds,
-    times its reference, where it read and from so much to so much in comments, read rather than
-    counted. One commit, after 96's parts and 122, before 97.
+    the review where they stand already; no comment is named first here, the far cascade's being the
+    engine's. STYLE.md's Register gains the sentence and its Checks a search for milliseconds, times
+    its reference, where it read and from so much to so much in comments, read rather than counted.
+    One commit, after 96's parts and 122, before 97.
+
+124. **The shadow map's request at the stop.** From item 122 on 2026-11-09, the third read Decision
+    81 leaves to the review, opened as one read. The drive stops on the creation of the directional
+    lights' shadow map with the program at 2,765 MB and some 2.4 GB of its budget unspent, so read
+    the request itself, the map's dimensions, layers and format at the ramps and the bytes they come
+    to, and what the device answers, the heap's budget or its largest free block, from the
+    validation layer or wgpu's error; where the request is large by the cascades' resolution and
+    count at the defaults, size it to the light's reach or the budget and the drive runs through,
+    and where the bound is the heap's fragmentation or its budget below the total, record it as the
+    machine's with the figures and the drive stays a CI judgment here. The 2026-11-03 worktree at
+    ~/.cache/bevycsharp/nov03 stays until this is done. After 123, before 97.
 
 ## Verdicts
 
@@ -6390,3 +6413,33 @@ Shared: on this machine the desktop holds about 2,600 MB of the GPU's 8,188 MB, 
 program the driver lists, and the driver budgets a program beside it at 5,132 MB, so a scripted run
 in either engine that stops on the GPU's memory reads the GPU's whole use at its start beside its
 own figure before it takes the stop as its own.
+
+Item 123, comments without readings and costs, in the commit carrying this line. Each comment in the
+sources, the shaders, the scripts, the workflows, the tests and the examples that carried a reading
+before and after a mend, a time or a size measured from a run, a count from a trial, a reading
+against a reference or an account of a run or a commit is rewritten to its reason, about 190
+comments in 94 files, the code, the strings and the identifiers unchanged in every one. A number
+stays where the code's choice depends on it, as a test's bound does with the reading it holds, a
+script's timeout with the wait it covers said by its kind, and a size the code works with.
+STYLE.md's Register says so after item 121's paragraph, and its Checks gain a search of the comments
+for a time or a size, a reading against a reference and a reading from one value to another, each
+hit read rather than counted.
+
+Four are left as they stand and offered. RayTracingTests keeps its budget of 3.2 ms with the
+stages' least frame it is a quarter over, since the bound is the test's. soak-check.py's slacks keep
+the soak's figures each is a multiple of, which N 3.5 asks. Packs.cs gives the meshlet twin's reason
+as the Bevy release it was seen in, a version's behavior rather than a reading. The ImGui pass's
+module comment in imgui/render.rs likens its shape to a reference engine's Vulkan backend, which is
+item 121's kind and carries no reading, and is left for a commit of that kind. The light hall's fog
+in Lights.cs gives its present reason in place of its history.
+
+The bridge's comments changed alone, and cargo check passed on headless, render and editor, cargo
+test passed, 118 with no feature and 204 with render, and the bridge was built with the editor
+profile, meshlets and Solari, its shaders' comments with it. The whole suite ran with it, 2,032
+passed and 3 skipped in 52 m 25 s at the 3 GB cap, none aborted, its largest process at 3,003 MB.
+NormTests passed, 18. The public listing and the cheat sheet are unchanged.
+
+Shared: Decision 87's sweep, comments carrying no reading of before and after, no cost measured from
+a run and no account of the trials, a number standing only where the code's choice depends on it
+with its reason, with STYLE.md's sentence in its Register and its search in its Checks, which the
+sibling's style guide may take as they are.

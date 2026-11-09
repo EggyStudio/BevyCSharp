@@ -6,9 +6,9 @@
 #   build/soaks.sh <seconds> <courtyard|stress|swarm|blockout|feature-test>...
 #
 # A failure is said as one error carrying each soak's FAILED lines and each value the check found
-# climbing, or too few readings to judge, so the page names the program and the figure. The pack run
-# of 5e01491e said only that a game grew or could not be played, since its one error came after the
-# scripts and build/step.py adds its page only to a step that said none.
+# climbing, or too few readings to judge, so the page names the program and the figure, since an
+# error said after the scripts would leave the page with no more than that a game grew or could not
+# be played, build/step.py adding its page only to a step that said none.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 

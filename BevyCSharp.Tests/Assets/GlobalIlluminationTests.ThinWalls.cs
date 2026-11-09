@@ -12,18 +12,17 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// The field holds a wall thinner than a cell half a cell thick about its middle where a cell
-    /// lies in front of one of its faces with the other straight behind it. The splat took a face
-    /// as lying behind a cell within 25 degrees of straight back, and a wall standing on a floor
-    /// has a bottom face buried against the floor's top, so along the wall's foot that face, its
-    /// edge 22 degrees off straight back from the cells there, lay nearer than the far face and was
-    /// kept as the face behind. Looking down and not against the face in front, it held nothing,
-    /// those cells kept the distance in front, and every probe's ray along the floor passed under
-    /// the wall, the room's faces reading 0.03 to 0.04, as a ceiling laid on the walls let rays
-    /// over them. The walls are 0.3 thick in cells of 0.5, as the feature test's hall's walls stand
-    /// in its second cascade, each face a tenth from the middles of the cells beside it, and the
-    /// room lies between the probes, every 4 units, so none stands in a wall. The screen probes are
-    /// left out, so the room reads the light the world's probes bring it, which the field's hold
-    /// decides.
+    /// lies in front of one of its faces with the other straight behind it. A wall standing on a
+    /// floor has a bottom face buried against the floor's top, whose edge lies about 22 degrees off
+    /// straight back from the cells along the wall's foot, so a splat that took a face as lying
+    /// behind a cell within 25 degrees of straight back would keep that bottom face as the face
+    /// behind. Looking down and not against the face in front, it holds nothing, those cells would
+    /// keep the distance in front, and every probe's ray along the floor would pass under the wall,
+    /// as a ceiling laid on the walls would let rays over them. The walls are 0.3 thick in cells of
+    /// 0.5, as the feature test's hall's walls stand in its second cascade, each face a tenth from
+    /// the middles of the cells beside it, and the room lies between the probes, every 4 units, so
+    /// none stands in a wall. The screen probes are left out, so the room reads the light the
+    /// world's probes bring it, which the field's hold decides.
     /// </remarks>
     [SkippableFact]
     public void ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls()
@@ -38,12 +37,12 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// A probe's hit takes the light of the lamps that cast shadows less what the field hides of
-    /// it, found by a march toward each lamp from a cell and a half off the surface, which was kept
-    /// two cells clear at its start as at the lamp's end, a unit past its point in cells of 0.5, so
-    /// a wall that near the hit was passed over and the lamp outside lit the faces the screen
-    /// probes read inside 0.014 to 0.055. What the floor keeps comes from the screen probes' rays
-    /// that start at a wall's foot and meet the wall at once, the hit's normal from the field's
-    /// slope pointing out through the wall, which is read apart.
+    /// it, found by a march toward each lamp from a cell and a half off the surface, so a wall that
+    /// near the hit hides the lamp beyond it, where a march kept two cells clear at its start as at
+    /// the lamp's end, a unit past its point in cells of 0.5, would pass over the wall and let the
+    /// lamp outside light the faces the screen probes read inside. What the floor keeps comes from
+    /// the screen probes' rays that start at a wall's foot and meet the wall at once, the hit's
+    /// normal from the field's slope pointing out through the wall, which is read apart.
     /// </remarks>
     [SkippableFact]
     public void ALampOutsideAThinWalledRoomIsHiddenFromTheHitsBesideItsWalls()
@@ -62,15 +61,12 @@ public sealed partial class GlobalIlluminationTests
     /// weighed by how much of the face it sees with its reach blended between its texels and a
     /// slack of half the probes' spacing (<c>probeSeesBlended</c>) and left out where it sees none,
     /// where the light about its normal takes a slack of an eighth, so this room reads whether that
-    /// slack lets a probe past the wall lend the light it sees there. The floor reads 0.0012. With
-    /// a white board standing outside past the lamp, which the probes beyond the wall see along the
-    /// floor's mirror way, the floor read 0.0123, against 0.0135 with each probe weighed by
-    /// <c>probeSees</c>, 0.0122 with no weight for sight at all and 0.0106 with no light along the
-    /// mirror way, the probes beyond the wall weighed a hundredfold reading 0.0258, so those probes
-    /// are among the ones read and the slack lends the reflection nothing <c>probeSees</c> keeps
-    /// out. What passed 0.005 there was the light about the normal, which the board brought through
-    /// the wall by the reach of the probes beyond it, and with each ray's reach its own (<see
-    /// cref="ALitBoardOutsideAThinWalledRoomLightsNothingInside"/>) the floor reads 0.0046.
+    /// slack lets a probe past the wall lend the light it sees there. With a white board standing
+    /// outside past the lamp, which the probes beyond the wall see along the floor's mirror way,
+    /// those probes are among the ones read, and the slack lends the reflection nothing
+    /// <c>probeSees</c> keeps out. The light about the normal, which the board would bring through
+    /// the wall by the reach of the probes beyond it, is kept out by each ray's reach being its own
+    /// (<see cref="ALitBoardOutsideAThinWalledRoomLightsNothingInside"/>).
     /// </remarks>
     [SkippableFact]
     public void ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside()
@@ -84,13 +80,11 @@ public sealed partial class GlobalIlluminationTests
     /// the probes beyond the east wall see, reads inside under 0.005 on every face.
     /// </summary>
     /// <remarks>
-    /// A probe's reach along a texel of its octahedron was the mean of the texel's four rays, so
-    /// where one of them passed beside the room's corner and met nothing, the texel read 5.8 units
-    /// where the wall stood at 2.6 along its other ways, and the probe beyond the east wall, lit by
-    /// the board, saw an eighth of the floor inside, which read 0.0119. With each ray's reach its
-    /// own, a texel of sixteen a side a ray, the floor reads 0.0037. A ray's reach stands for a
-    /// cell of ways about 15 degrees wide, so an edge narrower than that seen from a probe can still
-    /// let one cell read long.
+    /// A probe's reach along a texel of its octahedron is each ray's own, a texel of sixteen a side
+    /// a ray, since the mean of a texel's rays reads long where one of them passes beside the
+    /// room's corner and meets nothing, and the probe beyond the east wall, lit by the board, would
+    /// see the floor inside through it. A ray's reach stands for a cell of ways about 15 degrees
+    /// wide, so an edge narrower than that seen from a probe can still let one cell read long.
     /// </remarks>
     [SkippableFact]
     public void ALitBoardOutsideAThinWalledRoomLightsNothingInside()

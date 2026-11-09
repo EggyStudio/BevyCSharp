@@ -13,7 +13,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// says all the command reads, the objects the last full collection kept and the heap it left, the
 /// collections, the process's peak, the handles held and the bridge's allocations by kind, which a
 /// soak watches climb. They are a few to a line, as many as fit in about sixty letters, since a
-/// line each ran past the bottom of a window 720 pixels high.
+/// line each would run past the bottom of a window 720 pixels high.
 /// </para>
 /// <para>
 /// The command is asked with the app's world lent, since it counts the handles only with one, and

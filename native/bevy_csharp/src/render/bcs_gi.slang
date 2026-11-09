@@ -358,10 +358,10 @@ public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe,
 /// the way to the surface and falling to 0 over half the probes' spacing past it, so a probe the
 /// surface stops seeing fades out over about the angle a texel spans. The light a rough face
 /// reflects reads its probes so (`reflectedIn` in gi_light.slang), since along the mirror way the
-/// probes on either side of a mesh see unlike light, and weighed by `probeSees` they drew a Cornell
-/// box's tall block on its red wall, at a roughness of 0.5, with the straight edges of the probes'
-/// texels, where the reference blurs it. A quarter of the spacing left the edges scalloped. The
-/// texels are clamped at the octahedron's edges rather than folded across them.
+/// probes on either side of a mesh see unlike light, and weighed by `probeSees` alone the edge of a
+/// mesh's shadow in that light takes the straight edges of the probes' texels, where a rough face's
+/// reflection is soft. The texels are clamped at the octahedron's edges rather than folded across
+/// them.
 public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
 {
     float3 toward = p + n * (0.3 * apart) - probe;
@@ -431,9 +431,9 @@ public float bouncedHold(FieldInfo info, float3 p, float3 n, float spacing, floa
 /// three faces `n` looks toward weighed by the square of `n` along each. A probe it does not see
 /// keeps a twentieth of its weight, so a surface wedged between two meshes is not left dark. The
 /// faces are read toward their light at the surfaces they are read for (`cubesAt`) as
-/// `bouncedSeenSum` reads them, since read where the probes stood a closed box with dark side walls
-/// took its floor's first bounce 21% over its reference at four cascades of a quarter meter, where
-/// read so it takes it 8% over.
+/// `bouncedSeenSum` reads them, since a surface takes the light that reaches it where it lies
+/// rather than the light at a probe standing off it, which the walls and the ceiling around are
+/// nearer to.
 float3 bouncedIn(Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float> reach, FieldInfo info, float3 p, float3 n, float probes, float spacing, int c)
 {
     float4 oc = info.cascades[c].origin_and_cell;
@@ -540,8 +540,7 @@ float probeSeenFrom(Texture3D<float> field, SamplerState linear, FieldInfo info,
 /// toward their light at the surfaces they are read for (`cubesAt`, gi_ambient.slang) by how far
 /// `p` lies from the probe along `n` against how far that surface lay, so a hit on the floor a
 /// face's own ray met takes the light the floor gathers rather than the probe's over it, which the
-/// walls and the ceiling are nearer to. Read at the probes, a closed room of the level's white came
-/// back about 5% over its reference at each bounce.
+/// walls and the ceiling are nearer to.
 public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
     float3 p, float3 n, float probes, float spacing, int c)
 {
@@ -629,10 +628,10 @@ public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldIn
 /// The light the lamps that cast shadows would send a surface at `p` facing `n` but for what the
 /// field holds between them, each found by a march toward the lamp from a cell and a half off the
 /// surface, looking from its first step, and stopping two cells short of the lamp so its own
-/// fitting does not hide it. Kept two cells clear at its start as well, as `seesThrough` keeps both
-/// of its ends, the march began a unit past its point in cells of half a unit and passed over a
-/// wall that near the surface, so a lamp outside a closed room of walls 0.3 thick lit the faces
-/// inside that its screen probes read 0.014 to 0.055 where no light reaches them.
+/// fitting does not hide it. Where `seesThrough` keeps a clearance at both of its ends, this march
+/// keeps none at its start, since one begun farther from its point passes over a wall that near the
+/// surface, and a lamp outside a closed room of thin walls would light the faces inside, where no
+/// light reaches them.
 public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
 {
     float3 hidden = float3(0.0);
@@ -673,22 +672,19 @@ public float2 splitSum(float roughness, float nv)
 /// the ray (`splitSum`) and its color's diffuse share past its metal of what its gloss leaves, its
 /// f0 from its reflectance and its color by its metal as Bevy's lighting works it out, at the
 /// face's own roughness, so the gloss of a wall a probe's ray meets carries light between bounces
-/// as its diffuse share does, the share the path-traced reference's paths carry at every face past
-/// the first. The diffuse share takes the indirect light reaching the face over pi, and the gloss
-/// the light the probes hold along the ray's mirror way (`probeAlong`), as the reference's paths
-/// reflect it. Taken as though that light reached the face evenly from all around, a probe in a
-/// closed room of smooth walls of the level's white read its second bounce 12.5% over its
-/// reference, and read so 11.1%. The sun's and the lights' light is reflected as though it came
-/// evenly, since a probe's rays leave along the same ways every frame and a highlight as sharp as a
-/// roughness of 0.1 gives is caught or missed by where they fall. Lit by each light's highlight,
-/// the same probe read its first bounce 6.4% under its reference where 0.3% over. With the diffuse
-/// share at its whole color beside the gloss, a smooth white face met at a grazing ray sent on more
-/// light than reached it, half as much again at a roughness of 0.1, and a closed room of smooth
-/// walls as white as 0.95 ran away, its light past the direct 1,136 to 1,195 times its reference's.
-/// `own` holds the light the surface sends on of what reaches it straight from the sun, the lights
-/// and the glow lights, with its emission, which a probe weighs the frame before's light by. The
-/// sun and the lights are given as the light a white surface facing one returns, and the probes
-/// hold the light reaching a face, so the indirect light reaching it is taken over pi.
+/// as its diffuse share does, as light is carried at every face a path meets past the first. The
+/// diffuse share takes the indirect light reaching the face over pi, and the gloss the light the
+/// probes hold along the ray's mirror way (`probeAlong`), since a smooth face sends on the light
+/// that reaches it along that way rather than the light from all around. The sun's and the lights'
+/// light is reflected as though it came evenly, since a probe's rays leave along the same ways
+/// every frame and a highlight as sharp as a roughness of 0.1 gives is caught or missed by where
+/// they fall. The diffuse share is of what the gloss leaves rather than of the whole color beside
+/// it, since with both a smooth white face met at a grazing ray sends on more light than reached
+/// it, and a closed room of smooth white walls gathers light without end. `own` holds the light the
+/// surface sends on of what reaches it straight from the sun, the lights and the glow lights, with
+/// its emission, which a probe weighs the frame before's light by. The sun and the lights are given
+/// as the light a white surface facing one returns, and the probes hold the light reaching a face,
+/// so the indirect light reaching it is taken over pi.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
     Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p,
     float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)

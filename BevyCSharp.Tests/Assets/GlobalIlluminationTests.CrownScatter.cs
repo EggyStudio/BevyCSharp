@@ -17,18 +17,16 @@ public sealed partial class GlobalIlluminationTests
     /// <remarks>
     /// The crown lies past the first cascade, which lies about the eye, so its leaves read the
     /// second cascade's probes four meters apart, whose rays' interval begins at four meters. A ray
-    /// crossing the crown took the light of the place it met it at for all the crossing stops, so
-    /// the probe before the front, whose rays meet the sunlit front with the crown's shaded inside
-    /// behind it, read 151% over. A crossing begun before the interval took none of the light,
-    /// keeping only its share, so the probe in the front half, whose every crossing begins at the
-    /// probe, read 58% under. And the probe among the core's cards stood inside a mesh, the cards
-    /// reading below zero where they run together, and held nothing. A crossing lights what it
-    /// stops where it stops it on average, a crossing begun before the interval gives its light to
-    /// the probe's faces, and a probe in a cell the cards painted stands outside, and they read 2%
-    /// under, 11% over and 46% under. The core's probe reads under looking away from the sun, a
-    /// place deep in a crown lit as a surface facing out of it by the field's normal and letting
-    /// nothing through, where the reference lights a leaf by its normal bent toward the way out and
-    /// lets its translucent share through.
+    /// crossing the crown lights what it stops where it stops it on average, since the light of the
+    /// place it met the crown at, taken for all the crossing stops, reads the sunlit front for the
+    /// shaded inside behind it. A crossing begun before the interval gives its light to the probe's
+    /// faces, since keeping only its share leaves a probe whose every crossing begins at it near
+    /// dark. And a probe in a cell the cards painted stands outside, since the cards read below
+    /// zero where they run together and a probe inside a mesh holds nothing. The core's probe reads
+    /// under looking away from the sun, a place deep in a crown lit as a surface facing out of it
+    /// by the field's normal and letting nothing through, where the reference lights a leaf by its
+    /// normal bent toward the way out and lets its translucent share through, so its bound is 0.4
+    /// of its reference's.
     /// </remarks>
     [SkippableFact]
     public void ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter()
@@ -122,8 +120,8 @@ public sealed partial class GlobalIlluminationTests
     /// A reference asked of a scene with nothing drawn is refused, saying so.
     /// </summary>
     /// <remarks>
-    /// With nothing drawn no ray scene was ever made, and building the scene that was never made
-    /// again failed on a component type never registered before the refusal could be given.
+    /// With nothing drawn no ray scene is made, so the reference is refused before a scene that was
+    /// never made is built again, which fails on a component type never registered.
     /// </remarks>
     [SkippableFact]
     public void AReferenceOfASceneWithNothingDrawnIsRefused()

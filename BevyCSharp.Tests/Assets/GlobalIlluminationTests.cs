@@ -186,10 +186,11 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// A probe in the middle of a closed room lit by nothing but an emissive panel under its ceiling
-    /// gathers the panel's light on its face toward it, the light the field holds beside each cell's
-    /// color, where a probe of the same room with the panel dark gathers none. A panel four times
-    /// white 1.35 units above gave the face 3.06 on the development machine's GPU.
+    /// A probe in the middle of a closed room lit by nothing but an emissive panel under its
+    /// ceiling gathers the panel's light on its face toward it, the light the field holds beside
+    /// each cell's color, where a probe of the same room with the panel dark gathers none. A panel
+    /// four times white 1.35 units above gives the face about three times the 1 the test asks of
+    /// it.
     /// </summary>
     [SkippableFact]
     public void AnEmissivePanelLightsTheProbesOfAClosedRoom()
@@ -352,9 +353,9 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Bevy reads that share from its table of F_AB, 0.454 at that angle and 0.32 face on, and the
-    /// probes' sky holds 0.45 of the ambient light at every angle, as a sky does. Seen from straight
-    /// above, the floor read 106 with global illumination on and 92 with it off once the pass took
-    /// back what the table gives, where the polynomial it took back by before kept the two alike.
+    /// probes' sky holds 0.45 of the ambient light at every angle, as a sky does, so seen from
+    /// straight above the floor reads brighter with global illumination on than with it off, and
+    /// the test looks at 60 degrees, where the two shares meet.
     /// </remarks>
     [SkippableFact]
     public void AnOpenFloorReadsAsBevysAmbientLightGivesIt()
@@ -585,10 +586,9 @@ public sealed partial class GlobalIlluminationTests
     /// as the weather's camera over the roofs does, draws on and lights the floor. Switching it on
     /// draws every material deferred, and Bevy 0.20 queues a deferred material into the deferred
     /// phase of every camera drawing a prepass, which a camera given depth before, with no
-    /// G-buffer, lacks, so the frame after the switch ended the app, as the feature test's did under
-    /// its weather, until such a camera was given one while materials are deferred. The second
-    /// camera is multisampled, as a camera is unless set otherwise, which a G-buffer is not drawn
-    /// with.
+    /// G-buffer, lacks, so such a camera is given one while materials are deferred, where without
+    /// it the frame after the switch would end the app. The second camera is multisampled, as a
+    /// camera is unless set otherwise, which a G-buffer is not drawn with.
     /// </summary>
     [SkippableFact]
     public void SwitchingItOnWhileASecondCameraDrawsDepthDrawsOn()
@@ -711,12 +711,11 @@ public sealed partial class GlobalIlluminationTests
     /// picture waits for before the pipelines it then waits on.
     /// </summary>
     /// <remarks>
-    /// The field puts its draws on the camera once their programs have compiled, and turns the camera
-    /// deferred and to high dynamic range with them, which asks for pipelines of its own. Where that
-    /// came after a capture had seen three frames of ready pipelines, as the shadows' program waited
-    /// behind the suite's other compiles, the picture was a frame whose new pipelines were still
-    /// compiling, and the open floor read black with global illumination off once in a run of the
-    /// whole suite, never alone.
+    /// The field puts its draws on the camera once their programs have compiled, and turns the
+    /// camera deferred and to high dynamic range with them, which asks for pipelines of its own, so
+    /// a capture that saw three frames of ready pipelines before that, as where the shadows'
+    /// program waits behind other compiles, would take a frame whose new pipelines are still
+    /// compiling.
     /// </remarks>
     internal static bool EngineDrawsOn(bool traced) =>
         !SceneField.ShadowCamera.IsNone && (!traced || WorldProbes.LightPass.IsValid);

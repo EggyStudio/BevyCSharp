@@ -14,9 +14,7 @@
 #
 # Where CAPTURE_MINUTES is set, no example is started once that many minutes have gone since the
 # first, and an error names how many of how many were reached and the last of them, so a run that
-# cannot finish says how far it got before a job's limit cuts it off with nothing said. The pack
-# run of 5e01491e, the first with Bevy's files and slangc in place, was cancelled at its 90 minutes
-# with the captures still running and its page holding the cancellation alone.
+# cannot finish says how far it got before a job's limit cuts it off with nothing said.
 set -uo pipefail
 cd "$(dirname "$0")/.."
 
@@ -37,8 +35,7 @@ mkdir -p "$into"
 
 # Bevy's files first and the build after them, since the build copies beside the program what
 # bevy-assets holds when it runs, and compiles in the picture embedded_asset carries only where its
-# file is there. The pack run of d2a20b6a built the examples in a step before this fetched, and the
-# 58 examples that load a file of Bevy's were captured blank.
+# file is there, so an example built before the files were fetched is captured blank.
 build/fetch-bevy-assets.sh || exit 1
 dotnet build BevyCSharp.Examples "$@" || exit 1
 
@@ -72,10 +69,9 @@ said() {
 }
 
 # Three examples in a row that do not start end the run, since a program that cannot start twice
-# more will not start at all, and bcs waits a minute and a half for each before it says so. On the
-# pack run of 292eead2 no example found the bridge, and the step waited through them until the job's
-# hour ran out, its page holding the cancellation alone. The first one's log is read before the next
-# opens and writes over it.
+# more will not start at all, and bcs waits a minute and a half for each before it says so, which
+# over the whole list waits out the job's limit with nothing said. The first one's log is read
+# before the next opens and writes over it.
 unstarted=()
 examples=()
 index=0

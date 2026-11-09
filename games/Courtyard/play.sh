@@ -20,11 +20,10 @@ fail() { echo "FAILED: $*" >&2; grep -h "^\[play\]" "$shots/game.log" >&2 || tru
 
 # Every command waits as long as ten minutes for its answer, where bcs waits thirty seconds, since a
 # software device, as the workflow's runner has, draws a few frames a second and a hold or a wait
-# runs for as many of them as it names. Swarm's play and the feature test's course run ended pack
-# runs on a command's timeout with nothing said but bcs's exit code, so one that fails here says its
-# words, its code and the first line bcs gave of why, and anything else that fails is named by the
-# trap below. bcs writes why to its output, as it writes the answer, so the output is kept in a file
-# and passed on once the command has worked.
+# runs for as many of them as it names. A command that fails would say nothing of itself but bcs's
+# exit code, so one that fails here says its words, its code and the first line bcs gave of why, and
+# anything else that fails is named by the trap below. bcs writes why to its output, as it writes
+# the answer, so the output is kept in a file and passed on once the command has worked.
 c() { ./bcs command "$@" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
 shot() { ./bcs shot "$1" --timeout 600 >"$said" || fail "./bcs shot $1 ended with $?, $(head -n 1 "$said")"; }
@@ -74,8 +73,8 @@ for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Courtyard" &
 
 # Each frame a sixtieth of a second of the game, however long the machine took to draw it, since a
 # walk is planned in frames at the runner's speed. A software renderer, as the workflow's runner
-# has, draws a few frames a second, and on the machine's clock each held frame carried the runner
-# several times as far as planned, past every coin and into the wall.
+# has, draws a few frames a second, and on the machine's clock each held frame would carry the
+# runner several times as far as planned, past every coin and into the wall.
 quiet app.frametime 0.0166667
 quiet frames.wait 30
 shot "$shots/1-menu.png"

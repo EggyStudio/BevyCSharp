@@ -126,20 +126,18 @@ pub fn install_offscreen_target(app: &mut App, width: u32, height: u32) {
 /// Keeps an offscreen run no more than a frame ahead of the GPU.
 ///
 /// A window holds a run to what the GPU keeps up with, since a frame waits for an image of the swap
-/// chain to come free. An image drawn into waits for nothing, so a run as fast as it can go handed
-/// wgpu frames faster than the GPU finished them, and wgpu keeps what each submitted frame used
-/// until the GPU is past it. The stress program drawing a thousand cubes grew by a gigabyte in a
-/// minute that way, which `build/soak.sh` found. So each frame waits, as its last step, for the GPU
-/// to finish the one before, and one frame is drawn while the next is made ready, as a window's two
-/// images allow.
+/// chain to come free. An image drawn into waits for nothing, so a run as fast as it can go would
+/// hand wgpu frames faster than the GPU finished them, and wgpu keeps what each submitted frame
+/// used until the GPU is past it, the run's memory growing for as long as it runs. So each frame
+/// waits, as its last step, for the GPU to finish the one before, and one frame is drawn while the
+/// next is made ready, as a window's two images allow.
 ///
 /// The wait has a limit. wgpu signals a submission's fence even when nothing was submitted, so the
 /// mark waited on is always in the queue behind the frame's work, and a wait that does not end is a
-/// GPU that has not finished that work, as `irradiance_volumes` met once at frame 90 on a laptop's
-/// GPU. Without a limit the run stood still with nothing said until whatever ran it gave up. Past
-/// [`FRAME_BEFORE_LIMIT`] the run ends, saying which frame the GPU did not finish, with
-/// [`STALLED_EXIT_CODE`], since a device that has not finished a frame in that long cannot be
-/// counted on to finish closing either.
+/// GPU that has not finished that work. Without a limit the run would stand still with nothing said
+/// until whatever ran it gave up. Past [`FRAME_BEFORE_LIMIT`] the run ends, saying which frame the
+/// GPU did not finish, with [`STALLED_EXIT_CODE`], since a device that has not finished a frame in
+/// that long cannot be counted on to finish closing either.
 #[cfg(feature = "render")]
 fn wait_for_the_frame_before(
     queue: bevy::ecs::system::Res<bevy::render::renderer::RenderQueue>,

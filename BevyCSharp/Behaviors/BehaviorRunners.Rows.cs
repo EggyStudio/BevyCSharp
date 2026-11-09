@@ -41,12 +41,10 @@ public static partial class BehaviorRunners
     /// were before it ran, since its copy is not written back.
     /// </para>
     /// <para>
-    /// The copy is the cost. A walk on the calling thread of a hundred thousand entities, its
-    /// method one addition, took per entity 1.5 nanoseconds by reference and 4.9 copied for a
-    /// sixteen byte component, 3.8 and 12.4 with a forty byte transform taken beside it, and 6.5
-    /// and 14.4 for a component of a hundred and twenty eight bytes, at best of a run's last thirty
-    /// frames, and 2.4 and 7.0, 6.4 and 16.0, and 9.0 and 18.1 at their middle. A walk across the
-    /// thread pool, as one of four thousand and ninety six entities and more is, pays nothing.
+    /// The copy is the cost, a walk on the calling thread taking several times as long an entity
+    /// for a component copied as for one by reference, and more the larger the component or the
+    /// more components the method takes. A walk across the thread pool, as one of four thousand and
+    /// ninety six entities and more is, pays nothing.
     /// </para>
     /// </remarks>
     private unsafe struct Rows : IDisposable
@@ -168,11 +166,8 @@ public static partial class BehaviorRunners
     /// <remarks>
     /// Four bytes at a time up to sixty four, the width of the fields a method writes, since the
     /// copy is read back the moment the method returns, while its last writes may still be on their
-    /// way to memory, and a read wider than a write still on its way waits for it to land. Read
-    /// whole, a sixteen byte component took 11 nanoseconds an entity, and four bytes at a time 3.3,
-    /// with nothing else of the walk around it. A larger component is read whole, where four bytes
-    /// at a time cost more than the wait, 20 nanoseconds an entity for a hundred and twenty eight
-    /// bytes where read whole it took 15.
+    /// way to memory, and a read wider than a write still on its way waits for it to land. A larger
+    /// component is read whole, where four bytes at a time would cost more than the wait.
     /// </remarks>
     private static void WriteBack<T>(ref T row, in T copy) where T : unmanaged
     {

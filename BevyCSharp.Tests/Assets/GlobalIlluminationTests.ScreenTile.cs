@@ -31,11 +31,10 @@ public sealed partial class GlobalIlluminationTests
     /// every 8, the tile taken from the camera's picture's height.
     /// </summary>
     /// <remarks>
-    /// The tile was 16, 12 and 8 pixels at Low, Medium and High whatever the picture, so the
-    /// probes' count and their cost grew with the picture's pixels. In a box at High their trace
-    /// took 14.1, 29.0 and 64.2 ms at 1080p, 1440p and 4K, and with the tile grown past 1080 rows
-    /// 14.2, 14.1 and 15.1, while another program's draws shared the GPU (WorldProbes.Screen's
-    /// TileAt).
+    /// The tile is 16, 12 and 8 pixels at Low, Medium and High up to 1080 rows and grows with the
+    /// picture's height past them, so the probes' count and their cost stay about those of 1080
+    /// rows on a larger picture, where a tile of one size for every picture would let them grow
+    /// with its pixels (WorldProbes.Screen's TileAt).
     /// </remarks>
     [SkippableTheory]
     [InlineData(720u, 8)]

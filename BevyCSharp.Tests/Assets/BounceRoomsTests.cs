@@ -15,8 +15,7 @@ namespace Bevy.Tests;
 /// <c>BCS_WRITE_REFERENCES=1</c> traces them again. The picture's light is averaged the same, and a
 /// view's distance is its pixels' differences summed over the reference's light, so one region's
 /// excess does not hide another's shortfall. The tests run where the GPU traces rays, as the
-/// references are traced through them and the bounds were measured on such a GPU, the development
-/// machine's RTX 4070 Laptop GPU.
+/// references are traced through them and the bounds are set from readings on such a GPU.
 /// </para>
 /// <para>
 /// The rooms are 3DEngine's, its lights given in Bevy's units as the light a white surface facing
@@ -33,54 +32,33 @@ public sealed class BounceRoomsTests
 
     /// <summary>
     /// Each view at each quality with the screen probes traced and left unread, the world's probes
-    /// and each pixel's march to the glow lights alone as before the screen probes came, the
-    /// method's own guard, bound 15% over what it read on the development machine's GPU, so a mend
-    /// that widens no view keeps every bound and one that narrows a view is held to it by measuring
-    /// again. Left out, the probes stand for the glow lights alone where any is lit, as in every
-    /// view here, whose texels half the picture's size are two pixels wide at 160 by 90 and read
-    /// the emissive blocks' room 0.06 to 0.07 from its reference where marched at each pixel 0.05.
+    /// and each pixel's march to the glow lights alone, the method's own guard, each bound 15% over
+    /// the view's reading, so a mend that widens no view keeps every bound and one that narrows a
+    /// view is held to it by measuring again. Left out, the probes stand for the glow lights alone
+    /// where any is lit, as in every view here, whose texels half the picture's size are two pixels
+    /// wide at 160 by 90 and hold the emissive blocks' room farther from its reference than each
+    /// pixel's march does.
     /// </summary>
     /// <remarks>
     /// The references' paths are lit at every face as Bevy's lighting lights it and scatter there
     /// by its gloss and its diffuse share, each face past the first keeping for its diffuse share
     /// what its gloss leaves, as the probes' rays carry the gloss of what they meet and keep the
     /// same, and the picture reflects the light the probes it sees hold along the mirror way. The
-    /// views read 0.09 to 0.10 of their light from their references in the Cornell box, 0.05 in the
-    /// thin room, 0.35 in the corridor, 0.11 to 0.12 in the window's, 0.02 among the red walls,
-    /// 0.20 to 0.21 in the strip's, 0.05 to 0.07 on the grazing floor, 0.08 in the carried lamp's
-    /// and 0.07 around the emitting blocks. Before the emitters' light was carried, the Cornell box
-    /// read 0.11, the strip's 1.00 and the blocks' 0.30. The strip is thinner than a pixel at 160 by
-    /// 90, so the picture shows none of it where the reference's paths across each pixel meet it.
+    /// strip is thinner than a pixel at 160 by 90, so the picture shows none of it where the
+    /// reference's paths across each pixel meet it, and its view stands far from its reference.
     /// <para>
-    /// The grazing floor read 0.05 to 0.07 and the carried lamp's room 0.06 while each bounce came
-    /// back about 5% over, the hits and the pixels reading the probes' faces where the probes
-    /// stood. Read at the surfaces each face is read for, each patch the probes' rays met turned
-    /// toward them, the Cornell box comes to 0.08 from 0.11, the grazing floor's views read 0.09,
-    /// 0.07 and 0.06 at Low, Medium and High and the carried lamp's 0.08, so their bounds were
-    /// measured again. A fixed set of directions read at the layers' heights falls well or badly on
-    /// the grazing room's lamp's bright spot under its low ceiling by where the layers stand, the
-    /// room lifted 0, 0.3, 0.6 and 0.9 against the probes' grid in the field of 0.15 reading 0.89,
-    /// 1.05, 0.92 and 0.91 of its reference's light past the direct on its floor. The carried
-    /// lamp's room reads its back wall 13% under where 7%, its light coming mostly past the first
-    /// bounce, which reads short there as in the feature test's hall and alley, a shortfall the
-    /// gain hid.
+    /// A fixed set of directions read at the layers' heights falls well or badly on the grazing
+    /// room's lamp's bright spot under its low ceiling by where the layers stand against the
+    /// probes' grid. The carried lamp's room reads its back wall under its reference, its light
+    /// coming mostly past the first bounce, which reads short there as in the feature test's hall
+    /// and alley.
     /// </para>
     /// <para>
-    /// Each bound is taken with its reference, the farthest the picture of before read from
-    /// references traced from four seeds, which differ by 0.004 at most, plus the margin the bound
-    /// kept over its reading before, so the bound moves with the reference and the picture is held
-    /// to what it was, or 15% over the farthest the picture reads where that is less, so a view the
-    /// picture narrows is held to it. The references' faces past the first went on by their diffuse
-    /// share before the probes' rays carried the gloss of what they meet, and against the whole
-    /// reference the picture of before read the thin room 0.21 from it, the strip's 0.32 to 0.33,
-    /// the grazing floor 0.21 to 0.24 and the carried lamp's 0.15, where it reads 0.07, 0.21 to
-    /// 0.22, 0.06 to 0.08 and 0.08. The corridor reads 0.38 to 0.39 where it read 0.39, by gloss
-    /// the probes above it do not carry. The faces past the first took their diffuse share at its
-    /// whole color beside their gloss before they kept what the gloss leaves, and the references'
-    /// light is 0.1 to 14.5% less since, so the bounds were taken again, the strip's held 15% over
-    /// its reading, 0.24 to 0.25, since against the new references the picture of before read it
-    /// 0.17 from them, its probes' hits sending on more than reached them having hidden a shortfall
-    /// of a fifth of its light.
+    /// Each bound is taken with its reference, the farthest the picture reads from references
+    /// traced from four seeds plus the margin the bound keeps over its reading, so the bound moves
+    /// with the reference and the picture is held to what it was, or 15% over the farthest the
+    /// picture reads where that is less, so a view the picture narrows is held to it. The corridor
+    /// stands farthest from its reference, by gloss the probes above it do not carry.
     /// </para>
     /// </remarks>
     [SkippableTheory]
@@ -134,20 +112,14 @@ public sealed class BounceRoomsTests
     /// <summary>
     /// Each view at each quality with the screen probes traced, as they are by default, within
     /// 3DEngine's own bound at the same size, its reading with its screen probes and 15% over, or
-    /// the bound the view holds without them where that is wider, as in the corridor, whose world
-    /// probes read it 0.25 from its reference with the screen probes or without before its
-    /// reference's faces scattered by their gloss.
+    /// the bound the view holds without them where that is wider, as in the corridor.
     /// </summary>
     /// <remarks>
     /// The screen probes stand a tile apart, 16 pixels at Low, 12 at Medium and 8 at High, so at
     /// 160 by 90 the window's room at Low is 10 probes across and 6 down, and their light lies in
     /// blotches a tile wide that the views' distances read, where the size of the picture rather
-    /// than the method sets them. With them the views read 0.09 to 0.11 in the Cornell box, 0.02 to
-    /// 0.03 in the thin room, whose walls' seams the world's probes lit, 0.36 in the corridor, 0.15
-    /// to 0.17 in the window's, 0.02 among the red walls, 0.22 to 0.23 in the strip's, 0.05 to 0.07
-    /// on the grazing floor, 0.09 to 0.11 in the carried lamp's and 0.08 to 0.09 around the
-    /// emitting blocks. Their bounds are taken with their references as without the screen probes
-    /// (<see cref="EachRoomLiesWithinItsMeasuredDistanceFromItsReference"/>).
+    /// than the method sets them. Their bounds are taken with their references as without the
+    /// screen probes (<see cref="EachRoomLiesWithinItsMeasuredDistanceFromItsReference"/>).
     /// </remarks>
     [SkippableTheory]
     [InlineData(1, GlobalIllumination.Low, 0.12)]
@@ -189,14 +161,12 @@ public sealed class BounceRoomsTests
     }
 
     /// <summary>
-    /// The Cornell box's floor, lit by the lamp under its ceiling and the light its walls send back,
-    /// reads at <see cref="GlobalIllumination.High"/> within 16% of a reference of 1024 paths a pixel
-    /// traced in the same run, its light summed over the floor's pixels, where it read 3.5% over on
-    /// the development machine's GPU with the screen probes and 12.8% over without them, the world's
-    /// probes alone. Without them, with the lamp panel dark in both, it read 15.5% over, so the excess
-    /// is the probes' indirect light, and the panel's light, carried as a glow light, is about what
-    /// the reference gives; before that light was carried the floor read 2.5% under, the excess less
-    /// the panel's missing light.
+    /// The Cornell box's floor, lit by the lamp under its ceiling and the light its walls send
+    /// back, reads at <see cref="GlobalIllumination.High"/> within 16% of a reference of 1024 paths
+    /// a pixel traced in the same run, its light summed over the floor's pixels. What the floor
+    /// reads over its reference is the probes' indirect light, the world's probes' more than the
+    /// screen probes', since the panel's light, carried as a glow light, is about what the
+    /// reference gives.
     /// </summary>
     [SkippableFact]
     public void ALitRoomsFloorLiesWithinTheBoundOfItsReference()

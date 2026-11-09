@@ -319,9 +319,9 @@ public sealed class CliServerTests : IDisposable
     /// frames after it moves the clock as before.
     /// </summary>
     /// <remarks>
-    /// The drive's shots wait for the pipelines their view asked for, which on the working machine
-    /// took five seconds after the camera moved, and a clock moving through that wait would put each
-    /// shot at a moment of the game that hung on how fast the device compiled.
+    /// The feature test's scripted run waits before each shot for the pipelines its view asked for,
+    /// which compile for seconds after the camera moves, and a clock moving through that wait would
+    /// put each shot at a moment of the game that hung on how fast the device compiled.
     /// </remarks>
     [Fact]
     public void AWaitOnTheRendererLeavesAHeldClockStill()

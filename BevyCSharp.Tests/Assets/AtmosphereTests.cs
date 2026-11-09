@@ -132,11 +132,11 @@ public sealed class AtmosphereTests
         }, "Test.Sky"));
         app.AddSystem(Stage.Update, new SystemDescriptor(world =>
         {
-            // The sky is asked for once every pipeline has been ready for ten frames together, as well
-            // as past the settled frame, since the air's tables and the sky drawn from them compile
-            // away from the frame. Asked for at the settled frame alone, earth's sky read 1 red and 1
-            // blue in a whole run while another app's tests held the GPU, and its picture had not
-            // arrived 40 frames later on one core with the driver's shader cache off.
+            // The sky is asked for once every pipeline has been ready for ten frames together, as
+            // well as past the settled frame, since the air's tables and the sky drawn from them
+            // compile away from the frame, and asked for at the settled frame alone the sky can be
+            // read before they are drawn where another app holds the GPU or the driver's shader
+            // cache is off.
             ready = Render.PipelinesReady() ? ready + 1 : 0;
             if (capture is null && world.Resource<Time>().FrameCount >= Settled && ready >= 10) capture = Render.BeginCapture();
             if (picture is null && capture is { } asked && Render.TryReadCapture(asked, out var arrived)) picture = arrived;
@@ -267,8 +267,8 @@ public sealed class AtmosphereTests
     /// <summary>
     /// The sky drawn from Bevy's lookup textures lies within two levels of the sky raymarched for
     /// every pixel, Hillaire's reference, above the horizon at four heights of the sun, through
-    /// earth's air and through <see cref="ScatteringTerm.EarthArc"/>'s, where 0.6 to 1.0 were read
-    /// on the development machine's GPU.
+    /// earth's air and through <see cref="ScatteringTerm.EarthArc"/>'s, twice the farthest the two
+    /// lie apart.
     /// </summary>
     [SkippableTheory]
     [InlineData(30f, 13f)]

@@ -276,12 +276,10 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
     // it standing outside every mesh, or sees them for under a quarter of their weight, has no
     // probe to give it what lies past its interval, and its rays go on to the field's edge and
     // bring the light of what they meet there, the merge finding them met and giving them nothing
-    // more. In the feature test's alley, 5.5 wide, cascade 2's probes stand 8 apart outside its
-    // walls, each hidden from the alley's cascade 1 probes, so no light came from past 16 units,
-    // neither the sky nor the alley's lit ends. Carried, a corridor 5.6 wide read its walls 1.045
-    // and 1.010 of a path-traced reference's light past the direct where 0.700 and 0.651, and the
-    // light hall 3 to 7% under its reference where 9 to 14% (GlobalIlluminationTests.Corridor.cs).
-    // A carried ray that meets nothing brings the sky once the field holds every mesh in reach, and
+    // more. In an alley narrower than the spacing of cascade 2's probes, those probes stand outside
+    // its walls, each hidden from the alley's cascade 1 probes, so without its rays carried no
+    // light would come from past cascade 1's interval, neither the sky nor the alley's lit ends. A
+    // carried ray that meets nothing brings the sky once the field holds every mesh in reach, and
     // nothing before, since the sky reached through cascades not yet built would light a closed
     // room in its first frames, and its reach is its interval's end where it meets nothing. The
     // share is a quarter, since a probe that sees more of the cascade above takes the light past
@@ -362,15 +360,14 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         }
 #else
         // A surface that lets a share of light through, as a canopy's leaves, is crossed, the ray
-        // keeping that share for each unit of its depth and the rest taking the surface's light as
-        // a solid's would, up to four of them before the ray stops at the next as a solid. One
-        // crossed before the interval began is the cascade below's, whose ray takes this one's
-        // light from the interval on whole where it met nothing, so its light and its share go to
-        // the probe's own faces alone (kept), since a probe past every cascade below, as one by a
-        // crown far from the eye, has nothing else to read them from, and taking only its share, a
-        // probe in an oak's front half read its ways into the crown 63% under its reference. A
-        // solid surface is shaded in the same place as a crossed one, keeping none, so the build
-        // holds one copy of the shading.
+        // keeping that share for each unit of its depth and the rest taking the surface's light as a
+        // solid's would, up to four of them before the ray stops at the next as a solid. One crossed
+        // before the interval began is the cascade below's, whose ray takes this one's light from the
+        // interval on whole where it met nothing, so its light and its share go to the probe's own
+        // faces alone (kept), since a probe past every cascade below, as one by a crown far from the
+        // eye, has nothing else to read them from, and taking only its share, a probe in a crown's
+        // front half would read its ways into the crown far too dark. A solid surface is shaded in the
+        // same place as a crossed one, keeping none, so the build holds one copy of the shading.
         float3 crossed = float3(0.0), crossedOwn = float3(0.0);
         float firstAt = -1.0;
         [loop]
@@ -383,11 +380,11 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             float stopped = 0.0;
             float depth = passing > 0.0 ? lightThroughCrossedAt(field, field_sampler, albedo, fieldInfo, origin, way, t, end - t, inside, passes, stopped) : -1.0;
             // The light the surface sends along the ray of all it stops, lit where it stops it on
-            // average, so a crown's cards are lit where their leaves stop the ray and not where the
-            // ray met the crown, whose sunlit edge taken for all a crown stops read a probe's ways
-            // into a front-lit oak 118 to 160% over its reference, and any other surface where the
-            // ray met it. Lit at four places, where it lost each quarter of what it stops, the trace
-            // took 9.0 to 12.2 ms in the meadow at High where 3.5 to 3.6, for no nearer a reading.
+            // average, so a crown's cards are lit where their leaves stop the ray and not where the ray
+            // met the crown, whose sunlit edge taken for all a crown stops would read a probe's ways
+            // into a front-lit crown far too bright, and any other surface where the ray met it. It is
+            // lit at that one place rather than where it lost each quarter of what it stops, which
+            // would cost the trace several times as much for no nearer a reading.
             float3 itsOwn;
             float lost = 1.0 - passes;
             float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,

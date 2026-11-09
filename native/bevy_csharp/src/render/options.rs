@@ -90,11 +90,11 @@ pub(crate) fn install(
     // read of the meshes' changes a frame until a game turns the field on.
     crate::render::scene_field::install(app);
 
-    // Drawing a mesh as its edges, which an editor offers as a way to outline what is
-    // selected, and the same for a 2D mesh, which Bevy draws through its own pipeline and
-    // so outlines with its own plugin. Only where the app asked, since each plugin looks at
-    // every mesh of its kind in its prepare and queue phases every frame whether or not any
-    // is outlined, which at a hundred thousand sprite meshes is 8 ms of the render.
+    // Drawing a mesh as its edges, which an editor offers as a way to outline what is selected, and
+    // the same for a 2D mesh, which Bevy draws through its own pipeline and so outlines with its
+    // own plugin. Only where the app asked, since each plugin looks at every mesh of its kind in
+    // its prepare and queue phases every frame whether or not any is outlined, a cost that grows
+    // with how many meshes there are.
     if config.wireframes != 0 {
         app.add_plugins(bevy::pbr::wireframe::WireframePlugin::default());
         app.add_plugins(bevy::sprite_render::Wireframe2dPlugin::default());

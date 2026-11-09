@@ -90,10 +90,10 @@ public static unsafe partial class Render
     /// <remarks>
     /// Bevy 0.20's G-buffer keeps an emissive's color and not its alpha, which says how much of the
     /// camera's exposure it takes, so a camera drawn deferred, as the field's shadows and global
-    /// illumination draw one, showed an exposed emissive unexposed. The bridge carries the alpha to
-    /// the lighting pass in the G-buffer's flags and leaves the color as Bevy writes it
-    /// (<c>render/mended.rs</c>), since Solari and the bridge's denoiser read it there and expose it
-    /// themselves, and a release whose text moved refuses the mend, which a test holds.
+    /// illumination draw one, would draw an exposed emissive unexposed. The bridge carries the
+    /// alpha to the lighting pass in the G-buffer's flags and leaves the color as Bevy writes it
+    /// (<c>render/mended.rs</c>), since Solari and the bridge's denoiser read it there and expose
+    /// it themselves, and a release whose text moved refuses the mend, which a test holds.
     /// </remarks>
     internal static bool? EmissiveExposureMended
     {
@@ -156,14 +156,14 @@ public static unsafe partial class Render
     /// rays do their work.
     /// </para>
     /// <para>
-    /// The picture is filtered by the bridge's own denoiser, which <see cref="SetRayTracedDenoiser"/>
-    /// turns off and sets, since Bevy's denoiser is DLSS's, which the bridge does not build. Bevy's
-    /// ReSTIR, which reuses samples between pixels and frames, is on as well, where Bevy leaves it
-    /// off for a denoiser, since it leaves the denoiser less noise to take away. On the development
-    /// machine's laptop GPU it halved the noise between frames of a Cornell box for 1.3 ms more of
-    /// the GPU at 1280 by 720. Every setting Bevy gives the lighting, ReSTIR, the light samples,
-    /// the bounces and the world cache among them, is on the camera's <c>SolariLightingRef</c>,
-    /// reached with <c>ecs.Wrap&lt;SolariLightingRef&gt;(camera)</c> once this has turned it on.
+    /// The picture is filtered by the bridge's own denoiser, which
+    /// <see cref="SetRayTracedDenoiser"/> turns off and sets, since Bevy's denoiser is DLSS's,
+    /// which the bridge does not build. Bevy's ReSTIR, which reuses samples between pixels and
+    /// frames, is on as well, where Bevy leaves it off for a denoiser, since it leaves the denoiser
+    /// less noise to take away, the noise between frames less for a little more of the GPU's time.
+    /// Every setting Bevy gives the lighting, ReSTIR, the light samples, the bounces and the world
+    /// cache among them, is on the camera's <c>SolariLightingRef</c>, reached with
+    /// <c>ecs.Wrap&lt;SolariLightingRef&gt;(camera)</c> once this has turned it on.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">

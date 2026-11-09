@@ -31,10 +31,10 @@ public static partial class Trees
     private const int CardPicturesLongest = 900;
 
     // How many variants an app shapes and pictures at once, the rest waiting their turn. Shaping a
-    // variant allocates three to five times what it keeps, 128 MB for an oak's 33, in arrays large
-    // enough that the collector takes them back in its full collections alone, so a forest of three
-    // species shaping its twenty-four variants at once held 5.0 GB of the machine's memory at its
-    // peak, and four at a time 2.2 GB, its test taking 56 seconds against 30.
+    // variant allocates several times what it keeps, in arrays large enough that the collector
+    // takes them back in its full collections alone, so a forest shaping all its variants at once
+    // holds several times at its peak what four at a time hold, and four at a time dress a forest
+    // more slowly for the memory they leave the machine.
     private const int MostShapedAtOnce = 4;
 
     private static readonly ConditionalWeakTable<App, Dictionary<(TreeSpecies, int), CardPictures>> TakenPictures = new();

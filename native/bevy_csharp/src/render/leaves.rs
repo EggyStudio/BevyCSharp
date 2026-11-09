@@ -54,9 +54,9 @@ pub struct LeafLighting {
     pub probe_ways: bevy::asset::Handle<bevy::image::Image>,
 }
 
-/// What a leaf material's pipeline is made for beyond the standard material's, whether it reads
-/// the probes, whose reading is compiled into its fragment shader only then, since compiled in and
-/// passed over it took a forest's opaque pass from 7.6 ms to 8.1 with global illumination off.
+/// What a leaf material's pipeline is made for beyond the standard material's, whether it reads the
+/// probes, whose reading is compiled into its fragment shader only then, since compiled in and
+/// passed over it still lengthens a forest's opaque pass with global illumination off.
 #[cfg(feature = "render")]
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct LeafKey {
@@ -160,21 +160,20 @@ import bevy_pbr::light_probe::environment_map;
 /// The leaf's two lightings. The way out is unfolded from the octahedron, the leaf's own normal is
 /// taken on the side of its card the way out is on, by the card's own normal, the eye's where the
 /// way lies along the card, and the diffuse light's normal is bent half way from it to the way out.
-/// A grass blade's way out is straight up and its card stands upright, so the side was a rounding
-/// error's sign and lit many blades from behind, the grass under a sun at the eye's back 32% under
-/// its path-traced reference. The first lighting takes the diffuse share of the leaf's color, which
-/// Bevy's diffuse transmission leaves it, with no reflectance, so no specular, and nothing let
-/// through. The second takes the transmitted share as all it lets through, so no diffuse light, by
-/// the leaf's own normal, with its reflectance for the specular and no emission, which the first
+/// A grass blade's way out is straight up and its card stands upright, so the way lies along the
+/// card and the side the card's normal gives would be a rounding error's sign, lighting many blades
+/// from behind. The first lighting takes the diffuse share of the leaf's color, which Bevy's
+/// diffuse transmission leaves it, with no reflectance, so no specular, and nothing let through.
+/// The second takes the transmitted share as all it lets through, so no diffuse light, by the
+/// leaf's own normal, with its reflectance for the specular and no emission, which the first
 /// counted. The occlusion scales both, as it scales the standard material. The leaf's gray, the
 /// share of the sky the crown's leaves leave it, which Bevy multiplies into the base color, is
 /// taken out of the color and into the occlusions, so it darkens the light from all around and its
 /// reflection and leaves the sun to the shadow map, and it darkens the share let through from all
-/// around twice, that light coming from inside the crown. In the base color it darkened the sun
-/// the shadow map darkens as well, and the light let through from behind no more than the front's,
-/// and a lone aspen under a uniform sky read its leaves 34% over their path-traced reference leaf
-/// by leaf, where it reads them 16% over, the probes at a quarter meter's spacing not holding the
-/// shadow inside a crown that the gray stands in for.
+/// around twice, that light coming from inside the crown. In the base color it would darken the sun
+/// the shadow map darkens as well, and the light let through from behind no more than the front's.
+/// The gray stands in for the shadow inside a crown, which probes a quarter meter apart do not
+/// hold.
 ///
 /// While global illumination's probes light the scene, the leaf takes back the light Bevy's
 /// lighting gave it from all around and gives itself the probes' in its place, as the light pass
@@ -192,15 +191,14 @@ import bevy_pbr::light_probe::environment_map;
 /// from all around the probes give, and the light the probes it sees hold along its mirror way is
 /// given in that share's place, as the light pass reflects it for the G-buffer's surfaces
 /// (`reflectedAlong`), the light reaching the leaf's front standing in for the probes it does not
-/// see. Worked out again as `apply_pbr_lighting` works it out and taken back, with every
-/// roughness's directions sampled, Bevy's reflection came out an eighth short of Bevy's own and the
-/// forest of `TreeLeavesTests` took 8.1 ms at 1080p, where it takes 7.6. The environment map's
-/// reflection is taken back whole, a reflection probe's share with the camera's map's, since Bevy
-/// gives them as one, where the pass leaves a reflection probe's share as Bevy gave it. Bevy's
-/// ambient term reflects the ambient light's whole color, where the probes' sky and the path-traced
-/// reference's hold it as Bevy returns it from a surface facing the view, a share of 0.45, so a
-/// grass patch under a uniform sky read its blades 40% over the reference reflecting Bevy's and
-/// reads them 1% over reflecting the probes' light.
+/// see. Scaled so, Bevy's reflection is taken back as Bevy gave it, where worked out again as
+/// `apply_pbr_lighting` works it out, with every roughness's directions sampled, it would fall
+/// short of Bevy's own and cost a forest's pass more. The environment map's reflection is taken
+/// back whole, a reflection probe's share with the camera's map's, since Bevy gives them as one,
+/// where the pass leaves a reflection probe's share as Bevy gave it. Bevy's ambient term reflects
+/// the ambient light's whole color, where the probes' sky holds it as Bevy returns it from a
+/// surface facing the view, a share of 0.45, so the probes' light reflected in its place keeps a
+/// grass patch under a uniform sky from reflecting more of the sky than reaches it.
 #[cfg(feature = "render")]
 const LEAF_FRAGMENT_SOURCE: &str = r#"
 fn way_out(folded: vec2<f32>) -> vec3<f32> {
@@ -373,10 +371,9 @@ pub(crate) fn install(app: &mut bevy::app::App) {
 /// each kind it might be, and this is one.
 ///
 /// The entity takes Bevy's `TransmittedShadowReceiver` with it, since Bevy shadows the light a
-/// surface lets through from behind only for a mesh that carries it, and without it every leaf of
-/// a crown and every blade in a wall's shadow let through the whole sun, a lone aspen lit from
-/// behind reading its leaves 39% over its path-traced reference, whose shadow rays meet the leaves
-/// between a leaf and the sun.
+/// surface lets through from behind only for a mesh that carries it, and without it every leaf of a
+/// crown and every blade in a wall's shadow would let through the whole sun, where the leaves
+/// between a leaf and the sun hide it.
 #[cfg(feature = "render")]
 pub fn attach(entity: &mut bevy::ecs::world::EntityWorldMut, material: &bevy::asset::UntypedHandle) -> bool {
     match material.clone().try_typed::<LeafMaterial>() {

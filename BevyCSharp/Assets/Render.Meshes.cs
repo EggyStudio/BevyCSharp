@@ -37,8 +37,8 @@ public static unsafe partial class Render
     /// was made from, as a planted tree's, which a scene writes as its species and seed.
     /// </summary>
     /// <remarks>
-    /// The copy is as large as the vertices, so a forest of a thousand trees of three species held
-    /// 477 MB of copies of its meshes that nothing read.
+    /// The copy is as large as the vertices, so a forest of many trees would hold a copy of every
+    /// tree's meshes that nothing reads.
     /// </remarks>
     internal static AssetHandle CreateMesh(MeshData mesh, bool kept)
     {

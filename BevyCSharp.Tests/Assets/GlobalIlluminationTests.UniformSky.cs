@@ -16,8 +16,7 @@ public sealed partial class GlobalIlluminationTests
     /// and its environment map. The probes' sky holds the ambient light as Bevy's lighting returns
     /// it from a surface facing the view, a share of 0.45 of it, and the reference's paths bring
     /// that back where they meet nothing, where Bevy's ambient term reflects the ambient light's
-    /// whole color. Reflecting Bevy's, the blades read 40% over their reference, and reflecting the
-    /// probes' light 1% over.
+    /// whole color, so Bevy's reflection would carry the blades well over their reference.
     /// </remarks>
     [SkippableFact]
     public void AGrassPatchUnderAUniformSkyReadsItsReference()
@@ -40,19 +39,18 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Seen from there a leaf is a few pixels across, and its card samples its atlas's levels where
-    /// a leaf is two texels or so across. Those levels' color and translucency were the box's means
-    /// over the leaf and the transparent texels round it, the photograph's light background and a
-    /// translucency of none, so the aspen's leaves took a color half as bright again as their own
-    /// and let through 0.094 of their light where they let through 0.235. Each level's color and
-    /// surface are weighted by how much of each texel the leaves cover. The leaves' gray, the sky
-    /// the crown leaves a leaf, darkened its color, and it darkens the light from all around, which
-    /// the probes at a quarter meter's spacing hold as it is outside the crown, and the light let
-    /// through from all around twice, that light coming from inside the crown, where it read the
-    /// leaves 37% over their reference and reads them 19% over, the probes' light at a leaf inside
-    /// the crown still over the reference's with the gray laid on it. The leaves are read leaf by
-    /// leaf (<see cref="ReadUnderUniformSky"/>), since a far crown's pixels hold more of the sky
-    /// between its leaves in the reference than in the picture, whose leaves keep their share of a
-    /// card in the distance.
+    /// a leaf is two texels or so across. Each level's color and surface are weighted by how much
+    /// of each texel the leaves cover, since the box's means over the leaf and the transparent
+    /// texels round it would take in the photograph's light background and a translucency of none,
+    /// brightening the leaves past their own color and letting less light through them than they
+    /// do. The leaves' gray, the sky the crown leaves a leaf, darkens its color, and it darkens the
+    /// light from all around, which the probes at a quarter meter's spacing hold as it is outside
+    /// the crown, and the light let through from all around twice, that light coming from inside
+    /// the crown, the probes' light at a leaf inside the crown still over the reference's with the
+    /// gray laid on it, which the bound of 25% holds. The leaves are read leaf by leaf
+    /// (<see cref="ReadUnderUniformSky"/>), since a far crown's pixels hold more of the sky between
+    /// its leaves in the reference than in the picture, whose leaves keep their share of a card in
+    /// the distance.
     /// </remarks>
     [SkippableFact]
     public void ALoneAspensLeavesUnderAUniformSkyReadTheirReference()
@@ -70,11 +68,11 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// Bevy shadows the light a surface lets through from behind only for a mesh that carries
-    /// <c>TransmittedShadowReceiver</c>, which the leaf material gives its mesh, and without it
-    /// every leaf of the crown let through the whole sun, its leaves reading 57% over their
-    /// reference, whose shadow rays meet the leaves between a leaf and the sun. With it they read
-    /// 16% over while the gray darkened the light let through from all around no more than the
-    /// front's, and 5% over with it laid on twice.
+    /// <c>TransmittedShadowReceiver</c>, which the leaf material gives its mesh, since without it
+    /// every leaf of the crown lets through the whole sun, where the reference's shadow rays meet
+    /// the leaves between a leaf and the sun. The gray is laid on twice over the light let through
+    /// from all around, which comes from inside the crown, since laid on once, as on the front's,
+    /// it leaves the leaves over their reference.
     /// </remarks>
     [SkippableFact]
     public void ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes()
@@ -92,10 +90,11 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// The probes' rays cross the crowns in the scene's distance field, keeping a share of their
-    /// light for each meter of leaves. Held at one share for a whole crown, the share a crown as
-    /// dense as a preset's lets through, the few cards at a crown's edge stood as dense as its core,
-    /// and the floor read 41% under its reference. Each cell holds the share the area of the leaf
-    /// cards in it gives, a ray crossing the crown at each cell's own, and it reads 25% under.
+    /// light for each meter of leaves. Each cell holds the share the area of the leaf cards in it
+    /// gives, a ray crossing the crown at each cell's own, since one share for a whole crown, the
+    /// share a crown as dense as a preset's lets through, stands the few cards at a crown's edge as
+    /// dense as its core and darkens the floor. The floor still reads under its reference, which
+    /// the bound of 30% holds.
     /// </remarks>
     [SkippableFact]
     public void AForestFloorUnderAUniformSkyReadsItsReference()

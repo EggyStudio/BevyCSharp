@@ -47,9 +47,9 @@ pub fn on() -> bool {
 
 /// One crossing in this many is timed, and the rest counted, with the time scaled up from those.
 ///
-/// Timing one takes two clock reads, which on this machine is longer than a cheap crossing itself,
-/// so timing every one would double what it measured. A sample of a few hundred calls a frame is
-/// as good an average as all of them.
+/// Timing one takes two clock reads, which take longer than a cheap crossing itself, so timing
+/// every one would double what it measured. A sample of a few hundred calls a frame is as good an
+/// average as all of them.
 const SAMPLE_EVERY: u64 = 32;
 
 static SAMPLED: AtomicU64 = AtomicU64::new(0);

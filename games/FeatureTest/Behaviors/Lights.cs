@@ -59,11 +59,9 @@ public partial struct Lights
     /// <remarks>
     /// Bevy 0.19 runs every meshlet pass in every shadow view, a point light's six among them,
     /// whether or not a meshlet mesh casts a shadow there, and on an NVIDIA driver each such view
-    /// came to hold a few hundred megabytes of the driver's memory a quarter of a minute after it
-    /// began, wgpu's own resources standing still. With the hall's lights casting, Sponza drawn as
-    /// meshlets passed twelve gigabytes. With the sun alone it stood at six and a half, and with no
-    /// shadows at all the meshlet meshes alone stood under two, so the hall's lights give theirs up
-    /// while meshlets run.
+    /// comes to hold much of the driver's memory, wgpu's own resources standing still, so with the
+    /// hall's lights casting a scene drawn as meshlets outgrows the device. The hall's lights give
+    /// their shadows up while meshlets run, and the sun alone casts.
     /// </remarks>
     internal static bool CastShadows => !Render.MeshletsActive;
 
@@ -93,12 +91,11 @@ public partial struct Lights
     /// drawn by, and takes it off outside.
     /// </summary>
     /// <remarks>
-    /// Bevy marches only through fog volumes, so the fog costs little where none is in view. Bevy
-    /// 0.19 hazed the whole picture with it, the sky too, once a depth prepass was on the camera, as
-    /// ambient occlusion brings, which is why the fog was made the hall's alone. Bevy 0.20 keeps it
-    /// in its volume (<c>VolumetricFogPrepassTests</c>), and the hall's fog has stayed the hall's.
-    /// Its own ambient light is off, or the bay's volume would glow evenly rather than where the
-    /// light crosses it.
+    /// Bevy marches only through fog volumes, so the fog costs little where none is in view, and
+    /// the camera takes it inside the hall alone, where the fog bay's volume stands, so outside the
+    /// hall it costs nothing. A depth prepass on the camera, as ambient occlusion brings, leaves
+    /// the fog in its volume and the sky clear (<c>VolumetricFogPrepassTests</c>). Its own ambient
+    /// light is off, or the bay's volume would glow evenly rather than where the light crosses it.
     /// </remarks>
     [OnUpdate]
     public static void Fogged(BehaviorContext ctx)

@@ -287,10 +287,10 @@ def build(version, examples, order, triage, written, source, followed):
 
     # Every written example's capture for the README, a table a group in the order of the groups
     # above, each one row of the group's examples in the order Bevy's examples/README.md lists them,
-    # so a group wider than the page scrolls sideways rather than wrapping onto rows of its own. Each
-    # picture opens the C# file that drew it. The tables are Markdown, since nuget.org prints an
-    # HTML table as its text, where GitHub and nuget.org each draw a Markdown one as a block that
-    # scrolls sideways, measured on both on 2026-10-19.
+    # so a group wider than the page scrolls sideways rather than wrapping onto rows of its own.
+    # Each picture opens the C# file that drew it. The tables are Markdown, since nuget.org prints
+    # an HTML table as its text, where GitHub and nuget.org each draw a Markdown one as a block that
+    # scrolls sideways.
     sections = []
     shown = []
     for group in groups:

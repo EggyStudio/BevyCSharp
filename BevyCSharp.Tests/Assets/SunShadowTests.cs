@@ -16,10 +16,10 @@ public sealed class SunShadowTests(ITestOutputHelper output)
     /// reads in the picture the light the reference's sun gives it, within 5%.
     /// </summary>
     /// <remarks>
-    /// The light's normal bias was 0.6 texels for every kind of light, where Bevy's is 1.8 for a
-    /// directional light and a spot light, so a face the sun grazed in a far cascade fell under
-    /// its own shadow over a share of its filter, the feature test's meadow's walls 19 to 34% under
-    /// their reference where the sun grazed them.
+    /// The light's normal bias is Bevy's for each kind of light, 1.8 texels for a directional light
+    /// and a spot light, since at a smaller bias a face the sun grazes in a far cascade falls under
+    /// its own shadow over a share of its filter, as the feature test's meadow's walls do where the
+    /// sun grazes them.
     /// </remarks>
     [SkippableFact]
     public void AWallTheSunGrazesReadsTheReferencesSun()

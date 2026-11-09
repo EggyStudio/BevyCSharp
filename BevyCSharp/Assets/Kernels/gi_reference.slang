@@ -653,8 +653,8 @@ void main(uint3 id : SV_DispatchThreadID)
 {
     // The sun as Bevy's lighting gives the picture, dimmed and reddened through the camera's air
     // toward it, read at the camera as Bevy reads it and before any thread returns, as the clouds
-    // read it. The lights give the sun as it is above the air, which lit the reference's sunlit faces
-    // a third over the picture's at a low sun and whiter.
+    // read it. The lights give the sun as it is above the air, which would light the reference's
+    // sunlit faces brighter and whiter than the picture's at a low sun.
     GiLights given = lights[0];
     if (given.sunDirection.w > 0.5)
         given.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, given.sunDirection.xyz);
