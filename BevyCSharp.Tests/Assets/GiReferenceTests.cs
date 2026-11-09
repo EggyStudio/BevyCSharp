@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Reflected;
+using Vegetation;
 using Xunit;
 
 namespace Bevy.Tests;

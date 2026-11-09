@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Physics;
+using Vegetation;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 

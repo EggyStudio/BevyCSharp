@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Bevy;
+using Vegetation;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -44,16 +45,6 @@ public sealed class GrassTests(ITestOutputHelper output)
                 Assert.True((new Vec3(limb.X, limb.Y, limb.Z) - root).Length < 1e-5f && (new Vec3(held.X, held.Y, held.Z) - root).Length < 1e-5f, $"card {card} sways about {limb} and {held}, its root at {root}");
             }
         }
-    }
-
-    /// <summary>The same seed plants the same patch, and another seed another.</summary>
-    [Fact]
-    public void TheSameSeedPlantsTheSamePatchAndAnotherAnother()
-    {
-        var settings = new GrassSettings();
-        var once = Grass.Patch(settings, 1f, 4f, 4f, 11).Positions;
-        Assert.Equal(once, Grass.Patch(settings, 1f, 4f, 4f, 11).Positions);
-        Assert.NotEqual(once, Grass.Patch(settings, 1f, 4f, 4f, 12).Positions);
     }
 
     /// <summary>

@@ -284,7 +284,9 @@ A card's roots stand still in the wind and its blades swing
 and flutter about them, each clump in a phase of its own. The blades cast no shadows unless
 `CastsShadows` asks, which many small cut-out cards cost more than they show, and they receive them
 either way. The same settings over the same stretch plant the same grass, and a run with no renderer
-plants the patches' entities and draws nothing, as trees do.
+plants the patches' entities and draws nothing, as trees do. The settings and the scatter are the
+Vegetation module's, whose `GrassScatter` cuts a stretch into its patches and scatters each patch's
+clumps from its seed, so a game reads where a stretch's clumps stand without planting it.
 
 ## The skeleton
 

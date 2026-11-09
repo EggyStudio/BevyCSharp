@@ -4,9 +4,10 @@ using Vegetation;
 namespace Bevy;
 
 /// <summary>
-/// Grass planted over a stretch of ground in clumps of two cards crossed, cut from a grass set of
-/// the texture collection and drawn with the trees' leaf material, so its blades take the sun and
-/// the sky as the leaves do, let the light behind them through and sway in the trees' wind.
+/// Grass planted over a stretch of ground in clumps of two cards crossed, scattered by the
+/// Vegetation module's <see cref="GrassScatter"/>, cut from a grass set of the texture collection
+/// and drawn with the trees' leaf material, so its blades take the sun and the sky as the leaves do,
+/// let the light behind them through and sway in the trees' wind.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -48,23 +49,17 @@ public static class Grass
     /// <param name="settings">The set, the density, the height and the seed, the defaults where none are given.</param>
     /// <returns>The entity named <c>Grass</c> at <paramref name="center"/>, each patch a child of it.</returns>
     /// <remarks>
-    /// The patches are square from the stretch's corner, the last of a row and a column cut to what
-    /// is left, and a patch's clumps are scattered over it by a seed of its own from
-    /// <see cref="GrassSettings.Seed"/>, so a stretch planted twice with the same settings stands
-    /// the same. Moving or turning the returned entity moves the grass with it.
+    /// The patches and their clumps are those <see cref="GrassScatter.Patches"/> and
+    /// <see cref="GrassScatter.Clumps"/> give, so a stretch planted twice with the same settings
+    /// stands the same. Moving or turning the returned entity moves the grass with it.
     /// </remarks>
     /// <exception cref="ArgumentException">The set is not a grass set the collection has, or a size or a setting is not a positive number.</exception>
     public static Entity Plant(EcsWorld ecs, Vec3 center, Vec2 size, GrassSettings? settings = null)
     {
         ArgumentNullException.ThrowIfNull(ecs);
         settings ??= new GrassSettings();
-        if (!(size.X > 0f && size.Y > 0f) || !float.IsFinite(size.X) || !float.IsFinite(size.Y))
-            throw new ArgumentException($"Grass is planted over a stretch of some size, not {size.X} by {size.Y}.", nameof(size));
-        if (!(settings.Density > 0f && settings.Height > 0f && settings.PatchSize > 0f) || !(settings.Variation >= 0f && settings.Variation < 1f))
-            throw new ArgumentException("Grass needs a density, a height and a patch size above nothing and a variation from nothing up to less than the whole.", nameof(settings));
-        var set = TreeTextures.Find(settings.Set) is { Kind: TreeTextureKind.Grass } found
-            ? found
-            : throw new ArgumentException($"The texture collection has no grass set {settings.Set}.", nameof(settings));
+        var patches = GrassScatter.Patches(new Vector2(size.X, size.Y), settings);
+        var set = TreeTextures.Find(settings.Set)!;
         var aspect = set.Size is { } picture ? picture.Width / (float)picture.Height : 1f;
 
         var draws = App.HasRenderer && App.Running is { } app && !app.Config.Headless;
@@ -74,99 +69,76 @@ public static class Grass
         if (draws) ecs.Add(root, Visibility.Inherited);
         var material = draws ? Trees.GrassMaterial(set) : AssetHandle.None;
 
-        var (across, along) = ((int)MathF.Ceiling(size.X / settings.PatchSize), (int)MathF.Ceiling(size.Y / settings.PatchSize));
-        for (var row = 0; row < along; row++)
+        foreach (var cut in patches)
         {
-            for (var column = 0; column < across; column++)
-            {
-                var x0 = column * settings.PatchSize;
-                var z0 = row * settings.PatchSize;
-                var (width, depth) = (MathF.Min(settings.PatchSize, size.X - x0), MathF.Min(settings.PatchSize, size.Y - z0));
-                var patch = ecs.Spawn();
-                ecs.Add(patch, Transform.At(x0 + width / 2f - size.X / 2f, 0f, z0 + depth / 2f - size.Y / 2f));
-                ecs.SetParent(patch, root);
-                ecs.SetName(patch, $"Grass patch {column}, {row}");
-                if (!draws) continue;
+            var patch = ecs.Spawn();
+            ecs.Add(patch, Transform.At(cut.Middle.X, 0f, cut.Middle.Y));
+            ecs.SetParent(patch, root);
+            ecs.SetName(patch, $"Grass patch {cut.Column}, {cut.Row}");
+            if (!draws) continue;
 
-                // The tangents the set's normal map is read along, without which Bevy reads no map
-                // and leaves a card seen from behind facing away from the eye, so a blade's back
-                // took a sun at the eye's back as light let through it and none on its face.
-                var mesh = Render.CreateMesh(Patch(settings, aspect, width, depth, PatchSeed(settings.Seed, column, row)), kept: false);
-                Render.GenerateTangents(mesh);
-                Render.SetMesh(ecs, patch, mesh);
-                Render.SetMaterial(ecs, patch, material);
-                if (!settings.CastsShadows) Render.SetMeshFlags(ecs, patch, MeshFlags.NoShadowCasting);
-            }
+            // The tangents the set's normal map is read along, without which Bevy reads no map and
+            // leaves a card seen from behind facing away from the eye, so a blade's back took a sun
+            // at the eye's back as light let through it and none on its face.
+            var mesh = Render.CreateMesh(Patch(settings, aspect, cut.Size.X, cut.Size.Y, cut.Seed), kept: false);
+            Render.GenerateTangents(mesh);
+            Render.SetMesh(ecs, patch, mesh);
+            Render.SetMaterial(ecs, patch, material);
+            if (!settings.CastsShadows) Render.SetMeshFlags(ecs, patch, MeshFlags.NoShadowCasting);
         }
 
         return root;
     }
-
-    /// <summary>A patch's own seed from the stretch's and where the patch stands in it.</summary>
-    internal static uint PatchSeed(uint seed, int column, int row) => unchecked(seed * 0x9E3779B9u ^ (uint)column * 0x85EBCA6Bu ^ (uint)row * 0xC2B2AE35u);
 
     /// <summary>
     /// A patch's mesh, its clumps over a width along X and a depth along Z about its middle, each
     /// two cards crossed with its root on the ground at y 0.
     /// </summary>
     /// <remarks>
-    /// The clumps fall on a grid of cells a clump each, each placed anywhere in its cell, so the
-    /// grass covers its patch evenly without the rows of a grid. A card is as wide as the set's
-    /// picture is for the clump's height, its texture's top at the card's top, and both of its sway
-    /// streams hold the root with a phase from the clump's seed.
+    /// The clumps are those <see cref="GrassScatter.Clumps"/> scatters over the patch. A card is as
+    /// wide as the set's picture is for the clump's height, its texture's top at the card's top, and
+    /// both of its sway streams hold the root with the clump's phase.
     /// </remarks>
     internal static MeshData Patch(GrassSettings settings, float aspect, float width, float depth, uint seed)
     {
-        var cell = 1f / MathF.Sqrt(settings.Density);
-        var (columns, rows) = (Math.Max(1, (int)MathF.Round(width / cell)), Math.Max(1, (int)MathF.Round(depth / cell)));
-        var clumps = columns * rows;
-        var positions = new Vec3[clumps * 8];
-        var normals = new Vec3[clumps * 8];
-        var uvs = new float[clumps * 16];
-        var ways = new float[clumps * 16];
-        var limbs = new Vector4[clumps * 8];
-        var own = new Vector4[clumps * 8];
-        var indices = new uint[clumps * 12];
-        var random = new Pcg(seed);
+        var clumps = GrassScatter.Clumps(settings, new Vector2(width, depth), seed);
+        var positions = new Vec3[clumps.Count * 8];
+        var normals = new Vec3[clumps.Count * 8];
+        var uvs = new float[clumps.Count * 16];
+        var ways = new float[clumps.Count * 16];
+        var limbs = new Vector4[clumps.Count * 8];
+        var own = new Vector4[clumps.Count * 8];
+        var indices = new uint[clumps.Count * 12];
 
         var at = 0;
-        for (var row = 0; row < rows; row++)
+        foreach (var clump in clumps)
         {
-            for (var column = 0; column < columns; column++)
+            var root = new Vec3(clump.Root.X, clump.Root.Y, clump.Root.Z);
+            var tall = clump.Height;
+            var half = tall * aspect / 2f;
+            for (var card = 0; card < 2; card++)
             {
-                var root = new Vec3(
-                    (column + random.Unit()) * width / columns - width / 2f,
-                    0f,
-                    (row + random.Unit()) * depth / rows - depth / 2f);
-                var turn = random.Unit() * MathF.PI;
-                var tall = settings.Height * (1f + settings.Variation * (2f * random.Unit() - 1f));
-                var half = tall * aspect / 2f;
-                var (swing, flutter) = (random.Unit(), random.Unit());
-
-                for (var card = 0; card < 2; card++)
+                var angle = clump.Turn + card * MathF.PI / 2f;
+                var across = new Vec3(MathF.Cos(angle), 0f, MathF.Sin(angle));
+                var facing = new Vec3(-across.Z, 0f, across.X);
+                var first = at * 4;
+                (positions[first], positions[first + 1], positions[first + 2], positions[first + 3]) =
+                    (root - across * half, root + across * half, root + across * half + new Vec3(0f, tall, 0f), root - across * half + new Vec3(0f, tall, 0f));
+                (float U, float V)[] corners = [(0f, 1f), (1f, 1f), (1f, 0f), (0f, 0f)];
+                for (var corner = 0; corner < 4; corner++)
                 {
-                    var angle = turn + card * MathF.PI / 2f;
-                    var across = new Vec3(MathF.Cos(angle), 0f, MathF.Sin(angle));
-                    var facing = new Vec3(-across.Z, 0f, across.X);
-                    var first = at * 4;
-                    (positions[first], positions[first + 1], positions[first + 2], positions[first + 3]) =
-                        (root - across * half, root + across * half, root + across * half + new Vec3(0f, tall, 0f), root - across * half + new Vec3(0f, tall, 0f));
-                    (float U, float V)[] corners = [(0f, 1f), (1f, 1f), (1f, 0f), (0f, 0f)];
-                    for (var corner = 0; corner < 4; corner++)
-                    {
-                        normals[first + corner] = facing;
-                        (uvs[(first + corner) * 2], uvs[(first + corner) * 2 + 1]) = corners[corner];
-                        // Straight up, folded as the leaf material unfolds its way out.
-                        (ways[(first + corner) * 2], ways[(first + corner) * 2 + 1]) = (0.5f, 0.5f);
-                        limbs[first + corner] = new Vector4(root.X, root.Y, root.Z, swing);
-                        own[first + corner] = new Vector4(root.X, root.Y, root.Z, flutter);
-                    }
-
-                    var index = at * 6;
-                    (indices[index], indices[index + 1], indices[index + 2]) = ((uint)first, (uint)first + 1, (uint)first + 2);
-                    (indices[index + 3], indices[index + 4], indices[index + 5]) = ((uint)first, (uint)first + 2, (uint)first + 3);
-                    at++;
+                    normals[first + corner] = facing;
+                    (uvs[(first + corner) * 2], uvs[(first + corner) * 2 + 1]) = corners[corner];
+                    // Straight up, folded as the leaf material unfolds its way out.
+                    (ways[(first + corner) * 2], ways[(first + corner) * 2 + 1]) = (0.5f, 0.5f);
+                    limbs[first + corner] = new Vector4(root.X, root.Y, root.Z, clump.Swing);
+                    own[first + corner] = new Vector4(root.X, root.Y, root.Z, clump.Flutter);
                 }
+
+                var index = at * 6;
+                (indices[index], indices[index + 1], indices[index + 2]) = ((uint)first, (uint)first + 1, (uint)first + 2);
+                (indices[index + 3], indices[index + 4], indices[index + 5]) = ((uint)first, (uint)first + 2, (uint)first + 3);
+                at++;
             }
         }
 
