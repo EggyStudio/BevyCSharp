@@ -16,6 +16,14 @@ the one texel of its reach the way falls in, in the middle read between the four
 way, and below the middle's light less the top's ten times over, brighter in orange and darker in
 blue, the warm triangles along the foot spread into an even band.
 
+![](.github/assets/readings/2026-11-10-item-130-court.webp)
+The feature test's court seen through the gallery's orange arch at eight in the morning under a
+clear sky at Low, at three times its size, on the left with a directional light's share of the
+ground's light past the probes read along a surface's normal, in the middle read over the normal and
+four lines leaning 30 degrees from it, and on the right the middle's light less the left's ten times
+over, brighter in orange and darker in blue, the shaded wall's hard wedges softened at the cost of
+the yard's far wall in shade, so the trial was left out.
+
 ## 2026-11-09
 
 ![](.github/assets/readings/2026-11-09-item-97-wall-probe.webp)

@@ -9,6 +9,7 @@ committed at 01:18 on 2026-11-10 and not pushed. Its suite was stopped at 01:15 
 memory guard at 1,705 passed and none failed, as the machine ran out of memory under the engine
 session's script, the 67 illumination tests passing apart; the push waits until the whole suite has
 run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
+On it `62ba6c03`, 119's plan in the Replies, documents alone, committed at 01:24 and held with it.
 Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth cascade's
 probes under the floor seeing the wall's foot through their reach test's slack, a reading and
 documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in 14
@@ -23,12 +24,14 @@ version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on
 item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
 REVIEW-ARCHIVE.md under Head records.
 
-Next 119's plan in the Replies while the suite waits on the owner's word, then 130, the court's
-wedges through the arch, 125, the shadow maps' churn, 93's course drawn smaller after the next pack
-run's reading, then 66 and 67, the connections and the level editor, 119, the bridge as projects,
-and 120, the live path. A pack run with publish follows when the meadow's items rest. The engine's
-illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the
-one target by Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
+Next 130, the court's wedges through the arch, and 125, the shadow maps' churn, each a read with a
+served program, then 119, the bridge as projects, its plan confirmed and its first cut waiting on
+the suite's next run, 120, the live path, and after them 66 and 67, the connections and the level
+editor; 93's course drawn smaller after the next pack run's reading. `07143fdf` and `62ba6c03` are
+held for the whole suite on the owner's word. A pack run with publish follows when the meadow's
+items rest. The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80;
+the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the
+engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -110,7 +113,20 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     item 225), the native crate one package the others depend on and the dependency direction held
     by project references and a norm test; the public API held identical before and after, the
     documents' tables redrawn, the pack workflow packing every package at the one version. One
-    mechanical batch, planned in the Replies before it starts. After 67.
+    mechanical batch, planned in the Replies before it starts. After 67. The plan of 2026-11-10 in
+    the Replies at `62ba6c03` is confirmed by review, its projects, its order of cuts and its two
+    cuts that need more than moving files, with five conditions. The entry points go to an internal
+    class an area, and the ABI check covers as many entry points and mirror structs after that cut
+    as before it, the two counts said in its Reply. The extension blocks carry the global
+    illumination's and the sky's parts of Render and EcsWorld's spawn helpers, and beside the
+    listing reading the same lines the cut shows that the script host's compiler resolves an
+    extended member in a script, that the cheat sheet and the documentation comments follow, and
+    that nothing reads Render's or EcsWorld's members by reflection and so loses them. The sky's
+    edge to the audio for the thunder is cut as the animation's events are, the audio's plugin
+    playing an event the sky raises, unless a reason against it is found. Each cut is a commit with
+    the whole suite, so the first cut starts once the suite may run again on the owner's word. And
+    the split comes before 66 and 67, so those are written into the projects. AGENTS.md's table
+    waits on the owner's word.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -443,3 +459,32 @@ unchanged.
 Shared: C# 14's static extension members carry a static class's members declared in a second project
 with the class's calls unchanged, tried on .NET 10, for the sibling's split where a partial type
 spans areas.
+
+Item 130, the court's wedges through the arch, read once as the item says and recorded in the commit
+carrying this line, the trial left out. Past the probes a surface takes each directional light's
+share of the ground's light as read along its normal (sunAlong), so the court's shaded wall seen
+through the gallery's arch at Low takes it in wedges with hard edges where the line crosses the edge
+of a shadow. A trial read the share over five lines, the normal and four leaning 30 degrees from it
+toward its sides and up and down, each with its own trace of the field, the shares' mean, and a
+second over the normal and the two lines leaning toward its sides alone.
+
+In the feature test at Low at eight in the morning under a clear sky the court through the arch
+softens, the steps of 6 levels or more between neighbor pixels across its shaded wall 428 with the
+five lines and 523 with the three where 816, the pair 2026-11-10-item-130-court.webp, and the
+gallery's view lies 0.141 of its light from its reference in all three. The yard's far wall in shade
+reads 20% under its reference with the five lines and 18% with the three where 10%, its view 0.135
+and 0.134 from its reference where 0.132, and AFarWallInShadeTakesTheYardsLightAtLow reads 19.2% and
+6.2% under where 2.4% over, within its bound of 30%, Medium's test 20.2% over in all three, its
+probes holding the wall.
+
+So the spread costs the yard's far wall its reading, and the wedges are recorded as the method's
+past the probes, a share read along a line being as hard at its edges as the shadows the line
+crosses. The trials' patches are in the dump.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: a ground share past the probes read over five lines about the normal, or three leaning
+toward its sides, softened the wedges one line leaves on a shaded wall seen through an arch and cost
+a far wall in shade 8 to 10 points of its reference's light at Low, for the sibling to weigh before
+spreading its groundReached.
