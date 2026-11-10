@@ -15,33 +15,37 @@ that `8e088836`, item 125's record, documents alone, committed at 02:28 and held
 `ccef6170`, item 132, the roofs' cameras drawing a layer of their own that no light shares,
 committed at 03:05 and held with them; its test holds the frame's lights at none where the head
 brought three, and the course's textures stand at 774 to 794 MB at the stations where 886 to 1,002,
-the run reaching 17 shots where 5 and 3. The pack run with publish started on `f70cf5e7` at 02:29 on
-2026-11-10, the first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora
-captures, the feature test not answering on llvmpipe with the illumination switched off and Fedora's
-Mesa at 26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item
-128's record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing
-the wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
-2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
-the form and carries the review's files, the shortened REVIEW.md, the archive and N 7.9 among them.
-Before it `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before it,
-pushed at 19:15 on 2026-11-09 and green at 20:08 on its third attempt after GitHub's outage of
-Actions from about 19:16 to 19:47; it keeps the form. The release scene-packs holds the bridge's
-intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
-scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
-2026-11-02, the last pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and
-`v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
-before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
+the run reaching 17 shots where 5 and 3. On that `001c630d`, 119's first cut, the areas' frame work
+in a plugin an area that EnginePlugin builds, an app's list and not a static one, with the steps
+that run before the native app is made moved into Core, committed at 03:59 and held with them; its
+areas' tests pass 393 of 394 with one skipped and the listing is unchanged. The pack run with
+publish started on `f70cf5e7` at 02:29 on 2026-11-10, the first since 2026-11-02, ended red at 03:43
+in its drive, its soak and its Fedora captures, the feature test not answering on llvmpipe with the
+illumination switched off and Fedora's Mesa at 26.2.6, Verdict 52; nothing is published and 93 has
+no reading. Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth
+cascade's probes under the floor seeing the wall's foot through their reach test's slack, a reading
+and documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in
+14 minutes and Windows in 19; it keeps the form and carries the review's files, the shortened
+REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in shade past the
+probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at 20:08 on its
+third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the form. The
+release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
+hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
+published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
+version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
+item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+REVIEW-ARCHIVE.md under Head records.
 
 Next Verdict 52, the feature test not answering on the runner with the illumination off and Fedora's
-pictures on Mesa 26.2.6, after 119's first cut is amended; then 119, the bridge as projects, its
-plan confirmed, its first two cuts written and held on their builds, the norm's tests and their
-areas' tests, the later cuts each after the whole suite has run, 120, the live path, and after them
-66 and 67, the connections and the level editor; 93's course drawn smaller after the reading of the
-pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8`, `8e088836` and
-`ccef6170` are held for the whole suite on the owner's word. A pack run with publish follows when
-the meadow's items rest. The engine's illumination read goes first on the GPU (N 7.9). No budget by
-Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
-motion by the engine's Decision 107.
+pictures on Mesa 26.2.6, then 119, the bridge as projects, its plan confirmed, its first two cuts
+written and held on their builds, the norm's tests and their areas' tests, the later cuts each after
+the whole suite has run, 120, the live path, and after them 66 and 67, the connections and the level
+editor; 93's course drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10.
+`07143fdf`, `62ba6c03`, `259a09c8`, `8e088836`, `ccef6170` and `001c630d` are held for the whole
+suite on the owner's word. A pack run with publish follows when the meadow's items rest. The
+engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at
+8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
+Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -667,3 +671,40 @@ assets, the packs, the data and streamed reads, the audio, the animation, the sa
 modeling, the trees, the field and global illumination, the sky's, the hidden scope, the overlay,
 ImGui, the physics, the recording and the screenshot key, the memory guard and the window's memory
 among them. NormTests passed, 18. The public listing is unchanged.
+
+Verdict 52, the feature test not answering on the runner, in the commit carrying this line, held
+with the others. Five reads placed it in the start the runner takes. A fresh runner starts the
+feature test at its defaults, global illumination at Medium since c7eabbb0 on 2026-11-03 and the
+weather at its quality, and the course and the soak turn both off by a setting command a few seconds
+in, by which time the app has made 35 programs, the weather's, the scene field's and global
+illumination's, which lavapipe compiles on the CPU for minutes. On this machine's lavapipe on four
+threads the course's start read frames.wait 30 in 352 s, pipelines.wait in 408 s and frame.profile
+30 in 810 s, 23.6 s a frame, where the job gives frame.profile 30 150 s, and the pack run of
+b8cc8316 read 475, 24 and 102 s on the runner. Started with both off from launch, the engine makes
+none of their programs and builds no field. The weather turned off by command left the sky's fog
+drawn in medium froxels to 250 m, which on the GPU took 8.0 to 9.7 ms a frame where 6.1 to 6.6 with
+the weather off from launch, and some 320 MB more. The six probe faces are the light bay's
+reflection probe, captured once while pipelines compile, the bay's and not the illumination's.
+
+The feature test takes GLOBAL_ILLUMINATION and WEATHER_QUALITY from the environment as its settings
+are first read, for the run until the run changes that setting itself, the file keeping the player's
+own, so the course's and the soak's setting commands at their start and the soak's putting back at
+its end change nothing, and the weather turned off takes the sky's fog off as a start with it off
+does. With both, the course's start on the same lavapipe reads frames.wait 30 in 628 s,
+pipelines.wait in 43 s and frame.profile 30 in 155 s, 3.7 s a frame, the feature test's own eight
+programs alone made. This machine's lavapipe draws 1.3 to 1.5 times as slowly as the runner's, so
+the course reads about as the pack run of b8cc8316 did.
+
+GlobalIlluminationTests.AnAppWithGlobalIlluminationOffMakesNoneOfItsPrograms makes an app that never
+turns global illumination on and finds none of its programs or the field's made, no frame traced and
+no field built, and GlobalIlluminationTurnedOffTracesNoMoreAndLetsItsFieldGo turns it on at Medium
+and off and finds no frame traced in the thirty after and the field gone. Both pass without the mend
+as with it, the engine having done as they hold, and they hold it, the mend being the feature
+test's, which the next pack run's course and soak read.
+
+No native file changed. The solution builds with warnings as errors and the two tests pass. The
+whole suite waits on the owner's word. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a program a quality turns off a few frames into a run has been made and compiles all the
+same, for minutes on a device that draws on the CPU, so a scripted run that names a quality off
+names it at launch, for the sibling's runs on lavapipe.

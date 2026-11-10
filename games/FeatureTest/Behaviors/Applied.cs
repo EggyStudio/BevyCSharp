@@ -215,6 +215,7 @@ public partial struct Applied
         {
             Render.SetWeather(camera, null);
             Render.SetClouds(camera, null);
+            Render.ClearSkyFog(camera);
             Render.SetPrecipitation(camera, null);
             Render.SetThunder(camera, null);
             MapWeatherOn = false;

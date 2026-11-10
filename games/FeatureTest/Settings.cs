@@ -273,7 +273,28 @@ public static class Settings
     private static Persistent<FeatureSettings>? _store;
 
     /// <summary>The settings as they are now.</summary>
-    public static FeatureSettings Current => Store.Value;
+    /// <remarks>
+    /// The illumination's and the weather's quality are the ones a run names in its environment,
+    /// GLOBAL_ILLUMINATION and WEATHER_QUALITY, from the moment the settings are first read until
+    /// the run changes that setting itself. The workflow's scripted run and its soak name Off on
+    /// their software device, and a quality turned off a few frames in would have made the field,
+    /// the probes and the weather's programs at the start, which that device compiles for minutes.
+    /// The file keeps the player's own, so a run naming them leaves the next one as it was.
+    /// </remarks>
+    public static FeatureSettings Current => Named(Store.Value);
+
+    // The qualities the run names in its environment, until it changes them itself.
+    private static GlobalIllumination? _namedLighting = Name<GlobalIllumination>("GLOBAL_ILLUMINATION");
+    private static WeatherQuality? _namedWeather = Name<WeatherQuality>("WEATHER_QUALITY");
+
+    private static T? Name<T>(string variable) where T : struct, Enum =>
+        Enum.TryParse<T>(Environment.GetEnvironmentVariable(variable), ignoreCase: true, out var named) ? named : null;
+
+    private static FeatureSettings Named(FeatureSettings settings) => settings with
+    {
+        GlobalIllumination = _namedLighting ?? settings.GlobalIllumination,
+        WeatherQuality = _namedWeather ?? settings.WeatherQuality,
+    };
 
     /// <summary>Told after each change, with the settings before it.</summary>
     public static event Action<FeatureSettings>? Changed;
@@ -297,7 +318,17 @@ public static class Settings
         ArgumentNullException.ThrowIfNull(change);
 
         var was = Current;
-        Store.Update(change);
+        var next = change(was);
+
+        // A quality the run changes itself is the run's from then on, and one it leaves as named
+        // keeps the file's own.
+        if (next.GlobalIllumination != was.GlobalIllumination) _namedLighting = null;
+        if (next.WeatherQuality != was.WeatherQuality) _namedWeather = null;
+        Store.Update(stored => next with
+        {
+            GlobalIllumination = _namedLighting is null ? next.GlobalIllumination : stored.GlobalIllumination,
+            WeatherQuality = _namedWeather is null ? next.WeatherQuality : stored.WeatherQuality,
+        });
         if (Current == was) return;
 
         Store.Persist();

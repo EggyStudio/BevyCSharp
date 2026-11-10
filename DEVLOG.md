@@ -28,6 +28,7 @@ Done that day
 
 - Item 131 at `07143fdf`. A probe under a floor lends a wall's foot its light through the reach
   test's slack.
+- Item 132 at `ccef6170`. The rain's roof camera brings no lights into the frame.
 
 ## 2026-11-09
 
