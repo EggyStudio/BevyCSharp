@@ -6,6 +6,16 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-10
+
+![](.github/assets/readings/2026-11-10-item-131-foot-band.webp)
+The shaded yard wall's foot in the feature test's far view at eight in the morning under a clear sky
+at High with the screen probes left out, a band from the corner to the view's right edge at twice
+its size with its contrast three times over, above with each probe's sight of a surface read from
+the one texel of its reach the way falls in, in the middle read between the four texels nearest the
+way, and below the middle's light less the top's ten times over, brighter in orange and darker in
+blue, the warm triangles along the foot spread into an even band.
+
 ## 2026-11-09
 
 ![](.github/assets/readings/2026-11-09-item-97-wall-probe.webp)
@@ -50,6 +60,8 @@ Done that day
 - Item 123 at `710911f8`. Comments without readings and costs.
 - Item 124 at `d969c312`. The shadow map's request at the stop.
 - Item 126 at `26e541ef`. The far view's dashes along the yard wall's foot.
+- Item 128 at `02e30024`. Which probes or pass draw the yard's far foot dashes.
+- Item 129 at `f70cf5e7`. The build workflow runs on branch pushes alone.
 
 ## 2026-11-08
 

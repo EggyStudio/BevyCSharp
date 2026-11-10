@@ -297,6 +297,22 @@ High in the feature test's Cornell box, 2.25 to 2.31 ms where 2.26 to 2.33, the 
 where 0.153, and the probes' memory 11.1 MB where 10.4. A ray's reach stands for a cell of ways
 about 15 degrees wide, so an edge narrower than that seen from a probe can still let one cell read
 long.
+A surface reads a probe's reach between the four texels nearest the way to it (`reachAlong`), where
+it read the one texel the way fell in. At High the fourth cascade's probes under the feature test's
+yard floor, half a meter thick, stand on the line of the east wall standing on it, and their rays
+stop at the floor's underside, within the slack of an eighth of the spacing, two meters, of the
+point the wall's foot is weighed from, which lies at the floor's height. Read from one texel, such a
+probe saw about half of the point where its texel's ray stopped near it and none where the next
+one's stopped short of it, and lent the foot the warm light under the floor in triangles as wide as
+the texels. Read between texels, a wall's foot on a floor a quarter of a cell thick with an orange
+lamp under it changes by 0.064 of its mean from one column to the next at most where 0.57, its red
+over its blue 3.6% over its reference's where 6.5%
+(`AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor`), and the yard's far view at High keeps
+no column of the foot more than 5 levels warmer than the foot's mean, where 70 were, its picture
+0.077 of its light from its reference as before. A slack of a quarter of a cell, the floor's
+thickness, cut the probes over the floor as much as the ones under it, the foot 5.0% warm and darker
+in its middle, so the slack stays an eighth of the spacing. The light pass reads four texels of the
+reach for each of a pixel's eight probes where one.
 A cascade's probes stand eight cells of its field cascade apart, eight a side, the last in the
 far cascade where there is one. The bridge gathers the lights each frame (`bcs_gi_lights`), the sun,
 the camera's ambient light or the world's, and the sixteen point and spot lights nearest the camera,

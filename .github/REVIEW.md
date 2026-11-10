@@ -1,26 +1,27 @@
 # Review
 
-Reviewed up to `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before
-it, read along its normal past its own shadow, pushed at 19:15 on 2026-11-09, its run failing at its
-start twice with no job run during GitHub's outage of Actions from about 19:16 to 19:47, started
-again at 19:49 as its third attempt and green at 20:08 with Linux in 13 minutes, macOS in 17 and
-Windows in 18; it keeps the form and carries the review's files. Nothing is pushed after it. Before
-it `bacb6e2d`, item 127's record, read and left out, with its picture, the captions and the devlog,
-documents alone, pushed at 14:47 on 2026-11-09 with a run on it, green at 15:06 with Linux and macOS
-in 14 minutes and Windows in 18; it keeps the form. The release scene-packs holds the bridge's
-intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
-scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
-2026-11-02, the last pack run, green in every job, which settled Verdicts 49, 50 and 51 and, by its
-package check and its defaults step, Verdicts 2 and 43; the version stands at 0.6, tagged `v0.6.0`
-and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
-before `bacb6e2d` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `f70cf5e7`, item 129, the build on branch pushes alone, a workflow change, pushed at
+21:45 on 2026-11-09, its run green at 22:05 with Linux in 14 minutes, Windows in 15 and macOS in 20;
+it keeps the form. Before it `02e30024`, item 128's record, the yard's far foot dashes read to the
+fourth cascade's probes under the floor seeing the wall's foot through their reach test's slack, a
+reading and documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and
+macOS in 14 minutes and Windows in 19; it keeps the form and carries the review's files, the
+shortened REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in
+shade past the probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at
+20:08 on its third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the
+form. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the
+manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp
+0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every
+job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the
+highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+REVIEW-ARCHIVE.md under Head records.
 
-Next 128, the yard's far foot dashes, under its one read, 129, the build on branch pushes alone,
-130, the court's wedges through the arch, 125, the shadow maps' churn, 93's course drawn smaller
-after the next pack run's reading, then 66 and 67, the connections and the level editor, 119, the
-bridge as projects, and 120, the live path. A pack run with publish follows when the meadow's items
-rest. No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in
-motion is read in motion by the engine's Decision 107.
+Next 131, the foot's dashes mended at the probes' reach test, 130, the court's wedges through the
+arch, 125, the shadow maps' churn, 93's course drawn smaller after the next pack run's reading, then
+66 and 67, the connections and the level editor, 119, the bridge as projects, and 120, the live
+path. A pack run with publish follows when the meadow's items rest. The engine's illumination read
+goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
+Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -120,23 +121,6 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     record it as such, and where a bridge setting steadies the counts, the mend stands on its own as
     the course's memory is this machine's bound. After 98, before 66.
 
-128. **Which probes or pass draw the yard's far foot dashes.** From item 127 on 2026-11-09. The
-    dashes along the yard wall's far foot stand with the screen probes and without them and with the
-    wall's midplane probe passed over, so they are other probes' or another pass's. One read with
-    the probe diagnostic of item 104 at a dash's pixel and at the undashed pixel beside it in the
-    far view, the probes each pixel blends and the cascade, place and light of each, and the passes
-    that touch the foot's pixels with the dashes' share from each; where one probe or pass carries
-    the dashes, the mend is its own item, and where the read finds them spread across the fourth
-    cascade's probes at the wall, they are recorded as the method's at High's coarsest cells with
-    126. After 98, under Decision 81's one read.
-
-129. **The build workflow runs on branch pushes alone.** From 3DEngine's item 236 on 2026-11-09. The
-    workflow runs on any push, so the pushes of the tags v0.6.0 and v0.6.18 each started a build run
-    of the tag's ref beside the run of the same commit's push to main, two runs of one commit; a tag
-    marks a commit whose push already runs, so the push trigger names the branches and leaves the
-    tags out, the pack workflow unchanged. A workflow change alone, with the next commit that
-    touches the workflows or on its own after 98.
-
 130. **Hard-edged wedges in the court seen through the gallery's arch.** From item 98's commit on
     2026-11-09. Past the probes a surface's sun share is read along one line out from its normal, so
     the court seen through the arch keeps hard-edged wedges of light and shade under every form of
@@ -146,6 +130,27 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     wedges' edges soft within the test's bound at Low and Medium, the mend stands on its own, and
     where it costs the yard's far wall its reading, it is recorded as the method's past the probes.
     After 128 and 129.
+
+131. **A probe under a floor lends a wall's foot its light through the reach test's slack.** From
+    item 128's read on 2026-11-09. In the yard's far view at High the dashes along the shaded wall's
+    foot are one term of the world probes' blend, the fourth cascade's probes under the yard's floor
+    on the wall's line, 104 -8 -72 and 104 -8 -88, which see about half of the foot's point at a
+    dash and none beside it. probeSees reads one texel of the probe's reach toward the point leaned
+    off the wall and lets it fall over an eighth of the spacing, two meters there, and the probe's
+    rays stop about a meter short of the point under a floor thinner than that, so the weight swings
+    between a half and a twentieth from one texel of the reach to the next and the triangles are the
+    texels'. One mend is tried, by Decision 81, in two steps. First the reach read between its four
+    nearest texels in bouncedIn, as probeSeesBlended reads it, with the eighth's slack kept, which
+    takes the texels' edges from the foot and leaves a soft share. Then, where the foot still reads
+    warm against its reference, the slack at a cascade made no wider than the trace resolves there,
+    read from how far short of a floor of known thickness the fourth cascade's rays stop. The test
+    is a wall standing on a floor thinner than the coarsest cell with a warm light under the floor,
+    the foot's light along the wall steady within a bound from one reach texel to the next and
+    within a bound of its path-traced reference; the rooms, 97's and 111's thin walls and the meadow
+    at 8:00 hold their readings, and the light pass's cost is recorded (Decision 80). Where neither
+    step holds the foot without costing the thin walls theirs, the dashes are recorded as the
+    method's at High's coarsest cells with 126. The change is in bcs_gi.slang, the pair by N 4.9.
+    After 129, before 130.
 
 ## Verdicts
 
@@ -297,58 +302,57 @@ README cross-references the other engine, each in full under Decisions in REVIEW
 
 ## Replies
 
-Item 128, the yard's far foot dashes, read once as the item says and recorded in the commit carrying
-this line. A trial build wrote one pixel's blend of the light pass to a buffer that a console
-command read back, the pixel's world point and normal, each term the pass adds, and for each of the
-eight probes it blends the cascade, the place, the light, the nearness, the facing, whether it holds
-and how much it sees of the point. It adds 83 lines to the light kernel, which carries that file
-past 800, so it is not a command of a few lines and stays out of the commits, its patch in the dump.
+Item 131, the foot's dashes mended at the probes' reach test, in the commit carrying this line. The
+light pass weighs each of a pixel's eight probes by how much of the surface it sees (probeSees in
+bcs_gi.slang), its reach toward the point taken three tenths of the spacing off the surface, read
+from the one texel of its reach the way fell in and let fall over an eighth of the spacing. It reads
+the reach between the four texels nearest the way (reachAlong), as probeSeesBlended read it for the
+gloss, the eighth's slack kept, and the forward port in forward_probes.rs reads it the same way.
+probeSeesBlended reads its reach through reachAlong with its slack of half the spacing, as before.
 
-In the far view at High at eight in the morning under a clear sky, two dashes along the shaded
-wall's foot and the wall beside each were read with the screen probes in and out, the logs the same
-in both, and two more dashes with them out. Every one lies in the fourth cascade alone, which holds
-it whole, the screen probes holding none of it, the light past the probes none, and the gloss within
-0.005 of Bevy's. The dashes are the world probes' blend's and no other pass's.
+AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor stands a wall half a unit thick and 16 high
+on a floor half a unit thick, a quarter of High's coarsest cell, on a plane of the last cascade's
+probes eight units over one beneath the floor, as the yard's east wall stands, with an orange lamp
+under the floor past the wall and the sun overhead. Without the mend the foot's light changes by
+0.57 of its mean from one column to the next and its red over its blue reads 6.5% over its
+reference's, and with it 0.064 and 3.6%, under bounds of 0.15 and 5% set from the two. The foot
+reads 0.51 where 0.36 against its reference's 1.12, a shortfall the test reports and does not bound.
 
-At the dash at 872 413, the wall's point at 103.75 -0.86 -74.7, the probe at 104 -8 -72, under the
-yard's floor on the wall's own line, sees 0.47 of the point and so carries 76% of the blend's
-weight, its light 1.41 1.38 1.21 against 1.72 1.96 2.29 for the probe above the floor at 104 14.4
--72, and the wall takes 0.45 0.45 0.42. At the wall beside it at 842 413, three meters along, that
-probe sees none and keeps a twentieth of its weight, 17% of the blend, which the probe at 88 8 -72
-above the floor leads, and the wall takes 0.48 0.51 0.54. The dash at 935 416 reads the same with
-that probe seeing 0.50 and carrying 77%, and the wall beside it at 968 417 with it seeing none. The
-two other dashes take the probe at 104 -8 -88 under the floor, seeing 0.45 and 0.54 of them, the
-read 2026-11-09-item-128-foot-read.webp.
+The second step was tried, the foot still reading warm. 128's read gives the fourth cascade's rays
+under the yard stopping at the floor's underside, the brush 16 of the map's 32 units a meter thick,
+so the trace resolves a floor half a meter thick to its underside, and the slack was set to a
+quarter of a cell, half a meter at the fourth cascade. It cut the probes over the floor as much as
+the ones under it, since the point the foot is weighed from lies at the floor's height for both, and
+the foot changed by 0.069 from one column to the next, read 5.0% warm and 0.43 where 0.51, its
+middle at 0.30 where its ends read 0.45, the thin-walled room's floor 0.0009 where 0.0007. So the
+slack stays, the step's patch in the dump.
 
-How much a probe sees of a point is read from one texel of its reach toward the point taken three
-tenths of the spacing off the surface, falling to none over an eighth of the spacing past it, two
-meters at the fourth cascade. At the foot that point lies at the floor's height, and the probe under
-the floor reaches toward it to about a meter short of it at a dash, under the floor and within the
-two meters, and to more than two meters short of it beside the dash, so from one texel of its reach
-to the next the probe takes about half its weight or a twentieth of it, and the triangles' edges are
-the texels'.
+In the yard's far view at High at eight in the morning under a clear sky, the foot keeps no column
+more than 5 levels warmer than its mean, where 70 were with the screen probes in and 69 with them
+out, the spread of its red less its blue 1.7 levels where 3.6 and 1.2 where 4.0, the pair
+2026-11-10-item-131-foot-band.webp. The picture lies 0.077 of its light from its reference as
+before, the shaded wall 1% over in both. The near view changes by 8 levels or more at 3 pixels, the
+gallery at 58 and the hall at none, the plaza's change being its moving motes, and the meadow at
+eight in the morning at Medium reads 0.260 of its light from its reference as before, each region as
+it read.
 
-One term carries the dashes, how much a probe of the fourth cascade under the floor on the wall's
-line sees of the wall's foot, so by the item the mend is its own item and the dashes are not
-recorded with 126 as the method's. A lead for it is the slack of two meters against a floor whose
-underside the probe's rays reach within it. The read128 worktree goes with this commit.
+The 67 global illumination tests pass. The thin-walled room reads its floor 0.0007 where item 111
+left it at 0.0006, 0.0036 with the board where 0.0037 and 0.0290 with the screen probes where
+0.0303, item 97's probe on a wall's middle 0.0000, and the far wall in shade 2.4% over at Low and
+20.2% over at Medium as at item 98. The light pass reads four texels of the reach for each of a
+pixel's eight probes where one. The pass is drawn on the camera rather than dispatched, so the
+bridge keeps no span of its own for it, and its cost is recorded in reads, as item 98's was.
 
-No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
-unchanged.
+RENDERING.md's paragraph on the probes' reach, the guide's line on walls thinner than a cell and the
+comments of probeSees, reachAlong and probeSeesBlended say so.
 
-Shared: a probe of the coarsest cascade under a floor, on the line of a wall standing on it, saw the
-wall's foot through the slack of its reach test, an eighth of the spacing, and lent it the warm
-light under the floor in triangles the texels of its reach drew, for the sibling to read where its
-coarsest probes stand under a floor.
+The bridge was the editor profile's with meshlets and Solari, its three profiles checked and its
+tests run with no feature and with render, the ABI at 322. The whole suite ran with the mend under
+the GPU's shared lock and was stopped by the harness's memory guard when the machine ran short of
+memory, at 1,705 passed and none failed, its largest process at 2,147 MB, so its whole run waits on
+the owner's word, the 67 illumination tests passing apart. NormTests passed, 18. The public listing
+is unchanged.
 
-Item 129, the build on branch pushes alone, in the commit carrying this line. The push trigger of
-build.yml names every branch beside its paths, and a trigger that names branches and no tags leaves
-the tags out, so the push of a tag such as v0.6.18 starts no build run of its own beside the run of
-its commit's push to main. The pull request trigger and the pack workflow are unchanged, the
-sibling's item 236 the model.
-
-No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
-unchanged.
-
-Shared: the build workflow's push trigger names the branches as the sibling's does, so in both a
-commit that a tag marks is built once.
+Shared: a surface reading each probe's reach between the four texels nearest the way, as the gloss's
+reading did, took off the warm triangles a probe under a thin floor drew along a wall's foot at the
+coarsest cells, for the sibling to consider where its probes' sight reads one texel.

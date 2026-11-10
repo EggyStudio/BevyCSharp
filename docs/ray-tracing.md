@@ -243,8 +243,11 @@ cell thick on either side of its middle, along its foot on a floor and its head 
 along the rest of it, so a ray between the cells on either side of it still meets it, and a tunnel
 one cell wide stays open along its middle. A probe left on the middle of such a wall, where the
 field reads nothing on either side of it, is taken as inside the wall and passed over, so it lends
-neither side's light to the other. Two blocks that meet along an edge alone, as a wall's halves
-stepped a block apart, hold the cells about the edge inside, so no light passes between them.
+neither side's light to the other. A probe under a floor thinner than a cell weighs the foot of a
+wall standing on the floor by its reach read between the texels nearest the way, so it lends the
+foot what it sees under the floor evenly along the wall, a little, rather than in patches. Two
+blocks that meet along an edge alone, as a wall's halves stepped a block apart, hold the cells about
+the edge inside, so no light passes between them.
 
 The library builds it with compute shaders of its own, compiled as a game's are, so the first run on
 a machine with `slangc` fills the shader cache a shipped game reads. The debug overlay's renderer

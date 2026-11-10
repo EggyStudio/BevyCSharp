@@ -4169,6 +4169,26 @@ a batch.
     High's coarsest cells; 97's test passes because its wall's top lies on a cell boundary. The
     Reply's untried mend is item 127.
 
+128. **Which probes or pass draw the yard's far foot dashes.** From item 127 on 2026-11-09. The
+    dashes along the yard wall's far foot stand with the screen probes and without them and with the
+    wall's midplane probe passed over, so they are other probes' or another pass's. One read with
+    the probe diagnostic of item 104 at a dash's pixel and at the undashed pixel beside it in the
+    far view, the probes each pixel blends and the cascade, place and light of each, and the passes
+    that touch the foot's pixels with the dashes' share from each; where one probe or pass carries
+    the dashes, the mend is its own item, and where the read finds them spread across the fourth
+    cascade's probes at the wall, they are recorded as the method's at High's coarsest cells with
+    126. After 98, under Decision 81's one read. Done at `02e30024` on 2026-11-09, the dashes placed
+    on the fourth cascade's probes under the floor on the wall's line, which see about half of the
+    foot at a dash through the reach test's slack; the mend is item 131.
+
+129. **The build workflow runs on branch pushes alone.** From 3DEngine's item 236 on 2026-11-09. The
+    workflow runs on any push, so the pushes of the tags v0.6.0 and v0.6.18 each started a build run
+    of the tag's ref beside the run of the same commit's push to main, two runs of one commit; a tag
+    marks a commit whose push already runs, so the push trigger names the branches and leaves the
+    tags out, the pack workflow unchanged. A workflow change alone, with the next commit that
+    touches the workflows or on its own after 98. Done at `f70cf5e7` on 2026-11-09, the push trigger
+    naming every branch.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -9993,6 +10013,62 @@ along its normal out to 32 coarsest cells past the first point the sun reaches, 
 first surface, where read a coarsest cell out it lay in the face's own shadow, which the sibling's
 groundReached in lights.slang, read a cell along the normal as this was, may take for a far wall in
 shade.
+
+Item 128, the yard's far foot dashes, read once as the item says and recorded in the commit carrying
+this line. A trial build wrote one pixel's blend of the light pass to a buffer that a console
+command read back, the pixel's world point and normal, each term the pass adds, and for each of the
+eight probes it blends the cascade, the place, the light, the nearness, the facing, whether it holds
+and how much it sees of the point. It adds 83 lines to the light kernel, which carries that file
+past 800, so it is not a command of a few lines and stays out of the commits, its patch in the dump.
+
+In the far view at High at eight in the morning under a clear sky, two dashes along the shaded
+wall's foot and the wall beside each were read with the screen probes in and out, the logs the same
+in both, and two more dashes with them out. Every one lies in the fourth cascade alone, which holds
+it whole, the screen probes holding none of it, the light past the probes none, and the gloss within
+0.005 of Bevy's. The dashes are the world probes' blend's and no other pass's.
+
+At the dash at 872 413, the wall's point at 103.75 -0.86 -74.7, the probe at 104 -8 -72, under the
+yard's floor on the wall's own line, sees 0.47 of the point and so carries 76% of the blend's
+weight, its light 1.41 1.38 1.21 against 1.72 1.96 2.29 for the probe above the floor at 104 14.4
+-72, and the wall takes 0.45 0.45 0.42. At the wall beside it at 842 413, three meters along, that
+probe sees none and keeps a twentieth of its weight, 17% of the blend, which the probe at 88 8 -72
+above the floor leads, and the wall takes 0.48 0.51 0.54. The dash at 935 416 reads the same with
+that probe seeing 0.50 and carrying 77%, and the wall beside it at 968 417 with it seeing none. The
+two other dashes take the probe at 104 -8 -88 under the floor, seeing 0.45 and 0.54 of them, the
+read 2026-11-09-item-128-foot-read.webp.
+
+How much a probe sees of a point is read from one texel of its reach toward the point taken three
+tenths of the spacing off the surface, falling to none over an eighth of the spacing past it, two
+meters at the fourth cascade. At the foot that point lies at the floor's height, and the probe under
+the floor reaches toward it to about a meter short of it at a dash, under the floor and within the
+two meters, and to more than two meters short of it beside the dash, so from one texel of its reach
+to the next the probe takes about half its weight or a twentieth of it, and the triangles' edges are
+the texels'.
+
+One term carries the dashes, how much a probe of the fourth cascade under the floor on the wall's
+line sees of the wall's foot, so by the item the mend is its own item and the dashes are not
+recorded with 126 as the method's. A lead for it is the slack of two meters against a floor whose
+underside the probe's rays reach within it. The read128 worktree goes with this commit.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: a probe of the coarsest cascade under a floor, on the line of a wall standing on it, saw the
+wall's foot through the slack of its reach test, an eighth of the spacing, and lent it the warm
+light under the floor in triangles the texels of its reach drew, for the sibling to read where its
+coarsest probes stand under a floor.
+
+Item 129, the build on branch pushes alone, in the commit carrying this line. The push trigger of
+build.yml names every branch beside its paths, and a trigger that names branches and no tags leaves
+the tags out, so the push of a tag such as v0.6.18 starts no build run of its own beside the run of
+its commit's push to main. The pull request trigger and the pack workflow are unchanged, the
+sibling's item 236 the model.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: the build workflow's push trigger names the branches as the sibling's does, so in both a
+commit that a tag marks is built once.
 
 ## Items closed, parked or shortened
 

@@ -334,41 +334,13 @@ public float3 followed(float3 now, float3 before)
 /// since its own light is too little of its light to say what went out.
 public static const float OwnShare = 0.25;
 
-/// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
-/// `n`, 1 where `p`, taken three tenths of the probes' spacing off the surface along `n`, lies nearer
-/// the probe than its rays reached that way the frame before, falling to 0 over an eighth of the
-/// spacing past it, as DDGI weighs its probes by the distances they traced. Taken off the surface,
-/// the point comes nearer a probe on its own side and goes further from one past it, so a probe
-/// under a floor or beyond a wall, whose rays stop at the floor's or the wall's far face, lends a
-/// surface on this side none of the light it sees there.
-public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
+/// How far the probe of cascade `c` at `at` reached along `way` the frame before, its reach blended
+/// between the four texels nearest the way, each texel one ray's, so the reach moves across a texel
+/// as the way does rather than stepping at its edges. The texels are clamped at the octahedron's
+/// edges rather than folded across them.
+float reachAlong(Texture3D<float> reach, float3 way, int3 at, int c, float probes)
 {
-    float3 toward = p + n * (0.3 * apart) - probe;
-    float d = length(toward);
-    if (d < 1e-4)
-        return 1.0;
-    int2 texel = min(int2(octahedron(toward / d) * float(ReachTexels)), int2(ReachTexels - 1));
-    float reached = reach.Load(int4(int3(at.xy * ReachTexels + texel, c * int(probes) + at.z), 0));
-    float slack = 0.125 * apart;
-    return saturate((reached + slack - d) / slack);
-}
-
-/// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
-/// `n`, as `probeSees` weighs it, with the probe's reach blended between the four texels nearest
-/// the way to the surface and falling to 0 over half the probes' spacing past it, so a probe the
-/// surface stops seeing fades out over about the angle a texel spans. The light a rough face
-/// reflects reads its probes so (`reflectedIn` in gi_light.slang), since along the mirror way the
-/// probes on either side of a mesh see unlike light, and weighed by `probeSees` alone the edge of a
-/// mesh's shadow in that light takes the straight edges of the probes' texels, where a rough face's
-/// reflection is soft. The texels are clamped at the octahedron's edges rather than folded across
-/// them.
-public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
-{
-    float3 toward = p + n * (0.3 * apart) - probe;
-    float d = length(toward);
-    if (d < 1e-4)
-        return 1.0;
-    float2 t = octahedron(toward / d) * float(ReachTexels) - 0.5;
+    float2 t = octahedron(way) * float(ReachTexels) - 0.5;
     int2 base = int2(floor(t));
     float2 f = t - float2(base);
     float reached = 0.0;
@@ -379,8 +351,45 @@ public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3
         float2 lerps = lerp(1.0 - f, f, float2(offset));
         reached += lerps.x * lerps.y * reach.Load(int4(int3(at.xy * ReachTexels + texel, c * int(probes) + at.z), 0));
     }
+    return reached;
+}
+
+/// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
+/// `n`, 1 where `p`, taken three tenths of the probes' spacing off the surface along `n`, lies nearer
+/// the probe than its rays reached that way the frame before (`reachAlong`), falling to 0 over an
+/// eighth of the spacing past it, as DDGI weighs its probes by the distances they traced. Taken off
+/// the surface, the point comes nearer a probe on its own side and goes further from one past it,
+/// so a probe under a floor or beyond a wall, whose rays stop at the floor's or the wall's far face,
+/// lends a surface on this side none of the light it sees there. The reach is read between texels,
+/// since a probe under a floor thinner than a cell, whose rays stop within the slack of the foot of
+/// a wall standing on it, would take about half its weight where one texel's ray stops near the
+/// floor and a twentieth where the next one's stops short of it, and lend the foot its light in
+/// triangles as wide as the texels.
+public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
+{
+    float3 toward = p + n * (0.3 * apart) - probe;
+    float d = length(toward);
+    if (d < 1e-4)
+        return 1.0;
+    float slack = 0.125 * apart;
+    return saturate((reachAlong(reach, toward / d, at, c, probes) + slack - d) / slack);
+}
+
+/// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
+/// `n`, as `probeSees` weighs it, falling to 0 over half the probes' spacing past the reach rather
+/// than an eighth, so a probe the surface stops seeing fades out over about the angle a texel spans.
+/// The light a rough face reflects reads its probes so (`reflectedIn` in gi_light.slang), since
+/// along the mirror way the probes on either side of a mesh see unlike light, and weighed with the
+/// eighth's slack the edge of a mesh's shadow in that light stays sharp, where a rough face's
+/// reflection is soft.
+public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
+{
+    float3 toward = p + n * (0.3 * apart) - probe;
+    float d = length(toward);
+    if (d < 1e-4)
+        return 1.0;
     float slack = 0.5 * apart;
-    return saturate((reached + slack - d) / slack);
+    return saturate((reachAlong(reach, toward / d, at, c, probes) + slack - d) / slack);
 }
 
 /// How far off a surface along its normal the blend toward the light past the probes is weighed

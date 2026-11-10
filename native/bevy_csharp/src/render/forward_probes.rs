@@ -157,16 +157,28 @@ fn probe_facing(p: vec3<f32>, n: vec3<f32>, probe: vec3<f32>) -> f32 {
     return mix(0.02 * facing * facing, facing * facing + 0.2, smoothstep(-0.15, 0.15, cosine));
 }
 
+fn reach_along(way: vec3<f32>, at: vec3<i32>, c: i32, probes: f32) -> f32 {
+    let t = octahedron(way) * f32(REACH_TEXELS) - 0.5;
+    let base = vec2<i32>(floor(t));
+    let f = t - vec2<f32>(base);
+    var reached = 0.0;
+    for (var corner = 0; corner < 4; corner++) {
+        let offset = vec2<i32>(corner & 1, corner >> 1u);
+        let texel = clamp(base + offset, vec2<i32>(0), vec2<i32>(REACH_TEXELS - 1));
+        let lerps = mix(1.0 - f, f, vec2<f32>(offset));
+        reached += lerps.x * lerps.y * textureLoad(probe_reach, vec3<i32>(at.xy * REACH_TEXELS + texel, c * i32(probes) + at.z), 0).r;
+    }
+    return reached;
+}
+
 fn probe_sees(p: vec3<f32>, n: vec3<f32>, probe: vec3<f32>, at: vec3<i32>, c: i32, probes: f32, apart: f32) -> f32 {
     let toward = p + n * (0.3 * apart) - probe;
     let d = length(toward);
     if d < 1e-4 {
         return 1.0;
     }
-    let texel = min(vec2<i32>(octahedron(toward / d) * f32(REACH_TEXELS)), vec2<i32>(REACH_TEXELS - 1));
-    let reached = textureLoad(probe_reach, vec3<i32>(at.xy * REACH_TEXELS + texel, c * i32(probes) + at.z), 0).r;
     let slack = 0.125 * apart;
-    return saturate((reached + slack - d) / slack);
+    return saturate((reach_along(toward / d, at, c, probes) + slack - d) / slack);
 }
 
 fn cascade_hold(c: i32, p: vec3<f32>) -> f32 {
