@@ -2,26 +2,33 @@
 
 Reviewed up to `f70cf5e7`, item 129, the build on branch pushes alone, a workflow change, pushed at
 21:45 on 2026-11-09, its run green at 22:05 with Linux in 14 minutes, Windows in 15 and macOS in 20;
-it keeps the form. Before it `02e30024`, item 128's record, the yard's far foot dashes read to the
-fourth cascade's probes under the floor seeing the wall's foot through their reach test's slack, a
-reading and documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and
-macOS in 14 minutes and Windows in 19; it keeps the form and carries the review's files, the
-shortened REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in
-shade past the probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at
-20:08 on its third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the
-form. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the
-manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp
-0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every
-job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the
-highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+it keeps the form. After it `07143fdf`, item 131, the probe's reach read between its four nearest
+texels with the eighth's slack kept, the yard's far foot from 70 warm columns to none and the new
+test's step between neighbor columns from 0.57 to 0.064, its second step tried and left out,
+committed at 01:18 on 2026-11-10 and not pushed. Its suite was stopped at 01:15 by the session's
+memory guard at 1,705 passed and none failed, as the machine ran out of memory under the engine
+session's script, the 67 illumination tests passing apart; the push waits until the whole suite has
+run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
+Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth cascade's
+probes under the floor seeing the wall's foot through their reach test's slack, a reading and
+documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in 14
+minutes and Windows in 19; it keeps the form and carries the review's files, the shortened
+REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in shade past the
+probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at 20:08 on its
+third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the form. The
+release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
+hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
+published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
+version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
+item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
 REVIEW-ARCHIVE.md under Head records.
 
-Next 131, the foot's dashes mended at the probes' reach test, 130, the court's wedges through the
-arch, 125, the shadow maps' churn, 93's course drawn smaller after the next pack run's reading, then
-66 and 67, the connections and the level editor, 119, the bridge as projects, and 120, the live
-path. A pack run with publish follows when the meadow's items rest. The engine's illumination read
-goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
-Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
+Next 119's plan in the Replies while the suite waits on the owner's word, then 130, the court's
+wedges through the arch, 125, the shadow maps' churn, 93's course drawn smaller after the next pack
+run's reading, then 66 and 67, the connections and the level editor, 119, the bridge as projects,
+and 120, the live path. A pack run with publish follows when the meadow's items rest. The engine's
+illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the
+one target by Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -150,7 +157,8 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     at 8:00 hold their readings, and the light pass's cost is recorded (Decision 80). Where neither
     step holds the foot without costing the thin walls theirs, the dashes are recorded as the
     method's at High's coarsest cells with 126. The change is in bcs_gi.slang, the pair by N 4.9.
-    After 129, before 130.
+    After 129, before 130. Done at `07143fdf` on 2026-11-10 by its first step, the second read worse
+    and left out, the push held for the whole suite.
 
 ## Verdicts
 
@@ -356,3 +364,82 @@ is unchanged.
 Shared: a surface reading each probe's reach between the four texels nearest the way, as the gloss's
 reading did, took off the warm triangles a probe under a thin floor drew along a wall's foot at the
 coarsest cells, for the sibling to consider where its probes' sight reads one texel.
+
+119 planned on 2026-11-10, before the batch. The library's folders were read for which top-level
+types each names of another's, the code without its comments and strings, the Assets folder cut by
+its files' stems into the rendering, the shaders, global illumination, the weather, the 2D drawing,
+Bevy's UI, the audio, the animation, the gizmos and the asset server. The graph is not the item's
+layering yet, so the split goes in two parts as the sibling's does, first the back edges cut inside
+the one project, each cut a commit with its suite, and then the projects drawn along the cut areas.
+
+The projects, from the bottom. BevyCSharp.Native carries the bridge's library for each platform with
+the loader and the ABI check, the package every other depends on. BevyCSharp.Core holds Core, Ecs,
+Math, Time, Input and the behaviors' runner, since Core and Ecs name each other, 46 and 230 times,
+and both name the input and the clock, as the sibling's Core holds them, with the log ring,
+AssetHandle and the reflected wrappers of Bevy's components. On it BevyCSharp.Assets holds the asset
+server, its packs, data assets and glTF, BevyCSharp.Rendering the cameras, lights, materials,
+meshes, the look and the shader programs, BevyCSharp.Rendering.GlobalIllumination the scene field,
+the probes and the reference, and BevyCSharp.Sky the sky, fog, clouds, rain, snow and thunder over
+the Sky module, on the field, which it names 18 times, and on the audio for the thunder. Beside them
+stand BevyCSharp.Render2d, BevyCSharp.Ui for Bevy's UI and Feathers, BevyCSharp.ImGui for the Ui
+folder, BevyCSharp.Audio, BevyCSharp.Animation, BevyCSharp.Gizmos, BevyCSharp.Physics over
+BepuPhysics, BevyCSharp.Scenes, BevyCSharp.Modeling, BevyCSharp.Levels and BevyCSharp.Vegetation
+over their modules, BevyCSharp.Diagnostics with the console's host and catalog, and BevyCSharp.Cli,
+each on what it draws on. BevyCSharp itself keeps BevyApp and DefaultPlugins, which compose the
+rest, and is the package a game names, depending on all of them. The names are read against the docs
+before they are set, and every type keeps the namespace Bevy.
+
+The back edges and their cuts. App's frame loop calls a dozen areas by name, the asset server's
+sweep, the mixer, the animation machines, the recorder, the modeling, the trees, the scene field,
+the probes, the sky's weather and fog, and Config names the camera controllers, the dev tools,
+Feathers and the packs, so each area's work in the frame registers through its own plugin at the
+stage it runs in, and the flags the bridge is built with stay in Config as Core's. Ecs names
+AssetHandle and SaveId, which move into Core, its spawn helpers name the lights and cameras, which
+move into Rendering, and its observers name the animation's events, which the animation's plugin
+registers. The log ring and the crash log, which Core and Ecs name, move into Core, and the
+console's 135 commands, 17 files in Diagnostics naming the global illumination's types 26 times, the
+sky's 21 and the modeling's 23, move each into its area's project with the command generator running
+in each, as the sibling's do. The asset server names the mesh and material data, 19 times, and the
+scenes' values, 10, and Scenes names the asset server 61 times, so the mesh and material data move
+into Assets, which Rendering draws, and Scenes stands on Assets. The smaller ones are SyntheticInput
+naming the ImGui runtime, which ImGui's plugin hooks, and the shader programs naming the ray scene,
+which moves into Rendering.
+
+Two of the cuts need more than moving files. Native is one partial class over eleven files holding
+some 520 entry points, the mirror structs naming the areas' enums, AlphaMode, ClearMode, BloomMode,
+SliceTiling and TileData among them, and a partial cannot span assemblies, while two internal types
+of one name seen through InternalsVisibleTo clash. So each area's entry points and mirrors become an
+internal class of the area's own, NativeAudio and the like, and its 638 calls outside Interop are
+renamed, Native keeping the app's, the frame's and Check, the largest cut. And Render is partial
+over the rendering, global illumination and the sky, which C# 14's static extension members carry, a
+static class extended from a second project keeping its calls as they were, tried here on .NET 10
+with Render.SetGlobalIllumination declared in an extension(Render) block of another assembly. The
+global illumination's and the sky's parts of Render, and the spawn helpers on EcsWorld, become such
+blocks, so a game's code reads the same. The public listing is written from every project and lists
+an extension member under the type it extends, so PublicApi.txt reads the same lines, split per
+project and held to the whole before the move.
+
+Once the cuts are in, a norm test reads the areas' edges as the projects will and fails one that
+points upward, so the second part moves files without a cycle coming back. The second part makes the
+projects, the generators wired into each with InternalsVisibleTo among the engine's projects and the
+tests, the script host reading every loaded project as it reads the one, the pack workflow packing
+every project at the one version, the native libraries in BevyCSharp.Native and the build props and
+targets in BevyCSharp, so the templates and the games keep their one reference, and BUILDING.md's
+package table, the guide's lines and RENDERING.md's names redrawn. AGENTS.md's table of where things
+are lists folders of the one project, and the owner's allowance of 2026-10-05 covers adding a row it
+lacks, not redrawing it, so its rows change with the owner's word, which this plan asks for and does
+not take from the review.
+
+The cuts are some seven commits, the frame's hooks and Config, the log ring with AssetHandle and
+SaveId, the entry points by area, the commands by area, the extension members with the listing's
+writer, the asset data and the smaller ones, then the norm test, and the split as one or two. Each
+cut runs the whole suite, which waits on the owner's word for its next run. The review is asked to
+confirm the projects, the order and the two cuts that need more than moving files before the first
+cut.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: C# 14's static extension members carry a static class's members declared in a second project
+with the class's calls unchanged, tried on .NET 10, for the sibling's split where a partial type
+spans areas.
