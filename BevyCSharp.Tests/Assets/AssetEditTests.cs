@@ -22,6 +22,7 @@ public sealed class AssetEditTests
         BevyNativeException? refused = null;
 
         using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 4 });
+        app.AddPlugin(new EnginePlugin());
         app.AddSystem(Stage.Startup, new SystemDescriptor(_ =>
         {
             var triangle = Render.CreateMesh(new MeshData { Positions = [new(0f, 0f, 0f), new(1f, 0f, 0f), new(0f, 1f, 0f)] });

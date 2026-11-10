@@ -27,6 +27,7 @@ public sealed class LoadingTests
         var config = Config.OffscreenFor(32, 32, frames: 120);
         config.AssetRoot = EngineHarness.AssetDirectory;
         using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
         app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
         {
             var ecs = new BehaviorContext(world).Ecs;

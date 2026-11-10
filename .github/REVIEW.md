@@ -11,9 +11,14 @@ session's script, the 67 illumination tests passing apart; the push waits until 
 run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
 On it `62ba6c03`, 119's plan in the Replies, documents alone, committed at 01:24 and held with it.
 On that `259a09c8`, item 130's record, documents alone, committed at 01:34 and held with them. On
-that `8e088836`, item 125's record, documents alone, committed at 02:28 and held with them. A pack
-run with publish was started on `f70cf5e7` at 02:29 on 2026-11-10, the first since 2026-11-02, for a
-package of the week's work and for 93's reading of the drive's time. Before it `02e30024`, item
+that `8e088836`, item 125's record, documents alone, committed at 02:28 and held with them. On that
+`ccef6170`, item 132, the roofs' cameras drawing a layer of their own that no light shares,
+committed at 03:05 and held with them; its test holds the frame's lights at none where the head
+brought three, and the course's textures stand at 774 to 794 MB at the stations where 886 to 1,002,
+the run reaching 17 shots where 5 and 3. The pack run with publish started on `f70cf5e7` at 02:29 on
+2026-11-10, the first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora
+captures, the feature test not answering on llvmpipe with the illumination switched off and Fedora's
+Mesa at 26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item
 128's record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing
 the wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
 2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
@@ -27,11 +32,13 @@ scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run
 `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
 before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next 132, the rain's roof camera bringing no lights into the frame, then 119, the bridge as
-projects, its plan confirmed and its first cut waiting on the suite's next run, 120, the live path,
-and after them 66 and 67, the connections and the level editor; 93's course drawn smaller after the
-reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8` and
-`8e088836` are held for the whole suite on the owner's word. A pack run with publish follows when
+Next Verdict 52, the feature test not answering on the runner with the illumination off and Fedora's
+pictures on Mesa 26.2.6, after 119's first cut is amended; then 119, the bridge as projects, its
+plan confirmed, its first two cuts written and held on their builds, the norm's tests and their
+areas' tests, the later cuts each after the whole suite has run, 120, the live path, and after them
+66 and 67, the connections and the level editor; 93's course drawn smaller after the reading of the
+pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8`, `8e088836` and
+`ccef6170` are held for the whole suite on the owner's word. A pack run with publish follows when
 the meadow's items rest. The engine's illumination read goes first on the GPU (N 7.9). No budget by
 Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
 motion by the engine's Decision 107.
@@ -129,7 +136,11 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     playing an event the sky raises, unless a reason against it is found. Each cut is a commit with
     the whole suite, so the first cut starts once the suite may run again on the owner's word. And
     the split comes before 66 and 67, so those are written into the projects. AGENTS.md's table
-    waits on the owner's word.
+    waits on the owner's word. Eased at 03:05 on 2026-11-10 while the suite waits on the owner's
+    word, the first two cuts, the frame's hooks with Config and the log ring with AssetHandle and
+    SaveId, may be written and held on their builds, the norm's tests and the tests of the areas
+    they touch, the entry points' cut and those after it each waiting for the whole suite on what
+    stands before.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -205,11 +216,36 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     every frame at a depth pass a frame is the other form, the maps then standing at the larger
     count. The test runs the course's start in rain and holds the main view's map counts unchanged
     across the roof camera's frames, the rain still stopping under a roof. One commit, before 119's
-    first cut, held with the others until the suite has run.
+    first cut, held with the others until the suite has run. Done at `ccef6170` on 2026-11-10 by the
+    layer, the fallback not needed, the push held for the whole suite.
 
 ## Verdicts
 
-Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
+Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 52 is open.
+
+52. **The pack run of `f70cf5e7` is red in three jobs, the feature test not answering on the runner
+    and Fedora's Mesa moved on.** The pack run 42736156878, started at 02:29 on 2026-11-10 and the
+    first since 2026-11-02, has its drive red after 12 minutes, its soak after 13 and its Fedora
+    captures after 2, every other job green, the three systems' suites, the native builds, the
+    games, the four captures jobs, the storm and the README, so nothing is published. The drive's
+    feature test started in 34 seconds on a Xeon Platinum 8573C drawing by llvmpipe, answered its
+    first command, and then `frame.profile 30` did not answer within its 150 seconds; the soak's
+    `frames.wait 60` did not answer within 600. Both run with GLOBAL_ILLUMINATION set to Off, and
+    both logs hold the six probe-face cameras' warnings and the compile of field_stamp.slang and
+    field_resolve.slang, the soak's gi_trace.slang too, so the week's illumination, items 95 to 129,
+    draws or compiles on the runner with the switch off, or the probe capture's six faces draw at
+    the start, which item 125 read drawing for 95 frames, more than a frame of llvmpipe at over a
+    second can carry. The push runs leave these jobs out, so nothing ran them for eight days, the
+    review's lapse, and a pack run goes out at least every second day from here. The mend comes
+    before 119's second cut. First one read of the feature test's first hundred frames on lavapipe
+    on this machine with the switch off, the passes and views each frame draws and the pipelines it
+    makes. Then the switch turns off everything the illumination draws and compiles, the probe
+    capture's faces among it, or the faces are drawn over more frames where the device draws on the
+    CPU, with a test that an app with the switch off makes no pipeline of the illumination's and
+    draws no probe face. The Fedora job's Mesa is 26.2.6 where the workflow names 26.2.5, so its six
+    pictures are taken again on 26.2.6 and the workflow names it, as the job's message says. One
+    commit for the switch and one for Fedora's pictures, and the next pack run follows them. Written
+    at 03:46 on 2026-11-10.
 
 ## Decisions
 
@@ -599,3 +635,35 @@ Shared: a camera drawing depth for the rain sees no light where it draws a layer
 meshes it draws take beside theirs and no light stands on, which held the frame's shadow maps steady
 across its frames and kept the textures at the course's stations some 110 to 210 MB lower, for the
 sibling where an auxiliary view of its own draws from time to time.
+
+Item 119's first cut, the frame's hooks and Config, in the commit carrying this line, held with the
+others. App's making and its frame's first stage named a dozen areas. What it does before Bevy
+builds the app is Core's by what it does, the game's asset files and their pack handed to Bevy
+before it builds its asset sources, the streamed reads' root the project's settings are read from,
+the memory guard and the player's directory, so AssetFiles, AssetPack, Streaming, StreamRead,
+MemoryGuard and UserData, which name nothing above Core, move into Core and App keeps those calls.
+The rest goes to a plugin of each area's own, internal, which EnginePlugin adds to every app. As it
+is added it forgets what the area kept for the app before and adds its systems, the project's icon
+among them, and it puts the area's work in the frame on the app's own list (App.AreasWork) at places
+a hundred apart that keep the order the frame had, from the assets that failed and the sweep through
+the animation, the recorder, the modeling, the screenshot, the trees, the field, the probes, the
+sky's six, the field's own drawing, the hidden scope and the overlay to the data and material files
+and the scenes. A step that needs the renderer or a window asks for it itself, as the frame's blocks
+asked. The assets' failures are posted after Bevy's lines where before them, in the same stage
+before any system of the game. The flags the bridge is built with that Config types its members by,
+CameraControllers, DevTools and DiagnosticPlugins, move into Core.
+
+After the split EnginePlugin stands in the flat project, as BevyApp and DefaultPlugins do, adding
+every area's plugin, and Core keeps a plugin of its own for what is Core's, so a program that names
+one area's package adds that area's plugin and the area's work is its app's from the start. An app
+made without EnginePlugin takes none of the areas' upkeep, and the tests that made such apps where
+they use an area's work, the audio's, the loading's, the reflected wrappers', the asset edits' and
+the glTF export's, add it. Config's documentation names the areas' types by cref some forty times,
+which the split writes as plain names.
+
+No native file changed. The solution builds with warnings as errors, and the tests of the areas the
+cut touches pass, 393 of 394 with one skipped, the app's stages and its leaks, the plugins, the
+assets, the packs, the data and streamed reads, the audio, the animation, the saves and scenes, the
+modeling, the trees, the field and global illumination, the sky's, the hidden scope, the overlay,
+ImGui, the physics, the recording and the screenshot key, the memory guard and the window's memory
+among them. NormTests passed, 18. The public listing is unchanged.

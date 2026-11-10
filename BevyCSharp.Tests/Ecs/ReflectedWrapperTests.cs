@@ -662,6 +662,7 @@ public sealed class ReflectedWrapperTests
         // Offscreen, since a mesh is given its visibility class by the rendering a headless run
         // leaves out.
         using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 4 });
+        app.AddPlugin(new EnginePlugin());
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
         {
@@ -701,6 +702,7 @@ public sealed class ReflectedWrapperTests
         float? inserted = null, written = null;
 
         using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 3 });
+        app.AddPlugin(new EnginePlugin());
         app.AddSystem(Stage.Startup, new SystemDescriptor(world =>
         {
             var ecs = world.Resource<EcsWorld>();

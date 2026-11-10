@@ -124,6 +124,13 @@ public sealed unsafe partial class App : IDisposable
     /// </remarks>
     public ProjectSettings Project { get; } = new();
 
+    /// <summary>
+    /// The work the areas' plugins add to this app's frame, run in order of its places in the
+    /// frame's first stage, once the time, the input, their messages and Bevy's log lines are read
+    /// and before any system of the game runs.
+    /// </summary>
+    internal EngineSteps<World> AreasWork { get; } = new();
+
     /// <summary>The states, sub-states and computed states this app added, by their enum's name.</summary>
     /// <remarks>
     /// By name rather than by type, as the state tables find a state, so a script's enum compiled
@@ -260,28 +267,6 @@ public sealed unsafe partial class App : IDisposable
 
         ComponentRegistry.BeginApp(_handle);
 
-        // The ids the scenes, data assets and other files the managed side reads carry, from the
-        // folder or, for a game that compiled them into itself, from its own assembly.
-        AssetIds.Reindex();
-
-        // A data file changed on disk is read again when assets are, and not in a shipped game.
-        DataAssets.Watching = Config.WatchAssets;
-
-        // Sounds and buses belong to the app that played them, and meshes to the app that made them.
-        Audio.ResetMixer();
-        Render.ForgetMade();
-        Render.Wireframes = Config.Wireframes;
-        MaterialFiles.Forget();
-        MeshFiles.Forget();
-        AssetServer.ForgetFailed();
-        ImGuiRuntime.Forget();
-        Bevy.Physics.Colliders.Forget();
-
-        // A game in progress is one app's, and its entities would name others in the next.
-        SaveGame.Forget();
-        Animation.ForgetMachines();
-        SceneInstances.Forget();
-
         World.TrackChangeLocations = Config.TrackChangeLocations;
         World.InsertResource(Config);
         World.InsertResource(Project);
@@ -364,19 +349,9 @@ public sealed unsafe partial class App : IDisposable
             AddSystem(Stage.Startup, new SystemDescriptor(world => world.Resource<Time>().Holds = holds, "Engine.ClockHolds"));
         }
 
-        // The project's icon on the window it opens, where there is one. An offscreen or headless
-        // run has none to show it on.
-        if (HasRenderer && Project.Icon is { Length: > 0 } icon)
-        {
-            AddSystem(Stage.Startup, new SystemDescriptor(_ =>
-            {
-                if (Window.Entity().IsNone) return;
-                Window.SetIcon(AssetServer.Load(AssetKind.Image, icon));
-            }, "Engine.ProjectIcon"));
-        }
-
         // Refresh Time and Input from Bevy before any user system observes them.
-        AddSystem(Stage.FrameSync, new SystemDescriptor(static world =>
+        var areas = AreasWork;
+        AddSystem(Stage.FrameSync, new SystemDescriptor(world =>
         {
             NativeFrameState state;
             Native.Check(Native.bcs_frame_state(&state), "bcs_frame_state");
@@ -396,7 +371,6 @@ public sealed unsafe partial class App : IDisposable
             StateRegistry.PostTransitions(world.Resource<MessageBus>(), world.Resource<EcsWorld>());
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());
-            PostAssetFailures(world.Resource<MessageBus>());
 
             // Bevy's lines into the console's log and the run's, and what the adapter is for a
             // crash's report, once the renderer can say it.
@@ -404,66 +378,11 @@ public sealed unsafe partial class App : IDisposable
             if (CrashLog.Folder is not null && !CrashLog.Described && HasRenderer && !world.Resource<Config>().Headless)
                 CrashLog.Describe(DescribeAdapter());
 
-            // The handles a scene made for its entities that none of them draws with any more.
-            AssetServer.Sweep();
+            // The areas' work in the frame, from the assets that failed to the scenes spawned last
+            // frame, each in its place, as the areas' plugins added it to this app.
+            areas.Run(world);
 
-            if (HasRenderer)
-            {
-                Animation.PostFinished(world.Resource<MessageBus>());
-                Animation.AdvanceMachines(world.Resource<EcsWorld>());
-
-                // A recording's picture of this frame asked for, and those of frames before kept
-                // as they come back off the GPU.
-                Recorder.Tick(world.Resource<Time>());
-
-                // The models the console shows drawn again where its commands changed them, and
-                // the modeling windows' outlines in a run that draws.
-                Modeling.Tick(world.Resource<EcsWorld>(), !world.Resource<Config>().Headless);
-
-                // A picture of this frame where the screenshot key was pressed, the press left for the
-                // program to read as well, in a run that draws.
-                if (Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
-                    Capture.Screenshot();
-
-                // The trees planted, dressed as their variants grow, their colliders in every run and
-                // their meshes where something draws.
-                Trees.Tick(world);
-
-                // F1's hidden scope and F3's debug overlay, in a run that draws, the scene's
-                // distance field, which the overlay says, the probes global illumination traces
-                // through it, the weather, which gives the clouds, the fog, the rain and the storm
-                // their numbers, the storm, whose flash the clouds glow with, the clouds, carried on
-                // by the wind, the fog's froxels, whose images trade places every frame and which
-                // read the clouds' shadow this frame, the rain, which reads it too, and the night
-                // sky, which reads its clock.
-                if (!world.Resource<Config>().Headless)
-                {
-                    SceneField.Tick(world);
-                    WorldProbes.Tick(world);
-                    SkyWeather.Tick(world);
-                    SkyThunder.Tick(world);
-                    Clouds.Tick(world);
-                    SkyFog.Tick(world);
-                    Precipitation.Tick(world);
-                    NightSky.Tick(world);
-                    SceneField.DrawEngine(world);
-                    Ui.TickHidden(world.Resource<EcsWorld>(), world.Resource<Input>());
-                    Debug.TickOverlay(world);
-                }
-            }
-
-            DataAssets.PostChanges(world.Resource<MessageBus>());
-            SaveGame.PostLoaded(world.Resource<MessageBus>());
-            MaterialFiles.ReloadTouched();
             WindowMemory.Tick();
-
-            // A placed scene file written since the last frame is spawned again before the
-            // instances ready are posted, as one of them.
-            SceneReloads.ReloadTouched(world.Resource<EcsWorld>(), world.Resource<MessageBus>());
-
-            // After the scenes Bevy spawned last frame are in the world, so an instance's overrides
-            // find their nodes, and before anything reads that the instance is ready.
-            SceneInstances.PostReady(world.Resource<EcsWorld>(), world.Resource<MessageBus>());
 
             // What Bevy logged as an error since the last frame, heard while the run goes on
             // rather than only once it ends.
@@ -606,44 +525,6 @@ public sealed unsafe partial class App : IDisposable
                     bus.Send(new ImeDisabled());
                     break;
             }
-        }
-    }
-
-    /// <summary>
-    /// Moves the assets that failed to load onto the message bus.
-    /// </summary>
-    /// <remarks>
-    /// Three texts per failure, each read the way every text crosses the boundary, which is to ask
-    /// with nothing to learn the length and then ask again with a buffer that size. Failures are
-    /// rare, so the reads cost nothing and a frame with none costs one call that answers zero.
-    /// </remarks>
-    private static void PostAssetFailures(MessageBus bus)
-    {
-        // The files this side reads, mesh and material files and data assets, first.
-        while (AssetServer.TakeFailed(out var failure)) bus.Send(failure);
-
-        var count = Native.bcs_asset_failures_drain();
-        if (count <= 0) return;
-
-        for (var i = 0; i < count; i++)
-        {
-            var index = i;
-
-            var path = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_path(index, buffer, capacity),
-                "reading the path of an asset that failed to load");
-
-            var reason = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_reason(index, buffer, capacity),
-                "reading why an asset failed to load");
-
-            // What kind it was, which the path alone does not say once a loader is picked by
-            // content rather than by extension.
-            var kind = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_kind(index, buffer, capacity),
-                "reading what kind of asset failed to load");
-
-            bus.Send(new AssetLoadFailed(path, reason, kind));
         }
     }
 }

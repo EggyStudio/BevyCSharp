@@ -569,6 +569,7 @@ public sealed class AudioTests
             FrameSeconds = step,
             AssetRoot = EngineHarness.AssetDirectory,
         });
+        app.AddPlugin(new EnginePlugin());
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(_ =>
         {
@@ -663,6 +664,7 @@ public sealed class AudioTests
             AudioWithoutWindow = true,
             AssetRoot = EngineHarness.AssetDirectory,
         });
+        app.AddPlugin(new EnginePlugin());
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(
             _ => silent = Audio.IsSilent, "Test.Ask"));
@@ -704,6 +706,7 @@ public sealed class AudioTests
             AudioWithoutWindow = true,
             AssetRoot = EngineHarness.AssetDirectory,
         });
+        app.AddPlugin(new EnginePlugin());
 
         app.AddSystem(Stage.Startup, new SystemDescriptor(
             _ => clip = AssetServer.Load(AssetKind.Audio, "sounds/tone.wav"), "Test.Load"));

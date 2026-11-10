@@ -225,6 +225,7 @@ public sealed class GltfExportTests : IDisposable
             MeshData? read = null;
             AssetHandle mesh = AssetHandle.None;
             using var app = new App(new Config { Offscreen = true, Width = 32, Height = 32, HeadlessFps = 60, HeadlessFrames = 240, AssetRoot = EngineHarness.AssetDirectory });
+            app.AddPlugin(new EnginePlugin());
             app.AddSystem(Stage.Startup, new SystemDescriptor(_ => mesh = AssetServer.Load(AssetKind.Mesh, name + "#Mesh0/Primitive0"), "Test.Load"));
             app.AddSystem(Stage.Update, new SystemDescriptor(_ =>
             {
