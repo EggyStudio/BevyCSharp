@@ -28,8 +28,8 @@ the yard's far wall in shade, so the trial was left out.
 Bevy's meshlet example captured in Fedora 44 with a render bridge carrying meshlets and Solari, on
 the left on Mesa 26.2.5 as checked in on 2026-11-02 and in the middle on Mesa 26.2.6 at the head,
 and on the right the middle's light less the left's ten times over, brighter in orange and darker in
-blue, the bunnies and their shadows a little moved, since each bunny wiggles with the clock and the
-capture comes a frame or so on.
+blue, the sun's shadow edges across the floor and on the blue bunny a little moved by the shadow
+biases each light has taken for its kind since 2026-11-07, the bunnies standing where they stood.
 
 Done that day
 

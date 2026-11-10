@@ -23,7 +23,9 @@ Verdict 52's mend, the feature test taking the illumination's and the weather's 
 environment at its launch and the weather turned off by command taking the sky's fog with it,
 committed at 06:04 and held with them. On that `6f9b18ed`, Verdict 52's second commit, Fedora's six
 pictures taken again on its Mesa 26.2.6, which the workflow and BUILDING.md name, committed at 06:41
-and held with them. The pack run with publish started on `f70cf5e7` at 02:29 on 2026-11-10, the
+and held with them. On that `89b1368b`, 119's second cut, the logs, AssetHandle and AssetIds into
+Core and SaveId into Ecs, committed at 06:43 and held with them, its 143 touched tests passing and
+the listing unchanged. The pack run with publish started on `f70cf5e7` at 02:29 on 2026-11-10, the
 first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora captures, the
 feature test not answering on llvmpipe with the illumination switched off and Fedora's Mesa at
 26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item 128's
@@ -40,16 +42,15 @@ scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run
 `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
 before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next 119's second cut, written and held, and 133, the meshlet example's capture on the set clock,
+Next 133, the meshlet example's capture on the set clock, then the whole suite on the held stack,
 then 119, the bridge as projects, its plan confirmed, its first two cuts written and held on their
 builds, the norm's tests and their areas' tests, the later cuts each after the whole suite has run,
 120, the live path, and after them 66 and 67, the connections and the level editor; 93's course
-drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`,
-`62ba6c03`, `259a09c8`, `8e088836`, `ccef6170`, `001c630d`, `f5b450ad` and `6f9b18ed` are held for
-the whole suite on the owner's word. A pack run with publish follows when the meadow's items rest.
-The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow
-at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
-Decision 107.
+drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10. Nine commits are
+held, `07143fdf` to `89b1368b`, for the whole suite on the owner's word. A pack run with publish
+follows when the meadow's items rest. The engine's illumination read goes first on the GPU (N 7.9).
+No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion
+is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -234,7 +235,18 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     clock of a set amount a frame, held while a load runs, the same moment whatever the start took.
     One read of which clock the wiggle reads and why the capture's frame is not the same moment for
     it, and the mend so that it is, in the example or in the capture's clock, with the six of Fedora
-    and the runner's own captures unchanged. A small commit, held with the others.
+    and the runner's own captures unchanged. A small commit, held with the others. Read at 06:49 on
+    2026-11-10, and the premise does not hold. One bunny wiggles, by a step added each frame, so a
+    frame held while a load runs adds the same step as any other, which is a hole in the set clock's
+    promise but not the 3 percent, the mended capture lying 0.23 percent from the picture of
+    `6f9b18ed` and 3.15 from that of 2026-11-02. The difference is the sun's shadow edges across the
+    row's floor shadows and the blue bunny's own shadow, no bunny moved. So the item keeps the
+    example's step times the frame's time, nothing on a held frame, with a comment saying why it
+    departs from Bevy's line; one bounded read places the shadows, the bridge of 2026-11-02's commit
+    captured on Mesa 26.2.6, the old picture on it meaning the week's shadows moved it and a new one
+    meaning Mesa did, recorded either way with no mend unless the week's change was not meant; and
+    the false sentence of `6f9b18ed`'s Reply, caption and devlog block is corrected in this item's
+    commit, the held stack left as it is.
 
 ## Verdicts
 
@@ -275,8 +287,8 @@ Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdi
     the GPU, and takes it off with the mend. Fedora's pictures follow as the second commit; the
     verdict settles on the next pack run's drive, soak and Fedora captures. The second commit is
     `6f9b18ed`, the six captured again in Fedora 44 on Mesa 26.2.6, five within their bars and
-    meshlet 3.0 percent off its 2.0, its bunnies wiggling with the clock a frame or so on since the
-    apps' starts changed this week, which is item 133's.
+    meshlet 3.0 percent off its 2.0, which item 133 read to the sun's shadow edges and not to its
+    wiggling bunny.
 
 ## Decisions
 
@@ -742,10 +754,10 @@ archive checkout with a --render --meshlet --solari bridge of the head's native 
 the workflow and BUILDING.md naming 26.2.6. clustered_decals, test_meshlet, many_meshlet_materials,
 solari and solari_reflections lie within the compare's bar of their pictures, 0.01 to 0.76% of their
 pixels apart, so the new Mesa moved nothing they draw. meshlet differs in 3.0% past its 2.0%, the
-bunnies and their shadows a little moved, since each bunny wiggles along its depth with the clock
-(Wiggle in meshlet.cs) and the capture comes a frame or so on, every app's start having changed this
-week, the pair 2026-11-10-verdict-52-meshlet.webp. The six are taken again and the gallery's six
-made again from them (build/examples-table.py).
+sun's shadow edges across the floor and on the blue bunny a little moved by the shadow biases each
+light has taken for its kind since b576bf3f on 2026-11-07, the bunnies standing where they stood
+(item 133), the pair 2026-11-10-verdict-52-meshlet.webp. The six are taken again and the gallery's
+six made again from them (build/examples-table.py).
 
 No file of the engine changed, so the suite did not run for this part. The tests of the examples'
 catalog, the docs and the workflow pass with NormTests, 18. The public listing is unchanged.
@@ -770,3 +782,28 @@ touches pass, 143 of 143, the logs, the crash log, the logged errors, the consol
 assets, their ids, files, loads and failures, the saves, the schemas, the persistent values, the
 scene files and values, the reflected components and the world among them. NormTests passed, 18. The
 public listing is unchanged.
+
+Item 133, the meshlet example's capture on the set clock, in the commit carrying this line, held
+with the others. One bunny wiggles (BunnyWiggler in meshlet.cs), by a step added each frame as
+Bevy's example adds it, so a frame the clock holds still while a load runs added the same step as
+any other. The step is the cosine of ten times the time times 0.18 times the frame's time, the same
+three thousandths in a sixtieth of a second and nothing in a held frame, with a comment saying why
+it departs from Bevy's line. Captured so in Fedora 44 on Mesa 26.2.6 the example lies 0.23% from the
+picture of 6f9b18ed, which stays, and 3.15% from that of 2026-11-02, so the wiggle was not the 3%.
+
+The read placed the 3%. The bridge and the library of a18496c3, the commit that took Fedora's six on
+2026-11-02, captured meshlet on Mesa 26.2.6 at 0.20% from the old picture, so Mesa moved nothing.
+b576bf3f on 2026-11-07 gave each light that names no shadow bias Bevy's own for its kind where every
+light took the point light's 0.02 and 0.6, a sun's larger normal bias moving its shadows' edges,
+which that commit meant, a wall the sun grazes reading within 1% of the reference's sun, and took
+many_foxes again on the runner but not Fedora's six, which only a pack run draws. So the edges moved
+by a change meant, recorded with no mend. 6f9b18ed's Reply, the caption of
+2026-11-10-verdict-52-meshlet.webp and its devlog block said the bunnies had moved by the clock,
+which this commit corrects to the shadow edges and their cause.
+
+No native file changed. The examples build with warnings as errors, and the tests of the examples'
+catalog pass with NormTests, 18. The public listing is unchanged.
+
+Shared: a change to every light's default shadow biases moves the shadow edges of examples only a
+pack run draws, so such a commit takes Fedora's six again with the runner's own, for the sibling's
+captures on Fedora.

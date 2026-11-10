@@ -77,8 +77,16 @@ internal static class Meshlet
 [Behavior]
 public partial struct BunnyWiggler
 {
-    /// <summary>Moved along Z by the cosine of ten times the time, three thousandths at most a frame.</summary>
+    /// <summary>
+    /// Moved along Z by the cosine of ten times the time, three thousandths at most in a sixtieth of
+    /// a second.
+    /// </summary>
+    /// <remarks>
+    /// By the frame's time rather than a step a frame as Bevy's example moves it, so a frame the
+    /// clock holds still while a load runs moves it not at all, and the bunny stands at the same
+    /// place at the same moment of the clock however many frames the start took.
+    /// </remarks>
     [OnUpdate]
     public void Wiggle(BehaviorContext ctx, ref Transform transform) =>
-        transform.Translation.Z += MathF.Cos(ctx.Time.Elapsed * 10f) * 0.003f;
+        transform.Translation.Z += MathF.Cos(ctx.Time.Elapsed * 10f) * 0.18f * ctx.Time.Delta;
 }
