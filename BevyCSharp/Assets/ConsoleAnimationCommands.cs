@@ -16,7 +16,7 @@ internal static class ConsoleAnimationCommands
     internal static string Clips(string which)
     {
         var world = ConsoleHost.Ecs;
-        if (ConsoleWorldCommands.Find(world, which) is not { } scene) return ConsoleWorldCommands.Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } scene) return ConsoleHost.Missing(which);
 
         return Asked(() => Animation.TryClips(scene, out var clips)
             ? clips.Count == 0 ? $"{which} has no clips" : string.Join("\n", clips)
@@ -29,11 +29,11 @@ internal static class ConsoleAnimationCommands
     {
         // One line rather than three arguments, so the last can be left out, with the entity in
         // quotes when its name has a space.
-        var split = ConsoleWorldCommands.FirstAndRest(line);
+        var split = ConsoleHost.FirstAndRest(line);
         if (split.Length < 2) return Usage();
 
         var world = ConsoleHost.Ecs;
-        if (ConsoleWorldCommands.Find(world, split[0]) is not { } scene) return ConsoleWorldCommands.Missing(split[0]);
+        if (ConsoleHost.Find(world, split[0]) is not { } scene) return ConsoleHost.Missing(split[0]);
 
         var words = split[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var looping = words.Length > 1 && words[^1] == "loop";
@@ -49,7 +49,7 @@ internal static class ConsoleAnimationCommands
     internal static string Stop(string which)
     {
         var world = ConsoleHost.Ecs;
-        if (ConsoleWorldCommands.Find(world, which) is not { } scene) return ConsoleWorldCommands.Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } scene) return ConsoleHost.Missing(which);
 
         return Asked(() =>
         {

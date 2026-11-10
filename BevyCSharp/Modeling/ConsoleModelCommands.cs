@@ -365,7 +365,7 @@ internal static class ConsoleModelCommands
 
     private static (string Name, string Words) NameAndRest(string line)
     {
-        var split = ConsoleWorldCommands.FirstAndRest(line);
+        var split = ConsoleHost.FirstAndRest(line);
         return split.Length switch
         {
             0 => ("", ""),

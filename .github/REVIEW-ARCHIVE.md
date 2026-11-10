@@ -4781,6 +4781,20 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     green in 100 minutes, its soak in 29 and its Fedora captures green, the run red in the first
     captures job alone, Verdict 54.
 
+53. **The macOS job of `9ae92147` is red by one timing, a modifier stack built in 208.5 ms where 200
+    are allowed.** The build run 42840372025 of the ten commits, pushed at 16:03 on 2026-11-10, has
+    Linux and Windows green and macOS red with 1,314 passed and 1 failed, ModifierTests'
+    AStackOfFourBuildsWithinItsBudget, which times one build of 5,760 faces by a stopwatch against
+    200 ms and read 208.5 on a runner GitHub names as short of capacity; the pack run's macOS job on
+    the same commit passed it. None of the ten commits touches the modeling. The failed job is
+    started again at 16:22. The mend keeps the budget and steadies the measure, the least of three
+    builds held to 200 ms, since one build's time on a shared runner is the runner's as much as the
+    code's; a small commit with 119's third cut or before it. Settles when the job is green and the
+    mend is in. Written at 16:22 on 2026-11-10. The job is green on the second attempt at 16:41; the
+    verdict settles with the mend's commit. Mended at `0407f090`, pushed at 19:05; settles on that
+    push's macOS job. Settled at 19:29 on 2026-11-10, the macOS job of `739c2ba4`'s run green with
+    the mend.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -10434,6 +10448,19 @@ catalog, the docs and the workflow pass with NormTests, 18. The public listing i
 
 Shared: the workflow's Fedora job holds Fedora 44's Mesa to 26.2.6 from the commit carrying this
 line, the six taken again on it, for SHARED.md's row on captures.
+
+Verdict 53, the modifier stack's budget, in the commit carrying this line.
+AStackOfFourBuildsWithinItsBudget keeps its 200 ms and holds the least of three builds to it, each
+of a stack of its own with the same edit, since a mesh keeps what its modifiers made for its version
+and a second build of one mesh would time none of the modifiers. The stack, its 5,760 faces and the
+build that warms the code before the three stay as they were.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed on
+this commit with the next, 119's third cut, 2,039 passed, none failed and 3 skipped. NormTests
+passed, 18. The public listing is unchanged.
+
+Shared: a timing test on a shared runner holds the least of a few runs to its budget, each run doing
+the whole work again, for the sibling's budget tests.
 
 ## Items closed, parked or shortened
 

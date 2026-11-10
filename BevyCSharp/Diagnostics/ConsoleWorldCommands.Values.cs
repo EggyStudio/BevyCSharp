@@ -76,7 +76,7 @@ internal static partial class ConsoleWorldCommands
         FieldKind.Vec4 => Numbers(word, 4) is { } four ? new Vec4(four[0], four[1], four[2], four[3]) : null,
         FieldKind.Color => Numbers(word, 4) is { } rgba ? new Color(rgba[0], rgba[1], rgba[2], rgba[3]) : null,
         FieldKind.Enum or FieldKind.Flags => field.Options.FirstOrDefault(option => option.Equals(word, StringComparison.OrdinalIgnoreCase)),
-        FieldKind.Entity => Find(world, word) is { } entity ? entity : null,
+        FieldKind.Entity => ConsoleHost.Find(world, word) is { } entity ? entity : null,
         _ => null,
     };
 

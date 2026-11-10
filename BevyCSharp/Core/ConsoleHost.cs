@@ -15,6 +15,10 @@ namespace Bevy;
 /// only ever run from inside one. <see cref="Lend"/> says so, and <see cref="Ecs"/> refuses rather
 /// than returning something dead when it was called from anywhere else.
 /// </para>
+/// <para>
+/// It also reads the words the commands of every area read alike, a line's first word and an
+/// entity named by its name or its <c>#index</c>.
+/// </para>
 /// </remarks>
 public static class ConsoleHost
 {
@@ -164,6 +168,65 @@ public static class ConsoleHost
         Pending = null;
         PendingFrom = null;
         PendingStill = false;
+    }
+
+    /// <summary>
+    /// A line split into its first word and the rest, the first being the words in quotes when the
+    /// line starts with one, so an entity whose name has a space can be named.
+    /// </summary>
+    internal static string[] FirstAndRest(string line)
+    {
+        var trimmed = line.Trim();
+
+        string[] split;
+        if (trimmed.StartsWith('"') && trimmed.IndexOf('"', 1) is > 0 and var close)
+        {
+            var rest = trimmed[(close + 1)..].Trim();
+            split = rest.Length > 0 ? [trimmed[1..close], rest] : [trimmed[1..close]];
+        }
+        else
+        {
+            split = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        // The rest without the quotes a caller put round it as a whole, as bcs does for a word
+        // with a space in it.
+        if (split.Length == 2 && split[1].Length > 1 && split[1][0] == '"' && split[1][^1] == '"')
+            split[1] = split[1][1..^1];
+
+        return split;
+    }
+
+    /// <summary>The entity a word names, by name or by <c>#index</c>.</summary>
+    internal static Entity? Find(EcsWorld world, string which)
+    {
+        if (which.Length == 0) return null;
+
+        if (which[0] == '#' && uint.TryParse(which[1..], out var index))
+        {
+            foreach (var entity in world.All())
+            {
+                if (entity.Index == index) return entity;
+            }
+
+            return null;
+        }
+
+        foreach (var entity in world.All())
+        {
+            if (world.NameOf(entity) == which) return entity;
+        }
+
+        return null;
+    }
+
+    /// <summary>What to say, and to report, when nothing answers to a name.</summary>
+    internal static string Missing(string which)
+    {
+        ConsoleHost.Fail(
+            "NO_SUCH_ENTITY", $"No entity is called '{which}'. Run entity.list to see what is.");
+
+        return $"no entity called {which}";
     }
 
     /// <summary>The loan, which ends when it is disposed.</summary>

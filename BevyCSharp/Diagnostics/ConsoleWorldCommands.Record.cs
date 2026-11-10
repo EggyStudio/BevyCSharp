@@ -22,7 +22,7 @@ internal static partial class ConsoleWorldCommands
     internal static string Record(string line)
     {
         // The path first, in quotes where it holds a space, as bcs sends one, then the measures.
-        var split = FirstAndRest(line);
+        var split = ConsoleHost.FirstAndRest(line);
         if (split.Length < 2)
         {
             ConsoleHost.Fail("BAD_ARGUMENT", "record needs a path to write to and a length, as in record walk.gif 5s every 250ms.");

@@ -88,7 +88,7 @@ internal static partial class ConsoleWorldCommands
     {
         var world = ConsoleHost.Ecs;
 
-        if (Find(world, which) is not { } entity) return Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } entity) return ConsoleHost.Missing(which);
 
         var rows = new List<string> { $"#{entity.Index} {world.NameOf(entity) ?? "(no name)"}" };
 
@@ -145,7 +145,7 @@ internal static partial class ConsoleWorldCommands
     {
         var world = ConsoleHost.Ecs;
 
-        if (Find(world, which) is not { } entity) return Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } entity) return ConsoleHost.Missing(which);
 
         var schema = world.ComponentsOf(entity)
             .Select(ComponentSchemas.For)
@@ -315,14 +315,14 @@ internal static partial class ConsoleWorldCommands
     internal static string WindowShot(string line)
     {
         var world = ConsoleHost.Ecs;
-        var split = FirstAndRest(line);
+        var split = ConsoleHost.FirstAndRest(line);
         if (split.Length < 2)
         {
             ConsoleHost.Fail("BAD_ARGUMENT", "window.shot needs a window and a path to write to.");
             return "window.shot <window> <path>";
         }
 
-        if (Find(world, split[0]) is not { } window) return Missing(split[0]);
+        if (ConsoleHost.Find(world, split[0]) is not { } window) return ConsoleHost.Missing(split[0]);
 
         try
         {
@@ -419,7 +419,7 @@ internal static partial class ConsoleWorldCommands
     {
         // One line, so a name with spaces in it is the rest of the line, and the entity is the
         // first word, or the words in quotes when its own name has a space.
-        var words = FirstAndRest(line);
+        var words = ConsoleHost.FirstAndRest(line);
         if (words.Length < 2)
         {
             ConsoleHost.Fail("BAD_ARGUMENTS", "entity.rename takes an entity and a name, as in entity.rename #12 Wall");
@@ -427,7 +427,7 @@ internal static partial class ConsoleWorldCommands
         }
 
         var world = ConsoleHost.Ecs;
-        if (Find(world, words[0]) is not { } entity) return Missing(words[0]);
+        if (ConsoleHost.Find(world, words[0]) is not { } entity) return ConsoleHost.Missing(words[0]);
 
         world.SetName(entity, words[1]);
         return $"#{entity.Index} is called {words[1]}";
@@ -442,7 +442,7 @@ internal static partial class ConsoleWorldCommands
     internal static string AddComponent(string which, string component)
     {
         var world = ConsoleHost.Ecs;
-        if (Find(world, which) is not { } entity) return Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } entity) return ConsoleHost.Missing(which);
 
         if (ComponentSchemas.For(component) is not { } schema)
         {
@@ -462,7 +462,7 @@ internal static partial class ConsoleWorldCommands
     internal static string Material(string which, string setting, string value)
     {
         var world = ConsoleHost.Ecs;
-        if (Find(world, which) is not { } entity) return Missing(which);
+        if (ConsoleHost.Find(world, which) is not { } entity) return ConsoleHost.Missing(which);
 
         var material = Render.MaterialOf(world, entity);
         if (!material.IsValid || !Render.TryReadMaterial(material, out var settings) || settings is null)
@@ -505,65 +505,6 @@ internal static partial class ConsoleWorldCommands
 
         Render.WriteMaterial(material, settings);
         return $"{which}'s material has {setting} {value}";
-    }
-
-    /// <summary>
-    /// A line split into its first word and the rest, the first being the words in quotes when the
-    /// line starts with one, so an entity whose name has a space can be named.
-    /// </summary>
-    internal static string[] FirstAndRest(string line)
-    {
-        var trimmed = line.Trim();
-
-        string[] split;
-        if (trimmed.StartsWith('"') && trimmed.IndexOf('"', 1) is > 0 and var close)
-        {
-            var rest = trimmed[(close + 1)..].Trim();
-            split = rest.Length > 0 ? [trimmed[1..close], rest] : [trimmed[1..close]];
-        }
-        else
-        {
-            split = trimmed.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        // The rest without the quotes a caller put round it as a whole, as bcs does for a word
-        // with a space in it.
-        if (split.Length == 2 && split[1].Length > 1 && split[1][0] == '"' && split[1][^1] == '"')
-            split[1] = split[1][1..^1];
-
-        return split;
-    }
-
-    /// <summary>The entity a word names, by name or by <c>#index</c>.</summary>
-    internal static Entity? Find(EcsWorld world, string which)
-    {
-        if (which.Length == 0) return null;
-
-        if (which[0] == '#' && uint.TryParse(which[1..], out var index))
-        {
-            foreach (var entity in world.All())
-            {
-                if (entity.Index == index) return entity;
-            }
-
-            return null;
-        }
-
-        foreach (var entity in world.All())
-        {
-            if (world.NameOf(entity) == which) return entity;
-        }
-
-        return null;
-    }
-
-    /// <summary>What to say, and to report, when nothing answers to a name.</summary>
-    internal static string Missing(string which)
-    {
-        ConsoleHost.Fail(
-            "NO_SUCH_ENTITY", $"No entity is called '{which}'. Run entity.list to see what is.");
-
-        return $"no entity called {which}";
     }
 
     /// <summary>The names of what an entity carries, as one line.</summary>

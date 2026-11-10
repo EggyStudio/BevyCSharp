@@ -1,39 +1,32 @@
 # Review
 
-Reviewed up to `9ae92147`, item 133, the meshlet example's step by the frame's time and its
-picture's shadows read to the lights' own biases, pushed at 16:03 on 2026-11-10 with the nine before
-it, one run on the last, green at 16:41 on its second attempt with Linux in 15 minutes, Windows in
-17 and macOS in 18, the first attempt's macOS red by one timing of the modeling's, Verdict 53, and a
-pack run with publish started on it at 16:03, ended at 18:03 red in the first captures job alone,
-many_foxes, Verdict 54, so nothing is published, its drive green in 100 minutes, its soak in 29 and
-Fedora's captures green, which settles Verdict 52; the whole suite passed on the ten before the
-push, 2,038 passed, none failed and 3 skipped in 51 minutes, after the owner's word in the working
-session; they keep the form and carry the review's files. The nine are `07143fdf`, item 131, the
-probe's reach read between its four nearest texels; `62ba6c03`, 119's plan; `259a09c8`, item 130's
-record, the court's wedges the method's past the probes; `8e088836`, item 125's record, the shadow
-maps' churn read to the rain's roof camera; `ccef6170`, item 132, the roofs' cameras on a layer of
-their own that no light shares; `001c630d`, 119's first cut, the areas' frame work in a plugin an
-area; `f5b450ad`, Verdict 52's mend, the feature test taking the illumination's and the weather's
-settings from the environment at launch; `6f9b18ed`, Fedora's six pictures on Mesa 26.2.6; and
-`89b1368b`, 119's second cut, the logs, AssetHandle and AssetIds into Core. The suite had been
-stopped at 01:15 by the session's memory guard as the machine ran out of memory, and the ten were
-held from then. Before it `f70cf5e7`, item 129, the build on branch pushes alone, pushed at 21:45 on
-2026-11-09, green at 22:05, its pack run of 02:29 red in the drive, the soak and Fedora's captures,
-Verdict 52. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the
-manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp
-0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every
-job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the
-highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
-REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `739c2ba4`, Verdict 54's mend, the roofs' set of cameras made by the first roof
+camera so an app without rain keeps its entities' indices, and many_foxes seeking each fox by its
+place among the foxes, its picture taken again, pushed at 19:05 on 2026-11-10 with `0407f090`,
+Verdict 53's mend, the modifier stack's budget held by the least of three builds, and `f33c3847`,
+119's third cut, the entry points in an internal class an area, 523 behind the ABI's check before
+and after, one run on the last, green at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in
+18, which settles Verdict 53, and a pack run with publish started on it at 19:05; the whole suite
+passed on the three, 2,039 passed, none failed and 3 skipped; they keep the form and carry the
+review's files. Before it `9ae92147`, item 133 with the nine before it, the ten held since the
+night, pushed at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's
+macOS red by one timing, Verdict 53; its pack run ended at 18:03 red in the first captures job
+alone, many_foxes, Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures
+green, which settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09,
+green at 22:05. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with
+the manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds
+BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green
+in every job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on
+the highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands
+in REVIEW-ARCHIVE.md under Head records.
 
-Next Verdict 54, many_foxes off its picture in the pack run, and Verdict 53's steadied timing, then
-119's third cut, the entry points to an internal class an area, each cut from here a commit with the
-whole suite, the rest of the plan after it, 120, the live path, and after them 66 and 67, the
-connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
-the pack run of 16:03 on 2026-11-10. The next pack run follows the push of Verdict 54's mend. The
-engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at
-8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
-Decision 107.
+Next 119's fourth cut, the console's commands by area, each cut a commit with the whole suite, the
+rest of the plan after it, 120, the live path, and after them 66 and 67, the connections and the
+level editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03
+on 2026-11-10. The pack run started at 19:05 on 2026-11-10 settles Verdict 54 where its captures
+pass and publishes the first package since 2026-11-02. The engine's illumination read goes first on
+the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault
+seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -145,19 +138,7 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdicts 2 and 33 to 52 are settled, said under each in REVIEW-ARCHIVE.md; Verdicts 53 and 54 are open.
-
-53. **The macOS job of `9ae92147` is red by one timing, a modifier stack built in 208.5 ms where 200
-    are allowed.** The build run 42840372025 of the ten commits, pushed at 16:03 on 2026-11-10, has
-    Linux and Windows green and macOS red with 1,314 passed and 1 failed, ModifierTests'
-    AStackOfFourBuildsWithinItsBudget, which times one build of 5,760 faces by a stopwatch against
-    200 ms and read 208.5 on a runner GitHub names as short of capacity; the pack run's macOS job on
-    the same commit passed it. None of the ten commits touches the modeling. The failed job is
-    started again at 16:22. The mend keeps the budget and steadies the measure, the least of three
-    builds held to 200 ms, since one build's time on a shared runner is the runner's as much as the
-    code's; a small commit with 119's third cut or before it. Settles when the job is green and the
-    mend is in. Written at 16:22 on 2026-11-10. The job is green on the second attempt at 16:41; the
-    verdict settles with the mend's commit.
+Verdicts 2 and 33 to 53 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 54 is open on the pack run's captures.
 
 54. **The pack run of `9ae92147` is red in its first captures job, many_foxes 6.7 percent off its
     picture.** In the pack run 42840381265, started at 16:03 on 2026-11-10, the first of the four
@@ -174,6 +155,14 @@ Verdicts 2 and 33 to 52 are settled, said under each in REVIEW-ARCHIVE.md; Verdi
     cut shifted a step that the capture's frame depends on, the cut is mended so the frame is as it
     was, a cut of 119 changing nothing a program draws; where the change is meant, the picture is
     taken again with its reason. Before 119's third cut is pushed. Written at 16:57 on 2026-11-10.
+    Read and mended at `739c2ba4` on 2026-11-10, and the cause is 132's, not the cut's. many_foxes
+    sought each fox by its entity's index, and item 132 made the roofs' set of cameras in every app,
+    a resource Bevy keeps as an entity, so each fox stood a tenth of a second further on, the head
+    differing from its picture in 6.54 percent on lavapipe here as on the runner. The set is made by
+    the first roof camera, an app without rain spawning its first entity at the index it did, held
+    by a test, the head then 0.47 percent from the picture; and many_foxes seeks each fox by its
+    place among the foxes, which B 4 allows, its picture taken again. Settles where the pack run
+    started at 19:05 passes its captures.
 
 ## Decisions
 
@@ -450,19 +439,6 @@ assets, their ids, files, loads and failures, the saves, the schemas, the persis
 scene files and values, the reflected components and the world among them. NormTests passed, 18. The
 public listing is unchanged.
 
-Verdict 53, the modifier stack's budget, in the commit carrying this line.
-AStackOfFourBuildsWithinItsBudget keeps its 200 ms and holds the least of three builds to it, each
-of a stack of its own with the same edit, since a mesh keeps what its modifiers made for its version
-and a second build of one mesh would time none of the modifiers. The stack, its 5,760 faces and the
-build that warms the code before the three stay as they were.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed on
-this commit with the next, 119's third cut, 2,039 passed, none failed and 3 skipped. NormTests
-passed, 18. The public listing is unchanged.
-
-Shared: a timing test on a shared runner holds the least of a few runs to its budget, each run doing
-the whole work again, for the sibling's budget tests.
-
 Item 119's third cut, the entry points to an internal class an area, in the commit carrying this
 line. Native's 523 entry points leave its eleven files for 14 internal static classes in the areas'
 folders, each entry point in the class of the lowest area of the library that calls it by the plan's
@@ -556,3 +532,37 @@ skipped. NormTests passed, 18. The public listing is unchanged.
 Shared: a program that reads an entity's index moves with every entity the engine makes before its
 own, so an example's picture reads a place the example keeps, and a resource only some apps use is
 made by the first call that needs it, for SHARED.md's row on captures.
+
+Item 119's fourth cut, the console's commands by area, in the commit carrying this line. The
+commands of an area move into its folder, the animation's, the illumination's field and gi commands,
+the shaders' and the sky's into the Assets folder, and the levels', the modeling's and the scenes'
+into theirs, 7 files of 84 commands. What every command stands on moves into Core, which every area
+stands on, the Command attribute, its parameter, ConsoleCommand, the catalog ConsoleCommands and
+ConsoleHost, which lends a command the world and keeps its failure as a CliError, which moves from
+Cli with it. The plan put the catalog with the console's host in Diagnostics, which holds the
+overlay and the console's view over Bevy's UI and so stands above the areas, where an area's
+commands could not name it. Three helpers the commands of several areas read, a line's first word,
+an entity found by its name or its #index and the answer where nothing has the name, move from the
+world commands into ConsoleHost, and their 24 calls name it.
+
+The commands that stay with the console in Diagnostics are its own, 51 of them, the builtins, the
+frame's profile and the bridge's memory, the schemas' and the states', and the world's, for the app,
+entities, windows, shots, waits, input, the clock, materials and the recorder, which span Core, the
+rendering, the scenes and ImGui. camera.look stays with them, since where no camera has a look it
+takes the scene field's camera and so reads the illumination as well as the rendering.
+
+The generator emits each assembly's registration under one name, in a module initializer, as it does
+for a game's commands and the tests', so each project of the split registers its own commands with
+no change to the generator once the project references it. Read as the plan's graph reads,
+Diagnostics names the modeling, the sky, the animation, the levels and the command line no more, and
+the areas that name Diagnostics are Core and the physics for the frame's profile and ImGui for the
+console's view, which the smaller cuts take, ImGui's with the synthetic input, since the input
+commands and the overlay name ImGui's runtime. The engine's plugin, which builds every area's work,
+names Diagnostics' plugin as well and goes with BevyApp in the split.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,039 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged.
+
+Shared: the console's attribute, catalog and host stand in the lowest project, so each area's
+project declares its own commands and registers them through the generator's module initializer, for
+the sibling's commands in its areas.
