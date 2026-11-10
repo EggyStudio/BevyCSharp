@@ -663,7 +663,7 @@ jobs:
     # The Mesa the six's pictures were measured on, which the job holds Fedora's to, so a new one is
     # a commit that names it and takes the six again (build/capture-in-fedora.sh).
     env:
-      MESA: 26.2.5
+      MESA: 26.2.6
 
     steps:
       - uses: actions/checkout@v5

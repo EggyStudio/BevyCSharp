@@ -24,6 +24,13 @@ four lines leaning 30 degrees from it, and on the right the middle's light less 
 over, brighter in orange and darker in blue, the shaded wall's hard wedges softened at the cost of
 the yard's far wall in shade, so the trial was left out.
 
+![](.github/assets/readings/2026-11-10-verdict-52-meshlet.webp)
+Bevy's meshlet example captured in Fedora 44 with a render bridge carrying meshlets and Solari, on
+the left on Mesa 26.2.5 as checked in on 2026-11-02 and in the middle on Mesa 26.2.6 at the head,
+and on the right the middle's light less the left's ten times over, brighter in orange and darker in
+blue, the bunnies and their shadows a little moved, since each bunny wiggles with the clock and the
+capture comes a frame or so on.
+
 Done that day
 
 - Item 131 at `07143fdf`. A probe under a floor lends a wall's foot its light through the reach

@@ -18,34 +18,35 @@ brought three, and the course's textures stand at 774 to 794 MB at the stations 
 the run reaching 17 shots where 5 and 3. On that `001c630d`, 119's first cut, the areas' frame work
 in a plugin an area that EnginePlugin builds, an app's list and not a static one, with the steps
 that run before the native app is made moved into Core, committed at 03:59 and held with them; its
-areas' tests pass 393 of 394 with one skipped and the listing is unchanged. The pack run with
-publish started on `f70cf5e7` at 02:29 on 2026-11-10, the first since 2026-11-02, ended red at 03:43
-in its drive, its soak and its Fedora captures, the feature test not answering on llvmpipe with the
-illumination switched off and Fedora's Mesa at 26.2.6, Verdict 52; nothing is published and 93 has
-no reading. Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth
-cascade's probes under the floor seeing the wall's foot through their reach test's slack, a reading
-and documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in
-14 minutes and Windows in 19; it keeps the form and carries the review's files, the shortened
-REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in shade past the
-probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at 20:08 on its
-third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the form. The
-release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
-hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
-published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
-version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
-item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
-REVIEW-ARCHIVE.md under Head records.
+areas' tests pass 393 of 394 with one skipped and the listing is unchanged. On that `f5b450ad`,
+Verdict 52's mend, the feature test taking the illumination's and the weather's settings from the
+environment at its launch and the weather turned off by command taking the sky's fog with it,
+committed at 06:04 and held with them. The pack run with publish started on `f70cf5e7` at 02:29 on
+2026-11-10, the first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora
+captures, the feature test not answering on llvmpipe with the illumination switched off and Fedora's
+Mesa at 26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item
+128's record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing
+the wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
+2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
+the form and carries the review's files, the shortened REVIEW.md, the archive and N 7.9 among them.
+Before it `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before it,
+pushed at 19:15 on 2026-11-09 and green at 20:08 on its third attempt after GitHub's outage of
+Actions from about 19:16 to 19:47; it keeps the form. The release scene-packs holds the bridge's
+intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
+scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
+2026-11-02, the last pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and
+`v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
+before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next Verdict 52, the feature test not answering on the runner with the illumination off and Fedora's
-pictures on Mesa 26.2.6, then 119, the bridge as projects, its plan confirmed, its first two cuts
-written and held on their builds, the norm's tests and their areas' tests, the later cuts each after
-the whole suite has run, 120, the live path, and after them 66 and 67, the connections and the level
-editor; 93's course drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10.
-`07143fdf`, `62ba6c03`, `259a09c8`, `8e088836`, `ccef6170` and `001c630d` are held for the whole
-suite on the owner's word. A pack run with publish follows when the meadow's items rest. The
-engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at
-8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
-Decision 107.
+Next Verdict 52's second commit, Fedora's six pictures on Mesa 26.2.6, then 119, the bridge as
+projects, its plan confirmed, its first two cuts written and held on their builds, the norm's tests
+and their areas' tests, the later cuts each after the whole suite has run, 120, the live path, and
+after them 66 and 67, the connections and the level editor; 93's course drawn smaller after the
+reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8`,
+`8e088836`, `ccef6170`, `001c630d` and `f5b450ad` are held for the whole suite on the owner's word.
+A pack run with publish follows when the meadow's items rest. The engine's illumination read goes
+first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision
+81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -249,7 +250,18 @@ Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdi
     draws no probe face. The Fedora job's Mesa is 26.2.6 where the workflow names 26.2.5, so its six
     pictures are taken again on 26.2.6 and the workflow names it, as the job's message says. One
     commit for the switch and one for Fedora's pictures, and the next pack run follows them. Written
-    at 03:46 on 2026-11-10.
+    at 03:46 on 2026-11-10. Read and mended at `f5b450ad` on 2026-11-10. The cause is the start the
+    runner takes, the feature test launched at its defaults, the illumination at Medium since
+    `c7eabbb0` of 2026-11-03 and the weather at its quality, and turned off by the course's commands
+    seconds later, by which time 35 programs are made that llvmpipe compiles for minutes,
+    frames.wait 30 at 352 seconds, pipelines.wait at 408 and frame.profile 30 at 810 on lavapipe
+    here; the engine's switch was sound, no program of the illumination's or the field's being made
+    at Off from launch. The feature test takes both settings from the environment at launch, 8
+    programs where 35, pipelines.wait at 43 seconds and frame.profile 30 at 155 here, on a machine
+    1.3 to 1.5 times slower than the runner, where the green run of `b8cc8316` read 24 and 102. The
+    weather turned off by command left the sky's fog drawn, 320 MB and two to three milliseconds on
+    the GPU, and takes it off with the mend. Fedora's pictures follow as the second commit; the
+    verdict settles on the next pack run's drive, soak and Fedora captures.
 
 ## Decisions
 
@@ -708,3 +720,20 @@ whole suite waits on the owner's word. NormTests passed, 18. The public listing 
 Shared: a program a quality turns off a few frames into a run has been made and compiles all the
 same, for minutes on a device that draws on the CPU, so a scripted run that names a quality off
 names it at launch, for the sibling's runs on lavapipe.
+
+Verdict 52's second part, Fedora's six on Mesa 26.2.6, in the commit carrying this line, held with
+the others. The six were captured in Fedora 44 at the head (build/capture-in-fedora.sh from an
+archive checkout with a --render --meshlet --solari bridge of the head's native code, 14 minutes),
+the workflow and BUILDING.md naming 26.2.6. clustered_decals, test_meshlet, many_meshlet_materials,
+solari and solari_reflections lie within the compare's bar of their pictures, 0.01 to 0.76% of their
+pixels apart, so the new Mesa moved nothing they draw. meshlet differs in 3.0% past its 2.0%, the
+bunnies and their shadows a little moved, since each bunny wiggles along its depth with the clock
+(Wiggle in meshlet.cs) and the capture comes a frame or so on, every app's start having changed this
+week, the pair 2026-11-10-verdict-52-meshlet.webp. The six are taken again and the gallery's six
+made again from them (build/examples-table.py).
+
+No file of the engine changed, so the suite did not run for this part. The tests of the examples'
+catalog, the docs and the workflow pass with NormTests, 18. The public listing is unchanged.
+
+Shared: the workflow's Fedora job holds Fedora 44's Mesa to 26.2.6 from the commit carrying this
+line, the six taken again on it, for SHARED.md's row on captures.
