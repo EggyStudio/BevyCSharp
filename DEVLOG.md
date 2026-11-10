@@ -33,9 +33,11 @@ biases each light has taken for its kind since 2026-11-07, the bunnies standing 
 
 Done that day
 
+- Item 125 at `8e088836`. The shadow maps' churn at the course's start.
 - Item 131 at `07143fdf`. A probe under a floor lends a wall's foot its light through the reach
   test's slack.
 - Item 132 at `ccef6170`. The rain's roof camera brings no lights into the frame.
+- Item 133 at `9ae92147`. The meshlet example's capture stands on the set clock.
 
 ## 2026-11-09
 

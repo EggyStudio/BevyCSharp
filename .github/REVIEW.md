@@ -1,56 +1,38 @@
 # Review
 
-Reviewed up to `f70cf5e7`, item 129, the build on branch pushes alone, a workflow change, pushed at
-21:45 on 2026-11-09, its run green at 22:05 with Linux in 14 minutes, Windows in 15 and macOS in 20;
-it keeps the form. After it `07143fdf`, item 131, the probe's reach read between its four nearest
-texels with the eighth's slack kept, the yard's far foot from 70 warm columns to none and the new
-test's step between neighbor columns from 0.57 to 0.064, its second step tried and left out,
-committed at 01:18 on 2026-11-10 and not pushed. Its suite was stopped at 01:15 by the session's
-memory guard at 1,705 passed and none failed, as the machine ran out of memory under the engine
-session's script, the 67 illumination tests passing apart; the push waits until the whole suite has
-run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
-On it `62ba6c03`, 119's plan in the Replies, documents alone, committed at 01:24 and held with it.
-On that `259a09c8`, item 130's record, documents alone, committed at 01:34 and held with them. On
-that `8e088836`, item 125's record, documents alone, committed at 02:28 and held with them. On that
-`ccef6170`, item 132, the roofs' cameras drawing a layer of their own that no light shares,
-committed at 03:05 and held with them; its test holds the frame's lights at none where the head
-brought three, and the course's textures stand at 774 to 794 MB at the stations where 886 to 1,002,
-the run reaching 17 shots where 5 and 3. On that `001c630d`, 119's first cut, the areas' frame work
-in a plugin an area that EnginePlugin builds, an app's list and not a static one, with the steps
-that run before the native app is made moved into Core, committed at 03:59 and held with them; its
-areas' tests pass 393 of 394 with one skipped and the listing is unchanged. On that `f5b450ad`,
-Verdict 52's mend, the feature test taking the illumination's and the weather's settings from the
-environment at its launch and the weather turned off by command taking the sky's fog with it,
-committed at 06:04 and held with them. On that `6f9b18ed`, Verdict 52's second commit, Fedora's six
-pictures taken again on its Mesa 26.2.6, which the workflow and BUILDING.md name, committed at 06:41
-and held with them. On that `89b1368b`, 119's second cut, the logs, AssetHandle and AssetIds into
-Core and SaveId into Ecs, committed at 06:43 and held with them, its 143 touched tests passing and
-the listing unchanged. The pack run with publish started on `f70cf5e7` at 02:29 on 2026-11-10, the
-first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora captures, the
-feature test not answering on llvmpipe with the illumination switched off and Fedora's Mesa at
-26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item 128's
-record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing the
-wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
-2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
-the form and carries the review's files, the shortened REVIEW.md, the archive and N 7.9 among them.
-Before it `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before it,
-pushed at 19:15 on 2026-11-09 and green at 20:08 on its third attempt after GitHub's outage of
-Actions from about 19:16 to 19:47; it keeps the form. The release scene-packs holds the bridge's
-intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
-scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
-2026-11-02, the last pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and
-`v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
-before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `9ae92147`, item 133, the meshlet example's step by the frame's time and its
+picture's shadows read to the lights' own biases, pushed at 16:03 on 2026-11-10 with the nine before
+it, one run on the last, green at 16:41 on its second attempt with Linux in 15 minutes, Windows in
+17 and macOS in 18, the first attempt's macOS red by one timing of the modeling's, Verdict 53, and a
+pack run with publish started on it at 16:03 for Verdict 52, its first captures job red at 16:57 by
+many_foxes, Verdict 54, so it publishes nothing; the whole suite passed on the ten before the push,
+2,038 passed, none failed and 3 skipped in 51 minutes, after the owner's word in the working
+session; they keep the form and carry the review's files. The nine are `07143fdf`, item 131, the
+probe's reach read between its four nearest texels; `62ba6c03`, 119's plan; `259a09c8`, item 130's
+record, the court's wedges the method's past the probes; `8e088836`, item 125's record, the shadow
+maps' churn read to the rain's roof camera; `ccef6170`, item 132, the roofs' cameras on a layer of
+their own that no light shares; `001c630d`, 119's first cut, the areas' frame work in a plugin an
+area; `f5b450ad`, Verdict 52's mend, the feature test taking the illumination's and the weather's
+settings from the environment at launch; `6f9b18ed`, Fedora's six pictures on Mesa 26.2.6; and
+`89b1368b`, 119's second cut, the logs, AssetHandle and AssetIds into Core. The suite had been
+stopped at 01:15 by the session's memory guard as the machine ran out of memory, and the ten were
+held from then. Before it `f70cf5e7`, item 129, the build on branch pushes alone, pushed at 21:45 on
+2026-11-09, green at 22:05, its pack run of 02:29 red in the drive, the soak and Fedora's captures,
+Verdict 52. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the
+manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp
+0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every
+job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the
+highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+REVIEW-ARCHIVE.md under Head records.
 
-Next 133, the meshlet example's capture on the set clock, then the whole suite on the held stack,
-then 119, the bridge as projects, its plan confirmed, its first two cuts written and held on their
-builds, the norm's tests and their areas' tests, the later cuts each after the whole suite has run,
-120, the live path, and after them 66 and 67, the connections and the level editor; 93's course
-drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10. Nine commits are
-held, `07143fdf` to `89b1368b`, for the whole suite on the owner's word. A pack run with publish
-follows when the meadow's items rest. The engine's illumination read goes first on the GPU (N 7.9).
-No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion
-is read in motion by the engine's Decision 107.
+Next Verdict 54, many_foxes off its picture in the pack run, and Verdict 53's steadied timing, then
+119's third cut, the entry points to an internal class an area, each cut from here a commit with the
+whole suite, the rest of the plan after it, 120, the live path, and after them 66 and 67, the
+connections and the level editor; 93's course drawn smaller after the reading of the pack run
+started at 02:29 on 2026-11-10. The pack run started at 16:03 on 2026-11-10 settles Verdict 52 where
+its drive, soak and Fedora captures are green, and gives 93 its reading. The engine's illumination
+read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
+Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -157,100 +139,9 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     compiler, each change said in the log and reachable through the CLI, so a running program is
     edited and seen without a restart; the bridge's own code stays a restart. After 119.
 
-125. **The shadow maps' churn at the course's start.** From item 124's read on 2026-11-09. At the
-    course's start the main view's directional map flips between 4 and 7 layers and its point map
-    between 6 and 24 from frame to frame, a new texture made at each change while the texture cache
-    holds the other, and views not drawn in a frame keep an earlier frame's maps alive under them,
-    2,048 by 2,048 in 7 and 1,024 by 1,024 in 30. One read of what flips the counts, lights whose
-    shadows turn on and off at the course's edge or a view drawn every other frame, and whether the
-    bridge can hold them steady or drop the undrawn views' maps; where it is Bevy's own cache,
-    record it as such, and where a bridge setting steadies the counts, the mend stands on its own as
-    the course's memory is this machine's bound. After 98, before 66. Read on 2026-11-10 and
-    recorded at `8e088836`. The flips are the rain's roof camera's, which draws three frames each
-    time the eye moves about 12 meters and while pipelines compile, on the default layer, and brings
-    the hub's seven shadow-casting lights into the frame's set, the main view's maps going from 4
-    and 6 layers to 7 and 24 and back 19 times, and once more as the probe capture's faces stop at
-    frame 96; the six probe-face views keep their maps, 232 MB, after their 95 frames, held by
-    something of Bevy's own besides the bindings and recorded as such. The mend is item 132.
-
-130. **Hard-edged wedges in the court seen through the gallery's arch.** From item 98's commit on
-    2026-11-09. Past the probes a surface's sun share is read along one line out from its normal, so
-    the court seen through the arch keeps hard-edged wedges of light and shade under every form of
-    item 98's read, where the line is lit or not by the arch's edge. One read of the share taken
-    over a few lines spread in a cone about the normal, or weighted by the surface's distance from
-    the field, against the court's reference, with the pair by N 4.9; where a spread holds the
-    wedges' edges soft within the test's bound at Low and Medium, the mend stands on its own, and
-    where it costs the yard's far wall its reading, it is recorded as the method's past the probes.
-    After 128 and 129. Read on 2026-11-10 at Low and recorded at `259a09c8`. A cone of five lines,
-    the normal and four leaning 30 degrees, each with its own trace of the field, halves the wedges,
-    the steps of 6 levels or more across the court's shaded wall falling from 816 to 428, and three
-    lines leaning sideways bring them to 523, the gallery's view 0.141 from its reference in all
-    three; but the yard's far wall in shade then reads 20 and 18 percent under where 10, and its
-    test at Low 19.2 and 6.2 under where 2.4 over. So by the item the wedges are recorded as the
-    method's past the probes and the trial is left out, both patches in the dump.
-
-131. **A probe under a floor lends a wall's foot its light through the reach test's slack.** From
-    item 128's read on 2026-11-09. In the yard's far view at High the dashes along the shaded wall's
-    foot are one term of the world probes' blend, the fourth cascade's probes under the yard's floor
-    on the wall's line, 104 -8 -72 and 104 -8 -88, which see about half of the foot's point at a
-    dash and none beside it. probeSees reads one texel of the probe's reach toward the point leaned
-    off the wall and lets it fall over an eighth of the spacing, two meters there, and the probe's
-    rays stop about a meter short of the point under a floor thinner than that, so the weight swings
-    between a half and a twentieth from one texel of the reach to the next and the triangles are the
-    texels'. One mend is tried, by Decision 81, in two steps. First the reach read between its four
-    nearest texels in bouncedIn, as probeSeesBlended reads it, with the eighth's slack kept, which
-    takes the texels' edges from the foot and leaves a soft share. Then, where the foot still reads
-    warm against its reference, the slack at a cascade made no wider than the trace resolves there,
-    read from how far short of a floor of known thickness the fourth cascade's rays stop. The test
-    is a wall standing on a floor thinner than the coarsest cell with a warm light under the floor,
-    the foot's light along the wall steady within a bound from one reach texel to the next and
-    within a bound of its path-traced reference; the rooms, 97's and 111's thin walls and the meadow
-    at 8:00 hold their readings, and the light pass's cost is recorded (Decision 80). Where neither
-    step holds the foot without costing the thin walls theirs, the dashes are recorded as the
-    method's at High's coarsest cells with 126. The change is in bcs_gi.slang, the pair by N 4.9.
-    After 129, before 130. Done at `07143fdf` on 2026-11-10 by its first step, the second read worse
-    and left out, the push held for the whole suite.
-
-132. **The rain's roof camera brings no lights into the frame.** From item 125's read on 2026-11-10.
-    The roof camera of the rain, order -100 in Render.Precipitation.cs, draws for three frames each
-    time the eye moves about 12 meters and while pipelines compile, on the default layer where the
-    lights stand, so for those frames the hub's seven shadow-casting lights join the frame's set,
-    and Bevy, which sizes one directional and spot map and one point map a frame from every view's
-    lights, makes the main view's maps anew, 4 and 6 layers to 7 and 24 and back, each a new texture
-    while the cache holds the other. A camera that draws depth for the rain has no use for a light.
-    The mend gives what stops the rain a layer of its own that no light shares, the meshes drawn on
-    the default layer taking it beside theirs as they are spawned and the roof camera drawing that
-    layer alone, a game's own layers kept, so the roof camera's frames bring no light and the counts
-    stand. Where a mesh cannot take the layer without a cost the read shows, the roof camera drawn
-    every frame at a depth pass a frame is the other form, the maps then standing at the larger
-    count. The test runs the course's start in rain and holds the main view's map counts unchanged
-    across the roof camera's frames, the rain still stopping under a roof. One commit, before 119's
-    first cut, held with the others until the suite has run. Done at `ccef6170` on 2026-11-10 by the
-    layer, the fallback not needed, the push held for the whole suite.
-
-133. **The meshlet example's capture stands on the set clock.** From Verdict 52's second commit on
-    2026-11-10. The meshlet example's picture moved 3.0 percent against a bar of 2.0 with no change
-    of its own, its bunnies wiggling along z by the cosine of the elapsed time and so standing a
-    frame or so on once the apps' starts changed, where SHARED.md's row says a capture is taken on a
-    clock of a set amount a frame, held while a load runs, the same moment whatever the start took.
-    One read of which clock the wiggle reads and why the capture's frame is not the same moment for
-    it, and the mend so that it is, in the example or in the capture's clock, with the six of Fedora
-    and the runner's own captures unchanged. A small commit, held with the others. Read at 06:49 on
-    2026-11-10, and the premise does not hold. One bunny wiggles, by a step added each frame, so a
-    frame held while a load runs adds the same step as any other, which is a hole in the set clock's
-    promise but not the 3 percent, the mended capture lying 0.23 percent from the picture of
-    `6f9b18ed` and 3.15 from that of 2026-11-02. The difference is the sun's shadow edges across the
-    row's floor shadows and the blue bunny's own shadow, no bunny moved. So the item keeps the
-    example's step times the frame's time, nothing on a held frame, with a comment saying why it
-    departs from Bevy's line; one bounded read places the shadows, the bridge of 2026-11-02's commit
-    captured on Mesa 26.2.6, the old picture on it meaning the week's shadows moved it and a new one
-    meaning Mesa did, recorded either way with no mend unless the week's change was not meant; and
-    the false sentence of `6f9b18ed`'s Reply, caption and devlog block is corrected in this item's
-    commit, the held stack left as it is.
-
 ## Verdicts
 
-Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 52 is open.
+Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdicts 52, 53 and 54 are open.
 
 52. **The pack run of `f70cf5e7` is red in three jobs, the feature test not answering on the runner
     and Fedora's Mesa moved on.** The pack run 42736156878, started at 02:29 on 2026-11-10 and the
@@ -289,6 +180,34 @@ Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdi
     `6f9b18ed`, the six captured again in Fedora 44 on Mesa 26.2.6, five within their bars and
     meshlet 3.0 percent off its 2.0, which item 133 read to the sun's shadow edges and not to its
     wiggling bunny.
+
+53. **The macOS job of `9ae92147` is red by one timing, a modifier stack built in 208.5 ms where 200
+    are allowed.** The build run 42840372025 of the ten commits, pushed at 16:03 on 2026-11-10, has
+    Linux and Windows green and macOS red with 1,314 passed and 1 failed, ModifierTests'
+    AStackOfFourBuildsWithinItsBudget, which times one build of 5,760 faces by a stopwatch against
+    200 ms and read 208.5 on a runner GitHub names as short of capacity; the pack run's macOS job on
+    the same commit passed it. None of the ten commits touches the modeling. The failed job is
+    started again at 16:22. The mend keeps the budget and steadies the measure, the least of three
+    builds held to 200 ms, since one build's time on a shared runner is the runner's as much as the
+    code's; a small commit with 119's third cut or before it. Settles when the job is green and the
+    mend is in. Written at 16:22 on 2026-11-10. The job is green on the second attempt at 16:41; the
+    verdict settles with the mend's commit.
+
+54. **The pack run of `9ae92147` is red in its first captures job, many_foxes 6.7 percent off its
+    picture.** In the pack run 42840381265, started at 16:03 on 2026-11-10, the first of the four
+    captures jobs failed after 28 minutes, 1 of its 92 captures differing, many_foxes in 6.7 percent
+    of its pixels where 2.0 are allowed, within x 24 to 1894 and y 330 to 898, the band the foxes
+    stand in; the second job is green and the third, the fourth and the drive are going at 16:57.
+    Its picture was last taken at `b576bf3f` on 2026-11-07, and the push runs draw no captures, so
+    one of the commits since moved it, the ten pushed today among them. Of those the first cut of
+    119 stands nearest, which moved the order of two steps in the frame and put each area's work
+    behind a plugin, the foxes' animation a step of the frame; 131 changed how a surface reads its
+    probes and 132 gave every mesh a second layer. One read, many_foxes captured at `f70cf5e7` and
+    at the suspects in turn on this machine, the frame the capture takes and the foxes' poses in it,
+    to say which commit moved it and whether the picture or the code is at fault. Where the first
+    cut shifted a step that the capture's frame depends on, the cut is mended so the frame is as it
+    was, a cut of 119 changing nothing a program draws; where the change is meant, the picture is
+    taken again with its reason. Before 119's third cut is pushed. Written at 16:57 on 2026-11-10.
 
 ## Decisions
 
@@ -436,61 +355,6 @@ README cross-references the other engine, each in full under Decisions in REVIEW
 
 ## Replies
 
-Item 131, the foot's dashes mended at the probes' reach test, in the commit carrying this line. The
-light pass weighs each of a pixel's eight probes by how much of the surface it sees (probeSees in
-bcs_gi.slang), its reach toward the point taken three tenths of the spacing off the surface, read
-from the one texel of its reach the way fell in and let fall over an eighth of the spacing. It reads
-the reach between the four texels nearest the way (reachAlong), as probeSeesBlended read it for the
-gloss, the eighth's slack kept, and the forward port in forward_probes.rs reads it the same way.
-probeSeesBlended reads its reach through reachAlong with its slack of half the spacing, as before.
-
-AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor stands a wall half a unit thick and 16 high
-on a floor half a unit thick, a quarter of High's coarsest cell, on a plane of the last cascade's
-probes eight units over one beneath the floor, as the yard's east wall stands, with an orange lamp
-under the floor past the wall and the sun overhead. Without the mend the foot's light changes by
-0.57 of its mean from one column to the next and its red over its blue reads 6.5% over its
-reference's, and with it 0.064 and 3.6%, under bounds of 0.15 and 5% set from the two. The foot
-reads 0.51 where 0.36 against its reference's 1.12, a shortfall the test reports and does not bound.
-
-The second step was tried, the foot still reading warm. 128's read gives the fourth cascade's rays
-under the yard stopping at the floor's underside, the brush 16 of the map's 32 units a meter thick,
-so the trace resolves a floor half a meter thick to its underside, and the slack was set to a
-quarter of a cell, half a meter at the fourth cascade. It cut the probes over the floor as much as
-the ones under it, since the point the foot is weighed from lies at the floor's height for both, and
-the foot changed by 0.069 from one column to the next, read 5.0% warm and 0.43 where 0.51, its
-middle at 0.30 where its ends read 0.45, the thin-walled room's floor 0.0009 where 0.0007. So the
-slack stays, the step's patch in the dump.
-
-In the yard's far view at High at eight in the morning under a clear sky, the foot keeps no column
-more than 5 levels warmer than its mean, where 70 were with the screen probes in and 69 with them
-out, the spread of its red less its blue 1.7 levels where 3.6 and 1.2 where 4.0, the pair
-2026-11-10-item-131-foot-band.webp. The picture lies 0.077 of its light from its reference as
-before, the shaded wall 1% over in both. The near view changes by 8 levels or more at 3 pixels, the
-gallery at 58 and the hall at none, the plaza's change being its moving motes, and the meadow at
-eight in the morning at Medium reads 0.260 of its light from its reference as before, each region as
-it read.
-
-The 67 global illumination tests pass. The thin-walled room reads its floor 0.0007 where item 111
-left it at 0.0006, 0.0036 with the board where 0.0037 and 0.0290 with the screen probes where
-0.0303, item 97's probe on a wall's middle 0.0000, and the far wall in shade 2.4% over at Low and
-20.2% over at Medium as at item 98. The light pass reads four texels of the reach for each of a
-pixel's eight probes where one. The pass is drawn on the camera rather than dispatched, so the
-bridge keeps no span of its own for it, and its cost is recorded in reads, as item 98's was.
-
-RENDERING.md's paragraph on the probes' reach, the guide's line on walls thinner than a cell and the
-comments of probeSees, reachAlong and probeSeesBlended say so.
-
-The bridge was the editor profile's with meshlets and Solari, its three profiles checked and its
-tests run with no feature and with render, the ABI at 322. The whole suite ran with the mend under
-the GPU's shared lock and was stopped by the harness's memory guard when the machine ran short of
-memory, at 1,705 passed and none failed, its largest process at 2,147 MB, so its whole run waits on
-the owner's word, the 67 illumination tests passing apart. NormTests passed, 18. The public listing
-is unchanged.
-
-Shared: a surface reading each probe's reach between the four texels nearest the way, as the gloss's
-reading did, took off the warm triangles a probe under a thin floor drew along a wall's foot at the
-coarsest cells, for the sibling to consider where its probes' sight reads one texel.
-
 119 planned on 2026-11-10, before the batch. The library's folders were read for which top-level
 types each names of another's, the code without its comments and strings, the Assets folder cut by
 its files' stems into the rendering, the shaders, global illumination, the weather, the 2D drawing,
@@ -569,115 +433,6 @@ unchanged.
 Shared: C# 14's static extension members carry a static class's members declared in a second project
 with the class's calls unchanged, tried on .NET 10, for the sibling's split where a partial type
 spans areas.
-
-Item 130, the court's wedges through the arch, read once as the item says and recorded in the commit
-carrying this line, the trial left out. Past the probes a surface takes each directional light's
-share of the ground's light as read along its normal (sunAlong), so the court's shaded wall seen
-through the gallery's arch at Low takes it in wedges with hard edges where the line crosses the edge
-of a shadow. A trial read the share over five lines, the normal and four leaning 30 degrees from it
-toward its sides and up and down, each with its own trace of the field, the shares' mean, and a
-second over the normal and the two lines leaning toward its sides alone.
-
-In the feature test at Low at eight in the morning under a clear sky the court through the arch
-softens, the steps of 6 levels or more between neighbor pixels across its shaded wall 428 with the
-five lines and 523 with the three where 816, the pair 2026-11-10-item-130-court.webp, and the
-gallery's view lies 0.141 of its light from its reference in all three. The yard's far wall in shade
-reads 20% under its reference with the five lines and 18% with the three where 10%, its view 0.135
-and 0.134 from its reference where 0.132, and AFarWallInShadeTakesTheYardsLightAtLow reads 19.2% and
-6.2% under where 2.4% over, within its bound of 30%, Medium's test 20.2% over in all three, its
-probes holding the wall.
-
-So the spread costs the yard's far wall its reading, and the wedges are recorded as the method's
-past the probes, a share read along a line being as hard at its edges as the shadows the line
-crosses. The trials' patches are in the dump.
-
-No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
-unchanged.
-
-Shared: a ground share past the probes read over five lines about the normal, or three leaning
-toward its sides, softened the wedges one line leaves on a shaded wall seen through an arch and cost
-a far wall in shade 8 to 10 points of its reference's light at Low, for the sibling to weigh before
-spreading its groundReached.
-
-Item 125, the shadow maps' churn at the course's start, read once as the item says and recorded in
-the commit carrying this line. A trial bridge of the head, never committed, logged at each frame
-where they changed the main world's drawing cameras and the lights casting shadows in their view,
-and the render world's views with the layers of the shadow maps each held, and the scripted run at
-the defaults ran the course with it.
-
-What flips the counts is the rain's map of what stands over the ground (Render.Precipitation.cs), a
-camera at order -100 looking down over the eye, drawn for three frames each time the eye has moved
-some 12 meters and while pipelines compile. It draws the default layer, on which the lights stand,
-so while it draws its view takes in the hub's seven lights casting shadows, four points and three
-spots, where the main view at the course sees none. Bevy makes one map of the directional lights and
-the spots and one of the points a frame for every view's lights together, so the main view's maps go
-from 4 layers and 6 to 7 and 24 as the camera draws and back as it stops, 19 changes over the run, a
-new texture each way, rising at frames 636 and 694 as it turns on and falling at 645 and 697 as it
-stops, and at no other frame but the 96th, where the probe capture's faces stop and the Cornell
-box's light they alone saw leaves the set, the points' map from 30 layers to 24.
-
-The views not drawn are the six faces of the bridge's light probe capture (probes.rs), drawing for
-the first 95 frames and then off while the probe stands, and their views keep the maps of the frame
-they last drew, 2048 by 2048 by 7 and 1024 by 1024 by 30, 232 MB, to the end of the run, since Bevy
-leaves a view's shadow bindings on its render entity when its camera stops. A second run took the
-bindings off every view not drawn in the frame, and the allocator held the same textures at the
-course's stations, 906 MB and 1,002 MB at the last, so something of Bevy's own holds the maps beside
-the bindings, unread, and dropping the bindings frees nothing here.
-
-Both runs stopped on the machine's refusal of item 124, the first at the gallery after 2 minutes 46
-seconds on a map of the point lights and the second after 1 minute 46 seconds on one of the
-directional lights.
-
-So the counts flip by a camera of the library's own, which a bridge setting can hold steady in a way
-the review may weigh, the roofs' camera drawn every frame, which keeps the lights it sees in the
-frame's set at the cost of a depth pass of the roof layers a frame, since Bevy leaves a light out of
-a view by its render layers alone and the lights stand on the layer the roofs draw. The maps the
-undrawn views keep are Bevy's to hold, recorded as such. The trial's patch and both runs' logs are
-in the dump.
-
-No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
-unchanged.
-
-Shared: in Bevy a camera that draws a few frames at a time, as the map of roofs over the rain,
-brings the lights its view sees into the frame's shadow maps for those frames, so the maps change
-size each time it draws, for the sibling to read where an auxiliary view of its own draws from time
-to time.
-
-Item 132, the rain's roof camera bringing no lights into the frame, in the commit carrying this
-line. The bridge keeps the roofs' cameras on a layer of their own, layer 32, the first past the 32 a
-game's masks name, so no game's camera or light stands on it (roofs.rs). A new entry point makes the
-camera Render.Precipitation.cs spawns for the roofs draw that layer alone and names the layers its
-map draws, the default layer unless RoofLayers says otherwise, and each mesh on those layers takes
-layer 32 beside its own as it is spawned, as its layers change and as they are taken off it, the
-meshlet meshes among them where the bridge is built with them, a game's own layers kept. Where the
-roofs' cameras change, every mesh is read again, and a mesh on no layer the map draws loses layer
-32. The ABI goes from 322 to 323 for the entry point.
-
-PrecipitationTests.TheRoofsMapBringsNoLampIntoTheFramesLights stands three lamps casting shadows
-behind a camera in rain, inside the roofs' map about it and outside the camera's view, moves the
-camera 20 meters so the map is drawn again, and reads the lights the frame holds over the 30 frames
-after. Without the mend the frame holds 0, 0, 3, 3 and 3 lights and 0 after, the three frames the
-roofs' camera draws, and with it 0 throughout. ARoofKeepsTheRainOut passes, the rain still ending
-under a roof, and so do the 45 tests of the rain, the layers, the picking, the gizmos, the render
-controls, the mesh tags and the material surfaces. No mesh read here shows a cost of the layer, so
-the roofs' camera keeps drawing a few frames at a time.
-
-The scripted run at the defaults ran the course with the mend as item 125's runs did. The allocator
-held 774 to 794 MB of textures at the course's stations where 886 to 1,002, and the run went through
-the course, the tunnel, the playground, the gallery, the Cornell box and the light hall, 17 shots in
-229 seconds where 5 in 170 and 3 in 106, before it stopped on the machine's refusal of item 124 on a
-map of the directional lights.
-
-The guide's paragraph on the rain's roofs says so.
-
-The bridge was the editor profile's with meshlets and Solari, its three profiles checked and its
-tests run with no feature and with render. The whole suite waits on the owner's word, the 45 tests
-above passing apart. NormTests passed, 18. The public listing is unchanged.
-
-Shared: a camera drawing depth for the rain sees no light where it draws a layer of its own that the
-meshes it draws take beside theirs and no light stands on, which held the frame's shadow maps steady
-across its frames and kept the textures at the course's stations some 110 to 210 MB lower, for the
-sibling where an auxiliary view of its own draws from time to time.
 
 Item 119's first cut, the frame's hooks and Config, in the commit carrying this line, held with the
 others. App's making and its frame's first stage named a dozen areas. What it does before Bevy
@@ -783,27 +538,15 @@ assets, their ids, files, loads and failures, the saves, the schemas, the persis
 scene files and values, the reflected components and the world among them. NormTests passed, 18. The
 public listing is unchanged.
 
-Item 133, the meshlet example's capture on the set clock, in the commit carrying this line, held
-with the others. One bunny wiggles (BunnyWiggler in meshlet.cs), by a step added each frame as
-Bevy's example adds it, so a frame the clock holds still while a load runs added the same step as
-any other. The step is the cosine of ten times the time times 0.18 times the frame's time, the same
-three thousandths in a sixtieth of a second and nothing in a held frame, with a comment saying why
-it departs from Bevy's line. Captured so in Fedora 44 on Mesa 26.2.6 the example lies 0.23% from the
-picture of 6f9b18ed, which stays, and 3.15% from that of 2026-11-02, so the wiggle was not the 3%.
+Verdict 53, the modifier stack's budget, in the commit carrying this line.
+AStackOfFourBuildsWithinItsBudget keeps its 200 ms and holds the least of three builds to it, each
+of a stack of its own with the same edit, since a mesh keeps what its modifiers made for its version
+and a second build of one mesh would time none of the modifiers. The stack, its 5,760 faces and the
+build that warms the code before the three stay as they were.
 
-The read placed the 3%. The bridge and the library of a18496c3, the commit that took Fedora's six on
-2026-11-02, captured meshlet on Mesa 26.2.6 at 0.20% from the old picture, so Mesa moved nothing.
-b576bf3f on 2026-11-07 gave each light that names no shadow bias Bevy's own for its kind where every
-light took the point light's 0.02 and 0.6, a sun's larger normal bias moving its shadows' edges,
-which that commit meant, a wall the sun grazes reading within 1% of the reference's sun, and took
-many_foxes again on the runner but not Fedora's six, which only a pack run draws. So the edges moved
-by a change meant, recorded with no mend. 6f9b18ed's Reply, the caption of
-2026-11-10-verdict-52-meshlet.webp and its devlog block said the bunnies had moved by the clock,
-which this commit corrects to the shadow edges and their cause.
+No native file changed. The solution builds with warnings as errors, and the whole suite passed on
+this commit with the next, 119's third cut, 2,039 passed, none failed and 3 skipped. NormTests
+passed, 18. The public listing is unchanged.
 
-No native file changed. The examples build with warnings as errors, and the tests of the examples'
-catalog pass with NormTests, 18. The public listing is unchanged.
-
-Shared: a change to every light's default shadow biases moves the shadow edges of examples only a
-pack run draws, so such a commit takes Fedora's six again with the runner's own, for the sibling's
-captures on Fedora.
+Shared: a timing test on a shared runner holds the least of a few runs to its budget, each run doing
+the whole work again, for the sibling's budget tests.
