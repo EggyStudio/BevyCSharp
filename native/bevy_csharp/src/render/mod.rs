@@ -64,6 +64,7 @@ pub mod rays;
 pub mod recovery;
 pub mod reflect;
 pub mod render_errors;
+pub mod roofs;
 pub mod scene;
 pub mod shader_buffers;
 pub mod shader_materials;

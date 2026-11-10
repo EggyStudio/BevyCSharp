@@ -63,6 +63,62 @@ public sealed class PrecipitationTests
         Assert.Equal(0u, dry[4]);
     }
 
+    /// <summary>
+    /// Rain over a camera with three lamps casting shadows behind it, which the map of what stands
+    /// over the ground takes in from above, keeps the lamps out of the frame's lights while the map
+    /// is drawn again after the camera moves 20 meters, the lights the frame holds none throughout.
+    /// </summary>
+    /// <remarks>
+    /// Bevy makes one map of the point lights' shadows a frame for every view's lights together, a
+    /// light in it where any view sees it, so a camera drawing the roofs' depth for a few frames would
+    /// bring the lamps it sees from above into the frame's lights for those frames, and the maps would
+    /// be made again at another size each time, as at the start of the feature test's course under
+    /// the hub's lamps. The roofs' camera draws a layer of its own that no light stands on, which the
+    /// meshes it draws take beside their own.
+    /// </remarks>
+    [SkippableFact]
+    public void TheRoofsMapBringsNoLampIntoTheFramesLights()
+    {
+        Needs.Shaders();
+        Entity camera = default;
+        var held = new List<int>();
+        new PictureRun
+        {
+            Width = 320,
+            Height = 180,
+            Frames = 1500,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1.7f, 0f), new Vec3(0f, 1.7f, -1f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                var ground = ecs.Spawn();
+                Render.SetMesh(ecs, ground, Render.CreateMesh(MeshShape.Cuboid, 200f, 0.2f, 200f));
+                Render.SetMaterial(ecs, ground, Render.CreateMaterial(0.2f, 0.2f, 0.2f, roughness: 0.9f));
+                ecs.Add(ground, Transform.At(0f, -0.1f, 0f));
+                foreach (var x in new[] { 4f, 10f, 16f })
+                {
+                    var lamp = Render.SpawnLight(new LightSettings { Kind = LightKind.Point, Intensity = 50_000f, Range = 3f, Shadows = true });
+                    ecs.Add(lamp, Transform.At(x, 2f, 12f));
+                }
+                Render.SetPrecipitation(camera, new PrecipitationSettings { Rain = 1f });
+            },
+        }
+            .Wait(10)
+            .Until("compiled", _ => Precipitation.Ready())
+            .Until("ready", _ => Render.PipelinesReady())
+            .Wait(60)
+            .Do("moved", world => world.Resource<EcsWorld>().Set(camera, Transform.LookingAt(new Vec3(20f, 1.7f, 0f), new Vec3(20f, 1.7f, -1f), Vec3.UnitY)))
+            .Until("held", _ =>
+            {
+                held.Add(Render.PointLightsDrawn.Visible);
+                return held.Count >= 30;
+            })
+            .Go();
+
+        Assert.True(held.All(lights => lights == 0), $"the frame holds {string.Join(" ", held)} lights over the frames after the move");
+    }
+
     [Fact]
     public void SettingsOutOfRangeAreRefused()
     {

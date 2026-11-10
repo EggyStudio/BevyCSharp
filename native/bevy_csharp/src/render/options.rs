@@ -86,6 +86,9 @@ pub(crate) fn install(
     // The point lights the render world drew, two numbers a frame, which a stress test reads.
     crate::render::light_counts::install(app);
 
+    // The layer the rain's map of roofs draws, which no light stands on.
+    crate::render::roofs::install(app);
+
     // The meshes' numbers and generations the scene's distance field reads them by, which costs a
     // read of the meshes' changes a frame until a game turns the field on.
     crate::render::scene_field::install(app);

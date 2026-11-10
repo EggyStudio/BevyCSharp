@@ -1,4 +1,5 @@
 using System.Numerics;
+using Bevy.Interop;
 using Bevy.Reflected;
 
 namespace Bevy;
@@ -314,9 +315,13 @@ internal static class Precipitation
         roofs.Active = drawing;
     }
 
-    // The camera looking down at what stands over the ground, drawing the layers given into a small
-    // image of its own with no multisampling, so its depth reads, and the dispatch turning that depth
-    // into heights.
+    // The camera looking down at what stands over the ground, drawing the meshes on the layers given
+    // into a small image of its own with no multisampling, so its depth reads, and the dispatch
+    // turning that depth into heights. It draws the roofs' layer of the bridge alone, which those
+    // meshes take beside their own and no light stands on, since Bevy sizes the frame's shadow maps
+    // by every view's lights, and a camera drawing the default layer a few frames at a time would
+    // bring the lamps it sees from above into the frame's lights for those frames, the maps made
+    // again at another size each time it draws and each time it stops.
     private static Roofs MakeRoofs(uint layers)
     {
         var camera = Render.SpawnCamera3d(new CameraSettings
@@ -324,8 +329,8 @@ internal static class Precipitation
             Projection = CameraProjection.Orthographic,
             Height = RoofSize,
             Order = -100,
-            Layers = layers,
         });
+        Native.Check(Native.bcs_render_set_roof_camera(camera.Bits, layers), "making the roofs' camera");
         Render.SetCameraTarget(camera, Render.CreateTarget(RoofTexels, RoofTexels));
         Render.SetPostProcessing(camera, new PostSettings { Msaa = 1, Tonemapper = Tonemapper.None, Dither = false });
 

@@ -323,9 +323,11 @@ moving with no motion of its own in the prepass. With `Roofs`, a camera of its o
 draws what stands over the ground about the camera, 96 meters across, into a map of heights, again
 whenever the camera has moved some 12 meters, and the rain keeps out from under a roof, a tree or a
 bridge and splashes where it lands close by. Whatever moves is drawn into the map where it stood, so
-a game puts what moves on a layer of its own and leaves it out of `RoofLayers`. At 1280 by 720 the
-rain takes some 0.05 ms of the GPU at `Medium`, and the map some 0.02 ms on the frames it is drawn,
-beside the scene drawn again from above.
+a game puts what moves on a layer of its own and leaves it out of `RoofLayers`. The meshes on those
+layers take a layer of the bridge's own beside theirs, the first past the 32 a game's masks name,
+which the camera draws alone, so a lamp it sees from above stays out of the frame's shadow maps. At
+1280 by 720 the rain takes some 0.05 ms of the GPU at `Medium`, and the map some 0.02 ms on the
+frames it is drawn, beside the scene drawn again from above.
 
 Lightning strikes in a storm about the camera:
 

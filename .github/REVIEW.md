@@ -10,28 +10,31 @@ memory guard at 1,705 passed and none failed, as the machine ran out of memory u
 session's script, the 67 illumination tests passing apart; the push waits until the whole suite has
 run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
 On it `62ba6c03`, 119's plan in the Replies, documents alone, committed at 01:24 and held with it.
-On that `259a09c8`, item 130's record, documents alone, committed at 01:34 and held with them.
-Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth cascade's
-probes under the floor seeing the wall's foot through their reach test's slack, a reading and
-documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in 14
-minutes and Windows in 19; it keeps the form and carries the review's files, the shortened
-REVIEW.md, the archive and N 7.9 among them. Before it `074645e3`, item 98, a wall in shade past the
-probes taking the sunlit ground before it, pushed at 19:15 on 2026-11-09 and green at 20:08 on its
-third attempt after GitHub's outage of Actions from about 19:16 to 19:47; it keeps the form. The
-release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
-hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
-published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
-version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
-item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
-REVIEW-ARCHIVE.md under Head records.
+On that `259a09c8`, item 130's record, documents alone, committed at 01:34 and held with them. On
+that `8e088836`, item 125's record, documents alone, committed at 02:28 and held with them. A pack
+run with publish was started on `f70cf5e7` at 02:29 on 2026-11-10, the first since 2026-11-02, for a
+package of the week's work and for 93's reading of the drive's time. Before it `02e30024`, item
+128's record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing
+the wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
+2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
+the form and carries the review's files, the shortened REVIEW.md, the archive and N 7.9 among them.
+Before it `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before it,
+pushed at 19:15 on 2026-11-09 and green at 20:08 on its third attempt after GitHub's outage of
+Actions from about 19:16 to 19:47; it keeps the form. The release scene-packs holds the bridge's
+intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
+scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
+2026-11-02, the last pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and
+`v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
+before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next 125, the shadow maps' churn, a read with a served program, then 119, the bridge as projects,
-its plan confirmed and its first cut waiting on the suite's next run, 120, the live path, and after
-them 66 and 67, the connections and the level editor; 93's course drawn smaller after the next pack
-run's reading. `07143fdf`, `62ba6c03` and `259a09c8` are held for the whole suite on the owner's
-word. A pack run with publish follows when the meadow's items rest. The engine's illumination read
-goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
-Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
+Next 132, the rain's roof camera bringing no lights into the frame, then 119, the bridge as
+projects, its plan confirmed and its first cut waiting on the suite's next run, 120, the live path,
+and after them 66 and 67, the connections and the level editor; 93's course drawn smaller after the
+reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8` and
+`8e088836` are held for the whole suite on the owner's word. A pack run with publish follows when
+the meadow's items rest. The engine's illumination read goes first on the GPU (N 7.9). No budget by
+Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
+motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -142,7 +145,13 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     shadows turn on and off at the course's edge or a view drawn every other frame, and whether the
     bridge can hold them steady or drop the undrawn views' maps; where it is Bevy's own cache,
     record it as such, and where a bridge setting steadies the counts, the mend stands on its own as
-    the course's memory is this machine's bound. After 98, before 66.
+    the course's memory is this machine's bound. After 98, before 66. Read on 2026-11-10 and
+    recorded at `8e088836`. The flips are the rain's roof camera's, which draws three frames each
+    time the eye moves about 12 meters and while pipelines compile, on the default layer, and brings
+    the hub's seven shadow-casting lights into the frame's set, the main view's maps going from 4
+    and 6 layers to 7 and 24 and back 19 times, and once more as the probe capture's faces stop at
+    frame 96; the six probe-face views keep their maps, 232 MB, after their 95 frames, held by
+    something of Bevy's own besides the bindings and recorded as such. The mend is item 132.
 
 130. **Hard-edged wedges in the court seen through the gallery's arch.** From item 98's commit on
     2026-11-09. Past the probes a surface's sun share is read along one line out from its normal, so
@@ -181,6 +190,22 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     method's at High's coarsest cells with 126. The change is in bcs_gi.slang, the pair by N 4.9.
     After 129, before 130. Done at `07143fdf` on 2026-11-10 by its first step, the second read worse
     and left out, the push held for the whole suite.
+
+132. **The rain's roof camera brings no lights into the frame.** From item 125's read on 2026-11-10.
+    The roof camera of the rain, order -100 in Render.Precipitation.cs, draws for three frames each
+    time the eye moves about 12 meters and while pipelines compile, on the default layer where the
+    lights stand, so for those frames the hub's seven shadow-casting lights join the frame's set,
+    and Bevy, which sizes one directional and spot map and one point map a frame from every view's
+    lights, makes the main view's maps anew, 4 and 6 layers to 7 and 24 and back, each a new texture
+    while the cache holds the other. A camera that draws depth for the rain has no use for a light.
+    The mend gives what stops the rain a layer of its own that no light shares, the meshes drawn on
+    the default layer taking it beside theirs as they are spawned and the roof camera drawing that
+    layer alone, a game's own layers kept, so the roof camera's frames bring no light and the counts
+    stand. Where a mesh cannot take the layer without a cost the read shows, the roof camera drawn
+    every frame at a depth pass a frame is the other form, the maps then standing at the larger
+    count. The test runs the course's start in rain and holds the main view's map counts unchanged
+    across the roof camera's frames, the rain still stopping under a roof. One commit, before 119's
+    first cut, held with the others until the suite has run.
 
 ## Verdicts
 
@@ -538,3 +563,39 @@ Shared: in Bevy a camera that draws a few frames at a time, as the map of roofs 
 brings the lights its view sees into the frame's shadow maps for those frames, so the maps change
 size each time it draws, for the sibling to read where an auxiliary view of its own draws from time
 to time.
+
+Item 132, the rain's roof camera bringing no lights into the frame, in the commit carrying this
+line. The bridge keeps the roofs' cameras on a layer of their own, layer 32, the first past the 32 a
+game's masks name, so no game's camera or light stands on it (roofs.rs). A new entry point makes the
+camera Render.Precipitation.cs spawns for the roofs draw that layer alone and names the layers its
+map draws, the default layer unless RoofLayers says otherwise, and each mesh on those layers takes
+layer 32 beside its own as it is spawned, as its layers change and as they are taken off it, the
+meshlet meshes among them where the bridge is built with them, a game's own layers kept. Where the
+roofs' cameras change, every mesh is read again, and a mesh on no layer the map draws loses layer
+32. The ABI goes from 322 to 323 for the entry point.
+
+PrecipitationTests.TheRoofsMapBringsNoLampIntoTheFramesLights stands three lamps casting shadows
+behind a camera in rain, inside the roofs' map about it and outside the camera's view, moves the
+camera 20 meters so the map is drawn again, and reads the lights the frame holds over the 30 frames
+after. Without the mend the frame holds 0, 0, 3, 3 and 3 lights and 0 after, the three frames the
+roofs' camera draws, and with it 0 throughout. ARoofKeepsTheRainOut passes, the rain still ending
+under a roof, and so do the 45 tests of the rain, the layers, the picking, the gizmos, the render
+controls, the mesh tags and the material surfaces. No mesh read here shows a cost of the layer, so
+the roofs' camera keeps drawing a few frames at a time.
+
+The scripted run at the defaults ran the course with the mend as item 125's runs did. The allocator
+held 774 to 794 MB of textures at the course's stations where 886 to 1,002, and the run went through
+the course, the tunnel, the playground, the gallery, the Cornell box and the light hall, 17 shots in
+229 seconds where 5 in 170 and 3 in 106, before it stopped on the machine's refusal of item 124 on a
+map of the directional lights.
+
+The guide's paragraph on the rain's roofs says so.
+
+The bridge was the editor profile's with meshlets and Solari, its three profiles checked and its
+tests run with no feature and with render. The whole suite waits on the owner's word, the 45 tests
+above passing apart. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a camera drawing depth for the rain sees no light where it draws a layer of its own that the
+meshes it draws take beside theirs and no light stands on, which held the frame's shadow maps steady
+across its frames and kept the textures at the course's stations some 110 to 210 MB lower, for the
+sibling where an auxiliary view of its own draws from time to time.
