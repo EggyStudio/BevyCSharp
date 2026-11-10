@@ -41,11 +41,13 @@
                           ReferenceOutputAssembly="false"/>
 
         <!--
-          The generators' code fixes, applied in a workspace as an editor applies them, which the
-          workspace layer of the generators' compiler version gives.
+          The generators' code fixes, applied in a workspace as an editor applies them, which
+          Roslyn's workspace layer gives. It is the version of the compiler the script host
+          carries, which reads the language's extension blocks and which this project loads through
+          the editor, since the workspace layer takes the compiler of its own version alone.
         -->
         <ProjectReference Include="../BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.14.0"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0"/>
     </ItemGroup>
 
 

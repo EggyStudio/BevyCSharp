@@ -40,7 +40,7 @@ internal static partial class SceneField
         return _sliceImage;
     }
 
-    /// <summary>Draws the field's window, which <see cref="Render.DrawSceneFieldWindow"/> asks for.</summary>
+    /// <summary>Draws the field's window, which <see cref="RenderGlobalIllumination.extension(Render).DrawSceneFieldWindow"/> asks for.</summary>
     internal static void DrawWindow()
     {
         if (!ImGuiRuntime.IsRunning) return;

@@ -17,6 +17,24 @@ var asm = typeof(Bevy.App).Assembly;
 var xml = XDocument.Load(Path.Combine(root, "BevyCSharp/bin/Debug/net10.0/BevyCSharp.xml"));
 var docs = xml.Descendants("member").ToDictionary(m => (string)m.Attribute("name")!, m => m);
 
+// The methods an extension block of a named type gives it, which the compiler holds in a type of
+// its own nested in the block's class, each marked with the name of the block's marker type, whose
+// one method takes the extended type, and the static methods of the class that carry their calls,
+// which no caller names. A block over a type parameter extends no type a page can name, and its
+// class is listed with its methods as they are.
+const BindingFlags declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
+IEnumerable<Type> Markers(Type block) => block.GetNestedTypes(declared).Where(marker => marker.Name.StartsWith("<M>$"));
+Type Extended(Type marker) => marker.GetMethods(declared).Single(method => method.Name == "<Extension>$").GetParameters()[0].ParameterType;
+bool ExtendsNamedType(Type block) => block.Name.StartsWith("<G>$") && block.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute))
+    && Markers(block).All(marker => !Extended(marker).IsGenericParameter);
+IEnumerable<Type> Blocks(Type t) => t.GetNestedTypes(declared).Where(ExtendsNamedType);
+bool Carries(MethodInfo m) => Blocks(m.DeclaringType!).SelectMany(block => block.GetMembers(declared))
+    .Any(member => member.Name == m.Name || member is PropertyInfo p && (p.GetMethod?.Name == m.Name || p.SetMethod?.Name == m.Name));
+var extensions = asm.GetTypes().SelectMany(Blocks)
+    .SelectMany(block => Markers(block).Select(marker => (Extended: Extended(marker), Methods: block.GetMethods(declared)
+        .Where(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "ExtensionMarkerAttribute" && (string?)a.ConstructorArguments[0].Value == marker.Name)))))
+    .ToLookup(found => found.Extended, found => found.Methods);
+
 var groups = new (string Title, string Page, string[] Types)[]
 {
     ("Running an app", "running-a-game.md", ["BevyApp", "App", "Config", "World", "IPlugin", "IPluginGroup", "DefaultPlugins", "EnginePlugin", "BehaviorsPlugin", "Time", "FrameProfile"]),
@@ -44,11 +62,15 @@ var groups = new (string Title, string Page, string[] Types)[]
 bool Listed(Type t) => t.Namespace is "Bevy" or "Bevy.Physics" && !t.IsEnum && !typeof(Delegate).IsAssignableFrom(t)
     && !t.Name.Contains('<') && t.Name != "Enumerator" && Methods(t).Any();
 
+// A type's own methods, then those its extension blocks give it.
 IEnumerable<MethodInfo> Methods(Type t) =>
     t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+        .Where(m => !Carries(m))
+        .Concat(extensions[t].SelectMany(found => found))
         .Where(m => !m.IsSpecialName && !m.Name.Contains('<') && !m.Name.StartsWith("get_") && !m.Name.StartsWith("set_")
             && m.Name is not ("Equals" or "GetHashCode" or "ToString" or "Deconstruct" or "PrintMembers" or "GetEnumerator"))
-        .OrderBy(m => m.MetadataToken);
+        .OrderBy(m => m.DeclaringType == t ? 0 : 1)
+        .ThenBy(m => m.MetadataToken);
 
 string Key(Type t) => (t.Namespace == "Bevy.Physics" ? "Physics." : "") + (t.DeclaringType is { } outer ? outer.Name + "+" + t.Name : t.Name);
 

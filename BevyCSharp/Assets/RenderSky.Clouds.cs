@@ -3,83 +3,86 @@ using Bevy.Interop;
 
 namespace Bevy;
 
-public static partial class Render
+public static partial class RenderSky
 {
-    /// <summary>
-    /// Draws clouds in a camera's sky, replacing any it had, or with <see langword="null"/> takes
-    /// them off. Only valid inside a system.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The clouds are marched through a shell of the sky above the planet at half the picture's size
-    /// across and down, after the prepass, and laid over the sky before tonemapping, behind every
-    /// piece of geometry and in front of the sky's fog. Their light is the sun's through the
-    /// camera's atmosphere (<see cref="SetAtmosphere"/>) and the sky's from the camera's environment
-    /// map (<see cref="SetSkyLighting"/>), and without either they are lit by the sun alone, white.
-    /// Each frame blends with the last where the clouds stood, so they settle over a few frames and
-    /// move smoothly on the wind.
-    /// </para>
-    /// <para>
-    /// On a camera lit by the sky (<see cref="SetSkyLighting"/>), the clouds are laid over the sky
-    /// its lighting is filtered from as well, marched each frame into a small cube of their own from
-    /// the camera after Bevy's atmosphere has drawn the sky into its cube, so an overcast grays and
-    /// dims the light the ground, the rain and the clouds' own fog are lit by, and a clear patch lets
-    /// its blue through. The clouds themselves are lit by the clear sky, copied out of the cube
-    /// before they are laid over it.
-    /// </para>
-    /// <para>
-    /// The noise they are cut from is made once an app on the GPU, the first time a camera asks,
-    /// and the clouds show the frame after it is made. They need a camera drawn once a pixel
-    /// (<see cref="PostSettings.Msaa"/> of one), whose depth says where the sky is. The setting
-    /// lasts while the app runs.
-    /// </para>
-    /// <para>
-    /// With <see cref="CloudSettings.ShadowLight"/> the clouds shadow the sun, how much of its light
-    /// gets through worked out over a square about the camera each frame and laid over the light as
-    /// its picture, which Bevy's lighting reads, so the clouds' shadows drift over the ground with
-    /// them, and the sky's fog in froxels darkens in them too.
-    /// </para>
-    /// </remarks>
-    /// <param name="camera">The camera.</param>
-    /// <param name="settings">The clouds, or null to take them off.</param>
-    /// <exception cref="ArgumentOutOfRangeException">
-    /// A setting is not a number, the layer's top is not above its base, or a size, the density or
-    /// the distance is not above none.
-    /// </exception>
-    /// <exception cref="BevyNativeException">The settings name a shadow light that is not a directional light.</exception>
-    /// <example>
-    /// <code>
-    /// Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = ScatteringTerm.EarthArc() });
-    /// Render.SetSkyLighting(camera);
-    /// Render.SetClouds(camera, new CloudSettings { Coverage = 0.5f });
-    /// </code>
-    /// </example>
-    public static void SetClouds(Entity camera, CloudSettings? settings)
+    extension(Render)
     {
-        if (settings is null)
+        /// <summary>
+        /// Draws clouds in a camera's sky, replacing any it had, or with <see langword="null"/> takes
+        /// them off. Only valid inside a system.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The clouds are marched through a shell of the sky above the planet at half the picture's size
+        /// across and down, after the prepass, and laid over the sky before tonemapping, behind every
+        /// piece of geometry and in front of the sky's fog. Their light is the sun's through the
+        /// camera's atmosphere (<see cref="Render.SetAtmosphere"/>) and the sky's from the camera's environment
+        /// map (<see cref="Render.SetSkyLighting"/>), and without either they are lit by the sun alone, white.
+        /// Each frame blends with the last where the clouds stood, so they settle over a few frames and
+        /// move smoothly on the wind.
+        /// </para>
+        /// <para>
+        /// On a camera lit by the sky (<see cref="Render.SetSkyLighting"/>), the clouds are laid over the sky
+        /// its lighting is filtered from as well, marched each frame into a small cube of their own from
+        /// the camera after Bevy's atmosphere has drawn the sky into its cube, so an overcast grays and
+        /// dims the light the ground, the rain and the clouds' own fog are lit by, and a clear patch lets
+        /// its blue through. The clouds themselves are lit by the clear sky, copied out of the cube
+        /// before they are laid over it.
+        /// </para>
+        /// <para>
+        /// The noise they are cut from is made once an app on the GPU, the first time a camera asks,
+        /// and the clouds show the frame after it is made. They need a camera drawn once a pixel
+        /// (<see cref="PostSettings.Msaa"/> of one), whose depth says where the sky is. The setting
+        /// lasts while the app runs.
+        /// </para>
+        /// <para>
+        /// With <see cref="CloudSettings.ShadowLight"/> the clouds shadow the sun, how much of its light
+        /// gets through worked out over a square about the camera each frame and laid over the light as
+        /// its picture, which Bevy's lighting reads, so the clouds' shadows drift over the ground with
+        /// them, and the sky's fog in froxels darkens in them too.
+        /// </para>
+        /// </remarks>
+        /// <param name="camera">The camera.</param>
+        /// <param name="settings">The clouds, or null to take them off.</param>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// A setting is not a number, the layer's top is not above its base, or a size, the density or
+        /// the distance is not above none.
+        /// </exception>
+        /// <exception cref="BevyNativeException">The settings name a shadow light that is not a directional light.</exception>
+        /// <example>
+        /// <code>
+        /// Render.SetAtmosphere(camera, new AtmosphereSettings { Medium = ScatteringTerm.EarthArc() });
+        /// Render.SetSkyLighting(camera);
+        /// Render.SetClouds(camera, new CloudSettings { Coverage = 0.5f });
+        /// </code>
+        /// </example>
+        public static void SetClouds(Entity camera, CloudSettings? settings)
         {
-            Clouds.Clear(camera);
-            return;
+            if (settings is null)
+            {
+                Clouds.Clear(camera);
+                return;
+            }
+
+            float[] numbers =
+            [
+                settings.Coverage, settings.Stratus, settings.Bottom, settings.Top, settings.Density, settings.ShapeSize, settings.DetailSize,
+                settings.Erosion, settings.WeatherSize, settings.Wind.X, settings.Wind.Y, settings.Wind.Z, settings.Distance, settings.Ambient,
+                settings.ShadowSize, settings.ShadowStrength,
+            ];
+            if (!numbers.All(float.IsFinite))
+                throw new ArgumentOutOfRangeException(nameof(settings), "A setting of the clouds is not a number.");
+            if (!(settings.Top > settings.Bottom) || settings.Bottom < 0f)
+                throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' top is above their base, which is above the ground.");
+            if (!(settings.Density > 0f && settings.ShapeSize > 0f && settings.DetailSize > 0f && settings.WeatherSize > 0f && settings.Distance > 0f && settings.ShadowSize > 0f))
+                throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' density, sizes and distance are above none.");
+
+            Clouds.Set(camera, settings);
         }
-
-        float[] numbers =
-        [
-            settings.Coverage, settings.Stratus, settings.Bottom, settings.Top, settings.Density, settings.ShapeSize, settings.DetailSize,
-            settings.Erosion, settings.WeatherSize, settings.Wind.X, settings.Wind.Y, settings.Wind.Z, settings.Distance, settings.Ambient,
-            settings.ShadowSize, settings.ShadowStrength,
-        ];
-        if (!numbers.All(float.IsFinite))
-            throw new ArgumentOutOfRangeException(nameof(settings), "A setting of the clouds is not a number.");
-        if (!(settings.Top > settings.Bottom) || settings.Bottom < 0f)
-            throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' top is above their base, which is above the ground.");
-        if (!(settings.Density > 0f && settings.ShapeSize > 0f && settings.DetailSize > 0f && settings.WeatherSize > 0f && settings.Distance > 0f && settings.ShadowSize > 0f))
-            throw new ArgumentOutOfRangeException(nameof(settings), "The clouds' density, sizes and distance are above none.");
-
-        Clouds.Set(camera, settings);
     }
 }
 
-/// <summary>The clouds <see cref="Render.SetClouds"/> puts on cameras, the noise an app's and the march and draw a camera's.</summary>
+/// <summary>The clouds <see cref="RenderSky.extension(Render).SetClouds"/> puts on cameras, the noise an app's and the march and draw a camera's.</summary>
 internal static class Clouds
 {
     /// <summary>The name the clouds' image, dispatch, draw and prepass are kept under on a camera beside the engine's other parts.</summary>

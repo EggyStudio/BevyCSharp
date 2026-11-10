@@ -2,63 +2,75 @@ using Sky;
 
 namespace Bevy;
 
-public static partial class Render
+/// <summary>
+/// The members the sky and the weather give <see cref="Render"/>, which a game calls as its own,
+/// as <c>Render.SetWeather</c> is.
+/// </summary>
+/// <remarks>
+/// They extend <see cref="Render"/> rather than being a part of it, so the rendering's own members
+/// name no type of the sky's, and these stand beside the fog, the clouds, the rain and snow, the
+/// thunder and the night sky they set.
+/// </remarks>
+public static partial class RenderSky
 {
-    /// <summary>
-    /// Gives a camera's clouds and fog the weather, moving it on every frame, or with
-    /// <see langword="null"/> takes it off and leaves them as they last were. Only valid inside a
-    /// system.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Every frame the weather moves on by the game's clock (<see cref="WeatherState.Advance"/>)
-    /// and its conditions are laid over the settings given here. The clouds take its cover, its
-    /// share of a flat deck, its base, top and density, and its wind, which the fog's froxels
-    /// drift on too. The fog's visibility thins toward some eighty meters as its fog thickens. The
-    /// rain and the snow fall as hard as it rains and snows, on the gusting wind, and lightning
-    /// strikes as often as the weather's thunder says. Any set of settings can be none, and that part
-    /// is left to the program.
-    /// </para>
-    /// <para>
-    /// The settings given are kept as the weather's starting point and not changed, and the camera
-    /// is given new ones every frame, which change its clouds', fog's, rain's and storm's numbers
-    /// alone. The ground's wetness and snow cover are the state's for a program's materials to read.
-    /// </para>
-    /// </remarks>
-    /// <param name="camera">The camera.</param>
-    /// <param name="weather">The weather, or null to take it off.</param>
-    /// <param name="clouds">The clouds the weather starts from, or none to leave the camera's clouds alone.</param>
-    /// <param name="fog">The fog the weather starts from, or none to leave the camera's fog alone.</param>
-    /// <param name="precipitation">The rain and snow the weather starts from, or none to leave the camera's alone.</param>
-    /// <param name="thunder">The storm the weather starts from, or none to leave the camera's alone.</param>
-    /// <example>
-    /// <code>
-    /// var weather = new WeatherState { Forecast = true, Clock = clock };
-    /// Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings());
-    /// weather.Set(WeatherPreset.Rain);   // eases into rain over a minute or so
-    /// </code>
-    /// </example>
-    public static void SetWeather(
-        Entity camera,
-        WeatherState? weather,
-        CloudSettings? clouds = null,
-        SkyFogSettings? fog = null,
-        PrecipitationSettings? precipitation = null,
-        ThunderSettings? thunder = null)
+    extension(Render)
     {
-        if (weather is null)
+        /// <summary>
+        /// Gives a camera's clouds and fog the weather, moving it on every frame, or with
+        /// <see langword="null"/> takes it off and leaves them as they last were. Only valid inside a
+        /// system.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Every frame the weather moves on by the game's clock (<see cref="WeatherState.Advance"/>)
+        /// and its conditions are laid over the settings given here. The clouds take its cover, its
+        /// share of a flat deck, its base, top and density, and its wind, which the fog's froxels
+        /// drift on too. The fog's visibility thins toward some eighty meters as its fog thickens. The
+        /// rain and the snow fall as hard as it rains and snows, on the gusting wind, and lightning
+        /// strikes as often as the weather's thunder says. Any set of settings can be none, and that part
+        /// is left to the program.
+        /// </para>
+        /// <para>
+        /// The settings given are kept as the weather's starting point and not changed, and the camera
+        /// is given new ones every frame, which change its clouds', fog's, rain's and storm's numbers
+        /// alone. The ground's wetness and snow cover are the state's for a program's materials to read.
+        /// </para>
+        /// </remarks>
+        /// <param name="camera">The camera.</param>
+        /// <param name="weather">The weather, or null to take it off.</param>
+        /// <param name="clouds">The clouds the weather starts from, or none to leave the camera's clouds alone.</param>
+        /// <param name="fog">The fog the weather starts from, or none to leave the camera's fog alone.</param>
+        /// <param name="precipitation">The rain and snow the weather starts from, or none to leave the camera's alone.</param>
+        /// <param name="thunder">The storm the weather starts from, or none to leave the camera's alone.</param>
+        /// <example>
+        /// <code>
+        /// var weather = new WeatherState { Forecast = true, Clock = clock };
+        /// Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 900f }, new PrecipitationSettings());
+        /// weather.Set(WeatherPreset.Rain);   // eases into rain over a minute or so
+        /// </code>
+        /// </example>
+        public static void SetWeather(
+            Entity camera,
+            WeatherState? weather,
+            CloudSettings? clouds = null,
+            SkyFogSettings? fog = null,
+            PrecipitationSettings? precipitation = null,
+            ThunderSettings? thunder = null)
         {
-            SkyWeather.Clear(camera);
-            return;
-        }
+            if (weather is null)
+            {
+                SkyWeather.Clear(camera);
+                return;
+            }
 
-        var parts = new SkyWeather.Parts(clouds, fog, precipitation, thunder);
-        SkyWeather.Set(camera, weather, parts);
-        SkyWeather.Apply(camera, weather, parts);
+            var parts = new SkyWeather.Parts(clouds, fog, precipitation, thunder);
+            SkyWeather.Set(camera, weather, parts);
+            SkyWeather.Apply(camera, weather, parts);
+        }
     }
 }
 
-/// <summary>The weathers <see cref="Render.SetWeather"/> puts on cameras, an app's own, moved on every frame.</summary>
+/// <summary>The weathers <see cref="RenderSky.extension(Render).SetWeather"/> puts on cameras, an app's own, moved on every frame.</summary>
 internal static class SkyWeather
 {
     private static App? _app;

@@ -1,32 +1,31 @@
 # Review
 
-Reviewed up to `739c2ba4`, Verdict 54's mend, the roofs' set of cameras made by the first roof
-camera so an app without rain keeps its entities' indices, and many_foxes seeking each fox by its
-place among the foxes, its picture taken again, pushed at 19:05 on 2026-11-10 with `0407f090`,
-Verdict 53's mend, the modifier stack's budget held by the least of three builds, and `f33c3847`,
-119's third cut, the entry points in an internal class an area, 523 behind the ABI's check before
-and after, one run on the last, green at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in
-18, which settles Verdict 53, and a pack run with publish started on it at 19:05; the whole suite
-passed on the three, 2,039 passed, none failed and 3 skipped; they keep the form and carry the
-review's files. Before it `9ae92147`, item 133 with the nine before it, the ten held since the
-night, pushed at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's
-macOS red by one timing, Verdict 53; its pack run ended at 18:03 red in the first captures job
-alone, many_foxes, Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures
-green, which settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09,
-green at 22:05. The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with
-the manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds
-BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green
-in every job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on
-the highlights' item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands
-in REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `ed291326`, 119's fourth cut, each area's console commands in its folder and the
+command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22
+with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it, 2,039 passed,
+none failed and 3 skipped; it keeps the form and carries the review's files. Before it `739c2ba4`,
+Verdict 54's mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green
+at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack
+run with publish of 19:05 going, its first captures job green with many_foxes. Before it `9ae92147`,
+item 133 with the nine before it, the ten held since the night, pushed at 16:03 on 2026-11-10, green
+at 16:41 on its second attempt, the first attempt's macOS red by one timing, Verdict 53; its pack
+run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54, its drive green in
+100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict 52. Before it
+`f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release scene-packs holds
+the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on
+2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack
+run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands at 0.6,
+tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment.
+Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head
+records.
 
-Next 119's fourth cut, the console's commands by area, each cut a commit with the whole suite, the
-rest of the plan after it, 120, the live path, and after them 66 and 67, the connections and the
-level editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03
-on 2026-11-10. The pack run started at 19:05 on 2026-11-10 settles Verdict 54 where its captures
-pass and publishes the first package since 2026-11-02. The engine's illumination read goes first on
-the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault
-seen in motion is read in motion by the engine's Decision 107.
+Next 119's fifth cut, the extension members with the listing's writer, each cut a commit with the
+whole suite, the rest of the plan after it, 120, the live path, and after them 66 and 67, the
+connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
+the pack run of 16:03 on 2026-11-10. The pack run started at 19:05 on 2026-11-10 settles Verdict 54
+where its captures pass and publishes the first package since 2026-11-02. The engine's illumination
+read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
+Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -128,7 +127,13 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     word, the first two cuts, the frame's hooks with Config and the log ring with AssetHandle and
     SaveId, may be written and held on their builds, the norm's tests and the tests of the areas
     they touch, the entry points' cut and those after it each waiting for the whole suite on what
-    stands before.
+    stands before. The third cut is `f33c3847`, 523 entry points in 14 internal classes an area with
+    Native keeping 23, the ABI's check reading each class's static constructor, 523 entry points and
+    72 mirror structs behind it before and after. The fourth is `ed291326`, seven files of 84
+    commands moved to their areas and the command attribute, the catalog and the host into Core,
+    where the plan had them in Diagnostics, since Diagnostics holds the console's view and stands
+    above the areas; the console's own 51 stay there. Next the fifth, the extension members with the
+    listing's writer.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -566,3 +571,53 @@ No native file changed. The solution builds with warnings as errors, and the who
 Shared: the console's attribute, catalog and host stand in the lowest project, so each area's
 project declares its own commands and registers them through the generator's module initializer, for
 the sibling's commands in its areas.
+
+Item 119's fifth cut, the extension members with the listing's writer, in the commit carrying this
+line. Global illumination's five members of Render move into an extension(Render) block of
+RenderGlobalIllumination, the sky's eight into one of RenderSky, and EcsWorld's three spawn helpers,
+SpawnMesh, SpawnPointLight and SpawnCamera3d, into an extension(EcsWorld ecs) block of
+EcsWorldSpawning, each file named for its class as N 1.2 asks, and Descendants, which stood with the
+helpers, joins the world's relations. Every call reads as it did, the library's, the games', the
+examples' and the tests', and none changed. Render is partial within the rendering alone, and the
+world names no type of the rendering's.
+
+A cref naming a moved member through the type it extends does not resolve, and one in a block naming
+a member of Render's own bare does not either, so 28 crefs name the moved members in the language's
+form, as RenderSky.extension(Render).SetClouds, and 5 name Render's, as Render.SetAtmosphere.
+
+The three checks hold. The script host compiled scripts with Roslyn 4.14, which reads a static
+member of a block as a static method of the block's class alone. It takes Roslyn 5.0.0, the compiler
+of the .NET 10 SDK, and the tests take its workspace layer at the same version, which takes the
+compiler of its own version alone. ScriptExtensionTests compiles a script calling
+Render.SetGlobalIllumination, Render.SetClouds and ecs.SpawnPointLight, and on 4.14 it failed with
+CS0117 for the two members of Render, an instance member of a block compiling to a classic extension
+method as well, which 4.14 read. The generator and the code fixes stay on 4.14, since the compiler
+that runs them brings its own. The documentation file holds each member's comment under the block's
+type, which the class's method carrying the call points to with inheritdoc. The cheat sheet and
+CheatsheetTests read the members a block gives a named type as that type's own and leave out the
+classes that carry the calls, so CHEATSHEET.md keeps every line with its summary, 10 lines moving
+within their types' blocks. Nothing in the library, the editor, the script host or the player reads
+Render's or EcsWorld's members by reflection. Its two walks over types look for generated
+registrations alone, and the cheat sheet and the listing, which read members, read the blocks.
+
+The listing's writer, PublicSurface with ExtensionMembers beside it, lists a member a block of a
+named type gives under that type and leaves out the block's types and a class that carries calls
+alone, so PublicApi.txt reads the same lines and the commit leaves it as it was. ShaderValues' block
+over a type parameter extends no type the listing can name and is listed as the compiler made it, as
+it was.
+
+Read as the plan's graph reads with the three classes placed in their areas, what the rendering
+still names of the illumination and the sky is the look's reading of the field's camera and the
+atmosphere's and the probe captures' settings, which the graph's names file under the sky and the
+illumination though they are Bevy's rendering, for the smaller cuts. A script calling
+Render.SetWeather does not compile in the host, before the cut as after it, since WeatherState is
+the Sky module's and the host references the library alone.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,040 passed, none failed and 3 skipped, the script host's new test among them, which N 1.4's list
+takes by its nature beside the host's other three. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: C# 14's extension blocks need Roslyn 5 wherever code is compiled against them while a
+program runs, and a cref names an extension member as Class.extension(Type).Member, for the
+sibling's script host and its split.

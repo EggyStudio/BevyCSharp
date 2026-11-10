@@ -7,7 +7,7 @@ namespace Bevy;
 /// <summary>
 /// Global illumination's world probes, cascades of light probes over the scene's distance field,
 /// traced, merged and gathered on the GPU each frame through the library's compute shaders
-/// (<see cref="Render.SetGlobalIllumination"/>).
+/// (<see cref="RenderGlobalIllumination.extension(Render).SetGlobalIllumination"/>).
 /// </summary>
 /// <remarks>
 /// <para>

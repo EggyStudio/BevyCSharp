@@ -251,12 +251,12 @@ void Unrelate<TRelation>(Entity source);                        // Takes source'
 Entity? RelationOf<TRelation>(Entity source);                   // What source relates to by TRelation, or null where it relates to nothing by it
 Entity[] RelatedTo<TRelation>(Entity target);                   // The entities relating to target by TRelation, in the order they came to, as Bevy's relationship target lists them
 IEnumerable<Entity> RelationAncestors<TRelation>(Entity entity);  // What entity relates to by TRelation, what that relates to, and on, as Bevy's iter_ancestors follows a relationship
+IEnumerable<Entity> Descendants(Entity root);                   // Every entity under root, nearer ones first, as Bevy's iter_descendants walks them
 List<Entity> Removed<T>();                                      // The entities that lost T, by a removal or a despawn, since the running system last asked, oldest first
 List<Entity> RemovedById(int componentId);                      // The entities that lost the component with this id since the running system last asked, as Removed lists them
 Entity SpawnMesh(AssetHandle mesh, AssetHandle material, Transform at);  // Spawns an entity drawn with a mesh and a material, placed by a transform, as Bevy's (Mesh3d(mesh), MeshMaterial3d(material), transform) bundle does
 Entity SpawnPointLight(Vec3 at, bool shadows = false, float intensity = 1000000f, float range = 20f, float radius = 0f);  // Spawns a point light at a place, a million lumens reaching twenty units and casting no shadow unless asked, as Bevy's own point light is, bright enough at a camera's default exposure to light a room
 Entity SpawnCamera3d(Transform at, CameraSettings? settings = null);  // Spawns a 3D camera placed by a transform, with Bevy's defaults or the settings given
-IEnumerable<Entity> Descendants(Entity root);                   // Every entity under root, nearer ones first, as Bevy's iter_descendants walks them
 
 // EcsCommands
 EcsCommands Spawn(Action<Entity, EcsWorld> build);              // Queues an entity spawn, passing the new entity to build
@@ -721,7 +721,6 @@ static void SetAtmosphere(Entity camera, AtmosphereSettings settings);  // Draws
 static void SetSunDisk(Entity light, SunDisk disk);             // Gives a directional light the disk of the sun it stands for, which an atmosphere draws in its sky where the light comes from
 static void ClearAtmosphere(Entity camera);                     // Stops a camera drawing the sky
 static void SetAdjustedPerspective(Entity camera, ReadOnlySpan<(int, int, float)> entries, float fieldOfView = 0.7853982f, float near = 0.1f, float far = 1000f);  // Gives a camera Bevy's perspective with some entries of its clip-from-view matrix written over it, a projection of the game's own, as Bevy's custom_projection declares one
-static void SetClouds(Entity camera, CloudSettings? settings);  // Draws clouds in a camera's sky, replacing any it had, or with null takes them off
 static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a mesh primitive and returns a handle to it
 static MeshRecipe? RecipeOf(AssetHandle mesh);                  // The shape and measures a mesh was made from, or null for one that was not made by CreateMesh
 static bool RebuildMesh(AssetHandle mesh, string shape, float a = 1f, float b = 1f, float c = 1f);  // Builds a primitive again with other measures, in place, so everything drawn with the mesh changes and keeps its handle
@@ -768,8 +767,6 @@ static void SetDeferredRendering(bool on);                      // Draws Bevy's 
 static void SetContactShadows(Entity camera, ContactShadowSettings? settings);  // Draws contact shadows on a camera, or with null stops
 static void SetScreenSpaceReflections(Entity camera, ReflectionSettings? settings);  // Turns Bevy's screen-space reflections on for a camera, or with null off
 static void CauseError(RenderErrorCause cause);                 // Causes an error on the GPU, for a game to see what its ErrorPolicy does with one, as Bevy's render_recovery example causes them
-static void SetGlobalIllumination(GlobalIllumination quality);  // Lights the camera's picture with the light each surface reflects onto the others, traced through the scene's distance field each frame as cascades of probes around the camera, at a quality, or none with Off, which it is by default
-static void SetGlobalIlluminationScreenProbes(bool on);         // Leaves global illumination's screen probes out, or puts them back, which they are by default, so every surface reads the world's probes' light alone where they are out
 static Capture BeginCapture(AssetHandle target);                // Asks for a picture to be read back into memory rather than written to a file
 static Capture BeginCapture();                                  // Asks for a picture of whatever this run is drawing into
 static bool TryReadCapture(Capture capture, out CapturedImage? picture);  // Reads a capture once it has arrived, and forgets it
@@ -796,7 +793,6 @@ static void SetLook(Entity camera, LookSettings? look);         // Gives a camer
 static AssetHandle CreateMesh(MeshData mesh);                   // Builds a mesh from vertices and returns a handle to it
 static void WriteMesh(AssetHandle mesh, MeshData data);         // Writes vertices over a mesh, so everything drawn with it changes
 static AssetHandle CreateImage(ReadOnlySpan<byte> pixels, uint width, uint height, bool srgb, bool mipmaps);  // Makes an image out of pixels held here, with its mipmaps made from them, and hands back a handle to it
-static void SetNightSky(Entity camera, NightSkySettings? settings);  // Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing where the settings' clock puts them, or with null takes it off
 static IReadOnlyList<PassTiming> Timings();                     // How long each render pass took, smoothed over the last frames, where the app asked for it with GpuTimings
 static bool PipelinesReady();                                   // True once the renderer has compiled every pipeline it was asked for, so whatever has been spawned can be drawn
 static void SetRayTracedLighting(Entity camera, bool on);       // Lights a camera with Bevy's ray tracing, or with false the usual way again
@@ -814,19 +810,23 @@ static AssetHandle MeshOf(EcsWorld world, Entity entity);       // The mesh an e
 static AssetHandle MaterialOf(EcsWorld world, Entity entity);   // The standard material an entity is drawn with, or None when it has none, as MeshOf reads the mesh
 static bool IsDrawn(Entity entity);                             // Whether an entity carries a mesh the renderer draws
 static AssetHandle CreateExtrusion(ReadOnlySpan<Vec2> corners, float depth);  // Builds a convex polygon pushed out into a solid depth deep along Z, centered on its middle, from its corners in order around it
-static void SetPrecipitation(Entity camera, PrecipitationSettings? settings);  // Lets rain and snow fall about a camera, or with null stops them
-static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most from a given number of triangles at most, with a far cascade after them where asked, or turns it off with none, which it is by default
-static void SetSceneFieldShadows(FieldShadows shadows);         // Chooses where the scene's distance field darkens the light of each directional light it closes a surface off from, past the light's shadow map's reach by default, everywhere, or nowhere
-static void DrawSceneFieldWindow();                             // Draws the scene's distance field in an ImGui window of its own, what it is built from and a slice across one of its cascades, with its settings to change while it is looked at
 static string[]? MorphTargetNames(AssetHandle mesh);            // The names a mesh gives its morph targets, in their order, empty where it names none, or null while it loads
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
+static void SetGlobalIllumination(GlobalIllumination quality);  // Lights the camera's picture with the light each surface reflects onto the others, traced through the scene's distance field each frame as cascades of probes around the camera, at a quality, or none with Off, which it is by default
+static void SetGlobalIlluminationScreenProbes(bool on);         // Leaves global illumination's screen probes out, or puts them back, which they are by default, so every surface reads the world's probes' light alone where they are out
+static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most from a given number of triangles at most, with a far cascade after them where asked, or turns it off with none, which it is by default
+static void SetSceneFieldShadows(FieldShadows shadows);         // Chooses where the scene's distance field darkens the light of each directional light it closes a surface off from, past the light's shadow map's reach by default, everywhere, or nowhere
+static void DrawSceneFieldWindow();                             // Draws the scene's distance field in an ImGui window of its own, what it is built from and a slice across one of its cascades, with its settings to change while it is looked at
+static void SetClouds(Entity camera, CloudSettings? settings);  // Draws clouds in a camera's sky, replacing any it had, or with null takes them off
+static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null, ThunderSettings? thunder = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
+static void SetNightSky(Entity camera, NightSkySettings? settings);  // Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing where the settings' clock puts them, or with null takes it off
+static void SetPrecipitation(Entity camera, PrecipitationSettings? settings);  // Lets rain and snow fall about a camera, or with null stops them
 static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog over a camera's picture in the color the sky has at the horizon along each way, replacing any it had, so distant geometry fades into the sky behind it and the sky below the horizon takes the horizon's color
 static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
 static void SetThunder(Entity camera, ThunderSettings? settings);  // Brings a thunderstorm about a camera, lightning striking as settings says, or with null ends it
 static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null);  // Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or somewhere between its storm's nearest and farthest
-static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null, ThunderSettings? thunder = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is

@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The thunderstorm <see cref="Render.SetThunder"/> brings, its strikes' timing, flash, bolt and
+/// The thunderstorm <see cref="RenderSky.extension(Render).SetThunder"/> brings, its strikes' timing, flash, bolt and
 /// thunder worked out alone, and a strike read off pictures of a night it lights.
 /// </summary>
 [Collection("engine")]

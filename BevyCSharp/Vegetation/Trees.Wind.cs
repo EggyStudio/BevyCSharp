@@ -38,7 +38,7 @@ public static partial class Trees
     /// leans with its trunk, and every level's shadow sways with it.
     /// </para>
     /// <para>
-    /// <see cref="Render.SetWeather"/> gusts its wind and turns it, so a tree in the weather
+    /// <see cref="RenderSky.extension(Render).SetWeather"/> gusts its wind and turns it, so a tree in the weather
     /// sways as it does. A wind set here holds for every app until it is set again.
     /// </para>
     /// </remarks>

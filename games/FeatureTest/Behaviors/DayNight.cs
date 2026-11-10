@@ -28,7 +28,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// so a night costs no more shadow views than a day.
 /// </para>
 /// <para>
-/// The stars, the galaxy and the moon are the engine's night sky (<see cref="Render.SetNightSky"/>),
+/// The stars, the galaxy and the moon are the engine's night sky (<see cref="RenderSky.extension(Render).SetNightSky"/>),
 /// which <see cref="Applied"/> gives the camera under the atmosphere with this clock, so they turn
 /// about the pole star with the hours and come out as the sun goes down. The moon's light is its
 /// curve by the hour times the share of its face the sun lights. Under the dusk backdrop the sky

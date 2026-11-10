@@ -17,6 +17,11 @@ namespace Bevy.Tests;
 /// members of a type that can be derived from are listed, as a game's subclass reaches them.
 /// Nothing compiler-generated is listed, nor anything private or internal.
 /// </para>
+/// <para>
+/// A member an extension block gives a type is listed under that type as a member of its own,
+/// since a caller writes it there, and the class declaring the block is listed for what else it
+/// declares (<see cref="ExtensionMembers"/>).
+/// </para>
 /// </remarks>
 internal static class PublicSurface
 {
@@ -24,11 +29,18 @@ internal static class PublicSurface
 
     public static string Write(Assembly assembly)
     {
+        var extensions = ExtensionMembers.Of(assembly);
         var text = new StringBuilder();
-        foreach (var type in assembly.GetExportedTypes().OrderBy(t => t.FullName, StringComparer.Ordinal))
+        foreach (var type in assembly.GetExportedTypes().Where(type => !ExtensionMembers.Made(type)).OrderBy(t => t.FullName, StringComparer.Ordinal))
         {
+            var members = Members(type, type, member => member is not MethodInfo method || !ExtensionMembers.Carries(method))
+                .Concat(extensions[type].SelectMany(found => Members(found.Block, type, found.Members.Contains)))
+                .Order(StringComparer.Ordinal)
+                .ToList();
+            if (members.Count == 0 && ExtensionMembers.Extends(type)) continue;
+
             text.Append(Header(type)).Append('\n');
-            foreach (var member in Members(type).Order(StringComparer.Ordinal)) text.Append("  ").Append(member).Append('\n');
+            foreach (var member in members) text.Append("  ").Append(member).Append('\n');
         }
         return text.ToString();
     }
@@ -55,7 +67,9 @@ internal static class PublicSurface
         return $"{kind} {name}{(bases.Count > 0 ? " : " + string.Join(", ", bases) : "")}{Constraints(type.IsGenericTypeDefinition ? type.GetGenericArguments() : [])}";
     }
 
-    private static IEnumerable<string> Members(Type type)
+    // A type's members as written on the owner, which is the type itself or, for a block, the type
+    // it extends, those shown alone.
+    private static IEnumerable<string> Members(Type type, Type owner, Func<MemberInfo, bool> shown)
     {
         if (type.IsEnum)
         {
@@ -73,23 +87,23 @@ internal static class PublicSurface
             var set = Visible(property.SetMethod) ? property.SetMethod : null;
             if (property.GetMethod is { } g) accessors.Add(g);
             if (property.SetMethod is { } s) accessors.Add(s);
-            if ((get ?? set) is not { } any || Generated(property.Name)) continue;
+            if ((get ?? set) is not { } any || Generated(property.Name) || !shown(property)) continue;
             var init = set is not null && set.ReturnParameter.GetRequiredCustomModifiers().Contains(typeof(IsExternalInit));
             var parts = (get is not null ? Access(get, any) + "get; " : "") + (set is not null ? Access(set, any) + (init ? "init; " : "set; ") : "");
             var indexes = property.GetIndexParameters();
             var name = indexes.Length > 0 ? $"this[{Parameters(indexes)}]" : property.Name;
-            yield return $"{Modifiers(any, type)}{Name(property.PropertyType, Nullability.Create(property))} {name} {{ {parts}}}";
+            yield return $"{Modifiers(any, owner)}{Name(property.PropertyType, Nullability.Create(property))} {name} {{ {parts}}}";
         }
         foreach (var @event in type.GetEvents(Declared))
         {
             if (@event.AddMethod is { } add) accessors.Add(add);
             if (@event.RemoveMethod is { } remove) accessors.Add(remove);
-            if (!Visible(@event.AddMethod)) continue;
-            yield return $"{Modifiers(@event.AddMethod!, type)}event {Name(@event.EventHandlerType!, Nullability.Create(@event))} {@event.Name}";
+            if (!Visible(@event.AddMethod) || !shown(@event)) continue;
+            yield return $"{Modifiers(@event.AddMethod!, owner)}event {Name(@event.EventHandlerType!, Nullability.Create(@event))} {@event.Name}";
         }
         foreach (var field in type.GetFields(Declared))
         {
-            if (!(field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly) || Generated(field.Name)) continue;
+            if (!(field.IsPublic || field.IsFamily || field.IsFamilyOrAssembly) || Generated(field.Name) || !shown(field)) continue;
             var access = field.IsPublic ? "" : "protected ";
             var fieldType = Name(field.FieldType, Nullability.Create(field));
             if (field.IsLiteral) yield return $"{access}const {fieldType} {field.Name} = {Value(field.GetRawConstantValue(), field.FieldType)}";
@@ -97,15 +111,15 @@ internal static class PublicSurface
         }
         foreach (var constructor in type.GetConstructors(Declared))
         {
-            if (!Visible(constructor) || constructor.IsStatic) continue;
+            if (!Visible(constructor) || constructor.IsStatic || !shown(constructor)) continue;
             yield return $"{Access(constructor)}{Simple(type)}({Parameters(constructor.GetParameters())})";
         }
         foreach (var method in type.GetMethods(Declared))
         {
-            if (!Visible(method) || accessors.Contains(method) || Generated(method.Name)) continue;
+            if (!Visible(method) || accessors.Contains(method) || Generated(method.Name) || !shown(method)) continue;
             var generic = method.IsGenericMethodDefinition ? "<" + string.Join(", ", method.GetGenericArguments().Select(a => a.Name)) + ">" : "";
             var constraints = method.IsGenericMethodDefinition ? Constraints(method.GetGenericArguments()) : "";
-            yield return $"{Modifiers(method, type)}{Returned(method)} {method.Name}{generic}({Parameters(method.GetParameters(), Extension(method))}){constraints}";
+            yield return $"{Modifiers(method, owner)}{Returned(method)} {method.Name}{generic}({Parameters(method.GetParameters(), Extension(method))}){constraints}";
         }
     }
 

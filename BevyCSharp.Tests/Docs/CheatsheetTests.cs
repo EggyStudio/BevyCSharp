@@ -100,8 +100,13 @@ public sealed partial class CheatsheetTests
         && type.Name != "Enumerator"
         && Methods(type).Any();
 
+    // The members extension blocks give each named type, which the page lists under it.
+    private static readonly ILookup<Type, (Type Block, MemberInfo[] Members)> Extensions = ExtensionMembers.Of(typeof(App).Assembly);
+
     private static IEnumerable<MethodInfo> Methods(Type type) =>
         type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)
+            .Where(method => !ExtensionMembers.Carries(method))
+            .Concat(Extensions[type].SelectMany(found => found.Members.OfType<MethodInfo>()))
             .Where(method => !method.IsSpecialName
                 && !method.Name.Contains('<')
                 && !method.Name.StartsWith("get_", StringComparison.Ordinal)

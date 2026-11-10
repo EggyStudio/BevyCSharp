@@ -4,65 +4,68 @@ using Bevy.Reflected;
 
 namespace Bevy;
 
-public static partial class Render
+public static partial class RenderSky
 {
-    /// <summary>
-    /// Brings a thunderstorm about a camera, lightning striking as <paramref name="settings"/> says,
-    /// or with <see langword="null"/> ends it. Only valid inside a system.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The strikes are timed and placed on the CPU every frame from the game's clock. A strike's
-    /// flash lights the scene through a point light at its bolt, which the fog in froxels takes as
-    /// it takes any lamp, lights the camera's clouds from within (<see cref="SetClouds"/>), and
-    /// draws its bolt added to the picture after temporal antialiasing, from the clouds' base, or a
-    /// kilometer and a half up where the camera has no clouds, to the ground at the camera's height
-    /// less two meters. The thunder is written into a stream of samples as it plays (see
-    /// <see cref="Audio.CreateSampleStream"/>), where the app has audio, and none is heard where it
-    /// has none.
-    /// </para>
-    /// <para>
-    /// Settings given again every frame, as <see cref="SetWeather"/> gives them, keep the storm's
-    /// strikes and clock and take the numbers alone.
-    /// </para>
-    /// </remarks>
-    /// <param name="camera">The camera.</param>
-    /// <param name="settings">How the storm strikes, or null to end it.</param>
-    /// <exception cref="ArgumentOutOfRangeException">The rate, the brightness or the volume is under none or not a number, or the nearest strike is not nearer than the farthest.</exception>
-    /// <example>
-    /// <code>
-    /// Render.SetThunder(camera, new ThunderSettings { Rate = 4f, Struck = strike => Shake(strike.Distance) });
-    /// </code>
-    /// </example>
-    public static void SetThunder(Entity camera, ThunderSettings? settings)
+    extension(Render)
     {
-        if (settings is null)
+        /// <summary>
+        /// Brings a thunderstorm about a camera, lightning striking as <paramref name="settings"/> says,
+        /// or with <see langword="null"/> ends it. Only valid inside a system.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The strikes are timed and placed on the CPU every frame from the game's clock. A strike's
+        /// flash lights the scene through a point light at its bolt, which the fog in froxels takes as
+        /// it takes any lamp, lights the camera's clouds from within (<see cref="SetClouds"/>), and
+        /// draws its bolt added to the picture after temporal antialiasing, from the clouds' base, or a
+        /// kilometer and a half up where the camera has no clouds, to the ground at the camera's height
+        /// less two meters. The thunder is written into a stream of samples as it plays (see
+        /// <see cref="Audio.CreateSampleStream"/>), where the app has audio, and none is heard where it
+        /// has none.
+        /// </para>
+        /// <para>
+        /// Settings given again every frame, as <see cref="SetWeather"/> gives them, keep the storm's
+        /// strikes and clock and take the numbers alone.
+        /// </para>
+        /// </remarks>
+        /// <param name="camera">The camera.</param>
+        /// <param name="settings">How the storm strikes, or null to end it.</param>
+        /// <exception cref="ArgumentOutOfRangeException">The rate, the brightness or the volume is under none or not a number, or the nearest strike is not nearer than the farthest.</exception>
+        /// <example>
+        /// <code>
+        /// Render.SetThunder(camera, new ThunderSettings { Rate = 4f, Struck = strike => Shake(strike.Distance) });
+        /// </code>
+        /// </example>
+        public static void SetThunder(Entity camera, ThunderSettings? settings)
         {
-            SkyThunder.Clear(camera);
-            return;
+            if (settings is null)
+            {
+                SkyThunder.Clear(camera);
+                return;
+            }
+
+            float[] numbers = [settings.Rate, settings.Brightness, settings.Volume];
+            if (!numbers.All(n => float.IsFinite(n) && n >= 0f))
+                throw new ArgumentOutOfRangeException(nameof(settings), "The rate, the brightness or the volume is under none or not a number.");
+            if (!(settings.Nearest > 0f) || !(settings.Farthest > settings.Nearest) || !float.IsFinite(settings.Farthest))
+                throw new ArgumentOutOfRangeException(nameof(settings), "A strike lands nearer than its farthest and past none.");
+
+            SkyThunder.Set(camera, settings);
         }
 
-        float[] numbers = [settings.Rate, settings.Brightness, settings.Volume];
-        if (!numbers.All(n => float.IsFinite(n) && n >= 0f))
-            throw new ArgumentOutOfRangeException(nameof(settings), "The rate, the brightness or the volume is under none or not a number.");
-        if (!(settings.Nearest > 0f) || !(settings.Farthest > settings.Nearest) || !float.IsFinite(settings.Farthest))
-            throw new ArgumentOutOfRangeException(nameof(settings), "A strike lands nearer than its farthest and past none.");
-
-        SkyThunder.Set(camera, settings);
+        /// <summary>
+        /// Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or
+        /// somewhere between its storm's nearest and farthest. Only valid inside a system.
+        /// </summary>
+        /// <remarks>For a storm a game times itself, a strike at a story's turn or at a tower.</remarks>
+        /// <param name="camera">A camera given a storm by <see cref="SetThunder"/>.</param>
+        /// <param name="at">Where on the ground the bolt lands, or none for the storm to choose. A height not a number lands it at the camera's height less two meters.</param>
+        /// <returns>The strike, or none where the camera has no storm.</returns>
+        public static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null) => SkyThunder.Strike(camera, at, toGround: true);
     }
-
-    /// <summary>
-    /// Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or
-    /// somewhere between its storm's nearest and farthest. Only valid inside a system.
-    /// </summary>
-    /// <remarks>For a storm a game times itself, a strike at a story's turn or at a tower.</remarks>
-    /// <param name="camera">A camera given a storm by <see cref="SetThunder"/>.</param>
-    /// <param name="at">Where on the ground the bolt lands, or none for the storm to choose. A height not a number lands it at the camera's height less two meters.</param>
-    /// <returns>The strike, or none where the camera has no storm.</returns>
-    public static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null) => SkyThunder.Strike(camera, at, toGround: true);
 }
 
-/// <summary>The thunderstorms <see cref="Render.SetThunder"/> brings about cameras, an app's own.</summary>
+/// <summary>The thunderstorms <see cref="RenderSky.extension(Render).SetThunder"/> brings about cameras, an app's own.</summary>
 internal static class SkyThunder
 {
     // Drawn before the rain, its owner's name sorting before the rain's, so the drops in front of a

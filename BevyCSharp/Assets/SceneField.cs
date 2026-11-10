@@ -7,7 +7,7 @@ namespace Bevy;
 /// <summary>
 /// The scene's distance field, built on the GPU each frame from the meshes drawn that cast shadows,
 /// around the camera the view is drawn by, as <see cref="SceneFieldPlan"/> works out, through the
-/// bridge's compute shaders (<see cref="Render.SetSceneField"/>).
+/// bridge's compute shaders (<see cref="RenderGlobalIllumination.extension(Render).SetSceneField"/>).
 /// </summary>
 /// <remarks>
 /// <para>

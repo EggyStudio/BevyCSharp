@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The rain and the snow <see cref="Render.SetPrecipitation"/> lets fall, read off pictures of a
+/// The rain and the snow <see cref="RenderSky.extension(Render).SetPrecipitation"/> lets fall, read off pictures of a
 /// dark wall seen through them and off the counts the drops are drawn by.
 /// </summary>
 [Collection("engine")]

@@ -6,7 +6,7 @@ namespace Bevy;
 /// <summary>
 /// Global illumination's screen probes, a probe on the surface the camera's depth holds every few
 /// pixels, traced, blended and held over the frames by dispatches on the camera the field lies around
-/// before its opaque surfaces are lit (<see cref="Render.SetGlobalIlluminationScreenProbes"/>).
+/// before its opaque surfaces are lit (<see cref="RenderGlobalIllumination.extension(Render).SetGlobalIlluminationScreenProbes"/>).
 /// </summary>
 /// <remarks>
 /// <para>

@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>
 /// How much global illumination is worked out, from none to the full set of cascades of probes
-/// (<see cref="Render.SetGlobalIllumination"/>).
+/// (<see cref="RenderGlobalIllumination.extension(Render).SetGlobalIllumination"/>).
 /// </summary>
 public enum GlobalIllumination
 {

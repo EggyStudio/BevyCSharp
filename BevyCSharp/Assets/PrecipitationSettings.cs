@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// The rain and the snow <see cref="Render.SetPrecipitation"/> lets fall about a camera, drops and
+/// The rain and the snow <see cref="RenderSky.extension(Render).SetPrecipitation"/> lets fall about a camera, drops and
 /// flakes moved on the GPU, kept out from under roofs and splashing where the rain lands.
 /// </summary>
 /// <remarks>

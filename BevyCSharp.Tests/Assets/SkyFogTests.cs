@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The fog <see cref="Render.SetSkyFog"/> draws, read off pictures of level ground running far
+/// The fog <see cref="RenderSky.extension(Render).SetSkyFog"/> draws, read off pictures of level ground running far
 /// ahead under it, in a color of its own so the fog is told from the scene by its hue.
 /// </summary>
 [Collection("engine")]

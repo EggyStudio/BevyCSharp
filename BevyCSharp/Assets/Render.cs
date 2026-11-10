@@ -18,6 +18,11 @@ namespace Bevy;
 /// That is why these are named operations rather than a component written through
 /// <see cref="EcsWorld.Add{T}"/>, the way <see cref="Transform"/> is.
 /// </para>
+/// <para>
+/// Global illumination's members and the sky's are declared in
+/// <see cref="RenderGlobalIllumination"/> and <see cref="RenderSky"/>, which extend this class, and
+/// are called on it as its own.
+/// </para>
 /// </remarks>
 public static unsafe partial class Render
 {

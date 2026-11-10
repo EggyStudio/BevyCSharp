@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// The thunderstorm <see cref="Render.SetThunder"/> brings about a camera, lightning striking at a
+/// The thunderstorm <see cref="RenderSky.extension(Render).SetThunder"/> brings about a camera, lightning striking at a
 /// rate, lighting the scene and the clouds, its bolt drawn, and its thunder heard after the time
 /// sound takes to come.
 /// </summary>

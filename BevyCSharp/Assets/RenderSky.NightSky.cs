@@ -3,49 +3,52 @@ using Sky;
 
 namespace Bevy;
 
-public static partial class Render
+public static partial class RenderSky
 {
-    /// <summary>
-    /// Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing
-    /// where the settings' clock puts them, or with <see langword="null"/> takes it off. Only valid
-    /// inside a system.
-    /// </summary>
-    /// <remarks>
-    /// The sky is added over the sky's pixels before tonemapping, ahead of the clouds and the fog,
-    /// so a cloud hides the stars behind it, each frame reading the clock the program moves on. It
-    /// needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), whose depth says
-    /// where the sky is. The setting lasts while the app runs.
-    /// </remarks>
-    /// <param name="camera">The camera.</param>
-    /// <param name="settings">The sky, or null to take it off.</param>
-    /// <exception cref="ArgumentOutOfRangeException">A brightness or the moon's size is under none or not a number, or the stars' grid has none.</exception>
-    /// <example>
-    /// <code>
-    /// var clock = new SkyClock { Latitude = 50f, DayOfYear = 172f };
-    /// Render.SetNightSky(camera, new NightSkySettings { Clock = clock });
-    /// clock.Advance(ctx.Time.Delta / 60f);   // an hour a minute
-    /// </code>
-    /// </example>
-    public static void SetNightSky(Entity camera, NightSkySettings? settings)
+    extension(Render)
     {
-        if (settings is null)
+        /// <summary>
+        /// Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing
+        /// where the settings' clock puts them, or with <see langword="null"/> takes it off. Only valid
+        /// inside a system.
+        /// </summary>
+        /// <remarks>
+        /// The sky is added over the sky's pixels before tonemapping, ahead of the clouds and the fog,
+        /// so a cloud hides the stars behind it, each frame reading the clock the program moves on. It
+        /// needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), whose depth says
+        /// where the sky is. The setting lasts while the app runs.
+        /// </remarks>
+        /// <param name="camera">The camera.</param>
+        /// <param name="settings">The sky, or null to take it off.</param>
+        /// <exception cref="ArgumentOutOfRangeException">A brightness or the moon's size is under none or not a number, or the stars' grid has none.</exception>
+        /// <example>
+        /// <code>
+        /// var clock = new SkyClock { Latitude = 50f, DayOfYear = 172f };
+        /// Render.SetNightSky(camera, new NightSkySettings { Clock = clock });
+        /// clock.Advance(ctx.Time.Delta / 60f);   // an hour a minute
+        /// </code>
+        /// </example>
+        public static void SetNightSky(Entity camera, NightSkySettings? settings)
         {
-            NightSky.Clear(camera);
-            return;
+            if (settings is null)
+            {
+                NightSky.Clear(camera);
+                return;
+            }
+
+            ArgumentNullException.ThrowIfNull(settings.Clock);
+            float[] numbers = [settings.Stars, settings.Twinkle, settings.Galaxy, settings.Moon, settings.MoonSize, settings.Earthshine];
+            if (!numbers.All(n => float.IsFinite(n) && n >= 0f))
+                throw new ArgumentOutOfRangeException(nameof(settings), "A brightness, the twinkle, the moon's size or the earthshine is under none or not a number.");
+            if (!(settings.StarGrid >= 1f))
+                throw new ArgumentOutOfRangeException(nameof(settings), settings.StarGrid, "The stars' grid has a cell along each face at least.");
+
+            NightSky.Set(camera, settings);
         }
-
-        ArgumentNullException.ThrowIfNull(settings.Clock);
-        float[] numbers = [settings.Stars, settings.Twinkle, settings.Galaxy, settings.Moon, settings.MoonSize, settings.Earthshine];
-        if (!numbers.All(n => float.IsFinite(n) && n >= 0f))
-            throw new ArgumentOutOfRangeException(nameof(settings), "A brightness, the twinkle, the moon's size or the earthshine is under none or not a number.");
-        if (!(settings.StarGrid >= 1f))
-            throw new ArgumentOutOfRangeException(nameof(settings), settings.StarGrid, "The stars' grid has a cell along each face at least.");
-
-        NightSky.Set(camera, settings);
     }
 }
 
-/// <summary>The draws <see cref="Render.SetNightSky"/> puts on cameras, an instance a camera, an app's own.</summary>
+/// <summary>The draws <see cref="RenderSky.extension(Render).SetNightSky"/> puts on cameras, an instance a camera, an app's own.</summary>
 internal static class NightSky
 {
     /// <summary>The name the sky's draw and prepass are kept under, ahead of the clouds and the fog by its order.</summary>

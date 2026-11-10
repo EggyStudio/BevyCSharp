@@ -3,7 +3,7 @@ using Sky;
 namespace Bevy;
 
 /// <summary>
-/// The sky behind the atmosphere <see cref="Render.SetNightSky"/> draws, the stars, the galaxy and
+/// The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, the stars, the galaxy and
 /// the moon, standing where <see cref="Clock"/> puts them.
 /// </summary>
 /// <remarks>

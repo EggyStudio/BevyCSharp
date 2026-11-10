@@ -108,4 +108,24 @@ public sealed unsafe partial class EcsWorld
             return slot;
         }
     }
+
+    /// <summary>
+    /// Every entity under <paramref name="root"/>, nearer ones first, as Bevy's
+    /// <c>iter_descendants</c> walks them.
+    /// </summary>
+    /// <param name="root">The entity whose children, and theirs, are walked. It is not among them.</param>
+    /// <remarks>
+    /// Walked as it is read, so an entity spawned under one already walked past is not found, and
+    /// one despawned before it is reached is not either.
+    /// </remarks>
+    public IEnumerable<Entity> Descendants(Entity root)
+    {
+        var queue = new Queue<Entity>(ChildrenOf(root));
+        while (queue.Count > 0)
+        {
+            var entity = queue.Dequeue();
+            yield return entity;
+            foreach (var child in ChildrenOf(entity)) queue.Enqueue(child);
+        }
+    }
 }

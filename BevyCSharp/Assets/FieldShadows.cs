@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>
 /// Where the scene's distance field darkens a directional light's contact shadows, which
-/// <see cref="Render.SetSceneFieldShadows"/> chooses.
+/// <see cref="RenderGlobalIllumination.extension(Render).SetSceneFieldShadows"/> chooses.
 /// </summary>
 public enum FieldShadows
 {

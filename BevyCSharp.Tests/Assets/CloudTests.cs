@@ -4,7 +4,7 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// The clouds <see cref="Render.SetClouds"/> draws, read off pictures of the sky under an atmosphere
+/// The clouds <see cref="RenderSky.extension(Render).SetClouds"/> draws, read off pictures of the sky under an atmosphere
 /// with and without them.
 /// </summary>
 [Collection("engine")]

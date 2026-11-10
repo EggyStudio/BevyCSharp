@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// The fog <see cref="Render.SetSkyFog"/> draws over a camera's picture, in the color the sky has at
+/// The fog <see cref="RenderSky.extension(Render).SetSkyFog"/> draws over a camera's picture, in the color the sky has at
 /// the horizon along each way.
 /// </summary>
 /// <remarks>

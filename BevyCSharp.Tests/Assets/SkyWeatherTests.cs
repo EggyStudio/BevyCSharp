@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>The weather on a camera (<see cref="Render.SetWeather"/>), which moves its clouds, its fog and its rain.</summary>
+/// <summary>The weather on a camera (<see cref="RenderSky.extension(Render).SetWeather"/>), which moves its clouds, its fog and its rain.</summary>
 [Collection("engine")]
 public sealed class SkyWeatherTests
 {

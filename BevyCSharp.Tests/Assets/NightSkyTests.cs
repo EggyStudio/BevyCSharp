@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>The sky behind the atmosphere <see cref="Render.SetNightSky"/> draws, read off pictures of the sky.</summary>
+/// <summary>The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, read off pictures of the sky.</summary>
 [Collection("engine")]
 public sealed class NightSkyTests
 {

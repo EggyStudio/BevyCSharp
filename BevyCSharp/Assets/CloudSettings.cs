@@ -1,7 +1,7 @@
 namespace Bevy;
 
 /// <summary>
-/// The clouds <see cref="Render.SetClouds"/> draws in a camera's sky, a layer of them over the
+/// The clouds <see cref="RenderSky.extension(Render).SetClouds"/> draws in a camera's sky, a layer of them over the
 /// planet lit by the sun through the atmosphere and by the sky.
 /// </summary>
 /// <remarks>

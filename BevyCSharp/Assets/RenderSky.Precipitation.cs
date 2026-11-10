@@ -4,59 +4,62 @@ using Bevy.Reflected;
 
 namespace Bevy;
 
-public static partial class Render
+public static partial class RenderSky
 {
-    /// <summary>
-    /// Lets rain and snow fall about a camera, or with <see langword="null"/> stops them. Only valid
-    /// inside a system.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The drops and flakes are moved on the GPU every frame, each a point that falls, drifts and
-    /// comes back at the top of its box once it lands, and as many as stand in front of the camera
-    /// are counted into an indirect draw, so the CPU never sees them. Each is drawn with the light it
-    /// sends toward the eye, the sun's through the air, its shadows and the clouds', the sky's and
-    /// the lamps', behind whatever stands in front of it, after temporal antialiasing, which would
-    /// average a speck with no motion of its own in the prepass away, and after the sky's fog, which
-    /// it is not fogged by. <see cref="PrecipitationSettings"/> says how they fall.
-    /// </para>
-    /// <para>
-    /// The map of what stands over the ground is drawn by a camera of its own looking down, which
-    /// draws the scene again on the frames it is drawn, a few once the camera has moved some 12
-    /// meters, and none between. Settings given again every frame, as
-    /// <see cref="SetWeather"/> gives them, take the numbers alone.
-    /// </para>
-    /// </remarks>
-    /// <param name="camera">The camera.</param>
-    /// <param name="settings">How it rains and snows, or null to stop.</param>
-    /// <exception cref="ArgumentOutOfRangeException">An amount is outside 0 to 1, the wind is not a number, the reach is under 4 meters or the quality names none.</exception>
-    /// <example>
-    /// <code>
-    /// Render.SetPrecipitation(camera, new PrecipitationSettings { Rain = 0.6f, Wind = new Vec3(3f, 0f, 1f) });
-    /// </code>
-    /// </example>
-    public static void SetPrecipitation(Entity camera, PrecipitationSettings? settings)
+    extension(Render)
     {
-        if (settings is null)
+        /// <summary>
+        /// Lets rain and snow fall about a camera, or with <see langword="null"/> stops them. Only valid
+        /// inside a system.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The drops and flakes are moved on the GPU every frame, each a point that falls, drifts and
+        /// comes back at the top of its box once it lands, and as many as stand in front of the camera
+        /// are counted into an indirect draw, so the CPU never sees them. Each is drawn with the light it
+        /// sends toward the eye, the sun's through the air, its shadows and the clouds', the sky's and
+        /// the lamps', behind whatever stands in front of it, after temporal antialiasing, which would
+        /// average a speck with no motion of its own in the prepass away, and after the sky's fog, which
+        /// it is not fogged by. <see cref="PrecipitationSettings"/> says how they fall.
+        /// </para>
+        /// <para>
+        /// The map of what stands over the ground is drawn by a camera of its own looking down, which
+        /// draws the scene again on the frames it is drawn, a few once the camera has moved some 12
+        /// meters, and none between. Settings given again every frame, as
+        /// <see cref="SetWeather"/> gives them, take the numbers alone.
+        /// </para>
+        /// </remarks>
+        /// <param name="camera">The camera.</param>
+        /// <param name="settings">How it rains and snows, or null to stop.</param>
+        /// <exception cref="ArgumentOutOfRangeException">An amount is outside 0 to 1, the wind is not a number, the reach is under 4 meters or the quality names none.</exception>
+        /// <example>
+        /// <code>
+        /// Render.SetPrecipitation(camera, new PrecipitationSettings { Rain = 0.6f, Wind = new Vec3(3f, 0f, 1f) });
+        /// </code>
+        /// </example>
+        public static void SetPrecipitation(Entity camera, PrecipitationSettings? settings)
         {
-            Precipitation.Clear(camera);
-            return;
+            if (settings is null)
+            {
+                Precipitation.Clear(camera);
+                return;
+            }
+
+            if (!(settings.Rain is >= 0f and <= 1f) || !(settings.Snow is >= 0f and <= 1f))
+                throw new ArgumentOutOfRangeException(nameof(settings), "How hard it rains and snows is from 0 to 1.");
+            if (!float.IsFinite(settings.Wind.X) || !float.IsFinite(settings.Wind.Y) || !float.IsFinite(settings.Wind.Z))
+                throw new ArgumentOutOfRangeException(nameof(settings), settings.Wind, "The wind is not a number.");
+            if (!(settings.Reach >= 4f) || !float.IsFinite(settings.Reach))
+                throw new ArgumentOutOfRangeException(nameof(settings), settings.Reach, "The drops reach 4 meters from the camera at least.");
+            if (!Enum.IsDefined(settings.Quality))
+                throw new ArgumentOutOfRangeException(nameof(settings), settings.Quality, "The quality names none.");
+
+            Precipitation.Set(camera, settings);
         }
-
-        if (!(settings.Rain is >= 0f and <= 1f) || !(settings.Snow is >= 0f and <= 1f))
-            throw new ArgumentOutOfRangeException(nameof(settings), "How hard it rains and snows is from 0 to 1.");
-        if (!float.IsFinite(settings.Wind.X) || !float.IsFinite(settings.Wind.Y) || !float.IsFinite(settings.Wind.Z))
-            throw new ArgumentOutOfRangeException(nameof(settings), settings.Wind, "The wind is not a number.");
-        if (!(settings.Reach >= 4f) || !float.IsFinite(settings.Reach))
-            throw new ArgumentOutOfRangeException(nameof(settings), settings.Reach, "The drops reach 4 meters from the camera at least.");
-        if (!Enum.IsDefined(settings.Quality))
-            throw new ArgumentOutOfRangeException(nameof(settings), settings.Quality, "The quality names none.");
-
-        Precipitation.Set(camera, settings);
     }
 }
 
-/// <summary>The rain and snow <see cref="Render.SetPrecipitation"/> lets fall about cameras, an app's own.</summary>
+/// <summary>The rain and snow <see cref="RenderSky.extension(Render).SetPrecipitation"/> lets fall about cameras, an app's own.</summary>
 internal static class Precipitation
 {
     internal const string Owner = "weather";

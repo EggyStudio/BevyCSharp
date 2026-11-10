@@ -369,7 +369,7 @@ public static unsafe partial class Render
     /// <para>
     /// Needs <see cref="SetAtmosphere"/> on the same camera, because what it filters is the sky
     /// being drawn. A camera with no atmosphere has nothing to derive a map from. Where the camera
-    /// has clouds (<see cref="SetClouds"/>), they are laid over the sky before it is filtered, so an
+    /// has clouds (<see cref="RenderSky.extension(Render).SetClouds"/>), they are laid over the sky before it is filtered, so an
     /// overcast lights the scene gray.
     /// </para>
     /// </remarks>
