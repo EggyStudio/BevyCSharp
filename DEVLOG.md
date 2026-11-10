@@ -24,6 +24,11 @@ four lines leaning 30 degrees from it, and on the right the middle's light less 
 over, brighter in orange and darker in blue, the shaded wall's hard wedges softened at the cost of
 the yard's far wall in shade, so the trial was left out.
 
+Done that day
+
+- Item 131 at `07143fdf`. A probe under a floor lends a wall's foot its light through the reach
+  test's slack.
+
 ## 2026-11-09
 
 ![](.github/assets/readings/2026-11-09-item-97-wall-probe.webp)

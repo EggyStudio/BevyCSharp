@@ -10,6 +10,7 @@ memory guard at 1,705 passed and none failed, as the machine ran out of memory u
 session's script, the 67 illumination tests passing apart; the push waits until the whole suite has
 run, which the guard leaves to the owner's word. It keeps the form and carries the review's files.
 On it `62ba6c03`, 119's plan in the Replies, documents alone, committed at 01:24 and held with it.
+On that `259a09c8`, item 130's record, documents alone, committed at 01:34 and held with them.
 Before it `02e30024`, item 128's record, the yard's far foot dashes read to the fourth cascade's
 probes under the floor seeing the wall's foot through their reach test's slack, a reading and
 documents alone, pushed at 21:22 on 2026-11-09, its run green at 21:41 with Linux and macOS in 14
@@ -24,14 +25,13 @@ version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on
 item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
 REVIEW-ARCHIVE.md under Head records.
 
-Next 130, the court's wedges through the arch, and 125, the shadow maps' churn, each a read with a
-served program, then 119, the bridge as projects, its plan confirmed and its first cut waiting on
-the suite's next run, 120, the live path, and after them 66 and 67, the connections and the level
-editor; 93's course drawn smaller after the next pack run's reading. `07143fdf` and `62ba6c03` are
-held for the whole suite on the owner's word. A pack run with publish follows when the meadow's
-items rest. The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80;
-the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the
-engine's Decision 107.
+Next 125, the shadow maps' churn, a read with a served program, then 119, the bridge as projects,
+its plan confirmed and its first cut waiting on the suite's next run, 120, the live path, and after
+them 66 and 67, the connections and the level editor; 93's course drawn smaller after the next pack
+run's reading. `07143fdf`, `62ba6c03` and `259a09c8` are held for the whole suite on the owner's
+word. A pack run with publish follows when the meadow's items rest. The engine's illumination read
+goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
+Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -152,7 +152,13 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     the field, against the court's reference, with the pair by N 4.9; where a spread holds the
     wedges' edges soft within the test's bound at Low and Medium, the mend stands on its own, and
     where it costs the yard's far wall its reading, it is recorded as the method's past the probes.
-    After 128 and 129.
+    After 128 and 129. Read on 2026-11-10 at Low and recorded at `259a09c8`. A cone of five lines,
+    the normal and four leaning 30 degrees, each with its own trace of the field, halves the wedges,
+    the steps of 6 levels or more across the court's shaded wall falling from 816 to 428, and three
+    lines leaning sideways bring them to 523, the gallery's view 0.141 from its reference in all
+    three; but the yard's far wall in shade then reads 20 and 18 percent under where 10, and its
+    test at Low 19.2 and 6.2 under where 2.4 over. So by the item the wedges are recorded as the
+    method's past the probes and the trial is left out, both patches in the dump.
 
 131. **A probe under a floor lends a wall's foot its light through the reach test's slack.** From
     item 128's read on 2026-11-09. In the yard's far view at High the dashes along the shaded wall's
@@ -488,3 +494,47 @@ Shared: a ground share past the probes read over five lines about the normal, or
 toward its sides, softened the wedges one line leaves on a shaded wall seen through an arch and cost
 a far wall in shade 8 to 10 points of its reference's light at Low, for the sibling to weigh before
 spreading its groundReached.
+
+Item 125, the shadow maps' churn at the course's start, read once as the item says and recorded in
+the commit carrying this line. A trial bridge of the head, never committed, logged at each frame
+where they changed the main world's drawing cameras and the lights casting shadows in their view,
+and the render world's views with the layers of the shadow maps each held, and the scripted run at
+the defaults ran the course with it.
+
+What flips the counts is the rain's map of what stands over the ground (Render.Precipitation.cs), a
+camera at order -100 looking down over the eye, drawn for three frames each time the eye has moved
+some 12 meters and while pipelines compile. It draws the default layer, on which the lights stand,
+so while it draws its view takes in the hub's seven lights casting shadows, four points and three
+spots, where the main view at the course sees none. Bevy makes one map of the directional lights and
+the spots and one of the points a frame for every view's lights together, so the main view's maps go
+from 4 layers and 6 to 7 and 24 as the camera draws and back as it stops, 19 changes over the run, a
+new texture each way, rising at frames 636 and 694 as it turns on and falling at 645 and 697 as it
+stops, and at no other frame but the 96th, where the probe capture's faces stop and the Cornell
+box's light they alone saw leaves the set, the points' map from 30 layers to 24.
+
+The views not drawn are the six faces of the bridge's light probe capture (probes.rs), drawing for
+the first 95 frames and then off while the probe stands, and their views keep the maps of the frame
+they last drew, 2048 by 2048 by 7 and 1024 by 1024 by 30, 232 MB, to the end of the run, since Bevy
+leaves a view's shadow bindings on its render entity when its camera stops. A second run took the
+bindings off every view not drawn in the frame, and the allocator held the same textures at the
+course's stations, 906 MB and 1,002 MB at the last, so something of Bevy's own holds the maps beside
+the bindings, unread, and dropping the bindings frees nothing here.
+
+Both runs stopped on the machine's refusal of item 124, the first at the gallery after 2 minutes 46
+seconds on a map of the point lights and the second after 1 minute 46 seconds on one of the
+directional lights.
+
+So the counts flip by a camera of the library's own, which a bridge setting can hold steady in a way
+the review may weigh, the roofs' camera drawn every frame, which keeps the lights it sees in the
+frame's set at the cost of a depth pass of the roof layers a frame, since Bevy leaves a light out of
+a view by its render layers alone and the lights stand on the layer the roofs draw. The maps the
+undrawn views keep are Bevy's to hold, recorded as such. The trial's patch and both runs' logs are
+in the dump.
+
+No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
+unchanged.
+
+Shared: in Bevy a camera that draws a few frames at a time, as the map of roofs over the rain,
+brings the lights its view sees into the frame's shadow maps for those frames, so the maps change
+size each time it draws, for the sibling to read where an auxiliary view of its own draws from time
+to time.
