@@ -12,7 +12,7 @@ public static unsafe partial class Render
     /// Z; position it by writing its <see cref="Transform"/> like any other entity.
     /// </remarks>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
-    public static Entity SpawnCamera3d() => new(Native.bcs_render_spawn_camera_3d(null));
+    public static Entity SpawnCamera3d() => new(NativeRendering.bcs_render_spawn_camera_3d(null));
 
     /// <summary>
     /// Gives a camera part of the window to draw into, or the whole of it.
@@ -29,7 +29,7 @@ public static unsafe partial class Render
     /// <param name="height">How tall, in physical pixels, or zero for the whole window.</param>
     public static void SetViewport(Entity camera, uint x, uint y, uint width, uint height) =>
         Native.Check(
-            Native.bcs_render_set_viewport(camera.Bits, x, y, width, height),
+            NativeRendering.bcs_render_set_viewport(camera.Bits, x, y, width, height),
             "Render.SetViewport");
 
     /// <summary>
@@ -53,7 +53,7 @@ public static unsafe partial class Render
         if (!(near > 0f)) throw new ArgumentOutOfRangeException(nameof(near), near, "The near distance has to be above nothing.");
         if (!(far > near)) throw new ArgumentOutOfRangeException(nameof(far), far, "The far distance has to be beyond the near one.");
 
-        Native.Check(Native.bcs_render_set_perspective(camera.Bits, fieldOfView, near, far), "Render.SetPerspective");
+        Native.Check(NativeRendering.bcs_render_set_perspective(camera.Bits, fieldOfView, near, far), "Render.SetPerspective");
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public static unsafe partial class Render
         }
 
         Native.Check(
-            Native.bcs_render_set_rounded_corners(camera.Bits, radius, fill.R, fill.G, fill.B, fill.A),
+            NativeRendering.bcs_render_set_rounded_corners(camera.Bits, radius, fill.R, fill.G, fill.B, fill.A),
             "Render.SetRoundedCorners");
     }
 
@@ -112,7 +112,7 @@ public static unsafe partial class Render
     /// <param name="color">The color, straight rather than premultiplied.</param>
     public static void SetClearColor((float R, float G, float B, float A) color) =>
         Native.Check(
-            Native.bcs_render_set_clear_color(color.R, color.G, color.B, color.A),
+            NativeRendering.bcs_render_set_clear_color(color.R, color.G, color.B, color.A),
             "Render.SetClearColor");
 
 
@@ -143,7 +143,7 @@ public static unsafe partial class Render
             Layers = settings.Layers,
         };
 
-        return new Entity(Native.bcs_render_spawn_camera_3d(&native));
+        return new Entity(NativeRendering.bcs_render_spawn_camera_3d(&native));
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public static unsafe partial class Render
         get
         {
             var counts = stackalloc uint[2];
-            Native.Check(Native.bcs_render_point_lights_drawn(counts), "reading the point lights drawn");
+            Native.Check(NativeRendering.bcs_render_point_lights_drawn(counts), "reading the point lights drawn");
             return ((int)counts[0], (int)counts[1]);
         }
     }
@@ -201,7 +201,7 @@ public static unsafe partial class Render
             ShadowNormalBias = settings.ShadowNormalBias ?? (settings.Kind == LightKind.Point ? 0.6f : 1.8f),
         };
 
-        return new Entity(Native.bcs_render_spawn_light(&native));
+        return new Entity(NativeRendering.bcs_render_spawn_light(&native));
     }
 
     /// <summary>
@@ -243,7 +243,7 @@ public static unsafe partial class Render
         float firstBound = 0f,
         float overlap = 0f) =>
         Native.Check(
-            Native.bcs_render_set_shadow_cascades(
+            NativeRendering.bcs_render_set_shadow_cascades(
                 light.Bits, cascades, minimum, maximum, firstBound, overlap),
             $"setting the shadow cascades of {light}");
 
@@ -264,7 +264,7 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">The entity is not a spot light.</exception>
     public static void SetLightCookie(Entity light, AssetHandle cookie) =>
         Native.Check(
-            Native.bcs_render_set_light_cookie(light.Bits, cookie.Key),
+            NativeRendering.bcs_render_set_light_cookie(light.Bits, cookie.Key),
             $"shaping the beam of {light}");
 
     /// <summary>
@@ -290,14 +290,14 @@ public static unsafe partial class Render
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is not a light.</exception>
     public static void SetSoftShadows(Entity light, float size) =>
-        Native.Check(Native.bcs_render_set_soft_shadows(light.Bits, size), $"softening {light}'s shadows");
+        Native.Check(NativeRendering.bcs_render_set_soft_shadows(light.Bits, size), $"softening {light}'s shadows");
 
     /// <summary>
     /// Sets how a camera filters the shadow maps it reads. Only valid inside a system.
     /// </summary>
     /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
     public static void SetShadowFiltering(Entity camera, ShadowFiltering filtering) =>
-        Native.Check(Native.bcs_render_set_shadow_filtering(camera.Bits, (int)filtering), $"filtering {camera}'s shadows");
+        Native.Check(NativeRendering.bcs_render_set_shadow_filtering(camera.Bits, (int)filtering), $"filtering {camera}'s shadows");
 
     /// <summary>
     /// Says how a camera draws beyond what it looks at. Only valid inside a system.
@@ -310,7 +310,7 @@ public static unsafe partial class Render
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is not a camera, or there is no renderer.</exception>
     public static void SetCameraFlags(Entity camera, CameraFlags flags) =>
-        Native.Check(Native.bcs_render_set_camera_flags(camera.Bits, (uint)flags), $"setting how {camera} draws");
+        Native.Check(NativeRendering.bcs_render_set_camera_flags(camera.Bits, (uint)flags), $"setting how {camera} draws");
 
     /// <summary>
     /// Sets what a camera does to the picture after the scene has been drawn.
@@ -376,7 +376,7 @@ public static unsafe partial class Render
         };
 
         Native.Check(
-            Native.bcs_render_set_post(camera.Bits, &native),
+            NativeRendering.bcs_render_set_post(camera.Bits, &native),
             $"setting the post processing on {camera}");
     }
 
@@ -481,7 +481,7 @@ public static unsafe partial class Render
         }
 
         Native.Check(
-            Native.bcs_render_set_effects(camera.Bits, &native),
+            NativeRendering.bcs_render_set_effects(camera.Bits, &native),
             $"setting the effects on {camera}");
 
         static int Key(AssetHandle handle) => handle.IsValid ? handle.Key : -1;
@@ -572,7 +572,7 @@ public static unsafe partial class Render
             native.TermCount = own?.Length ?? 0;
             native.Terms = (nint)terms;
             Native.Check(
-                Native.bcs_render_set_atmosphere(camera.Bits, &native),
+                NativeRendering.bcs_render_set_atmosphere(camera.Bits, &native),
                 $"setting the atmosphere on {camera}");
         }
     }
@@ -648,7 +648,7 @@ public static unsafe partial class Render
         ArgumentOutOfRangeException.ThrowIfNegative(disk.Intensity, nameof(disk));
 
         Native.Check(
-            Native.bcs_render_set_sun_disk(light.Bits, disk.AngularSize, disk.Intensity),
+            NativeRendering.bcs_render_set_sun_disk(light.Bits, disk.AngularSize, disk.Intensity),
             $"setting the sun's disk on {light}");
     }
 
@@ -667,7 +667,7 @@ public static unsafe partial class Render
         var native = new NativeAtmosphereConfig();
 
         Native.Check(
-            Native.bcs_render_set_atmosphere(camera.Bits, &native),
+            NativeRendering.bcs_render_set_atmosphere(camera.Bits, &native),
             $"clearing the atmosphere on {camera}");
     }
 
@@ -715,7 +715,7 @@ public static unsafe partial class Render
 
         fixed (float* raw = flat)
             Native.Check(
-                Native.bcs_render_set_adjusted_perspective(camera.Bits, fieldOfView, near, far, raw, entries.Length),
+                NativeRendering.bcs_render_set_adjusted_perspective(camera.Bits, fieldOfView, near, far, raw, entries.Length),
                 $"giving camera {camera} an adjusted perspective");
     }
 }

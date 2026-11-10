@@ -30,7 +30,7 @@ public sealed unsafe partial class App : IDisposable
                 + "from a plugin's Build method or before calling Run.");
 
         Native.Check(
-            Native.bcs_state_add(_handle, StateRegistry.Claim<TState>(), StateRegistry.ToInt(initial)),
+            NativeCore.bcs_state_add(_handle, StateRegistry.Claim<TState>(), StateRegistry.ToInt(initial)),
             $"adding state {typeof(TState).Name}");
 
         _addedStates.Add(SameState.NameOf(typeof(TState)));
@@ -85,7 +85,7 @@ public sealed unsafe partial class App : IDisposable
             fixed (int* wanted = wants)
             {
                 Native.Check(
-                    Native.bcs_joint_substate_add(_handle, joint, wanted, wants.Length, StateRegistry.ToInt(initial)),
+                    NativeCore.bcs_joint_substate_add(_handle, joint, wanted, wants.Length, StateRegistry.ToInt(initial)),
                     $"adding sub-state {typeof(TState).Name} under {string.Join(" and ", parents.Select(parent => parent.Parent.Name))}");
             }
 
@@ -105,7 +105,7 @@ public sealed unsafe partial class App : IDisposable
         var slot = StateRegistry.Claim<TState>() - StateRegistry.SlotCount;
 
         Native.Check(
-            Native.bcs_substate_add(
+            NativeCore.bcs_substate_add(
                 _handle,
                 slot,
                 Convert.ToInt32(sub.WhileIn, System.Globalization.CultureInfo.InvariantCulture),
@@ -198,7 +198,7 @@ public sealed unsafe partial class App : IDisposable
         fixed (int* results = to)
         {
             Native.Check(
-                Native.bcs_computed_add(_handle, slot, sources, results, table.Length),
+                NativeCore.bcs_computed_add(_handle, slot, sources, results, table.Length),
                 $"adding computed state {typeof(TState).Name} from {computed.Source.Name}");
         }
 
@@ -269,7 +269,7 @@ public sealed unsafe partial class App : IDisposable
             rule((TSource)Enum.ToObject(typeof(TSource), raw)) is { } value ? StateRegistry.ToInt(value) : null);
 
         Native.Check(
-            Native.bcs_computed_add_rule(_handle, slot),
+            NativeCore.bcs_computed_add_rule(_handle, slot),
             $"adding computed state {typeof(TState).Name} from {computed.Source.Name} by a rule");
 
         _addedStates.Add(SameState.NameOf(typeof(TState)));
@@ -396,7 +396,7 @@ public sealed unsafe partial class App : IDisposable
         });
 
         Native.Check(
-            Native.bcs_joint_add(_handle, joint),
+            NativeCore.bcs_joint_add(_handle, joint),
             $"adding computed state {typeof(TState).Name} from {Named(computed)}");
 
         _addedStates.Add(SameState.NameOf(typeof(TState)));
@@ -500,7 +500,7 @@ public sealed unsafe partial class App : IDisposable
         _systems.Add(registration);
 
         Native.Check(
-            Native.bcs_state_add_system(
+            NativeCore.bcs_state_add_system(
                 _handle,
                 StateRegistry.SlotForRegistration<TState>(),
                 StateRegistry.ToInt(value),
@@ -564,7 +564,7 @@ public sealed unsafe partial class App : IDisposable
         _systems.Add(registration);
 
         Native.Check(
-            Native.bcs_state_add_transition(
+            NativeCore.bcs_state_add_transition(
                 _handle,
                 StateRegistry.SlotForRegistration<TState>(),
                 StateRegistry.ToInt(from),

@@ -37,15 +37,15 @@ public static unsafe class Stepping
     /// <summary>Steps the systems of <paramref name="stage"/>, from the next frame, while stepping is on.</summary>
     /// <exception cref="ArgumentOutOfRangeException">The stage runs once or is the engine's own.</exception>
     public static void Add(Stage stage) =>
-        Native.Check(Native.bcs_stepping_add(Steppable(stage)), $"stepping {stage}");
+        Native.Check(NativeCore.bcs_stepping_add(Steppable(stage)), $"stepping {stage}");
 
     /// <summary>Runs <paramref name="stage"/> whole again, and forgets what was set for its systems.</summary>
     /// <exception cref="ArgumentOutOfRangeException">The stage runs once or is the engine's own.</exception>
     public static void Remove(Stage stage) =>
-        Native.Check(Native.bcs_stepping_remove(Steppable(stage)), $"ending the stepping of {stage}");
+        Native.Check(NativeCore.bcs_stepping_remove(Steppable(stage)), $"ending the stepping of {stage}");
 
     /// <summary>Whether stepping is on.</summary>
-    public static bool IsEnabled => Native.Check(Native.bcs_stepping_enabled(), "asking whether stepping is on") == 1;
+    public static bool IsEnabled => Native.Check(NativeCore.bcs_stepping_enabled(), "asking whether stepping is on") == 1;
 
     /// <summary>Turns stepping on, so the systems of the added stages wait for a step.</summary>
     public static void Enable() => Act(1, "turning stepping on");
@@ -96,11 +96,11 @@ public static unsafe class Stepping
     {
         get
         {
-            var length = Native.bcs_stepping_systems(null, 0);
+            var length = NativeCore.bcs_stepping_systems(null, 0);
             if (length == NativeStatus.NotPresent) return null;
             Native.Check(length, "reading the stepped systems");
 
-            var text = Native.ReadText(Native.bcs_stepping_systems, "reading the stepped systems");
+            var text = Native.ReadText(NativeCore.bcs_stepping_systems, "reading the stepped systems");
             return text.Split('\n').Select(line =>
             {
                 var tab = line.IndexOf('\t');
@@ -117,7 +117,7 @@ public static unsafe class Stepping
     {
         get
         {
-            var cursor = Native.bcs_stepping_cursor();
+            var cursor = NativeCore.bcs_stepping_cursor();
             if (cursor == NativeStatus.NotPresent) return null;
             return Native.Check(cursor, "reading where stepping is");
         }
@@ -129,19 +129,19 @@ public static unsafe class Stepping
     /// </summary>
     public static string? Describe()
     {
-        var length = Native.bcs_stepping_describe(null, 0);
+        var length = NativeCore.bcs_stepping_describe(null, 0);
         if (length == NativeStatus.NotPresent) return null;
         Native.Check(length, "describing the stepping");
-        return Native.ReadText(Native.bcs_stepping_describe, "describing the stepping");
+        return Native.ReadText(NativeCore.bcs_stepping_describe, "describing the stepping");
     }
 
-    private static void Act(int action, string operation) => Native.Check(Native.bcs_stepping_act(action), operation);
+    private static void Act(int action, string operation) => Native.Check(NativeCore.bcs_stepping_act(action), operation);
 
     private static void Behave(Stage stage, string system, int behavior, string what)
     {
         ArgumentException.ThrowIfNullOrEmpty(system);
         Native.Check(
-            Native.bcs_stepping_set_behavior(Steppable(stage), system, behavior),
+            NativeCore.bcs_stepping_set_behavior(Steppable(stage), system, behavior),
             $"setting {system} in {stage} {what}");
     }
 

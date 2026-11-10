@@ -42,7 +42,7 @@ public static class FrameProfile
     {
         _roundTrip = RoundTrip();
         lock (Gate) BySystem.Clear();
-        Native.Check(Native.bcs_profile_enable(1), "starting the frame profile");
+        Native.Check(NativeDiagnostics.bcs_profile_enable(1), "starting the frame profile");
         On = true;
     }
 
@@ -50,7 +50,7 @@ public static class FrameProfile
     public static void Stop()
     {
         On = false;
-        Native.Check(Native.bcs_profile_enable(0), "stopping the frame profile");
+        Native.Check(NativeDiagnostics.bcs_profile_enable(0), "stopping the frame profile");
     }
 
     /// <summary>What was measured since <see cref="Start"/> or the last take, which starts the count over.</summary>
@@ -60,7 +60,7 @@ public static class FrameProfile
         ArgumentNullException.ThrowIfNull(world);
 
         NativeProfile counted;
-        Native.Check(Native.bcs_profile_take(&counted), "reading the frame profile");
+        Native.Check(NativeDiagnostics.bcs_profile_take(&counted), "reading the frame profile");
 
         List<(string Name, double Milliseconds)> systems;
         var frames = Math.Max(1UL, counted.Frames);
@@ -107,12 +107,12 @@ public static class FrameProfile
         if (renders == 0) return [];
 
         // The names first, which reads no times, then the times, which clears them.
-        var names = Native.ReadText((buffer, capacity) => Native.bcs_profile_phases(null, 0, buffer, capacity), "naming the render phases")
+        var names = Native.ReadText((buffer, capacity) => NativeDiagnostics.bcs_profile_phases(null, 0, buffer, capacity), "naming the render phases")
             .Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         var nanos = new ulong[names.Length];
         fixed (ulong* times = nanos)
-            Native.Check(Native.bcs_profile_phases(times, nanos.Length, null, 0), "reading the render phases");
+            Native.Check(NativeDiagnostics.bcs_profile_phases(times, nanos.Length, null, 0), "reading the render phases");
 
         return [.. names.Select((name, i) => (name, nanos[i] / 1e6 / renders)).OrderByDescending(phase => phase.Item2)];
     }
@@ -123,10 +123,10 @@ public static class FrameProfile
         const int Warm = 2_000;
         const int Timed = 50_000;
 
-        for (var i = 0; i < Warm; i++) Native.bcs_profile_noop();
+        for (var i = 0; i < Warm; i++) NativeDiagnostics.bcs_profile_noop();
 
         var started = Stopwatch.GetTimestamp();
-        for (var i = 0; i < Timed; i++) Native.bcs_profile_noop();
+        for (var i = 0; i < Timed; i++) NativeDiagnostics.bcs_profile_noop();
         var ticks = Stopwatch.GetTimestamp() - started;
 
         return ticks * 1e9 / Stopwatch.Frequency / Timed;

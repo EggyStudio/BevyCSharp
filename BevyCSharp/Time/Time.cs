@@ -149,7 +149,7 @@ public sealed unsafe class Time
         get
         {
             float fraction;
-            return Native.bcs_time_fixed_overstep(&fraction) == 0 ? fraction : 0f;
+            return NativeCore.bcs_time_fixed_overstep(&fraction) == 0 ? fraction : 0f;
         }
     }
 
@@ -171,7 +171,7 @@ public sealed unsafe class Time
         get
         {
             int paused;
-            return Native.bcs_time_virtual(&paused, null) == 0 && paused != 0;
+            return NativeCore.bcs_time_virtual(&paused, null) == 0 && paused != 0;
         }
     }
 
@@ -181,7 +181,7 @@ public sealed unsafe class Time
         get
         {
             float speed;
-            return Native.bcs_time_virtual(null, &speed) == 0 ? speed : 1f;
+            return NativeCore.bcs_time_virtual(null, &speed) == 0 ? speed : 1f;
         }
     }
 
@@ -211,14 +211,14 @@ public sealed unsafe class Time
         get
         {
             double seconds;
-            return Native.bcs_time_frame_seconds(&seconds) == 0 ? seconds : 0.0;
+            return NativeCore.bcs_time_frame_seconds(&seconds) == 0 ? seconds : 0.0;
         }
         set
         {
             if (!(value >= 0.0) || double.IsInfinity(value))
                 throw new ArgumentOutOfRangeException(nameof(value), value, "A frame lasts zero seconds, for the machine's clock, or a length more than zero.");
 
-            Native.Check(Native.bcs_time_set_frame_seconds(value), "Time.FrameSeconds");
+            Native.Check(NativeCore.bcs_time_set_frame_seconds(value), "Time.FrameSeconds");
         }
     }
 
@@ -254,21 +254,21 @@ public sealed unsafe class Time
 
     /// <summary>Tells the engine the bits of its hold, the load's one and the still one.</summary>
     private void TellHolds() => Native.Check(
-        Native.bcs_time_set_hold((_holds.HasFlag(ClockHolds.Loads) ? 1u : 0u) | (_still ? 2u : 0u)),
+        NativeCore.bcs_time_set_hold((_holds.HasFlag(ClockHolds.Loads) ? 1u : 0u) | (_still ? 2u : 0u)),
         "Time.Holds");
 
     /// <summary>Stops the game's clock, from the next frame.</summary>
     public void Pause()
     {
         _stepping = 0;
-        Native.Check(Native.bcs_time_set_virtual(1, -1f), "Time.Pause");
+        Native.Check(NativeCore.bcs_time_set_virtual(1, -1f), "Time.Pause");
     }
 
     /// <summary>Starts the game's clock again, from the next frame.</summary>
     public void Resume()
     {
         _stepping = 0;
-        Native.Check(Native.bcs_time_set_virtual(0, -1f), "Time.Resume");
+        Native.Check(NativeCore.bcs_time_set_virtual(0, -1f), "Time.Resume");
     }
 
     /// <summary>
@@ -282,7 +282,7 @@ public sealed unsafe class Time
     /// </remarks>
     public void Step(int frames = 1)
     {
-        Native.Check(Native.bcs_time_set_virtual(0, -1f), "Time.Step");
+        Native.Check(NativeCore.bcs_time_set_virtual(0, -1f), "Time.Step");
         _stepping = Math.Max(1, frames);
     }
 
@@ -293,7 +293,7 @@ public sealed unsafe class Time
     {
         if (!(speed >= 0f)) throw new ArgumentOutOfRangeException(nameof(speed), speed, "A clock runs forward, at zero or more.");
 
-        Native.Check(Native.bcs_time_set_virtual(Paused ? 1 : 0, speed), "Time.SetSpeed");
+        Native.Check(NativeCore.bcs_time_set_virtual(Paused ? 1 : 0, speed), "Time.SetSpeed");
     }
 
     /// <inheritdoc/>

@@ -33,7 +33,7 @@ public sealed unsafe partial class EcsWorld
     /// <exception cref="InvalidOperationException">Every relationship slot the bridge has is taken.</exception>
     /// <exception cref="BevyNativeException">Either entity is gone.</exception>
     public void Relate<TRelation>(Entity source, Entity target) =>
-        Native.Check(Native.bcs_relation_set(RelationSlot<TRelation>(), source.Bits, target.Bits), $"relating {source} to {target} by {typeof(TRelation).Name}");
+        Native.Check(NativeCore.bcs_relation_set(RelationSlot<TRelation>(), source.Bits, target.Bits), $"relating {source} to {target} by {typeof(TRelation).Name}");
 
     /// <summary>
     /// Takes <paramref name="source"/>'s relation by <typeparamref name="TRelation"/> away, as
@@ -41,7 +41,7 @@ public sealed unsafe partial class EcsWorld
     /// </summary>
     /// <exception cref="BevyNativeException">The entity is gone.</exception>
     public void Unrelate<TRelation>(Entity source) =>
-        Native.Check(Native.bcs_relation_remove(RelationSlot<TRelation>(), source.Bits), $"taking {source}'s {typeof(TRelation).Name} away");
+        Native.Check(NativeCore.bcs_relation_remove(RelationSlot<TRelation>(), source.Bits), $"taking {source}'s {typeof(TRelation).Name} away");
 
     /// <summary>
     /// What <paramref name="source"/> relates to by <typeparamref name="TRelation"/>, or
@@ -50,7 +50,7 @@ public sealed unsafe partial class EcsWorld
     public Entity? RelationOf<TRelation>(Entity source)
     {
         ulong target;
-        var answer = Native.bcs_relation_target(RelationSlot<TRelation>(), source.Bits, &target);
+        var answer = NativeCore.bcs_relation_target(RelationSlot<TRelation>(), source.Bits, &target);
         if (answer == NativeStatus.NotPresent) return null;
         Native.Check(answer, $"reading {source}'s {typeof(TRelation).Name}");
         return new Entity(target);
@@ -64,11 +64,11 @@ public sealed unsafe partial class EcsWorld
     public Entity[] RelatedTo<TRelation>(Entity target)
     {
         var slot = RelationSlot<TRelation>();
-        var count = Native.Check(Native.bcs_relation_sources(slot, target.Bits, null, 0), $"reading what relates to {target} by {typeof(TRelation).Name}");
+        var count = Native.Check(NativeCore.bcs_relation_sources(slot, target.Bits, null, 0), $"reading what relates to {target} by {typeof(TRelation).Name}");
         if (count == 0) return [];
 
         var sources = new ulong[count];
-        fixed (ulong* written = sources) Native.Check(Native.bcs_relation_sources(slot, target.Bits, written, count), $"reading what relates to {target} by {typeof(TRelation).Name}");
+        fixed (ulong* written = sources) Native.Check(NativeCore.bcs_relation_sources(slot, target.Bits, written, count), $"reading what relates to {target} by {typeof(TRelation).Name}");
         return [.. sources.Select(bits => new Entity(bits))];
     }
 
@@ -98,7 +98,7 @@ public sealed unsafe partial class EcsWorld
             if (RelationSlots.TryGetValue(typeof(TRelation), out var slot)) return slot;
 
             slot = RelationSlots.Count;
-            var slots = Native.bcs_relation_slots();
+            var slots = NativeCore.bcs_relation_slots();
             if (slot >= slots)
                 throw new InvalidOperationException(
                     $"The bridge has {slots} relationship slots and every one is taken, so {typeof(TRelation).Name} has none. "

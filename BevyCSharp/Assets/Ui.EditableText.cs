@@ -48,7 +48,7 @@ public static unsafe partial class Ui
             Mode = (int)settings.Mode,
         };
 
-        var status = Native.bcs_ui_set_editable_text(node.Bits, &native, settings.Text ?? string.Empty, settings.Allowed);
+        var status = NativeUi.bcs_ui_set_editable_text(node.Bits, &native, settings.Text ?? string.Empty, settings.Allowed);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Making a text field");
         Native.Check(status, $"making {node} a text field");
     }
@@ -57,8 +57,8 @@ public static unsafe partial class Ui
     /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
     public static string? EditableTextOf(Entity node)
     {
-        if (Native.bcs_ui_editable_text(node.Bits, null, 0) == NativeStatus.NotPresent) return null;
-        return Native.ReadText((buffer, capacity) => Native.bcs_ui_editable_text(node.Bits, buffer, capacity), $"reading the text field {node}");
+        if (NativeUi.bcs_ui_editable_text(node.Bits, null, 0) == NativeStatus.NotPresent) return null;
+        return Native.ReadText((buffer, capacity) => NativeUi.bcs_ui_editable_text(node.Bits, buffer, capacity), $"reading the text field {node}");
     }
 
     /// <summary>Gives a text field a cursor and selection of its own.</summary>
@@ -78,7 +78,7 @@ public static unsafe partial class Ui
         Write(native.UnfocusedSelection, settings.UnfocusedSelection);
         Write(native.SelectedText, settings.SelectedText ?? default);
 
-        var status = Native.bcs_ui_set_text_cursor(field.Bits, &native);
+        var status = NativeUi.bcs_ui_set_text_cursor(field.Bits, &native);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Styling a text field's cursor");
         Native.Check(status, $"styling the cursor of the text field {field}");
 
@@ -98,7 +98,7 @@ public static unsafe partial class Ui
     public static TextViewport? TextViewportOf(Entity field)
     {
         var values = stackalloc float[4];
-        var status = Native.bcs_ui_editable_viewport(field.Bits, values);
+        var status = NativeUi.bcs_ui_editable_viewport(field.Bits, values);
         if (status == NativeStatus.NotPresent) return null;
         Native.Check(status, $"reading the viewport of the text field {field}");
         return new TextViewport(new Vec2(values[0], values[1]), new Vec2(values[2], values[3]));
@@ -112,7 +112,7 @@ public static unsafe partial class Ui
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is gone or is no text field, or this build has no renderer.</exception>
     public static void ScrollText(Entity field, Vec2 offset) =>
-        Native.Check(Native.bcs_ui_scroll_editable(field.Bits, offset.X, offset.Y), $"scrolling the text field {field}");
+        Native.Check(NativeUi.bcs_ui_scroll_editable(field.Bits, offset.X, offset.Y), $"scrolling the text field {field}");
 
     /// <summary>
     /// Sets how many lines tall a text field is, its text and cursor left as they are.
@@ -123,14 +123,14 @@ public static unsafe partial class Ui
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is gone or is no text field, or this build has no renderer.</exception>
     public static void SetVisibleLines(Entity field, float lines) =>
-        Native.Check(Native.bcs_ui_set_editable_lines(field.Bits, lines), $"setting the lines of the text field {field}");
+        Native.Check(NativeUi.bcs_ui_set_editable_lines(field.Bits, lines), $"setting the lines of the text field {field}");
 
     /// <summary>Replaces what a text field holds, its cursor put at the end. An empty string clears it.</summary>
     /// <exception cref="BevyNativeException">The entity is gone or is no text field, or this build has no renderer.</exception>
     public static void SetEditableValue(Entity node, string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        Native.Check(Native.bcs_ui_set_editable_value(node.Bits, text), $"setting the text field {node}");
+        Native.Check(NativeUi.bcs_ui_set_editable_value(node.Bits, text), $"setting the text field {node}");
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public static unsafe partial class Ui
         fixed (byte* text = bytes)
         {
             Native.Check(
-                Native.bcs_ui_edit_text(field.Bits, (int)edit.Kind, edit.Select ? 1 : 0, edit.Point.X, edit.Point.Y, text, bytes.Length),
+                NativeUi.bcs_ui_edit_text(field.Bits, (int)edit.Kind, edit.Select ? 1 : 0, edit.Point.X, edit.Point.Y, text, bytes.Length),
                 $"queuing {edit.Kind} on {field}");
         }
     }

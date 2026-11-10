@@ -145,8 +145,8 @@ public static unsafe partial class Render
                 };
 
                 var status = into == AssetHandle.None
-                    ? Native.bcs_mesh_create_from(&native)
-                    : Native.bcs_mesh_write(into.Key, &native);
+                    ? NativeRendering.bcs_mesh_create_from(&native)
+                    : NativeRendering.bcs_mesh_write(into.Key, &native);
 
                 if (status == NativeStatus.InvalidState) RefuseReshapedStream(streams);
 
@@ -222,7 +222,7 @@ public static unsafe partial class Render
 
             fixed (byte* at = name)
             {
-                if (Native.bcs_mesh_stream_of(at, name.Length, &format, &location) != NativeStatus.Ok) continue;
+                if (NativeRendering.bcs_mesh_stream_of(at, name.Length, &format, &location) != NativeStatus.Ok) continue;
             }
 
             if ((MeshStreamFormat)format == stream.Format && location == stream.Location) continue;

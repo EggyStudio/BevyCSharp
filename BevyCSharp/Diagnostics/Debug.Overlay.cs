@@ -223,7 +223,7 @@ public static unsafe partial class Debug
         var timings = Render.Timings();
 
         NativeSceneCounts scene = default;
-        var counted = App.HasRenderer && Native.bcs_render_scene_counts(&scene) == NativeStatus.Ok;
+        var counted = App.HasRenderer && NativeGlobalIllumination.bcs_render_scene_counts(&scene) == NativeStatus.Ok;
 
         var head = new List<string>
         {
@@ -513,7 +513,7 @@ public static unsafe partial class Debug
     /// <summary>The bridge's account of what it holds, its names and numbers.</summary>
     private static Dictionary<string, long> Held()
     {
-        var words = Native.ReadText(Native.bcs_memory_describe, "reading what the bridge holds").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var words = Native.ReadText(NativeDiagnostics.bcs_memory_describe, "reading what the bridge holds").Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var held = new Dictionary<string, long>(StringComparer.Ordinal);
         for (var i = 0; i + 1 < words.Length; i += 2)
         {
@@ -530,7 +530,7 @@ public static unsafe partial class Debug
     {
         if (_system is { } known) return known;
 
-        var lines = Native.ReadText(Native.bcs_system_describe, "reading the system").Split('\n');
+        var lines = Native.ReadText(NativeDiagnostics.bcs_system_describe, "reading the system").Split('\n');
         return _system = lines.Length >= 5 ? lines : [.. lines, .. Enumerable.Repeat("not available", 5 - lines.Length)];
     }
 

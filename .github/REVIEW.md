@@ -550,3 +550,60 @@ passed, 18. The public listing is unchanged.
 
 Shared: a timing test on a shared runner holds the least of a few runs to its budget, each run doing
 the whole work again, for the sibling's budget tests.
+
+Item 119's third cut, the entry points to an internal class an area, in the commit carrying this
+line. Native's 523 entry points leave its eleven files for 14 internal static classes in the areas'
+folders, each entry point in the class of the lowest area of the library that calls it by the plan's
+layers, and the four no library code calls in the class of what they name. NativeCore holds 159 in
+Core and Ecs, the ECS with its components, their reflection, the hierarchy, relations and observers,
+the states and stepping, the windows, input, the clock and colors. NativeRendering holds 191, the
+shader programs among them, NativeUi 37, NativeAnimation 26, NativeAssets 18, NativeAudio 17,
+NativeGizmos 13, NativeDiagnostics 12, NativeRender2d 10, NativeGlobalIllumination 7, NativeImGui 6,
+NativeSky 3 and NativeScenes 1, each in the folder its area's files stand in. Native keeps 23, the
+bridge's version and build, the main thread, the app with its systems, the frame, the log and the
+panics, with Check and ReadText, and LastPanic moves into it from CrashLog, so the bridge's status
+names nothing in Core. A class too long for one file is partial over files by subject, the longest
+347 lines.
+
+Every block moved as it stood, the 523 with Native's seven other members, each found once in the new
+files, and none changed but one cref, the animation's field curve naming
+NativeCore.bcs_reflect_error. Each class has a Library constant, Native's, so each block reads as it
+did. The old banners go, one of them naming a page of HTML and CSS over the ImGui entry points, and
+each file's subjects have banners of their own. 621 calls of the moved entry points are renamed, the
+library's and the tests', with the 22 uses of the primary window's constant, which goes to
+NativeCore with the windows.
+
+Each class runs NativeLoader.Initialize from its static constructor, as Native does, so the library
+is resolved and its ABI compared before the first call into any of them. AbiCheckTests reads the
+static constructor of every class that declares an entry point for that call, and with NativeSky's
+taken out it failed naming NativeSky. The check covers 523 entry points before the cut, in one
+class, and 523 after it, in 14. The mirror structs those entry points pass, through their
+parameters, what they answer, the callbacks they are handed and the fields of each mirror followed
+through pointers and fixed buffers, are 72 of the 73 structs of Bevy.Interop before and after, the
+same 72, the 73rd, NativeScatteringTerm, crossing as an array behind an nint of
+NativeAtmosphereConfig. Both counts were read from the built library by reflection, on each side of
+the cut, by a test written for the reading and not kept.
+
+The plan named five mirrors as naming the areas' enums. AlphaMode, ClearMode, BloomMode and
+SliceTiling are integer fields of those names, and TileData is the one such type a mirror names, in
+NativeTile. The mirrors that name a type above the bridge move to their areas with their namespace
+kept, NativeChunk, which names Entity, into Ecs, and NativeTile and NativeScatteringTerm, which name
+TileData and Vec3, into Assets. Read as the plan's graph reads, Interop names no type of another
+area after the cut, each name it shares with one being a field's.
+
+Two things wait on later cuts. The observers' entry points for the animation's clip events and the
+interface's pointer, widgets and focused keys stay in NativeCore, called from the observers in Ecs
+(Observers.cs), until the smaller cut moves their registration into the animation's and the
+interface's plugins, and they go with it. And NativeLibrary.SetDllImportResolver is set once for
+each assembly, so the split sets the loader's resolver for each project that declares an entry
+point, its classes' static constructors handing the loader their own assembly. AGENTS.md's row for
+Interop, which says Native holds the bcs_* entry points, waits on the owner's word with the rest of
+the table, as the plan says.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed on
+this commit with the one before it, Verdict 53's mend, 2,039 passed, none failed and 3 skipped,
+AbiCheckTests among them. NormTests passed, 18. The public listing is unchanged.
+
+Shared: NativeLibrary.SetDllImportResolver is set once for each assembly, so an engine split into
+projects sets its loader's resolver from each project that declares an import, for the sibling's
+system imports in its split.

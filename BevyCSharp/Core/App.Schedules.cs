@@ -128,7 +128,7 @@ public sealed unsafe partial class App
         var descriptor = new SystemDescriptor(world =>
         {
             NativeStateTransition made;
-            if (Native.bcs_state_step_transition(&made) != NativeStatus.Ok) return;
+            if (NativeCore.bcs_state_step_transition(&made) != NativeStatus.Ok) return;
 
             run(new BehaviorContext(world), new StateTransitionEvent<TState>(
                 (made.Flags & 1) != 0 ? StateRegistry.FromInt<TState>(made.Exited) : null,
@@ -140,7 +140,7 @@ public sealed unsafe partial class App
         _systems.Add(registration);
 
         Native.Check(
-            Native.bcs_state_add_step(
+            NativeCore.bcs_state_add_step(
                 _handle,
                 StateRegistry.SlotForRegistration<TState>(),
                 (int)step,

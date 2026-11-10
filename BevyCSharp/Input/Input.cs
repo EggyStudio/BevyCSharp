@@ -202,7 +202,7 @@ public sealed class Input
     {
         const int Capacity = 32;
         var natives = stackalloc NativeLogicalKey[Capacity];
-        var count = Math.Clamp(Native.bcs_logical_keys(natives, Capacity), 0, Capacity);
+        var count = Math.Clamp(NativeCore.bcs_logical_keys(natives, Capacity), 0, Capacity);
 
         _logicalDown.Clear();
         _logicalPressed.Clear();
@@ -258,7 +258,7 @@ public sealed class Input
     {
         const int Capacity = 16;
         var natives = stackalloc NativeGamepad[Capacity];
-        var count = Native.bcs_gamepads(natives, Capacity);
+        var count = NativeCore.bcs_gamepads(natives, Capacity);
         if (count < 0) count = 0;
 
         var now = new Gamepad[Math.Min(count, Capacity)];

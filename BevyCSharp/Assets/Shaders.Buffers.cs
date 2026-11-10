@@ -44,7 +44,7 @@ public static unsafe partial class Shaders
         fixed (byte* at = bytes)
         {
             return new AssetHandle(Native.Check(
-                Native.bcs_shader_buffer_create(at, bytes.Length, size),
+                NativeRendering.bcs_shader_buffer_create(at, bytes.Length, size),
                 $"making a shader buffer of {Math.Max(size, bytes.Length)} bytes"));
         }
     }
@@ -61,7 +61,7 @@ public static unsafe partial class Shaders
 
         fixed (byte* at = bytes)
         {
-            status = Native.bcs_shader_buffer_write(buffer.Key, at, bytes.Length);
+            status = NativeRendering.bcs_shader_buffer_write(buffer.Key, at, bytes.Length);
         }
 
         if (status == NativeStatus.BufferTooSmall)
@@ -94,7 +94,7 @@ public static unsafe partial class Shaders
     public static int GrowBuffer(AssetHandle buffer, int size)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(size);
-        return Native.Check(Native.bcs_shader_buffer_grow(buffer.Key, size), "growing a shader buffer");
+        return Native.Check(NativeRendering.bcs_shader_buffer_grow(buffer.Key, size), "growing a shader buffer");
     }
 
     /// <summary>How many bytes one slot of an instance buffer takes.</summary>
@@ -123,7 +123,7 @@ public static unsafe partial class Shaders
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
         return new AssetHandle(Native.Check(
-            Native.bcs_shader_instance_buffer_create(capacity),
+            NativeRendering.bcs_shader_instance_buffer_create(capacity),
             $"making an instance buffer of {capacity} slots"));
     }
 
@@ -151,7 +151,7 @@ public static unsafe partial class Shaders
     public static GeometryPool CreateGeometryPool()
     {
         var keys = stackalloc int[3];
-        Native.Check(Native.bcs_shader_geometry_pool_create(keys), "making a geometry pool");
+        Native.Check(NativeRendering.bcs_shader_geometry_pool_create(keys), "making a geometry pool");
         return new GeometryPool(new AssetHandle(keys[0]), new AssetHandle(keys[1]), new AssetHandle(keys[2]));
     }
 
@@ -169,26 +169,26 @@ public static unsafe partial class Shaders
     /// The mesh has not loaded, is not triangles, or the handle names no mesh.
     /// </exception>
     public static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh) =>
-        Native.Check(Native.bcs_shader_geometry_pool_add(pool.Meshes.Key, mesh.Key), "adding a mesh to a geometry pool");
+        Native.Check(NativeRendering.bcs_shader_geometry_pool_add(pool.Meshes.Key, mesh.Key), "adding a mesh to a geometry pool");
 
     /// <summary>
     /// Whether this device can build a <see cref="RayScene"/> and trace rays through one, which
     /// takes hardware ray tracing and a Vulkan backend. Only valid inside a system.
     /// </summary>
-    public static bool SupportsRayQueries => Native.bcs_shader_ray_queries_supported() != 0;
+    public static bool SupportsRayQueries => NativeRendering.bcs_shader_ray_queries_supported() != 0;
 
     /// <summary>
     /// How many sampled textures one stage of a shader may bind on this device, or 0 before it has
     /// one.
     /// </summary>
-    internal static int SampledTexturesPerStage => Native.bcs_shader_sampled_textures_per_stage();
+    internal static int SampledTexturesPerStage => NativeRendering.bcs_shader_sampled_textures_per_stage();
 
     /// <summary>
     /// Whether this device runs mesh shaders, which a program's <see cref="ShaderProgramSettings.DrawMesh"/>
     /// draws with, which takes Vulkan, DirectX 12 or Metal on hardware that has them. Only valid
     /// inside a system.
     /// </summary>
-    public static bool SupportsMeshShaders => Native.bcs_shader_mesh_shaders_supported() != 0;
+    public static bool SupportsMeshShaders => NativeRendering.bcs_shader_mesh_shaders_supported() != 0;
 
     /// <summary>
     /// Makes a scene rays are traced through, over the meshes of a geometry pool, with
@@ -217,7 +217,7 @@ public static unsafe partial class Shaders
     /// </exception>
     public static RayScene CreateRayScene(GeometryPool pool, int capacity) =>
         new(Native.Check(
-            Native.bcs_shader_ray_scene_create(pool.Meshes.Key, capacity),
+            NativeRendering.bcs_shader_ray_scene_create(pool.Meshes.Key, capacity),
             $"making a ray scene of {capacity} slots"));
 
     /// <summary>
@@ -231,7 +231,7 @@ public static unsafe partial class Shaders
     /// <param name="mesh">What <see cref="AddToGeometryPool"/> answered for its mesh.</param>
     public static void SetRaySceneInstance(RayScene scene, int slot, Entity entity, int mesh) =>
         Native.Check(
-            Native.bcs_shader_ray_scene_set(scene.Key, slot, entity.Bits, entity == Entity.None ? -1 : mesh),
+            NativeRendering.bcs_shader_ray_scene_set(scene.Key, slot, entity.Bits, entity == Entity.None ? -1 : mesh),
             $"putting {entity} in slot {slot} of a ray scene");
 
     /// <summary>
@@ -249,7 +249,7 @@ public static unsafe partial class Shaders
     /// <exception cref="BevyNativeException">The scene is gone, or the pool has no such mesh.</exception>
     public static void RebuildRayScene(RayScene scene, int? mesh = null) =>
         Native.Check(
-            Native.bcs_shader_ray_scene_rebuild(scene.Key, mesh ?? -1),
+            NativeRendering.bcs_shader_ray_scene_rebuild(scene.Key, mesh ?? -1),
             "building a ray scene's meshes again");
 
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
@@ -295,7 +295,7 @@ public static unsafe partial class Shaders
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(capacity, 1);
         return new AssetHandle(Native.Check(
-            Native.bcs_shader_material_buffer_create(capacity),
+            NativeRendering.bcs_shader_material_buffer_create(capacity),
             $"making a material buffer of {capacity} slots"));
     }
 
@@ -314,7 +314,7 @@ public static unsafe partial class Shaders
     /// </remarks>
     public static AssetHandle MaterialBufferMask(AssetHandle buffer, int index)
     {
-        var key = Native.bcs_shader_material_buffer_mask(buffer.Key, index);
+        var key = NativeRendering.bcs_shader_material_buffer_mask(buffer.Key, index);
         return key == NativeStatus.NotPresent ? AssetHandle.None : new AssetHandle(Native.Check(key, $"reading mask {index} of {buffer}"));
     }
 
@@ -332,7 +332,7 @@ public static unsafe partial class Shaders
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle is not a material buffer.</exception>
     public static int MaterialBufferUnmasked(AssetHandle buffer) =>
-        Native.Check(Native.bcs_shader_material_buffer_unmasked(buffer.Key), $"counting the textures past the masks of {buffer}");
+        Native.Check(NativeRendering.bcs_shader_material_buffer_unmasked(buffer.Key), $"counting the textures past the masks of {buffer}");
 
     /// <summary>
     /// Puts an entity in a slot of an instance or material buffer, or with
@@ -347,7 +347,7 @@ public static unsafe partial class Shaders
     {
         ArgumentOutOfRangeException.ThrowIfNegative(slot);
 
-        var status = Native.bcs_shader_instance_buffer_set(buffer.Key, slot, entity == Entity.None ? 0 : entity.Bits);
+        var status = NativeRendering.bcs_shader_instance_buffer_set(buffer.Key, slot, entity == Entity.None ? 0 : entity.Bits);
 
         if (status == NativeStatus.NotPresent)
         {
@@ -359,7 +359,7 @@ public static unsafe partial class Shaders
 
     /// <summary>A buffer's size in bytes. Only valid inside a system.</summary>
     public static int BufferSize(AssetHandle buffer) =>
-        Native.Check(Native.bcs_shader_buffer_size(buffer.Key), "reading a shader buffer's size");
+        Native.Check(NativeRendering.bcs_shader_buffer_size(buffer.Key), "reading a shader buffer's size");
 
     /// <summary>
     /// Starts copying a buffer back from the GPU. Only valid inside a system.
@@ -371,7 +371,7 @@ public static unsafe partial class Shaders
     /// kept on the GPU.
     /// </remarks>
     public static BufferRead BeginBufferRead(AssetHandle buffer) =>
-        new(Native.Check(Native.bcs_shader_buffer_read(buffer.Key), "reading a shader buffer back"));
+        new(Native.Check(NativeRendering.bcs_shader_buffer_read(buffer.Key), "reading a shader buffer back"));
 
     /// <summary>
     /// Starts copying an image back from the GPU, as <see cref="BeginBufferRead"/> copies a buffer.
@@ -399,7 +399,7 @@ public static unsafe partial class Shaders
         // had compiled and so before it had an image, toward the world's types.
         if (image == AssetHandle.None)
             throw new ArgumentException("No image was given. Make one with Shaders.CreateImage, or wait for the call that answers one.", nameof(image));
-        return new(Native.Check(Native.bcs_shader_image_read(image.Key), "reading an image back"));
+        return new(Native.Check(NativeRendering.bcs_shader_image_read(image.Key), "reading an image back"));
     }
 
     /// <summary>
@@ -412,7 +412,7 @@ public static unsafe partial class Shaders
 
         const int Probe = 4096;
         byte* probe = stackalloc byte[Probe];
-        var length = Native.bcs_shader_buffer_take(read.Ticket, probe, Probe);
+        var length = NativeRendering.bcs_shader_buffer_take(read.Ticket, probe, Probe);
 
         if (length == NativeStatus.NotPresent) return false;
         Native.Check(length, "taking what a shader buffer read brought back");
@@ -428,7 +428,7 @@ public static unsafe partial class Shaders
         fixed (byte* target = whole)
         {
             Native.Check(
-                Native.bcs_shader_buffer_take(read.Ticket, target, whole.Length),
+                NativeRendering.bcs_shader_buffer_take(read.Ticket, target, whole.Length),
                 "taking what a shader buffer read brought back");
         }
 
@@ -487,7 +487,7 @@ public static unsafe partial class Shaders
         ArgumentOutOfRangeException.ThrowIfZero(depth);
 
         return new AssetHandle(Native.Check(
-            Native.bcs_shader_image_create(width, height, depth, (int)format, Math.Max(1u, mips)),
+            NativeRendering.bcs_shader_image_create(width, height, depth, (int)format, Math.Max(1u, mips)),
             $"making a {width}x{height}x{depth} image for a compute shader"));
     }
 
@@ -531,7 +531,7 @@ public static unsafe partial class Shaders
         fixed (byte* at = bytes)
         {
             return new AssetHandle(Native.Check(
-                Native.bcs_shader_image_create_from(width, height, depth, (int)format, at, bytes.Length),
+                NativeRendering.bcs_shader_image_create_from(width, height, depth, (int)format, at, bytes.Length),
                 $"making a {width}x{height}x{depth} {format} image"));
         }
     }
@@ -574,7 +574,7 @@ public static unsafe partial class Shaders
         fixed (byte* at = bytes)
         {
             Native.Check(
-                Native.bcs_shader_image_write(image.Key, x, y, z, width, height, depth, mip, at, bytes.Length),
+                NativeRendering.bcs_shader_image_write(image.Key, x, y, z, width, height, depth, mip, at, bytes.Length),
                 $"writing a {width}x{height}x{depth} region of an image");
         }
     }

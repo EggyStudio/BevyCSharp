@@ -195,9 +195,9 @@ public sealed unsafe partial class App : IDisposable
         AssetFiles.Serve();
 
         // Any folder named as a source of its own, forgetting the last app's first.
-        Native.Check(Native.bcs_asset_source_add(null, null), "forgetting the last app's asset sources");
+        Native.Check(NativeCore.bcs_asset_source_add(null, null), "forgetting the last app's asset sources");
         foreach (var (name, folder) in Config.AssetSources)
-            Native.Check(Native.bcs_asset_source_add(name, Path.GetFullPath(folder)), $"naming {folder} as the asset source {name}");
+            Native.Check(NativeCore.bcs_asset_source_add(name, Path.GetFullPath(folder)), $"naming {folder} as the asset source {name}");
 
         // Where Bevy reads assets from, and where a streamed read's path starts too, is the
         // directory asked for, or `assets` beside the executable, which is Bevy's own default.
@@ -415,7 +415,7 @@ public sealed unsafe partial class App : IDisposable
         const int Capacity = 16;
 
         NativeWindowEvent* buffer = stackalloc NativeWindowEvent[Capacity];
-        var count = Native.bcs_window_events(buffer, Capacity);
+        var count = NativeCore.bcs_window_events(buffer, Capacity);
         if (count <= 0) return;
 
         for (var i = 0; i < count; i++)
@@ -453,7 +453,7 @@ public sealed unsafe partial class App : IDisposable
     /// </remarks>
     private static void PostFileDrops(MessageBus bus)
     {
-        var count = Native.bcs_file_drops_drain();
+        var count = NativeCore.bcs_file_drops_drain();
         if (count <= 0) return;
 
         for (var i = 0; i < count; i++)
@@ -467,7 +467,7 @@ public sealed unsafe partial class App : IDisposable
                 (buffer, capacity) =>
                 {
                     fixed (int* target = kind)
-                        return Native.bcs_file_drop_path(index, target, buffer, capacity);
+                        return NativeCore.bcs_file_drop_path(index, target, buffer, capacity);
                 },
                 "reading a dropped file's path");
 
@@ -490,7 +490,7 @@ public sealed unsafe partial class App : IDisposable
     /// <remarks>The same drain and read by index as the dropped files, since each carries text.</remarks>
     private static void PostIme(MessageBus bus)
     {
-        var count = Native.bcs_ime_drain();
+        var count = NativeCore.bcs_ime_drain();
         if (count <= 0) return;
 
         for (var i = 0; i < count; i++)
@@ -506,7 +506,7 @@ public sealed unsafe partial class App : IDisposable
                 {
                     fixed (int* kindAt = kind)
                     fixed (int* caretAt = caret)
-                        return Native.bcs_ime_read(index, kindAt, caretAt, buffer, capacity);
+                        return NativeCore.bcs_ime_read(index, kindAt, caretAt, buffer, capacity);
                 },
                 "reading what the input method said");
 

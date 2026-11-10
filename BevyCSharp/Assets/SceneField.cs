@@ -189,7 +189,7 @@ internal static unsafe partial class SceneField
         if (Plan is not { } plan) return 0;
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
-        Native.Check(Native.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
+        Native.Check(NativeGlobalIllumination.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
         return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
@@ -436,7 +436,7 @@ internal static unsafe partial class SceneField
         while (true)
         {
             fixed (NativeFieldDraw* draws = _draws)
-                Native.Check(Native.bcs_scene_field_gather(draws, _draws.Length, &eye, &count), "reading the meshes the scene's distance field is built from");
+                Native.Check(NativeGlobalIllumination.bcs_scene_field_gather(draws, _draws.Length, &eye, &count), "reading the meshes the scene's distance field is built from");
             if (count <= _draws.Length) break;
             _draws = new NativeFieldDraw[Math.Max(count, _draws.Length * 2)];
         }
@@ -528,7 +528,7 @@ internal static unsafe partial class SceneField
         int pool;
         fixed (uint* ask = asked)
         fixed (uint* answer = placed)
-            pool = Native.Check(Native.bcs_scene_field_pool(ask, meshes.Count, answer), "pooling the triangles the scene's distance field is built from");
+            pool = Native.Check(NativeGlobalIllumination.bcs_scene_field_pool(ask, meshes.Count, answer), "pooling the triangles the scene's distance field is built from");
         if (pool != built.Pool.Key)
         {
             built.Pool = new AssetHandle(pool);

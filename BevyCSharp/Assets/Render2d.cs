@@ -42,7 +42,7 @@ public static unsafe partial class Render2d
     /// </param>
     /// <returns><see cref="Entity.None"/> on a build with no renderer.</returns>
     public static Entity SpawnCamera2d(int order = 0) =>
-        new(Native.bcs_render_spawn_camera_2d(order));
+        new(NativeRender2d.bcs_render_spawn_camera_2d(order));
 
     /// <summary>
     /// Builds an atlas layout over a grid of equal tiles and returns it.
@@ -85,7 +85,7 @@ public static unsafe partial class Render2d
         (uint X, uint Y) padding = default,
         (uint X, uint Y) offset = default)
     {
-        var key = Native.bcs_atlas_create(
+        var key = NativeRender2d.bcs_atlas_create(
             tileWidth, tileHeight, columns, rows, padding.X, padding.Y, offset.X, offset.Y);
         Native.Check(key, "building an atlas layout");
 
@@ -128,7 +128,7 @@ public static unsafe partial class Render2d
         fixed (int* given = keys)
         fixed (int* placed = indices)
         {
-            var answer = Native.bcs_atlas_build(given, keys.Length, padding.X, padding.Y, &packed, &layout, placed);
+            var answer = NativeRender2d.bcs_atlas_build(given, keys.Length, padding.X, padding.Y, &packed, &layout, placed);
             if (answer == NativeStatus.NotPresent) return null;
             Native.Check(answer, $"packing {keys.Length} images into an atlas");
         }
@@ -187,7 +187,7 @@ public static unsafe partial class Render2d
             SliceTiling = (int)settings.SliceTiling,
         };
 
-        var status = Native.bcs_render_set_sprite(entity.Bits, &native);
+        var status = NativeRender2d.bcs_render_set_sprite(entity.Bits, &native);
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
@@ -229,7 +229,7 @@ public static unsafe partial class Render2d
         int moved;
         fixed (Entity* entities = sprites)
         fixed (uint* each = frames)
-            moved = Native.bcs_sprite_frames((ulong*)entities, each, sprites.Length);
+            moved = NativeRender2d.bcs_sprite_frames((ulong*)entities, each, sprites.Length);
 
         if (moved == NativeStatus.Unsupported)
             throw new BevyNativeException(

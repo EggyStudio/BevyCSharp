@@ -44,7 +44,7 @@ internal static unsafe class ConsoleStateCommands
             return $"{type!.Name} has no value {value}, only {string.Join(", ", Enum.GetNames(type))}";
 
         Native.Check(
-            Native.bcs_state_set(slot, Convert.ToInt32(parsed, CultureInfo.InvariantCulture)),
+            NativeCore.bcs_state_set(slot, Convert.ToInt32(parsed, CultureInfo.InvariantCulture)),
             $"setting state {type!.Name}");
         return $"{type.Name} goes to {parsed} at its next transition";
     }
@@ -77,7 +77,7 @@ internal static unsafe class ConsoleStateCommands
     private static string ValueOf(Type state, int slot)
     {
         int raw;
-        var status = Native.bcs_state_get(slot, &raw);
+        var status = NativeCore.bcs_state_get(slot, &raw);
         if (status == NativeStatus.NotPresent) return "absent";
 
         Native.Check(status, $"reading state {state.Name}");

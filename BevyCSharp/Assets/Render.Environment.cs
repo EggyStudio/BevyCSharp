@@ -31,7 +31,7 @@ public static unsafe partial class Render
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Native.Check(
-            Native.bcs_render_screenshot(path, AssetHandle.None.Key),
+            NativeRendering.bcs_render_screenshot(path, AssetHandle.None.Key),
             $"capturing what is being drawn to {path}");
     }
 
@@ -53,7 +53,7 @@ public static unsafe partial class Render
         ArgumentException.ThrowIfNullOrEmpty(path);
 
         Native.Check(
-            Native.bcs_render_screenshot(path, target.Key), $"capturing {target} to {path}");
+            NativeRendering.bcs_render_screenshot(path, target.Key), $"capturing {target} to {path}");
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public static unsafe partial class Render
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        Native.Check(Native.bcs_window_screenshot(path, window.Bits), $"capturing window {window} to {path}");
+        Native.Check(NativeRendering.bcs_window_screenshot(path, window.Bits), $"capturing window {window} to {path}");
     }
 
     /// <summary>
@@ -112,7 +112,7 @@ public static unsafe partial class Render
         if (rotation is not { } turn)
         {
             Native.Check(
-                Native.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, null),
+                NativeRendering.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, null),
                 $"lighting {camera} from an image");
 
             return;
@@ -121,7 +121,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
 
         Native.Check(
-            Native.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, parts),
+            NativeRendering.bcs_render_set_image_lighting(camera.Bits, cubemap.Key, intensity, parts),
             $"lighting {camera} from an image");
     }
 
@@ -163,7 +163,7 @@ public static unsafe partial class Render
         if (rotation is not { } turn)
         {
             Native.Check(
-                Native.bcs_render_set_environment_map(
+                NativeRendering.bcs_render_set_environment_map(
                     camera.Bits, diffuse.Key, specular.Key, intensity, null),
                 $"lighting {camera} from a baked environment map");
 
@@ -173,7 +173,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
 
         Native.Check(
-            Native.bcs_render_set_environment_map(
+            NativeRendering.bcs_render_set_environment_map(
                 camera.Bits, diffuse.Key, specular.Key, intensity, parts),
             $"lighting {camera} from a baked environment map");
     }
@@ -221,7 +221,7 @@ public static unsafe partial class Render
         if (falloff is not { } fade)
         {
             Native.Check(
-                Native.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, null),
+                NativeRendering.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, null),
                 $"making {probe} a reflection probe");
 
             return;
@@ -230,7 +230,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[3] { fade.X, fade.Y, fade.Z };
 
         Native.Check(
-            Native.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, parts),
+            NativeRendering.bcs_render_set_reflection_probe(probe.Bits, diffuse.Key, specular.Key, intensity, parts),
             $"making {probe} a reflection probe");
     }
 
@@ -281,7 +281,7 @@ public static unsafe partial class Render
         if (falloff is not { } fade)
         {
             Native.Check(
-                Native.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, null),
+                NativeRendering.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, null),
                 $"making {probe} an irradiance volume");
 
             return;
@@ -290,7 +290,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[3] { fade.X, fade.Y, fade.Z };
 
         Native.Check(
-            Native.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, parts),
+            NativeRendering.bcs_render_set_irradiance_volume(probe.Bits, voxels.Key, intensity, parts),
             $"making {probe} an irradiance volume");
     }
 
@@ -330,7 +330,7 @@ public static unsafe partial class Render
         if (settings is null)
         {
             Native.Check(
-                Native.bcs_render_set_probe_capture(probe.Bits, 0, 0f, null, 0, 0f),
+                NativeRendering.bcs_render_set_probe_capture(probe.Bits, 0, 0f, null, 0, 0f),
                 $"stopping the capture of {probe}");
 
             return;
@@ -339,7 +339,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[3] { settings.Falloff.X, settings.Falloff.Y, settings.Falloff.Z };
 
         Native.Check(
-            Native.bcs_render_set_probe_capture(
+            NativeRendering.bcs_render_set_probe_capture(
                 probe.Bits,
                 settings.Size,
                 settings.Intensity,
@@ -355,7 +355,7 @@ public static unsafe partial class Render
     /// </summary>
     /// <exception cref="BevyNativeException">The entity has no capture.</exception>
     public static void RecaptureProbe(Entity probe) =>
-        Native.Check(Native.bcs_render_recapture_probe(probe.Bits), $"capturing {probe} again");
+        Native.Check(NativeRendering.bcs_render_recapture_probe(probe.Bits), $"capturing {probe} again");
 
     /// <summary>
     /// Lights the scene from the sky this camera is already scattering.
@@ -383,12 +383,12 @@ public static unsafe partial class Render
     /// </exception>
     public static void SetSkyLighting(Entity camera, float intensity = 1f, uint size = 512) =>
         Native.Check(
-            Native.bcs_render_set_sky_lighting(camera.Bits, 1, intensity, size),
+            NativeRendering.bcs_render_set_sky_lighting(camera.Bits, 1, intensity, size),
             $"lighting {camera} from the sky");
 
     /// <summary>Stops lighting the scene from the sky.</summary>
     public static void ClearSkyLighting(Entity camera) => Native.Check(
-        Native.bcs_render_set_sky_lighting(camera.Bits, 0, 0f, 0),
+        NativeRendering.bcs_render_set_sky_lighting(camera.Bits, 0, 0f, 0),
         $"taking the sky lighting off {camera}");
 
     /// <summary>
@@ -426,7 +426,7 @@ public static unsafe partial class Render
         if (rotation is not { } turn)
         {
             Native.Check(
-                Native.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, null),
+                NativeRendering.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, null),
                 $"putting a skybox on {camera}");
 
             return;
@@ -435,7 +435,7 @@ public static unsafe partial class Render
         var parts = stackalloc float[4] { turn.X, turn.Y, turn.Z, turn.W };
 
         Native.Check(
-            Native.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, parts),
+            NativeRendering.bcs_render_set_skybox(camera.Bits, cubemap.Key, brightness, parts),
             $"putting a skybox on {camera}");
     }
 
@@ -454,7 +454,7 @@ public static unsafe partial class Render
         if (settings is null)
         {
             Native.Check(
-                Native.bcs_render_set_grading(camera.Bits, null),
+                NativeRendering.bcs_render_set_grading(camera.Bits, null),
                 $"clearing the color grade on {camera}");
 
             return;
@@ -463,7 +463,7 @@ public static unsafe partial class Render
         var native = settings.ToNative();
 
         Native.Check(
-            Native.bcs_render_set_grading(camera.Bits, &native),
+            NativeRendering.bcs_render_set_grading(camera.Bits, &native),
             $"grading {camera}");
     }
 
@@ -485,7 +485,7 @@ public static unsafe partial class Render
     /// <param name="ev100">The exposure value at ISO 100.</param>
     /// <exception cref="BevyNativeException">The entity is not a camera.</exception>
     public static void SetExposure(Entity camera, float ev100) => Native.Check(
-        Native.bcs_render_set_exposure(camera.Bits, ev100), $"metering {camera}");
+        NativeRendering.bcs_render_set_exposure(camera.Bits, ev100), $"metering {camera}");
 
     /// <summary>
     /// Sets a camera's exposure from the lens it stands in for.
@@ -512,7 +512,7 @@ public static unsafe partial class Render
         float shutter = 0f,
         float sensitivity = 0f) =>
         Native.Check(
-            Native.bcs_render_set_lens_exposure(camera.Bits, aperture, shutter, sensitivity),
+            NativeRendering.bcs_render_set_lens_exposure(camera.Bits, aperture, shutter, sensitivity),
             $"metering {camera} from a lens");
 
     /// <summary>Meters a camera from a lens written down once (<see cref="PhysicalLens"/>).</summary>
@@ -561,7 +561,7 @@ public static unsafe partial class Render
         float average = 0f,
         float threshold = 0f) =>
         Native.Check(
-            Native.bcs_render_set_sorted_transparency(
+            NativeRendering.bcs_render_set_sorted_transparency(
                 camera.Bits, on ? 1 : 0, layers, average, threshold),
             $"sorting transparency for {camera}");
 
@@ -576,7 +576,7 @@ public static unsafe partial class Render
     /// </remarks>
     public static void SetAmbientLight((float R, float G, float B) color, float brightness) =>
         Native.Check(
-            Native.bcs_render_set_ambient_light(0, color.R, color.G, color.B, Math.Max(0f, brightness)),
+            NativeRendering.bcs_render_set_ambient_light(0, color.R, color.G, color.B, Math.Max(0f, brightness)),
             "setting the ambient light");
 
     /// <summary>
@@ -588,7 +588,7 @@ public static unsafe partial class Render
         var (r, g, b) = color ?? (1f, 1f, 1f);
 
         Native.Check(
-            Native.bcs_render_set_ambient_light(camera.Bits, r, g, b, color is null ? -1f : Math.Max(0f, brightness)),
+            NativeRendering.bcs_render_set_ambient_light(camera.Bits, r, g, b, color is null ? -1f : Math.Max(0f, brightness)),
             $"setting the ambient light of {camera}");
     }
 
@@ -620,7 +620,7 @@ public static unsafe partial class Render
     /// </param>
     public static void SetAmbientOcclusion(Entity camera, AmbientOcclusionQuality? quality, float thickness = 0f) =>
         Native.Check(
-            Native.bcs_render_set_ambient_occlusion(camera.Bits, quality is { } level ? (int)level : -1, thickness),
+            NativeRendering.bcs_render_set_ambient_occlusion(camera.Bits, quality is { } level ? (int)level : -1, thickness),
             $"setting the ambient occlusion of {camera}");
 
     /// <summary>
@@ -640,7 +640,7 @@ public static unsafe partial class Render
     /// prepass, and a camera with none ended the app the frame materials went deferred.
     /// </remarks>
     public static void SetDeferredRendering(bool on) =>
-        Native.Check(Native.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");
+        Native.Check(NativeRendering.bcs_render_set_deferred(on ? 1 : 0), "switching between forward and deferred");
 
     /// <summary>
     /// Draws contact shadows on a camera, or with <see langword="null"/> stops. Only valid inside a
@@ -664,8 +664,8 @@ public static unsafe partial class Render
     public static void SetContactShadows(Entity camera, ContactShadowSettings? settings) =>
         Native.Check(
             settings is { } given
-                ? Native.bcs_render_set_contact_shadows(camera.Bits, Math.Max(1u, given.Steps), given.Thickness, given.Length)
-                : Native.bcs_render_set_contact_shadows(camera.Bits, 0, 0f, 0f),
+                ? NativeRendering.bcs_render_set_contact_shadows(camera.Bits, Math.Max(1u, given.Steps), given.Thickness, given.Length)
+                : NativeRendering.bcs_render_set_contact_shadows(camera.Bits, 0, 0f, 0f),
             $"setting contact shadows on {camera}");
 
     /// <summary>
@@ -689,7 +689,7 @@ public static unsafe partial class Render
         if (settings is null)
         {
             Native.Check(
-                Native.bcs_render_set_screen_space_reflections(camera.Bits, null),
+                NativeRendering.bcs_render_set_screen_space_reflections(camera.Bits, null),
                 $"taking reflections off {camera}");
             return;
         }
@@ -710,7 +710,7 @@ public static unsafe partial class Render
         };
 
         Native.Check(
-            Native.bcs_render_set_screen_space_reflections(camera.Bits, &config),
+            NativeRendering.bcs_render_set_screen_space_reflections(camera.Bits, &config),
             $"turning reflections on for {camera}");
     }
 }

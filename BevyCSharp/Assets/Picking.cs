@@ -35,7 +35,7 @@ public static unsafe class Picking
         do
         {
             // An app that did not ask for meshes to be picked has no queue, and nothing in it.
-            count = Native.bcs_pick_events(buffer, BatchSize);
+            count = NativeRendering.bcs_pick_events(buffer, BatchSize);
             if (count == NativeStatus.Unsupported) return [];
             Native.Check(count, "draining the scene picks");
 
@@ -103,7 +103,7 @@ public static unsafe class Picking
         var texel = stackalloc float[2];
         ulong hit;
 
-        if (Native.bcs_pick_ray(from, towards, &hit, at, facing, texel) != 0) return false;
+        if (NativeRendering.bcs_pick_ray(from, towards, &hit, at, facing, texel) != 0) return false;
 
         entity = new Entity(hit);
         point = new Vec3(at[0], at[1], at[2]);
@@ -130,7 +130,7 @@ public static unsafe class Picking
     public static PointerId SpawnPointer()
     {
         ulong number;
-        Native.Check(Native.bcs_pointer_spawn(&number), "making a pointer");
+        Native.Check(NativeRendering.bcs_pointer_spawn(&number), "making a pointer");
         return new PointerId(PointerKind.Custom, number);
     }
 
@@ -192,7 +192,7 @@ public static unsafe class Picking
         var facing = stackalloc float[] { normal.X, normal.Y, normal.Z };
 
         Native.Check(
-            Native.bcs_pointer_capture(
+            NativeRendering.bcs_pointer_capture(
                 (int)pointer.Kind,
                 pointer.Number,
                 entity.Bits,
@@ -212,7 +212,7 @@ public static unsafe class Picking
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static void ReleaseCapture(PointerId pointer) =>
         Native.Check(
-            Native.bcs_pointer_release_capture((int)pointer.Kind, pointer.Number),
+            NativeRendering.bcs_pointer_release_capture((int)pointer.Kind, pointer.Number),
             $"releasing {pointer}");
 
     /// <summary>
@@ -232,10 +232,10 @@ public static unsafe class Picking
         get
         {
             int mode;
-            Native.Check(Native.bcs_dev_tools_picking_debug(&mode), "reading picking's debug mode");
+            Native.Check(NativeRendering.bcs_dev_tools_picking_debug(&mode), "reading picking's debug mode");
             return (PickingDebugMode)mode;
         }
-        set => Native.Check(Native.bcs_dev_tools_set_picking_debug((int)value), "setting picking's debug mode");
+        set => Native.Check(NativeRendering.bcs_dev_tools_set_picking_debug((int)value), "setting picking's debug mode");
     }
 
     private static void Send(PointerId pointer, AssetHandle image, Vec2 position, int action, PointerButton button)
@@ -244,7 +244,7 @@ public static unsafe class Picking
             throw new ArgumentException("Only a pointer of the game's own, from SpawnPointer, is moved and pressed here.", nameof(pointer));
 
         Native.Check(
-            Native.bcs_pointer_input(pointer.Number, image.Key, position.X, position.Y, action, (int)button),
+            NativeRendering.bcs_pointer_input(pointer.Number, image.Key, position.X, position.Y, action, (int)button),
             $"moving {pointer} on {image}");
     }
 }

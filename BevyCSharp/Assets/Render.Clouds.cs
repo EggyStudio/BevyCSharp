@@ -200,7 +200,7 @@ internal static class Clouds
     // clouds over it where the camera has gained one, or takes them off where it has lost it.
     private static void Light(Entity camera, Camera clouds)
     {
-        var key = Native.bcs_render_sky_lighting_cube(camera.Bits);
+        var key = NativeSky.bcs_render_sky_lighting_cube(camera.Bits);
         var cube = key >= 0 ? new AssetHandle(key) : AssetHandle.None;
         if (cube == clouds.SkyCube) return;
         if (cube.IsValid && !Render.TryImageSize(cube, out _, out _, out _)) return;
@@ -331,7 +331,7 @@ internal static class Clouds
             .Set("shadow_up", new Vector4(up.X, up.Y, up.Z, Math.Clamp(clouds.Settings.ShadowStrength, 0f, 1f)));
         if (clouds.Shadowed != light || clouds.Middle != middle)
         {
-            Native.Check(Native.bcs_render_set_directional_cookie(light.Bits, clouds.ShadowImage.Key, half, middle.X, middle.Y, middle.Z),
+            Native.Check(NativeSky.bcs_render_set_directional_cookie(light.Bits, clouds.ShadowImage.Key, half, middle.X, middle.Y, middle.Z),
                 $"laying the clouds' shadow over {light}");
             clouds.Shadowed = light;
         }
@@ -343,7 +343,7 @@ internal static class Clouds
     private static void Uncookie(Camera clouds)
     {
         if (clouds.Shadowed.IsNone) return;
-        Native.bcs_render_set_directional_cookie(clouds.Shadowed.Bits, -1, 0f, 0f, 0f, 0f);
+        NativeSky.bcs_render_set_directional_cookie(clouds.Shadowed.Bits, -1, 0f, 0f, 0f, 0f);
         clouds.Shadowed = Entity.None;
     }
 

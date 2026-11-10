@@ -139,7 +139,7 @@ internal static unsafe partial class GiReference
                 }
                 if (rays.Trace.Program.State != ShaderProgramState.Ready) return null;
                 fixed (byte* lights = rays.LightBytes)
-                    Native.Check(Native.bcs_gi_lights((NativeGiLights*)lights), "reading the lights the probe's reading is lit by");
+                    Native.Check(NativeGlobalIllumination.bcs_gi_lights((NativeGiLights*)lights), "reading the lights the probe's reading is lit by");
                 Shaders.WriteBuffer<byte>(rays.Lights, rays.LightBytes);
                 var share = Math.Min(MostAFrame, job.Samples - job.Added);
                 ReadOnlySpan<uint> counts = [(uint)share, (uint)job.Added, (uint)job.Faces, (uint)job.Texels];

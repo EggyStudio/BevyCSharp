@@ -281,7 +281,7 @@ internal static unsafe partial class GiReference
         // camera can be one drawing nothing, and a read with global illumination off would ask for
         // that camera's picture size until it gave up.
         NativeSceneCounts counts = default;
-        if (Native.bcs_render_scene_counts(&counts) != NativeStatus.Ok || counts.Camera == 0) return Entity.None;
+        if (NativeGlobalIllumination.bcs_render_scene_counts(&counts) != NativeStatus.Ok || counts.Camera == 0) return Entity.None;
         var view = new Entity(counts.Camera);
         return ecs.IsAlive(view) && ecs.Get<Camera3dRef>(view) is not null ? view : Entity.None;
     }
@@ -455,7 +455,7 @@ internal static unsafe partial class GiReference
         if (rays.Trace.Program.State != ShaderProgramState.Ready) return;
 
         fixed (byte* lights = rays.LightBytes)
-            Native.Check(Native.bcs_gi_lights((NativeGiLights*)lights), "reading the lights the reference is lit by");
+            Native.Check(NativeGlobalIllumination.bcs_gi_lights((NativeGiLights*)lights), "reading the lights the reference is lit by");
         Shaders.WriteBuffer<byte>(rays.Lights, rays.LightBytes);
 
         var share = Math.Clamp(PathsAFrame / Math.Max(1, job.Width * job.Height), 1, MostAFrame);

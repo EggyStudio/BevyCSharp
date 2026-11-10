@@ -58,7 +58,7 @@ public static unsafe class UiGrid
             };
 
             Interop.Native.Check(
-                Interop.Native.bcs_ui_set_grid(node.Bits, &config),
+                Interop.NativeUi.bcs_ui_set_grid(node.Bits, &config),
                 $"laying {node} out as a grid");
         }
     }
@@ -79,7 +79,7 @@ public static unsafe class UiGrid
         ArgumentNullException.ThrowIfNull(placement);
 
         Interop.Native.Check(
-            Interop.Native.bcs_ui_set_grid_placement(
+            Interop.NativeUi.bcs_ui_set_grid_placement(
                 node.Bits,
                 placement.Row,
                 placement.RowSpan,

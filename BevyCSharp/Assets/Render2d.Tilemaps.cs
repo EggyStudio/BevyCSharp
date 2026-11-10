@@ -59,7 +59,7 @@ public static unsafe partial class Render2d
         var packed = Pack(tiles);
         fixed (NativeTile* first = packed)
         {
-            var status = Native.bcs_tilemap_insert(entity.Bits, &native, first, packed.Length);
+            var status = NativeRender2d.bcs_tilemap_insert(entity.Bits, &native, first, packed.Length);
             if (status == NativeStatus.Unsupported)
             {
                 // A build with the renderer refuses too, in a run that draws nothing.
@@ -88,7 +88,7 @@ public static unsafe partial class Render2d
         var packed = Pack(tiles);
         fixed (NativeTile* first = packed)
         {
-            var status = Native.bcs_tilemap_write(entity.Bits, start, first, packed.Length);
+            var status = NativeRender2d.bcs_tilemap_write(entity.Bits, start, first, packed.Length);
             if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Drawing a tilemap");
             Native.Check(status, $"writing {tiles.Length} tiles of {entity} from {start}");
         }
@@ -103,7 +103,7 @@ public static unsafe partial class Render2d
         ArgumentNullException.ThrowIfNull(world);
 
         NativeTile tile;
-        var status = Native.bcs_tilemap_read(entity.Bits, index, &tile, 1);
+        var status = NativeRender2d.bcs_tilemap_read(entity.Bits, index, &tile, 1);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Reading a tilemap");
         Native.Check(status, $"reading tile {index} of {entity}");
         return tile.ToTile();

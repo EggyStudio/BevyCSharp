@@ -71,7 +71,7 @@ public static partial class BehaviorRunners
             if (_guard is null)
             {
                 NativeRowGuard* guard;
-                Native.Check(Native.bcs_ecs_row_guard(&guard), "reading the row guard");
+                Native.Check(NativeCore.bcs_ecs_row_guard(&guard), "reading the row guard");
                 _guard = guard;
             }
 
@@ -186,7 +186,7 @@ public static partial class BehaviorRunners
     /// <summary>Writes a method's copy of a component to its entity, where the entity still carries it.</summary>
     private static unsafe void Put<T>(Entity entity, in T value) where T : unmanaged
     {
-        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ChunkId);
+        var pointer = NativeCore.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ChunkId);
         if (pointer is not null) Unsafe.WriteUnaligned(pointer, value);
     }
 }

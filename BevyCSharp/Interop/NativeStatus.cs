@@ -71,7 +71,7 @@ public static class NativeStatus
         string panic;
         try
         {
-            panic = CrashLog.LastPanic();
+            panic = Native.LastPanic();
         }
         catch (Exception error) when (error is BevyNativeException or DllNotFoundException or EntryPointNotFoundException)
         {

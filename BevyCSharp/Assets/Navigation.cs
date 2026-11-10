@@ -43,7 +43,7 @@ public static unsafe class Navigation
     public static Entity? Move(CompassOctant direction)
     {
         ulong moved;
-        var status = Native.bcs_nav_move((int)direction, &moved);
+        var status = NativeUi.bcs_nav_move((int)direction, &moved);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Moving the input focus by direction");
         Native.Check(status, $"moving the input focus {direction}");
         return status == 1 ? new Entity(moved) : null;
@@ -95,7 +95,7 @@ public static unsafe class Navigation
         int status;
         fixed (ulong* at = bits)
         {
-            status = Native.bcs_nav_edges(at, bits.Length, (int)direction, looping ? 1 : 0);
+            status = NativeUi.bcs_nav_edges(at, bits.Length, (int)direction, looping ? 1 : 0);
         }
 
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Drawing navigation edges");
@@ -117,14 +117,14 @@ public static unsafe class Navigation
 
     private static void Edge(Entity from, Entity to, CompassOctant direction, int kind, string doing)
     {
-        var status = Native.bcs_nav_edge(from.Bits, to.Bits, (int)direction, kind);
+        var status = NativeUi.bcs_nav_edge(from.Bits, to.Bits, (int)direction, kind);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Drawing navigation edges");
         Native.Check(status, $"{doing} from {from} {direction}");
     }
 
     private static void Forgetting(Entity node, string doing)
     {
-        var status = Native.bcs_nav_forget(node.Bits);
+        var status = NativeUi.bcs_nav_forget(node.Bits);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Taking navigation edges out");
         Native.Check(status, doing);
     }

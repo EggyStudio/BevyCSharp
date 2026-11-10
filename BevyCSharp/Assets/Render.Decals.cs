@@ -38,7 +38,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_forward_decal(&native, depthFadeFactor, depthBias);
+        var key = NativeRendering.bcs_material_create_forward_decal(&native, depthFadeFactor, depthBias);
         if (key == NativeStatus.Unsupported)
             throw App.HasRenderer
                 ? new BevyNativeException(NativeStatus.Unsupported, "Building a decal material needs a run that draws, windowed or offscreen. A headless run has no decals to draw.")
@@ -64,5 +64,5 @@ public static unsafe partial class Render
     /// The material is no decal material, the entity does not exist, or this build has no renderer.
     /// </exception>
     public static void SetForwardDecal(Entity entity, AssetHandle material) =>
-        Native.Check(Native.bcs_render_set_forward_decal(entity.Bits, material.Key), $"making {entity} a forward decal");
+        Native.Check(NativeRendering.bcs_render_set_forward_decal(entity.Bits, material.Key), $"making {entity} a forward decal");
 }

@@ -125,7 +125,7 @@ public sealed class BehaviorContext
     public bool TryRunSchedule(ScheduleLabel schedule)
     {
         ArgumentException.ThrowIfNullOrEmpty(schedule.Name);
-        return Interop.Native.Check(Interop.Native.bcs_schedule_run(schedule.Name), $"running schedule '{schedule.Name}'") == 1;
+        return Interop.Native.Check(Interop.NativeCore.bcs_schedule_run(schedule.Name), $"running schedule '{schedule.Name}'") == 1;
     }
 
     /// <summary>Asks the engine to shut down after this frame.</summary>

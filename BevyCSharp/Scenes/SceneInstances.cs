@@ -597,7 +597,7 @@ public static partial class SceneInstances
         int read;
         do
         {
-            read = Interop.Native.bcs_world_instances_ready(bits, Batch);
+            read = Interop.NativeScenes.bcs_world_instances_ready(bits, Batch);
             for (var i = 0; i < read; i++) Ready(world, bus, new Entity(bits[i]), apply: true);
         }
         while (read == Batch);

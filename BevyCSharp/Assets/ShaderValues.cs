@@ -142,7 +142,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_bytes(kind, id, named, at, bytes.Length),
+                    NativeRendering.bcs_shader_set_bytes(kind, id, named, at, bytes.Length),
                     name,
                     target);
             }
@@ -185,7 +185,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_image(kind, id, named, index, image.Key, mip),
+                    NativeRendering.bcs_shader_set_image(kind, id, named, index, image.Key, mip),
                     name,
                     target);
             }
@@ -204,7 +204,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_ray_scene(kind, id, named, scene.Key),
+                    NativeRendering.bcs_shader_set_ray_scene(kind, id, named, scene.Key),
                     name,
                     target);
             }
@@ -227,7 +227,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_buffer(kind, id, named, buffer.Key),
+                    NativeRendering.bcs_shader_set_buffer(kind, id, named, buffer.Key),
                     name,
                     target);
             }
@@ -254,7 +254,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_sampler(kind, id, named, index, &config),
+                    NativeRendering.bcs_shader_set_sampler(kind, id, named, index, &config),
                     name,
                     target);
             }
@@ -272,7 +272,7 @@ public static unsafe class ShaderValues
 
             fixed (byte* named = ShaderValues.Utf8(name))
             {
-                Native.Check(Native.bcs_shader_unset(kind, id, named), $"taking {name} off a shader");
+                Native.Check(NativeRendering.bcs_shader_unset(kind, id, named), $"taking {name} off a shader");
             }
 
             return target;
@@ -304,7 +304,7 @@ public static unsafe class ShaderValues
             {
                 var (kind, id) = target.Target;
                 var text = Native.ReadText(
-                    (buffer, capacity) => Native.bcs_shader_target_names(kind, id, buffer, capacity),
+                    (buffer, capacity) => NativeRendering.bcs_shader_target_names(kind, id, buffer, capacity),
                     "reading what a shader declares");
 
                 return ShaderParameter.Parse(text);
@@ -322,7 +322,7 @@ public static unsafe class ShaderValues
             fixed (byte* named = ShaderValues.Utf8(name))
             {
                 ShaderValues.Refuse(
-                    Native.bcs_shader_set_numbers(kind, id, named, (int)scalar, components, (byte*)data, count),
+                    NativeRendering.bcs_shader_set_numbers(kind, id, named, (int)scalar, components, (byte*)data, count),
                     name,
                     target);
             }
@@ -339,7 +339,7 @@ public static unsafe class ShaderValues
         fixed (byte* at = named)
         {
             var length = Native.Check(
-                Native.bcs_shader_get_numbers(target.Kind, target.Id, at, null, 0),
+                NativeRendering.bcs_shader_get_numbers(target.Kind, target.Id, at, null, 0),
                 $"reading {name} from a shader");
 
             var items = new TItem[length / sizeof(TItem)];
@@ -347,7 +347,7 @@ public static unsafe class ShaderValues
             fixed (TItem* into = items)
             {
                 Native.Check(
-                    Native.bcs_shader_get_numbers(target.Kind, target.Id, at, (byte*)into, items.Length * sizeof(TItem)),
+                    NativeRendering.bcs_shader_get_numbers(target.Kind, target.Id, at, (byte*)into, items.Length * sizeof(TItem)),
                     $"reading {name} from a shader");
             }
 
@@ -388,7 +388,7 @@ public static unsafe class ShaderValues
         if (status == NativeStatus.InvalidState)
         {
             var reason = Native.ReadText(
-                (buffer, capacity) => Native.bcs_shader_last_error(buffer, capacity),
+                (buffer, capacity) => NativeRendering.bcs_shader_last_error(buffer, capacity),
                 "reading why a shader value was refused");
 
             throw new ArgumentException(reason.Length > 0 ? reason : $"{name} was not set.", nameof(name));

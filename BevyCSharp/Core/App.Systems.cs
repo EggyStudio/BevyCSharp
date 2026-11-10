@@ -387,7 +387,7 @@ public sealed unsafe partial class App : IDisposable
     private static int? ReadSlot(int slot)
     {
         int value;
-        return Native.bcs_state_get(slot, &value) == NativeStatus.Ok ? value : null;
+        return NativeCore.bcs_state_get(slot, &value) == NativeStatus.Ok ? value : null;
     }
 
     /// <summary>Adds a system to the dispatcher for its stage.</summary>

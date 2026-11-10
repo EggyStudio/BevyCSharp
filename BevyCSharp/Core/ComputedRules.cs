@@ -48,7 +48,7 @@ internal static unsafe class ComputedRules
 
             if (_registered) return;
 
-            Native.Check(Native.bcs_computed_rule(&Compute), "giving the bridge the computed state rules");
+            Native.Check(NativeCore.bcs_computed_rule(&Compute), "giving the bridge the computed state rules");
             _registered = true;
         }
     }
@@ -81,7 +81,7 @@ internal static unsafe class ComputedRules
 
             if (_jointsRegistered) return;
 
-            Native.Check(Native.bcs_joint_rule(&Joint), "giving the bridge the joint state rules");
+            Native.Check(NativeCore.bcs_joint_rule(&Joint), "giving the bridge the joint state rules");
             _jointsRegistered = true;
         }
     }

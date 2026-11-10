@@ -124,7 +124,7 @@ public static class NativeComponents
             var key = layout is null ? name : name + "\n" + layout;
             if (Cache.TryGetValue(key, out var cached)) return cached;
 
-            var id = Native.bcs_component_id_of(name);
+            var id = NativeCore.bcs_component_id_of(name);
             if (id == NativeStatus.NoWorld)
                 throw new BevyNativeException(
                     NativeStatus.NoWorld,
@@ -189,7 +189,7 @@ public static class NativeComponents
         uint actualSize;
         uint actualAlign;
         Native.Check(
-            Native.bcs_component_layout(id, &actualSize, &actualAlign),
+            NativeCore.bcs_component_layout(id, &actualSize, &actualAlign),
             $"reading the layout of '{name}'");
 
         if (actualSize != (uint)expectedSize)

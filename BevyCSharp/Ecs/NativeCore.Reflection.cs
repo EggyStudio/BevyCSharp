@@ -1,41 +1,10 @@
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Bevy.Interop;
 
-internal static unsafe partial class Native
+internal static unsafe partial class NativeCore
 {
-    // -- Introspection
-
-    /// <summary>Copies every live entity into a buffer, returning how many exist.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_ecs_entities(ulong* buffer, int capacity);
-
-    /// <summary>Copies the components an entity carries, returning how many it has.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_ecs_components_of(ulong entity, int* buffer, int capacity);
-
-    /// <summary>Writes a component's name into a buffer, returning the bytes it needs.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_component_name(int component, byte* buffer, int capacity);
-
-    /// <summary>Writes an entity's name into a buffer, returning the bytes it needs.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_ecs_entity_name(ulong entity, byte* buffer, int capacity);
-
-    /// <summary>Gives an entity a name, or removes it when the name is empty.</summary>
-    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_ecs_set_entity_name(ulong entity, string name);
-
     // -- Bevy's components through its reflection
-    //
-    // A component is named by its full Rust type path and a field by Bevy's reflect path, and
-    // values cross as JSON. Every failure leaves its reason for bcs_reflect_error.
 
     /// <summary>Describes every reflected component and the types its fields reach, as JSON.</summary>
     [LibraryImport(Library)]

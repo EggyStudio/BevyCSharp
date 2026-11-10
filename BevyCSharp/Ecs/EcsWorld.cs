@@ -28,7 +28,7 @@ public sealed unsafe partial class EcsWorld
     /// <summary>Spawns an entity with no components.</summary>
     public Entity Spawn()
     {
-        var bits = Native.bcs_ecs_spawn();
+        var bits = NativeCore.bcs_ecs_spawn();
         if (bits == 0)
             throw new BevyNativeException(
                 NativeStatus.NoWorld,
@@ -87,7 +87,7 @@ public sealed unsafe partial class EcsWorld
     /// <exception cref="BevyNativeException">The handle names no scene, or no world is loaned.</exception>
     public Entity SpawnScene(AssetHandle scene)
     {
-        var bits = Native.bcs_scene_spawn(scene.Key);
+        var bits = NativeCore.bcs_scene_spawn(scene.Key);
         if (bits == 0)
             throw new BevyNativeException(
                 NativeStatus.NoComponent,
@@ -119,7 +119,7 @@ public sealed unsafe partial class EcsWorld
     {
         if (!IsAlive(entity)) return Entity.None;
 
-        var bits = Native.bcs_ecs_clone(entity.Bits);
+        var bits = NativeCore.bcs_ecs_clone(entity.Bits);
         if (bits == 0)
             throw new BevyNativeException(
                 NativeStatus.NoWorld,
@@ -132,7 +132,7 @@ public sealed unsafe partial class EcsWorld
     /// <returns><see langword="false"/> if the handle was already stale.</returns>
     public bool Despawn(Entity entity)
     {
-        var status = Native.bcs_ecs_despawn(entity.Bits);
+        var status = NativeCore.bcs_ecs_despawn(entity.Bits);
         if (status == NativeStatus.NoEntity) return false;
         Native.Check(status, "Despawn");
         return true;
@@ -170,7 +170,7 @@ public sealed unsafe partial class EcsWorld
     /// </example>
     public void DespawnOnExit<TState>(Entity entity, TState state) where TState : struct, Enum =>
         Native.Check(
-            Native.bcs_state_despawn_on_exit(
+            NativeCore.bcs_state_despawn_on_exit(
                 entity.Bits, StateRegistry.SlotOf<TState>(), StateRegistry.ToInt(state)),
             $"scoping {entity} to {typeof(TState).Name}");
 
@@ -189,7 +189,7 @@ public sealed unsafe partial class EcsWorld
     /// </exception>
     public void DespawnOnEnter<TState>(Entity entity, TState state) where TState : struct, Enum =>
         Native.Check(
-            Native.bcs_state_despawn_on_enter(
+            NativeCore.bcs_state_despawn_on_enter(
                 entity.Bits, StateRegistry.SlotOf<TState>(), StateRegistry.ToInt(state)),
             $"scoping {entity} to entering {typeof(TState).Name}");
 
@@ -215,7 +215,7 @@ public sealed unsafe partial class EcsWorld
 
     /// <summary>True when the handle still refers to a live entity.</summary>
     public bool IsAlive(Entity entity) =>
-        Native.Check(Native.bcs_ecs_alive(entity.Bits), "IsAlive") != 0;
+        Native.Check(NativeCore.bcs_ecs_alive(entity.Bits), "IsAlive") != 0;
 
     /// <summary>Adds or replaces a component on an entity.</summary>
     /// <remarks>
@@ -236,7 +236,7 @@ public sealed unsafe partial class EcsWorld
         where T : unmanaged
     {
         Native.Check(
-            Native.bcs_ecs_insert(entity.Bits, ComponentType<T>.ValueId, &component),
+            NativeCore.bcs_ecs_insert(entity.Bits, ComponentType<T>.ValueId, &component),
             $"Add<{typeof(T).Name}>");
         Wrote<T>(entity, file, line);
     }
@@ -248,7 +248,7 @@ public sealed unsafe partial class EcsWorld
     /// <summary>Removes a component. Succeeds whether or not it was present.</summary>
     public bool Remove<T>(Entity entity) where T : unmanaged
     {
-        var status = Native.bcs_ecs_remove(entity.Bits, ComponentType<T>.Id);
+        var status = NativeCore.bcs_ecs_remove(entity.Bits, ComponentType<T>.Id);
         if (status == NativeStatus.NoEntity) return false;
         Native.Check(status, $"Remove<{typeof(T).Name}>");
         return true;
@@ -257,7 +257,7 @@ public sealed unsafe partial class EcsWorld
     /// <summary>True when an entity carries a component.</summary>
     public bool Has<T>(Entity entity) where T : unmanaged
     {
-        var status = Native.bcs_ecs_has(entity.Bits, ComponentType<T>.Id);
+        var status = NativeCore.bcs_ecs_has(entity.Bits, ComponentType<T>.Id);
         return status > 0;
     }
 
@@ -265,7 +265,7 @@ public sealed unsafe partial class EcsWorld
     /// <remarks>A read marks nothing changed, where <see cref="GetRef{T}"/> and <see cref="Mutate{T}"/> do.</remarks>
     public bool TryGet<T>(Entity entity, out T component) where T : unmanaged
     {
-        var pointer = Native.bcs_ecs_read_ptr(entity.Bits, ComponentType<T>.ValueId);
+        var pointer = NativeCore.bcs_ecs_read_ptr(entity.Bits, ComponentType<T>.ValueId);
         if (pointer is null)
         {
             component = default;
@@ -292,13 +292,13 @@ public sealed unsafe partial class EcsWorld
     /// <exception cref="BevyNativeException">The entity does not carry the component.</exception>
     public ref T GetRef<T>(Entity entity) where T : unmanaged
     {
-        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
+        var pointer = NativeCore.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
         if (pointer is null)
         {
             // A null pointer is the same answer for a missing component and for no world at all,
             // and a behavior method running on a worker thread gets the second, a different
             // mistake with a different fix, so the two are told apart before saying which.
-            if (Native.bcs_ecs_has(entity.Bits, ComponentType<T>.ValueId) == NativeStatus.NoWorld)
+            if (NativeCore.bcs_ecs_has(entity.Bits, ComponentType<T>.ValueId) == NativeStatus.NoWorld)
                 throw new BevyNativeException(
                     NativeStatus.NoWorld,
                     $"GetRef<{typeof(T).Name}> failed: the world is not on loan here, as on the worker threads a "
@@ -319,7 +319,7 @@ public sealed unsafe partial class EcsWorld
     public bool Mutate<T>(Entity entity, Func<T, T> mutate) where T : unmanaged
     {
         ArgumentNullException.ThrowIfNull(mutate);
-        var pointer = Native.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
+        var pointer = NativeCore.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ValueId);
         if (pointer is null) return false;
 
         ref var slot = ref Unsafe.AsRef<T>(pointer);
@@ -335,20 +335,20 @@ public sealed unsafe partial class EcsWorld
     /// For a behavior runner whose rows were listed unmarked under a <c>[Changed]</c> filter, which
     /// marks only the rows its method runs on.
     /// </remarks>
-    internal void MarkChanged(Entity entity, int componentId) => Native.bcs_ecs_get_ptr(entity.Bits, componentId);
+    internal void MarkChanged(Entity entity, int componentId) => NativeCore.bcs_ecs_get_ptr(entity.Bits, componentId);
 
     /// <summary>True when a component changed since the previous frame.</summary>
     public bool Changed<T>(Entity entity) where T : unmanaged =>
-        Native.bcs_ecs_changed(entity.Bits, ComponentType<T>.Id) > 0;
+        NativeCore.bcs_ecs_changed(entity.Bits, ComponentType<T>.Id) > 0;
 
     /// <summary>True when a component changed since the previous frame, by raw component id.</summary>
     /// <remarks>Used by generated <c>[Changed]</c> filters, which work in ids rather than types.</remarks>
     public bool ChangedById(Entity entity, int componentId) =>
-        Native.bcs_ecs_changed(entity.Bits, componentId) > 0;
+        NativeCore.bcs_ecs_changed(entity.Bits, componentId) > 0;
 
     /// <summary>Counts entities carrying <typeparamref name="T"/>.</summary>
     public int Count<T>() where T : unmanaged =>
-        Native.Check(Native.bcs_ecs_count(ComponentType<T>.Id), $"Count<{typeof(T).Name}>");
+        Native.Check(NativeCore.bcs_ecs_count(ComponentType<T>.Id), $"Count<{typeof(T).Name}>");
 
     /// <summary>The Bevy component id for <typeparamref name="T"/>, registering it if needed.</summary>
     public static int ComponentId<T>() where T : unmanaged => ComponentType<T>.Id;
@@ -357,7 +357,7 @@ public sealed unsafe partial class EcsWorld
 
     /// <summary>True when an entity carries the component with this id.</summary>
     public bool HasById(Entity entity, int componentId) =>
-        Native.bcs_ecs_has(entity.Bits, componentId) > 0;
+        NativeCore.bcs_ecs_has(entity.Bits, componentId) > 0;
 
     /// <summary>
     /// The entities whose <typeparamref name="T"/> was added or changed after a tick, which is
@@ -376,7 +376,7 @@ public sealed unsafe partial class EcsWorld
 
         Span<ulong> few = stackalloc ulong[64];
         fixed (ulong* buffer = few)
-            count = Native.Check(Native.bcs_ecs_changed_since(id, tick, buffer, few.Length, &now), $"reading what changed of {typeof(T).Name}");
+            count = Native.Check(NativeCore.bcs_ecs_changed_since(id, tick, buffer, few.Length, &now), $"reading what changed of {typeof(T).Name}");
 
         var changed = new List<Entity>(count);
         if (count <= few.Length)
@@ -387,7 +387,7 @@ public sealed unsafe partial class EcsWorld
         {
             var all = new ulong[count];
             fixed (ulong* buffer = all)
-                count = Native.Check(Native.bcs_ecs_changed_since(id, tick, buffer, all.Length, &now), $"reading what changed of {typeof(T).Name}");
+                count = Native.Check(NativeCore.bcs_ecs_changed_since(id, tick, buffer, all.Length, &now), $"reading what changed of {typeof(T).Name}");
 
             foreach (var bits in all.AsSpan(0, Math.Min(count, all.Length))) changed.Add(new Entity(bits));
         }
@@ -415,19 +415,19 @@ public sealed unsafe partial class EcsWorld
         var bytes = new byte[entities.Length];
         fixed (Entity* asked = entities)
         fixed (byte* answered = bytes)
-            Native.Check(Native.bcs_ecs_has_many(component, since, (ulong*)asked, entities.Length, answered), "asking after several entities");
+            Native.Check(NativeCore.bcs_ecs_has_many(component, since, (ulong*)asked, entities.Length, answered), "asking after several entities");
 
         for (var i = 0; i < bytes.Length; i++) answers[i] = bytes[i] != 0;
     }
 
     /// <summary>Counts entities carrying the component with this id.</summary>
     public int CountById(int componentId) =>
-        Native.Check(Native.bcs_ecs_count(componentId), "CountById");
+        Native.Check(NativeCore.bcs_ecs_count(componentId), "CountById");
 
     /// <summary>Removes the component with this id. Succeeds whether or not it was present.</summary>
     public bool RemoveById(Entity entity, int componentId)
     {
-        var status = Native.bcs_ecs_remove(entity.Bits, componentId);
+        var status = NativeCore.bcs_ecs_remove(entity.Bits, componentId);
         if (status == NativeStatus.NoEntity) return false;
         Native.Check(status, "RemoveById");
         return true;
@@ -447,7 +447,7 @@ public sealed unsafe partial class EcsWorld
     /// <returns><see langword="false"/> if either entity is no longer alive.</returns>
     public bool SetParent(Entity child, Entity parent)
     {
-        var status = Native.bcs_ecs_set_parent(child.Bits, parent.Bits);
+        var status = NativeCore.bcs_ecs_set_parent(child.Bits, parent.Bits);
         if (status == NativeStatus.NoEntity) return false;
         Native.Check(status, "SetParent");
         return true;
@@ -456,20 +456,20 @@ public sealed unsafe partial class EcsWorld
     /// <summary>Detaches an entity from its parent. Succeeds whether or not it had one.</summary>
     public bool ClearParent(Entity child)
     {
-        var status = Native.bcs_ecs_clear_parent(child.Bits);
+        var status = NativeCore.bcs_ecs_clear_parent(child.Bits);
         if (status == NativeStatus.NoEntity) return false;
         Native.Check(status, "ClearParent");
         return true;
     }
 
     /// <summary>An entity's parent, or <see cref="Entity.None"/> if it has none.</summary>
-    public Entity ParentOf(Entity entity) => new(Native.bcs_ecs_parent_of(entity.Bits));
+    public Entity ParentOf(Entity entity) => new(NativeCore.bcs_ecs_parent_of(entity.Bits));
 
     /// <summary>An entity's direct children, in order.</summary>
     /// <remarks>Only the immediate children; walk the result to go deeper.</remarks>
     public Entity[] ChildrenOf(Entity entity)
     {
-        var count = Native.bcs_ecs_children(entity.Bits, null, 0);
+        var count = NativeCore.bcs_ecs_children(entity.Bits, null, 0);
         if (count == NativeStatus.NoEntity) return [];
         Native.Check(count, "ChildrenOf");
         if (count == 0) return [];
@@ -477,7 +477,7 @@ public sealed unsafe partial class EcsWorld
         var children = new Entity[count];
         fixed (Entity* target = children)
         {
-            var written = Native.bcs_ecs_children(entity.Bits, (ulong*)target, count);
+            var written = NativeCore.bcs_ecs_children(entity.Bits, (ulong*)target, count);
             Native.Check(written, "ChildrenOf");
             if (written != count) return ChildrenOf(entity);
         }
@@ -574,14 +574,14 @@ public sealed unsafe partial class EcsWorld
     /// </remarks>
     public Entity[] All()
     {
-        var count = Native.Check(Native.bcs_ecs_entities(null, 0), "counting the entities");
+        var count = Native.Check(NativeCore.bcs_ecs_entities(null, 0), "counting the entities");
         if (count == 0) return [];
 
         var entities = new Entity[count];
         fixed (Entity* target = entities)
         {
             var written = Native.Check(
-                Native.bcs_ecs_entities((ulong*)target, count), "reading the entities");
+                NativeCore.bcs_ecs_entities((ulong*)target, count), "reading the entities");
 
             // The world can gain one between the two calls, and the answer would then be a
             // buffer's worth of a longer list. Asking again is cheaper than locking the world.
@@ -600,7 +600,7 @@ public sealed unsafe partial class EcsWorld
     /// </remarks>
     public int[] ComponentsOf(Entity entity)
     {
-        var count = Native.bcs_ecs_components_of(entity.Bits, null, 0);
+        var count = NativeCore.bcs_ecs_components_of(entity.Bits, null, 0);
         if (count == NativeStatus.NoEntity) return [];
         Native.Check(count, $"counting the components on {entity}");
         if (count == 0) return [];
@@ -609,7 +609,7 @@ public sealed unsafe partial class EcsWorld
         fixed (int* target = components)
         {
             var written = Native.Check(
-                Native.bcs_ecs_components_of(entity.Bits, target, count),
+                NativeCore.bcs_ecs_components_of(entity.Bits, target, count),
                 $"reading the components on {entity}");
 
             if (written != count) return ComponentsOf(entity);
@@ -628,7 +628,7 @@ public sealed unsafe partial class EcsWorld
     /// </remarks>
     /// <exception cref="BevyNativeException">No component has that id.</exception>
     public string ComponentName(int component) => Native.ReadText(
-        (buffer, capacity) => Native.bcs_component_name(component, buffer, capacity),
+        (buffer, capacity) => NativeCore.bcs_component_name(component, buffer, capacity),
         $"reading the name of component {component}");
 
     /// <summary>
@@ -640,11 +640,11 @@ public sealed unsafe partial class EcsWorld
     /// </remarks>
     public string? NameOf(Entity entity)
     {
-        var needed = Native.bcs_ecs_entity_name(entity.Bits, null, 0);
+        var needed = NativeCore.bcs_ecs_entity_name(entity.Bits, null, 0);
         if (needed == NativeStatus.NotPresent || needed == NativeStatus.NoEntity) return null;
 
         return Native.ReadText(
-            (buffer, capacity) => Native.bcs_ecs_entity_name(entity.Bits, buffer, capacity),
+            (buffer, capacity) => NativeCore.bcs_ecs_entity_name(entity.Bits, buffer, capacity),
             $"reading the name of {entity}");
     }
 
@@ -658,7 +658,7 @@ public sealed unsafe partial class EcsWorld
     /// than through the generic component API, which carries blittable structs only.
     /// </remarks>
     public void SetName(Entity entity, string? name) => Native.Check(
-        Native.bcs_ecs_set_entity_name(entity.Bits, name ?? string.Empty),
+        NativeCore.bcs_ecs_set_entity_name(entity.Bits, name ?? string.Empty),
         $"naming {entity}");
 
     // -- Iteration
@@ -721,7 +721,7 @@ public sealed unsafe partial class EcsWorld
             fixed (int* withPtr = with)
             fixed (int* withoutPtr = without)
             {
-                count = Native.bcs_ecs_chunks(
+                count = NativeCore.bcs_ecs_chunks(
                     componentId,
                     withPtr, with.Length,
                     withoutPtr, without.Length,

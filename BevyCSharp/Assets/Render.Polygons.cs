@@ -27,7 +27,7 @@ public static unsafe partial class Render
 
         fixed (Vec2* first = corners)
         {
-            var key = Native.bcs_mesh_create_convex_extrusion((float*)first, corners.Length, depth);
+            var key = NativeRendering.bcs_mesh_create_convex_extrusion((float*)first, corners.Length, depth);
             Native.Check(key, "extruding a convex polygon");
             return new AssetHandle(key);
         }

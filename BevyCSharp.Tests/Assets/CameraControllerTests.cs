@@ -36,12 +36,12 @@ public sealed unsafe class CameraControllerTests
         Needs.Renderer();
 
         NativeFreeCamera bevyFree;
-        Assert.Equal(NativeStatus.Ok, Native.bcs_free_camera_default(&bevyFree));
+        Assert.Equal(NativeStatus.Ok, NativeRendering.bcs_free_camera_default(&bevyFree));
         var ourFree = Render.ToNative(new FreeCameraSettings());
         Assert.True(Bytes(&bevyFree, sizeof(NativeFreeCamera)).SequenceEqual(Bytes(&ourFree, sizeof(NativeFreeCamera))), "the free camera's defaults are not Bevy's");
 
         NativePanCamera bevyPan;
-        Assert.Equal(NativeStatus.Ok, Native.bcs_pan_camera_default(&bevyPan));
+        Assert.Equal(NativeStatus.Ok, NativeRendering.bcs_pan_camera_default(&bevyPan));
         var ourPan = Render.ToNative(new PanCameraSettings());
         Assert.True(Bytes(&bevyPan, sizeof(NativePanCamera)).SequenceEqual(Bytes(&ourPan, sizeof(NativePanCamera))), "the pan camera's defaults are not Bevy's");
     }

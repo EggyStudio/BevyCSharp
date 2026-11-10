@@ -147,7 +147,7 @@ public struct Color : IEquatable<Color>
     {
         float* read = stackalloc float[4] { components.X, components.Y, components.Z, components.W };
         float* linear = stackalloc float[4];
-        Native.Check(Native.bcs_color_from((int)space, read, linear), $"reading a color in {space}");
+        Native.Check(NativeCore.bcs_color_from((int)space, read, linear), $"reading a color in {space}");
         return new Color(linear[0], linear[1], linear[2], linear[3]);
     }
 
@@ -160,7 +160,7 @@ public struct Color : IEquatable<Color>
     {
         float* linear = stackalloc float[4] { R, G, B, A };
         float* components = stackalloc float[4];
-        Native.Check(Native.bcs_color_to((int)space, linear, components), $"reading {this} in {space}");
+        Native.Check(NativeCore.bcs_color_to((int)space, linear, components), $"reading {this} in {space}");
         return new Vec4(components[0], components[1], components[2], components[3]);
     }
 

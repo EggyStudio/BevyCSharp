@@ -94,7 +94,7 @@ public static unsafe partial class Shaders
         fixed (int* afterAt = after)
         {
             Native.Check(
-                Native.bcs_render_set_shader_passes(camera.Bits, idsAt, afterAt, ids.Length),
+                NativeRendering.bcs_render_set_shader_passes(camera.Bits, idsAt, afterAt, ids.Length),
                 "setting a camera's shader passes");
         }
     }
@@ -228,7 +228,7 @@ public static unsafe partial class Shaders
     {
         var flags = ProgramPrepasses.GetValueOrDefault(camera.Bits);
         foreach (var part in EnginePrepasses.GetValueOrDefault(camera.Bits)?.Values ?? Enumerable.Empty<uint>()) flags |= part;
-        Native.Check(Native.bcs_render_set_prepass(camera.Bits, flags), "asking a camera for a prepass");
+        Native.Check(NativeRendering.bcs_render_set_prepass(camera.Bits, flags), "asking a camera for a prepass");
     }
 
     /// <summary>
@@ -342,7 +342,7 @@ public static unsafe partial class Shaders
             fixed (NativeViewImage* first = native)
             {
                 Native.Check(
-                    Native.bcs_render_set_view_images(camera.Bits, first, native.Length),
+                    NativeRendering.bcs_render_set_view_images(camera.Bits, first, native.Length),
                     "giving a camera its images");
             }
 
@@ -402,7 +402,7 @@ public static unsafe partial class Shaders
         if (!App.HasRenderer) return [];
 
         var text = Native.ReadText(
-            (buffer, capacity) => Native.bcs_render_drawn_view_image_names(camera.Bits, buffer, capacity),
+            (buffer, capacity) => NativeRendering.bcs_render_drawn_view_image_names(camera.Bits, buffer, capacity),
             "reading the images a camera drew");
 
         return text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -466,7 +466,7 @@ public static unsafe partial class Shaders
         fixed (byte* named = ShaderValues.Utf8(name))
         {
             return new AssetHandle(Native.Check(
-                Native.bcs_render_watch_view_image(camera.Bits, named, width, height, scale, offset),
+                NativeRendering.bcs_render_watch_view_image(camera.Bits, named, width, height, scale, offset),
                 $"watching {name} on {camera}"));
         }
     }
@@ -478,7 +478,7 @@ public static unsafe partial class Shaders
 
         fixed (byte* named = ShaderValues.Utf8(name))
         {
-            Native.Check(Native.bcs_render_unwatch_view_image(camera.Bits, named), $"unwatching {name} on {camera}");
+            Native.Check(NativeRendering.bcs_render_unwatch_view_image(camera.Bits, named), $"unwatching {name} on {camera}");
         }
     }
 
@@ -574,7 +574,7 @@ public static unsafe partial class Shaders
         fixed (NativeViewDispatch* first = native)
         {
             Native.Check(
-                Native.bcs_render_set_view_dispatches(camera.Bits, first, native.Length),
+                NativeRendering.bcs_render_set_view_dispatches(camera.Bits, first, native.Length),
                 "setting the compute shaders a camera runs");
         }
     }
@@ -627,7 +627,7 @@ public static unsafe partial class Shaders
         }
 
         Native.Check(
-            Native.bcs_shader_dispatch(instance.Id, x, y, z),
+            NativeRendering.bcs_shader_dispatch(instance.Id, x, y, z),
             $"dispatching shader instance {instance.Id}");
     }
 
@@ -750,7 +750,7 @@ public static unsafe partial class Shaders
             fixed (NativeViewDraw* first = native)
             {
                 Native.Check(
-                    Native.bcs_render_set_view_draws(camera.Bits, first, native.Length),
+                    NativeRendering.bcs_render_set_view_draws(camera.Bits, first, native.Length),
                     "setting what a camera draws out of buffers");
             }
         }
@@ -786,7 +786,7 @@ public static unsafe partial class Shaders
         }
 
         Native.Check(
-            Native.bcs_shader_dispatch_indirect(instance.Id, buffer.Key, offset),
+            NativeRendering.bcs_shader_dispatch_indirect(instance.Id, buffer.Key, offset),
             $"dispatching shader instance {instance.Id} from a buffer");
     }
 }

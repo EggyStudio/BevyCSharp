@@ -23,7 +23,7 @@ public static unsafe partial class Ui
     /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
     public static void SelfUpdate(Entity widget, UiWidgetKind kind)
     {
-        var status = Native.bcs_ui_widget_self_update(widget.Bits, (int)kind);
+        var status = NativeUi.bcs_ui_widget_self_update(widget.Bits, (int)kind);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Setting up a widget");
         Native.Check(status, $"making {widget} keep its own state");
     }

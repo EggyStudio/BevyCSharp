@@ -471,7 +471,7 @@ public sealed class NativeComponentTests
         harness.OnContext(Stage.Startup, _ =>
         {
             var ex = Assert.Throws<BevyNativeException>(
-                () => Native.Check(Native.bcs_component_id_of("NotARealComponent"), "lookup"));
+                () => Native.Check(NativeCore.bcs_component_id_of("NotARealComponent"), "lookup"));
 
             Assert.Equal(NativeStatus.NoComponent, ex.Status);
         });

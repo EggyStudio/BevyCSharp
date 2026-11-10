@@ -123,7 +123,7 @@ public static unsafe class ComponentHooks
             {
                 if (game[kind] is null) continue;
                 Native.Check(
-                    Native.bcs_component_on_hook(ComponentRegistry.AppHandle, id, kind, &Hooked),
+                    NativeCore.bcs_component_on_hook(ComponentRegistry.AppHandle, id, kind, &Hooked),
                     $"attaching a hook of {typeof(T).Name}, which Bevy takes before any entity carries it");
             }
         }
@@ -131,14 +131,14 @@ public static unsafe class ComponentHooks
         if (removed is not null || game?[Remove] is not null)
         {
             Native.Check(
-                Native.bcs_component_on_remove(ComponentRegistry.AppHandle, id, &Removed),
+                NativeCore.bcs_component_on_remove(ComponentRegistry.AppHandle, id, &Removed),
                 $"attaching the remove hook of {typeof(T).Name}");
         }
 
         if (cloned is not null)
         {
             Native.Check(
-                Native.bcs_component_on_clone(id, &Cloned),
+                NativeCore.bcs_component_on_clone(id, &Cloned),
                 $"attaching the clone hook of {typeof(T).Name}");
         }
     }

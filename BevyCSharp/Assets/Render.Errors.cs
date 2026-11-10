@@ -28,12 +28,12 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static RenderErrorPolicy ErrorPolicy
     {
-        get => App.HasRenderer ? (RenderErrorPolicy)Native.bcs_render_error_policy() : RenderErrorPolicy.Quit;
+        get => App.HasRenderer ? (RenderErrorPolicy)NativeRendering.bcs_render_error_policy() : RenderErrorPolicy.Quit;
         set
         {
             if (!Enum.IsDefined(value)) throw new ArgumentOutOfRangeException(nameof(value), value, "Not one of the policies.");
 
-            var status = Native.bcs_render_set_error_policy((int)value);
+            var status = NativeRendering.bcs_render_set_error_policy((int)value);
             if (status == NativeStatus.Unsupported) throw NoRenderer("Setting what a render error does");
             Native.Check(status, "setting what a render error does");
         }
@@ -47,7 +47,7 @@ public static unsafe partial class Render
     /// What a game compares with the count it saw last to learn an error arrived, the text of the
     /// last one in <see cref="Shaders.LastRenderError"/>. Zero where nothing draws.
     /// </remarks>
-    public static int ErrorCount => App.HasRenderer ? Math.Max(0, Native.bcs_render_error_count()) : 0;
+    public static int ErrorCount => App.HasRenderer ? Math.Max(0, NativeRendering.bcs_render_error_count()) : 0;
 
     /// <summary>
     /// Causes an error on the GPU, for a game to see what its <see cref="ErrorPolicy"/> does with
@@ -69,6 +69,6 @@ public static unsafe partial class Render
         if (!Enum.IsDefined(cause)) throw new ArgumentOutOfRangeException(nameof(cause), cause, "Not one of the causes.");
 
         if (!App.HasRenderer) throw NoRenderer("Causing a render error");
-        Native.Check(Native.bcs_render_cause_error((int)cause), "causing a render error, which needs an app that draws");
+        Native.Check(NativeRendering.bcs_render_cause_error((int)cause), "causing a render error, which needs an app that draws");
     }
 }

@@ -85,7 +85,7 @@ public static unsafe class Diagnostics
         ArgumentNullException.ThrowIfNull(suffix);
         ArgumentOutOfRangeException.ThrowIfNegative(history);
 
-        var answer = Native.bcs_diagnostic_register(path, suffix, (uint)history);
+        var answer = NativeDiagnostics.bcs_diagnostic_register(path, suffix, (uint)history);
         if (answer == NativeStatus.InvalidState)
             throw new ArgumentException($"\"{path}\" is not a diagnostic's path, which is names apart by single slashes.", nameof(path));
 
@@ -101,7 +101,7 @@ public static unsafe class Diagnostics
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        var answer = Native.bcs_diagnostic_measure(path, value);
+        var answer = NativeDiagnostics.bcs_diagnostic_measure(path, value);
         if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState) return false;
 
         Native.Check(answer, $"measuring the diagnostic {path}");
@@ -116,7 +116,7 @@ public static unsafe class Diagnostics
         reading = default;
 
         NativeDiagnostic read;
-        var answer = Native.bcs_diagnostic_read(path, &read);
+        var answer = NativeDiagnostics.bcs_diagnostic_read(path, &read);
         if (answer == NativeStatus.NotPresent) return false;
         Native.Check(answer, $"reading the diagnostic {path}");
 
@@ -135,7 +135,7 @@ public static unsafe class Diagnostics
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        var answer = Native.bcs_diagnostic_set_enabled(path, on ? 1 : 0);
+        var answer = NativeDiagnostics.bcs_diagnostic_set_enabled(path, on ? 1 : 0);
         if (answer == NativeStatus.NotPresent) return false;
 
         Native.Check(answer, $"turning the diagnostic {path} {(on ? "on" : "off")}");
@@ -149,7 +149,7 @@ public static unsafe class Diagnostics
     /// </remarks>
     public static IReadOnlyList<DiagnosticReading> All()
     {
-        var text = Native.ReadText((buffer, capacity) => Native.bcs_diagnostics_list(buffer, capacity), "listing diagnostics");
+        var text = Native.ReadText((buffer, capacity) => NativeDiagnostics.bcs_diagnostics_list(buffer, capacity), "listing diagnostics");
         var readings = new List<DiagnosticReading>();
 
         foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
@@ -191,7 +191,7 @@ public static unsafe class Diagnostics
     /// <exception cref="InvalidOperationException">The app has no log of its diagnostics.</exception>
     public static void SetLogFilter(IEnumerable<string>? paths)
     {
-        var answer = Native.bcs_diagnostics_set_log_filter(paths is null ? null : string.Join('\n', paths));
+        var answer = NativeDiagnostics.bcs_diagnostics_set_log_filter(paths is null ? null : string.Join('\n', paths));
         if (answer == NativeStatus.InvalidState)
             throw new InvalidOperationException("The app logs no diagnostics, which Config.DiagnosticPlugins with DiagnosticPlugins.Log asks for.");
 

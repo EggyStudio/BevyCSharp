@@ -85,11 +85,11 @@ public sealed class Gamepad
     /// </remarks>
     /// <exception cref="BevyNativeException">The pad has been disconnected.</exception>
     public void Rumble(float strong, float weak, float seconds) =>
-        Native.Check(Native.bcs_gamepad_rumble(Entity.Bits, strong, weak, Math.Max(seconds, 1e-3f)), $"rumbling {Name}");
+        Native.Check(NativeCore.bcs_gamepad_rumble(Entity.Bits, strong, weak, Math.Max(seconds, 1e-3f)), $"rumbling {Name}");
 
     /// <summary>Stops every rumble the pad is playing.</summary>
     /// <exception cref="BevyNativeException">The pad has been disconnected.</exception>
-    public void StopRumble() => Native.Check(Native.bcs_gamepad_rumble(Entity.Bits, 0f, 0f, 0f), $"stopping {Name}'s rumble");
+    public void StopRumble() => Native.Check(NativeCore.bcs_gamepad_rumble(Entity.Bits, 0f, 0f, 0f), $"stopping {Name}'s rumble");
 
     /// <inheritdoc/>
     public override string ToString() => $"{Name} ({Entity})";

@@ -52,7 +52,7 @@ internal sealed class AssetWork : IPlugin
         // The files this side reads, mesh and material files and data assets, first.
         while (AssetServer.TakeFailed(out var failure)) bus.Send(failure);
 
-        var count = Native.bcs_asset_failures_drain();
+        var count = NativeAssets.bcs_asset_failures_drain();
         if (count <= 0) return;
 
         for (var i = 0; i < count; i++)
@@ -60,17 +60,17 @@ internal sealed class AssetWork : IPlugin
             var index = i;
 
             var path = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_path(index, buffer, capacity),
+                (buffer, capacity) => NativeAssets.bcs_asset_failure_path(index, buffer, capacity),
                 "reading the path of an asset that failed to load");
 
             var reason = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_reason(index, buffer, capacity),
+                (buffer, capacity) => NativeAssets.bcs_asset_failure_reason(index, buffer, capacity),
                 "reading why an asset failed to load");
 
             // What kind it was, which the path alone does not say once a loader is picked by
             // content rather than by extension.
             var kind = Native.ReadText(
-                (buffer, capacity) => Native.bcs_asset_failure_kind(index, buffer, capacity),
+                (buffer, capacity) => NativeAssets.bcs_asset_failure_kind(index, buffer, capacity),
                 "reading what kind of asset failed to load");
 
             bus.Send(new AssetLoadFailed(path, reason, kind));

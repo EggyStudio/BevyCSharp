@@ -23,12 +23,12 @@ public static unsafe partial class Window
     public static void SetTitle(string title)
     {
         ArgumentException.ThrowIfNullOrEmpty(title);
-        Native.Check(Native.bcs_window_set_title(Native.PrimaryWindow, title), "Window.SetTitle");
+        Native.Check(NativeCore.bcs_window_set_title(NativeCore.PrimaryWindow, title), "Window.SetTitle");
     }
 
     /// <summary>Resizes the window, in logical pixels.</summary>
     public static void SetSize(uint width, uint height) =>
-        Native.Check(Native.bcs_window_set_size(Native.PrimaryWindow, width, height), "Window.SetSize");
+        Native.Check(NativeCore.bcs_window_set_size(NativeCore.PrimaryWindow, width, height), "Window.SetSize");
 
     /// <summary>
     /// The window's current size, in logical pixels.
@@ -41,7 +41,7 @@ public static unsafe partial class Window
     {
         uint width;
         uint height;
-        Native.Check(Native.bcs_window_size(Native.PrimaryWindow, &width, &height), "Window.Size");
+        Native.Check(NativeCore.bcs_window_size(NativeCore.PrimaryWindow, &width, &height), "Window.Size");
         return (width, height);
     }
 
@@ -68,7 +68,7 @@ public static unsafe partial class Window
     public static Entity Entity()
     {
         ulong bits;
-        var status = Native.bcs_window_entity(&bits);
+        var status = NativeCore.bcs_window_entity(&bits);
         if (status == NativeStatus.NotPresent) return Bevy.Entity.None;
         Native.Check(status, "Window.Entity");
         return new Entity(bits);
@@ -84,20 +84,20 @@ public static unsafe partial class Window
     public static float Scale()
     {
         float scale;
-        Native.Check(Native.bcs_window_scale(Native.PrimaryWindow, &scale), "Window.Scale");
+        Native.Check(NativeCore.bcs_window_scale(NativeCore.PrimaryWindow, &scale), "Window.Scale");
         return scale <= 0f ? 1f : scale;
     }
 
     /// <summary>Sets how the window fills the screen.</summary>
     public static void SetMode(WindowMode mode) =>
-        Native.Check(Native.bcs_window_set_mode(Native.PrimaryWindow, (int)mode), "Window.SetMode");
+        Native.Check(NativeCore.bcs_window_set_mode(NativeCore.PrimaryWindow, (int)mode), "Window.SetMode");
 
     /// <summary>Moves the window, in physical pixels from the desktop's top-left corner.</summary>
     /// <remarks>
     /// A window manager is free to ignore this, or to adjust it so the window stays on screen.
     /// </remarks>
     public static void SetPosition(int x, int y) =>
-        Native.Check(Native.bcs_window_set_position(Native.PrimaryWindow, x, y), "Window.SetPosition");
+        Native.Check(NativeCore.bcs_window_set_position(NativeCore.PrimaryWindow, x, y), "Window.SetPosition");
 
     /// <summary>
     /// Turns the platform's input method on or off, and says where the text being composed is.
@@ -117,7 +117,7 @@ public static unsafe partial class Window
     /// </remarks>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void SetIme(bool enabled, float x = 0f, float y = 0f) =>
-        Native.Check(Native.bcs_window_set_ime(Native.PrimaryWindow, enabled ? 1 : 0, x, y), "Window.SetIme");
+        Native.Check(NativeCore.bcs_window_set_ime(NativeCore.PrimaryWindow, enabled ? 1 : 0, x, y), "Window.SetIme");
 
     /// <summary>
     /// Sets whether the window has a title bar and border, whether it can be resized by dragging,
@@ -129,7 +129,7 @@ public static unsafe partial class Window
     /// </remarks>
     public static void SetStyle(bool decorations = true, bool resizable = true, bool alwaysOnTop = false) =>
         Native.Check(
-            Native.bcs_window_set_style(Native.PrimaryWindow, decorations ? 1 : 0, resizable ? 1 : 0, alwaysOnTop ? 1 : 0),
+            NativeCore.bcs_window_set_style(NativeCore.PrimaryWindow, decorations ? 1 : 0, resizable ? 1 : 0, alwaysOnTop ? 1 : 0),
             "Window.SetStyle");
 
     /// <summary>Sets the shape of the pointer while it is over the window.</summary>
@@ -141,7 +141,7 @@ public static unsafe partial class Window
     /// <param name="shape">Which shape.</param>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void SetCursorShape(CursorShape shape) =>
-        Native.Check(Native.bcs_window_set_cursor_shape(Native.PrimaryWindow, (int)shape), "Window.SetCursorShape");
+        Native.Check(NativeCore.bcs_window_set_cursor_shape(NativeCore.PrimaryWindow, (int)shape), "Window.SetCursorShape");
 
     /// <summary>
     /// Sets the pointer over the window to an image, its hotspot, the pixel that points, given in
@@ -158,7 +158,7 @@ public static unsafe partial class Window
     /// <param name="hotspotY">How far down.</param>
     /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
     public static void SetCursorImage(AssetHandle image, uint hotspotX = 0, uint hotspotY = 0) =>
-        Native.Check(Native.bcs_window_set_cursor_image(Native.PrimaryWindow, image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
+        Native.Check(NativeCore.bcs_window_set_cursor_image(NativeCore.PrimaryWindow, image.Key, hotspotX, hotspotY), "Window.SetCursorImage");
 
     /// <summary>Shows the window by an image, as the platform's icon for it in its title bar and task switcher.</summary>
     /// <remarks>
@@ -170,7 +170,7 @@ public static unsafe partial class Window
     /// <param name="image">The picture, loaded or made, eight bits a channel as a PNG gives.</param>
     /// <exception cref="BevyNativeException">There is no window, the handle names no image, or this build has none.</exception>
     public static void SetIcon(AssetHandle image) =>
-        Native.Check(Native.bcs_window_set_icon(Native.PrimaryWindow, image.Key), "Window.SetIcon");
+        Native.Check(NativeCore.bcs_window_set_icon(NativeCore.PrimaryWindow, image.Key), "Window.SetIcon");
 
     /// <summary>
     /// Cuts the pointer's image to one frame of an atlas, its hotspot given across and down from the
@@ -198,7 +198,7 @@ public static unsafe partial class Window
     /// has no windows.
     /// </exception>
     public static void SetCursorAtlas(AssetHandle? layout, uint index = 0, uint hotspotX = 0, uint hotspotY = 0) =>
-        Native.Check(Native.bcs_window_set_cursor_atlas(Native.PrimaryWindow, layout?.Key ?? -1, index, hotspotX, hotspotY), "Window.SetCursorAtlas");
+        Native.Check(NativeCore.bcs_window_set_cursor_atlas(NativeCore.PrimaryWindow, layout?.Key ?? -1, index, hotspotX, hotspotY), "Window.SetCursorAtlas");
 
     /// <summary>
     /// Sets how often the app updates while its window has focus and while it does not, as
@@ -227,7 +227,7 @@ public static unsafe partial class Window
         ArgumentOutOfRangeException.ThrowIfLessThan(settings.Unfocused.Wait, TimeSpan.Zero, "settings.Unfocused.Wait");
 
         Native.Check(
-            Native.bcs_window_set_update_modes(
+            NativeCore.bcs_window_set_update_modes(
                 settings.Focused.IsContinuous ? 1u : 0u, settings.Focused.Wait.TotalSeconds, Reacts(settings.Focused),
                 settings.Unfocused.IsContinuous ? 1u : 0u, settings.Unfocused.Wait.TotalSeconds, Reacts(settings.Unfocused)),
             "Window.SetUpdateSettings");
@@ -247,7 +247,7 @@ public static unsafe partial class Window
     /// this does nothing there.
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no windows.</exception>
-    public static void RequestRedraw() => Native.Check(Native.bcs_window_request_redraw(), "Window.RequestRedraw");
+    public static void RequestRedraw() => Native.Check(NativeCore.bcs_window_request_redraw(), "Window.RequestRedraw");
 
     /// <summary>
     /// Wakes winit's loop for one more update, as Bevy's <c>WinitUserEvent::WakeUp</c> does. Only
@@ -259,7 +259,7 @@ public static unsafe partial class Window
     /// does nothing there.
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no windows.</exception>
-    public static void WakeUp() => Native.Check(Native.bcs_window_wake_up(), "Window.WakeUp");
+    public static void WakeUp() => Native.Check(NativeCore.bcs_window_wake_up(), "Window.WakeUp");
 
     /// <summary>Minimizes the window to the taskbar or dock.</summary>
     /// <remarks>
@@ -269,7 +269,7 @@ public static unsafe partial class Window
     /// </remarks>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void Minimize() =>
-        Native.Check(Native.bcs_window_minimize(Native.PrimaryWindow), "Window.Minimize");
+        Native.Check(NativeCore.bcs_window_minimize(NativeCore.PrimaryWindow), "Window.Minimize");
 
     /// <summary>
     /// Maximizes the window to fill the screen less the taskbar, or puts it back to the size it had.
@@ -282,7 +282,7 @@ public static unsafe partial class Window
     /// <param name="maximized">Whether to maximize, or put it back.</param>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void SetMaximized(bool maximized) =>
-        Native.Check(Native.bcs_window_set_maximized(Native.PrimaryWindow, maximized ? 1 : 0), "Window.SetMaximized");
+        Native.Check(NativeCore.bcs_window_set_maximized(NativeCore.PrimaryWindow, maximized ? 1 : 0), "Window.SetMaximized");
 
     /// <summary>Where the window is, how large, and whether it is maximized.</summary>
     /// <remarks>
@@ -294,7 +294,7 @@ public static unsafe partial class Window
     public static WindowPlace Place()
     {
         NativeWindowPlace place;
-        Native.Check(Native.bcs_window_place(Native.PrimaryWindow, &place), "Window.Place");
+        Native.Check(NativeCore.bcs_window_place(NativeCore.PrimaryWindow, &place), "Window.Place");
         return new WindowPlace(place.HasPosition != 0, place.X, place.Y, place.Width, place.Height, place.Maximized != 0);
     }
 
@@ -315,7 +315,7 @@ public static unsafe partial class Window
     /// </remarks>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void StartDragMove() =>
-        Native.Check(Native.bcs_window_start_drag_move(Native.PrimaryWindow), "Window.StartDragMove");
+        Native.Check(NativeCore.bcs_window_start_drag_move(NativeCore.PrimaryWindow), "Window.StartDragMove");
 
     /// <summary>
     /// Hands the window to the platform to be resized by the pointer from one edge or corner, until
@@ -329,7 +329,7 @@ public static unsafe partial class Window
     /// <param name="edge">Which edge or corner moves.</param>
     /// <exception cref="BevyNativeException">There is no window, or this build has none.</exception>
     public static void StartDragResize(WindowEdge edge) =>
-        Native.Check(Native.bcs_window_start_drag_resize(Native.PrimaryWindow, (int)edge), "Window.StartDragResize");
+        Native.Check(NativeCore.bcs_window_start_drag_resize(NativeCore.PrimaryWindow, (int)edge), "Window.StartDragResize");
 
     /// <summary>
     /// Makes a window a game spawned fill a monitor, at the mode the monitor shows, and centers it
@@ -355,13 +355,13 @@ public static unsafe partial class Window
     /// The window is no window, the monitor no monitor, or this build has no windows.
     /// </exception>
     public static void SetFullscreenOn(Entity window, Entity monitor) =>
-        Native.Check(Native.bcs_window_fullscreen_on(window.Bits, monitor.Bits), $"filling monitor {monitor} with window {window}");
+        Native.Check(NativeCore.bcs_window_fullscreen_on(window.Bits, monitor.Bits), $"filling monitor {monitor} with window {window}");
 
     /// <summary>How many monitors the platform reports.</summary>
     /// <returns>Zero on a windowless run, which has no monitors to report.</returns>
     public static int MonitorCount()
     {
-        var count = Native.bcs_monitor_count();
+        var count = NativeCore.bcs_monitor_count();
         return count < 0 ? 0 : count;
     }
 
@@ -378,7 +378,7 @@ public static unsafe partial class Window
         ArgumentOutOfRangeException.ThrowIfNegative(index);
 
         NativeMonitor monitor;
-        Native.Check(Native.bcs_monitor_info(index, &monitor), $"reading monitor {index}");
+        Native.Check(NativeCore.bcs_monitor_info(index, &monitor), $"reading monitor {index}");
 
         return new MonitorInfo(
             monitor.Width,
@@ -403,7 +403,7 @@ public static unsafe partial class Window
         ArgumentOutOfRangeException.ThrowIfNegative(index);
 
         return Native.ReadText(
-            (buffer, capacity) => Native.bcs_monitor_name(index, buffer, capacity),
+            (buffer, capacity) => NativeCore.bcs_monitor_name(index, buffer, capacity),
             $"reading the name of monitor {index}");
     }
 
@@ -426,7 +426,7 @@ public static unsafe partial class Window
     {
         ArgumentOutOfRangeException.ThrowIfNegative(index);
 
-        var count = Native.bcs_monitor_mode_count(index);
+        var count = NativeCore.bcs_monitor_mode_count(index);
         if (count == NativeStatus.Unsupported) return [];
 
         Native.Check(count, $"counting the video modes of monitor {index}");
@@ -438,7 +438,7 @@ public static unsafe partial class Window
         {
             NativeVideoMode mode;
             Native.Check(
-                Native.bcs_monitor_mode(index, i, &mode),
+                NativeCore.bcs_monitor_mode(index, i, &mode),
                 $"reading video mode {i} of monitor {index}");
 
             modes[i] = new VideoMode(
@@ -476,7 +476,7 @@ public static unsafe partial class Window
         ArgumentOutOfRangeException.ThrowIfNegative(mode);
 
         Native.Check(
-            Native.bcs_window_set_video_mode(Native.PrimaryWindow, monitor, mode),
+            NativeCore.bcs_window_set_video_mode(NativeCore.PrimaryWindow, monitor, mode),
             $"taking monitor {monitor} over at video mode {mode}");
     }
 
@@ -498,5 +498,5 @@ public static unsafe partial class Window
     /// <param name="grab">How to restrict the cursor.</param>
     /// <param name="visible">Whether the cursor is drawn.</param>
     public static void SetCursor(CursorGrab grab, bool visible) =>
-        Native.Check(Native.bcs_window_set_cursor(Native.PrimaryWindow, (int)grab, visible ? 1 : 0), "Window.SetCursor");
+        Native.Check(NativeCore.bcs_window_set_cursor(NativeCore.PrimaryWindow, (int)grab, visible ? 1 : 0), "Window.SetCursor");
 }

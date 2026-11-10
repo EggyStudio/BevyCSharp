@@ -381,7 +381,7 @@ internal static unsafe partial class WorldProbes
         _origins = [];
 
         // The leaves read Bevy's lighting alone again.
-        Native.Check(Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0), "taking global illumination's probes from the leaves");
+        Native.Check(NativeGlobalIllumination.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0), "taking global illumination's probes from the leaves");
     }
 
     /// <summary>
@@ -414,7 +414,7 @@ internal static unsafe partial class WorldProbes
         // before has the same probes, so a probe's own light of the frame before is its own.
         var bytes = made.LightBytes.AsSpan();
         fixed (byte* lights = bytes)
-            Native.Check(Native.bcs_gi_lights((NativeGiLights*)lights), "reading the lights global illumination is lit by");
+            Native.Check(NativeGlobalIllumination.bcs_gi_lights((NativeGiLights*)lights), "reading the lights global illumination is lit by");
         var floats = MemoryMarshal.Cast<byte, float>(bytes);
         (floats[13], floats[14]) = (_frame, HeldBounces == 0 || HeldBounces > 0 && _frame - _heldFrom == 1 ? 0 : 1);
         var still = StandStill;
@@ -512,8 +512,8 @@ internal static unsafe partial class WorldProbes
         // The leaves and the grass, drawn forward where the pass does not reach, read the probes as
         // it reads them.
         Native.Check(LeavesUnread
-                ? Native.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0)
-                : Native.bcs_render_set_forward_probes(made.Cubes.Key, made.Reach.Key, made.Ways.Key, info.Key, made.Lights.Key, made.Air.Key, p, ProbeSpacing, cascades),
+                ? NativeGlobalIllumination.bcs_render_set_forward_probes(0, 0, 0, 0, 0, 0, 0, 0, 0)
+                : NativeGlobalIllumination.bcs_render_set_forward_probes(made.Cubes.Key, made.Reach.Key, made.Ways.Key, info.Key, made.Lights.Key, made.Air.Key, p, ProbeSpacing, cascades),
             "handing the leaves global illumination's probes");
     }
 }

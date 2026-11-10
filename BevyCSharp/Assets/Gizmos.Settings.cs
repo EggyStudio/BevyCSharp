@@ -40,7 +40,7 @@ public static unsafe partial class Gizmos
         bool enabled = true,
         GizmoGroup which = GizmoGroup.Both) =>
         Native.Check(
-            Native.bcs_gizmo_configure(width, layers, enabled ? 1 : 0, (int)which),
+            NativeGizmos.bcs_gizmo_configure(width, layers, enabled ? 1 : 0, (int)which),
             "configuring gizmos");
 
     /// <summary>
@@ -87,7 +87,7 @@ public static unsafe partial class Gizmos
         bool perspective = false,
         GizmoGroup which = GizmoGroup.Both) =>
         Native.Check(
-            Native.bcs_gizmo_style(
+            NativeGizmos.bcs_gizmo_style(
                 (int)style,
                 gapScale,
                 lineScale,
@@ -111,7 +111,7 @@ public static unsafe partial class Gizmos
     /// <param name="which">Which groups it applies to.</param>
     /// <exception cref="BevyNativeException">There is nothing to draw on.</exception>
     public static void SetDepthBias(float bias, GizmoGroup which = GizmoGroup.Both) =>
-        Native.Check(Native.bcs_gizmo_depth_bias(bias, (int)which), "setting the gizmo depth bias");
+        Native.Check(NativeGizmos.bcs_gizmo_depth_bias(bias, (int)which), "setting the gizmo depth bias");
 
     /// <summary>
     /// Sets whether Bevy draws the shape of every light, and how it colors them.
@@ -139,7 +139,7 @@ public static unsafe partial class Gizmos
         (float R, float G, float B, float A) color = default)
     {
         var rgba = stackalloc float[] { color.R, color.G, color.B, color.A };
-        Native.Check(Native.bcs_gizmo_lights(all ? 1 : 0, (int)coloring, rgba), "showing light gizmos");
+        Native.Check(NativeGizmos.bcs_gizmo_lights(all ? 1 : 0, (int)coloring, rgba), "showing light gizmos");
     }
 
     /// <summary>
@@ -158,12 +158,12 @@ public static unsafe partial class Gizmos
     {
         if (color is not { } c)
         {
-            Native.Check(Native.bcs_gizmo_bounds(all ? 1 : 0, null), "showing bounding boxes");
+            Native.Check(NativeGizmos.bcs_gizmo_bounds(all ? 1 : 0, null), "showing bounding boxes");
             return;
         }
 
         var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
-        Native.Check(Native.bcs_gizmo_bounds(all ? 1 : 0, rgba), "showing bounding boxes");
+        Native.Check(NativeGizmos.bcs_gizmo_bounds(all ? 1 : 0, rgba), "showing bounding boxes");
     }
 
     /// <summary>
@@ -181,12 +181,12 @@ public static unsafe partial class Gizmos
     {
         if (color is not { } c)
         {
-            Native.Check(Native.bcs_gizmo_frusta(all ? 1 : 0, null), "showing frusta");
+            Native.Check(NativeGizmos.bcs_gizmo_frusta(all ? 1 : 0, null), "showing frusta");
             return;
         }
 
         var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
-        Native.Check(Native.bcs_gizmo_frusta(all ? 1 : 0, rgba), "showing frusta");
+        Native.Check(NativeGizmos.bcs_gizmo_frusta(all ? 1 : 0, rgba), "showing frusta");
     }
 
     /// <summary>
@@ -204,12 +204,12 @@ public static unsafe partial class Gizmos
     {
         if (color is not { } c)
         {
-            Native.Check(Native.bcs_gizmo_skinned_bounds(all ? 1 : 0, null), "showing skinned mesh bounds");
+            Native.Check(NativeGizmos.bcs_gizmo_skinned_bounds(all ? 1 : 0, null), "showing skinned mesh bounds");
             return;
         }
 
         var rgba = stackalloc float[] { c.R, c.G, c.B, c.A };
-        Native.Check(Native.bcs_gizmo_skinned_bounds(all ? 1 : 0, rgba), "showing skinned mesh bounds");
+        Native.Check(NativeGizmos.bcs_gizmo_skinned_bounds(all ? 1 : 0, rgba), "showing skinned mesh bounds");
     }
 
     /// <summary>
@@ -246,7 +246,7 @@ public static unsafe partial class Gizmos
             batch.Clear();
         }
 
-        Native.Check(Native.bcs_gizmo_record_begin(), "starting a gizmo recording");
+        Native.Check(NativeGizmos.bcs_gizmo_record_begin(), "starting a gizmo recording");
         int key;
         try
         {
@@ -259,7 +259,7 @@ public static unsafe partial class Gizmos
         }
         finally
         {
-            Native.Check(Native.bcs_gizmo_record_end(&key), "ending a gizmo recording");
+            Native.Check(NativeGizmos.bcs_gizmo_record_end(&key), "ending a gizmo recording");
         }
 
         return new AssetHandle(key);
@@ -404,7 +404,7 @@ public static unsafe partial class Gizmos
     {
         fixed (NativeGizmoConfig* at = configs)
         {
-            var status = Native.bcs_gizmo_draw_many(at, configs.Length);
+            var status = NativeGizmos.bcs_gizmo_draw_many(at, configs.Length);
 
             if (status == NativeStatus.Unsupported)
                 throw new BevyNativeException(
@@ -464,7 +464,7 @@ public static unsafe partial class Gizmos
         (settings.Anchor[0], settings.Anchor[1]) = anchor;
         (settings.Color[0], settings.Color[1], settings.Color[2], settings.Color[3]) = color;
 
-        var status = Native.bcs_gizmo_text(text, &settings);
+        var status = NativeGizmos.bcs_gizmo_text(text, &settings);
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
@@ -502,7 +502,7 @@ public static unsafe partial class Gizmos
             return;
         }
 
-        var status = Native.bcs_gizmo_draw(&config);
+        var status = NativeGizmos.bcs_gizmo_draw(&config);
         if (status == NativeStatus.Unsupported)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,

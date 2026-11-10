@@ -34,14 +34,14 @@ public readonly struct ShaderInstance : IShaderValues, IEquatable<ShaderInstance
     public ShaderProgram Program
     {
         get => new(Native.Check(
-            Native.bcs_shader_target_program(KindInstance, Id),
+            NativeRendering.bcs_shader_target_program(KindInstance, Id),
             $"reading which program shader instance {Id} runs"));
         set
         {
             if (!value.IsValid) throw new ArgumentException("No program was given.", nameof(value));
 
             Native.Check(
-                Native.bcs_shader_instance_set_program(Id, value.Id),
+                NativeRendering.bcs_shader_instance_set_program(Id, value.Id),
                 $"having shader instance {Id} run program {value.Id}");
         }
     }

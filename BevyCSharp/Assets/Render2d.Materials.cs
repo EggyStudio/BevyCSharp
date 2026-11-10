@@ -15,7 +15,7 @@ public static unsafe partial class Render2d
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = settings.Native();
-        var key = Interop.Native.bcs_render_color_material_create(&native);
+        var key = Interop.NativeRender2d.bcs_render_color_material_create(&native);
         if (key == NativeStatus.Unsupported) throw Render.NoRenderer("Building a 2D material");
         Interop.Native.Check(key, "building a 2D material");
         return new AssetHandle(key);
@@ -28,7 +28,7 @@ public static unsafe partial class Render2d
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = settings.Native();
-        var status = Interop.Native.bcs_render_color_material_write(material.Key, &native);
+        var status = Interop.NativeRender2d.bcs_render_color_material_write(material.Key, &native);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Writing a 2D material");
         Interop.Native.Check(status, $"writing the 2D material {material}");
     }

@@ -487,7 +487,7 @@ public static unsafe class Feathers
     public static Entity ContentsOf(Entity control)
     {
         ulong contents;
-        Native.Check(Native.bcs_feathers_contents(control.Bits, &contents), $"finding where the contents of {control} go");
+        Native.Check(NativeUi.bcs_feathers_contents(control.Bits, &contents), $"finding where the contents of {control} go");
         return new Entity(contents);
     }
 
@@ -523,7 +523,7 @@ public static unsafe class Feathers
         int kind;
         double value;
         long whole;
-        var answer = Native.bcs_feathers_number_get(input.Bits, &kind, &value, &whole);
+        var answer = NativeUi.bcs_feathers_number_get(input.Bits, &kind, &value, &whole);
         if (answer == NativeStatus.NotPresent) return null;
 
         Native.Check(answer, $"reading the number {input} holds");
@@ -572,7 +572,7 @@ public static unsafe class Feathers
         var bytes = Encoding.UTF8.GetBytes(id);
         fixed (byte* text = bytes)
         {
-            Native.Check(Native.bcs_feathers_number_units(input.Bits, text, bytes.Length), $"showing {input} in {units}");
+            Native.Check(NativeUi.bcs_feathers_number_units(input.Bits, text, bytes.Length), $"showing {input} in {units}");
         }
     }
 
@@ -615,7 +615,7 @@ public static unsafe class Feathers
         fixed (byte* text = bytes)
         fixed (float* values = linear)
         {
-            Native.Check(Native.bcs_feathers_set_theme(text, bytes.Length, values, names.Length), "setting the theme");
+            Native.Check(NativeUi.bcs_feathers_set_theme(text, bytes.Length, values, names.Length), "setting the theme");
         }
     }
 
@@ -623,7 +623,7 @@ public static unsafe class Feathers
     /// <exception cref="BevyNativeException">
     /// The app did not ask for <see cref="Config.Feathers"/>, or this build has no renderer.
     /// </exception>
-    public static void SetDarkTheme() => Native.Check(Native.bcs_feathers_set_theme(null, 0, null, 0), "setting the dark theme");
+    public static void SetDarkTheme() => Native.Check(NativeUi.bcs_feathers_set_theme(null, 0, null, 0), "setting the dark theme");
 
     /// <summary>
     /// Colors a node of the game's own from the theme, by one of <see cref="FeathersToken"/>'s
@@ -645,7 +645,7 @@ public static unsafe class Feathers
         var bytes = Encoding.UTF8.GetBytes(token);
         fixed (byte* text = bytes)
         {
-            Native.Check(Native.bcs_feathers_theme_color(node.Bits, (int)part, text, bytes.Length), $"coloring {node} by {token}");
+            Native.Check(NativeUi.bcs_feathers_theme_color(node.Bits, (int)part, text, bytes.Length), $"coloring {node} by {token}");
         }
     }
 
@@ -661,11 +661,11 @@ public static unsafe class Feathers
     }
 
     private static void SetNumber(Entity input, NumberKind kind, double value, long whole) =>
-        Native.Check(Native.bcs_feathers_number_set(input.Bits, (int)kind, value, whole), $"writing the number {input} holds");
+        Native.Check(NativeUi.bcs_feathers_number_set(input.Bits, (int)kind, value, whole), $"writing the number {input} holds");
 
     private static void Limit(Entity input, bool hard, NumberKind kind, double min, double max, long minWhole, long maxWhole) =>
         Native.Check(
-            Native.bcs_feathers_number_limit(input.Bits, hard ? 1 : 0, (int)kind, min, max, minWhole, maxWhole),
+            NativeUi.bcs_feathers_number_limit(input.Bits, hard ? 1 : 0, (int)kind, min, max, minWhole, maxWhole),
             $"bounding the number {input} holds");
 
     private static Entity Spawn(int kind, Entity parent, string text, NativeFeathersProps props, string? token = null)
@@ -681,7 +681,7 @@ public static unsafe class Feathers
             props.Token = token is null ? null : named;
             props.TokenLength = token is null ? 0 : tokenBytes.Length;
             Native.Check(
-                Native.bcs_feathers_spawn(kind, parent.Bits, &props, caption, bytes.Length, &spawned),
+                NativeUi.bcs_feathers_spawn(kind, parent.Bits, &props, caption, bytes.Length, &spawned),
                 $"spawning a Feathers control under {parent}");
         }
 

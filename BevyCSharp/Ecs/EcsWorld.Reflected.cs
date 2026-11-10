@@ -45,7 +45,7 @@ public sealed unsafe partial class EcsWorld
 
         return ReflectedText(
             (buffer, capacity) =>
-                Native.bcs_reflect_get(entity.Bits, typePath, path, buffer, capacity),
+                NativeCore.bcs_reflect_get(entity.Bits, typePath, path, buffer, capacity),
             $"Reading {Described(typePath, path)} on {entity}");
     }
 
@@ -75,7 +75,7 @@ public sealed unsafe partial class EcsWorld
         var bytes = Encoding.UTF8.GetBytes(json);
         fixed (byte* text = bytes)
             ReflectedCheck(
-                Native.bcs_reflect_set(entity.Bits, typePath, path ?? string.Empty, text, bytes.Length),
+                NativeCore.bcs_reflect_set(entity.Bits, typePath, path ?? string.Empty, text, bytes.Length),
                 $"Writing {Described(typePath, path)} on {entity}");
     }
 
@@ -95,7 +95,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
         return ReflectedText(
-            (buffer, capacity) => Native.bcs_reflect_variant(
+            (buffer, capacity) => NativeCore.bcs_reflect_variant(
                 entity.Bits, typePath, path ?? string.Empty, buffer, capacity),
             $"Reading the variant of {Described(typePath, path)} on {entity}");
     }
@@ -118,7 +118,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(variant);
 
         ReflectedCheck(
-            Native.bcs_reflect_set_variant(entity.Bits, typePath, path ?? string.Empty, variant),
+            NativeCore.bcs_reflect_set_variant(entity.Bits, typePath, path ?? string.Empty, variant),
             $"Choosing '{variant}' for {Described(typePath, path)} on {entity}");
     }
 
@@ -141,7 +141,7 @@ public sealed unsafe partial class EcsWorld
     {
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
-        var key = Native.bcs_reflect_get_asset(entity.Bits, typePath, path ?? string.Empty);
+        var key = NativeCore.bcs_reflect_get_asset(entity.Bits, typePath, path ?? string.Empty);
         if (key == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(key, $"Reading the asset at {Described(typePath, path)} on {entity}");
@@ -170,7 +170,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
         ReflectedCheck(
-            Native.bcs_reflect_set_asset(entity.Bits, typePath, path ?? string.Empty, asset.Key),
+            NativeCore.bcs_reflect_set_asset(entity.Bits, typePath, path ?? string.Empty, asset.Key),
             $"Writing the asset at {Described(typePath, path)} on {entity}");
     }
 
@@ -191,7 +191,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
         var parts = stackalloc float[4];
-        var status = Native.bcs_reflect_get_color(entity.Bits, typePath, path ?? string.Empty, parts);
+        var status = NativeCore.bcs_reflect_get_color(entity.Bits, typePath, path ?? string.Empty, parts);
         if (status == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(status, $"Reading the color at {Described(typePath, path)} on {entity}");
@@ -203,7 +203,7 @@ public sealed unsafe partial class EcsWorld
     internal double? GetReflectedFloat(Entity entity, string typePath, string path)
     {
         double value;
-        var status = Native.bcs_reflect_get_float(entity.Bits, typePath, path ?? string.Empty, &value);
+        var status = NativeCore.bcs_reflect_get_float(entity.Bits, typePath, path ?? string.Empty, &value);
         if (status == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(status, $"Reading the number at {Described(typePath, path)} on {entity}");
@@ -216,7 +216,7 @@ public sealed unsafe partial class EcsWorld
     /// </summary>
     internal int? ReflectedLength(Entity entity, string typePath, string path)
     {
-        var count = Native.bcs_reflect_list_len(entity.Bits, typePath, path ?? string.Empty);
+        var count = NativeCore.bcs_reflect_list_len(entity.Bits, typePath, path ?? string.Empty);
         if (count == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(count, $"Counting the items of {Described(typePath, path)} on {entity}");
@@ -229,13 +229,13 @@ public sealed unsafe partial class EcsWorld
     /// </summary>
     internal void ResizeReflected(Entity entity, string typePath, string path, int length) =>
         ReflectedCheck(
-            Native.bcs_reflect_list_resize(entity.Bits, typePath, path ?? string.Empty, length),
+            NativeCore.bcs_reflect_list_resize(entity.Bits, typePath, path ?? string.Empty, length),
             $"Making {Described(typePath, path)} on {entity} {length} long");
 
     /// <summary>Writes a float inside one of Bevy's components at the width it holds.</summary>
     internal void SetReflectedFloat(Entity entity, string typePath, string path, double value) =>
         ReflectedCheck(
-            Native.bcs_reflect_set_float(entity.Bits, typePath, path ?? string.Empty, value),
+            NativeCore.bcs_reflect_set_float(entity.Bits, typePath, path ?? string.Empty, value),
             $"Writing {value} to {Described(typePath, path)} on {entity}");
 
     /// <summary>
@@ -245,7 +245,7 @@ public sealed unsafe partial class EcsWorld
     internal long? GetReflectedInteger(Entity entity, string typePath, string path)
     {
         long value;
-        var status = Native.bcs_reflect_get_integer(entity.Bits, typePath, path ?? string.Empty, &value);
+        var status = NativeCore.bcs_reflect_get_integer(entity.Bits, typePath, path ?? string.Empty, &value);
         if (status == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(status, $"Reading the number at {Described(typePath, path)} on {entity}");
@@ -258,7 +258,7 @@ public sealed unsafe partial class EcsWorld
     /// </summary>
     internal void SetReflectedInteger(Entity entity, string typePath, string path, long value) =>
         ReflectedCheck(
-            Native.bcs_reflect_set_integer(entity.Bits, typePath, path ?? string.Empty, value),
+            NativeCore.bcs_reflect_set_integer(entity.Bits, typePath, path ?? string.Empty, value),
             $"Writing {value} to {Described(typePath, path)} on {entity}");
 
     /// <summary>
@@ -274,7 +274,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
         ReflectedCheck(
-            Native.bcs_reflect_set_color(
+            NativeCore.bcs_reflect_set_color(
                 entity.Bits, typePath, path ?? string.Empty, color.R, color.G, color.B, color.A),
             $"Writing the color at {Described(typePath, path)} on {entity}");
     }
@@ -302,7 +302,7 @@ public sealed unsafe partial class EcsWorld
         var bytes = json is null ? [] : Encoding.UTF8.GetBytes(json);
         fixed (byte* text = bytes)
             ReflectedCheck(
-                Native.bcs_reflect_insert(entity.Bits, typePath, text, bytes.Length),
+                NativeCore.bcs_reflect_insert(entity.Bits, typePath, text, bytes.Length),
                 $"Inserting {typePath} on {entity}");
     }
 
@@ -315,7 +315,7 @@ public sealed unsafe partial class EcsWorld
     {
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
-        var status = Native.bcs_reflect_remove(entity.Bits, typePath);
+        var status = NativeCore.bcs_reflect_remove(entity.Bits, typePath);
         if (status == NativeStatus.NotPresent) return false;
 
         ReflectedCheck(status, $"Removing {typePath} from {entity}");
@@ -387,13 +387,13 @@ public sealed unsafe partial class EcsWorld
     /// <exception cref="BevyNativeException">The type is not a reflected component.</exception>
     public T[] All<T>() where T : struct, IReflectedComponent<T>
     {
-        var count = Native.bcs_reflect_entities(T.TypePath, null, 0);
+        var count = NativeCore.bcs_reflect_entities(T.TypePath, null, 0);
         ReflectedCheck(count, $"Finding the entities carrying {T.TypePath}");
         if (count == 0) return [];
 
         var entities = new ulong[count];
         fixed (ulong* written = entities)
-            ReflectedCheck(Native.bcs_reflect_entities(T.TypePath, written, count), $"Finding the entities carrying {T.TypePath}");
+            ReflectedCheck(NativeCore.bcs_reflect_entities(T.TypePath, written, count), $"Finding the entities carrying {T.TypePath}");
         return [.. entities.Select(bits => T.Create(this, new Entity(bits)))];
     }
 
@@ -422,7 +422,7 @@ public sealed unsafe partial class EcsWorld
         ArgumentException.ThrowIfNullOrEmpty(typePath);
 
         ulong bits;
-        var status = Native.bcs_reflect_resource_entity(typePath, &bits);
+        var status = NativeCore.bcs_reflect_resource_entity(typePath, &bits);
         if (status == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(status, $"Finding the resource {typePath}");
@@ -497,7 +497,7 @@ public sealed unsafe partial class EcsWorld
     private static Entity? ResourcePlace(string typePath)
     {
         ulong bits;
-        var status = Native.bcs_reflect_resource_place(typePath, &bits);
+        var status = NativeCore.bcs_reflect_resource_place(typePath, &bits);
         if (status == NativeStatus.NotPresent) return null;
 
         ReflectedCheck(status, $"Finding where the resource {typePath} goes");
@@ -507,7 +507,7 @@ public sealed unsafe partial class EcsWorld
     /// <summary>Whether a reflected type has a default of Bevy's to insert from nothing.</summary>
     private static bool HasDefault(string typePath)
     {
-        var answer = Native.bcs_reflect_has_default(typePath);
+        var answer = NativeCore.bcs_reflect_has_default(typePath);
         ReflectedCheck(answer, $"Reading whether {typePath} has a default");
         return answer == 1;
     }
@@ -519,10 +519,10 @@ public sealed unsafe partial class EcsWorld
     /// </remarks>
     internal static string? DescribeReflected()
     {
-        if (Native.bcs_reflect_types(null, 0) == NativeStatus.NoWorld) return null;
+        if (NativeCore.bcs_reflect_types(null, 0) == NativeStatus.NoWorld) return null;
 
         return ReflectedText(
-            (buffer, capacity) => Native.bcs_reflect_types(buffer, capacity),
+            (buffer, capacity) => NativeCore.bcs_reflect_types(buffer, capacity),
             "Describing Bevy's reflected components");
     }
 
@@ -533,10 +533,10 @@ public sealed unsafe partial class EcsWorld
     /// <exception cref="BevyNativeException">The type is not registered, or has no default to measure a value of.</exception>
     internal static string? DescribeLayout(string typePath)
     {
-        if (Native.bcs_reflect_layout(typePath, null, 0) == NativeStatus.NoWorld) return null;
+        if (NativeCore.bcs_reflect_layout(typePath, null, 0) == NativeStatus.NoWorld) return null;
 
         return ReflectedText(
-            (buffer, capacity) => Native.bcs_reflect_layout(typePath, buffer, capacity),
+            (buffer, capacity) => NativeCore.bcs_reflect_layout(typePath, buffer, capacity),
             $"Reading the layout of {typePath}");
     }
 
@@ -583,7 +583,7 @@ public sealed unsafe partial class EcsWorld
         // No world means no reason was recorded, and the general description says it better.
         if (status == NativeStatus.NoWorld) NativeStatus.Throw(status, operation);
 
-        var reason = Native.ReadText(Native.bcs_reflect_error, "reading the reflection error");
+        var reason = Native.ReadText(NativeCore.bcs_reflect_error, "reading the reflection error");
         throw new BevyNativeException(status, $"{operation} failed. {reason}");
     }
 }

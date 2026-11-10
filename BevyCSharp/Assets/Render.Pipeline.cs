@@ -17,7 +17,7 @@ public static unsafe partial class Render
     {
         if (!App.HasRenderer) return [];
 
-        var text = Native.ReadText((buffer, capacity) => Native.bcs_render_timings(buffer, capacity), "reading render timings");
+        var text = Native.ReadText((buffer, capacity) => NativeRendering.bcs_render_timings(buffer, capacity), "reading render timings");
         var timings = new List<PassTiming>();
 
         foreach (var line in text.Split('\n', StringSplitOptions.RemoveEmptyEntries))
@@ -55,7 +55,7 @@ public static unsafe partial class Render
     {
         if (!App.HasRenderer) return false;
         uint waiting;
-        var status = Native.bcs_render_pipelines_waiting(&waiting);
+        var status = NativeRendering.bcs_render_pipelines_waiting(&waiting);
         if (status == NativeStatus.NotPresent) return false;
         Native.Check(status, "Render.PipelinesReady");
         return waiting == 0;
@@ -77,7 +77,7 @@ public static unsafe partial class Render
         {
             if (!App.HasRenderer) return null;
             uint mends;
-            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.AnisotropyMended");
+            Native.Check(NativeRendering.bcs_render_shader_mends(&mends), "Render.AnisotropyMended");
             return (mends & 1) != 0 ? true : (mends & 2) != 0 ? false : null;
         }
     }
@@ -101,7 +101,7 @@ public static unsafe partial class Render
         {
             if (!App.HasRenderer) return null;
             uint mends;
-            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.EmissiveExposureMended");
+            Native.Check(NativeRendering.bcs_render_shader_mends(&mends), "Render.EmissiveExposureMended");
             return (mends & 4) != 0 ? true : (mends & 8) != 0 ? false : null;
         }
     }
@@ -125,7 +125,7 @@ public static unsafe partial class Render
         {
             if (!App.HasRenderer) return null;
             uint mends;
-            Native.Check(Native.bcs_render_shader_mends(&mends), "Render.IrradianceFallbackMended");
+            Native.Check(NativeRendering.bcs_render_shader_mends(&mends), "Render.IrradianceFallbackMended");
             return (mends & 16) != 0 ? true : (mends & 32) != 0 ? false : null;
         }
     }
@@ -135,7 +135,7 @@ public static unsafe partial class Render
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.
     /// </summary>
-    public static bool RayTracingActive => Native.bcs_render_ray_tracing_active() != 0;
+    public static bool RayTracingActive => NativeRendering.bcs_render_ray_tracing_active() != 0;
 
     /// <summary>
     /// Lights a camera with Bevy's ray tracing, or with <see langword="false"/> the usual way again.
@@ -172,7 +172,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void SetRayTracedLighting(Entity camera, bool on) =>
         Native.Check(
-            Native.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 1 : 0),
+            NativeRendering.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 1 : 0),
             $"setting ray-traced lighting on {camera}");
 
     /// <summary>
@@ -199,7 +199,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void SetPathTraced(Entity camera, bool on) =>
         Native.Check(
-            Native.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 2 : 0),
+            NativeRendering.bcs_render_set_ray_traced_lighting(camera.Bits, on ? 2 : 0),
             $"setting the path tracer on {camera}");
 
     /// <summary>
@@ -207,7 +207,7 @@ public static unsafe partial class Render
     /// running (see <see cref="RayTracingActive"/>) and <see cref="SetRayTracedDenoiser"/> has not
     /// turned the denoiser off.
     /// </summary>
-    public static bool RayTracedDenoiserActive => Native.bcs_render_ray_traced_denoiser_active() != 0;
+    public static bool RayTracedDenoiserActive => NativeRendering.bcs_render_ray_traced_denoiser_active() != 0;
 
     /// <summary>
     /// Turns the bridge's denoiser over ray-traced lighting on or off, and sets what it filters by,
@@ -259,7 +259,7 @@ public static unsafe partial class Render
         };
 
         Native.Check(
-            Native.bcs_render_set_ray_traced_denoiser(on ? 1 : 0, &native),
+            NativeRendering.bcs_render_set_ray_traced_denoiser(on ? 1 : 0, &native),
             on ? "turning the ray-traced denoiser on" : "turning the ray-traced denoiser off");
 
         static void Positive(float value, string name)
@@ -289,14 +289,14 @@ public static unsafe partial class Render
     /// with normals.
     /// </exception>
     public static void SetRayTraced(Entity entity, AssetHandle mesh) =>
-        Native.Check(Native.bcs_render_set_ray_traced(entity.Bits, mesh.Key), $"making {entity} ray traced");
+        Native.Check(NativeRendering.bcs_render_set_ray_traced(entity.Bits, mesh.Key), $"making {entity} ray traced");
 
     /// <summary>
     /// Whether Bevy's meshlets are running, meaning the bridge was built with them
     /// (<c>--meshlet</c>), the app asked for them with <see cref="Config.MeshletClusters"/>, and
     /// the GPU can draw them.
     /// </summary>
-    public static bool MeshletsActive => Native.bcs_render_meshlets_active() != 0;
+    public static bool MeshletsActive => NativeRendering.bcs_render_meshlets_active() != 0;
 
     /// <summary>
     /// Starts or stops reading back how many meshes the opaque pass draws, which
@@ -320,7 +320,7 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static void CountDrawnMeshes(bool on)
     {
-        var status = Native.bcs_render_count_drawn(on ? 1 : 0);
+        var status = NativeRendering.bcs_render_count_drawn(on ? 1 : 0);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Counting the meshes drawn");
         Native.Check(status, "counting the meshes drawn");
     }
@@ -339,7 +339,7 @@ public static unsafe partial class Render
     public static DrawnMeshCount DrawnMeshes(out uint drawn)
     {
         uint count = 0;
-        var status = Native.bcs_render_drawn_meshes(&count);
+        var status = NativeRendering.bcs_render_drawn_meshes(&count);
         drawn = count;
 
         if (status == NativeStatus.Unsupported) throw NoRenderer("Counting the meshes drawn");
@@ -386,7 +386,7 @@ public static unsafe partial class Render
     /// </exception>
     public static AssetHandle CreateMeshletMesh(AssetHandle mesh, uint quantization = 0, string? saveTo = null) =>
         new(Native.Check(
-            Native.bcs_render_create_meshlet_mesh(mesh.Key, quantization, saveTo),
+            NativeRendering.bcs_render_create_meshlet_mesh(mesh.Key, quantization, saveTo),
             "making a meshlet mesh"));
 
     /// <summary>
@@ -426,7 +426,7 @@ public static unsafe partial class Render
     /// <param name="seed">Mixed into each cluster's color, a mesh's place in a scene's own list for one.</param>
     /// <exception cref="BevyNativeException">Meshlets are not running (see <see cref="MeshletsActive"/>).</exception>
     public static AssetHandle CreateClusterMaterial(uint seed = 0) =>
-        new(Native.Check(Native.bcs_render_cluster_material_create(seed), "making a cluster material"));
+        new(Native.Check(NativeRendering.bcs_render_cluster_material_create(seed), "making a cluster material"));
 
     /// <summary>
     /// Where an entity's mesh was loaded from, or empty when it was not loaded from anywhere.
@@ -509,19 +509,19 @@ public static unsafe partial class Render
     /// </remarks>
     /// <param name="entity">The entity to ask about.</param>
     public static bool IsDrawn(Entity entity) =>
-        Native.bcs_render_asset_path(entity.Bits, 0, null, 0) >= 0;
+        NativeRendering.bcs_render_asset_path(entity.Bits, 0, null, 0) >= 0;
 
     /// <summary>One of the two paths, or empty when there is nothing to say.</summary>
     private static string AssetPathOf(Entity entity, int which)
     {
         // Absent rather than refused, because a tool asks this about whatever is selected and most
         // things are not drawn at all.
-        var probe = Native.bcs_render_asset_path(entity.Bits, which, null, 0);
+        var probe = NativeRendering.bcs_render_asset_path(entity.Bits, which, null, 0);
         if (probe < 0) return string.Empty;
 
         return Native.ReadText(
             (buffer, capacity) =>
-                Native.bcs_render_asset_path(entity.Bits, which, buffer, capacity),
+                NativeRendering.bcs_render_asset_path(entity.Bits, which, buffer, capacity),
             $"reading what {entity} is drawn with");
     }
 }

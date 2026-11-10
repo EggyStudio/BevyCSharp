@@ -97,7 +97,7 @@ public static unsafe partial class Gizmos
 
         fixed (NativeGizmoSegment* at = segments)
         {
-            var status = Native.bcs_gizmo_lines(at, segments.Length, inFront ? 1 : 0);
+            var status = NativeGizmos.bcs_gizmo_lines(at, segments.Length, inFront ? 1 : 0);
             if (status == NativeStatus.Unsupported)
                 throw new BevyNativeException(
                     NativeStatus.Unsupported,

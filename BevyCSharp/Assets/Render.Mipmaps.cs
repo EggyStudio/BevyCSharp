@@ -47,7 +47,7 @@ public static unsafe partial class Render
         int key;
         fixed (byte* at = chain)
         {
-            key = Native.bcs_render_create_image_levels(at, width, height, srgb ? 1 : 0, levels);
+            key = NativeRendering.bcs_render_create_image_levels(at, width, height, srgb ? 1 : 0, levels);
         }
 
         if (key < 0) throw NoRenderer($"Creating a {width}x{height} image with its mipmaps");
@@ -66,7 +66,7 @@ public static unsafe partial class Render
         int key;
         fixed (byte* at = chain)
         {
-            key = Native.bcs_render_create_image_levels(at, width, height, srgb ? 1 : 0, levels);
+            key = NativeRendering.bcs_render_create_image_levels(at, width, height, srgb ? 1 : 0, levels);
         }
 
         if (key < 0) throw NoRenderer($"Creating a {width}x{height} image with its levels");

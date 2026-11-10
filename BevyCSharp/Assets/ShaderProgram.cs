@@ -34,7 +34,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     /// </remarks>
     public ShaderProgramState State =>
         (ShaderProgramState)Native.Check(
-            Native.bcs_shader_program_state(Id),
+            NativeRendering.bcs_shader_program_state(Id),
             $"asking about shader program {Id}");
 
     /// <summary>
@@ -48,7 +48,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     /// </remarks>
     public int Generation =>
         Native.Check(
-            Native.bcs_shader_program_generation(Id),
+            NativeRendering.bcs_shader_program_generation(Id),
             $"asking about shader program {Id}");
 
     /// <summary>
@@ -61,7 +61,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
         {
             var id = Id;
             return Native.ReadText(
-                (buffer, capacity) => Native.bcs_shader_program_diagnostics(id, buffer, capacity),
+                (buffer, capacity) => NativeRendering.bcs_shader_program_diagnostics(id, buffer, capacity),
                 $"reading what shader program {id}'s compiler said");
         }
     }
@@ -73,7 +73,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
         {
             var id = Id;
             return Native.ReadText(
-                (buffer, capacity) => Native.bcs_shader_program_describe(id, buffer, capacity),
+                (buffer, capacity) => NativeRendering.bcs_shader_program_describe(id, buffer, capacity),
                 $"reading which files shader program {id} is made of");
         }
     }
@@ -92,7 +92,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
         {
             var id = Id;
             return Native.ReadText(
-                (buffer, capacity) => Native.bcs_shader_program_layout(id, buffer, capacity),
+                (buffer, capacity) => NativeRendering.bcs_shader_program_layout(id, buffer, capacity),
                 $"reading what shader program {id} declares");
         }
     }
@@ -101,7 +101,7 @@ public readonly unsafe struct ShaderProgram : IEquatable<ShaderProgram>
     /// Compiles every stage again now, whether a file changed or not. Only valid inside a system.
     /// </summary>
     public void Reload() =>
-        Native.Check(Native.bcs_shader_program_reload(Id), $"reloading shader program {Id}");
+        Native.Check(NativeRendering.bcs_shader_program_reload(Id), $"reloading shader program {Id}");
 
     /// <inheritdoc />
     public bool Equals(ShaderProgram other) => _idPlusOne == other._idPlusOne;

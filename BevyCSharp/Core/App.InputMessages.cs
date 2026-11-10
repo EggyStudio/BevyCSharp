@@ -26,7 +26,7 @@ public sealed unsafe partial class App
         int count;
         do
         {
-            count = Native.bcs_input_messages(buffer, Capacity);
+            count = NativeCore.bcs_input_messages(buffer, Capacity);
             for (var i = 0; i < count; i++) Post(bus, ref buffer[i]);
         }
         while (count == Capacity);

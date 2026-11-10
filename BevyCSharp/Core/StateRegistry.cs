@@ -36,7 +36,7 @@ public static unsafe class StateRegistry
     private static int _next;
 
     /// <summary>How many independent state machines this bridge supports.</summary>
-    public static int SlotCount => Native.bcs_state_slots();
+    public static int SlotCount => NativeCore.bcs_state_slots();
 
     /// <summary>How many sub-states one state can carry.</summary>
     /// <remarks>
@@ -44,31 +44,31 @@ public static unsafe class StateRegistry
     /// types exist when the crate is built. The sub-states of the state in slot <c>n</c> are the
     /// block of slots starting at <see cref="SlotCount"/> plus <c>n</c> times this.
     /// </remarks>
-    public static int SubsPerSlot => Native.bcs_state_subs_per_slot();
+    public static int SubsPerSlot => NativeCore.bcs_state_subs_per_slot();
 
     /// <summary>How many computed states one state can carry.</summary>
     /// <remarks>Fixed by the bridge for the same reason <see cref="SubsPerSlot"/> is.</remarks>
-    public static int ComputedPerSlot => Native.bcs_state_computed_per_slot();
+    public static int ComputedPerSlot => NativeCore.bcs_state_computed_per_slot();
 
     /// <summary>How many sub-states exist in total, which is where computed slots start.</summary>
-    internal static int SubCount => Native.bcs_state_sub_count();
+    internal static int SubCount => NativeCore.bcs_state_sub_count();
 
     /// <summary>How many computed states exist in total, which is where joint slots start.</summary>
-    internal static int ComputedCount => Native.bcs_state_computed_count();
+    internal static int ComputedCount => NativeCore.bcs_state_computed_count();
 
     /// <summary>How many joint states this bridge has, each worked out from several states at once.</summary>
     /// <remarks>
     /// Fixed by the bridge as every other count is, though a joint's sources are not, since a joint
     /// is worked out from every state slot and its rule reads the ones it was given.
     /// </remarks>
-    public static int JointCount => Native.bcs_state_joint_count();
+    public static int JointCount => NativeCore.bcs_state_joint_count();
 
     /// <summary>Where joint slots start, past every state, sub-state and computed state.</summary>
     internal static int FirstJoint => SlotCount + SubCount + ComputedCount;
 
     /// <summary>How many sub-states of several states at once this bridge has.</summary>
     /// <remarks>Fixed by the bridge, though which states each lives inside is not, as for joints.</remarks>
-    public static int JointSubCount => Native.bcs_state_joint_sub_count();
+    public static int JointSubCount => NativeCore.bcs_state_joint_sub_count();
 
     /// <summary>Where the slots of sub-states of several states start, past every joint.</summary>
     internal static int FirstJointSub => FirstJoint + JointCount;
@@ -170,7 +170,7 @@ public static unsafe class StateRegistry
             lock (Gate) claimed = Slots.TryGetValue(state, out slot);
 
             int read;
-            if (!claimed || Native.bcs_state_get(slot, &read) == NativeStatus.NotPresent) names.Add(state.Name);
+            if (!claimed || NativeCore.bcs_state_get(slot, &read) == NativeStatus.NotPresent) names.Add(state.Name);
         }
 
         return names;
@@ -278,7 +278,7 @@ public static unsafe class StateRegistry
         int count;
         do
         {
-            count = Native.bcs_state_transitions(buffer, Capacity);
+            count = NativeCore.bcs_state_transitions(buffer, Capacity);
             for (var i = 0; i < count; i++)
             {
                 var transition = buffer[i];
@@ -577,7 +577,7 @@ public static unsafe class StateRegistry
     {
         int value;
         Native.Check(
-            Native.bcs_state_get(SlotOf<TState>(), &value),
+            NativeCore.bcs_state_get(SlotOf<TState>(), &value),
             $"reading state {typeof(TState).Name}");
 
         return Unsafe.As<int, TState>(ref value);
@@ -592,7 +592,7 @@ public static unsafe class StateRegistry
     {
         int value;
         Native.Check(
-            Native.bcs_state_get(SlotOf<TState>(), &value),
+            NativeCore.bcs_state_get(SlotOf<TState>(), &value),
             $"reading state {typeof(TState).Name}");
 
         return value;
@@ -611,7 +611,7 @@ public static unsafe class StateRegistry
         if (!TryGetSlot<TState>(out var slot)) return false;
 
         int read;
-        var status = Native.bcs_state_get(slot, &read);
+        var status = NativeCore.bcs_state_get(slot, &read);
 
         // Not there is an answer rather than a failure. A sub-state whose parent is elsewhere does
         // not exist at all, and a state that claimed a slot when a behavior registered but was
@@ -650,7 +650,7 @@ public static unsafe class StateRegistry
         if (!TryGetSlot<TState>(out var slot)) return false;
 
         int read;
-        var status = Native.bcs_state_get(slot, &read);
+        var status = NativeCore.bcs_state_get(slot, &read);
 
         // Missing is an answer here rather than a failure, which is the whole point of asking this
         // way. Anything else is still a failure worth reporting.
@@ -671,7 +671,7 @@ public static unsafe class StateRegistry
     /// </remarks>
     public static void Set<TState>(TState value) where TState : struct, Enum =>
         Native.Check(
-            Native.bcs_state_set(SlotOf<TState>(), ToInt(value)),
+            NativeCore.bcs_state_set(SlotOf<TState>(), ToInt(value)),
             $"setting state {typeof(TState).Name}");
 
     /// <summary>The enum's underlying value, which the bridge stores.</summary>

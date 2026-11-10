@@ -176,7 +176,7 @@ public static unsafe class ImGuiRuntime
 
         if (pixels == IntPtr.Zero || width <= 0 || height <= 0) return;
 
-        _atlas = Native.bcs_imgui_texture((byte*)pixels, (uint)width, (uint)height);
+        _atlas = NativeImGui.bcs_imgui_texture((byte*)pixels, (uint)width, (uint)height);
 
         // ImGui puts this in every draw call that reads from the atlas, and it comes back
         // unchanged on the other side.
@@ -264,7 +264,7 @@ public static unsafe class ImGuiRuntime
             _ => CursorShape.Default,
         };
 
-        _ = Native.bcs_window_set_cursor_shape(Native.PrimaryWindow, (int)shape);
+        _ = NativeCore.bcs_window_set_cursor_shape(NativeCore.PrimaryWindow, (int)shape);
     }
 
     /// <summary>Ends the frame and hands the engine what came of it.</summary>
@@ -292,7 +292,7 @@ public static unsafe class ImGuiRuntime
                 ScaleX = data.FramebufferScale.X,
                 ScaleY = data.FramebufferScale.Y,
             };
-            Native.Check(Native.bcs_imgui_frame(&empty), nameof(Native.bcs_imgui_frame));
+            Native.Check(NativeImGui.bcs_imgui_frame(&empty), nameof(NativeImGui.bcs_imgui_frame));
             return;
         }
 
@@ -372,7 +372,7 @@ public static unsafe class ImGuiRuntime
             ScaleY = data.FramebufferScale.Y,
         };
 
-        Native.Check(Native.bcs_imgui_frame(&frame), nameof(Native.bcs_imgui_frame));
+        Native.Check(NativeImGui.bcs_imgui_frame(&frame), nameof(NativeImGui.bcs_imgui_frame));
     }
 
     /// <summary>Makes sure a buffer has room, keeping it between frames.</summary>

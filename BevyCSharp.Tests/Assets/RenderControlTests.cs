@@ -267,7 +267,7 @@ public sealed class RenderControlTests
             {
                 Assert.Equal(
                     NativeStatus.InvalidState,
-                    Native.bcs_render_set_post(camera.Bits, &config));
+                    NativeRendering.bcs_render_set_post(camera.Bits, &config));
             }
         });
 

@@ -77,7 +77,7 @@ public static unsafe partial class Shaders
     /// is the situation of a shipped game. What false does mean is that an edit cannot be compiled.
     /// </para>
     /// </remarks>
-    public static bool SlangAvailable => Native.bcs_shader_slang_available() != 0;
+    public static bool SlangAvailable => NativeRendering.bcs_shader_slang_available() != 0;
 
     /// <summary>
     /// Whether a validation error from the renderer is survived rather than closing the app.
@@ -103,7 +103,7 @@ public static unsafe partial class Shaders
         set
         {
             _keepRendering = value;
-            if (App.HasRenderer) Native.bcs_shader_keep_rendering_after_errors(value ? 1 : 0);
+            if (App.HasRenderer) NativeRendering.bcs_shader_keep_rendering_after_errors(value ? 1 : 0);
         }
     }
 
@@ -112,13 +112,13 @@ public static unsafe partial class Shaders
     /// <summary>The last error the renderer reported, or an empty string.</summary>
     public static string LastRenderError => App.HasRenderer
         ? Native.ReadText(
-            (buffer, capacity) => Native.bcs_shader_last_render_error(buffer, capacity),
+            (buffer, capacity) => NativeRendering.bcs_shader_last_render_error(buffer, capacity),
             "reading the last render error")
         : string.Empty;
 
     /// <summary>How many programs the running app has made. Only valid inside a system.</summary>
     public static int ProgramCount =>
-        Native.Check(Native.bcs_shader_program_count(), "counting shader programs");
+        Native.Check(NativeRendering.bcs_shader_program_count(), "counting shader programs");
 
     /// <summary>Every program the running app has made. Only valid inside a system.</summary>
     public static IEnumerable<ShaderProgram> Programs =>
@@ -304,7 +304,7 @@ public static unsafe partial class Shaders
                     FragmentUi = Stage(settings.FragmentUi),
                 };
 
-                var id = Native.bcs_shader_program_create(&config);
+                var id = NativeRendering.bcs_shader_program_create(&config);
 
                 if (id == NativeStatus.NullArgument)
                 {
@@ -354,7 +354,7 @@ public static unsafe partial class Shaders
         ArgumentNullException.ThrowIfNull(settings);
         RequireProgram(settings.Program, nameof(settings));
 
-        var key = Native.bcs_shader_material_create(
+        var key = NativeRendering.bcs_shader_material_create(
             settings.Program.Id,
             (int)settings.Alpha,
             settings.AlphaCutoff,
@@ -407,7 +407,7 @@ public static unsafe partial class Shaders
     {
         RequireProgram(program, nameof(program));
 
-        var key = Native.bcs_shader_material_2d_create(program.Id, alpha is { } given ? (int)given : -1, cutoff);
+        var key = NativeRendering.bcs_shader_material_2d_create(program.Id, alpha is { } given ? (int)given : -1, cutoff);
 
         ThrowIfNoProgram(key, program);
         Native.Check(key, $"making a 2D material drawn by shader program {program.Id}");
@@ -440,7 +440,7 @@ public static unsafe partial class Shaders
     {
         RequireProgram(program, nameof(program));
 
-        var key = Native.bcs_shader_material_ui_create(program.Id);
+        var key = NativeRendering.bcs_shader_material_ui_create(program.Id);
 
         ThrowIfNoProgram(key, program);
         Native.Check(key, $"making an interface material drawn by shader program {program.Id}");
@@ -463,7 +463,7 @@ public static unsafe partial class Shaders
     /// </summary>
     public static ShaderProgram ProgramOn(Entity entity)
     {
-        var id = Native.bcs_shader_entity_program(entity.Bits);
+        var id = NativeRendering.bcs_shader_entity_program(entity.Bits);
         if (id == NativeStatus.NoComponent || id == NativeStatus.Unsupported) return ShaderProgram.None;
 
         return new ShaderProgram(Native.Check(id, $"asking what draws entity {entity}"));
@@ -486,7 +486,7 @@ public static unsafe partial class Shaders
     {
         RequireProgram(program, nameof(program));
 
-        var id = Native.bcs_shader_instance_create(program.Id);
+        var id = NativeRendering.bcs_shader_instance_create(program.Id);
         ThrowIfNoProgram(id, program);
         return new ShaderInstance(Native.Check(id, $"making an instance of shader program {program.Id}"));
     }

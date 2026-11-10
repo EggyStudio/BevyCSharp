@@ -330,7 +330,7 @@ internal static class Precipitation
             Height = RoofSize,
             Order = -100,
         });
-        Native.Check(Native.bcs_render_set_roof_camera(camera.Bits, layers), "making the roofs' camera");
+        Native.Check(NativeSky.bcs_render_set_roof_camera(camera.Bits, layers), "making the roofs' camera");
         Render.SetCameraTarget(camera, Render.CreateTarget(RoofTexels, RoofTexels));
         Render.SetPostProcessing(camera, new PostSettings { Msaa = 1, Tonemapper = Tonemapper.None, Dither = false });
 

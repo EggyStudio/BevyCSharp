@@ -113,7 +113,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         if (_watchedClipEvents) return;
         _watchedClipEvents = true;
 
-        var status = Native.bcs_observe_clip_events(ComponentRegistry.AppHandle, &ClipEventReported, GCHandle.ToIntPtr(_self));
+        var status = NativeCore.bcs_observe_clip_events(ComponentRegistry.AppHandle, &ClipEventReported, GCHandle.ToIntPtr(_self));
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing the events placed on clips");
     }
 
@@ -170,7 +170,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
 
         ulong observer;
         Native.Check(
-            Native.bcs_observe_component(ComponentRegistry.AppHandle, kind, component, &Reported, GCHandle.ToIntPtr(_self), &observer),
+            NativeCore.bcs_observe_component(ComponentRegistry.AppHandle, kind, component, &Reported, GCHandle.ToIntPtr(_self), &observer),
             $"observing {typeof(T).Name}");
     }
 
@@ -184,7 +184,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         if (!_watchedPointers.Add(kind)) return;
 
         ulong observer;
-        var status = Native.bcs_observe_pointer(ComponentRegistry.AppHandle, kind, &PointerReported, GCHandle.ToIntPtr(_self), &observer);
+        var status = NativeCore.bcs_observe_pointer(ComponentRegistry.AppHandle, kind, &PointerReported, GCHandle.ToIntPtr(_self), &observer);
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a pointer does");
     }
 
@@ -197,7 +197,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         if (!_watchedWidgets.Add(kind)) return;
 
         ulong observer;
-        var status = Native.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &WidgetReported, GCHandle.ToIntPtr(_self), &observer);
+        var status = NativeCore.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &WidgetReported, GCHandle.ToIntPtr(_self), &observer);
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a widget reports");
     }
 
@@ -209,7 +209,7 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         _watchedFocusedKeys = true;
 
         ulong observer;
-        var status = Native.bcs_observe_focused_keys(ComponentRegistry.AppHandle, &FocusedKeyReported, GCHandle.ToIntPtr(_self), &observer);
+        var status = NativeCore.bcs_observe_focused_keys(ComponentRegistry.AppHandle, &FocusedKeyReported, GCHandle.ToIntPtr(_self), &observer);
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing keys handed to the focused entity");
     }
 

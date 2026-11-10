@@ -38,7 +38,7 @@ public static unsafe partial class Render
     /// </exception>
     public static Capture BeginCapture(AssetHandle target)
     {
-        var id = Native.bcs_render_capture(target.Key);
+        var id = NativeRendering.bcs_render_capture(target.Key);
         if (id == NativeStatus.Unsupported) throw NoRenderer("Capturing a picture");
 
         Native.Check(id, $"asking for a capture of {target}");
@@ -67,7 +67,7 @@ public static unsafe partial class Render
         uint width;
         uint height;
 
-        var needed = Native.bcs_render_capture_read(capture.Id, &width, &height, null, 0);
+        var needed = NativeRendering.bcs_render_capture_read(capture.Id, &width, &height, null, 0);
 
         // Still coming back off the GPU. Asking again next frame is the whole of the protocol.
         if (needed == NativeStatus.InvalidState) return false;
@@ -80,7 +80,7 @@ public static unsafe partial class Render
         fixed (byte* buffer = pixels)
         {
             Native.Check(
-                Native.bcs_render_capture_read(capture.Id, &width, &height, buffer, needed),
+                NativeRendering.bcs_render_capture_read(capture.Id, &width, &height, buffer, needed),
                 $"reading {capture}");
         }
 
@@ -121,7 +121,7 @@ public static unsafe partial class Render
         uint height;
         int format;
 
-        var needed = Native.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, null, 0);
+        var needed = NativeRendering.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, null, 0);
 
         if (needed == NativeStatus.InvalidState) return false;
         if (needed == NativeStatus.Unsupported) throw NoRenderer("Reading a capture");
@@ -133,7 +133,7 @@ public static unsafe partial class Render
         fixed (byte* buffer = bytes)
         {
             Native.Check(
-                Native.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, buffer, needed),
+                NativeRendering.bcs_render_capture_read_raw(capture.Id, &width, &height, &format, buffer, needed),
                 $"reading {capture} as it was drawn");
         }
 
@@ -147,7 +147,7 @@ public static unsafe partial class Render
     /// something drops them, and one that never arrives holds nothing.
     /// </remarks>
     public static void ReleaseCapture(Capture capture) =>
-        Native.Check(Native.bcs_render_capture_release(capture.Id), $"releasing {capture}");
+        Native.Check(NativeRendering.bcs_render_capture_release(capture.Id), $"releasing {capture}");
 
     /// <summary>
     /// Creates an empty image a camera can draw into.
@@ -187,7 +187,7 @@ public static unsafe partial class Render
         TargetFormat format = TargetFormat.Rgba8,
         uint layers = 1)
     {
-        var key = Native.bcs_render_create_target(width, height, (int)format, layers);
+        var key = NativeRendering.bcs_render_create_target(width, height, (int)format, layers);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Creating a render target");
 
         Native.Check(key, $"creating a {width}x{height} render target");
@@ -230,7 +230,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void SetMipGeneration(AssetHandle image, bool on)
     {
-        var status = Native.bcs_render_set_mip_generation(image.Key, on ? 1 : 0);
+        var status = NativeRendering.bcs_render_set_mip_generation(image.Key, on ? 1 : 0);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Making an image's mipmaps");
         if (status == NativeStatus.InvalidState)
         {
@@ -282,7 +282,7 @@ public static unsafe partial class Render
             Srgb = settings.Srgb ? 1 : 0,
         };
 
-        var status = Native.bcs_render_set_sampler(image.Key, &native);
+        var status = NativeRendering.bcs_render_set_sampler(image.Key, &native);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Setting an image's sampler");
         Native.Check(status, $"setting the sampler of {image}");
     }
@@ -340,7 +340,7 @@ public static unsafe partial class Render
 
         fixed (byte* at = pixels)
         {
-            key = Native.bcs_render_create_image(at, width, height, srgb ? 1 : 0);
+            key = NativeRendering.bcs_render_create_image(at, width, height, srgb ? 1 : 0);
         }
 
         if (key < 0) throw NoRenderer($"Creating a {width}x{height} image");
@@ -369,7 +369,7 @@ public static unsafe partial class Render
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no image, or there is no renderer.</exception>
     public static void MakeCubemap(AssetHandle image) =>
-        Native.Check(Native.bcs_render_make_cubemap(image.Key), "making an image a cubemap");
+        Native.Check(NativeRendering.bcs_render_make_cubemap(image.Key), "making an image a cubemap");
 
     /// <summary>
     /// The compressed texture formats this device decodes, none where nothing draws. Only valid
@@ -382,7 +382,7 @@ public static unsafe partial class Render
     /// <see cref="CompressedImageFormats.Astc"/> and <see cref="CompressedImageFormats.Etc2"/>, though a
     /// device may decode more than its kind does.
     /// </remarks>
-    public static CompressedImageFormats CompressedFormats => (CompressedImageFormats)Native.bcs_render_compressed_formats();
+    public static CompressedImageFormats CompressedFormats => (CompressedImageFormats)NativeRendering.bcs_render_compressed_formats();
 
     /// <summary>
     /// Makes a cubemap out of six images, one a face, as a cubemap shipped as six files is.
@@ -412,7 +412,7 @@ public static unsafe partial class Render
         AssetHandle negativeZ)
     {
         var faces = stackalloc int[6] { positiveX.Key, negativeX.Key, positiveY.Key, negativeY.Key, positiveZ.Key, negativeZ.Key };
-        var key = Native.Check(Native.bcs_render_cubemap_from_faces(faces), "making a cubemap of six images");
+        var key = Native.Check(NativeRendering.bcs_render_cubemap_from_faces(faces), "making a cubemap of six images");
         return new AssetHandle(key);
     }
 
@@ -431,7 +431,7 @@ public static unsafe partial class Render
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(layers, 1);
         Native.Check(
-            Native.bcs_render_reshape_image(image.Key, layers, 0),
+            NativeRendering.bcs_render_reshape_image(image.Key, layers, 0),
             $"cutting an image into {layers} layers");
     }
 
@@ -450,7 +450,7 @@ public static unsafe partial class Render
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(slices, 1);
         Native.Check(
-            Native.bcs_render_reshape_image(image.Key, slices, 1),
+            NativeRendering.bcs_render_reshape_image(image.Key, slices, 1),
             $"cutting an image into {slices} slices");
     }
 
@@ -502,7 +502,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void SetCameraTarget(Entity camera, Entity window) =>
         Native.Check(
-            Native.bcs_render_set_camera_window(camera.Bits, window.Bits),
+            NativeRendering.bcs_render_set_camera_window(camera.Bits, window.Bits),
             $"pointing {camera} at window {window}");
 
     /// <summary>
@@ -529,7 +529,7 @@ public static unsafe partial class Render
     /// The entity is not a camera, the handle names no image, or the image has no such layer.
     /// </exception>
     public static void SetCameraTarget(Entity camera, AssetHandle target, int layer) => Native.Check(
-        Native.bcs_render_set_camera_target(camera.Bits, target.Key, layer),
+        NativeRendering.bcs_render_set_camera_target(camera.Bits, target.Key, layer),
         $"pointing {camera} at {target}");
 
     /// <summary>
@@ -544,7 +544,7 @@ public static unsafe partial class Render
     {
         var screen = stackalloc float[2];
 
-        if (Native.bcs_render_world_to_viewport(camera.Bits, point.X, point.Y, point.Z, screen) < 0)
+        if (NativeRendering.bcs_render_world_to_viewport(camera.Bits, point.X, point.Y, point.Z, screen) < 0)
         {
             x = 0f;
             y = 0f;
@@ -567,7 +567,7 @@ public static unsafe partial class Render
     {
         var ray = stackalloc float[6];
 
-        if (Native.bcs_render_viewport_to_world(camera.Bits, x, y, ray) < 0)
+        if (NativeRendering.bcs_render_viewport_to_world(camera.Bits, x, y, ray) < 0)
         {
             origin = default;
             direction = default;
@@ -592,7 +592,7 @@ public static unsafe partial class Render
     {
         var bounds = stackalloc float[6];
 
-        if (Native.bcs_render_bounds(entity.Bits, bounds) < 0)
+        if (NativeRendering.bcs_render_bounds(entity.Bits, bounds) < 0)
         {
             min = default;
             max = default;
@@ -639,7 +639,7 @@ public static unsafe partial class Render
                 "Drawing a mesh as its edges needs the app's Config.Wireframes, which adds Bevy's wireframe plugins.");
         }
 
-        var status = Native.bcs_render_wireframe(
+        var status = NativeRendering.bcs_render_wireframe(
             entity.Bits, on ? 1 : 0, color.R, color.G, color.B, color.A);
 
         if (status == NativeStatus.Unsupported) throw NoRenderer("Drawing a wireframe");
@@ -665,7 +665,7 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static void SetShadowMapSize(uint directional = 0, uint point = 0)
     {
-        var status = Native.bcs_render_set_shadow_maps(directional, point);
+        var status = NativeRendering.bcs_render_set_shadow_maps(directional, point);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Setting the shadow map size");
 
         Native.Check(status, "setting the shadow map size");
@@ -691,7 +691,7 @@ public static unsafe partial class Render
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        var status = Native.bcs_render_set_layers(entity.Bits, layers);
+        var status = NativeRendering.bcs_render_set_layers(entity.Bits, layers);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Setting render layers");
 
         Native.Check(status, $"setting the render layers of {entity}");
@@ -715,7 +715,7 @@ public static unsafe partial class Render
     /// </summary>
     internal static void Attach(Entity entity, string component, AssetHandle handle, string described)
     {
-        var status = Native.bcs_ecs_insert_asset(entity.Bits, component, handle.Key);
+        var status = NativeRendering.bcs_ecs_insert_asset(entity.Bits, component, handle.Key);
         if (status == NativeStatus.Unsupported) throw NoRenderer($"Attaching {described}");
         if (status == NativeStatus.NoEntity)
             throw new BevyNativeException(

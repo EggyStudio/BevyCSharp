@@ -112,7 +112,7 @@ internal static partial class WorldProbes
     private static unsafe uint HeightOf(Entity camera)
     {
         var size = stackalloc uint[2];
-        return Native.bcs_render_viewport_size(camera.Bits, size) == NativeStatus.Ok ? size[1] : 1080u;
+        return NativeGlobalIllumination.bcs_render_viewport_size(camera.Bits, size) == NativeStatus.Ok ? size[1] : 1080u;
     }
 
     /// <summary>

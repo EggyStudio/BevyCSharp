@@ -125,13 +125,13 @@ public sealed unsafe partial class App : IDisposable
     /// </remarks>
     public static string? DescribeAdapter()
     {
-        var needed = Native.bcs_render_adapter(null, 0);
+        var needed = NativeCore.bcs_render_adapter(null, 0);
         if (needed <= 0) return null;
 
         var buffer = new byte[needed];
         fixed (byte* target = buffer)
         {
-            if (Native.bcs_render_adapter(target, needed) != needed) return null;
+            if (NativeCore.bcs_render_adapter(target, needed) != needed) return null;
         }
 
         return Encoding.UTF8.GetString(buffer);

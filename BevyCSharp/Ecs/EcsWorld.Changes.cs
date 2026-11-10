@@ -63,7 +63,7 @@ public sealed unsafe partial class EcsWorld
     private static bool TryTicks<T>(Entity entity, out NativeChangeTicks ticks) where T : unmanaged
     {
         NativeChangeTicks read;
-        var answer = Native.bcs_ecs_change_ticks(entity.Bits, ComponentType<T>.Id, &read);
+        var answer = NativeCore.bcs_ecs_change_ticks(entity.Bits, ComponentType<T>.Id, &read);
         ticks = read;
         if (answer is NativeStatus.NotPresent or NativeStatus.NoEntity) return false;
         Native.Check(answer, $"reading when {typeof(T).Name} of {entity} changed");

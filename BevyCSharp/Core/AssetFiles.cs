@@ -377,7 +377,7 @@ public static unsafe class AssetFiles
 
         if (paths.Length == 0)
         {
-            Native.Check(Native.bcs_assets_carried(null, null, 0), "taking back the assets the game carries");
+            Native.Check(NativeCore.bcs_assets_carried(null, null, 0), "taking back the assets the game carries");
             return;
         }
 
@@ -385,7 +385,7 @@ public static unsafe class AssetFiles
 
         fixed (byte* list = joined)
         {
-            Native.Check(Native.bcs_assets_carried(&ReadCarried, list, (nuint)joined.Length), "handing the bridge the assets the game carries");
+            Native.Check(NativeCore.bcs_assets_carried(&ReadCarried, list, (nuint)joined.Length), "handing the bridge the assets the game carries");
         }
     }
 

@@ -48,7 +48,7 @@ public sealed unsafe partial class EcsWorld
 
         int Read(ulong* buffer, int capacity)
         {
-            var answer = Native.bcs_ecs_removed(componentId, buffer, capacity);
+            var answer = NativeCore.bcs_ecs_removed(componentId, buffer, capacity);
             if (answer == NativeStatus.InvalidState)
                 throw new InvalidOperationException("Removed is asked from inside a system, which keeps its own place in each component's removals.");
             return Native.Check(answer, $"reading the removals of component {componentId}");

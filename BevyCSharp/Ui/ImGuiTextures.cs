@@ -35,7 +35,7 @@ public static unsafe class ImGuiTextures
 
         if (Loaded.TryGetValue(path, out var picture)) return picture;
 
-        picture = Native.bcs_imgui_picture(path);
+        picture = NativeImGui.bcs_imgui_picture(path);
         if (picture != 0) Loaded[path] = picture;
 
         return picture;
@@ -57,7 +57,7 @@ public static unsafe class ImGuiTextures
         if (!image.IsValid) return 0;
         if (Assets.TryGetValue(image.Key, out var picture)) return picture;
 
-        picture = Native.bcs_imgui_asset_texture(image.Key);
+        picture = NativeImGui.bcs_imgui_asset_texture(image.Key);
         Assets[image.Key] = picture;
 
         return picture;
@@ -80,7 +80,7 @@ public static unsafe class ImGuiTextures
         uint width;
         uint height;
 
-        if (Native.bcs_imgui_picture_size(picture, &width, &height) != NativeStatus.Ok)
+        if (NativeImGui.bcs_imgui_picture_size(picture, &width, &height) != NativeStatus.Ok)
             return (0, 0);
 
         return (width, height);

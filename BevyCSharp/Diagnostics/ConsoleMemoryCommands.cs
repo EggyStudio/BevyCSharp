@@ -55,9 +55,9 @@ internal static unsafe class ConsoleMemoryCommands
 
         // The handles need a world, which a command asked from outside a frame has not got.
         if (ConsoleHost.World is not null)
-            line += string.Create(CultureInfo.InvariantCulture, $" handles {Native.bcs_asset_live_count()}");
+            line += string.Create(CultureInfo.InvariantCulture, $" handles {NativeAssets.bcs_asset_live_count()}");
 
-        return line + " " + Native.ReadText(Native.bcs_memory_describe, "reading what the bridge holds");
+        return line + " " + Native.ReadText(NativeDiagnostics.bcs_memory_describe, "reading what the bridge holds");
     }
 
     /// <summary>Says what the program holds after a full compacting collection.</summary>

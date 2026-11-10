@@ -43,7 +43,7 @@ public static unsafe partial class Animation
     {
         clips = [];
 
-        var length = Native.bcs_animation_clips(scene.Bits, null, 0);
+        var length = NativeAnimation.bcs_animation_clips(scene.Bits, null, 0);
         if (length == NativeStatus.InvalidState) return false;
         if (length == NativeStatus.Unsupported) throw NoRenderer();
 
@@ -52,7 +52,7 @@ public static unsafe partial class Animation
         var bytes = new byte[length];
         fixed (byte* buffer = bytes)
         {
-            Native.Check(Native.bcs_animation_clips(scene.Bits, buffer, length), $"reading the clips of {scene}");
+            Native.Check(NativeAnimation.bcs_animation_clips(scene.Bits, buffer, length), $"reading the clips of {scene}");
         }
 
         clips = length == 0 ? [] : Encoding.UTF8.GetString(bytes).Split('\n');
@@ -82,27 +82,27 @@ public static unsafe partial class Animation
                 nameof(clip));
 
         Native.Check(
-            Native.bcs_animation_play(scene.Bits, index, settings.Repeat ? 1 : settings.Times >= 2 ? (int)settings.Times : 0, settings.Speed, settings.Blend),
+            NativeAnimation.bcs_animation_play(scene.Bits, index, settings.Repeat ? 1 : settings.Times >= 2 ? (int)settings.Times : 0, settings.Speed, settings.Blend),
             $"playing {clip} on {scene}");
 
         return true;
     }
 
     /// <summary>Stops every clip on a model, leaving it in the pose it was in.</summary>
-    public static void Stop(Entity scene) => Act(Native.bcs_animation_stop(scene.Bits), "stopping", scene);
+    public static void Stop(Entity scene) => Act(NativeAnimation.bcs_animation_stop(scene.Bits), "stopping", scene);
 
     /// <summary>Holds what a model is playing where it is.</summary>
-    public static void Pause(Entity scene) => Act(Native.bcs_animation_pause(scene.Bits, 1), "pausing", scene);
+    public static void Pause(Entity scene) => Act(NativeAnimation.bcs_animation_pause(scene.Bits, 1), "pausing", scene);
 
     /// <summary>Lets what a model is playing go on from where it was held.</summary>
-    public static void Resume(Entity scene) => Act(Native.bcs_animation_pause(scene.Bits, 0), "resuming", scene);
+    public static void Resume(Entity scene) => Act(NativeAnimation.bcs_animation_pause(scene.Bits, 0), "resuming", scene);
 
     /// <summary>Moves the clip a model is playing to a time from its start.</summary>
     /// <exception cref="BevyNativeException">Nothing is playing, or the model has not arrived.</exception>
     public static void Seek(Entity scene, float seconds)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(seconds);
-        Act(Native.bcs_animation_adjust(scene.Bits, seconds, float.NaN), "seeking", scene);
+        Act(NativeAnimation.bcs_animation_adjust(scene.Bits, seconds, float.NaN), "seeking", scene);
     }
 
     /// <summary>
@@ -114,12 +114,12 @@ public static unsafe partial class Animation
     /// end of the play it is in.
     /// </remarks>
     /// <exception cref="BevyNativeException">Nothing is playing, or the entity has no scene.</exception>
-    public static void SetRepeat(Entity scene, uint times) => Act(Native.bcs_animation_set_repeat(scene.Bits, times), "changing how many times the clip plays on", scene);
+    public static void SetRepeat(Entity scene, uint times) => Act(NativeAnimation.bcs_animation_set_repeat(scene.Bits, times), "changing how many times the clip plays on", scene);
 
     /// <summary>Changes how fast the clip a model is playing goes.</summary>
     /// <exception cref="BevyNativeException">Nothing is playing, or the model has not arrived.</exception>
     public static void SetSpeed(Entity scene, float speed) =>
-        Act(Native.bcs_animation_adjust(scene.Bits, -1f, speed), "changing the speed of", scene);
+        Act(NativeAnimation.bcs_animation_adjust(scene.Bits, -1f, speed), "changing the speed of", scene);
 
     /// <summary>What a model is playing, or nothing while it has not arrived.</summary>
     /// <exception cref="BevyNativeException">
@@ -128,7 +128,7 @@ public static unsafe partial class Animation
     public static AnimationState? StateOf(Entity scene)
     {
         NativeAnimationState read;
-        var answer = Native.bcs_animation_state(scene.Bits, &read);
+        var answer = NativeAnimation.bcs_animation_state(scene.Bits, &read);
         if (answer == NativeStatus.InvalidState) return null;
         if (answer == NativeStatus.Unsupported) throw NoRenderer();
 
@@ -150,7 +150,7 @@ public static unsafe partial class Animation
         int* clips = stackalloc int[Capacity];
 
         int count;
-        while ((count = Native.bcs_animation_finished(roots, clips, Capacity)) > 0)
+        while ((count = NativeAnimation.bcs_animation_finished(roots, clips, Capacity)) > 0)
         {
             for (var i = 0; i < count; i++)
             {
@@ -186,7 +186,7 @@ public static unsafe partial class Animation
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static AssetHandle CreateClip()
     {
-        var key = Native.bcs_animation_clip_create();
+        var key = NativeAnimation.bcs_animation_clip_create();
         if (key == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(key, "making an animation clip");
         return new AssetHandle(key);
@@ -226,9 +226,9 @@ public static unsafe partial class Animation
         fixed (float* values = curve.Values)
         {
             status = curve.Moved is { } field
-                ? Native.bcs_animation_clip_add_field_curve(
+                ? NativeAnimation.bcs_animation_clip_add_field_curve(
                     clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length, field.Component, field.Path, (int)field.Value)
-                : Native.bcs_animation_clip_add_curve(clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length);
+                : NativeAnimation.bcs_animation_clip_add_curve(clip.Key, target.High, target.Low, &native, times, values, curve.Values.Length);
         }
 
         if (status == NativeStatus.Unsupported) throw NoRenderer();
@@ -237,7 +237,7 @@ public static unsafe partial class Animation
         if (curve.Moved is { } moved && status is NativeStatus.NoComponent or NativeStatus.InvalidState)
             throw new BevyNativeException(
                 status,
-                $"Adding a curve on {moved.Component}'s {moved.Path} to clip {clip.Key} failed. {Native.ReadText(Native.bcs_reflect_error, "reading the reflection error")}");
+                $"Adding a curve on {moved.Component}'s {moved.Path} to clip {clip.Key} failed. {Native.ReadText(NativeCore.bcs_reflect_error, "reading the reflection error")}");
 
         Native.Check(status, $"adding a {curve.Property} curve to clip {clip.Key}");
     }
@@ -249,7 +249,7 @@ public static unsafe partial class Animation
     {
         int graph;
         uint node;
-        var status = Native.bcs_animation_graph_from_clip(clip.Key, &graph, &node);
+        var status = NativeAnimation.bcs_animation_graph_from_clip(clip.Key, &graph, &node);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"making a graph of clip {clip.Key}");
         return (new AssetHandle(graph), node);
@@ -268,7 +268,7 @@ public static unsafe partial class Animation
     /// <param name="repeat">Whether it plays over and over.</param>
     /// <exception cref="BevyNativeException">The entity or the graph is gone, or this build has no renderer.</exception>
     public static void PlayGraph(Entity player, AssetHandle graph, uint node, bool repeat = false) =>
-        Act(Native.bcs_animation_play_graph(player.Bits, graph.Key, node, repeat ? 1 : 0), "playing a graph as", player);
+        Act(NativeAnimation.bcs_animation_play_graph(player.Bits, graph.Key, node, repeat ? 1 : 0), "playing a graph as", player);
 
     /// <summary>Makes an entity the target a clip's curves are aimed at, moved by a player.</summary>
     /// <remarks>Bevy's <c>AnimationTargetId</c> and <c>AnimatedBy</c> on the entity.</remarks>
@@ -277,7 +277,7 @@ public static unsafe partial class Animation
     /// <param name="player">The entity whose player moves it, which may be itself.</param>
     /// <exception cref="BevyNativeException">An entity is gone, or this build has no renderer.</exception>
     public static void Animate(Entity entity, AnimationTarget target, Entity player) =>
-        Act(Native.bcs_animation_animate(entity.Bits, target.High, target.Low, player.Bits), "aiming curves at", entity);
+        Act(NativeAnimation.bcs_animation_animate(entity.Bits, target.High, target.Low, player.Bits), "aiming curves at", entity);
 
     /// <summary>Starts loading one of a model file's clips by its label, as <c>models/Fox.glb#Animation2</c>.</summary>
     /// <remarks>
@@ -296,7 +296,7 @@ public static unsafe partial class Animation
     /// <exception cref="BevyNativeException">The clip is gone, or this build has no renderer.</exception>
     public static void SetClipDuration(AssetHandle clip, float seconds)
     {
-        var status = Native.bcs_animation_clip_set_duration(clip.Key, seconds);
+        var status = NativeAnimation.bcs_animation_clip_set_duration(clip.Key, seconds);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"setting the length of clip {clip.Key}");
     }
@@ -325,7 +325,7 @@ public static unsafe partial class Animation
     private static bool PlaceEvent<TEvent>(AssetHandle clip, float time, TEvent value, AnimationTarget? target) where TEvent : IAnimationEvent
     {
         var at = target ?? default;
-        var status = Native.bcs_animation_clip_add_event(clip.Key, time, ClipEvents.Keep(value), target is null ? 0 : 1, at.High, at.Low);
+        var status = NativeAnimation.bcs_animation_clip_add_event(clip.Key, time, ClipEvents.Keep(value), target is null ? 0 : 1, at.High, at.Low);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         if (status == NativeStatus.NotPresent) return false;
         Native.Check(status, $"placing a {typeof(TEvent).Name} on clip {clip.Key}");
@@ -359,7 +359,7 @@ public static unsafe partial class Animation
     {
         int graph;
         uint root;
-        var status = Native.bcs_animation_graph_create(&graph, &root);
+        var status = NativeAnimation.bcs_animation_graph_create(&graph, &root);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, "making an animation graph");
         return (new AssetHandle(graph), root);
@@ -379,7 +379,7 @@ public static unsafe partial class Animation
     public static uint AddBlend(AssetHandle graph, float weight, uint parent, bool additive = false)
     {
         uint node;
-        var status = Native.bcs_animation_graph_add_blend(graph.Key, weight, parent, additive ? 1 : 0, &node);
+        var status = NativeAnimation.bcs_animation_graph_add_blend(graph.Key, weight, parent, additive ? 1 : 0, &node);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"adding a blend to graph {graph.Key}");
         return node;
@@ -395,7 +395,7 @@ public static unsafe partial class Animation
     public static uint AddClip(AssetHandle graph, AssetHandle clip, float weight, uint parent, ulong mask = 0)
     {
         uint node;
-        var status = Native.bcs_animation_graph_add_clip(graph.Key, clip.Key, mask, weight, parent, &node);
+        var status = NativeAnimation.bcs_animation_graph_add_clip(graph.Key, clip.Key, mask, weight, parent, &node);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"adding clip {clip.Key} to graph {graph.Key}");
         return node;
@@ -408,7 +408,7 @@ public static unsafe partial class Animation
     /// <exception cref="BevyNativeException">The graph is gone, or this build has no renderer.</exception>
     public static void AddToMaskGroup(AssetHandle graph, AnimationTarget target, uint group)
     {
-        var status = Native.bcs_animation_graph_add_to_mask_group(graph.Key, target.High, target.Low, group);
+        var status = NativeAnimation.bcs_animation_graph_add_to_mask_group(graph.Key, target.High, target.Low, group);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"masking a target in graph {graph.Key}");
     }
@@ -420,7 +420,7 @@ public static unsafe partial class Animation
     /// <exception cref="BevyNativeException">The graph or the node is gone, or this build has no renderer.</exception>
     public static void SetNodeMask(AssetHandle graph, uint node, ulong mask)
     {
-        var status = Native.bcs_animation_graph_set_mask(graph.Key, node, mask);
+        var status = NativeAnimation.bcs_animation_graph_set_mask(graph.Key, node, mask);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         Native.Check(status, $"masking node {node} of graph {graph.Key}");
     }
@@ -435,7 +435,7 @@ public static unsafe partial class Animation
     public static AnimationTarget? TargetOf(Entity entity)
     {
         ulong high, low;
-        var status = Native.bcs_animation_target_of(entity.Bits, &high, &low);
+        var status = NativeAnimation.bcs_animation_target_of(entity.Bits, &high, &low);
         if (status == NativeStatus.NotPresent) return null;
         Act(status, "reading the target of", entity);
         return new AnimationTarget(high, low);
@@ -446,7 +446,7 @@ public static unsafe partial class Animation
     /// <param name="graph">The graph.</param>
     /// <exception cref="BevyNativeException">The entity or the graph is gone, or this build has no renderer.</exception>
     public static void SetGraph(Entity player, AssetHandle graph) =>
-        Act(Native.bcs_animation_set_graph(player.Bits, graph.Key), "giving a graph to", player);
+        Act(NativeAnimation.bcs_animation_set_graph(player.Bits, graph.Key), "giving a graph to", player);
 
     /// <summary>Starts a node of an entity's graph playing beside whatever it plays already.</summary>
     /// <param name="player">The entity with the graph.</param>
@@ -454,7 +454,7 @@ public static unsafe partial class Animation
     /// <param name="repeat">Whether it plays over and over.</param>
     /// <exception cref="BevyNativeException">The entity is gone or plays no graph, or this build has no renderer.</exception>
     public static void PlayNode(Entity player, uint node, bool repeat = false) =>
-        Act(Native.bcs_animation_play_node(player.Bits, node, repeat ? 1 : 0), "playing a node as", player);
+        Act(NativeAnimation.bcs_animation_play_node(player.Bits, node, repeat ? 1 : 0), "playing a node as", player);
 
     /// <summary>Sets the weight a playing node is mixed in at.</summary>
     /// <param name="player">The entity playing it.</param>
@@ -464,7 +464,7 @@ public static unsafe partial class Animation
     /// <exception cref="BevyNativeException">The entity is gone or plays no graph, or this build has no renderer.</exception>
     public static bool SetNodeWeight(Entity player, uint node, float weight)
     {
-        var status = Native.bcs_animation_node_weight(player.Bits, node, weight);
+        var status = NativeAnimation.bcs_animation_node_weight(player.Bits, node, weight);
         if (status == NativeStatus.NotPresent) return false;
         Act(status, "weighting a node of", player);
         return true;

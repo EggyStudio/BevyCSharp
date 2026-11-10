@@ -71,7 +71,7 @@ public static class SyntheticInput
 
         var bytes = System.Text.Encoding.UTF8.GetBytes(name);
         ulong entity;
-        fixed (byte* text = bytes) entity = Native.bcs_gamepad_connect(text, (uint)bytes.Length);
+        fixed (byte* text = bytes) entity = NativeCore.bcs_gamepad_connect(text, (uint)bytes.Length);
 
         if (entity == 0)
             throw new BevyNativeException(NativeStatus.NoWorld, "Connecting a pretended gamepad needs the world, so it is done from inside a system.");
@@ -82,18 +82,18 @@ public static class SyntheticInput
     /// <summary>Disconnects a pretended gamepad, which leaves <see cref="Input.Gamepads"/> the next frame.</summary>
     /// <exception cref="BevyNativeException">The entity is gone, or this was called from outside a system.</exception>
     public static void DisconnectGamepad(Entity gamepad) =>
-        Native.Check(Native.bcs_gamepad_disconnect(gamepad.Bits), $"disconnecting gamepad {gamepad}");
+        Native.Check(NativeCore.bcs_gamepad_disconnect(gamepad.Bits), $"disconnecting gamepad {gamepad}");
 
     /// <summary>Sets one of a pretended pad's buttons, from zero, up, to one, down.</summary>
     /// <remarks>Down past three quarters counts as held, as Bevy reads a real pad's buttons.</remarks>
     /// <exception cref="BevyNativeException">Called from outside a system.</exception>
     public static void SetGamepadButton(Entity gamepad, GamepadButton button, float value = 1f) =>
-        Native.Check(Native.bcs_gamepad_button(gamepad.Bits, (int)button, value), $"setting {button} on gamepad {gamepad}");
+        Native.Check(NativeCore.bcs_gamepad_button(gamepad.Bits, (int)button, value), $"setting {button} on gamepad {gamepad}");
 
     /// <summary>Sets one of a pretended pad's axes, a stick from minus one to one and a trigger from zero to one.</summary>
     /// <exception cref="BevyNativeException">Called from outside a system.</exception>
     public static void SetGamepadAxis(Entity gamepad, GamepadAxis axis, float value) =>
-        Native.Check(Native.bcs_gamepad_axis(gamepad.Bits, (int)axis, value), $"setting {axis} on gamepad {gamepad}");
+        Native.Check(NativeCore.bcs_gamepad_axis(gamepad.Bits, (int)axis, value), $"setting {axis} on gamepad {gamepad}");
 
     /// <summary>
     /// Rolls the wheel, in the lines a wheel with detents reports.
@@ -117,7 +117,7 @@ public static class SyntheticInput
     /// <param name="sideways">How far to the right.</param>
     /// <exception cref="BevyNativeException">Called from outside a system.</exception>
     public static void Wheel(float lines, float sideways = 0f) =>
-        Native.Check(Native.bcs_input_wheel(sideways, lines, (int)ScrollUnit.Line), $"rolling the wheel {lines}");
+        Native.Check(NativeCore.bcs_input_wheel(sideways, lines, (int)ScrollUnit.Line), $"rolling the wheel {lines}");
 
     /// <summary>
     /// Presses a key where a real one is reported, at the window.
@@ -167,7 +167,7 @@ public static class SyntheticInput
         fixed (byte* text = bytes)
         {
             Native.Check(
-                Native.bcs_input_key(
+                NativeCore.bcs_input_key(
                     (int)key, (int)action, bytes.Length > 0 ? text : null, (uint)bytes.Length),
                 $"sending a key {action} for {key}");
         }
@@ -223,7 +223,7 @@ public static class SyntheticInput
         fixed (byte* at = bytes)
         {
             Native.Check(
-                Native.bcs_input_ime(kind, at, (uint)bytes.Length, Bytes(caretStart), Bytes(caretEnd)),
+                NativeCore.bcs_input_ime(kind, at, (uint)bytes.Length, Bytes(caretStart), Bytes(caretEnd)),
                 "composing as an input method");
         }
     }
@@ -261,7 +261,7 @@ public static class SyntheticInput
     public static void Send(
         float x, float y, PointerAction action, MouseButton button = MouseButton.Left)
     {
-        var status = Native.bcs_input_pointer(x, y, (int)action, (int)button);
+        var status = NativeCore.bcs_input_pointer(x, y, (int)action, (int)button);
         var windowless = status == NativeStatus.InvalidState;
 
         if (windowless && !ImGuiRuntime.IsRunning)

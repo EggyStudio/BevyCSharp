@@ -16,13 +16,13 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">The handle names something other than a mesh.</exception>
     public static string[]? MorphTargetNames(AssetHandle mesh)
     {
-        var length = Native.bcs_render_morph_target_names(mesh.Key, null, 0);
+        var length = NativeRendering.bcs_render_morph_target_names(mesh.Key, null, 0);
         if (length == NativeStatus.NotPresent) return null;
         Native.Check(length, $"reading the morph targets of {mesh}");
         if (length == 0) return [];
 
         var names = Native.ReadText(
-            (buffer, capacity) => Native.bcs_render_morph_target_names(mesh.Key, buffer, capacity),
+            (buffer, capacity) => NativeRendering.bcs_render_morph_target_names(mesh.Key, buffer, capacity),
             $"reading the morph targets of {mesh}");
         return names.Split('\n');
     }
@@ -61,7 +61,7 @@ public static unsafe partial class Render
         fixed (ushort* jointsAt = joints)
         fixed (float* weightsAt = weights)
         {
-            status = Native.bcs_mesh_set_joints(mesh.Key, jointsAt, weightsAt, joints.Length / 4);
+            status = NativeRendering.bcs_mesh_set_joints(mesh.Key, jointsAt, weightsAt, joints.Length / 4);
         }
 
         if (status == NativeStatus.InvalidState)
@@ -98,7 +98,7 @@ public static unsafe partial class Render
         int key;
         fixed (float* at = floats)
         {
-            Native.Check(Native.bcs_skin_create(at, inverseBindposes.Length, &key), "making a skin");
+            Native.Check(NativeRendering.bcs_skin_create(at, inverseBindposes.Length, &key), "making a skin");
         }
 
         return new AssetHandle(key);
@@ -135,7 +135,7 @@ public static unsafe partial class Render
 
         fixed (ulong* at = bits)
         {
-            Native.Check(Native.bcs_skin_set(entity.Bits, skin.Key, at, bits.Length), $"skinning {entity}");
+            Native.Check(NativeRendering.bcs_skin_set(entity.Bits, skin.Key, at, bits.Length), $"skinning {entity}");
         }
     }
 }

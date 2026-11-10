@@ -86,7 +86,7 @@ public static unsafe class Audio
 
         foreach (var (bits, mixed) in Sounds.Where(sound => sound.Value.Bus == bus).ToList())
         {
-            var answer = Native.bcs_audio_control(bits, mixed.Volume * volume, mixed.Paused ? 1 : 0);
+            var answer = NativeAudio.bcs_audio_control(bits, mixed.Volume * volume, mixed.Paused ? 1 : 0);
 
             if (answer == NativeStatus.NoEntity) Sounds.Remove(bits);
         }
@@ -113,7 +113,7 @@ public static unsafe class Audio
         if (duration < TimeSpan.Zero)
             throw new ArgumentOutOfRangeException(nameof(duration), duration, "A tone lasts no less than nothing.");
 
-        var key = Native.bcs_audio_create_pitch(frequency, (float)duration.TotalSeconds);
+        var key = NativeAudio.bcs_audio_create_pitch(frequency, (float)duration.TotalSeconds);
         if (key == NativeStatus.Unsupported)
             throw new BevyNativeException(NativeStatus.Unsupported, "Making a tone needs audio, which this build or this app has none of.");
 
@@ -150,7 +150,7 @@ public static unsafe class Audio
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(channels);
         ArgumentOutOfRangeException.ThrowIfGreaterThan(channels, ushort.MaxValue);
 
-        var key = Native.bcs_audio_create_samples((uint)sampleRate, (uint)channels);
+        var key = NativeAudio.bcs_audio_create_samples((uint)sampleRate, (uint)channels);
         if (key == NativeStatus.Unsupported)
             throw new BevyNativeException(NativeStatus.Unsupported, "Making a stream of samples needs audio, which this build or this app has none of.");
 
@@ -170,7 +170,7 @@ public static unsafe class Audio
         int held;
         fixed (float* at = samples)
         {
-            held = Native.bcs_audio_queue_samples(stream.Key, at, samples.Length);
+            held = NativeAudio.bcs_audio_queue_samples(stream.Key, at, samples.Length);
         }
 
         if (held == NativeStatus.NullArgument)
@@ -185,7 +185,7 @@ public static unsafe class Audio
     /// </summary>
     /// <exception cref="BevyNativeException">The handle names no stream, or this build has no audio.</exception>
     public static int QueuedSamples(AssetHandle stream) =>
-        Native.Check(Native.bcs_audio_queued_samples(stream.Key), $"reading what {stream} holds");
+        Native.Check(NativeAudio.bcs_audio_queued_samples(stream.Key), $"reading what {stream} holds");
 
     /// <summary>Plays a sound and returns the entity playing it.</summary>
     /// <exception cref="BevyNativeException">The handle names no sound, or this build has no audio.</exception>
@@ -214,7 +214,7 @@ public static unsafe class Audio
             PlaySeconds = settings.Play,
         };
 
-        var bits = Native.bcs_audio_play(clip.Key, &native);
+        var bits = NativeAudio.bcs_audio_play(clip.Key, &native);
         if (bits == 0)
             throw new BevyNativeException(
                 NativeStatus.Unsupported,
@@ -254,7 +254,7 @@ public static unsafe class Audio
         var now = known with { Volume = volume, Paused = paused ?? known.Paused };
 
         Native.Check(
-            Native.bcs_audio_control(playing.Bits, volume * BusVolume(now.Bus), now.Paused ? 1 : 0),
+            NativeAudio.bcs_audio_control(playing.Bits, volume * BusVolume(now.Bus), now.Paused ? 1 : 0),
             doing);
 
         Sounds[playing.Bits] = now;
@@ -271,7 +271,7 @@ public static unsafe class Audio
     public static float VolumeOf(Entity playing)
     {
         float volume;
-        Native.Check(Native.bcs_audio_state(playing.Bits, &volume, null), $"reading the volume of {playing}");
+        Native.Check(NativeAudio.bcs_audio_state(playing.Bits, &volume, null), $"reading the volume of {playing}");
         return volume;
     }
 
@@ -286,7 +286,7 @@ public static unsafe class Audio
     /// <exception cref="BevyNativeException">The entity is gone, or this build has no audio.</exception>
     public static bool HasStarted(Entity playing)
     {
-        var status = Native.bcs_audio_state(playing.Bits, null, null);
+        var status = NativeAudio.bcs_audio_state(playing.Bits, null, null);
         if (status == NativeStatus.NotPresent) return false;
         Native.Check(status, $"asking whether {playing} has started");
         return true;
@@ -299,7 +299,7 @@ public static unsafe class Audio
     public static bool IsPaused(Entity playing)
     {
         int paused;
-        Native.Check(Native.bcs_audio_state(playing.Bits, null, &paused), $"asking whether {playing} is paused");
+        Native.Check(NativeAudio.bcs_audio_state(playing.Bits, null, &paused), $"asking whether {playing} is paused");
         return paused != 0;
     }
 
@@ -307,7 +307,7 @@ public static unsafe class Audio
     public static void Stop(Entity playing)
     {
         Sounds.Remove(playing.Bits);
-        Native.Check(Native.bcs_audio_stop(playing.Bits), $"stopping {playing}");
+        Native.Check(NativeAudio.bcs_audio_stop(playing.Bits), $"stopping {playing}");
     }
 
     /// <summary>
@@ -334,7 +334,7 @@ public static unsafe class Audio
     /// </example>
     public static void SetListener(Entity entity, float earGap = 0f) =>
         Native.Check(
-            Native.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
+            NativeAudio.bcs_audio_listener(entity.Bits, earGap), $"listening from {entity}");
 
     /// <summary>
     /// A volume multiplier from a number of decibels.
@@ -385,7 +385,7 @@ public static unsafe class Audio
         var to = stackalloc float[3] { right.X, right.Y, right.Z };
 
         Native.Check(
-            Native.bcs_audio_listener_ears(entity.Bits, from, to),
+            NativeAudio.bcs_audio_listener_ears(entity.Bits, from, to),
             $"listening from {entity}");
     }
 
@@ -403,7 +403,7 @@ public static unsafe class Audio
     {
         float seconds;
         Native.Check(
-            Native.bcs_audio_position(playing.Bits, &seconds), $"reading the position of {playing}");
+            NativeAudio.bcs_audio_position(playing.Bits, &seconds), $"reading the position of {playing}");
 
         return seconds;
     }
@@ -428,7 +428,7 @@ public static unsafe class Audio
     /// </exception>
     public static void Seek(Entity playing, float seconds) =>
         Native.Check(
-            Native.bcs_audio_seek(playing.Bits, seconds), $"seeking {playing} to {seconds}s");
+            NativeAudio.bcs_audio_seek(playing.Bits, seconds), $"seeking {playing} to {seconds}s");
 
     /// <summary>Sets how fast a playing sound plays, one as recorded, Bevy's <c>AudioSink::set_speed</c>.</summary>
     /// <remarks>
@@ -440,14 +440,14 @@ public static unsafe class Audio
     /// The speed is zero or less, the entity is gone or not playing yet, or this build has no audio.
     /// </exception>
     public static void SetSpeed(Entity playing, float speed) =>
-        Native.Check(Native.bcs_audio_speed(playing.Bits, speed), $"setting {playing}'s speed to {speed}");
+        Native.Check(NativeAudio.bcs_audio_speed(playing.Bits, speed), $"setting {playing}'s speed to {speed}");
 
     /// <summary>How fast a playing sound plays, one as recorded.</summary>
     /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
     public static float SpeedOf(Entity playing)
     {
         float speed;
-        Native.Check(Native.bcs_audio_playback(playing.Bits, &speed, null), $"reading {playing}'s speed");
+        Native.Check(NativeAudio.bcs_audio_playback(playing.Bits, &speed, null), $"reading {playing}'s speed");
         return speed;
     }
 
@@ -458,14 +458,14 @@ public static unsafe class Audio
     /// </remarks>
     /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
     public static void SetMuted(Entity playing, bool muted) =>
-        Native.Check(Native.bcs_audio_mute(playing.Bits, muted ? 1 : 0), $"{(muted ? "muting" : "unmuting")} {playing}");
+        Native.Check(NativeAudio.bcs_audio_mute(playing.Bits, muted ? 1 : 0), $"{(muted ? "muting" : "unmuting")} {playing}");
 
     /// <summary>Whether a playing sound is muted.</summary>
     /// <exception cref="BevyNativeException">The entity is gone, is not playing yet, or this build has no audio.</exception>
     public static bool IsMuted(Entity playing)
     {
         int muted;
-        Native.Check(Native.bcs_audio_playback(playing.Bits, null, &muted), $"reading whether {playing} is muted");
+        Native.Check(NativeAudio.bcs_audio_playback(playing.Bits, null, &muted), $"reading whether {playing} is muted");
         return muted != 0;
     }
 
@@ -482,7 +482,7 @@ public static unsafe class Audio
     /// The volume is negative, or this build has no audio.
     /// </exception>
     public static void SetGlobalVolume(float volume) =>
-        Native.Check(Native.bcs_audio_global_volume(volume), "setting the global volume");
+        Native.Check(NativeAudio.bcs_audio_global_volume(volume), "setting the global volume");
 
     /// <summary>
     /// Whether this run plays its sounds to no device, as a run with no window does unless
@@ -499,7 +499,7 @@ public static unsafe class Audio
         get
         {
             int silent;
-            Native.Check(Native.bcs_audio_silent(&silent), "asking whether sound reaches a device");
+            Native.Check(NativeAudio.bcs_audio_silent(&silent), "asking whether sound reaches a device");
             return silent != 0;
         }
     }

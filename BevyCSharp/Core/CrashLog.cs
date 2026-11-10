@@ -201,10 +201,6 @@ public static unsafe class CrashLog
         get { lock (Gate) return _adapter is not null; }
     }
 
-    /// <summary>What the most recent panic the bridge caught said, or nothing.</summary>
-    internal static string LastPanic() =>
-        Native.ReadText((buffer, capacity) => Native.bcs_last_panic(buffer, capacity), "reading the bridge's last panic");
-
     /// <summary>
     /// Writes a crash to this run's crash file, made the first time, and says where on the log.
     /// </summary>
@@ -248,7 +244,7 @@ public static unsafe class CrashLog
 
         // The panic the bridge caught last, where it is not the one written above, since a panic
         // inside a call from C# comes back as an exception whose message has its first lines alone.
-        var panic = Quietly(LastPanic) ?? string.Empty;
+        var panic = Quietly(Native.LastPanic) ?? string.Empty;
         if (panic.Length > 0 && !what.Contains(panic, StringComparison.Ordinal))
         {
             text.AppendLine();

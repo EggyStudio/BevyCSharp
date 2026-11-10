@@ -52,7 +52,7 @@ public static unsafe partial class Render
     {
         ArgumentException.ThrowIfNullOrEmpty(shape);
 
-        var key = Native.bcs_mesh_create(shape, a, b, c);
+        var key = NativeRendering.bcs_mesh_create(shape, a, b, c);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a mesh");
         if (key == NativeStatus.NoComponent)
             throw new BevyNativeException(
@@ -122,7 +122,7 @@ public static unsafe partial class Render
     {
         ArgumentException.ThrowIfNullOrEmpty(shape);
 
-        var status = Native.bcs_mesh_rebuild(mesh.Key, shape, a, b, c);
+        var status = NativeRendering.bcs_mesh_rebuild(mesh.Key, shape, a, b, c);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Rebuilding a mesh");
         if (status != NativeStatus.Ok) return false;
 
@@ -150,7 +150,7 @@ public static unsafe partial class Render
     /// <exception cref="BevyNativeException">The handle names something other than a mesh.</exception>
     public static bool CompressMesh(AssetHandle mesh)
     {
-        var answer = Native.bcs_render_compress_mesh(mesh.Key);
+        var answer = NativeRendering.bcs_render_compress_mesh(mesh.Key);
         if (answer is NativeStatus.NotPresent) return false;
         Native.Check(answer, $"compressing {mesh}");
         return true;
@@ -181,7 +181,7 @@ public static unsafe partial class Render
         if (!mesh.IsValid) return false;
 
         NativeMeshInfo read;
-        var answer = Native.bcs_render_mesh_info(mesh.Key, &read);
+        var answer = NativeRendering.bcs_render_mesh_info(mesh.Key, &read);
         if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState or NativeStatus.Unsupported)
             return false;
         Native.Check(answer, $"reading what {mesh} holds");
@@ -224,7 +224,7 @@ public static unsafe partial class Render
     {
         if (!mesh.IsValid) return false;
 
-        var answer = Native.bcs_render_mesh_generate_tangents(mesh.Key);
+        var answer = NativeRendering.bcs_render_mesh_generate_tangents(mesh.Key);
         if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState or NativeStatus.Unsupported) return false;
 
         Native.Check(answer, $"working out the tangents of {mesh}");
@@ -247,7 +247,7 @@ public static unsafe partial class Render
         if (!material.IsValid) return false;
 
         NativeMaterialConfig read;
-        var answer = Native.bcs_render_material_read(material.Key, &read);
+        var answer = NativeRendering.bcs_render_material_read(material.Key, &read);
         if (answer is NativeStatus.NotPresent or NativeStatus.InvalidState) return false;
         if (answer == NativeStatus.Unsupported) throw NoRenderer("Reading a material");
         Native.Check(answer, $"reading {material}");
@@ -307,7 +307,7 @@ public static unsafe partial class Render
         static float LightThroughOf(AssetHandle material)
         {
             float through;
-            Native.Check(Native.bcs_material_light_through(material.Key, &through), $"reading the light {material} lets through");
+            Native.Check(NativeRendering.bcs_material_light_through(material.Key, &through), $"reading the light {material} lets through");
             return through;
         }
     }
@@ -333,7 +333,7 @@ public static unsafe partial class Render
     public static bool TryReadImage(AssetHandle image, out ImagePixels? pixels)
     {
         var size = stackalloc uint[3];
-        var length = Native.bcs_render_image_pixels(image.Key, size, null, 0);
+        var length = NativeRendering.bcs_render_image_pixels(image.Key, size, null, 0);
         if (length == NativeStatus.NotPresent)
         {
             pixels = null;
@@ -344,7 +344,7 @@ public static unsafe partial class Render
 
         var data = new byte[length];
         fixed (byte* at = data)
-            Native.Check(Native.bcs_render_image_pixels(image.Key, size, at, length), $"reading the image {image}");
+            Native.Check(NativeRendering.bcs_render_image_pixels(image.Key, size, at, length), $"reading the image {image}");
 
         pixels = new ImagePixels(size[0], size[1], size[2], data);
         return true;
@@ -365,7 +365,7 @@ public static unsafe partial class Render
     public static bool TryImageSize(AssetHandle image, out uint width, out uint height, out uint depth)
     {
         var size = stackalloc uint[3];
-        var status = Native.bcs_render_image_size(image.Key, size);
+        var status = NativeRendering.bcs_render_image_size(image.Key, size);
         (width, height, depth) = (0, 0, 0);
         if (status == NativeStatus.NotPresent) return false;
         if (status == NativeStatus.Unsupported) throw NoRenderer("Reading an image's size");
@@ -388,7 +388,7 @@ public static unsafe partial class Render
     {
         fixed (byte* at = texels)
         {
-            var status = Native.bcs_render_image_set_pixels(image.Key, at, texels.Length);
+            var status = NativeRendering.bcs_render_image_set_pixels(image.Key, at, texels.Length);
             if (status == NativeStatus.Unsupported) throw NoRenderer("Writing an image");
             Native.Check(status, $"writing {texels.Length} bytes over the image {image}");
         }
@@ -419,7 +419,7 @@ public static unsafe partial class Render
         triangles = null;
 
         var counts = stackalloc int[2];
-        var answer = Native.bcs_render_mesh_triangles(mesh.Key, null, 0, null, 0, counts);
+        var answer = NativeRendering.bcs_render_mesh_triangles(mesh.Key, null, 0, null, 0, counts);
 
         if (answer == NativeStatus.NotPresent) return false;
         Native.Check(answer, $"reading the triangles of {mesh}");
@@ -431,7 +431,7 @@ public static unsafe partial class Render
         fixed (uint* order = indices)
         {
             Native.Check(
-                Native.bcs_render_mesh_triangles(mesh.Key, (float*)corners, positions.Length * 3, order, indices.Length, counts),
+                NativeRendering.bcs_render_mesh_triangles(mesh.Key, (float*)corners, positions.Length * 3, order, indices.Length, counts),
                 $"reading the triangles of {mesh}");
         }
 
@@ -455,7 +455,7 @@ public static unsafe partial class Render
         normals = [];
 
         var count = 0;
-        var answer = Native.bcs_render_mesh_normals(mesh.Key, null, null, 0, &count);
+        var answer = NativeRendering.bcs_render_mesh_normals(mesh.Key, null, null, 0, &count);
         if (answer is NativeStatus.NotPresent or NativeStatus.NullArgument) return false;
         if (answer == NativeStatus.Unsupported) throw NoRenderer("Reading a mesh's normals");
         Native.Check(answer, $"reading the normals of {mesh}");
@@ -467,7 +467,7 @@ public static unsafe partial class Render
         fixed (Vec3* facing = normals)
         {
             Native.Check(
-                Native.bcs_render_mesh_normals(mesh.Key, (float*)at, (float*)facing, count * 3, &count),
+                NativeRendering.bcs_render_mesh_normals(mesh.Key, (float*)at, (float*)facing, count * 3, &count),
                 $"reading the normals of {mesh}");
         }
 
@@ -494,7 +494,7 @@ public static unsafe partial class Render
     {
         ArgumentNullException.ThrowIfNull(world);
         Native.Check(
-            Native.bcs_render_set_mesh_flags(entity.Bits, (uint)flags),
+            NativeRendering.bcs_render_set_mesh_flags(entity.Bits, (uint)flags),
             $"setting how entity {entity} is drawn");
     }
 
@@ -545,7 +545,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create(&native);
+        var key = NativeRendering.bcs_material_create(&native);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a material");
 
         Native.Check(key, "building a material");
@@ -555,7 +555,7 @@ public static unsafe partial class Render
     /// <summary>A material made, given the share of global illumination's light its settings let through where they let some.</summary>
     private static AssetHandle LettingThrough(AssetHandle material, MaterialSettings settings)
     {
-        if (settings.LightThrough != 0f) Native.Check(Native.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
+        if (settings.LightThrough != 0f) Native.Check(NativeRendering.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
         return material;
     }
 
@@ -564,14 +564,14 @@ public static unsafe partial class Render
 
     /// <summary>Gives any material the share of global illumination's light that passes a meter of its depth, as a test sets a tree's leaves'.</summary>
     internal static void SetLightThrough(AssetHandle material, float share) =>
-        Native.Check(Native.bcs_material_set_light_through(material.Key, share), $"letting light through {material}");
+        Native.Check(NativeRendering.bcs_material_set_light_through(material.Key, share), $"letting light through {material}");
 
     /// <summary>
     /// Gives a material the color the scene's distance field paints its base color times, as the
     /// mean of a texture the field does not read, which the trees give their bark and leaves.
     /// </summary>
     internal static void SetFieldTint(AssetHandle material, (float R, float G, float B) tint) =>
-        Native.Check(Native.bcs_material_set_field_tint(material.Key, tint.R, tint.G, tint.B), $"tinting {material} in the scene's distance field");
+        Native.Check(NativeRendering.bcs_material_set_field_tint(material.Key, tint.R, tint.G, tint.B), $"tinting {material} in the scene's distance field");
 
     /// <summary>
     /// Builds the material a tree's leaves are drawn with, a standard material lit twice a pixel,
@@ -587,7 +587,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_leaf(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
+        var key = NativeRendering.bcs_material_create_leaf(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a leaf material");
 
         Native.Check(key, "building a leaf material");
@@ -607,7 +607,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_bark(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
+        var key = NativeRendering.bcs_material_create_bark(&native, stiffness.Trunk, stiffness.Limb, stiffness.Flutter, stiffness.Frequency);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building a bark material");
 
         Native.Check(key, "building a bark material");
@@ -615,7 +615,7 @@ public static unsafe partial class Render
     }
 
     /// <summary>Sets the wind the trees' materials sway in, in the world's meters a second.</summary>
-    internal static void SetTreeWind(Vec3 wind) => Native.bcs_render_set_tree_wind(wind.X, wind.Y, wind.Z);
+    internal static void SetTreeWind(Vec3 wind) => NativeRendering.bcs_render_set_tree_wind(wind.X, wind.Y, wind.Z);
 
     /// <summary>
     /// Builds the material a far tree is drawn with as an octahedral impostor, one quad turned to
@@ -638,7 +638,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var key = Native.bcs_material_create_impostor(&native, colors.Key, normals.Key, faces.Key, middle.X, middle.Y, middle.Z, extent, (uint)across, trunk);
+        var key = NativeRendering.bcs_material_create_impostor(&native, colors.Key, normals.Key, faces.Key, middle.X, middle.Y, middle.Z, extent, (uint)across, trunk);
         if (key == NativeStatus.Unsupported) throw NoRenderer("Building an impostor material");
 
         Native.Check(key, "building an impostor material");
@@ -661,9 +661,9 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = Config(settings);
-        var status = Native.bcs_render_material_write(material.Key, &native);
+        var status = NativeRendering.bcs_render_material_write(material.Key, &native);
         if (status == NativeStatus.Unsupported) throw NoRenderer("Writing a material");
-        if (status == NativeStatus.Ok) Native.Check(Native.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
+        if (status == NativeStatus.Ok) Native.Check(NativeRendering.bcs_material_set_light_through(material.Key, Through(settings)), $"letting light through {material}");
 
         return status == NativeStatus.Ok;
     }

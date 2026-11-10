@@ -59,14 +59,14 @@ public readonly unsafe struct ShaderMaterial : IShaderValues, IEquatable<ShaderM
     public ShaderProgram Program
     {
         get => new(Native.Check(
-            Native.bcs_shader_target_program(_kind, _id),
+            NativeRendering.bcs_shader_target_program(_kind, _id),
             "reading which program draws a shader material"));
         set
         {
             if (!value.IsValid) throw new ArgumentException("No program was given.", nameof(value));
 
             Native.Check(
-                Native.bcs_shader_material_configure(Material, value.Id, -1, 0, 0, 0),
+                NativeRendering.bcs_shader_material_configure(Material, value.Id, -1, 0, 0, 0),
                 $"having shader program {value.Id} draw a material");
         }
     }
@@ -82,7 +82,7 @@ public readonly unsafe struct ShaderMaterial : IShaderValues, IEquatable<ShaderM
         float depthBias = 0)
     {
         Native.Check(
-            Native.bcs_shader_material_configure(Material, -1, (int)alpha, cutoff, (int)cull, depthBias),
+            NativeRendering.bcs_shader_material_configure(Material, -1, (int)alpha, cutoff, (int)cull, depthBias),
             "changing how a shader material is drawn");
         return this;
     }

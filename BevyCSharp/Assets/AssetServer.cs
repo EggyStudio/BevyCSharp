@@ -81,7 +81,7 @@ public static unsafe class AssetServer
             Layers = settings.Layers,
         };
 
-        var key = Native.bcs_asset_load_image(path, &native);
+        var key = NativeAssets.bcs_asset_load_image(path, &native);
         Native.Check(key, $"loading image '{path}'");
         return new AssetHandle(key);
     }
@@ -161,7 +161,7 @@ public static unsafe class AssetServer
     {
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        var key = Native.bcs_asset_load_folder(path);
+        var key = NativeAssets.bcs_asset_load_folder(path);
         Native.Check(key, $"loading the folder '{path}'");
         return new AssetHandle(key);
     }
@@ -175,7 +175,7 @@ public static unsafe class AssetServer
     public static bool TryReadFolder(AssetHandle folder, out AssetHandle[] assets)
     {
         assets = [];
-        var count = Native.bcs_asset_folder_handles(folder.Key, null, 0);
+        var count = NativeAssets.bcs_asset_folder_handles(folder.Key, null, 0);
         if (count == NativeStatus.NotPresent) return false;
         Native.Check(count, $"reading the folder {folder}");
 
@@ -183,7 +183,7 @@ public static unsafe class AssetServer
         fixed (int* written = keys)
         {
             // Asked again for as many as it said, which the same frame keeps it holding.
-            Native.Check(Native.bcs_asset_folder_handles(folder.Key, written, count), $"reading the folder {folder}");
+            Native.Check(NativeAssets.bcs_asset_folder_handles(folder.Key, written, count), $"reading the folder {folder}");
         }
 
         assets = [.. keys.Select(key => new AssetHandle(key))];
@@ -216,7 +216,7 @@ public static unsafe class AssetServer
         ArgumentException.ThrowIfNullOrEmpty(path);
         ArgumentOutOfRangeException.ThrowIfNegative(scene);
 
-        var key = Native.bcs_asset_load_compressed("Scene", $"{path}#Scene{scene}");
+        var key = NativeAssets.bcs_asset_load_compressed("Scene", $"{path}#Scene{scene}");
         Native.Check(key, $"loading '{path}' with its meshes compressed");
         return new AssetHandle(key);
     }
@@ -234,12 +234,12 @@ public static unsafe class AssetServer
     {
         if (!handle.IsValid) return null;
 
-        var length = Native.bcs_asset_path(handle.Key, null, 0);
+        var length = NativeAssets.bcs_asset_path(handle.Key, null, 0);
         if (length < 0) return null;
         if (length == 0) return string.Empty;
 
         return Native.ReadText(
-            (buffer, capacity) => Native.bcs_asset_path(handle.Key, buffer, capacity),
+            (buffer, capacity) => NativeAssets.bcs_asset_path(handle.Key, buffer, capacity),
             $"reading the path of {handle}");
     }
 
@@ -256,7 +256,7 @@ public static unsafe class AssetServer
         ArgumentException.ThrowIfNullOrEmpty(kind);
         ArgumentException.ThrowIfNullOrEmpty(path);
 
-        var key = Native.bcs_asset_load(kind, path);
+        var key = NativeAssets.bcs_asset_load(kind, path);
         if (key == NativeStatus.NoComponent)
             throw new BevyNativeException(
                 NativeStatus.NoComponent,
@@ -270,7 +270,7 @@ public static unsafe class AssetServer
     /// <summary>How far along an asset's load is.</summary>
     public static AssetLoadState StateOf(AssetHandle handle) =>
         handle.IsValid
-            ? (AssetLoadState)Native.bcs_asset_load_state(handle.Key)
+            ? (AssetLoadState)NativeAssets.bcs_asset_load_state(handle.Key)
             : AssetLoadState.Unknown;
 
     /// <summary>
@@ -285,12 +285,12 @@ public static unsafe class AssetServer
     /// </remarks>
     public static AssetLoadState StateWithDependenciesOf(AssetHandle handle) =>
         handle.IsValid
-            ? (AssetLoadState)Native.bcs_asset_load_state_with_dependencies(handle.Key)
+            ? (AssetLoadState)NativeAssets.bcs_asset_load_state_with_dependencies(handle.Key)
             : AssetLoadState.Unknown;
 
     /// <summary>True when the engine is still holding this handle.</summary>
     public static bool IsAlive(AssetHandle handle) =>
-        handle.IsValid && Native.bcs_asset_is_valid(handle.Key) > 0;
+        handle.IsValid && NativeAssets.bcs_asset_is_valid(handle.Key) > 0;
 
     /// <summary>
     /// Releases a handle.
@@ -302,7 +302,7 @@ public static unsafe class AssetServer
     /// <returns><see langword="false"/> if the handle was already released.</returns>
     public static bool Release(AssetHandle handle)
     {
-        if (!handle.IsValid || Native.bcs_asset_release(handle.Key) <= 0) return false;
+        if (!handle.IsValid || NativeAssets.bcs_asset_release(handle.Key) <= 0) return false;
 
         Forget(handle);
         return true;
@@ -331,7 +331,7 @@ public static unsafe class AssetServer
     /// <returns><see langword="false"/> if the handle names nothing.</returns>
     public static bool ReleaseWhenUnused(AssetHandle handle) =>
         handle.IsValid
-        && Native.Check(Native.bcs_asset_release_when_unused(handle.Key), "marking an asset handle to go once unused") > 0;
+        && Native.Check(NativeAssets.bcs_asset_release_when_unused(handle.Key), "marking an asset handle to go once unused") > 0;
 
     /// <summary>Forgets what was kept for a handle released.</summary>
     /// <remarks>
@@ -351,14 +351,14 @@ public static unsafe class AssetServer
     /// <remarks>Once a frame, at its top, since a handle goes only after two sweeps find it unused.</remarks>
     internal static unsafe void Sweep()
     {
-        if (Native.Check(Native.bcs_asset_sweep(), "releasing unused asset handles") == 0) return;
+        if (Native.Check(NativeAssets.bcs_asset_sweep(), "releasing unused asset handles") == 0) return;
 
         const int Batch = 64;
         var keys = stackalloc int[Batch];
         int taken;
         do
         {
-            taken = Native.Check(Native.bcs_asset_take_released(keys, Batch), "taking the released asset handles");
+            taken = Native.Check(NativeAssets.bcs_asset_take_released(keys, Batch), "taking the released asset handles");
             for (var i = 0; i < taken; i++) Forget(new AssetHandle(keys[i]));
         }
         while (taken == Batch);
@@ -399,5 +399,5 @@ public static unsafe class AssetServer
     /// </summary>
     /// <remarks>Intended for leak checks in tests.</remarks>
     public static int LiveHandleCount => Native.Check(
-        Native.bcs_asset_live_count(), "counting live asset handles");
+        NativeAssets.bcs_asset_live_count(), "counting live asset handles");
 }

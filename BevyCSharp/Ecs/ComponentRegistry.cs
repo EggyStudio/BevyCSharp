@@ -90,8 +90,8 @@ internal static class ComponentRegistry
 
             var storage = sparse ? SparseStorage : TableStorage;
             var id = _running
-                ? Native.bcs_component_register_live(name, size, align, storage)
-                : Native.bcs_component_register(_appHandle, name, size, align, storage);
+                ? NativeCore.bcs_component_register_live(name, size, align, storage)
+                : NativeCore.bcs_component_register(_appHandle, name, size, align, storage);
 
             return Native.Check(id, $"registering component '{name}'");
         }

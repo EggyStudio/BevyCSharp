@@ -44,7 +44,7 @@ public readonly unsafe struct Entity : IEquatable<Entity>
         get
         {
             uint index;
-            Native.bcs_entity_parts(Bits, &index, null);
+            NativeCore.bcs_entity_parts(Bits, &index, null);
             return index;
         }
     }
@@ -55,7 +55,7 @@ public readonly unsafe struct Entity : IEquatable<Entity>
         get
         {
             uint generation;
-            Native.bcs_entity_parts(Bits, null, &generation);
+            NativeCore.bcs_entity_parts(Bits, null, &generation);
             return generation;
         }
     }

@@ -38,7 +38,7 @@ public static unsafe partial class Ui
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = ToNative(settings);
-        var bits = Native.bcs_ui_spawn_node(&native);
+        var bits = NativeUi.bcs_ui_spawn_node(&native);
         if (bits == 0) throw NoUi("Spawning a UI node");
 
         return InScope(new Entity(bits));
@@ -95,7 +95,7 @@ public static unsafe partial class Ui
 
         var nativeText = ToNative(style);
 
-        var bits = Native.bcs_ui_spawn_text(text, &native, &nativeText);
+        var bits = NativeUi.bcs_ui_spawn_text(text, &native, &nativeText);
         if (bits == 0) throw NoUi("Spawning UI text");
 
         return InScope(new Entity(bits));
@@ -145,7 +145,7 @@ public static unsafe partial class Ui
         var nativeText = ToNative(style);
         var rgba = stackalloc float[4] { color.R, color.G, color.B, color.A };
 
-        var bits = Native.bcs_ui_spawn_text_span(parent.Bits, text, &nativeText, rgba);
+        var bits = NativeUi.bcs_ui_spawn_text_span(parent.Bits, text, &nativeText, rgba);
         if (bits == 0) throw NoUi($"Adding a run of text to {parent}");
 
         return new Entity(bits);
@@ -182,7 +182,7 @@ public static unsafe partial class Ui
     public static void SetText(Entity entity, string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        Native.Check(Native.bcs_ui_set_text(entity.Bits, text), $"setting the text of {entity}");
+        Native.Check(NativeUi.bcs_ui_set_text(entity.Bits, text), $"setting the text of {entity}");
     }
 
     /// <summary>
@@ -199,7 +199,7 @@ public static unsafe partial class Ui
         get
         {
             var counts = stackalloc ulong[2];
-            Native.Check(Native.bcs_ui_font_atlases(counts), "counting the font atlases");
+            Native.Check(NativeUi.bcs_ui_font_atlases(counts), "counting the font atlases");
             return ((int)counts[0], (long)counts[1]);
         }
     }
@@ -224,7 +224,7 @@ public static unsafe partial class Ui
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static IReadOnlyList<FontAtlasPicture> FontAtlasPictures()
     {
-        var total = Native.Check(Native.bcs_ui_font_atlas_pictures(null, null, 0), "listing the font atlases");
+        var total = Native.Check(NativeUi.bcs_ui_font_atlas_pictures(null, null, 0), "listing the font atlases");
         if (total == 0) return [];
 
         // Asked again with room for what there was, and read as far as fitted, since text drawn
@@ -235,7 +235,7 @@ public static unsafe partial class Ui
         fixed (int* keyAt = keys)
         fixed (float* sizeAt = sizes)
         {
-            written = Native.Check(Native.bcs_ui_font_atlas_pictures(keyAt, sizeAt, total), "listing the font atlases");
+            written = Native.Check(NativeUi.bcs_ui_font_atlas_pictures(keyAt, sizeAt, total), "listing the font atlases");
         }
 
         var pictures = new FontAtlasPicture[Math.Min(written, total)];
@@ -253,7 +253,7 @@ public static unsafe partial class Ui
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no renderer.</exception>
     public static void ClearFontAtlases() =>
-        Native.Check(Native.bcs_ui_clear_font_atlases(), "emptying the font atlases");
+        Native.Check(NativeUi.bcs_ui_clear_font_atlases(), "emptying the font atlases");
 
     /// <summary>
     /// Reports how the pointer stands on an interactive node.
@@ -284,7 +284,7 @@ public static unsafe partial class Ui
     /// </example>
     public static UiInteraction InteractionOf(Entity entity)
     {
-        var value = Native.bcs_ui_interaction(entity.Bits);
+        var value = NativeUi.bcs_ui_interaction(entity.Bits);
         Native.Check(value, $"reading the interaction of {entity}");
 
         return (UiInteraction)value;
@@ -374,7 +374,7 @@ public static unsafe partial class Ui
         };
 
         Native.Check(
-            Native.bcs_ui_set_image(entity.Bits, &native), $"drawing an image in {entity}");
+            NativeUi.bcs_ui_set_image(entity.Bits, &native), $"drawing an image in {entity}");
     }
 
     /// <summary>
@@ -398,7 +398,7 @@ public static unsafe partial class Ui
     /// </exception>
     public static void SetScroll(Entity entity, float x, float y) =>
         Native.Check(
-            Native.bcs_ui_set_scroll(entity.Bits, x, y), $"scrolling the contents of {entity}");
+            NativeUi.bcs_ui_set_scroll(entity.Bits, x, y), $"scrolling the contents of {entity}");
 
     private static NativeUiNodeConfig ToNative(UiSettings settings) => new()
     {
@@ -502,7 +502,7 @@ public static unsafe partial class Ui
     /// <exception cref="BevyNativeException">The entity is gone, or this build has no renderer.</exception>
     public static void Focus(Entity entity, FocusCause cause = FocusCause.Navigated)
     {
-        var status = Native.bcs_ui_focus(entity.Bits, (int)cause);
+        var status = NativeUi.bcs_ui_focus(entity.Bits, (int)cause);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Giving the input focus");
         Native.Check(status, $"giving {entity} the input focus");
     }
@@ -523,7 +523,7 @@ public static unsafe partial class Ui
     public static Entity? Navigate(NavAction action)
     {
         ulong next;
-        var status = Native.bcs_ui_navigate((int)action, &next);
+        var status = NativeUi.bcs_ui_navigate((int)action, &next);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Moving the input focus");
         Native.Check(status, $"finding where the focus moves {action}");
         return status == 1 ? new Entity(next) : null;
@@ -552,7 +552,7 @@ public static unsafe partial class Ui
 
     private static void TextLines(Entity text, int underline, int strikethrough)
     {
-        var status = Native.bcs_ui_text_lines(text.Bits, underline, strikethrough);
+        var status = NativeUi.bcs_ui_text_lines(text.Bits, underline, strikethrough);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Drawing a line on text");
         Native.Check(status, $"drawing a line on {text}");
     }
@@ -613,7 +613,7 @@ public static unsafe partial class Ui
     private static void FontTags(Entity text, int kind, ReadOnlySpan<NativeFontTag> tags)
     {
         int status;
-        fixed (NativeFontTag* at = tags) status = Native.bcs_ui_font_tags(text.Bits, kind, at, tags.Length);
+        fixed (NativeFontTag* at = tags) status = NativeUi.bcs_ui_font_tags(text.Bits, kind, at, tags.Length);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Setting a font's OpenType tags");
         Native.Check(status, $"setting the font of {text}");
     }

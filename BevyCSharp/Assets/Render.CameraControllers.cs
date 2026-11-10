@@ -30,7 +30,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = ToNative(settings);
-        Native.Check(Native.bcs_free_camera_set(camera.Bits, &native), $"putting the free camera on {camera}");
+        Native.Check(NativeRendering.bcs_free_camera_set(camera.Bits, &native), $"putting the free camera on {camera}");
     }
 
     /// <summary>The free camera's settings on a camera, or null where it has none.</summary>
@@ -40,7 +40,7 @@ public static unsafe partial class Render
     public static FreeCameraSettings? FreeCameraOf(Entity camera)
     {
         NativeFreeCamera native;
-        var answer = Native.bcs_free_camera_get(camera.Bits, &native);
+        var answer = NativeRendering.bcs_free_camera_get(camera.Bits, &native);
         if (answer == NativeStatus.NotPresent) return null;
 
         Native.Check(answer, $"reading the free camera on {camera}");
@@ -52,7 +52,7 @@ public static unsafe partial class Render
     /// The entity is gone or is not a camera, or this build has no renderer.
     /// </exception>
     public static void ClearFreeCamera(Entity camera) =>
-        Native.Check(Native.bcs_free_camera_remove(camera.Bits), $"taking the free camera off {camera}");
+        Native.Check(NativeRendering.bcs_free_camera_remove(camera.Bits), $"taking the free camera off {camera}");
 
     /// <summary>
     /// What the free camera holds about a camera as it moves it, or null where it has no free
@@ -64,7 +64,7 @@ public static unsafe partial class Render
     public static FreeCameraState? FreeCameraStateOf(Entity camera)
     {
         NativeFreeCameraState native;
-        var answer = Native.bcs_free_camera_state(camera.Bits, &native);
+        var answer = NativeRendering.bcs_free_camera_state(camera.Bits, &native);
         if (answer == NativeStatus.NotPresent) return null;
 
         Native.Check(answer, $"reading what the free camera on {camera} holds");
@@ -102,7 +102,7 @@ public static unsafe partial class Render
             VelocityY = state.Velocity.Y,
             VelocityZ = state.Velocity.Z,
         };
-        Native.Check(Native.bcs_free_camera_set_state(camera.Bits, &native), $"writing what the free camera on {camera} holds");
+        Native.Check(NativeRendering.bcs_free_camera_set_state(camera.Bits, &native), $"writing what the free camera on {camera} holds");
     }
 
     /// <summary>
@@ -114,7 +114,7 @@ public static unsafe partial class Render
     /// </exception>
     public static string FreeCameraControls(Entity camera) =>
         Native.ReadText(
-            (buffer, capacity) => Native.bcs_free_camera_text(camera.Bits, buffer, capacity),
+            (buffer, capacity) => NativeRendering.bcs_free_camera_text(camera.Bits, buffer, capacity),
             $"describing the free camera on {camera}");
 
     /// <summary>
@@ -136,7 +136,7 @@ public static unsafe partial class Render
         ArgumentNullException.ThrowIfNull(settings);
 
         var native = ToNative(settings);
-        Native.Check(Native.bcs_pan_camera_set(camera.Bits, &native), $"putting the pan camera on {camera}");
+        Native.Check(NativeRendering.bcs_pan_camera_set(camera.Bits, &native), $"putting the pan camera on {camera}");
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ public static unsafe partial class Render
     public static PanCameraSettings? PanCameraOf(Entity camera)
     {
         NativePanCamera native;
-        var answer = Native.bcs_pan_camera_get(camera.Bits, &native);
+        var answer = NativeRendering.bcs_pan_camera_get(camera.Bits, &native);
         if (answer == NativeStatus.NotPresent) return null;
 
         Native.Check(answer, $"reading the pan camera on {camera}");
@@ -161,7 +161,7 @@ public static unsafe partial class Render
     /// The entity is gone or is not a camera, or this build has no renderer.
     /// </exception>
     public static void ClearPanCamera(Entity camera) =>
-        Native.Check(Native.bcs_pan_camera_remove(camera.Bits), $"taking the pan camera off {camera}");
+        Native.Check(NativeRendering.bcs_pan_camera_remove(camera.Bits), $"taking the pan camera off {camera}");
 
     /// <summary>
     /// Bevy's own description of the pan camera's controls on a camera, a line a control with
@@ -172,7 +172,7 @@ public static unsafe partial class Render
     /// </exception>
     public static string PanCameraControls(Entity camera) =>
         Native.ReadText(
-            (buffer, capacity) => Native.bcs_pan_camera_text(camera.Bits, buffer, capacity),
+            (buffer, capacity) => NativeRendering.bcs_pan_camera_text(camera.Bits, buffer, capacity),
             $"describing the pan camera on {camera}");
 
     /// <summary>
@@ -192,7 +192,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void DollyZoom(Entity camera, CameraProjection projection) =>
         Native.Check(
-            Native.bcs_pan_orbit_dolly_zoom(camera.Bits, projection == CameraProjection.Orthographic ? 1 : 0),
+            NativeRendering.bcs_pan_orbit_dolly_zoom(camera.Bits, projection == CameraProjection.Orthographic ? 1 : 0),
             $"dolly zooming {camera}");
 
     /// <summary>
@@ -212,7 +212,7 @@ public static unsafe partial class Render
     /// </exception>
     public static void LookTo(Entity camera, Vec3 direction) =>
         Native.Check(
-            Native.bcs_pan_orbit_look_to(camera.Bits, direction.X, direction.Y, direction.Z),
+            NativeRendering.bcs_pan_orbit_look_to(camera.Bits, direction.X, direction.Y, direction.Z),
             $"turning {camera} to face {direction}");
 
     internal static NativeFreeCamera ToNative(FreeCameraSettings settings)

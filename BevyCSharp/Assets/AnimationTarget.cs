@@ -34,7 +34,7 @@ public readonly record struct AnimationTarget(ulong High, ulong Low)
         }
 
         ulong high, low;
-        var status = Native.bcs_animation_target(string.Join('\n', names.ToArray()), &high, &low);
+        var status = NativeAnimation.bcs_animation_target(string.Join('\n', names.ToArray()), &high, &low);
         if (status == NativeStatus.Unsupported) throw Render.NoRenderer("Naming an animation target");
         Native.Check(status, "naming an animation target");
         return new AnimationTarget(high, low);
