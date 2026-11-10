@@ -4741,6 +4741,46 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     passes. Settled on the pack run of `b8cc8316` on 2026-11-02, its defaults step building each
     game on its own default from nuget.org green after 0.6.18 was pushed.
 
+52. **The pack run of `f70cf5e7` is red in three jobs, the feature test not answering on the runner
+    and Fedora's Mesa moved on.** The pack run 42736156878, started at 02:29 on 2026-11-10 and the
+    first since 2026-11-02, has its drive red after 12 minutes, its soak after 13 and its Fedora
+    captures after 2, every other job green, the three systems' suites, the native builds, the
+    games, the four captures jobs, the storm and the README, so nothing is published. The drive's
+    feature test started in 34 seconds on a Xeon Platinum 8573C drawing by llvmpipe, answered its
+    first command, and then `frame.profile 30` did not answer within its 150 seconds; the soak's
+    `frames.wait 60` did not answer within 600. Both run with GLOBAL_ILLUMINATION set to Off, and
+    both logs hold the six probe-face cameras' warnings and the compile of field_stamp.slang and
+    field_resolve.slang, the soak's gi_trace.slang too, so the week's illumination, items 95 to 129,
+    draws or compiles on the runner with the switch off, or the probe capture's six faces draw at
+    the start, which item 125 read drawing for 95 frames, more than a frame of llvmpipe at over a
+    second can carry. The push runs leave these jobs out, so nothing ran them for eight days, the
+    review's lapse, and a pack run goes out at least every second day from here. The mend comes
+    before 119's second cut. First one read of the feature test's first hundred frames on lavapipe
+    on this machine with the switch off, the passes and views each frame draws and the pipelines it
+    makes. Then the switch turns off everything the illumination draws and compiles, the probe
+    capture's faces among it, or the faces are drawn over more frames where the device draws on the
+    CPU, with a test that an app with the switch off makes no pipeline of the illumination's and
+    draws no probe face. The Fedora job's Mesa is 26.2.6 where the workflow names 26.2.5, so its six
+    pictures are taken again on 26.2.6 and the workflow names it, as the job's message says. One
+    commit for the switch and one for Fedora's pictures, and the next pack run follows them. Written
+    at 03:46 on 2026-11-10. Read and mended at `f5b450ad` on 2026-11-10. The cause is the start the
+    runner takes, the feature test launched at its defaults, the illumination at Medium since
+    `c7eabbb0` of 2026-11-03 and the weather at its quality, and turned off by the course's commands
+    seconds later, by which time 35 programs are made that llvmpipe compiles for minutes,
+    frames.wait 30 at 352 seconds, pipelines.wait at 408 and frame.profile 30 at 810 on lavapipe
+    here; the engine's switch was sound, no program of the illumination's or the field's being made
+    at Off from launch. The feature test takes both settings from the environment at launch, 8
+    programs where 35, pipelines.wait at 43 seconds and frame.profile 30 at 155 here, on a machine
+    1.3 to 1.5 times slower than the runner, where the green run of `b8cc8316` read 24 and 102. The
+    weather turned off by command left the sky's fog drawn, 320 MB and two to three milliseconds on
+    the GPU, and takes it off with the mend. Fedora's pictures follow as the second commit; the
+    verdict settles on the next pack run's drive, soak and Fedora captures. The second commit is
+    `6f9b18ed`, the six captured again in Fedora 44 on Mesa 26.2.6, five within their bars and
+    meshlet 3.0 percent off its 2.0, which item 133 read to the sun's shadow edges and not to its
+    wiggling bunny. Settled on the pack run of `9ae92147`, ended at 18:03 on 2026-11-10, its drive
+    green in 100 minutes, its soak in 29 and its Fedora captures green, the run red in the first
+    captures job alone, Verdict 54.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -10340,6 +10380,60 @@ Shared: a ground share past the probes read over five lines about the normal, or
 toward its sides, softened the wedges one line leaves on a shaded wall seen through an arch and cost
 a far wall in shade 8 to 10 points of its reference's light at Low, for the sibling to weigh before
 spreading its groundReached.
+
+Verdict 52, the feature test not answering on the runner, in the commit carrying this line, held
+with the others. Five reads placed it in the start the runner takes. A fresh runner starts the
+feature test at its defaults, global illumination at Medium since c7eabbb0 on 2026-11-03 and the
+weather at its quality, and the course and the soak turn both off by a setting command a few seconds
+in, by which time the app has made 35 programs, the weather's, the scene field's and global
+illumination's, which lavapipe compiles on the CPU for minutes. On this machine's lavapipe on four
+threads the course's start read frames.wait 30 in 352 s, pipelines.wait in 408 s and frame.profile
+30 in 810 s, 23.6 s a frame, where the job gives frame.profile 30 150 s, and the pack run of
+b8cc8316 read 475, 24 and 102 s on the runner. Started with both off from launch, the engine makes
+none of their programs and builds no field. The weather turned off by command left the sky's fog
+drawn in medium froxels to 250 m, which on the GPU took 8.0 to 9.7 ms a frame where 6.1 to 6.6 with
+the weather off from launch, and some 320 MB more. The six probe faces are the light bay's
+reflection probe, captured once while pipelines compile, the bay's and not the illumination's.
+
+The feature test takes GLOBAL_ILLUMINATION and WEATHER_QUALITY from the environment as its settings
+are first read, for the run until the run changes that setting itself, the file keeping the player's
+own, so the course's and the soak's setting commands at their start and the soak's putting back at
+its end change nothing, and the weather turned off takes the sky's fog off as a start with it off
+does. With both, the course's start on the same lavapipe reads frames.wait 30 in 628 s,
+pipelines.wait in 43 s and frame.profile 30 in 155 s, 3.7 s a frame, the feature test's own eight
+programs alone made. This machine's lavapipe draws 1.3 to 1.5 times as slowly as the runner's, so
+the course reads about as the pack run of b8cc8316 did.
+
+GlobalIlluminationTests.AnAppWithGlobalIlluminationOffMakesNoneOfItsPrograms makes an app that never
+turns global illumination on and finds none of its programs or the field's made, no frame traced and
+no field built, and GlobalIlluminationTurnedOffTracesNoMoreAndLetsItsFieldGo turns it on at Medium
+and off and finds no frame traced in the thirty after and the field gone. Both pass without the mend
+as with it, the engine having done as they hold, and they hold it, the mend being the feature
+test's, which the next pack run's course and soak read.
+
+No native file changed. The solution builds with warnings as errors and the two tests pass. The
+whole suite waits on the owner's word. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a program a quality turns off a few frames into a run has been made and compiles all the
+same, for minutes on a device that draws on the CPU, so a scripted run that names a quality off
+names it at launch, for the sibling's runs on lavapipe.
+
+Verdict 52's second part, Fedora's six on Mesa 26.2.6, in the commit carrying this line, held with
+the others. The six were captured in Fedora 44 at the head (build/capture-in-fedora.sh from an
+archive checkout with a --render --meshlet --solari bridge of the head's native code, 14 minutes),
+the workflow and BUILDING.md naming 26.2.6. clustered_decals, test_meshlet, many_meshlet_materials,
+solari and solari_reflections lie within the compare's bar of their pictures, 0.01 to 0.76% of their
+pixels apart, so the new Mesa moved nothing they draw. meshlet differs in 3.0% past its 2.0%, the
+sun's shadow edges across the floor and on the blue bunny a little moved by the shadow biases each
+light has taken for its kind since b576bf3f on 2026-11-07, the bunnies standing where they stood
+(item 133), the pair 2026-11-10-verdict-52-meshlet.webp. The six are taken again and the gallery's
+six made again from them (build/examples-table.py).
+
+No file of the engine changed, so the suite did not run for this part. The tests of the examples'
+catalog, the docs and the workflow pass with NormTests, 18. The public listing is unchanged.
+
+Shared: the workflow's Fedora job holds Fedora 44's Mesa to 26.2.6 from the commit carrying this
+line, the six taken again on it, for SHARED.md's row on captures.
 
 ## Items closed, parked or shortened
 

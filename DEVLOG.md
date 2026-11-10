@@ -31,6 +31,14 @@ and on the right the middle's light less the left's ten times over, brighter in 
 blue, the sun's shadow edges across the floor and on the blue bunny a little moved by the shadow
 biases each light has taken for its kind since 2026-11-07, the bunnies standing where they stood.
 
+![](.github/assets/readings/2026-11-10-verdict-54-foxes.webp)
+Bevy's many_foxes example captured on lavapipe, the middle of the rings at their size, on the left
+at the head, where the roofs' set of cameras stood in every app, and in the middle with that set
+made by the first roof camera, and on the right the middle's light less the left's ten times over,
+brighter in orange and darker in blue, every fox in another pose of its run and the rings and the
+ground where they were, since each fox seeks its run by its entity's index and the set took an index
+before the foxes'.
+
 Done that day
 
 - Item 125 at `8e088836`. The shadow maps' churn at the course's start.

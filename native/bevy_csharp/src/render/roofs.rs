@@ -23,15 +23,19 @@ pub const ROOF_LAYER: usize = 32;
 #[derive(bevy::ecs::resource::Resource, Default)]
 struct RoofCameras(std::collections::HashMap<bevy::ecs::entity::Entity, u32>);
 
-/// Keeps the meshes the roofs' cameras draw on their layer, from zero cameras for a new app.
+/// Keeps the meshes the roofs' cameras draw on their layer, once the first of them is set.
+///
+/// The set of cameras is made with the first roof camera and not with the app, since Bevy keeps a
+/// resource as an entity, and one made in every app moves the index of every entity spawned after
+/// it, which a program that reads an entity's index shows in what it draws.
 #[cfg(feature = "render")]
 pub(crate) fn install(app: &mut bevy::app::App) {
     use bevy::ecs::schedule::IntoScheduleConfigs;
 
-    app.init_resource::<RoofCameras>();
     app.add_systems(
         bevy::app::PostUpdate,
-        tag.before(bevy::camera::visibility::VisibilitySystems::CheckVisibility),
+        tag.run_if(bevy::ecs::schedule::common_conditions::resource_exists::<RoofCameras>)
+            .before(bevy::camera::visibility::VisibilitySystems::CheckVisibility),
     );
 }
 
@@ -143,9 +147,29 @@ pub extern "C" fn bcs_render_set_roof_camera(camera: u64, mask: u32) -> i32 {
                     return status::NO_ENTITY;
                 };
                 entity.insert(bevy::camera::visibility::RenderLayers::layer(ROOF_LAYER));
-                world.resource_mut::<RoofCameras>().0.insert(camera, mask);
+                world.get_resource_or_init::<RoofCameras>().0.insert(camera, mask);
                 status::OK
             })
         }
     })
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_app_that_sets_no_roof_camera_spawns_its_entities_at_the_indices_it_would_without_them() {
+        let first_spawned = |roofs: bool| {
+            let mut app = bevy::app::App::new();
+            if roofs {
+                install(&mut app);
+            }
+            app.update();
+            let first = app.world_mut().spawn_empty().id().index_u32();
+            (first, app.world().contains_resource::<RoofCameras>())
+        };
+
+        assert_eq!(first_spawned(true), first_spawned(false));
+    }
 }

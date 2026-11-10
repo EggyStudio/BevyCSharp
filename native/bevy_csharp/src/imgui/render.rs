@@ -2,8 +2,8 @@
 //!
 //! One system in the view's schedule, after everything else the camera does and before the picture
 //! reaches the window. It knows nothing about widgets. It uploads this frame's triangles, and for
-//! each draw call sets a scissor rectangle and a texture and draws a run of indices. That is the
-//! whole of an ImGui backend, and the same shape the reference engine's Vulkan one has.
+//! each draw call sets a scissor rectangle and a texture and draws a run of indices, which is all
+//! that crosses from ImGui into the renderer.
 
 use bevy::app::App;
 use bevy::asset::{AssetId, AssetServer, Handle, RenderAssetUsages, load_embedded_asset};

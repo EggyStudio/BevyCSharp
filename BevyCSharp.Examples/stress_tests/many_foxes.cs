@@ -130,7 +130,7 @@ internal static class ManyFoxes
             var fox = ecs.SpawnScene(_fox);
             ecs.Set(fox, at);
             ecs.SetParent(fox, ring);
-            ecs.Add(fox, new FoxRunner());
+            ecs.Add(fox, new FoxRunner { Place = Foxes.Count });
             Foxes.Add(fox);
         }
 
@@ -199,12 +199,21 @@ public partial struct FoxRunner
     /// <summary>Whether its run has started.</summary>
     public bool Started;
 
-    /// <summary>Its run started once its player is there, and moved on by its entity's number.</summary>
+    /// <summary>Its place among the foxes, in the order they were spawned.</summary>
+    public int Place;
+
+    /// <summary>Its run started once its player is there, and moved on by its place among the foxes.</summary>
+    /// <remarks>
+    /// Bevy's example moves each run on by a tenth of a second for each step of its player entity's
+    /// index. An entity's index counts every entity spawned before it, and Bevy keeps each resource
+    /// the engine holds as an entity, so a fox moves on here by its place among the foxes, which no
+    /// resource of the engine moves.
+    /// </remarks>
     [OnUpdate]
     public void SetupSceneOnceLoaded(BehaviorContext ctx)
     {
         if (Started) return;
         Started = Animation.Play(ctx.Entity, "Run", new AnimationSettings { Repeat = true });
-        if (Started && !ManyFoxes.Sync) Animation.Seek(ctx.Entity, ctx.Entity.Index / 10f);
+        if (Started && !ManyFoxes.Sync) Animation.Seek(ctx.Entity, Place / 10f);
     }
 }
