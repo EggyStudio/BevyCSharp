@@ -15,7 +15,7 @@ namespace Bevy;
 /// <see cref="AssetLoadState.Unknown"/> instead.
 /// </para>
 /// </remarks>
-public readonly struct AssetHandle : IEquatable<AssetHandle>
+public readonly partial struct AssetHandle : IEquatable<AssetHandle>
 {
     /// <summary>The packed slot and generation the engine knows this asset by.</summary>
     internal readonly int Key;
@@ -34,12 +34,6 @@ public readonly struct AssetHandle : IEquatable<AssetHandle>
     /// holds nothing rather than whatever was loaded first.
     /// </remarks>
     public bool IsValid => Key > 0;
-
-    /// <summary>How far along this asset's load is.</summary>
-    public AssetLoadState State => AssetServer.StateOf(this);
-
-    /// <summary>True when the asset is ready to use.</summary>
-    public bool IsLoaded => State == AssetLoadState.Loaded;
 
     /// <inheritdoc/>
     public bool Equals(AssetHandle other) => Key == other.Key;

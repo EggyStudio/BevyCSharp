@@ -21,12 +21,14 @@ that run before the native app is made moved into Core, committed at 03:59 and h
 areas' tests pass 393 of 394 with one skipped and the listing is unchanged. On that `f5b450ad`,
 Verdict 52's mend, the feature test taking the illumination's and the weather's settings from the
 environment at its launch and the weather turned off by command taking the sky's fog with it,
-committed at 06:04 and held with them. The pack run with publish started on `f70cf5e7` at 02:29 on
-2026-11-10, the first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora
-captures, the feature test not answering on llvmpipe with the illumination switched off and Fedora's
-Mesa at 26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item
-128's record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing
-the wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
+committed at 06:04 and held with them. On that `6f9b18ed`, Verdict 52's second commit, Fedora's six
+pictures taken again on its Mesa 26.2.6, which the workflow and BUILDING.md name, committed at 06:41
+and held with them. The pack run with publish started on `f70cf5e7` at 02:29 on 2026-11-10, the
+first since 2026-11-02, ended red at 03:43 in its drive, its soak and its Fedora captures, the
+feature test not answering on llvmpipe with the illumination switched off and Fedora's Mesa at
+26.2.6, Verdict 52; nothing is published and 93 has no reading. Before it `02e30024`, item 128's
+record, the yard's far foot dashes read to the fourth cascade's probes under the floor seeing the
+wall's foot through their reach test's slack, a reading and documents alone, pushed at 21:22 on
 2026-11-09, its run green at 21:41 with Linux and macOS in 14 minutes and Windows in 19; it keeps
 the form and carries the review's files, the shortened REVIEW.md, the archive and N 7.9 among them.
 Before it `074645e3`, item 98, a wall in shade past the probes taking the sunlit ground before it,
@@ -38,15 +40,16 @@ scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run
 `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
 before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next Verdict 52's second commit, Fedora's six pictures on Mesa 26.2.6, then 119, the bridge as
-projects, its plan confirmed, its first two cuts written and held on their builds, the norm's tests
-and their areas' tests, the later cuts each after the whole suite has run, 120, the live path, and
-after them 66 and 67, the connections and the level editor; 93's course drawn smaller after the
-reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`, `62ba6c03`, `259a09c8`,
-`8e088836`, `ccef6170`, `001c630d` and `f5b450ad` are held for the whole suite on the owner's word.
-A pack run with publish follows when the meadow's items rest. The engine's illumination read goes
-first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision
-81; a fault seen in motion is read in motion by the engine's Decision 107.
+Next 119's second cut, written and held, and 133, the meshlet example's capture on the set clock,
+then 119, the bridge as projects, its plan confirmed, its first two cuts written and held on their
+builds, the norm's tests and their areas' tests, the later cuts each after the whole suite has run,
+120, the live path, and after them 66 and 67, the connections and the level editor; 93's course
+drawn smaller after the reading of the pack run started at 02:29 on 2026-11-10. `07143fdf`,
+`62ba6c03`, `259a09c8`, `8e088836`, `ccef6170`, `001c630d`, `f5b450ad` and `6f9b18ed` are held for
+the whole suite on the owner's word. A pack run with publish follows when the meadow's items rest.
+The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow
+at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
+Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -224,6 +227,15 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     first cut, held with the others until the suite has run. Done at `ccef6170` on 2026-11-10 by the
     layer, the fallback not needed, the push held for the whole suite.
 
+133. **The meshlet example's capture stands on the set clock.** From Verdict 52's second commit on
+    2026-11-10. The meshlet example's picture moved 3.0 percent against a bar of 2.0 with no change
+    of its own, its bunnies wiggling along z by the cosine of the elapsed time and so standing a
+    frame or so on once the apps' starts changed, where SHARED.md's row says a capture is taken on a
+    clock of a set amount a frame, held while a load runs, the same moment whatever the start took.
+    One read of which clock the wiggle reads and why the capture's frame is not the same moment for
+    it, and the mend so that it is, in the example or in the capture's clock, with the six of Fedora
+    and the runner's own captures unchanged. A small commit, held with the others.
+
 ## Verdicts
 
 Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 52 is open.
@@ -261,7 +273,10 @@ Verdicts 2 and 33 to 51 are settled, said under each in REVIEW-ARCHIVE.md; Verdi
     1.3 to 1.5 times slower than the runner, where the green run of `b8cc8316` read 24 and 102. The
     weather turned off by command left the sky's fog drawn, 320 MB and two to three milliseconds on
     the GPU, and takes it off with the mend. Fedora's pictures follow as the second commit; the
-    verdict settles on the next pack run's drive, soak and Fedora captures.
+    verdict settles on the next pack run's drive, soak and Fedora captures. The second commit is
+    `6f9b18ed`, the six captured again in Fedora 44 on Mesa 26.2.6, five within their bars and
+    meshlet 3.0 percent off its 2.0, its bunnies wiggling with the clock a frame or so on since the
+    apps' starts changed this week, which is item 133's.
 
 ## Decisions
 
@@ -737,3 +752,21 @@ catalog, the docs and the workflow pass with NormTests, 18. The public listing i
 
 Shared: the workflow's Fedora job holds Fedora 44's Mesa to 26.2.6 from the commit carrying this
 line, the six taken again on it, for SHARED.md's row on captures.
+
+Item 119's second cut, the log ring with AssetHandle and SaveId, in the commit carrying this line,
+held with the others. EngineLog, CrashLog, ConsoleLog, Log, LogLevel and LogLine move from the
+diagnostics into Core, which Core, Ecs and the bridge's status name, the console's host and its
+catalog staying with the diagnostics. SaveId, which the component schemas name, moves from the
+scenes into Ecs. AssetHandle, which Core and Ecs name, moves into Core as a partial struct, its
+State and IsLoaded, which ask the asset server, staying with the assets in a part of their own
+(AssetHandle.Loading.cs), which the cut that writes the extension members makes one of them.
+AssetIds moves into Core with them, since cut 1 put AssetFiles there, which names its root. None of
+the moved types names one above Core. What Core still names above it is the smaller cuts': the app's
+systems naming the asset server and the scenes' ready message, the frame's profile, and the window's
+memory naming Persistent.
+
+No native file changed. The solution builds with warnings as errors, and the tests of what the cut
+touches pass, 143 of 143, the logs, the crash log, the logged errors, the console and its hosts, the
+assets, their ids, files, loads and failures, the saves, the schemas, the persistent values, the
+scene files and values, the reflected components and the world among them. NormTests passed, 18. The
+public listing is unchanged.
