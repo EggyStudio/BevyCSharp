@@ -13,9 +13,7 @@ internal sealed class AssetWork : IPlugin
         AssetIds.Reindex();
         DataAssets.Watching = app.Config.WatchAssets;
 
-        // Meshes and materials belong to the app that made them, and so do the failures said.
-        MaterialFiles.Forget();
-        MeshFiles.Forget();
+        // The failures said belong to the app whose loads failed.
         AssetServer.ForgetFailed();
 
         // The project's icon on the window it opens, where there is one. An offscreen or headless
@@ -34,9 +32,8 @@ internal sealed class AssetWork : IPlugin
         // The handles a scene made for its entities that none of them draws with any more.
         app.AreasWork.Add(200, _ => AssetServer.Sweep());
 
-        // The data files and the material files changed on disk since the frame before.
+        // The data files changed on disk since the frame before.
         app.AreasWork.Add(4000, world => DataAssets.PostChanges(world.Resource<MessageBus>()));
-        app.AreasWork.Add(4200, _ => MaterialFiles.ReloadTouched());
     }
 
     /// <summary>

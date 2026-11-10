@@ -24,11 +24,8 @@ namespace Bevy;
 /// </remarks>
 public static class FrameProfile
 {
-    private static readonly object Gate = new();
-    private static readonly Dictionary<string, (long Ticks, long Runs)> BySystem = new(StringComparer.Ordinal);
-
     /// <summary>Whether a measurement is running.</summary>
-    public static bool On { get; private set; }
+    public static bool On => SystemTimes.On;
 
     /// <summary>What a call into the bridge and back costs with nothing done inside, in nanoseconds.</summary>
     private static double _roundTrip;
@@ -41,15 +38,14 @@ public static class FrameProfile
     public static void Start()
     {
         _roundTrip = RoundTrip();
-        lock (Gate) BySystem.Clear();
         Native.Check(NativeDiagnostics.bcs_profile_enable(1), "starting the frame profile");
-        On = true;
+        SystemTimes.Start();
     }
 
     /// <summary>Stops measuring.</summary>
     public static void Stop()
     {
-        On = false;
+        SystemTimes.Stop();
         Native.Check(NativeDiagnostics.bcs_profile_enable(0), "stopping the frame profile");
     }
 
@@ -62,21 +58,16 @@ public static class FrameProfile
         NativeProfile counted;
         Native.Check(NativeDiagnostics.bcs_profile_take(&counted), "reading the frame profile");
 
-        List<(string Name, double Milliseconds)> systems;
         var frames = Math.Max(1UL, counted.Frames);
-        lock (Gate)
-        {
-            systems =
-            [
-                .. BySystem
-                    // The dispatchers that run systems added while the app runs hold those
-                    // systems' time, which is counted under their own names.
-                    .Where(pair => !pair.Key.StartsWith("DynamicSystems.", StringComparison.Ordinal))
-                    .Select(pair => (pair.Key, Milliseconds: pair.Value.Ticks * 1000d / Stopwatch.Frequency / frames))
-                    .OrderByDescending(pair => pair.Milliseconds),
-            ];
-            BySystem.Clear();
-        }
+        List<(string Name, double Milliseconds)> systems =
+        [
+            .. SystemTimes.Take()
+                // The dispatchers that run systems added while the app runs hold those
+                // systems' time, which is counted under their own names.
+                .Where(system => !system.Name.StartsWith("DynamicSystems.", StringComparison.Ordinal))
+                .Select(system => (system.Name, Milliseconds: system.Ticks * 1000d / Stopwatch.Frequency / frames))
+                .OrderByDescending(system => system.Milliseconds),
+        ];
 
         var passes = Render.Timings().OrderByDescending(pass => pass.GpuMilliseconds ?? pass.CpuMilliseconds ?? 0d).ToList();
         double? cpu = passes.Any(pass => pass.CpuMilliseconds is not null) ? passes.Sum(pass => pass.CpuMilliseconds ?? 0d) : null;
@@ -130,15 +121,5 @@ public static class FrameProfile
         var ticks = Stopwatch.GetTimestamp() - started;
 
         return ticks * 1e9 / Stopwatch.Frequency / Timed;
-    }
-
-    /// <summary>Counts a managed system's run. Called by <see cref="SystemDescriptor.Invoke"/>.</summary>
-    internal static void Ran(string name, long ticks)
-    {
-        lock (Gate)
-        {
-            BySystem.TryGetValue(name, out var was);
-            BySystem[name] = (was.Ticks + ticks, was.Runs + 1);
-        }
     }
 }

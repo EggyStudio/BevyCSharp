@@ -340,8 +340,20 @@ public static unsafe class AssetServer
     /// </remarks>
     private static void Forget(AssetHandle handle)
     {
-        Render.Forget(handle);
-        Physics.Colliders.Forget(handle);
+        Action<AssetHandle>[] forgetters;
+        lock (ForgettersGate) forgetters = [.. Forgetters];
+        foreach (var forget in forgetters) forget(handle);
+    }
+
+    // What the areas keep by a handle, the rendering's meshes and the physics' colliders among
+    // them, which each area's plugin adds, so a handle released forgets it.
+    private static readonly Lock ForgettersGate = new();
+    private static readonly HashSet<Action<AssetHandle>> Forgetters = [];
+
+    /// <summary>Adds what an area forgets of a handle released, once however often it is added.</summary>
+    internal static void AddForgetter(Action<AssetHandle> forget)
+    {
+        lock (ForgettersGate) Forgetters.Add(forget);
     }
 
     /// <summary>

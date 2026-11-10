@@ -24,5 +24,5 @@ public readonly record struct MenuEvent(Entity Source, MenuAction Action, NavAct
     Entity IEntityEvent.Entity => Source;
 
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.Menu);
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.Menu);
 }

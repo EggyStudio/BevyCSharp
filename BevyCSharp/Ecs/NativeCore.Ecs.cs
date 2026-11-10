@@ -260,15 +260,6 @@ internal static unsafe partial class NativeCore
         IntPtr user,
         ulong* observer);
 
-    /// <summary>Asks Bevy to report one kind of thing its widgets report, through an observer it spawns.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_observe_widget(
-        IntPtr app,
-        int kind,
-        delegate* unmanaged[Cdecl]<NativeWidgetEvent*, IntPtr, void> callback,
-        IntPtr user,
-        ulong* observer);
 
     /// <summary>Asks Bevy to report one kind of change to a component, through an observer it spawns.</summary>
     [LibraryImport(Library)]
@@ -281,8 +272,4 @@ internal static unsafe partial class NativeCore
         IntPtr user,
         ulong* observer);
 
-    /// <summary>Has the clips' events call back into C#, through the handle given.</summary>
-    [LibraryImport(Library)]
-    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    internal static partial int bcs_observe_clip_events(IntPtr app, delegate* unmanaged[Cdecl]<uint, ulong, IntPtr, void> callback, IntPtr user);
 }

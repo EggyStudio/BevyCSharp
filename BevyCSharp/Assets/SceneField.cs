@@ -217,7 +217,7 @@ internal static unsafe partial class SceneField
             _splat = Program("field_splat.slang");
             _resolve = Program("field_resolve.slang");
             _stamp = Program("field_stamp.slang");
-            _shadows = Draw("field_shadows.slang");
+            _shadows = Shaders.KernelDraw("field_shadows.slang");
             _slice = Program("field_slice.slang");
         }
 
@@ -319,48 +319,7 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>An instance of one of the field's compute programs, compiled from the library's own copy.</summary>
-    private static ShaderInstance Program(string file) => Shaders.CreateInstance(KernelProgram(file));
-
-    /// <summary>
-    /// One of the library's compute programs, compiled from its own copy of the kernel, which the field
-    /// and global illumination's probes are built and traced with.
-    /// </summary>
-    // Named by its file, so its GPU time reads as shader field_splat and the like, and by its entry
-    // point beside the file's name where it is not main, as shader clouds_shadows.
-    internal static ShaderProgram KernelProgram(string file, ShaderTarget target = ShaderTarget.Wgsl, string entry = "main", IReadOnlyDictionary<string, ShaderDefine>? defines = null)
-    {
-        var named = entry == "main" ? file : $"{Path.GetFileNameWithoutExtension(file)}_{entry}.slang";
-        return Shaders.CreateProgram(new ShaderProgramSettings
-        {
-            Compute = new ShaderStage(named, entry) { Source = Kernel(file) },
-            ComputeTarget = target,
-            Defines = defines is null ? new(StringComparer.Ordinal) : new(defines, StringComparer.Ordinal),
-        });
-    }
-
-    /// <summary>An instance of one of the library's programs that draws on a camera, its vertex and fragment shaders in one file.</summary>
-    internal static ShaderInstance Draw(string file)
-    {
-        var source = Kernel(file);
-        return Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings
-        {
-            DrawVertex = new ShaderStage(file, "vertex") { Source = source },
-            DrawFragment = new ShaderStage(file, "fragment") { Source = source },
-        }));
-    }
-
-    /// <summary>An instance of one of the library's programs that runs over a camera's picture as a full-screen pass.</summary>
-    internal static ShaderInstance Pass(string file) =>
-        Shaders.CreateInstance(Shaders.CreateProgram(new ShaderProgramSettings { Pass = new ShaderStage(file) { Source = Kernel(file) } }));
-
-    /// <summary>One of the field's Slang files, as the library carries it.</summary>
-    private static string Kernel(string file)
-    {
-        using var stream = typeof(SceneField).Assembly.GetManifestResourceStream("Bevy.Kernels." + file)
-            ?? throw new InvalidOperationException($"The library carries no {file}, which the scene's distance field is built with.");
-        using var reader = new StreamReader(stream);
-        return reader.ReadToEnd();
-    }
+    private static ShaderInstance Program(string file) => Shaders.CreateInstance(Shaders.KernelProgram(file));
 
     /// <summary>Makes the field's images and buffers for its settings, every cell far and unpainted and every word cleared.</summary>
     private static Built Make((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made)

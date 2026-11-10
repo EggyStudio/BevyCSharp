@@ -170,10 +170,10 @@ internal static class Precipitation
         var counts = Shaders.CreateBuffer<uint>([6u, 0u, 0u, 0u, 0u, 0u, 0u, 0u]);
         var rain = new Camera
         {
-            Clear = Shaders.CreateInstance(SceneField.KernelProgram("precipitation.slang", entry: "clear")),
-            Simulate = Shaders.CreateInstance(SceneField.KernelProgram("precipitation.slang")),
-            Drops = SceneField.Draw("precipitation_drops.slang"),
-            Splashes = SceneField.Draw("precipitation_splashes.slang"),
+            Clear = Shaders.CreateInstance(Shaders.KernelProgram("precipitation.slang", entry: "clear")),
+            Simulate = Shaders.CreateInstance(Shaders.KernelProgram("precipitation.slang")),
+            Drops = Shaders.KernelDraw("precipitation_drops.slang"),
+            Splashes = Shaders.KernelDraw("precipitation_splashes.slang"),
             Particles = Shaders.CreateBuffer<Vector4>(asleep),
             Drawn = Shaders.CreateBuffer(capacity * 3 * 16),
             Counts = counts,
@@ -339,7 +339,7 @@ internal static class Precipitation
 
         var heights = Shaders.CreateImage(RoofTexels, RoofTexels, ShaderImageFormat.R32Float);
         var frame = Shaders.CreateBuffer<Vector4>([Vector4.Zero]);
-        var map = Shaders.CreateInstance(SceneField.KernelProgram("precipitation.slang", entry: "roofs"))
+        var map = Shaders.CreateInstance(Shaders.KernelProgram("precipitation.slang", entry: "roofs"))
             .SetTexture("roof_map", heights)
             .SetBuffer("roof_map_frame", frame)
             .Set("roof_size", new Vector4(RoofSize, RoofTexels, 0f, 0f));

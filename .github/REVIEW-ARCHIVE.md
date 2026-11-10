@@ -4795,6 +4795,32 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     push's macOS job. Settled at 19:29 on 2026-11-10, the macOS job of `739c2ba4`'s run green with
     the mend.
 
+54. **The pack run of `9ae92147` is red in its first captures job, many_foxes 6.7 percent off its
+    picture.** In the pack run 42840381265, started at 16:03 on 2026-11-10, the first of the four
+    captures jobs failed after 28 minutes, 1 of its 92 captures differing, many_foxes in 6.7 percent
+    of its pixels where 2.0 are allowed, within x 24 to 1894 and y 330 to 898, the band the foxes
+    stand in; the second job is green and the third, the fourth and the drive are going at 16:57.
+    Its picture was last taken at `b576bf3f` on 2026-11-07, and the push runs draw no captures, so
+    one of the commits since moved it, the ten pushed today among them. Of those the first cut of
+    119 stands nearest, which moved the order of two steps in the frame and put each area's work
+    behind a plugin, the foxes' animation a step of the frame; 131 changed how a surface reads its
+    probes and 132 gave every mesh a second layer. One read, many_foxes captured at `f70cf5e7` and
+    at the suspects in turn on this machine, the frame the capture takes and the foxes' poses in it,
+    to say which commit moved it and whether the picture or the code is at fault. Where the first
+    cut shifted a step that the capture's frame depends on, the cut is mended so the frame is as it
+    was, a cut of 119 changing nothing a program draws; where the change is meant, the picture is
+    taken again with its reason. Before 119's third cut is pushed. Written at 16:57 on 2026-11-10.
+    Read and mended at `739c2ba4` on 2026-11-10, and the cause is 132's, not the cut's. many_foxes
+    sought each fox by its entity's index, and item 132 made the roofs' set of cameras in every app,
+    a resource Bevy keeps as an entity, so each fox stood a tenth of a second further on, the head
+    differing from its picture in 6.54 percent on lavapipe here as on the runner. The set is made by
+    the first roof camera, an app without rain spawning its first entity at the index it did, held
+    by a test, the head then 0.47 percent from the picture; and many_foxes seeks each fox by its
+    place among the foxes, which B 4 allows, its picture taken again. Settles where the pack run
+    started at 19:05 passes its captures. Settled on 2026-11-10. The pack run 42871551558 on
+    `739c2ba4` ended green at 21:58, its four captures jobs green with many_foxes among them and its
+    drive in 104 minutes; 0.6.91 is published, the first package since 0.6.18, and tagged `v0.6.91`.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -10461,6 +10487,43 @@ passed, 18. The public listing is unchanged.
 
 Shared: a timing test on a shared runner holds the least of a few runs to its budget, each run doing
 the whole work again, for the sibling's budget tests.
+
+Verdict 54, many_foxes moved by the roofs' set of cameras, in the commit carrying this line. Each
+fox of many_foxes seeks its run by a tenth of a second for each step of its entity's index, and
+ccef6170, item 132, made the roofs' set of cameras in every app as a resource, which Bevy keeps as
+an entity, so every entity an app spawned took an index one higher and every fox stood a tenth of a
+second further into its run. Captured on lavapipe at the head, the example differs from its picture
+in 6.54% of its pixels, within x 24 to 1894 and y 331 to 898, the run's failure in the same band,
+and with the set made by the first roof camera in 0.47%, scattered, which this machine's Mesa draws
+against the runner's. 119's first cut adds no entity, so it was not captured.
+
+The set of cameras is made by the first roof camera, and the system that keeps the meshes on the
+roofs' layer runs once the set stands, so an app without rain spawns its entities at the indices it
+spawned them at before item 132. A test in roofs.rs spawns an app's first entity with the roofs
+installed and without them and compares the two indices and whether the set stands. With the set
+made in every app it read index 8 where 7 is right.
+
+B 4 allows a fox to seek by its place among the foxes, since B 4 says where an example keeps its
+state and the place is kept on the fox's entity, in its FoxRunner behavior. Bevy's example seeks by
+its player entity's index, a bone within the fox's scene, where the port seeks by the fox's root, so
+the two differed before. many_foxes seeks by its place among the foxes, with a remark saying why,
+and its picture is taken again on lavapipe here, 10.29% from the one before, the 0.47% the fix read
+against the runner's picture standing for how far this machine's lavapipe draws from the runner's.
+The gallery's picture is made again from it by examples-table.py. A resource the bridge adds can
+still move the picture another way, by a frame more at the start, as the trees' material plugins did
+under Verdict 50. The reading 2026-11-10-verdict-54-foxes.webp shows the head and the fix with their
+difference.
+
+The ImGui pass's module comment says what crosses from ImGui into the renderer in place of naming
+another engine's backend.
+
+The three profiles check, and the bridge's tests pass, 118 with no feature and 205 with render. The
+solution builds with warnings as errors, and the whole suite passed, 2,039 passed, none failed and 3
+skipped. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a program that reads an entity's index moves with every entity the engine makes before its
+own, so an example's picture reads a place the example keeps, and a resource only some apps use is
+made by the first call that needs it, for SHARED.md's row on captures.
 
 ## Items closed, parked or shortened
 

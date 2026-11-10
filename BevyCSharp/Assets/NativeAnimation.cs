@@ -147,4 +147,9 @@ internal static unsafe partial class NativeAnimation
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_animation_finished(ulong* roots, int* clips, int capacity);
+
+    /// <summary>Has the clips' events call back into C#, through the handle given.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_observe_clip_events(IntPtr app, delegate* unmanaged[Cdecl]<uint, ulong, IntPtr, void> callback, IntPtr user);
 }

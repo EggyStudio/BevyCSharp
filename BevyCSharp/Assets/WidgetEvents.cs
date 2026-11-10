@@ -1,9 +1,10 @@
+using System.Runtime.InteropServices;
 using Bevy.Interop;
 
 namespace Bevy;
 
 /// <summary>The kinds of thing Bevy's widgets report, by the numbers the bridge reports them under.</summary>
-internal static class WidgetEvents
+internal static unsafe class WidgetEvents
 {
     internal const int Activate = 0;
     internal const int Number = 1;
@@ -19,6 +20,35 @@ internal static class WidgetEvents
     internal const int Vector2 = 11;
     internal const int ColorValue = 12;
     internal const int Close = 13;
+
+    /// <summary>Asks the bridge to report one kind of thing Bevy's widgets report, once.</summary>
+    /// <remarks>
+    /// A bridge without the renderer has no widgets, answers so, and nothing is ever reported.
+    /// </remarks>
+    internal static void Watch(ObserverRegistry registry, int kind)
+    {
+        if (!registry.FirstAsked((typeof(WidgetEvents), kind))) return;
+
+        ulong observer;
+        var status = NativeUi.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &Reported, registry.Handle, &observer);
+        if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a widget reports");
+    }
+
+    /// <summary>Where the bridge reports what a widget reported, with the world on loan.</summary>
+    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    private static void Reported(NativeWidgetEvent* reported, IntPtr user)
+    {
+        try
+        {
+            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry || reported == null) return;
+            Trigger(registry, *reported);
+        }
+        catch (Exception ex)
+        {
+            // An exception crossing back into Rust is undefined, so it ends here, said.
+            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
+        }
+    }
 
     /// <summary>The number the bridge reports a <see cref="ValueChange{T}"/> of <typeparamref name="T"/> under.</summary>
     /// <exception cref="NotSupportedException">No widget of Bevy's reports a value of that type.</exception>

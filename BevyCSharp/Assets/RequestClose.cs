@@ -18,5 +18,5 @@ public readonly record struct RequestClose(Entity Source) : IPropagatingEvent, I
     Entity IEntityEvent.Entity => Source;
 
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.Close);
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.Close);
 }

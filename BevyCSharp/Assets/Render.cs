@@ -587,7 +587,7 @@ public static unsafe partial class Render
     /// Internal to the trees, which build the meshes it reads, and drawn forward whatever the
     /// camera, as <c>native/bevy_csharp/src/render/leaves.rs</c> says.
     /// </remarks>
-    internal static AssetHandle CreateLeafMaterial(MaterialSettings settings, Trees.TreeStiffness stiffness)
+    internal static AssetHandle CreateLeafMaterial(MaterialSettings settings, (float Trunk, float Limb, float Flutter, float Frequency) stiffness)
     {
         ArgumentNullException.ThrowIfNull(settings);
 
@@ -607,7 +607,7 @@ public static unsafe partial class Render
     /// Internal to the trees, which build the meshes it reads, as
     /// <c>native/bevy_csharp/src/render/sway.rs</c> says.
     /// </remarks>
-    internal static AssetHandle CreateBarkMaterial(MaterialSettings settings, Trees.TreeStiffness stiffness)
+    internal static AssetHandle CreateBarkMaterial(MaterialSettings settings, (float Trunk, float Limb, float Flutter, float Frequency) stiffness)
     {
         ArgumentNullException.ThrowIfNull(settings);
 

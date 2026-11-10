@@ -193,7 +193,7 @@ public sealed class SystemDescriptor
     {
         if (RunCondition is { } condition && !condition(world)) return false;
 
-        if (!FrameProfile.On)
+        if (!SystemTimes.On)
         {
             System(world);
             return true;
@@ -201,7 +201,7 @@ public sealed class SystemDescriptor
 
         var started = global::System.Diagnostics.Stopwatch.GetTimestamp();
         System(world);
-        FrameProfile.Ran(Name, global::System.Diagnostics.Stopwatch.GetTimestamp() - started);
+        SystemTimes.Ran(Name, global::System.Diagnostics.Stopwatch.GetTimestamp() - started);
         return true;
     }
 

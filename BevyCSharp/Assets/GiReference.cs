@@ -120,6 +120,12 @@ internal static unsafe partial class GiReference
     private static Rays? _rays;
     private static Job? _job;
 
+    /// <summary>
+    /// How many of the world's trees are not dressed yet, which the trees' plugin answers and a
+    /// reading says, since one taken before they stand reads a scene with fewer.
+    /// </summary>
+    internal static Func<EcsWorld, int> UndressedTrees { get; set; } = _ => 0;
+
     /// <summary>The reference traced last, in the running app.</summary>
     internal static Traced? Last { get; private set; }
 
@@ -159,7 +165,7 @@ internal static unsafe partial class GiReference
             Leaves = leaves,
             Slots = slots,
             Skipped = skipped,
-            Undressed = Trees.Undressed(ecs),
+            Undressed = UndressedTrees(ecs),
             Started = Stopwatch.GetTimestamp(),
         };
         AskSize(_job, rays);
@@ -227,7 +233,7 @@ internal static unsafe partial class GiReference
         if (rays && !Shaders.SupportsRayQueries) return "the GPU traces no rays, which the reference is traced through";
         if (CameraOf(ecs).IsNone) return "there is no 3D camera to trace the picture of";
 
-        _rays ??= new Rays { Copy = Shaders.CreateInstance(SceneField.KernelProgram("gi_frame.slang")) };
+        _rays ??= new Rays { Copy = Shaders.CreateInstance(Shaders.KernelProgram("gi_frame.slang")) };
         if (rays && !_rays.Trace.IsValid)
         {
             _rays.Pool = Shaders.CreateGeometryPool();
@@ -237,7 +243,7 @@ internal static unsafe partial class GiReference
             // The mask a slot past the material buffer's masks reads, letting nothing through.
             _rays.White = Render.CreateImage([255, 255, 255, 255], 1, 1, srgb: false, mipmaps: false);
             (_rays.Limit, _rays.Masks) = (Shaders.SampledTexturesPerStage, MasksFor(Shaders.SampledTexturesPerStage));
-            _rays.Trace = Shaders.CreateInstance(SceneField.KernelProgram("gi_reference.slang", ShaderTarget.SpirV, defines: new Dictionary<string, ShaderDefine> { ["MASKS"] = (uint)_rays.Masks }));
+            _rays.Trace = Shaders.CreateInstance(Shaders.KernelProgram("gi_reference.slang", ShaderTarget.SpirV, defines: new Dictionary<string, ShaderDefine> { ["MASKS"] = (uint)_rays.Masks }));
         }
         return null;
     }

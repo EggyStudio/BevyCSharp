@@ -1,5 +1,4 @@
 using Bevy.Interop;
-using ImGuiNET;
 
 namespace Bevy;
 
@@ -38,6 +37,15 @@ public static class SyntheticInput
 {
     /// <summary>Where the pretend pointer is, or nothing while the real one is in charge.</summary>
     internal static (float X, float Y)? Pretend { get; private set; }
+
+    /// <summary>Whether an interface runs to take a pointer, which the interface's plugin answers.</summary>
+    internal static Func<bool> InterfaceRunning { get; set; } = () => false;
+
+    /// <summary>
+    /// Puts a pointer into the interface's own event queue, which the interface's plugin gives, so
+    /// what the interface does with it behaves as it would with a hand's.
+    /// </summary>
+    internal static Action<float, float, PointerAction, MouseButton>? ToInterface { get; set; }
 
     /// <summary>Moves the pointer to a point in the window, in logical pixels.</summary>
     public static void MoveTo(float x, float y) => Send(x, y, PointerAction.Move);
@@ -174,30 +182,6 @@ public static class SyntheticInput
     }
 
     /// <summary>
-    /// Presses and releases a key in the interface's own queue.
-    /// </summary>
-    /// <remarks>
-    /// A key that types something types it as well, because a keyboard does that and a field is
-    /// waiting for it. This reaches the interface only; <see cref="Press(Key, string)"/> starts
-    /// where a real key starts.
-    /// </remarks>
-    public static void Key(ImGuiKey key, string? typed = null)
-    {
-        if (!ImGuiRuntime.IsRunning) return;
-
-        var io = ImGui.GetIO();
-
-        io.AddKeyEvent(key, true);
-
-        if (typed is { Length: > 0 })
-        {
-            foreach (var character in typed) io.AddInputCharacter(character);
-        }
-
-        io.AddKeyEvent(key, false);
-    }
-
-    /// <summary>
     /// Composes text as the platform's input method would, with the caret over
     /// <paramref name="caretStart"/> to <paramref name="caretEnd"/>, or hidden at -1.
     /// </summary>
@@ -228,16 +212,6 @@ public static class SyntheticInput
         }
     }
 
-    /// <summary>Types a run of characters.</summary>
-    public static void Type(string text)
-    {
-        ArgumentNullException.ThrowIfNull(text);
-        if (!ImGuiRuntime.IsRunning) return;
-
-        var io = ImGui.GetIO();
-        foreach (var character in text) io.AddInputCharacter(character);
-    }
-
     /// <summary>
     /// Moves, presses or releases the pointer.
     /// </summary>
@@ -264,7 +238,8 @@ public static class SyntheticInput
         var status = NativeCore.bcs_input_pointer(x, y, (int)action, (int)button);
         var windowless = status == NativeStatus.InvalidState;
 
-        if (windowless && !ImGuiRuntime.IsRunning)
+        var interfaced = InterfaceRunning();
+        if (windowless && !interfaced)
             throw new BevyNativeException(
                 NativeStatus.InvalidState,
                 $"Sending a pointer {action} at {x},{y} failed, because this run has no window and "
@@ -274,30 +249,10 @@ public static class SyntheticInput
         if (!windowless) Native.Check(status, $"sending a pointer {action} at {x},{y}");
         else if (button == MouseButton.Left) Unwindowed(x, y, action);
 
-        if (!ImGuiRuntime.IsRunning) return;
+        if (!interfaced) return;
 
         Pretend = (x, y);
-
-        var io = ImGui.GetIO();
-        io.AddMousePosEvent(x, y);
-
-        var which = button switch
-        {
-            MouseButton.Right => 1,
-            MouseButton.Middle => 2,
-            _ => 0,
-        };
-
-        switch (action)
-        {
-            case PointerAction.Press:
-                io.AddMouseButtonEvent(which, true);
-                break;
-
-            case PointerAction.Release:
-                io.AddMouseButtonEvent(which, false);
-                break;
-        }
+        ToInterface?.Invoke(x, y, action, button);
     }
 
     /// <summary>Gives the pointer back to the hand on the desk.</summary>

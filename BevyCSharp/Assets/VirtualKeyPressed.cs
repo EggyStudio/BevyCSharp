@@ -19,5 +19,5 @@ public readonly record struct VirtualKeyPressed(Entity Keyboard, string Key, int
     Entity IEntityEvent.Entity => Keyboard;
 
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.VirtualKey);
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.VirtualKey);
 }

@@ -19,7 +19,6 @@ static App Build(Config? config = null);                        // Builds an app
 // App
 App DetectAmbiguities(Stage stage, AmbiguityReport report = AmbiguityReport.Warn, Func<string, bool>? among = null);  // Reports, as the app starts, the systems of stage whose declared access conflicts and whose order nothing states, as Bevy's ambiguity_detection in a schedule's build settings does
 IReadOnlyList<SystemAmbiguity> AmbiguitiesIn(Stage stage, Func<string, bool>? among = null);  // The pairs of systems of stage whose declared access conflicts and whose order nothing states, in the order they were added, which DetectAmbiguities reports
-ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
 App OnAdd<T>(ComponentHook<T> hook);                            // Runs hook the first time a T is put on an entity, Bevy's on_add
 App OnInsert<T>(ComponentHook<T> hook);                         // Runs hook each time a T is put on an entity, after OnAdd the first time, Bevy's on_insert
 App OnDiscard<T>(ComponentHook<T> hook);                        // Runs hook with a T's value before it is overwritten or taken off, Bevy's on_discard
@@ -52,12 +51,13 @@ App AddSystem(Stage stage, SystemDescriptor descriptor);        // Registers a d
 App Startup(Action<BehaviorContext> setup, string name = "Startup");  // Runs setup once as the app starts, as Bevy's Startup systems do
 App Update(Action<BehaviorContext> update, string name = "Update");  // Runs update every frame, as Bevy's Update systems do
 App On(Stage stage, Action<BehaviorContext> run, string name, Func<World, bool>? runIf = null);  // Runs run in stage, as a system Bevy adds to that schedule, and only while runIf passes where one is given
-App SpawnGltf(string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0);  // Spawns a glTF file's scene once it has loaded, as Bevy's SceneRoot of a glTF does, and hands the root to spawned once the scene is in the world under it
 App Chain(Stage stage, params SystemDescriptor[] systems);      // Registers systems in stage, each to run after the one before it
 App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer each time a TEvent is triggered
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
 int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
 IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
+ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
+App SpawnGltf(string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0);  // Spawns a glTF file's scene once it has loaded, as Bevy's SceneRoot of a glTF does, and hands the root to spawned once the scene is in the world under it
 
 // Config
 static Config HeadlessFor(uint frames);                         // A windowless configuration that runs frames ticks and exits
@@ -1503,13 +1503,13 @@ static void Wheel(float lines, float sideways = 0f);            // Rolls the whe
 static void Press(Key key, string typed = "");                  // Presses a key where a real one is reported, at the window
 static void Lift(Key key);                                      // Lets a key go, where a real one is reported
 static void Tap(Key key, string typed = "");                    // Presses a key and lets it go again
-static void Key(ImGuiKey key, string? typed = null);            // Presses and releases a key in the interface's own queue
 static void Compose(string text, int caretStart = -1, int caretEnd = -1);  // Composes text as the platform's input method would, with the caret over caretStart to caretEnd, or hidden at -1
 static void Commit(string text);                                // Commits text as the platform's input method would, arriving as an ImeCommit
-static void Type(string text);                                  // Types a run of characters
 static void Send(float x, float y, PointerAction action, MouseButton button = MouseButton.Left);  // Moves, presses or releases the pointer
 static void Forget();                                           // Gives the pointer back to the hand on the desk
 static bool TryTakeClickWithoutWindow(out float x, out float y);  // Takes the oldest left click given to a run with no window that nothing has answered yet
+static void Key(ImGuiKey key, string? typed = null);            // Presses and releases a key in the interface's own queue
+static void Type(string text);                                  // Types a run of characters
 
 // KeyTable
 static bool IsMapped(Key key);                                  // True when key has a bit in the input bitsets

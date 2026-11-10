@@ -38,11 +38,31 @@ internal sealed unsafe class ObserverRegistry : IDisposable
     private readonly Dictionary<(Type, Entity), List<Delegate>> _onEntity = [];
     private readonly HashSet<(int Kind, int Component, Type Event)> _watched = [];
     private readonly HashSet<int> _watchedPointers = [];
-    private readonly HashSet<int> _watchedWidgets = [];
+    private readonly HashSet<object> _asked = [];
     private bool _watchedFocusedKeys;
-    private bool _watchedClipEvents;
     private readonly Dictionary<(int Kind, int Component), Action<Entity, ReadOnlySpan<byte>>> _reports = [];
     private GCHandle _self;
+
+    // What asks Bevy for an area's reports as an observer of one of its events is added, which the
+    // area's plugin adds. An event a game declares for an area, as an event placed on a clip is,
+    // names no report of its own, so the area knows it by the area's interface.
+    private static readonly Lock WatchersGate = new();
+    private static readonly HashSet<Action<ObserverRegistry, object?>> Watchers = [];
+
+    /// <summary>Adds what asks Bevy for an area's reports, once however often it is added.</summary>
+    internal static void AddWatcher(Action<ObserverRegistry, object?> watcher)
+    {
+        lock (WatchersGate) Watchers.Add(watcher);
+    }
+
+    /// <summary>
+    /// Whether a report is asked for the first time in this world, by what names it, which an area
+    /// asks before it asks the bridge for the report.
+    /// </summary>
+    internal bool FirstAsked(object report) => _asked.Add(report);
+
+    /// <summary>What the bridge hands back with each report, which finds this registry.</summary>
+    internal IntPtr Handle => GCHandle.ToIntPtr(_self);
 
     internal ObserverRegistry(World world)
     {
@@ -56,9 +76,12 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         ArgumentNullException.ThrowIfNull(handler);
 
         // A change to a component, or what a pointer did, is Bevy's to report, so watching one
-        // starts the report, as watching an event placed on a clip starts the clips' reports.
+        // starts the report, and an area's watcher starts the reports of the events a game
+        // declares for it, as watching an event placed on a clip starts the clips' reports.
         if (default(TEvent) is IReportedEvent reported) reported.Watch(this);
-        if (default(TEvent) is IAnimationEvent) WatchClipEvents();
+        Action<ObserverRegistry, object?>[] watchers;
+        lock (WatchersGate) watchers = [.. Watchers];
+        foreach (var watcher in watchers) watcher(this, default(TEvent));
 
         var list = entity is { } at
             ? GetOrAdd(_onEntity, (typeof(TEvent), at))
@@ -104,33 +127,6 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         var on = new On<TEvent>(_world, value, at);
         Run(_global, typeof(TEvent), on);
         if (at != Entity.None) Run(_onEntity, (typeof(TEvent), at), on);
-    }
-
-    /// <summary>Asks the bridge to report the events this app's clips reach, once.</summary>
-    /// <remarks>A bridge without the renderer has no animation, answers so, and reports nothing.</remarks>
-    internal void WatchClipEvents()
-    {
-        if (_watchedClipEvents) return;
-        _watchedClipEvents = true;
-
-        var status = NativeCore.bcs_observe_clip_events(ComponentRegistry.AppHandle, &ClipEventReported, GCHandle.ToIntPtr(_self));
-        if (status != NativeStatus.Unsupported) Native.Check(status, "observing the events placed on clips");
-    }
-
-    /// <summary>Where the bridge reports a clip reaching an event placed on it, with the world on loan.</summary>
-    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    private static void ClipEventReported(uint number, ulong entity, IntPtr user)
-    {
-        try
-        {
-            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry) return;
-            ClipEvents.Fire(registry, number, new Entity(entity));
-        }
-        catch (Exception ex)
-        {
-            // An exception crossing back into Rust is undefined, so it ends here, said.
-            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
-        }
     }
 
     /// <summary>Asks the bridge to report one kind of change to <typeparamref name="T"/>, once.</summary>
@@ -188,19 +184,6 @@ internal sealed unsafe class ObserverRegistry : IDisposable
         if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a pointer does");
     }
 
-    /// <summary>Asks the bridge to report one kind of thing Bevy's widgets report, once.</summary>
-    /// <remarks>
-    /// A bridge without the renderer has no widgets, answers so, and nothing is ever reported.
-    /// </remarks>
-    internal void WatchWidget(int kind)
-    {
-        if (!_watchedWidgets.Add(kind)) return;
-
-        ulong observer;
-        var status = NativeCore.bcs_observe_widget(ComponentRegistry.AppHandle, kind, &WidgetReported, GCHandle.ToIntPtr(_self), &observer);
-        if (status != NativeStatus.Unsupported) Native.Check(status, "observing what a widget reports");
-    }
-
     /// <summary>Asks the bridge to report each key that reaches the focused entity, once.</summary>
     /// <remarks>A bridge without the renderer has no input focus, answers so, and reports nothing.</remarks>
     internal void WatchFocusedKeys()
@@ -236,22 +219,6 @@ internal sealed unsafe class ObserverRegistry : IDisposable
                 native.Repeat != 0);
 
             registry.Trigger(new FocusedInput<KeyboardInput>(new Entity(native.Entity), key));
-        }
-        catch (Exception ex)
-        {
-            // An exception crossing back into Rust is undefined, so it ends here, said.
-            EngineLog.Error(null, "observer", $"[BevyCSharp] An observer threw: {ex}", ex);
-        }
-    }
-
-    /// <summary>Where the bridge reports what a widget reported, with the world on loan.</summary>
-    [UnmanagedCallersOnly(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
-    private static void WidgetReported(NativeWidgetEvent* reported, IntPtr user)
-    {
-        try
-        {
-            if (GCHandle.FromIntPtr(user).Target is not ObserverRegistry registry || reported == null) return;
-            WidgetEvents.Trigger(registry, *reported);
         }
         catch (Exception ex)
         {

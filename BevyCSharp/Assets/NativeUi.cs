@@ -207,4 +207,16 @@ internal static unsafe partial class NativeUi
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_feathers_set_theme(byte* tokens, int length, float* colors, int count);
+
+    // -- Observers
+
+    /// <summary>Asks Bevy to report one kind of thing its widgets report, through an observer it spawns.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_observe_widget(
+        IntPtr app,
+        int kind,
+        delegate* unmanaged[Cdecl]<NativeWidgetEvent*, IntPtr, void> callback,
+        IntPtr user,
+        ulong* observer);
 }

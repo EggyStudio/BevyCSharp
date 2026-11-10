@@ -7,5 +7,9 @@ internal sealed class ImGuiWork : IPlugin
     {
         // The textures and the frame ImGui drew belong to the app that drew them.
         ImGuiRuntime.Forget();
+
+        // A pointer put in as a hand would is put into the interface's queue too, while it runs.
+        SyntheticInput.InterfaceRunning = () => ImGuiRuntime.IsRunning;
+        SyntheticInput.ToInterface = SyntheticInputImGui.Send;
     }
 }

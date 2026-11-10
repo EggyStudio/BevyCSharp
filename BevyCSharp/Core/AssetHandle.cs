@@ -15,7 +15,7 @@ namespace Bevy;
 /// <see cref="AssetLoadState.Unknown"/> instead.
 /// </para>
 /// </remarks>
-public readonly partial struct AssetHandle : IEquatable<AssetHandle>
+public readonly struct AssetHandle : IEquatable<AssetHandle>
 {
     /// <summary>The packed slot and generation the engine knows this asset by.</summary>
     internal readonly int Key;

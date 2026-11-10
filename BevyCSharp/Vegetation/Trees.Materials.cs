@@ -59,7 +59,7 @@ public static partial class Trees
                     MetallicRoughnessTexture = surface,
                     Roughness = 1f,
                     Metallic = 1f,
-                }, set.LoadDepth()), stiffness);
+                }, set.LoadDepth()), stiffness.Sway);
                 Render.SetFieldTint(made, (set.MeanColor.X, set.MeanColor.Y, set.MeanColor.Z));
                 return made;
             }
@@ -72,7 +72,7 @@ public static partial class Trees
                 BaseColorTexture = color,
                 NormalMap = bumps,
                 Roughness = 0.9f,
-            }, depth), stiffness);
+            }, depth), stiffness.Sway);
         });
     }
 
@@ -144,7 +144,7 @@ public static partial class Trees
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
                     LightThrough = LeafLightThrough,
-                }, stiffness);
+                }, stiffness.Sway);
                 Render.SetFieldTint(made, (mean.X, mean.Y, mean.Z));
                 return made;
             }
@@ -160,7 +160,7 @@ public static partial class Trees
                 AlphaMode = AlphaMode.Mask,
                 DoubleSided = true,
                 LightThrough = LeafLightThrough,
-            }, stiffness);
+            }, stiffness.Sway);
         });
     }
 
@@ -186,7 +186,7 @@ public static partial class Trees
             AlphaMode = AlphaMode.Mask,
             DoubleSided = true,
             LightThrough = LeafLightThrough,
-        }, Grass.Stiffness);
+        }, Grass.Stiffness.Sway);
         Render.SetFieldTint(made, (set.MeanColor.X, set.MeanColor.Y, set.MeanColor.Z));
         return made;
     });

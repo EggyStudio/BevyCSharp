@@ -208,7 +208,7 @@ public static partial class Trees
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
                     LightThrough = LeafLightThrough,
-                }, Stiffness(species));
+                }, Stiffness(species).Sway);
                 if (species.LeafSet is { } leafSet && TreeTextures.Find(leafSet) is { Kind: TreeTextureKind.Leaves } leafLook)
                     Render.SetFieldTint(pictures.Material, (leafLook.MeanColor.X, leafLook.MeanColor.Y, leafLook.MeanColor.Z));
                 pictures.Limbs = Created(shaped.Cards!.Limbs);

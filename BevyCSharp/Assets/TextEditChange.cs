@@ -23,5 +23,5 @@ namespace Bevy;
 public readonly record struct TextEditChange(Entity Entity) : IEntityEvent, IReportedEvent
 {
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.TextEdit);
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.TextEdit);
 }

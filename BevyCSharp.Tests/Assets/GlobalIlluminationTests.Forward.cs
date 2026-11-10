@@ -215,7 +215,7 @@ public sealed partial class GlobalIlluminationTests
                     DiffuseTransmission = through,
                     AlphaMode = AlphaMode.Mask,
                     DoubleSided = true,
-                }, new Trees.TreeStiffness(0f, 0f, 0f, 0f)));
+                }, (0f, 0f, 0f, 0f)));
 
                 if (lamp)
                 {

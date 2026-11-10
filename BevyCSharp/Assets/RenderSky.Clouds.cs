@@ -147,8 +147,8 @@ internal static class Clouds
         {
             clouds = new Camera
             {
-                March = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang")),
-                Draw = SceneField.Draw("clouds_draw.slang"),
+                March = Shaders.CreateInstance(Shaders.KernelProgram("clouds.slang")),
+                Draw = Shaders.KernelDraw("clouds_draw.slang"),
                 Settings = settings,
             };
             Cameras[camera.Bits] = clouds;
@@ -160,7 +160,7 @@ internal static class Clouds
         clouds.Settings = settings;
         if (!settings.ShadowLight.IsNone && !clouds.Shadow.IsValid)
         {
-            clouds.Shadow = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "shadows"));
+            clouds.Shadow = Shaders.CreateInstance(Shaders.KernelProgram("clouds.slang", entry: "shadows"));
             clouds.ShadowImage = Shaders.CreateImage(ShadowTexels, ShadowTexels, ShaderImageFormat.Rgba8);
             clouds.Shadow.SetTexture("cloud_shadow", clouds.ShadowImage);
         }
@@ -218,9 +218,9 @@ internal static class Clouds
             var held = Shaders.CreateImage(width, height, ShaderImageFormat.Rgba16Float, depth: 6);
             if (!clouds.SkyClouds.IsValid)
             {
-                clouds.SkyClouds = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_clouds"));
-                clouds.SkyCopy = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_copy"));
-                clouds.SkyMerge = Shaders.CreateInstance(SceneField.KernelProgram("clouds.slang", entry: "sky_merge"));
+                clouds.SkyClouds = Shaders.CreateInstance(Shaders.KernelProgram("clouds.slang", entry: "sky_clouds"));
+                clouds.SkyCopy = Shaders.CreateInstance(Shaders.KernelProgram("clouds.slang", entry: "sky_copy"));
+                clouds.SkyMerge = Shaders.CreateInstance(Shaders.KernelProgram("clouds.slang", entry: "sky_merge"));
             }
             clouds.SkyClouds.SetTexture("sky_cloud_cube", small);
             clouds.SkyCopy.SetTexture("sky_source", cube).SetTexture("sky_held", held).SetSampler("sky_sampler", SamplerSettings.ClampedTable);
@@ -391,7 +391,7 @@ internal static class Clouds
     {
         if (_noise is { } noise && noise.Seed == seed) return noise;
         ShaderInstance Maker(uint size, uint which, uint depth) =>
-            Shaders.CreateInstance(SceneField.KernelProgram("cloud_noise.slang")).SetNumbers("size", 4, (ReadOnlySpan<uint>)[size, which, depth, seed]);
+            Shaders.CreateInstance(Shaders.KernelProgram("cloud_noise.slang")).SetNumbers("size", 4, (ReadOnlySpan<uint>)[size, which, depth, seed]);
         var shape = Shaders.CreateImage(128, 128, ShaderImageFormat.Rgba8, depth: 128);
         var detail = Shaders.CreateImage(32, 32, ShaderImageFormat.Rgba8, depth: 32);
         // Two slices deep, so it is a 3D image as the march reads it, the second a copy of the first.

@@ -1,31 +1,37 @@
 # Review
 
-Reviewed up to `ed291326`, 119's fourth cut, each area's console commands in its folder and the
-command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22
-with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it, 2,039 passed,
-none failed and 3 skipped; it keeps the form and carries the review's files. Before it `739c2ba4`,
-Verdict 54's mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green
-at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack
-run with publish of 19:05 going, its first captures job green with many_foxes. Before it `9ae92147`,
-item 133 with the nine before it, the ten held since the night, pushed at 16:03 on 2026-11-10, green
-at 16:41 on its second attempt, the first attempt's macOS red by one timing, Verdict 53; its pack
-run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54, its drive green in
-100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict 52. Before it
-`f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release scene-packs holds
-the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on
-2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack
-run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands at 0.6,
-tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment.
-Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head
-records.
+Reviewed up to `04394b88`, 119's fifth cut, global illumination's and the sky's members of Render
+and the world's spawn helpers as extension blocks, the listing unchanged line for line, the script
+host's compiler and the tests' workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed
+at 21:20 on 2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the
+whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form and carries the
+review's file. Before it `ed291326`, 119's fourth cut, each area's console commands in its folder
+and the command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at
+20:22 with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's
+mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with
+Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with
+publish of 19:05 green at 21:58, the four captures jobs green with many_foxes and the drive in 104
+minutes, which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since
+0.6.18. Before it `9ae92147`, item 133 with the nine before it, the ten held since the night, pushed
+at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one
+timing, Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes,
+Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which
+settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05.
+The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
+hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
+published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
+version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
+item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+REVIEW-ARCHIVE.md under Head records.
 
-Next 119's fifth cut, the extension members with the listing's writer, each cut a commit with the
-whole suite, the rest of the plan after it, 120, the live path, and after them 66 and 67, the
-connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
-the pack run of 16:03 on 2026-11-10. The pack run started at 19:05 on 2026-11-10 settles Verdict 54
-where its captures pass and publishes the first package since 2026-11-02. The engine's illumination
-read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by
-Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
+Next 119's sixth cut, the asset data and the smaller ones, each cut a commit with the whole suite,
+134 in a commit of its own before the split, the rest of the plan after it, 120, the live path, and
+after them 66 and 67, the connections and the level editor; 93's course drawn smaller after 119, its
+drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from
+`739c2ba4`, the next pack run after 119's split or by 2026-11-12, whichever comes first. The
+engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at
+8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
+Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -133,7 +139,17 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     commands moved to their areas and the command attribute, the catalog and the host into Core,
     where the plan had them in Diagnostics, since Diagnostics holds the console's view and stands
     above the areas; the console's own 51 stay there. Next the fifth, the extension members with the
-    listing's writer.
+    listing's writer. The fifth is `04394b88`, global illumination's 5 members of Render in an
+    extension block of RenderGlobalIllumination, the sky's 8 in one of RenderSky and the world's 3
+    spawn helpers in one of EcsWorldSpawning, no call site changed and PublicApi.txt the same line
+    for line, the listing's writer and the cheat sheet reading a block's members as their type's
+    own. The review's three checks hold. The script host's compiler was Roslyn 4.14, which reads a
+    static member of a block as the block's class's alone, so the host and the tests' workspace
+    layer go to 5.0.0, the SDK's compiler, the generator and the code fixes staying on 4.14, with a
+    test that a script calls the members on the types they extend; the host is no part of the
+    library, so N 2.8 is not touched, and the change of version is named to the owner. Nothing reads
+    Render's or EcsWorld's members by reflection. Next the sixth, the asset data and the smaller
+    ones.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -141,33 +157,19 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     compiler, each change said in the log and reachable through the CLI, so a running program is
     edited and seen without a restart; the bridge's own code stays a restart. After 119.
 
+134. **A script compiles against every assembly the library's members name.** Found with 119's fifth
+    cut on 2026-11-10 and older than it. A script that calls Render.SetWeather does not compile in
+    the script host, since WeatherState is the Sky module's and the host hands a script the library
+    alone, so any member whose signature names a module's type is closed to a script that a game's
+    compiled code calls freely. The host hands a script the references of the app it is loaded into,
+    the library's and each assembly the library's public members name, the modules' among them, and
+    a test compiles a script that calls Render.SetWeather. 119's split makes every area an assembly
+    of its own, so this lands in a commit of its own before the split's cut, and the split's cut
+    keeps the test green with the areas' assemblies in the list.
+
 ## Verdicts
 
-Verdicts 2 and 33 to 53 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 54 is open on the pack run's captures.
-
-54. **The pack run of `9ae92147` is red in its first captures job, many_foxes 6.7 percent off its
-    picture.** In the pack run 42840381265, started at 16:03 on 2026-11-10, the first of the four
-    captures jobs failed after 28 minutes, 1 of its 92 captures differing, many_foxes in 6.7 percent
-    of its pixels where 2.0 are allowed, within x 24 to 1894 and y 330 to 898, the band the foxes
-    stand in; the second job is green and the third, the fourth and the drive are going at 16:57.
-    Its picture was last taken at `b576bf3f` on 2026-11-07, and the push runs draw no captures, so
-    one of the commits since moved it, the ten pushed today among them. Of those the first cut of
-    119 stands nearest, which moved the order of two steps in the frame and put each area's work
-    behind a plugin, the foxes' animation a step of the frame; 131 changed how a surface reads its
-    probes and 132 gave every mesh a second layer. One read, many_foxes captured at `f70cf5e7` and
-    at the suspects in turn on this machine, the frame the capture takes and the foxes' poses in it,
-    to say which commit moved it and whether the picture or the code is at fault. Where the first
-    cut shifted a step that the capture's frame depends on, the cut is mended so the frame is as it
-    was, a cut of 119 changing nothing a program draws; where the change is meant, the picture is
-    taken again with its reason. Before 119's third cut is pushed. Written at 16:57 on 2026-11-10.
-    Read and mended at `739c2ba4` on 2026-11-10, and the cause is 132's, not the cut's. many_foxes
-    sought each fox by its entity's index, and item 132 made the roofs' set of cameras in every app,
-    a resource Bevy keeps as an entity, so each fox stood a tenth of a second further on, the head
-    differing from its picture in 6.54 percent on lavapipe here as on the runner. The set is made by
-    the first roof camera, an app without rain spawning its first entity at the index it did, held
-    by a test, the head then 0.47 percent from the picture; and many_foxes seeks each fox by its
-    place among the foxes, which B 4 allows, its picture taken again. Settles where the pack run
-    started at 19:05 passes its captures.
+Verdicts 2 and 33 to 54 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
 
 ## Decisions
 
@@ -501,43 +503,6 @@ Shared: NativeLibrary.SetDllImportResolver is set once for each assembly, so an 
 projects sets its loader's resolver from each project that declares an import, for the sibling's
 system imports in its split.
 
-Verdict 54, many_foxes moved by the roofs' set of cameras, in the commit carrying this line. Each
-fox of many_foxes seeks its run by a tenth of a second for each step of its entity's index, and
-ccef6170, item 132, made the roofs' set of cameras in every app as a resource, which Bevy keeps as
-an entity, so every entity an app spawned took an index one higher and every fox stood a tenth of a
-second further into its run. Captured on lavapipe at the head, the example differs from its picture
-in 6.54% of its pixels, within x 24 to 1894 and y 331 to 898, the run's failure in the same band,
-and with the set made by the first roof camera in 0.47%, scattered, which this machine's Mesa draws
-against the runner's. 119's first cut adds no entity, so it was not captured.
-
-The set of cameras is made by the first roof camera, and the system that keeps the meshes on the
-roofs' layer runs once the set stands, so an app without rain spawns its entities at the indices it
-spawned them at before item 132. A test in roofs.rs spawns an app's first entity with the roofs
-installed and without them and compares the two indices and whether the set stands. With the set
-made in every app it read index 8 where 7 is right.
-
-B 4 allows a fox to seek by its place among the foxes, since B 4 says where an example keeps its
-state and the place is kept on the fox's entity, in its FoxRunner behavior. Bevy's example seeks by
-its player entity's index, a bone within the fox's scene, where the port seeks by the fox's root, so
-the two differed before. many_foxes seeks by its place among the foxes, with a remark saying why,
-and its picture is taken again on lavapipe here, 10.29% from the one before, the 0.47% the fix read
-against the runner's picture standing for how far this machine's lavapipe draws from the runner's.
-The gallery's picture is made again from it by examples-table.py. A resource the bridge adds can
-still move the picture another way, by a frame more at the start, as the trees' material plugins did
-under Verdict 50. The reading 2026-11-10-verdict-54-foxes.webp shows the head and the fix with their
-difference.
-
-The ImGui pass's module comment says what crosses from ImGui into the renderer in place of naming
-another engine's backend.
-
-The three profiles check, and the bridge's tests pass, 118 with no feature and 205 with render. The
-solution builds with warnings as errors, and the whole suite passed, 2,039 passed, none failed and 3
-skipped. NormTests passed, 18. The public listing is unchanged.
-
-Shared: a program that reads an entity's index moves with every entity the engine makes before its
-own, so an example's picture reads a place the example keeps, and a resource only some apps use is
-made by the first call that needs it, for SHARED.md's row on captures.
-
 Item 119's fourth cut, the console's commands by area, in the commit carrying this line. The
 commands of an area move into its folder, the animation's, the illumination's field and gi commands,
 the shaders' and the sky's into the Assets folder, and the levels', the modeling's and the scenes'
@@ -621,3 +586,65 @@ unchanged.
 Shared: C# 14's extension blocks need Roslyn 5 wherever code is compiled against them while a
 program runs, and a cref names an extension member as Class.extension(Type).Member, for the
 sibling's script host and its split.
+
+Item 119's sixth cut, the asset data and the smaller ones, in the commit carrying this line. Read
+from a compile of the library's sources, every name resolved to the file that declares it and each
+file placed in the plan's projects, no edge points up their order after the cut, Native, Core,
+Assets, Rendering, then Render2d, Audio, Animation, Gizmos, ImGui, Ui, GlobalIllumination, Scenes,
+Physics, Sky, Modeling, Vegetation, Levels, Diagnostics, Cli and BevyCSharp, and the projects hold
+no cycle. Before it Core named seven projects above it, the asset server three, the rendering four,
+and ImGui, global illumination and the physics one or two each. The reader is the scratchpad's, and
+the norm test's cut reads the edges the same way.
+
+Of the asset data, SceneValue and SceneReferences, which the asset server's data assets and material
+files read and which name nothing above the asset server, move from Scenes into Assets, so the
+scenes stand on the asset server. The mesh and material files, MaterialFiles, MeshFiles and
+MeshJson, call Render's own operations to make and read meshes and materials, so the data under them
+moving to the asset server, as the plan had it, would leave the edge, and they stand with the
+rendering instead, the data with them. The texture settings, how an image file is read, stand with
+the asset server, whose loads take them. The asset server forgets what an area keeps by a released
+handle through forgetters the rendering's and the physics' plugins add, and the material and mesh
+files' steps move from its plugin to the rendering's, at the same places in the frame. AssetHandle's
+State and IsLoaded become an extension block of AssetHandleLoading, which 89b1368b's Reply gave to
+the cut writing the extension members and which this cut makes, so the handle in Core is whole.
+
+In Core, App.SpawnGltf, which loads through the asset server and waits on the scenes' ready message,
+becomes an extension block of AppScenes, and App.AddComponentArray, whose array is the shaders', one
+of AppRendering. The observers take the reports of the clips' events through a watcher the
+animation's plugin adds, and the widgets' through WidgetEvents, each report's native callback and
+entry point going with it, bcs_observe_clip_events to NativeAnimation and bcs_observe_widget to
+NativeUi, as f33c3847's Reply said they would. SyntheticInput's Key and Type, which reach ImGui
+alone, become an extension block of SyntheticInputImGui, and Send hands the pointer's half that
+reaches the interface over through two hooks ImGui's plugin sets. The managed systems' times a frame
+profile counts move into Core as SystemTimes, which every system and the physics' step count into
+and FrameProfile takes, its public members as they were. Persistent and IPersistentValue, which name
+nothing above Core, move from Scenes into Core, where the window's memory keeps its place with them.
+
+Of the smaller ones, the tree materials take the trees' stiffness as four numbers rather than the
+trees' own type. Global illumination's reference counts the trees not dressed yet through a hook the
+trees' plugin sets. The helpers for the library's own programs, which the look, the field and the
+sky build with, move from SceneField into Shaders (Shaders.Kernels.cs). ImGui's console window,
+which draws the console's view, moves into Diagnostics. The ray scene, the light probes' capture
+settings, AlphaMode2d and Bevy's atmosphere settings stand with the rendering, which declares them,
+though the names the plan's graph read them by said otherwise, and the physics stands on the scenes,
+which name nothing of it, for its colliders' wait on a scene.
+
+The sky's edge to the audio is left, for the reason item 119 allows. It points down the plan's own
+layers, the sky standing on the audio, and turning it would put a type of sound both read into Core,
+wire the two in BevyCSharp, or stand the audio on the sky, each a path of its own for one sound the
+audio's own calls play.
+
+Two things fall to the split. Doc comments name types of projects above their own, as AssetServer's
+name Render.CreateMesh and AssetHandle's the asset server, which the split writes as text where a
+reference leaves its project. The watchers, forgetters and hooks are each added by an area's plugin
+that EnginePlugin builds, so an app without EnginePlugin reports no clip events, keeps what a
+released handle held and puts no pointer into ImGui, as it has run none of the areas' frame work
+since 001c630d.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,040 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged, and
+the cheat sheet keeps every line, 4 moving within their types' blocks.
+
+Shared: a lower area that calls into a higher one at a point in its own work takes a hook the higher
+area's plugin adds, the forgetters of a released handle, the observers' watchers and the input's
+interface among them, for the sibling's areas.

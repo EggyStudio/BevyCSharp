@@ -45,7 +45,11 @@ public static partial class Trees
     public static Vec3? Wind { get; set; }
 
     /// <summary>How stiff a species stands in the wind, as the trees' materials hold it.</summary>
-    internal readonly record struct TreeStiffness(float Trunk, float Limb, float Flutter, float Frequency);
+    internal readonly record struct TreeStiffness(float Trunk, float Limb, float Flutter, float Frequency)
+    {
+        /// <summary>The stiffness as the leaves' and the bark's materials take it.</summary>
+        internal (float Trunk, float Limb, float Flutter, float Frequency) Sway => (Trunk, Limb, Flutter, Frequency);
+    }
 
     /// <summary>
     /// A species' stiffness, its top bending <see cref="TrunkBend"/> of its height, a limb as long

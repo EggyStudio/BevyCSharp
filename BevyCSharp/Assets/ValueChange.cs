@@ -36,5 +36,5 @@ public readonly record struct ValueChange<T>(Entity Source, T Value, bool IsFina
     Entity IEntityEvent.Entity => Source;
 
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.KindOfValue<T>());
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.KindOfValue<T>());
 }

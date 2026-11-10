@@ -5,7 +5,9 @@ internal sealed class PhysicsWork : IPlugin
 {
     public void Build(App app)
     {
-        // The colliders fitted to meshes belong to the app whose meshes they fit.
+        // The colliders fitted to meshes belong to the app whose meshes they fit, and one fitted to
+        // a mesh goes with the mesh's handle.
         Bevy.Physics.Colliders.Forget();
+        AssetServer.AddForgetter(Bevy.Physics.Colliders.Forget);
     }
 }

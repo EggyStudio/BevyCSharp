@@ -18,5 +18,5 @@ namespace Bevy;
 public readonly record struct Activate(Entity Entity) : IEntityEvent, IReportedEvent
 {
     /// <inheritdoc/>
-    void IReportedEvent.Watch(ObserverRegistry registry) => registry.WatchWidget(WidgetEvents.Activate);
+    void IReportedEvent.Watch(ObserverRegistry registry) => WidgetEvents.Watch(registry, WidgetEvents.Activate);
 }

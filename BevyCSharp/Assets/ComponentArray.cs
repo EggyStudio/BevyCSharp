@@ -10,7 +10,7 @@ namespace Bevy;
 /// <typeparam name="T">The component, copied into the buffer as C# lays it out.</typeparam>
 /// <remarks>
 /// <para>
-/// Made by <see cref="App.AddComponentArray{T}"/>, which brings it up to date at the end of every
+/// Made by <see cref="AppRendering.extension(App).AddComponentArray{T}"/>, which brings it up to date at the end of every
 /// frame. An entity given a <typeparamref name="T"/> takes the next place and a mesh tag holding
 /// it, one whose component changed has its place written again, and one that lost the component or
 /// was despawned gives its place to the last entry, whose entity takes the place as its tag, so the

@@ -8,6 +8,9 @@ internal sealed class AnimationWork : IPlugin
         // The state machines playing belong to the app whose entities they play on.
         Animation.ForgetMachines();
 
+        // An observer of an event placed on clips asks Bevy for the clips' reports.
+        ObserverRegistry.AddWatcher(ClipEvents.Watch);
+
         // The clips that finished last frame said, and the state machines carried on.
         app.AreasWork.Add(1000, world =>
         {

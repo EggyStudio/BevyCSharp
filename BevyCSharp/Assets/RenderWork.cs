@@ -5,8 +5,12 @@ internal sealed class RenderWork : IPlugin
 {
     public void Build(App app)
     {
-        // Meshes belong to the app that made them, and the wireframes are the app's to ask for.
+        // Meshes and materials belong to the app that made them, what is kept of a mesh goes with
+        // its handle, and the wireframes are the app's to ask for.
         Render.ForgetMade();
+        MaterialFiles.Forget();
+        MeshFiles.Forget();
+        AssetServer.AddForgetter(Render.Forget);
         Render.Wireframes = app.Config.Wireframes;
 
         // A recording's picture of this frame asked for, and those of frames before kept as they
@@ -23,5 +27,8 @@ internal sealed class RenderWork : IPlugin
             if (App.HasRenderer && Capture.ScreenshotKey is { } shot && world.Resource<Input>().KeyPressed(shot) && !world.Resource<Config>().Headless)
                 Capture.Screenshot();
         });
+
+        // The material files changed on disk since the frame before, after the data files are.
+        app.AreasWork.Add(4200, _ => MaterialFiles.ReloadTouched());
     }
 }
