@@ -1,15 +1,19 @@
 # Review
 
-Reviewed up to `6f43e883`, the game of life swapping its sprite's image once its programs are ready,
-pushed at 09:24 on 2026-11-11, green at 09:39 with Linux in 15 minutes, Windows in 15 and macOS in
-11, with a pack run without publish, 42986918695, started at 09:26 after a first one took the head
-before the push and was canceled; the whole suite passed, 2,043 passed, none failed and 3 skipped;
-it keeps the form and carries the review's file. Before it `250078ae`, the game of life printing in
-its capture's log the steps it ran by its shot, its frame and the image it shows, pushed at 08:22 on
-2026-11-11, green at 08:36 with Linux in 12 minutes, Windows in 14 and macOS in 11, its pack run
-without publish, 42979077838, read at 09:16 with the runner's line and its soak, its games and four
-of its captures jobs green, the rest canceled for the run on `6f43e883`; the whole suite passed,
-2,043 passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
+Reviewed up to `1f061b2c`, 119's norm test, N 1.6 holding the library's areas in the split's nine
+layers by what each file names of another in the built library and its PDB, each file placed by a
+list, pushed at 10:07 on 2026-11-11 with a run on it; the whole suite passed twice, 2,043 passed,
+none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's file. Before it
+`6f43e883`, the game of life swapping its sprite's image once its programs are ready, pushed at
+09:24 on 2026-11-11, green at 09:39 with Linux in 15 minutes, Windows in 15 and macOS in 11, with a
+pack run without publish, 42986918695, started at 09:26 after a first one took the head before the
+push and was canceled; the whole suite passed, 2,043 passed, none failed and 3 skipped; it keeps the
+form and carries the review's file. Before it `250078ae`, the game of life printing in its capture's
+log the steps it ran by its shot, its frame and the image it shows, pushed at 08:22 on 2026-11-11,
+green at 08:36 with Linux in 12 minutes, Windows in 14 and macOS in 11, its pack run without
+publish, 42979077838, read at 09:16 with the runner's line and its soak, its games and four of its
+captures jobs green, the rest canceled for the run on `6f43e883`; the whole suite passed, 2,043
+passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
 `d672cabd`, Verdict 55's second mend, the feature test making its screen-space light's and old
 screen's programs when the panel turns them on and the soak giving its first frames 1,500 s and
 printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41 with Linux in 13
@@ -65,13 +69,13 @@ pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and `v0
 0.7 waiting on the highlights' item by 117's judgment. Every push and run before `074645e3` since
 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
-Next Verdict 55 again, the game of life's steps on the runner, then 119's norm test and its split,
-each a commit with the whole suite, 120, the live path, and after them 66 and 67, the connections
-and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run
-of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's
-split or by 2026-11-12, whichever comes first. The engine's illumination read goes first on the GPU
-(N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in
-motion is read in motion by the engine's Decision 107.
+Next 119's split, its AGENTS.md rows on the owner's word, Verdict 55 settling on the pack run of
+`6f43e883`; each a commit with the whole suite, 120, the live path, and after them 66 and 67, the
+connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
+the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run
+after 119's split or by 2026-11-12, whichever comes first. The engine's illumination read goes first
+on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a
+fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -202,7 +206,17 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     sky for one sound. An app without EnginePlugin reports no clip events and forgets nothing a
     released handle held, as it runs none of the areas' frame work. The steps of the material and
     mesh files moved between plugins at the same places in the frame, so a pack run without publish
-    reads the captures on it, 42920356361. Next 134, the norm test and the split.
+    reads the captures on it, 42920356361. Next 134, the norm test and the split. The norm test is
+    `1f061b2c`, pushed at 10:07 on 2026-11-11. NormTests.N_1_6 holds the areas in nine layers,
+    Native, then Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d,
+    Animation, GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and
+    Diagnostics, then Vegetation, then Levels and the flat project, each in the lowest layer what it
+    names allows. build/norm/1.6.tsv places every file, the Assets folder's 298 one by one, a file
+    placed nowhere and a line placing nothing both failing; the edges come from the built library
+    and its portable PDB through System.Reflection.Metadata. It fails for a misplaced SceneField.cs
+    and for a field of Core's Config naming RenderSky, and passes on Debug, Release and a Release
+    built as the runner builds it. The norm's N 1.6 and its row say so. Next the split, whose
+    AGENTS.md rows are the owner's word.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -992,3 +1006,62 @@ is unchanged.
 Shared: the areas of a library of one project are held to the layers of its coming split by a norm
 test reading the built assembly and its portable PDB, each type placed by its source files, for the
 sibling's N 1.6 and any area it splits again.
+
+119's split planned on 2026-11-11, before the work. The projects are N 1.6's layers, each in its
+area's folder under BevyCSharp/, named BevyCSharp.<Area>, each referencing what its code names and
+nothing else, the rest coming through those. BevyCSharp.Native, the Interop folder, references
+nothing. BevyCSharp.Core, holding Core, Ecs, Math, Time, Input and Behaviors as its folders,
+references Native. BevyCSharp.Assets, Audio, Gizmos and ImGui (the Ui folder as it stands) reference
+Core and Native, ImGui with the ImGui package, and BevyCSharp.CliServer, the Cli folder, references
+Core, its name the sibling's since BevyCSharp.Cli is the command line's. BevyCSharp.Rendering
+references Assets. Render2d, Animation, GlobalIllumination and Scenes reference Rendering, with
+Assets for the last three and ImGui for global illumination. BevyCSharp.Ui, Bevy's interface from
+the Assets folder, references Render2d and ImGui, Physics references Scenes and Gizmos with
+BepuPhysics, and Sky references GlobalIllumination and Audio with the Sky module. Modeling
+references Physics and ImGui, Diagnostics references Ui, Scenes and GlobalIllumination, Vegetation
+references Sky and Modeling with its module, and Levels references Vegetation with its module.
+build/norm/1.6.tsv is the move list, each file going to its line's project.
+
+The flat project, BevyCSharp, keeps BevyApp, EnginePlugin and DefaultPlugins, which compose the
+rest, references every project, and is the package a game names, carrying the generator and its code
+fixes in its analyzer slot and the props and targets of BevyCSharp/build. A Directory.Build.props
+under BevyCSharp/ runs the generators in every project, so each area's schemas, behaviors and
+commands register from its own assembly, gives every project InternalsVisibleTo the engine's
+projects, the tests, the editor and the script host, and packs the icon, the readme, the license and
+the notices into each package. Each module's assembly is carried in the package of the project that
+references it, as the sibling's Rendering carries Sky. The reflected wrappers' list goes with Core,
+and the library's own kernels go with the area that runs them, embedded in its assembly, the look's
+in Rendering, the field's and the probes' in GlobalIllumination and the weather's in Sky, the kernel
+helpers reading the assembly they are handed.
+
+The bridge's native libraries, every platform's under runtimes/<rid>/native, go in
+BevyCSharp.Native's package alone, with the loader, the ABI check and the copy into bin for a run
+from a clone with its freshness check, and every other package depends on it. Since
+NativeLibrary.SetDllImportResolver is set once for each assembly, NativeLoader.Initialize takes the
+assembly of the area class calling it from its static constructor and sets the resolver for that
+assembly too, so every area's entry points find the one library.
+
+The pack workflow packs every project at the one version from build/version.sh into build/package,
+the push taking every .nupkg there as it does, and a run with publish pushes all of them, so the
+NuGet key's pattern has to cover BevyCSharp.*, as it covers BevyCSharp.Templates. N 6.4 and N 6.5
+read the natives in BevyCSharp.Native's package, the analyzers and build files in BevyCSharp's, and
+every package's dependencies at the one version. The games, the templates and the examples on the
+package keep their one PackageReference to BevyCSharp, a local feed of build/package serving them
+all, and the feature test and the tests keep their reference to the flat project. The script host's
+walk starts from the flat assembly, as item 134 said. N 1.6 then reads the project files' references
+against its layers, as the sibling's does, and build/norm/1.6.tsv goes.
+
+The first run of a game on the split packages shows the game restoring BevyCSharp and the 19 area
+packages at the one version and building with the generator, the bridge found in BevyCSharp.Native's
+runtimes folder on each system with the ABI check passing, ./bcs list naming the same commands as
+before the split, Courtyard and the feature test's scripted run playing their courses, a script
+compiling against the areas, the examples on the package building, and PublicApi.txt and
+CHEATSHEET.md reading the same lines. The split's cut gets a pack run with publish.
+
+The cut is two commits. The first moves the files into their projects' folders inside the one
+project, git moves alone with N 1.6's list read from the folders, and the second makes the projects,
+the packing and the workflow. BUILDING.md's table of packages, the guide's lines, RENDERING.md's
+names and AGENTS.md's table of where things are follow the folders. That table's rows are the
+owner's word, which I ask for in my session before the first commit.
+
+No file of the engine changed. NormTests passed, 19. The public listing is unchanged.
