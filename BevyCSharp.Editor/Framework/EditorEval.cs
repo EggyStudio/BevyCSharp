@@ -137,7 +137,7 @@ public static class EditorEval
 
     private static int _generation;
 
-    /// <summary>What a fragment is compiled against, everything this process already loaded.</summary>
+    /// <summary>What a fragment is compiled against, everything this process loaded and every assembly the library names.</summary>
     /// <remarks>
     /// The script host's, read once for the process and shared, so the editor holds one image of
     /// each file however many fragments it runs and scripts it compiles.

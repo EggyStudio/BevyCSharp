@@ -189,23 +189,77 @@ public sealed class ScriptHost(App app, string directory)
 
     /// <summary>
     /// What a script is compiled against, every assembly the process has loaded from a file, the
-    /// app's own among them, each read once for the process.
+    /// app's own among them, and every assembly the library names, the modules' among them, each
+    /// read once for the process.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A reference holds its file's whole image in native memory that only its finalizer gives
     /// back, while the GC's heap stays small and a full collection comes late. Read again at every
     /// compilation, they gather in a host compiling on each save, its native memory climbing with
     /// every compilation. Each file is read the first time a compilation needs it and shared by
     /// every compilation after, an assembly loaded since the last being read at the next, and the
     /// editor's evaluation compiles against the same.
+    /// </para>
+    /// <para>
+    /// The process loads an assembly the first time code that runs names one of its types, so the
+    /// loaded ones leave out an assembly the library's members name that nothing has run into, as
+    /// the Sky module's before any weather is set, whose WeatherState <c>Render.SetWeather</c>
+    /// takes. A script calling such a member does not compile without the assembly that declares
+    /// the type, though a game's compiled code calls it freely, its build referencing what the
+    /// library does.
+    /// </para>
     /// </remarks>
     public static MetadataReference[] References() => [.. AppDomain.CurrentDomain
         .GetAssemblies()
+        .Union(Named)
         .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
         .Select(a => Read.GetOrAdd(a.Location, static location => MetadataReference.CreateFromFile(location)))];
 
     /// <summary>The references read for the process, by the file each was read from.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, MetadataReference> Read = new(StringComparer.Ordinal);
+
+    /// <summary>Every assembly the library names, loaded once for the process.</summary>
+    private static readonly Assembly[] Named = Load(typeof(App).Assembly);
+
+    /// <summary>
+    /// What an assembly names, loaded in the context it was loaded in, and what each of the app's
+    /// own files among them names in turn.
+    /// </summary>
+    /// <remarks>
+    /// The framework's assemblies are loaded where one is named and not walked, so the references
+    /// hold what the app's files name rather than the whole framework, each file of which a
+    /// reference holds in native memory. A name no file answers is left out, as a script can name
+    /// no type of it either.
+    /// </remarks>
+    private static Assembly[] Load(Assembly library)
+    {
+        var context = AssemblyLoadContext.GetLoadContext(library) ?? AssemblyLoadContext.Default;
+        var beside = Path.GetDirectoryName(library.Location);
+        var found = new Dictionary<string, Assembly>(StringComparer.Ordinal);
+        var walk = new Stack<Assembly>([library]);
+        while (walk.TryPop(out var assembly))
+        {
+            foreach (var name in assembly.GetReferencedAssemblies())
+            {
+                if (found.ContainsKey(name.FullName)) continue;
+                Assembly named;
+                try
+                {
+                    named = context.LoadFromAssemblyName(name);
+                }
+                catch (IOException)
+                {
+                    continue;
+                }
+
+                found[name.FullName] = named;
+                if (string.Equals(Path.GetDirectoryName(named.Location), beside, StringComparison.Ordinal)) walk.Push(named);
+            }
+        }
+
+        return [.. found.Values];
+    }
 
     /// <summary>
     /// Invokes the generated registration in a freshly loaded assembly.

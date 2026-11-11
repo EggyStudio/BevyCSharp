@@ -266,10 +266,12 @@ opens a level.
 
 The generation replaced is unloaded, since nothing of the app or the process keeps it. Its systems
 let go of what they ran, its messages and its resources are dropped, and its behaviors and states
-are not kept in the process's lists for apps made after. Each assembly a script is compiled against
-is read once for the process and shared by every compilation, so a script saved again and again
-costs a compilation and not another copy of the runtime. A `[Command]` in a script is not
-registered, since commands are written into a game's assembly as it is built.
+are not kept in the process's lists for apps made after. A script is compiled against every assembly
+the app has loaded and every one the library's members name, so it calls whatever a game's compiled
+code calls, `Render.SetWeather` with the sky's `WeatherState` among them. Each assembly a script is
+compiled against is read once for the process and shared by every compilation, so a script saved
+again and again costs a compilation and not another copy of the runtime. A `[Command]` in a script
+is not registered, since commands are written into a game's assembly as it is built.
 
 A script that does not compile changes nothing. The errors are reported and the running
 generation stays. The compiler itself lives in `BevyCSharp.Editor`, because a game should not

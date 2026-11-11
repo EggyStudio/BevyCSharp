@@ -1,37 +1,42 @@
 # Review
 
-Reviewed up to `04394b88`, 119's fifth cut, global illumination's and the sky's members of Render
-and the world's spawn helpers as extension blocks, the listing unchanged line for line, the script
-host's compiler and the tests' workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed
-at 21:20 on 2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the
-whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form and carries the
-review's file. Before it `ed291326`, 119's fourth cut, each area's console commands in its folder
-and the command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at
-20:22 with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's
-mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with
-Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with
-publish of 19:05 green at 21:58, the four captures jobs green with many_foxes and the drive in 104
-minutes, which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since
-0.6.18. Before it `9ae92147`, item 133 with the nine before it, the ten held since the night, pushed
-at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one
-timing, Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes,
-Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which
-settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05.
-The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
-hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
-published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
-version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
-item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
-REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `04d6b73a`, 119's sixth cut, the asset data under the scenes and every edge Core and
+the areas had up the plan's order moved with its type or put behind a hook an area's plugin adds, so
+the projects hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes,
+Windows in 15 and macOS in 19, with a pack run without publish, started to read the captures over
+the fourth, fifth and sixth cuts before the split; the whole suite passed on it, 2,040 passed, none
+failed and 3 skipped; it keeps the form and carries the review's files. Before it `04394b88`, 119's
+fifth cut, global illumination's and the sky's members of Render and the world's spawn helpers as
+extension blocks, the listing unchanged line for line, the script host's compiler and the tests'
+workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on 2026-11-10, green
+at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it,
+2,040 passed, none failed and 3 skipped; it keeps the form and carries the review's file. Before it
+`ed291326`, 119's fourth cut, each area's console commands in its folder and the command attribute,
+the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22 with Linux in 12
+minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend, pushed at 19:05 on
+2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with Linux in 13 minutes,
+Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with publish of 19:05 green at
+21:58, the four captures jobs green with many_foxes and the drive in 104 minutes, which settles
+Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since 0.6.18. Before it
+`9ae92147`, item 133 with the nine before it, the ten held since the night, pushed at 16:03 on
+2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one timing,
+Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54,
+its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict
+52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release
+scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since
+17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by
+the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands
+at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's
+judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
+Head records.
 
-Next 119's sixth cut, the asset data and the smaller ones, each cut a commit with the whole suite,
-134 in a commit of its own before the split, the rest of the plan after it, 120, the live path, and
-after them 66 and 67, the connections and the level editor; 93's course drawn smaller after 119, its
-drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from
-`739c2ba4`, the next pack run after 119's split or by 2026-11-12, whichever comes first. The
-engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at
-8:00 the one target by Decision 81; a fault seen in motion is read in motion by the engine's
-Decision 107.
+Next 134 in a commit of its own, then 119's norm test and its split, each a commit with the whole
+suite, 120, the live path, and after them 66 and 67, the connections and the level editor; 93's
+course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The
+package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by 2026-11-12,
+whichever comes first. The engine's illumination read goes first on the GPU (N 7.9). No budget by
+Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
+motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -149,7 +154,20 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     test that a script calls the members on the types they extend; the host is no part of the
     library, so N 2.8 is not touched, and the change of version is named to the owner. Nothing reads
     Render's or EcsWorld's members by reflection. Next the sixth, the asset data and the smaller
-    ones.
+    ones. The sixth is `04d6b73a`. Read from a compile of the sources, no edge points up the order
+    of projects after it, Native, Core, Assets, Rendering, then Render2d, Audio, Animation, Gizmos,
+    ImGui, Ui, GlobalIllumination, Scenes, Physics, Sky, Modeling, Vegetation, Levels, Diagnostics,
+    Cli and BevyCSharp. The mesh and material files stand with the rendering, whose operations they
+    call, where the plan had their data with the asset server; a lower area that calls a higher one
+    at a point of its own work takes a hook the higher area's plugin adds, the forgetters of a
+    released handle, the observers' watchers and the pointer's way into ImGui; and five members go
+    to extension blocks, the listing unchanged. The sky's edge to the audio stays, accepted, the sky
+    standing on the audio down the layers, since the audio's plugin playing an event the sky raises
+    would put the event's type in Core, wire the two in the flat project or stand the audio on the
+    sky for one sound. An app without EnginePlugin reports no clip events and forgets nothing a
+    released handle held, as it runs none of the areas' frame work. The steps of the material and
+    mesh files moved between plugins at the same places in the frame, so a pack run without publish
+    reads the captures on it, 42920356361. Next 134, the norm test and the split.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -648,3 +666,35 @@ the cheat sheet keeps every line, 4 moving within their types' blocks.
 Shared: a lower area that calls into a higher one at a point in its own work takes a hook the higher
 area's plugin adds, the forgetters of a released handle, the observers' watchers and the input's
 interface among them, for the sibling's areas.
+
+Item 134, a script compiled against every assembly the library names, in the commit carrying this
+line. The script host compiled a script against the assemblies the process had loaded, and the
+process loads an assembly the first time running code names one of its types, so the Sky module
+stayed out until something set a weather, and a script naming WeatherState failed though a game's
+compiled code calls Render.SetWeather freely.
+
+ScriptHost.References adds every assembly the library names, loaded once for the process in the
+context the library was loaded in, the Sky, Vegetation and Levels modules among them, and walks on
+through what each of the app's own files among them names, those beside the library. The framework's
+assemblies are loaded where one is named and not walked, so the references hold what the app's files
+name rather than the whole framework, each file of which a reference holds in native memory. The
+editor's evaluation compiles against the same list and takes the modules with it. The guide's page
+on running a game says what a script is compiled against.
+
+ScriptReferenceTests compiles a script whose system calls Render.SetWeather with a WeatherState.
+Without the mend, run alone, it fails with CS0246 for the Sky namespace and WeatherState and CS0012
+for the call. In the whole suite it fails without the mend wherever no test before it has loaded the
+Sky module, since the process keeps an assembly once loaded. N 1.4's list takes it by its nature
+beside the host's other four. The 105 tests that compile scripts or fragments passed with it,
+ScriptCompilationMemoryTests among them.
+
+For the split, the walk starts from the assembly declaring App, which the split puts in Core, whose
+references reach none of the areas. The split's cut starts it from the assembly that references
+every area, so the test stays green with the areas' assemblies in the list.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,041 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a script host compiling against the assemblies the process has loaded misses what the
+library's members name and nothing has run into, so it loads every assembly the library names before
+its first compilation, for the sibling's script host.
