@@ -30,12 +30,27 @@ public partial struct ScreenSpaceLight
     private static ShaderInstance _composite;
     private static Entity _camera;
     private static bool _on;
+    private static bool _drawn;
 
-    /// <summary>Makes the three programs.</summary>
+    /// <summary>Says how to turn it on, where something draws.</summary>
+    /// <remarks>
+    /// The three programs are made the first time it is put on (<see cref="Make"/>), so a run that
+    /// never turns it on compiles none of them.
+    /// </remarks>
     [OnStartup]
     public static void Build(BehaviorContext ctx)
     {
-        if (!App.HasRenderer || ctx.Res<Config>().Headless) return;
+        (_trace, _accumulate, _composite) = (default, default, default);
+        _drawn = App.HasRenderer && !ctx.Res<Config>().Headless;
+        if (!_drawn) return;
+
+        Console.WriteLine("[ScreenSpaceLight] the panel's graphics page turns on screen-space global illumination");
+    }
+
+    /// <summary>Makes the three programs, where they are not made yet.</summary>
+    private static void Make()
+    {
+        if (_trace.IsValid) return;
 
         _trace = Shaders.CreateInstance(Shaders.CreateProgram(
                 new ShaderProgramSettings { Compute = "shaders/gi_trace.slang" }))
@@ -53,8 +68,6 @@ public partial struct ScreenSpaceLight
                 DrawFragment = "shaders/gi_composite.slang",
             }))
             .Set("strength", 1f);
-
-        Console.WriteLine("[ScreenSpaceLight] the panel's graphics page turns on screen-space global illumination");
     }
 
     /// <summary>Whether it is to be on, as the panel's graphics page sets it.</summary>
@@ -64,7 +77,7 @@ public partial struct ScreenSpaceLight
     [OnUpdate]
     public static void Toggle(BehaviorContext ctx)
     {
-        if (!_trace.IsValid || On == _on || Camera(ctx.Ecs) is not { } camera) return;
+        if (!_drawn || On == _on || Camera(ctx.Ecs) is not { } camera) return;
 
         _on = On;
         Apply(camera, _on);
@@ -75,7 +88,7 @@ public partial struct ScreenSpaceLight
     [Command("feature.gi", "Screen-space global illumination on the feature test's camera: feature.gi <on|off> [strength]")]
     internal static string Command(string state)
     {
-        if (!_trace.IsValid || Camera(ConsoleHost.Ecs) is not { } camera) return "there is no camera to light";
+        if (!_drawn || Camera(ConsoleHost.Ecs) is not { } camera) return "there is no camera to light";
 
         // A strength after the state exaggerates or tones down the indirect light, which is how its
         // contribution is told apart from the rest of the lighting.
@@ -86,7 +99,8 @@ public partial struct ScreenSpaceLight
             ? given
             : 1f;
 
-        _composite.Set("strength", strength);
+        if (_on) Make();
+        if (_composite.IsValid) _composite.Set("strength", strength);
         Apply(camera, _on);
         On = _on;
         return $"screen-space global illumination is {(_on ? $"on at {strength}" : "off")}";
@@ -119,6 +133,8 @@ public partial struct ScreenSpaceLight
             Shaders.SetViewImages(camera);
             return;
         }
+
+        Make();
 
         // Depth to march through, motion to find last frame's light by, and the G-buffer for each
         // surface's normal and color.

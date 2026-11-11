@@ -53,12 +53,17 @@ said="$PWD/build/soak/$name.said"
 # Each call of bcs that fails says its words, its code and the first line bcs gave of why, as the
 # games' plays do, where set -e ended one with nothing said, and anything else that fails is named
 # by the trap. The four games play at once, so each line names its game.
-c() { ./bcs command "$@" --name "$program" --timeout 600 >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
+c() { ./bcs command "$@" --name "$program" --timeout "${limit:-600}" >"$said" || fail "./bcs command $* ended with $?, $(head -n 1 "$said")"; cat "$said"; }
 quiet() { c "$@" >/dev/null; }
 fail() { echo "FAILED: $name: $*" >&2; tail -20 "$log" >&2 || true; exit 1; }
 
 trap 'code=$?; echo "FAILED: $name: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
 trap './bcs stop --name "$program" >/dev/null 2>&1 || true' EXIT
+# Each step of the start says how many seconds it took, in every soak's words and so in the job's
+# log, a run that passes as well as one that fails, so a start growing toward its limit shows
+# before it reaches it.
+mark=$(date +%s)
+took() { local now; now=$(date +%s); echo "[soak] $name: $1 in $(( now - mark )) s" >&2; mark=$now; }
 (cd "$folder" && { BCS_OFFSCREEN=1 BCS_SERVE=1 "./$program" "${args[@]}"; echo "[soak] the game exited with $?"; } >"$log" 2>&1 &)
 # Ten minutes for the game to answer, as long as each command is given, and its answer taken once
 # rather than asked for again. On lavapipe with no shader cache of Mesa's, as the feature test's
@@ -68,11 +73,16 @@ trap './bcs stop --name "$program" >/dev/null 2>&1 || true' EXIT
 answered=0
 for _ in $(seq 1 600); do ./bcs status 2>/dev/null | grep -q "ready.*$program" && { answered=1; break; }; sleep 1; done
 [ "$answered" = 1 ] || fail "the game never answered"
+took ready
 
 # Each frame a sixtieth of a second of the game, so a round walks as far on a slow machine as on a
-# fast one.
+# fast one. The first sixty frames are given twenty-five minutes, since on lavapipe with no shader
+# cache of Mesa's they hold the start's compiles, which go past the ten minutes any other command
+# is given.
 [ "$name" = stress ] || quiet app.frametime 0.0166667
-quiet frames.wait 60
+mark=$(date +%s)
+limit=1500 quiet frames.wait 60
+took "frames.wait 60"
 # The feature test's global illumination at the quality GLOBAL_ILLUMINATION names, the game's own
 # where it names none, as the scripted run's (build/drive-feature-test.sh), and put back as it was
 # at the end. The workflow names Off, since its tracing takes a large share of each frame on
@@ -86,7 +96,7 @@ fi
 # The feature test's pipelines compiled before its first round, which on lavapipe with no shader
 # cache of Mesa's take minutes and grow what it holds while they do, so its readings are not of
 # compiles.
-if [ "$name" = feature-test ]; then quiet mode walking; quiet pipelines.wait; fi
+if [ "$name" = feature-test ]; then quiet mode walking; mark=$(date +%s); quiet pipelines.wait; took pipelines.wait; fi
 
 round() {
     case "$name" in

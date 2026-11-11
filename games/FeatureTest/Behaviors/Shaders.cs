@@ -66,9 +66,9 @@ public partial struct ShaderShowcase
             .SetBuffer("flies", buffer)
             .Set("reach", 0.9f);
 
-        _screen = Shaders.CreateInstance(Shaders.CreateProgram(
-                new ShaderProgramSettings { Pass = "shaders/crt.slang" }))
-            .Set("strength", 1f);
+        // The old screen's program is made the first time the panel puts it on, so a run that
+        // never does compiles none of it.
+        _screen = default;
 
         var glow = Shaders.CreateMaterial(new ShaderMaterialSettings
             {
@@ -125,6 +125,13 @@ public partial struct ShaderShowcase
 
         if (_screenOn)
         {
+            if (!_screen.IsValid)
+            {
+                _screen = Shaders.CreateInstance(Shaders.CreateProgram(
+                        new ShaderProgramSettings { Pass = "shaders/crt.slang" }))
+                    .Set("strength", 1f);
+            }
+
             Shaders.SetPasses(_camera, new ShaderPass(_screen, AfterTonemapping: true));
         }
         else
