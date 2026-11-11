@@ -1,34 +1,43 @@
 # Review
 
-Reviewed up to `7428798d`, the split's second commit, the library's areas as nineteen projects with
-the flat one, each packed at one version and depending on those below it at exactly that version,
-pushed at 15:30 on 2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a
-third attempt, the runners' package mirror having failed from 15:34 to 17:54, which settles Verdict
-57; its pack run without publish, 43039130555, red by the same fault and not run again, the
-packages' layout having changed by Decision 88; the whole suite passed, 2,045 passed, none failed
-and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `00f012ff`,
-the split's first commit, the library's files moved by git into the folders of the areas' projects
-inside the one project, 668 files renamed whole and one nearly, with the paths that name them and
-AGENTS.md's rows, pushed at 13:06 on 2026-11-11, green at 13:25 with Linux in 13 minutes, Windows in
-18 and macOS in 16; the whole suite passed, 2,043 passed, none failed and 3 skipped, NormTests 19
-with N 1.6 on folders; it keeps the form and carries the review's files. Before it `514b2110`, the
-split's plan as a Reply, documents alone, pushed at 10:24 on 2026-11-11, no run starting for it.
-Before it `1f061b2c`, 119's norm test, N 1.6 holding the library's areas in the split's nine layers
-by what each file names of another in the built library and its PDB, each file placed by a list,
-pushed at 10:07 on 2026-11-11, green at 10:23 with Linux in 13 minutes, Windows in 15 and macOS in
-11; the whole suite passed twice, 2,043 passed, none failed and 3 skipped, NormTests 19; it keeps
-the form and carries the review's file. Before it `6f43e883`, the game of life swapping its sprite's
-image once its programs are ready, pushed at 09:24 on 2026-11-11, green at 09:39 with Linux in 15
-minutes, Windows in 15 and macOS in 11, its pack run without publish, 42986918695, read at 10:20
-with its four captures jobs, Fedora's captures, its games and its soak green, the game of life
-showing its second image on the runner, which settled Verdict 55, the whole run green at 11:30 with
-its drive in 104 minutes and its pack job, nothing published; the whole suite passed, 2,043 passed,
-none failed and 3 skipped; it keeps the form and carries the review's file. Before it `250078ae`,
-the game of life printing in its capture's log the steps it ran by its shot, its frame and the image
-it shows, pushed at 08:22 on 2026-11-11, green at 08:36 with Linux in 12 minutes, Windows in 14 and
-macOS in 11, its pack run without publish, 42979077838, read at 09:16 with the runner's line and its
-soak, its games and four of its captures jobs green, the rest canceled for the run on `6f43e883`;
-the whole suite passed, 2,043 passed, none failed and 3 skipped; it keeps the form and carries the
+Reviewed up to `77941f42`, the split packed as one package by Decision 88, every area's assembly and
+the three modules' in the one package's lib folder with no dependency on an area, the bridges' pack
+items in the flat project, a size step in the pack job failing a package over 262,139,904 bytes
+before anything is kept or pushed, and the script host walking from every loaded assembly of the
+engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and Windows in 15 minutes
+each and macOS in 18, its pack run without publish, 43081159142, started on the same head; the whole
+suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local package with the Linux
+bridge alone is 52,739,654 bytes in 60 entries, its only dependencies BepuPhysics and
+Twizzle.ImGui-Bundle.NET; it keeps the form and carries the review's files. Before it `7428798d`,
+the split's second commit, the library's areas as nineteen projects with the flat one, each packed
+at one version and depending on those below it at exactly that version, pushed at 15:30 on
+2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a third attempt, the
+runners' package mirror having failed from 15:34 to 17:54, which settles Verdict 57; its pack run
+without publish, 43039130555, red by the same fault and not run again, the packages' layout having
+changed by Decision 88; the whole suite passed, 2,045 passed, none failed and 3 skipped, NormTests
+19; it keeps the form and carries the review's files. Before it `00f012ff`, the split's first
+commit, the library's files moved by git into the folders of the areas' projects inside the one
+project, 668 files renamed whole and one nearly, with the paths that name them and AGENTS.md's rows,
+pushed at 13:06 on 2026-11-11, green at 13:25 with Linux in 13 minutes, Windows in 18 and macOS in
+16; the whole suite passed, 2,043 passed, none failed and 3 skipped, NormTests 19 with N 1.6 on
+folders; it keeps the form and carries the review's files. Before it `514b2110`, the split's plan as
+a Reply, documents alone, pushed at 10:24 on 2026-11-11, no run starting for it. Before it
+`1f061b2c`, 119's norm test, N 1.6 holding the library's areas in the split's nine layers by what
+each file names of another in the built library and its PDB, each file placed by a list, pushed at
+10:07 on 2026-11-11, green at 10:23 with Linux in 13 minutes, Windows in 15 and macOS in 11; the
+whole suite passed twice, 2,043 passed, none failed and 3 skipped, NormTests 19; it keeps the form
+and carries the review's file. Before it `6f43e883`, the game of life swapping its sprite's image
+once its programs are ready, pushed at 09:24 on 2026-11-11, green at 09:39 with Linux in 15 minutes,
+Windows in 15 and macOS in 11, its pack run without publish, 42986918695, read at 10:20 with its
+four captures jobs, Fedora's captures, its games and its soak green, the game of life showing its
+second image on the runner, which settled Verdict 55, the whole run green at 11:30 with its drive in
+104 minutes and its pack job, nothing published; the whole suite passed, 2,043 passed, none failed
+and 3 skipped; it keeps the form and carries the review's file. Before it `250078ae`, the game of
+life printing in its capture's log the steps it ran by its shot, its frame and the image it shows,
+pushed at 08:22 on 2026-11-11, green at 08:36 with Linux in 12 minutes, Windows in 14 and macOS in
+11, its pack run without publish, 42979077838, read at 09:16 with the runner's line and its soak,
+its games and four of its captures jobs green, the rest canceled for the run on `6f43e883`; the
+whole suite passed, 2,043 passed, none failed and 3 skipped; it keeps the form and carries the
 review's files. Before it `d672cabd`, Verdict 55's second mend, the feature test making its
 screen-space light's and old screen's programs when the panel turns them on and the soak giving its
 first frames 1,500 s and printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41
@@ -85,13 +94,14 @@ at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights
 judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
 Head records.
 
-Next the split packed as one package by Decision 88, its pack run without publish read, then the run
-with publish; each a commit with the whole suite, 120, the live path, and after them 66 and 67, the
-connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
-the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run
-after 119's split or by 2026-11-12, whichever comes first. The engine's illumination read goes first
-on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a
-fault seen in motion is read in motion by the engine's Decision 107.
+Next the one package of `77941f42` read from its pack run without publish, 43081159142, then the run
+with publish and its tag; then 135, the bridge's size, and 120, the live path, each a commit with
+the whole suite, and after them 66 and 67, the connections and the level editor; 93's course drawn
+smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package
+stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by 2026-11-12, whichever
+comes first. The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80;
+the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the
+engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -634,3 +644,34 @@ Shared: an engine of several projects packed as one package, the flat project ca
 references' assemblies in its lib folder and holding its references private while packing by an item
 definition on _IsPacking, since NuGet writes a dependency for every public one, with the packages
 from outside named again in it, for the sibling's projects.
+
+Item 119's first item after the split, the tests' Assets folder moved to its areas, in the commit
+carrying this line, which moves alone. The folder held 158 files, the tests of what the renderer,
+the interface, the sky and the rest draw beside the asset server's, from before the split, when
+every area's tests sat there. 146 move by git, whole, to the folder of the area each tests, 83 to
+Rendering, 26 to GlobalIllumination, 11 to Ui, 9 to Sky, 8 to Render2d, 3 each to Animation and
+Gizmos, 2 to Audio and 1 to Core. Twelve stay, the asset server's, its files, folders, ids, packs,
+data assets and glTF, with the two tables over every loader, BadFileTests and FileHandleTests, since
+loading is the area's and each row is a loader of another area. No file's text changes, and no list
+or document names a file that moved.
+
+Each file's area was read by a compilation of the tests that asks, for every name a file names,
+which engine assembly declares it, the highest layer of N 1.6 named taken. Its class's summary was
+read where the highest only sets the test up, a 2D camera under a shader's quad, a tree in a room
+the illumination lights, the path-traced reference a shadow is read against, a scene file a material
+file is shared by, a recording read back by the animation's reader, so the shader, material, mesh
+file, shadow and recording tests go to Rendering, and GlobalIlluminationTests' partials and
+SceneFieldTests' go with their classes. KernelLightTests reads the sky's kernels and goes to Sky,
+and SlangModuleTests reads the bridge's render modules and goes to Rendering, neither naming a type.
+
+The whole suite passed on the move, 2,048 passed, none failed and 3 skipped, the listing the same
+2,040. NormTests passed, 19. No native file changed, the solution builds with warnings as errors,
+and the public listing is unchanged.
+
+Rule: N 1.4 finds a test in an area's folder and not that the area is the one it tests, so a test of
+the sky placed under Ui holds it. The compilation this commit was read by could check it, a test's
+folder the highest area it names, with a list for the 26 files this commit placed otherwise, 24
+whose highest name only sets the test up and the 2 that name no type.
+
+Shared: a test's area read by a compilation of the tests, the assembly declaring each name a file
+names, for the sibling's N 1.4 wherever its tests share a folder.
