@@ -11,8 +11,8 @@ file, and [ASSETS.md](ASSETS.md) how meshes, materials and textures are seen and
 
 - **Five of Bevy's components are mirrored by hand.** `Transform`, `GlobalTransform`, `Visibility`,
   `InheritedVisibility` and `ViewVisibility` are C# structs with the same bytes as the Rust types
-  (`INativeComponent`, `BevyCSharp/Ecs/NativeComponents.cs`). A system reads them straight out of
-  Bevy's storage through `bcs_ecs_get_ptr` and `bcs_ecs_chunks`, with nothing copied.
+  (`INativeComponent`, `BevyCSharp/Core/Ecs/NativeComponents.cs`). A system reads them straight out
+  of Bevy's storage through `bcs_ecs_get_ptr` and `bcs_ecs_chunks`, with nothing copied.
 - **Each mirror is found by a hand-written match.** `bcs_component_id_of`
   (`native/bevy_csharp/src/app.rs`) turns a short name into a component id with one arm per
   mirrored type, and a `bcs_*_layout` export per type reports field offsets, which the managed side
@@ -78,7 +78,7 @@ to keep mirrors only where their speed matters.
 - **The C# surface** is `EcsWorld.GetReflected`, `SetReflected`, `GetVariant`, `SetVariant`,
   `GetReflectedAsset`, `SetReflectedAsset`, `InsertReflected` and `RemoveReflected`, naming a
   component by its full type path.
-- **Schemas from the description** (`BevyCSharp/Ecs/ReflectedSchemas.cs`). `ComponentSchemas`
+- **Schemas from the description** (`BevyCSharp/Core/Ecs/ReflectedSchemas.cs`). `ComponentSchemas`
   builds a `ComponentSchema` for each reflected component the first time it is asked inside a
   system, and drops them when a new app starts, since ids belong to a world. A mirrored component
   keeps its hand-written schema. A nested struct is taken apart into rows in a fold, as the
@@ -105,7 +105,7 @@ silent failure rather than a compile error.
 
 - **A checked-in description.** `./bcs command schema.dump <path>`
   (`BevyCSharp/Diagnostics/ConsoleSchemaCommands.cs`) writes every reflected component and the
-  fields a wrapper can type to `BevyCSharp/Generated/bevy-components.tsv`, and the file is
+  fields a wrapper can type to `BevyCSharp/Core/Generated/bevy-components.tsv`, and the file is
   committed. It is written from an editor build, the profile that reflects the most, and again
   whenever Bevy is upgraded ([BUILDING.md](BUILDING.md)), and its diff is the list of what Bevy
   changed in its components. It is sorted tab-separated lines rather than JSON, because the
@@ -206,14 +206,14 @@ back through tier 1.
 A component lives in Bevy's storage as bytes, so it cannot hold a managed `List<T>`, whose memory
 the garbage collector moves and frees. Two kinds of list fill the gap, and both are built.
 
-- **Inline lists** (`BevyCSharp/Ecs/InlineList4.cs` to `InlineList64.cs`) hold a count and a fixed
-  run of unmanaged items over C#'s `[InlineArray]`. They are the component's own bytes, so they
-  iterate in chunks with everything else and cost nothing to keep, which suits small bounded lists
-  such as waypoints, slots, the last few hits. The capacity is part of the type, `InlineList4<T>`
-  through `InlineList64<T>`, because C# fixes an inline array's length at compile time and cannot
-  take it as a type parameter. A freed slot is cleared, so two lists of the same items are the same
-  bytes.
-- **`EcsList<T>` and `EcsMap<K, V>`** (`BevyCSharp/Ecs/EcsList.cs`, `EcsMap.cs`) are unmanaged
+- **Inline lists** (`BevyCSharp/Core/Ecs/InlineList4.cs` to `InlineList64.cs`) hold a count and a
+  fixed run of unmanaged items over C#'s `[InlineArray]`. They are the component's own bytes, so
+  they iterate in chunks with everything else and cost nothing to keep, which suits small bounded
+  lists such as waypoints, slots, the last few hits. The capacity is part of the type,
+  `InlineList4<T>` through `InlineList64<T>`, because C# fixes an inline array's length at compile
+  time and cannot take it as a type parameter. A freed slot is cleared, so two lists of the same
+  items are the same bytes.
+- **`EcsList<T>` and `EcsMap<K, V>`** (`BevyCSharp/Core/Ecs/EcsList.cs`, `EcsMap.cs`) are unmanaged
   handles (a slot and a generation) into a store on the managed side, so they grow without bound
   and hold `string` as well as unmanaged values. Each is made on its first write.
   - **Freed with the entity.** The generator registers a remove hook for every component holding

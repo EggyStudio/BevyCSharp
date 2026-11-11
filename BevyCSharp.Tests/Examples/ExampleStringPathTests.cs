@@ -41,7 +41,7 @@ public sealed class ExampleStringPathTests
     [Fact]
     public void NoExampleReachesAComponentByAStringPathItsWrapperCovers()
     {
-        var description = Description.Read(Path.Combine(Root, "BevyCSharp", "Generated", "bevy-components.tsv"));
+        var description = Description.Read(Path.Combine(Root, "BevyCSharp", "Core", "Generated", "bevy-components.tsv"));
         var covered = new List<string>();
 
         foreach (var file in Directory.EnumerateFiles(Path.Combine(Root, "BevyCSharp.Examples"), "*.cs", SearchOption.AllDirectories))

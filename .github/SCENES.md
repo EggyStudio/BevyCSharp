@@ -24,7 +24,7 @@ then on.
 
 Around it:
 
-- `ComponentSchema` (`BevyCSharp/Ecs/ComponentSchema.cs`) describes every C# component field by
+- `ComponentSchema` (`BevyCSharp/Core/Ecs/ComponentSchema.cs`) describes every C# component field by
   field without reflection, because the generator emits it (`BevyCSharp.Generator/SchemaEmitter.cs`).
   `Transform` and `Visibility` have one written by hand over their mirrors, and every other
   component Bevy reflects has one built from Bevy's reflection ([COMPONENTS.md](COMPONENTS.md),

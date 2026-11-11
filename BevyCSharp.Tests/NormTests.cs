@@ -129,19 +129,14 @@ public sealed partial class NormTests
     public void N_1_6()
     {
         var layerOf = Layers.SelectMany((names, layer) => names.Select(name => (name, layer))).ToDictionary(p => p.name, p => p.layer);
-        var places = Places();
         var sources = Sources("BevyCSharp/", ".cs").ToHashSet(StringComparer.Ordinal);
         var found = new List<string>();
 
-        foreach (var file in sources.Where(file => ProjectOf(places, file) is null)) found.Add($"{file} placed in no project");
-        foreach (var (place, project) in places)
-        {
-            if (!layerOf.ContainsKey(project)) found.Add($"{place} placed in {project}, which no layer lists");
-            if (!sources.Any(file => file == place || (place.EndsWith('/') && file.StartsWith(place, StringComparison.Ordinal)))) found.Add($"{place} places no file");
-        }
+        var projects = sources.ToDictionary(file => file, ProjectOf, StringComparer.Ordinal);
+        foreach (var project in projects.Values.Distinct().Where(project => !layerOf.ContainsKey(project)))
+            found.Add($"{project}, a folder of the library, stands in no layer");
 
         // What each project's files name of another's, which the split's references will hold.
-        var projects = sources.ToDictionary(file => file, file => ProjectOf(places, file), StringComparer.Ordinal);
         var edges = LibraryEdges(file => projects.GetValueOrDefault(file), found);
         foreach (var (project, layer) in layerOf)
         {
@@ -152,7 +147,7 @@ public sealed partial class NormTests
             if (layer != lowest) found.Add($"{project} in layer {layer + 1} where what it names allows {lowest + 1}");
         }
 
-        Hold("1.6", found, "a file of the library in no project, a project out of its layer, or one naming a project of its own layer or above");
+        Hold("1.6", found, "a folder of the library in no layer, a project out of its layer, or one naming a project of its own layer or above");
     }
 
     [Fact]

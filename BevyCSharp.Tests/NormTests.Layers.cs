@@ -8,8 +8,8 @@ using Xunit;
 namespace Bevy.Tests;
 
 // What N 1.6 reads the library's layers with while the library is one project, the project each of
-// its files stands in, from build/norm/1.6.tsv, and what each names of another, from the built
-// library and its portable PDB, as the projects' references will hold it once the split makes them.
+// its files stands in, its area's folder, and what each names of another, from the built library
+// and its portable PDB, as the projects' references will hold it once the split makes them.
 public sealed partial class NormTests
 {
     /// <summary>
@@ -29,19 +29,11 @@ public sealed partial class NormTests
         ["Levels", "BevyCSharp"],
     ];
 
-    /// <summary>The places of build/norm/1.6.tsv, a folder ending in a slash or a file, each with its project.</summary>
-    private static List<(string Place, string Project)> Places() =>
-        [.. Text("build/norm/1.6.tsv").Split('\n')
-            .Where(line => line.Length > 0 && !line.StartsWith('#'))
-            .Select(line => line.Split('\t'))
-            .Select(parts => (parts[0], parts[1]))];
-
-    /// <summary>The project of a file, its own line's or the longest folder's holding it.</summary>
-    private static string? ProjectOf(List<(string Place, string Project)> places, string file) =>
-        places.Where(p => p.Place == file || (p.Place.EndsWith('/') && file.StartsWith(p.Place, StringComparison.Ordinal)))
-            .OrderByDescending(p => p.Place.Length)
-            .Select(p => p.Project)
-            .FirstOrDefault();
+    /// <summary>
+    /// The project a file of the library stands in, its top folder's under BevyCSharp/, an area's,
+    /// or BevyCSharp's for a file at the top, which composes the rest.
+    /// </summary>
+    private static string ProjectOf(string file) => file.Split('/') is { Length: > 2 } parts ? parts[1] : "BevyCSharp";
 
     /// <summary>
     /// Each project the built library's code names of another, with the first place that names it,

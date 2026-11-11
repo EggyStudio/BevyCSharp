@@ -112,7 +112,7 @@ public sealed class ReflectedLayoutTests
     {
         Needs.Renderer();
 
-        var dumped = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Generated", "bevy-components.tsv"))
+        var dumped = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Core", "Generated", "bevy-components.tsv"))
             .Select(line => line.Split('\t'))
             .Where(words => words is ["layout", _, _])
             .ToDictionary(words => words[1], words => words[2], StringComparer.Ordinal);
@@ -223,7 +223,7 @@ public sealed class ReflectedLayoutTests
     [Fact]
     public void EachOfTheLibrarysMirrorsHoldsItsComponentWhereTheDescriptionSays()
     {
-        var described = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Generated", "bevy-components.tsv"))
+        var described = File.ReadLines(Path.Combine(CheatsheetTests.RepositoryRoot(), "BevyCSharp", "Core", "Generated", "bevy-components.tsv"))
             .Select(line => line.Split('\t'))
             .Where(words => words is ["layout", _, _])
             .ToDictionary(words => words[1], words => words[2], StringComparer.Ordinal);

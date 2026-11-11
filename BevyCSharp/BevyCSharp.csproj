@@ -106,15 +106,16 @@
       compilation emits nothing for it. The list of the components that moved beside it gives a
       reflected component the paths a scene written before the move names.
     -->
-    <!-- The scene's distance field's compute shaders, read as Slang source when the field is first
+    <!-- The library's own programs, the look's, the scene's distance field's, the probes' and the
+         weather's, each in its area's Kernels folder and read as Slang source when it is first
          built, so the library carries them as it carries everything else it runs. -->
     <ItemGroup>
-        <EmbeddedResource Include="Assets/Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
+        <EmbeddedResource Include="*/Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
     </ItemGroup>
 
     <ItemGroup>
-        <AdditionalFiles Include="Generated/bevy-components.tsv"/>
-        <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>
+        <AdditionalFiles Include="Core/Generated/bevy-components.tsv"/>
+        <AdditionalFiles Include="Core/Generated/bevy-former-paths.tsv"/>
     </ItemGroup>
 
     <!-- Ship the generator and its code fixes in the package's analyzer slot. -->

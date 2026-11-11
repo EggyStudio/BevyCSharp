@@ -181,7 +181,7 @@ still exports a game without one.
 
 ## Bevy's components after an upgrade
 
-`BevyCSharp/Generated/bevy-components.tsv` describes every component Bevy reflects, and the
+`BevyCSharp/Core/Generated/bevy-components.tsv` describes every component Bevy reflects, and the
 generator turns it into the typed wrappers in `Bevy.Reflected` (`PointLightRef` and the rest). It
 is read out of Bevy's registry in a running app, an editor build because that profile reflects the
 most, so it is written again whenever Bevy is upgraded:
@@ -189,7 +189,7 @@ most, so it is written again whenever Bevy is upgraded:
 ```bash
 ./bcs build --editor
 ./bcs open --editor --offscreen
-./bcs command schema.dump "$PWD/BevyCSharp/Generated/bevy-components.tsv"
+./bcs command schema.dump "$PWD/BevyCSharp/Core/Generated/bevy-components.tsv"
 ./bcs stop
 dotnet build
 ```

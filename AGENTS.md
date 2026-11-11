@@ -69,11 +69,11 @@ Stop any serving session before running the suite.
 
 | Path | Holds |
 |---|---|
-| `BevyCSharp/Core` | `App`, `Config`, `World`, stages, plugins |
-| `BevyCSharp/Ecs` | `EcsWorld`, the component registry, `ComponentSchemas` (generated, reflection-free) |
-| `BevyCSharp/Interop` | `Native` (the `bcs_*` entry points), the loader and the ABI check |
+| `BevyCSharp` | The package a game names, `BevyApp`, `EnginePlugin` and `DefaultPlugins` over every area's project, each a folder below |
+| `BevyCSharp/Native` | `Native` (the `bcs_*` entry points of the app and the frame), the loader, the ABI check and the bridge's library for each platform |
+| `BevyCSharp/Core` | `App`, `Config`, `World`, stages, plugins and `Persistent<T>`, with `Ecs`, `Math`, `Time`, `Input`, `Behaviors` and `Generated` (Bevy's reflected components) as its folders |
 | `BevyCSharp/Physics` | Rigid bodies over BepuPhysics, simulated on the managed side |
-| `BevyCSharp/Diagnostics` | The console log ring and the `[Command]` catalog |
+| `BevyCSharp/Diagnostics` | The console's view and window, the frame profile and the console's own commands |
 | `BevyCSharp/Cli` | The server side of `./bcs`, its session file, socket and request queue |
 | `BevyCSharp.Generator` | Behavior, schema and command generators |
 | `BevyCSharp.CodeFixes` | The fixes an editor offers for the generators' diagnostics, carried beside them in the package |
@@ -82,17 +82,20 @@ Stop any serving session before running the suite.
 | `BevyCSharp.Player` | Plays a scene file with its scripts, which the editor's Play scene runs |
 | `native/bevy_csharp/src` | The Rust bridge, one module per subsystem |
 | `modules` | The modules both engines share, each its own repository checked out as a git submodule, the Levels module among them |
-| `BevyCSharp/Assets` | Assets and what draws them, in `AssetServer`, `Render`, `Render2d`, `Shaders`, `Ui`, `Gizmos`, `Audio` and `Animation` |
-| `BevyCSharp/Behaviors` | The `[Behavior]` attributes, run conditions, `BehaviorContext` and the runner behaviors are registered with |
-| `BevyCSharp/Generated` | `bevy-components.tsv`, Bevy's components as the wrappers in `Bevy.Reflected` are generated from |
-| `BevyCSharp/Input` | `Input`, `Key`, gamepads and `SyntheticInput` |
-| `BevyCSharp/Math` | `Vec2`, `Vec3`, `Quat`, `Transform` and `GlobalTransform` |
+| `BevyCSharp/Assets` | `AssetServer`, asset handles, packs, data assets and glTF |
+| `BevyCSharp/Rendering` | `Render` and `Shaders`, cameras, lights, materials, meshes, the look and shader programs |
+| `BevyCSharp/Render2d` | `Render2d`, sprites, tilemaps and 2D materials |
+| `BevyCSharp/GlobalIllumination` | The scene's distance field, the world probes and the reference |
+| `BevyCSharp/Sky` | Fog, clouds, rain, snow, thunder and the night sky over the Sky module |
+| `BevyCSharp/Ui` | Bevy's interface, `Ui`, its widgets and Feathers |
+| `BevyCSharp/ImGui` | ImGui's runtime, input and textures |
+| `BevyCSharp/Audio` | `Audio`, its tracks and streams |
+| `BevyCSharp/Animation` | `Animation`, clips and state machines |
+| `BevyCSharp/Gizmos` | `Gizmos`, lines and shapes drawn for a frame |
 | `BevyCSharp/Modeling` | `EditMesh`, a mesh shaped by operations through a selection, as a modeling program shapes one |
 | `BevyCSharp/Levels` | The binding of the Levels module (`modules/Levels`), `LevelSpawner`, which builds a level's meshes, collision and entities into a scene, with the engine's TrenchBroom classes |
 | `BevyCSharp/Vegetation` | Trees grown from a species and a seed, in `Trees`, `TreeSpecies` and `TreeSkeleton`, and built into meshes through the modeling |
-| `BevyCSharp/Scenes` | Scene files, saved games and `Persistent<T>` settings |
-| `BevyCSharp/Time` | `Time`, the frame's clock and the fixed one |
-| `BevyCSharp/Ui` | ImGui's runtime, input and textures |
+| `BevyCSharp/Scenes` | Scene files and saved games |
 | `BevyCSharp/build` | The props and targets the package adds to a game's build |
 | `BevyCSharp.Cli` | `./bcs`, the command line that drives a running app |
 | `BevyCSharp.Examples` | Bevy's examples written in C#, opened by name, and `triage.tsv` for the rest |

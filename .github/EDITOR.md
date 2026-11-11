@@ -397,7 +397,7 @@ The few with a mirror on this side keep a schema written by hand, which writes t
 ## The interface
 
 The editor's interface is **Dear ImGui**, running in C# and drawn by Bevy. The managed side owns the
-context and builds the windows; the engine gets triangles. `BevyCSharp/Ui/ImGuiRuntime.cs` is the
+context and builds the windows; the engine gets triangles. `BevyCSharp/ImGui/ImGuiRuntime.cs` is the
 join, `native/bevy_csharp/src/imgui` the pass.
 
 What that buys:

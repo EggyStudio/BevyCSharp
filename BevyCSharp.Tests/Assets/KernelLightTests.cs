@@ -25,7 +25,11 @@ public sealed class KernelLightTests
     [Fact]
     public void EachEntryChoosesItsLightBeforeItsThreadsPart()
     {
-        var kernels = Directory.GetFiles(Path.Combine(Root, "BevyCSharp", "Assets", "Kernels"), "*.slang")
+        // The library's own programs, in each area's Kernels folder.
+        var kernels = Directory.GetDirectories(Path.Combine(Root, "BevyCSharp"))
+            .Select(area => Path.Combine(area, "Kernels"))
+            .Where(Directory.Exists)
+            .SelectMany(folder => Directory.GetFiles(folder, "*.slang"))
             .Select(path => (Name: Path.GetFileName(path), Code: Code(File.ReadAllText(path))))
             .Where(kernel => kernel.Code.Contains("int brightest()"))
             .ToArray();
