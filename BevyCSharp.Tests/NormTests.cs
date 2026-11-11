@@ -343,22 +343,17 @@ public sealed partial class NormTests
         var package = Package();
         Skip.If(package is null, "N 6.4 has no package to open; BCS_PACKAGE names one, and the pack job sets it");
 
-        // The package a game names, whose version follows its name, and every area's package
-        // packed beside it at that version.
-        var version = Path.GetFileNameWithoutExtension(package!)["BevyCSharp.".Length..];
-        var folder = Path.GetDirectoryName(package)!;
-        var wanted = EngineAssemblies.Names.ToDictionary(name => name, name => new List<string> { $"lib/net10.0/{name}.dll", "README.md" });
-        wanted["BevyCSharp"].AddRange(["analyzers/dotnet/cs/BevyCSharp.Generator.dll", "analyzers/dotnet/cs/BevyCSharp.CodeFixes.dll", "build/BevyCSharp.props", "build/BevyCSharp.targets"]);
+        // Every project's assembly with its documentation in the lib folder, the modules' beside
+        // them, since none of them is a package of its own, and the generator, its code fixes and the
+        // props and targets a game's build takes.
+        var wanted = EngineAssemblies.Names.Concat(["Levels", "Sky", "Vegetation"])
+            .SelectMany(name => new[] { $"lib/net10.0/{name}.dll", $"lib/net10.0/{name}.xml" })
+            .Concat(["README.md", "analyzers/dotnet/cs/BevyCSharp.Generator.dll", "analyzers/dotnet/cs/BevyCSharp.CodeFixes.dll", "build/BevyCSharp.props", "build/BevyCSharp.targets"])
+            .ToList();
 
-        // Each module's assembly in the lowest package naming it.
-        wanted["BevyCSharp.Rendering"].Add("lib/net10.0/Sky.dll");
-        wanted["BevyCSharp.Modeling"].Add("lib/net10.0/Vegetation.dll");
-        wanted["BevyCSharp.Levels"].Add("lib/net10.0/Levels.dll");
-
-        // The natives staged for the pack, a system a folder, each in its runtime's folder of the
-        // bridge's package. The folders named as a runtime are read alone, and the files in them a
-        // level deep, since a file beside them, as the release notes a pack writes into
-        // build/artifacts, is no library.
+        // The natives staged for the pack, a system a folder, each in its runtime's folder. The
+        // folders named as a runtime are read alone, and the files in them a level deep, since a file
+        // beside them, as the release notes a pack writes into build/artifacts, is no library.
         var staged = Path.Combine(Root, "build", "artifacts");
         var runtime = new Regex(@"^(?:linux|linux-musl|win|osx)-(?:x64|arm64)$");
         if (Directory.Exists(staged))
@@ -367,42 +362,33 @@ public sealed partial class NormTests
             {
                 foreach (var native in Directory.EnumerateFiles(platform))
                 {
-                    wanted["BevyCSharp.Native"].Add($"runtimes/{Path.GetFileName(platform)}/native/{Path.GetFileName(native)}");
+                    wanted.Add($"runtimes/{Path.GetFileName(platform)}/native/{Path.GetFileName(native)}");
                 }
             }
         }
 
-        var missing = new List<string>();
-        foreach (var (name, files) in wanted)
-        {
-            var path = Path.Combine(folder, $"{name}.{version}.nupkg");
-            if (!File.Exists(path))
-            {
-                missing.Add($"no {Path.GetFileName(path)} beside {Path.GetFileName(package)}");
-                continue;
-            }
+        using var zip = ZipFile.OpenRead(package!);
+        var held = zip.Entries.Select(entry => entry.FullName).ToHashSet(StringComparer.Ordinal);
+        var missing = wanted.Where(file => !held.Contains(file)).Select(file => $"{Path.GetFileName(package)} holds no {file}").ToList();
 
-            using var zip = ZipFile.OpenRead(path);
-            var held = zip.Entries.Select(entry => entry.FullName).ToHashSet(StringComparer.Ordinal);
-            missing.AddRange(files.Where(file => !held.Contains(file)).Select(file => $"{Path.GetFileName(path)} holds no {file}"));
-
-            // Each of the engine's packages it depends on at exactly its own version, so a restore
-            // cannot put packages of two versions together.
-            var nuspec = zip.Entries.Single(entry => entry.FullName.EndsWith(".nuspec", StringComparison.Ordinal));
-            using var reader = new StreamReader(nuspec.Open());
-            var dependencies = Regex.Matches(reader.ReadToEnd(), "<dependency id=\"(BevyCSharp[^\"]*)\" version=\"([^\"]+)\"")
-                .Select(match => (Id: match.Groups[1].Value, Version: match.Groups[2].Value))
-                .ToList();
-            missing.AddRange(dependencies.Where(dependency => dependency.Version != $"[{version}]")
-                .Select(dependency => $"{Path.GetFileName(path)} depends on {dependency.Id} at {dependency.Version}, not exactly {version}"));
-
-            // The flat package depends on every area's, so a game naming it has them all.
-            if (name == "BevyCSharp")
-            {
-                missing.AddRange(EngineAssemblies.Names.Where(area => area != name && dependencies.All(dependency => dependency.Id != area))
-                    .Select(area => $"{Path.GetFileName(path)} does not depend on {area}"));
-            }
-        }
+        // No project of the engine as a dependency, since the package carries them, and every
+        // package from outside that an area's project names, at the version it names, since the
+        // flat project names them again for the package to depend on.
+        var nuspec = zip.Entries.Single(entry => entry.FullName.EndsWith(".nuspec", StringComparison.Ordinal));
+        using var reader = new StreamReader(nuspec.Open());
+        var dependencies = Regex.Matches(reader.ReadToEnd(), "<dependency id=\"([^\"]+)\" version=\"([^\"]+)\"")
+            .Select(match => (Id: match.Groups[1].Value, Version: match.Groups[2].Value))
+            .ToList();
+        missing.AddRange(dependencies.Where(dependency => dependency.Id.StartsWith("BevyCSharp", StringComparison.Ordinal))
+            .Select(dependency => $"{Path.GetFileName(package)} depends on {dependency.Id}, a project it carries"));
+        var outside = Sources("BevyCSharp/", ".csproj").Where(project => project != "BevyCSharp/BevyCSharp.csproj")
+            .SelectMany(project => Regex.Matches(Text(project), @"<PackageReference Include=""([^""]+)"" Version=""([^""]+)""")
+                .Select(match => (Id: match.Groups[1].Value, Version: match.Groups[2].Value, Project: project)))
+            .ToList();
+        missing.AddRange(outside.Where(reference => !dependencies.Contains((reference.Id, reference.Version)))
+            .Select(reference => $"{Path.GetFileName(package)} does not depend on {reference.Id} at {reference.Version}, which {reference.Project} names"));
+        missing.AddRange(dependencies.Where(dependency => !dependency.Id.StartsWith("BevyCSharp", StringComparison.Ordinal) && outside.All(reference => reference.Id != dependency.Id))
+            .Select(dependency => $"{Path.GetFileName(package)} depends on {dependency.Id}, which no area's project names"));
 
         Assert.True(missing.Count == 0, $"N 6.4: {string.Join("; ", missing)}");
     }

@@ -220,14 +220,18 @@ public sealed class ScriptHost(App app, string directory)
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, MetadataReference> Read = new(StringComparer.Ordinal);
 
     /// <summary>
-    /// Every assembly the library names, loaded once for the process, walked from the flat
-    /// project's, which references every area's.
+    /// Every assembly the library names, loaded once for the process, walked from each of the
+    /// engine's own.
     /// </summary>
-    private static readonly Assembly[] Named = Load(typeof(BevyApp).Assembly);
+    /// <remarks>
+    /// The flat project's assembly references only the areas its own code names, which leaves out
+    /// the levels' area, named by no area below it either, and with it the Levels module it names.
+    /// </remarks>
+    private static readonly Assembly[] Named = Load(EngineAssemblies.Loaded());
 
     /// <summary>
-    /// What an assembly names, loaded in the context it was loaded in, and what each of the app's
-    /// own files among them names in turn.
+    /// The engine's assemblies, what each names, loaded in the context the library was loaded in,
+    /// and what each of the app's own files among them names in turn.
     /// </summary>
     /// <remarks>
     /// The framework's assemblies are loaded where one is named and not walked, so the references
@@ -235,12 +239,13 @@ public sealed class ScriptHost(App app, string directory)
     /// reference holds in native memory. A name no file answers is left out, as a script can name
     /// no type of it either.
     /// </remarks>
-    private static Assembly[] Load(Assembly library)
+    private static Assembly[] Load(IEnumerable<Assembly> engine)
     {
+        var library = typeof(BevyApp).Assembly;
         var context = AssemblyLoadContext.GetLoadContext(library) ?? AssemblyLoadContext.Default;
         var beside = Path.GetDirectoryName(library.Location);
-        var found = new Dictionary<string, Assembly>(StringComparer.Ordinal);
-        var walk = new Stack<Assembly>([library]);
+        var found = engine.ToDictionary(assembly => assembly.FullName!, StringComparer.Ordinal);
+        var walk = new Stack<Assembly>(found.Values);
         while (walk.TryPop(out var assembly))
         {
             foreach (var name in assembly.GetReferencedAssemblies())

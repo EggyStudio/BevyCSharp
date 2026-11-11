@@ -22,8 +22,11 @@
         -->
         <NoWarn>$(NoWarn.Replace(';CS1591', ''))</NoWarn>
         <WarningsAsErrors>$(WarningsAsErrors);CS1591;CS0419;CS1570;CS1571;CS1572;CS1573;CS1574;CS1580;CS1581;CS1584;CS1587;CS1589;CS1590;CS1592;CS1710;CS1711;CS1712;CS1723;CS1734;CS1735</WarningsAsErrors>
-        <IsPackable>true</IsPackable>
-        <PackageTags>bevy;ecs;gamedev;engine;source-generator;behavior</PackageTags>
+        <!--
+          An area's project is not packed on its own. The flat project's package carries every
+          area's assembly, so a game names one package and nuget.org holds no id of an area's.
+        -->
+        <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <!--
@@ -44,21 +47,5 @@
     <ItemGroup>
         <InternalsVisibleTo Include="BevyCSharp.Tests"/>
     </ItemGroup>
-
-    <!--
-      A package depends on the areas it references at exactly its own version, so a restore cannot
-      put packages of two versions together, the bridge's entry points and its ABI being the one
-      version's. NuGet writes a referenced project's version as the lowest it accepts, so the
-      version each reference carries is closed on both sides before the nuspec is written.
-    -->
-    <Target Name="BevyCSharpExactProjectVersions" AfterTargets="_GetProjectReferenceVersions">
-        <ItemGroup>
-            <_BevyCSharpExactVersion Include="@(_ProjectReferencesWithVersions)">
-                <ProjectVersion>[%(_ProjectReferencesWithVersions.ProjectVersion)]</ProjectVersion>
-            </_BevyCSharpExactVersion>
-            <_ProjectReferencesWithVersions Remove="@(_ProjectReferencesWithVersions)"/>
-            <_ProjectReferencesWithVersions Include="@(_BevyCSharpExactVersion)"/>
-        </ItemGroup>
-    </Target>
 
 </Project>

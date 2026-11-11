@@ -300,23 +300,29 @@ defunct entries until it goes.
 
 ```bash
 build/build-native.sh          # stage the native bridge first
-build/pack.sh -c Release       # the library's twenty packages
+dotnet pack BevyCSharp/BevyCSharp.csproj -c Release
 build/pack-templates.sh        # the templates, at the engine's version, beside it
 ```
 
-The library is twenty projects, a folder each under `BevyCSharp/`, and packs as twenty packages at
-one version. `BevyCSharp` is the package a game names, holding `BevyApp`, `EnginePlugin` and
-`DefaultPlugins`, the generator and its code fixes and the props and targets of `BevyCSharp/build`,
-and it depends on every area's package, `BevyCSharp.Native` with the bridge's library for each
-platform, `BevyCSharp.Core`, `BevyCSharp.Rendering` and the rest. Each package depends on those it
-references at exactly its own version, so a restore never puts two versions together, and a module's
-assembly rides in the lowest package that names it, the Sky module's in `BevyCSharp.Rendering`.
+The library is twenty projects, a folder each under `BevyCSharp/`, packed as one package,
+`BevyCSharp`, the one a game names. The flat project's package carries every project's assembly with
+its documentation in its lib folder, `BevyApp`, `EnginePlugin` and `DefaultPlugins` in its own
+beside `BevyCSharp.Core`, `BevyCSharp.Rendering` and the rest, the three modules' assemblies, the
+bridge's library for each platform in its runtimes folder, the generator and its code fixes and the
+props and targets of `BevyCSharp/build`, and depends on the packages from outside the areas build on
+alone. No area's project is packed on its own.
 
 `BevyCSharp.Templates` holds the templates a game is made from, `dotnet new bevycsharp` the README's
 first program and `dotnet new bevycsharp-empty` the first game's first step, each in a project
 asking for the engine of the templates' own version. They live in `templates/` with a placeholder
 for that version, and `build/pack-templates.sh` packs a copy with the version of the engine package
 packed last written in, into `build/package` beside it, so the two go out together.
+
+`build/package-size.py <version>` says the size of each package of a version in `build/package`
+against the size nuget.org takes, 262,144,000 bytes of a push's request less 4,096 for the form the
+push wraps a package in, and fails where one is over, as the pack job does on every run before a
+package is kept or pushed. The engine's package carries the bridge for every system and stood at
+249,913,716 bytes at 0.6.91.
 
 Packing fails with `BCS101` if the staged bridge is older than a file under `native` it is built
 from, its shaders among them, because a stale one fails with an `EntryPointNotFoundException` far
@@ -426,7 +432,7 @@ batch, as Blockout's from 0.5.178 to 0.5.193 was after the pack run of `09fc95dd
 
 ```bash
 build/build-native.sh --render
-build/pack.sh -c Release -p:Version=0.0.1-local1
+dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.1-local1
 dotnet build games/Swarm -p:BevyCSharpVersion=0.0.1-local1
 ```
 
@@ -459,7 +465,7 @@ makes one zip for the machine it runs on, from a package packed into `build/pack
 ```bash
 build/build-native.sh --render --meshlet --solari
 build/fetch-slang.sh
-build/pack.sh -c Release -p:Version=0.0.40-game
+dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.40-game
 build/publish-feature-test.sh 0.0.40-game   # build/feature-test/BevyCSharp-FeatureTest-<rid>.zip
 ```
 

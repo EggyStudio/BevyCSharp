@@ -13,24 +13,12 @@
     </ItemGroup>
 
     <!--
-      The Levels module both engines share, a git submodule under modules/, whose assembly this
-      package carries in its lib folder with its documentation, since a package cannot name a
-      project as a dependency and the modules are not packages of their own. It is the lowest
-      package naming the module, and those above it that name it too find it here.
+      The Levels module both engines share, a git submodule under modules/, kept out of what
+      a project referencing this one sees, since the module is not a package of its own. The
+      flat project's package carries its assembly in its lib folder beside the areas'.
     -->
     <ItemGroup>
         <ProjectReference Include="../../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
     </ItemGroup>
-    <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModule</TargetsForTfmSpecificBuildOutput>
-    </PropertyGroup>
-    <Target Name="BevyCSharpPackModule" DependsOnTargets="ResolveReferences">
-        <ItemGroup>
-            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Levels'"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
-                                  Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
-        </ItemGroup>
-    </Target>
 
 </Project>

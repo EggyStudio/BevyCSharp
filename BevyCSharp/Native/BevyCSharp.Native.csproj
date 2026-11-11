@@ -5,38 +5,6 @@
     </PropertyGroup>
 
     <!--
-      Native runtime assets, staged per RID by build/build-native.sh. A missing slot is skipped
-      rather than failing the build, so you can pack on one platform without cross-compiling for
-      all the others.
-    -->
-    <ItemGroup>
-        <None Include="$(BevyCSharpArtifactDir)linux-x64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-x64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-musl-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-musl-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll"
-              Pack="true" PackagePath="runtimes/win-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll"
-              Pack="true" PackagePath="runtimes/win-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib"
-              Pack="true" PackagePath="runtimes/osx-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib')"/>
-        <None Include="$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib"
-              Pack="true" PackagePath="runtimes/osx-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib')"/>
-    </ItemGroup>
-
-    <!--
       Repo-local development: copy whatever the last cargo build produced next to the sample and
       test binaries, so running them works without packing first, each project referencing this one
       copying it on.
@@ -98,6 +66,10 @@
 
       Set BevyCSharpSkipNativeFreshnessCheck=true where timestamps carry no meaning, such as CI
       collecting binaries that were built from this very commit on other machines.
+
+      The flat project's package carries the staged bridges, so its pack runs this check before the
+      nuspec is written, and the list of what the bridge is built from stays here, beside the
+      build's own check below.
     -->
     <ItemGroup>
         <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)bevy_csharp/src/**/*"
@@ -109,7 +81,6 @@
         <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.dylib"/>
     </ItemGroup>
     <Target Name="BevyCSharpVerifyNativeIsCurrent"
-            BeforeTargets="GenerateNuspec"
             Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true'"
             Inputs="@(BevyCSharpNativeSource)"
             Outputs="@(BevyCSharpStagedNative)">
@@ -171,26 +142,6 @@
                  Code="BCS102"
                  Text="The native bridge in $(BevyCSharpNativeOutDir) is older than $([MSBuild]::MakeRelative('$(BevyCSharpNativeDir)', '$(_BevyCSharpFirstNewer)'))$(_BevyCSharpAndOthers) in $(BevyCSharpNativeDir) it is built from, so what runs leaves out what changed since it was built. Rebuild it with build/build-native.sh and the profile it was built with, or with ./bcs build, which builds both halves."/>
     </Target>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     <!--
       The projects above this one that reach its internals, each under what it reaches.

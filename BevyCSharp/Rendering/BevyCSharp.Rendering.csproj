@@ -11,25 +11,13 @@
     </ItemGroup>
 
     <!--
-      The Sky module both engines share, a git submodule under modules/, whose assembly this
-      package carries in its lib folder with its documentation, since a package cannot name a
-      project as a dependency and the modules are not packages of their own. It is the lowest
-      package naming the module, and those above it that name it too find it here.
+      The Sky module both engines share, a git submodule under modules/, kept out of what
+      a project referencing this one sees, since the module is not a package of its own. The
+      flat project's package carries its assembly in its lib folder beside the areas'.
     -->
     <ItemGroup>
         <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
     </ItemGroup>
-    <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModule</TargetsForTfmSpecificBuildOutput>
-    </PropertyGroup>
-    <Target Name="BevyCSharpPackModule" DependsOnTargets="ResolveReferences">
-        <ItemGroup>
-            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Sky'"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
-                                  Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
-        </ItemGroup>
-    </Target>
 
     <!-- The area's own programs, read as Slang source when each is first built, so the area
          carries them as it carries everything else it runs. -->

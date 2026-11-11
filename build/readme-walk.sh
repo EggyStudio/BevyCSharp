@@ -4,7 +4,7 @@
 # says, built, and run with no display as Install says. A step the README leaves out or gets wrong
 # fails here.
 #
-#   build/pack.sh -c Release -p:Version=1.2.3   # into build/package
+#   dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=1.2.3   # into build/package
 #   build/pack-templates.sh 1.2.3
 #   build/readme-walk.sh [version]
 #

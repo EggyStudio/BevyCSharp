@@ -3,7 +3,7 @@
 # build/package, at the engine's version and asking for it, so a game made from a template builds
 # on the package packed with it.
 #
-#   build/pack.sh -c Release    # into build/package
+#   dotnet pack BevyCSharp/BevyCSharp.csproj -c Release    # into build/package
 #   build/pack-templates.sh [version]
 #
 # The version is the engine package's packed last unless one is named. The templates are packed from

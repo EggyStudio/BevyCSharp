@@ -105,8 +105,14 @@ jobs:
       - name: Pack
         run: |
           python3 build/release-notes.py "$PWD/build/release-notes.txt"
-          build/pack.sh -c Release -p:Version=${{ steps.version.outputs.version }} -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/release-notes.txt"
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=${{ steps.version.outputs.version }} -p:BevyCSharpSkipNativeFreshnessCheck=true -p:ReleaseNotesFile="$PWD/build/release-notes.txt"
           build/pack-templates.sh
+
+      # Each package against the size nuget.org takes, on every run and before any is kept or pushed,
+      # so a package over it fails the run here and not at the push, with each one's size and room in
+      # the run's summary (build/package-size.py).
+      - name: Check each package against nuget.org's size
+        run: python3 build/package-size.py ${{ steps.version.outputs.version }}
 
       - name: Show what shipped
         run: for package in build/package/*.nupkg; do unzip -l "$package"; done

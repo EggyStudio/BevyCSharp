@@ -343,7 +343,7 @@ jobs:
       # A package of this commit's library and the Linux bridge alone, under a version of its
       # own so nothing cached under another is restored in its place.
       - name: Pack
-        run: build/pack.sh -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       - name: Build Courtyard
         run: dotnet build games/Courtyard -p:BevyCSharpVersion=0.0.0-ci -warnaserror
@@ -484,7 +484,7 @@ jobs:
 
       # A package of this commit's library and the Linux bridge alone, as the games job packs one.
       - name: Pack
-        run: build/pack.sh -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       # Without the weather and without global illumination, each a large share of each frame on
       # lavapipe, so the course finishes within the job's limit, the run's rain and snow at its end
@@ -553,7 +553,7 @@ jobs:
 
       # A package of this commit's library and the Linux bridge alone, as the games job packs one.
       - name: Pack
-        run: build/pack.sh -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+        run: dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
 
       - name: Build the feature test
         run: dotnet build games/FeatureTest -c Release -warnaserror -p:BevyCSharpVersion=0.0.0-ci
@@ -813,7 +813,7 @@ jobs:
 
       - name: Pack
         run: |
-          build/pack.sh -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
+          dotnet pack BevyCSharp/BevyCSharp.csproj -c Release -p:Version=0.0.0-ci -p:BevyCSharpSkipNativeFreshnessCheck=true
           build/pack-templates.sh 0.0.0-ci
 
       - name: Walk the README

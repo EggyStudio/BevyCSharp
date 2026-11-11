@@ -1,85 +1,92 @@
 # Review
 
-Reviewed up to `00f012ff`, the split's first commit, the library's files moved by git into the
-folders of the areas' projects inside the one project, 668 files renamed whole and one nearly, with
-the paths that name them and AGENTS.md's rows, pushed at 13:06 on 2026-11-11, green at 13:25 with
-Linux in 13 minutes, Windows in 18 and macOS in 16; the whole suite passed, 2,043 passed, none
-failed and 3 skipped, NormTests 19 with N 1.6 on folders; it keeps the form and carries the review's
-files. Before it `514b2110`, the split's plan as a Reply, documents alone, pushed at 10:24 on
-2026-11-11, no run starting for it. Before it `1f061b2c`, 119's norm test, N 1.6 holding the
-library's areas in the split's nine layers by what each file names of another in the built library
-and its PDB, each file placed by a list, pushed at 10:07 on 2026-11-11, green at 10:23 with Linux in
-13 minutes, Windows in 15 and macOS in 11; the whole suite passed twice, 2,043 passed, none failed
-and 3 skipped, NormTests 19; it keeps the form and carries the review's file. Before it `6f43e883`,
-the game of life swapping its sprite's image once its programs are ready, pushed at 09:24 on
-2026-11-11, green at 09:39 with Linux in 15 minutes, Windows in 15 and macOS in 11, its pack run
-without publish, 42986918695, read at 10:20 with its four captures jobs, Fedora's captures, its
-games and its soak green, the game of life showing its second image on the runner, which settled
-Verdict 55, the whole run green at 11:30 with its drive in 104 minutes and its pack job, nothing
-published; the whole suite passed, 2,043 passed, none failed and 3 skipped; it keeps the form and
-carries the review's file. Before it `250078ae`, the game of life printing in its capture's log the
-steps it ran by its shot, its frame and the image it shows, pushed at 08:22 on 2026-11-11, green at
-08:36 with Linux in 12 minutes, Windows in 14 and macOS in 11, its pack run without publish,
-42979077838, read at 09:16 with the runner's line and its soak, its games and four of its captures
-jobs green, the rest canceled for the run on `6f43e883`; the whole suite passed, 2,043 passed, none
-failed and 3 skipped; it keeps the form and carries the review's files. Before it `d672cabd`,
-Verdict 55's second mend, the feature test making its screen-space light's and old screen's programs
-when the panel turns them on and the soak giving its first frames 1,500 s and printing its start's
-seconds, pushed at 06:24 on 2026-11-11, green at 06:41 with Linux in 13 minutes, Windows in 15 and
-macOS in 16, which settles Verdict 56; its pack run without publish, 42965606576, read at 08:24 with
-its soak green in 29 minutes, the start printing ready in 143 s, frames.wait 60 in 490 s and
-pipelines.wait in 3 s, its games, Fedora's captures and two captures jobs green and the first red by
-the game of life as before, the rest of it canceled so that the run on `250078ae`, which covers it
-whole, starts; the whole suite passed, 2,042 passed, none failed and 3 skipped; it keeps the form
-and carries the review's file. Before it `250e8376`, Verdict 56's mend, the gallery's copy of the
-game of life's picture written again, pushed at 05:53 on 2026-11-11, no run starting for it since
-the push's paths leave out .github's documents and assets, which are all it changes; the table's
-check passes here and NormTests pass, 18; it keeps the form and carries the review's file. Before it
-`8231cc94`, Verdict 55's first mend, a clock held for loads standing still while a Slang program
-compiles and its compute pipeline is built, with `06fbde11` before it, the render side's table of
-programs moved to a module of its own, both pushed at 05:30 on 2026-11-11, the run on the last red
-on Linux at 05:48 at the check of the examples' table, Verdict 56, Windows and macOS green, its pack
-run without publish, 42959641216, ended at 07:31 red in its Linux job by the same check and in its
-first captures job, the game of life one step short on the runner, Verdict 55, its other captures,
-its games and its soak green and its drive green in 104 minutes; the whole suite passed, 2,042
-passed, none failed and 3 skipped, the native checks clean in the three profiles; they keep the form
-and carry the review's files. Before them `5f86882d`, item 134, a script compiled against every
-assembly the library names, the three modules among them, with a test that a script calls
-Render.SetWeather, pushed at 01:02 on 2026-11-11, green at 01:20 with Linux in 14 minutes, Windows
-in 12 and macOS in 17; the whole suite passed on it, 2,041 passed, none failed and 3 skipped; it
-keeps the form and carries the review's files. Before it `04d6b73a`, 119's sixth cut, the asset data
-under the scenes and every edge Core and the areas had up the plan's order moved with its type or
-put behind a hook an area's plugin adds, so the projects hold no cycle, pushed at 00:05 on
-2026-11-11, green at 00:24 with Linux in 14 minutes, Windows in 15 and macOS in 19, its pack run
-without publish, started to read the captures over the fourth, fifth and sixth cuts before the
-split, red in the soak and in the first captures job, Verdict 55, its drive green in 104 minutes at
-02:07; the whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form and
-carries the review's files. Before it `04394b88`, 119's fifth cut, global illumination's and the
-sky's members of Render and the world's spawn helpers as extension blocks, the listing unchanged
-line for line, the script host's compiler and the tests' workspace layer at Roslyn 5.0.0 so a script
-reads the blocks, pushed at 21:20 on 2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in
-15 and macOS in 19; the whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps
-the form and carries the review's file. Before it `ed291326`, 119's fourth cut, each area's console
-commands in its folder and the command attribute, the catalog and the host in Core, pushed at 20:04
-on 2026-11-10, green at 20:22 with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it
-`739c2ba4`, Verdict 54's mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third
-cut, green at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict
-53, its pack run with publish of 19:05 green at 21:58, the four captures jobs green with many_foxes
-and the drive in 104 minutes, which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the
-first package since 0.6.18. Before it `9ae92147`, item 133 with the nine before it, the ten held
-since the night, pushed at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first
-attempt's macOS red by one timing, Verdict 53; its pack run ended at 18:03 red in the first captures
-job alone, many_foxes, Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's
-captures green, which settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on
-2026-11-09, green at 22:05. The release scene-packs holds the bridge's intel-sponza.pack,
-208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works.
-nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last
-pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to
-0.7 waiting on the highlights' item by 117's judgment. Every push and run before `074645e3` since
-2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `7428798d`, the split's second commit, the library's areas as nineteen projects with
+the flat one, each packed at one version and depending on those below it at exactly that version,
+pushed at 15:30 on 2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a
+third attempt, the runners' package mirror having failed from 15:34 to 17:54, which settles Verdict
+57; its pack run without publish, 43039130555, red by the same fault and not run again, the
+packages' layout having changed by Decision 88; the whole suite passed, 2,045 passed, none failed
+and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `00f012ff`,
+the split's first commit, the library's files moved by git into the folders of the areas' projects
+inside the one project, 668 files renamed whole and one nearly, with the paths that name them and
+AGENTS.md's rows, pushed at 13:06 on 2026-11-11, green at 13:25 with Linux in 13 minutes, Windows in
+18 and macOS in 16; the whole suite passed, 2,043 passed, none failed and 3 skipped, NormTests 19
+with N 1.6 on folders; it keeps the form and carries the review's files. Before it `514b2110`, the
+split's plan as a Reply, documents alone, pushed at 10:24 on 2026-11-11, no run starting for it.
+Before it `1f061b2c`, 119's norm test, N 1.6 holding the library's areas in the split's nine layers
+by what each file names of another in the built library and its PDB, each file placed by a list,
+pushed at 10:07 on 2026-11-11, green at 10:23 with Linux in 13 minutes, Windows in 15 and macOS in
+11; the whole suite passed twice, 2,043 passed, none failed and 3 skipped, NormTests 19; it keeps
+the form and carries the review's file. Before it `6f43e883`, the game of life swapping its sprite's
+image once its programs are ready, pushed at 09:24 on 2026-11-11, green at 09:39 with Linux in 15
+minutes, Windows in 15 and macOS in 11, its pack run without publish, 42986918695, read at 10:20
+with its four captures jobs, Fedora's captures, its games and its soak green, the game of life
+showing its second image on the runner, which settled Verdict 55, the whole run green at 11:30 with
+its drive in 104 minutes and its pack job, nothing published; the whole suite passed, 2,043 passed,
+none failed and 3 skipped; it keeps the form and carries the review's file. Before it `250078ae`,
+the game of life printing in its capture's log the steps it ran by its shot, its frame and the image
+it shows, pushed at 08:22 on 2026-11-11, green at 08:36 with Linux in 12 minutes, Windows in 14 and
+macOS in 11, its pack run without publish, 42979077838, read at 09:16 with the runner's line and its
+soak, its games and four of its captures jobs green, the rest canceled for the run on `6f43e883`;
+the whole suite passed, 2,043 passed, none failed and 3 skipped; it keeps the form and carries the
+review's files. Before it `d672cabd`, Verdict 55's second mend, the feature test making its
+screen-space light's and old screen's programs when the panel turns them on and the soak giving its
+first frames 1,500 s and printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41
+with Linux in 13 minutes, Windows in 15 and macOS in 16, which settles Verdict 56; its pack run
+without publish, 42965606576, read at 08:24 with its soak green in 29 minutes, the start printing
+ready in 143 s, frames.wait 60 in 490 s and pipelines.wait in 3 s, its games, Fedora's captures and
+two captures jobs green and the first red by the game of life as before, the rest of it canceled so
+that the run on `250078ae`, which covers it whole, starts; the whole suite passed, 2,042 passed,
+none failed and 3 skipped; it keeps the form and carries the review's file. Before it `250e8376`,
+Verdict 56's mend, the gallery's copy of the game of life's picture written again, pushed at 05:53
+on 2026-11-11, no run starting for it since the push's paths leave out .github's documents and
+assets, which are all it changes; the table's check passes here and NormTests pass, 18; it keeps the
+form and carries the review's file. Before it `8231cc94`, Verdict 55's first mend, a clock held for
+loads standing still while a Slang program compiles and its compute pipeline is built, with
+`06fbde11` before it, the render side's table of programs moved to a module of its own, both pushed
+at 05:30 on 2026-11-11, the run on the last red on Linux at 05:48 at the check of the examples'
+table, Verdict 56, Windows and macOS green, its pack run without publish, 42959641216, ended at
+07:31 red in its Linux job by the same check and in its first captures job, the game of life one
+step short on the runner, Verdict 55, its other captures, its games and its soak green and its drive
+green in 104 minutes; the whole suite passed, 2,042 passed, none failed and 3 skipped, the native
+checks clean in the three profiles; they keep the form and carry the review's files. Before them
+`5f86882d`, item 134, a script compiled against every assembly the library names, the three modules
+among them, with a test that a script calls Render.SetWeather, pushed at 01:02 on 2026-11-11, green
+at 01:20 with Linux in 14 minutes, Windows in 12 and macOS in 17; the whole suite passed on it,
+2,041 passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
+`04d6b73a`, 119's sixth cut, the asset data under the scenes and every edge Core and the areas had
+up the plan's order moved with its type or put behind a hook an area's plugin adds, so the projects
+hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes, Windows in 15
+and macOS in 19, its pack run without publish, started to read the captures over the fourth, fifth
+and sixth cuts before the split, red in the soak and in the first captures job, Verdict 55, its
+drive green in 104 minutes at 02:07; the whole suite passed on it, 2,040 passed, none failed and 3
+skipped; it keeps the form and carries the review's files. Before it `04394b88`, 119's fifth cut,
+global illumination's and the sky's members of Render and the world's spawn helpers as extension
+blocks, the listing unchanged line for line, the script host's compiler and the tests' workspace
+layer at Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on 2026-11-10, green at 21:39
+with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it, 2,040 passed,
+none failed and 3 skipped; it keeps the form and carries the review's file. Before it `ed291326`,
+119's fourth cut, each area's console commands in its folder and the command attribute, the catalog
+and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22 with Linux in 12 minutes,
+Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend, pushed at 19:05 on
+2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with Linux in 13 minutes,
+Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with publish of 19:05 green at
+21:58, the four captures jobs green with many_foxes and the drive in 104 minutes, which settles
+Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since 0.6.18. Before it
+`9ae92147`, item 133 with the nine before it, the ten held since the night, pushed at 16:03 on
+2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one timing,
+Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54,
+its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict
+52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release
+scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since
+17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by
+the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands
+at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's
+judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
+Head records.
 
-Next 119's split, its AGENTS.md rows on the owner's word, Verdict 55 settling on the pack run of
-`6f43e883`; each a commit with the whole suite, 120, the live path, and after them 66 and 67, the
+Next the split packed as one package by Decision 88, its pack run without publish read, then the run
+with publish; each a commit with the whole suite, 120, the live path, and after them 66 and 67, the
 connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
 the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run
 after 119's split or by 2026-11-12, whichever comes first. The engine's illumination read goes first
@@ -165,90 +172,26 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 119. **The bridge as projects.** Decision 85 on 2026-11-08. The C# side over the native crate
     becomes one solution of projects, each an area with its own public surface and its own plugin,
-    packed as its own package at the bridge's one version, along the lines of the engine's (3DEngine
-    item 225), the native crate one package the others depend on and the dependency direction held
-    by project references and a norm test; the public API held identical before and after, the
-    documents' tables redrawn, the pack workflow packing every package at the one version. One
-    mechanical batch, planned in the Replies before it starts. After 67. The plan of 2026-11-10 in
-    the Replies at `62ba6c03` is confirmed by review, its projects, its order of cuts and its two
-    cuts that need more than moving files, with five conditions. The entry points go to an internal
-    class an area, and the ABI check covers as many entry points and mirror structs after that cut
-    as before it, the two counts said in its Reply. The extension blocks carry the global
-    illumination's and the sky's parts of Render and EcsWorld's spawn helpers, and beside the
-    listing reading the same lines the cut shows that the script host's compiler resolves an
-    extended member in a script, that the cheat sheet and the documentation comments follow, and
-    that nothing reads Render's or EcsWorld's members by reflection and so loses them. The sky's
-    edge to the audio for the thunder is cut as the animation's events are, the audio's plugin
-    playing an event the sky raises, unless a reason against it is found. Each cut is a commit with
-    the whole suite, so the first cut starts once the suite may run again on the owner's word. And
-    the split comes before 66 and 67, so those are written into the projects. AGENTS.md's table
-    waits on the owner's word. Eased at 03:05 on 2026-11-10 while the suite waits on the owner's
-    word, the first two cuts, the frame's hooks with Config and the log ring with AssetHandle and
-    SaveId, may be written and held on their builds, the norm's tests and the tests of the areas
-    they touch, the entry points' cut and those after it each waiting for the whole suite on what
-    stands before. The third cut is `f33c3847`, 523 entry points in 14 internal classes an area with
-    Native keeping 23, the ABI's check reading each class's static constructor, 523 entry points and
-    72 mirror structs behind it before and after. The fourth is `ed291326`, seven files of 84
-    commands moved to their areas and the command attribute, the catalog and the host into Core,
-    where the plan had them in Diagnostics, since Diagnostics holds the console's view and stands
-    above the areas; the console's own 51 stay there. Next the fifth, the extension members with the
-    listing's writer. The fifth is `04394b88`, global illumination's 5 members of Render in an
-    extension block of RenderGlobalIllumination, the sky's 8 in one of RenderSky and the world's 3
-    spawn helpers in one of EcsWorldSpawning, no call site changed and PublicApi.txt the same line
-    for line, the listing's writer and the cheat sheet reading a block's members as their type's
-    own. The review's three checks hold. The script host's compiler was Roslyn 4.14, which reads a
-    static member of a block as the block's class's alone, so the host and the tests' workspace
-    layer go to 5.0.0, the SDK's compiler, the generator and the code fixes staying on 4.14, with a
-    test that a script calls the members on the types they extend; the host is no part of the
-    library, so N 2.8 is not touched, and the change of version is named to the owner. Nothing reads
-    Render's or EcsWorld's members by reflection. Next the sixth, the asset data and the smaller
-    ones. The sixth is `04d6b73a`. Read from a compile of the sources, no edge points up the order
-    of projects after it, Native, Core, Assets, Rendering, then Render2d, Audio, Animation, Gizmos,
-    ImGui, Ui, GlobalIllumination, Scenes, Physics, Sky, Modeling, Vegetation, Levels, Diagnostics,
-    Cli and BevyCSharp. The mesh and material files stand with the rendering, whose operations they
-    call, where the plan had their data with the asset server; a lower area that calls a higher one
-    at a point of its own work takes a hook the higher area's plugin adds, the forgetters of a
-    released handle, the observers' watchers and the pointer's way into ImGui; and five members go
-    to extension blocks, the listing unchanged. The sky's edge to the audio stays, accepted, the sky
-    standing on the audio down the layers, since the audio's plugin playing an event the sky raises
-    would put the event's type in Core, wire the two in the flat project or stand the audio on the
-    sky for one sound. An app without EnginePlugin reports no clip events and forgets nothing a
-    released handle held, as it runs none of the areas' frame work. The steps of the material and
-    mesh files moved between plugins at the same places in the frame, so a pack run without publish
-    reads the captures on it, 42920356361. Next 134, the norm test and the split. The norm test is
-    `1f061b2c`, pushed at 10:07 on 2026-11-11. NormTests.N_1_6 holds the areas in nine layers,
-    Native, then Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d,
-    Animation, GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and
-    Diagnostics, then Vegetation, then Levels and the flat project, each in the lowest layer what it
-    names allows. build/norm/1.6.tsv places every file, the Assets folder's 298 one by one, a file
-    placed nowhere and a line placing nothing both failing; the edges come from the built library
-    and its portable PDB through System.Reflection.Metadata. It fails for a misplaced SceneField.cs
-    and for a field of Core's Config naming RenderSky, and passes on Debug, Release and a Release
-    built as the runner builds it. The norm's N 1.6 and its row say so. Next the split, whose
-    AGENTS.md rows are the owner's word. The split's plan is the Reply of `514b2110`, accepted at
-    10:12 on 2026-11-11 with four conditions. The layers become BevyCSharp.<Area> projects in their
-    areas' folders, the flat project keeping BevyApp, EnginePlugin and DefaultPlugins and
-    referencing every project, its package carrying the analyzers and the build files; every
-    system's bridge goes in BevyCSharp.Native's package alone with the loader and the ABI's check;
-    every project packs at the one version, twenty packages; the games, the templates and the
-    examples keep their one reference to BevyCSharp. Two commits, the files moved by git inside the
-    one project first, then the projects, the packing and the workflow. The conditions. Nothing is
-    published before the packages are read, the cut getting a pack run without publish, its
-    packages' ids, dependencies and contents read by the review and the ids told to the owner, the
-    run with publish after; each area's package depends on the areas it references at exactly its
-    own version; InternalsVisibleTo is named pair by pair and given only where used; and between the
-    two commits nothing else lands, each with the whole suite. The AGENTS.md rows are the owner's
-    word in the coder's session. The split's first commit is `00f012ff`, pushed at 13:06 on
-    2026-11-11, moves alone, 668 files renamed whole by git, 619 of the library's and 50 of the
-    tests' in all, Interop becoming Native and Ui ImGui, Ecs, Math, Time, Input, Behaviors and
-    Generated folders inside Core, the Assets folder keeping the asset server's 20 files and its
-    others going to their areas, the 27 kernels to their areas' Kernels folders, embedded under
-    their old names. The paths that name them follow, the project file's globs, three tests, N 1.6
-    by top folder with its list gone, and four documents; AGENTS.md's library rows are redrawn on
-    the owner's yes in the coder's session. The tests' Assets folder of 158 files stays, moving it
-    an item after the split. Next the second commit, the projects, with the twenty ids, the
-    exact-version dependencies and the InternalsVisibleTo pairs in its Reply, and a pack run without
-    publish on it.
+    packed as its own package at the bridge's one version, the native crate one package the others
+    depend on, the dependency direction held by project references and a norm test, the public API
+    held identical before and after. Landed, each with the whole suite and the listing unchanged.
+    Six cuts that took every edge up the layers away, `62ba6c03` to `04d6b73a`, the frame's hooks
+    and Config, the log ring, the entry points an internal class an area, the console's commands by
+    area, the extension members, and the asset data with hooks a higher area's plugin adds;
+    `5f86882d`, a script compiled against every assembly the library names; `1f061b2c`, N 1.6
+    holding nine layers by what each file names in the built library; `00f012ff`, 668 files moved by
+    git into the areas' folders; `7428798d`, pushed at 15:30 on 2026-11-11, nineteen area projects
+    and the flat one, each packed at one version with exact-version dependencies. Open. Verdict 57,
+    its runs red on Linux by the runners' network alone, green on Windows and macOS. By Decision 88
+    of 2026-11-11 the areas are not packed on their own, so a commit on `7428798d` makes
+    BevyCSharp's one package carry every area's assembly with no dependency on an engine id, the
+    exact-version closing going with the ids, N 6.4 and N 6.5 reading the one package, the pack job
+    saying its size and failing before the push where it is over nuget.org's limit, and AGENTS.md's
+    rows, BUILDING and the guide saying projects in one package. Then a pack run without publish,
+    the one package read, and the run with publish. After the split, items of their own, the tests'
+    Assets folder moved to its areas and InternalsVisibleTo's 68 pairs narrowed. The item as it
+    stood on 2026-11-11 at 16:08, with the plan of 2026-11-10 and the cuts' and the norm test's
+    Replies, stands in REVIEW-ARCHIVE.md.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -256,9 +199,22 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     compiler, each change said in the log and reachable through the CLI, so a running program is
     edited and seen without a restart; the bridge's own code stays a restart. After 119.
 
+135. **The bridge's size.** Decision 88 on 2026-11-11. The one package stands at 249,913,716 bytes
+    of nuget.org's 250 MB, each system's bridge about 41 MB compressed, so a publish fails on the
+    day a bridge grows by a tenth of a percent. One read first, on one system, of what a bridge's
+    bytes are, by section and by crate, the symbols and the debug information, the features built in
+    and the optimization's settings; then the cut that takes the most with nothing a game draws
+    changed, held by the captures and the ABI's check, the package's size said in every pack run's
+    log beside the limit. After the split is published. The limit read by the coder at 16:21 on
+    2026-11-11. nuget.org's documents say up to 250 MB and no bytes; its gallery's configuration
+    allows a request of 262,144,000 bytes, 250 times 1024 times 1024, answering 413 past it, so the
+    pack's check fails a package above 262,139,904 and 0.6.91 has 12,226,188 bytes of room, 4.66
+    percent, where the review had counted 86,284 under 250,000,000. So the item is less pressing
+    than it was written and stays, the room being four or five percent of a bridge's growth.
+
 ## Verdicts
 
-Verdicts 2 and 33 to 56 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
+Verdicts 2 and 33 to 57 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
 
 ## Decisions
 
@@ -404,387 +360,22 @@ README cross-references the other engine, each in full under Decisions in REVIEW
     which are the review's records and RENDERING.md's; a number stands in a comment only where the
     code's choice depends on it, with its reason. Item 123.
 
+88. **One package on nuget.org.** The owner chose on 2026-11-11 at about 16:20, asked by the review
+    with the twenty ids of item 119's split before them, to keep one package, and wrote, "I want
+    bevy csharp nuget to be one pacakge because habing so many different pacakges is a hassle and
+    not great. It is also not necessary", and then of both engines, "I prefer one nuger only or two
+    with the second being heavy binaries". So the library's areas stay projects of their own inside
+    the repository, their layers held by the project references and N 1.6, and BevyCSharp's one
+    package carries every area's assembly, the modules', the six systems' bridges, the analyzers and
+    the build files; no BevyCSharp.<Area> id is published. Asked about the bridge's size, 249.9 MB
+    against nuget.org's limit of 250, the owner chose to keep one package there too. The pack job
+    says the package's size and fails before the push where it is over the limit. Decision 85's
+    packages at one version give way to this for the bridge. Asked again at about 16:40 between one
+    package and two, the second for the bridges, as the owner had written "Like BevyCSharp.Binaries
+    or something", the owner chose one package with the bridge shrunk, a second package of the
+    bridges alone standing at about 247 MB of the limit by itself; the shrinking is item 135.
+
 ## Replies
-
-119 planned on 2026-11-10, before the batch. The library's folders were read for which top-level
-types each names of another's, the code without its comments and strings, the Assets folder cut by
-its files' stems into the rendering, the shaders, global illumination, the weather, the 2D drawing,
-Bevy's UI, the audio, the animation, the gizmos and the asset server. The graph is not the item's
-layering yet, so the split goes in two parts as the sibling's does, first the back edges cut inside
-the one project, each cut a commit with its suite, and then the projects drawn along the cut areas.
-
-The projects, from the bottom. BevyCSharp.Native carries the bridge's library for each platform with
-the loader and the ABI check, the package every other depends on. BevyCSharp.Core holds Core, Ecs,
-Math, Time, Input and the behaviors' runner, since Core and Ecs name each other, 46 and 230 times,
-and both name the input and the clock, as the sibling's Core holds them, with the log ring,
-AssetHandle and the reflected wrappers of Bevy's components. On it BevyCSharp.Assets holds the asset
-server, its packs, data assets and glTF, BevyCSharp.Rendering the cameras, lights, materials,
-meshes, the look and the shader programs, BevyCSharp.Rendering.GlobalIllumination the scene field,
-the probes and the reference, and BevyCSharp.Sky the sky, fog, clouds, rain, snow and thunder over
-the Sky module, on the field, which it names 18 times, and on the audio for the thunder. Beside them
-stand BevyCSharp.Render2d, BevyCSharp.Ui for Bevy's UI and Feathers, BevyCSharp.ImGui for the Ui
-folder, BevyCSharp.Audio, BevyCSharp.Animation, BevyCSharp.Gizmos, BevyCSharp.Physics over
-BepuPhysics, BevyCSharp.Scenes, BevyCSharp.Modeling, BevyCSharp.Levels and BevyCSharp.Vegetation
-over their modules, BevyCSharp.Diagnostics with the console's host and catalog, and BevyCSharp.Cli,
-each on what it draws on. BevyCSharp itself keeps BevyApp and DefaultPlugins, which compose the
-rest, and is the package a game names, depending on all of them. The names are read against the docs
-before they are set, and every type keeps the namespace Bevy.
-
-The back edges and their cuts. App's frame loop calls a dozen areas by name, the asset server's
-sweep, the mixer, the animation machines, the recorder, the modeling, the trees, the scene field,
-the probes, the sky's weather and fog, and Config names the camera controllers, the dev tools,
-Feathers and the packs, so each area's work in the frame registers through its own plugin at the
-stage it runs in, and the flags the bridge is built with stay in Config as Core's. Ecs names
-AssetHandle and SaveId, which move into Core, its spawn helpers name the lights and cameras, which
-move into Rendering, and its observers name the animation's events, which the animation's plugin
-registers. The log ring and the crash log, which Core and Ecs name, move into Core, and the
-console's 135 commands, 17 files in Diagnostics naming the global illumination's types 26 times, the
-sky's 21 and the modeling's 23, move each into its area's project with the command generator running
-in each, as the sibling's do. The asset server names the mesh and material data, 19 times, and the
-scenes' values, 10, and Scenes names the asset server 61 times, so the mesh and material data move
-into Assets, which Rendering draws, and Scenes stands on Assets. The smaller ones are SyntheticInput
-naming the ImGui runtime, which ImGui's plugin hooks, and the shader programs naming the ray scene,
-which moves into Rendering.
-
-Two of the cuts need more than moving files. Native is one partial class over eleven files holding
-some 520 entry points, the mirror structs naming the areas' enums, AlphaMode, ClearMode, BloomMode,
-SliceTiling and TileData among them, and a partial cannot span assemblies, while two internal types
-of one name seen through InternalsVisibleTo clash. So each area's entry points and mirrors become an
-internal class of the area's own, NativeAudio and the like, and its 638 calls outside Interop are
-renamed, Native keeping the app's, the frame's and Check, the largest cut. And Render is partial
-over the rendering, global illumination and the sky, which C# 14's static extension members carry, a
-static class extended from a second project keeping its calls as they were, tried here on .NET 10
-with Render.SetGlobalIllumination declared in an extension(Render) block of another assembly. The
-global illumination's and the sky's parts of Render, and the spawn helpers on EcsWorld, become such
-blocks, so a game's code reads the same. The public listing is written from every project and lists
-an extension member under the type it extends, so PublicApi.txt reads the same lines, split per
-project and held to the whole before the move.
-
-Once the cuts are in, a norm test reads the areas' edges as the projects will and fails one that
-points upward, so the second part moves files without a cycle coming back. The second part makes the
-projects, the generators wired into each with InternalsVisibleTo among the engine's projects and the
-tests, the script host reading every loaded project as it reads the one, the pack workflow packing
-every project at the one version, the native libraries in BevyCSharp.Native and the build props and
-targets in BevyCSharp, so the templates and the games keep their one reference, and BUILDING.md's
-package table, the guide's lines and RENDERING.md's names redrawn. AGENTS.md's table of where things
-are lists folders of the one project, and the owner's allowance of 2026-10-05 covers adding a row it
-lacks, not redrawing it, so its rows change with the owner's word, which this plan asks for and does
-not take from the review.
-
-The cuts are some seven commits, the frame's hooks and Config, the log ring with AssetHandle and
-SaveId, the entry points by area, the commands by area, the extension members with the listing's
-writer, the asset data and the smaller ones, then the norm test, and the split as one or two. Each
-cut runs the whole suite, which waits on the owner's word for its next run. The review is asked to
-confirm the projects, the order and the two cuts that need more than moving files before the first
-cut.
-
-No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
-unchanged.
-
-Shared: C# 14's static extension members carry a static class's members declared in a second project
-with the class's calls unchanged, tried on .NET 10, for the sibling's split where a partial type
-spans areas.
-
-Item 119's first cut, the frame's hooks and Config, in the commit carrying this line, held with the
-others. App's making and its frame's first stage named a dozen areas. What it does before Bevy
-builds the app is Core's by what it does, the game's asset files and their pack handed to Bevy
-before it builds its asset sources, the streamed reads' root the project's settings are read from,
-the memory guard and the player's directory, so AssetFiles, AssetPack, Streaming, StreamRead,
-MemoryGuard and UserData, which name nothing above Core, move into Core and App keeps those calls.
-The rest goes to a plugin of each area's own, internal, which EnginePlugin adds to every app. As it
-is added it forgets what the area kept for the app before and adds its systems, the project's icon
-among them, and it puts the area's work in the frame on the app's own list (App.AreasWork) at places
-a hundred apart that keep the order the frame had, from the assets that failed and the sweep through
-the animation, the recorder, the modeling, the screenshot, the trees, the field, the probes, the
-sky's six, the field's own drawing, the hidden scope and the overlay to the data and material files
-and the scenes. A step that needs the renderer or a window asks for it itself, as the frame's blocks
-asked. The assets' failures are posted after Bevy's lines where before them, in the same stage
-before any system of the game. The flags the bridge is built with that Config types its members by,
-CameraControllers, DevTools and DiagnosticPlugins, move into Core.
-
-After the split EnginePlugin stands in the flat project, as BevyApp and DefaultPlugins do, adding
-every area's plugin, and Core keeps a plugin of its own for what is Core's, so a program that names
-one area's package adds that area's plugin and the area's work is its app's from the start. An app
-made without EnginePlugin takes none of the areas' upkeep, and the tests that made such apps where
-they use an area's work, the audio's, the loading's, the reflected wrappers', the asset edits' and
-the glTF export's, add it. Config's documentation names the areas' types by cref some forty times,
-which the split writes as plain names.
-
-No native file changed. The solution builds with warnings as errors, and the tests of the areas the
-cut touches pass, 393 of 394 with one skipped, the app's stages and its leaks, the plugins, the
-assets, the packs, the data and streamed reads, the audio, the animation, the saves and scenes, the
-modeling, the trees, the field and global illumination, the sky's, the hidden scope, the overlay,
-ImGui, the physics, the recording and the screenshot key, the memory guard and the window's memory
-among them. NormTests passed, 18. The public listing is unchanged.
-
-Item 119's second cut, the log ring with AssetHandle and SaveId, in the commit carrying this line,
-held with the others. EngineLog, CrashLog, ConsoleLog, Log, LogLevel and LogLine move from the
-diagnostics into Core, which Core, Ecs and the bridge's status name, the console's host and its
-catalog staying with the diagnostics. SaveId, which the component schemas name, moves from the
-scenes into Ecs. AssetHandle, which Core and Ecs name, moves into Core as a partial struct, its
-State and IsLoaded, which ask the asset server, staying with the assets in a part of their own
-(AssetHandle.Loading.cs), which the cut that writes the extension members makes one of them.
-AssetIds moves into Core with them, since cut 1 put AssetFiles there, which names its root. None of
-the moved types names one above Core. What Core still names above it is the smaller cuts': the app's
-systems naming the asset server and the scenes' ready message, the frame's profile, and the window's
-memory naming Persistent.
-
-No native file changed. The solution builds with warnings as errors, and the tests of what the cut
-touches pass, 143 of 143, the logs, the crash log, the logged errors, the console and its hosts, the
-assets, their ids, files, loads and failures, the saves, the schemas, the persistent values, the
-scene files and values, the reflected components and the world among them. NormTests passed, 18. The
-public listing is unchanged.
-
-Item 119's third cut, the entry points to an internal class an area, in the commit carrying this
-line. Native's 523 entry points leave its eleven files for 14 internal static classes in the areas'
-folders, each entry point in the class of the lowest area of the library that calls it by the plan's
-layers, and the four no library code calls in the class of what they name. NativeCore holds 159 in
-Core and Ecs, the ECS with its components, their reflection, the hierarchy, relations and observers,
-the states and stepping, the windows, input, the clock and colors. NativeRendering holds 191, the
-shader programs among them, NativeUi 37, NativeAnimation 26, NativeAssets 18, NativeAudio 17,
-NativeGizmos 13, NativeDiagnostics 12, NativeRender2d 10, NativeGlobalIllumination 7, NativeImGui 6,
-NativeSky 3 and NativeScenes 1, each in the folder its area's files stand in. Native keeps 23, the
-bridge's version and build, the main thread, the app with its systems, the frame, the log and the
-panics, with Check and ReadText, and LastPanic moves into it from CrashLog, so the bridge's status
-names nothing in Core. A class too long for one file is partial over files by subject, the longest
-347 lines.
-
-Every block moved as it stood, the 523 with Native's seven other members, each found once in the new
-files, and none changed but one cref, the animation's field curve naming
-NativeCore.bcs_reflect_error. Each class has a Library constant, Native's, so each block reads as it
-did. The old banners go, one of them naming a page of HTML and CSS over the ImGui entry points, and
-each file's subjects have banners of their own. 621 calls of the moved entry points are renamed, the
-library's and the tests', with the 22 uses of the primary window's constant, which goes to
-NativeCore with the windows.
-
-Each class runs NativeLoader.Initialize from its static constructor, as Native does, so the library
-is resolved and its ABI compared before the first call into any of them. AbiCheckTests reads the
-static constructor of every class that declares an entry point for that call, and with NativeSky's
-taken out it failed naming NativeSky. The check covers 523 entry points before the cut, in one
-class, and 523 after it, in 14. The mirror structs those entry points pass, through their
-parameters, what they answer, the callbacks they are handed and the fields of each mirror followed
-through pointers and fixed buffers, are 72 of the 73 structs of Bevy.Interop before and after, the
-same 72, the 73rd, NativeScatteringTerm, crossing as an array behind an nint of
-NativeAtmosphereConfig. Both counts were read from the built library by reflection, on each side of
-the cut, by a test written for the reading and not kept.
-
-The plan named five mirrors as naming the areas' enums. AlphaMode, ClearMode, BloomMode and
-SliceTiling are integer fields of those names, and TileData is the one such type a mirror names, in
-NativeTile. The mirrors that name a type above the bridge move to their areas with their namespace
-kept, NativeChunk, which names Entity, into Ecs, and NativeTile and NativeScatteringTerm, which name
-TileData and Vec3, into Assets. Read as the plan's graph reads, Interop names no type of another
-area after the cut, each name it shares with one being a field's.
-
-Two things wait on later cuts. The observers' entry points for the animation's clip events and the
-interface's pointer, widgets and focused keys stay in NativeCore, called from the observers in Ecs
-(Observers.cs), until the smaller cut moves their registration into the animation's and the
-interface's plugins, and they go with it. And NativeLibrary.SetDllImportResolver is set once for
-each assembly, so the split sets the loader's resolver for each project that declares an entry
-point, its classes' static constructors handing the loader their own assembly. AGENTS.md's row for
-Interop, which says Native holds the bcs_* entry points, waits on the owner's word with the rest of
-the table, as the plan says.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed on
-this commit with the one before it, Verdict 53's mend, 2,039 passed, none failed and 3 skipped,
-AbiCheckTests among them. NormTests passed, 18. The public listing is unchanged.
-
-Shared: NativeLibrary.SetDllImportResolver is set once for each assembly, so an engine split into
-projects sets its loader's resolver from each project that declares an import, for the sibling's
-system imports in its split.
-
-Item 119's fourth cut, the console's commands by area, in the commit carrying this line. The
-commands of an area move into its folder, the animation's, the illumination's field and gi commands,
-the shaders' and the sky's into the Assets folder, and the levels', the modeling's and the scenes'
-into theirs, 7 files of 84 commands. What every command stands on moves into Core, which every area
-stands on, the Command attribute, its parameter, ConsoleCommand, the catalog ConsoleCommands and
-ConsoleHost, which lends a command the world and keeps its failure as a CliError, which moves from
-Cli with it. The plan put the catalog with the console's host in Diagnostics, which holds the
-overlay and the console's view over Bevy's UI and so stands above the areas, where an area's
-commands could not name it. Three helpers the commands of several areas read, a line's first word,
-an entity found by its name or its #index and the answer where nothing has the name, move from the
-world commands into ConsoleHost, and their 24 calls name it.
-
-The commands that stay with the console in Diagnostics are its own, 51 of them, the builtins, the
-frame's profile and the bridge's memory, the schemas' and the states', and the world's, for the app,
-entities, windows, shots, waits, input, the clock, materials and the recorder, which span Core, the
-rendering, the scenes and ImGui. camera.look stays with them, since where no camera has a look it
-takes the scene field's camera and so reads the illumination as well as the rendering.
-
-The generator emits each assembly's registration under one name, in a module initializer, as it does
-for a game's commands and the tests', so each project of the split registers its own commands with
-no change to the generator once the project references it. Read as the plan's graph reads,
-Diagnostics names the modeling, the sky, the animation, the levels and the command line no more, and
-the areas that name Diagnostics are Core and the physics for the frame's profile and ImGui for the
-console's view, which the smaller cuts take, ImGui's with the synthetic input, since the input
-commands and the overlay name ImGui's runtime. The engine's plugin, which builds every area's work,
-names Diagnostics' plugin as well and goes with BevyApp in the split.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed,
-2,039 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged.
-
-Shared: the console's attribute, catalog and host stand in the lowest project, so each area's
-project declares its own commands and registers them through the generator's module initializer, for
-the sibling's commands in its areas.
-
-Item 119's fifth cut, the extension members with the listing's writer, in the commit carrying this
-line. Global illumination's five members of Render move into an extension(Render) block of
-RenderGlobalIllumination, the sky's eight into one of RenderSky, and EcsWorld's three spawn helpers,
-SpawnMesh, SpawnPointLight and SpawnCamera3d, into an extension(EcsWorld ecs) block of
-EcsWorldSpawning, each file named for its class as N 1.2 asks, and Descendants, which stood with the
-helpers, joins the world's relations. Every call reads as it did, the library's, the games', the
-examples' and the tests', and none changed. Render is partial within the rendering alone, and the
-world names no type of the rendering's.
-
-A cref naming a moved member through the type it extends does not resolve, and one in a block naming
-a member of Render's own bare does not either, so 28 crefs name the moved members in the language's
-form, as RenderSky.extension(Render).SetClouds, and 5 name Render's, as Render.SetAtmosphere.
-
-The three checks hold. The script host compiled scripts with Roslyn 4.14, which reads a static
-member of a block as a static method of the block's class alone. It takes Roslyn 5.0.0, the compiler
-of the .NET 10 SDK, and the tests take its workspace layer at the same version, which takes the
-compiler of its own version alone. ScriptExtensionTests compiles a script calling
-Render.SetGlobalIllumination, Render.SetClouds and ecs.SpawnPointLight, and on 4.14 it failed with
-CS0117 for the two members of Render, an instance member of a block compiling to a classic extension
-method as well, which 4.14 read. The generator and the code fixes stay on 4.14, since the compiler
-that runs them brings its own. The documentation file holds each member's comment under the block's
-type, which the class's method carrying the call points to with inheritdoc. The cheat sheet and
-CheatsheetTests read the members a block gives a named type as that type's own and leave out the
-classes that carry the calls, so CHEATSHEET.md keeps every line with its summary, 10 lines moving
-within their types' blocks. Nothing in the library, the editor, the script host or the player reads
-Render's or EcsWorld's members by reflection. Its two walks over types look for generated
-registrations alone, and the cheat sheet and the listing, which read members, read the blocks.
-
-The listing's writer, PublicSurface with ExtensionMembers beside it, lists a member a block of a
-named type gives under that type and leaves out the block's types and a class that carries calls
-alone, so PublicApi.txt reads the same lines and the commit leaves it as it was. ShaderValues' block
-over a type parameter extends no type the listing can name and is listed as the compiler made it, as
-it was.
-
-Read as the plan's graph reads with the three classes placed in their areas, what the rendering
-still names of the illumination and the sky is the look's reading of the field's camera and the
-atmosphere's and the probe captures' settings, which the graph's names file under the sky and the
-illumination though they are Bevy's rendering, for the smaller cuts. A script calling
-Render.SetWeather does not compile in the host, before the cut as after it, since WeatherState is
-the Sky module's and the host references the library alone.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed,
-2,040 passed, none failed and 3 skipped, the script host's new test among them, which N 1.4's list
-takes by its nature beside the host's other three. NormTests passed, 18. The public listing is
-unchanged.
-
-Shared: C# 14's extension blocks need Roslyn 5 wherever code is compiled against them while a
-program runs, and a cref names an extension member as Class.extension(Type).Member, for the
-sibling's script host and its split.
-
-Item 119's sixth cut, the asset data and the smaller ones, in the commit carrying this line. Read
-from a compile of the library's sources, every name resolved to the file that declares it and each
-file placed in the plan's projects, no edge points up their order after the cut, Native, Core,
-Assets, Rendering, then Render2d, Audio, Animation, Gizmos, ImGui, Ui, GlobalIllumination, Scenes,
-Physics, Sky, Modeling, Vegetation, Levels, Diagnostics, Cli and BevyCSharp, and the projects hold
-no cycle. Before it Core named seven projects above it, the asset server three, the rendering four,
-and ImGui, global illumination and the physics one or two each. The reader is the scratchpad's, and
-the norm test's cut reads the edges the same way.
-
-Of the asset data, SceneValue and SceneReferences, which the asset server's data assets and material
-files read and which name nothing above the asset server, move from Scenes into Assets, so the
-scenes stand on the asset server. The mesh and material files, MaterialFiles, MeshFiles and
-MeshJson, call Render's own operations to make and read meshes and materials, so the data under them
-moving to the asset server, as the plan had it, would leave the edge, and they stand with the
-rendering instead, the data with them. The texture settings, how an image file is read, stand with
-the asset server, whose loads take them. The asset server forgets what an area keeps by a released
-handle through forgetters the rendering's and the physics' plugins add, and the material and mesh
-files' steps move from its plugin to the rendering's, at the same places in the frame. AssetHandle's
-State and IsLoaded become an extension block of AssetHandleLoading, which 89b1368b's Reply gave to
-the cut writing the extension members and which this cut makes, so the handle in Core is whole.
-
-In Core, App.SpawnGltf, which loads through the asset server and waits on the scenes' ready message,
-becomes an extension block of AppScenes, and App.AddComponentArray, whose array is the shaders', one
-of AppRendering. The observers take the reports of the clips' events through a watcher the
-animation's plugin adds, and the widgets' through WidgetEvents, each report's native callback and
-entry point going with it, bcs_observe_clip_events to NativeAnimation and bcs_observe_widget to
-NativeUi, as f33c3847's Reply said they would. SyntheticInput's Key and Type, which reach ImGui
-alone, become an extension block of SyntheticInputImGui, and Send hands the pointer's half that
-reaches the interface over through two hooks ImGui's plugin sets. The managed systems' times a frame
-profile counts move into Core as SystemTimes, which every system and the physics' step count into
-and FrameProfile takes, its public members as they were. Persistent and IPersistentValue, which name
-nothing above Core, move from Scenes into Core, where the window's memory keeps its place with them.
-
-Of the smaller ones, the tree materials take the trees' stiffness as four numbers rather than the
-trees' own type. Global illumination's reference counts the trees not dressed yet through a hook the
-trees' plugin sets. The helpers for the library's own programs, which the look, the field and the
-sky build with, move from SceneField into Shaders (Shaders.Kernels.cs). ImGui's console window,
-which draws the console's view, moves into Diagnostics. The ray scene, the light probes' capture
-settings, AlphaMode2d and Bevy's atmosphere settings stand with the rendering, which declares them,
-though the names the plan's graph read them by said otherwise, and the physics stands on the scenes,
-which name nothing of it, for its colliders' wait on a scene.
-
-The sky's edge to the audio is left, for the reason item 119 allows. It points down the plan's own
-layers, the sky standing on the audio, and turning it would put a type of sound both read into Core,
-wire the two in BevyCSharp, or stand the audio on the sky, each a path of its own for one sound the
-audio's own calls play.
-
-Two things fall to the split. Doc comments name types of projects above their own, as AssetServer's
-name Render.CreateMesh and AssetHandle's the asset server, which the split writes as text where a
-reference leaves its project. The watchers, forgetters and hooks are each added by an area's plugin
-that EnginePlugin builds, so an app without EnginePlugin reports no clip events, keeps what a
-released handle held and puts no pointer into ImGui, as it has run none of the areas' frame work
-since 001c630d.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed,
-2,040 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged, and
-the cheat sheet keeps every line, 4 moving within their types' blocks.
-
-Shared: a lower area that calls into a higher one at a point in its own work takes a hook the higher
-area's plugin adds, the forgetters of a released handle, the observers' watchers and the input's
-interface among them, for the sibling's areas.
-
-Item 119's norm test, in the commit carrying this line. NormTests.N_1_6 holds the library's areas in
-the layers the split gives them projects in, read as the projects' references will hold them, so the
-split moves files without a cycle coming back.
-
-Each of the library's files stands in its area's project by build/norm/1.6.tsv, a folder or a file a
-line with its project. The Assets folder names each of its 298 files, since it holds files of ten
-projects, EnginePlugin and DefaultPlugins stand in BevyCSharp, which composes the rest, and every
-other folder goes whole. A file placed nowhere fails the test, and so does a line that places
-nothing. It is a .tsv beside the norm's lists, being no list of places that break a rule, and the
-split's moves follow it, after which the projects' files say where each file stands. The projects go
-by their areas' names until the split sets them, BevyCSharp.Cli being the command line's project.
-
-What each file names of another's is read from the built library and its portable PDB. A type stands
-in the files its methods' sequence points name and those the compiler records for a type with no
-method to carry them, and it names what its methods' instructions, locals and signatures and its
-base, interfaces, fields and attributes hold, each as the compiler resolved it. So a member of an
-extension block counts for the class declaring the block, and a word in a comment or a string counts
-for nothing. A file the generators write stands in no project. The reading finds what the sixth
-cut's reader found compiling the sources with Roslyn, no edge up the plan's order and no cycle, in
-under half a second.
-
-The layers, each project in the lowest its names allow, as the sibling's N 1.6 lists them, are
-Native, then Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d,
-Animation, GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and Diagnostics,
-then Vegetation, then Levels and BevyCSharp. The test fails for a project naming one of its own
-layer or above, for one in a higher layer than its names need, and for a type standing in files of
-two projects, since a partial type cannot span assemblies.
-
-Placing SceneField.cs in Core fails it, Core naming Assets, GlobalIllumination and Rendering and
-SceneField's parts standing in two projects, and a field of Core's Config naming RenderSky fails it
-with Core naming Sky. It passes on the Debug build, on a Release build and on a Release build with
-ContinuousIntegrationBuild, whose PDB names the files under a mapped root, and it fails where the
-PDB names none of the library's files, so an empty reading never passes. The walk of instructions N
-2.10 reads with takes a body's bytes as well, and N 1.6 walks the library's bodies with it.
-
-N 1.6's row in NORM.md's table reads to take, at item 119, and its text has a repository of one
-project keep its layers by review until its split. With this commit the test holds them before the
-split, from the code, and once the split makes the projects it reads their files' references as the
-sibling's does, the placement's file going.
-
-No native file changed. The solution builds with warnings as errors, and the whole suite passed,
-2,043 passed, none failed and 3 skipped, N_1_6 among them. NormTests passed, 19. The public listing
-is unchanged.
-
-Shared: the areas of a library of one project are held to the layers of its coming split by a norm
-test reading the built assembly and its portable PDB, each type placed by its source files, for the
-sibling's N 1.6 and any area it splits again.
 
 119's split planned on 2026-11-11, before the work. The projects are N 1.6's layers, each in its
 area's folder under BevyCSharp/, named BevyCSharp.<Area>, each referencing what its code names and
@@ -961,3 +552,85 @@ Shared: an EngineAssemblies.Load that sets its flag before it loads lets a secon
 read the assemblies loaded so far, which a second flag set after the last one ends, for the
 sibling's copy, and an engine's InternalsVisibleTo found by building without it gives each pair by
 use, for the sibling's projects.
+
+Item 119's split packed as one package, by Decision 88, in the commit carrying this line on
+7428798d. No area's project is packed on its own, the shared props setting IsPackable off. The flat
+project's package carries every project's assembly with its documentation in lib/net10.0, taken from
+the project references it builds, the three modules' beside them through references of its own, the
+bridge's library for each platform in its runtimes folder, moved there from the bridge's project,
+the generator, the code fixes and the build files. NuGet writes a dependency for each project
+reference the restore holds public, whatever the list of versions it is given says, as a first pack
+here found with the nineteen still among its dependencies, so the flat project's references are
+private while packing, by an item definition on _IsPacking, which dotnet pack sets for its restore
+and its pack alike, and each project of the repository referencing the flat one sees every area
+through it otherwise. The package depends on Twizzle.ImGui-Bundle.NET and BepuPhysics alone, which
+the flat project names again at the versions the ImGui and Physics projects name, since a package
+depends on what its own project names. The exact-version target and the modules' pack targets in
+Rendering, Modeling and Levels go with the ids, and build/pack.sh goes, the workflows' packs, the
+scripts' notes, the games' nuget.config and BUILDING.md packing the one project again as before the
+split.
+
+The staged bridges' check, BCS100 and BCS101, stays in the bridge's project beside the list of what
+the bridge is built from, which its build's check reads too, and the flat project's pack runs it
+before the nuspec is written. The twenty blank lines 7428798d left in the bridge's project go. N 6.4
+opens the one package again and finds every engine assembly and module with its documentation in the
+lib folder, the analyzers, the build files, the readme and the staged bridges, no dependency on an
+id of the engine, and each package from outside that an area's project names at the version it
+names, with none beside them.
+
+build/package-size.py says the size and room of each package of a version and fails where one is
+over the size nuget.org takes, and the pack job runs it as a step of its own after the pack, before
+a package is kept or pushed, its table in the run's summary. nuget.org's documents give the size as
+250 MB, up to 250MB in the FAQ and about 250 MB in the guide to publishing, with no count of bytes.
+The gallery's own Web.config gives the count, ASP.NET's maxRequestLength of 256,000 KB and IIS's
+maxAllowedContentLength of 262,144,000 bytes, 250 MiB, its comment reading 250MB * 1024 * 1024, and
+its push answers 413, the package file exceeding the size limit, where ASP.NET finds the request
+over it. The request is the package as the one part of a form, as NuGet's client sends it, a few
+hundred bytes of framing, so the script measures each package against 262,144,000 bytes less 4,096,
+262,139,904. The published 0.6.91 of 249,913,716 bytes has 12,226,188 bytes of room under that, 4.7
+percent, and 86,284 under 250,000,000, the limit counted in millions. PackageSizeTests holds the
+script to its table and its failure on files standing in for packages under a limit of a few
+kilobytes.
+
+The local package at 0.0.0-one1, packed in Release on this machine's bridge alone, is 52,739,654
+bytes in 60 entries, read one by one. lib/net10.0 holds 46, the twenty engine assemblies and the
+Levels, Sky and Vegetation modules, each a .dll and its .xml. runtimes holds one,
+linux-x64/native/libbevy_csharp.so of 185,408,304 bytes unpacked, the one bridge staged here, where
+the pack run stages six. analyzers/dotnet/cs holds BevyCSharp.Generator.dll and
+BevyCSharp.CodeFixes.dll, and build holds BevyCSharp.props, BevyCSharp.targets and
+BevyCSharp.Embed.targets. At the root are README.md, LICENSE, THIRD-PARTY-NOTICES.md, icon.png and
+BevyCSharp.nuspec, with the three parts every package has, _rels/.rels, [Content_Types].xml and the
+core properties. The nuspec's one group, net10.0, depends on BepuPhysics 2.5.0-beta.29 and
+Twizzle.ImGui-Bundle.NET 1.91.5.2 and nothing else. The pack run without publish on this commit says
+the package's size with six bridges in its summary.
+
+Courtyard built on it with warnings as errors, restoring BevyCSharp alone, its folder holding the
+twenty assemblies, the three modules' and the bridge, found the bridge and answered in 1 s, and
+./bcs list names the same 135 commands as on 0.6.91, line for line. The pack run's games, the
+feature test's course, the examples on the package, the captures, the soak's printed seconds against
+the ground of 124, 478 and 3 and the README's walk read the rest of the first run.
+
+A script against the areas, read on the way. The script host walked the assemblies it compiles
+against from the flat project's alone, which references the fifteen areas its code names and not
+BevyCSharp.Levels, which no area below names either, so the levels' area and the Levels module
+reached a script's references only where the process had loaded them. It walks from every engine
+assembly, EngineAssemblies.Loaded, and ScriptReferenceTests reads the walk itself for the twenty and
+the three modules, since what a test process has loaded before covers a gap in the compilation.
+Without the change the test fails, naming BevyCSharp.Levels and Levels, and BevyCSharp as well, the
+walk's start, which it never counted and the loaded ones bring.
+
+AGENTS.md's rows hold for one package as they stand, the BevyCSharp row naming the package a game
+names over every area's project and no row naming an area's package, and the guide names none.
+BUILDING.md's section on packing says the twenty projects pack as one package and what it carries,
+and the script's size.
+
+The whole suite's first run on the change failed one test, N 1.4, with PackageSizeTests in
+Tests/Build outside an area's folder, and build/norm/1.4.txt lists it by its nature beside the other
+tests of the build scripts. No native file changed. The solution builds with warnings as errors, and
+the whole suite ran again after that line and passed, 2,048 passed, none failed and 3 skipped.
+NormTests passed, 19. The public listing and the cheat sheet are unchanged.
+
+Shared: an engine of several projects packed as one package, the flat project carrying its
+references' assemblies in its lib folder and holding its references private while packing by an item
+definition on _IsPacking, since NuGet writes a dependency for every public one, with the packages
+from outside named again in it, for the sibling's projects.
