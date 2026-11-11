@@ -1,6 +1,11 @@
 # Review
 
-Reviewed up to `514b2110`, the split's plan as a Reply, documents alone, pushed at 10:24 on
+Reviewed up to `00f012ff`, the split's first commit, the library's files moved by git into the
+folders of the areas' projects inside the one project, 668 files renamed whole and one nearly, with
+the paths that name them and AGENTS.md's rows, pushed at 13:06 on 2026-11-11, green at 13:25 with
+Linux in 13 minutes, Windows in 18 and macOS in 16; the whole suite passed, 2,043 passed, none
+failed and 3 skipped, NormTests 19 with N 1.6 on folders; it keeps the form and carries the review's
+files. Before it `514b2110`, the split's plan as a Reply, documents alone, pushed at 10:24 on
 2026-11-11, no run starting for it. Before it `1f061b2c`, 119's norm test, N 1.6 holding the
 library's areas in the split's nine layers by what each file names of another in the built library
 and its PDB, each file placed by a list, pushed at 10:07 on 2026-11-11, green at 10:23 with Linux in
@@ -233,7 +238,17 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     run with publish after; each area's package depends on the areas it references at exactly its
     own version; InternalsVisibleTo is named pair by pair and given only where used; and between the
     two commits nothing else lands, each with the whole suite. The AGENTS.md rows are the owner's
-    word in the coder's session.
+    word in the coder's session. The split's first commit is `00f012ff`, pushed at 13:06 on
+    2026-11-11, moves alone, 668 files renamed whole by git, 619 of the library's and 50 of the
+    tests' in all, Interop becoming Native and Ui ImGui, Ecs, Math, Time, Input, Behaviors and
+    Generated folders inside Core, the Assets folder keeping the asset server's 20 files and its
+    others going to their areas, the 27 kernels to their areas' Kernels folders, embedded under
+    their old names. The paths that name them follow, the project file's globs, three tests, N 1.6
+    by top folder with its list gone, and four documents; AGENTS.md's library rows are redrawn on
+    the owner's yes in the coder's session. The tests' Assets folder of 158 files stays, moving it
+    an item after the split. Next the second commit, the projects, with the twenty ids, the
+    exact-version dependencies and the InternalsVisibleTo pairs in its Reply, and a pack run without
+    publish on it.
 
 120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
     changed texture, model, scene or shader reloaded in the running program, is exposed and read,
@@ -859,3 +874,90 @@ after the split.
 No native file changed. The solution builds with warnings as errors, and the whole suite passed,
 2,043 passed, none failed and 3 skipped. NormTests passed, 19, N 1.6 on the folders. The public
 listing and the cheat sheet are unchanged.
+
+Item 119's split, its second commit, the projects, in the commit carrying this line. Each area's
+folder under BevyCSharp/ is a project, BevyCSharp.<Area>, the Cli folder's BevyCSharp.CliServer,
+each referencing the projects its code names, as the plan listed them, and
+BevyCSharp/BevyCSharp.csproj is the flat project, compiling BevyApp, EnginePlugin and DefaultPlugins
+alone and referencing all nineteen. A Directory.Build.props under BevyCSharp/ gives them the
+documentation's errors of N 2.2, runs the generator in each, so each area's commands, schemas and
+behaviors register from its own assembly, and opens every project to the tests. N 1.6 reads the
+project files' references against its layers, the flat project in a layer of its own above Levels,
+and holds the layers to EngineAssemblies.Names, and the solution lists the nineteen in a folder of
+its own.
+
+The twenty ids, as a publishing run would push them, are BevyCSharp, BevyCSharp.Native,
+BevyCSharp.Core, BevyCSharp.Assets, BevyCSharp.Audio, BevyCSharp.Gizmos, BevyCSharp.ImGui,
+BevyCSharp.CliServer, BevyCSharp.Rendering, BevyCSharp.Render2d, BevyCSharp.Animation,
+BevyCSharp.GlobalIllumination, BevyCSharp.Scenes, BevyCSharp.Ui, BevyCSharp.Physics, BevyCSharp.Sky,
+BevyCSharp.Modeling, BevyCSharp.Diagnostics, BevyCSharp.Vegetation and BevyCSharp.Levels. The
+bridge's library for each platform rides in BevyCSharp.Native's runtimes folder alone, the ImGui
+package with BevyCSharp.ImGui, BepuPhysics with BevyCSharp.Physics, and each module's assembly in
+the lowest package naming it, Sky's in BevyCSharp.Rendering, Vegetation's in BevyCSharp.Modeling and
+Levels' in BevyCSharp.Levels. The flat package carries the generator, the code fixes and the props
+and targets a game's build takes, and depends on every area's package. build/pack.sh packs the
+twenty, and the workflows' five packs call it.
+
+A package depends on each area it references at exactly its own version. NuGet writes a referenced
+project's version as the lowest it accepts, so a target of the shared props, run after NuGet's
+_GetProjectReferenceVersions, closes each on both sides before the nuspec is written, and
+BevyCSharp.Sky's reads BevyCSharp.Rendering at [0.0.0-split1] and the rest alike in the twenty
+packed here. N 6.4 opens the flat package and finds each area's beside it at the same version, with
+what each carries and every engine dependency exact, and N 2.8 reads the packages every library
+project references.
+
+InternalsVisibleTo is given by use alone, 68 pairs, each a lower project opening to a higher one
+that reaches its internals, found by building without them and reading what each could not reach,
+and each project file names under each pair what it reaches. Native opens to the fourteen areas with
+entry points, for the library's name the entry points import, NativeRowGuard for Core and the mirror
+structs of the denoiser, the tilemap chunk and the field's draws, eye, lights and counts. Core opens
+to the areas for AssetHandle's key and constructor, App's frame work and running app, the console
+host's waits, the observers' registry, the clock's holds for the CLI server and the ECS's change
+queries for the physics, and to the script host for App.ForgetAssembly. Assets opens to the
+rendering for the asset server's forgetters and the texture settings' sampling, to the physics for
+the forgetters and to the scenes for SceneReferences.SameRun. Rendering opens to the 2D drawing, the
+interface and the trees for Render's internal members, to global illumination and the sky for the
+kernel helpers and the engine's views, to the scenes for the mesh and material files' JSON, to the
+console for the looks and the recorder, and to bcs for its GIF and PNG writers, which
+AnimationReader in the animation joins. Global illumination opens to the sky for the field, to the
+trees for the reference and to the console, the scenes to the physics for their instances, the
+physics to the levels for the colliders, the modeling to the levels, the sky to the trees for the
+weather, and each area to the flat project for the plugin EnginePlugin builds.
+
+The split needed more beside the projects. NativeLoader.Initialize takes the assembly of the class
+of entry points calling it and sets the resolver for that assembly, the ABI checked once. The
+kernels are embedded in the area that runs them and the kernel helpers take the assembly they read
+from. EngineAssemblies in Core loads every engine assembly by name and runs its module initializer
+where an app is made or the console's or the schemas' registry is read, as the sibling's does, so
+Courtyard's ./bcs list names the same 135 commands on the twenty packages as on 0.6.91. Its flag was
+set before the loading in the sibling's form, so another thread read a partial set while the first
+loaded, which the cheat sheet's test caught beside the listing's, and a second flag keeps another
+thread waiting on the gate until the last is loaded. The reflected wrappers' generator reads
+Core/Generated/bevy-taken-names.txt, the six names the projects above Core give their types, which
+its wrappers keep apart from, so SpriteImageModeValue keeps its name beside SpriteImageMode, and
+ReflectedNameTests holds the list to the assemblies. The script host walks from the flat assembly.
+The listing's writer, the cheat sheet and its test, N 1.1, N 2.10 and the ABI check read every
+engine assembly.
+
+145 doc comments' crefs naming a type of a project above their own become the name as code text, as
+the asset kinds' comment names <c>Audio.Play(AssetHandle, AudioSettings)</c>, so a reader can search
+it. BUILDING.md's section on packing says what the twenty hold, and the games' nuget.config and the
+scripts' notes pack with build/pack.sh. NativeFreshnessTests, which runs the bridge's project to its
+BeforeBuild, where the freshness checks went, moves to Tests/Native, and its line comes off N 1.4's
+list.
+
+Courtyard built on the twenty packages at 0.0.0-split1 with warnings as errors, every area's
+assembly, the three modules and the bridge beside it, and answered in 1 s as it did on 0.6.91. The
+rest of the first run is the pack run's to read, its games, the feature test's course, the examples
+on the package, the captures and the README's walk, and the soak's printed seconds, a game on the
+twenty packages starting no slower than on 0.6.91, whose ground is ready in 124 s, frames.wait 60 in
+478 s and pipelines.wait in 3 s.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,045 passed, none failed and 3 skipped. NormTests passed, 19. The public listing is unchanged line
+for line, and the cheat sheet keeps every line, 6 moving within their types' blocks.
+
+Shared: an EngineAssemblies.Load that sets its flag before it loads lets a second thread return and
+read the assemblies loaded so far, which a second flag set after the last one ends, for the
+sibling's copy, and an engine's InternalsVisibleTo found by building without it gives each pair by
+use, for the sibling's projects.

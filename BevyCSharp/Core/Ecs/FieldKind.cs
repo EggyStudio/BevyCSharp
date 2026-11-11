@@ -93,11 +93,11 @@ public enum FieldKind
     Map,
 
     /// <summary>
-    /// A <see cref="DataRef{T}"/>, a reference to a data asset, whose type
+    /// A <c>DataRef{T}</c>, a reference to a data asset, whose type
     /// <see cref="FieldHints.Asset"/> names.
     /// </summary>
     /// <remarks>
-    /// Read as the reference, boxed, which says its file's id through <see cref="IDataRef"/>, and
+    /// Read as the reference, boxed, which says its file's id through <c>IDataRef</c>, and
     /// written from a reference or from a file's id.
     /// </remarks>
     Data,

@@ -12,7 +12,7 @@ internal static unsafe partial class NativeGizmos
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeGizmos() => NativeLoader.Initialize();
+    static NativeGizmos() => NativeLoader.Initialize(typeof(NativeGizmos).Assembly);
 
     /// <summary>Records a run of gizmo text to draw this frame.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

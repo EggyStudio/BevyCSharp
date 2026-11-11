@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 
 namespace Bevy.Interop;
 
-/// <summary>What <see cref="Animation.StateOf"/> reads, in the bridge's layout.</summary>
+/// <summary>What <c>Animation.StateOf</c> reads, in the bridge's layout.</summary>
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeAnimationState
 {

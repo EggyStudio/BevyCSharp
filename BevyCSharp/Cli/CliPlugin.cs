@@ -8,7 +8,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Added to every app by <see cref="DefaultPlugins"/> and inert unless <see cref="Config.Serve"/>
+/// Added to every app by <c>DefaultPlugins</c> and inert unless <see cref="Config.Serve"/>
 /// is set or <c>BCS_SERVE</c> is in the environment, so an ordinary run opens no port and writes no
 /// file. What it costs when it is on is one thread waiting on a socket and one system a frame that
 /// usually finds an empty queue.

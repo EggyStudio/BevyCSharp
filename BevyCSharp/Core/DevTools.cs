@@ -32,7 +32,7 @@ public enum DevTools
 
     /// <summary>
     /// The overlay at each pointer of what picking finds under it, with a log of picking's events,
-    /// shown while <see cref="Picking.DebugMode"/> is other than disabled
+    /// shown while <c>Picking.DebugMode</c> is other than disabled
     /// (<c>DebugPickingPlugin</c>).
     /// </summary>
     /// <remarks>

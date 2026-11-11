@@ -25,11 +25,11 @@ public static unsafe class AssetServer
     /// </para>
     /// <para>
     /// What comes back is an ordinary mesh handle, indistinguishable from one
-    /// <see cref="Render.CreateMesh(MeshData)"/> built, so <see cref="Render.SetMesh"/> takes it as it is.
+    /// <c>Render.CreateMesh(MeshData)</c> built, so <c>Render.SetMesh</c> takes it as it is.
     /// </para>
     /// <para>
     /// The file's own material comes from <see cref="LoadGltfMaterial"/>, which needs a window.
-    /// Give the entity one from <see cref="Render.CreateMaterial(MaterialSettings)"/> otherwise.
+    /// Give the entity one from <c>Render.CreateMaterial(MaterialSettings)</c> otherwise.
     /// </para>
     /// </remarks>
     /// <param name="path">Path to the glTF file, relative to the assets directory.</param>
@@ -204,7 +204,7 @@ public static unsafe class AssetServer
     /// </para>
     /// <para>
     /// The compression is the file's, so the file loaded both ways is two loads of it, as Bevy has
-    /// it, each keeping its own meshes. <see cref="Render.CompressMesh"/> compresses a mesh made in
+    /// it, each keeping its own meshes. <c>Render.CompressMesh</c> compresses a mesh made in
     /// code the same way.
     /// </para>
     /// </remarks>
@@ -324,7 +324,7 @@ public static unsafe class AssetServer
     /// <para>
     /// So it is given here by what puts it on its entities at once and keeps it nowhere else. A
     /// handle kept in a field and spawned with later names nothing once the entities it was put on
-    /// are gone, and the same handle read back off one of them (<see cref="Render.MeshOf"/>) goes
+    /// are gone, and the same handle read back off one of them (<c>Render.MeshOf</c>) goes
     /// with it too.
     /// </para>
     /// </remarks>

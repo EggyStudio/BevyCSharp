@@ -9,7 +9,7 @@ public unsafe struct NativeMeshStream
     /// <summary>How many bytes the name is.</summary>
     public int NameLength;
 
-    /// <summary>The <see cref="MeshStreamFormat"/>.</summary>
+    /// <summary>The <c>MeshStreamFormat</c>.</summary>
     public int Format;
 
     /// <summary>Where the vertex shader reads it.</summary>

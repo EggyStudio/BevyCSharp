@@ -9,7 +9,7 @@ internal static unsafe partial class NativeScenes
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeScenes() => NativeLoader.Initialize();
+    static NativeScenes() => NativeLoader.Initialize(typeof(NativeScenes).Assembly);
 
     /// <summary>Moves up to <paramref name="capacity"/> world instances Bevy reported ready into a buffer.</summary>
     [LibraryImport(Library)]

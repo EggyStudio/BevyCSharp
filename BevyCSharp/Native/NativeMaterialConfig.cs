@@ -36,7 +36,7 @@ public struct NativeMaterialConfig
     /// <summary>1 to scale the emission by the camera's exposure, 0 to leave it alone.</summary>
     public float EmissiveA;
 
-    /// <summary>The <see cref="Bevy.AlphaMode"/>, by its number.</summary>
+    /// <summary>The <c>Bevy.AlphaMode</c>, by its number.</summary>
     public int AlphaMode;
 
     /// <summary>Cut-off for a masked material.</summary>

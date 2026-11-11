@@ -179,7 +179,7 @@ public static unsafe partial class Window
     /// <remarks>
     /// <para>
     /// The pointer is the image <see cref="SetCursorImage(AssetHandle, uint, uint)"/> set, a sheet of frames the layout cuts,
-    /// as <see cref="Render2d.CreateAtlas"/> makes one, so a pointer can be animated as Bevy's
+    /// as <c>Render2d.CreateAtlas</c> makes one, so a pointer can be animated as Bevy's
     /// custom_cursor_image animates its crosshairs. The hotspot is set here beside the frame because
     /// a frame's tip is where the frame has it.
     /// </para>

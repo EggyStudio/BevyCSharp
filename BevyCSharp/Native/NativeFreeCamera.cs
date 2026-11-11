@@ -35,7 +35,7 @@ public unsafe struct NativeFreeCamera
 
     /// <summary>
     /// Forward, back, left, right, up, down, run, toggle grab, snap reverse, snap top, snap right
-    /// and snap front, each a <see cref="Key"/>, or -1 for a key outside the table.
+    /// and snap front, each a <c>Key</c>, or -1 for a key outside the table.
     /// </summary>
     public fixed int Keys[KeyCount];
 }

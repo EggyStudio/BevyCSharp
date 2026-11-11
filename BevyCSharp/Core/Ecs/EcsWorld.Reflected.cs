@@ -131,10 +131,10 @@ public sealed unsafe partial class EcsWorld
     /// <remarks>
     /// A handle has no JSON form, because what it holds is a reference to an asset rather than a
     /// value, so it is read here rather than through <see cref="GetReflected"/>. The handle comes
-    /// back as the same kind of <see cref="AssetHandle"/> <see cref="AssetServer.Load"/> returns,
+    /// back as the same kind of <see cref="AssetHandle"/> <c>AssetServer.Load</c> returns,
     /// and reading one the program already holds returns that one, so reading a field every frame
     /// costs nothing to keep. A handle the program never held is kept from then on, until
-    /// <see cref="AssetServer.Release"/> lets it go.
+    /// <c>AssetServer.Release</c> lets it go.
     /// </remarks>
     /// <exception cref="BevyNativeException">The path does not lead to a handle.</exception>
     public AssetHandle? GetReflectedAsset(Entity entity, string typePath, string path)

@@ -12,7 +12,7 @@ internal static unsafe partial class NativeAnimation
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeAnimation() => NativeLoader.Initialize();
+    static NativeAnimation() => NativeLoader.Initialize(typeof(NativeAnimation).Assembly);
 
     /// <summary>The names of a scene's clips, a line each.</summary>
     [LibraryImport(Library)]

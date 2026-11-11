@@ -2,10 +2,10 @@ namespace Bevy;
 
 /// <summary>
 /// The two parts of a color a Feathers color plane sets, across and down, Bevy's
-/// <c>FeathersColorPlane</c>, for <see cref="Feathers.ColorPlane"/>.
+/// <c>FeathersColorPlane</c>, for <c>Feathers.ColorPlane</c>.
 /// </summary>
 /// <remarks>
-/// The plane reports the point picked as a <see cref="ValueChange{T}"/> of a <see cref="Vec2"/>,
+/// The plane reports the point picked as a <c>ValueChange{T}</c> of a <see cref="Vec2"/>,
 /// each from zero to one, and is drawn from Bevy's reflected <c>ColorPlaneValueRef</c>, the two
 /// parts it sets and the third it holds still.
 /// </remarks>

@@ -6,7 +6,7 @@ namespace Bevy;
 /// </param>
 /// <param name="Number">
 /// Which finger, for a touch, as Bevy numbers them, and the last eight bytes of its identifier for
-/// a pointer of the game's own, which for one from <see cref="Picking.SpawnPointer"/> is the
+/// a pointer of the game's own, which for one from <c>Picking.SpawnPointer</c> is the
 /// number it was given. Zero for the mouse.
 /// </param>
 public readonly record struct PointerId(PointerKind Kind, ulong Number);

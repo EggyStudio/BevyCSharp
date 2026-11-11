@@ -7,7 +7,7 @@ namespace Bevy.Interop;
 [StructLayout(LayoutKind.Sequential)]
 public struct NativeAnimationCurve
 {
-    /// <summary>What it moves, as <see cref="AnimatedProperty"/> numbers it.</summary>
+    /// <summary>What it moves, as <c>AnimatedProperty</c> numbers it.</summary>
     public int Property;
 
     /// <summary>Zero for sampled values, one for two values eased between.</summary>
@@ -16,13 +16,13 @@ public struct NativeAnimationCurve
     /// <summary>How many values there are.</summary>
     public int Count;
 
-    /// <summary>The easing, as <see cref="EaseKind"/> numbers it.</summary>
+    /// <summary>The easing, as <c>EaseKind</c> numbers it.</summary>
     public int Ease;
 
     /// <summary>A staircase's steps.</summary>
     public int EaseSteps;
 
-    /// <summary>Where a staircase rises, as <see cref="JumpAt"/> numbers it.</summary>
+    /// <summary>Where a staircase rises, as <c>JumpAt</c> numbers it.</summary>
     public int EaseJump;
 
     /// <summary>A spring's angular frequency.</summary>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's gizmos, lines and shapes drawn for a frame.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+    </ItemGroup>
+
+</Project>

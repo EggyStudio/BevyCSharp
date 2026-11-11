@@ -18,6 +18,6 @@ public struct NativeEditableTextConfig
     /// <summary>Non-zero to let Enter start a new line.</summary>
     public int AllowNewlines;
 
-    /// <summary>A <see cref="TextReadWriteMode"/>.</summary>
+    /// <summary>A <c>TextReadWriteMode</c>.</summary>
     public int Mode;
 }

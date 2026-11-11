@@ -33,7 +33,7 @@ public sealed class AbiCheckTests
     internal static IEnumerable<MethodInfo> EntryPoints()
     {
         const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.DeclaredOnly;
-        return typeof(App).Assembly.GetTypes()
+        return EngineAssemblies.Loaded().SelectMany(assembly => assembly.GetTypes())
             .SelectMany(type => type.GetMethods(all))
             .Where(method => method.GetCustomAttribute<LibraryImportAttribute>()?.LibraryName == Native.Library);
     }

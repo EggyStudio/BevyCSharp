@@ -1,5 +1,26 @@
 <Solution>
   <Project Path="BevyCSharp/BevyCSharp.csproj" />
+  <Folder Name="/Areas/">
+    <Project Path="BevyCSharp/Native/BevyCSharp.Native.csproj" />
+    <Project Path="BevyCSharp/Core/BevyCSharp.Core.csproj" />
+    <Project Path="BevyCSharp/Assets/BevyCSharp.Assets.csproj" />
+    <Project Path="BevyCSharp/Audio/BevyCSharp.Audio.csproj" />
+    <Project Path="BevyCSharp/Gizmos/BevyCSharp.Gizmos.csproj" />
+    <Project Path="BevyCSharp/ImGui/BevyCSharp.ImGui.csproj" />
+    <Project Path="BevyCSharp/Cli/BevyCSharp.CliServer.csproj" />
+    <Project Path="BevyCSharp/Rendering/BevyCSharp.Rendering.csproj" />
+    <Project Path="BevyCSharp/Render2d/BevyCSharp.Render2d.csproj" />
+    <Project Path="BevyCSharp/Animation/BevyCSharp.Animation.csproj" />
+    <Project Path="BevyCSharp/GlobalIllumination/BevyCSharp.GlobalIllumination.csproj" />
+    <Project Path="BevyCSharp/Scenes/BevyCSharp.Scenes.csproj" />
+    <Project Path="BevyCSharp/Ui/BevyCSharp.Ui.csproj" />
+    <Project Path="BevyCSharp/Physics/BevyCSharp.Physics.csproj" />
+    <Project Path="BevyCSharp/Sky/BevyCSharp.Sky.csproj" />
+    <Project Path="BevyCSharp/Modeling/BevyCSharp.Modeling.csproj" />
+    <Project Path="BevyCSharp/Diagnostics/BevyCSharp.Diagnostics.csproj" />
+    <Project Path="BevyCSharp/Vegetation/BevyCSharp.Vegetation.csproj" />
+    <Project Path="BevyCSharp/Levels/BevyCSharp.Levels.csproj" />
+  </Folder>
   <Folder Name="/Common/">
     <File Path="Directory.Build.props" />
     <File Path="README.md" />

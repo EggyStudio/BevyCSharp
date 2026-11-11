@@ -12,10 +12,11 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// The check ran at packing alone and read the Rust files and the manifest alone, so a pull that
-/// changed a shader ran the bridge's old one under the new C# with no word, at <c>dotnet run</c> and
-/// at packing both. Each case runs the library's own project to its <c>BeforeBuild</c>, the step a
-/// build takes first, with the native folder and the bridge's folder pointed at a folder of the
-/// test's own whose files carry set times, so nothing of the checkout is read or compiled.
+/// changed a shader ran the bridge's old one under the new C# with no word, at <c>dotnet run</c>
+/// and at packing both. Each case runs the bridge's project, BevyCSharp.Native, which every project
+/// of the library builds on, to its <c>BeforeBuild</c>, the step a build takes first, with the
+/// native folder and the bridge's folder pointed at a folder of the test's own whose files carry
+/// set times, so nothing of the checkout is read or compiled.
 /// </remarks>
 public sealed class NativeFreshnessTests : IDisposable
 {
@@ -88,7 +89,7 @@ public sealed class NativeFreshnessTests : IDisposable
         File.SetLastWriteTimeUtc(path, time);
     }
 
-    /// <summary>What the library's project says when run to its <c>BeforeBuild</c> against the test's folders.</summary>
+    /// <summary>What the bridge's project, BevyCSharp.Native, says when run to its <c>BeforeBuild</c> against the test's folders.</summary>
     private string BeforeBuild()
     {
         var start = new ProcessStartInfo(Environment.GetEnvironmentVariable("DOTNET_HOST_PATH") is { Length: > 0 } host ? host : "dotnet")
@@ -101,7 +102,7 @@ public sealed class NativeFreshnessTests : IDisposable
         };
         foreach (var argument in new[]
                  {
-                     "msbuild", Path.Combine(Root, "BevyCSharp", "BevyCSharp.csproj"), "-t:BeforeBuild", "-nologo", "-nodeReuse:false", "-v:m",
+                     "msbuild", Path.Combine(Root, "BevyCSharp", "Native", "BevyCSharp.Native.csproj"), "-t:BeforeBuild", "-nologo", "-nodeReuse:false", "-v:m",
                      $"-p:BevyCSharpNativeDir={_folder.File("native")}{Path.DirectorySeparatorChar}",
                      $"-p:BevyCSharpNativeOutDir={_folder.File("release")}{Path.DirectorySeparatorChar}",
                      "-p:BevyCSharpSkipNativeFreshnessCheck=false",

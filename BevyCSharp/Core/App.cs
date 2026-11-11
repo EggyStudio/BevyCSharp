@@ -15,7 +15,7 @@ namespace Bevy;
 /// active system instead, and <see cref="App"/> switches routes automatically.
 /// </para>
 /// <para>
-/// In the common case you never touch this directly <see cref="BevyApp.Run(Config?)"/> wires
+/// In the common case you never touch this directly <c>BevyApp.Run(Config?)</c> wires
 /// up the defaults and discovers every <c>[Behavior]</c> struct in your assemblies.
 /// </para>
 /// </remarks>
@@ -143,6 +143,9 @@ public sealed unsafe partial class App : IDisposable
     /// <exception cref="BevyNativeException">The native app could not be created.</exception>
     public App(Config? config = null)
     {
+        // Every area's registrations, its commands, schemas and behaviors, before anything of the
+        // app reads them.
+        EngineAssemblies.Load();
         Config = config ?? Config.Default;
         Created?.Invoke(this);
 

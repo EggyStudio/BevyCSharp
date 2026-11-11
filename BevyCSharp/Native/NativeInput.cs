@@ -6,8 +6,8 @@ namespace Bevy.Interop;
 /// Input state mirrored from Bevy's <c>ButtonInput</c> and accumulated-mouse resources.
 /// </summary>
 /// <remarks>
-/// Keyboard state arrives as a bitset indexed by <see cref="Key"/>. The bit order is pinned by
-/// the key table in the native crate; <see cref="Key"/> declares the identical order.
+/// Keyboard state arrives as a bitset indexed by <c>Key</c>. The bit order is pinned by
+/// the key table in the native crate, and <c>Key</c> declares the identical order.
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct NativeInput

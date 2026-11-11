@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's console, its view and window, the frame profile and its own commands.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../ImGui/BevyCSharp.ImGui.csproj"/>
+        <ProjectReference Include="../Ui/BevyCSharp.Ui.csproj"/>
+        <ProjectReference Include="../GlobalIllumination/BevyCSharp.GlobalIllumination.csproj"/>
+        <ProjectReference Include="../Scenes/BevyCSharp.Scenes.csproj"/>
+    </ItemGroup>
+
+    <!--
+      The Sky module, whose assembly a package below this one carries, so it is referenced for
+      the compile alone.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- DiagnosticsWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+    </ItemGroup>
+
+</Project>

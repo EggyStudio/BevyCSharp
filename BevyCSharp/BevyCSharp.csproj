@@ -1,26 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net10.0</TargetFramework>
-        <RootNamespace>Bevy</RootNamespace>
         <AssemblyName>BevyCSharp</AssemblyName>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <IsAotCompatible>true</IsAotCompatible>
-        <!--
-          A public member with no documentation is an error here, though Directory.Build.props
-          turns the warning off for every other project, since the summary is the help a game's
-          author sees at the call and the package carries it (NORM.md, N 2.2). The wrappers the
-          generator writes for Bevy's components count as well, and it documents what it writes.
-          A fault in the documentation that is there stops the build too, where it is written,
-          such as a comment malformed or on nothing, a param or typeparam for nothing or missing
-          beside the others, or a cref or paramref naming nothing or more than one thing.
-        -->
-        <NoWarn>$(NoWarn.Replace(';CS1591', ''))</NoWarn>
-        <WarningsAsErrors>$(WarningsAsErrors);CS1591;CS0419;CS1570;CS1571;CS1572;CS1573;CS1574;CS1580;CS1581;CS1584;CS1587;CS1589;CS1590;CS1592;CS1710;CS1711;CS1712;CS1723;CS1734;CS1735</WarningsAsErrors>
-    </PropertyGroup>
-
-    <PropertyGroup>
-        <IsPackable>true</IsPackable>
         <PackageId>BevyCSharp</PackageId>
         <Title>BevyCSharp</Title>
         <Description>
@@ -29,42 +10,42 @@
             Bevy is the engine underneath, providing its ECS, scheduler, renderer and input
             through a native bridge.
         </Description>
-        <PackageTags>bevy;ecs;gamedev;engine;source-generator;behavior</PackageTags>
         <!--
           The commits since the package nuget.org lists last was built, which build/release-notes.py
           writes to the file a pack names.
         -->
         <PackageReleaseNotes Condition="'$(ReleaseNotesFile)' != '' And Exists('$(ReleaseNotesFile)')">$([System.IO.File]::ReadAllText('$(ReleaseNotesFile)'))</PackageReleaseNotes>
-        <!-- The generator and the native binaries are carried inside this package. -->
-        <IncludeBuildOutput>true</IncludeBuildOutput>
-        <DevelopmentDependency>false</DevelopmentDependency>
+        <!--
+          The areas' projects are folders below this one, each compiled by its own project, so this
+          one compiles the files at the top alone, which compose the rest.
+        -->
+        <DefaultItemExcludes>$(DefaultItemExcludes);*/**</DefaultItemExcludes>
     </PropertyGroup>
 
-    <ItemGroup>
-        <!--
-          Dear ImGui, which the interface is built with. The package carries the native library for
-          every platform the bridge builds for, so a game gets an interface by referencing this one
-          and nothing else.
-        -->
-        <PackageReference Include="Twizzle.ImGui-Bundle.NET" Version="1.91.5.2"/>
-
-        <!--
-          BepuPhysics, which rigid bodies are simulated with, beside the interface in the same way:
-          C# on this side, so a game gets physics by referencing this one and nothing new crosses
-          to the native bridge. It is on a beta line, and the version is pinned rather than floating
-          so an update is a decision.
-        -->
-        <PackageReference Include="BepuPhysics" Version="2.5.0-beta.29"/>
-    </ItemGroup>
-
     <!--
-      The generator runs against the consumer's compilation. It is referenced as an analyzer
-      (never as a library) so its Roslyn dependencies never leak into the consumer's closure.
+      Every area's project, so this is the package a game names and the areas come as its
+      dependencies, each at this package's version.
     -->
     <ItemGroup>
-        <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
-                          OutputItemType="Analyzer"
-                          ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="Audio/BevyCSharp.Audio.csproj"/>
+        <ProjectReference Include="Gizmos/BevyCSharp.Gizmos.csproj"/>
+        <ProjectReference Include="ImGui/BevyCSharp.ImGui.csproj"/>
+        <ProjectReference Include="Cli/BevyCSharp.CliServer.csproj"/>
+        <ProjectReference Include="Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="Render2d/BevyCSharp.Render2d.csproj"/>
+        <ProjectReference Include="Animation/BevyCSharp.Animation.csproj"/>
+        <ProjectReference Include="GlobalIllumination/BevyCSharp.GlobalIllumination.csproj"/>
+        <ProjectReference Include="Scenes/BevyCSharp.Scenes.csproj"/>
+        <ProjectReference Include="Ui/BevyCSharp.Ui.csproj"/>
+        <ProjectReference Include="Physics/BevyCSharp.Physics.csproj"/>
+        <ProjectReference Include="Sky/BevyCSharp.Sky.csproj"/>
+        <ProjectReference Include="Modeling/BevyCSharp.Modeling.csproj"/>
+        <ProjectReference Include="Diagnostics/BevyCSharp.Diagnostics.csproj"/>
+        <ProjectReference Include="Vegetation/BevyCSharp.Vegetation.csproj"/>
+        <ProjectReference Include="Levels/BevyCSharp.Levels.csproj"/>
     </ItemGroup>
 
     <!--
@@ -73,52 +54,14 @@
     -->
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp.CodeFixes/BevyCSharp.CodeFixes.csproj"
-                          ReferenceOutputAssembly="false"/>
+                          ReferenceOutputAssembly="false"
+                          PrivateAssets="all"/>
     </ItemGroup>
 
     <!--
-      The modules both engines share, each its own repository checked out as a git submodule under
-      modules/, whose assemblies the library references and the package carries in its lib folder
-      beside the library's, with their documentation, since a package cannot name a project as a
-      dependency and the modules are not packages of their own.
+      The generator and its code fixes in this package's analyzer slot, so they run against the
+      game that names it.
     -->
-    <ItemGroup>
-        <ProjectReference Include="../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
-        <ProjectReference Include="../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
-        <ProjectReference Include="../modules/Vegetation/Vegetation/Vegetation.csproj" PrivateAssets="all"/>
-    </ItemGroup>
-    <PropertyGroup>
-        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModules</TargetsForTfmSpecificBuildOutput>
-    </PropertyGroup>
-    <Target Name="BevyCSharpPackModules" DependsOnTargets="ResolveReferences">
-        <ItemGroup>
-            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Levels' Or '%(ReferencePath.Filename)' == 'Sky' Or '%(ReferencePath.Filename)' == 'Vegetation'"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
-            <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
-                                  Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
-        </ItemGroup>
-    </Target>
-
-    <!--
-      The description of Bevy's reflected components, written by the schema.dump command and
-      checked in. The generator turns it into the typed wrappers in Bevy.Reflected. It is named here
-      and nowhere else, so only the library is compiled with the wrappers and a game's own
-      compilation emits nothing for it. The list of the components that moved beside it gives a
-      reflected component the paths a scene written before the move names.
-    -->
-    <!-- The library's own programs, the look's, the scene's distance field's, the probes' and the
-         weather's, each in its area's Kernels folder and read as Slang source when it is first
-         built, so the library carries them as it carries everything else it runs. -->
-    <ItemGroup>
-        <EmbeddedResource Include="*/Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <AdditionalFiles Include="Core/Generated/bevy-components.tsv"/>
-        <AdditionalFiles Include="Core/Generated/bevy-former-paths.tsv"/>
-    </ItemGroup>
-
-    <!-- Ship the generator and its code fixes in the package's analyzer slot. -->
     <ItemGroup>
         <None Include="../BevyCSharp.Generator/bin/$(Configuration)/netstandard2.0/BevyCSharp.Generator.dll"
               Pack="true"
@@ -136,172 +79,5 @@
         <None Include="build/BevyCSharp.props" Pack="true" PackagePath="build/" Visible="false"/>
         <None Include="build/BevyCSharp.Embed.targets" Pack="true" PackagePath="build/" Visible="false"/>
     </ItemGroup>
-
-    <!--
-      Native runtime assets, staged per RID by build/build-native.sh. A missing slot is skipped
-      rather than failing the build, so you can pack on one platform without cross-compiling for
-      all the others.
-    -->
-    <ItemGroup>
-        <None Include="$(BevyCSharpArtifactDir)linux-x64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-x64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-arm64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-musl-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-x64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so"
-              Pack="true" PackagePath="runtimes/linux-musl-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)linux-musl-arm64/libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll"
-              Pack="true" PackagePath="runtimes/win-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)win-x64/bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll"
-              Pack="true" PackagePath="runtimes/win-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)win-arm64/bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib"
-              Pack="true" PackagePath="runtimes/osx-x64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)osx-x64/libbevy_csharp.dylib')"/>
-        <None Include="$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib"
-              Pack="true" PackagePath="runtimes/osx-arm64/native/" Visible="false"
-              Condition="Exists('$(BevyCSharpArtifactDir)osx-arm64/libbevy_csharp.dylib')"/>
-    </ItemGroup>
-
-    <!--
-      Repo-local development: copy whatever the last cargo build produced next to the sample and
-      test binaries, so running them works without packing first.
-    -->
-    <ItemGroup>
-        <None Include="$(BevyCSharpNativeOutDir)libbevy_csharp.so"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpNativeOutDir)bevy_csharp.dll"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpNativeOutDir)bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpNativeOutDir)libbevy_csharp.dylib"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.dylib')"/>
-    </ItemGroup>
-
-    <!--
-      Where no build ran here and a bridge was put in this machine's slot of the staged ones alone,
-      the slot is copied in the flat copy's place. The pack workflow's jobs that run a program from
-      this repository download the bridge its native job built into that slot, as the pack reads it,
-      and the storm job's tests of 292eead2 found no bridge beside them, since the copy above takes
-      build/target alone and the slot was never read. The slot is named by the SDK's portable runtime
-      identifier, linux-x64 where a distribution's SDK names its own, which is how build-native.sh
-      names it.
-    -->
-    <PropertyGroup>
-        <BevyCSharpHostArtifactDir>$(BevyCSharpArtifactDir)$(NETCoreSdkPortableRuntimeIdentifier)/</BevyCSharpHostArtifactDir>
-        <BevyCSharpNoFlatCopy Condition="!Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.so') And !Exists('$(BevyCSharpNativeOutDir)bevy_csharp.dll') And !Exists('$(BevyCSharpNativeOutDir)libbevy_csharp.dylib')">true</BevyCSharpNoFlatCopy>
-    </PropertyGroup>
-    <ItemGroup Condition="'$(BevyCSharpNoFlatCopy)' == 'true'">
-        <None Include="$(BevyCSharpHostArtifactDir)libbevy_csharp.so"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpHostArtifactDir)libbevy_csharp.so')"/>
-        <None Include="$(BevyCSharpHostArtifactDir)bevy_csharp.dll"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpHostArtifactDir)bevy_csharp.dll')"/>
-        <None Include="$(BevyCSharpHostArtifactDir)libbevy_csharp.dylib"
-              CopyToOutputDirectory="PreserveNewest" Visible="false" Pack="false"
-              Condition="Exists('$(BevyCSharpHostArtifactDir)libbevy_csharp.dylib')"/>
-    </ItemGroup>
-
-    <!--
-      The native bridge is built by cargo, not by MSBuild, so nothing forces it to be current, and a
-      stale one is a nasty failure to diagnose. Its ABI version still matches, but an entry point
-      added since it was built is missing, and the app dies on the first call to it with an
-      EntryPointNotFoundException far from the cause. A shader changed since, which the bridge
-      carries in itself, says nothing at all, and the app draws the shaders of the bridge's build
-      under the C# of the checkout.
-
-      Its inputs are every file under native the library is built from, the shaders and its other
-      carried files beside the Rust, the two manifests, the lock and the build script. The test
-      modules and their fixtures are left out, since cargo builds them into the crate's tests alone
-      and a change to one leaves the library as it was.
-
-      Inputs and Outputs give each check below without a comparison of its own. MSBuild skips a
-      target whose outputs are all newer than its inputs, so its body runs only when the bridge is
-      stale. Both build scripts give each copy they stage the time of their run, so a run whose cargo
-      had nothing to do, a file changed that only another profile builds, answers the checks too.
-
-      Set BevyCSharpSkipNativeFreshnessCheck=true where timestamps carry no meaning, such as CI
-      collecting binaries that were built from this very commit on other machines.
-    -->
-    <ItemGroup>
-        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)bevy_csharp/src/**/*"
-                                Exclude="$(BevyCSharpNativeDir)bevy_csharp/src/**/tests.rs;$(BevyCSharpNativeDir)bevy_csharp/src/**/fixtures/**"/>
-        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)bevy_csharp/Cargo.toml;$(BevyCSharpNativeDir)bevy_csharp/build.rs"/>
-        <BevyCSharpNativeSource Include="$(BevyCSharpNativeDir)Cargo.toml;$(BevyCSharpNativeDir)Cargo.lock"/>
-        <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.so"/>
-        <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/bevy_csharp.dll"/>
-        <BevyCSharpStagedNative Include="$(BevyCSharpArtifactDir)**/libbevy_csharp.dylib"/>
-    </ItemGroup>
-    <Target Name="BevyCSharpVerifyNativeIsCurrent"
-            BeforeTargets="GenerateNuspec"
-            Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true'"
-            Inputs="@(BevyCSharpNativeSource)"
-            Outputs="@(BevyCSharpStagedNative)">
-
-        <Warning Condition="'@(BevyCSharpStagedNative)' == ''"
-                 Code="BCS100"
-                 Text="No native bridge has been staged in $(BevyCSharpArtifactDir), so this package will carry no runtime assets and will not run. Run build/build-native.sh before packing."/>
-
-        <Error Condition="'@(BevyCSharpStagedNative)' != ''"
-               Code="BCS101"
-               Text="The staged native bridge in $(BevyCSharpArtifactDir) is older than the files in $(BevyCSharpNativeDir) it is built from, its shaders among them. Re-run build/build-native.sh before packing, or the package will ship a bridge missing the newest entry points and drawing with the shaders it was built with."/>
-    </Target>
-
-    <!--
-      A build checks the bridge it copies beside each project's binaries, the flat one the build
-      scripts leave in build/target/release for running from a clone, where the check above runs at
-      packing alone. A pull that changed a shader or an entry point then says so at dotnet build and
-      dotnet run, where it drew the bridge's old shaders under the new C# with no word. It warns
-      rather than fails, since a stale bridge runs and work on the managed side alone goes on with
-      it, and it runs before the build so the line comes first. Where no build ran here, as in the
-      workflow's jobs that download a bridge into its slot, there is nothing to compare and it says
-      nothing.
-
-      The line names the first of the newer files and counts the others, since one rebuild answers
-      them all. A property batched over the files cannot carry the newest of them from one file to
-      the next, each file's batch reading the property as it stood before any of them, so the first
-      is taken from the list. MSBuild runs a skipped target's property and item groups too, to know
-      what it would have made, so nothing there reads a file it is not sure is there.
-    -->
-    <PropertyGroup>
-        <BevyCSharpDevNative>$(BevyCSharpNativeOutDir)libbevy_csharp.so</BevyCSharpDevNative>
-        <BevyCSharpDevNative Condition="$([MSBuild]::IsOSPlatform('Windows'))">$(BevyCSharpNativeOutDir)bevy_csharp.dll</BevyCSharpDevNative>
-        <BevyCSharpDevNative Condition="$([MSBuild]::IsOSPlatform('OSX'))">$(BevyCSharpNativeOutDir)libbevy_csharp.dylib</BevyCSharpDevNative>
-    </PropertyGroup>
-    <Target Name="BevyCSharpWarnNativeIsStale"
-            BeforeTargets="BeforeBuild"
-            Condition="'$(BevyCSharpSkipNativeFreshnessCheck)' != 'true' And Exists('$(BevyCSharpDevNative)')"
-            Inputs="@(BevyCSharpNativeSource)"
-            Outputs="$(BevyCSharpDevNative)">
-
-        <PropertyGroup>
-            <_BevyCSharpDevNativeTime>$([System.IO.File]::GetLastWriteTime('$(BevyCSharpDevNative)').ToUniversalTime().Ticks)</_BevyCSharpDevNativeTime>
-        </PropertyGroup>
-        <ItemGroup>
-            <_BevyCSharpNewerNativeSource Include="@(BevyCSharpNativeSource)"
-                                          Condition="$([System.IO.File]::GetLastWriteTime('%(FullPath)').ToUniversalTime().Ticks) &gt; $(_BevyCSharpDevNativeTime)"/>
-        </ItemGroup>
-        <PropertyGroup>
-            <_BevyCSharpNewer>@(_BevyCSharpNewerNativeSource->'%(FullPath)')</_BevyCSharpNewer>
-            <_BevyCSharpFirstNewer>$(_BevyCSharpNewer)</_BevyCSharpFirstNewer>
-            <_BevyCSharpFirstNewer Condition="$(_BevyCSharpNewer.Contains(';'))">$(_BevyCSharpNewer.Substring(0, $(_BevyCSharpNewer.IndexOf(';'))))</_BevyCSharpFirstNewer>
-            <_BevyCSharpNewerCount>@(_BevyCSharpNewerNativeSource->Count())</_BevyCSharpNewerCount>
-            <_BevyCSharpOthers>$([MSBuild]::Subtract($(_BevyCSharpNewerCount), 1))</_BevyCSharpOthers>
-            <_BevyCSharpAndOthers Condition="'$(_BevyCSharpOthers)' == '1'"> and 1 other file</_BevyCSharpAndOthers>
-            <_BevyCSharpAndOthers Condition="'$(_BevyCSharpOthers)' &gt; '1'"> and $(_BevyCSharpOthers) other files</_BevyCSharpAndOthers>
-        </PropertyGroup>
-
-        <Warning Condition="'$(_BevyCSharpNewerCount)' != '0'"
-                 Code="BCS102"
-                 Text="The native bridge in $(BevyCSharpNativeOutDir) is older than $([MSBuild]::MakeRelative('$(BevyCSharpNativeDir)', '$(_BevyCSharpFirstNewer)'))$(_BevyCSharpAndOthers) in $(BevyCSharpNativeDir) it is built from, so what runs leaves out what changed since it was built. Rebuild it with build/build-native.sh and the profile it was built with, or with ./bcs build, which builds both halves."/>
-    </Target>
 
 </Project>

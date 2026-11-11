@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's interface over Bevy's UI, its widgets and Feathers.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../Render2d/BevyCSharp.Render2d.csproj"/>
+        <ProjectReference Include="../ImGui/BevyCSharp.ImGui.csproj"/>
+    </ItemGroup>
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- UiWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+    </ItemGroup>
+
+</Project>

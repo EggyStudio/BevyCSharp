@@ -12,7 +12,7 @@ internal static unsafe partial class NativeUi
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeUi() => NativeLoader.Initialize();
+    static NativeUi() => NativeLoader.Initialize(typeof(NativeUi).Assembly);
 
     // -- Nodes, text and images
 

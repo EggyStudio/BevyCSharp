@@ -78,7 +78,7 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to add Bevy's wireframe plugins, for 3D and 2D meshes.</summary>
     public uint Wireframes;
 
-    /// <summary>Bevy's diagnostics plugins to add, a bit each, as <see cref="DiagnosticPlugins"/> has them.</summary>
+    /// <summary>Bevy's diagnostics plugins to add, a bit each, as <c>DiagnosticPlugins</c> has them.</summary>
     public uint Diagnostics;
 
     /// <summary>The window's scale factor in place of the display's, or zero for the display's.</summary>
@@ -99,12 +99,12 @@ public unsafe struct NativeConfig
     /// <summary>Non-zero to add Bevy's interactive transform gizmo.</summary>
     public uint TransformGizmo;
 
-    /// <summary>Bevy's camera controllers to add, a bit each, as <see cref="Bevy.CameraControllers"/> numbers them.</summary>
+    /// <summary>Bevy's camera controllers to add, a bit each, as <c>Bevy.CameraControllers</c> numbers them.</summary>
     public uint CameraControllers;
 
     /// <summary>Non-zero to add Feathers, Bevy's styled widgets, with its dark theme.</summary>
     public uint Feathers;
 
-    /// <summary>Bevy's dev tools to add, a bit each, as <see cref="Bevy.DevTools"/> numbers them.</summary>
+    /// <summary>Bevy's dev tools to add, a bit each, as <c>Bevy.DevTools</c> numbers them.</summary>
     public uint DevTools;
 }

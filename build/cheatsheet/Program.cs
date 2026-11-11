@@ -13,9 +13,23 @@ using System.Xml.Linq;
 // A type not named in a group below is listed under "Everything else", so a new one is never left
 // off the page, and naming it in its group moves it there.
 var root = args[0];
-var asm = typeof(Bevy.App).Assembly;
-var xml = XDocument.Load(Path.Combine(root, "BevyCSharp/bin/Debug/net10.0/BevyCSharp.xml"));
-var docs = xml.Descendants("member").ToDictionary(m => (string)m.Attribute("name")!, m => m);
+// Every assembly of the library, the flat project's and each area's, as the build puts them beside
+// this program, and the documentation each carries in the flat project's output.
+bool Library(string name) => (name == "BevyCSharp" || name.StartsWith("BevyCSharp.", StringComparison.Ordinal))
+    && name is not ("BevyCSharp.Generator" or "BevyCSharp.CodeFixes");
+var assemblies = Directory.EnumerateFiles(AppContext.BaseDirectory, "BevyCSharp*.dll")
+    .Select(path => Path.GetFileNameWithoutExtension(path))
+    .Where(Library)
+    // By name, so a type's members from blocks of several assemblies come in one order on every machine.
+    .Order(StringComparer.Ordinal)
+    .Select(name => Assembly.Load(new AssemblyName(name)))
+    .ToList();
+var docs = assemblies
+    .Select(assembly => Path.Combine(root, "BevyCSharp/bin/Debug/net10.0", assembly.GetName().Name + ".xml"))
+    .SelectMany(path => XDocument.Load(path).Descendants("member"))
+    // The generated registrations each area carries share their names, and none is on the page.
+    .GroupBy(m => (string)m.Attribute("name")!)
+    .ToDictionary(g => g.Key, g => g.First());
 
 // The methods an extension block of a named type gives it, which the compiler holds in a type of
 // its own nested in the block's class, each marked with the name of the block's marker type, whose
@@ -30,7 +44,7 @@ bool ExtendsNamedType(Type block) => block.Name.StartsWith("<G>$") && block.IsDe
 IEnumerable<Type> Blocks(Type t) => t.GetNestedTypes(declared).Where(ExtendsNamedType);
 bool Carries(MethodInfo m) => Blocks(m.DeclaringType!).SelectMany(block => block.GetMembers(declared))
     .Any(member => member.Name == m.Name || member is PropertyInfo p && (p.GetMethod?.Name == m.Name || p.SetMethod?.Name == m.Name));
-var extensions = asm.GetTypes().SelectMany(Blocks)
+var extensions = assemblies.SelectMany(assembly => assembly.GetTypes()).SelectMany(Blocks)
     .SelectMany(block => Markers(block).Select(marker => (Extended: Extended(marker), Methods: block.GetMethods(declared)
         .Where(m => m.CustomAttributes.Any(a => a.AttributeType.Name == "ExtensionMarkerAttribute" && (string?)a.ConstructorArguments[0].Value == marker.Name)))))
     .ToLookup(found => found.Extended, found => found.Methods);
@@ -76,7 +90,7 @@ string Key(Type t) => (t.Namespace == "Bevy.Physics" ? "Physics." : "") + (t.Dec
 
 string Heading(Type t) => Regex.Replace(Key(t).Replace('+', '.'), @"`(\d)", m => "<" + string.Join(", ", (t.GetGenericArguments().Select(a => a.Name))) + ">");
 
-var all = asm.GetExportedTypes().Where(Listed).ToDictionary(Key);
+var all = assemblies.SelectMany(assembly => assembly.GetExportedTypes()).Where(Listed).ToDictionary(Key);
 var placed = groups.SelectMany(g => g.Types).ToHashSet();
 var rest = all.Keys.Where(k => !placed.Contains(k)).OrderBy(k => k).ToArray();
 var missing = placed.Where(k => !all.ContainsKey(k)).ToArray();

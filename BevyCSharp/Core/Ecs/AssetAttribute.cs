@@ -7,11 +7,11 @@ namespace Bevy;
 /// A handle is a handle whatever is behind it, so the field's type cannot say whether a mesh or a
 /// sound belongs in it. This does, and a field without it is offered every file there is.
 /// </remarks>
-/// <param name="kind">One of the names on <see cref="AssetKind"/>.</param>
+/// <param name="kind">One of the names on <c>AssetKind</c>.</param>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
 public sealed class AssetAttribute(string kind) : Attribute
 {
-    /// <summary>The asset type, as <see cref="AssetKind"/> names it.</summary>
+    /// <summary>The asset type, as <c>AssetKind</c> names it.</summary>
     public string Kind { get; } = kind;
 
     /// <summary>

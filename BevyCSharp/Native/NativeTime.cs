@@ -18,6 +18,6 @@ public struct NativeTime
     /// <summary>Frames completed since app start.</summary>
     public ulong FrameCount;
 
-    /// <summary>Seconds one <see cref="Stage.FixedUpdate"/> step covers.</summary>
+    /// <summary>Seconds one <c>Stage.FixedUpdate</c> step covers.</summary>
     public double FixedDeltaSeconds;
 }

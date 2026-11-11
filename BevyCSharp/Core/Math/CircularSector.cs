@@ -8,7 +8,7 @@ namespace Bevy;
 /// <remarks>
 /// Symmetric about the Y axis as its arc is, so a slice turned to start at the top and run clockwise,
 /// as Bevy's <c>mesh2d_arcs</c> turns its slices, is turned by minus its half angle.
-/// <see cref="MeshShape.CircularSector"/> builds its mesh from the same two measures.
+/// <c>MeshShape.CircularSector</c> builds its mesh from the same two measures.
 /// </remarks>
 public readonly record struct CircularSector(Arc2d Arc) : IBounded2d
 {

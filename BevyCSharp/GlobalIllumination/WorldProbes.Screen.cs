@@ -190,9 +190,9 @@ internal static partial class WorldProbes
 
         if (!_screenTrace.IsValid)
         {
-            _screenTrace = Shaders.CreateInstance(Shaders.KernelProgram("gi_screen.slang"));
-            _screenFilter = Shaders.CreateInstance(Shaders.KernelProgram("gi_screen_filter.slang"));
-            _screenGlow = Shaders.CreateInstance(Shaders.KernelProgram("gi_screen_glow.slang"));
+            _screenTrace = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_screen.slang"));
+            _screenFilter = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_screen_filter.slang"));
+            _screenGlow = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_screen_glow.slang"));
             _screenRayLog = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenRayLogValues]);
         }
 

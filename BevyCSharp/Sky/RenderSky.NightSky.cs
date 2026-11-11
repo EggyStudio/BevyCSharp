@@ -61,7 +61,7 @@ internal static class NightSky
     internal static void Set(Entity camera, NightSkySettings settings)
     {
         ForgetOtherApps();
-        var draw = Skies.TryGetValue(camera.Bits, out var sky) ? sky.Draw : Shaders.KernelDraw("night_sky.slang");
+        var draw = Skies.TryGetValue(camera.Bits, out var sky) ? sky.Draw : Shaders.KernelDraw(typeof(RenderSky).Assembly, "night_sky.slang");
         Skies[camera.Bits] = (draw, settings);
         Feed(draw, settings);
         Shaders.SetEnginePrepass(camera, Owner, 1u);

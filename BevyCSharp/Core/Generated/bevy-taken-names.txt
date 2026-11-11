@@ -1,0 +1,10 @@
+# The names the library's projects above Core give types in the Bevy namespace that a reflected
+# component's wrapper or union would also take, so the generator, which compiles the wrappers in
+# Core and cannot see those projects, names its own apart, as SpriteImageModeValue beside
+# SpriteImageMode. A name a line. ReflectedNameTests holds the list to the built assemblies.
+AlphaMode2d
+FocusCause
+NavAction
+NumberInputValue
+SpriteImageMode
+TileOrientation

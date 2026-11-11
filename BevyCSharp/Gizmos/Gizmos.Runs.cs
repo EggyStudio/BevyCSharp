@@ -151,7 +151,7 @@ public static unsafe partial class Gizmos
 
     /// <summary>Draws the six edges of a tetrahedron through four points.</summary>
     /// <remarks>
-    /// The simplest solid, and the shape of a <see cref="MeshShape.Tetrahedron"/>, a trigger volume
+    /// The simplest solid, and the shape of a <c>MeshShape.Tetrahedron</c>, a trigger volume
     /// with four corners or a debug marker that reads as a solid from any side. Six segments in one
     /// call, each edge drawn once rather than twice as four triangles would draw it.
     /// </remarks>

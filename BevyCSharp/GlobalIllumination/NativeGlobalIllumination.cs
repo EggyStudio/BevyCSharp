@@ -12,7 +12,7 @@ internal static unsafe partial class NativeGlobalIllumination
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeGlobalIllumination() => NativeLoader.Initialize();
+    static NativeGlobalIllumination() => NativeLoader.Initialize(typeof(NativeGlobalIllumination).Assembly);
 
     /// <summary>Writes the meshes in view and their triangles, the lights by kind and the camera the view is drawn by.</summary>
     [LibraryImport(Library)]

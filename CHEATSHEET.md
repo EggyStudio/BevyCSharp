@@ -56,8 +56,8 @@ App AddObserver<TEvent>(Action<On<TEvent>> observer);           // Runs observer
 App EnableDynamicSystems();                                     // Allows systems to be added after the loop has started
 int RemoveSystemsBySource(string source);                       // Removes every system tagged with source
 IReadOnlyList<SystemDescriptor> SystemsIn(Stage stage);         // The descriptors registered for stage, in registration order
-ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
 App SpawnGltf(string path, Action<BehaviorContext, Entity>? spawned = null, int scene = 0);  // Spawns a glTF file's scene once it has loaded, as Bevy's SceneRoot of a glTF does, and hands the root to spawned once the scene is in the world under it
+ComponentArray<T> AddComponentArray<T>();                       // Keeps every entity's T in a storage buffer a shader reads by the entity's mesh tag, as Bevy's GpuComponentArrayBufferPlugin does
 
 // Config
 static Config HeadlessFor(uint frames);                         // A windowless configuration that runs frames ticks and exits
@@ -814,11 +814,6 @@ static string[]? MorphTargetNames(AssetHandle mesh);            // The names a m
 static void SetMeshJoints(AssetHandle mesh, ReadOnlySpan<ushort> joints, ReadOnlySpan<float> weights);  // Gives a mesh made in code the joints each vertex follows and how much each of them moves it, which a skin then bends it by
 static AssetHandle CreateSkin(ReadOnlySpan<Transform> inverseBindposes);  // Makes a skin, Bevy's inverse bindposes, one for each joint, which SetSkin binds an entity's mesh to its joints with
 static void SetSkin(Entity entity, AssetHandle skin, ReadOnlySpan<Entity> joints);  // Skins the mesh an entity draws with a skin and the joints that move it, Bevy's SkinnedMesh
-static void SetGlobalIllumination(GlobalIllumination quality);  // Lights the camera's picture with the light each surface reflects onto the others, traced through the scene's distance field each frame as cascades of probes around the camera, at a quality, or none with Off, which it is by default
-static void SetGlobalIlluminationScreenProbes(bool on);         // Leaves global illumination's screen probes out, or puts them back, which they are by default, so every surface reads the world's probes' light alone where they are out
-static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most from a given number of triangles at most, with a far cascade after them where asked, or turns it off with none, which it is by default
-static void SetSceneFieldShadows(FieldShadows shadows);         // Chooses where the scene's distance field darkens the light of each directional light it closes a surface off from, past the light's shadow map's reach by default, everywhere, or nowhere
-static void DrawSceneFieldWindow();                             // Draws the scene's distance field in an ImGui window of its own, what it is built from and a slice across one of its cascades, with its settings to change while it is looked at
 static void SetClouds(Entity camera, CloudSettings? settings);  // Draws clouds in a camera's sky, replacing any it had, or with null takes them off
 static void SetWeather(Entity camera, WeatherState? weather, CloudSettings? clouds = null, SkyFogSettings? fog = null, PrecipitationSettings? precipitation = null, ThunderSettings? thunder = null);  // Gives a camera's clouds and fog the weather, moving it on every frame, or with null takes it off and leaves them as they last were
 static void SetNightSky(Entity camera, NightSkySettings? settings);  // Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing where the settings' clock puts them, or with null takes it off
@@ -827,6 +822,11 @@ static void SetSkyFog(Entity camera, SkyFogSettings settings);  // Draws fog ove
 static void ClearSkyFog(Entity camera);                         // Takes SetSkyFog's fog off a camera
 static void SetThunder(Entity camera, ThunderSettings? settings);  // Brings a thunderstorm about a camera, lightning striking as settings says, or with null ends it
 static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null);  // Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or somewhere between its storm's nearest and farthest
+static void SetGlobalIllumination(GlobalIllumination quality);  // Lights the camera's picture with the light each surface reflects onto the others, traced through the scene's distance field each frame as cascades of probes around the camera, at a quality, or none with Off, which it is by default
+static void SetGlobalIlluminationScreenProbes(bool on);         // Leaves global illumination's screen probes out, or puts them back, which they are by default, so every surface reads the world's probes' light alone where they are out
+static void SetSceneField(int cascades, float cellSize = 0.25f, int budget = 1, float farCascade = 0f, int triangleBudget = 32768);  // Builds a distance field of the scene around the camera, in one to eight cascades, the finest's cells a given width and a given number built a frame at most from a given number of triangles at most, with a far cascade after them where asked, or turns it off with none, which it is by default
+static void SetSceneFieldShadows(FieldShadows shadows);         // Chooses where the scene's distance field darkens the light of each directional light it closes a surface off from, past the light's shadow map's reach by default, everywhere, or nowhere
+static void DrawSceneFieldWindow();                             // Draws the scene's distance field in an ImGui window of its own, what it is built from and a slice across one of its cascades, with its settings to change while it is looked at
 
 // MeshShape
 static string Ring(string outline);                             // A flat band along the inside of another flat shape's outline, sized by that shape's measures and, third, how wide the band is

@@ -47,6 +47,7 @@ public static class ComponentSchemas
     {
         get
         {
+            EngineAssemblies.Load();
             lock (Gate)
             {
                 Reflect();
@@ -71,6 +72,7 @@ public static class ComponentSchemas
     /// <summary>The schema for a component id, or <see langword="null"/> when none describes it.</summary>
     public static ComponentSchema? For(int componentId)
     {
+        EngineAssemblies.Load();
         lock (Gate)
         {
             Reflect();
@@ -84,13 +86,14 @@ public static class ComponentSchemas
     /// The name route needs no world, so a tool listing what it could show before an app exists has
     /// to use it. It also matches on the short name, because Bevy reports its own components by a
     /// path this side does not share. A name a type had before, kept on it with
-    /// <see cref="FormerNameAttribute"/>, or a path one of Bevy's components had before it moved,
+    /// <c>FormerNameAttribute</c>, or a path one of Bevy's components had before it moved,
     /// is tried last, so a type that has since taken that name wins over the one that gave it up.
     /// </remarks>
     public static ComponentSchema? For(string name)
     {
         if (string.IsNullOrEmpty(name)) return null;
 
+        EngineAssemblies.Load();
         lock (Gate)
         {
             Reflect();

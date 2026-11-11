@@ -41,7 +41,7 @@ internal enum ClockHolds
     /// A program compiles in a process of its own and its compute pipeline is built on the render
     /// side's thread, so one a game steps from once it is ready, as the game of life's compute
     /// steps are, starts in whichever frame they end. Held, the program reads ready
-    /// (<see cref="ShaderProgram.State"/>) at the same moment of the clock on every device.
+    /// (<c>ShaderProgram.State</c>) at the same moment of the clock on every device.
     /// </para>
     /// </remarks>
     Loads = 1,

@@ -78,7 +78,7 @@ public static class NativeComponents
     /// <summary>Bevy's <c>Atmosphere</c>, the planet whose air a sky is scattered through.</summary>
     /// <remarks>
     /// Render builds only. The id behind <see cref="Bevy.Atmosphere"/>, which is how the planet
-    /// <see cref="Render.SetAtmosphere"/> keeps is found or counted.
+    /// <c>Render.SetAtmosphere</c> keeps is found or counted.
     /// </remarks>
     public static int Atmosphere => ComponentType<Bevy.Atmosphere>.Id;
 
@@ -86,7 +86,7 @@ public static class NativeComponents
     /// <remarks>
     /// Render builds only. The id behind <see cref="Bevy.Interaction"/>, which a <c>[With]</c>
     /// filter needs to find the nodes that react. Its value comes from
-    /// <see cref="Ui.InteractionOf"/>.
+    /// <c>Ui.InteractionOf</c>.
     /// </remarks>
     public static int Interaction => ComponentType<Bevy.Interaction>.Id;
 

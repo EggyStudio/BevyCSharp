@@ -18,7 +18,7 @@ namespace Bevy;
 /// <para>
 /// The managed side resolves these paths, and an app registers the directory with Bevy as its
 /// <c>user</c> asset source as it starts, making it first, so a texture or a model the game wrote
-/// there loads through <see cref="AssetServer"/> as <c>user://…</c>. The source is built once, so
+/// there loads through <c>AssetServer</c> as <c>user://…</c>. The source is built once, so
 /// a <see cref="Root"/> changed after an app starts reaches the managed side and not Bevy.
 /// </para>
 /// </remarks>

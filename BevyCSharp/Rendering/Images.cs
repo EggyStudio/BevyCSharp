@@ -38,7 +38,7 @@ public static class Images
     /// <para>
     /// The grid of the prototype textures of the engines of the 2000s, which tells a reader of a
     /// level blocked out in it how big each thing is, laid over every face of an
-    /// <see cref="EditMesh"/> by its texture coordinates in meters (<see cref="Modeling.Build"/>), so
+    /// <c>EditMesh</c> by its texture coordinates in meters (<c>Modeling.Build</c>), so
     /// a cell is a meter on every face and the lines run on across faces. A meter's line is half on
     /// each edge of the cell, so cells tiled side by side make it whole, and the half's and the
     /// quarters' lines are centered on theirs. The steps are a level editor's, as Source's measuring
@@ -50,7 +50,7 @@ public static class Images
     /// Made with its mipmaps, so a floor running into the distance fades into the face's tone
     /// rather than shimmering, and given a sampler that repeats and filters across sixteen samples
     /// along a surface seen at a slant, so its lines stay sharp along a corridor. A light face
-    /// tinted by a material's color (<see cref="Modeling.Prototype(string)"/>) shows the tint, and
+    /// tinted by a material's color (<c>Modeling.Prototype(string)</c>) shows the tint, and
     /// the lines a darker tone of it.
     /// </para>
     /// </remarks>

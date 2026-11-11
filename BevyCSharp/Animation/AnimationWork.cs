@@ -1,6 +1,6 @@
 namespace Bevy;
 
-/// <summary>The animation's part in the app and its frame, which <see cref="EnginePlugin"/> adds to every app.</summary>
+/// <summary>The animation's part in the app and its frame, which <c>EnginePlugin</c> adds to every app.</summary>
 internal sealed class AnimationWork : IPlugin
 {
     public void Build(App app)

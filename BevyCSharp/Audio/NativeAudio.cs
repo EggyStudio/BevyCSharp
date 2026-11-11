@@ -12,7 +12,7 @@ internal static unsafe partial class NativeAudio
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeAudio() => NativeLoader.Initialize();
+    static NativeAudio() => NativeLoader.Initialize(typeof(NativeAudio).Assembly);
 
     /// <summary>Plays a sound, returning the entity playing it or 0.</summary>
     [LibraryImport(Library)]

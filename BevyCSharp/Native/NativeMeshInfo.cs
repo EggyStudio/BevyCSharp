@@ -18,7 +18,7 @@ public struct NativeMeshInfo
     /// <summary>0 triangles, 1 a strip, 2 lines, 3 a line strip, 4 points.</summary>
     public uint Topology;
 
-    /// <summary>One bit per attribute, as <see cref="MeshAttributes"/> numbers them.</summary>
+    /// <summary>One bit per attribute, as <c>MeshAttributes</c> numbers them.</summary>
     public uint Attributes;
 
     /// <summary>The bounds' smallest corner.</summary>

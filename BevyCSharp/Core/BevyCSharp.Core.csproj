@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's core, the App and its World, the ECS over Bevy's, the vectors and transforms, the clocks, input and the runner of [Behavior] structs, with Bevy's reflected components.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+    </ItemGroup>
+
+    <!--
+      The description of Bevy's reflected components, written by the schema.dump command and
+      checked in. The generator turns it into the typed wrappers in Bevy.Reflected. It is named here
+      and nowhere else, so only Core is compiled with the wrappers and a game's own compilation
+      emits nothing for it. The list of the components that moved beside it gives a reflected
+      component the paths a scene written before the move names, and the names of the projects
+      above Core that its wrappers keep apart from.
+    -->
+    <ItemGroup>
+        <AdditionalFiles Include="Generated/bevy-components.tsv"/>
+        <AdditionalFiles Include="Generated/bevy-former-paths.tsv"/>
+        <AdditionalFiles Include="Generated/bevy-taken-names.txt"/>
+    </ItemGroup>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- ObserverRegistry -->
+        <InternalsVisibleTo Include="BevyCSharp.Animation"/>
+        <!-- AssetHandle.Key -->
+        <InternalsVisibleTo Include="BevyCSharp.Assets"/>
+        <!-- AssetHandle.Key -->
+        <InternalsVisibleTo Include="BevyCSharp.Audio"/>
+        <!-- ConsoleHost.Failure, ConsoleHost.GiveUpAt, ConsoleHost.Held, ConsoleHost.PendingStill, Time.ClockFrames, Time.HoldStill -->
+        <InternalsVisibleTo Include="BevyCSharp.CliServer"/>
+        <!-- App.AreasWork, App.Running, ClockHoldNames, ClockHolds, ComponentField.ItemType, ComponentField.ReflectPath, ConsoleHost.Find, ConsoleHost.FirstAndRest, ConsoleHost.GiveUpAt, ConsoleHost.LaterFrom, ConsoleHost.LaterStill, ConsoleHost.Missing, EcsWorld.DescribeReflected, MemoryGuard.PeakBytes, NativeCore, ReflectedLayouts, ReflectedSchemas, StateRegistry.Claimed, SystemTimes, Time.ClockFrames, Time.Holds -->
+        <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
+        <!-- AssetHandle -->
+        <InternalsVisibleTo Include="BevyCSharp.Gizmos"/>
+        <!-- App.AreasWork, App.Running, AssetHandle, AssetHandle.Key, ConsoleHost.LaterFrom -->
+        <InternalsVisibleTo Include="BevyCSharp.GlobalIllumination"/>
+        <!-- AssetHandle.Key, NativeCore -->
+        <InternalsVisibleTo Include="BevyCSharp.ImGui"/>
+        <!-- App.Running -->
+        <InternalsVisibleTo Include="BevyCSharp.Levels"/>
+        <!-- App.AreasWork, App.Running, AssetIds.Root, ConsoleHost.FirstAndRest -->
+        <InternalsVisibleTo Include="BevyCSharp.Modeling"/>
+        <!-- EcsWorld.AliveMany, EcsWorld.ChangedSince, EcsWorld.HasMany, SystemTimes -->
+        <InternalsVisibleTo Include="BevyCSharp.Physics"/>
+        <!-- AssetHandle, AssetHandle.Key -->
+        <InternalsVisibleTo Include="BevyCSharp.Render2d"/>
+        <!-- AssetHandle.Key, EngineLog -->
+        <InternalsVisibleTo Include="BevyCSharp.Rendering"/>
+        <!-- App.AreasWork, AssetFiles.TryReadJson, AssetHandle, AssetHandle.Key, AssetIds.Root, ComponentRegistry, EcsStore, EcsWorld.Owner, UserData.PlatformDirectory -->
+        <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
+        <!-- App.ForgetAssembly -->
+        <InternalsVisibleTo Include="BevyCSharp.Scripting"/>
+        <!-- App.AreasWork, App.Running, AssetHandle, AssetHandle.Key -->
+        <InternalsVisibleTo Include="BevyCSharp.Sky"/>
+        <!-- IReportedEvent, ObserverRegistry -->
+        <InternalsVisibleTo Include="BevyCSharp.Ui"/>
+        <!-- App.AreasWork, App.Running, AssetFiles.Started, EngineLog -->
+        <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
+    </ItemGroup>
+
+</Project>

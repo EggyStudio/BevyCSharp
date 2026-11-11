@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's server for ./bcs, its session file, socket and queue of requests.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+    </ItemGroup>
+
+</Project>

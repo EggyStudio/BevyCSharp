@@ -273,7 +273,7 @@ public static class SyntheticInput
     /// For a run with neither a window nor an image it draws into, where Bevy's picking has nothing
     /// to find a pointer on, so a click reaches the interface and nothing in the scene. This hands
     /// such a click to whoever answers clicks on the scene, which casts a ray from its camera
-    /// through the point (<see cref="Render.TryRay"/>, <see cref="Picking.TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)"/>). An offscreen
+    /// through the point (<c>Render.TryRay</c>, <c>Picking.TryCast(Vec3, Vec3, out Entity, out Vec3, out Vec3)</c>). An offscreen
     /// run has its pointer put on the image it draws into, where picking finds what is under it,
     /// and gives nothing here.
     /// </para>

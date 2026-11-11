@@ -4,7 +4,7 @@ namespace Bevy;
 /// <param name="HalfSize">Half its size along each axis, so the box reaches from minus this to this.</param>
 /// <remarks>
 /// A shape as a value, which a game samples points in or on, as Bevy's <c>ShapeSample</c> does, to
-/// scatter what it spawns. Drawing one is <see cref="Render.CreateMesh(string, float, float, float)"/>'s.
+/// scatter what it spawns. Drawing one is <c>Render.CreateMesh(string, float, float, float)</c>'s.
 /// </remarks>
 public readonly record struct Cuboid(Vec3 HalfSize)
 {

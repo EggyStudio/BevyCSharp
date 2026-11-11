@@ -478,7 +478,7 @@ public static unsafe partial class Render
     /// A second window is Bevy's <c>Window</c> on an entity of its own, added through reflection as
     /// Bevy's other components are, and opened by Bevy once it is. A camera aimed at it draws there
     /// rather than in the first window. Each window shows what its own cameras draw, so an
-    /// interface meant for one names one of them (<see cref="UiSettings.Camera"/>), and what only
+    /// interface meant for one names one of them (<c>UiSettings.Camera</c>), and what only
     /// one window shows is kept to its camera's layers (<see cref="SetLayers"/>). Closing the
     /// window despawns its entity.
     /// </para>

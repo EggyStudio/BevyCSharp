@@ -1,6 +1,6 @@
 namespace Bevy;
 
-/// <summary>The field an <see cref="AnimatedProperty.Field"/> curve moves, and what its values are.</summary>
+/// <summary>The field an <c>AnimatedProperty.Field</c> curve moves, and what its values are.</summary>
 internal sealed record FieldCurve
 {
     public FieldCurve(string component, string path, FieldValue value)

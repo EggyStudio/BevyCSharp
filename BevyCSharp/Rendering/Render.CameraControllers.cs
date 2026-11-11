@@ -126,7 +126,7 @@ public static unsafe partial class Render
     /// moves the view under the pointer, so <see cref="PanCameraSettings.MousePan"/> needs the
     /// window's pointer.
     /// </remarks>
-    /// <param name="camera">A camera entity, usually from <see cref="Render2d.SpawnCamera2d"/>.</param>
+    /// <param name="camera">A camera entity, usually from <c>Render2d.SpawnCamera2d</c>.</param>
     /// <param name="settings">How the pan camera moves it.</param>
     /// <exception cref="BevyNativeException">
     /// The entity is gone or is not a camera, or this build has no renderer.

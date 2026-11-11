@@ -4,7 +4,7 @@ namespace Bevy.Interop;
 
 /// <summary>One connected gamepad as the bridge copies it out, mirroring <c>BcsGamepad</c>.</summary>
 /// <remarks>
-/// The button bits are numbered as <see cref="GamepadButton"/> declares them, which is the order the
+/// The button bits are numbered as <c>GamepadButton</c> declares them, which is the order the
 /// bridge's <c>BUTTONS</c> table pins, so Bevy's own enum growing moves neither.
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]

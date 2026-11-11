@@ -27,11 +27,12 @@ internal static class PublicSurface
 {
     private const BindingFlags Declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-    public static string Write(Assembly assembly)
+    public static string Write(IEnumerable<Assembly> assemblies)
     {
-        var extensions = ExtensionMembers.Of(assembly);
+        var library = assemblies.ToList();
+        var extensions = ExtensionMembers.Of(library);
         var text = new StringBuilder();
-        foreach (var type in assembly.GetExportedTypes().Where(type => !ExtensionMembers.Made(type)).OrderBy(t => t.FullName, StringComparer.Ordinal))
+        foreach (var type in library.SelectMany(assembly => assembly.GetExportedTypes()).Where(type => !ExtensionMembers.Made(type)).OrderBy(t => t.FullName, StringComparer.Ordinal))
         {
             var members = Members(type, type, member => member is not MethodInfo method || !ExtensionMembers.Carries(method))
                 .Concat(extensions[type].SelectMany(found => Members(found.Block, type, found.Members.Contains)))

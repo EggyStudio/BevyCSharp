@@ -25,7 +25,7 @@ public unsafe struct NativeFocusedKey
     /// <summary>One where the platform repeats a held key.</summary>
     public uint Repeat;
 
-    /// <summary>The logical key's kind, as <see cref="LogicalKeyKind"/> numbers them, or three for one the platform could not identify.</summary>
+    /// <summary>The logical key's kind, as <c>LogicalKeyKind</c> numbers them, or three for one the platform could not identify.</summary>
     public byte LogicalKind;
 
     /// <summary>How many bytes of <see cref="Logical"/> are its name or character.</summary>

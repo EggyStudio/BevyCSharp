@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>
 /// What a Feathers color slider sets, Bevy's <c>ColorChannel</c>, for
-/// <see cref="Feathers.ColorSlider"/>.
+/// <c>Feathers.ColorSlider</c>.
 /// </summary>
 /// <remarks>
 /// The slider draws its track as the color it sets would look along it, from the color Bevy's

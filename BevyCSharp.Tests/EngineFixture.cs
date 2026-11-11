@@ -151,7 +151,7 @@ public sealed class EngineHarness : IDisposable
     /// the suite loads to test its panels and whose behaviors would bring the editor up inside
     /// the app.
     /// </summary>
-    public static BehaviorsPlugin Behaviors() => new() { Assemblies = [typeof(EngineHarness).Assembly, typeof(App).Assembly] };
+    public static BehaviorsPlugin Behaviors() => new() { Assemblies = [typeof(EngineHarness).Assembly, .. EngineAssemblies.Loaded()] };
 
     /// <summary>Adds a system, capturing anything it throws for the test to re-raise.</summary>
     public EngineHarness On(Stage stage, Action<World> body, string? name = null)

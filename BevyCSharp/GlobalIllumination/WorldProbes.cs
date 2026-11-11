@@ -268,12 +268,12 @@ internal static unsafe partial class WorldProbes
 
         if (!_traceProgram.IsValid)
         {
-            _traceProgram = Shaders.KernelProgram("gi_trace.slang");
-            _traceSolid = Shaders.KernelProgram("gi_trace.slang", defines: new Dictionary<string, ShaderDefine> { ["NO_LIGHT_THROUGH"] = true });
-            _mergeProgram = Shaders.KernelProgram("gi_merge.slang");
-            _ambientProgram = Shaders.KernelProgram("gi_ambient.slang");
-            _light = Shaders.KernelDraw("gi_light.slang");
-            _sky = Shaders.CreateInstance(Shaders.KernelProgram("gi_sky.slang"));
+            _traceProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_trace.slang");
+            _traceSolid = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_trace.slang", defines: new Dictionary<string, ShaderDefine> { ["NO_LIGHT_THROUGH"] = true });
+            _mergeProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_merge.slang");
+            _ambientProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_ambient.slang");
+            _light = Shaders.KernelDraw(typeof(SceneField).Assembly, "gi_light.slang");
+            _sky = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_sky.slang"));
         }
 
         if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready

@@ -6,7 +6,7 @@ public unsafe struct NativeViewImage
     /// <summary>NUL-terminated UTF-8.</summary>
     public byte* Name;
 
-    /// <summary>A <see cref="ShaderImageFormat"/>.</summary>
+    /// <summary>A <c>ShaderImageFormat</c>.</summary>
     public int Format;
 
     /// <summary>A fraction of the picture's size.</summary>
@@ -18,7 +18,7 @@ public unsafe struct NativeViewImage
     /// <summary>How many mip levels.</summary>
     public int Mips;
 
-    /// <summary>The <see cref="FramePoint"/> the picture is copied in at, or -1 for none.</summary>
+    /// <summary>The <c>FramePoint</c> the picture is copied in at, or -1 for none.</summary>
     public int Copy;
 
     /// <summary>Non-zero to clear it at the start of every frame.</summary>

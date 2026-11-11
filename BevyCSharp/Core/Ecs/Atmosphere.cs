@@ -7,7 +7,7 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// A name-only handle, so <c>Count&lt;Atmosphere&gt;()</c> and <c>[With]</c> filters can find the
-/// planet <see cref="Render.SetAtmosphere"/> keeps. The component holds radii and an asset
+/// planet <c>Render.SetAtmosphere</c> keeps. The component holds radii and an asset
 /// handle, which raw bytes cannot represent, so its settings go through that call rather than
 /// through a component write.
 /// </remarks>

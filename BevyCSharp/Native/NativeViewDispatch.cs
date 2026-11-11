@@ -6,7 +6,7 @@ public unsafe struct NativeViewDispatch
     /// <summary>The shader instance.</summary>
     public int Instance;
 
-    /// <summary>A <see cref="FramePoint"/>.</summary>
+    /// <summary>A <c>FramePoint</c>.</summary>
     public int Point;
 
     /// <summary>0 counted from the picture, 1 fixed, 2 read from a buffer.</summary>

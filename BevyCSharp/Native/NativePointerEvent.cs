@@ -31,7 +31,7 @@ public struct NativePointerEvent
     /// <summary>Mouse, touch or a pointer of the game's own, as <see cref="PointerKind"/> numbers them.</summary>
     public int PointerKind;
 
-    /// <summary>The button, as <see cref="PointerButton"/> numbers them.</summary>
+    /// <summary>The button, as <c>PointerButton</c> numbers them.</summary>
     public int Button;
 
     /// <summary>The count of a press or a click.</summary>

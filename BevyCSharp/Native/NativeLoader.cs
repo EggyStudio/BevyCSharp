@@ -28,19 +28,27 @@ internal static class NativeLoader
 
     private static bool _initialized;
 
+    /// <summary>The assemblies whose entry points find the bridge through <see cref="Resolve"/>.</summary>
+    private static readonly HashSet<Assembly> Resolving = [];
+
     /// <summary>
-    /// Installs the resolver and verifies the ABI. Safe to call repeatedly; only the first
-    /// call does work.
+    /// Installs the resolver for an assembly's entry points, and on the first call for any of
+    /// them verifies the ABI. Safe to call repeatedly, since each assembly's first call does its work.
     /// </summary>
-    internal static void Initialize()
+    /// <remarks>
+    /// An area's entry points live in its own assembly, each area a project of its own, and a
+    /// resolver is set once for each assembly, so each area's class of entry points hands its own
+    /// from its static constructor and every area finds the one library.
+    /// </remarks>
+    internal static void Initialize(Assembly assembly)
     {
-        if (_initialized) return;
         lock (Gate)
         {
+            if (Resolving.Add(assembly)) NativeLibrary.SetDllImportResolver(assembly, Resolve);
             if (_initialized) return;
             _initialized = true;
 
-            NativeLibrary.SetDllImportResolver(typeof(NativeLoader).Assembly, Resolve);
+            if (Resolving.Add(typeof(NativeLoader).Assembly)) NativeLibrary.SetDllImportResolver(typeof(NativeLoader).Assembly, Resolve);
             VerifyAbi();
         }
     }

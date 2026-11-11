@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's global illumination, the scene's distance field, the world probes and the reference.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../ImGui/BevyCSharp.ImGui.csproj"/>
+    </ItemGroup>
+
+    <!-- The area's own programs, read as Slang source when each is first built, so the area
+         carries them as it carries everything else it runs. -->
+    <ItemGroup>
+        <EmbeddedResource Include="Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- FieldWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- NativeGlobalIllumination, SceneField -->
+        <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
+        <!-- SceneField -->
+        <InternalsVisibleTo Include="BevyCSharp.Sky"/>
+        <!-- GiReference -->
+        <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
+    </ItemGroup>
+
+</Project>

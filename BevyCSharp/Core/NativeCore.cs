@@ -19,7 +19,7 @@ internal static unsafe partial class NativeCore
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeCore() => NativeLoader.Initialize();
+    static NativeCore() => NativeLoader.Initialize(typeof(NativeCore).Assembly);
 
     // -- Asset sources
 

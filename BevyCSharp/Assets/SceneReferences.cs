@@ -75,7 +75,7 @@ public class SceneReferences
 
     /// <summary>
     /// Whether what is written is read back in this same run, as a component moved to the type a
-    /// script reload made of it is, so a field marked <see cref="NotSavedAttribute"/> goes along
+    /// script reload made of it is, so a field marked <c>NotSavedAttribute</c> goes along
     /// rather than starting over.
     /// </summary>
     internal bool SameRun { get; init; }

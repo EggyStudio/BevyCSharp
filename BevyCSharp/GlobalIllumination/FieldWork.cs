@@ -1,6 +1,6 @@
 namespace Bevy;
 
-/// <summary>The scene's distance field's and global illumination's part in the app's frame, which <see cref="EnginePlugin"/> adds to every app.</summary>
+/// <summary>The scene's distance field's and global illumination's part in the app's frame, which <c>EnginePlugin</c> adds to every app.</summary>
 internal sealed class FieldWork : IPlugin
 {
     public void Build(App app)

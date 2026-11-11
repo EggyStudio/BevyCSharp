@@ -7,7 +7,7 @@ namespace Bevy;
 /// <param name="Arc">The arc its round edge is.</param>
 /// <remarks>
 /// Symmetric about the Y axis as its arc is, its chord below the arc's midpoint.
-/// <see cref="MeshShape.CircularSegment"/> builds its mesh from the same two measures.
+/// <c>MeshShape.CircularSegment</c> builds its mesh from the same two measures.
 /// </remarks>
 public readonly record struct CircularSegment(Arc2d Arc) : IBounded2d
 {

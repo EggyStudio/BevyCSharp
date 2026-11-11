@@ -6,7 +6,7 @@ public unsafe struct NativeViewDraw
     /// <summary>The shader instance.</summary>
     public int Instance;
 
-    /// <summary>A <see cref="FramePoint"/>.</summary>
+    /// <summary>A <c>FramePoint</c>.</summary>
     public int Point;
 
     /// <summary>0 a fixed count, 1 counts read from a buffer, 2 workgroups of mesh shaders.</summary>
@@ -24,7 +24,7 @@ public unsafe struct NativeViewDraw
     /// <summary>The byte offset of the counts in it.</summary>
     public uint Offset;
 
-    /// <summary>A <see cref="DrawBlend"/>.</summary>
+    /// <summary>A <c>DrawBlend</c>.</summary>
     public int Blend;
 
     /// <summary>One to write depth, and two to cast shadows as well.</summary>

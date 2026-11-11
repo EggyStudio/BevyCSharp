@@ -16,7 +16,7 @@ public unsafe struct NativeLogicalKey
     /// <summary>One while held, two on the frame it went down, four on the frame it came up, added.</summary>
     public byte Flags;
 
-    /// <summary>What kind of key, as <see cref="LogicalKeyKind"/> numbers them.</summary>
+    /// <summary>What kind of key, as <c>LogicalKeyKind</c> numbers them.</summary>
     public byte Kind;
 
     /// <summary>How many bytes of <see cref="Text"/> are its name or its character.</summary>

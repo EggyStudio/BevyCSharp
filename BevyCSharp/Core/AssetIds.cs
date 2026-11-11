@@ -21,7 +21,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Only something that edits the project writes a sidecar, the editor and
-/// <see cref="DataAssets.Create{T}"/> among them. A game reads them. Paths are relative to the
+/// <c>DataAssets.Create{T}</c> among them. A game reads them. Paths are relative to the
 /// asset root, with forward slashes, as everywhere else an asset path is given.
 /// </para>
 /// <para>

@@ -1,6 +1,6 @@
 namespace Bevy;
 
-/// <summary>The scenes' part in the app and its frame, which <see cref="EnginePlugin"/> adds to every app.</summary>
+/// <summary>The scenes' part in the app and its frame, which <c>EnginePlugin</c> adds to every app.</summary>
 internal sealed class SceneWork : IPlugin
 {
     public void Build(App app)

@@ -121,7 +121,7 @@ internal static partial class SkyFog
     internal static ShaderInstance DrawFor(Entity camera, SkyFogSettings settings)
     {
         ForgetOtherApps();
-        var draw = Fogs.TryGetValue(camera.Bits, out var fog) ? fog.Draw : Shaders.KernelDraw("sky_fog.slang");
+        var draw = Fogs.TryGetValue(camera.Bits, out var fog) ? fog.Draw : Shaders.KernelDraw(typeof(RenderSky).Assembly, "sky_fog.slang");
         Fogs[camera.Bits] = (draw, settings, true);
         return draw;
     }

@@ -8,7 +8,7 @@ public static unsafe partial class Gizmos
     /// <summary>Draws the outline of a rectangle, flat, for a 2D camera.</summary>
     /// <remarks>
     /// <para>
-    /// Every call below is the shape above it seen by <see cref="Render2d.SpawnCamera2d"/>. They take
+    /// Every call below is the shape above it seen by <c>Render2d.SpawnCamera2d</c>. They take
     /// a point on the XY plane and an angle about Z, because that is all a flat shape can be turned
     /// by, and they are drawn by Bevy's own flat calls rather than by the solid ones at zero depth,
     /// which differ once a line has width.

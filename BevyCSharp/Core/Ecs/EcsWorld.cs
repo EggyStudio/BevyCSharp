@@ -70,18 +70,18 @@ public sealed unsafe partial class EcsWorld
     /// answer rather than a failure.
     /// </para>
     /// <para>
-    /// <b>Wait for <see cref="WorldInstanceReady"/>, not for <see cref="Bevy.WorldInstance"/>.</b>
+    /// <b>Wait for <c>WorldInstanceReady</c>, not for <see cref="Bevy.WorldInstance"/>.</b>
     /// That component marks the spawn as done, but it can appear a frame before the entities it
     /// produced are visible, so treating it as "the scene is ready" is a race that fails about one
     /// run in three. The message is posted at the top of the frame after Bevy announces the
     /// instance, once its entities are in the world.
     /// </para>
     /// <para>
-    /// Takes a glTF scene from <see cref="AssetServer.LoadGltfScene"/> or a <c>.scn.ron</c> world
-    /// from <see cref="AssetKind.Scene"/>; both load as the same asset, so one call spawns
+    /// Takes a glTF scene from <c>AssetServer.LoadGltfScene</c> or a <c>.scn.ron</c> world
+    /// from <c>AssetKind.Scene</c>. Both load as the same asset, so one call spawns
     /// either. Compose on top of what it produced the ordinary way, by walking
     /// <see cref="ChildrenOf"/> and adding components to the entities you find, or place it with
-    /// <see cref="SceneInstances.Spawn"/> to have the changes kept as overrides a scene file saves.
+    /// <c>SceneInstances.Spawn</c> to have the changes kept as overrides a scene file saves.
     /// </para>
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle names no scene, or no world is loaned.</exception>

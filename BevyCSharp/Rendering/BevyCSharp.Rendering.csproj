@@ -1,0 +1,84 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's rendering, Render and Shaders, cameras, lights, materials, meshes, the look and the Slang programs.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+    </ItemGroup>
+
+    <!--
+      The Sky module both engines share, a git submodule under modules/, whose assembly this
+      package carries in its lib folder with its documentation, since a package cannot name a
+      project as a dependency and the modules are not packages of their own. It is the lowest
+      package naming the module, and those above it that name it too find it here.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+    <PropertyGroup>
+        <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);BevyCSharpPackModule</TargetsForTfmSpecificBuildOutput>
+    </PropertyGroup>
+    <Target Name="BevyCSharpPackModule" DependsOnTargets="ResolveReferences">
+        <ItemGroup>
+            <_BevyCSharpModule Include="@(ReferencePath)" Condition="'%(ReferencePath.Filename)' == 'Sky'"/>
+            <BuildOutputInPackage Include="@(_BevyCSharpModule)"/>
+            <BuildOutputInPackage Include="@(_BevyCSharpModule->'%(RootDir)%(Directory)%(Filename).xml')"
+                                  Condition="Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
+        </ItemGroup>
+    </Target>
+
+    <!-- The area's own programs, read as Slang source when each is first built, so the area
+         carries them as it carries everything else it runs. -->
+    <ItemGroup>
+        <EmbeddedResource Include="Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- RenderWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- FieldCurve -->
+        <InternalsVisibleTo Include="BevyCSharp.Animation"/>
+        <!-- Looks, Recorder, Recorder.Request.Count, Recorder.Request.Length, Recorder.Request.Path, Recorder.Request.Step -->
+        <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
+        <!-- PngWriter, Shaders.KernelDraw, Shaders.KernelProgram, Shaders.SampledTexturesPerStage, Shaders.SetEnginePrepass, Shaders.SetEngineViewDispatches, Shaders.SetEngineViewDraws, Shaders.SetEngineViewImages -->
+        <InternalsVisibleTo Include="BevyCSharp.GlobalIllumination"/>
+        <!-- PngWriter -->
+        <InternalsVisibleTo Include="BevyCSharp.Levels"/>
+        <!-- Images.GridPixels -->
+        <InternalsVisibleTo Include="BevyCSharp.Modeling"/>
+        <!-- Render.Attach, Render.NoRenderer -->
+        <InternalsVisibleTo Include="BevyCSharp.Render2d"/>
+        <!-- MaterialJson, MeshJson -->
+        <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
+        <!-- Shaders.KernelDraw, Shaders.KernelProgram, Shaders.SetEnginePrepass, Shaders.SetEngineViewDispatches, Shaders.SetEngineViewDraws, Shaders.SetEngineViewImages -->
+        <InternalsVisibleTo Include="BevyCSharp.Sky"/>
+        <!-- Render.Attach, Render.NoRenderer -->
+        <InternalsVisibleTo Include="BevyCSharp.Ui"/>
+        <!-- Render.CreateBarkMaterial, Render.CreateImageLevels, Render.CreateImpostorMaterial, Render.CreateLeafMaterial, Render.MipChain, Render.SetFieldTint, Render.SetTreeWind -->
+        <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
+        <!-- GifWriter, PngWriter -->
+        <InternalsVisibleTo Include="bcs"/>
+    </ItemGroup>
+
+</Project>

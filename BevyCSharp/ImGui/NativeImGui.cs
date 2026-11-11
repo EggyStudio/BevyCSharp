@@ -13,7 +13,7 @@ internal static unsafe partial class NativeImGui
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeImGui() => NativeLoader.Initialize();
+    static NativeImGui() => NativeLoader.Initialize(typeof(NativeImGui).Assembly);
 
     /// <summary>Hands over this frame's triangles.</summary>
     [LibraryImport(Library)]

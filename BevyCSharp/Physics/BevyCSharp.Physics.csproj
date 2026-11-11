@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's rigid bodies over BepuPhysics, simulated on the managed side.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../Gizmos/BevyCSharp.Gizmos.csproj"/>
+        <ProjectReference Include="../Scenes/BevyCSharp.Scenes.csproj"/>
+    </ItemGroup>
+
+    <!--
+      BepuPhysics, which rigid bodies are simulated with, C# on this side, so nothing new crosses
+          to the native bridge. It is on a beta line, and the version is pinned rather than floating
+          so an update is a decision.
+    -->
+    <ItemGroup>
+        <PackageReference Include="BepuPhysics" Version="2.5.0-beta.29"/>
+    </ItemGroup>
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- PhysicsWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- Colliders.WorldOf -->
+        <InternalsVisibleTo Include="BevyCSharp.Levels"/>
+    </ItemGroup>
+
+</Project>

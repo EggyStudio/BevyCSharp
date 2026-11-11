@@ -437,7 +437,7 @@ public static unsafe partial class Gizmos
     /// Bevy's text gizmos, drawn as lines in its Simplex stroke font, so a label costs no font
     /// asset, no texture and no entity, and lasts the frame it was asked for like any gizmo. For a
     /// value watched as it changes, a name over what it names, or a measurement beside what it
-    /// measures. Text a player reads belongs in <see cref="Ui"/> or on an entity with
+    /// measures. Text a player reads belongs in <c>Ui</c> or on an entity with
     /// <c>Text2d</c>, which are shaped by a real font and kept.
     /// </para>
     /// <para>

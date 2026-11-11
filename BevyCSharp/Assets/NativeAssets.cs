@@ -12,7 +12,7 @@ internal static unsafe partial class NativeAssets
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeAssets() => NativeLoader.Initialize();
+    static NativeAssets() => NativeLoader.Initialize(typeof(NativeAssets).Assembly);
 
     /// <summary>Collects the assets that failed to load, and reports how many.</summary>
     [LibraryImport(Library)]

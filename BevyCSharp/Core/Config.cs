@@ -163,7 +163,7 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What <see cref="ImGuiRuntime"/> needs. Off unless asked for, because it is not free to an
+    /// What <c>ImGuiRuntime</c> needs. Off unless asked for, because it is not free to an
     /// app that never draws one. It brings the pass that rasterizes the interface and the buffers
     /// it draws from. The editor profile is a superset of the render one, so a game and the editor
     /// run against the same library and this tells them apart.
@@ -216,7 +216,7 @@ public sealed class Config
 
     /// <summary>
     /// Find the mesh under a pointer, for what a pointer does to it (<see cref="Pointer{TEvent}"/>)
-    /// and for <see cref="Picking.Drain"/>.
+    /// and for <c>Picking.Drain</c>.
     /// </summary>
     /// <remarks>
     /// Bevy's <c>MeshPickingPlugin</c>, which casts a ray at every mesh in the scene as the pointer
@@ -245,14 +245,14 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// Bevy's default plugins leave each out, and each moves only a camera given its controller,
-    /// with <see cref="Render.SetFreeCamera"/>, <see cref="Render.SetPanCamera"/> or the reflected
+    /// with <c>Render.SetFreeCamera</c>, <c>Render.SetPanCamera</c> or the reflected
     /// <c>PanOrbitCameraRef</c>. A camera given a controller the app did not ask for stands still.
     /// A bridge with the renderer is needed.
     /// </remarks>
     public CameraControllers CameraControllers { get; set; }
 
     /// <summary>
-    /// Add Feathers, Bevy's styled widgets, which <see cref="Bevy.Feathers"/> spawns, with Bevy's dark
+    /// Add Feathers, Bevy's styled widgets, which <c>Bevy.Feathers</c> spawns, with Bevy's dark
     /// theme.
     /// </summary>
     /// <remarks>
@@ -269,7 +269,7 @@ public sealed class Config
     /// <remarks>
     /// Bevy's default plugins leave each out. The overlay shows from the start, the grid is drawn on
     /// an entity given its component, and picking's overlay shows once
-    /// <see cref="Picking.DebugMode"/> turns it on. A bridge with the renderer is needed.
+    /// <c>Picking.DebugMode</c> turns it on. A bridge with the renderer is needed.
     /// </remarks>
     public DevTools DevTools { get; set; }
 
@@ -281,7 +281,7 @@ public sealed class Config
     /// The renderer without a screen. Everything else about the run is as it would be in a window,
     /// down to the plugins that are installed and the cameras that draw. <see cref="Width"/> and
     /// <see cref="Height"/> size the image the way they would size the window, and
-    /// <see cref="Render.Screenshot(string)"/> captures it.
+    /// <c>Render.Screenshot(string)</c> captures it.
     /// </para>
     /// <para>
     /// What it is for is a machine with no display. A windowed run needs a display server to open
@@ -374,8 +374,8 @@ public sealed class Config
     /// plays reaches somebody beside the machine who never asked for it, so by default such a run
     /// opens no device. Its sounds still run their course. Each is decoded and drawn from on the
     /// app's clock as a device would draw from it, so it pauses, seeks, loops and ends when it
-    /// would be heard to, a sound played with <see cref="PlaybackMode.Despawn"/> goes on time, and
-    /// a game that waits on a sound's end works the same. <see cref="Audio.IsSilent"/> says which
+    /// would be heard to, a sound played with <c>PlaybackMode.Despawn</c> goes on time, and
+    /// a game that waits on a sound's end works the same. <c>Audio.IsSilent</c> says which
     /// a run does.
     /// </para>
     /// <para>
@@ -409,7 +409,7 @@ public sealed class Config
     /// Meshlets need a bridge built with them (<c>build/build-native.sh --editor --meshlet</c>) and a
     /// GPU with 64-bit texture atomics on Vulkan or Metal. The bridge asks the GPU before turning
     /// them on, and on one that lacks them says so and runs without, which
-    /// <see cref="Render.MeshletsActive"/> reports.
+    /// <c>Render.MeshletsActive</c> reports.
     /// </para>
     /// <para>
     /// Each cluster costs four bytes of GPU memory, and too few shows as meshes flickering or
@@ -443,7 +443,7 @@ public sealed class Config
 
     /// <summary>
     /// Measure how long every render pass takes, on the CPU and the GPU, for
-    /// <see cref="Render.Timings"/>.
+    /// <c>Render.Timings</c>.
     /// </summary>
     /// <remarks>
     /// Bevy's own passes are measured, and so is every dispatch, pass and draw a shader program
@@ -455,7 +455,7 @@ public sealed class Config
     public bool GpuTimings { get; set; }
 
     /// <summary>
-    /// Add Bevy's wireframe plugins, so <see cref="Render.SetWireframe"/> can draw a mesh as its
+    /// Add Bevy's wireframe plugins, so <c>Render.SetWireframe</c> can draw a mesh as its
     /// edges, and Bevy's wireframe components and settings, for 3D and 2D meshes, are drawn.
     /// </summary>
     /// <remarks>
@@ -484,9 +484,9 @@ public sealed class Config
     /// and its log of the store, none by default.
     /// </summary>
     /// <remarks>
-    /// <see cref="Diagnostics"/> reads what they measure and is where a game's own measures go.
+    /// <c>Diagnostics</c> reads what they measure and is where a game's own measures go.
     /// The log prints every diagnostic once a second, a game's among them, unless
-    /// <see cref="Diagnostics.SetLogFilter"/> says which.
+    /// <c>Diagnostics.SetLogFilter</c> says which.
     /// </remarks>
     public DiagnosticPlugins DiagnosticPlugins { get; set; }
 
@@ -509,8 +509,8 @@ public sealed class Config
     /// <para>
     /// Decided when the window is made, since the platform builds a see-through window
     /// differently from an opaque one. What is left clear is then clear, the world's clear color
-    /// where it has no alpha (<see cref="Render.SetClearColor"/>), the part of a window a camera's
-    /// viewport leaves out, and the corners <see cref="Render.SetRoundedCorners"/> takes off. A
+    /// where it has no alpha (<c>Render.SetClearColor</c>), the part of a window a camera's
+    /// viewport leaves out, and the corners <c>Render.SetRoundedCorners</c> takes off. A
     /// window without a frame (<see cref="Window.SetStyle(bool, bool, bool)"/>) and with this on can be any shape.
     /// </para>
     /// <para>
@@ -563,7 +563,7 @@ public sealed class Config
 
     /// <summary>
     /// Make Bevy's ray-traced lighting available, which a camera then turns on with
-    /// <see cref="Render.SetRayTracedLighting"/>.
+    /// <c>Render.SetRayTracedLighting</c>.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -571,7 +571,7 @@ public sealed class Config
     /// from every light and every emissive surface, and indirect light from everything, in
     /// real time. It needs a bridge built with it (<c>./bcs build --editor --solari</c>) and an
     /// adapter with ray queries, which the bridge asks about before turning it on and which
-    /// <see cref="Render.RayTracingActive"/> reports.
+    /// <c>Render.RayTracingActive</c> reports.
     /// </para>
     /// <para>
     /// Turning it on makes every one of Bevy's materials deferred for the whole app, since Solari
@@ -583,7 +583,7 @@ public sealed class Config
 
     /// <summary>
     /// Make Bevy's path tracer available beside its ray-traced lighting, which a camera then draws
-    /// with in the lighting's place through <see cref="Render.SetPathTraced"/>.
+    /// with in the lighting's place through <c>Render.SetPathTraced</c>.
     /// </summary>
     /// <remarks>
     /// The path tracer follows each pixel's light to its end and adds every frame's samples to the

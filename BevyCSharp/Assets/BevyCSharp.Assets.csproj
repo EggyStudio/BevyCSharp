@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's asset server, handles, loads, packs, data assets and glTF files.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+    </ItemGroup>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- AssetWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- NativeAssets -->
+        <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
+        <!-- AssetServer.AddForgetter -->
+        <InternalsVisibleTo Include="BevyCSharp.Physics"/>
+        <!-- AssetServer.AddForgetter, AssetServer.Failed, TextureSettings.Anisotropy, TextureSettings.SlantSamples -->
+        <InternalsVisibleTo Include="BevyCSharp.Rendering"/>
+        <!-- SceneReferences.SameRun -->
+        <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
+    </ItemGroup>
+
+</Project>

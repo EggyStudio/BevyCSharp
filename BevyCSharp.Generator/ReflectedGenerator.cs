@@ -30,6 +30,12 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
 {
     private const string FileName = "bevy-components.tsv";
 
+    /// <summary>
+    /// The names the library's projects above the one compiling the wrappers give types in the
+    /// Bevy namespace, which its compilation cannot see.
+    /// </summary>
+    private const string TakenFileName = "bevy-taken-names.txt";
+
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -40,12 +46,27 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
                 || file.Path == FileName)
             .Select(static (file, token) => Parse(file.GetText(token)?.ToString() ?? string.Empty));
 
-        // The names the library already gives types in the Bevy namespace, which a union of the
-        // same name would make ambiguous in code that uses both namespaces.
-        var taken = context.CompilationProvider.Select(static (compilation, _) =>
+        // The names the library gives types in the Bevy namespace, which a union of the same name
+        // would make ambiguous in code that uses both namespaces, those the compilation holds and
+        // those of the projects above it, which it cannot see and which a file of names lists.
+        var listed = context.AdditionalTextsProvider
+            .Where(static file =>
+                file.Path.EndsWith("/" + TakenFileName, StringComparison.Ordinal)
+                || file.Path.EndsWith("\\" + TakenFileName, StringComparison.Ordinal)
+                || file.Path == TakenFileName)
+            .SelectMany(static (file, token) => (file.GetText(token)?.ToString() ?? string.Empty)
+                .Split('\n')
+                .Select(line => line.Trim())
+                .Where(line => line.Length > 0 && !line.StartsWith("#", StringComparison.Ordinal)))
+            .Collect();
+        var taken = context.CompilationProvider.Combine(listed).Select(static (pair, _) =>
         {
-            var bevy = compilation.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(n => n.Name == "Bevy");
-            var names = bevy is null ? new string[0] : bevy.GetTypeMembers().Select(t => t.Name).Distinct().OrderBy(n => n, StringComparer.Ordinal).ToArray();
+            var bevy = pair.Left.GlobalNamespace.GetNamespaceMembers().FirstOrDefault(n => n.Name == "Bevy");
+            var names = (bevy is null ? Enumerable.Empty<string>() : bevy.GetTypeMembers().Select(t => t.Name))
+                .Concat(pair.Right)
+                .Distinct()
+                .OrderBy(n => n, StringComparer.Ordinal)
+                .ToArray();
             return new EquatableArray<string>(names);
         });
 

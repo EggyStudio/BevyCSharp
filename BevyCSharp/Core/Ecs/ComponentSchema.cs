@@ -97,13 +97,13 @@ public sealed class ComponentSchema
 
     /// <summary>The full names the type had before, which an old file may still use.</summary>
     /// <remarks>
-    /// Filled from <see cref="FormerNameAttribute"/>, with a name given alone placed in the type's
+    /// Filled from <c>FormerNameAttribute</c>, with a name given alone placed in the type's
     /// own namespace. A file naming one of these is read as this type and written back under its
     /// current name.
     /// </remarks>
     public IReadOnlyList<string> FormerNames { get; init; } = [];
 
-    /// <summary>The version a file of the type is written at, from <see cref="DataVersionAttribute"/>.</summary>
+    /// <summary>The version a file of the type is written at, from <c>DataVersionAttribute</c>.</summary>
     /// <remarks>Zero for a type with none, which writes no version and reads every file as it is.</remarks>
     public int Version { get; init; }
 
@@ -114,9 +114,9 @@ public sealed class ComponentSchema
     /// <remarks>The type's own <c>Migrate</c> method, which the generator finds and wraps.</remarks>
     public Func<int, JsonObject, JsonObject>? Migrate { get; init; }
 
-    /// <summary>Whether a save game writes this component's fields, from <see cref="PersistAttribute"/>.</summary>
+    /// <summary>Whether a save game writes this component's fields, from <c>PersistAttribute</c>.</summary>
     /// <remarks>
-    /// <see cref="SaveGame.Persisted"/> opts in a component this side did not declare, such as
+    /// <c>SaveGame.Persisted</c> opts in a component this side did not declare, such as
     /// Bevy's transform.
     /// </remarks>
     public bool Persisted { get; init; }

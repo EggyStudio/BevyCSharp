@@ -12,7 +12,7 @@ internal static unsafe partial class NativeSky
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeSky() => NativeLoader.Initialize();
+    static NativeSky() => NativeLoader.Initialize(typeof(NativeSky).Assembly);
 
     /// <summary>Lays a picture over a directional light across a square of the world about a point, or with an image under zero takes it off.</summary>
     [LibraryImport(Library)]

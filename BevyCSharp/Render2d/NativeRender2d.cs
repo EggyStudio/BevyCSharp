@@ -12,7 +12,7 @@ internal static unsafe partial class NativeRender2d
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeRender2d() => NativeLoader.Initialize();
+    static NativeRender2d() => NativeLoader.Initialize(typeof(NativeRender2d).Assembly);
 
     /// <summary>Makes an entity a tilemap chunk with its tiles.</summary>
     [LibraryImport(Library)]

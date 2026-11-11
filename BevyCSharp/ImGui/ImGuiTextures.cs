@@ -50,7 +50,7 @@ public static unsafe class ImGuiTextures
     /// picture somebody saved. Asked for once per handle and kept, because what it names does not
     /// change when the picture behind it is redrawn.
     /// </remarks>
-    /// <param name="image">The image, usually from <see cref="Render.CreateTarget"/>.</param>
+    /// <param name="image">The image, usually from <c>Render.CreateTarget</c>.</param>
     /// <returns>A name ImGui can draw with, or zero when the handle names no image.</returns>
     public static ulong Of(AssetHandle image)
     {

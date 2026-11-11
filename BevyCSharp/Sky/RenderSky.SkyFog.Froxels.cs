@@ -58,8 +58,8 @@ internal static partial class SkyFog
                 Grid = grid,
                 Scatter = [Image(), Image()],
                 Volume = Image(),
-                Inject = Shaders.CreateInstance(Shaders.KernelProgram("fog_froxels.slang")),
-                Integrate = Shaders.CreateInstance(Shaders.KernelProgram("fog_integrate.slang")),
+                Inject = Shaders.CreateInstance(Shaders.KernelProgram(typeof(RenderSky).Assembly, "fog_froxels.slang")),
+                Integrate = Shaders.CreateInstance(Shaders.KernelProgram(typeof(RenderSky).Assembly, "fog_integrate.slang")),
                 Settings = asked,
             };
             Froxeled[camera.Bits] = froxels;

@@ -6,10 +6,10 @@ namespace Bevy.Interop;
 [StructLayout(LayoutKind.Sequential)]
 public unsafe struct NativeFeathersProps
 {
-    /// <summary>A button's look, as <see cref="ButtonVariant"/> numbers it.</summary>
+    /// <summary>A button's look, as <c>ButtonVariant</c> numbers it.</summary>
     public int Variant;
 
-    /// <summary>Which corners are rounded, as <see cref="RoundedCorners"/> numbers them.</summary>
+    /// <summary>Which corners are rounded, as <c>RoundedCorners</c> numbers them.</summary>
     public int Corners;
 
     /// <summary>A slider's least value.</summary>

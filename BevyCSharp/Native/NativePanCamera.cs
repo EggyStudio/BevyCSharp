@@ -41,7 +41,7 @@ public unsafe struct NativePanCamera
 
     /// <summary>
     /// Zoom in, zoom out, up, down, left, right, turn counterclockwise and turn clockwise, each a
-    /// <see cref="Key"/>, or -1 for none.
+    /// <c>Key</c>, or -1 for none.
     /// </summary>
     public fixed int Keys[KeyCount];
 }

@@ -1,6 +1,6 @@
 namespace Bevy;
 
-/// <summary>The trees' part in the app's frame, which <see cref="EnginePlugin"/> adds to every app.</summary>
+/// <summary>The trees' part in the app's frame, which <c>EnginePlugin</c> adds to every app.</summary>
 internal sealed class TreeWork : IPlugin
 {
     public void Build(App app)

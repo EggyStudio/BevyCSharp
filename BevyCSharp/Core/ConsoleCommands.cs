@@ -26,6 +26,7 @@ public static class ConsoleCommands
     {
         get
         {
+            EngineAssemblies.Load();
             lock (Gate) return [.. Registered.Values];
         }
     }
@@ -52,12 +53,14 @@ public static class ConsoleCommands
     /// <summary>The command of a given name, or <see langword="null"/>.</summary>
     public static ConsoleCommand? Find(string name)
     {
+        EngineAssemblies.Load();
         lock (Gate) return Registered.GetValueOrDefault(name);
     }
 
     /// <summary>The commands whose names start with what has been typed so far.</summary>
     public static IReadOnlyList<ConsoleCommand> Starting(string prefix)
     {
+        EngineAssemblies.Load();
         lock (Gate)
         {
             if (string.IsNullOrWhiteSpace(prefix)) return [.. Registered.Values];

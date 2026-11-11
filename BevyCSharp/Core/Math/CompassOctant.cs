@@ -2,7 +2,7 @@ namespace Bevy;
 
 /// <summary>One of eight directions on a screen or a map, counted clockwise from north, as Bevy's <c>CompassOctant</c>.</summary>
 /// <remarks>
-/// North is up the screen and east to its right. <see cref="Navigation.Move"/> moves the input
+/// North is up the screen and east to its right. <c>Navigation.Move</c> moves the input
 /// focus by one, and <see cref="CompassOctants.Of(Vec2)"/> finds the one a stick or a pair of keys
 /// points in.
 /// </remarks>

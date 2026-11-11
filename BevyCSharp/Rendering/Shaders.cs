@@ -374,8 +374,8 @@ public static unsafe partial class Shaders
     /// The program's <see cref="ShaderProgramSettings.Fragment2d"/> draws it, with its
     /// <see cref="ShaderProgramSettings.Vertex2d"/> where it has one. Its values are set by name
     /// on what this returns as a 3D material's are, starting at zero, its textures at a stand-in
-    /// of the right shape. It goes on an entity with <see cref="Render2d.SetMaterial"/>, beside the
-    /// 2D mesh <see cref="Render2d.SetMesh"/> gives it, and a 2D camera draws it as Bevy draws a
+    /// of the right shape. It goes on an entity with <c>Render2d.SetMaterial</c>, beside the
+    /// 2D mesh <c>Render2d.SetMesh</c> gives it, and a 2D camera draws it as Bevy draws a
     /// <c>Material2d</c>.
     /// </para>
     /// <para>
@@ -422,7 +422,7 @@ public static unsafe partial class Shaders
     /// The program's <see cref="ShaderProgramSettings.FragmentUi"/> draws it, with its
     /// <see cref="ShaderProgramSettings.VertexUi"/> where it has one. Its values are set by name on
     /// what this returns as a 3D material's are, starting at zero, its textures at a stand-in of
-    /// the right shape. It goes on a node with <see cref="Ui.SetMaterial"/>, and the interface
+    /// the right shape. It goes on a node with <c>Ui.SetMaterial</c>, and the interface
     /// draws it as Bevy draws a <c>UiMaterial</c>, over the node's background, border and image
     /// and under its text, clipped as the node is and taking an outline or a shadow as any node
     /// does.

@@ -15,13 +15,13 @@ public enum CameraControllers
 
     /// <summary>
     /// The free camera, moved with the keys and turned with the mouse, which
-    /// <see cref="Render.SetFreeCamera"/> puts on a camera (<c>FreeCameraPlugin</c>).
+    /// <c>Render.SetFreeCamera</c> puts on a camera (<c>FreeCameraPlugin</c>).
     /// </summary>
     Free = 1,
 
     /// <summary>
     /// The pan camera for a 2D view, moved and turned with the keys, zoomed with the wheel and
-    /// dragged with a button, which <see cref="Render.SetPanCamera"/> puts on a camera
+    /// dragged with a button, which <c>Render.SetPanCamera</c> puts on a camera
     /// (<c>PanCameraPlugin</c>).
     /// </summary>
     Pan = 2,

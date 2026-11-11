@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's Dear ImGui runtime, its input and textures, which the editor and the console are built with.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+    </ItemGroup>
+
+    <!--
+      Dear ImGui, which the interface is built with. The package carries the native library for
+          every platform the bridge builds for.
+    -->
+    <ItemGroup>
+        <PackageReference Include="Twizzle.ImGui-Bundle.NET" Version="1.91.5.2"/>
+    </ItemGroup>
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- ImGuiWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+    </ItemGroup>
+
+</Project>

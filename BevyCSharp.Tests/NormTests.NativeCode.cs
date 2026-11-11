@@ -25,7 +25,7 @@ public sealed partial class NormTests
     /// </remarks>
     private static List<MethodBase> HandedToNativeCode()
     {
-        Assembly[] ours = [typeof(App).Assembly, Assembly.Load("BevyCSharp.Editor")];
+        Assembly[] ours = [.. EngineAssemblies.Loaded(), Assembly.Load("BevyCSharp.Editor")];
         var handed = new HashSet<MethodBase>();
         foreach (var assembly in ours)
             foreach (var method in Methods(assembly))
@@ -165,12 +165,7 @@ public sealed partial class NormTests
             il = null;
         }
 
-        return il is null ? [] : Instructions(il);
-    }
-
-    /// <summary>The instructions of a method's body, each with where it starts and its operand where that is a token.</summary>
-    private static IEnumerable<(int Offset, OpCode Code, int Operand)> Instructions(byte[] il)
-    {
+        if (il is null) yield break;
         for (var at = 0; at < il.Length;)
         {
             var offset = at;

@@ -12,7 +12,7 @@ internal static unsafe partial class NativeDiagnostics
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeDiagnostics() => NativeLoader.Initialize();
+    static NativeDiagnostics() => NativeLoader.Initialize(typeof(NativeDiagnostics).Assembly);
 
     /// <summary>Registers a diagnostic in Bevy's store.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]

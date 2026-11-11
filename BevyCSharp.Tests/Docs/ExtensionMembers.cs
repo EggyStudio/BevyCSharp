@@ -26,9 +26,13 @@ internal static class ExtensionMembers
 {
     private const BindingFlags Declared = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly;
 
-    /// <summary>Each block of an assembly, with the members it gives, by the type they extend.</summary>
-    public static ILookup<Type, (Type Block, MemberInfo[] Members)> Of(Assembly assembly) =>
-        assembly.GetTypes()
+    /// <summary>Each block of the assemblies, with the members it gives, by the type they extend.</summary>
+    /// <remarks>
+    /// An area's block may extend a type of another area's assembly, as the sky's extends
+    /// <see cref="Render"/>, so the blocks of every assembly are read together.
+    /// </remarks>
+    public static ILookup<Type, (Type Block, MemberInfo[] Members)> Of(IEnumerable<Assembly> assemblies) =>
+        assemblies.SelectMany(assembly => assembly.GetTypes())
             .SelectMany(Blocks)
             .SelectMany(block => Markers(block).Select(marker => (Extended: Extended(marker), block, Members: Marked(block, marker.Name))))
             .ToLookup(found => found.Extended, found => (found.block, found.Members));

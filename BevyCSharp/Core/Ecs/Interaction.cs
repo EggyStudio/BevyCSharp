@@ -10,8 +10,8 @@ namespace Bevy;
 /// nodes that react to the pointer, and a <c>[Changed]</c> filter sees the pointer come over a
 /// node, leave it, press or let go. It names the bridge's own record of how the pointer stands on
 /// the node, kept from Bevy's hover and press each frame, since Bevy's own interaction is
-/// deprecated, and its value is read through <see cref="Ui.InteractionOf"/>. Spawn a node with
-/// <see cref="UiSettings.Interactive"/> to give it one.
+/// deprecated, and its value is read through <c>Ui.InteractionOf</c>. Spawn a node with
+/// <c>UiSettings.Interactive</c> to give it one.
 /// </remarks>
 public readonly struct Interaction : INativeComponent
 {

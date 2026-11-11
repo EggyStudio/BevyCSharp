@@ -219,8 +219,11 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>The references read for the process, by the file each was read from.</summary>
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, MetadataReference> Read = new(StringComparer.Ordinal);
 
-    /// <summary>Every assembly the library names, loaded once for the process.</summary>
-    private static readonly Assembly[] Named = Load(typeof(App).Assembly);
+    /// <summary>
+    /// Every assembly the library names, loaded once for the process, walked from the flat
+    /// project's, which references every area's.
+    /// </summary>
+    private static readonly Assembly[] Named = Load(typeof(BevyApp).Assembly);
 
     /// <summary>
     /// What an assembly names, loaded in the context it was loaded in, and what each of the app's

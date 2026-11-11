@@ -20,7 +20,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// Global illumination's members and the sky's are declared in
-/// <see cref="RenderGlobalIllumination"/> and <see cref="RenderSky"/>, which extend this class, and
+/// <c>RenderGlobalIllumination</c> and <c>RenderSky</c>, which extend this class, and
 /// are called on it as its own.
 /// </para>
 /// </remarks>

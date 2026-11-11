@@ -28,7 +28,7 @@ public sealed partial class CheatsheetTests
     [Fact]
     public void EveryPublicMethodHasItsLineAndEveryLineAMethod()
     {
-        var library = typeof(App).Assembly.GetExportedTypes()
+        var library = EngineAssemblies.Loaded().SelectMany(assembly => assembly.GetExportedTypes())
             .Where(Listed)
             .SelectMany(type => Methods(type).Select(method => $"{Key(type)}.{method.Name}/{method.GetParameters().Length}"))
             .ToHashSet();
@@ -101,7 +101,7 @@ public sealed partial class CheatsheetTests
         && Methods(type).Any();
 
     // The members extension blocks give each named type, which the page lists under it.
-    private static readonly ILookup<Type, (Type Block, MemberInfo[] Members)> Extensions = ExtensionMembers.Of(typeof(App).Assembly);
+    private static readonly ILookup<Type, (Type Block, MemberInfo[] Members)> Extensions = ExtensionMembers.Of(EngineAssemblies.Loaded());
 
     private static IEnumerable<MethodInfo> Methods(Type type) =>
         type.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly)

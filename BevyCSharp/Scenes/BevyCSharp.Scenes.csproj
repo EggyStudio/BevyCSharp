@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's scene files and saved games.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+    </ItemGroup>
+
+
+
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- SceneWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- SceneInstances.IsReady -->
+        <InternalsVisibleTo Include="BevyCSharp.Physics"/>
+    </ItemGroup>
+
+</Project>

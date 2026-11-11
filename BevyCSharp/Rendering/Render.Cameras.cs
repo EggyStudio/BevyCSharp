@@ -321,7 +321,7 @@ public static unsafe partial class Render
     /// these, since it is the camera's render graph that reads them.
     /// </remarks>
     /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or
-    /// <see cref="Render2d.SpawnCamera2d"/>.</param>
+    /// <c>Render2d.SpawnCamera2d</c>.</param>
     /// <param name="settings">What the camera should do.</param>
     /// <exception cref="ArgumentException">
     /// <see cref="AntiAliasPass.Temporal"/> is asked for together with multisampling.
@@ -389,7 +389,7 @@ public static unsafe partial class Render
     /// settings leave off is taken off the camera.
     /// </remarks>
     /// <param name="camera">A camera entity from <see cref="SpawnCamera3d()"/> or
-    /// <see cref="Render2d.SpawnCamera2d"/>.</param>
+    /// <c>Render2d.SpawnCamera2d</c>.</param>
     /// <param name="settings">The lens to draw through.</param>
     /// <exception cref="ArgumentException">
     /// <see cref="EffectSettings.ExposureCompensation"/> does not rise in luminance.

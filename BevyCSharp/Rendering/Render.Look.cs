@@ -87,7 +87,7 @@ internal static class Looks
     internal static ShaderInstance PassFor(Entity camera, LookSettings settings)
     {
         ForgetOtherApps();
-        var pass = Kept.TryGetValue(camera.Bits, out var look) ? look.Pass : Shaders.KernelPass("look.slang");
+        var pass = Kept.TryGetValue(camera.Bits, out var look) ? look.Pass : Shaders.KernelPass(typeof(Render).Assembly, "look.slang");
         Kept[camera.Bits] = (pass, settings, true);
         return pass;
     }

@@ -217,7 +217,7 @@ internal static unsafe partial class SceneField
             _splat = Program("field_splat.slang");
             _resolve = Program("field_resolve.slang");
             _stamp = Program("field_stamp.slang");
-            _shadows = Shaders.KernelDraw("field_shadows.slang");
+            _shadows = Shaders.KernelDraw(typeof(SceneField).Assembly, "field_shadows.slang");
             _slice = Program("field_slice.slang");
         }
 
@@ -319,7 +319,7 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>An instance of one of the field's compute programs, compiled from the library's own copy.</summary>
-    private static ShaderInstance Program(string file) => Shaders.CreateInstance(Shaders.KernelProgram(file));
+    private static ShaderInstance Program(string file) => Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, file));
 
     /// <summary>Makes the field's images and buffers for its settings, every cell far and unpainted and every word cleared.</summary>
     private static Built Make((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made)

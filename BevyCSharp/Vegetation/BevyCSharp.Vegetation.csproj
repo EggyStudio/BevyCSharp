@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's trees, grown from a species and a seed and built into meshes.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Assets/BevyCSharp.Assets.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../GlobalIllumination/BevyCSharp.GlobalIllumination.csproj"/>
+        <ProjectReference Include="../Physics/BevyCSharp.Physics.csproj"/>
+        <ProjectReference Include="../Sky/BevyCSharp.Sky.csproj"/>
+        <ProjectReference Include="../Modeling/BevyCSharp.Modeling.csproj"/>
+    </ItemGroup>
+
+    <!--
+      The Vegetation module, and the Sky module whose weather the wind reads, whose assemblies
+      packages below this one carry, so they are referenced for the compile alone.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../../modules/Vegetation/Vegetation/Vegetation.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- TreeWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+    </ItemGroup>
+
+</Project>

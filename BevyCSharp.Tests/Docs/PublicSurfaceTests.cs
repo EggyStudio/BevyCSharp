@@ -19,7 +19,7 @@ public sealed class PublicSurfaceTests
     [Fact]
     public void ThePublicSurfaceIsTheListingCheckedIn()
     {
-        var built = PublicSurface.Write(typeof(App).Assembly);
+        var built = PublicSurface.Write(EngineAssemblies.Loaded());
         if (Environment.GetEnvironmentVariable("BCS_WRITE_API") == "1") File.WriteAllText(Listing(), built);
 
         var checkedIn = File.Exists(Listing()) ? File.ReadAllText(Listing()).ReplaceLineEndings("\n") : "";
@@ -36,7 +36,7 @@ public sealed class PublicSurfaceTests
     [Fact]
     public void AListingSpellsMembersAsASignatureDoes()
     {
-        var listing = PublicSurface.Write(typeof(App).Assembly);
+        var listing = PublicSurface.Write(EngineAssemblies.Loaded());
 
         Assert.Contains("static class Bevy.Render\n", listing);
         Assert.Contains("  static AssetHandle CreateMesh(string shape, float a = 1f, float b = 1f, float c = 1f)\n", listing);

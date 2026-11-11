@@ -28,10 +28,10 @@ public struct NativeWidgetEvent
     /// <summary>One where the change is the last of its interaction.</summary>
     public uint IsFinal;
 
-    /// <summary>What a menu is asked to do, as <see cref="MenuAction"/> numbers it.</summary>
+    /// <summary>What a menu is asked to do, as <c>MenuAction</c> numbers it.</summary>
     public int Action;
 
-    /// <summary>For a menu opened, which item takes the focus, as <see cref="NavAction"/> numbers it.</summary>
+    /// <summary>For a menu opened, which item takes the focus, as <c>NavAction</c> numbers it.</summary>
     public int Navigation;
 
     /// <summary>A color plane's two numbers, or a color input's linear red, green, blue and alpha.</summary>

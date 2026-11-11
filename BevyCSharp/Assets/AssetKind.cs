@@ -32,7 +32,7 @@ public static class AssetKind
     /// A sound in Ogg Vorbis, WAV, FLAC or MP3. Render builds only.
     /// </summary>
     /// <remarks>
-    /// Play it with <see cref="Audio.Play(AssetHandle, AudioSettings)"/>. Sound belongs to the
+    /// Play it with <c>Audio.Play(AssetHandle, AudioSettings)</c>. Sound belongs to the
     /// render profile because that is the one that takes a system library, not because it draws.
     /// </remarks>
     public const string Audio = "Audio";
@@ -42,14 +42,14 @@ public static class AssetKind
     /// </summary>
     /// <remarks>
     /// Text is set in the font Bevy compiles in unless one of these is named, so a game only loads
-    /// a font when it has its own. See <see cref="UiTextSettings.Font"/>.
+    /// a font when it has its own. See <c>UiTextSettings.Font</c>.
     /// </remarks>
     public const string Font = "Font";
 
     /// <summary>
     /// A baked meshlet mesh, a <c>.meshlet_mesh</c> file written by
-    /// <see cref="Render.CreateMeshletMesh"/>. Needs meshlets running (see
-    /// <see cref="Render.MeshletsActive"/>).
+    /// <c>Render.CreateMeshletMesh</c>. Needs meshlets running (see
+    /// <c>Render.MeshletsActive</c>).
     /// </summary>
     public const string MeshletMesh = "MeshletMesh";
 

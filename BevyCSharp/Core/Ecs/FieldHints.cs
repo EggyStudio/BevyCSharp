@@ -43,7 +43,7 @@ namespace Bevy;
 /// asset type.
 /// </param>
 /// <param name="FormerNames">The names the field had before, which an old file may still use.</param>
-/// <param name="NotSaved">Whether no file is written with it (<see cref="NotSavedAttribute"/>).</param>
+/// <param name="NotSaved">Whether no file is written with it (<c>NotSavedAttribute</c>).</param>
 public sealed record FieldHints(
     string? Label = null,
     string? Tooltip = null,

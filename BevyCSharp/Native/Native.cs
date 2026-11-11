@@ -28,7 +28,7 @@ internal static unsafe partial class Native
     /// <summary>ABI revision this assembly was built against.</summary>
     internal const int ExpectedAbiVersion = 323;
 
-    static Native() => NativeLoader.Initialize();
+    static Native() => NativeLoader.Initialize(typeof(Native).Assembly);
 
     // -- The bridge and its build
 

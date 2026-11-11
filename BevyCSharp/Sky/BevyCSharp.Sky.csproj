@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <Description>BevyCSharp's sky and weather, fog, clouds, rain, snow, thunder and the night sky.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Native/BevyCSharp.Native.csproj"/>
+        <ProjectReference Include="../Core/BevyCSharp.Core.csproj"/>
+        <ProjectReference Include="../Rendering/BevyCSharp.Rendering.csproj"/>
+        <ProjectReference Include="../Audio/BevyCSharp.Audio.csproj"/>
+        <ProjectReference Include="../GlobalIllumination/BevyCSharp.GlobalIllumination.csproj"/>
+    </ItemGroup>
+
+    <!--
+      The Sky module, whose assembly a package below this one carries, so it is referenced for
+      the compile alone.
+    -->
+    <ItemGroup>
+        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <!-- The area's own programs, read as Slang source when each is first built, so the area
+         carries them as it carries everything else it runs. -->
+    <ItemGroup>
+        <EmbeddedResource Include="Kernels/*.slang" LogicalName="Bevy.Kernels.%(Filename)%(Extension)"/>
+    </ItemGroup>
+
+
+
+
+    <!--
+      The projects above this one that reach its internals, each under what it reaches.
+    -->
+    <ItemGroup>
+        <!-- SkyWork -->
+        <InternalsVisibleTo Include="BevyCSharp"/>
+        <!-- SkyWeather -->
+        <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
+    </ItemGroup>
+
+</Project>

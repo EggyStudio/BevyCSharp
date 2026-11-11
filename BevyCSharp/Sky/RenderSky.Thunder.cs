@@ -135,7 +135,7 @@ internal static class SkyThunder
 
         // The bolt's program made with the storm, so it has compiled by the first strike, whose
         // flash is over in half a second.
-        if (settings.Bolts && !storm.Bolt.IsValid) storm.Bolt = Shaders.KernelDraw("lightning_bolt.slang");
+        if (settings.Bolts && !storm.Bolt.IsValid) storm.Bolt = Shaders.KernelDraw(typeof(RenderSky).Assembly, "lightning_bolt.slang");
     }
 
     /// <summary>Whether every storm's bolt has compiled, so a strike draws it.</summary>
@@ -281,7 +281,7 @@ internal static class SkyThunder
                 numbers[i * 2] = new Vector4(s.From.X, s.From.Y, s.From.Z, s.Width);
                 numbers[(i * 2) + 1] = new Vector4(s.To.X, s.To.Y, s.To.Z, s.Brightness);
             }
-            if (!storm.Bolt.IsValid) storm.Bolt = Shaders.KernelDraw("lightning_bolt.slang");
+            if (!storm.Bolt.IsValid) storm.Bolt = Shaders.KernelDraw(typeof(RenderSky).Assembly, "lightning_bolt.slang");
             if (!storm.Segments.IsValid || Shaders.BufferSize(storm.Segments) < numbers.Length * 16)
                 storm.Segments = Shaders.CreateBuffer<Vector4>(numbers, Math.Max(numbers.Length, 1024) * 16);
             else

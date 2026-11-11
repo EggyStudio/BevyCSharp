@@ -12,7 +12,7 @@ internal static unsafe partial class NativeRendering
     private const string Library = Native.Library;
 
     // Runs the loader's check before this class's first call, as Native's remarks say.
-    static NativeRendering() => NativeLoader.Initialize();
+    static NativeRendering() => NativeLoader.Initialize(typeof(NativeRendering).Assembly);
 
     // -- Cameras
 
