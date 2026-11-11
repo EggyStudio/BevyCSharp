@@ -62,9 +62,15 @@ internal static class ComputeShaderGameOfLife
         app.Update(ctx =>
         {
             // Bevy swaps the sprite's image every frame, so it shows the one written a frame ago
-            // on one frame and the newest on the next.
-            _showingA = !_showingA;
-            Render2d.SetSprite(ctx.Ecs, _sprite, _showingA ? _a : _b, new SpriteSettings { Size = (Width, Height) });
+            // on one frame and the newest on the next. The swaps start once the programs are ready,
+            // since both images are blank until then and a swap shows nothing, while a clock held
+            // as they compile runs as many frames as the device takes, which would decide the image
+            // shown at a given moment of the clock.
+            if (_stage != Stage.Loading)
+            {
+                _showingA = !_showingA;
+                Render2d.SetSprite(ctx.Ecs, _sprite, _showingA ? _a : _b, new SpriteSettings { Size = (Width, Height) });
+            }
 
             // Where the workflow runs, as a capture does, the steps run by two seconds of the game's
             // clock, the moment the capture is taken in, and the image shown, so its log says which
