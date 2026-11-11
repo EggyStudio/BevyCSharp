@@ -41,44 +41,45 @@
 
 
     <!--
-      The projects above this one that reach its internals, each under what it reaches.
+      The projects above this one that reach its internals, each under what it reaches, and each
+      on build/norm/1.6.txt with why, which N 1.6 holds them to.
     -->
     <ItemGroup>
-        <!-- ObserverRegistry -->
+        <!-- App.AreasWork, AssetHandle.Key, ComponentRegistry, ConsoleHost.Find, ConsoleHost.FirstAndRest, ConsoleHost.Missing, EngineLog, EngineSteps, NativeCore, ObserverRegistry, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Animation"/>
-        <!-- AssetHandle.Key -->
+        <!-- App.AreasWork, AssetFiles.ReadJson, AssetHandle.Key, AssetIds.Root, EngineSteps, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Assets"/>
-        <!-- AssetHandle.Key -->
+        <!-- AssetHandle.Key, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Audio"/>
         <!-- ConsoleHost.Failure, ConsoleHost.GiveUpAt, ConsoleHost.Held, ConsoleHost.PendingStill, Time.ClockFrames, Time.HoldStill -->
         <InternalsVisibleTo Include="BevyCSharp.CliServer"/>
-        <!-- App.AreasWork, App.Running, ClockHoldNames, ClockHolds, ComponentField.ItemType, ComponentField.ReflectPath, ConsoleHost.Find, ConsoleHost.FirstAndRest, ConsoleHost.GiveUpAt, ConsoleHost.LaterFrom, ConsoleHost.LaterStill, ConsoleHost.Missing, EcsWorld.DescribeReflected, MemoryGuard.PeakBytes, NativeCore, ReflectedLayouts, ReflectedSchemas, StateRegistry.Claimed, SystemTimes, Time.ClockFrames, Time.Holds -->
+        <!-- App.AreasWork, App.Running, ClockHoldNames, ClockHolds, ComponentField.ItemType, ComponentField.ReflectPath, ConsoleHost.Find, ConsoleHost.FirstAndRest, ConsoleHost.GiveUpAt, ConsoleHost.LaterFrom, ConsoleHost.LaterStill, ConsoleHost.Missing, EcsWorld.DescribeReflected, EngineSteps, MemoryGuard.PeakBytes, NativeCore, ReflectedLayouts, ReflectedSchemas, StateRegistry.Claimed, SystemTimes, Time.ClockFrames, Time.Holds -->
         <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
-        <!-- AssetHandle -->
+        <!-- new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Gizmos"/>
-        <!-- App.AreasWork, App.Running, AssetHandle, AssetHandle.Key, ConsoleHost.LaterFrom -->
+        <!-- App.AreasWork, App.Running, AssetHandle.Key, ConsoleHost.LaterFrom, EngineSteps, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.GlobalIllumination"/>
-        <!-- AssetHandle.Key, NativeCore -->
+        <!-- AssetHandle.Key, NativeCore, SyntheticInput.InterfaceRunning, SyntheticInput.Pretend, SyntheticInput.ToInterface -->
         <InternalsVisibleTo Include="BevyCSharp.ImGui"/>
         <!-- App.Running -->
         <InternalsVisibleTo Include="BevyCSharp.Levels"/>
-        <!-- App.AreasWork, App.Running, AssetIds.Root, ConsoleHost.FirstAndRest -->
+        <!-- App.AreasWork, App.Running, AssetIds.Root, ConsoleHost.FirstAndRest, EngineSteps -->
         <InternalsVisibleTo Include="BevyCSharp.Modeling"/>
         <!-- EcsWorld.AliveMany, EcsWorld.ChangedSince, EcsWorld.HasMany, SystemTimes -->
         <InternalsVisibleTo Include="BevyCSharp.Physics"/>
-        <!-- AssetHandle, AssetHandle.Key -->
+        <!-- AssetHandle.Key, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Render2d"/>
-        <!-- AssetHandle.Key, EngineLog -->
+        <!-- App.AreasWork, App.Running, AssetFiles.ReadJson, AssetFiles.TryReadJson, AssetHandle.Key, AssetIds.Root, EngineLog, EngineSteps, Time.ClockFrames, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Rendering"/>
-        <!-- App.AreasWork, AssetFiles.TryReadJson, AssetHandle, AssetHandle.Key, AssetIds.Root, ComponentRegistry, EcsStore, EcsWorld.Owner, UserData.PlatformDirectory -->
+        <!-- App.AreasWork, AssetFiles.TryReadJson, AssetHandle.Key, AssetIds.Root, ComponentRegistry, EcsStore, EcsWorld.Owner, EngineSteps, UserData.PlatformDirectory, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
-        <!-- App.ForgetAssembly -->
+        <!-- App.ForgetAssembly, EngineAssemblies -->
         <InternalsVisibleTo Include="BevyCSharp.Scripting"/>
-        <!-- App.AreasWork, App.Running, AssetHandle, AssetHandle.Key -->
+        <!-- App.AreasWork, App.Running, AssetHandle.Key, EngineSteps, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Sky"/>
-        <!-- IReportedEvent, ObserverRegistry -->
+        <!-- App.AreasWork, App.Running, AssetHandle.Key, ComponentRegistry, EngineLog, EngineSteps, IReportedEvent, ObserverRegistry, new AssetHandle -->
         <InternalsVisibleTo Include="BevyCSharp.Ui"/>
-        <!-- App.AreasWork, App.Running, AssetFiles.Started, EngineLog -->
+        <!-- App.AreasWork, App.Running, AssetFiles.Mount, AssetFiles.Started, EngineLog, EngineSteps -->
         <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
     </ItemGroup>
 

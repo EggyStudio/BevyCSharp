@@ -1,0 +1,77 @@
+# N 1.6, the library's projects in their layers, each referencing projects of the layers below it
+# alone. A place is a project out of its layer or referencing one of its own layer or above, or a
+# lower project opening its internals to a higher one, as the project's file and the assembly it
+# opens to, each why naming what the opening reaches. build/norm/internals.cs finds what each
+# reaches, compiling each project against the others' built assemblies, run with dotnet run after a
+# build, and writes each project file's comment over its opening from the same list.
+# A place a line, then a tab and why, which every opening has. The list only gets shorter, a
+# place coming off it in the batch that mends it, and NormTests fails for a line whose place keeps
+# the rule.
+
+BevyCSharp/Animation/BevyCSharp.Animation.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Assets/BevyCSharp.Assets.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Assets/BevyCSharp.Assets.csproj opens to BevyCSharp.Diagnostics	the asset server's entry points, which the console's asset commands read
+BevyCSharp/Assets/BevyCSharp.Assets.csproj opens to BevyCSharp.Physics	the asset server's forgetters, a hook each area holding assets adds
+BevyCSharp/Assets/BevyCSharp.Assets.csproj opens to BevyCSharp.Rendering	the asset server's forgetters, a hook each area holding assets adds, its failures, and a texture's sampling settings
+BevyCSharp/Assets/BevyCSharp.Assets.csproj opens to BevyCSharp.Scenes	a scene's references within one run, by which a reload in place keeps the fields a save leaves out
+BevyCSharp/Audio/BevyCSharp.Audio.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Animation	the areas' work, the handle's key and constructor, the components' registry, the console host's lookups, the engine's log and steps, Core's entry points and the observers' registry, which the animation's work, commands and events go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Assets	the areas' work, the asset files and root, the handle's key and constructor and the engine's steps, which the asset server's work and handles go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Audio	the handle's key and constructor, which a sound's handle is made with
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.CliServer	the console host's waits and the clock's holds, which a request from the command line waits on
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Diagnostics	the running app, the areas' work, the clock's holds, the console host's lookups and waits, the ECS's reflected schemas and layouts, the states, the systems' times, the engine's steps and the memory guard, which the console's own commands read
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Gizmos	the handle's constructor, which a gizmo's assets are made with
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.GlobalIllumination	the running app, the areas' work, the handle's key and constructor, the console's later answer and the engine's steps, which the field's work in the frame uses
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.ImGui	the handle's key, Core's entry points and the synthetic input, which ImGui's textures and input go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Levels	the running app, which a level is spawned into
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Modeling	the running app, the areas' work, the assets' root, the console's arguments and the engine's steps, which the modeling's commands and work use
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Physics	the ECS's reads of many entities, its changes since a frame and the systems' times, which the physics' step reads the world by
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Render2d	the handle's key and constructor, which a sprite's assets are made with
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Rendering	the running app, the areas' work, the asset files and root, the handle's key and constructor, the engine's log and steps and the clock's frames, which every render asset and the render side's work go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Scenes	the areas' work, the asset files and root, the handle's key and constructor, the components' registry, the ECS's store and owner, the engine's steps and the user's folder, which a scene's load and save go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Scripting	the app forgetting an assembly and the engine's assemblies, by which the script host retires a script and compiles one
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Sky	the running app, the areas' work, the handle's key and constructor and the engine's steps, which the weather's work in the frame uses
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Ui	the running app, the areas' work, the handle's key and constructor, the components' registry, the engine's log and steps, the observers' registry and the reported event, which the interface's work and events go through
+BevyCSharp/Core/BevyCSharp.Core.csproj opens to BevyCSharp.Vegetation	the running app, the areas' work, the asset files' mount and start and the engine's log and steps, which the trees' work in the frame uses
+BevyCSharp/Diagnostics/BevyCSharp.Diagnostics.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/GlobalIllumination/BevyCSharp.GlobalIllumination.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/GlobalIllumination/BevyCSharp.GlobalIllumination.csproj opens to BevyCSharp.Diagnostics	the field's entry points and the scene's field, which the console's illumination commands read
+BevyCSharp/GlobalIllumination/BevyCSharp.GlobalIllumination.csproj opens to BevyCSharp.Sky	the scene's field, which the sky's fog and clouds are shadowed through
+BevyCSharp/GlobalIllumination/BevyCSharp.GlobalIllumination.csproj opens to BevyCSharp.Vegetation	the path-traced reference, which the trees' crowns are read against
+BevyCSharp/ImGui/BevyCSharp.ImGui.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Modeling/BevyCSharp.Modeling.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Modeling/BevyCSharp.Modeling.csproj opens to BevyCSharp.Levels	a prototype's picture, made from the grid of the material it matches, which a level's textures are written from
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Animation	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Assets	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Audio	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.CliServer	the ABI's version the bridge has to report, which the server's status gives
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Core	the bridge's library name, which the area's entry points import, the loader their first call goes through, and the guard a read of the ECS's rows holds
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Diagnostics	the bridge's library name, which the area's entry points import, the loader their first call goes through, and the mirror of the scene's counts
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Gizmos	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.GlobalIllumination	the bridge's library name, which the area's entry points import, the loader their first call goes through, and the mirrors of the field's draws, eye, lights and counts
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.ImGui	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Render2d	the bridge's library name, which the area's entry points import, the loader their first call goes through, and the mirror of a tilemap's chunk
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Rendering	the bridge's library name, which the area's entry points import, the loader their first call goes through, and the mirror of the denoiser's settings
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Scenes	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Sky	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Native/BevyCSharp.Native.csproj opens to BevyCSharp.Ui	the bridge's library name, which the area's entry points import, and the loader their first call goes through
+BevyCSharp/Physics/BevyCSharp.Physics.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Physics/BevyCSharp.Physics.csproj opens to BevyCSharp.Levels	a static body's world transform, which the physics reads as well, for a level's collision
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Animation	the refusal where no renderer is built, which every drawing area shares
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Diagnostics	the looks and the recorder, which the console's look and record commands run
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.GlobalIllumination	the kernels' draws and programs, the engine's view passes, the samplers' tables and the PNG writer, which the field's kernels and pictures go through
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Levels	the PNG writer and a mesh made with its data kept, which a level's textures and brushes are made with
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Modeling	the grid's pixels, which a prototype's picture is made from
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Render2d	attaching an asset to an entity and the refusal where no renderer is built, which every drawing area shares
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Scenes	the JSON of a material and of a mesh, which a scene file writes its resources in
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Sky	the kernels' draws and programs, the engine's view passes and the samplers' tables, which the weather's kernels go through
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Ui	attaching an asset to an entity and the refusal where no renderer is built, which every drawing area shares
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to BevyCSharp.Vegetation	the bark, leaf and impostor materials, the image levels, the wind and a mesh made with its data kept, built through the render side's entry points
+BevyCSharp/Rendering/BevyCSharp.Rendering.csproj opens to bcs	the GIF and PNG writers, the frame they take and the reader of an animated picture, which the command line records with and reads a recording back by
+BevyCSharp/Scenes/BevyCSharp.Scenes.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Scenes/BevyCSharp.Scenes.csproj opens to BevyCSharp.Physics	whether a placed scene is in the world, which a scene's colliders wait on
+BevyCSharp/Sky/BevyCSharp.Sky.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Sky/BevyCSharp.Sky.csproj opens to BevyCSharp.Vegetation	the weather's state, which the trees' wind is read from
+BevyCSharp/Ui/BevyCSharp.Ui.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order
+BevyCSharp/Vegetation/BevyCSharp.Vegetation.csproj opens to BevyCSharp	the area's work in the frame, which EnginePlugin runs in the frame's order

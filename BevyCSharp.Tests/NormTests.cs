@@ -169,13 +169,27 @@ public sealed partial class NormTests
                 found.Add($"{place} references {referenced}, of its own layer or one above");
             var lowest = below.Count == 0 ? 0 : below.Max(r => layerOf.GetValueOrDefault(r)) + 1;
             if (layer != lowest) found.Add($"{place} in layer {layer + 1} where its references allow {lowest + 1}");
+
+            // Each project this one opens its internals to, which the list holds with why, so an
+            // opening comes in with its reason and goes off the list when its last use goes. The
+            // tests' own, which the library's shared props give every project, is in no project's
+            // file and no pair of the layers.
+            found.AddRange(Regex.Matches(File.ReadAllText(project), "<InternalsVisibleTo Include=\"([^\"]+)\"")
+                .Select(m => $"{place} opens to {m.Groups[1].Value}"));
         }
+
+        // An opening the list holds says why.
+        var list = Full("build/norm/1.6.txt");
+        found.AddRange((File.Exists(list) ? File.ReadLines(list) : [])
+            .Where(line => !line.StartsWith('#') && line.Contains(" opens to ", StringComparison.Ordinal))
+            .Where(line => line.Split('\t') is not [_, { Length: > 0 }])
+            .Select(line => $"build/norm/1.6.txt giving no why for {line}"));
 
         // The engine loads its assemblies by these names, so each is a project's.
         found.AddRange(layerOf.Keys.Except(EngineAssemblies.Names).Select(name => $"{name} not in EngineAssemblies.Names"));
         found.AddRange(EngineAssemblies.Names.Except(layerOf.Keys).Select(name => $"{name} in EngineAssemblies.Names and in no layer"));
 
-        Hold("1.6", found, "a project out of its layer, or referencing one of its own layer or above");
+        Hold("1.6", found, "a project out of its layer, referencing one of its own layer or above, or opening its internals to one above");
     }
 
     [Fact]

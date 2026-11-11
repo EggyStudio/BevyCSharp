@@ -144,36 +144,37 @@
     </Target>
 
     <!--
-      The projects above this one that reach its internals, each under what it reaches.
+      The projects above this one that reach its internals, each under what it reaches, and each
+      on build/norm/1.6.txt with why, which N 1.6 holds them to.
     -->
     <ItemGroup>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Animation"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Assets"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Audio"/>
         <!-- Native -->
         <InternalsVisibleTo Include="BevyCSharp.CliServer"/>
-        <!-- Native, NativeRowGuard -->
+        <!-- Native, NativeLoader, NativeRowGuard -->
         <InternalsVisibleTo Include="BevyCSharp.Core"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader, NativeSceneCounts -->
         <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Gizmos"/>
-        <!-- Native, NativeFieldDraw, NativeFieldEye, NativeGiLights, NativeSceneCounts -->
+        <!-- Native, NativeFieldDraw, NativeFieldEye, NativeGiLights, NativeLoader, NativeSceneCounts -->
         <InternalsVisibleTo Include="BevyCSharp.GlobalIllumination"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.ImGui"/>
-        <!-- Native, NativeTilemapChunk -->
+        <!-- Native, NativeLoader, NativeTilemapChunk -->
         <InternalsVisibleTo Include="BevyCSharp.Render2d"/>
-        <!-- Native, NativeDenoiserSettings -->
+        <!-- Native, NativeDenoiserSettings, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Rendering"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Sky"/>
-        <!-- Native -->
+        <!-- Native, NativeLoader -->
         <InternalsVisibleTo Include="BevyCSharp.Ui"/>
     </ItemGroup>
 

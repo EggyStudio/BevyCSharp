@@ -30,7 +30,8 @@
 
 
     <!--
-      The projects above this one that reach its internals, each under what it reaches.
+      The projects above this one that reach its internals, each under what it reaches, and each
+      on build/norm/1.6.txt with why, which N 1.6 holds them to.
     -->
     <ItemGroup>
         <!-- SkyWork -->

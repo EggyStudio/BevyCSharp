@@ -1,13 +1,25 @@
 # Review
 
-Reviewed up to `77941f42`, the split packed as one package by Decision 88, every area's assembly and
-the three modules' in the one package's lib folder with no dependency on an area, the bridges' pack
-items in the flat project, a size step in the pack job failing a package over 262,139,904 bytes
-before anything is kept or pushed, and the script host walking from every loaded assembly of the
-engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and Windows in 15 minutes
-each and macOS in 18, its pack run without publish, 43081159142, started on the same head; the whole
-suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local package with the Linux
-bridge alone is 52,739,654 bytes in 60 entries, its only dependencies BepuPhysics and
+Reviewed up to `064cdae8`, the tests' Assets folder moved to the areas, 146 files renamed whole by
+git to the area each tests and the asset server's 12 staying, no file's text changed, pushed at
+21:16 on 2026-11-11 once the run with publish had started on the commit before it, its run red on
+the three systems at the step that keeps an artifact, their tests passed, Verdict 58; the whole
+suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
+the review's files. Before it `77941f42`, the split packed as one package by Decision 88, every
+area's assembly and the three modules' in the one package's lib folder with no dependency on an
+area, the bridges' pack items in the flat project, a size step in the pack job failing a package
+over 262,139,904 bytes before anything is kept or pushed, and the script host walking from every
+loaded assembly of the engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and
+Windows in 15 minutes each and macOS in 18, its pack run without publish, 43081159142, green at
+21:11 with the drive in 59 minutes. Its package read from the artifact, BevyCSharp.0.6.106.nupkg, 65
+entries, 46 in lib for the 20 assemblies of the engine and the modules' Levels, Sky and Vegetation,
+each a dll with its xml, six bridges, the two musl slots empty as before, its only dependencies
+BepuPhysics 2.5.0-beta.29 and Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp
+alone, 250,121,275 bytes with 12,018,629 of room, 4.58 percent, and both ids on nuget.org before it,
+so no new id goes out; the run with publish, 43094830090, started at 21:15 on the same head and red
+by 21:45 in its native jobs by an outage of GitHub's Actions, nothing published, Verdict 58; the
+whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local package with the
+Linux bridge alone is 52,739,654 bytes in 60 entries, its only dependencies BepuPhysics and
 Twizzle.ImGui-Bundle.NET; it keeps the form and carries the review's files. Before it `7428798d`,
 the split's second commit, the library's areas as nineteen projects with the flat one, each packed
 at one version and depending on those below it at exactly that version, pushed at 15:30 on
@@ -94,14 +106,16 @@ at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights
 judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
 Head records.
 
-Next the one package of `77941f42` read from its pack run without publish, 43081159142, then the run
-with publish and its tag; then 135, the bridge's size, and 120, the live path, each a commit with
-the whole suite, and after them 66 and 67, the connections and the level editor; 93's course drawn
-smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package
-stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by 2026-11-12, whichever
-comes first. The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80;
-the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the
-engine's Decision 107.
+Next the run with publish of `77941f42`, 43094830090, read and tagged v0.6.106; then
+InternalsVisibleTo's pairs measured by the compiler and narrowed in one commit, the pairs that
+remain listed with a reason each under build/norm and held by N 1.6; then 136, the depth's points
+and ways far from the origin, read and mended; then 135, the bridge's size, and 120, the live path,
+each a commit with the whole suite, and after them 66 and 67, the connections and the level editor;
+93's course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03 on
+2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by
+2026-11-12, whichever comes first. The engine's illumination read goes first on the GPU (N 7.9). No
+budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is
+read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -222,9 +236,51 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     percent, where the review had counted 86,284 under 250,000,000. So the item is less pressing
     than it was written and stays, the room being four or five percent of a bridge's growth.
 
+136. **A point and a ray's way taken from the depth far from the origin.** From the sibling's item
+    257 on 2026-11-11 and a read of the bridge's own shaders by the review the same evening, nothing
+    built or run, every figure reasoned from a float's step, 0.0005 at 4,450 units and 0.0078 at
+    71,000. The sibling's noise in the owner's game was normals made from differences of world
+    points taken from the depth, several percent off 4,450 units out, where every test scene stands
+    at the origin. The bridge has the same. Every depth point comes through passWorldPosition in
+    bcs_pass.slang, world_from_clip in floats, and the kernels make ways and normals from
+    differences of such points, gi_screen.slang's and gi_screen_glow.slang's pointAt and wayAlong
+    and gi_light.slang's, which the probes' likeness weights, the filter's and the history's tests
+    and each probe's hemisphere then rest on; reasoned, a one-pixel step is off by a third of its
+    length 2 units from the eye and by 6 percent at 10, visible within about 5 units where probes
+    beside each other differ. Second, passRayDirection takes the near plane's point in the world
+    less the eye, a direction in steps of about 6 pixels at 4,450, which the night sky's stars, the
+    clouds, the fog and the reference tracer take. Third, the rain's and the snow's streaks are
+    built at world points a few float steps wide. Fourth, the histories look up through
+    clip_from_world of a world point. The one far test there is, the screen probes at 10,000 units,
+    counts black pixels alone. First the read, one room of the bridge's at the origin and at 4,450
+    units, the wall's steps at each quality, and the night sky at both, to say what shows; then the
+    mend, an eye-relative point and way in bcs_pass.slang, the view's point turned by
+    world_from_view's rotation, the kernels taking differences and distances on offsets and adding
+    the eye only where the field or the probes are read; with a test that the room reads far out as
+    at the origin. One thing to check before the histories are judged, at the origin too.
+    gi_screen_glow.slang's pixelOf takes pixel 2t+1 for texel t, whose middle looks up a quarter
+    texel off the texel's own, so a still view may never read as still; read what still and steady
+    come to for a still view. Left as they are, the field's and the probes' lookups at world points,
+    0.2 percent of a cell at 4,450, the cascades' snap, the glow lights' keys, and what is Bevy's
+    own, the meshes, its shadows and its picking. After the pairs' commit and before 135.
+
 ## Verdicts
 
-Verdicts 2 and 33 to 57 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
+Verdicts 2 and 33 to 57 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 58 is open, the
+run of `064cdae8` and the pack run with publish of `77941f42` red by an outage of GitHub's Actions,
+their failed jobs run again when the service answers.
+
+58. **The run of `064cdae8` and the pack run with publish of `77941f42` are red at the step that
+    keeps an artifact, GitHub's own service failing.** In the build run 43094897522 the three
+    systems failed at actions/upload-artifact after their tests had passed, 1,541 on Linux, 1,324 on
+    macOS and 1,332 on Windows with none failed, the artifact not made after five attempts, the
+    service answering a page of HTML where JSON was due. In the pack run 43094830090, started at
+    21:15, six of the seven native jobs and the Linux and Windows builds failed the same way between
+    21:35 and 21:45, so nothing was packed and nothing published, and 0.6.91 is still the last on
+    nuget.org. GitHub's status page reports a major outage of Actions, its incident updated at 21:59
+    on 2026-11-11. Nothing of either commit's failed. The failed jobs of both are run again when the
+    status page says Actions works, the pack run on its own head `77941f42`, and the verdict settles
+    where the build run is green and the package lists. Written at 22:07 on 2026-11-11.
 
 ## Decisions
 
@@ -675,3 +731,47 @@ whose highest name only sets the test up and the 2 that name no type.
 
 Shared: a test's area read by a compilation of the tests, the assembly declaring each name a file
 names, for the sibling's N 1.4 wherever its tests share a folder.
+
+Item 119's second item after the split, InternalsVisibleTo's pairs narrowed, in the commit carrying
+this line, measured first by the compiler. build/norm/internals.cs compiles each project an opening
+names from its own sources, with the generator run over them, against the assemblies its build put
+beside it, and lists every internal name of another engine assembly it reaches, a name inside an
+internal type counted as the type and an internal constructor as new and the type. Before the commit
+it counts 68 pairs and 221 internal names, the 445 said before the commit counting each member of an
+internal type apart. The project files' comments, written from a build without each opening, missed
+names, Core's opening to the script host leaving out EngineAssemblies, which the script host's walk
+reaches since 77941f42, and Rendering's to Animation leaving out the frame, FieldValue, the PNG
+writer and the refusal where no renderer is built. The commit leaves 67 pairs and 217 internal
+names.
+
+AnimationReader, the reader of an animated GIF or PNG, moves from Animation to Rendering beside the
+writers it reads back and the RgbaFrame it fills, Animation's code naming it nowhere, so Animation's
+opening to the command line goes, and the command line reaches the reader through Rendering's
+opening to it, which it had for the writers. FieldCurve and FieldValue, the field an animation curve
+moves and what it holds, which Animation's curves alone name, move from Rendering to Animation, so
+Rendering's opening to Animation reaches the refusal where no renderer is built alone, as Render2d's
+and Ui's do, where it reached five names. No other pair clears by one move. A member its own area
+uses too stays with it, the PNG writer, the scene's field, the weather's state, a static body's
+world transform and a scene's readiness among them, the trees' materials are built through
+Rendering's own entry points, and a prototype's picture shares the grid's constants with the
+material it matches. Native's fourteen pairs stand as they are, the bridge's library name and loader
+every area's entry points go through with the mirrors four areas fill, and Core's eighteen, the
+frame's work, the handle, the log and the console host each area's work goes through, and the
+thirteen to the flat project, each area's work in the frame, which EnginePlugin runs.
+
+build/norm/1.6.txt lists the 67 with why each, the why naming what the opening reaches, and N 1.6
+places each opening a library project's file gives as the file opening to the assembly, failing on
+one the list lacks, on a listed one that is gone and on a line with no why. The tests' opening,
+which the shared props give every project, is no pair. With the list emptied of its pairs N 1.6
+fails naming each, with the why taken off one line it fails naming that line, and with the list as
+written it passes. internals.cs, run with dotnet run after a build, prints each opening with what it
+reaches and the counts, and with --write writes each project file's comment over its opening from
+the same list, as the fifteen are written here. It ends with an error where an opening reaches
+nothing or a project reaches internals no opening gives, and the list's head says how it is made.
+
+The whole suite passed, 2,048 passed, none failed and 3 skipped, the listing the same 2,040.
+NormTests passed, 19. No native file changed, the solution builds with warnings as errors, and the
+public listing and the cheat sheet are unchanged, the three types that move being internal.
+
+Shared: N 1.6's openings listed with why and found by a compilation of each project against the
+others' built assemblies, for the sibling's projects and their InternalsVisibleTo.
