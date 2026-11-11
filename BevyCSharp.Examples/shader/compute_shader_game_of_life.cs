@@ -25,6 +25,10 @@ internal static class ComputeShaderGameOfLife
     private static int _index;
     private static bool _showingA;
 
+    // The steps run, and whether they were said, which a capture's log carries beside its picture.
+    private static int _steps;
+    private static bool _said;
+
     public static void Configure(Config config) => (config.Width, config.Height) = (Width * DisplayFactor, Height * DisplayFactor);
 
     public static void Build(App app)
@@ -32,7 +36,7 @@ internal static class ComputeShaderGameOfLife
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_stage, _index, _showingA) = (Stage.Loading, 1, true);
+            (_stage, _index, _showingA, _steps, _said) = (Stage.Loading, 1, true, 0, false);
             Render.SetClearColor((0f, 0f, 0f, 1f));
 
             _a = Shaders.CreateImage(Width, Height, ShaderImageFormat.Rgba32Float);
@@ -62,6 +66,15 @@ internal static class ComputeShaderGameOfLife
             _showingA = !_showingA;
             Render2d.SetSprite(ctx.Ecs, _sprite, _showingA ? _a : _b, new SpriteSettings { Size = (Width, Height) });
 
+            // Where the workflow runs, as a capture does, the steps run by two seconds of the game's
+            // clock, the moment the capture is taken in, and the image shown, so its log says which
+            // generation the picture holds.
+            if (!_said && ctx.Time.ElapsedSeconds >= 2.0 && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+            {
+                _said = true;
+                Console.WriteLine($"[compute_shader_game_of_life] {_steps} steps by two seconds, in frame {ctx.Time.FrameCount}, showing {(_showingA ? "a" : "b")}");
+            }
+
             switch (_stage)
             {
                 case Stage.Loading:
@@ -76,6 +89,7 @@ internal static class ComputeShaderGameOfLife
                 default:
                     Shaders.Dispatch(_index == 0 ? _aToB : _bToA, Width / WorkgroupSize, Height / WorkgroupSize);
                     _index = 1 - _index;
+                    _steps++;
                     break;
             }
         }, "compute_shader_game_of_life.Step");

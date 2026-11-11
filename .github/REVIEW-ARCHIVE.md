@@ -4836,6 +4836,22 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     `739c2ba4` ended green at 21:58, its four captures jobs green with many_foxes among them and its
     drive in 104 minutes; 0.6.91 is published, the first package since 0.6.18, and tagged `v0.6.91`.
 
+56. **The push run of `8231cc94` is red on Linux, the gallery's copy of the game of life's picture
+    out of date.** In run 42959640387 the Linux job failed after five minutes at the step that
+    checks the table of examples, build/examples-table.py with its check naming
+    .github/assets/gallery/compute_shader_game_of_life.webp as out of date; Windows and macOS are
+    green. The commit took the example's picture again and left the gallery's copy, which the script
+    makes from it, as it was. The mend is the script run and the gallery's file committed, and where
+    the picture's retake is a step a session takes by hand, the step that takes a picture again runs
+    the table's script too, or the check runs among the local checks before a commit. First, before
+    the soak's mend. Written at 05:51 on 2026-11-11. Mended at `250e8376`, pushed at 05:53, the
+    script run and the gallery's picture with its line in captures.tsv written again from the
+    picture; the table's check runs among the coder's local checks before every commit that changes
+    a picture of an example. No run starts for it, the push's paths leaving out .github's documents
+    and assets, so it settles where the Linux job of the next push run, the soak's mend's, passes
+    the table's check. Settled on 2026-11-11. The push run of `d672cabd`, the first to start after
+    the mend, is green at 06:41 with its Linux job passing the table's check in 13 minutes.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
@@ -10571,6 +10587,13 @@ No native file changed. The solution builds with warnings as errors, and the who
 Shared: a script host compiling against the assemblies the process has loaded misses what the
 library's members name and nothing has run into, so it loads every assembly the library names before
 its first compilation, for the sibling's script host.
+
+Verdict 56 in the commit carrying this line. build/examples-table.py writes the gallery's copy of
+compute_shader_game_of_life.webp from the picture 8231cc94 took again, with its line in
+captures.tsv, and its check passes. The table's check runs among the local checks before every
+commit that changes a picture under .github/assets/examples, beside NormTests.
+
+No other file changed. NormTests passed, 18.
 
 ## Items closed, parked or shortened
 

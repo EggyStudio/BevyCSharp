@@ -1,57 +1,65 @@
 # Review
 
-Reviewed up to `250e8376`, Verdict 56's mend, the gallery's copy of the game of life's picture
-written again, pushed at 05:53 on 2026-11-11, no run starting for it since the push's paths leave
-out .github's documents and assets, which are all it changes; the table's check passes here and
-NormTests pass, 18; it keeps the form and carries the review's file. Before it `8231cc94`, Verdict
-55's first mend, a clock held for loads standing still while a Slang program compiles and its
-compute pipeline is built, with `06fbde11` before it, the render side's table of programs moved to a
-module of its own, both pushed at 05:30 on 2026-11-11, the run on the last red on Linux at 05:48 at
-the check of the examples' table, Verdict 56, Windows and macOS green, with a pack run without
-publish, 42959641216, to read the captures with it; the whole suite passed, 2,042 passed, none
-failed and 3 skipped, the native checks clean in the three profiles; they keep the form and carry
-the review's files. Before them `5f86882d`, item 134, a script compiled against every assembly the
-library names, the three modules among them, with a test that a script calls Render.SetWeather,
-pushed at 01:02 on 2026-11-11, green at 01:20 with Linux in 14 minutes, Windows in 12 and macOS in
-17; the whole suite passed on it, 2,041 passed, none failed and 3 skipped; it keeps the form and
-carries the review's files. Before it `04d6b73a`, 119's sixth cut, the asset data under the scenes
-and every edge Core and the areas had up the plan's order moved with its type or put behind a hook
-an area's plugin adds, so the projects hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24
-with Linux in 14 minutes, Windows in 15 and macOS in 19, its pack run without publish, started to
-read the captures over the fourth, fifth and sixth cuts before the split, red in the soak and in the
-first captures job, Verdict 55, its drive green in 104 minutes at 02:07; the whole suite passed on
-it, 2,040 passed, none failed and 3 skipped; it keeps the form and carries the review's files.
-Before it `04394b88`, 119's fifth cut, global illumination's and the sky's members of Render and the
-world's spawn helpers as extension blocks, the listing unchanged line for line, the script host's
-compiler and the tests' workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed at
-21:20 on 2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the
-whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form and carries the
-review's file. Before it `ed291326`, 119's fourth cut, each area's console commands in its folder
-and the command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at
-20:22 with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's
-mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with
-Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with
-publish of 19:05 green at 21:58, the four captures jobs green with many_foxes and the drive in 104
-minutes, which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since
-0.6.18. Before it `9ae92147`, item 133 with the nine before it, the ten held since the night, pushed
-at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one
-timing, Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes,
-Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which
-settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05.
-The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
-hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
-published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
-version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
-item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
-REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `d672cabd`, Verdict 55's second mend, the feature test making its screen-space
+light's and old screen's programs when the panel turns them on and the soak giving its first frames
+1,500 s and printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41 with Linux
+in 13 minutes, Windows in 15 and macOS in 16, which settles Verdict 56, with a pack run without
+publish, 42965606576, waiting behind the one on `8231cc94`; the whole suite passed, 2,042 passed,
+none failed and 3 skipped; it keeps the form and carries the review's file. Before it `250e8376`,
+Verdict 56's mend, the gallery's copy of the game of life's picture written again, pushed at 05:53
+on 2026-11-11, no run starting for it since the push's paths leave out .github's documents and
+assets, which are all it changes; the table's check passes here and NormTests pass, 18; it keeps the
+form and carries the review's file. Before it `8231cc94`, Verdict 55's first mend, a clock held for
+loads standing still while a Slang program compiles and its compute pipeline is built, with
+`06fbde11` before it, the render side's table of programs moved to a module of its own, both pushed
+at 05:30 on 2026-11-11, the run on the last red on Linux at 05:48 at the check of the examples'
+table, Verdict 56, Windows and macOS green, its pack run without publish, 42959641216, ended at
+07:31 red in its Linux job by the same check and in its first captures job, the game of life one
+step short on the runner, Verdict 55, its other captures, its games and its soak green and its drive
+green in 104 minutes; the whole suite passed, 2,042 passed, none failed and 3 skipped, the native
+checks clean in the three profiles; they keep the form and carry the review's files. Before them
+`5f86882d`, item 134, a script compiled against every assembly the library names, the three modules
+among them, with a test that a script calls Render.SetWeather, pushed at 01:02 on 2026-11-11, green
+at 01:20 with Linux in 14 minutes, Windows in 12 and macOS in 17; the whole suite passed on it,
+2,041 passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
+`04d6b73a`, 119's sixth cut, the asset data under the scenes and every edge Core and the areas had
+up the plan's order moved with its type or put behind a hook an area's plugin adds, so the projects
+hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes, Windows in 15
+and macOS in 19, its pack run without publish, started to read the captures over the fourth, fifth
+and sixth cuts before the split, red in the soak and in the first captures job, Verdict 55, its
+drive green in 104 minutes at 02:07; the whole suite passed on it, 2,040 passed, none failed and 3
+skipped; it keeps the form and carries the review's files. Before it `04394b88`, 119's fifth cut,
+global illumination's and the sky's members of Render and the world's spawn helpers as extension
+blocks, the listing unchanged line for line, the script host's compiler and the tests' workspace
+layer at Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on 2026-11-10, green at 21:39
+with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it, 2,040 passed,
+none failed and 3 skipped; it keeps the form and carries the review's file. Before it `ed291326`,
+119's fourth cut, each area's console commands in its folder and the command attribute, the catalog
+and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22 with Linux in 12 minutes,
+Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend, pushed at 19:05 on
+2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with Linux in 13 minutes,
+Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with publish of 19:05 green at
+21:58, the four captures jobs green with many_foxes and the drive in 104 minutes, which settles
+Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since 0.6.18. Before it
+`9ae92147`, item 133 with the nine before it, the ten held since the night, pushed at 16:03 on
+2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one timing,
+Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54,
+its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict
+52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release
+scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since
+17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by
+the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands
+at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's
+judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
+Head records.
 
-Next Verdict 55's second mend, the soak's start, then 119's norm test and its split, each a commit
-with the whole suite, 120, the live path, and after them 66 and 67, the connections and the level
-editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03 on
-2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by
-2026-11-12, whichever comes first. The engine's illumination read goes first on the GPU (N 7.9). No
-budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is
-read in motion by the engine's Decision 107.
+Next Verdict 55 again, the game of life's steps on the runner, then 119's norm test and its split,
+each a commit with the whole suite, 120, the live path, and after them 66 and 67, the connections
+and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run
+of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's
+split or by 2026-11-12, whichever comes first. The engine's illumination read goes first on the GPU
+(N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in
+motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -192,8 +200,8 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdicts 2 and 33 to 54 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 55 is open on the
-pack run of `04d6b73a` and Verdict 56 on the push run of `8231cc94`.
+Verdicts 2, 33 to 54 and 56 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 55 is open,
+settling on the pack run of `d672cabd`.
 
 55. **The pack run of `04d6b73a` is red twice, the feature test no longer answering in the soak and
     the game of life's capture 7.4 percent off its picture.** In the pack run 42920356361, started
@@ -261,22 +269,32 @@ pack run of `04d6b73a` and Verdict 56 on the push run of `8231cc94`.
     make a Slang program, captured here with the mend, 33 stand within their bounds and the game of
     life moves 8.7 percent, its steps starting three frames earlier, 117 by the shot where 114, and
     it alone is taken again, the same bytes on one core as at full speed. A pack run without publish
-    on it reads the four captures jobs; the soak's mend follows.
-
-56. **The push run of `8231cc94` is red on Linux, the gallery's copy of the game of life's picture
-    out of date.** In run 42959640387 the Linux job failed after five minutes at the step that
-    checks the table of examples, build/examples-table.py with its check naming
-    .github/assets/gallery/compute_shader_game_of_life.webp as out of date; Windows and macOS are
-    green. The commit took the example's picture again and left the gallery's copy, which the script
-    makes from it, as it was. The mend is the script run and the gallery's file committed, and where
-    the picture's retake is a step a session takes by hand, the step that takes a picture again runs
-    the table's script too, or the check runs among the local checks before a commit. First, before
-    the soak's mend. Written at 05:51 on 2026-11-11. Mended at `250e8376`, pushed at 05:53, the
-    script run and the gallery's picture with its line in captures.tsv written again from the
-    picture; the table's check runs among the coder's local checks before every commit that changes
-    a picture of an example. No run starts for it, the push's paths leaving out .github's documents
-    and assets, so it settles where the Linux job of the next push run, the soak's mend's, passes
-    the table's check.
+    on it reads the four captures jobs; the soak's mend follows. The second mend is `d672cabd`,
+    pushed at 06:24 on 2026-11-11. The feature test makes the screen-space light's three programs
+    and the old screen's pass the first time the panel or its command turns them on, 20 programs at
+    its start where 24; build/soak.sh gives the first frames.wait 60 1,500 s, every other command
+    keeping 600, and prints the seconds to ready, of frames.wait 60 and of pipelines.wait in every
+    soak's log. Its Reply holds the ground, 620 s at `5f86882d` and 724 s at `739c2ba4`, read with
+    another program drawing beside both. The verdict settles on the pack run without publish
+    42965606576, its soak and its four captures jobs. The first mend does not hold on the runner,
+    read at 07:05 on 2026-11-11. In the pack run 42959641216 on `8231cc94` the first captures job
+    failed again, compute_shader_game_of_life 7.6 percent off the picture taken again, within x 0 to
+    1279 and y 2 to 705, the other three captures jobs, Fedora's, the games and the soak green, the
+    soak in 29 minutes without its mend. So the runner's steps by the shot are not the 117 read here
+    on lavapipe at full speed and on one core, and something the hold does not cover still follows
+    the device. The run keeps its captures as the artifact examples-1, so the runner's picture is
+    compared with the pictures of the steps around 117 made here to say how many steps it ran, and
+    the example or the capture prints its count of steps at the shot in the job's log; then what the
+    runner does between a program's making and its first step that this machine does not. Before
+    119's norm test. The runner's picture read by 07:31. Against shots made here on lavapipe with
+    the mend, one a clock frame from 113 to 127, the runner's picture is the shot at clock frame 119
+    to the pixel, 116 steps, and the picture taken again is the shot at 120, 117 steps, every other
+    frame 6 to 11 percent off. So at its clock 120 the runner stands one step short, its clock a
+    frame ahead or its stepping a frame late, where the trace here never varies, at full speed, on
+    one core and with a bridge built for rendering alone. The example prints its steps, its frame
+    and the image shown at two seconds of its clock in every capture on the runner, the capture's
+    script copying the line into the job's log, 117 steps in frame 124 here; the next pack run says
+    the runner's, and no picture is taken again before the two counts agree.
 
 ## Decisions
 
@@ -810,13 +828,6 @@ Shared: a clock held for loads also stands still while a shader program compiles
 pipeline is built, the render thread's marks taken in once at the frame's start so the hold and the
 program's state agree, for the sibling's captures of an example that waits on its programs.
 
-Verdict 56 in the commit carrying this line. build/examples-table.py writes the gallery's copy of
-compute_shader_game_of_life.webp from the picture 8231cc94 took again, with its line in
-captures.tsv, and its check passes. The table's check runs among the local checks before every
-commit that changes a picture under .github/assets/examples, beside NormTests.
-
-No other file changed. NormTests passed, 18.
-
 Verdict 55, the soak's half, in the commit carrying this line. The feature test started as the soak
 starts it, on lavapipe here on four threads from no shader cache of Mesa's with GLOBAL_ILLUMINATION
 Off at launch, was ready after 3 s at 5f86882d and at 739c2ba4 and reached its 60th frame in 620 s
@@ -846,3 +857,26 @@ No native file changed. The solution builds with warnings as errors, and the who
 Shared: a soak prints each step of its start with its seconds in every run's log, ready, the first
 frames and the pipelines' wait, so a start nearing its limit shows before it fails, and a program a
 game turns on from a panel is made when it is turned on, for the sibling's soaks.
+
+Verdict 55, the game of life's count said by the runner, in the commit carrying this line. In the
+pack run of 8231cc94 the runner's capture is the same, pixel for pixel, as the shot taken here at
+clock frame 119, 116 steps run and image A shown, where the checked-in picture is the shot at 120,
+117 steps and image B, and every other frame from 113 to 127 differs from the runner's by 6 to 11
+percent. Here the trace is the same at full speed, on one core with one lavapipe thread and with a
+render-only bridge as the runner's, frames 1 to 4 held, the programs ready at frame 5 and the first
+step at clock frame 3. So the runner stood at its clock frame 120 where this machine stands at 119,
+by a frame of its start moving the clock that holds here or by its stepping starting a clock frame
+later, and the count is the runner's to say.
+
+Where the workflow runs, the example prints at two seconds of the game's clock, the moment of its
+shot, the steps it ran, its frame and the image shown, and capture-example.sh carries a line an
+example begins with its own name from the session's log into the job's log beside the picture. Here
+it reads 117 steps by two seconds, in frame 124, showing b, and the picture is the same bytes as
+checked in. The picture is not taken again until the runner's count is the same.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,043 passed, none failed and 3 skipped, run with the norm test of the commit after this one beside
+it. NormTests passed. The public listing is unchanged, and the table of examples' check passes.
+
+Shared: an example whose picture rests on a count of frames says the count in its capture's log, so
+a capture differing on the runner says by how much, for the sibling's captures.

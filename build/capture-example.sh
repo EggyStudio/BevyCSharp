@@ -207,6 +207,10 @@ shot="${out%.webp}.shot.png"
 ./bcs shot "$shot" "$frames" --quiet --timeout "$wait" \
     || { echo "capture-example.sh: ./bcs shot of frame $frames ended with $? in $example" >&2; exit 1; }
 
+# What the example says of itself, in a line beginning with its name, as the game of life says the
+# steps it ran by its shot, carried into the job's log beside the picture.
+sed -E 's/\x1b\[[0-9;]*m//g' build/sessions/BevyCSharp.Examples.log 2>/dev/null | grep -a "^\[$example\] " || true
+
 # Every picture sixteen by nine, as the README's gallery shows each in a box of that shape, so a
 # shot of another shape, as the square window Bevy's resizing test opens, is scaled until it fills
 # 1280 by 720 and cut around its middle. An example whose cut would lose what it shows opens a
