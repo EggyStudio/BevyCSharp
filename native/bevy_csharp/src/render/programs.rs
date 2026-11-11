@@ -57,9 +57,10 @@ mod tests;
 pub use queries::*;
 pub use role::{ROLE_COUNT, Role};
 pub use table::{
-    PipelineProgram, StageBinding, forget_all, label, lookup, mark_compute_ready, table_len,
+    PipelineProgram, StageBinding, forget_all, label, lookup, mark_compute_failed,
+    mark_compute_ready, table_len,
 };
-use table::{TABLE, compute_ready};
+use table::{TABLE, compute_marked};
 pub use wgsl::stand_ins;
 use wgsl::{fallback_source, with_bevy};
 
@@ -194,6 +195,10 @@ pub struct ShaderPrograms {
     /// Programs whose generation moved since this was last taken, whose materials have to build
     /// their bind groups again.
     changed: Vec<u32>,
+    /// The generation each program's compute pipeline was built for, and the one it could not be
+    /// built for, as [`ShaderPrograms::take_in_pipelines`] last took them in.
+    built: Vec<u32>,
+    unbuilt: Vec<u32>,
 }
 
 impl ShaderPrograms {
@@ -216,12 +221,53 @@ impl ShaderPrograms {
             receiver: Mutex::new(receiver),
             last_poll: Instant::now(),
             changed: Vec::new(),
+            built: Vec::new(),
+            unbuilt: Vec::new(),
         }
     }
 
     /// The programs whose generation moved since this was last asked.
     pub fn take_changed(&mut self) -> Vec<u32> {
         std::mem::take(&mut self.changed)
+    }
+
+    /// Takes in which compute pipelines the render side has built, or could not build, which a
+    /// program's state reads until the next frame takes them in again.
+    ///
+    /// The render side marks a pipeline on its own thread while the world runs the next frame, so
+    /// a mark read as it came would land before or after a frame's systems by the threads' timing.
+    /// Taken in once at the frame's start, where a set clock held for loads looks too
+    /// (`sync::hold_clock`), every system of the frame sees what the hold saw.
+    pub fn take_in_pipelines(&mut self) {
+        (self.built, self.unbuilt) = compute_marked();
+    }
+
+    /// Whether a compute pipeline taken in is built for a program's current generation.
+    fn built(&self, id: usize, generation: u32) -> bool {
+        self.built.get(id) == Some(&generation)
+    }
+
+    /// Whether a unit is compiling or a compute pipeline is being built, which a set clock held for
+    /// loads stands still for (`sync::hold_clock`), as it does for a file loading.
+    ///
+    /// A program reading a camera's inputs is built against a camera's when one dispatches it, and
+    /// one tracing Solari's scene only where the app runs Solari, so neither is waited for, nor one
+    /// whose stages' layouts could not be merged.
+    pub fn compiling(&self) -> bool {
+        self.units.iter().any(|unit| unit.busy)
+            || self.programs.iter().enumerate().any(|(id, program)| {
+                let Some(unit) = program.stages[Role::Compute as usize].map(|unit| &self.units[unit])
+                else {
+                    return false;
+                };
+
+                unit.state == UnitState::Ready
+                    && !unit.layout.reads_view
+                    && !unit.layout.traces_scene
+                    && program.problem.is_empty()
+                    && !self.built(id, program.generation)
+                    && self.unbuilt.get(id) != Some(&program.generation)
+            })
     }
 }
 

@@ -79,24 +79,39 @@ pub fn table_len() -> u32 {
 /// ready while that is still true of it.
 static COMPUTE_READY: RwLock<Vec<u32>> = RwLock::new(Vec::new());
 
+/// The programs whose compute pipeline for their current generation the cache could not build.
+///
+/// Written by the render side beside [`COMPUTE_READY`], so a set clock held while a pipeline is
+/// built lets go of one that never will be.
+static COMPUTE_FAILED: RwLock<Vec<u32>> = RwLock::new(Vec::new());
+
 /// Says that a program's compute pipeline has been built for `generation`.
 pub fn mark_compute_ready(id: u32, generation: u32) {
-    if let Ok(mut ready) = COMPUTE_READY.write() {
+    mark(&COMPUTE_READY, id, generation);
+}
+
+/// Says that a program's compute pipeline could not be built for `generation`.
+pub fn mark_compute_failed(id: u32, generation: u32) {
+    mark(&COMPUTE_FAILED, id, generation);
+}
+
+fn mark(table: &RwLock<Vec<u32>>, id: u32, generation: u32) {
+    if let Ok(mut marked) = table.write() {
         let index = id as usize;
 
-        if ready.len() <= index {
-            ready.resize(index + 1, u32::MAX);
+        if marked.len() <= index {
+            marked.resize(index + 1, u32::MAX);
         }
 
-        ready[index] = generation;
+        marked[index] = generation;
     }
 }
 
-pub(super) fn compute_ready(id: usize, generation: u32) -> bool {
-    COMPUTE_READY
-        .read()
-        .map(|ready| ready.get(id).copied() == Some(generation))
-        .unwrap_or(false)
+/// The generation each program's compute pipeline was built for, and the one it could not be
+/// built for, as the render side has marked them so far.
+pub(super) fn compute_marked() -> (Vec<u32>, Vec<u32>) {
+    let read = |table: &RwLock<Vec<u32>>| table.read().map(|marked| marked.clone()).unwrap_or_default();
+    (read(&COMPUTE_READY), read(&COMPUTE_FAILED))
 }
 
 /// Forgets every program, so a new app starts from none.
@@ -107,5 +122,9 @@ pub fn forget_all() {
 
     if let Ok(mut ready) = COMPUTE_READY.write() {
         ready.clear();
+    }
+
+    if let Ok(mut failed) = COMPUTE_FAILED.write() {
+        failed.clear();
     }
 }

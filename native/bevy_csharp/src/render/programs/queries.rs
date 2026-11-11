@@ -42,7 +42,7 @@ pub fn state(world: &World, id: i32) -> i32 {
     // A compute stage whose pipeline has not been built counts as compiling, however the shader
     // itself stands, because a dispatch sees it that way.
     if program.stages[Role::Compute as usize].is_some()
-        && !compute_ready(id as usize, program.generation)
+        && !programs.built(id as usize, program.generation)
     {
         compiling = true;
     }

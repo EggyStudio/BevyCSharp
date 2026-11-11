@@ -11,9 +11,11 @@
 use std::borrow::Cow;
 
 use bevy::render::render_resource::{
-    BindGroupLayoutDescriptor, CachedComputePipelineId, ComputePipeline, PipelineCache,
+    BindGroupLayoutDescriptor, CachedComputePipelineId, CachedPipelineState, ComputePipeline,
+    PipelineCache,
 };
 use bevy::render::renderer::RenderDevice;
+use bevy::shader::ShaderCacheError;
 
 /// A compute pipeline, queued in Bevy's cache or built by the bridge.
 #[derive(Clone, Debug)]
@@ -29,6 +31,24 @@ impl ComputePipelineRef {
             Self::Cached(id) => cache.get_compute_pipeline(*id),
             Self::Own(pipeline) => Some(pipeline),
         }
+    }
+
+    /// Whether the cache could not build it and will not try again.
+    ///
+    /// A shader not loaded yet, or one whose import is not there yet, is an error the cache tries
+    /// again on every frame, and the pipeline is built once the shader arrives, so neither counts.
+    pub fn failed(&self, cache: &PipelineCache) -> bool {
+        let Self::Cached(id) = self else {
+            return false;
+        };
+
+        matches!(
+            cache.get_compute_pipeline_state(*id),
+            CachedPipelineState::Err(error) if !matches!(
+                error,
+                ShaderCacheError::ShaderNotLoaded(_) | ShaderCacheError::ShaderImportNotYetAvailable
+            )
+        )
     }
 }
 

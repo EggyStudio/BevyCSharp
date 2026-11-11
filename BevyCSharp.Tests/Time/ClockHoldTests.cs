@@ -110,6 +110,72 @@ public sealed class ClockHoldTests
     }
 
     /// <summary>
+    /// Held for loads, a set clock stands still while a program's Slang compiles and its compute
+    /// pipeline is built, so the program reads ready one step of the clock after the moment it was
+    /// made in, however many frames the two take.
+    /// </summary>
+    /// <remarks>
+    /// The compile runs in a process of its own and the pipeline is built on the render side's
+    /// thread, each taken in at the start of a later frame, so the frame that takes the pipeline in
+    /// is the first to move the clock, and more than one frame runs before the program is ready.
+    /// The game of life's compute steps start once its programs are ready, so on a running clock a
+    /// slower device started them later and a picture taken at a frame caught another generation.
+    /// </remarks>
+    [SkippableFact]
+    public void AClockHeldForLoadsStandsStillWhileAProgramCompiles()
+    {
+        Needs.Shaders();
+
+        using var assets = PictureRun.Temporary();
+        assets.Write("count.slang", """
+            import bcs_compute;
+
+            RWStructuredBuffer<uint> numbers;
+
+            [shader("compute")]
+            [numthreads(64, 1, 1)]
+            void main(uint3 id : SV_DispatchThreadID)
+            {
+                numbers[id.x] = id.x;
+            }
+            """);
+
+        var program = ShaderProgram.None;
+        (ulong Frame, double Elapsed, ulong Clock)? made = null, ready = null;
+        static (ulong, double, ulong) Now(World world)
+        {
+            var time = world.Resource<Time>();
+            return (time.FrameCount, time.ElapsedSeconds, time.ClockFrames);
+        }
+
+        var run = new PictureRun
+        {
+            AssetRoot = assets.Root,
+            Configure = config => config.FrameSeconds = 0.1,
+            Scene = ecs => PictureRun.Camera(ecs),
+        };
+
+        run.Do("holding the clock for loads", world => world.Resource<Time>().Holds = ClockHolds.Loads)
+            .Do("making the program", world =>
+            {
+                program = Shaders.CreateProgram(new ShaderProgramSettings { Compute = "count.slang" });
+                made = Now(world);
+            })
+            .Until("the program is ready", world =>
+            {
+                if (program.State != ShaderProgramState.Ready) return false;
+                ready = Now(world);
+                return true;
+            })
+            .Go();
+
+        var (was, now) = (made!.Value, ready!.Value);
+        var seen = $"made in frame {was.Frame} at clock {was.Clock} and {was.Elapsed:F3} s, ready in frame {now.Frame} at clock {now.Clock} and {now.Elapsed:F3} s";
+        Assert.True(now.Frame > was.Frame + 1, $"the program was ready in the frame after the one that made it, so its compile held nothing: {seen}");
+        Assert.True(now.Clock == was.Clock + 1 && Math.Abs(now.Elapsed - was.Elapsed - 0.1) < 1e-9, $"the clock moved other than one step while the program compiled: {seen}");
+    }
+
+    /// <summary>
     /// Held still, as the server holds it between commands, a set clock passes no time to the game
     /// and runs no fixed step until it is let go, and the frames it stood in are left out of its
     /// count.

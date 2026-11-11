@@ -4271,6 +4271,21 @@ a batch.
     wiggle's step by the frame's time stays, and the false sentence of `6f9b18ed` is corrected in
     the Reply, the captions and the devlog.
 
+134. **A script compiles against every assembly the library's members name.** Found with 119's fifth
+    cut on 2026-11-10 and older than it. A script that calls Render.SetWeather does not compile in
+    the script host, since WeatherState is the Sky module's and the host hands a script the library
+    alone, so any member whose signature names a module's type is closed to a script that a game's
+    compiled code calls freely. The host hands a script the references of the app it is loaded into,
+    the library's and each assembly the library's public members name, the modules' among them, and
+    a test compiles a script that calls Render.SetWeather. 119's split makes every area an assembly
+    of its own, so this lands in a commit of its own before the split's cut, and the split's cut
+    keeps the test green with the areas' assemblies in the list. Done at `5f86882d` on 2026-11-11.
+    ScriptHost.References adds every assembly the library names, loaded once for the process, and
+    walks what the app's own files beside the library name in turn, the framework's loaded where
+    named and not walked; ScriptReferenceTests compiles a script that calls Render.SetWeather with a
+    WeatherState, which the host before it refused with CS0246 and CS0012. The walk starts from
+    App's assembly, so 119's split starts it from the assembly that references every area.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -10524,6 +10539,38 @@ skipped. NormTests passed, 18. The public listing is unchanged.
 Shared: a program that reads an entity's index moves with every entity the engine makes before its
 own, so an example's picture reads a place the example keeps, and a resource only some apps use is
 made by the first call that needs it, for SHARED.md's row on captures.
+
+Item 134, a script compiled against every assembly the library names, in the commit carrying this
+line. The script host compiled a script against the assemblies the process had loaded, and the
+process loads an assembly the first time running code names one of its types, so the Sky module
+stayed out until something set a weather, and a script naming WeatherState failed though a game's
+compiled code calls Render.SetWeather freely.
+
+ScriptHost.References adds every assembly the library names, loaded once for the process in the
+context the library was loaded in, the Sky, Vegetation and Levels modules among them, and walks on
+through what each of the app's own files among them names, those beside the library. The framework's
+assemblies are loaded where one is named and not walked, so the references hold what the app's files
+name rather than the whole framework, each file of which a reference holds in native memory. The
+editor's evaluation compiles against the same list and takes the modules with it. The guide's page
+on running a game says what a script is compiled against.
+
+ScriptReferenceTests compiles a script whose system calls Render.SetWeather with a WeatherState.
+Without the mend, run alone, it fails with CS0246 for the Sky namespace and WeatherState and CS0012
+for the call. In the whole suite it fails without the mend wherever no test before it has loaded the
+Sky module, since the process keeps an assembly once loaded. N 1.4's list takes it by its nature
+beside the host's other four. The 105 tests that compile scripts or fragments passed with it,
+ScriptCompilationMemoryTests among them.
+
+For the split, the walk starts from the assembly declaring App, which the split puts in Core, whose
+references reach none of the areas. The split's cut starts it from the assembly that references
+every area, so the test stays green with the areas' assemblies in the list.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,041 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a script host compiling against the assemblies the process has loaded misses what the
+library's members name and nothing has run into, so it loads every assembly the library names before
+its first compilation, for the sibling's script host.
 
 ## Items closed, parked or shortened
 

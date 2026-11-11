@@ -6,6 +6,17 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-11
+
+![](.github/assets/readings/2026-11-11-verdict-55-life.webp)
+Bevy's compute_shader_game_of_life captured on lavapipe at frame 120, on the left as checked in, its
+programs ready on whichever frame their compile ended, in the middle with the clock held until they
+are ready, the same on any device, and on the right their difference at twice its size.
+
+Done that day
+
+- Item 134 at `5f86882d`. A script compiles against every assembly the library's members name.
+
 ## 2026-11-10
 
 ![](.github/assets/readings/2026-11-10-item-131-foot-band.webp)

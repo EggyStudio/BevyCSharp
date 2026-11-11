@@ -328,8 +328,9 @@ pub unsafe extern "C" fn bcs_time_frame_seconds(seconds: *mut f64) -> i32 {
 
 /// The holds [`bcs_time_set_hold`] takes, each a bit.
 pub mod hold {
-    /// Stands still while an asset the app asked for, or one it depends on, is loading, or a file
-    /// the bridge reads for the app, such as a scene's file read again for its clips' names.
+    /// Stands still while an asset the app asked for, or one it depends on, is loading, a file the
+    /// bridge reads for the app, such as a scene's file read again for its clips' names, or a
+    /// program's Slang compiling.
     pub const LOADS: u32 = 1;
     /// Stands still until the bit is cleared.
     pub const STILL: u32 = 2;
@@ -373,22 +374,42 @@ impl ClockHold {
 ///
 /// A hold changes the strategy for no longer than Bevy's time system reads it, so the length a
 /// frame reads the same to everything else, `bcs_time_frame_seconds` and a change to it included.
+///
+/// A program's Slang compiles in a process of its own, and its compute pipeline is built on the
+/// render side's thread, over as many frames as the device draws in the time they take, so a
+/// program a game steps once it is ready, as the game of life's compute steps are, would start at
+/// another moment of the clock on each device. Held while either runs, with a finished compile
+/// taken in after this has looked (`programs::update`) and the pipelines built taken in here, a
+/// program reads ready one step of the clock after the moment it was made in, on any device.
 pub(crate) fn hold_clock(
     mut hold: bevy::ecs::system::ResMut<ClockHold>,
     mut strategy: bevy::ecs::system::ResMut<bevy::time::TimeUpdateStrategy>,
     server: Option<bevy::ecs::system::Res<bevy::asset::AssetServer>>,
     handles: Option<bevy::ecs::system::Res<crate::assets::AssetHandles>>,
+    #[cfg(feature = "render")] programs: Option<
+        bevy::ecs::system::ResMut<crate::render::programs::ShaderPrograms>,
+    >,
 ) {
+    // Taken in on every frame, held or not, since a program's state reads what was taken in.
+    #[cfg(feature = "render")]
+    let compiling = programs.is_some_and(|mut programs| {
+        programs.take_in_pipelines();
+        programs.compiling()
+    });
+    #[cfg(not(feature = "render"))]
+    let compiling = false;
+
     let bevy::time::TimeUpdateStrategy::ManualDuration(length) = *strategy else {
         return;
     };
 
     let still = hold.holds & hold::STILL != 0
         || (hold.holds & hold::LOADS != 0
-            && server.is_some_and(|server| {
-                hold.reads.retain(|&read| crate::assets::is_loading(&server, read));
-                !hold.reads.is_empty() || handles.is_some_and(|handles| handles.loading(&server))
-            }));
+            && (compiling
+                || server.is_some_and(|server| {
+                    hold.reads.retain(|&read| crate::assets::is_loading(&server, read));
+                    !hold.reads.is_empty() || handles.is_some_and(|handles| handles.loading(&server))
+                })));
 
     if still {
         hold.kept = Some(length);

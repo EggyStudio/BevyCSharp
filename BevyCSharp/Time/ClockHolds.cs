@@ -24,16 +24,25 @@ internal enum ClockHolds
     None = 0,
 
     /// <summary>
-    /// While an asset the app asked for, or one of the assets it depends on, is loading, or a file
-    /// the engine reads for the app, such as a scene's file read again for its clips' names.
+    /// While an asset the app asked for, or one of the assets it depends on, is loading, a file the
+    /// engine reads for the app, such as a scene's file read again for its clips' names, or a
+    /// program's Slang is compiling.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// A model's animation started once the model has loaded starts in whichever frame the load
     /// ends, which a device drawing slowly reaches in fewer frames, so a picture taken at a frame
     /// caught it in another pose on each. Held, every device starts it at the same moment of the
     /// clock. An asset built in memory is never loading, and one that failed has stopped. The first
     /// clip played on a scene reads the scene's file again for the clips' names, since Bevy frees the
     /// file's own asset once the scene has loaded, and that read holds the clock as a load does.
+    /// </para>
+    /// <para>
+    /// A program compiles in a process of its own and its compute pipeline is built on the render
+    /// side's thread, so one a game steps from once it is ready, as the game of life's compute
+    /// steps are, starts in whichever frame they end. Held, the program reads ready
+    /// (<see cref="ShaderProgram.State"/>) at the same moment of the clock on every device.
+    /// </para>
     /// </remarks>
     Loads = 1,
 

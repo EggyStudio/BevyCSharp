@@ -1,42 +1,47 @@
 # Review
 
-Reviewed up to `04d6b73a`, 119's sixth cut, the asset data under the scenes and every edge Core and
-the areas had up the plan's order moved with its type or put behind a hook an area's plugin adds, so
-the projects hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes,
-Windows in 15 and macOS in 19, with a pack run without publish, started to read the captures over
-the fourth, fifth and sixth cuts before the split; the whole suite passed on it, 2,040 passed, none
-failed and 3 skipped; it keeps the form and carries the review's files. Before it `04394b88`, 119's
-fifth cut, global illumination's and the sky's members of Render and the world's spawn helpers as
-extension blocks, the listing unchanged line for line, the script host's compiler and the tests'
-workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on 2026-11-10, green
-at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it,
-2,040 passed, none failed and 3 skipped; it keeps the form and carries the review's file. Before it
-`ed291326`, 119's fourth cut, each area's console commands in its folder and the command attribute,
-the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22 with Linux in 12
-minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend, pushed at 19:05 on
-2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with Linux in 13 minutes,
-Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with publish of 19:05 green at
-21:58, the four captures jobs green with many_foxes and the drive in 104 minutes, which settles
-Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since 0.6.18. Before it
-`9ae92147`, item 133 with the nine before it, the ten held since the night, pushed at 16:03 on
-2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one timing,
-Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes, Verdict 54,
-its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which settled Verdict
-52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05. The release
-scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since
-17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by
-the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the version stands
-at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's
-judgment. Every push and run before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under
-Head records.
+Reviewed up to `5f86882d`, item 134, a script compiled against every assembly the library names, the
+three modules among them, with a test that a script calls Render.SetWeather, pushed at 01:02 on
+2026-11-11, green at 01:20 with Linux in 14 minutes, Windows in 12 and macOS in 17; the whole suite
+passed on it, 2,041 passed, none failed and 3 skipped; it keeps the form and carries the review's
+files. Before it `04d6b73a`, 119's sixth cut, the asset data under the scenes and every edge Core
+and the areas had up the plan's order moved with its type or put behind a hook an area's plugin
+adds, so the projects hold no cycle, pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14
+minutes, Windows in 15 and macOS in 19, its pack run without publish, started to read the captures
+over the fourth, fifth and sixth cuts before the split, red in the soak and in the first captures
+job, Verdict 55, its drive green in 104 minutes at 02:07; the whole suite passed on it, 2,040
+passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
+`04394b88`, 119's fifth cut, global illumination's and the sky's members of Render and the world's
+spawn helpers as extension blocks, the listing unchanged line for line, the script host's compiler
+and the tests' workspace layer at Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on
+2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in 15 and macOS in 19; the whole suite
+passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form and carries the review's
+file. Before it `ed291326`, 119's fourth cut, each area's console commands in its folder and the
+command attribute, the catalog and the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22
+with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend,
+pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third cut, green at 19:29 with Linux
+in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict 53, its pack run with publish of
+19:05 green at 21:58, the four captures jobs green with many_foxes and the drive in 104 minutes,
+which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the first package since 0.6.18.
+Before it `9ae92147`, item 133 with the nine before it, the ten held since the night, pushed at
+16:03 on 2026-11-10, green at 16:41 on its second attempt, the first attempt's macOS red by one
+timing, Verdict 53; its pack run ended at 18:03 red in the first captures job alone, many_foxes,
+Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's captures green, which
+settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on 2026-11-09, green at 22:05.
+The release scene-packs holds the bridge's intel-sponza.pack, 208,923,293 bytes with the manifest's
+hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works. nuget.org holds BevyCSharp 0.6.18,
+published by the pack run of `b8cc8316` on 2026-11-02, the last pack run, green in every job; the
+version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to 0.7 waiting on the highlights'
+item by 117's judgment. Every push and run before `074645e3` since 2026-10-23 stands in
+REVIEW-ARCHIVE.md under Head records.
 
-Next 134 in a commit of its own, then 119's norm test and its split, each a commit with the whole
-suite, 120, the live path, and after them 66 and 67, the connections and the level editor; 93's
-course drawn smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The
-package stands at 0.6.91 from `739c2ba4`, the next pack run after 119's split or by 2026-11-12,
-whichever comes first. The engine's illumination read goes first on the GPU (N 7.9). No budget by
-Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
-motion by the engine's Decision 107.
+Next Verdict 55's two mends, the clock's hold while a program compiles and the soak's start, then
+119's norm test and its split, each a commit with the whole suite, 120, the live path, and after
+them 66 and 67, the connections and the level editor; 93's course drawn smaller after 119, its drive
+at 100 minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.91 from `739c2ba4`,
+the next pack run after 119's split or by 2026-11-12, whichever comes first. The engine's
+illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the
+one target by Decision 81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -175,19 +180,69 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     compiler, each change said in the log and reachable through the CLI, so a running program is
     edited and seen without a restart; the bridge's own code stays a restart. After 119.
 
-134. **A script compiles against every assembly the library's members name.** Found with 119's fifth
-    cut on 2026-11-10 and older than it. A script that calls Render.SetWeather does not compile in
-    the script host, since WeatherState is the Sky module's and the host hands a script the library
-    alone, so any member whose signature names a module's type is closed to a script that a game's
-    compiled code calls freely. The host hands a script the references of the app it is loaded into,
-    the library's and each assembly the library's public members name, the modules' among them, and
-    a test compiles a script that calls Render.SetWeather. 119's split makes every area an assembly
-    of its own, so this lands in a commit of its own before the split's cut, and the split's cut
-    keeps the test green with the areas' assemblies in the list.
-
 ## Verdicts
 
-Verdicts 2 and 33 to 54 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
+Verdicts 2 and 33 to 54 are settled, said under each in REVIEW-ARCHIVE.md; Verdict 55 is open on the
+pack run of `04d6b73a`.
+
+55. **The pack run of `04d6b73a` is red twice, the feature test no longer answering in the soak and
+    the game of life's capture 7.4 percent off its picture.** In the pack run 42920356361, started
+    without publish at 00:05 on 2026-11-11 to read the captures over 119's fourth, fifth and sixth
+    cuts, the soak failed after 15 minutes, the feature test serving on llvmpipe with global
+    illumination off and its first command, frames.wait 60, unanswered within 600 seconds, so its
+    frames stopped or took ten seconds each, with no reading taken; and the first captures job
+    failed, 1 of its 92 captures differing, compute_shader_game_of_life in 7.4 percent of its pixels
+    where 2.0 are allowed, over the whole picture, x 0 to 1221 and y 0 to 705. The other three
+    captures jobs, Fedora's captures, the games, the storm and the README's walk are green, and the
+    drive is going at 01:03. The pack run of `739c2ba4` passed both jobs at 21:58 on 2026-11-10, so
+    one of the three cuts packed here for the first time moved them, `ed291326`, `04394b88` or
+    `04d6b73a`. Both stand on a compute shader, the game of life's steps and the feature test's 768
+    fireflies, and the sixth cut moved the shaders' component array to an extension block of
+    AppRendering, the library's programs' helpers into Shaders and steps of the frame between
+    plugins, so it stands nearest; a capture of a simulation a generation on or back is a step that
+    runs once more or once less before the frame the capture takes, as many_foxes moved in Verdict
+    54. One read, under the shared lock on lavapipe here, compute_shader_game_of_life captured at
+    `739c2ba4` and at each of the three cuts in turn, with the count of the compute step's runs up
+    to the captured frame, and the feature test started as the soak starts it with the seconds to
+    its 60th frame at each, to say which cut moved each and by what. Then the mend, the frame as it
+    was at `739c2ba4`, a cut of 119 changing nothing a program draws or how long a frame takes, with
+    a test that holds the compute step's place in the frame; no picture is taken again for it.
+    Before 119's norm test and its split. Written at 01:06 on 2026-11-11. The run ended at 02:07
+    with its drive green in 104 minutes, as long as the one before, so the feature test runs its
+    whole course on the runner and what stalls is the soak's start alone, the feature test launched
+    with GLOBAL_ILLUMINATION named Off. Its log there ends on six warnings for the probes' faces'
+    cameras, which stand only with global illumination on, so the Off named at launch may no longer
+    take since the cuts, Verdict 52's fault back by another way, the fifth cut having moved global
+    illumination's members of Render to an extension block and the sixth its hooks to the area's
+    plugin; the read's count of programs and of probe faces at the soak's start says. Read at 02:20
+    on 2026-11-11, and neither the verdict's inference nor the review's lead holds so far. The game
+    of life captured on lavapipe here at `739c2ba4` and at the head gives the same bytes and matches
+    its picture; its program reads ready at the fifth frame and the shot at the 120th holds 114
+    steps, on one core at the sixth with 113, the clock's hold on loads covering an asset's load and
+    not the Slang compile after it, so the frame a program is ready on follows the device's speed
+    and the runner's two frames off move the picture with no cut at fault. The mend, approved, is
+    the hold kept while a Slang program compiles, with a test that readiness lands on one clock
+    frame however slowly it compiles, a native change in a commit of its own. The six cameras named
+    for a probe's faces are the feature test's own reflection probe, made with the illumination off
+    as with it on. The soak's failure stood at `f70cf5e7` in run 42736156878 before any cut, Verdict
+    52's start, and the start is timed at `739c2ba4` and at the head under the exclusive lock, with
+    the runner's own seconds from the green soak of run 42871551558; where the head starts no
+    slower, the mend is on Verdict 52's ground, what the soak's start still compiles and its first
+    command's limit set from the measured start. The starts read at 02:55. The feature test as the
+    soak starts it, on lavapipe on four threads from a cold cache under the exclusive lock, answers
+    frames.wait 60 in 620 s at the head and in 724 s at `739c2ba4`, the same 24 programs made at
+    both, 17 of them the sky's and the weather's, which the soak keeps, and the screen-space light's
+    three and the CRT pass made at the start though the panel turns them on; the runner's green soak
+    of `739c2ba4` spent about 16.5 minutes in its start. So no cut of 119 moved either job, the
+    verdict's inference was wrong, and the soak's start stands at its 600 s on any slow device. Two
+    mends, each approved. The clock's hold stands still while a Slang program compiles, a native
+    commit with its test; it moves by design the frame every such program reads ready on, so every
+    example that makes one is captured here with it and each that moves past its bound is named with
+    its frames and taken again in that commit, the game of life among them, the verdict's line
+    against a retake withdrawn with its ground. Then the soak's start, the four programs made when
+    the panel turns them on, frames.wait 60's limit at 1,500 s and the start's seconds printed in
+    every soak's log. Settles where a pack run without publish on the two passes the soak and the
+    four captures jobs.
 
 ## Decisions
 
@@ -667,34 +722,56 @@ Shared: a lower area that calls into a higher one at a point in its own work tak
 area's plugin adds, the forgetters of a released handle, the observers' watchers and the input's
 interface among them, for the sibling's areas.
 
-Item 134, a script compiled against every assembly the library names, in the commit carrying this
-line. The script host compiled a script against the assemblies the process had loaded, and the
-process loads an assembly the first time running code names one of its types, so the Sky module
-stayed out until something set a weather, and a script naming WeatherState failed though a game's
-compiled code calls Render.SetWeather freely.
+Verdict 55, the game of life's half, in the commit carrying this line, with 06fbde11 before it
+moving the table of programs the render side reads into a module of its own, the code as it was.
 
-ScriptHost.References adds every assembly the library names, loaded once for the process in the
-context the library was loaded in, the Sky, Vegetation and Levels modules among them, and walks on
-through what each of the app's own files among them names, those beside the library. The framework's
-assemblies are loaded where one is named and not walked, so the references hold what the app's files
-name rather than the whole framework, each file of which a reference holds in native memory. The
-editor's evaluation compiles against the same list and takes the modules with it. The guide's page
-on running a game says what a script is compiled against.
+Read on lavapipe here, compute_shader_game_of_life captured at 739c2ba4, in a worktree with the same
+bridge since native/ and the modules are the same at both, and at 5f86882d gives the same bytes,
+which match the picture checked in. Its programs read ready in frame 4, and the shot at frame 120
+has 114 steps run, and on one core with one lavapipe thread in frame 5, with 113. The runner's
+picture shares two thirds of its live cells with the checked-in one in every quarter, the same seed
+at another generation. No cut of 119 moved it.
 
-ScriptReferenceTests compiles a script whose system calls Render.SetWeather with a WeatherState.
-Without the mend, run alone, it fails with CS0246 for the Sky namespace and WeatherState and CS0012
-for the call. In the whole suite it fails without the mend wherever no test before it has loaded the
-Sky module, since the process keeps an assembly once loaded. N 1.4's list takes it by its nature
-beside the host's other four. The 105 tests that compile scripts or fragments passed with it,
-ScriptCompilationMemoryTests among them.
+The clock's hold on loads stood still while an asset loaded or the bridge read a file, and not while
+a program's Slang compiled in a process of its own or its compute pipeline was built on the render
+side's thread. So a program read ready in whichever frame those ended, and the game of life's steps,
+which start once its programs are ready, ran a few more or fewer by the frame its capture is taken
+in. The render side also marked a pipeline built while the world ran its next frame, so the frame
+that read the mark differed by the threads' timing alone.
 
-For the split, the walk starts from the assembly declaring App, which the split puts in Core, whose
-references reach none of the areas. The split's cut starts it from the assembly that references
-every area, so the test stays green with the areas' assemblies in the list.
+The hold stands still while a unit compiles or a compute pipeline is being built for a program's
+current generation, ShaderPrograms.compiling. A finished compile is taken in after the hold has
+looked, so the frame that takes it in stands still too, and the render side's marks are taken in
+once at the frame's start, where the hold looks, and a program's state reads them from there, so
+every system of a frame sees what the hold saw. A pipeline the cache gives up on lets the hold go, a
+shader not loaded yet or an import not there yet, which the cache tries again, counting as being
+built. A program reading a camera's inputs or tracing Solari's scene is not waited for, since its
+pipeline is built only on a camera or where Solari runs. A compute program reads ready one step of
+the clock after the moment it was made in, on any device, and a material's program in the moment it
+was made in.
 
-No native file changed. The solution builds with warnings as errors, and the whole suite passed,
-2,041 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged.
+ClockHoldTests.AClockHeldForLoadsStandsStillWhileAProgramCompiles makes a compute program with the
+clock held for loads and finds it ready one step of the clock on, later than the frame after the one
+that made it. On the bridge built before the mend it reads ready in frame 6 at clock 6.
 
-Shared: a script host compiling against the assemblies the process has loaded misses what the
-library's members name and nothing has run into, so it loads every assembly the library names before
-its first compilation, for the sibling's script host.
+Every example that makes a Slang program, 34, was captured on lavapipe here with the mend and
+compared with its checked-in picture as the pack run compares. 33 stay within their bounds.
+compute_shader_game_of_life moved past its own, 8.7 percent where 2.0 are allowed, its programs
+ready at the clock's first step where they read ready at its fourth, three frames earlier, so 117
+steps have run by the shot where 114 had. Its picture is taken again in this commit, the same bytes
+on one core as at full speed, and the pair is
+.github/assets/readings/2026-11-11-verdict-55-life.webp. gpu_readback prints and draws nothing a
+capture compares, compute_mesh builds its mesh once, long before the shot, the meshlet example draws
+through Bevy's pipelines alone, and the fireflies are the feature test's, which no capture compares.
+
+render/programs.rs stood at 800 lines and the mend adds some fifty, so the commit before moves
+StageBinding, PipelineProgram, the table and the compute marks into render/programs/table.rs,
+leaving 706 and 111 lines, and with the mend the file stands at 752. The bridge checks clean in its
+three profiles at both commits, its tests passing, 118 with no feature and 205 with render.
+
+The solution builds with warnings as errors, and the whole suite passed, 2,042 passed, none failed
+and 3 skipped. NormTests passed, 18. The public listing is unchanged.
+
+Shared: a clock held for loads also stands still while a shader program compiles and its compute
+pipeline is built, the render thread's marks taken in once at the frame's start so the hold and the
+program's state agree, for the sibling's captures of an example that waits on its programs.

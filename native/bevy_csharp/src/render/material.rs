@@ -719,9 +719,16 @@ pub fn install(app: &mut bevy::app::App, root: std::path::PathBuf) {
                 super::lights::frame_cookies.after(bevy::transform::TransformSystems::Propagate),
             ),
         )
+        // A finished compile taken in after a clock held for loads has looked, so the frame that
+        // takes it in stands still too, and a program's readiness lands on the same moment of the
+        // clock on any device.
         .add_systems(
             First,
-            (programs::update, super::shader_materials::refresh_materials_of_changed_programs).chain(),
+            (
+                programs::update.after(crate::sync::hold_clock),
+                super::shader_materials::refresh_materials_of_changed_programs,
+            )
+                .chain(),
         )
         .add_systems(PostUpdate, super::post::match_samples_per_target)
         .add_systems(

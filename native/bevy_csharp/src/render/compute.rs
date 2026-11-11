@@ -277,10 +277,12 @@ fn prepare_dispatches(
     // it exists, rather than when it is first dispatched, so a dispatch made once the program
     // reports ready runs rather than being dropped while its pipeline compiles.
     for id in 0..programs::table_len() {
-        if let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, &render_device, id)
-            && pipeline.get(&cache).is_some()
-        {
-            programs::mark_compute_ready(id, program.generation);
+        if let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, &render_device, id) {
+            if pipeline.get(&cache).is_some() {
+                programs::mark_compute_ready(id, program.generation);
+            } else if pipeline.failed(&cache) {
+                programs::mark_compute_failed(id, program.generation);
+            }
         }
     }
 
