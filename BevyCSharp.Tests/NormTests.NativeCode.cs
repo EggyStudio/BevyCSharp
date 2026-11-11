@@ -165,7 +165,12 @@ public sealed partial class NormTests
             il = null;
         }
 
-        if (il is null) yield break;
+        return il is null ? [] : Instructions(il);
+    }
+
+    /// <summary>The instructions of a method's body, each with where it starts and its operand where that is a token.</summary>
+    private static IEnumerable<(int Offset, OpCode Code, int Operand)> Instructions(byte[] il)
+    {
         for (var at = 0; at < il.Length;)
         {
             var offset = at;

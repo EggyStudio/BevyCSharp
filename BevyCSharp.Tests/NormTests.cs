@@ -126,6 +126,36 @@ public sealed partial class NormTests
     }
 
     [Fact]
+    public void N_1_6()
+    {
+        var layerOf = Layers.SelectMany((names, layer) => names.Select(name => (name, layer))).ToDictionary(p => p.name, p => p.layer);
+        var places = Places();
+        var sources = Sources("BevyCSharp/", ".cs").ToHashSet(StringComparer.Ordinal);
+        var found = new List<string>();
+
+        foreach (var file in sources.Where(file => ProjectOf(places, file) is null)) found.Add($"{file} placed in no project");
+        foreach (var (place, project) in places)
+        {
+            if (!layerOf.ContainsKey(project)) found.Add($"{place} placed in {project}, which no layer lists");
+            if (!sources.Any(file => file == place || (place.EndsWith('/') && file.StartsWith(place, StringComparison.Ordinal)))) found.Add($"{place} places no file");
+        }
+
+        // What each project's files name of another's, which the split's references will hold.
+        var projects = sources.ToDictionary(file => file, file => ProjectOf(places, file), StringComparer.Ordinal);
+        var edges = LibraryEdges(file => projects.GetValueOrDefault(file), found);
+        foreach (var (project, layer) in layerOf)
+        {
+            var named = edges.Where(edge => edge.Key.From == project).ToList();
+            foreach (var ((_, to), example) in named.Where(edge => layerOf.GetValueOrDefault(edge.Key.To, int.MaxValue) >= layer))
+                found.Add($"{project} names {to}, of its own layer or one above, as {example}");
+            var lowest = named.Count == 0 ? 0 : named.Max(edge => layerOf.GetValueOrDefault(edge.Key.To)) + 1;
+            if (layer != lowest) found.Add($"{project} in layer {layer + 1} where what it names allows {lowest + 1}");
+        }
+
+        Hold("1.6", found, "a file of the library in no project, a project out of its layer, or one naming a project of its own layer or above");
+    }
+
+    [Fact]
     public void N_2_8()
     {
         // The list Annex B names, the rows of BUILDING.md's tables under its section of packages.

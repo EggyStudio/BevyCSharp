@@ -1,63 +1,69 @@
 # Review
 
-Reviewed up to `250078ae`, the game of life printing in its capture's log the steps it ran by its
-shot, its frame and the image it shows, pushed at 08:22 on 2026-11-11, green at 08:36 with Linux in
-12 minutes, Windows in 14 and macOS in 11, with a pack run without publish, 42979077838; the whole
-suite passed, 2,043 passed, none failed and 3 skipped; it keeps the form and carries the review's
-files. Before it `d672cabd`, Verdict 55's second mend, the feature test making its screen-space
-light's and old screen's programs when the panel turns them on and the soak giving its first frames
-1,500 s and printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41 with Linux
-in 13 minutes, Windows in 15 and macOS in 16, which settles Verdict 56; its pack run without
-publish, 42965606576, read at 08:24 with its soak green in 29 minutes, the start printing ready in
-143 s, frames.wait 60 in 490 s and pipelines.wait in 3 s, its games, Fedora's captures and two
-captures jobs green and the first red by the game of life as before, the rest of it canceled so that
-the run on `250078ae`, which covers it whole, starts; the whole suite passed, 2,042 passed, none
-failed and 3 skipped; it keeps the form and carries the review's file. Before it `250e8376`, Verdict
-56's mend, the gallery's copy of the game of life's picture written again, pushed at 05:53 on
-2026-11-11, no run starting for it since the push's paths leave out .github's documents and assets,
-which are all it changes; the table's check passes here and NormTests pass, 18; it keeps the form
-and carries the review's file. Before it `8231cc94`, Verdict 55's first mend, a clock held for loads
-standing still while a Slang program compiles and its compute pipeline is built, with `06fbde11`
-before it, the render side's table of programs moved to a module of its own, both pushed at 05:30 on
-2026-11-11, the run on the last red on Linux at 05:48 at the check of the examples' table, Verdict
-56, Windows and macOS green, its pack run without publish, 42959641216, ended at 07:31 red in its
-Linux job by the same check and in its first captures job, the game of life one step short on the
-runner, Verdict 55, its other captures, its games and its soak green and its drive green in 104
-minutes; the whole suite passed, 2,042 passed, none failed and 3 skipped, the native checks clean in
-the three profiles; they keep the form and carry the review's files. Before them `5f86882d`, item
-134, a script compiled against every assembly the library names, the three modules among them, with
-a test that a script calls Render.SetWeather, pushed at 01:02 on 2026-11-11, green at 01:20 with
-Linux in 14 minutes, Windows in 12 and macOS in 17; the whole suite passed on it, 2,041 passed, none
-failed and 3 skipped; it keeps the form and carries the review's files. Before it `04d6b73a`, 119's
-sixth cut, the asset data under the scenes and every edge Core and the areas had up the plan's order
-moved with its type or put behind a hook an area's plugin adds, so the projects hold no cycle,
-pushed at 00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes, Windows in 15 and macOS in
-19, its pack run without publish, started to read the captures over the fourth, fifth and sixth cuts
-before the split, red in the soak and in the first captures job, Verdict 55, its drive green in 104
-minutes at 02:07; the whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps
-the form and carries the review's files. Before it `04394b88`, 119's fifth cut, global
-illumination's and the sky's members of Render and the world's spawn helpers as extension blocks,
-the listing unchanged line for line, the script host's compiler and the tests' workspace layer at
-Roslyn 5.0.0 so a script reads the blocks, pushed at 21:20 on 2026-11-10, green at 21:39 with Linux
-in 12 minutes, Windows in 15 and macOS in 19; the whole suite passed on it, 2,040 passed, none
-failed and 3 skipped; it keeps the form and carries the review's file. Before it `ed291326`, 119's
-fourth cut, each area's console commands in its folder and the command attribute, the catalog and
-the host in Core, pushed at 20:04 on 2026-11-10, green at 20:22 with Linux in 12 minutes, Windows in
-15 and macOS in 19. Before it `739c2ba4`, Verdict 54's mend, pushed at 19:05 on 2026-11-10 with
-Verdict 53's mend and 119's third cut, green at 19:29 with Linux in 13 minutes, Windows in 15 and
-macOS in 18, which settled Verdict 53, its pack run with publish of 19:05 green at 21:58, the four
-captures jobs green with many_foxes and the drive in 104 minutes, which settles Verdict 54, 0.6.91
-published and tagged `v0.6.91`, the first package since 0.6.18. Before it `9ae92147`, item 133 with
-the nine before it, the ten held since the night, pushed at 16:03 on 2026-11-10, green at 16:41 on
-its second attempt, the first attempt's macOS red by one timing, Verdict 53; its pack run ended at
-18:03 red in the first captures job alone, many_foxes, Verdict 54, its drive green in 100 minutes,
-its soak in 29 and Fedora's captures green, which settled Verdict 52. Before it `f70cf5e7`, item
-129, pushed at 21:45 on 2026-11-09, green at 22:05. The release scene-packs holds the bridge's
-intel-sponza.pack, 208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs
-scenes fetch works. nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on
-2026-11-02, the last pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and
-`v0.6.18`, its rise to 0.7 waiting on the highlights' item by 117's judgment. Every push and run
-before `074645e3` since 2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
+Reviewed up to `6f43e883`, the game of life swapping its sprite's image once its programs are ready,
+pushed at 09:24 on 2026-11-11, green at 09:39 with Linux in 15 minutes, Windows in 15 and macOS in
+11, with a pack run without publish, 42986918695, started at 09:26 after a first one took the head
+before the push and was canceled; the whole suite passed, 2,043 passed, none failed and 3 skipped;
+it keeps the form and carries the review's file. Before it `250078ae`, the game of life printing in
+its capture's log the steps it ran by its shot, its frame and the image it shows, pushed at 08:22 on
+2026-11-11, green at 08:36 with Linux in 12 minutes, Windows in 14 and macOS in 11, its pack run
+without publish, 42979077838, read at 09:16 with the runner's line and its soak, its games and four
+of its captures jobs green, the rest canceled for the run on `6f43e883`; the whole suite passed,
+2,043 passed, none failed and 3 skipped; it keeps the form and carries the review's files. Before it
+`d672cabd`, Verdict 55's second mend, the feature test making its screen-space light's and old
+screen's programs when the panel turns them on and the soak giving its first frames 1,500 s and
+printing its start's seconds, pushed at 06:24 on 2026-11-11, green at 06:41 with Linux in 13
+minutes, Windows in 15 and macOS in 16, which settles Verdict 56; its pack run without publish,
+42965606576, read at 08:24 with its soak green in 29 minutes, the start printing ready in 143 s,
+frames.wait 60 in 490 s and pipelines.wait in 3 s, its games, Fedora's captures and two captures
+jobs green and the first red by the game of life as before, the rest of it canceled so that the run
+on `250078ae`, which covers it whole, starts; the whole suite passed, 2,042 passed, none failed and
+3 skipped; it keeps the form and carries the review's file. Before it `250e8376`, Verdict 56's mend,
+the gallery's copy of the game of life's picture written again, pushed at 05:53 on 2026-11-11, no
+run starting for it since the push's paths leave out .github's documents and assets, which are all
+it changes; the table's check passes here and NormTests pass, 18; it keeps the form and carries the
+review's file. Before it `8231cc94`, Verdict 55's first mend, a clock held for loads standing still
+while a Slang program compiles and its compute pipeline is built, with `06fbde11` before it, the
+render side's table of programs moved to a module of its own, both pushed at 05:30 on 2026-11-11,
+the run on the last red on Linux at 05:48 at the check of the examples' table, Verdict 56, Windows
+and macOS green, its pack run without publish, 42959641216, ended at 07:31 red in its Linux job by
+the same check and in its first captures job, the game of life one step short on the runner, Verdict
+55, its other captures, its games and its soak green and its drive green in 104 minutes; the whole
+suite passed, 2,042 passed, none failed and 3 skipped, the native checks clean in the three
+profiles; they keep the form and carry the review's files. Before them `5f86882d`, item 134, a
+script compiled against every assembly the library names, the three modules among them, with a test
+that a script calls Render.SetWeather, pushed at 01:02 on 2026-11-11, green at 01:20 with Linux in
+14 minutes, Windows in 12 and macOS in 17; the whole suite passed on it, 2,041 passed, none failed
+and 3 skipped; it keeps the form and carries the review's files. Before it `04d6b73a`, 119's sixth
+cut, the asset data under the scenes and every edge Core and the areas had up the plan's order moved
+with its type or put behind a hook an area's plugin adds, so the projects hold no cycle, pushed at
+00:05 on 2026-11-11, green at 00:24 with Linux in 14 minutes, Windows in 15 and macOS in 19, its
+pack run without publish, started to read the captures over the fourth, fifth and sixth cuts before
+the split, red in the soak and in the first captures job, Verdict 55, its drive green in 104 minutes
+at 02:07; the whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps the form
+and carries the review's files. Before it `04394b88`, 119's fifth cut, global illumination's and the
+sky's members of Render and the world's spawn helpers as extension blocks, the listing unchanged
+line for line, the script host's compiler and the tests' workspace layer at Roslyn 5.0.0 so a script
+reads the blocks, pushed at 21:20 on 2026-11-10, green at 21:39 with Linux in 12 minutes, Windows in
+15 and macOS in 19; the whole suite passed on it, 2,040 passed, none failed and 3 skipped; it keeps
+the form and carries the review's file. Before it `ed291326`, 119's fourth cut, each area's console
+commands in its folder and the command attribute, the catalog and the host in Core, pushed at 20:04
+on 2026-11-10, green at 20:22 with Linux in 12 minutes, Windows in 15 and macOS in 19. Before it
+`739c2ba4`, Verdict 54's mend, pushed at 19:05 on 2026-11-10 with Verdict 53's mend and 119's third
+cut, green at 19:29 with Linux in 13 minutes, Windows in 15 and macOS in 18, which settled Verdict
+53, its pack run with publish of 19:05 green at 21:58, the four captures jobs green with many_foxes
+and the drive in 104 minutes, which settles Verdict 54, 0.6.91 published and tagged `v0.6.91`, the
+first package since 0.6.18. Before it `9ae92147`, item 133 with the nine before it, the ten held
+since the night, pushed at 16:03 on 2026-11-10, green at 16:41 on its second attempt, the first
+attempt's macOS red by one timing, Verdict 53; its pack run ended at 18:03 red in the first captures
+job alone, many_foxes, Verdict 54, its drive green in 100 minutes, its soak in 29 and Fedora's
+captures green, which settled Verdict 52. Before it `f70cf5e7`, item 129, pushed at 21:45 on
+2026-11-09, green at 22:05. The release scene-packs holds the bridge's intel-sponza.pack,
+208,923,293 bytes with the manifest's hash, since 17:57 on 2026-11-09, so ./bcs scenes fetch works.
+nuget.org holds BevyCSharp 0.6.18, published by the pack run of `b8cc8316` on 2026-11-02, the last
+pack run, green in every job; the version stands at 0.6, tagged `v0.6.0` and `v0.6.18`, its rise to
+0.7 waiting on the highlights' item by 117's judgment. Every push and run before `074645e3` since
+2026-10-23 stands in REVIEW-ARCHIVE.md under Head records.
 
 Next Verdict 55 again, the game of life's steps on the runner, then 119's norm test and its split,
 each a commit with the whole suite, 120, the live path, and after them 66 and 67, the connections
@@ -316,7 +322,13 @@ settling on the pack run of `d672cabd`.
     leaves Loading, read here and in the container before its commit with no picture taken again.
     The runner says the same at 09:16 in the pack run on `250078ae`, its first captures job printing
     117 steps by two seconds, in frame 125, showing its first image, the picture 7.6 percent off as
-    before; so the cause stands confirmed on the runner.
+    before; so the cause stands confirmed on the runner. The example's mend is `6f43e883`, pushed at
+    09:24, the swaps starting once the stage leaves Loading. Here it prints 117 steps in frame 124
+    showing its second image, the picture the same bytes; in the runner's container, on one core and
+    with the compiler slowed by a second and more, holding 35 and 47 frames, it prints 117 steps
+    showing the second image each time, each picture the checked-in one to the pixel, none taken
+    again. The Reply says how the container is made and run. The verdict settles on the pack run
+    42986918695, its four captures jobs and its soak.
 
 ## Decisions
 
@@ -932,3 +944,51 @@ public listing is unchanged, and the table of examples' check passes.
 Shared: a capture that fails on the runner alone is read first in a container of the runner's image
 on its own Mesa, and an example's count of frames, a swap or a step, starts once what it waits on is
 ready, so frames held for a compile do not move it, for the sibling's captures.
+
+Item 119's norm test, in the commit carrying this line. NormTests.N_1_6 holds the library's areas in
+the layers the split gives them projects in, read as the projects' references will hold them, so the
+split moves files without a cycle coming back.
+
+Each of the library's files stands in its area's project by build/norm/1.6.tsv, a folder or a file a
+line with its project. The Assets folder names each of its 298 files, since it holds files of ten
+projects, EnginePlugin and DefaultPlugins stand in BevyCSharp, which composes the rest, and every
+other folder goes whole. A file placed nowhere fails the test, and so does a line that places
+nothing. It is a .tsv beside the norm's lists, being no list of places that break a rule, and the
+split's moves follow it, after which the projects' files say where each file stands. The projects go
+by their areas' names until the split sets them, BevyCSharp.Cli being the command line's project.
+
+What each file names of another's is read from the built library and its portable PDB. A type stands
+in the files its methods' sequence points name and those the compiler records for a type with no
+method to carry them, and it names what its methods' instructions, locals and signatures and its
+base, interfaces, fields and attributes hold, each as the compiler resolved it. So a member of an
+extension block counts for the class declaring the block, and a word in a comment or a string counts
+for nothing. A file the generators write stands in no project. The reading finds what the sixth
+cut's reader found compiling the sources with Roslyn, no edge up the plan's order and no cycle, in
+under half a second.
+
+The layers, each project in the lowest its names allow, as the sibling's N 1.6 lists them, are
+Native, then Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d,
+Animation, GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and Diagnostics,
+then Vegetation, then Levels and BevyCSharp. The test fails for a project naming one of its own
+layer or above, for one in a higher layer than its names need, and for a type standing in files of
+two projects, since a partial type cannot span assemblies.
+
+Placing SceneField.cs in Core fails it, Core naming Assets, GlobalIllumination and Rendering and
+SceneField's parts standing in two projects, and a field of Core's Config naming RenderSky fails it
+with Core naming Sky. It passes on the Debug build, on a Release build and on a Release build with
+ContinuousIntegrationBuild, whose PDB names the files under a mapped root, and it fails where the
+PDB names none of the library's files, so an empty reading never passes. The walk of instructions N
+2.10 reads with takes a body's bytes as well, and N 1.6 walks the library's bodies with it.
+
+N 1.6's row in NORM.md's table reads to take, at item 119, and its text has a repository of one
+project keep its layers by review until its split. With this commit the test holds them before the
+split, from the code, and once the split makes the projects it reads their files' references as the
+sibling's does, the placement's file going.
+
+No native file changed. The solution builds with warnings as errors, and the whole suite passed,
+2,043 passed, none failed and 3 skipped, N_1_6 among them. NormTests passed, 19. The public listing
+is unchanged.
+
+Shared: the areas of a library of one project are held to the layers of its coming split by a norm
+test reading the built assembly and its portable PDB, each type placed by its source files, for the
+sibling's N 1.6 and any area it splits again.
