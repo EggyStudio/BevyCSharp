@@ -19,6 +19,38 @@ public sealed class NightSkyTests
         Assert.True(Bright(starry) > 10, $"{Bright(starry)} stars shine over the night");
     }
 
+    /// <summary>
+    /// The night sky drawn 4,450 units from the world's origin along two axes is the one drawn at it,
+    /// each star where it stands at the origin and as round.
+    /// </summary>
+    /// <remarks>
+    /// A pixel's way into the sky is taken from the view's own numbers and turned into the world's
+    /// directions. Taken as the near plane's point in the world less the eye, both 4,450 units out,
+    /// it would step by about six pixels' worth of a way, and each star, its spread found from how
+    /// its pixel's way differs from its neighbors', would stretch across or down a few pixels and
+    /// move off its place, a mean of a level apart over the picture.
+    /// </remarks>
+    [SkippableFact]
+    public void TheNightSkyFarFromTheWorldsOriginIsTheOneDrawnAtIt()
+    {
+        Needs.Shaders();
+        var clock = new SkyClock { Hour = 0f };
+        var settings = new NightSkySettings { Clock = clock, Moon = 0f };
+        var near = Sky(settings, clock);
+        var far = Sky(settings, clock, at: new Vec3(4450f, 0f, -4450f));
+        double apart = 0;
+        var off = 0;
+        for (var y = 0u; y < near.Height; y++)
+            for (var x = 0u; x < near.Width; x++)
+            {
+                var (a, b) = (Luma(near.At(x, y)), Luma(far.At(x, y)));
+                apart += Math.Abs(a - b);
+                if (Math.Abs(a - b) >= 3) off++;
+            }
+        apart /= near.Width * near.Height;
+        Assert.True(apart < 0.1 && off < 100, $"the night sky far from the origin is the one at it, a mean of {apart:0.000} levels apart and {off} pixels apart by 3 or more");
+    }
+
     [SkippableFact]
     public void TheDaysSkyDrownsThem()
     {
@@ -77,9 +109,9 @@ public sealed class NightSkyTests
         return count;
     }
 
-    // The sky from two meters up, looking sixty degrees up toward the south, or at the moon, under
-    // an atmosphere lit by the clock's sun or under none, with the night sky or none.
-    private static CapturedImage Sky(NightSkySettings? settings, SkyClock clock, bool atmosphere = false, bool towardMoon = false)
+    // The sky from two meters over `at`, looking sixty degrees up toward the south, or at the moon,
+    // under an atmosphere lit by the clock's sun or under none, with the night sky or none.
+    private static CapturedImage Sky(NightSkySettings? settings, SkyClock clock, bool atmosphere = false, bool towardMoon = false, Vec3 at = default)
     {
         var run = new PictureRun
         {
@@ -89,7 +121,7 @@ public sealed class NightSkyTests
             Scene = ecs =>
             {
                 var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = towardMoon ? 30f : 60f });
-                var eye = new Vec3(0f, 2f, 0f);
+                var eye = at + new Vec3(0f, 2f, 0f);
                 var toward = towardMoon ? Of(clock.MoonDirection) : new Vec3(0f, MathF.Sin(MathF.PI / 3f), MathF.Cos(MathF.PI / 3f));
                 ecs.Add(camera, Transform.LookingAt(eye, eye + toward, Vec3.UnitY));
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });

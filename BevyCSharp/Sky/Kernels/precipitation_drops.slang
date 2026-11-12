@@ -73,10 +73,13 @@ Corner vertex(uint vertex_id : SV_VertexID, uint instance_id : SV_InstanceID)
         way = passView.world_from_view[1].xyz;
     }
     float reach = max(span, width) * 0.5;
-    float3 at = where.xyz + way * corner.y * reach + side * corner.x * width * 0.5;
+    // The corner as its way from the eye, which keeps a streak's width of a few millimeters however
+    // far from the world's origin it falls, where the corner in the world's own numbers steps by half
+    // a millimeter 4,450 units out.
+    float3 at = (where.xyz - passView.world_position) + way * corner.y * reach + side * corner.x * width * 0.5;
 
     Corner output;
-    output.position = passTransform(passView.unjittered_clip_from_world, float4(at, 1.0));
+    output.position = passClipOfOffset(passView.unjittered_clip_from_world, at);
     output.across = float2(corner.x, corner.y * reach / (width * 0.5));
     output.light = float4(light.rgb, opacity);
     output.ends = float2(max(reach / (width * 0.5) - 1.0, 0.0), moving.w);

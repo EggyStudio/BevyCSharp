@@ -484,7 +484,35 @@ public float passDistanceAt(float4 position)
     return passDistanceFromDepth(passDepthAt(position));
 }
 
-/// Where in the world the surface at `uv` with `depth_value` is.
+/// A way in the view turned into the world's directions, by the view's rotation alone.
+public float3 passTurnToWorld(float3 way)
+{
+    return passView.world_from_view[0].xyz * way.x + passView.world_from_view[1].xyz * way.y + passView.world_from_view[2].xyz * way.z;
+}
+
+/// Where the surface at `uv` with `depth_value` is, as its way from the eye in the world's
+/// directions.
+///
+/// Found in the view and turned into the world's directions, so its numbers are as large as its
+/// distance from the eye, and two of them taken a pixel apart differ by what lies between them
+/// however far from the world's origin the view stands. Taken through `world_from_clip`, a point
+/// carries the eye's place in its every bit, so 4,450 units out it steps by half a millimeter,
+/// where the points of pixels beside each other two units off lie a few millimeters apart, and
+/// a normal or a way made from their difference tilts from pixel to pixel. A shader working out
+/// a normal, a distance or a way from points of the depth works on these, and adds the eye
+/// (`passView.world_position`) where it looks something up at a place in the world.
+public float3 passEyeOffset(float2 uv, float depth_value)
+{
+    let ndc = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, depth_value, 1.0);
+    let view = passTransform(passView.view_from_clip, ndc);
+    return passTurnToWorld(view.xyz / view.w);
+}
+
+/// Where in the world the surface at `uv` with `depth_value` is, through `world_from_clip`.
+///
+/// A difference of two of these keeps no better than the eye's place does, so a shader comparing
+/// points of the depth, as a normal or a way between pixels, compares their ways from the eye
+/// (`passEyeOffset`).
 public float3 passWorldPosition(float2 uv, float depth_value)
 {
     let ndc = float4(uv.x * 2.0 - 1.0, 1.0 - uv.y * 2.0, depth_value, 1.0);
@@ -505,6 +533,42 @@ public float2 passPreviousUvOf(float3 world)
     let clip = passTransform(passPreviousView.clip_from_world, float4(world, 1.0));
     let ndc = clip.xy / clip.w;
     return float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
+}
+
+/// Where the point `offset` from the eye lies in a clip space, `clip_from_world` taking the world
+/// there.
+///
+/// The eye taken through the whole matrix, which is the same for every point, and the offset through
+/// its turn and scale alone, so the points of pixels beside each other, or the corners of a streak a
+/// few millimeters wide, land as far apart as they lie. A point in the world's own numbers would land
+/// within half a millimeter's step of its place 4,450 units from the origin, and the eye's own
+/// rounding moves every point alike.
+public float4 passClipOfOffset(float4 clip_from_world[4], float3 offset)
+{
+    return passTransform(clip_from_world, float4(passView.world_position, 1.0))
+        + clip_from_world[0] * offset.x + clip_from_world[1] * offset.y + clip_from_world[2] * offset.z;
+}
+
+/// Where the point `offset` from this frame's eye (`passEyeOffset`) lay in the previous frame's clip
+/// space, behind the previous eye where its w is not above zero.
+public float4 passPreviousClipAt(float3 offset)
+{
+    return passClipOfOffset(passPreviousView.clip_from_world, offset);
+}
+
+/// Where the point `offset` from this frame's eye (`passEyeOffset`) was on the previous frame's
+/// picture, in `uv`, as `passPreviousUvOf` finds a point in the world's.
+public float2 passPreviousUvAt(float3 offset)
+{
+    let clip = passPreviousClipAt(offset);
+    let ndc = clip.xy / clip.w;
+    return float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
+}
+
+/// Where the point `offset` from this frame's eye lies in this frame's clip space.
+public float4 passClipAt(float3 offset)
+{
+    return passClipOfOffset(passView.clip_from_world, offset);
 }
 
 /// The depth Bevy keeps for a point in the world as the view sees it, which a draw that finds its
@@ -539,7 +603,7 @@ public float3 passRayDirection(float2 uv)
     if (passOrthographic())
         return normalize(-passView.world_from_view[2].xyz);
 
-    return normalize(passWorldPosition(uv, 1.0) - passView.world_position);
+    return normalize(passEyeOffset(uv, 1.0));
 }
 
 /// A corner of one triangle covering the whole view, for a draw over every pixel of it with three

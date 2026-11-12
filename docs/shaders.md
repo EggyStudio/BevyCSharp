@@ -590,7 +590,11 @@ declares is its own. Depth, normals and motion come from a prepass the camera dr
 `Shaders.SetPrepass(camera, depth: true, normals: true, motion: true)`, and an outline, a fog or
 anything reusing the previous frame is built from them. `passDistanceAt` turns depth into
 world units, `passWorldPosition` turns a pixel back into a point in the world, and `passPreviousUvOf`
-finds where a point was on the previous frame. A camera that draws none of them binds the far plane,
+finds where a point was on the previous frame. `passEyeOffset` gives the same point as its way from
+the eye, which a pass working out a normal, a way or a distance from points of the depth takes,
+since far from the world's origin a point in the world's own numbers keeps too few bits to tell
+pixels beside each other apart, and `passPreviousUvAt` and `passClipAt` take such a way where the
+other two take a point. A camera that draws none of them binds the far plane,
 white normals and no motion, and so does a multisampled one, whose prepass a pass cannot bind. A
 pass before tonemapping sees the linear picture, which may be brighter than white, and suits
 anything about light; one after sees what the screen will show, and suits anything about the picture

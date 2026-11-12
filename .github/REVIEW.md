@@ -1,6 +1,15 @@
 # Review
 
-Reviewed up to `8784bdd1`, InternalsVisibleTo's pairs measured by the compiler and narrowed,
+Reviewed up to `fdf68d62`, item 136's first commit, the glow lights' history looked up less the part
+of a texel by which a texel's own sample point lies off its middle, a quarter where the picture is
+twice the images' size, so a still view finds its own texel whole, still, steady and frames reading
+whole where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's change between frames 0.023 levels
+where 0.289, a change of light followed as fast as before, with a test, pushed at 04:09 on
+2026-11-12, green at 04:28 with Linux in 13 minutes, macOS in 17 and Windows in 18; the whole suite
+2,048 passed, 1 failed and 3 skipped, the one a sky light's share under a slab at High reading 0.180
+against 0.2 to 0.5 in a scene the glow pass does not run in, passing alone on both kernels, taken as
+intermittent and to be read after the precision mend; it keeps the form and carries the review's
+files. Before it `8784bdd1`, InternalsVisibleTo's pairs measured by the compiler and narrowed,
 AnimationReader moved to Rendering beside the writers it reads back and FieldCurve and FieldValue to
 Animation, 67 pairs and 217 internal names reached where 68 and 221, the pairs listed with a why
 each in build/norm/1.6.txt and held by N 1.6, build/norm/internals.cs finding them and writing the
@@ -38,15 +47,18 @@ by the same fault and not run again, the packages' layout having changed by Deci
 suite passed, 2,045 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
 the review's files. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
 
-Next 136, the glow history's quarter texel mended apart and first, then the depth's points and ways
-far from the origin; then 135, the bridge's size, stripped with offsets in the crash file; then 137,
-a near wall's light moving with where the grids fall; then 120, the live path, each a commit with
-the whole suite, and after them 66 and 67, the connections and the level editor; 93's course drawn
-smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package
-stands at 0.6.106 from `77941f42`, one package with its templates, published at 00:36 on 2026-11-12;
-the next pack run when 136 and 135 are in. The engine's illumination read goes first on the GPU (N
-7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in
-motion is read in motion by the engine's Decision 107.
+Next 136's first commit, the eye's offset and the ray's way from it in bcs_pass.slang, the streaks'
+corners and the night sky's test, the world point left as it is; then 139, three readings at their
+bounds moving with a rounding's change in a pixel's step, sized by the readings before and after,
+with the slab test and the alley's probe read there, and 136's kernels on offsets after it; then
+135, the bridge's size, stripped with offsets in the crash file; then 137, a near wall's light
+moving with where the grids fall; then 120, the live path, each a commit with the whole suite, and
+after them 66 and 67, the connections and the level editor; 93's course drawn smaller after 119, its
+drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.106 from
+`77941f42`, one package with its templates, published at 00:36 on 2026-11-12; the next pack run when
+136 and 135 are in. The engine's illumination read goes first on the GPU (N 7.9). No budget by
+Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
+motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -202,7 +214,16 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     in bcs_pass.slang with passWorldPosition, passRayDirection and the previous frame's lookup on
     it, the kernels' points as offsets, the streaks' corners, and two tests, the night sky far
     against near and the wall 2 units off at 354 against 4,450. The grids' share, 4.4 percent of a
-    near wall's indirect light by where the grids fall, is item 137.
+    near wall's indirect light by where the grids fall, is item 137. The mend's read, recorded at
+    05:23. On a rebuilt bridge the night sky far out is the one drawn at the origin, its test
+    failing on the head's bridge at 1.003 levels and 6,408 pixels apart; the rain's read is running.
+    The kernels on offsets move no picture here, the head's kernels and the mended ones on the one
+    bridge reading a slanted glow-lit wall 0.049 and 0.029 levels apart between 354 and 4,450 units
+    out, the straight wall 1.919 and 1.922, and alike at 69,986, so the review's first finding,
+    reasoned and not measured, does not hold for this bridge. Two commits, the pictures' mend with
+    the night sky's test, and the kernels' conversion apart as a change that moves no picture, kept
+    for costing nothing and holding the two engines' kernels alike. The wall test is dropped,
+    failing before and after, its 1.8 levels being item 137's.
 
 137. **A near wall's indirect light moves with where the grids fall against the room.** From 136's
     read on 2026-11-11. The same closed room reads its wall 2 units from the eye at 182.1 at the
@@ -211,7 +232,64 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     probes' spacing fall against the walls. One read, the room stepped through a cell and through a
     probe's spacing along each axis, which term moves and by how much, the field's distance at the
     wall, the probes' light or the screen probes' pick, and whether the alley's probe that varies
-    between starts is the same thing. Then what holds it, as an item of its own. After 135.
+    between starts is the same thing. Then what holds it, as an item of its own. After 135. Widened
+    at 05:23 on 2026-11-12 by 136's mend. With the grids alike, 354 against 4,450 units out, the
+    straight wall still reads 1.8 levels apart with the screen's probes off, 174.20 against 175.94,
+    the same to a hundredth before and after the kernels took their points as offsets from the eye,
+    so it is the field's or the world probes' own loss far from the origin, which 136 had judged
+    safe by reasoning. The one read takes both, the grids' share and this, which lookup loses it and
+    by how much.
+
+138. **The lighting's kernels written once.** Decision 89 on 2026-11-12. The radiance cascades'
+    kernels go into the RadianceCascades module as Slang written once, each engine giving its
+    bindings, its pass's view and its field's lookups through a small interface the module names.
+    First a read with the sibling's coder, as a Reply in both files, of where the two copies differ
+    today and why, what is the bridge's own and stays, bcs_pass and Bevy's view among it, and what
+    the interface is. Then the move, a kernel at a time, the bridge's tests and rooms holding before
+    and after, the two engines' pictures of one room compared. It starts when the sibling reaches
+    its item 265, after its grain, its blobs, its publish and its places far from the origin; until
+    then 135, 137 and 120 as ordered.
+
+139. **One view's light by the screen's probes moves by half its distance from the reference on a
+    rounding's change, and two tests stand at their bounds by a hair.** From 136's first commit on
+    2026-11-12. With passWorldPosition made the eye plus an offset, a point moved by at most 1.4e-5
+    units near the origin, three tests fail every time, a room lit by one emitter reading its right
+    wall 0.760 against 0.856 and the bounce rooms' fifth view 0.031 and 0.035 against a bound of
+    0.03. By kernel the change bites in gi_light.slang alone, on the pixel's own point at its line
+    627 and nearerStep's neighbors at 424 to 425 together, so its weighing of the screen's probes
+    and the glow texels by the pixel's steps, the expected distance, the facing and the weight's
+    floor before it falls back, moves a whole wall by 11 percent on a change that is rounding; the
+    mean of near-equal steps in nearerStep did not remove it. Another GPU or driver could move a
+    reading the same way. First the read, which weight swings and at which pixels, a floor crossed
+    or a comparison flipped, with the slab's sky light that read 0.180 once against 0.2 and the
+    alley's probe that varies between starts read there as likely the same. Then the weighing made
+    to hold, a reading within a level under steps changed by a few float steps, with a test that
+    changes them so and holds the three readings. Then 136's second commit, the kernels on offsets,
+    on top of it. Said in terms the sibling can check its model pass by, which weighs its probes and
+    glow texels by the same slopes. After 136's first commit, ahead of 135. Corrected by the coder
+    at 08:36 the same morning, before any work on it. The 0.112 is the wall's distance from its
+    reference and the test fails at 11 percent, the wall reading about 9 percent under as a rule by
+    the test's own remark, and the bounce rooms' fifth view sat inside its bound of 0.03 before, so
+    the rounding's change most likely moved each reading by a point or two across a tight bound and
+    did not swing a wall by a tenth. The readings before and after, with the old formula and the
+    new, come after the first commit's suite, and the item's size and place are set by them. Until
+    then it is three readings standing at their bounds and moved by rounding, which is still to be
+    known, the slab's 0.180 against 0.2 perhaps the same kind. The figures, recorded at 10:57, the
+    old point through world_from_clip against the eye plus the offset in gi_light alone. The room
+    lit by one emitter, its right wall 0.766 against the reference's 0.856 on the old, 0.105 under,
+    and 0.760 on the new, 0.112 under, 0.005 inside its bound of 0.11 before and moved 0.006, the
+    other four faces alike to three places, the test's remark of about 9 percent stale, so a bound
+    standing by a hair and the test's fault, as the slab's 0.180 against 0.2 is. The bounce rooms
+    with the screen's probes, the fifth view, red walls at three distances from white blocks in the
+    sun, at High 0.0197 on the old and 0.0311 on the new against a bound of 0.03, at Medium 0.0235
+    and 0.0347, at Low 0.0220 and 0.0219, every other view at every quality within 0.002 of itself;
+    so at the two qualities that read the screen's probes one view's distance from its reference
+    grows by half on a rounding's change, the reading's fault and the item's subject. In that order
+    then. The fifth view read with the screen's probes, where on the picture the 0.011 lies and
+    which weight of the screen probes' or the glow lights' crosses its line there; that weighing
+    mended so the view reads the same within a hair under such a change, with a test that changes
+    the steps by a few float steps; the emitter room's bound measured again and said with its
+    margin; the slab test read in the same pass; then the kernels on offsets. Ahead of 135.
 
 ## Verdicts
 
@@ -376,6 +454,31 @@ README cross-references the other engine, each in full under Decisions in REVIEW
     or something", the owner chose one package with the bridge shrunk, a second package of the
     bridges alone standing at about 247 MB of the limit by itself; the shrinking is item 135.
 
+89. **The lighting's kernels written once.** The owner chose on 2026-11-12 at about 05:40, asked by
+    the review, among this, two copies with a check of their parity, and one engine's lighting
+    alone. The kernels of the radiance cascades stand twice, here and in the sibling, ported by
+    hand, and two faults of one night, the glow history's quarter texel and the depth's points far
+    from the origin, were found and mended in both. They go into the RadianceCascades module,
+    written once in Slang, each engine giving its own bindings, so a mend lands in both. Item 138
+    here and the sibling's item 265, after the sibling's grain, blobs and publish, its places far
+    from the origin first.
+
+90. **An editor as a module both engines use, later.** The owner wrote on 2026-11-12 that the editor
+    is no focus yet and will be, and what they aim for, "a full framework that you can build imgui
+    frames for editor tools easily and have helpers to implement their data like ecs and assets in
+    diagnostics windows and a way for a shell to have a surfsce to have a editor layout", "a module
+    used by both engines", made in ImGui as this library's is, giving an engine the functions to
+    build an editor on or a way to show its data in one. The owner thinks further before it is taken
+    up, so no item is made and nothing is moved. BevyCSharp.Editor stands as it is, its shell owning
+    the arrangement and its panels registered in tables, and the two engines stay on one ImGui
+    binding at one version. The owner the same morning, of how it sits and of what there is, "The
+    editor module would provide finctions and drawer calls that the engine then uses in there imgui
+    scope. The process is the same just imgui calls", and "Bevycsharps editor is great progress, but
+    fundamentally crook and for the module I want it sound but that will be explained further down
+    the line". So the engine hosts, the module owning no window, no ImGui context and no process,
+    and this library's editor is progress to learn from and no model to lift as it stands; what is
+    crooked in it and what sound is are the owner's to say.
+
 ## Replies
 
 119's split planned on 2026-11-11, before the work. The projects are N 1.6's layers, each in its
@@ -475,3 +578,57 @@ warnings as errors, and the public listing and the cheat sheet are unchanged.
 Shared: a texel of a half-sized image whose point is its pixel's middle and not its own looks its
 history up less that part, or a still view reads as moving, for the sibling's glow texels, whose
 points stand at the depth's texel middles.
+
+Item 136's second commit, what of the precision mend changes a picture, in the commit carrying this
+line. bcs_pass.slang gives the point the depth holds at a pixel as its way from the eye,
+passEyeOffset, view_from_clip times the pixel's place turned into the world's directions by
+world_from_view's rotation alone, so its numbers are as large as its distance from the eye.
+passRayDirection is the way to the near plane's point found so, which the night sky's stars, the
+clouds, the fog and the path-traced reference take. passClipOfOffset takes a way from the eye
+through a clip_from_world as the matrix's eye plus its turn and scale of the way, the eye's own
+rounding moving every point alike, and passClipAt, passPreviousClipAt and passPreviousUvAt take a
+way where passPreviousUvOf takes a point. The rain's streaks and the splashes are placed by their
+corners from the eye through the unjittered view. passWorldPosition stays as it was, through
+world_from_clip, its comment sending a shader that compares points of the depth to passEyeOffset,
+for the reason below. The shader guide names passEyeOffset, passPreviousUvAt and passClipAt beside
+passWorldPosition.
+
+Read on the bridge rebuilt with it, the native checks clean in the three profiles and cargo's tests
+passing, 118 with no feature and 205 with render. The night sky 4,450 units out along two axes,
+which stood a mean of 1.0 levels from the origin's with 6,870 of 76,800 pixels apart by 3 or more,
+its stars stretched a few pixels and moved off their places, stands 0.002 apart with 5, each star
+round and in its place, the pictures in .github/dump/2026-11-12. The rain over 16 frames, with the
+drops' and the splashes' kernels as they were and as they are on the same bridge, added 2.661 and
+2.553 levels at the origin and far out before and 2.516 and 2.498 after, within the 5 percent one
+run of it moves from the next, so the read's single frame of 3.34 against 3.50 was the rain's own
+variance and the corners change no picture measured. They stay, since a streak's width is a few
+float steps 4,450 out.
+
+passWorldPosition taken as the eye plus passEyeOffset, as first written, put three tests red, each
+again when run alone, and stays as it was for it. A scratch pass draws the two formulas' points
+apart by at most 1.4e-5 units near the origin, a float's rounding, and swapped kernel by kernel, the
+change takes gi_light.slang alone, on both the pixel's own point and nearerStep's neighbors.
+ARoomLitByOneEmitterKeepsItsReading's right wall reads 0.766 of 0.856, 0.105 under, with the formula
+as it was and 0.760, 0.112 under, with the new one, so it stood 0.005 inside its bar of 0.11 and
+moved 0.006, a bar standing by a hair, its remark's nine percent stale. BounceRoomsTests' view 5
+with the screen's probes, red walls at three distances from white blocks in the sun, lies 0.0197
+from its reference on High and 0.0235 on Medium with the formula as it was and 0.0311 and 0.0347
+with the new one, against a bound of 0.03, and 0.0220 and 0.0219 on Low, while every other view at
+every quality stays within 0.002 of itself. So the weighing of the screen's probes by the steps
+between pixels that view 5 reads swings by half again on a rounding, which is item 139's, and the GI
+kernels on offsets, the third commit as planned, wait for it, moving the same readings the same way.
+
+NightSkyTests.TheNightSkyFarFromTheWorldsOriginIsTheOneDrawnAtIt holds the two within a tenth of a
+level on average and under 100 pixels apart by 3, and on the bridge without the change fails at
+1.003 levels and 6,408 pixels. The wall two units from the eye, written as the mend's second test,
+reads 1.8 levels apart at 354 and at 4,450 out before and after the change and with the screen's
+probes off, so it tests something else, and goes with that loss to item 137 by the review's word.
+
+The whole suite passed, 2,050 passed, 0 failed and 3 skipped, 2,053 in all where the listing is
+2,042. NormTests passed, 19. The solution builds with warnings as errors, and the public listing and
+the cheat sheet are unchanged.
+
+Shared: a pass's way into the sky taken from the view's own numbers turned by its rotation, and a
+clip position as the matrix's eye plus its turn of the way, for the sibling's sky and passes, and a
+light pass's weighing by the steps between pixels read for how far a rounding moves it, since here
+one view of the bounce rooms moves by half again.

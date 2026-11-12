@@ -53,9 +53,10 @@ Corner vertex(uint vertex_id : SV_VertexID, uint instance_id : SV_InstanceID)
     float sideSpan = sqrt(dot(side, side));
     side = sideSpan > 1e-3 ? side / sideSpan : passView.world_from_view[0].xyz;
     float wide = light.a;
-    float3 at = where.xyz + side * corner.x * wide * 0.5 + float3(0.0, corner.y * wide * 0.6, 0.0);
+    // The corner as its way from the eye, as a drop's streak is placed (precipitation_drops.slang).
+    float3 at = (where.xyz - passView.world_position) + side * corner.x * wide * 0.5 + float3(0.0, corner.y * wide * 0.6, 0.0);
 
-    output.position = passTransform(passView.unjittered_clip_from_world, float4(at, 1.0));
+    output.position = passClipOfOffset(passView.unjittered_clip_from_world, at);
     output.across = corner;
     output.light = float4(light.rgb, age);
     return output;
