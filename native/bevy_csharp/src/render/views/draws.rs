@@ -548,7 +548,7 @@ pub(super) fn prepare_view_draws(
     }
 }
 
-/// Drops what a view kept for draws its camera no longer has.
+/// Drops what a view kept for draws its camera does not have.
 pub(super) fn forget_view_draws(
     mut commands: Commands,
     views: Query<Entity, (With<PreparedViewDraws>, Without<BcsViewDraws>)>,

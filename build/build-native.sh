@@ -58,7 +58,7 @@ PORTABLE=0
 # A binary only runs on a glibc at least as new as the one it was built against, so on a machine
 # whose glibc is newer than the machines its output has to run on, every ordinary build produces
 # something unloadable there. Setting `PORTABLE=1` in this file makes the container path the
-# default for that machine and leaves every other machine, and CI, building as before.
+# default for that machine and leaves every other machine, and CI, on the ordinary build.
 if [[ -f "$BUILD_DIR/build-native.local" ]]; then
     # shellcheck source=/dev/null
     source "$BUILD_DIR/build-native.local"

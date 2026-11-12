@@ -495,11 +495,11 @@ public float3 passTurnToWorld(float3 way)
 ///
 /// Found in the view and turned into the world's directions, so its numbers are as large as its
 /// distance from the eye, and two of them taken a pixel apart differ by what lies between them
-/// however far from the world's origin the view stands. Taken through `world_from_clip`, a point
-/// carries the eye's place in its every bit, so 4,450 units out it steps by half a millimeter,
-/// where the points of pixels beside each other two units off lie a few millimeters apart, and
-/// a normal or a way made from their difference tilts from pixel to pixel. A shader working out
-/// a normal, a distance or a way from points of the depth works on these, and adds the eye
+/// however far from the world's origin the view stands. A point through `world_from_clip` carries
+/// the eye's place in its every bit, so far from the origin its last bit grows coarser than the
+/// step between the points of pixels beside each other, and a normal or a way made from the
+/// difference of two such points tilts from pixel to pixel. A shader working out a normal, a
+/// distance or a way from points of the depth works on these, and adds the eye
 /// (`passView.world_position`) where it looks something up at a place in the world.
 public float3 passEyeOffset(float2 uv, float depth_value)
 {
@@ -540,9 +540,9 @@ public float2 passPreviousUvOf(float3 world)
 ///
 /// The eye taken through the whole matrix, which is the same for every point, and the offset through
 /// its turn and scale alone, so the points of pixels beside each other, or the corners of a streak a
-/// few millimeters wide, land as far apart as they lie. A point in the world's own numbers would land
-/// within half a millimeter's step of its place 4,450 units from the origin, and the eye's own
-/// rounding moves every point alike.
+/// few millimeters wide, land as far apart as they lie. The eye's own rounding moves every point
+/// alike, where a point in the world's own numbers rounds on its own, by a step that far from the
+/// origin grows coarser than such a width.
 public float4 passClipOfOffset(float4 clip_from_world[4], float3 offset)
 {
     return passTransform(clip_from_world, float4(passView.world_position, 1.0))

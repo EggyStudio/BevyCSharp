@@ -59,7 +59,7 @@ config.Wireframes = true;
 
 // See-through where nothing is drawn, so the editor is the shape of its panels and its scene rather
 // than a black rectangle round them. The platform decides, and it falls back to an opaque window,
-// which looks as the editor always did.
+// black where nothing is drawn.
 config.Transparent = !args.Contains("--offscreen");
 
 // As many frames as the machine can draw rather than as many as the display shows, so the

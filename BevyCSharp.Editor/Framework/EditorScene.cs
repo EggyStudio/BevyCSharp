@@ -23,9 +23,9 @@ public struct EditorOnly;
 /// whatever code made.
 /// </para>
 /// <para>
-/// A project saved before the scene file existed has a <c>world.json</c> of edits by name instead.
-/// Loading reads that the old way when there is no scene file yet, and the next save writes the
-/// scene file, which is read from then on.
+/// A project may hold a <c>world.json</c> of edits by name and no scene file. Loading applies those
+/// edits by name where there is no scene file, and the next save writes the scene file, which is
+/// read from then on.
 /// </para>
 /// </remarks>
 public static class EditorScene

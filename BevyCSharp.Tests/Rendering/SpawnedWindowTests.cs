@@ -104,8 +104,8 @@ public sealed class SpawnedWindowTests : IDisposable
     // once every pipeline the run asked for has compiled. The window's picture is written into its
     // image by a pass whose pipeline Bevy compiles off the main thread, and until it has, the image
     // holds the zeros it was made with. A capture at the tenth frame, which a quiet machine reaches
-    // with some thirty pipelines still compiling, read the window back black in one run of forty
-    // with every core busy, and that run had drawn it by the twenty-fifth.
+    // with some thirty pipelines still compiling, would read the window back black on a machine
+    // with every core busy.
     private string Captured(float? scale)
     {
         var path = _folder.File($"window-{scale ?? 1f}.png");

@@ -10,7 +10,7 @@ namespace Bevy.Tests;
 /// so a level loaded again does not hold every earlier load's.
 /// </summary>
 /// <remarks>
-/// <c>build/soak.sh</c> found Courtyard holding a level's look more for each save it loaded, every
+/// A game loading saves over a level would hold a level's look more for each save it loads, every
 /// load making the meshes and materials again under handles nothing released. The scene here is
 /// written from an entity made in the test, a cube in one material, and read twice, the first
 /// load's entity despawned before the second, as a save loaded over a level does.

@@ -106,7 +106,7 @@ float4 spatial(int2 id, int2 grid, float4 surface, out float3 spread)
 // The frame before's light at the probe's surface, with in a how much of the four probes around its
 // place then stood on a surface like it, or 0 where the frame before showed none of it. The four are
 // blended by where they stand rather than by their tiles' middles, since read by the middles a still
-// view's blend took the next probe along each axis by a pixel's share every frame.
+// view's blend would take the next probe along each axis by a pixel's share every frame.
 float4 earlier(int2 id, int2 grid, float4 surface)
 {
     if (screen.y < 0.5)

@@ -50,8 +50,7 @@ public sealed class BounceRoomsTests
     /// A fixed set of directions read at the layers' heights falls well or badly on the grazing
     /// room's lamp's bright spot under its low ceiling by where the layers stand against the
     /// probes' grid. The carried lamp's room reads its back wall under its reference, its light
-    /// coming mostly past the first bounce, which reads short there as in the feature test's hall
-    /// and alley.
+    /// coming mostly past the first bounce, which the probes read short wherever a wall is lit so.
     /// </para>
     /// <para>
     /// Each bound is taken with its reference, the farthest the picture reads from references

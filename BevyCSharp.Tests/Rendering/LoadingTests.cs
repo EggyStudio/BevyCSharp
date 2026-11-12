@@ -63,10 +63,10 @@ public sealed class LoadingTests
     /// </summary>
     /// <remarks>
     /// What a capture on a set clock rests on, the examples' captures among them, since only an app
-    /// begun on one compiles each pipeline in the frame that asks for it. The feature test given its
-    /// clock once it ran compiled off the main thread, and its meadow, first seen forty frames
-    /// before its shot, lost its grass or its walls' light in ten fresh sessions of ten. Begun on
-    /// the machine's clock, this test's first frame drew no cube.
+    /// begun on one compiles each pipeline in the frame that asks for it. An app given its set clock
+    /// once it runs compiles off the main thread, so a view first seen some frames before its shot
+    /// can be taken while its pipelines still compile. Begun on the machine's clock, this test's
+    /// first frame would draw no cube.
     /// </remarks>
     [SkippableFact]
     public void AnAppBegunOnASetClockDrawsWhatComesIntoViewWholeInItsFirstFrame()

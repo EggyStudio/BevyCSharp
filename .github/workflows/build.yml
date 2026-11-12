@@ -368,7 +368,7 @@ jobs:
         run: build/examples-on-package.sh 0.0.0-ci
 
       # Every C# block of the guide under docs/ built on the same package, a fragment after the
-      # lines a comment before it gives, so a block calling what the library no longer has fails
+      # lines a comment before it gives, so a block calling what the library does not have fails
       # the run with its page and line (build/docs-on-package.py).
       - name: Build the guide's code on the package
         run: python3 -u build/docs-on-package.py --version 0.0.0-ci

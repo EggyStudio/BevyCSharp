@@ -95,7 +95,7 @@ public sealed class EffectSettings
     /// </summary>
     /// <remarks>
     /// What a lens does when it fails to focus every color at one point. Bevy's own strength is
-    /// 0.02, and a horror game reaching for it on a hit needs more.
+    /// 0.02, and a fringe meant to be seen, as on a hit, needs more.
     /// </remarks>
     public float Aberration { get; set; }
 

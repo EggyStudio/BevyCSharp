@@ -84,8 +84,7 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// A closed room of the level's white, eight units across and three high, lit by a ball 0.6 in
-    /// radius emitting a lamp's warm light as the feature test's hub's lamp does, at a tenth of its
-    /// light, 1.2 over the floor.
+    /// radius emitting a warm lamp's light at a tenth of a lamp's, 1.2 over the floor.
     /// </summary>
     private static void BallScene(EcsWorld ecs)
     {

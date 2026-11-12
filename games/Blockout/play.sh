@@ -59,8 +59,8 @@ for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Blockout" &&
 
 # Each frame a sixtieth of a second of the game, however long the machine took to draw it, so a
 # walk takes as many frames on a software device as on a GPU. The first picture waits four seconds
-# of the game, since the renderer makes its pipelines while the first frames are drawn, and the
-# thirtieth and the sixtieth showed the sky alone.
+# of the game, since the renderer makes its pipelines while the first frames are drawn, and a
+# picture at the thirtieth or the sixtieth shows the sky alone.
 quiet app.frametime 0.0166667
 quiet frames.wait 240
 grep -q "^\[blockout\] levels/blockout.model, [0-9]* faces from [0-9]* lines" "$shots/game.log" || fail "the level was not made from its recipe"

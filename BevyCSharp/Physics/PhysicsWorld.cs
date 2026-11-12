@@ -741,7 +741,7 @@ public sealed partial class PhysicsWorld : IDisposable
             Normal = normal;
             Collidable = collidable;
 
-            // Anything farther than this one is no longer worth testing.
+            // Anything farther than this one is not worth testing.
             maximumT = t;
         }
     }

@@ -49,8 +49,8 @@ public static class EditorProject
 
     /// <summary>Puts the saved scene and the saved arrangement back.</summary>
     /// <remarks>
-    /// A project saved before the scene file existed has only a <c>world.json</c> of edits by name,
-    /// which is applied the old way, and the next save writes the scene file in its place.
+    /// A project with a <c>world.json</c> of edits by name and no scene file has those edits applied
+    /// by name, and the next save writes the scene file in its place.
     /// </remarks>
     public static void Load(EcsWorld world)
     {

@@ -295,11 +295,11 @@ public sealed partial class GlobalIlluminationTests
     /// read from step through their sixteen places within a tile.
     /// </summary>
     /// <remarks>
-    /// The glow light's light is blended over the frames a texel's place held still, up to 32, which a
-    /// texel looking up its place in the frame before at its own middle, a quarter of a texel off the
-    /// pixel it takes its point from, would never reach, finding its light shared with three other
-    /// texels and keeping one frame's and a seventh, so the wall would move by about 0.29 of a level
-    /// between frames where it moves by 0.02 kept whole.
+    /// The glow light's light is blended over the frames a texel's place held still, up to 32. A
+    /// texel looking up its place in the frame before at its own middle, a quarter of a texel off
+    /// the pixel it takes its point from, would find its light shared with three other texels and
+    /// keep little more than a frame's, so a still view's wall would move from frame to frame with
+    /// the probes.
     /// </remarks>
     [SkippableFact]
     public void AStillViewOfAWallLitByAGlowLightHoldsItsLightFromFrameToFrame()

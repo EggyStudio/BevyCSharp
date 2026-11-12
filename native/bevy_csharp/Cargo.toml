@@ -147,7 +147,7 @@ render = [
     "bevy/smaa_luts",
     "bevy/bevy_pbr",
     # Soft shadows, whose penumbra widens with distance from the caster. Shader code behind a
-    # define, used only by a light given a size, so a scene without one draws as before.
+    # define, used only by a light given a size, so a scene without one draws the same with it.
     "bevy/experimental_pbr_pcss",
     # The maps a standard material can have past the five every renderer knows, which are
     # clearcoat and its roughness and normal, transmission and thickness, anisotropy's direction,
@@ -160,7 +160,8 @@ render = [
     "bevy/pbr_specular_textures",
     # A picture a light shines through, as a spot light's cookie or a point light's cube of them,
     # and the decals clustered with the lights that draw them. Shader code behind defines, so a
-    # scene without either draws as before, where a GPU without binding arrays leaves them out.
+    # scene without either draws the same with them, where a GPU without binding arrays leaves
+    # them out.
     "bevy/pbr_light_textures",
     "bevy/bevy_gltf",
     # Skeletal and transform animation, which a glTF file's clips play through. Pure Rust, and

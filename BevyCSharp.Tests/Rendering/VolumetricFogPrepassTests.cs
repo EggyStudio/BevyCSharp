@@ -9,10 +9,9 @@ namespace Bevy.Tests;
 /// with and without a depth prepass.
 /// </summary>
 /// <remarks>
-/// On Bevy 0.19 the fog hazed the whole picture, the sky with it, once a depth prepass was on the
-/// camera, as ambient occlusion brings, which the feature test's hall worked round by giving the
-/// camera its fog only inside. Bevy 0.20 keeps it in its volume, which this holds it to, a picture
-/// without the fog and one with it differing only where the volume is.
+/// A depth prepass on the camera, as ambient occlusion brings, leaves the fog in its volume, which
+/// this holds it to, a picture without the fog and one with it differing only where the volume is.
+/// Fog marched against the prepass's depth wrongly would haze the whole picture, the sky with it.
 /// </remarks>
 [Collection("engine")]
 public sealed class VolumetricFogPrepassTests

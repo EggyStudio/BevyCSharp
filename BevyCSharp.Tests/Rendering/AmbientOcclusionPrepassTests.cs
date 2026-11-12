@@ -10,12 +10,11 @@ namespace Bevy.Tests;
 /// </summary>
 /// <remarks>
 /// Bevy's occlusion brings both prepasses when it comes, and takes the normals unchecked as it
-/// builds its bind group. A prepass asked for without normals took them off the camera under it,
-/// which ended the app at its next frame, as the feature test's scripted run did at its effects
-/// view once global illumination was on by default, global illumination asking for depth and the
-/// G-buffer.
-/// Materials going forward took the depth the G-buffer had brought, which the occlusion had found
-/// there and so brought none of its own, and the occlusion went out with nothing said.
+/// builds its bind group. A prepass asked for without normals would take them off the camera under
+/// it and end the app at its next frame, which global illumination, asking for depth and the
+/// G-buffer, would do to a camera with occlusion on. Materials going forward would take the depth
+/// the G-buffer brought, which the occlusion finds there and so brings none of its own, and the
+/// occlusion would go out with nothing said.
 /// </remarks>
 [Collection("engine")]
 public sealed class AmbientOcclusionPrepassTests

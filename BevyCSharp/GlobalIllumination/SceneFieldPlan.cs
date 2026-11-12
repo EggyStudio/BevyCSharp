@@ -151,9 +151,9 @@ internal sealed partial class SceneFieldPlan
     // Still meshes that left, kept in the field for the meshes replacing them, by the frame they left.
     private readonly Dictionary<Instance, long> _kept = new(Keys.Shared);
     // Still meshes that replaced a kept one in place and wait for cascades built since, which still
-    // hold the one they replaced and so are not stamped. Stamped as its box, a section of a voxel
-    // game's ground would fill the air above it in the cascades a budget of two leaves for the next
-    // frame.
+    // hold the one they replaced and so are not stamped. Stamped as its box, a section of ground
+    // built of blocks would fill the air above it in the cascades a budget of two leaves for the
+    // next frame.
     private readonly HashSet<Instance> _replacing = new(Keys.Shared);
     private readonly Vector3?[] _built;
     private readonly long[] _builtFrame;

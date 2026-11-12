@@ -14,7 +14,7 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class DeferredEmissiveTests
 {
-    /// <summary>A lamp panel's emission in nits, exposed by the camera, as the feature test's Cornell box has it.</summary>
+    /// <summary>A lamp panel's emission in nits, exposed by the camera, as bright as a Cornell box's lamp.</summary>
     private static readonly (float R, float G, float B, float A) Lamp = (40_000f, 38_000f, 34_000f, 1f);
 
     /// <summary>
@@ -34,8 +34,8 @@ public sealed class DeferredEmissiveTests
 
     /// <summary>
     /// An exposed emissive panel seen under rays reads the light it reads drawn forward, within 2%,
-    /// where a G-buffer written exposed had Solari expose it again, the feature test's Cornell lamp
-    /// showing gray, its own light gone and only what fell on it left.
+    /// where a G-buffer written exposed would have Solari expose it again, a lamp showing gray, its
+    /// own light gone and only what fell on it left.
     /// </summary>
     [SkippableFact]
     public void AnExposedEmissiveReadsTheSameUnderRaysAsForward()

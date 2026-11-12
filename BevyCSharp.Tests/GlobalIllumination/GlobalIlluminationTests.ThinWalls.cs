@@ -20,10 +20,9 @@ public sealed partial class GlobalIlluminationTests
     /// behind. Looking down and not against the face in front, it holds nothing, those cells would
     /// keep the distance in front, and every probe's ray along the floor would pass under the wall,
     /// as a ceiling laid on the walls would let rays over them. The walls are 0.3 thick in cells of
-    /// 0.5, as the feature test's hall's walls stand in its second cascade, each face a tenth from
-    /// the middles of the cells beside it, and the room lies between the probes, every 4 units, so
-    /// none stands in a wall. The screen probes are left out, so the room reads the light the
-    /// world's probes bring it, which the field's hold decides.
+    /// 0.5, each face a tenth from the middles of the cells beside it, and the room lies between
+    /// the probes, every 4 units, so none stands in a wall. The screen probes are left out, so the
+    /// room reads the light the world's probes bring it, which the field's hold decides.
     /// </remarks>
     [SkippableFact]
     public void ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls()

@@ -409,7 +409,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
     let mut packed = Packed::default();
 
     // Checked once here as well as when each value was set, because the shader may have been
-    // edited since, and a value it no longer declares is reported rather than silently dropped.
+    // edited since, and a value it does not declare is reported rather than silently dropped.
     for (name, value) in &values.entries {
         if let Err(problem) = check(layout, name, value) {
             packed.problems.push(format!("{name}: {problem}"));

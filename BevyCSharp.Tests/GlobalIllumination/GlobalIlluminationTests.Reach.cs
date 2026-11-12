@@ -13,9 +13,8 @@ public sealed partial class GlobalIlluminationTests
     /// <remarks>
     /// Medium's probes lie in four cascades, as High's do, and reach a wall 56 units off along each
     /// axis of a diagonal view, which in three would lie past the last cascade's box, 64 units wide
-    /// lying 0.35 of its width ahead of the eye, as the feature test's yard's far wall at eight in
-    /// the morning does. The ambient light is none and the camera has no environment map, so the
-    /// wall's light comes from the yard's sunlit faces alone.
+    /// lying 0.35 of its width ahead of the eye. The ambient light is none and the camera has no
+    /// environment map, so the wall's light comes from the yard's sunlit faces alone.
     /// </remarks>
     [SkippableFact]
     public void AFarWallInShadeTakesTheYardsLightAtMedium()

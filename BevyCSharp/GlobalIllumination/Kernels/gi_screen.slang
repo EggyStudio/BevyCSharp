@@ -404,7 +404,8 @@ void writeSeen(uint2 id, uint4 codes, int texel)
 void main(uint3 id : SV_DispatchThreadID)
 {
     // The sun through the camera's air, as Bevy's lighting gives it the picture, where the lights
-    // give it as it is above the air, read before any thread returns, as the clouds read it.
+    // give it as it is above the air, read before any thread returns, since a read of the air once a
+    // group's threads have parted faults on Mesa's llvmpipe (clouds.slang's brightest).
     GiLights lights = gi_lights[0];
     if (lights.sunDirection.w > 0.5)
         lights.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz);

@@ -11,8 +11,8 @@ namespace Bevy.Tests;
 // that came and starting again for one that left.
 public sealed partial class SceneFieldTests
 {
-    // The sections a voxel world streams in at once, 500 of 1,024 triangles each, nearly eight
-    // times a budget of 65,536, flat boxes four meters a side on a grid of 25 by 20 about the eye.
+    // Sections streamed in at once, 500 of 1,024 triangles each, nearly eight times a budget of
+    // 65,536, flat boxes four meters a side on a grid of 25 by 20 about the eye.
     private const int Sections = 500, SectionTriangles = 1024;
 
     private static readonly SceneFieldPlan.Box SectionBounds = new(Vector3.Zero, new Vector3(4, 1, 4));

@@ -28,7 +28,7 @@ public sealed class NightSkyTests
     /// directions. Taken as the near plane's point in the world less the eye, both 4,450 units out,
     /// it would step by about six pixels' worth of a way, and each star, its spread found from how
     /// its pixel's way differs from its neighbors', would stretch across or down a few pixels and
-    /// move off its place, a mean of a level apart over the picture.
+    /// move off its place.
     /// </remarks>
     [SkippableFact]
     public void TheNightSkyFarFromTheWorldsOriginIsTheOneDrawnAtIt()

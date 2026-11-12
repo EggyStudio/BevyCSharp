@@ -347,7 +347,7 @@ pub struct ClockHold {
     holds: u32,
     kept: Option<std::time::Duration>,
     /// The loads the bridge started for the app while the hold on loads was on, each dropped once
-    /// it is no longer loading ([`ClockHold::wait_for`]).
+    /// it is not loading ([`ClockHold::wait_for`]).
     reads: Vec<bevy::asset::UntypedAssetId>,
 }
 
@@ -372,7 +372,7 @@ impl ClockHold {
 /// Sets this frame's step of a set clock to nothing where a hold asks it to, before Bevy advances
 /// its clocks, keeping the length for [`release_clock`] to put back once they have.
 ///
-/// A hold changes the strategy for no longer than Bevy's time system reads it, so the length a
+/// A hold changes the strategy for at most as long as Bevy's time system reads it, so the length a
 /// frame reads the same to everything else, `bcs_time_frame_seconds` and a change to it included.
 ///
 /// A program's Slang compiles in a process of its own, and its compute pipeline is built on the

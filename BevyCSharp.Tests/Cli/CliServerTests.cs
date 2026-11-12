@@ -269,8 +269,8 @@ public sealed class CliServerTests : IDisposable
     /// <para>
     /// Each frame's time is kept from its update, after the server has answered in that frame's
     /// first stage, so the times are read once the app has stopped, when every frame an answer
-    /// named has run its systems. Read as each answer came, the last was missing on a runner of the
-    /// push run of 97ea3055, whose app had not reached that frame's update when the test asked.
+    /// named has run its systems. Read as each answer came, the last could be missing, since an app
+    /// on a slow machine may not have reached that frame's update when the test asks.
     /// </para>
     /// </remarks>
     [Fact]
@@ -319,9 +319,9 @@ public sealed class CliServerTests : IDisposable
     /// frames after it moves the clock as before.
     /// </summary>
     /// <remarks>
-    /// The feature test's scripted run waits before each shot for the pipelines its view asked for,
-    /// which compile for seconds after the camera moves, and a clock moving through that wait would
-    /// put each shot at a moment of the game that hung on how fast the device compiled.
+    /// A scripted run that waits before each shot for the pipelines its view asked for, which
+    /// compile for seconds after the camera moves, would take each shot at a moment of the game
+    /// that hung on how fast the device compiled if the clock moved through that wait.
     /// </remarks>
     [Fact]
     public void AWaitOnTheRendererLeavesAHeldClockStill()

@@ -147,7 +147,7 @@ internal static class FieldNumbers
         return new Vector3(Tidy(euler.X), Tidy(euler.Y), Tidy(euler.Z));
     }
 
-    /// <summary>Lets go of a box's full precision once ImGui says it is no longer in use.</summary>
+    /// <summary>Lets go of a box's full precision once ImGui says it is out of use.</summary>
     /// <param name="id">Which field, and which box of it.</param>
     internal static void Close(string id)
     {

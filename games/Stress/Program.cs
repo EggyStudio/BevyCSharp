@@ -23,7 +23,7 @@ var config = drawn
     ? new Config { Offscreen = true, Width = 1280, Height = 720, GpuTimings = Environment.GetEnvironmentVariable("STRESS_GPU_TIMINGS") != "0" }
     : new Config { Headless = true };
 
-// Unpaced, so a frame is as long as its work and no longer.
+// Unpaced, so a frame lasts as long as its work.
 config.HeadlessFps = 0;
 config.GameName = "Stress";
 config.Serve = true;

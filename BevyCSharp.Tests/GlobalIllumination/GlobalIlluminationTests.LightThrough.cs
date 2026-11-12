@@ -44,7 +44,7 @@ public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
                 ambient: 400f,
                 traced: true,
                 // Traced for 180 frames, which the floor under a solid slab five and a half up needs
-                // to settle, at 60 still lit a fifth more than where it settles.
+                // to settle.
                 frames: 180);
             return Luminance(r, g, b);
         }

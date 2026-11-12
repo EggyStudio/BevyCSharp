@@ -17,8 +17,8 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// What the level placing it added under the old copy's nodes is kept and put back under the new
-/// node at the same path, and the level's overrides are applied again as on loading, a node the
-/// file no longer has keeping its override as missed. The instance is posted as
+/// node at the same path, and the level's overrides are applied again as on loading, a node missing
+/// from the file keeping its override as missed. The instance is posted as
 /// <see cref="WorldInstanceReady"/> again, so code waiting for it hears of the new copy. A file
 /// that does not read, as one caught halfway through being written, leaves the old copy where it
 /// is until it is written whole.

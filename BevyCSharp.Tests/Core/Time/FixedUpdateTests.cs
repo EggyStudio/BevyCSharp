@@ -28,8 +28,9 @@ public partial struct FixedStepper
 /// The assertions are about the relationship between fixed steps and frames rather than about
 /// exact counts. A test of that relationship steps its clock a frame at a time
 /// (<c>frameSeconds</c>), so the frames are the length they are paced at however long the machine
-/// took to run them, where on the machine's clock a slow runner's frame outlasted a fixed step and
-/// the fixed step caught up between two readings. The test of the clock itself keeps the machine's.
+/// takes to run them, where on the machine's clock a slow runner's frame would outlast a fixed step
+/// and the fixed step catch up between two readings. The test of the clock itself keeps the
+/// machine's.
 /// </remarks>
 [Collection("engine")]
 public sealed class FixedUpdateTests

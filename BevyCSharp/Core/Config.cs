@@ -528,8 +528,8 @@ public sealed class Config
     /// <remarks>
     /// <para>
     /// GNOME does not draw a frame for a Wayland window, so on Wayland the window draws its own,
-    /// and the one it has is a re-creation of an older GNOME look that no longer matches the rest
-    /// of the desktop. GNOME does draw a frame for an X11 window, in the theme everything else
+    /// and the one it has is a re-creation of an older GNOME look that matches nothing else on the
+    /// desktop. GNOME does draw a frame for an X11 window, in the theme everything else
     /// wears. With this on, a window opened under GNOME on Wayland is opened through XWayland, and
     /// its title bar and buttons are the desktop's own.
     /// </para>

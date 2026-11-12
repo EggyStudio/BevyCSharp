@@ -444,7 +444,7 @@ public sealed unsafe partial class EcsWorld
     /// invalidates outstanding component references; queue it on <see cref="EcsCommands"/> when
     /// calling from inside a loop.
     /// </remarks>
-    /// <returns><see langword="false"/> if either entity is no longer alive.</returns>
+    /// <returns><see langword="false"/> if either entity is not alive.</returns>
     public bool SetParent(Entity child, Entity parent)
     {
         var status = NativeCore.bcs_ecs_set_parent(child.Bits, parent.Bits);

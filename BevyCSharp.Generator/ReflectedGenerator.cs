@@ -367,8 +367,8 @@ public sealed partial class ReflectedGenerator : IIncrementalGenerator
             /// </summary>
             /// <remarks>
             /// Generated from <c>bevy-components.tsv</c>. Each property reads or writes one field of the
-            /// component on <see cref="Entity"/> as it is now, and throws when the entity no longer
-            /// carries it. Get one with <c>EcsWorld.Get</c> or <c>EcsWorld.Insert</c>.
+            /// component on <see cref="Entity"/> as it stands, and throws when the entity does not
+            /// carry it. Get one with <c>EcsWorld.Get</c> or <c>EcsWorld.Insert</c>.
             /// </remarks>
             public readonly struct {{type}} : global::Bevy.IReflectedComponent<{{type}}>, global::Bevy.IReflectedWrapper<{{type}}>
             {

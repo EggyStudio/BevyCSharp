@@ -32,9 +32,9 @@ namespace BevyCSharp.Editor.Behaviors;
 /// to keep the horizon level, which is a decision this needs to remember rather than rediscover.
 /// </para>
 /// <para>
-/// The same behavior the sample carries, and deliberately a copy rather than something shared. Both
-/// are applications, and a camera with opinions about which button orbits does not belong in the
-/// library, where it would join the schedule of every app that referenced it.
+/// The same behavior the feature test carries, and deliberately a copy rather than something
+/// shared. Both are applications, and a camera with opinions about which button orbits does not
+/// belong in the library, where it would join the schedule of every app that referenced it.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -227,10 +227,10 @@ public partial struct FlyCamera
         var (dx, dy) = input.MouseDelta;
         var wheel = input.WheelY;
 
-        // The difference between this copy of the camera and the sample's. A wheel over a panel
-        // belongs to that panel, because rolling it over a list should scroll the list rather than
-        // fly the camera through the wall behind it. A drag is not affected, because a drag that
-        // began over the viewport should keep working wherever the pointer goes.
+        // The difference between this copy of the camera and the feature test's. A wheel over a
+        // panel belongs to that panel, because rolling it over a list should scroll the list rather
+        // than fly the camera through the wall behind it. A drag is not affected, because a drag
+        // that began over the viewport should keep working wherever the pointer goes.
         if (wheel != 0f && EditorShell.PointerOverPanel) wheel = 0f;
         var position = ctx.Ecs.GetOrDefault<Transform>(ctx.Entity).Translation;
         var moved = false;

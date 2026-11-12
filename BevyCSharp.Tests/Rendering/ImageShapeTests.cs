@@ -8,9 +8,9 @@ namespace Bevy.Tests;
 /// the system that asked, so what it is handed to there never sees it flat.
 /// </summary>
 /// <remarks>
-/// The shape was applied at the next frame's reshaping, which a file still loading has to wait for
-/// and an image made from pixels does not. In the meantime an irradiance volume refused the image
-/// as flat, and a skybox given a cube warned that it was not one, both in the feature test.
+/// A shape applied at the next frame's reshaping, which a file still loading has to wait for and an
+/// image made from pixels does not, would leave the image flat in the meantime, an irradiance
+/// volume refusing it as flat and a skybox given a cube warning that it was not one.
 /// </remarks>
 [Collection("engine")]
 public sealed class ImageShapeTests

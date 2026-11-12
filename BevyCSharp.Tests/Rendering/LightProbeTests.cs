@@ -40,8 +40,8 @@ public sealed class LightProbeTests
     /// has been applied, as the reshape's documentation allows.
     /// </summary>
     /// <remarks>
-    /// The image was flat until the next frame, so the probe refused it, and the feature test's
-    /// light hall stopped building at its irradiance volume.
+    /// An image left flat until the next frame would be refused by the probe, and a scene building
+    /// an irradiance volume from it would stop there.
     /// </remarks>
     [SkippableFact]
     public void AVolumeMadeFromPixelsIsTakenAtOnceAndLightsEachFaceFromItsOwnDirection()
@@ -307,11 +307,10 @@ public sealed class LightProbeTests
     /// <summary>
     /// A floor lit by the camera's environment map alone keeps its light where an empty irradiance
     /// volume beside it turns into view, as it has with the volume behind the camera, and the floor
-    /// the volume holds takes the volume's light, which is none. Bevy 0.20
-    /// counted a point's diffuse light as found once it had looked for a volume about it, so while
-    /// a view held one every point outside it lost the map's diffuse light, and the feature test's
-    /// light hall dimmed by about two fifths as the camera turned its bay's volume into view; the
-    /// bridge mends that (<see cref="Render.IrradianceFallbackMended"/>).
+    /// the volume holds takes the volume's light, which is none. Bevy 0.20 counts a point's diffuse
+    /// light as found once it has looked for a volume about it, so while a view holds one every
+    /// point outside it would lose the map's diffuse light, a room dimming as the camera turns a
+    /// volume into view, which the bridge mends (<see cref="Render.IrradianceFallbackMended"/>).
     /// </summary>
     [SkippableFact]
     public void AFloorOutsideAnIrradianceVolumeKeepsTheEnvironmentsLightWhileTheVolumeIsInView()

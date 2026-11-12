@@ -17,9 +17,9 @@
 //!
 //! From the frame the app begins ending until it is destroyed ([`ending`]), a panic on a thread of
 //! Bevy's own is kept and printed as the process's hook prints one, and not written as a crash.
-//! Bevy's file watcher panicked there as the app ended, sending an event on a channel the asset
-//! server had already closed, and the crash file it was written to made the next run say the last
-//! one crashed when it had ended as it was asked to.
+//! Bevy's file watcher can panic there as the app ends, sending an event on a channel the asset
+//! server has closed, and written as a crash it would make the next run say the last one crashed
+//! when it ended as it was asked to.
 
 use core::cell::Cell;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};

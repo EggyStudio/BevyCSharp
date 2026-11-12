@@ -17,17 +17,17 @@ public sealed partial class GlobalIlluminationTests
     /// A probe weighs a surface by how much of it it sees, its reach toward a point taken three
     /// tenths of the probes' spacing off the surface against the point's distance with a slack of
     /// an eighth of the spacing, two units at High's last cascade. At a wall's foot that point lies
-    /// at the floor's height, and the rays of a probe under the floor stop at the floor's underside,
-    /// within the slack of the point. Read from the one texel of the probe's reach the way falls
-    /// in, the probe took about half its weight where its texel's ray stopped near the point and a
-    /// twentieth where the next one's stopped short of it, and the lamp's orange light lay along the
-    /// foot in triangles as wide as the texels, as along the feature test's yard wall at High. Read
-    /// between the four texels nearest the way, the probe's share moves along the foot as the way
-    /// does. The wall stands on a plane of the last cascade's probes eight units over one beneath
-    /// the floor, as the yard's east wall does, the lamp past the wall on its far side, so no face
-    /// the camera sees faces it. The sun stands overhead, so the wall's face takes none of its light
-    /// and the floor before the wall is lit evenly along it, and the ambient light is none and the
-    /// camera has no environment map, so the foot's light comes from the sunlit floor alone.
+    /// at the floor's height, and the rays of a probe under the floor stop at the floor's
+    /// underside, within the slack of the point. Read from the one texel of the probe's reach the
+    /// way falls in, the probe would take about half its weight where its texel's ray stops near
+    /// the point and a twentieth where the next one's stops short of it, and the lamp's orange
+    /// light would lie along the foot in triangles as wide as the texels. Read between the four
+    /// texels nearest the way, the probe's share moves along the foot as the way does. The wall
+    /// stands on a plane of the last cascade's probes eight units over one beneath the floor, the
+    /// lamp past the wall on its far side, so no face the camera sees faces it. The sun stands
+    /// overhead, so the wall's face takes none of its light and the floor before the wall is lit
+    /// evenly along it, and the ambient light is none and the camera has no environment map, so the
+    /// foot's light comes from the sunlit floor alone.
     /// </remarks>
     [SkippableFact]
     public void AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor()

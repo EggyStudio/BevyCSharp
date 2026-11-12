@@ -312,7 +312,7 @@ pub(super) fn prepare_view_dispatches(
     }
 }
 
-/// Drops what a view kept for dispatches its camera no longer has.
+/// Drops what a view kept for dispatches its camera does not have.
 pub(super) fn forget_view_dispatches(
     mut commands: Commands,
     views: Query<Entity, (With<PreparedViewDispatches>, Without<BcsViewDispatches>)>,

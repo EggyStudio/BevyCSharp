@@ -352,7 +352,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
         // Each tree drawn whole and drawn reduced, alone against the sky from the side and from 37
         // degrees above at two and a half of its heights, where a planted tree is dithered from one
         // to the other. The reduced tree covers as many pixels within a tenth and as many of leaf
-        // within a sixth, its larger cards a little more, where the twigs it leaves out showed
+        // within a sixth, its larger cards a little more, where the twigs it leaves out show
         // between the leaves as lines a pixel wide, so the change does not show.
         TreeSpecies[] presets = [TreeSpecies.QuakingAspen, TreeSpecies.BlackTupelo, TreeSpecies.WeepingWillow, TreeSpecies.CaliforniaBlackOak, TreeSpecies.Bush];
         TreeDetail[] levels = [TreeDetail.Full, TreeDetail.Reduced];

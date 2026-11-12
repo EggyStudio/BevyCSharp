@@ -28,8 +28,8 @@ pub mod unused;
 /// the asset server a second handle provider for the type, inserts the new store over whatever
 /// was there and adds another copy of the per-frame asset systems. Handles minted before that
 /// point come from a different id space than the one anything reads afterwards, so they resolve
-/// to nothing while every call still reports success. On a windowed build this showed up as
-/// every mesh and material drawing with the fallback and no error anywhere.
+/// to nothing while every call still reports success. On a windowed build every mesh and
+/// material would draw with the fallback, with no error anywhere.
 ///
 /// Which types a profile has to register is a question about plugins, and it is answered in
 /// [`crate::app`]. This is the guard that keeps a wrong answer inert.
@@ -247,8 +247,8 @@ pub(crate) fn clone_handle(world: &World, key: i32) -> Option<UntypedHandle> {
 /// kind it already is, and needs no bridge of its own. `Gltf` itself loads the whole file, which
 /// is the description rather than anything drawable.
 ///
-/// Whole scenes are absent. In 0.19 a glTF scene is a `WorldAsset` rather than the old `Scene`
-/// asset, which is a different mechanism from anything else here and needs its own bridge.
+/// Whole scenes are absent. A glTF scene is a `WorldAsset`, which is a different mechanism from
+/// anything else here and needs its own bridge.
 fn load(world: &mut World, kind: &str, path: &str) -> i32 {
     let Some(server) = world.get_resource::<AssetServer>() else {
         return status::UNSUPPORTED;

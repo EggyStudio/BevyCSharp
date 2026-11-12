@@ -1,9 +1,8 @@
-//! How many point lights the render world took from the game's world and how many it drew, the
-//! two numbers Bevy's many_lights stress test logs to show how many of its lights the view's
-//! clusters kept.
+//! How many point lights the render world took from the game's world and how many it drew, which
+//! together say how many of the lights the view's clusters kept.
 //!
-//! Counted in the render world, where the lights are once extracted, as Bevy's example counts
-//! them, and kept for the managed side to read from its own frame, a frame behind.
+//! Counted in the render world, where the lights are once extracted, and kept for the managed side
+//! to read from its own frame, a frame behind.
 
 use std::sync::atomic::{AtomicU32, Ordering};
 

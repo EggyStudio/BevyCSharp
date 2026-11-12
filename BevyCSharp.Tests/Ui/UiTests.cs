@@ -597,10 +597,10 @@ public sealed class UiTests
 
     /// <summary>
     /// A windowless run's camera spawned at startup draws the interface from the first frame, the
-    /// mark chosen once the camera is pointed at the run's image. Chosen before, the interface was
-    /// laid out that frame against no camera at no size, where a node with a margin inside one that
-    /// stretches came out smaller than nothing and Bevy's border radius asserted on it, which
-    /// text_debug did, so no such node is spawned here and the mark is read instead.
+    /// mark chosen once the camera is pointed at the run's image. Chosen before, the interface would
+    /// be laid out that frame against no camera at no size, where a node with a margin inside one
+    /// that stretches comes out smaller than nothing and Bevy's border radius asserts on it, so no
+    /// such node is spawned here and the mark is read instead.
     /// </summary>
     [SkippableFact]
     public void AWindowlessRunsCameraDrawsTheInterfaceFromTheFirstFrame()

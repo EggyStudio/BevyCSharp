@@ -10,6 +10,7 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 Done that day
 
+- Item 136 at `eb940339`. A point and a ray's way taken from the depth far from the origin.
 - Item 139 at `18364420`. One view's light by the screen's probes moves by half its distance from
   the reference on a rounding's change, and two tests stand at their bounds by a hair.
 

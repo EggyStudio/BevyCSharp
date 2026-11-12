@@ -87,7 +87,7 @@ public static class EditorHistory
     /// </summary>
     /// <remarks>
     /// Recording clears what was undone, as every editor does. Once the world has been changed by
-    /// hand, the branch that was undone is no longer a thing to return to.
+    /// hand, the branch that was undone is not a thing to return to.
     /// </remarks>
     public static void Record(
         string what,

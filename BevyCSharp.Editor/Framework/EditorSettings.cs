@@ -214,7 +214,7 @@ public static class EditorSettings
     }
 
     /// <summary>
-    /// Puts saved values back, ignoring anything it no longer recognizes.
+    /// Puts saved values back, ignoring anything it does not recognize.
     /// </summary>
     /// <remarks>
     /// A line naming a setting this build does not have is skipped rather than reported. A saved
@@ -255,7 +255,7 @@ public static class EditorSettings
         return values;
     }
 
-    /// <summary>Puts saved values back, ignoring anything it no longer recognizes, as the text form does.</summary>
+    /// <summary>Puts saved values back, ignoring anything it does not recognize, as the text form does.</summary>
     public static void Restore(IReadOnlyDictionary<string, string> values)
     {
         ArgumentNullException.ThrowIfNull(values);

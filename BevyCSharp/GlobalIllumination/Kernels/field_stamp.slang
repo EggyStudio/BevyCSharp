@@ -19,7 +19,7 @@ struct FieldShape
     float4 row1;
     float4 row2;
     // xyz: the box's middle in its own space. w: the least scale from its own space to the world's,
-    // which a distance there is turned into a world distance no longer than the true one by.
+    // which a distance there is turned into a world distance at most the true one by.
     float4 center_and_scale;
     // xyz: the box's half extents in its own space.
     float4 extents;

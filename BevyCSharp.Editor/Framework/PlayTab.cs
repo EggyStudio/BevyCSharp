@@ -177,8 +177,8 @@ public static class PlayTab
         string[] labels = [EditorPlay.Running ? "Stop" : "Play", "Play scene", "Build", "Clear"];
         var buttons = labels.Sum(EditorWidgets.PillWidth) + (ImGui.GetStyle().ItemSpacing.X * labels.Length);
 
-        // The project the buttons act on, as a field filling what the buttons leave, with the sample
-        // named in its hint, so an empty field still says what will run.
+        // The project the buttons act on, as a field filling what the buttons leave, with the feature
+        // test named in its hint, so an empty field still says what will run.
         var project = EditorPlay.Project;
         var hint = EditorPlay.Resolved is { } found ? Path.GetFileName(found) : "Path to a .csproj";
 

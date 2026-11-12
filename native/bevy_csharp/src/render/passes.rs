@@ -401,7 +401,7 @@ fn leave_out_tonemapper(
     }
 }
 
-/// Drops what a view kept for passes its camera no longer has.
+/// Drops what a view kept for passes its camera does not have.
 fn forget_passes(
     mut commands: Commands,
     views: Query<Entity, (With<PreparedShaderPasses>, Without<BcsShaderPasses>)>,

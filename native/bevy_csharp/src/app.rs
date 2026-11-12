@@ -727,7 +727,7 @@ pub unsafe extern "C" fn bcs_app_destroy(handle: *mut BcsApp) {
             drop(unsafe { Box::from_raw(handle) });
         }
 
-        // Gone with its threads, so a panic after this is no longer the end of its run.
+        // Gone with its threads, so a panic after this does not end its run.
         crate::crash::ending(false);
     });
 }

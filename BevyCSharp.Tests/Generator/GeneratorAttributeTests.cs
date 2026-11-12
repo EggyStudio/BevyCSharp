@@ -319,8 +319,8 @@ public sealed class GeneratorAttributeTests
         {
             // Twice the frames a second the fixed step is, so it runs in half of them. The clock
             // is stepped a 240th of a second a frame, so forty frames are a sixth of a second and
-            // twenty fixed steps however long the machine took to run them, where on its own clock
-            // a slow runner's frames let the fixed step catch up a hundred times.
+            // twenty fixed steps however long the machine takes to run them, where on its own clock
+            // a slow runner's frames would let the fixed step catch up many times over.
             Run(new EngineHarness(frames: 40, fixedHz: 120, frameSeconds: 1.0 / 240), null);
             Assert.InRange(FramesOf("OnFixedUpdate").Count, 19, 21);
         },

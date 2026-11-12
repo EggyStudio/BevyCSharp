@@ -54,7 +54,7 @@ thread_local! {
 }
 
 /// The counter for the calling thread, or the first one while the thread is being torn down and
-/// its own can no longer be read.
+/// its own cannot be read.
 #[inline]
 fn shard() -> &'static Shard {
     let index = SHARD

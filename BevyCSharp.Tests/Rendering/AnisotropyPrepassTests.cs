@@ -21,7 +21,7 @@ namespace Bevy.Tests;
 /// <para>
 /// The bridge mends the shader in the text Bevy ships, the setup moved out of the skipped block with
 /// a tangent frame of its own (<c>render/mended.rs</c>). Ambient occlusion asks for the normal
-/// prepass, which is how the feature test's gallery met it. A release of Bevy whose text moved
+/// prepass, so a camera with occlusion on draws through it. A release of Bevy whose text moved
 /// refuses the mend, which the last test here holds, so the mend is written again for that release,
 /// or taken out where Bevy has mended its shader.
 /// </para>
@@ -59,7 +59,7 @@ public sealed class AnisotropyPrepassTests
     }
 
     /// <summary>
-    /// The bridge mended Bevy's shader, which a release of Bevy whose text moved refuses, failing
+    /// The bridge mends Bevy's shader, which a release of Bevy whose text moved refuses, failing
     /// here so the mend follows it.
     /// </summary>
     [SkippableFact]

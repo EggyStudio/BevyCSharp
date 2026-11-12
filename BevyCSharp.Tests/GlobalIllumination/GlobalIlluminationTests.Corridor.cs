@@ -14,10 +14,10 @@ public sealed partial class GlobalIlluminationTests
     /// Cascade 2's probes stand 8 apart at x -4 and 4, outside the corridor's walls, each hidden
     /// from the corridor's cascade 1 probes at x -2 and 2, so the merge's weights would sum to
     /// nothing and no light would come from past 16 units, neither the sky above nor the lamp's end
-    /// of the corridor, as in the feature test's alley at night. A probe that sees too little of
-    /// the cascade above carries its rays on to the field's edge (gi_trace.slang), so the first
-    /// bounce reads near its reference. The light pass takes back Bevy's ambient term by Bevy's
-    /// table of F_AB, so a surface seen at a grazing angle keeps none of it (the floor of
+    /// of the corridor. A probe that sees too little of the cascade above carries its rays on to
+    /// the field's edge (gi_trace.slang), so the first bounce reads near its reference. The light
+    /// pass takes back Bevy's ambient term by Bevy's table of F_AB, so a surface seen at a grazing
+    /// angle keeps none of it (the floor of
     /// AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle). The corridor reads
     /// about a quarter short of its reference's light past the direct, by the gloss carried between
     /// bounces past the probes above, which stand outside its walls and hold little of it, so the
@@ -40,7 +40,7 @@ public sealed partial class GlobalIlluminationTests
     /// A corridor of the level's white 5.6 units wide, 6 high and 40 long, its floor and walls 0.4
     /// thick and its top and both ends open, under a white sky of a tenth of a light of one, with a
     /// shadowed lamp 2 units up near its far end, the camera near its near end looking along it, in
-    /// a field of four cascades of a quarter unit as the feature test has it.
+    /// a field of four cascades of a quarter unit.
     /// </summary>
     private static void NarrowCorridor(EcsWorld ecs)
     {

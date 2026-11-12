@@ -252,7 +252,7 @@ internal static class Launch
     {
         foreach (var argument in arguments)
         {
-            // The feature test, which was the sample and is still opened by that name.
+            // The feature test, which --sample opens as well.
             if (argument is "--feature-test" or "--sample") return "BevyCSharp.FeatureTest";
             if (argument is "--editor") return "BevyCSharp.Editor";
             if (argument is "--example") return "BevyCSharp.Examples";

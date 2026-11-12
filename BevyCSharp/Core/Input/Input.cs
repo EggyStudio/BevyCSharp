@@ -234,7 +234,7 @@ public sealed class Input
     /// </para>
     /// <para>
     /// The first pad is <c>Gamepads[0]</c> where there is one, and a game read by one player
-    /// takes that and the keyboard together, as Courtyard steers its runner.
+    /// takes that and the keyboard together.
     /// </para>
     /// </remarks>
     /// <example>

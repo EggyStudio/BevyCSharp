@@ -110,7 +110,7 @@ public partial struct DayNight
     /// by the hour.
     /// </summary>
     /// <remarks>
-    /// The sky's own small white by day, as it was before the fill, the probes carrying the light
+    /// The sky's own small white by day with no fill added, the probes carrying the light
     /// the walls and floors throw into the shade. Global illumination takes the ambient light back
     /// from every surface it lights, but its probes take it as the sky's light along each ray that
     /// leaves the scene, so the fill's warm white of 1000 would light every shade as a warm sky

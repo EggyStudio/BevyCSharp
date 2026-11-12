@@ -83,7 +83,7 @@ pub(crate) fn install(
     // The render schedule's clock for frame.profile, which does nothing until asked.
     crate::profile::install_render(app);
 
-    // The point lights the render world drew, two numbers a frame, which a stress test reads.
+    // The point lights the render world took and drew, two numbers a frame, for the managed side.
     crate::render::light_counts::install(app);
 
     // The layer the rain's map of roofs draws, which no light stands on.

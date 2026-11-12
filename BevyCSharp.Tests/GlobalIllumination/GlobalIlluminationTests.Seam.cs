@@ -110,12 +110,11 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// One bay and its stretch of aisle with the feature test's hall's measures in the level's
-    /// white, every wall, the floor and the ceiling 0.3 thick, the aisle eight units wide and
-    /// sixteen long, the bay eight units square off its west side through an arch six units wide
-    /// and 4.5 high between two piers, a column in it, lit by three shadowed lamps in red, green
-    /// and blue as the hall's first west bay is, the camera at <paramref name="eye"/> along the
-    /// aisle's middle looking down its length.
+    /// One bay and its stretch of aisle in the level's white, every wall, the floor and the ceiling
+    /// 0.3 thick, the aisle eight units wide and sixteen long, the bay eight units square off its
+    /// west side through an arch six units wide and 4.5 high between two piers, a column in it, lit
+    /// by three shadowed lamps in red, green and blue, the camera at <paramref name="eye"/> along
+    /// the aisle's middle looking down its length.
     /// </summary>
     private static void BayAndAisle(EcsWorld ecs, float eye)
     {

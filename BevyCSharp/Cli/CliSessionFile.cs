@@ -187,7 +187,7 @@ public static class CliSessionFile
         }
     }
 
-    /// <summary>Deletes the files of sessions whose processes are no longer there.</summary>
+    /// <summary>Deletes the files of sessions whose processes have ended.</summary>
     /// <returns>How many were swept up.</returns>
     public static int Prune()
     {

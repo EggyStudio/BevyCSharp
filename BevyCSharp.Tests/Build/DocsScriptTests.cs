@@ -6,25 +6,24 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// <c>build/docs-on-package.py</c>, which builds every C# block of the guide against the packed
-/// package and names a block that no longer builds by its page and line, as an annotation where it
+/// package and names a block that does not build by its page and line, as an annotation where it
 /// runs in the workflow, and <c>build/check-docs.py</c>, which follows every link of the README, the
 /// cheatsheet and the guide into this repository to a file that is here and an anchor to a heading
 /// that file has, with no request made (NORM.md, N 4.3).
 /// </summary>
 /// <remarks>
 /// <para>
-/// A guide shows code a reader copies into a game, and a block that stopped compiling, a call
-/// renamed or made internal since it was written, teaches what the package no longer does. The page
+/// A guide shows code a reader copies into a game, and a block that does not compile, a call it
+/// makes renamed or made internal in the package, teaches what the package does not do. The page
 /// here holds a block that builds after the lines its comment gives, one calling what the library
 /// has not got, and one marked as not compiled, which is left out.
 /// </para>
 /// <para>
 /// The links are followed here on every system, so a page moved or a heading renamed without the
-/// links to it fails the suite rather than a reader. The build workflow's docs job ran the script
-/// on every push with <c>--external</c>, which asks each link off this repository as well. Those
-/// are asked by a run by hand before a package, since a site that does not answer for a minute is
-/// no fault of a commit. The test runs the script a writer of the guide runs, rather than following
-/// the links in C# of its own, so the two cannot disagree.
+/// links to it fails the suite rather than a reader. Each link off this repository is asked by a
+/// run by hand with <c>--external</c> before a package, since a site that does not answer for a
+/// minute is no fault of a commit. The test runs the script a writer of the guide runs, rather
+/// than following the links in C# of its own, so the two cannot disagree.
 /// </para>
 /// </remarks>
 public sealed class DocsScriptTests : IDisposable

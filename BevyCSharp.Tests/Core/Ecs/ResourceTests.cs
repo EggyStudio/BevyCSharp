@@ -76,7 +76,7 @@ public sealed class ResourceTests
     /// </summary>
     /// <remarks>
     /// Bevy's default filters hold the component that disables an entity, and built from nothing
-    /// they would hold none. Bevy's switch for static transforms, taken off, is no longer found,
+    /// they would hold none. Bevy's switch for static transforms, taken off, is not found,
     /// and goes back on the entity Bevy kept for it, built at its first variant, enabled, which is
     /// also where Bevy starts it.
     /// </remarks>

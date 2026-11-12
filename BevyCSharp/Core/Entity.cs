@@ -9,7 +9,7 @@ namespace Bevy;
 /// <remarks>
 /// This is Bevy's own <c>Entity</c>, bit for bit, an index paired with a generation counter. The
 /// generation makes a stale handle detectable. Once an entity is despawned its index is reused with
-/// a higher generation, so an old handle no longer matches and <see cref="EcsWorld.IsAlive"/>
+/// a higher generation, so an old handle does not match it and <see cref="EcsWorld.IsAlive"/>
 /// reports false instead of silently addressing a new entity.
 /// </remarks>
 [StructLayout(LayoutKind.Sequential)]

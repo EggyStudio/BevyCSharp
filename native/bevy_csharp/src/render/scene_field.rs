@@ -120,7 +120,7 @@ pub unsafe extern "C" fn bcs_scene_field_gather(
 /// a mesh whose data the bridge cannot read. Answers the pool's buffer key.
 ///
 /// The pool is made again holding only the meshes asked for where those it holds would not fit
-/// beside them in its buffer, so meshes no longer built from leave it, and a caller asks for every
+/// beside them in its buffer, so meshes no build reads leave it, and a caller asks for every
 /// mesh a frame's builds read each time, since a place answered before may have moved.
 ///
 /// # Safety
@@ -558,7 +558,7 @@ mod built {
         let changed = !adding.is_empty() || pool.buffer.is_none();
 
         // Made again with the meshes asked for where the rest would not fit beside them, which
-        // drops the meshes no longer built from, at twice their size so the next few fit.
+        // drops the meshes no build reads, at twice their size so the next few fit.
         if pool.corners.len() + more > pool.capacity {
             let keep: Vec<(u32, u32)> = wanted.iter().map(|&(number, generation, _)| (number, generation)).collect();
             let old = std::mem::take(&mut pool.corners);

@@ -122,8 +122,9 @@ public sealed class PhysicsComponentTests : IDisposable
     /// scaled, as its collider is drawn, rather than at its own transform taken as the world's.
     /// </summary>
     /// <remarks>
-    /// The feature test's Sponza is a scene whose walls are children of the entity that places it,
-    /// and the player walked through them, the bodies standing near the hub.
+    /// A scene's walls are children of the entity that places it, and bodies taken at their own
+    /// transforms as the world's would stand away from the walls they belong to, a player walking
+    /// through the walls.
     /// </remarks>
     [Fact]
     public void AStaticBodyUnderAParentIsWhereItsParentPutsIt()

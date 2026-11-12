@@ -100,8 +100,8 @@ public sealed class KinematicBodyTests
     /// </summary>
     /// <remarks>
     /// A radian a second at three units out, which asks 3 a second squared of the friction toward
-    /// the middle and 9.81 is there. When a box slid a quarter as rough as its friction, the crate
-    /// slid outward as it was carried and went 1.64 radians round in the two seconds.
+    /// the middle and 9.81 is there. A box slid a quarter as rough as its friction would slide
+    /// outward as it is carried and fall behind the platform's turn.
     /// </remarks>
     [Theory]
     [InlineData(144.0)]

@@ -377,7 +377,7 @@ internal static class ReflectedValue
     internal static string Item(string list, int index) =>
         list + "[" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) + "]";
 
-    /// <summary>The failure for a wrapper over a component the entity no longer carries.</summary>
+    /// <summary>The failure for a wrapper over a component the entity does not carry.</summary>
     private static BevyNativeException Absent(string type, Entity entity) =>
         new(NativeStatus.NotPresent, $"{entity} does not carry {type}.");
 }

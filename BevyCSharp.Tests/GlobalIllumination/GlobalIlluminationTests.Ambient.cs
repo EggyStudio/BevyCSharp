@@ -93,7 +93,7 @@ public sealed partial class GlobalIlluminationTests
     /// <summary>
     /// A floor of the level's white 400 units across reflecting nothing, under a white sky of a
     /// light of one and no other light, the camera 4 units over it looking down on a point 6 units
-    /// ahead, in the field the feature test has.
+    /// ahead, in a field of four cascades of a quarter unit.
     /// </summary>
     private static void OpenFloor(EcsWorld ecs)
     {

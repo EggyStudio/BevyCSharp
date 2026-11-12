@@ -3,7 +3,7 @@
 //! Bevy 0.20 forgets a camera's auto exposure by the camera's own entity where it keeps the pass
 //! by the render world's, so once the effect is turned off its pass, kept on the camera's view in
 //! the render world, goes on adjusting the picture, brighter and brighter in a dark room. Here the
-//! pass's component is taken off every view that no longer has the effect, after Bevy has queued
+//! pass's component is taken off every view without the effect, after Bevy has queued
 //! it for the views that do.
 
 #![cfg(feature = "render")]

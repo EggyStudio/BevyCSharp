@@ -72,8 +72,8 @@ pub fn asked_for_motion(entity: &bevy::ecs::world::EntityWorldMut) -> bool {
 /// its prepasses off as it went.
 ///
 /// Solari requires its prepasses as it is inserted and is not asked again, so an effect taken off
-/// after it, as motion blur takes the motion vectors it brought, left it reading nothing and the
-/// picture unlit, the feature test's Cornell box among it.
+/// after it, as motion blur takes the motion vectors it brought, would leave it reading nothing and
+/// the picture unlit.
 #[cfg(feature = "render")]
 pub fn keep_traced(entity: &mut bevy::ecs::world::EntityWorldMut) {
     #[cfg(feature = "solari")]
@@ -159,10 +159,9 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
                 camera.insert(RequestedPrepass(flags));
                 let reflecting = camera.contains::<ScreenSpaceReflections>();
                 // Bevy's ambient occlusion brings the depth and normal prepasses it reads when it
-                // comes and takes the normals unchecked, so a camera that lost them under it ended
-                // the app, as the feature test did when its effects page turned the occlusion on
-                // beside global illumination. They stay while it is on and go with it
-                // (bcs_render_set_ambient_occlusion).
+                // comes and takes the normals unchecked, so a camera that lost them under it, as
+                // global illumination's prepass request would take them, would end the app. They
+                // stay while it is on and go with it (bcs_render_set_ambient_occlusion).
                 let occluding = camera.contains::<ScreenSpaceAmbientOcclusion>();
 
                 // The pyramid is built from the depth prepass, by Bevy's occlusion culling, without
@@ -224,7 +223,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
 /// bit left clear takes that behavior off again, so the flags are the whole answer rather than
 /// additions to it.
 ///
-/// Both measure what Bevy's own paths save, as its many_cubes stress test turns them off to.
+/// Turned off, each lets a measure of the frame say what Bevy's own path saves.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_render_set_camera_flags(camera: u64, flags: u32) -> i32 {
     crate::interop::guard(|| {

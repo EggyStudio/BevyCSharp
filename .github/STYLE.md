@@ -292,6 +292,12 @@ git grep -n -E "^\s*(///?|//!|#|\*).*(3DEngine|HDRP|URP|Unity|Unreal|Godot|Blend
 # with its reason, so each hit is read rather than counted.
 git grep -n -i -E "^\s*(///?|//!|#|\*).*([0-9][0-9.,]* ?(ms|milliseconds?|µs|seconds?|minutes?|[KMG]i?B|bytes)\b|times (its|the) reference|where it read|from [0-9][0-9.,]* to [0-9])" -- '*.cs' '*.rs' '*.slang' '*.wgsl' '*.sh' '*.py' '*.yml'
 
+# Comments that tell what the code was, what a mend changed or the fault that led to it, or that
+# name a program built on the library as their example, rather than saying what the code is (N 4.11).
+# A word in its plain sense, as a fixed order or bytes read as a float, and a game's own sources
+# naming themselves, are left, so each hit is read rather than counted.
+git grep -n -i -E "^\s*(///?|//!|#|\*).*\b(as it was|as before|no longer|used to|previously|formerly|first written|had been|until now|mended|mends?|faults?|fixe[sd]|worked round|came out|voxel|feature test|courtyard|sponza|a [a-z]+ game|kind of game)\b" -- '*.cs' '*.rs' '*.slang' '*.wgsl' '*.sh' '*.py' '*.yml' ':!modules' ':!BevyCSharp.Examples/bevy-assets'
+
 # References to paths that are not checked in.
 grep -rn "\.ref/" --include=*.cs --include=*.rs --include=*.md . | grep -v "^\./\.ref/"
 ```

@@ -123,7 +123,7 @@ public sealed class BooleanTests : IDisposable
     [Fact]
     public void AFlightJoinedByItsLineIsOneSolidWithTheFloorAndTheWallItStandsOn()
     {
-        // A hall's floor and wall the flight stands on and against, as Blockout's stairs do.
+        // A hall's floor and wall the flight stands on and against.
         static EditMesh Hall() => new EditMesh().Box(new Vec3(6f, 3f, 6f)).Cut("box 5.6 2.6 5.6 at 0.2 0.2 0.2");
         var shell = 6f * 3f * 6f - 5.6f * 2.6f * 5.6f;
 

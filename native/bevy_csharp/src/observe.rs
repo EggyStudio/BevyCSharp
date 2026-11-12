@@ -51,7 +51,7 @@ impl Target {
     }
 }
 
-/// The component's bytes on `entity`, copied, or nothing where it is no longer there.
+/// The component's bytes on `entity`, copied, or nothing where it is not there.
 fn bytes_of(world: &DeferredWorld, entity: Entity, id: ComponentId) -> Vec<u8> {
     let Some(size) = world.components().get_info(id).map(|info| info.layout().size()) else {
         return Vec::new();

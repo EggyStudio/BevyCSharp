@@ -55,7 +55,7 @@ public static unsafe partial class Render
     /// than making a new one and pointing every entity at it. <see cref="TryReadMesh"/> reads what a
     /// mesh holds, so a loaded model can be read, changed and written back. What
     /// <see cref="CreateMesh(MeshData)"/> checks, this checks, and the mesh's recipe, if it was
-    /// built from a primitive, is forgotten, since it no longer describes it.
+    /// built from a primitive, is forgotten, since it does not describe what was written.
     /// </remarks>
     /// <exception cref="ArgumentException">As for <see cref="CreateMesh(MeshData)"/>.</exception>
     /// <exception cref="BevyNativeException">The handle names no mesh, or this build has no renderer.</exception>

@@ -103,8 +103,8 @@ public sealed class PersistentTests : IDisposable
     /// </summary>
     /// <remarks>
     /// A source-generated reader gives an init-only property a file leaves out the zero of its
-    /// type, so settings that gained a field read it as nothing from every file a player already
-    /// had. The feature test's effects page found it, its tonemapper coming back as none.
+    /// type, so settings that gain a field would read it as nothing from every file a player has, a
+    /// tonemapper among them coming back as none.
     /// </remarks>
     [Fact]
     public void AFieldAFileWasWrittenWithoutKeepsItsDefault()

@@ -179,9 +179,9 @@ float density(float3 world, float3 planet, bool detailed)
 // at night, or none, the same for every texel of a view.
 //
 // Each entry calls it first, before any of its threads returns or takes a branch of its own, and
-// hands the light on. Mesa's llvmpipe, the software Vulkan the workflow's runners draw with, faults
-// on the transmittance read in this loop where it runs once the threads of a group have parted, as
-// it did inside the march's branches, ending the feature test within a minute of its start there.
+// hands the light on. Mesa's llvmpipe, a software Vulkan, faults on the transmittance read in this
+// loop where it runs once the threads of a group have parted, so called inside the march's branches
+// it would end the program on that driver.
 int brightest()
 {
     int best = -1;

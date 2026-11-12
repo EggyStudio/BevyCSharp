@@ -41,8 +41,8 @@ internal static unsafe class ConsoleMemoryCommands
     /// of that collection, and <c>heap</c> is the heap's size after it, those objects and the free
     /// space between them. After <c>memory.collect</c>, which compacts, that free space is what
     /// pinned objects hold apart, so a soak judges both. The runtime's own total is left out, since
-    /// with objects pinned it counts the free space around them against itself and read below zero
-    /// in Stress and Swarm after a full collection.
+    /// with objects pinned it counts the free space around them against itself and can read below
+    /// zero after a full collection.
     /// </para>
     /// </remarks>
     [Command("memory", "What the program holds, as name and number pairs: managed memory, the process and its peak, the bridge's allocations, entities, assets and the GPU's resources")]

@@ -159,7 +159,7 @@ public static class EditorSelection
         // the entity holding it.
         //
         // Only while they are all alive, because the frame something is despawned is the frame its
-        // name can no longer be asked for, so remembering then would forget exactly the name that
+        // name cannot be asked for, so remembering then would forget exactly the name that
         // is about to be needed.
         if (Chosen.TrueForAll(world.IsAlive)) Remember(world);
 

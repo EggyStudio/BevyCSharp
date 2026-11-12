@@ -118,8 +118,8 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// </summary>
     /// <remarks>
     /// With no field the view's camera is taken as the field takes it, since the world's first 3D
-    /// camera, which in the feature test's yard is a camera drawing nothing, would leave a read
-    /// with global illumination off asking for the picture's size until it gave up.
+    /// camera may be one drawing nothing, which would leave a read with global illumination off
+    /// asking for the picture's size until it gave up.
     /// </remarks>
     [SkippableFact]
     public void WithNoFieldThePictureIsReadFromTheCameraTheViewIsDrawnBy()
@@ -198,8 +198,8 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     /// <remarks>
     /// The reference lights a face by the sun through the air, the light the picture's faces take,
     /// since lit by the sun as it is above the air, its own color and strength, every sunlit face
-    /// of the feature test's yard at a low sun would read well over the picture and whiter,
-    /// whatever global illumination gave the faces in shade.
+    /// at a low sun would read well over the picture and whiter, whatever global illumination gave
+    /// the faces in shade.
     /// </remarks>
     [SkippableFact]
     public void TheReferencesSunIsDimmedThroughTheAirAsThePictures()
@@ -471,15 +471,14 @@ public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output
     }
 
     /// <summary>
-    /// The feature test's meadow's grass, seen from where its scripted run's eye stands over it at
-    /// Medium, draws every pixel a number.
+    /// A meadow of grass thirty units square, seen from a standing eye over it at Medium, draws
+    /// every pixel a number.
     /// </summary>
     /// <remarks>
     /// A blade seen edge on reads its normal map's smallest levels, which average its normals to
-    /// nothing, and normalizing nothing gives no number, so with the grass given its tangents 18 of
-    /// the meadow's values were none, at the bottom of the view, and made the comparison's sums
-    /// none, as 30 are here. The leaf material takes the card's own normal where the mapped one has
-    /// no length, and the normal bent toward the way out where that has none.
+    /// nothing, and normalizing nothing gives no number, which would make the comparison's sums
+    /// none. The leaf material takes the card's own normal where the mapped one has no length, and
+    /// the normal bent toward the way out where that has none.
     /// </remarks>
     [SkippableFact]
     public void TheMeadowsGrassDrawsEveryPixelANumber()

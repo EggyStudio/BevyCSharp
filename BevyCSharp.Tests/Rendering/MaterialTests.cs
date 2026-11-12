@@ -307,7 +307,7 @@ public sealed class MaterialTests
     [SkippableFact]
     public void TheShortColorOverloadStillWorks()
     {
-        // The old argument list, kept so existing code and the simple case stay one line.
+        // The short argument list, which keeps the simple case one line.
         using var harness = new EngineHarness(frames: 2);
         Needs.Renderer();
 

@@ -18,8 +18,7 @@ public sealed partial class GlobalIlluminationTests
     /// gave where it gave it. Taking back the camera's environment map's light alone would leave
     /// the volume's half with the volume's light and without the blue map's, the probe's half with
     /// the probe's warm light beside the probes', and the chrome without a blue reflection it never
-    /// had, as in the feature test's light hall's bays. The room is closed, so the reference's
-    /// light is the lamp's and what bounces from it.
+    /// had. The room is closed, so the reference's light is the lamp's and what bounces from it.
     /// </remarks>
     [SkippableFact]
     public void TheLightBevysLightProbesGaveIsTakenBackAsTheyGaveIt()

@@ -200,9 +200,8 @@ public sealed class RayTracingTests
     /// </summary>
     /// <remarks>
     /// A filter that weighed each tap against one frame's variance rather than its history's mean's,
-    /// and kept its own filtered light as the next frame's history, carried light down the slope
-    /// and out from the lamp, this band at 0.61 of its mean and the feature test's Cornell box's
-    /// ceiling by its lamp at 0.37 to 0.59, with a ring further out a fifth over its mean.
+    /// and kept its own filtered light as the next frame's history, would carry light down the
+    /// slope and out from the lamp, leaving this band dark and a ring further out bright.
     /// </remarks>
     [SkippableFact]
     public void TheDenoiserKeepsTheSlopeBesideALamp()
@@ -401,7 +400,7 @@ public sealed class RayTracingTests
     /// <remarks>
     /// The rays read the motion vectors, so a lens set after them that takes off a motion blur
     /// never on keeps the motion vectors the rays ask for, where taking them away with it would
-    /// leave a scene such as the feature test's map drawn unlit.
+    /// leave a scene drawn unlit.
     /// </remarks>
     [SkippableFact]
     public void EffectsSetAfterTheRaysLeaveThemLighting()

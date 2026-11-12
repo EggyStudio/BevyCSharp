@@ -14,8 +14,8 @@ public sealed partial class GlobalIlluminationTests
     /// The light pass lights the G-buffer's surfaces and is to pass over a pixel no deferred
     /// material drew, telling it apart from Bevy's clear of the G-buffer, black with an alpha of
     /// one, which reads as a black mirror, so a pixel drawn forward taken for a surface would take
-    /// the reflection of the sky Bevy gives a mirror at a slant with nothing given, leaving the
-    /// feature test's meadow's leaves dark red.
+    /// the reflection of the sky Bevy gives a mirror at a slant with nothing given, leaving leaves
+    /// drawn forward dark red.
     /// </remarks>
     [SkippableFact]
     public void ASurfaceDrawnForwardKeepsTheLightBevyGaveIt()
@@ -132,9 +132,9 @@ public sealed partial class GlobalIlluminationTests
     /// </summary>
     /// <remarks>
     /// The light pass lights the G-buffer's surfaces, and a leaf is drawn forward, since the
-    /// G-buffer holds one normal and a leaf is lit by two, so with the feature test's fill off
-    /// under global illumination the meadow's leaves and grass took the sky's small ambient light
-    /// alone in shade and lay near black. The leaf material reads the probes as the pass does.
+    /// G-buffer holds one normal and a leaf is lit by two, so a leaf the pass left unlit would take
+    /// the sky's small ambient light alone in shade and lie near black. The leaf material reads the
+    /// probes as the pass does.
     /// </remarks>
     [SkippableFact]
     public void ALeafInShadeTakesTheProbesLightAsTheSurfaceBesideIt()

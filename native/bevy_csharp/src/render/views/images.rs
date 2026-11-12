@@ -365,7 +365,7 @@ pub(super) fn copy_pictures<const POINT: u8>(
     }
 }
 
-/// Drops the images of a view whose camera no longer asks for any.
+/// Drops the images of a view whose camera asks for none.
 pub(super) fn forget_view_images(
     mut commands: Commands,
     views: Query<Entity, (With<ViewImageTextures>, Without<BcsViewImages>)>,

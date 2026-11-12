@@ -123,9 +123,8 @@ public sealed class SceneFieldShadowTests(ITestOutputHelper output)
     /// <remarks>
     /// The field sees the ground stand between a sun below the horizon and every surface facing it,
     /// so shadows that took back the light a directional light sends a surface as it is above the
-    /// air would take back all of a light Bevy gives none of and leave the pillar's side black, as
-    /// the feature test's walls facing its sun at night. The light is taken back through the
-    /// camera's air as Bevy dims it.
+    /// air would take back all of a light Bevy gives none of and leave the pillar's side black. The
+    /// light is taken back through the camera's air as Bevy dims it.
     /// </remarks>
     [SkippableFact]
     public void ASunUnderTheHorizonHasNoLightTakenBackThroughTheField()

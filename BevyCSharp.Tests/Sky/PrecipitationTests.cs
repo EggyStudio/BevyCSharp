@@ -70,11 +70,10 @@ public sealed class PrecipitationTests
     /// </summary>
     /// <remarks>
     /// Bevy makes one map of the point lights' shadows a frame for every view's lights together, a
-    /// light in it where any view sees it, so a camera drawing the roofs' depth for a few frames would
-    /// bring the lamps it sees from above into the frame's lights for those frames, and the maps would
-    /// be made again at another size each time, as at the start of the feature test's course under
-    /// the hub's lamps. The roofs' camera draws a layer of its own that no light stands on, which the
-    /// meshes it draws take beside their own.
+    /// light in it where any view sees it, so a camera drawing the roofs' depth for a few frames
+    /// would bring the lamps it sees from above into the frame's lights for those frames, and the
+    /// maps would be made again at another size each time. The roofs' camera draws a layer of its
+    /// own that no light stands on, which the meshes it draws take beside their own.
     /// </remarks>
     [SkippableFact]
     public void TheRoofsMapBringsNoLampIntoTheFramesLights()

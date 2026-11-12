@@ -469,7 +469,7 @@ public static class SceneValue
     /// </summary>
     /// <returns>How many fields were written.</returns>
     /// <remarks>
-    /// A field the file names and the type no longer has is skipped, and one whose value is not its
+    /// A field the file names and the type does not have is skipped, and one whose value is not its
     /// kind is left as it is, so a file written before a type changed still loads what it can. A
     /// field the file has under a name the field gave up, kept with <c>FormerNameAttribute</c>,
     /// is read from there when the file has nothing under the current name.

@@ -19,7 +19,7 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// raised walkway and trees, its walls high enough that the sky shows over them and never the horizon, built
 /// with its collision by <see cref="LevelSpawner.Load"/> with its root at the ground's height and drawn in
 /// TrenchBroom from the same file. The signposts at the plaza's doorways are <see cref="Zones"/>'.
-/// The ground is no longer drawn, its entity kept where the floors stand for the crates' slab and
+/// The ground is not drawn, its entity standing where the floors stand for the crates' slab and
 /// the ray-traced occlusion's rays.
 /// </para>
 /// </remarks>

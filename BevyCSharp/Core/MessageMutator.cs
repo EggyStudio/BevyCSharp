@@ -9,7 +9,7 @@ namespace Bevy;
 /// <remarks>
 /// It keeps its own place, as a <see cref="MessageReader{T}"/> does. A message sent while the
 /// messages read are being changed is read on the next call, and not through the ones in hand,
-/// which may no longer be where it was put, so a system sends what it read only once it is done
+/// which may have moved from where it was put, so a system sends what it read only once it is done
 /// changing them, as Bevy's example does.
 /// </remarks>
 /// <example>

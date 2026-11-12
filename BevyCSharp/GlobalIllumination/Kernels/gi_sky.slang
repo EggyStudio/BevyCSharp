@@ -28,7 +28,8 @@ static const uint AirSuns = 10u;
 [numthreads(8, 8, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    // Read at the camera as Bevy reads it, and before any thread returns, as the clouds read it.
+    // Read at the camera as Bevy reads it, and before any thread returns, since a read of the air
+    // once a group's threads have parted faults on Mesa's llvmpipe (clouds.slang's brightest).
     GiLights lights = gi_lights[0];
     float3 through = lights.sunDirection.w > 0.5 ? passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz) : float3(1.0);
 

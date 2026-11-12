@@ -652,8 +652,9 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
 void main(uint3 id : SV_DispatchThreadID)
 {
     // The sun as Bevy's lighting gives the picture, dimmed and reddened through the camera's air
-    // toward it, read at the camera as Bevy reads it and before any thread returns, as the clouds
-    // read it. The lights give the sun as it is above the air, which would light the reference's
+    // toward it, read at the camera as Bevy reads it and before any thread returns, since a read of
+    // the air once a group's threads have parted faults on Mesa's llvmpipe (clouds.slang's
+    // brightest). The lights give the sun as it is above the air, which would light the reference's
     // sunlit faces brighter and whiter than the picture's at a low sun.
     GiLights given = lights[0];
     if (given.sunDirection.w > 0.5)

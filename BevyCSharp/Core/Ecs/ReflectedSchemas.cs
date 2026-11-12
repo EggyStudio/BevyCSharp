@@ -701,7 +701,7 @@ internal static class ReflectedSchemas
     /// Runs a read, answering <see langword="null"/> where the bridge refused it.
     /// </summary>
     /// <remarks>
-    /// A row is read every frame it is drawn, and a refusal (a path the running Bevy no longer has,
+    /// A row is read every frame it is drawn, and a refusal (a path the running Bevy does not have,
     /// a value with no JSON form) would otherwise end the frame each time. The reason is still there
     /// for <see cref="EcsWorld.GetReflected"/> to give to a caller who asks directly.
     /// </remarks>

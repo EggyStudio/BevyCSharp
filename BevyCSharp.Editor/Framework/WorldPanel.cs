@@ -731,7 +731,7 @@ public static class WorldPanel
 
         foreach (var root in roots) Add(root, 0);
 
-        // A fold on something that is no longer there is a fold that hides the next thing to take
+        // A fold on something that is not there is a fold that hides the next thing to take
         // its place in storage.
         Folded.RemoveWhere(bits => !names.ContainsKey(bits));
 

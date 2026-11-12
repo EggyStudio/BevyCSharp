@@ -85,9 +85,9 @@ public sealed class GrassTests(ITestOutputHelper output)
     /// so Bevy reads the map and turns a card seen from behind to face the eye.
     /// </summary>
     /// <remarks>
-    /// The patches were made without tangents, so Bevy read no normal map and left a card seen from
-    /// behind facing away from the eye, and under a sun at the eye's back the feature test's meadow
-    /// lit its blades' backs by the sun let through them and their faces by none.
+    /// A patch made without tangents would have Bevy read no normal map and leave a card seen from
+    /// behind facing away from the eye, and under a sun at the eye's back its blades' backs would be
+    /// lit by the sun let through them and their faces by none.
     /// </remarks>
     [SkippableFact]
     public void EachPatchCarriesTheTangentsItsNormalMapIsReadAlong()

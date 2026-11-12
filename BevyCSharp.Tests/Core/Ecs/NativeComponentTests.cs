@@ -403,8 +403,8 @@ public sealed class NativeComponentTests
         Assert.Equal(1, Unsafe.SizeOf<InheritedVisibility>());
         Assert.Equal(1, Unsafe.SizeOf<ViewVisibility>());
 
-        // Bit 0 is this frame and bit 1 the frame before, which is how Bevy tells "no longer
-        // seen" from "never seen" without tripping change detection every frame.
+        // Bit 0 is this frame and bit 1 the frame before, which is how Bevy tells "seen the frame
+        // before and not this one" from "never seen" without tripping change detection every frame.
         Assert.True(new ViewVisibility { Bits = 0b01 }.IsVisible);
         Assert.False(new ViewVisibility { Bits = 0b01 }.WasVisible);
         Assert.False(new ViewVisibility { Bits = 0b10 }.IsVisible);

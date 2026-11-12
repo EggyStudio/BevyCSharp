@@ -8,8 +8,8 @@ namespace Bevy.Tests;
 /// mesh with nothing to work them out from is not.
 /// </summary>
 /// <remarks>
-/// The feature test's spheres under an anisotropic material were drawn as a blaze of white, the
-/// direction the surface is brushed in read from tangents they did not have, as Bevy's own
+/// A sphere under an anisotropic material without tangents would be drawn as a blaze of white, the
+/// direction the surface is brushed in read from tangents it does not have, so Bevy's own
 /// <c>anisotropy</c> example makes its sphere with <c>with_generated_tangents</c>.
 /// </remarks>
 [Collection("engine")]

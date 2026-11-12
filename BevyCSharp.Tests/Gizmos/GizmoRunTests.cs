@@ -51,8 +51,8 @@ public sealed class GizmoRunTests
     /// A 2D camera laid over a 3D scene draws the world's gizmos a unit a pixel about the window's
     /// middle, a line through the world's middle as a mark across the picture's, and put on a layer
     /// of its own with <see cref="Render.SetLayers"/> draws none of them, as
-    /// <see cref="Render2d.SpawnCamera2d"/> says, the feature test's sprite overlay having left such
-    /// marks at the middle of its window.
+    /// <see cref="Render2d.SpawnCamera2d"/> says, where a sprite overlay sharing the world's layer
+    /// would leave such marks at the middle of its window.
     /// </summary>
     [SkippableFact]
     public void A2dCameraOverA3dSceneDrawsNoGizmoOnALayerOfItsOwn()

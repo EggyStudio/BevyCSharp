@@ -118,7 +118,7 @@ public class SceneReferences
     /// The path a file reference names, where the file holding its id is now, with the label the
     /// reference gave, or the path it recorded when no file holds the id.
     /// </summary>
-    /// <remarks>A bare string is read as a path, which is how a scene wrote a file before ids.</remarks>
+    /// <remarks>A bare string is read as a path, the form of a file reference that holds no id.</remarks>
     public static string? ReadFile(JsonElement json)
     {
         if (json.ValueKind == JsonValueKind.String) return json.GetString();

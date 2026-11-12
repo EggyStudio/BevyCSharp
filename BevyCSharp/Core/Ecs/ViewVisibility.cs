@@ -14,7 +14,7 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// The byte packs two frames, bit 0 for this one and bit 1 for the one before. Bevy keeps the
-/// older bit as scratch space so it can tell "no longer seen by anything" from "was never seen",
+/// older bit as scratch space so it can tell "seen last frame and not this one" from "never seen",
 /// and only then trip change detection.
 /// </para>
 /// </remarks>

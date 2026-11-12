@@ -41,7 +41,7 @@ public partial struct SelectionOutline
     /// <summary>What the engine is currently drawing edges for.</summary>
     /// <remarks>
     /// Kept rather than worked out, because turning a wireframe off is a call about an entity that
-    /// is no longer selected, and something has to remember which those were.
+    /// has left the selection, and something has to remember which those were.
     /// </remarks>
     private static readonly HashSet<ulong> Wired = [];
 

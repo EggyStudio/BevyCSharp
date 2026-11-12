@@ -616,7 +616,8 @@ float4 fragment(FullscreenOutput input) : SV_Target
 {
     // The sun and each directional light through the camera's air, as Bevy's lighting gives them
     // the picture, where the lights give the sun as it is above the air, read before any pixel is
-    // discarded, as the clouds read the air before any thread parts from the others.
+    // discarded, since a read of the air once a group's threads have parted faults on Mesa's
+    // llvmpipe (clouds.slang's brightest).
     GiLights lights = gi_lights[0];
     if (lights.sunDirection.w > 0.5)
         lights.sunColor.rgb *= passAtmosphereTransmittance(passView.world_position, lights.sunDirection.xyz);

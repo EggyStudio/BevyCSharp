@@ -7,9 +7,8 @@
 //! ones in their place, and the record Bevy keeps for each index grows with them. Three of Bevy's
 //! systems despawn through it, the one for what is scoped to a state with `DespawnOnExit` or
 //! `DespawnOnEnter`, the one for a sound played to a device once it has ended, and the one for a
-//! screenshot once it has been taken. Without what follows, a game that leaves a state over and
-//! over climbs to many more indices than it ever holds, Swarm reaching 16,384 in ten minutes of
-//! its soak with 500 alive.
+//! screenshot once it has been taken. Without what follows, an app that leaves a state over and
+//! over climbs to many more indices than it ever holds alive.
 //!
 //! What follows despawns the same entities first, one at a time, which frees each, so Bevy's own
 //! finds nothing left to lose. A test below holds Bevy's call to the fault, and fails once a

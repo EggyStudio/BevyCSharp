@@ -14,10 +14,11 @@ namespace BevyCSharp.Editor.Framework;
 /// with it. Its own window is also the window the game ships in, sized and framed as it will be.
 /// </para>
 /// <para>
-/// What it runs is a project file, the sample's by default, and a setting names any other. It is run
-/// through <c>dotnet run</c>, which builds it first when it is out of date, so the first press takes
-/// as long as a build and later ones as long as a start. What the game writes goes to the editor's
-/// console, each line marked as the game's, so a message from it is read where the editor's own are.
+/// What it runs is a project file, the feature test's by default, and a setting names any other. It
+/// is run through <c>dotnet run</c>, which builds it first when it is out of date, so the first
+/// press takes as long as a build and later ones as long as a start. What the game writes goes to
+/// the editor's console, each line marked as the game's, so a message from it is read where the
+/// editor's own are.
 /// </para>
 /// <para>
 /// It lives in a tab rather than on the scene's toolbar, so the viewport holds the scene and the
@@ -53,7 +54,7 @@ public static class EditorPlay
     /// <param name="After">What follows it on this side, such as copying a file into place, or nothing.</param>
     private sealed record Step(string File, string[] Arguments, string Says, Action? After = null);
 
-    /// <summary>The project file that is run, or empty for the sample's, found from where the editor runs.</summary>
+    /// <summary>The project file that is run, or empty for the feature test's, found from where the editor runs.</summary>
     public static string Project { get; set; } = string.Empty;
 
     /// <summary>When the game was last started, which tells its session from any that ran before.</summary>
@@ -110,7 +111,7 @@ public static class EditorPlay
             return;
         }
 
-        // The window, which the sample opens only when asked, since it runs headless otherwise.
+        // The window, which the feature test opens only when asked, since it runs headless otherwise.
         Start(PlayJob.Playing, ["run", "--project", "{project}", "--", "--window"]);
     }
 
@@ -137,8 +138,8 @@ public static class EditorPlay
     /// no camera of its own is seen from where the editor's camera is.
     /// </para>
     /// <para>
-    /// The player is found in the checkout the editor runs from, as the sample is, and run through
-    /// <c>dotnet run</c>, so the first press builds it.
+    /// The player is found in the checkout the editor runs from, as the feature test is, and run
+    /// through <c>dotnet run</c>, so the first press builds it.
     /// </para>
     /// </remarks>
     /// <returns>Why it could not start, or nothing once it has.</returns>

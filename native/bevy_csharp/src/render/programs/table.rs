@@ -50,7 +50,7 @@ pub struct PipelineProgram {
 ///
 /// Process-wide because the render side has no main world to look in. Emptied when an app is built,
 /// so the numbers a new app hands out never name a program of an app before it, whose shader
-/// handles belong to an asset server that no longer exists.
+/// handles belong to an asset server that has gone.
 pub(super) static TABLE: RwLock<Vec<PipelineProgram>> = RwLock::new(Vec::new());
 
 /// Looks a program up.

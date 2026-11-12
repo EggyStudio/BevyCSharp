@@ -61,7 +61,7 @@ public sealed class MeshletTests
     /// bindings it adds and the first meshlet mesh drawn under it would end the app.
     /// </summary>
     /// <remarks>
-    /// The feature test's camera has an atmosphere, and loading Sponza with meshlets ended it on a
+    /// A camera with an atmosphere drawing a scene loaded with meshlets would end the app on a
     /// validation error naming the view layout.
     /// </remarks>
     [SkippableFact]

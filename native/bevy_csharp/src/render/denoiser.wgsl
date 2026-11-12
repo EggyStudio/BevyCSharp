@@ -122,12 +122,10 @@ fn normal_from(packed: u32) -> vec3<f32> {
 // The share of the light reaching a surface that it sends back, which the light is divided by, its
 // diffuse color and what its specular reflection returns at the angle it is seen at, as Bevy's
 // lighting takes it from the polynomial `F_AB` where it reads no table. Solari's light holds both,
-// and a dark surface seen at a slant, the feature test's ground far off, sends back more by its
-// specular than by its color, so divided by its color alone it stood far above the light of the
-// lighter squares beside it, and the filter spread it among them until the picture's checker was
-// further from its mean than a grainy frame (build/denoiser-readings.py). Kept above the floor so
-// a black surface divides by something, and multiplied back by the same so a pixel the filter
-// leaves alone comes back as it was.
+// and a dark surface seen at a slant sends back more by its specular than by its color, so divided
+// by its color alone it would stand far above the light of the lighter surfaces beside it, and the
+// filter would spread it among them. Kept above the floor so a black surface divides by something,
+// and multiplied back by the same so a pixel the filter leaves alone comes back as it was.
 fn albedo_of(gpixel: vec4<u32>, pixel: vec2<i32>, depth: f32) -> vec3<f32> {
     let color = unpack4x8unorm(gpixel.r);
     let base = pow(color.rgb, vec3<f32>(2.2));

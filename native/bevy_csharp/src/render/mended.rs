@@ -88,9 +88,9 @@ const ANISOTROPY: [(&str, &str); 3] = [
 /// volume does not hold loses the environment map's diffuse light, the sky's light, and gets
 /// nothing in its place. Bevy culls the volumes by each view's frustum, so a room with a small
 /// volume in a corner dims all over as the camera turns the volume into view and brightens as it
-/// turns away, the feature test's light hall by about two fifths. The mend counts the diffuse light
-/// as found only where a volume holds the point, as Bevy's search for one decides it, and leaves
-/// the environment map to light the rest, as it lights them with no volume in view.
+/// turns away. The mend counts the diffuse light as found only where a volume holds the point, as
+/// Bevy's search for one decides it, and leaves the environment map to light the rest, as it lights
+/// them with no volume in view.
 ///
 /// The fault is lines 702 to 711 of Bevy 0.20's file, the `IRRADIANCE_VOLUME` block setting
 /// `found_diffuse_indirect` to true after `irradiance_volume_light`. A release that sets it from

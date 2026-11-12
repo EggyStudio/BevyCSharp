@@ -70,7 +70,7 @@ public static class EditorEntity
     /// </remarks>
     /// <param name="world">The world the entities are in.</param>
     /// <param name="sources">What to copy.</param>
-    /// <returns>The copies, in the order of the sources, skipping any that no longer exist.</returns>
+    /// <returns>The copies, in the order of the sources, skipping any that do not exist.</returns>
     public static IReadOnlyList<Entity> Duplicate(EcsWorld world, IReadOnlyList<Entity> sources)
     {
         ArgumentNullException.ThrowIfNull(world);

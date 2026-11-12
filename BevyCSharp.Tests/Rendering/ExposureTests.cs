@@ -8,10 +8,10 @@ namespace Bevy.Tests;
 /// it had adjusted to.
 /// </summary>
 /// <remarks>
-/// Bevy 0.19 forgets the effect's buffer by the camera's own entity where it keeps it by the render
-/// world's, so its pass went on adjusting a dim scene brighter after the component was gone, and
-/// the feature test's effects page could turn it on but never off. The bridge gives the camera a
-/// new entity in the render world as the effect goes.
+/// Bevy forgets the effect's buffer by the camera's own entity where it keeps it by the render
+/// world's, so its pass would go on adjusting a dim scene brighter after the component was gone,
+/// the effect turned on and never off. The bridge gives the camera a new entity in the render world
+/// as the effect goes.
 /// </remarks>
 [Collection("engine")]
 public sealed class ExposureTests

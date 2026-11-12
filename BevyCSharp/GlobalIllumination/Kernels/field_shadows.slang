@@ -137,7 +137,8 @@ float3 sent(PassSurface surface, float3 V, float3 L, float3 color)
 float4 fragment(FullscreenOutput input) : SV_Target
 {
     // Each directional light through the camera's air, as Bevy's lighting gives it the picture,
-    // read before any pixel is discarded, as the light pass reads it.
+    // read before any pixel is discarded, since a read of the air once a group's threads have parted
+    // faults on Mesa's llvmpipe (clouds.slang's brightest).
     float3 through[10];
     for (uint i = 0u; i < min(passLights.n_directional_lights, 10u); i++)
         through[i] = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);

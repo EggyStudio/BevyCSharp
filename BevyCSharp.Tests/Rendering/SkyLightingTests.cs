@@ -62,7 +62,7 @@ public sealed class SkyLightingTests
     /// <remarks>
     /// The same file the skybox draws, filtered on the GPU into the two halves an environment map
     /// carries. What is asserted is the same thing the sky test asserts, that the side no lamp
-    /// reaches is no longer black.
+    /// reaches is lit and not black.
     /// </remarks>
     [SkippableFact]
     public void AnImageLightsWhatTheSunDoesNot()

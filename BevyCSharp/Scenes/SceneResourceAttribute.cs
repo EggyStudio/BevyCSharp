@@ -10,7 +10,7 @@ namespace Bevy;
 /// a level, which a scene saves with the entities it belongs with. Its fields are written as a data
 /// asset's are, a string, a list and a dictionary among them, under the scene's
 /// <c>worldResources</c>, and <see cref="SceneFile.Load"/> sets it into the world, over the one it
-/// held. A scene of a world holding none is written as before.
+/// held. A scene of a world holding none writes no <c>worldResources</c>.
 /// </para>
 /// <para>
 /// <see cref="FormerNameAttribute"/> and <see cref="DataVersionAttribute"/> work on it as on a

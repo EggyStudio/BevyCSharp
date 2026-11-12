@@ -3,8 +3,8 @@ using Bevy.Interop;
 namespace Bevy;
 
 /// <summary>
-/// Where every error the engine logs and goes on from is said, on the error stream as before and to
-/// whoever listens, each laid to the app that logged it.
+/// Where every error the engine logs and goes on from is said, on the error stream and to whoever
+/// listens, each laid to the app that logged it.
 /// </summary>
 /// <remarks>
 /// <para>

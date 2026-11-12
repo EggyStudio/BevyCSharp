@@ -14,7 +14,7 @@ namespace Bevy.Generator;
 /// <para>
 /// A reflected component's schema is built while the app runs, from Bevy's registry, which knows
 /// only where a type is now. A scene names a component by the path it had when the scene was
-/// written, so one written before Bevy moved a type names a path the registry no longer has, and
+/// written, so one written before Bevy moved a type names a path the registry does not have, and
 /// the component would be refused. The list gives each moved type the paths it had, and the
 /// schema keeps them as the former names a generated schema keeps from a <c>[FormerName]</c>.
 /// </para>
