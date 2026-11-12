@@ -43,9 +43,8 @@ public sealed partial class GlobalIlluminationTests(ITestOutputHelper output)
                 at: new Vec3(0f, 0f, 3.5f),
                 ambient: 400f,
                 traced: true,
-                // Traced for three seconds' frames rather than one's, since with the GPU drawing
-                // for another app beside the suite the floors read after 60 frames come out short
-                // of where they settle, and at 180 they read as they do with the GPU to the suite.
+                // Traced for 180 frames, which the floor under a solid slab five and a half up needs
+                // to settle, at 60 still lit a fifth more than where it settles.
                 frames: 180);
             return Luminance(r, g, b);
         }

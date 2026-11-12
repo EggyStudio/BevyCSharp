@@ -540,11 +540,18 @@ public sealed partial class GlobalIlluminationTests
     /// The mean color of the middle of the camera's picture, five pixels a side, looking from
     /// <paramref name="eye"/> at <paramref name="at"/> under a white ambient light of
     /// <paramref name="ambient"/>, once the field holds the scene's still meshes and, where
-    /// <paramref name="traced"/>, the probes have traced for <paramref name="frames"/> frames.
+    /// <paramref name="traced"/>, the probes have traced for <paramref name="frames"/> frames counted
+    /// from the frame every pipeline is ready.
     /// </summary>
+    /// <remarks>
+    /// A pass whose pipeline is still compiling is skipped, so frames counted from the probes' making
+    /// would count frames that traced nothing, as many as the compiles take on a machine busy with
+    /// something else, and the light read after them would fall short of where it settles.
+    /// </remarks>
     private static (int R, int G, int B) Looking(Action<EcsWorld> scene, int stills, Vec3 eye, Vec3 at, float ambient, bool traced,
         Action<Entity>? lit = null, int frames = 60)
     {
+        long from = 0;
         var run = new PictureRun
         {
             Width = 64,
@@ -559,8 +566,10 @@ public sealed partial class GlobalIlluminationTests
             },
         }
             .Until("settled", _ => Settled(stills))
-            .Until("traced", _ => !traced || WorldProbes.TracedFrames >= frames)
             .Until("drawn", _ => EngineDrawsOn(traced))
+            .Until("ready", _ => Render.PipelinesReady())
+            .Do("counted from", _ => from = WorldProbes.TracedFrames)
+            .Until("traced", _ => !traced || WorldProbes.TracedFrames - from >= frames)
             .Capture("seen");
         run.Go();
 

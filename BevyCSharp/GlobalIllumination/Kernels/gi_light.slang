@@ -415,12 +415,17 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
 
 // The step toward a pixel's neighbor a pixel on or back along an axis, the one whose point lies
 // nearer p, so a pixel at a thing's edge takes its neighbor on its own surface, which says how the
-// surface's point moves from pixel to pixel.
+// surface's point moves from pixel to pixel. A pixel on the picture's edge has no neighbor past it,
+// so it takes the one inside. Clamped to the picture, the neighbor past it would be the pixel
+// itself, its step the pixel's point found twice, nothing but a float's rounding, and as the shorter
+// of the two it would be taken, so the way the surface faces, made from it, and every weight that
+// rests on that way would turn as the rounding falls.
 float3 nearerStep(int2 pixel, int2 step, float3 p)
 {
     int2 size = int2(passPictureSize());
     int2 ahead = min(pixel + step, size - 1), behind = max(pixel - step, int2(0));
-    float aheadDepth = passLoadDepth(ahead), behindDepth = passLoadDepth(behind);
+    float aheadDepth = any(ahead != pixel) ? passLoadDepth(ahead) : 0.0;
+    float behindDepth = any(behind != pixel) ? passLoadDepth(behind) : 0.0;
     float3 forward = aheadDepth > 0.0 ? passWorldPosition(passUv(ahead), aheadDepth) - p : float3(1e10);
     float3 back = behindDepth > 0.0 ? p - passWorldPosition(passUv(behind), behindDepth) : float3(1e10);
     float3 nearer = dot(forward, forward) < dot(back, back) ? forward : back;

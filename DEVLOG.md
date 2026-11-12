@@ -491,7 +491,7 @@ saturation, the hall's floor and the yard's shade blue, and on the right with a 
 
 Done that day
 
-- Item 78 at `c5d9cd20`. The README's words under the header, as given.
+- Item 78 at `c5d9cd20`. The README's words under the header are replaced.
 - Item 82 at `785a1136`. The light hall keeps its brightness as the camera turns.
 - Item 83 at `219142e2`. The grass is shaded as the trees are.
 - Item 84 at `1c9b6baf`. The light-through tests read the same in the whole suite as alone.
@@ -1585,7 +1585,8 @@ Done that day
 - Item 40 at `bee54e98`. The modeling commands, so a level is blocked out from the terminal, and a
   window in the game to shape by hand (Decision 46).
 - Item 41 at `fc63b7ba`. Texture coordinates shaped and textures given to faces (Decision 46).
-- Item 42 at `09fc95dd`. A game that is a level blocked out with the tools, Blockout (Decision 46).
+- Item 42 at `09fc95dd`. A game that is a level blocked out with the tools, Blockout unless named
+  otherwise (Decision 46).
 - Item 46 at `585497f1`. An animated capture of a run, frames taken at an interval and written as
   one file, and one made from captures on disk (Decision 48).
 - Item 47 at `3d045110`. F2 takes a screenshot in every program, to a screenshots folder beside it

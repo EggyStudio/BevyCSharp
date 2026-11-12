@@ -161,6 +161,32 @@ public sealed class BounceRoomsTests
     }
 
     /// <summary>
+    /// The fifth view, red walls at three distances from white blocks in the sun, read with the
+    /// screen's probes, lies within a thousandth of its light of itself with its camera moved by
+    /// three hundred thousandths of a unit along x, a few float steps where it stands.
+    /// </summary>
+    /// <remarks>
+    /// The move changes nothing the picture shows by a measurable part of a pixel, and changes each
+    /// point found from the depth by the float's rounding alone, so the view reads the same where its
+    /// light takes nothing from a float's last bits. A pixel's step to its neighbor gives the way the
+    /// surface faces, which the screen's probes and the glow lights' texels are weighed by, and a
+    /// step of nothing, as a neighbor clamped onto the pixel at the picture's edge would give, faces
+    /// whichever way the rounding falls.
+    /// </remarks>
+    [SkippableTheory]
+    [InlineData(GlobalIllumination.Medium)]
+    [InlineData(GlobalIllumination.High)]
+    public void WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps(GlobalIllumination quality)
+    {
+        Needs.Shaders();
+        var (supported, still) = Measure(5, quality, 0, screen: true);
+        Needs.RayQueries(supported);
+        var (_, moved) = Measure(5, quality, 0, screen: true, nudge: new Vec3(3e-5f, 0f, 0f));
+        var apart = GiReference.Distance(moved, still);
+        Assert.True(apart < 0.001, $"view 5 at {quality} reads within a thousandth of itself with its camera moved by a few float steps, {apart:0.0000} apart");
+    }
+
+    /// <summary>
     /// The Cornell box's floor, lit by the lamp under its ceiling and the light its walls send
     /// back, reads at <see cref="GlobalIllumination.High"/> within 16% of a reference of 1024 paths
     /// a pixel traced in the same run, its light summed over the floor's pixels. What the floor
@@ -202,7 +228,7 @@ public sealed class BounceRoomsTests
     /// with the screen probes read or, where <paramref name="screen"/> is false, traced and left
     /// unread.
     /// </summary>
-    private static (bool Supported, float[] Picture) Measure(int view, GlobalIllumination quality, int samples, bool screen)
+    private static (bool Supported, float[] Picture) Measure(int view, GlobalIllumination quality, int samples, bool screen, Vec3 nudge = default)
     {
         var supported = false;
         var (begun, read) = (false, false);
@@ -216,7 +242,7 @@ public sealed class BounceRoomsTests
                 Frames = 6000,
                 Scene = ecs =>
                 {
-                    Rooms.Build(ecs, view);
+                    Rooms.Build(ecs, view, nudge);
                     Render.SetSceneField(3, 0.15f, 2);
                     Render.SetGlobalIllumination(quality);
                     WorldProbes.ScreenUnread = !screen;
@@ -291,9 +317,10 @@ public sealed class BounceRoomsTests
         /// <summary>The camera's exposure as Bevy works it out at its default of 9.7 EV.</summary>
         private static readonly float Exposure = 1f / (1.2f * MathF.Pow(2f, 9.7f));
 
-        public static void Build(EcsWorld ecs, int view)
+        public static void Build(EcsWorld ecs, int view, Vec3 nudge = default)
         {
             var (eye, target, fov) = Views[view - 1];
+            (eye, target) = (eye + nudge, target + nudge);
             var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f), FieldOfView = fov });
             ecs.Add(camera, Transform.LookingAt(eye, target, Vec3.UnitY));
             Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);

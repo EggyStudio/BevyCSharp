@@ -19,97 +19,97 @@ a batch.
    material's depth and specular maps, done at `e09a2ed8` with `pbr_specular_textures` on (Decision
    25); and Bevy's diagnostics store, done at `90075005`, `log_diagnostics` in part for the system
    information behind the `sysinfo` crate. The dev tools' three, `fps_overlay`, `infinite_grid` and
-   `scene_viewer`, wait on the owner's word for their crate as Feathers' and the system information
-   do (Decision 11), and the remote protocol's three stay as they are, `./bcs` being this engine's
-   own. With the gaps that wait on no word done, the captures' comparison below is next, the
-   transmission flake first. When the captures have settled, they are compared whole with checked-in
-   references by the workflow, a small share of pixels allowed to differ between devices, as
-   3DEngine does for its scenes. The four faults named before that job goes red are traced at
-   `d98c299d`: transmission's missing spheres do not reproduce on 0.20; `dragdrop_picking`'s preview
-   over the words is Bevy's own, the same on bare 0.20; the anisotropic spheres blown white under a
-   normal prepass are Bevy's shader skipping anisotropy's setup with the tangent frame, pinned by a
-   test that fails when Bevy mends it, no report filed from here as the owner has it; and the fog's
-   haze under a depth prepass is gone on 0.20, pinned. The captures are compared whole by the
-   workflow since `d17f0d97`: each taken in a set frame on a clock of a sixtieth, every pipeline
-   compiled in the frame that asks for it, all 329 matching between the laptop's GPU and lavapipe,
-   seven within allowances listed with their causes in `build/captures-differ.txt`, which only gets
-   shorter, and `build/compare-captures.py` failing a capture past 24 in a channel over 2% of its
-   pixels and naming the share and the box. Feathers' three examples with `feathers_number_input`
-   and the three camera controllers follow the other gaps, their crates allowed (Decisions 11 and
-   12) on the owner's word in the working session, and the four font examples stay missing (Decision
-   13). monitor_info opens a fullscreen window on every monitor of the machine, so its bridge part,
-   no first window, a run that does not end with its last window, monitor entities, a window
-   fullscreen on a monitor named by its entity and a camera aimed at that window, is in at
-   `ff467a5f` with headless tests, and the example is written and listed in part until the owner
-   runs it on their own screens and gives its capture, which waits on the owner's word. The
-   example's walk of every entity for a monitor showed the bridge listed no entities by a reflected
-   component, which `All<T>()` does since `28ba2698`. `compressed_image_saver` was to come last
-   here, for the scene packs' textures as KTX2 in BCn or ASTC with their mipmaps, less memory after
-   the kill of 2026-10-08, and waits with the others: Bevy's feature pulls the `ctt` crate, which
-   the lock does not hold, so it takes the owner's word as Feathers' crates do (Decisions 11 and
-   25), and its universal twin is basis-universal, already on that list. With every free gap done,
-   item 11 and the three move-only splits are in at `c3aaacac` to `09e3b339`, and the working
-   session follows TODO.md's order: the option fields without a kind are typed at `ac2817aa` but for
-   the tuples, the instants and a node index, said by kind, and custom_cursor_image is in at
-   `69fca4bb` with a bridge call for the cursor's atlas, frame and hotspot, and low_power at
-   `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at `4ea63186`, which needed no
-   bridge work, and ghost_nodes at `d91665d9` on a feature pulling no crate (Decision 25), and the
-   forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and error_handling at `6641dbcc`,
-   the custom projection at `6e28c3cc` and the depth to a texture at `b134dd4d`, the table at 346
-   written and 34 missing; the rows that need no crate and no word follow in TODO.md's order, the
-   interface material next, the last four of the list read against the lock first. Open again in
-   full on 2026-10-18 at 22:25 (Decision 38). Every gap closes, in the table's order by how many
-   rows each holds, with the examples each unlocks written in its batch and the comparison kept
-   green; the gaps that need a crate, Feathers' widgets and theming, the three camera controllers,
-   the dev tools' three and the system information, wait each on the owner's word typed in the
-   working session (Decisions 11, 12 and 20, AGENTS.md), which the working session asks for by name
-   as it reaches them, taking the gaps that need no word first; the remote protocol's three stay as
-   they are. One batch a commit, as before, and the bridge is complete when the table names no gap
-   but those the owner declines. Read against `triage.tsv` on 2026-10-18 at 22:31, no gap is left
-   that needs no word. The twenty rows not written whole are the camera controllers, five (free, pan
-   and the three pan-orbit); Feathers, four (counter, gallery, virtual keyboard, number input); the
-   dev tools, four (the FPS overlay, the infinite grid, the scene viewer, debug picking); the system
-   information, one (`log_diagnostics` in part); `web_asset`, one; `compressed_image_saver`, one;
-   the system fonts, three, which Decision 13 declined; and `monitor_info` in part, which waits on
-   the owner's screens; the remote protocol's rows stay as they are. None of the crates needed is in
-   `native/Cargo.lock`, and each was measured in a scratch copy of `native/` by adding the Bevy
-   feature to the editor profile and comparing the lock's package names: the camera controllers add
-   one package, `bevy_camera_controller`; Feathers one; the dev tools one; the system information
-   five, `sysinfo` with `ntapi`, `winapi` and its two shims; `web_asset` over https twenty-one,
-   `ureq` with `rustls`, `ring`, `webpki` and the platform verifiers, where plain http adds five and
-   the example loads an https address; and `compressed_image_saver` seventeen, `ctt` with its five
-   compressors, some prebuilt, `ispc-build-utils`, `zstd` and `fast_image_resize`. The working
-   session asks the owner for each word by name in the table's order, the camera controllers first,
-   then Feathers and the dev tools, then the system information, `web_asset` and the image saver,
-   and bridges each as its word is typed; item 29's list, which is reading and no mend, may be
-   written meanwhile. On 2026-10-19 the owner typed the words (Decision 39): the camera controllers'
-   crate, Feathers', the dev tools' and the system information's come in, the https asset loading
-   and the image saver are declined and their rows stay missing as declined, and `monitor_info` is
-   captured on virtual monitors in a headless display and never on the owner's screens. The batches
-   go in that order, one a commit. The camera controllers came at `670ecf2c` on 2026-10-19, five
-   rows written, the table at 363 written and 13 missing, the lock gaining the one crate, the ABI
-   286, the five examples captured and the examples' own free camera gone for Bevy's. Feathers'
-   first step came at `edee9686` the same day, the core plugin, the dark theme, ten controls and the
-   theme tokens, `feathers_counter` written, the table at 364 written and 12 missing, the lock
-   gaining `bevy_feathers`, the ABI 287; its steps to come were the number input and the virtual
-   keyboard, the gallery's controls, and the fifteen examples moved to Feathers' radio, each a
-   commit with its examples. The second step came at `5452a595`, the number input and the virtual
-   keyboard with their two examples, the table at 366 written and 10 missing, the ABI 289, the lock
-   unchanged. The third came at `1e8c4750`, the gallery's thirty-four controls with the gallery
-   written, the color conversions across Bevy's spaces, the table at 367 written and 9 missing,
-   Feathers' four rows all in, the ABI 291, the lock unchanged. The last came at `319624bf`, the
-   fourteen examples with option rows at Bevy's v0.20.0 on Feathers' radio, a theme call in the
-   package, the port's own helper gone for one file mirroring Bevy's three shared helper files, the
-   ABI 292, the lock unchanged, Feathers whole in four steps. The dev tools came at `64c1b25d` the
-   same day, the overlay, the grid, the picking debug and the scene viewer with their four examples,
-   the table at 371 written and 5 missing, the lock gaining `bevy_dev_tools`, the ABI 293. The
-   system information came at `8ae312a4` the same day, `log_diagnostics` whole, the table at 372
-   written, 1 in part and 5 missing, the lock gaining `sysinfo` and its four, the ABI 294. The two
-   declined rows are marked at `b7cd83db` the same day with Decision 39's reasons, the table at 5
-   missing with 2 declined. `monitor_info` came at `142dc131` the same day, its picture taken on a
-   headless compositor's four virtual outputs in a container by a script under `build/`, the row
-   written. Done at `142dc131`, the table at 373 written and 5 missing, 2 declined by Decision 39
-   and 3 by Decision 13, no gap left that a word could open.
+   `scene_viewer`, wait on a decision for their crate as Feathers' and the system information do
+   (Decision 11), and the remote protocol's three stay as they are, `./bcs` being this engine's own.
+   With the gaps that wait on no word done, the captures' comparison below is next, the transmission
+   flake first. When the captures have settled, they are compared whole with checked-in references
+   by the workflow, a small share of pixels allowed to differ between devices, as 3DEngine does for
+   its scenes. The four faults named before that job goes red are traced at `d98c299d`:
+   transmission's missing spheres do not reproduce on 0.20; `dragdrop_picking`'s preview over the
+   words is Bevy's own, the same on bare 0.20; the anisotropic spheres blown white under a normal
+   prepass are Bevy's shader skipping anisotropy's setup with the tangent frame, pinned by a test
+   that fails when Bevy mends it, no report filed from here by decision; and the fog's haze under a
+   depth prepass is gone on 0.20, pinned. The captures are compared whole by the workflow since
+   `d17f0d97`: each taken in a set frame on a clock of a sixtieth, every pipeline compiled in the
+   frame that asks for it, all 329 matching between the laptop's GPU and lavapipe, seven within
+   allowances listed with their causes in `build/captures-differ.txt`, which only gets shorter, and
+   `build/compare-captures.py` failing a capture past 24 in a channel over 2% of its pixels and
+   naming the share and the box. Feathers' three examples with `feathers_number_input` and the three
+   camera controllers follow the other gaps, their crates allowed (Decisions 11 and 12) by decision
+   in the working session, and the four font examples stay missing (Decision 13). monitor_info opens
+   a fullscreen window on every monitor of the machine, so its bridge part, no first window, a run
+   that does not end with its last window, monitor entities, a window fullscreen on a monitor named
+   by its entity and a camera aimed at that window, is in at `ff467a5f` with headless tests, and the
+   example is written and listed in part until it is run on real screens and its capture given,
+   which waits on a decision. The example's walk of every entity for a monitor showed the bridge
+   listed no entities by a reflected component, which `All<T>()` does since `28ba2698`.
+   `compressed_image_saver` was to come last here, for the scene packs' textures as KTX2 in BCn or
+   ASTC with their mipmaps, less memory after the kill of 2026-10-08, and waits with the others:
+   Bevy's feature pulls the `ctt` crate, which the lock does not hold, so it takes a decision as
+   Feathers' crates do (Decisions 11 and 25), and its universal twin is basis-universal, already on
+   that list. With every free gap done, item 11 and the three move-only splits are in at `c3aaacac`
+   to `09e3b339`, and the working session follows TODO.md's order: the option fields without a kind
+   are typed at `ac2817aa` but for the tuples, the instants and a node index, said by kind, and
+   custom_cursor_image is in at `69fca4bb` with a bridge call for the cursor's atlas, frame and
+   hotspot, and low_power at `ea5e1532`, custom_schedule at `bb4cb09f` and asset_settings at
+   `4ea63186`, which needed no bridge work, and ghost_nodes at `d91665d9` on a feature pulling no
+   crate (Decision 25), and the forward decal at `c16f67e5`, and the glTF extras at `7a6cbf16`, and
+   error_handling at `6641dbcc`, the custom projection at `6e28c3cc` and the depth to a texture at
+   `b134dd4d`, the table at 346 written and 34 missing; the rows that need no crate and no word
+   follow in TODO.md's order, the interface material next, the last four of the list read against
+   the lock first. Open again in full on 2026-10-18 at 22:25 (Decision 38). Every gap closes, in the
+   table's order by how many rows each holds, with the examples each unlocks written in its batch
+   and the comparison kept green; the gaps that need a crate, Feathers' widgets and theming, the
+   three camera controllers, the dev tools' three and the system information, wait each on the
+   owner's word typed in the working session (Decisions 11, 12 and 20, AGENTS.md), which the working
+   session asks for by name as it reaches them, taking the gaps that need no word first; the remote
+   protocol's three stay as they are. One batch a commit, as before, and the bridge is complete when
+   the table names no gap but those declined. Read against `triage.tsv` on 2026-10-18 at 22:31, no
+   gap is left that needs no word. The twenty rows not written whole are the camera controllers,
+   five (free, pan and the three pan-orbit); Feathers, four (counter, gallery, virtual keyboard,
+   number input); the dev tools, four (the FPS overlay, the infinite grid, the scene viewer, debug
+   picking); the system information, one (`log_diagnostics` in part); `web_asset`, one;
+   `compressed_image_saver`, one; the system fonts, three, which Decision 13 declined; and
+   `monitor_info` in part, which waits on real screens; the remote protocol's rows stay as they are.
+   None of the crates needed is in `native/Cargo.lock`, and each was measured in a scratch copy of
+   `native/` by adding the Bevy feature to the editor profile and comparing the lock's package
+   names: the camera controllers add one package, `bevy_camera_controller`; Feathers one; the dev
+   tools one; the system information five, `sysinfo` with `ntapi`, `winapi` and its two shims;
+   `web_asset` over https twenty-one, `ureq` with `rustls`, `ring`, `webpki` and the platform
+   verifiers, where plain http adds five and the example loads an https address; and
+   `compressed_image_saver` seventeen, `ctt` with its five compressors, some prebuilt,
+   `ispc-build-utils`, `zstd` and `fast_image_resize`. The working session asks for each word by
+   name in the table's order, the camera controllers first, then Feathers and the dev tools, then
+   the system information, `web_asset` and the image saver, and bridges each as its word is typed;
+   item 29's list, which is reading and no mend, may be written meanwhile. On 2026-10-19 the words
+   were typed (Decision 39): the camera controllers' crate, Feathers', the dev tools' and the system
+   information's come in, the https asset loading and the image saver are declined and their rows
+   stay missing as declined, and `monitor_info` is captured on virtual monitors in a headless
+   display and never on real screens. The batches go in that order, one a commit. The camera
+   controllers came at `670ecf2c` on 2026-10-19, five rows written, the table at 363 written and 13
+   missing, the lock gaining the one crate, the ABI 286, the five examples captured and the
+   examples' own free camera gone for Bevy's. Feathers' first step came at `edee9686` the same day,
+   the core plugin, the dark theme, ten controls and the theme tokens, `feathers_counter` written,
+   the table at 364 written and 12 missing, the lock gaining `bevy_feathers`, the ABI 287; its steps
+   to come were the number input and the virtual keyboard, the gallery's controls, and the fifteen
+   examples moved to Feathers' radio, each a commit with its examples. The second step came at
+   `5452a595`, the number input and the virtual keyboard with their two examples, the table at 366
+   written and 10 missing, the ABI 289, the lock unchanged. The third came at `1e8c4750`, the
+   gallery's thirty-four controls with the gallery written, the color conversions across Bevy's
+   spaces, the table at 367 written and 9 missing, Feathers' four rows all in, the ABI 291, the lock
+   unchanged. The last came at `319624bf`, the fourteen examples with option rows at Bevy's v0.20.0
+   on Feathers' radio, a theme call in the package, the port's own helper gone for one file
+   mirroring Bevy's three shared helper files, the ABI 292, the lock unchanged, Feathers whole in
+   four steps. The dev tools came at `64c1b25d` the same day, the overlay, the grid, the picking
+   debug and the scene viewer with their four examples, the table at 371 written and 5 missing, the
+   lock gaining `bevy_dev_tools`, the ABI 293. The system information came at `8ae312a4` the same
+   day, `log_diagnostics` whole, the table at 372 written, 1 in part and 5 missing, the lock gaining
+   `sysinfo` and its four, the ABI 294. The two declined rows are marked at `b7cd83db` the same day
+   with Decision 39's reasons, the table at 5 missing with 2 declined. `monitor_info` came at
+   `142dc131` the same day, its picture taken on a headless compositor's four virtual outputs in a
+   container by a script under `build/`, the row written. Done at `142dc131`, the table at 373
+   written and 5 missing, 2 declined by Decision 39 and 3 by Decision 13, no gap left that a word
+   could open.
 
 5. **Every method native code calls catches every exception**, from 3DEngine's `NormTests.N_2_10`
    (`48fbb663`): a test finds a callback the bridge calls that lets an exception through, by how it
@@ -123,9 +123,8 @@ a batch.
    workflow, as the first game's first step would have a newcomer do. Done at `fef6bbeb`, `dotnet
    new bevycsharp` making the README's first program, packed beside the engine and walked by the
    README job; its publishing on nuget.org beside the engine, a second package in the owner's name,
-   waits on the owner's word (Decision 8), and the README's install line needs it;
-   `docs/first-game.md` starts from a second template, `bevycsharp-empty`, since `c67c7981`, as
-   3DEngine's does.
+   waits on a decision (Decision 8), and the README's install line needs it; `docs/first-game.md`
+   starts from a second template, `bevycsharp-empty`, since `c67c7981`, as 3DEngine's does.
 
 7. **The entities that lost a component since a system last ran**, from 3DEngine's `Removed`
    (`ab052859`): a query's filter or a world call answering the entities a component was removed
@@ -140,8 +139,8 @@ a batch.
    into the project fails the build. The capture drivers move to one file beside the catalog,
    `StressTest.Warn` and the transforms' cube scene are written into each example as Bevy's carry
    theirs, and the opened size comes from a library call or is read as Bevy's read it; `FreeCamera`
-   and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on the
-   owner's word for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
+   and `RadioButtons` stay helpers on the script's list with their reasons, the first waiting on a
+   decision for Bevy's camera controller crate (Decision 12), whose camera then replaces it, the
    second a helper Bevy's own examples share and Feathers' radio would replace (Decision 11), the
    list only getting shorter. Done at `5d955562`, the two helpers listed. The free camera helper
    left at `670ecf2c` for Bevy's controller and the radio buttons helper at `319624bf` for Feathers'
@@ -188,7 +187,7 @@ a batch.
     it, a resource taken off its entity answered as held.
 
 13. **The README's gallery as one scrolling row of pictures a group, done through `83b371cc`
-    (Decision 27).** The owner asked on 2026-10-11 at 15:36, as for 3DEngine's README.
+    (Decision 27).** Asked on 2026-10-11 at 15:36, as for 3DEngine's README.
     `build/examples-table.py` writes the gallery between its markers as one table of four pictures a
     row over every written example; it writes instead one table a group in the order Bevy's
     `examples/README.md` lists the groups, which the script already reads, each a single row holding
@@ -198,29 +197,28 @@ a batch.
     GitHub, which is the point, so no row is wrapped. The script's check reads the result as it
     reads the table today, so the workflow's table check and the README's walk run on it, and the
     raw links keep their form for the package's page. A batch of its own before low_power, since it
-    is small and the owner asked; the owner's eye judges the look. Done at `b06ff120`: a heading and
-    a one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives
-    them, the kept-out ones last, 28 groups, the check passing. The owner asked at 15:52 that the
-    pictures be one size, where they differ today: every picture carries the same width and height
-    on its tag, 200 wide as before and the height of sixteen by nine, and the captures that are not
-    of that shape, four of 304, a square, a four by three and two of five by three, are taken again
-    at it where the example's window allows or padded to it by the capture script, so the tag
-    distorts nothing; the table check and the captures' comparison read the result, the comparison's
-    references following the captures. Done at `21d08b44`: every tag 200 by 113, four captures
-    padded to sixteen by nine by the capture script, which pads any capture that needs it;
-    `b06ff120`'s gallery had passed N 4.2's 320 lines, mended at `d0e638d7` before its page could
-    show it. The owner looked at the pushed page at 16:04 and the pictures still read as different
-    sizes. GitHub renders every tag at one box, its own style giving each the full width of its
-    cell, an automatic height and the tag's aspect, so the box is uniform; what differs is the
-    picture inside it, since a capture of another shape was padded with nothing to sixteen by nine
-    and the page fills the padding with its muted color, which reads as a smaller picture. The fit
-    fills instead: the capture script scales a shot of another shape so its shorter side fills
-    sixteen by nine and cuts the rest around the middle, or the example's window is opened at
-    sixteen by nine where the cut would lose something that matters, so every picture fills its box
-    edge to edge; the four captures are taken again so, the comparison's references following, and
-    the page is read after the push. Done at `04cefc8e`: the capture script fills and cuts around
-    the middle, two examples filled so and two opened at a sixteen by nine window where the cut
-    would lose their point. The owner looked again at 16:12: each picture is as wide as the name
+    is small and was asked for; the look is judged by eye. Done at `b06ff120`: a heading and a
+    one-row table a group in Bevy's order, the examples in each in the order Bevy's list gives them,
+    the kept-out ones last, 28 groups, the check passing. Asked at 15:52 that the pictures be one
+    size, where they differ today: every picture carries the same width and height on its tag, 200
+    wide as before and the height of sixteen by nine, and the captures that are not of that shape,
+    four of 304, a square, a four by three and two of five by three, are taken again at it where the
+    example's window allows or padded to it by the capture script, so the tag distorts nothing; the
+    table check and the captures' comparison read the result, the comparison's references following
+    the captures. Done at `21d08b44`: every tag 200 by 113, four captures padded to sixteen by nine
+    by the capture script, which pads any capture that needs it; `b06ff120`'s gallery had passed N
+    4.2's 320 lines, mended at `d0e638d7` before its page could show it. On the pushed page at 16:04
+    the pictures still read as different sizes. GitHub renders every tag at one box, its own style
+    giving each the full width of its cell, an automatic height and the tag's aspect, so the box is
+    uniform; what differs is the picture inside it, since a capture of another shape was padded with
+    nothing to sixteen by nine and the page fills the padding with its muted color, which reads as a
+    smaller picture. The fit fills instead: the capture script scales a shot of another shape so its
+    shorter side fills sixteen by nine and cuts the rest around the middle, or the example's window
+    is opened at sixteen by nine where the cut would lose something that matters, so every picture
+    fills its box edge to edge; the four captures are taken again so, the comparison's references
+    following, and the page is read after the push. Done at `04cefc8e`: the capture script fills and
+    cuts around the middle, two examples filled so and two opened at a sixteen by nine window where
+    the cut would lose their point. Looked at again at 16:12, each picture is as wide as the name
     under it, a short name's tiny and a long name's large. GitHub squeezes a table to the page's
     width before it lets it scroll, and a cell shrinks to the one thing in it that cannot wrap, the
     name, the picture shrinking with it under the page's own rule of a picture no wider than its
@@ -229,60 +227,59 @@ a batch.
     full width and scrolls; a header row of non-breaking spaces is the fallback should the attribute
     be stripped, which the rendered page says after the push. Done at `f60bc166`: every cell 200
     wide, N 4.5's reader widened to a cell with attributes, the rendered page read after the push.
-    The owner looked at the pushed page at 16:20 and the pictures still differ. The rendered page
-    keeps the cell's width, read here, so the squeeze is the browser's table layout: a cell's width
-    is a preference, and when a table is wider than the page the browser shrinks each cell to its
-    narrowest unbreakable content, the name, the picture with it, GitHub's table being a block
-    capped at the page's width that scrolls only past that minimum. So the minimum comes from
-    content: the script pads the run name under each picture, in its code tag, with non-breaking
-    spaces, the character itself and not the entity, to thirty characters, which the code font draws
-    at some 246 pixels, past the picture's 200 on every platform's monospace and past the longest
-    name, so no cell can shrink below its picture and the name reads as a caption bar; the cell's
-    width stays as the preference, N 4.5's reader and the prose count checked, and the rendered page
-    read after the push. Done at `e92591dd`: every name at thirty characters or more, the page read
-    after the push. The owner looked at the pushed pages at 16:30: the look is right, and on a phone
-    the caption under each picture is a tenth to a fifth wider than the picture, on a desktop a
-    little wider. The caption's padded text sets the cell's width while the picture fills no more
-    than its own size, so on a font that draws text wider, as a phone's does, the text overshoots
-    the picture. The caption sets the width on purpose and the picture fills it exactly: each
-    picture's tag and cell take a nominal width past the caption's widest rendering, so the cell is
-    the caption's width on every device and the picture, no wider than its cell by the page's rule,
-    fills it edge to edge; and the caption shrinks to the small tag, `<small><code>`, which the page
-    keeps, since the padding cannot go below the longest name and the font is the other knob: the
-    names padded to 35 characters, the longest, in a small code caption, every tag 260 by 146 and
-    every cell 260, so the pictures come out about 260 wide and the same width as their captions;
-    the owner tried a padding of 28 with the longer names broken by a `<wbr>` tag and the tags at
-    220 on 3DEngine's page at 16:38 and prefers this form, its pictures filling up to the caption's
-    width where the other's fell short, the names being Bevy's and the table's keys, so none is
-    renamed; the rendered page read after the push on a desktop and a phone. Done at `bbb7de81`:
-    captions of 35 set small, every tag and cell 260. The owner looked at both pushed galleries at
-    16:58 and finds 3DEngine's the better: its captions are padded to 32, narrower than the picture
-    of 260, so the picture shrinks to the caption and the two match edge to edge, where BevyCSharp's
-    35 draws past the picture. The padding goes to 32 as 3DEngine's, the one name longer than that,
-    `shader_material_screenspace_texture`, left unpadded with its cell a little wider, the tags and
-    cells unchanged, so the two galleries read alike. Done at `83b371cc`.
+    On the pushed page at 16:20 the pictures still differ. The rendered page keeps the cell's width,
+    read here, so the squeeze is the browser's table layout: a cell's width is a preference, and
+    when a table is wider than the page the browser shrinks each cell to its narrowest unbreakable
+    content, the name, the picture with it, GitHub's table being a block capped at the page's width
+    that scrolls only past that minimum. So the minimum comes from content: the script pads the run
+    name under each picture, in its code tag, with non-breaking spaces, the character itself and not
+    the entity, to thirty characters, which the code font draws at some 246 pixels, past the
+    picture's 200 on every platform's monospace and past the longest name, so no cell can shrink
+    below its picture and the name reads as a caption bar; the cell's width stays as the preference,
+    N 4.5's reader and the prose count checked, and the rendered page read after the push. Done at
+    `e92591dd`: every name at thirty characters or more, the page read after the push. On the pushed
+    pages at 16:30 the look is right, and on a phone the caption under each picture is a tenth to a
+    fifth wider than the picture, on a desktop a little wider. The caption's padded text sets the
+    cell's width while the picture fills no more than its own size, so on a font that draws text
+    wider, as a phone's does, the text overshoots the picture. The caption sets the width on purpose
+    and the picture fills it exactly: each picture's tag and cell take a nominal width past the
+    caption's widest rendering, so the cell is the caption's width on every device and the picture,
+    no wider than its cell by the page's rule, fills it edge to edge; and the caption shrinks to the
+    small tag, `<small><code>`, which the page keeps, since the padding cannot go below the longest
+    name and the font is the other knob: the names padded to 35 characters, the longest, in a small
+    code caption, every tag 260 by 146 and every cell 260, so the pictures come out about 260 wide
+    and the same width as their captions; a padding of 28 with the longer names broken by a `<wbr>`
+    tag and the tags at 220 was tried on 3DEngine's page at 16:38 and this form is preferred, its
+    pictures filling up to the caption's width where the other's fell short, the names being Bevy's
+    and the table's keys, so none is renamed; the rendered page read after the push on a desktop and
+    a phone. Done at `bbb7de81`: captions of 35 set small, every tag and cell 260. Of both pushed
+    galleries at 16:58, 3DEngine's is found the better, its captions are padded to 32, narrower than
+    the picture of 260, so the picture shrinks to the caption and the two match edge to edge, where
+    BevyCSharp's 35 draws past the picture. The padding goes to 32 as 3DEngine's, the one name
+    longer than that, `shader_material_screenspace_texture`, left unpadded with its cell a little
+    wider, the tags and cells unchanged, so the two galleries read alike. Done at `83b371cc`.
 
-14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** The owner asked
-    on 2026-10-11 at 15:50 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
+14. **The bcs skill left the `.claude` folder, done at `53fd0c3f` (Decision 28).** Asked on
+    2026-10-11 at 15:50 that `.claude/skills/bcs-cli/SKILL.md` go to the root or elsewhere, the
     `.claude` folder and long subfolders holding nothing else being unwanted, as for 3DEngine's. The
     document becomes `.github/BCS.md`, beside the other documents a session reads, its skill header
     dropped since it means nothing outside that folder, its body as it is; AGENTS.md's line on
-    controlling a session and its documents table name the new place, which the owner's ask is the
-    word for, as does STYLE.md's line on the skills; the folder goes with the move, and `.claude/`
-    joins `.gitignore` so the tool's own lock file there never enters the tree. A batch of its own,
-    taken when the owner types the ask in the working session, which changes AGENTS.md and the
-    tool's own folder only on the owner's word given there and has asked the owner for it, a right
-    the reviewing session holds. Done at `53fd0c3f` on the owner's word typed there:
-    `.github/BCS.md`, every reference moved, the folder gone and ignored.
+    controlling a session and its documents table name the new place, which the ask is the word for,
+    as does STYLE.md's line on the skills; the folder goes with the move, and `.claude/` joins
+    `.gitignore` so the tool's own lock file there never enters the tree. A batch of its own, taken
+    when the ask is typed in the working session, which changes AGENTS.md and the tool's own folder
+    only on the owner's word given there and has asked for it, a right the reviewing session holds.
+    Done at `53fd0c3f` by decision typed there: `.github/BCS.md`, every reference moved, the folder
+    gone and ignored.
 
 15. **The development machine's GPU is named nowhere a user reads, done at `c447a370` and `c16f67e5`
-    (Decision 29).** The owner asked on 2026-10-11 at 17:26, as of 3DEngine, that the mention of
-    their machine, the RTX 4070, leave the code and comments a user sees: here `Render.Pipeline.cs`,
-    the running guide and the comparison with Bevy name it, each where a measurement was taken; the
-    measurement stays and the device becomes a plain phrase, the development machine's GPU or a
-    laptop GPU of its class. The documents under `.github` keep the name unless the owner says
-    otherwise. Done at `c447a370` in the three files, the CPU's model gone with the GPU's; the
-    Solari comment at `c16f67e5`, so nothing outside `.github` names the model.
+    (Decision 29).** Asked on 2026-10-11 at 17:26, as of 3DEngine, that the mention of the
+    development machine, the RTX 4070, leave the code and comments a user sees: here
+    `Render.Pipeline.cs`, the running guide and the comparison with Bevy name it, each where a
+    measurement was taken; the measurement stays and the device becomes a plain phrase, the
+    development machine's GPU or a laptop GPU of its class. The documents under `.github` keep the
+    name unless decided otherwise. Done at `c447a370` in the three files, the CPU's model gone with
+    the GPU's; the Solari comment at `c16f67e5`, so nothing outside `.github` names the model.
 
 16. **An offscreen click lands only where the pointer has been, done at `4e6eab36`.** Found at
     `d91665d9`: run offscreen through `./bcs`, a click at a point the pointer has not moved to is
@@ -294,23 +291,22 @@ a batch.
     `4e6eab36`, two hover frames before the press and a test of three of three.
 
 17. **The examples' counts under the Examples heading, and a count on each group's heading, done at
-    `02598971` (Decision 30).** The owner asked on 2026-10-11 at 19:35. The line the table script
-    writes between its markers, of Bevy's 438 examples how many are written here, in part, waiting
-    on the bridge and about Rust itself, stands under the status heading today and moves under the
-    Examples heading, after its paragraph and before the gallery, the markers with it, so a reader
-    sees the count where the pictures are; and each group's heading in the gallery carries its
-    count, the written examples in its row and, where Bevy's group holds more, Bevy's count beside
-    it, as `### 2D Rendering, 26 of 27`, the form the working session finds reads best and the
-    owner's eye judges. The script writes both, so the check reads them, with the prose count kept
-    and the README walk run on the result. Done at `02598971`, the heading counting the group's
-    examples written whole rather than its pictures, since one that prints has none, said above the
-    gallery.
+    `02598971` (Decision 30).** Asked on 2026-10-11 at 19:35. The line the table script writes
+    between its markers, of Bevy's 438 examples how many are written here, in part, waiting on the
+    bridge and about Rust itself, stands under the status heading today and moves under the Examples
+    heading, after its paragraph and before the gallery, the markers with it, so a reader sees the
+    count where the pictures are; and each group's heading in the gallery carries its count, the
+    written examples in its row and, where Bevy's group holds more, Bevy's count beside it, as `###
+    2D Rendering, 26 of 27`, the form the working session finds reads best, to be judged by eye. The
+    script writes both, so the check reads them, with the prose count kept and the README walk run
+    on the result. Done at `02598971`, the heading counting the group's examples written whole
+    rather than its pictures, since one that prints has none, said above the gallery.
 
 18. **A vertex stream of the game's own on a mesh, Bevy's `custom_vertex_attribute` reached from C#
-    (Decision 31), done at `32ae29fb`.** The owner put a packed-vertex game in 3DEngine's `.ref` on
-    2026-10-11 at 20:05, one float a vertex unpacked in the shader, and asked for the same in both
-    engines; the plan was approved at 20:40 and its full text is kept by the reviewing session, this
-    item being what it asks of the bridge. `MeshData` gains `Streams`, each a name, a format of
+    (Decision 31), done at `32ae29fb`.** A packed-vertex game was put in 3DEngine's `.ref` on
+    2026-10-11 at 20:05, one float a vertex unpacked in the shader, with the ask for the same in
+    both engines; the plan was approved at 20:40 and its full text is kept by the reviewing session,
+    this item being what it asks of the bridge. `MeshData` gains `Streams`, each a name, a format of
     five, `UInt`, `UInt2`, `Float`, `Float4` and four bytes read as 0 to 1, a location from 8 to 15
     and its bytes, the shader declaring the input at that location's `TEXCOORDn` as every input here
     is, so the game writes one number twice and they agree; positions stay required, since Bevy's
@@ -373,9 +369,9 @@ a batch.
     and its mirror in lockstep, bit 0 the switch, the layout test gaining its offset and the new
     size, the ABI bumped or folded into the row under way's bump; a native test that a mesh with the
     flag and no normals holds none. The shaders guide's stream section says, with this item, why the
-    packed bytes are a vertex stream and not a storage buffer read by the vertex id, which the owner
-    asked at 23:15: a stream travels with the mesh, uploaded once with its positions and indices and
-    read by every draw of it with nothing else bound, where a buffer is bound to the shader or the
+    packed bytes are a vertex stream and not a storage buffer read by the vertex id, which was asked
+    at 23:15: a stream travels with the mesh, uploaded once with its positions and indices and read
+    by every draw of it with nothing else bound, where a buffer is bound to the shader or the
     material, so thousands of chunks would each need a binding a draw or one giant buffer with an
     offset a chunk; meshes sharing a shader keep drawing in one batch; the GPU fetches the attribute
     by the vertex index as it fetches the position, where a buffer read needs the vertex id by hand
@@ -438,17 +434,17 @@ a batch.
     the templates, what shipped, `NormTests N_6_4|N_6_5`, the upload, the push to nuget.org if asked
     and the summary, so a package is made only when every job passed, where today's pack job needs
     `native` and `test` alone; the `version` and `publish` jobs go. `feature-test.yml` and
-    `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the owner's
-    machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip needs a
-    Windows machine with `--cache`), and the Sponza run is `build/scenes.sh` (the meshlet and solari
-    bridge, `build/fetch-slang.sh`, `./bcs scenes fetch intel-sponza`, the feature test built strict
-    and run with `SHOTS=build/scenes`), BUILDING.md:356-363 saying so. Both files: `permissions:
-    contents: read`, concurrency `build-${{ github.ref }}` cancelling in progress and `pack-${{
-    github.ref }}` not, a time limit on every job with its reason (N 6.8), a head comment saying
-    what a push runs and what the pack run adds; a push still tests the library alone, the render
-    bridge costing a quarter of an hour cold, said in BUILDING.md in one sentence beside 3DEngine's.
-    Lines that change: `build/step.py:6-7`, `.github/BUILDING.md:63, 213, 336-379, 481, 498`,
-    `README.md:202, 266`. Checked by `WorkflowTests`, `TestScriptTests`, `NormTests`,
+    `scenes.yml` are deleted: the tester zips are `build/publish-feature-test.sh` run on the
+    development machine (BUILDING.md:364-379 rewritten around the recipe at 373-379; the Windows zip
+    needs a Windows machine with `--cache`), and the Sponza run is `build/scenes.sh` (the meshlet
+    and solari bridge, `build/fetch-slang.sh`, `./bcs scenes fetch intel-sponza`, the feature test
+    built strict and run with `SHOTS=build/scenes`), BUILDING.md:356-363 saying so. Both files:
+    `permissions: contents: read`, concurrency `build-${{ github.ref }}` cancelling in progress and
+    `pack-${{ github.ref }}` not, a time limit on every job with its reason (N 6.8), a head comment
+    saying what a push runs and what the pack run adds; a push still tests the library alone, the
+    render bridge costing a quarter of an hour cold, said in BUILDING.md in one sentence beside
+    3DEngine's. Lines that change: `build/step.py:6-7`, `.github/BUILDING.md:63, 213, 336-379, 481,
+    498`, `README.md:202, 266`. Checked by `WorkflowTests`, `TestScriptTests`, `NormTests`,
     `build/check-docs.py`, a push run green with the pack-only jobs skipped, a docs-only push
     running, and a pack run green with its package, which are Decision 33's gate (Decision 35). The
     norm's and SHARED.md's lines are the reviewer's and ride with the commit.
@@ -467,21 +463,21 @@ a batch.
 25. **The register: STYLE.md's rule and the sweep (Decision 37), done at `f8e9a6d2`, the figures
     Decision 37 adds at `b4d45938`.** STYLE.md gains a section, Register: prose uses the technical
     and generic term, the engine's own where it has one, and no figure of speech or casual
-    paraphrase, with the pairs the owner named and their replacements: the light that bounces
-    becomes global illumination; gives off light and glowing become emissive; driving a running
-    program becomes controlling or scripting it through the command line, and a drive a scripted run
-    or a course. The colon joins it: STYLE.md's rule, which allows a colon before a list, tightens
-    so that a running sentence holds none, the sentence recast or split where one appended an
-    elaboration or a list, as in "makes the program the README opens with: a window with a turning
-    cube"; a colon stands before a bulleted list, a code block or a command, and as a label in a
-    table, and STYLE.md's check of colons joining clauses reads prose lines of Markdown as well as
-    comments. The sweep covers README.md, `docs/`, AGENTS.md, `templates/README.md`, every Markdown
-    under `.github`, the comments of the code, the scripts and the workflows, and the sentences a
-    program prints; 20 documents hold the drive words some 90 times and one the first pair once, and
-    a rough count finds a colon inside a sentence on some 180 prose lines of the documents and 160
-    comment lines of the library and the examples. `build/drive-feature-test.sh` and the `drive` job
-    keep their names as identifiers, the job's shown name becoming "run the feature test's course"
-    and the comments reworded. The REVIEW.md, NORM.md and SHARED.md lines are the reviewer's and are
+    paraphrase, with the pairs named and their replacements: the light that bounces becomes global
+    illumination; gives off light and glowing become emissive; driving a running program becomes
+    controlling or scripting it through the command line, and a drive a scripted run or a course.
+    The colon joins it: STYLE.md's rule, which allows a colon before a list, tightens so that a
+    running sentence holds none, the sentence recast or split where one appended an elaboration or a
+    list, as in "makes the program the README opens with: a window with a turning cube"; a colon
+    stands before a bulleted list, a code block or a command, and as a label in a table, and
+    STYLE.md's check of colons joining clauses reads prose lines of Markdown as well as comments.
+    The sweep covers README.md, `docs/`, AGENTS.md, `templates/README.md`, every Markdown under
+    `.github`, the comments of the code, the scripts and the workflows, and the sentences a program
+    prints; 20 documents hold the drive words some 90 times and one the first pair once, and a rough
+    count finds a colon inside a sentence on some 180 prose lines of the documents and 160 comment
+    lines of the library and the examples. `build/drive-feature-test.sh` and the `drive` job keep
+    their names as identifiers, the job's shown name becoming "run the feature test's course" and
+    the comments reworded. The REVIEW.md, NORM.md and SHARED.md lines are the reviewer's and are
     swept already. Checked by `NormTests`, the links test of item 24 and `git grep -i` for the pairs
     finding the channel's history alone. One commit. 3DEngine's game repository did this first at
     its `b87e386`, and its STYLE.md's Register section and colon rule, with their checks, are the
@@ -500,27 +496,27 @@ a batch.
     `native/bevy_csharp/src/render/bcs.slang:286`; plumbing in
     `BevyCSharp.Tests/Behaviors/BehaviorTests.cs:141`; a long way in
     `BevyCSharp.Tests/Assets/ExposureTests.cs:32`; and whatever a sweep for such figures finds
-    beside them, STYLE.md's Register section carrying the rule with the owner's example. The box a
-    joint leaves (`Assets/Render.Skins.cs:121`) and the road to a signpost (`Zones.cs:125`) are
-    literal and stay, and the third-party notices are their authors' text. The reviewer's line in
-    NORM.md is reworded here. Done at `b4d45938`, 70 rewordings across 64 files, the idiom list
-    grown by the knob, the plumbing, the wiring, an escape hatch and for free, a handful made the
-    count the code gives, and the literal senses kept.
+    beside them, STYLE.md's Register section carrying the rule with the example. The box a joint
+    leaves (`Assets/Render.Skins.cs:121`) and the road to a signpost (`Zones.cs:125`) are literal
+    and stay, and the third-party notices are their authors' text. The reviewer's line in NORM.md is
+    reworded here. Done at `b4d45938`, 70 rewordings across 64 files, the idiom list grown by the
+    knob, the plumbing, the wiring, an escape hatch and for free, a handful made the count the code
+    gives, and the literal senses kept.
 
 26. **The reflected variants holding a tuple, an instant or a graph's index get typed properties,
     TODO.md's open line under the components through reflection, item 4's remainder, done at
     `c3bd5349`.** Chosen on 2026-10-18 as the next work, since every other row of the Now list and
-    of TODO.md waits on a crate the lock lacks, on a word the owner types in the working session
-    (Decisions 11, 12 and 20; Feathers, the camera controllers, the dev tools, `sysinfo`, `ctt`,
-    `ureq`, the template's publishing) or on a run on the owner's screens (`monitor_info`), and the
-    font examples stay off under Decision 13. The generated wrappers type an enum inside a variant,
-    a list, a duration and an integer that holds no zero, and leave an `Option` of a tuple (a text
-    layout's cursor, a window's pan gesture, the focus and its cause), of Rust's `Instant` (the real
-    clock's first and last update) or of a node index (animation transitions' main animation) with
-    its variant names alone, the value on a string path checked when it runs; each gets a typed
-    property, with a test a kind, and TODO.md's line and COMPONENTS.md follow. One commit, the eight
-    register rewordings riding along. Done at `c3bd5349` as asked, a test a kind and the lists of
-    tuples left named in COMPONENTS.md.
+    of TODO.md waits on a crate the lock lacks, on a word typed in the working session (Decisions
+    11, 12 and 20; Feathers, the camera controllers, the dev tools, `sysinfo`, `ctt`, `ureq`, the
+    template's publishing) or on a run on real screens (`monitor_info`), and the font examples stay
+    off under Decision 13. The generated wrappers type an enum inside a variant, a list, a duration
+    and an integer that holds no zero, and leave an `Option` of a tuple (a text layout's cursor, a
+    window's pan gesture, the focus and its cause), of Rust's `Instant` (the real clock's first and
+    last update) or of a node index (animation transitions' main animation) with its variant names
+    alone, the value on a string path checked when it runs; each gets a typed property, with a test
+    a kind, and TODO.md's line and COMPONENTS.md follow. One commit, the eight register rewordings
+    riding along. Done at `c3bd5349` as asked, a test a kind and the lists of tuples left named in
+    COMPONENTS.md.
 
 27. **Byte mirrors for the components that are plain data, COMPONENTS.md's third tier, TODO.md's
     next open line, in steps, done at `1a6c5d22`.** Chosen on 2026-10-18 at 03:10 over the smaller
@@ -580,18 +576,18 @@ a batch.
     earth's, and the guide's line. Done at `c5f19669` as asked, with a curve or a picture for a
     falloff or a phase left named in TODO.md.
 
-29. **What was mended for the time being is mended for good (Decision 38), after item 4.** The owner
-    said on 2026-10-18 at 22:25 that once everything is bridged, the places where a mend of the
-    moment stands are to be mended fundamentally. First the list, in a commit of its own: every
-    place mended for the time being, in the code's comments and TODO.md's lines, and in the
-    verdicts' mends that bounded, listed or said a figure in place of removing a cause, among them
-    the captures' differ lines whose cause is the machine's clock, the pictures taken on a bridge
-    without Solari for the `dfg_lut` it enables, the measure's rooms and the figures said and not
-    judged, each with what the lasting mend is and what it costs, written here as parts of this
-    item, and the reviewer orders them with the owner. Then each part is mended on its own, one
-    commit a part, measured where a figure moves (N 3.5). Listed at `2b355276` in TODO.md's section
-    "Mended for the time being", thirteen parts, taken here in the reviewer's order, the cheap and
-    self-contained first and the ones that are the owner's to decide last: (a) `many_sprites` and
+29. **What was mended for the time being is mended for good (Decision 38), after item 4.** Decided
+    on 2026-10-18 at 22:25, once everything is bridged, the places where a mend of the moment stands
+    are to be mended fundamentally. First the list, in a commit of its own: every place mended for
+    the time being, in the code's comments and TODO.md's lines, and in the verdicts' mends that
+    bounded, listed or said a figure in place of removing a cause, among them the captures' differ
+    lines whose cause is the machine's clock, the pictures taken on a bridge without Solari for the
+    `dfg_lut` it enables, the measure's rooms and the figures said and not judged, each with what
+    the lasting mend is and what it costs, written here as parts of this item, and the reviewer
+    orders them, the order open to change. Then each part is mended on its own, one commit a part,
+    measured where a figure moves (N 3.5). Listed at `2b355276` in TODO.md's section "Mended for the
+    time being", thirteen parts, taken here in the reviewer's order, the cheap and self-contained
+    first and the ones that are the owner's to decide last: (a) `many_sprites` and
     `many_animated_sprites` seeded under the workflow, two lines off the differ list, done at
     `024c1113` on 2026-10-19, the pictures matching in every pixel across two bridges; (b) Solari's
     panel hiding the device's timings under the workflow, its room measured again for the noise
@@ -610,23 +606,23 @@ a batch.
     an asset loads and between the drive's commands, one hold serving the two animation examples and
     the drive's swing, every capture taken again, done at `714451b0` on 2026-10-19, the clock held
     while a load runs and between a served session's commands, the drive's readings identical on two
-    devices and two differ lines off; (g) `dfg_lut` on in the render profile, the owner's decision,
+    devices and two differ lines off; (g) `dfg_lut` on in the render profile, a decision to take,
     since games on the package are then lit a little otherwise and every 3D picture is taken again
     (Decision 25), done at `93600e85` on 2026-10-19, the lookup table's feature on in the render
     profile with no crate added and the lock unchanged, eleven pictures retaken on a bridge with it,
     the three that stood apart between bridges within a pixel in the runner's image; (h) a newer
-    Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared examples, the
-    owner's decision on the jobs' image; (i) lavapipe's dropped bunnies traced and reported to Mesa,
-    outside the repository, and found at `714451b0` on the GPU as well, a different subset of the
-    2,500 bunnies drawn at each take, so the differ line's reason is incomplete; (j) the anisotropy
-    fault reported to Bevy, the owner's decision, a patched shader declined; (k) the two helpers go
-    with item 4's gaps; (l) runners with a graphics card, the owner's purchase; (m) the norm's lists
-    are item 2's. The mends follow item 4 as Decision 38 orders, unless the owner says the parts
-    that need no decision may start while the words for item 4 are awaited. On 2026-10-19 the owner
-    decided (Decision 39): item 4 comes first and then this item in the order above; (g) `dfg_lut`
-    goes on in the render profile with the lock byte for byte the same; (h) and (l) are one, the
-    capture jobs in a container of a distribution image with a newer Mesa and a Linux bridge built
-    with meshlets and Solari, no runner with a graphics card and no Mesa from an archive outside the
+    Mesa on the runner with a `--meshlet --solari` bridge for the six uncompared examples, a
+    decision on the jobs' image; (i) lavapipe's dropped bunnies traced and reported to Mesa, outside
+    the repository, and found at `714451b0` on the GPU as well, a different subset of the 2,500
+    bunnies drawn at each take, so the differ line's reason is incomplete; (j) the anisotropy fault
+    reported to Bevy, a decision to take, a patched shader declined; (k) the two helpers go with
+    item 4's gaps; (l) runners with a graphics card, a purchase to decide; (m) the norm's lists are
+    item 2's. The mends follow item 4 as Decision 38 orders, unless it is decided that the parts
+    that need no decision may start while the words for item 4 are awaited. Decided on 2026-10-19
+    (Decision 39): item 4 comes first and then this item in the order above; (g) `dfg_lut` goes on
+    in the render profile with the lock byte for byte the same; (h) and (l) are one, the capture
+    jobs in a container of a distribution image with a newer Mesa and a Linux bridge built with
+    meshlets and Solari, no runner with a graphics card and no Mesa from an archive outside the
     distribution; (j) the anisotropy fault is mended by a patched shader of Bevy's in the bridge,
     which overrides the earlier decline, with a test that fails when Bevy's original changes. Part
     (k) is whole at `319624bf`, half done at `670ecf2c` with the free camera helper gone for Bevy's
@@ -669,7 +665,7 @@ a batch.
     reason in the script's remark, and BUILDING.md says which image draws which pictures. One
     commit, with the SHARED.md row for the reviewer to write. The alternative, every capture in
     Fedora on eight shards or a raised budget, costs two to five times the capture minutes on a Mesa
-    slower for some scenes, and is not taken; the owner is told that the shards stay on the runner's
+    slower for some scenes, and is not taken; it is reported that the shards stay on the runner's
     Mesa, a narrowing of Decision 39's words by the measured cost. (i)'s cause found by 03:14 on
     2026-10-20, and it is not Mesa's. `many_meshlet_materials` drops bunnies on every device because
     its cluster budget is too small for its crowd, Bevy's own example setting 8,192 cluster buffer
@@ -678,27 +674,27 @@ a batch.
     to 2 to the 20th in a local experiment not kept, two GPU takes on the editor bridge match in
     every pixel and the host's lavapipe comes within 1.2 pixels of them, where at 8,192 the GPU's
     takes differ by 6.9 percent and lavapipe's by 5 to 7. So no Mesa report is written. The reviewer
-    decides, on the owner's precedent in Decision 39 of mending Bevy's faults in the port with the
+    decides, on the precedent of Decision 39 of mending Bevy's faults in the port with the
     difference said, that the port's example takes the smallest power of two that draws the crowd
     whole on both devices, measured, the difference from Bevy's 8,192 said in its triage row with
     the documentation's sentence as the reason, so the picture is whole and compared as the others
     are, the differ line comes off and TODO.md's paragraph goes; a report of the budget to Bevy is
-    the owner's call, as upstream reports are. Order: (h)'s commit first with the line's reason as
+    left to a decision, as upstream reports are. Order: (h)'s commit first with the line's reason as
     the budget's, then (i)'s commit taking the line off, two things, two commits. (h) done at
     `17b004c0` on 2026-10-20, as the head says. (i) done at `5195e95a` on 2026-10-20, as the head
     says. (j) done at `0f8e89b4` on 2026-10-20, as the head says, and no part of the item is open.
 
 30. **The templates package is published beside the engine, and the README's install line follows
-    (Decision 39).** The owner decided on 2026-10-19 that a pack run that publishes pushes
-    `BevyCSharp.Templates` beside the engine's package, which `pack.yml`'s glob over the packed
-    files already takes, and that the README's `dotnet new install` line stands once nuget.org lists
-    the package. Checked by the publishing pack run's page naming both packages and the README's
-    line tried from nuget.org. Done on 2026-10-19 at 22:01 with no commit: the owner uploaded
-    `BevyCSharp.Templates` `0.5.120` beside the engine's `0.5.120`, and the README's two program
-    blocks ran as written in a clean container of the SDK's image with nothing of the repository's,
-    the install from the feed, the project made from the template with the README's first program to
-    the letter, a clean build, 120 frames offscreen on lavapipe with exit 0, and the guide's empty
-    template built and run the same; no document said the templates waited, so nothing changes.
+    (Decision 39).** Decided on 2026-10-19, a pack run that publishes pushes `BevyCSharp.Templates`
+    beside the engine's package, which `pack.yml`'s glob over the packed files already takes, and
+    the README's `dotnet new install` line stands once nuget.org lists the package. Checked by the
+    publishing pack run's page naming both packages and the README's line tried from nuget.org. Done
+    on 2026-10-19 at 22:01 with no commit: `BevyCSharp.Templates` `0.5.120` was uploaded beside the
+    engine's `0.5.120`, and the README's two program blocks ran as written in a clean container of
+    the SDK's image with nothing of the repository's, the install from the feed, the project made
+    from the template with the README's first program to the letter, a clean build, 120 frames
+    offscreen on lavapipe with exit 0, and the guide's empty template built and run the same; no
+    document said the templates waited, so nothing changes.
 
 31. **The README's centered parts are markdown inside one centering block (Decision 40), and
     nuget.org draws them.** The heading, the description and the banners at the README's head stand
@@ -710,13 +706,13 @@ a batch.
     `build/examples-table.py` writing the same. Done at `b68da75c` on 2026-10-19, the head one
     centering block of markdown and the gallery markdown tables of 260 by 146 thumbnails with padded
     names, measured on both sites before it was taken, nuget.org's page of the next upload the
-    check. Open again on 2026-10-19 at 22:34 for the banners: the owner asked that the README's
-    centered block carry the five banners 3DEngine's carries, .NET, Graphics, Windowing, Shaders and
-    Status, as markdown images inside the block, each with this project's own value, .NET 10.0, the
-    graphics by what Bevy draws with, the windowing by its window crate, the shaders by what the
-    bridge compiles, and the status as the project stands, the labels' colors as 3DEngine's for the
-    labels the two share. Done at `8fe38f60` on 2026-10-19, the five in one row with this project's
-    values and 3DEngine's colors.
+    check. Open again on 2026-10-19 at 22:34 for the banners: the ask was that the README's centered
+    block carry the five banners 3DEngine's carries, .NET, Graphics, Windowing, Shaders and Status,
+    as markdown images inside the block, each with this project's own value, .NET 10.0, the graphics
+    by what Bevy draws with, the windowing by its window crate, the shaders by what the bridge
+    compiles, and the status as the project stands, the labels' colors as 3DEngine's for the labels
+    the two share. Done at `8fe38f60` on 2026-10-19, the five in one row with this project's values
+    and 3DEngine's colors.
 
 32. **A package's release notes are the commits since the package last published (Decision 41).**
     The pack run's notes are the commits since `build/version.txt` last changed
@@ -739,14 +735,14 @@ a batch.
 33. **The pack run publishes through nuget.org's trusted publishing and no stored key (Decision
     42).** The pack job gains the identity token's write permission beside its read of the contents,
     a step with the feed's login action, `NuGet/login@v1`, given the nuget.org user name the policy
-    belongs to, `EggyStudio` unless the owner says another, which answers a short-lived key, and the
-    push step takes that key where it took the secret, the input's description and the head comment
+    belongs to, `EggyStudio` unless another is named, which answers a short-lived key, and the push
+    step takes that key where it took the secret, the input's description and the head comment
     saying the run publishes through the trusted publisher policy and needs no secret, BUILDING.md's
     publishing section saying the same with the policy's values, workflow `pack.yml`, no environment
     and the package pattern; the step with the secret goes. Checked by a pack run with publish on,
-    whose push the feed accepts, the first the owner starts after the policy stands. One commit, the
-    pattern `BevyCSharp*`; at 22:54 the owner asked whether the pack could upload by itself, so this
-    comes first, right after the step of (g) in hand, and item 32 with it. Done at `e1f516fa` on
+    whose push the feed accepts, the first started after the policy stands. One commit, the pattern
+    `BevyCSharp*`; at 22:54 the question was whether the pack could upload by itself, so this comes
+    first, right after the step of (g) in hand, and item 32 with it. Done at `e1f516fa` on
     2026-10-19; the first pack run with publish on is its check. Proven on the pack run of
     `3eaa0a44` on 2026-10-20 at 02:00, the login and the push passing and `0.5.149` on the feed.
 
@@ -800,11 +796,11 @@ a batch.
     sequential walk's cost about three times an entity for the promise, the parallel walk's none.
 
 35. **The build workflow's jobs are named as 3DEngine's are, by their ids, with no expression in a
-    name.** The owner wrote on 2026-10-20 that a push run's page shows the pack-only jobs with their
-    name templates unexpanded, `capture the examples (${{ matrix.shard }} of 4)` and `native (${{
+    name.** Reported on 2026-10-20, a push run's page shows the pack-only jobs with their name
+    templates unexpanded, `capture the examples (${{ matrix.shard }} of 4)` and `native (${{
     matrix.rid }}...)`, since GitHub skips a matrix job before it expands the matrix and prints the
     name as written, where 3DEngine's skipped jobs show plain names because its jobs carry no `name`
-    and no matrix. At 07:10 the owner left the shape to the reviewer, for a graph that reads as
+    and no matrix. At 07:10 the shape was left to the reviewer, for a graph that reads as
     3DEngine's. So: the suite job keeps its matrix, which is never skipped, and names its three
     entries `linux`, `windows` and `macos` through an include and the entry's system in its `name`,
     as 3DEngine's suite jobs are named, since a name's expression expands wherever the job runs;
@@ -833,31 +829,31 @@ a batch.
     counts the engine runs. One commit, carrying the review's files. Done at `d56e7cb7` on
     2026-10-20, as the head says.
 
-37. **The feature test moves into the games folder, as 3DEngine's lives (Decision 45).** The owner
-    wrote on 2026-10-20 at 23:21 that 3DEngine's feature test under its games folder looks good and
-    BevyCSharp is to do the same: `BevyCSharp.FeatureTest` moves to `games/FeatureTest` with its
-    history kept by a move git follows, and every place that names the old path follows it, 58 files
-    today, the solution, the workflow's drive and storm jobs, the drive, soak, scenes and publish
-    scripts, the answer script, the editor's project and its play, the CLI's launch and tools, the
-    tests that name it, BUILDING.md, TODO.md, the guides and AGENTS.md's table row. Read first what
-    the games' build properties apply to a project under that folder, since the games build on the
-    packed package where the feature test tests the tree through a project reference, and say
-    whether it keeps the tree's reference by opting out of those properties in its own project file,
-    said in its README, or builds on the package as 3DEngine's does with the drive job packing
-    first; the first keeps the drive's time and what the test is for. The feature test stays out of
-    the README's gallery as before. One commit, the move alone with the references, carrying the
+37. **The feature test moves into the games folder, as 3DEngine's lives (Decision 45).** Decided on
+    2026-10-20 at 23:21, 3DEngine's feature test under its games folder looks good and BevyCSharp is
+    to do the same: `BevyCSharp.FeatureTest` moves to `games/FeatureTest` with its history kept by a
+    move git follows, and every place that names the old path follows it, 58 files today, the
+    solution, the workflow's drive and storm jobs, the drive, soak, scenes and publish scripts, the
+    answer script, the editor's project and its play, the CLI's launch and tools, the tests that
+    name it, BUILDING.md, TODO.md, the guides and AGENTS.md's table row. Read first what the games'
+    build properties apply to a project under that folder, since the games build on the packed
+    package where the feature test tests the tree through a project reference, and say whether it
+    keeps the tree's reference by opting out of those properties in its own project file, said in
+    its README, or builds on the package as 3DEngine's does with the drive job packing first; the
+    first keeps the drive's time and what the test is for. The feature test stays out of the
+    README's gallery as before. One commit, the move alone with the references, carrying the
     review's files; the tests that name the path pass after it. Done at `cf70c650` on 2026-10-21, as
     the head says.
 
 38. **An edit mesh a program shapes by operations, with a recipe that rebuilds it, built into what
-    the engine draws and collides with (Decision 46).** The owner asked for modeling in both
-    engines, Blender's kind, from the command line as well as in a game, grid prototyping first;
-    this item is the kernel the rest stands on. An edit mesh is a polygon mesh of vertices, faces as
-    loops of vertex indices of any count, a texture coordinate at each face corner, a material slot
-    and a smooth flag a face, and edges read from the faces; a selection of vertices, edges or faces
-    as sets; and its history as the list of operations that made it, the recipe, so undo drops the
-    last line and rebuilds, and a saved model is its recipe, a text file `*.model` of one operation
-    a line in the words the commands of item 40 use, read back and rebuilt at load, so a level's
+    the engine draws and collides with (Decision 46).** The ask is modeling in both engines,
+    Blender's kind, from the command line as well as in a game, grid prototyping first; this item is
+    the kernel the rest stands on. An edit mesh is a polygon mesh of vertices, faces as loops of
+    vertex indices of any count, a texture coordinate at each face corner, a material slot and a
+    smooth flag a face, and edges read from the faces; a selection of vertices, edges or faces as
+    sets; and its history as the list of operations that made it, the recipe, so undo drops the last
+    line and rebuilds, and a saved model is its recipe, a text file `*.model` of one operation a
+    line in the words the commands of item 40 use, read back and rebuilt at load, so a level's
     models are small files a reader understands and a diff reads. The operations of this item: new
     and free; the primitives box, plane, cylinder, cone, wedge, stairs with a count of steps, a
     rise, a run and a width and closed underneath, and arch, each placed by its lowest corner or its
@@ -888,44 +884,44 @@ a batch.
     collider and the feature test's row, as the heads say.
 
 39. **Grid prototyping: materials that show a meter, texture coordinates aligned to the world, and
-    openings cut by booleans (Decision 46).** The owner's first use: blocking out a level with
-    textures of different colors showing a grid of about a meter, stairs, and windows cut by boolean
-    operations. The engine makes the grid image, `Images.Grid(int pixelsPerMeter, Color face, Color
-    line, Color fine)`, an image of one meter's cell with its edge lines and lines every tenth of a
-    meter in a finer tone, 1024 pixels a meter by default with mipmaps, and a prototype material
-    from a color, the grid image tinted, in a small set of named colors for floors, walls, ceilings,
-    stairs, doors, windows, and a hazard, so a level reads by color as the dev textures of the
-    engines of the 2000s read; a face's texture coordinates by world-aligned box mapping, each face
-    projected along the axis its normal faces nearest, in meters, so the grid shows one meter
-    everywhere and continues across faces, which is the default of every primitive and of every face
-    a boolean makes. Booleans: union, difference and intersection of two edit meshes, the second
-    placed by a transform, written in the engine as the binary space partition algorithm of csg.js,
-    each mesh split by the other's planes, the parts kept by the operation, the triangles then
-    merged back into faces where coplanar and sharing edges and the vertices merged, so a window cut
-    from a wall is a few faces and not a hundred triangles; coplanar faces of the two meshes handled
-    by the algorithm's classification with an epsilon the mesh holds, and the limit said in the
-    guide that two faces in one plane are cut as the algorithm cuts them, so an opening is cut with
-    a box a little deeper than the wall. The new primitives on it: a room, a box with its inside
-    hollowed by a wall thickness, a door and a window, each a cut of a box through a wall selected
-    or named, a ramp. Tests: a box cut by a box through its wall has the faces counted, is
-    watertight and has the volume of the two less their overlap; a union of two boxes sharing a
-    face; the grid image's lines at the right pixels; the box mapping giving a two meter face
-    coordinates spanning two; a capture of a room with a window and a door and stairs in it. Two
-    commits, the grid image, the materials and the mapping, then the booleans and the openings. Done
-    at `bfe1fc63` and `76f784af` on 2026-10-21, the grid image, the prototype materials and the box
-    mapping, then the booleans, the merge and the openings, as the heads say.
+    openings cut by booleans (Decision 46).** The first use, blocking out a level with textures of
+    different colors showing a grid of about a meter, stairs, and windows cut by boolean operations.
+    The engine makes the grid image, `Images.Grid(int pixelsPerMeter, Color face, Color line, Color
+    fine)`, an image of one meter's cell with its edge lines and lines every tenth of a meter in a
+    finer tone, 1024 pixels a meter by default with mipmaps, and a prototype material from a color,
+    the grid image tinted, in a small set of named colors for floors, walls, ceilings, stairs,
+    doors, windows, and a hazard, so a level reads by color as the dev textures of the engines of
+    the 2000s read; a face's texture coordinates by world-aligned box mapping, each face projected
+    along the axis its normal faces nearest, in meters, so the grid shows one meter everywhere and
+    continues across faces, which is the default of every primitive and of every face a boolean
+    makes. Booleans: union, difference and intersection of two edit meshes, the second placed by a
+    transform, written in the engine as the binary space partition algorithm of csg.js, each mesh
+    split by the other's planes, the parts kept by the operation, the triangles then merged back
+    into faces where coplanar and sharing edges and the vertices merged, so a window cut from a wall
+    is a few faces and not a hundred triangles; coplanar faces of the two meshes handled by the
+    algorithm's classification with an epsilon the mesh holds, and the limit said in the guide that
+    two faces in one plane are cut as the algorithm cuts them, so an opening is cut with a box a
+    little deeper than the wall. The new primitives on it: a room, a box with its inside hollowed by
+    a wall thickness, a door and a window, each a cut of a box through a wall selected or named, a
+    ramp. Tests: a box cut by a box through its wall has the faces counted, is watertight and has
+    the volume of the two less their overlap; a union of two boxes sharing a face; the grid image's
+    lines at the right pixels; the box mapping giving a two meter face coordinates spanning two; a
+    capture of a room with a window and a door and stairs in it. Two commits, the grid image, the
+    materials and the mapping, then the booleans and the openings. Done at `bfe1fc63` and `76f784af`
+    on 2026-10-21, the grid image, the prototype materials and the box mapping, then the booleans,
+    the merge and the openings, as the heads say.
 
 40. **The modeling commands, so a level is blocked out from the terminal, and a window in the game
-    to shape by hand (Decision 46).** The owner asked that all of it be possible from the command
-    line, simple to use. The engine's catalog gains `model.*` commands, one an operation, each
-    taking the model's name first and then the operation's measures in the recipe's words, so a line
-    typed is a line of the recipe: `model.box room 8 3 6`, `model.select room +y`, `model.extrude
-    room 1`, `model.cut room window 1 1 2 0.5`, `model.material room wall`, `model.undo room`,
-    `model.save room resources/models/room.model`, `model.load room <path>`, `model.show room 0 0 0`
-    spawning or moving an entity that draws the model and follows its edits, `model.info room`
-    answering the counts, the bounds, the volume and the open edges, and `model.list`; a command
-    answers the counts after it, so a script reads what it did, and `./bcs command model.<op>`
-    reaches each as the catalog does. The window: an ImGui window a program draws with one call,
+    to shape by hand (Decision 46).** The ask is that all of it be possible from the command line,
+    simple to use. The engine's catalog gains `model.*` commands, one an operation, each taking the
+    model's name first and then the operation's measures in the recipe's words, so a line typed is a
+    line of the recipe: `model.box room 8 3 6`, `model.select room +y`, `model.extrude room 1`,
+    `model.cut room window 1 1 2 0.5`, `model.material room wall`, `model.undo room`, `model.save
+    room resources/models/room.model`, `model.load room <path>`, `model.show room 0 0 0` spawning or
+    moving an entity that draws the model and follows its edits, `model.info room` answering the
+    counts, the bounds, the volume and the open edges, and `model.list`; a command answers the
+    counts after it, so a script reads what it did, and `./bcs command model.<op>` reaches each as
+    the catalog does. The window: an ImGui window a program draws with one call,
     `Modeling.DrawWindow(EditMesh)`, and the same window as a panel of the editor, which picks
     entities already, opened on the edit mesh an entity's mesh was built from; it lists the recipe
     with the last lines undone and redone by buttons, shows the selection's counts, offers each
@@ -941,7 +937,7 @@ a batch.
     `3fb5643e` on 2026-10-21, the commands, then the window with its picking and its drag and the
     editor's Model tab, as the heads say.
 
-41. **Texture coordinates shaped and textures given to faces (Decision 46).** The owner asked for UV
+41. **Texture coordinates shaped and textures given to faces (Decision 46).** The ask is UV
     processing and adding textures to surfaces. The selection's texture coordinates by projection,
     planar along an axis or the view, box as item 39's default, cylindrical about an axis, and
     spherical; moved, scaled and rotated as a whole or about their center; set to a texel density,
@@ -956,32 +952,32 @@ a batch.
     wall and a wooden floor from the examples' resources. One commit. Done at `fc63b7ba` on
     2026-10-21, as the head says.
 
-42. **A game that is a level blocked out with the tools, Blockout unless the owner names it
-    otherwise (Decision 46).** A game under `games/` built on the package as the others are: a level
-    of three rooms, a corridor, stairs between two floors, a window and two doors, made from one
-    recipe file of some forty lines in the game's resources and rebuilt at load, in the prototype
-    materials; a character walking it through the character controller as Courtyard has, the level
-    solid through the built collider; Tab opening and closing the modeling window, Blender's key for
-    edit mode, F1 to F3 being the engine's on the level's edit mesh so the level is reshaped while
-    walking in it, the collider rebuilt on a change, and F5 saving the recipe; a sun and the global
-    illumination on, so the grid walls show the light. Commands `blockout.status` and
-    `blockout.autopilot` for the drive and the soak, the drive walking the stairs to the upper floor
-    and reading the character's height, cutting a window by a command and reading the counts, and a
-    capture; the game joins the build-all, drive, soak and storm lists and the README's gallery with
-    its capture, and the guide's page names it. One commit. Read at 07:05 on 2026-10-21 for this
-    engine: the global illumination is Solari, asked for when the app is made with the level's
-    meshes marked ray traced, and where ray tracing is not active, the package and CI among them,
-    the sun with shadows, an ambient fill and SSAO light the level, the status command saying which,
-    the README's capture from whichever runs on the machine taking it and named in the commit; the
-    feature test's screen-space reference stays out of the game as the guide says. Blockout joins
-    the games job's build, play and soak lists, the defaults script taking it by its glob. With the
-    radiance cascades coming as items 50 to 52, Blockout keeps the lighting read at 07:05 and
-    switches to the cascades once item 51 exists, a line in its item then. Item 53 first, ImGui's
-    pass in the render profile, so the window opens on the package. Done at `09fc95dd` on
-    2026-10-21, as the head says, the booleans' line and the window's focus with it.
+42. **A game that is a level blocked out with the tools, Blockout unless named otherwise (Decision
+    46).** A game under `games/` built on the package as the others are: a level of three rooms, a
+    corridor, stairs between two floors, a window and two doors, made from one recipe file of some
+    forty lines in the game's resources and rebuilt at load, in the prototype materials; a character
+    walking it through the character controller as Courtyard has, the level solid through the built
+    collider; Tab opening and closing the modeling window, Blender's key for edit mode, F1 to F3
+    being the engine's on the level's edit mesh so the level is reshaped while walking in it, the
+    collider rebuilt on a change, and F5 saving the recipe; a sun and the global illumination on, so
+    the grid walls show the light. Commands `blockout.status` and `blockout.autopilot` for the drive
+    and the soak, the drive walking the stairs to the upper floor and reading the character's
+    height, cutting a window by a command and reading the counts, and a capture; the game joins the
+    build-all, drive, soak and storm lists and the README's gallery with its capture, and the
+    guide's page names it. One commit. Read at 07:05 on 2026-10-21 for this engine: the global
+    illumination is Solari, asked for when the app is made with the level's meshes marked ray
+    traced, and where ray tracing is not active, the package and CI among them, the sun with
+    shadows, an ambient fill and SSAO light the level, the status command saying which, the README's
+    capture from whichever runs on the machine taking it and named in the commit; the feature test's
+    screen-space reference stays out of the game as the guide says. Blockout joins the games job's
+    build, play and soak lists, the defaults script taking it by its glob. With the radiance
+    cascades coming as items 50 to 52, Blockout keeps the lighting read at 07:05 and switches to the
+    cascades once item 51 exists, a line in its item then. Item 53 first, ImGui's pass in the render
+    profile, so the window opens on the package. Done at `09fc95dd` on 2026-10-21, as the head says,
+    the booleans' line and the window's focus with it.
 
-43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The owner's later
-    wave: selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
+43. **Modeling operations on faces and edges, Blender's kinds (Decision 46).** The later wave,
+    selecting a face, insetting and pulling it, merging, beveling. On the kernel: bevel of the
     selected edges by a width with a count of segments, the profile round; loop cut, a cut around a
     ring of faces at a fraction; subdivide the selected faces by a count; bridge two selected face
     loops of the same count; fill a hole of selected edges with one face; dissolve the selected
@@ -993,58 +989,58 @@ a batch.
     segments watertight and the volume between the box's and its inscribed one, a mirror of a half
     giving a whole with no doubled vertices; a capture of a beveled, inset and loop-cut box. Two
     commits, the bevel, the loop cut and the subdivision, then the rest. Taken at 19:35 on
-    2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 49 of the local
-    coder; the captures and the device tests fall to the local coder when it cherry-picks the
-    branch. First commit `01b89b59` on the branch, read at 20:00 on 2026-10-23: the bevel by a width
-    in one to 64 segments across a round profile, the loop cut round a ring of four-sided faces, the
-    subdivision, and `select edge a b` since no edge could be selected alone, each a recipe line, a
-    model command and a button of the window's new Edges group; departures taken, a bevel skipping
-    open edges and a hole's rim and refused when none is left, a loop cut refusing edges on two
-    rings, a face of more than four corners subdividing into a fan; a cube with two segments 56
-    vertices and 54 faces closed, a loop cut 12 and 10, a subdivision 26 and 24 then 98 and 96; the
-    strict build clean, the headless suite 1,095 passed and 574 skipped. The message is COMMITS.md's
-    form; the author is the cloud environment's identity, reset at the cherry-pick; the capture
-    falls to the local coder. The second commit, the rest of the operations, follows. The session
-    notes Bevy 0.20 needs rustc 1.97.1, 1.97.0 refusing to build the bridge. Second commit
-    `c0e6c111` on the branch, read at 20:10: bridge, fill, dissolve, knife, mirror, spin and smooth
-    in the recipe, the commands and the window's Edges group; departures taken, a bridge of two
-    regions each with one rim of the same count and refused otherwise, dissolved edges taking the
-    straight corners with them so a dissolved loop gives the box back, the knife cutting a face
-    crossed twice and only marking a concave face crossed more, a mirror merging within a millimeter
-    and dropping faces in the plane, a spin's faces taking the profile's facing; two boxes bridged
-    16 vertices and 14 faces closed, a half box mirrored 12 and 10, a square spun a whole turn in 16
-    steps 34 and 48 closed; the headless suite 1,108 passed and 574 skipped, the strict build clean.
-    The item's code is whole on the branch; the capture falls to the local coder at the cherry-pick.
-    On main at `ae596af8` and `4f80c464`, pushed at 20:14; done but for the capture, which the local
-    coder's next commit carries. Capture done at `cd05d9a2`; item 43 done.
+    2026-10-23 by the cloud session on its branch (Decision 53), after item 49 of the local coder;
+    the captures and the device tests fall to the local coder when it cherry-picks the branch. First
+    commit `01b89b59` on the branch, read at 20:00 on 2026-10-23: the bevel by a width in one to 64
+    segments across a round profile, the loop cut round a ring of four-sided faces, the subdivision,
+    and `select edge a b` since no edge could be selected alone, each a recipe line, a model command
+    and a button of the window's new Edges group; departures taken, a bevel skipping open edges and
+    a hole's rim and refused when none is left, a loop cut refusing edges on two rings, a face of
+    more than four corners subdividing into a fan; a cube with two segments 56 vertices and 54 faces
+    closed, a loop cut 12 and 10, a subdivision 26 and 24 then 98 and 96; the strict build clean,
+    the headless suite 1,095 passed and 574 skipped. The message is COMMITS.md's form; the author is
+    the cloud environment's identity, reset at the cherry-pick; the capture falls to the local
+    coder. The second commit, the rest of the operations, follows. The session notes Bevy 0.20 needs
+    rustc 1.97.1, 1.97.0 refusing to build the bridge. Second commit `c0e6c111` on the branch, read
+    at 20:10: bridge, fill, dissolve, knife, mirror, spin and smooth in the recipe, the commands and
+    the window's Edges group; departures taken, a bridge of two regions each with one rim of the
+    same count and refused otherwise, dissolved edges taking the straight corners with them so a
+    dissolved loop gives the box back, the knife cutting a face crossed twice and only marking a
+    concave face crossed more, a mirror merging within a millimeter and dropping faces in the plane,
+    a spin's faces taking the profile's facing; two boxes bridged 16 vertices and 14 faces closed, a
+    half box mirrored 12 and 10, a square spun a whole turn in 16 steps 34 and 48 closed; the
+    headless suite 1,108 passed and 574 skipped, the strict build clean. The item's code is whole on
+    the branch; the capture falls to the local coder at the cherry-pick. On main at `ae596af8` and
+    `4f80c464`, pushed at 20:14; done but for the capture, which the local coder's next commit
+    carries. Capture done at `cd05d9a2`; item 43 done.
 
-44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The owner
-    asked for Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the
-    build over the base, which stays editable: mirror across axes, array by a count and an offset or
-    along a curve of positions, bevel as item 43's over every edge or the edges past an angle,
-    subdivision by Catmull-Clark to a level, solidify by a thickness inward or outward, boolean with
-    another edit mesh placed by a transform, and triangulate; each added, reordered, removed and
-    applied, applying baking its result into the base and dropping it; in the recipe as `modifier`
-    lines and in the commands and the window, the build's time for a stack read in a test against a
-    budget. Tests: a mirror on a half box giving a box's counts, an array of three, a subdivision of
-    a box to level one giving 26 vertices and level two 98, a solidified plane watertight, and a
-    capture of a subdivided and beveled shape. One commit. Taken at 19:35 on 2026-10-23 by the
-    owner's cloud session on its branch (Decision 53), after item 43; the captures and the device
-    tests fall to the local coder when it cherry-picks the branch. Commit `1f79ec4a` on the cloud
-    session's branch, read at 20:22: the stack of mirror, array, bevel, Catmull-Clark subdivision to
-    level 6, solidify, boolean and triangulate, each added, moved, removed and applied by a recipe
-    line, the model.modifier command and the window's Modifiers group, the build, materials,
-    collider and drawn parts using the built mesh; departures taken, a mirrored half box tested as a
-    whole box with a middle loop, a boolean placed by at alone, an array along points translating
-    without turning, a modifier built once as it is added so a missing file is refused then, apply
-    running on the base as Blender does; the stack of mirror, array of 4, bevel and subdivision 2
-    making 5,760 faces in 13 ms warm against a budget of 200; the budget test's Stopwatch on the N
-    3.3 list as a cost rather than motion, accepted; the headless suite 1,119 passed and 574
-    skipped. The capture of a subdivided and beveled shape falls to the local coder at the
-    cherry-pick. On main as `33edc8a3` at 20:28 on 2026-10-23, cherry-picked plain with the owner's
-    identity before the branch's deletion, the capture with it in the local coder's batch of item
-    50. Pushed at 20:46; the capture follows in the local coder's batch. Capture done at `cd05d9a2`;
-    item 44 done.
+44. **Modifiers, a stack applied at the build and never baked until asked (Decision 46).** The ask
+    is Blender-like modifiers. An edit mesh holds a list of modifiers applied in order at the build
+    over the base, which stays editable: mirror across axes, array by a count and an offset or along
+    a curve of positions, bevel as item 43's over every edge or the edges past an angle, subdivision
+    by Catmull-Clark to a level, solidify by a thickness inward or outward, boolean with another
+    edit mesh placed by a transform, and triangulate; each added, reordered, removed and applied,
+    applying baking its result into the base and dropping it; in the recipe as `modifier` lines and
+    in the commands and the window, the build's time for a stack read in a test against a budget.
+    Tests: a mirror on a half box giving a box's counts, an array of three, a subdivision of a box
+    to level one giving 26 vertices and level two 98, a solidified plane watertight, and a capture
+    of a subdivided and beveled shape. One commit. Taken at 19:35 on 2026-10-23 by the cloud session
+    on its branch (Decision 53), after item 43; the captures and the device tests fall to the local
+    coder when it cherry-picks the branch. Commit `1f79ec4a` on the cloud session's branch, read at
+    20:22: the stack of mirror, array, bevel, Catmull-Clark subdivision to level 6, solidify,
+    boolean and triangulate, each added, moved, removed and applied by a recipe line, the
+    model.modifier command and the window's Modifiers group, the build, materials, collider and
+    drawn parts using the built mesh; departures taken, a mirrored half box tested as a whole box
+    with a middle loop, a boolean placed by at alone, an array along points translating without
+    turning, a modifier built once as it is added so a missing file is refused then, apply running
+    on the base as Blender does; the stack of mirror, array of 4, bevel and subdivision 2 making
+    5,760 faces in 13 ms warm against a budget of 200; the budget test's Stopwatch on the N 3.3 list
+    as a cost rather than motion, accepted; the headless suite 1,119 passed and 574 skipped. The
+    capture of a subdivided and beveled shape falls to the local coder at the cherry-pick. On main
+    as `33edc8a3` at 20:28 on 2026-10-23, cherry-picked plain with the repository's author identity
+    before the branch's deletion, the capture with it in the local coder's batch of item 50. Pushed
+    at 20:46; the capture follows in the local coder's batch. Capture done at `cd05d9a2`; item 44
+    done.
 
 45. **What is modeled is exported for Blender and imported from it (Decision 46).** The built mesh
     and its materials written as a glTF 2.0 file, a JSON with its buffer beside or embedded,
@@ -1056,11 +1052,11 @@ a batch.
     the game. `model.export` and `model.import` beside the save and the load. Tests: a box exported
     and read back with the engine's own reader having the same counts, a file validated against the
     glTF schema's required fields, and a known glTF's import counted. One commit. Taken at 19:35 on
-    2026-10-23 by the owner's cloud session on its branch (Decision 53), after item 44; the captures
-    and the device tests fall to the local coder when it cherry-picks the branch. Commit `4659b331`
-    on the cloud session's branch `modeling-operations`, read at 20:43 on 2026-10-23, the owner's
-    identity as author and committer: `EditMesh.Export(path, embedded)` writing glTF 2.0 with a
-    writer of the engine's own, a primitive and a material a slot with linear factors, emissive
+    2026-10-23 by the cloud session on its branch (Decision 53), after item 44; the captures and the
+    device tests fall to the local coder when it cherry-picks the branch. Commit `4659b331` on the
+    cloud session's branch `modeling-operations`, read at 20:43 on 2026-10-23, the repository's
+    author identity as author and committer: `EditMesh.Export(path, embedded)` writing glTF 2.0 with
+    a writer of the engine's own, a primitive and a material a slot with linear factors, emissive
     strength past 1 by its extension and textures by relative URI, and `EditMesh.Import(path)`
     reading .gltf and .glb through a new managed `GltfReader` along the scene's node transforms,
     welding corners within 0.01 mm and joining coplanar triangles of one slot with matching texture
@@ -1071,60 +1067,59 @@ a batch.
     edges and 6 faces closed at volume 8, the schema's required fields checked, Bevy's own loader
     reading the exported box as 24 corners and 36 indices on a render bridge; the headless suite
     1,130 passed and 579 skipped, the render suite reported when it ends. The branch's first commit
-    `ba8a5324` repeats item 44 under the owner's identity and is skipped at the cherry-pick,
-    `33edc8a3` standing on main. On main as `ba8111fb`, pushed at 20:46. The cloud's render suite on
-    lavapipe gave 1,542 passed, 163 skipped and 4 failed, the four the container's own, three Slang
-    shaders uncompiled without slangc and a readback of red as 0 on llvmpipe, every modeling, glTF
-    and command test passing; the local build run of `135e43b5` is the proof. The run of `a2c8348e`,
-    carrying it, green on the three systems; item 45 done.
+    `ba8a5324` repeats item 44 under the repository's author identity and is skipped at the
+    cherry-pick, `33edc8a3` standing on main. On main as `ba8111fb`, pushed at 20:46. The cloud's
+    render suite on lavapipe gave 1,542 passed, 163 skipped and 4 failed, the four the container's
+    own, three Slang shaders uncompiled without slangc and a readback of red as 0 on llvmpipe, every
+    modeling, glTF and command test passing; the local build run of `135e43b5` is the proof. The run
+    of `a2c8348e`, carrying it, green on the three systems; item 45 done.
 
 46. **An animated capture of a run, frames taken at an interval and written as one file, and one
-    made from captures on disk (Decision 48).** The owner asked at about 00:29 on 2026-10-21 for
-    captures made into animations from several pictures with a time between them, a second or 250
-    ms, as tooling to show things in the documentation and in devlogs. The engine gains a recorder:
-    `record <path> <length> [every <step>] [scale <s>]` beside `shot` and `window.shot` in the
-    catalog, taking frames from the frame being drawn at a step given in milliseconds or frames
-    (`250ms`, `15f`), for a length in seconds or frames or a count of pictures (`5s`, `8`), scaled
-    down by a factor where asked, each frame kept in memory as it is taken and the file written when
-    the length is reached or `record.stop` is sent, with the frames' own times as the delays, so a
-    step of 1 s plays at 1 s and `record ... play <ms>` plays faster or slower; the formats by the
-    path's extension, `.gif` by an encoder of the engine's own in managed code, a palette of 256
-    colors by median cut over all the frames with ordered dithering, the LZW of the format and a
-    loop forever, and `.png` as an animated PNG, the frames as the format's frame chunks over the
-    engine's PNG writer, lossless, which GitHub's pages play as they play a GIF; no library is
-    taken, the dependency table allowing none for it and, for a program,
-    `Capture.StartRecording(path, intervalMs)` and `Capture.StopRecording()` with their cheat sheet
-    lines through the script and the surface listing; and a step of its own in the bcs client,
-    `./bcs record <path> <length> [--every <step>]`, which sends the command and waits for the file.
-    For captures on disk, a script `build/animate.py <out> <pictures...> --delay <ms> [--loop n]
-    [--scale s]` assembles PNG or WebP captures into a GIF, an animated PNG or an animated WebP by
-    their extension, with Pillow where it is present and the engine's own writers where it is not,
-    so a devlog's animation is made from the captures the pack run already takes; the guide's
-    section on captures shows both, with one animation of a game in the README's gallery as its
-    first use. Tests: a recording of eight frames at 250 ms on the null device whose file parses as
-    a GIF with eight frames and the delays right, the same as an animated PNG read back by the
-    engine's reader frame by frame, a palette of a known picture within a distance of its colors,
-    and the script run over three captures in the suite. Two commits, the recorder with its formats
-    and the command, then the client's step and the script. One or two days, before item 38's second
-    commit. Done at `585497f1` and `27b3f8eb` on 2026-10-21, the recorder, the two writers, the
-    calls and the command, then the client's step, the script and the README's animation, as the
-    heads say.
+    made from captures on disk (Decision 48).** Asked at about 00:29 on 2026-10-21 for captures made
+    into animations from several pictures with a time between them, a second or 250 ms, as tooling
+    to show things in the documentation and in devlogs. The engine gains a recorder: `record <path>
+    <length> [every <step>] [scale <s>]` beside `shot` and `window.shot` in the catalog, taking
+    frames from the frame being drawn at a step given in milliseconds or frames (`250ms`, `15f`),
+    for a length in seconds or frames or a count of pictures (`5s`, `8`), scaled down by a factor
+    where asked, each frame kept in memory as it is taken and the file written when the length is
+    reached or `record.stop` is sent, with the frames' own times as the delays, so a step of 1 s
+    plays at 1 s and `record ... play <ms>` plays faster or slower; the formats by the path's
+    extension, `.gif` by an encoder of the engine's own in managed code, a palette of 256 colors by
+    median cut over all the frames with ordered dithering, the LZW of the format and a loop forever,
+    and `.png` as an animated PNG, the frames as the format's frame chunks over the engine's PNG
+    writer, lossless, which GitHub's pages play as they play a GIF; no library is taken, the
+    dependency table allowing none for it and, for a program, `Capture.StartRecording(path,
+    intervalMs)` and `Capture.StopRecording()` with their cheat sheet lines through the script and
+    the surface listing; and a step of its own in the bcs client, `./bcs record <path> <length>
+    [--every <step>]`, which sends the command and waits for the file. For captures on disk, a
+    script `build/animate.py <out> <pictures...> --delay <ms> [--loop n] [--scale s]` assembles PNG
+    or WebP captures into a GIF, an animated PNG or an animated WebP by their extension, with Pillow
+    where it is present and the engine's own writers where it is not, so a devlog's animation is
+    made from the captures the pack run already takes; the guide's section on captures shows both,
+    with one animation of a game in the README's gallery as its first use. Tests: a recording of
+    eight frames at 250 ms on the null device whose file parses as a GIF with eight frames and the
+    delays right, the same as an animated PNG read back by the engine's reader frame by frame, a
+    palette of a known picture within a distance of its colors, and the script run over three
+    captures in the suite. Two commits, the recorder with its formats and the command, then the
+    client's step and the script. One or two days, before item 38's second commit. Done at
+    `585497f1` and `27b3f8eb` on 2026-10-21, the recorder, the two writers, the calls and the
+    command, then the client's step, the script and the README's animation, as the heads say.
 
-47. **F2 takes a screenshot in every program, to a screenshots folder beside it (Decision 49).** The
-    owner wrote shortly before 03:42 on 2026-10-21 that, as in Minecraft, a screenshot is to be
-    taken in the game with F2, the same for BevyCSharp, the captures put in the root or a subfolder.
-    The engine gains a built-in key: F2 writes the frame being drawn as a PNG into a `screenshots`
-    folder beside the program, made on first use, the file named by the time as the source names its
-    own, `2026-10-21_03.45.12.png` and a count where two fall in one second, the second file `_2`
-    and the third `_3` as the source's own code counts, read by the game's coder, through the
-    capture the `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves
-    it or turns it off with none, and a program that reads F2 itself still sees the press. The cheat
-    sheet line through the script, the surface listing and the tools guide's paragraph beside the
-    captures. Tests: a press through the input writing a file of the frame's size into the folder in
-    a headless run, two in one second given two names, the key moved and turned off. One commit,
-    after item 40's first commit. Where the engine has a default key of its own on F2, it moves to
-    F3 as 3DEngine's performance window does, with a setting to move it to match, the move said in
-    the tools guide. Done at `3d045110` on 2026-10-21, as the head says.
+47. **F2 takes a screenshot in every program, to a screenshots folder beside it (Decision 49).**
+    Decided shortly before 03:42 on 2026-10-21, as in Minecraft, a screenshot is to be taken in the
+    game with F2, the same for BevyCSharp, the captures put in the root or a subfolder. The engine
+    gains a built-in key: F2 writes the frame being drawn as a PNG into a `screenshots` folder
+    beside the program, made on first use, the file named by the time as the source names its own,
+    `2026-10-21_03.45.12.png` and a count where two fall in one second, the second file `_2` and the
+    third `_3` as the source's own code counts, read by the game's coder, through the capture the
+    `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves it or turns
+    it off with none, and a program that reads F2 itself still sees the press. The cheat sheet line
+    through the script, the surface listing and the tools guide's paragraph beside the captures.
+    Tests: a press through the input writing a file of the frame's size into the folder in a
+    headless run, two in one second given two names, the key moved and turned off. One commit, after
+    item 40's first commit. Where the engine has a default key of its own on F2, it moves to F3 as
+    3DEngine's performance window does, with a setting to move it to match, the move said in the
+    tools guide. Done at `3d045110` on 2026-10-21, as the head says.
 
 48. **The render recovery test reads its error count until it is one or a bound of frames.** Found
     by item 40's suite run on 2026-10-21: the test that a stopped drawing leaves the systems running
@@ -1137,8 +1132,8 @@ a batch.
     the device's reporting measured idle and under load.
 
 49. **F1 hides the interface, F3 shows a debug overlay like the newest Minecraft's with sections a
-    program adds, and Shift+F3 the profiler with it (Decision 50).** The owner asked shortly before
-    07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine feature, F2 the
+    program adds, and Shift+F3 the profiler with it (Decision 50).** Asked shortly before 07:05 on
+    2026-10-21 for F1 to hide the interface as Minecraft does, as an engine feature, F2 the
     screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts logically with
     modules a game adds, world generation among them, showing the system, the camera and the
     renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
@@ -1195,7 +1190,7 @@ a batch.
     `e1b08124` on 2026-10-23, the departures in the head; item 49 done.
 
 50. **The scene's distance field, 3DEngine's first phase of its global illumination, through the
-    bridge (Decision 51).** The owner wrote to the coder shortly before 07:15 on 2026-10-21 that
+    bridge (Decision 51).** Decided in the coder's session shortly before 07:15 on 2026-10-21 that
     3DEngine's radiance cascades were always meant for this engine too, built there first, and can
     be done here. The three phases come as 3DEngine's did, each read from its code and RENDERING.md
     as the model and its Slang kernels taken through the bridge's compute chain, plain Slang the
@@ -1269,67 +1264,68 @@ a batch.
     readings on a machine with ray queries and the guide's figures fall to the local coder at the
     cherry-pick, after item 50. Its first commit, `fc749b2e` on `modeling-operations` at 00:30 on
     2026-10-24, is the node with its stages, the shader and the Cargo tests of the weights, the
-    reprojection and the shader, 6 files and 1,171 lines under the owner's identity, the branch's
-    build run green; the setting, the guide and the readings follow as the second commit with the C
-    entry points, ABI 300 to 301, and the local cherry-pick after item 50. Reported at 01:2x; its
-    departures the node's place after the main opaque pass and before the transparent one, Solari's
-    system and the transmissive pass being private to their crates, sky and forward-material texels
-    neither filtered nor taps, non-finite light taken as none and a zero-weight tap unread, and the
-    à-trous depth gradient read from surface neighbors alone after sky taps spread a NaN to a black
-    floor; 8 Cargo tests, the check clean across the profiles on three systems, the six ray tracing
-    tests passing on lavapipe with the node on. Its second, `62136e08` at 01:47 on 2026-10-24 under
-    the owner's identity, 15 files, 376 lines, is Render.SetRayTracedDenoiser with DenoiserSettings,
-    a sealed class of the history's clamp and the three widths at SVGF's defaults,
-    Render.RayTracedDenoiserActive, the two C entry points at ABI 303 since main holds 302, every
-    app clearing the ray tracing flags as it begins, a fault found there, the guide's passage
-    rewritten with a compiled block; 1,132 passed headless, the 9 ray tracing tests on lavapipe, 11
-    Cargo tests, the checks clean on three systems. The item is whole on the branch; the local coder
-    cherry-picks both, the ABI line the one conflict, and takes the still means, the strafe and the
-    node's time at 1080p with its budget. On main as `97440a1d` and `16614918`, pushed at 01:57 on
-    2026-10-24; the readings to come. The readings at `c770351f` on 2026-10-24, pushed at 03:47, the
-    demodulation mended there and the cost taken as item 59; item 54 done.
+    reprojection and the shader, 6 files and 1,171 lines under the repository's author identity, the
+    branch's build run green; the setting, the guide and the readings follow as the second commit
+    with the C entry points, ABI 300 to 301, and the local cherry-pick after item 50. Reported at
+    01:2x; its departures the node's place after the main opaque pass and before the transparent
+    one, Solari's system and the transmissive pass being private to their crates, sky and
+    forward-material texels neither filtered nor taps, non-finite light taken as none and a
+    zero-weight tap unread, and the à-trous depth gradient read from surface neighbors alone after
+    sky taps spread a NaN to a black floor; 8 Cargo tests, the check clean across the profiles on
+    three systems, the six ray tracing tests passing on lavapipe with the node on. Its second,
+    `62136e08` at 01:47 on 2026-10-24 under the repository's author identity, 15 files, 376 lines,
+    is Render.SetRayTracedDenoiser with DenoiserSettings, a sealed class of the history's clamp and
+    the three widths at SVGF's defaults, Render.RayTracedDenoiserActive, the two C entry points at
+    ABI 303 since main holds 302, every app clearing the ray tracing flags as it begins, a fault
+    found there, the guide's passage rewritten with a compiled block; 1,132 passed headless, the 9
+    ray tracing tests on lavapipe, 11 Cargo tests, the checks clean on three systems. The item is
+    whole on the branch; the local coder cherry-picks both, the ABI line the one conflict, and takes
+    the still means, the strafe and the node's time at 1080p with its budget. On main as `97440a1d`
+    and `16614918`, pushed at 01:57 on 2026-10-24; the readings to come. The readings at `c770351f`
+    on 2026-10-24, pushed at 03:47, the demodulation mended there and the cost taken as item 59;
+    item 54 done.
 
-55. **The README's animated capture of Swarm goes.** The owner wrote at 20:22 on 2026-10-23 that the
-    small section at the top of both engines' READMEs showing that they capture GIFs, BevyCSharp's
-    of a game and 3DEngine's of Ore, is not necessary information and is to be removed. The mend:
-    the Swarm picture and the paragraph under the Examples heading saying it was recorded by `./bcs
+55. **The README's animated capture of Swarm goes.** Reported at 20:22 on 2026-10-23, the small
+    section at the top of both engines' READMEs showing that they capture GIFs, BevyCSharp's of a
+    game and 3DEngine's of Ore, is not necessary information and is to be removed. The mend: the
+    Swarm picture and the paragraph under the Examples heading saying it was recorded by `./bcs
     record` go from the README, and `.github/assets/swarm.gif` is deleted since nothing else
     references it; the showcase picture at the very top and Blockout's picture stay, the tools guide
     keeps its own words. One commit, small, with the local coder's next batch. Done at `135e43b5` on
     2026-10-23.
 
 56. **The bridge's Slang modules give their names plainly, as 3DEngine's do, with no `bcs_*::`
-    before them (Decision 56).** The owner asked at 21:31 on 2026-10-23 why a shader here cannot use
-    Slang as in 3DEngine, without the double colon, and said yes to the change. The cause:
-    `bcs_compute`, `bcs_scene`, `bcs_pass`, `bcs_field` and the bridge's other modules wrap their
-    contents in a `public namespace` of the module's name, so every use is qualified,
-    `bufferElement`, `Instance`, `passUv`, where 3DEngine's modules declare their names at the top
-    level and name each helper for what it is, `fieldDistance` rather than `distance`; nothing in
-    Slang or the WGSL it writes asks for the namespaces, and no document records a reason beyond
-    keeping generic names from colliding with a program's own. The mend: the namespaces go, and each
-    helper is named for its module and its work so no plain name collides, `bufferCount`,
-    `bufferElement` and `bufferStore` for the raw buffer's three, `passUv` and its kin for the
-    pass's, the types plain, `Instance`, `Material`, `PoolVertex`, `PoolMesh`, `FieldInfo`, read
-    against 3DEngine's names where the two engines hold the same thing so a shader reads the same in
-    both; the kernels of item 50, the feature test's shaders and every example's shader change with
-    it, the compute and ray tracing guides and docs/shaders.md follow; no upgrading entry, the owner
-    saying at 21:32 that none is needed since nobody uses the engine yet, and this engine having no
-    upgrading page. Tests: the existing shader and compute tests passing with the plain names, and a
-    test that no module declares a namespace. One commit, after item 50's second commit and before
-    item 54's readings, by the local coder since the kernels of item 50 are in its hands. Done at
-    `fda2f62e` on 2026-10-23, the scheme and the second test in the head.
+    before them (Decision 56).** Asked at 21:31 on 2026-10-23 why a shader here cannot use Slang as
+    in 3DEngine, without the double colon, and the change was approved. The cause: `bcs_compute`,
+    `bcs_scene`, `bcs_pass`, `bcs_field` and the bridge's other modules wrap their contents in a
+    `public namespace` of the module's name, so every use is qualified, `bufferElement`, `Instance`,
+    `passUv`, where 3DEngine's modules declare their names at the top level and name each helper for
+    what it is, `fieldDistance` rather than `distance`; nothing in Slang or the WGSL it writes asks
+    for the namespaces, and no document records a reason beyond keeping generic names from colliding
+    with a program's own. The mend: the namespaces go, and each helper is named for its module and
+    its work so no plain name collides, `bufferCount`, `bufferElement` and `bufferStore` for the raw
+    buffer's three, `passUv` and its kin for the pass's, the types plain, `Instance`, `Material`,
+    `PoolVertex`, `PoolMesh`, `FieldInfo`, read against 3DEngine's names where the two engines hold
+    the same thing so a shader reads the same in both; the kernels of item 50, the feature test's
+    shaders and every example's shader change with it, the compute and ray tracing guides and
+    docs/shaders.md follow; no upgrading entry, none being needed since nobody uses the engine yet,
+    as decided at 21:32, and this engine having no upgrading page. Tests: the existing shader and
+    compute tests passing with the plain names, and a test that no module declares a namespace. One
+    commit, after item 50's second commit and before item 54's readings, by the local coder since
+    the kernels of item 50 are in its hands. Done at `fda2f62e` on 2026-10-23, the scheme and the
+    second test in the head.
 
 58. **The cheat sheet's headers are 3DEngine's, plain group headings and no sub-heading a type
-    (Decision 58).** The owner wrote at 21:39 on 2026-10-23 that the cheat sheets are to be
-    coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's section headers as
-    3DEngine's, plain words without the code styling. Here each group opens with a `##` heading and
-    a guide link, then a `###` sub-heading in code styling for every type, `BevyApp`, `App`,
-    `Config` and the rest, each with its own block, where 3DEngine's page has the group heading and
-    one block. The mend: the sub-headings go, each group one fenced block with its members in the
-    order the types came, a type's members set apart by a blank line inside the block where that
-    helps a reader, the heading words plain; `CheatsheetTests` holds the form as it holds the lines.
-    One commit, small, with the local coder's next batch. Done at `66e2b067` on 2026-10-23, pushed
-    at 23:09 under `fda2f62e`, each type's methods under a comment naming it inside the block.
+    (Decision 58).** Decided at 21:39 on 2026-10-23, the cheat sheets are to be coherent: 3DEngine's
+    lines one-liners as BevyCSharp's are, and BevyCSharp's section headers as 3DEngine's, plain
+    words without the code styling. Here each group opens with a `##` heading and a guide link, then
+    a `###` sub-heading in code styling for every type, `BevyApp`, `App`, `Config` and the rest,
+    each with its own block, where 3DEngine's page has the group heading and one block. The mend:
+    the sub-headings go, each group one fenced block with its members in the order the types came, a
+    type's members set apart by a blank line inside the block where that helps a reader, the heading
+    words plain; `CheatsheetTests` holds the form as it holds the lines. One commit, small, with the
+    local coder's next batch. Done at `66e2b067` on 2026-10-23, pushed at 23:09 under `fda2f62e`,
+    each type's methods under a comment naming it inside the block.
 
 59. **The denoiser's node comes down from 3.6 ms at 1080p, read stage by stage first.** Item 54's
     readings put the node at 3.6 ms in Bevy's Solari scene and 5.7 with every pixel filtered on the
@@ -1360,12 +1356,12 @@ a batch.
     white block's side, a lit room's floor within the bound of its reference, and the quality
     levels' costs read on the Cornell box. Three commits, the probes and their tracing, the pass and
     the reference, then the glossy term and the emitters. It waited while the method was still
-    moving in 3DEngine, its items 71, 72 and 74 open, and the owner said shortly before 07:28 on
-    2026-10-21 that if it is not yet ready BevyCSharp waits, so this item starts only once those are
+    moving in 3DEngine, its items 71, 72 and 74 open, and by the decision shortly before 07:28 on
+    2026-10-21 BevyCSharp waits if it is not yet ready, so this item starts only once those are
     mended and the voxel game's captures say the light holds, the port carrying the mends in.
     3DEngine's items 71, 72 and 74 are mended and on its main on 2026-10-24 and the voxel game's
-    pictures retaken that day, so the wait ends by the reviewer's reading of the owner's condition,
-    the owner's to overrule; the item starts at 07:2x with its first commit, the probes and their
+    pictures retaken that day, so the wait ends by the reviewer's reading of that condition, the
+    owner's to overrule; the item starts at 07:2x with its first commit, the probes and their
     tracing. The first commit at `0f0be8f0` on 2026-10-24, pushed at 08:19, the departures in the
     head. The pass at `07863068`, pushed at 09:24, the sky's share departure in the head; the
     reference in a commit of its own next. The reference at `8cb6cbaa`, pushed at 10:22; the third
@@ -1377,16 +1373,16 @@ a batch.
     at `c230300b` on 2026-10-24 in five commits, the probes, the pass, the reference, the emitters,
     the sky and the glossy term, the departures in the heads of their records and in RENDERING.md.
 
-61. **No running sentence holds a colon, across the documents, the comments and the scripts.** The
-    owner wrote at about 10:34 on 2026-10-24 that some documents join sentences with a colon and
-    that STYLE.md forbids it. STYLE.md's own check lists the hits, the awk over the Markdown files
-    outside their code and the grep over the comments and scripts, and each is read and recast as
-    STYLE.md says, a sentence of its own or the same sentence recast, a label at a line's end or in
-    a table left as it is, over the guides under docs, RENDERING.md, BUILDING.md, AGENTS.md's line,
-    CHEATSHEET.md's comment lines, ASKS.md and the comments of the code and the scripts; the
-    review's files are the reviewing session's own and are not touched. One commit, docs and
-    comments only, after item 51's third commit and before item 60. Done at `eca6e651` on
-    2026-10-24, 36 joints recast, the labels and the shaders' component labels kept.
+61. **No running sentence holds a colon, across the documents, the comments and the scripts.**
+    Reported at about 10:34 on 2026-10-24, some documents join sentences with a colon and STYLE.md
+    forbids it. STYLE.md's own check lists the hits, the awk over the Markdown files outside their
+    code and the grep over the comments and scripts, and each is read and recast as STYLE.md says, a
+    sentence of its own or the same sentence recast, a label at a line's end or in a table left as
+    it is, over the guides under docs, RENDERING.md, BUILDING.md, AGENTS.md's line, CHEATSHEET.md's
+    comment lines, ASKS.md and the comments of the code and the scripts; the review's files are the
+    reviewing session's own and are not touched. One commit, docs and comments only, after item 51's
+    third commit and before item 60. Done at `eca6e651` on 2026-10-24, 36 joints recast, the labels
+    and the shaders' component labels kept.
 
 60. **The deferred G-buffer keeps the emissive's exposure.** Found by item 51's reference on
     2026-10-24: Bevy's deferred G-buffer drops the emissive color's alpha, which carries whether the
@@ -1465,13 +1461,13 @@ a batch.
     draws such a mesh, and its two departures stand in the head.
 
 63. **The feature test's HUD is clean, a green frame rate in a corner and nothing else over the
-    view.** The owner wrote to this session at about 19:30 on 2026-10-24, Decision 61, to remove the
-    "frame N fps" text at the bottom left and the stray pixels in the screen's middle and to add a
-    green FPS number in a top corner. The text goes, the number stands in a top corner in green, and
-    the stray pixels are read first for what draws them, the cursor, a debug draw or a pass's seam,
-    and mended at the cause; a capture before and after. One commit, small, after item 52. Done at
-    `30362cf2` on 2026-10-24, the orb a throbber sprite and the stray marks its camera's gizmos,
-    both gone, the frame rate green at the top left.
+    view.** Asked of this session at about 19:30 on 2026-10-24, Decision 61, to remove the "frame N
+    fps" text at the bottom left and the stray pixels in the screen's middle and to add a green FPS
+    number in a top corner. The text goes, the number stands in a top corner in green, and the stray
+    pixels are read first for what draws them, the cursor, a debug draw or a pass's seam, and mended
+    at the cause; a capture before and after. One commit, small, after item 52. Done at `30362cf2`
+    on 2026-10-24, the orb a throbber sprite and the stray marks its camera's gizmos, both gone, the
+    frame rate green at the top left.
 
 71. **A frame point after tonemapping is ordered against FXAA, SMAA and CAS.** Found by item 64's
     second part on 2026-10-24, read at 23:20: FramePoint.AfterTonemapping and the passes after
@@ -1503,27 +1499,27 @@ a batch.
     reference raymarch the LUT sky is read against at four sun heights with Bruneton and ARC
     pictures; then the lower hemisphere and the distance fog taking the horizon's color from the
     atmosphere so the far ground meets the sky with no gray band; then 3DEngine's tone curve and
-    grading as engine settings read against 3DEngine's numbers; then, on the owner's word, the view
-    from space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's
-    grading keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
-    suggestion the owner heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with their
-    readings; the second next, the distant geometry and the band below the horizon fading to the
-    sky's horizon color by view direction, read from the camera's sky-lit environment map in a pass
-    of the engine's own. The second phase at `53583307` on 2026-10-24, the fog and the band with the
-    frame points ordered; the third next, the grading keyed by the sun's height. The third phase's
-    plan at 23:30, since 3DEngine's look, the voxel game's BSL curve at exposure 1.6, saturation 1.4
-    in linear light after the curve, contrast 1.12 about the middle once encoded and the engine's
-    knee as the default curve, cannot be said in Bevy's tonemappers, is an engine pass in the
-    tonemapper's place, the view's Tonemapping set to None in the render world while a look is on,
-    the look pass after tonemapping and before the anti-aliasing and the passes after tonemapping,
-    Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and its knee,
-    tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then, as a second
-    commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's height,
-    3DEngine keying no grading by the hour. The third phase at `d8ecd271` on 2026-10-25, the look
-    pass with the Vivid preset, item 71 inside it; its second commit next, the look keyed by the
-    sun's height; the fourth, the view from space, on the owner's word. Done at `5041dda3` on
-    2026-10-25 in four commits, the media, the fog and the band, the look pass and the look cycle;
-    the view from space on the owner's word as a new item.
+    grading as engine settings read against 3DEngine's numbers; then, by decision, the view from
+    space with per-pixel transmittance as Bennett's. The third phase may take 3DEngine's grading
+    keyed by the sun's height, a small timecycle as GTA V's artists key theirs, the coder's
+    suggestion, which was heard. The first phase at `0ce0069d` on 2026-10-24, the two airs with
+    their readings; the second next, the distant geometry and the band below the horizon fading to
+    the sky's horizon color by view direction, read from the camera's sky-lit environment map in a
+    pass of the engine's own. The second phase at `53583307` on 2026-10-24, the fog and the band
+    with the frame points ordered; the third next, the grading keyed by the sun's height. The third
+    phase's plan at 23:30, since 3DEngine's look, the voxel game's BSL curve at exposure 1.6,
+    saturation 1.4 in linear light after the curve, contrast 1.12 about the middle once encoded and
+    the engine's knee as the default curve, cannot be said in Bevy's tonemappers, is an engine pass
+    in the tonemapper's place, the view's Tonemapping set to None in the render world while a look
+    is on, the look pass after tonemapping and before the anti-aliasing and the passes after
+    tonemapping, Render.SetLook(camera, LookSettings) with a Vivid preset of 3DEngine's numbers and
+    its knee, tests against 3DEngine's TonemapCurveTests figures, the feature test on Vivid; then,
+    as a second commit, the timecycle this engine's own, LookSettings.Lerp with keys by the sun's
+    height, 3DEngine keying no grading by the hour. The third phase at `d8ecd271` on 2026-10-25, the
+    look pass with the Vivid preset, item 71 inside it; its second commit next, the look keyed by
+    the sun's height; the fourth, the view from space, by decision. Done at `5041dda3` on 2026-10-25
+    in four commits, the media, the fog and the band, the look pass and the look cycle; the view
+    from space by decision as a new item.
 
 72. **The feature test's sample behaviors go from the source.** From the word of 2026-10-25 at
     08:18, with the console of the feature test run from games/FeatureTest on the desktop and closed
@@ -1541,7 +1537,7 @@ a batch.
     the verbose flag, nothing found relying on them.
 
 69. **The weather is the engine's own, lit by the atmosphere, and the vendored weather crate
-    leaves.** From Decision 62, the owner's word at about 21:3x on 2026-10-24. Volumetric fog and
+    leaves.** From Decision 62, the decision at about 21:3x on 2026-10-24. Volumetric fog and
     volumetric clouds are written in the engine and lit by Bevy's Hillaire atmosphere as RDR2 lights
     its froxel fog and raymarched clouds together under its sky; rain, snow, thunder, wind, and the
     stars and the moon are written in the engine as well; the vendored native/bevy_weather, 0.2.0 at
@@ -1611,17 +1607,16 @@ a batch.
     script in the repository starts a shard, capture-in-fedora.sh running podman with --rm and
     ending with its work, so no repository line takes an init. Each shard holds an idle dotnet and
     VBCSCompiler from that night beside the defunct entries. The coder's removal was refused by its
-    session's permission check and the owner is asked to remove them or allow it; the rule, a work
+    session's permission check and the ask is made to remove them or allow it; the rule, a work
     container started with --init and removed as its work ends, goes into BUILDING.md's local
-    recipes in one sentence, with the crate's removal. Removed at 10:37 on 2026-10-25 by the owner's
-    leave, podman killing sleep after ten seconds since it ignores the term signal, the defunct
+    recipes in one sentence, with the crate's removal. Removed at 10:37 on 2026-10-25 by leave
+    given, podman killing sleep after ten seconds since it ignores the term signal, the defunct
     entries gone with them and three unrelated ones left; the sentence stands in BUILDING.md's
     caches section and goes with the crate's removal, which closes this item. Done at `ff5fa5e9` on
-    2026-10-25, the sentence under BUILDING.md's caches, the shards removed at 10:37 by the owner's
-    leave.
+    2026-10-25, the sentence under BUILDING.md's caches, the shards removed at 10:37 by leave given.
 
 74. **A texture collection for the vegetation, imported from free sources, small on disk and on the
-    GPU.** From Decision 66, the owner's word of 2026-10-25 at about 13:00. The collection is
+    GPU.** From Decision 66, the decision of 2026-10-25 at about 13:00. The collection is
     assets/textures in the library, built by build/textures.py from a manifest naming each source
     under .ref and the recipe applied to it, the crop, the resize, the channel packing and any color
     change, so the import is repeatable and the sources stay out of the repository; an entry is
@@ -1647,50 +1642,49 @@ a batch.
     byte for byte, the bounds, a loaded entry's size and format, and a tree built with a named bark
     and leaves drawn in a picture. After item 70's second phase's growth and before its dressing, so
     the dressing takes the collection where it has an entry. Two commits, the pipeline and the
-    format, then the entries. The owner added at 13:08 that branch cards or leaf clusters batched
-    from the leaves are the review's call and that questions are welcome; so the import may also
-    bake branch cards, a twig with several leaves of an atlas drawn into one card with its own
-    normal and translucency, for the middle level of detail where item 70's third phase goes from
-    clusters to cards, the coder choosing per species whether a card is baked or built from the
-    atlas at load, said in the record. The coder's reading at 13:10, taken. Basis Universal is out,
-    its crate among those the owner declined with ureq, ctt and wgpu's std, so the entries are KTX2
-    holding BC7 and BC5 under zstd, which the bridge's ktx2 and zstd features read with nothing
-    added; build/textures.py encodes BC7 mode 6 for the albedo and the surface and BC5 for the
-    normals in plain Python with PIL reading, cropping, resizing and packing and Python's own zstd,
-    no numpy, the import taking minutes for the collection, the mips keeping the alpha's coverage so
-    leaves do not thin with distance. BC7 being a byte a texel, a bark's albedo is 512 by 1024 or
-    512 square and a leaf atlas's 1024 square, the normal and the surface at half the albedo's size,
-    about 1 MB a bark and 2 a leaf set before zstd, the bounds held after it. Branch cards are built
-    at load from the atlas in item 70's third phase and not baked at import, so the collection stays
-    small. Changed at 13:40 under Decision 66 as amended. The entries come from the hidden folder
-    .vegetation, where the review sorted the usable sources by kind, bark, leaves, branches and
-    scans, a set a folder with its files named albedo, opacity, normal, gloss or specular,
-    subsurface, ao and height as the source had them and a README saying what each gives and what is
-    needed; the folder stays out of the repository, the import reads it by path, and the manifest
-    names each entry's folder as its source. The entries ship in the second commit; nothing waits.
-    The coder's three points, taken. The surface file follows Bevy's channels, occlusion in R,
-    roughness in G, metallic in B left at zero and the diffuse transmission in A, so one file binds
-    as the occlusion, the metallic-roughness and the transmission textures with no shader of the
-    library's, and Bevy reads BC5 as a two-channel normal by itself; the collection lives in
-    BevyCSharp/Vegetation/Textures, since a folder named assets would collide with BevyCSharp/Assets
-    on a case-insensitive file system, the KTX2 files and textures.json embedded in the library and
-    mounted under bevycsharp/vegetation in the asset root so Bevy's own loader reads them by path,
-    waiting entries imported to Textures/waiting under .gitignore and not embedded, TreeTextures.Add
-    mounting a folder for a local reading or a game's own; the AGENTS.md row for ASSETS.md is the
-    owner's to say, .github being hidden from N 1.5, and the coder asks. At 14:22 the owner told the
-    coder to ship the sorted folder as it is and to say nothing more of it in any document, so the
-    pipeline commit ships no set and adds nothing to the notices, a set ships unless the manifest
-    marks it waiting, the tests run on a 64-square sample kept under the tests' references, and the
-    entries' commit imports the sorted folder by its README's preset map. The pipeline at `70f92473`
-    on 2026-10-25, the encoder, the KTX2 writer, the mount and the lookup, no set shipped; the
-    entries next, the six presets' sets alone. Done at `d151e0cc` on 2026-10-25 with the entries,
-    ten sets for the six presets at 3.3 MB, the rest of the sorted folder waiting for an item that
-    asks.
+    format, then the entries. Added at 13:08, branch cards or leaf clusters batched from the leaves
+    are the review's call and questions are welcome; so the import may also bake branch cards, a
+    twig with several leaves of an atlas drawn into one card with its own normal and translucency,
+    for the middle level of detail where item 70's third phase goes from clusters to cards, the
+    coder choosing per species whether a card is baked or built from the atlas at load, said in the
+    record. The coder's reading at 13:10, taken. Basis Universal is out, its crate among those
+    declined with ureq, ctt and wgpu's std, so the entries are KTX2 holding BC7 and BC5 under zstd,
+    which the bridge's ktx2 and zstd features read with nothing added; build/textures.py encodes BC7
+    mode 6 for the albedo and the surface and BC5 for the normals in plain Python with PIL reading,
+    cropping, resizing and packing and Python's own zstd, no numpy, the import taking minutes for
+    the collection, the mips keeping the alpha's coverage so leaves do not thin with distance. BC7
+    being a byte a texel, a bark's albedo is 512 by 1024 or 512 square and a leaf atlas's 1024
+    square, the normal and the surface at half the albedo's size, about 1 MB a bark and 2 a leaf set
+    before zstd, the bounds held after it. Branch cards are built at load from the atlas in item
+    70's third phase and not baked at import, so the collection stays small. Changed at 13:40 under
+    Decision 66 as amended. The entries come from the hidden folder .vegetation, where the review
+    sorted the usable sources by kind, bark, leaves, branches and scans, a set a folder with its
+    files named albedo, opacity, normal, gloss or specular, subsurface, ao and height as the source
+    had them and a README saying what each gives and what is needed; the folder stays out of the
+    repository, the import reads it by path, and the manifest names each entry's folder as its
+    source. The entries ship in the second commit; nothing waits. The coder's three points, taken.
+    The surface file follows Bevy's channels, occlusion in R, roughness in G, metallic in B left at
+    zero and the diffuse transmission in A, so one file binds as the occlusion, the
+    metallic-roughness and the transmission textures with no shader of the library's, and Bevy reads
+    BC5 as a two-channel normal by itself; the collection lives in BevyCSharp/Vegetation/Textures,
+    since a folder named assets would collide with BevyCSharp/Assets on a case-insensitive file
+    system, the KTX2 files and textures.json embedded in the library and mounted under
+    bevycsharp/vegetation in the asset root so Bevy's own loader reads them by path, waiting entries
+    imported to Textures/waiting under .gitignore and not embedded, TreeTextures.Add mounting a
+    folder for a local reading or a game's own; the AGENTS.md row for ASSETS.md is the owner's to
+    say, .github being hidden from N 1.5, and the coder asks. At 14:22 the coder was told to ship
+    the sorted folder as it is and to say nothing more of it in any document, so the pipeline commit
+    ships no set and adds nothing to the notices, a set ships unless the manifest marks it waiting,
+    the tests run on a 64-square sample kept under the tests' references, and the entries' commit
+    imports the sorted folder by its README's preset map. The pipeline at `70f92473` on 2026-10-25,
+    the encoder, the KTX2 writer, the mount and the lookup, no set shipped; the entries next, the
+    six presets' sets alone. Done at `d151e0cc` on 2026-10-25 with the entries, ten sets for the six
+    presets at 3.3 MB, the rest of the sorted folder waiting for an item that asks.
 
 75. **Bark has depth by parallax occlusion, its height map taken from the source or derived from the
-    normal.** From the owner's question of 2026-10-25 at about 15:00 whether the tree textures could
-    take parallax occlusion mapping for depth, and the word yes at {now}. About a third of the
-    sorted bark sets carry a height or a displacement map, the hornbeam and silver maple trunks, the
+    normal.** From the question of 2026-10-25 at about 15:00 whether the tree textures could take
+    parallax occlusion mapping for depth, and the word yes at {now}. About a third of the sorted
+    bark sets carry a height or a displacement map, the hornbeam and silver maple trunks, the
     Italian cypress and both pines among them; for the rest the import derives the height from the
     normal map by integrating its slopes, truer than a guess from the color and needing no other
     tool. An entry gains a fourth file, depth.ktx2, one channel in BC4 at half a byte a texel, the
@@ -1704,11 +1698,11 @@ a batch.
     alone, about 0.2 ms on 24 trunks at 1080p, the departure in the head.
 
 76. **A crown shades as a volume, each leaf's depth and outward direction taken from the shadow
-    grid.** From the owner's question of 2026-10-25 at about 19:45 on the leaves' normals, and the
-    word yes at 19:55. A leaf card's own normal is right for its specular and its transmission, but
-    a crown shades mostly as a volume, leaves deep inside and on the far side getting less sun and
-    sky than those on the lit rim, so per-leaf normals alone read as a heap of flat cards; bending
-    the normals outward is the stand-in artists use, toward a sphere by the shortcut and toward the
+    grid.** From the question of 2026-10-25 at about 19:45 on the leaves' normals, and the word yes
+    at 19:55. A leaf card's own normal is right for its specular and its transmission, but a crown
+    shades mostly as a volume, leaves deep inside and on the far side getting less sun and sky than
+    those on the lit rim, so per-leaf normals alone read as a heap of flat cards; bending the
+    normals outward is the stand-in artists use, toward a sphere by the shortcut and toward the
     crown's real shape by the physical form. The growth's shadow grid already holds the leaf density
     of each variant, so at each leaf the dressing reads two numbers from it and writes them per
     vertex. The depth is the density above and around the leaf by Beer and Lambert's law, which
@@ -1738,15 +1732,15 @@ a batch.
     Bevy's turned normals and no bend, the doc correction kept and SameNormalBothSides dropped; then
     the bend for the diffuse term alone as its own commit through a leaf Slang material lighting
     twice, its cost measured against the leaves' lighting, with SameNormalBothSides if it needs it.
-    The owner, shown the grazing-sun pair at about 21:34, the aspen and the oak flat on the left and
-    with the normal bent half way out of the crown on the right, wrote that it looks great, so the
-    right-hand look is the target the bend's commit gives without the sheen from below, its side-lit
-    picture held against this one. The first part at `6b2503ff` on 2026-10-25, the depth as a vertex
-    gray from the sky each leaf sees, the deepest at half; the bend next as its own commit through
-    the leaf material, the owner's liked pair its target. Done at `14c2df0f` on 2026-10-25 with the
-    second part, the leaf material lighting the diffuse term on the bent normal and the rest on the
-    leaf's own, the sun's side showing and no sky mirrored from below, 2.3 ms on 24 trunks' crowns
-    at 1080p.
+    On the grazing-sun pair shown at about 21:34, the aspen and the oak flat on the left and with
+    the normal bent half way out of the crown on the right, the answer was that it looks very good,
+    so the right-hand look is the target the bend's commit gives without the sheen from below, its
+    side-lit picture held against this one. The first part at `6b2503ff` on 2026-10-25, the depth as
+    a vertex gray from the sky each leaf sees, the deepest at half; the bend next as its own commit
+    through the leaf material, the approved pair its target. Done at `14c2df0f` on 2026-10-25 with
+    the second part, the leaf material lighting the diffuse term on the bent normal and the rest on
+    the leaf's own, the sun's side showing and no sky mirrored from below, 2.3 ms on 24 trunks'
+    crowns at 1080p.
 
 77. **The trees' memory for the process read and cut, and the memory guard's stop read as a stop.**
     From the test host's stops of 2026-10-26, read at 06:3x. The suite's host passed 3.75 GB of
@@ -1769,22 +1763,22 @@ a batch.
     line read by test.py from a file; three leads in the head.
 
 70. **Trees and foliage grow from a seed inside Weber and Penn's parameters, through the modeling,
-    with no asset files.** From Decision 63, the owner's word at 21:26 on 2026-10-24 and their
-    choice of the hybrid, grown method at about 21:5x. Weber and Penn's species parameters of 1995,
-    the crown's envelope, the branch angles, the taper and the leaves' arrangement, stay the
-    controls an artist sets, and within them the branch structure grows from a seed by space
-    colonization after Runions, Lane and Prusinkiewicz (2007) with light competition through a
-    shadow grid after Palubicki and others (2009), so crowns fill naturally and react to neighbors
-    and walls; the branches are smooth tapered generalized cylinders with joints through the
-    modeling's EditMesh with a bark material, the leaves small geometry clusters where meshlets run
-    and alpha-cut cards elsewhere with Bevy's diffuse transmission, octahedral impostors at distance
-    with instancing for forests, and the wind from a per-vertex branch hierarchy as SpeedTree's and
-    Pivot Painter's, which item 69's wind moves; the same seed grows the same tree bit for bit. The
-    paper's four presets, the quaking aspen, the black tupelo, the weeping willow and the California
-    black oak, with bushes and ferns beside them, are the library's first entries; a tree entity
-    placed by preset and seed in the level file of item 65 and the editor of item 67, an example and
-    a guide page showing the parameters; tests of determinism by seed, each preset's height and
-    spread within the paper's values and the triangle counts within bounds, and captures of the four
+    with no asset files.** From Decision 63, the decision at 21:26 on 2026-10-24 and the choice of
+    the hybrid, grown method at about 21:5x. Weber and Penn's species parameters of 1995, the
+    crown's envelope, the branch angles, the taper and the leaves' arrangement, stay the controls an
+    artist sets, and within them the branch structure grows from a seed by space colonization after
+    Runions, Lane and Prusinkiewicz (2007) with light competition through a shadow grid after
+    Palubicki and others (2009), so crowns fill naturally and react to neighbors and walls; the
+    branches are smooth tapered generalized cylinders with joints through the modeling's EditMesh
+    with a bark material, the leaves small geometry clusters where meshlets run and alpha-cut cards
+    elsewhere with Bevy's diffuse transmission, octahedral impostors at distance with instancing for
+    forests, and the wind from a per-vertex branch hierarchy as SpeedTree's and Pivot Painter's,
+    which item 69's wind moves; the same seed grows the same tree bit for bit. The paper's four
+    presets, the quaking aspen, the black tupelo, the weeping willow and the California black oak,
+    with bushes and ferns beside them, are the library's first entries; a tree entity placed by
+    preset and seed in the level file of item 65 and the editor of item 67, an example and a guide
+    page showing the parameters; tests of determinism by seed, each preset's height and spread
+    within the paper's values and the triangle counts within bounds, and captures of the four
     presets held against the paper's figures for their overall shape. Phases proposed by the coder,
     the growth and the branches first, then the leaves and the presets, then the entity, the
     impostors and the editor; the wind with item 69. After item 69 and before 65. The reviewer's
@@ -1794,18 +1788,18 @@ a batch.
     grown skeleton, nodes with parent, place and radius, may be kept in the level file beside the
     seed so a tree is the same on every machine whatever the floating point of the growth. The bark
     and the leaves' pictures are generated too, small noise-made textures and leaf masks, so no
-    texture set becomes the large file the owner ruled out. Each tree gets its colliders, a capsule
-    for the trunk and the thick branches. The levels of detail cross-fade by dither so no tree pops,
-    the cylinders' segments falling first, then the clusters to cards, then the impostor. The leaves
-    are written into the scene field as cells that pass a share of light, as 3DEngine's item 100
-    gives its field, so the global illumination under a canopy is a shade and not a cave, the share
-    shared with 3DEngine through SHARED.md. The paper's parameters that name a growth map to the
-    growth's own terms, the envelope to the attractors' placement, the down and rotate angles and
-    the curve to the tropisms, the splits to the branching's chance, said in the guide so an
-    artist's expectations hold. A leaf color per preset with a seasonal tint is cheap and goes in
-    with the presets. The coder's phases at 11:22 on 2026-10-25, taken as laid out, each a commit
-    with the suite green and pictures. The first, the growth and the branches, TreeSpecies holding
-    the paper's controls, height and scale, the envelope's eight shapes, the base size, three levels
+    texture set becomes the large file ruled out. Each tree gets its colliders, a capsule for the
+    trunk and the thick branches. The levels of detail cross-fade by dither so no tree pops, the
+    cylinders' segments falling first, then the clusters to cards, then the impostor. The leaves are
+    written into the scene field as cells that pass a share of light, as 3DEngine's item 100 gives
+    its field, so the global illumination under a canopy is a shade and not a cave, the share shared
+    with 3DEngine through SHARED.md. The paper's parameters that name a growth map to the growth's
+    own terms, the envelope to the attractors' placement, the down and rotate angles and the curve
+    to the tropisms, the splits to the branching's chance, said in the guide so an artist's
+    expectations hold. A leaf color per preset with a seasonal tint is cheap and goes in with the
+    presets. The coder's phases at 11:22 on 2026-10-25, taken as laid out, each a commit with the
+    suite green and pictures. The first, the growth and the branches, TreeSpecies holding the
+    paper's controls, height and scale, the envelope's eight shapes, the base size, three levels
     with down and rotate angles, curve, splits, branches and length a level, the taper and the
     radius ratio, Trees.Grow running space colonization from attractors seeded in the envelope with
     influence and kill radii, tropisms from the down angle and the curve and radii by the pipe
@@ -1948,55 +1942,54 @@ a batch.
     reading the file back with its five doorways and the start, the drive's and capture jobs' new
     picture, the FeatureTest README and docs/levels.md pointing at the file. The helpers at
     `d53a3108` on 2026-10-26, boxes, wedges, arches and doorways as brushes; the hub's file next,
-    and the level then grows into item 68's rooms by the owner's word of that day, Decision 68. Done
-    at `c5cb4888` on 2026-10-26 with the third phase's hub, the plaza from a level file in place of
-    the open ground's cube alone, the level then growing under item 68 by Decision 68.
+    and the level then grows into item 68's rooms by decision of that day, Decision 68. Done at
+    `c5cb4888` on 2026-10-26 with the third phase's hub, the plaza from a level file in place of the
+    open ground's cube alone, the level then growing under item 68 by Decision 68.
 
-79. **The feature test's window shows what the devlog's pictures show.** The owner wrote on
-    2026-10-30 that the feature test run by hand does not look like the devlog's pictures, the
-    clouds and the lighting looking far worse than the latest pictures of the clouds, which come
-    from the drive's offscreen runs. A reading first, in the owner's own way of running with the
-    same build, window size and mode. The weather preset, hour and quality of the pictured frames
-    are read against what a run by hand starts with and what keys change them; a window screenshot
-    at the pictures' views is read against offscreen captures of the same frames, pixel by pixel,
-    the swapchain's format and tone mapping against the capture's; and the clouds and the global
-    illumination under movement and in the first seconds are read against a still that settled,
-    since temporal passes converge over frames. Then the mend for what the reading shows, the
-    feature test starting as pictured or its keys said on screen, a window path matching the
-    capture's, or the README saying what settles and how long. First, before item 68's next zone,
-    with a note and the pair of pictures. The owner added that the feature test is run with dotnet
-    run, the bin folder deleted at times, so the C# build is current, the clouds the most visible
-    difference, and that the sessions may open a window on this machine and capture it; the reading
-    runs windowed the owner's way and asks first which native bridge dotnet run loads, since the
-    clouds' shaders live in the bridge and a bridge not rebuilt since a pull is older than the C#
-    that calls it, the freshness check read for why it did not say so. Read first on 2026-10-30, the
-    bridge is not stale for the clouds on this machine, a plain dotnet run copying the library built
-    on 2026-10-26 at 04:45, which holds the cloud code of 2025-10-25 and lacks only scene_field.rs's
-    light-through of `929a1cf7`; the owner's saved settings start at hour 11 with the day stopped
-    and PartlyCloudy where the pictures stand at 15:00 and 8:00, the window ugly standing still, so
-    size and settling are out; the windowed Debug run against offscreen at one pose and hour, pixel
-    by pixel, is next. Read at the owner's settings on 2026-10-30, the window equal to offscreen
-    within 0.3 to 1.2% on still views, so not the swapchain; the fault is the clouds lit from the
-    eye's side, the start view north at 11:00 with the sun behind, coming out gray and no brighter
-    than the sky, the phase of two Henyey-Greenstein lobes over four octaves returning about 0.08 of
-    the light toward the sun where a white cloud returns about 0.25, the devlog's 15:00 shots facing
-    the sun's side where the forward lobe whitens them; a smaller lavender tint from the clear sky's
-    ambient of `5a8c6251`; and near clouds as soft smears with the walls hiding the horizon's. The
-    mend is the clouds' many-times-scattered light so a front-lit thick cloud reaches a white
-    albedo, then the tint, each with a pair at the owner's settings. Done at `e3ddec48` on
-    2026-10-30, the many-times-scattered share in the clouds' march, the other glitches the owner
-    sees to items 81 and 82.
+79. **The feature test's window shows what the devlog's pictures show.** Reported on 2026-10-30, the
+    feature test run by hand does not look like the devlog's pictures, the clouds and the lighting
+    looking far worse than the latest pictures of the clouds, which come from the drive's offscreen
+    runs. A reading first, in the reported way of running with the same build, window size and mode.
+    The weather preset, hour and quality of the pictured frames are read against what a run by hand
+    starts with and what keys change them; a window screenshot at the pictures' views is read
+    against offscreen captures of the same frames, pixel by pixel, the swapchain's format and tone
+    mapping against the capture's; and the clouds and the global illumination under movement and in
+    the first seconds are read against a still that settled, since temporal passes converge over
+    frames. Then the mend for what the reading shows, the feature test starting as pictured or its
+    keys said on screen, a window path matching the capture's, or the README saying what settles and
+    how long. First, before item 68's next zone, with a note and the pair of pictures. Added, the
+    feature test is run with dotnet run, the bin folder deleted at times, so the C# build is
+    current, the clouds the most visible difference, and the sessions may open a window on this
+    machine and capture it; the reading runs windowed the same way and asks first which native
+    bridge dotnet run loads, since the clouds' shaders live in the bridge and a bridge not rebuilt
+    since a pull is older than the C# that calls it, the freshness check read for why it did not say
+    so. Read first on 2026-10-30, the bridge is not stale for the clouds on this machine, a plain
+    dotnet run copying the library built on 2026-10-26 at 04:45, which holds the cloud code of
+    2025-10-25 and lacks only scene_field.rs's light-through of `929a1cf7`; the saved settings start
+    at hour 11 with the day stopped and PartlyCloudy where the pictures stand at 15:00 and 8:00, the
+    window ugly standing still, so size and settling are out; the windowed Debug run against
+    offscreen at one pose and hour, pixel by pixel, is next. Read at the saved settings on
+    2026-10-30, the window equal to offscreen within 0.3 to 1.2% on still views, so not the
+    swapchain; the fault is the clouds lit from the eye's side, the start view north at 11:00 with
+    the sun behind, coming out gray and no brighter than the sky, the phase of two Henyey-Greenstein
+    lobes over four octaves returning about 0.08 of the light toward the sun where a white cloud
+    returns about 0.25, the devlog's 15:00 shots facing the sun's side where the forward lobe
+    whitens them; a smaller lavender tint from the clear sky's ambient of `5a8c6251`; and near
+    clouds as soft smears with the walls hiding the horizon's. The mend is the clouds'
+    many-times-scattered light so a front-lit thick cloud reaches a white albedo, then the tint,
+    each with a pair at the saved settings. Done at `e3ddec48` on 2026-10-30, the
+    many-times-scattered share in the clouds' march, the other glitches seen to items 81 and 82.
 
-81. **The meadow's grass holds its light from one frame to the next.** The owner wrote on 2026-10-30
-    at 20:4x that the feature test looks good but the grass in the vegetation areas glitches, dark
-    patches for one frame that change the next, and asked that two pictures be taken one after the
-    other to see it. A reading first, two consecutive offscreen captures at the meadow and their
+81. **The meadow's grass holds its light from one frame to the next.** Reported on 2026-10-30 at
+    20:4x, the feature test looks good but the grass in the vegetation areas glitches, dark patches
+    for one frame that change the next, with the ask that two pictures be taken one after the other
+    to see it. A reading first, two consecutive offscreen captures at the meadow and their
     difference picture, then the cause among the frame-to-frame terms, the global illumination's
     screen probes and their history, the leaves' share in the scene field with the wind moving the
     grass, the leaf material's twofold lighting under a swaying normal, the shadow cascades' jitter,
     or the smoothing's history; then the mend so a still view of the grass changes by no more than
     the smoothing's own grain between frames, read by the difference picture's share of pixels past
-    a threshold before and after, with a pair or a short animation at the owner's settings. First
+    a threshold before and after, with a pair or a short animation at the saved settings. First
     after item 79's cloud mend. The cause read on 2026-10-30, the grass shader's main vertex stage
     adding the wind's push in world space while the prepass took it into mesh space and back through
     the transform, the two depths differing by a rounding so that where the main pass landed behind
@@ -2007,14 +2000,14 @@ a batch.
     means the same sums in the same order. Done at `de14e311` on 2026-10-30, the two vertex stages
     summing the wind the same way.
 
-82. **The light hall keeps its brightness as the camera turns.** The owner wrote on 2026-10-30 at
-    21:0x that in the lighting room the room gets brighter when the camera looks left and darker
-    when it looks right. A reading first, offscreen in the hall at the owner's settings, the same
-    point turned left and right with the mean of the frame and of a fixed wall patch, then the cause
-    among the view-dependent terms, the camera's exposure adapting to what is in view, the global
+82. **The light hall keeps its brightness as the camera turns.** Reported on 2026-10-30 at 21:0x, in
+    the lighting room the room gets brighter when the camera looks left and darker when it looks
+    right. A reading first, offscreen in the hall at the saved settings, the same point turned left
+    and right with the mean of the frame and of a fixed wall patch, then the cause among the
+    view-dependent terms, the camera's exposure adapting to what is in view, the global
     illumination's screen probes or the cascades' merge changing with the view, the clustered lights
     cut by the view's bounds, or bloom; then the mend so a wall's patch reads the same within a few
-    percent from either side, with a pair at the owner's settings. After item 81. Read at 08:02 on
+    percent from either side, with a pair at the saved settings. After item 81. Read at 08:02 on
     2026-10-31, the cause Bevy 0.20's. The floor two meters ahead, swept every 15 degrees, reads
     0.24 to 0.27 and 0.14 to 0.17 from 165 to 315 degrees, the same at 15:00 and gone at night;
     without the bay's irradiance volume no jump, with the probe alone none, with the volume alone
@@ -2051,44 +2044,42 @@ a batch.
     settled values. The mend gives Looking a frame count, 60 by default, the light-through test
     asking 180 with a comment, the class 26 of 26 in 3 minutes. Done at `1c9b6baf`.
 
-78. **The README's words under the header are the owner's.** The owner wrote on 2026-10-30 that
-    below the README's header stands "Bevy C# [Behavior] on a struct are component & systems,
-    generated at compile or runtime and wired straight into Bevy's ECS. Implementing Radiance
-    Cascades. [bcs]", in place of the line there; every test or check that reads the README's first
-    paragraph follows, FirstGameTests among them; the bracketed bcs is a question put to the owner,
-    a link to the bcs script or a plain mark, and stands as written until answered. One commit,
-    small, documents alone, between item 83's phases. Answered on 2026-10-31 at 12:13, the bracketed
-    bcs is BevyCSharp's short identifier, named from its command line, since the engine's name alone
-    is general; it stays as written, a plain mark in the text, no link. Goes at once, a commit of
-    its own. Done at `c5d9cd20`, the line verbatim, the mark plain, the checks that read the first
-    paragraph passing.
+78. **The README's words under the header are replaced.** Decided on 2026-10-30, below the README's
+    header stands "Bevy C# [Behavior] on a struct are component & systems, generated at compile or
+    runtime and wired straight into Bevy's ECS. Implementing Radiance Cascades. [bcs]", in place of
+    the line there; every test or check that reads the README's first paragraph follows,
+    FirstGameTests among them; the bracketed bcs is a question put back, a link to the bcs script or
+    a plain mark, and stands as written until answered. One commit, small, documents alone, between
+    item 83's phases. Answered on 2026-10-31 at 12:13, the bracketed bcs is BevyCSharp's short
+    identifier, named from its command line, since the engine's name alone is general; it stays as
+    written, a plain mark in the text, no link. Goes at once, a commit of its own. Done at
+    `c5d9cd20`, the line verbatim, the mark plain, the checks that read the first paragraph passing.
 
-83. **The grass is shaded as the trees are.** The owner asked in the coder's session on 2026-10-30,
-    seeing the feature test's grass stylized beside the trees, whether it can be physically shaded
-    like them. Today the grass is a shader of its own, a two-tone gradient with the normal leaned
-    70% up, no texture and no transmission. An engine grass under BevyCSharp/Vegetation beside
-    Trees, drawn with the leaves' wind material, albedo, normal and surface textures, diffuse
-    transmission, the alpha mask, two-sided normals and LightThrough, its cards clumps from the
-    sorted grass sets picked by kind and density and shipped in the bounded collection as the trees'
-    leaves are, the meadow using it; read against the trees' leaves in one view and by the meadow's
-    cost before and after, the drive's meadow checks kept, a captioned picture. After item 84, in
-    three phases the coder proposed on 2026-10-31, a commit each. First the grass sets into the
-    bounded collection, recipes in build/textures.py for the sets with albedo, opacity and normal, a
-    Grass kind beside Bark and Leaf in TreeTextureSet, the collection's size and count said, a test
-    that each loads with its channels. Second the engine grass, Grass.Plant in
-    BevyCSharp/Vegetation/Grass.cs taking the area, the set, density, height and seed, clumps as
-    crossed alpha-masked cards batched a mesh a patch rather than an entity a blade, drawn with the
-    leaves' material and the trees' Wind with the root pinned, the main pass and the prepass placing
-    a vertex by the same sums as item 81 asks, tests that a backlit clump transmits, the wind moves
-    tops and not roots and a patch builds headless, the docs page's lines. Third the meadow on it in
-    place of its 14,000 strip entities, the drive's meadow checks kept, read against the trees'
-    leaves in one view and by frame.profile before and after, with a picture. First phase done at
-    `d92ac690`, read at 12:24 on 2026-10-31, the three grass cards in the collection with their
-    channels, a grass kind in textures.py and TreeTextureKind, BarkDepthTests reading bark alone.
-    Second phase done at `1099cb35`, the engine grass as recorded in the head; third phase done at
-    `219142e2`, the meadow on the engine grass as the head records, the frame at the drive's meadow
-    view 47.7 to 36.7 ms and the entities 15,066 to 1,083, a plain pair with the numbers. Done at
-    `219142e2`.
+83. **The grass is shaded as the trees are.** Asked in the coder's session on 2026-10-30, on the
+    feature test's grass stylized beside the trees, whether it can be physically shaded like them.
+    Today the grass is a shader of its own, a two-tone gradient with the normal leaned 70% up, no
+    texture and no transmission. An engine grass under BevyCSharp/Vegetation beside Trees, drawn
+    with the leaves' wind material, albedo, normal and surface textures, diffuse transmission, the
+    alpha mask, two-sided normals and LightThrough, its cards clumps from the sorted grass sets
+    picked by kind and density and shipped in the bounded collection as the trees' leaves are, the
+    meadow using it; read against the trees' leaves in one view and by the meadow's cost before and
+    after, the drive's meadow checks kept, a captioned picture. After item 84, in three phases the
+    coder proposed on 2026-10-31, a commit each. First the grass sets into the bounded collection,
+    recipes in build/textures.py for the sets with albedo, opacity and normal, a Grass kind beside
+    Bark and Leaf in TreeTextureSet, the collection's size and count said, a test that each loads
+    with its channels. Second the engine grass, Grass.Plant in BevyCSharp/Vegetation/Grass.cs taking
+    the area, the set, density, height and seed, clumps as crossed alpha-masked cards batched a mesh
+    a patch rather than an entity a blade, drawn with the leaves' material and the trees' Wind with
+    the root pinned, the main pass and the prepass placing a vertex by the same sums as item 81
+    asks, tests that a backlit clump transmits, the wind moves tops and not roots and a patch builds
+    headless, the docs page's lines. Third the meadow on it in place of its 14,000 strip entities,
+    the drive's meadow checks kept, read against the trees' leaves in one view and by frame.profile
+    before and after, with a picture. First phase done at `d92ac690`, read at 12:24 on 2026-10-31,
+    the three grass cards in the collection with their channels, a grass kind in textures.py and
+    TreeTextureKind, BarkDepthTests reading bark alone. Second phase done at `1099cb35`, the engine
+    grass as recorded in the head; third phase done at `219142e2`, the meadow on the engine grass as
+    the head records, the frame at the drive's meadow view 47.7 to 36.7 ms and the entities 15,066
+    to 1,083, a plain pair with the numbers. Done at `219142e2`.
 
 85. **The engine takes the Levels module as a submodule.** After the module's item 3 lands in its
     three parts, this engine adds the Levels repository as a git submodule under modules/ and
@@ -2102,16 +2093,16 @@ a batch.
     `a01b2df`, LevelSpawner the binding, the format's tests in the module's suite, the drive's
     courts green.
 
-86. **Three asks of the afternoon in the feature test.** Given in the coder's session on
-    2026-10-31 before 16:56, the player drawn as a plain capsule; the 1 m prototyping grid whiter,
-    floors and walls at 0.90 and ceilings at 0.95, chosen by the owner from pictures, with a Shared
-    line for the grid's row; and Sponza's z-fight with the yard's floor gone by standing Sponza 2 cm
-    over it. One commit after the gallery court's, the drive's checks green. Done at `26763e87`.
+86. **Three asks of the afternoon in the feature test.** Given in the coder's session on 2026-10-31
+    before 16:56, the player drawn as a plain capsule; the 1 m prototyping grid whiter, floors and
+    walls at 0.90 and ceilings at 0.95, chosen from pictures, with a Shared line for the grid's row;
+    and Sponza's z-fight with the yard's floor gone by standing Sponza 2 cm over it. One commit
+    after the gallery court's, the drive's checks green. Done at `26763e87`.
 
-87. **The feature test's day is filled near neutral until global illumination carries it.** The
-    owner found on 2026-10-31 the white level blue in shade and the morning sun too warm, chose that
+87. **The feature test's day is filled near neutral until global illumination carries it.** Found on
+    2026-10-31, the white level is blue in shade and the morning sun too warm; the choice was that
     global illumination is fixed first and used in the feature test after the radiance cascades'
-    fix, and took the near-neutral fill shown meanwhile (Decision 74). In DayNight a warm white
+    fix, with the near-neutral fill shown taken meanwhile (Decision 74). In DayNight a warm white
     ambient fill of 1000 by day, the Day look's saturation at a quarter of what it added, 1.4 to
     1.1, and a mild daytime white balance, a plain pair in the hall and the yard. One commit after
     its suite, before item 88. Done at `60638b01`, the pair 2026-10-31-item-87-fill.webp.
@@ -2125,10 +2116,10 @@ a batch.
     setting both reach the path, so a player can hit it. The mend gives every 3D camera with a
     prepass a DeferredPrepass while materials are deferred and takes it off after, with a test that
     switches GI with a probe's cameras alive and fails without the mend. Small, after 87 and before
-    68's meadow court. Global illumination on by default waits as Decision 74 says. The owner's own
-    session hit the same panic at 20:48 on 2026-10-31 when ScreenSpaceLight went on from the panel,
-    a path the mend covers. Corrected on 2026-10-31 at 21:3x, the probe's face cameras hold no
-    prepass and Bevy skips them; the camera that panics is the weather's camera over the roofs in
+    68's meadow court. Global illumination on by default waits as Decision 74 says. A play session
+    hit the same panic at 20:48 on 2026-10-31 when ScreenSpaceLight went on from the panel, a path
+    the mend covers. Corrected on 2026-10-31 at 21:3x, the probe's face cameras hold no prepass and
+    Bevy skips them; the camera that panics is the weather's camera over the roofs in
     Render.Precipitation.cs, orthographic at order -100 with a depth prepass made while materials
     were forward, so it holds depth and no G-buffer when the scene camera turns deferred on. The
     test draws depth into an image of its own through a second camera made first, then switches the
@@ -2148,45 +2139,45 @@ a batch.
     records; starting on a set clock was dropped since it streaked the effects view under ambient
     occlusion.
 
-68. **The feature test's level is remade in the new tools and looks as the owner asked.** From
-    Decision 61, the owner finding the level ugly. The level is rebuilt as a file of item 65 in the
-    prototyping palette with the editor of item 67, its rooms, lights and the course the drive walks
-    kept so the feature test's checks hold, under the sky of item 64 with the clean HUD of item 63;
-    the captures of the feature test retaken and the owner shown the result. After item 67. Brought
-    forward on 2026-10-26 by the owner's word, Decision 68, after item 65's hub commit and before 66
-    and 67, in the phases the coder proposed, the hub as the plaza first; then the rooms and the
-    boundary, a hall for the course, a gallery room, light bays, a meadow courtyard and a scenes
-    hall joined by corridors, ramps and a raised walkway inside a tall wall, the ground plane, the
-    terrain and the light hall's house going and Zones' centers and starts moving into the rooms,
-    the layout pictured before content moves; then each zone's content moved in, one commit a zone,
-    the drive's stations and captures updated as each moves; then the drive and captures retaken,
-    the README and docs saying the new map. The engine's features stay; a check a room cannot hold
-    goes with a note. The second phase as the coder proposed on 2026-10-26 after the hub, courts
-    enclosing each zone's content where it stands so the drive stays green before anything moves,
-    the course and playground, the gallery, the meadow and forests, the Sponza yard with its corner
-    toward the hub cut away and the light hall's shell rebuilt from brushes at its size, arched
-    corridors joining them to the plaza, the west corridor an arcade and the meadow given a raised
-    walkway on ramps, the ground plane's mesh going with an entity at ground height for Crates' slab
-    and the RTAO rays, Lights.Shell replaced by brushes, a public LevelBrush.Moved for the generator
-    and item 67's editor, the layout pictured to the owner and in the devlog with a line a room
-    before the third phase. The second phase at `7e082be1` on 2026-10-26, the courts, the hall's
-    shell and the corridors round the zones where they stand, no horizon from any start, the walkway
-    or the ramps, the layout pictured and sent; the third phase next, each zone's pieces moved into
-    its court's own structure, one zone a commit. The light hall at `0ed9073c` on 2026-10-30; the
-    course court next. The course court at `3417d612` on 2026-10-30. The gallery court landed at
-    `63aca2f2` on 2026-10-31, the first court built on the Levels module; the meadow court next, its
-    trees as level tree entities. The meadow court landed at `7332bc50` on 2026-11-01, its trees as
-    level tree entities; the scenes yard next, then phase 4. The scenes yard landed at `3808bd37` on
-    2026-11-01, the pack's site an info_scene point in the level, which ends the third phase's
-    courts; phase 4 after item 89. The fourth phase is done at `720ec3db`, read at 00:23 on
-    2026-11-02, which ends the item, the ray tracing guide's denoiser figures read again over 256
-    frames a view, filtered 1.3 to 6.4 levels from the mean and grainy 8.9 to 18.0, the strafe's
-    uncovered surfaces 18 to 20 against 38, denoiser.webp and scene-field.webp retaken on the walled
-    map, the RTAO sentence corrected, the weather's costs at the hub at 15:00 under an overcast in
-    the comparison guide (clouds and their shadow 0.27 ms, the clouds over the sky 0.29, froxel fog
-    0.38, precipitation 0.04), two remarks losing the old map's words, the reading
-    2026-11-01-item-68-scene-field.webp; the GPU drive whole in 244 s, every view sent to the owner
-    in one sheet; 1,996 in the suite. Two leads from the reading are item 92.
+68. **The feature test's level is remade in the new tools and looks as asked.** From Decision 61,
+    the level found ugly. The level is rebuilt as a file of item 65 in the prototyping palette with
+    the editor of item 67, its rooms, lights and the course the drive walks kept so the feature
+    test's checks hold, under the sky of item 64 with the clean HUD of item 63; the captures of the
+    feature test retaken and the result shown. After item 67. Brought forward on 2026-10-26 by
+    decision, Decision 68, after item 65's hub commit and before 66 and 67, in the phases the coder
+    proposed, the hub as the plaza first; then the rooms and the boundary, a hall for the course, a
+    gallery room, light bays, a meadow courtyard and a scenes hall joined by corridors, ramps and a
+    raised walkway inside a tall wall, the ground plane, the terrain and the light hall's house
+    going and Zones' centers and starts moving into the rooms, the layout pictured before content
+    moves; then each zone's content moved in, one commit a zone, the drive's stations and captures
+    updated as each moves; then the drive and captures retaken, the README and docs saying the new
+    map. The engine's features stay; a check a room cannot hold goes with a note. The second phase
+    as the coder proposed on 2026-10-26 after the hub, courts enclosing each zone's content where it
+    stands so the drive stays green before anything moves, the course and playground, the gallery,
+    the meadow and forests, the Sponza yard with its corner toward the hub cut away and the light
+    hall's shell rebuilt from brushes at its size, arched corridors joining them to the plaza, the
+    west corridor an arcade and the meadow given a raised walkway on ramps, the ground plane's mesh
+    going with an entity at ground height for Crates' slab and the RTAO rays, Lights.Shell replaced
+    by brushes, a public LevelBrush.Moved for the generator and item 67's editor, the layout shown
+    in pictures and in the devlog with a line a room before the third phase. The second phase at
+    `7e082be1` on 2026-10-26, the courts, the hall's shell and the corridors round the zones where
+    they stand, no horizon from any start, the walkway or the ramps, the layout pictured and sent;
+    the third phase next, each zone's pieces moved into its court's own structure, one zone a
+    commit. The light hall at `0ed9073c` on 2026-10-30; the course court next. The course court at
+    `3417d612` on 2026-10-30. The gallery court landed at `63aca2f2` on 2026-10-31, the first court
+    built on the Levels module; the meadow court next, its trees as level tree entities. The meadow
+    court landed at `7332bc50` on 2026-11-01, its trees as level tree entities; the scenes yard
+    next, then phase 4. The scenes yard landed at `3808bd37` on 2026-11-01, the pack's site an
+    info_scene point in the level, which ends the third phase's courts; phase 4 after item 89. The
+    fourth phase is done at `720ec3db`, read at 00:23 on 2026-11-02, which ends the item, the ray
+    tracing guide's denoiser figures read again over 256 frames a view, filtered 1.3 to 6.4 levels
+    from the mean and grainy 8.9 to 18.0, the strafe's uncovered surfaces 18 to 20 against 38,
+    denoiser.webp and scene-field.webp retaken on the walled map, the RTAO sentence corrected, the
+    weather's costs at the hub at 15:00 under an overcast in the comparison guide (clouds and their
+    shadow 0.27 ms, the clouds over the sky 0.29, froxel fog 0.38, precipitation 0.04), two remarks
+    losing the old map's words, the reading 2026-11-01-item-68-scene-field.webp; the GPU drive whole
+    in 244 s, every view sent in one sheet; 1,996 in the suite. Two leads from the reading are item
+    92.
 
 80. **The native bridge's freshness is checked at build and run, shaders among its inputs.** From
     item 79's reading of 2026-10-30. The check BCS101 in BevyCSharp.csproj runs before
@@ -2298,8 +2289,8 @@ a batch.
     to 2.65, the vegetation 3.74 to 1.82, the cost 1.99 ms against 1.94; the helmet's reflection in
     solari_reflections sharp by the same mend, its Fedora pictures taken again within 2.7% of the
     old; a test of the band beside a lamp within 15% of the grainy mean; 1,998 in the suite; the
-    Cornell and reflections readings sent to the owner. A lead for the readings script, the
-    reference taken before tonemapping.
+    Cornell and reflections readings sent. A lead for the readings script, the reference taken
+    before tonemapping.
 
 94. **A scene field shadow test fails once in a suite and passes alone.** From item 93's suite on
     2026-11-02:
@@ -2330,29 +2321,29 @@ a batch.
     `UiTests.cs`, which stood at 799, 794 and 794, are split at `88a75e54`, `f68bd192` and
     `09e3b339` to 557, 588 and 535, each a commit that moves code alone; `app.rs` is at 709 since
     `c5b6d1d3`. N 7.2's list takes `ff467a5f`, the subject's marks run together and pushed before
-    the suite read them, beside the owner's `5a7f2c07`, and the list only gets shorter from there;
-    `a0c8b1b0`, the owner's own one-line commit of the showcase's caption, pushed, joins it as the
-    owner's with custom_schedule's commit, three left out. N 1.3's count of the Slang shaders done
-    at `5e9235ce` on 2026-10-20. The lists read whole against their rules by 04:29 the same day:
-    1.4's 30 entries are tests of what is no area of the library, the build, the documents, the
-    editor, the examples, the generator, the scripting and the norm's own, listed by nature as the
-    list's head says; 4.5's 20 are examples drawn at the window Bevy's own asks for, 18 stress tests
-    and the headless renderer at 1920 by 1080 and the scale factor override at 512 by 288, which the
-    rule leaves out; B 3's 15 entry points answer a constant or a flag and cannot panic, which the
-    rule leaves out; 3.3's six are clocks or waits on things outside the frame, the asset server's
-    threads, the file watcher, the socket server and the test folder's retried delete; 4.1's four
-    are documents quoting another's words or naming the dash itself; 1.2, 1.3 and 3.4 hold headers
-    alone; 7.2 stays. So the lists hold no debt, and nothing moves. Meanwhile, with no item open,
-    the coder reads SHARED.md's row on a mesh replaced in place keeping its indirect light,
-    3DEngine's `03e0bd36`, under Solari and under Bevy's light probes, whether a frame draws without
-    indirect light when a mesh is replaced, with a capture of the frame after the swap against the
-    one before, and reports the reading under Replies for the row; a fault found is an item. The
+    the suite read them, beside the hand-made `5a7f2c07`, and the list only gets shorter from there;
+    `a0c8b1b0`, a one-line commit of the showcase's caption made by hand, pushed, joins it with
+    custom_schedule's commit, three left out. N 1.3's count of the Slang shaders done at `5e9235ce`
+    on 2026-10-20. The lists read whole against their rules by 04:29 the same day: 1.4's 30 entries
+    are tests of what is no area of the library, the build, the documents, the editor, the examples,
+    the generator, the scripting and the norm's own, listed by nature as the list's head says; 4.5's
+    20 are examples drawn at the window Bevy's own asks for, 18 stress tests and the headless
+    renderer at 1920 by 1080 and the scale factor override at 512 by 288, which the rule leaves out;
+    B 3's 15 entry points answer a constant or a flag and cannot panic, which the rule leaves out;
+    3.3's six are clocks or waits on things outside the frame, the asset server's threads, the file
+    watcher, the socket server and the test folder's retried delete; 4.1's four are documents
+    quoting another's words or naming the dash itself; 1.2, 1.3 and 3.4 hold headers alone; 7.2
+    stays. So the lists hold no debt, and nothing moves. Meanwhile, with no item open, the coder
+    reads SHARED.md's row on a mesh replaced in place keeping its indirect light, 3DEngine's
+    `03e0bd36`, under Solari and under Bevy's light probes, whether a frame draws without indirect
+    light when a mesh is replaced, with a capture of the frame after the swap against the one
+    before, and reports the reading under Replies for the row; a fault found is an item. The
     replaced-mesh row read at `6cca47f7` on 2026-10-20, no fault found, the figures in the head and
     the ledger.
 
-3. **Bevy 0.20.** The owner chose it on 2026-10-09 (Decisions 17 to 20), and the crates' word is
-   typed by the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy
-   0.20.0 was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
+3. **Bevy 0.20.** It was chosen on 2026-10-09 (Decisions 17 to 20), and the crates' word is typed by
+   the owner into the working session, as AGENTS.md has it, before a manifest changes. Bevy 0.20.0
+   was published on 2026-10-08 with wgpu and naga 30, winit 0.30, gilrs 0.11 and nonmax 0.5
    unchanged, a minimum Rust of 1.97.1 that this machine, the portable image and the runners meet,
    and every one of the 70 `bevy/*` features the bridge names. In this order, each step a commit of
    its own where it stands alone.
@@ -2401,13 +2392,13 @@ a batch.
    MIT or Apache-2.0 notice kept for what was taken, and the dependency removed (Decision 17).
 
 **The weather vendored and ported.** `bevy_weather` 0.2.0 targets 0.19.1 alone and has one
-   maintainer; its source in `.ref/bevy_weather-main` becomes a workspace member
-   `native/bevy_weather` in upstream's shape with its LICENSE.md, the bridge depending on it by
-   path, and is ported there: four shader loads whose `sky.wgsl` and `precipitation.wgsl` carry five
-   preprocessor lines, converted to WESL and renamed `.wesl`; five `AsBindGroup` derives and eight
-   material impls; 34 atmosphere sites against an atmosphere that is per camera in 0.20
-   (`AtmosphereBuffer` a component, `init_atmosphere_buffer` gone). The Weather page and the course
-   script script pass as before, and the port is offered upstream by the owner (Decision 18).
+maintainer; its source in `.ref/bevy_weather-main` becomes a workspace member `native/bevy_weather`
+in upstream's shape with its LICENSE.md, the bridge depending on it by path, and is ported there:
+four shader loads whose `sky.wgsl` and `precipitation.wgsl` carry five preprocessor lines, converted
+to WESL and renamed `.wesl`; five `AsBindGroup` derives and eight material impls; 34 atmosphere
+sites against an atmosphere that is per camera in 0.20 (`AtmosphereBuffer` a component,
+`init_atmosphere_buffer` gone). The Weather page and the course script script pass as before, and
+the port is offered upstream (Decision 18).
 
    **The schema and the files.** `bevy-components.tsv` written again from an editor build as
    BUILDING.md has it, its diff read as what Bevy changed; `ABI_VERSION` and `ExpectedAbiVersion`
@@ -2553,31 +2544,31 @@ a batch.
     item 130. The suite 2,034 passed and 3 skipped. A Shared line offers the read to the engine's
     groundReached.
 
-99. **The screen probes' tile grows with the picture's height past 1080.** The owner asked on
-    2026-11-03 at 11:20 whether the engine applies the fix that the screen probes' spacing is not
-    hard-coded a tier but scales with the picture as 3DEngine's does. It does not:
-    WorldProbes.Screen's TileAt gives 16, 12 and 8 pixels a side at Low, Medium and High whatever
-    the height, where 3DEngine's TileAt takes those at 1080 and scales them by the height over 1080,
-    8, 8, 8, 11 and 16 for heights 450 to 2160, so the probes' count and the pass's cost hold near
-    1080p's at 1440p and 4K while each probe covers more pixels. The same here, the tile from the
-    view's height with the 1080 figures as the least, the glow texels with it where they stand on
-    the tile, read at 1080p, 1440p and 4K in the hall and the yard at the three qualities by
-    gpu.global_illumination and the distances to the references, the cost holding within a fifth
-    across the sizes and the pictures within their bars; a SHARED.md row. One commit, after 95. Read
-    with it the shared row added at 14:40 from the engine's item 141, whether the far cascade
-    carries screen probes or a thin-wall test and what they cost in a wood; the engine keeps its
-    screen probes in the counted cascades alone, their hold fading across the last counted band, and
-    took 0.75 to 0.85 ms off the grove. A second row from the engine's 141 to read with it, whether
-    the bridge's screen rays march past their reach where the probes around their end read dark, by
-    a deep cave's cost; the engine marches only where no probe holds light and took 1.1 ms of global
-    illumination off the deep cave at High. Done at `03bc102f`, pushed at 08:22 on 2026-11-05. TileAt
-    takes the picture's height through bcs_render_viewport_size (ABI 318), the tile 16, 12 and 8
-    pixels at Low, Medium and High up to 1080 rows and growing with the height past it as the
-    engine's does, 21, 16 and 11 at 1440p and 32, 24 and 16 at 4K, the feature test taking a size;
-    the screen probes' trace at High 9.22, 9.46 and 9.84 ms at 1080p, 1440p and 4K where 9.21, 16.58
-    and 37.53 with the tile held, Medium and Low within 15% across the sizes, the hall and the yard
-    the same distance from their references within a thousandth at every size; the suite 2,022 in 45
-    minutes, cargo test 118 and 203, NormTests 18, the listing unchanged. Next 105.
+99. **The screen probes' tile grows with the picture's height past 1080.** Asked on 2026-11-03 at
+    11:20 whether the engine applies the fix that the screen probes' spacing is not hard-coded a
+    tier but scales with the picture as 3DEngine's does. It does not: WorldProbes.Screen's TileAt
+    gives 16, 12 and 8 pixels a side at Low, Medium and High whatever the height, where 3DEngine's
+    TileAt takes those at 1080 and scales them by the height over 1080, 8, 8, 8, 11 and 16 for
+    heights 450 to 2160, so the probes' count and the pass's cost hold near 1080p's at 1440p and 4K
+    while each probe covers more pixels. The same here, the tile from the view's height with the
+    1080 figures as the least, the glow texels with it where they stand on the tile, read at 1080p,
+    1440p and 4K in the hall and the yard at the three qualities by gpu.global_illumination and the
+    distances to the references, the cost holding within a fifth across the sizes and the pictures
+    within their bars; a SHARED.md row. One commit, after 95. Read with it the shared row added at
+    14:40 from the engine's item 141, whether the far cascade carries screen probes or a thin-wall
+    test and what they cost in a wood; the engine keeps its screen probes in the counted cascades
+    alone, their hold fading across the last counted band, and took 0.75 to 0.85 ms off the grove. A
+    second row from the engine's 141 to read with it, whether the bridge's screen rays march past
+    their reach where the probes around their end read dark, by a deep cave's cost; the engine
+    marches only where no probe holds light and took 1.1 ms of global illumination off the deep cave
+    at High. Done at `03bc102f`, pushed at 08:22 on 2026-11-05. TileAt takes the picture's height
+    through bcs_render_viewport_size (ABI 318), the tile 16, 12 and 8 pixels at Low, Medium and High
+    up to 1080 rows and growing with the height past it as the engine's does, 21, 16 and 11 at 1440p
+    and 32, 24 and 16 at 4K, the feature test taking a size; the screen probes' trace at High 9.22,
+    9.46 and 9.84 ms at 1080p, 1440p and 4K where 9.21, 16.58 and 37.53 with the tile held, Medium
+    and Low within 15% across the sizes, the hall and the yard the same distance from their
+    references within a thousandth at every size; the suite 2,022 in 45 minutes, cargo test 118 and
+    203, NormTests 18, the listing unchanged. Next 105.
 
 100. **The path-traced reference reads the leaf material's color and its alpha cutout.** From item
     95's meadow reading on 2026-11-03: gi.reference traces the grass cards and the tree impostors as
@@ -2625,58 +2616,58 @@ a batch.
     and Moon parts since `a5e474b`, the moon 0.126 lux at 4,100 K in the HDRP reference's recipe),
     with the night's exposure as the reference's, so the alley wall in the moon's shade reads a dim
     blue. Read by the alley's night pair against its fill picture and the reference's night, and
-    placed for the owner's eye in the devlog. After the aisle floor, before 100. Scope set at 02:35.
+    placed for a look by eye in the devlog. After the aisle floor, before 100. Scope set at 02:35.
     The feature test's moon stays at its 900 lux, bluish, kept that bright so a tester can walk the
-    night, and its exposure stays, a darker night as the reference's being a look for the owner's
-    word; the escaping rays carry the night sky in proportion to that moon as the Sky module gives
-    it, SkyLight's luminance with the moon as the light scaled by this moon over the module's, plus
-    Night's airglow scaled alike, so the shade holds the reference's ratio to the moonlit ground. In
-    the drive's night view the atmosphere draws a pale moonlit sky while the shaded alley wall reads
-    dark blue with GI off and the fill on and black at Medium with the fill off, so the escaping
-    rays carry neither the drawn sky nor more than the ambient. The escaping rays reading the sky as
-    drawn by direction, day and night, as the engine's 189 does, is a later row. The black shade
-    read at 03:00 is negative light from the field's contact shadows, not too little sky. In the
-    drive's night view at 23:00 against a 256-path night reference the shaded wall facing -x read
-    -0.60 a channel where the reference reads 0.06, the wall facing -z -2.0 and the stairs -2.4,
-    negative in proportion to albedo, 0.02 to 0.05 with GI off, the light pass not it, and by hour
-    -3.0 at 19:00, -2.2 at 21:00 and -0.6 at 23:00, positive by day, following the sun, which keeps
-    12,500 lux below the horizon that the atmosphere puts out. field_shadows.slang takes back each
-    directional light's light from the G-buffer where the field closes it off, as the light is above
-    the air, so the field, seeing the ground between a below-horizon sun and every surface facing
-    it, took back all of a light the atmosphere had given none of, and only GI showed it since GI
-    turns the field on. The mend, the light taken back through the camera's air as the light pass
-    reads its throughs; its test a pillar under the atmosphere with a 10,000 lux sun 15 degrees
-    down, 0 of 11,867 lit pixels darker by more than 8 levels with the mend and 534 without against
-    its 1% bar. The night view against a fresh reference at Low, Medium and High, the distance
-    0.231, 0.244 and 0.242 where 4.5, the -x wall -19, -17 and -18%, the +x wall -17, -15 and -16,
-    the -z wall +17, +42 and +42, the stairs -25, -21 and -20, the floor's 0.4% of the view +250 to
-    +280, the drawn sky +28, the shaded wall's blue over red 1.02 where the reference's 1.10. This
-    mend is 101's first commit with the night pair; the night sky on the escaping rays (B) its
-    second, read by the shaded walls toward the reference and its blue, the -z wall's and the
-    floor's excess read in the same pass; the sun's lux under the horizon left as the weather's
+    night, and its exposure stays, a darker night as the reference's being a look left to a
+    decision; the escaping rays carry the night sky in proportion to that moon as the Sky module
+    gives it, SkyLight's luminance with the moon as the light scaled by this moon over the module's,
+    plus Night's airglow scaled alike, so the shade holds the reference's ratio to the moonlit
+    ground. In the drive's night view the atmosphere draws a pale moonlit sky while the shaded alley
+    wall reads dark blue with GI off and the fill on and black at Medium with the fill off, so the
+    escaping rays carry neither the drawn sky nor more than the ambient. The escaping rays reading
+    the sky as drawn by direction, day and night, as the engine's 189 does, is a later row. The
+    black shade read at 03:00 is negative light from the field's contact shadows, not too little
+    sky. In the drive's night view at 23:00 against a 256-path night reference the shaded wall
+    facing -x read -0.60 a channel where the reference reads 0.06, the wall facing -z -2.0 and the
+    stairs -2.4, negative in proportion to albedo, 0.02 to 0.05 with GI off, the light pass not it,
+    and by hour -3.0 at 19:00, -2.2 at 21:00 and -0.6 at 23:00, positive by day, following the sun,
+    which keeps 12,500 lux below the horizon that the atmosphere puts out. field_shadows.slang takes
+    back each directional light's light from the G-buffer where the field closes it off, as the
+    light is above the air, so the field, seeing the ground between a below-horizon sun and every
+    surface facing it, took back all of a light the atmosphere had given none of, and only GI showed
+    it since GI turns the field on. The mend, the light taken back through the camera's air as the
+    light pass reads its throughs; its test a pillar under the atmosphere with a 10,000 lux sun 15
+    degrees down, 0 of 11,867 lit pixels darker by more than 8 levels with the mend and 534 without
+    against its 1% bar. The night view against a fresh reference at Low, Medium and High, the
+    distance 0.231, 0.244 and 0.242 where 4.5, the -x wall -19, -17 and -18%, the +x wall -17, -15
+    and -16, the -z wall +17, +42 and +42, the stairs -25, -21 and -20, the floor's 0.4% of the view
+    +250 to +280, the drawn sky +28, the shaded wall's blue over red 1.02 where the reference's
+    1.10. This mend is 101's first commit with the night pair; the night sky on the escaping rays
+    (B) its second, read by the shaded walls toward the reference and its blue, the -z wall's and
+    the floor's excess read in the same pass; the sun's lux under the horizon left as the weather's
     choice. A row to read for the engine, whose sun comes through its atmosphere's transmittance.
-    The first commit is `9bdb29b3`, pushed at 03:48 on 2026-11-04, field_shadows.slang taking a light
-    back through the camera's air with its header and ray-tracing.md saying so, the pillar test
-    under its 1% bar, the night pair 2026-11-04-item-101-night.webp; the suite 2,006 in 43 minutes
-    with a peak of 2,704 MB, NormTests 18. A scripted rewrap of a Reply paragraph anchored on a line
-    two Replies hold merged a thousand lines of this file before staging, recovered from the earlier
-    blob and checked against the version before; the coder's note asks a count-of-one anchor and a
-    diff before staging from here. Next (B), first whether the escaping rays already carry the
-    moonlit sky through the camera's environment copy, then the shaded walls' -17%, the -z wall's
-    +42% and the floor's +250%. (B) read at 03:51 and not done as set, since the escaping rays
-    already carry the moon's scattered sky through the camera's environment copy, Bevy's atmosphere
-    scattering every directional light into the cube gi_sky reads, so it would count the moon twice.
-    The split in the drive's night view at Medium, the shaded wall facing -x, moonlit 0.053, 0.046
-    and 0.054 against 0.062, 0.056 and 0.068 (-17%), the moon off 0.020, 0.010 and 0.008 against
-    0.028, 0.018 and 0.014 (-39%, the alley's own emitters, the arch's lamp and the fireflies), the
-    moon's share -3% red, -5% green and -15% blue, the blue noted as a reading to keep; the airglow
-    the atmosphere does not draw would be a few percent and is skipped. The rest is the emitters
-    near and far, the -z wall by the arch +52% moonlit and +79% moonless, the floor by the lamp +270
-    and +601, the far walls -39, mostly the world probes and the pass. 101's second part, the
-    emitters' near-and-far error at night, which glow light the arch's lamp is, its reach and the
-    groups, read against the reference by source, the mend with a test on the alley's lamp wall and
-    floor within 10% of their references and the day's hall unchanged. The emitters read at 03:59.
-    The excess by the arch is the fireflies, emissive squares a compute shader moves that the
+    The first commit is `9bdb29b3`, pushed at 03:48 on 2026-11-04, field_shadows.slang taking a
+    light back through the camera's air with its header and ray-tracing.md saying so, the pillar
+    test under its 1% bar, the night pair 2026-11-04-item-101-night.webp; the suite 2,006 in 43
+    minutes with a peak of 2,704 MB, NormTests 18. A scripted rewrap of a Reply paragraph anchored
+    on a line two Replies hold merged a thousand lines of this file before staging, recovered from
+    the earlier blob and checked against the version before; the coder's note asks a count-of-one
+    anchor and a diff before staging from here. Next (B), first whether the escaping rays already
+    carry the moonlit sky through the camera's environment copy, then the shaded walls' -17%, the -z
+    wall's +42% and the floor's +250%. (B) read at 03:51 and not done as set, since the escaping
+    rays already carry the moon's scattered sky through the camera's environment copy, Bevy's
+    atmosphere scattering every directional light into the cube gi_sky reads, so it would count the
+    moon twice. The split in the drive's night view at Medium, the shaded wall facing -x, moonlit
+    0.053, 0.046 and 0.054 against 0.062, 0.056 and 0.068 (-17%), the moon off 0.020, 0.010 and
+    0.008 against 0.028, 0.018 and 0.014 (-39%, the alley's own emitters, the arch's lamp and the
+    fireflies), the moon's share -3% red, -5% green and -15% blue, the blue noted as a reading to
+    keep; the airglow the atmosphere does not draw would be a few percent and is skipped. The rest
+    is the emitters near and far, the -z wall by the arch +52% moonlit and +79% moonless, the floor
+    by the lamp +270 and +601, the far walls -39, mostly the world probes and the pass. 101's second
+    part, the emitters' near-and-far error at night, which glow light the arch's lamp is, its reach
+    and the groups, read against the reference by source, the mend with a test on the alley's lamp
+    wall and floor within 10% of their references and the day's hall unchanged. The emitters read at
+    03:59. The excess by the arch is the fireflies, emissive squares a compute shader moves that the
     picture draws where they fly while the reference traces their mesh where it stands; hidden,
     against a reference taken so, the -z wall by the arch reads -10% where +52 and the floor +7
     where +270, the rest unchanged, a fault of the measure, so any night reading here hides the
@@ -3145,70 +3136,69 @@ a batch.
     the picture's fill comes from, by distance, one crown at 5, 15, 30 and 60 meters in both, the
     share of the crown's disc the leaves cover in the picture and in the reference at each, and say
     which of the fill is the leaves and which the atlas's mips; then a proposal and no mend before
-    the owner's word, the choices being the reference sampling the mask at the mip the ray's
-    footprint gives, as the picture does, so the two agree and the picture's fill stands as the
-    look, or the leaves' count and size raised so the geometry fills the crown at close range as
-    well, item 70's triangle counts the bound. The look is the picture's, thick and filled, Decision
-    78. After 106, before 96. A figure at 19:08 on 2026-11-06 from 105's grass test, with the maps
-    applying. The picture reads +23% over the reference at 96 by 64, +6 at 384 by 256 and +2 at 768
-    by 512, and with the reference's masks read at mip 3 the 96 by 64 test reads +1, so the gap
-    between the two is the masks' mip filtering, the normal map's above all, the picture's mips
-    against the reference's mip 0; the test moves to 384 by 256 where the bar holds and no sampling
-    changes. The crowns' read takes that as its first figure, the mip the eye's distance gives at
-    each of the four distances. Read at 08:42 on 2026-11-08, no mend. The fill, the lone oak 75 seen
-    level as the share of the crown's disc its leaves cover, picture against reference at 640 by
-    360, 0.750 against 0.751 at 5 m, 0.407 against 0.413 at 15, 0.334 against 0.341 at 30 and 0.340
-    against 0.327 at 60, the picture's fill the leaves' own within 2% to 30 m and 4 over at 60; the
-    atlas of 512 by 256 with two 256-texel leaves gives 1,310 texels a meter on the full level's
-    cards and 926 on the reduced, build/textures.py keeping each leaf's box share until the box is
-    about a texel across; at 320 by 180 the picture reads +5 and +18% at 30 and 60 m and the
-    reference's masks at a set mip hold below about mip 6 and rise past it, so the mips add fill
-    only where a leaf's box comes to about a texel, which at 1280 by 720 never happens before the
-    reduced level gives way to the cards. The first case, oak 75's reduced level at -47 and -49:
-    across the dither band Bevy draws both levels whole into the sun's shadow map, bevy_camera's
-    range testing a light's view over the whole band and specialize_shadows never adding the dither
-    key, the lone oak side-lit with GI off reading -3% at 22 m and +8 at 33 with one level and -16,
-    -17 and -12 in the band at 26.5, 29.5 and 30.3 m against +8, 0 and +5 with the other level's
-    leaves not casting, the doubled cast costing the meadow's oak 5 to 6 points; the rest is not
-    shadow, the oak reading -53 and -52 with every tree's casting away on both sides and 0 and -8
-    against the reference's direct sun alone, and the lone oak lit from behind the eye -22 and -16%
-    against the whole reference with GI on as with it off, the probes adding 0.001 of 0.114, so the
-    light a crown's leaves scatter between them, about a fifth there, reaches them through no probe.
-    Small findings, the oak alone keeping a gray of 0.012 against the reference's 0.002 with the sun
-    off under the meadow's reflection probe and irradiance volume, and a reference of a scene with
+    the decision, the choices being the reference sampling the mask at the mip the ray's footprint
+    gives, as the picture does, so the two agree and the picture's fill stands as the look, or the
+    leaves' count and size raised so the geometry fills the crown at close range as well, item 70's
+    triangle counts the bound. The look is the picture's, thick and filled, Decision 78. After 106,
+    before 96. A figure at 19:08 on 2026-11-06 from 105's grass test, with the maps applying. The
+    picture reads +23% over the reference at 96 by 64, +6 at 384 by 256 and +2 at 768 by 512, and
+    with the reference's masks read at mip 3 the 96 by 64 test reads +1, so the gap between the two
+    is the masks' mip filtering, the normal map's above all, the picture's mips against the
+    reference's mip 0; the test moves to 384 by 256 where the bar holds and no sampling changes. The
+    crowns' read takes that as its first figure, the mip the eye's distance gives at each of the
+    four distances. Read at 08:42 on 2026-11-08, no mend. The fill, the lone oak 75 seen level as
+    the share of the crown's disc its leaves cover, picture against reference at 640 by 360, 0.750
+    against 0.751 at 5 m, 0.407 against 0.413 at 15, 0.334 against 0.341 at 30 and 0.340 against
+    0.327 at 60, the picture's fill the leaves' own within 2% to 30 m and 4 over at 60; the atlas of
+    512 by 256 with two 256-texel leaves gives 1,310 texels a meter on the full level's cards and
+    926 on the reduced, build/textures.py keeping each leaf's box share until the box is about a
+    texel across; at 320 by 180 the picture reads +5 and +18% at 30 and 60 m and the reference's
+    masks at a set mip hold below about mip 6 and rise past it, so the mips add fill only where a
+    leaf's box comes to about a texel, which at 1280 by 720 never happens before the reduced level
+    gives way to the cards. The first case, oak 75's reduced level at -47 and -49: across the dither
+    band Bevy draws both levels whole into the sun's shadow map, bevy_camera's range testing a
+    light's view over the whole band and specialize_shadows never adding the dither key, the lone
+    oak side-lit with GI off reading -3% at 22 m and +8 at 33 with one level and -16, -17 and -12 in
+    the band at 26.5, 29.5 and 30.3 m against +8, 0 and +5 with the other level's leaves not
+    casting, the doubled cast costing the meadow's oak 5 to 6 points; the rest is not shadow, the
+    oak reading -53 and -52 with every tree's casting away on both sides and 0 and -8 against the
+    reference's direct sun alone, and the lone oak lit from behind the eye -22 and -16% against the
+    whole reference with GI on as with it off, the probes adding 0.001 of 0.114, so the light a
+    crown's leaves scatter between them, about a fifth there, reaches them through no probe. Small
+    findings, the oak alone keeping a gray of 0.012 against the reference's 0.002 with the sun off
+    under the meadow's reflection probe and irradiance volume, and a reference of a scene with
     nothing drawn failing on an unregistered component type. Decided, (a) one level casts at any
     distance, NotShadowCaster on the level whose half of the band the eye is not in by the rule
     GiReference.InRange uses, the shadow stepping at the band's middle within a frame, a mend since
-    it is a fault and not the owner's look; (b) the fill stands as the leaves' own, which is the
-    owner's look (Decision 78) and the reference's alike, no sampling moves, and the crown tests
-    read at 640 by 360 or more as 105's grass test did; (c) the light a crown's leaves scatter
-    between them is item 116, before 114, since it brightens the crowns by the right light; the two
-    small findings mend in passing in 116's commit. The pictures 08-11-item-107-measure.png and
-    08-11-item-107-band.png in the day's dump, sent to the owner. 107's reading rides in
-    `571174fc`'s replies. The shadow mend goes on as a native system in shadow_origin.rs, each frame
-    taking Bevy's own shadow origin and giving NotShadowCaster to any mesh of a visibility range
-    while the origin lies outside the span from the middle of its fade-in margin to the middle of
-    its fade-out, InRange's rule, with a marker of its own so only the NotShadowCaster it gave is
-    taken off and a game's own stays, which mends Bevy's doubled cast for every level group and not
-    trees alone, no ABI change; the test the lone oak at 26.5, 29.5 and 30.3 m against the
-    reference's direct light failing at the head, the guide's components page corrected where it
-    says the shadow fades by the same distance, the meadow's oak 75 and the cost read beside it.
-    Done at `69d97fec`, pushed at 11:22 on 2026-11-08. The native system cast_one_level in
-    render/shadow_origin.rs takes Bevy's shadow origin after transform propagation and before the
-    lights' visibility check and gives NotShadowCaster with an OutOfItsHalf marker to any mesh of a
-    visibility range outside InRange's span, a game's own NotShadowCaster staying, the ABI unchanged
-    at 322; TreeLevelShadowTests reads the lone oak side-lit against the reference's direct light at
-    26.5, 27.85, 28.05, 29.5 and 30.3 m at 8, 4, 3, 1 and 7% over where the head read 16, 19, 15, 17
-    and 12 under, the bar 0.92 to 1.15, and a capture a frame either side of the band's middle reads
-    0.0000 apart from the picture taken once the eye stood on that side (0.1682 and 0.1679 against
-    0.1659 with both levels casting and 0.1807 casting nothing), with a native unit test for the
-    rule; the meadow's oak 75 -42 and -43% where -47 and -49, the aspens +10 and +16, the shaded
-    grass -3; 33, 77 and 357 microseconds a frame for 1,000, 10,000 and 50,000 meshes in a release
-    build; the components page, the trees page and RENDERING.md corrected, the reading
-    2026-11-08-item-107-band.webp; check95 passed, cargo test 118 and 204 after two flaky native
-    tests passed in both reruns, the suite 2,051 in 59 minutes, NormTests 18. 107 is done, the fill
-    the leaves' own by the owner's look, the band's shadow mended and the crowns' scattered light
-    item 116. Next 116.
+    it is a fault and not the chosen look; (b) the fill stands as the leaves' own, which is the
+    chosen look (Decision 78) and the reference's alike, no sampling moves, and the crown tests read
+    at 640 by 360 or more as 105's grass test did; (c) the light a crown's leaves scatter between
+    them is item 116, before 114, since it brightens the crowns by the right light; the two small
+    findings mend in passing in 116's commit. The pictures 08-11-item-107-measure.png and
+    08-11-item-107-band.png in the day's dump, sent. 107's reading rides in `571174fc`'s replies.
+    The shadow mend goes on as a native system in shadow_origin.rs, each frame taking Bevy's own
+    shadow origin and giving NotShadowCaster to any mesh of a visibility range while the origin lies
+    outside the span from the middle of its fade-in margin to the middle of its fade-out, InRange's
+    rule, with a marker of its own so only the NotShadowCaster it gave is taken off and a game's own
+    stays, which mends Bevy's doubled cast for every level group and not trees alone, no ABI change;
+    the test the lone oak at 26.5, 29.5 and 30.3 m against the reference's direct light failing at
+    the head, the guide's components page corrected where it says the shadow fades by the same
+    distance, the meadow's oak 75 and the cost read beside it. Done at `69d97fec`, pushed at 11:22
+    on 2026-11-08. The native system cast_one_level in render/shadow_origin.rs takes Bevy's shadow
+    origin after transform propagation and before the lights' visibility check and gives
+    NotShadowCaster with an OutOfItsHalf marker to any mesh of a visibility range outside InRange's
+    span, a game's own NotShadowCaster staying, the ABI unchanged at 322; TreeLevelShadowTests reads
+    the lone oak side-lit against the reference's direct light at 26.5, 27.85, 28.05, 29.5 and 30.3
+    m at 8, 4, 3, 1 and 7% over where the head read 16, 19, 15, 17 and 12 under, the bar 0.92 to
+    1.15, and a capture a frame either side of the band's middle reads 0.0000 apart from the picture
+    taken once the eye stood on that side (0.1682 and 0.1679 against 0.1659 with both levels casting
+    and 0.1807 casting nothing), with a native unit test for the rule; the meadow's oak 75 -42 and
+    -43% where -47 and -49, the aspens +10 and +16, the shaded grass -3; 33, 77 and 357 microseconds
+    a frame for 1,000, 10,000 and 50,000 meshes in a release build; the components page, the trees
+    page and RENDERING.md corrected, the reading 2026-11-08-item-107-band.webp; check95 passed,
+    cargo test 118 and 204 after two flaky native tests passed in both reruns, the suite 2,051 in 59
+    minutes, NormTests 18. 107 is done, the fill the leaves' own by the chosen look, the band's
+    shadow mended and the crowns' scattered light item 116. Next 116.
 
 108. **The README's last top link is 3DEngine.** Decision 79 on 2026-11-05. The row over the
     README's title, Devlog and Cheat sheet, ends with a third link, 3DEngine, to
@@ -3484,56 +3474,56 @@ a batch.
     the shortfall is the stand-in where the probes inside the grass go unseen, the light reaching
     the front over pi in place of the sky along the mirror way, or the probes' own light along
     grazing ways; then the step lands with that mend or with the crowns as a named remainder, and
-    not darker without the read, since the owner likes the crowns thick and bright (Decision 78).
-    Read at 13:11, the third step's reading, and it is not the stand-in. A scratch diagnostic
-    writing each part of the reflection as the leaf fragment's color, against a grass patch (density
-    12, 0.6 high, 3 by 3) and a lone aspen under a uniform white sky of ambient 2000 with no sun at
-    Medium, the one reference at 128 paths, reads the blades at 0.2065, 0.2578 and 0.0986 against
-    0.1844, 0.2319 and 0.0675, about 12% over with the step in, the seen share 0.99, the seen
-    probes' reflection 0.032 to 0.049, the stand-in's 0.006 to 0.010 and Bevy's gloss taken back
-    0.088 to 0.132; the aspen's leaves 0.069 to 0.073 against 0.105 to 0.120, about 33% under, the
-    seen share 0.88 to 0.94 (0.73 on +y), the probes' reflection 0.017 to 0.022, the stand-in's
-    0.002 to 0.006 and Bevy's gloss 0.052 to 0.060. So the probes are seen almost whole, the stand-
-    in lends next to nothing, and the probes' reflection is about 0.4 of Bevy's ambient specular,
-    the probes' sky holding 0.45 of the ambient light (AmbientReturned in gi_lights.rs), the same
-    sky the reference brings back where a path meets nothing, where Bevy's ambient specular
-    reflected the full ambient color, about 2.2 times too bright against the reference; the step's
-    gloss agrees with the reference, and in the meadow the same holds for the environment map's sky.
-    What the crowns show is a shortfall underneath, the aspen's leaves' diffuse and let-through
-    light from the probes about 0.056 against 0.095, some 40% under, which Bevy's too-bright gloss
-    had made up, the crown reading close to the reference for the wrong reason. Decided, the third
-    step lands, the gloss as the reference has it, and the crowns' diffuse shortfall is item 112,
-    first in the order so the crowns are not left darker for long; the diagnostic comes out before
-    it lands. The third step's test is AGrassPatchUnderAUniformSkyReadsItsReference, the blades'
-    light within 15% of the reference under a uniform sky with no sun at Medium, +40% at the head
-    failing and +8 with the step. Its cost is the problem, the opaque pass with the leaves reading
-    the probes in TreeLeavesTests' forest of 24 tupelos at 1920 by 1080 at 10.2 ms with the step
-    where the head took 6.9 and Bevy alone 3.2 to 4.5, the step's own walk over the eight probes
-    about 4.7 ms on the foliage's overdraw, four reach loads each for the blended sight, the faces
-    again and the second cascade in the band; so it is folded into the diffuse read's walk,
-    bounced_in, sharing the probes, their positions, their faces where the mirror way's side matches
-    and the one reach read, adding three faces at most and one filtered sample of the ways per
-    probe, with the diffuse read's hard sight since foliage hides the soft edge that was for walls,
-    the forest, the grass test and the meadow measured before it lands. Read at 14:24, the fold into
-    bounced_in's walk. The forest's opaque pass with the leaves reading the probes reads 6.87 to
-    6.88 ms at the head and 8.12 to 8.13 with the fold, 1.25 over, where the separate walk read
-    10.2; the leaves' probe read at the head without any reflection costs 2.5 over its Bevy-only
-    pass (4.30 to 4.44 to 6.87), and the fold's own Bevy-only pass reads 3.22 to 3.24, 1.1 under the
-    head's with nothing on that path changed by intent, so counted against each build's own baseline
-    the step costs 2.4 (4.9 against 2.5), an unexplained figure the record keeps beside the first.
-    The grass test reads +8% with the fold as with the separate walk against +40 at the head. The
-    meadow as head, separate and fold reads the view 0.319, 0.314 and 0.324, the near grass +6, -15
-    and -14%, the far patch +45 and +42, -10 and +2, -8 and -1, patch 3 2 +x +19, -31 and -29, the
-    oak -19 and -11, -21 and -17, -18 and -9, one aspen +4 and +10, -10 and +5, -8 and +4, the other
-    -13 and -5, -18 and -15, -16 and -11, the oak's reduced level -46 and -49, -51 and -53, -51 and
-    -52, the fold reading the crowns a little brighter and its view distance the worst of the three
-    by 0.005; the nine leaf and forward tests pass with no NaN. Two ways under the millisecond, both
-    measured before the choice, the ways' filtered sample skipped where the surface is rough enough
-    for the faces to carry the whole mix (roughness 1 and up, as much of the grass is) and the
-    reflection read from the finest cascade alone as the engine's reflectedAt does so the band's
-    second walk carries none; the cheapest that holds the grass test and the meadow's figures lands.
-    Read at 14:59, the form that lands is under the bar, the fold with the finest cascade alone for
-    the reflection, the roughness skip and Bevy's gloss taken back by its own occlusions. The finest
+    not darker without the read, since the crowns are to read thick and bright (Decision 78). Read
+    at 13:11, the third step's reading, and it is not the stand-in. A scratch diagnostic writing
+    each part of the reflection as the leaf fragment's color, against a grass patch (density 12, 0.6
+    high, 3 by 3) and a lone aspen under a uniform white sky of ambient 2000 with no sun at Medium,
+    the one reference at 128 paths, reads the blades at 0.2065, 0.2578 and 0.0986 against 0.1844,
+    0.2319 and 0.0675, about 12% over with the step in, the seen share 0.99, the seen probes'
+    reflection 0.032 to 0.049, the stand-in's 0.006 to 0.010 and Bevy's gloss taken back 0.088 to
+    0.132; the aspen's leaves 0.069 to 0.073 against 0.105 to 0.120, about 33% under, the seen share
+    0.88 to 0.94 (0.73 on +y), the probes' reflection 0.017 to 0.022, the stand-in's 0.002 to 0.006
+    and Bevy's gloss 0.052 to 0.060. So the probes are seen almost whole, the stand- in lends next
+    to nothing, and the probes' reflection is about 0.4 of Bevy's ambient specular, the probes' sky
+    holding 0.45 of the ambient light (AmbientReturned in gi_lights.rs), the same sky the reference
+    brings back where a path meets nothing, where Bevy's ambient specular reflected the full ambient
+    color, about 2.2 times too bright against the reference; the step's gloss agrees with the
+    reference, and in the meadow the same holds for the environment map's sky. What the crowns show
+    is a shortfall underneath, the aspen's leaves' diffuse and let-through light from the probes
+    about 0.056 against 0.095, some 40% under, which Bevy's too-bright gloss had made up, the crown
+    reading close to the reference for the wrong reason. Decided, the third step lands, the gloss as
+    the reference has it, and the crowns' diffuse shortfall is item 112, first in the order so the
+    crowns are not left darker for long; the diagnostic comes out before it lands. The third step's
+    test is AGrassPatchUnderAUniformSkyReadsItsReference, the blades' light within 15% of the
+    reference under a uniform sky with no sun at Medium, +40% at the head failing and +8 with the
+    step. Its cost is the problem, the opaque pass with the leaves reading the probes in
+    TreeLeavesTests' forest of 24 tupelos at 1920 by 1080 at 10.2 ms with the step where the head
+    took 6.9 and Bevy alone 3.2 to 4.5, the step's own walk over the eight probes about 4.7 ms on
+    the foliage's overdraw, four reach loads each for the blended sight, the faces again and the
+    second cascade in the band; so it is folded into the diffuse read's walk, bounced_in, sharing
+    the probes, their positions, their faces where the mirror way's side matches and the one reach
+    read, adding three faces at most and one filtered sample of the ways per probe, with the diffuse
+    read's hard sight since foliage hides the soft edge that was for walls, the forest, the grass
+    test and the meadow measured before it lands. Read at 14:24, the fold into bounced_in's walk.
+    The forest's opaque pass with the leaves reading the probes reads 6.87 to 6.88 ms at the head
+    and 8.12 to 8.13 with the fold, 1.25 over, where the separate walk read 10.2; the leaves' probe
+    read at the head without any reflection costs 2.5 over its Bevy-only pass (4.30 to 4.44 to
+    6.87), and the fold's own Bevy-only pass reads 3.22 to 3.24, 1.1 under the head's with nothing
+    on that path changed by intent, so counted against each build's own baseline the step costs 2.4
+    (4.9 against 2.5), an unexplained figure the record keeps beside the first. The grass test reads
+    +8% with the fold as with the separate walk against +40 at the head. The meadow as head,
+    separate and fold reads the view 0.319, 0.314 and 0.324, the near grass +6, -15 and -14%, the
+    far patch +45 and +42, -10 and +2, -8 and -1, patch 3 2 +x +19, -31 and -29, the oak -19 and
+    -11, -21 and -17, -18 and -9, one aspen +4 and +10, -10 and +5, -8 and +4, the other -13 and -5,
+    -18 and -15, -16 and -11, the oak's reduced level -46 and -49, -51 and -53, -51 and -52, the
+    fold reading the crowns a little brighter and its view distance the worst of the three by 0.005;
+    the nine leaf and forward tests pass with no NaN. Two ways under the millisecond, both measured
+    before the choice, the ways' filtered sample skipped where the surface is rough enough for the
+    faces to carry the whole mix (roughness 1 and up, as much of the grass is) and the reflection
+    read from the finest cascade alone as the engine's reflectedAt does so the band's second walk
+    carries none; the cheapest that holds the grass test and the meadow's figures lands. Read at
+    14:59, the form that lands is under the bar, the fold with the finest cascade alone for the
+    reflection, the roughness skip and Bevy's gloss taken back by its own occlusions. The finest
     cascade alone saved nothing in the forest, 8.13 where 8.12, the band's second walk rare there;
     the cost was the take-back, gloss_given sampling Bevy's environment map and working out the
     ambient reflection again on every leaf fragment, where for the leaf's second lighting Bevy's
@@ -4066,8 +4056,8 @@ a batch.
 
 121. **Comments on the code's own terms.** Decision 86 on 2026-11-08. A sweep, a commit of its own,
     every comment in the sources, kernels, scripts and examples that explains by HDRP, Unity, Bevy's
-    own defaults where they are given as the reason, a profile, an outside asset's file name, the
-    owner, a reference picture or a session's doing, some 100 lines by a first search for those
+    own defaults where they are given as the reason, a profile, an outside asset's file name, a
+    person, a reference picture or a session's doing, some 100 lines by a first search for those
     words of which the widgets' owner is not one, rewritten in the bridge's terms with its numbers
     kept and their reason said, the comparison tests' naming of the reference they compare against
     left where the test is the comparison; STYLE.md's Register gains the sentence and its Checks the
@@ -4754,19 +4744,19 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     14:30, its drive in 125 minutes on the runner, at the limit's edge, 0.6.18 published.
 
 2. **The pack job of `421d4e1` fails in `NormTests.N_6_4` and `N_6_5`, the package tests, before
-    they open the package.** Read from the owner's paste of the job: `DirectoryNotFoundException`
-    for `BevyCSharp.Tests/bin/Release/net10.0/build/package/BevyCSharp.0.4.88.nupkg`. The step
-    exports `BCS_PACKAGE` as `ls build/package/*.nupkg`, a path relative to the checkout, and the
-    tests open it from their own working directory, `bin/Release/net10.0`, so the two never meet;
-    the tests passed only where nobody set the variable and they skipped. Two things: the tests
-    resolve a relative `BCS_PACKAGE` against the repository root, as the norm's other tests find
-    their files, so the variable works from any directory, and the step exports an absolute path as
-    well, `$PWD/...`, so the job does not lean on the test. The pack job was the first to run these
-    tests with a package in hand, which is why the test suite never showed it. The same job's build
-    prints 21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has
-    since mended, with `-warnaserror` on every managed build. Settled on the pack run of `b8cc8316`
-    on 2026-11-02, whose step checking what the package holds ran the package tests on the package
-    in hand and passed.
+    they open the package.** Read from a paste of the job: `DirectoryNotFoundException` for
+    `BevyCSharp.Tests/bin/Release/net10.0/build/package/BevyCSharp.0.4.88.nupkg`. The step exports
+    `BCS_PACKAGE` as `ls build/package/*.nupkg`, a path relative to the checkout, and the tests open
+    it from their own working directory, `bin/Release/net10.0`, so the two never meet; the tests
+    passed only where nobody set the variable and they skipped. Two things: the tests resolve a
+    relative `BCS_PACKAGE` against the repository root, as the norm's other tests find their files,
+    so the variable works from any directory, and the step exports an absolute path as well,
+    `$PWD/...`, so the job does not lean on the test. The pack job was the first to run these tests
+    with a package in hand, which is why the test suite never showed it. The same job's build prints
+    21 warnings, CS1573, CS1735, CS8604, CS8620, xUnit2029 and RS1032, which `4308619` has since
+    mended, with `-warnaserror` on every managed build. Settled on the pack run of `b8cc8316` on
+    2026-11-02, whose step checking what the package holds ran the package tests on the package in
+    hand and passed.
 
 43. **The pack run of `09fc95dd` fails its defaults step after pushing 0.5.193, Blockout naming
     0.5.178, which has no EditMesh.** On the pack run 39566353797 on 2026-10-21 every job passed,
@@ -5039,102 +5029,99 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
 
 ## Decisions
 
-1. **Commits stay local.** The owner pushes `main` from their own tools, and the working session
-   commits and does not push, as COMMITS.md and AGENTS.md say. An earlier entry here that allowed
-   pushing is withdrawn by the owner.
+1. **Commits stay local.** The owner pushes `main` by hand, and the working session commits and does
+   not push, as COMMITS.md and AGENTS.md say. An earlier entry here that allowed pushing is
+   withdrawn.
 
-2. **AGENTS.md's bullet on SHARED.md is the owner's.** They approved it on 2026-10-04, and it is
-   committed like any other change.
+2. **AGENTS.md's bullet on SHARED.md changes by the project's direction alone.** Approved on
+   2026-10-04, it is committed like any other change.
 
-3. **A picture opens the example's own source, and not Bevy's live demo of it.** The owner chose
-   it on 2026-10-05, and `57fc7e9` carried it out.
+3. **A picture opens the example's own source, and not Bevy's live demo of it.** It was chosen on
+   2026-10-05, and `57fc7e9` carried it out.
 
-4. **AGENTS.md's bullet on NORM.md is the owner's, with the exception N 7.4 makes.** They approved
-   both on 2026-10-05 in the reviewing session, with the plan for the norm. A working session
-   that commits a change to its instruction file only on the owner's word in its own session
-   is right to, and waits for that word.
+4. **AGENTS.md's bullet on NORM.md changes by the project's direction alone, with the exception N
+   7.4 makes.** Both were approved on 2026-10-05 in the reviewing session, with the plan for the
+   norm. A working session that commits a change to its instruction file only by decision in its own
+   session is right to, and waits for that word.
 
-5. **The examples written are brought to B 4 a group at a time.** The owner chose it on
-   2026-10-05, over leaving them as they are and over doing them all before other work.
+5. **The examples written are brought to B 4 a group at a time.** It was chosen on 2026-10-05, over
+   leaving them as they are and over doing them all before other work.
 
-6. **A run that fails says what failed in a page, and the reviewing session is given no log.**
-   The owner chose it on 2026-10-05, after a log pasted into the reviewing session ended it.
-   The suite runs whole, and in parts only after a process is lost, and a test in which the
-   engine logs an error fails unless it says it expects that error. The norm has these as
-   N 6.7, N 6.8 and N 3.7, and the reviewing session reads a run's jobs and annotations from
-   GitHub.
+6. **A run that fails says what failed in a page, and the reviewing session is given no log.** It
+   was chosen on 2026-10-05, after a log pasted into the reviewing session ended it. The suite runs
+   whole, and in parts only after a process is lost, and a test in which the engine logs an error
+   fails unless it says it expects that error. The norm has these as N 6.7, N 6.8 and N 3.7, and the
+   reviewing session reads a run's jobs and annotations from GitHub.
 
-7. **The page's repeated lines are warnings and errors.** The owner chose it on 2026-10-06, after
-   the page of `98f6d8e5` repeated the engine's banner, so the section counts what is logged at
-   warning or error or with no level and is left out when nothing repeats.
+7. **The page's repeated lines are warnings and errors.** It was chosen on 2026-10-06, after the
+   page of `98f6d8e5` repeated the engine's banner, so the section counts what is logged at warning
+   or error or with no level and is left out when nothing repeats.
 
-8. **The next package is 0.4.** The owner chose it on 2026-10-06 for the ABI's moves from 199 and
-   the surface added since 0.3.2, `build/version.txt` holding `0.4` so the patch counts itself,
-   packed when the owner chooses. On 2026-10-09 the owner chose that 0.4 waits for Bevy 0.20 and is
-   packed on it, its release notes naming the move.
+8. **The next package is 0.4.** It was chosen on 2026-10-06 for the ABI's moves from 199 and the
+   surface added since 0.3.2, `build/version.txt` holding `0.4` so the patch counts itself, packed
+   when chosen. Chosen on 2026-10-09, 0.4 waits for Bevy 0.20 and is packed on it, its release notes
+   naming the move.
 
-9. **A document a game's author reads names no one who decided.** The owner asked on 2026-10-06
-   that release notes and the documents under `docs/`, the README and the cheatsheet give reasons
-   and not who wanted what, which is N 4.7, and who chose what stays here under Decisions.
+9. **A document a game's author reads names no one who decided.** Asked on 2026-10-06 that release
+   notes and the documents under `docs/`, the README and the cheatsheet give reasons and not who
+   wanted what, which is N 4.7, and who chose what stays here under Decisions.
 
-10. **The tests run on macOS as well.** The owner chose it on 2026-10-07, the package being
-    built for osx-arm64 and osx-x64 while the suite ran on Linux and Windows alone; N 6.2 asks for
-    every desktop system the package ships for, and `macos-latest` joined the matrix at `6528ea2`.
+10. **The tests run on macOS as well.** It was chosen on 2026-10-07, the package being built for
+    osx-arm64 and osx-x64 while the suite ran on Linux and Windows alone; N 6.2 asks for every
+    desktop system the package ships for, and `macos-latest` joined the matrix at `6528ea2`.
 
-11. **Feathers' crate may be enabled, after the other gaps.** The owner allowed it on 2026-10-07
-    for `feathers_counter`, `feathers_gallery` and `virtual_keyboard`, Bevy's `bevy_feathers`
-    feature; the working session adds the crate on the owner's word in its own session, as AGENTS.md
-    has it.
+11. **Feathers' crate may be enabled, after the other gaps.** Allowed on 2026-10-07 for
+    `feathers_counter`, `feathers_gallery` and `virtual_keyboard`, Bevy's `bevy_feathers` feature;
+    the working session adds the crate on the owner's word in its own session, as AGENTS.md has it.
 
-12. **The free and pan camera controllers may be enabled, after the other gaps.** The owner
-    allowed it on 2026-10-07 for `free_camera_controller` and `pan_camera_controller`, Bevy's
-    `free_camera` and `pan_camera` features with the `bevy_camera_controller` crate, on the same
-    word in the working session. On 2026-10-09 the owner extended it to the pan-orbit controller,
-    which 0.20 upstreamed into the same crate as `PanOrbitCamera`, so the word, when typed, names
-    all three.
+12. **The free and pan camera controllers may be enabled, after the other gaps.** Allowed on
+    2026-10-07 for `free_camera_controller` and `pan_camera_controller`, Bevy's `free_camera` and
+    `pan_camera` features with the `bevy_camera_controller` crate, on the same word in the working
+    session. On 2026-10-09 it was extended to the pan-orbit controller, which 0.20 upstreamed into
+    the same crate as `PanOrbitCamera`, so the word, when typed, names all three.
 
-13. **System font discovery stays off.** The owner chose it on 2026-10-07: its Linux backend
-    links fontconfig at build time, and the bridge builds with nothing but a C compiler, so a font
-    by family name is not offered, the four font examples stay missing with that reason, and
+13. **System font discovery stays off.** It was chosen on 2026-10-07: its Linux backend links
+    fontconfig at build time, and the bridge builds with nothing but a C compiler, so a font by
+    family name is not offered, the four font examples stay missing with that reason, and
     `docs/ui.md` says why without naming anyone (N 4.7).
 
-14. **The sample becomes a feature test.** The owner decided on 2026-10-07 that
-    `BevyCSharp.Sample` is renamed `BevyCSharp.FeatureTest` and stays in the solution, puts every
-    feature on one map with a capsule character on four course zones, a PBR sphere grid, a Cornell
-    box, vegetation, a lights gallery and Bevy's atmosphere with a C# time of day, has an admin
-    panel and a Source-style console in Dear ImGui with settings kept in a file, logs a crash to a
-    file beside the executable, and is published native for Windows x64 and Linux x64 as a zip for
-    testers. `bevy_weather` comes as its own batch once the map stands, for stars, the moon, clouds,
-    fog, rain and snow drawn around Bevy's atmosphere, its crate added on the owner's word in the
-    working session, and volumetric clouds are not written by hand.
+14. **The sample becomes a feature test.** Decided on 2026-10-07, `BevyCSharp.Sample` is renamed
+    `BevyCSharp.FeatureTest` and stays in the solution, puts every feature on one map with a capsule
+    character on four course zones, a PBR sphere grid, a Cornell box, vegetation, a lights gallery
+    and Bevy's atmosphere with a C# time of day, has an admin panel and a Source-style console in
+    Dear ImGui with settings kept in a file, logs a crash to a file beside the executable, and is
+    published native for Windows x64 and Linux x64 as a zip for testers. `bevy_weather` comes as its
+    own batch once the map stands, for stars, the moon, clouds, fog, rain and snow drawn around
+    Bevy's atmosphere, its crate added by decision in the working session, and volumetric clouds are
+    not written by hand.
 
-15. **Graphics test scenes come as packs fetched on demand, never checked in.** The owner
-    decided on 2026-10-07: Intel Sponza first, its textures at 1K, the pack a release asset of this
-    repository, fetched by the feature test's panel and by `bcs` on demand and cached for the user,
-    with Bistro, the classic Sponza and San Miguel left for later; the repository holds the
-    manifests and the script that makes a pack. Sponza stands on the feature test's map at ground
-    level with its main door open, for the character to walk in, and its heaviest meshes are drawn
-    as meshlets, to test them, where the GPU can.
+15. **Graphics test scenes come as packs fetched on demand, never checked in.** Decided on
+    2026-10-07, Intel Sponza first, its textures at 1K, the pack a release asset of this repository,
+    fetched by the feature test's panel and by `bcs` on demand and cached for the user, with Bistro,
+    the classic Sponza and San Miguel left for later; the repository holds the manifests and the
+    script that makes a pack. Sponza stands on the feature test's map at ground level with its main
+    door open, for the character to walk in, and its heaviest meshes are drawn as meshlets, to test
+    them, where the GPU can.
 
-16. **Every tonemapper here comes to 3DEngine.** The owner decided on 2026-10-08 that 3DEngine
-    takes Bevy's eight tonemappers, the three drawn through lookup tables from Bevy's own data and
-    the others ported from Bevy's shader, so the two engines draw one picture from one value; this
-    side's part is the proof, a ramp drawn through each tonemapper and kept as references that
-    3DEngine's test compares its own picture with, the ramp defined in SHARED.md.
+16. **Every tonemapper here comes to 3DEngine.** Decided on 2026-10-08, 3DEngine takes Bevy's eight
+    tonemappers, the three drawn through lookup tables from Bevy's own data and the others ported
+    from Bevy's shader, so the two engines draw one picture from one value; this side's part is the
+    proof, a ramp drawn through each tonemapper and kept as references that 3DEngine's test compares
+    its own picture with, the ramp defined in SHARED.md.
 
-17. **The embedding is the bridge's own.** The owner chose on 2026-10-09 that
-    `bevy_embedded_assets`, whose 0.16 targets Bevy 0.19 alone, is ported into the bridge's source
-    as a build script and an asset reader behind the `embed` feature, its MIT or Apache-2.0 notice
-    kept, and the dependency removed.
+17. **The embedding is the bridge's own.** Chosen on 2026-10-09 that `bevy_embedded_assets`, whose
+    0.16 targets Bevy 0.19 alone, is ported into the bridge's source as a build script and an asset
+    reader behind the `embed` feature, its MIT or Apache-2.0 notice kept, and the dependency
+    removed.
 
-18. **The weather is vendored and ported.** The owner chose on 2026-10-09 that `bevy_weather`, whose
-    0.2.0 targets Bevy 0.19.1 alone and has one maintainer, is kept as a workspace member under
-    `native/` in upstream's shape with its license and ported to 0.20 there, the port offered
-    upstream, over waiting with the weather off and over dropping it.
+18. **The weather is vendored and ported.** Chosen on 2026-10-09 that `bevy_weather`, whose 0.2.0
+    targets Bevy 0.19.1 alone and has one maintainer, is kept as a workspace member under `native/`
+    in upstream's shape with its license and ported to 0.20 there, the port offered upstream, over
+    waiting with the weather off and over dropping it.
 
-19. **Bevy 0.20 comes after the deferred batch in flight and before the other gaps.** The owner
-    chose it on 2026-10-09, over upgrading at once with the batch set aside and over finishing every
-    gap on 0.19, since each gap bridged into Bevy's WGSL on 0.19 would be written again under WESL.
+19. **Bevy 0.20 comes after the deferred batch in flight and before the other gaps.** It was chosen
+    on 2026-10-09, over upgrading at once with the batch set aside and over finishing every gap on
+    0.19, since each gap bridged into Bevy's WGSL on 0.19 would be written again under WESL.
 
 20. **The crates' word for the upgrade.** Bevy 0.20.0 with wgpu and naga 30, the embedding ported in
     and its crate removed, `bevy_weather` vendored under `native/` and ported, and nothing else
@@ -5142,14 +5129,14 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     changes. DLSS waits for a tester to ask, Solari and meshlets stay additions outside the package,
     and Feathers' new widgets and theming stay under Decision 11.
 
-21. **No document or comment a reader sees names the owner or a session.** The owner ordered it on
-    2026-10-09 after a dependency row in 3DEngine's DESIGN.md said who admitted a crate and when; N
-    4.7 reaches every Markdown file but REVIEW.md, SHARED.md, NORM.md, AGENTS.md and COMMITS.md and
-    the comments of every source, script, manifest and workflow, in both repositories, and who chose
-    what stays in REVIEW.md's Decisions.
+21. **No document or comment a reader sees names a person or a session.** Ordered on 2026-10-09
+    after a dependency row in 3DEngine's DESIGN.md said who admitted a crate and when; N 4.7 reaches
+    every Markdown file but REVIEW.md, SHARED.md, NORM.md, AGENTS.md and COMMITS.md and the comments
+    of every source, script, manifest and workflow, in both repositories, and who chose what stays
+    in REVIEW.md's Decisions.
 
-22. **Content streamed on the go stays in the ledger, and the browser stays out.** The owner chose
-    on 2026-10-09, after reading a browser port of a large game that downloads its world as it is
+22. **Content streamed on the go stays in the ledger, and the browser stays out.** Chosen on
+    2026-10-09, after reading a browser port of a large game that downloads its world as it is
     played, that the idea is recorded in SHARED.md as the file layer that port has (packs on a
     static host, reads by byte range into a block cache, a recorded first-run set, prefetch by the
     game's own streaming), to consider until a game here ships a world too large to download first,
@@ -5158,149 +5145,147 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     calls only native code linked into its own build and Bevy's web runtime is another toolchain
     that owns the page's loop.
 
-23. **A run that shows no window makes no sound.** The owner ordered it on 2026-10-10, since a
-    hidden or offscreen run, a test or a soak, played through the machine's speakers; its audio goes
-    to no device or a device of silence, sounds still run their course, and a config field turns
-    real audio on for such a run.
+23. **A run that shows no window makes no sound.** Ordered on 2026-10-10, since a hidden or
+    offscreen run, a test or a soak, played through the machine's speakers; its audio goes to no
+    device or a device of silence, sounds still run their course, and a config field turns real
+    audio on for such a run.
 
-24. **A game's session writes what the engine lacks in `.github/ASKS.md`, here as in 3DEngine.** The
-    owner ordered it on 2026-10-10, when the session making a voxel game in `3DEngine.Game` found
-    the sun's shadows costing the GPU 14.8 ms and the CPU 13 ms over some 1,800 draws, every chunk
-    drawn once a cascade with no culling, and had no way to tell the engine's session: the game's
-    session writes an entry there with what it measured and how, the reviewing session turns it into
-    an item of the Now list by its weight and writes the item's number under the entry, and the
-    engine's session reads REVIEW.md as before; no game of this engine has written one yet;
-    AGENTS.md names the file beside SHARED.md and NORM.md, with the owner's word, and the engine's
-    session writes nothing in it. ASKS.md and AGENTS.md's bullet on it are the reviewing session's
-    and are committed with whichever batch comes next, as REVIEW.md is; a game's own files are the
-    game's session's to commit.
+24. **A game's session writes what the engine lacks in `.github/ASKS.md`, here as in 3DEngine.**
+    Ordered on 2026-10-10, when the session making a voxel game in `3DEngine.Game` found the sun's
+    shadows costing the GPU 14.8 ms and the CPU 13 ms over some 1,800 draws, every chunk drawn once
+    a cascade with no culling, and had no way to tell the engine's session: the game's session
+    writes an entry there with what it measured and how, the reviewing session turns it into an item
+    of the Now list by its weight and writes the item's number under the entry, and the engine's
+    session reads REVIEW.md as before; no game of this engine has written one yet; AGENTS.md names
+    the file beside SHARED.md and NORM.md, with the decision, and the engine's session writes
+    nothing in it. ASKS.md and AGENTS.md's bullet on it are the reviewing session's and are
+    committed with whichever batch comes next, as REVIEW.md is; a game's own files are the game's
+    session's to commit.
 
 25. **A feature of a crate already in the tree that pulls no crate in is the working session's to
     turn on; a feature that pulls a crate in waits on the owner's word as Decision 11 has it.** Read
     by review on 2026-10-10 from the rule that nothing else is added, asked over Bevy's
     `pbr_specular_textures`, which turns on code in a crate the tree builds, where Feathers' and the
-    dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The owner's word overrides it.
+    dev tools' features pull `bevy_feathers` and `bevy_dev_tools` in. The decision overrides it.
 
 26. **An insert from nothing over a resource a plugin made, of a type that reflects no default, is
     refused and names `Resource<T>`.** Read by review on 2026-10-11 from the working session's
     question at `68aa5dd5`, where the debug options inserted from nothing came zeroed over Bevy's:
     the field-by-field build stays for a component and for a resource the world lacks, since every
     example sets fields after it, and only the replace of a living resource with zeros is refused, a
-    zeroed copy over the plugin's being never meant. The owner may overrule it as any decision here.
+    zeroed copy over the plugin's being never meant. It may be overruled as any decision here.
 
 27. **The README's gallery is one scrolling row of pictures a group, in Bevy's order of its
-    groups.** The owner asked at 15:36 on 2026-10-11, after asking the same of 3DEngine's README,
-    which is item 13: the written examples' pictures in one-row tables that scroll sideways rather
-    than the grid of four, one a group of Bevy's examples.
+    groups.** Asked at 15:36 on 2026-10-11, after asking the same of 3DEngine's README, which is
+    item 13: the written examples' pictures in one-row tables that scroll sideways rather than the
+    grid of four, one a group of Bevy's examples.
 
 28. **The bcs skill leaves `.claude` for `.github/BCS.md`, and the gallery's pictures are one
-    size.** The owner asked at 15:50 and 15:52 on 2026-10-11, as of 3DEngine: the skill document out
-    of the `.claude` folder and its empty subfolders, which is item 14 with AGENTS.md's line changed
-    on that word; and every picture in the README's rows the same size, which item 13 takes.
+    size.** Asked at 15:50 and 15:52 on 2026-10-11, as of 3DEngine: the skill document out of the
+    `.claude` folder and its empty subfolders, which is item 14 with AGENTS.md's line changed on
+    that word; and every picture in the README's rows the same size, which item 13 takes.
 
-29. **The development machine's GPU is named nowhere a user reads.** The owner asked at 17:26 on
-    2026-10-11, as of 3DEngine, which is item 15: the machine's name out of the code and comments a
-    user sees, the measurements kept with the device a plain phrase.
+29. **The development machine's GPU is named nowhere a user reads.** Asked at 17:26 on 2026-10-11,
+    as of 3DEngine, which is item 15: the machine's name out of the code and comments a user sees,
+    the measurements kept with the device a plain phrase.
 
-30. **The examples' counts stand under the Examples heading and on each group's heading.** The owner
-    asked at 19:35 on 2026-10-11, which is item 17: the line of how many of Bevy's examples are
-    written moved under the Examples heading, and each group's heading in the gallery carrying its
-    count.
+30. **The examples' counts stand under the Examples heading and on each group's heading.** Asked at
+    19:35 on 2026-10-11, which is item 17: the line of how many of Bevy's examples are written moved
+    under the Examples heading, and each group's heading in the gallery carrying its count.
 
-31. **A vertex stream of the game's own, in both engines.** The owner put a game built on 3DEngine's
-    3.1.0 package in its `.ref` at 20:05 on 2026-10-11, which fed its shader one packed float a
-    vertex and unpacked it there, asked whether such a stream belongs in a game engine and how both
-    would do it, and approved the plan at 20:40, which is item 18 here and item 20 in 3DEngine: one
-    stream a mesh in five formats, at `TEXCOORD8` and up here beside Bevy's positions and as
+31. **A vertex stream of the game's own, in both engines.** A game built on 3DEngine's 3.1.0 package
+    was put in its `.ref` at 20:05 on 2026-10-11, which fed its shader one packed float a vertex and
+    unpacked it there, with the question whether such a stream belongs in a game engine and how both
+    would do it, and the plan was approved at 20:40, which is item 18 here and item 20 in 3DEngine:
+    one stream a mesh in five formats, at `TEXCOORD8` and up here beside Bevy's positions and as
     `CUSTOM0` there, beside the vertex and then as the vertex alone.
 
-32. **A position is every mesh's, and the packed data a stream beside it.** The owner refined
-    Decision 31 at 22:55 on 2026-10-11, approved at 22:58: a position is mandatory in both engines,
-    as Bevy has it, since shadows, motion vectors and everything around a mesh read it, and a game's
+32. **A position is every mesh's, and the packed data a stream beside it.** Decision 31 was refined
+    at 22:55 on 2026-10-11, approved at 22:58, so that a position is mandatory in both engines, as
+    Bevy has it, since shadows, motion vectors and everything around a mesh read it, and a game's
     packed four bytes ride in a stream beside it, which is what item 18 gave; 3DEngine's second
     stage becomes a vertex of positions alone, and here the worked-out normals can be left out, item
     20.
 
 33. **No development on either engine until every job is green on every push and pack.** On
-    2026-10-16 the owner, after the pushes and pack runs of both engines failed in a row each on a
-    different job while the code stood still, stopped development on both: the working sessions mend
-    what the verdicts name and nothing else, every push must be green on every job, three in a row,
-    and the pack run after them, before an item is taken again, on 3DEngine as here (its Decision
-    39). Lifted for this engine on 2026-10-18 under Decision 35, the push run and the pack run of
+    2026-10-16, after the pushes and pack runs of both engines failed in a row each on a different
+    job while the code stood still, development was stopped on both: the working sessions mend what
+    the verdicts name and nothing else, every push must be green on every job, three in a row, and
+    the pack run after them, before an item is taken again, on 3DEngine as here (its Decision 39).
+    Lifted for this engine on 2026-10-18 under Decision 35, the push run and the pack run of
     `b4d45938` whole green under the two workflows; 3DEngine's Decision 39 stands until its own
     gate.
 
 34. **Two workflows an engine, build and pack, the same shape in both; the tester zips and the scene
-    packs are runs on the owner's machine.** The owner found on 2026-10-17 that the two engines'
-    workflow sets differed, five files here and four in 3DEngine with graphs that looked unlike each
-    other, and ordered each engine down to two: a build workflow on an ordinary push and a pack
-    workflow by hand, consistent between them, the pack run keeping every check that ran only there;
-    the feature test's zips and the Sponza run leave CI for the owner's machine, the Sponza files
-    under `.ref/Sponza`. Written as item 23 here and item 26 in 3DEngine (its Decision 40). The
-    norm's "the workflow" names both, and a rule the one it means.
+    packs are runs on the development machine.** Found on 2026-10-17, the two engines' workflow sets
+    differed, five files here and four in 3DEngine with graphs that looked unlike each other, and
+    each engine was ordered down to two: a build workflow on an ordinary push and a pack workflow by
+    hand, consistent between them, the pack run keeping every check that ran only there; the feature
+    test's zips and the Sponza run leave CI for the development machine, the Sponza files under
+    `.ref/Sponza`. Written as item 23 here and item 26 in 3DEngine (its Decision 40). The norm's
+    "the workflow" names both, and a rule the one it means.
 
-35. **Decision 33's gate is the new workflows.** The owner chose on 2026-10-17 that the rework of
-    item 23 starts that day as the first work on both engines, after the verdicts open are mended,
-    and that the green lights Decision 33 asks are then asked of the new workflows: a green push and
-    a green pack run under them on each engine before features resume (3DEngine's Decision 42). Met
-    here on 2026-10-18, the push run of `b4d45938` whole green at 23:38 the day before and its pack
-    run whole green at 01:29 with the package made, so Decision 33 is lifted for this engine and
-    development resumes with item 22 and the owner's items, the verdicts open mended as they come.
+35. **Decision 33's gate is the new workflows.** Chosen on 2026-10-17 that the rework of item 23
+    starts that day as the first work on both engines, after the verdicts open are mended, and that
+    the green lights Decision 33 asks are then asked of the new workflows: a green push and a green
+    pack run under them on each engine before features resume (3DEngine's Decision 42). Met here on
+    2026-10-18, the push run of `b4d45938` whole green at 23:38 the day before and its pack run
+    whole green at 01:29 with the package made, so Decision 33 is lifted for this engine and
+    development resumes with item 22 and the items named, the verdicts open mended as they come.
 
-36. **The docs job goes; the repository's links are the suite's to check.** The owner asked on
-    2026-10-17 whether the build workflow needs a job that follows the README's and the guide's
-    links and found it unnecessary, so the job and its requests to outside addresses leave the
-    workflow. N 4.3 stands: a test of the suite follows every link into the repository against the
-    checkout with no request made, as 3DEngine's `DocumentLinkTests` does, and a link to an outside
-    address is followed by hand with `build/check-docs.py --external` when a package is made.
-    Written as item 24.
+36. **The docs job goes; the repository's links are the suite's to check.** Asked on 2026-10-17
+    whether the build workflow needs a job that follows the README's and the guide's links and the
+    job was found unnecessary, so the job and its requests to outside addresses leave the workflow.
+    N 4.3 stands: a test of the suite follows every link into the repository against the checkout
+    with no request made, as 3DEngine's `DocumentLinkTests` does, and a link to an outside address
+    is followed by hand with `build/check-docs.py --external` when a package is made. Written as
+    item 24.
 
-37. **Prose is technical and generic.** The owner said on 2026-10-17 that phrasings such as "the
-    light that bounces" and "how to drive the game" read as casual and do not fit. A feature is
-    named by its technical term, the engine's own where it has one, and never by a figure of speech
-    or a paraphrase: global illumination where the light bounced; emissive where a block gave off
-    light; a running program controlled or scripted through the command line where it was driven,
-    and a scripted run or a course where a drive. The owner added at 14:37 that the colon is
-    overused, an elaboration or a list appended to a sentence after one where a sentence would do,
-    in documents, comments and logs alike, which STYLE.md should have covered; its rule tightens so
-    that a running sentence holds no colon. STYLE.md carries both rules with these pairs in each
-    repository, every document, comment and message a reader sees is swept (item 25 here, 29 in
-    3DEngine, 4 in Voxel-Sandbox), and an identifier keeps its name unless the rename is cheap and
-    the thing is new; a new name follows the rule. On 2026-10-17 at 20:34 the owner read the voxel
-    game's README's opening, "A voxel game in the manner of Minecraft, and the ground floor of a
-    larger one", and asked that no phrasing of the kind stand either. A likeness is not a
-    description and a figure of speech is not a term, so a thing is said by what it is and does,
-    another product is named only where a rule or a number is taken from it, and a plan is not
-    written into a description. The idioms the three repositories hold go with it, in the manner of,
-    the ground floor of, out of the box, under the hood, at a glance, a handful of, in the wild, a
-    great deal of, the knob, the plumbing and a long way among them, items 25 here, 29 in 3DEngine
-    and 5 in Voxel-Sandbox; a word in its literal sense stays, a box a joint leaves or a road to a
-    signpost.
+37. **Prose is technical and generic.** Reported on 2026-10-17, phrasings such as "the light that
+    bounces" and "how to drive the game" read as casual and do not fit. A feature is named by its
+    technical term, the engine's own where it has one, and never by a figure of speech or a
+    paraphrase: global illumination where the light bounced; emissive where a block gave off light;
+    a running program controlled or scripted through the command line where it was driven, and a
+    scripted run or a course where a drive. Added at 14:37, the colon is overused, an elaboration or
+    a list appended to a sentence after one where a sentence would do, in documents, comments and
+    logs alike, which STYLE.md should have covered; its rule tightens so that a running sentence
+    holds no colon. STYLE.md carries both rules with these pairs in each repository, every document,
+    comment and message a reader sees is swept (item 25 here, 29 in 3DEngine, 4 in Voxel-Sandbox),
+    and an identifier keeps its name unless the rename is cheap and the thing is new; a new name
+    follows the rule. On 2026-10-17 at 20:34 the voxel game's README's opening was read, "A voxel
+    game in the manner of Minecraft, and the ground floor of a larger one", and the ask was that no
+    phrasing of the kind stand either. A likeness is not a description and a figure of speech is not
+    a term, so a thing is said by what it is and does, another product is named only where a rule or
+    a number is taken from it, and a plan is not written into a description. The idioms the three
+    repositories hold go with it, in the manner of, the ground floor of, out of the box, under the
+    hood, at a glance, a handful of, in the wild, a great deal of, the knob, the plumbing and a long
+    way among them, items 25 here, 29 in 3DEngine and 5 in Voxel-Sandbox; a word in its literal
+    sense stays, a box a joint leaves or a road to a signpost.
 
 38. **Development resumes, the bridge completed first and the mends of the moment made lasting
     after.** On 2026-10-18 at 22:25, with every run green and the pack run of `6bac018b` whole green
-    with its package, the owner resumed development on both engines and the voxel game. For this
-    engine the order is to bridge everything first, every gap of item 4, and then to mend
-    fundamentally what was mended for the time being (item 29). The gaps that need a crate still
-    wait on the owner's word typed in the working session (Decisions 11, 12 and 20); the verdicts
-    open are mended as they come.
+    with its package, development resumed on both engines and the voxel game. For this engine the
+    order is to bridge everything first, every gap of item 4, and then to mend fundamentally what
+    was mended for the time being (item 29). The gaps that need a crate still wait on a decision
+    typed in the working session (Decisions 11, 12 and 20); the verdicts open are mended as they
+    come.
 
-39. **The owner's words of 2026-10-19 on the crates, the order and the mends of the moment.** Typed
-    in the working session as AGENTS.md asks: the crates for the camera controllers, free, pan and
-    the three pan-orbit, Feathers, the dev tools and the system information may be added; https
-    asset loading and the compressed image saver are declined, their rows missing as declined; item
-    4 comes first and item 29 after in the reviewer's order, as Decision 38 has it; `dfg_lut` goes
-    on in the render profile; the capture jobs move to a container of a distribution image with a
-    newer Mesa and a Linux bridge built with meshlets and Solari, with no runner with a graphics
-    card and no Mesa from an archive outside the distribution; the anisotropy fault is mended by a
-    patched shader of Bevy's in the bridge, held by a test that fails when Bevy's original changes;
-    a publishing pack run pushes the templates package beside the engine's, the README's install
-    line following once nuget.org lists it (item 30); and `monitor_info` is captured on virtual
-    monitors in a headless display.
+39. **The direction of 2026-10-19 on the crates, the order and the mends of the moment.** Typed in
+    the working session as AGENTS.md asks: the crates for the camera controllers, free, pan and the
+    three pan-orbit, Feathers, the dev tools and the system information may be added; https asset
+    loading and the compressed image saver are declined, their rows missing as declined; item 4
+    comes first and item 29 after in the reviewer's order, as Decision 38 has it; `dfg_lut` goes on
+    in the render profile; the capture jobs move to a container of a distribution image with a newer
+    Mesa and a Linux bridge built with meshlets and Solari, with no runner with a graphics card and
+    no Mesa from an archive outside the distribution; the anisotropy fault is mended by a patched
+    shader of Bevy's in the bridge, held by a test that fails when Bevy's original changes; a
+    publishing pack run pushes the templates package beside the engine's, the README's install line
+    following once nuget.org lists it (item 30); and `monitor_info` is captured on virtual monitors
+    in a headless display.
 
 40. **The README's centered parts are markdown inside a centering block, since nuget.org draws a
-    README without its HTML.** The owner wrote at 20:47 on 2026-10-19, having uploaded the packages
-    to nuget.org, that the README's centered elements need not be HTML: a centering block, `<div
+    README without its HTML.** Decided at 20:47 on 2026-10-19, having uploaded the packages to
+    nuget.org, the README's centered elements need not be HTML: a centering block, `<div
     align="center">`, holding plain markdown, the heading, the text and the banners, with a blank
     line after the opening tag and before the closing one so the markdown inside is rendered,
     centers on GitHub, and on nuget.org, which draws a package's README without its HTML and shows
@@ -5309,9 +5294,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     thumbnails at the shown width, which is measured on GitHub and nuget.org before it is taken. The
     README is the package's, so what nuget.org draws is what a reader of the package sees.
 
-41. **A package's release notes are the commits since the package last published on nuget.org.** The
-    owner wrote at 22:45 on 2026-10-19 that the release notes include everything and the next
-    package appends them to the older ones: the notes a pack run writes are the commits since
+41. **A package's release notes are the commits since the package last published on nuget.org.**
+    Reported at 22:45 on 2026-10-19, the release notes include everything and the next package
+    appends them to the older ones: the notes a pack run writes are the commits since
     `build/version.txt` last changed, so every package of a minor carries the whole minor's notes,
     104 lines at `0.5.105` and 119 at `0.5.120`, 89 at the engine's `5.2.92`. So a package's release
     notes are the commits since the package last published on nuget.org, whose commit the feed's own
@@ -5320,276 +5305,276 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     told what changed since what they could have had.
 
 42. **The pack workflow publishes through nuget.org's trusted publishing.** On 2026-10-19 at 22:51
-    the owner, making nuget.org's trusted publisher policies for the two repositories, quoted the
-    feed's notice that API keys are strongly discouraged for automated publishing and trusted
-    publishing is the way for GitHub Actions, and so the pack workflow publishes through it: the
-    policy on nuget.org names the package owner `EggyStudio`, the repository owner `EggyStudio`, the
-    repository, the workflow file `pack.yml`, no environment, the push scope and the package
-    pattern, and the pack job proves it is that workflow with its identity token, takes a
-    short-lived key from the feed's login action and pushes with it, so no key is stored in the
-    repository. The two policies stood active on nuget.org at 22:53, one a repository, each with the
-    package owner and repository owner `EggyStudio`, the workflow `pack.yml`, the push scope and its
-    pattern, the feed holding the permanent GitHub ids of the owner and the repository for its
-    check.
+    nuget.org's trusted publisher policies were made for the two repositories, on the feed's notice
+    that API keys are strongly discouraged for automated publishing and trusted publishing is the
+    way for GitHub Actions, and so the pack workflow publishes through it: the policy on nuget.org
+    names the package owner `EggyStudio`, the repository owner `EggyStudio`, the repository, the
+    workflow file `pack.yml`, no environment, the push scope and the package pattern, and the pack
+    job proves it is that workflow with its identity token, takes a short-lived key from the feed's
+    login action and pushes with it, so no key is stored in the repository. The two policies stood
+    active on nuget.org at 22:53, one a repository, each with the package owner and repository owner
+    `EggyStudio`, the workflow `pack.yml`, the push scope and its pattern, the feed holding the
+    permanent GitHub ids of the owner and the repository for its check.
 
-43. **The reviewer starts the pack runs when a package is due.** The owner wrote at 22:57 on
-    2026-10-19 that the reviewer is to start the pack workflow as well, so no one waits on the owner
-    for a package and a pack can be made and checked as part of the review; the owner's GitHub login
-    on the machine carries the workflow scope, and the pushes were the reviewer's since 22:20. So
-    the reviewer starts a pack run with publish on when a package is due: after a commit the voxel
-    game or the other engine waits on, after the mend of a fault that made a pack run red, at the
-    end of a day's batch, and when the owner asks, and not after every commit, since a pack run is
-    more than an hour of the runners' time; the run is read and recorded as every run is, and its
-    package is what the game and the other engine take.
+43. **The reviewer starts the pack runs when a package is due.** Decided at 22:57 on 2026-10-19, the
+    reviewer is to start the pack workflow as well, so a package waits on no one and a pack can be
+    made and checked as part of the review; the owner's GitHub login on the machine carries the
+    workflow scope, and the pushes were the reviewer's since 22:20. So the reviewer starts a pack
+    run with publish on when a package is due: after a commit the voxel game or the other engine
+    waits on, after the mend of a fault that made a pack run red, at the end of a day's batch, and
+    when asked for, and not after every commit, since a pack run is more than an hour of the
+    runners' time; the run is read and recorded as every run is, and its package is what the game
+    and the other engine take.
 
 44. **The review's files are committed by the batch that comes next, and by the reviewer at most
-    once a day.** The owner wrote on 2026-10-20 that the review's commits had become nine of every
-    ten in the history and were to stop, and then that the reviewer is to edit the review's files in
-    the tree and commit nothing, as it did before 2026-10-19, with one commit a day at most where
-    that makes sense. So REVIEW.md, SHARED.md and NORM.md stay edited in the tree and the coder's
-    next batch carries them, as AGENTS.md has it; the reviewer commits them in a commit of their own
-    only at a day's end where no batch carried them, never for a reading, a run or a package. The
-    coder adds one sentence saying so to COMMITS.md in the next batch, in the paragraph on what a
-    commit carries, naming the review's files, the batch that comes next and the one commit a day at
-    most, and no one who decided it (N 4.7).
+    once a day.** Decided on 2026-10-20, the review's commits had become nine of every ten in the
+    history and were to stop, and then the reviewer is to edit the review's files in the tree and
+    commit nothing, as it did before 2026-10-19, with one commit a day at most where that makes
+    sense. So REVIEW.md, SHARED.md and NORM.md stay edited in the tree and the coder's next batch
+    carries them, as AGENTS.md has it; the reviewer commits them in a commit of their own only at a
+    day's end where no batch carried them, never for a reading, a run or a package. The coder adds
+    one sentence saying so to COMMITS.md in the next batch, in the paragraph on what a commit
+    carries, naming the review's files, the batch that comes next and the one commit a day at most,
+    and no one who decided it (N 4.7).
 
-45. **The feature test lives in the games folder, as 3DEngine's does.** The owner wrote on
-    2026-10-20 at 23:21, seeing 3DEngine's feature test under its games folder, that it looks good
-    and BevyCSharp is to do the same; so `BevyCSharp.FeatureTest` becomes `games/FeatureTest`, item
-    37, the two engines' trees reading alike, a program beside the games that is not a game to show.
+45. **The feature test lives in the games folder, as 3DEngine's does.** Decided on 2026-10-20 at
+    23:21, on 3DEngine's feature test under its games folder, it looks good and BevyCSharp is to do
+    the same; so `BevyCSharp.FeatureTest` becomes `games/FeatureTest`, item 37, the two engines'
+    trees reading alike, a program beside the games that is not a game to show.
 
-46. **Modeling in both engines, from the kernel to the modifiers, grid prototyping first.** The
-    owner wrote at about 23:47 on 2026-10-20 that the engines are to support modeling too, beyond
-    the primitives they have, Blender's kind, possible in a game and all of it from the command
-    line, simple to use so it is the more powerful: grid prototyping as the essential tool of world
-    design, with textures of different colors showing a grid of about a meter, stairs, and windows
-    through boolean operations; processing texture coordinates and adding textures to surfaces; and
-    later selecting a face, insetting and pulling it, merging, beveling and Blender-like modifiers;
-    the reviewer to shape the best solution, adding and removing as it sees fit, and to ask what
-    needs asking. The reviewer's shape, the same in both engines by SHARED.md's rows and each
-    engine's own underneath: items 38 to 45, an edit mesh of faces of any count with a selection and
-    a recipe of operations that is its history, its undo and its saved file, built into the engine's
-    meshes and colliders; the grid materials, world-aligned texture coordinates and booleans by
-    binary space partition, written in the engine since the dependency table takes no library for
-    it; the commands, one an operation in the recipe's words, and an ImGui window a program draws
-    with face picking by ray and a drag to extrude, no editor application in 3DEngine and the
-    editor's panel in BevyCSharp; texture coordinate projections and materials by slot; a game
-    blocking out a level from one recipe; the face and edge operations; a modifier stack applied at
-    the build; and glTF written by the engine and read into an edit mesh, so Blender opens what the
-    game made and the game cuts what Blender made. Each engine's coder takes the items after its
-    current work, item 58 and the feature test's sixth part in 3DEngine and item 37 in BevyCSharp,
-    in the items' order, the two in parallel to one text, the words of the recipe and the commands
-    the same in both. The owner is asked the game's name, Blockout failing a word, whether the glTF
-    export comes earlier than last, and whether a dependency for robust booleans is wanted later
-    should the partition's limits show.
+46. **Modeling in both engines, from the kernel to the modifiers, grid prototyping first.** Decided
+    at about 23:47 on 2026-10-20, the engines are to support modeling too, beyond the primitives
+    they have, Blender's kind, possible in a game and all of it from the command line, simple to use
+    so it is the more powerful: grid prototyping as the essential tool of world design, with
+    textures of different colors showing a grid of about a meter, stairs, and windows through
+    boolean operations; processing texture coordinates and adding textures to surfaces; and later
+    selecting a face, insetting and pulling it, merging, beveling and Blender-like modifiers; the
+    reviewer to shape the best solution, adding and removing as it sees fit, and to ask what needs
+    asking. The reviewer's shape, the same in both engines by SHARED.md's rows and each engine's own
+    underneath: items 38 to 45, an edit mesh of faces of any count with a selection and a recipe of
+    operations that is its history, its undo and its saved file, built into the engine's meshes and
+    colliders; the grid materials, world-aligned texture coordinates and booleans by binary space
+    partition, written in the engine since the dependency table takes no library for it; the
+    commands, one an operation in the recipe's words, and an ImGui window a program draws with face
+    picking by ray and a drag to extrude, no editor application in 3DEngine and the editor's panel
+    in BevyCSharp; texture coordinate projections and materials by slot; a game blocking out a level
+    from one recipe; the face and edge operations; a modifier stack applied at the build; and glTF
+    written by the engine and read into an edit mesh, so Blender opens what the game made and the
+    game cuts what Blender made. Each engine's coder takes the items after its current work, item 58
+    and the feature test's sixth part in 3DEngine and item 37 in BevyCSharp, in the items' order,
+    the two in parallel to one text, the words of the recipe and the commands the same in both. The
+    questions put back are the game's name, Blockout failing a word, whether the glTF export comes
+    earlier than last, and whether a dependency for robust booleans is wanted later should the
+    partition's limits show.
 
-47. **The Actions bill is not weighed.** The owner wrote at 00:06 on 2026-10-21 that the bill need
-    not be considered, the runs being free of charge for them. So a push's build run is left to run
-    beside a pack run started at the same time and is never cancelled for its cost, macOS stays in
-    every push, the three systems' suites run on every push as they do, and the reviewer's reading
-    of the month's minutes stands as a reading and not as a reason; a run is still cancelled where
-    it is doomed, so its figures are not waited for, and a push still waits for the run before it to
-    end, so no figure is lost.
+47. **The Actions bill is not weighed.** Decided at 00:06 on 2026-10-21, the bill need not be
+    considered, the runs being free of charge. So a push's build run is left to run beside a pack
+    run started at the same time and is never cancelled for its cost, macOS stays in every push, the
+    three systems' suites run on every push as they do, and the reviewer's reading of the month's
+    minutes stands as a reading and not as a reason; a run is still cancelled where it is doomed, so
+    its figures are not waited for, and a push still waits for the run before it to end, so no
+    figure is lost.
 
-48. **Animated captures as tooling for documentation and devlogs.** The owner wrote at about 00:29
-    on 2026-10-21 that it is to be possible to capture, or to make animations from several captures,
-    with timings such as a second or 250 ms between the pictures, to have more tooling to show
-    things in the documentation or in devlogs. So item 46: a recorder in the engine taking frames at
-    a step for a length and writing a GIF or an animated PNG by encoders of the engine's own, a
-    client step for it, and a script assembling an animation from captures on disk, with one
-    animation in the README as its first use; the same in both engines.
+48. **Animated captures as tooling for documentation and devlogs.** Decided at about 00:29 on
+    2026-10-21, it is to be possible to capture, or to make animations from several captures, with
+    timings such as a second or 250 ms between the pictures, to have more tooling to show things in
+    the documentation or in devlogs. So item 46: a recorder in the engine taking frames at a step
+    for a length and writing a GIF or an animated PNG by encoders of the engine's own, a client step
+    for it, and a script assembling an animation from captures on disk, with one animation in the
+    README as its first use; the same in both engines.
 
-49. **A screenshot on F2 in every program.** The owner wrote shortly before 03:42 on 2026-10-21
-    that, as in Minecraft, a screenshot is to be taken in the game with F2, the same for BevyCSharp,
-    the captures put in the root or a subfolder. So item 47 here, item 73 in 3DEngine and item 40 in
-    the voxel game: a built-in key writing the frame into a screenshots folder beside the program,
-    named by the time as the source names its own, movable and off by a setting.
+49. **A screenshot on F2 in every program.** Decided shortly before 03:42 on 2026-10-21, as in
+    Minecraft, a screenshot is to be taken in the game with F2, the same for BevyCSharp, the
+    captures put in the root or a subfolder. So item 47 here, item 73 in 3DEngine and item 40 in the
+    voxel game: a built-in key writing the frame into a screenshots folder beside the program, named
+    by the time as the source names its own, movable and off by a setting.
 
-50. **F1 hides the interface and F3 shows the debug overlay, in both engines.** The owner asked
-    shortly before 07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine
-    feature, F2 the screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts
-    logically with modules a game adds, world generation among them, showing the system, the camera
-    and the renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
+50. **F1 hides the interface and F3 shows the debug overlay, in both engines.** Asked shortly before
+    07:05 on 2026-10-21 for F1 to hide the interface as Minecraft does, as an engine feature, F2 the
+    screenshot, and F3 a debug overlay like the newest Minecraft's, sorted in parts logically with
+    modules a game adds, world generation among them, showing the system, the camera and the
+    renderer, memory, fps and frametime with a graph like the RivaTuner overlay's, both for
     BevyCSharp and 3DEngine, F1 hiding the interface and ImGui but not the F3 overlay so everything
     hides but the overlay over the renderer, and Shift+F3 showing the frame debugger too; and
     answered the reviewer's questions shortly before 07:06: the interface hidden by a scope, F3 the
     overlay's on its release alone with any chord left to the program, the look Minecraft's with no
     header, window styling or border, text on a transparent backing, and the order as the reviewer
     sees fit. So item 49 here and item 78 in 3DEngine, the same in both, after Blockout here and
-    after the cascade faults there, and the voxel game taking them when the package comes. Shortly
-    before 07:10 the owner added that Minecraft hides its HUD only while the player's camera shows
-    and not in the pause or any other screen, so hiding every panel at any point, even in menus,
-    would be wrong; the scope gives that, the HUD inside it hidden and a screen drawn outside it
-    never, which the items say.
+    after the cascade faults there, and the voxel game taking them when the package comes. Added
+    shortly before 07:10, Minecraft hides its HUD only while the player's camera shows and not in
+    the pause or any other screen, so hiding every panel at any point, even in menus, would be
+    wrong; the scope gives that, the HUD inside it hidden and a screen drawn outside it never, which
+    the items say.
 
-51. **3DEngine's radiance cascades come to this engine.** The owner wrote to the coder shortly
+51. **3DEngine's radiance cascades come to this engine.** Decided in the coder's session shortly
     before 07:15 on 2026-10-21, on Blockout's lighting, that the radiance cascades of 3DEngine were
-    always intended for this engine as well, built there first, and can be done here too, and said
-    to ask the reviewer. So items 50 to 52, the three phases as 3DEngine built them, the field, the
+    always intended for this engine as well, built there first, and can be done here too, the
+    reviewer to be asked. So items 50 to 52, the three phases as 3DEngine built them, the field, the
     cascades with the additive pass and the reference, then the screen's probes, the glow lights and
     the mends of the day, each read from 3DEngine's code and RENDERING.md as the model with its
     kernels taken through the bridge; items 50 and 51 after item 49 and before 43 to 45, item 52
     after them; Blockout keeps its lighting and switches to the cascades once item 51 exists. The
     ledger's row changes from to consider to to take. Asked shortly before 07:28 whether the
     cascades are ready to copy, the reviewer said not yet, the method still moving in 3DEngine with
-    its faults, the fill cascades and the budget open, and the owner said that if not yet ready,
+    its faults, the fill cascades and the budget open, and the answer was that if not yet ready,
     BevyCSharp waits; so item 50, the field, goes after items 43 to 45, and items 51 and 52 wait
     until 3DEngine's items 71, 72 and 74 are mended and the voxel game's captures say the light
     holds, Blockout and the games keeping Solari where the GPU has ray queries and the sun with
     ambient and occlusion elsewhere.
 
 52. **A denoiser for the ray-traced tier of global illumination, beside the cascades, in both
-    engines.** The owner asked at 08:42 on 2026-10-21 why BevyCSharp has no denoiser, was answered
-    that Bevy's Solari at 0.20 knows only DLSS Ray Reconstruction, which the bridge does not build,
-    ReSTIR halving the noise meanwhile, and said shortly before 08:56 that a denoiser for Solari is
+    engines.** Asked at 08:42 on 2026-10-21 why BevyCSharp has no denoiser, the answer being that
+    Bevy's Solari at 0.20 knows only DLSS Ray Reconstruction, which the bridge does not build,
+    ReSTIR halving the noise meanwhile, and decided shortly before 08:56, a denoiser for Solari is
     necessary as the higher-definition solution for global illumination beside the radiance
-    cascades, and that it is implemented for both engines in the future. So the engines carry two
-    tiers, the cascades everywhere, which need no denoiser since they integrate over directions, and
-    a ray-traced lighting with a denoiser where the GPU has ray queries, here over Solari's output
-    as item 54, after item 50 and before items 51 and 52, and in 3DEngine over a ray-traced pass of
-    its own once its cascades settle, its Decision 59, no item there yet. The owner holds the source
-    of H-Trace, a Unity asset received from its developer as a patron; it is read for the method's
+    cascades, and it is implemented for both engines in the future. So the engines carry two tiers,
+    the cascades everywhere, which need no denoiser since they integrate over directions, and a
+    ray-traced lighting with a denoiser where the GPU has ray queries, here over Solari's output as
+    item 54, after item 50 and before items 51 and 52, and in 3DEngine over a ray-traced pass of its
+    own once its cascades settle, its Decision 59, no item there yet. The owner holds the source of
+    H-Trace, a Unity asset received from its developer as a patron; it is read for the method's
     shape and its constants as the modpack's shaders were read by the voxel game, and nothing of its
-    code enters either repository, the license being the owner's to use and not to publish, unless
-    the developer grants it in writing, which the owner may ask.
+    code enters either repository, the license allowing use and not publishing, unless the developer
+    grants it in writing, which may be asked.
 
-53. **The owner's cloud sessions take GPU-free items on branches of their own.** On 2026-10-23 the
-    owner opened a cloud session on each engine with 200 dollars of usage of their own, four cores,
-    no GPU and no display, each able to push to one branch of its own and never to main, this
-    engine's on `claude/festive-faraday-r9drnv`, with Cargo installed and the .NET SDK to install,
-    the headless suite running there. A cloud session reads REVIEW.md, COMMITS.md, STYLE.md and
-    NORM.md as a coder does, commits in COMMITS.md's form on its branch, edits none of the review's
-    files, and reports to the reviewer in a few lines; the reviewer reads its commits from the
-    branch, and the local coder cherry-picks them onto main as the first part of its next batch,
-    taking the captures and the device tests the cloud cannot, so main keeps one writer and the
-    pushes stay the reviewer's.
+53. **The cloud sessions take GPU-free items on branches of their own.** On 2026-10-23 a cloud
+    session was opened on each engine with 200 dollars of usage, four cores, no GPU and no display,
+    each able to push to one branch of its own and never to main, this engine's on
+    `claude/festive-faraday-r9drnv`, with Cargo installed and the .NET SDK to install, the headless
+    suite running there. A cloud session reads REVIEW.md, COMMITS.md, STYLE.md and NORM.md as a
+    coder does, commits in COMMITS.md's form on its branch, edits none of the review's files, and
+    reports to the reviewer in a few lines; the reviewer reads its commits from the branch, and the
+    local coder cherry-picks them onto main as the first part of its next batch, taking the captures
+    and the device tests the cloud cannot, so main keeps one writer and the pushes stay the
+    reviewer's.
 
 54. **Branches are named for their work, never claude/ or a random string, and work stays on main
-    where one session writes.** The owner wrote at 20:16 on 2026-10-23 not to create branches named
-    claude or the like and not to name them with random characters, but to work on main, or, where
-    several sessions on one repository make a branch necessary, on a branch with a descriptive name
-    and no claude/ prefix. So the cloud session's work moves to a branch named modeling-operations,
-    and its claude/ branch is deleted once its commits are on main; a branch exists only while a
-    second writer needs one.
+    where one session writes.** Decided at 20:16 on 2026-10-23, no branches are created named claude
+    or the like or named with random characters, and work is on main, or, where several sessions on
+    one repository make a branch necessary, on a branch with a descriptive name and no claude/
+    prefix. So the cloud session's work moves to a branch named modeling-operations, and its claude/
+    branch is deleted once its commits are on main; a branch exists only while a second writer needs
+    one.
 
-55. **Every commit carries the owner's identity, and the cloud session's branch was deleted for not
-    carrying it.** At 20:25 on 2026-10-23 the owner saw that the commits on the cloud sessions'
-    branches named Claude as their sole contributor, said no to it and asked for the branches to be
-    deleted and gone for good; the reviewer deleted `claude/festive-faraday-r9drnv` and its workflow
-    runs. N 7.6 holds the rule: every commit's author and committer are the owner's identity on
-    every branch, a session setting it before its first commit, a commit with another identity
-    pushed nowhere and rewritten first. The cherry-picks on main, `ae596af8` and `4f80c464` for item
-    43, carry the owner's identity, as item 44's will. The cloud session was told to stop pushing,
-    set the identity, rewrite the authors of every local commit not on main and push nothing until
-    the owner confirms `modeling-operations` in that session.
+55. **Every commit carries the repository's author identity, and the cloud session's branch was
+    deleted for not carrying it.** At 20:25 on 2026-10-23 the commits on the cloud sessions'
+    branches were seen to name Claude as their sole contributor, which was refused, with the ask
+    that the branches be deleted and gone for good; the reviewer deleted
+    `claude/festive-faraday-r9drnv` and its workflow runs. N 7.6 holds the rule: every commit's
+    author and committer are the repository's author identity on every branch, a session setting it
+    before its first commit, a commit with another identity pushed nowhere and rewritten first. The
+    cherry-picks on main, `ae596af8` and `4f80c464` for item 43, carry the repository's author
+    identity, as item 44's will. The cloud session was told to stop pushing, set the identity,
+    rewrite the authors of every local commit not on main and push nothing until
+    `modeling-operations` is confirmed in that session.
 
-56. **Slang reads the same in both engines, plain names and no module prefix.** The owner asked at
-    21:31 on 2026-10-23 why the Slang in BevyCSharp cannot be used as in 3DEngine without `::` and,
-    told that the bridge's modules alone wrap their names in namespaces, said yes to dropping them;
-    so the bridge's modules give their names plainly, each helper named for its work as 3DEngine's
-    are, item 56, and a shader's words are the same in both engines where they hold the same thing.
+56. **Slang reads the same in both engines, plain names and no module prefix.** Asked at 21:31 on
+    2026-10-23 why the Slang in BevyCSharp cannot be used as in 3DEngine without `::` and, the
+    bridge's modules alone wrapping their names in namespaces, dropping them was approved; so the
+    bridge's modules give their names plainly, each helper named for its work as 3DEngine's are,
+    item 56, and a shader's words are the same in both engines where they hold the same thing.
 
-57. **Until a full release, both engines are used by nobody.** The owner wrote at 21:36 on
-    2026-10-23 that an upgrading entry is not needed since nobody uses the engine, said "Drop" to
-    the rule that every new public name has its line on 3DEngine's upgrading page, and added that
-    until a full release both engines are to be considered used by no one. So a change of the public
-    surface is made outright, with no entry for a name gained or lost, no deprecation and no path
-    kept for an older caller; the package's release notes written from the commit messages are the
-    record of what changed, and the upgrading page this engine never had stays absent, the Shared
-    row's upgrading guide not kept. The owner's word ends this at the full release.
+57. **Until a full release, both engines are used by nobody.** Decided at 21:36 on 2026-10-23, an
+    upgrading entry is not needed since nobody uses the engine, the rule that every new public name
+    has its line on 3DEngine's upgrading page is dropped, and until a full release both engines are
+    to be considered used by no one. So a change of the public surface is made outright, with no
+    entry for a name gained or lost, no deprecation and no path kept for an older caller; the
+    package's release notes written from the commit messages are the record of what changed, and the
+    upgrading page this engine never had stays absent, the Shared row's upgrading guide not kept. A
+    decision ends this at the full release.
 
-58. **The two cheat sheets have one form.** The owner wrote at 21:39 on 2026-10-23 that the cheat
-    sheets are to be coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's
-    section headers as 3DEngine's, plain words without the code styling. So both pages are a `#
-    Cheatsheet` heading, a paragraph saying what the page is and what writes it, then `## Group`
-    headings in plain words, each group a guide link line and one fenced block, and in the block one
-    line a member, the signature and then `//` and the first sentence of its documentation on the
-    same line however long, no continuation lines and no sub-heading a type.
+58. **The two cheat sheets have one form.** Decided at 21:39 on 2026-10-23, the cheat sheets are to
+    be coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's section headers
+    as 3DEngine's, plain words without the code styling. So both pages are a `# Cheatsheet` heading,
+    a paragraph saying what the page is and what writes it, then `## Group` headings in plain words,
+    each group a guide link line and one fenced block, and in the block one line a member, the
+    signature and then `//` and the first sentence of its documentation on the same line however
+    long, no continuation lines and no sub-heading a type.
 
-59. **A devlog under `.github/devlog`, with AGENTS.md's row for it.** The owner asked at about 04:35
-    on 2026-10-24 that the pictures the sessions made be saved with a text in a folder under
-    .github; `.github/devlog/README.md` holds what landed by day, newest first, with the
-    repository's captures and the items closed, written by the reviewing session and carried by the
-    coder's commits like REVIEW.md, and the owner gave this repository's session the word for
-    AGENTS.md's row at about 04:50. At about 07:56 the owner asked that the devlog be `DEVLOG.md` at
-    the repository's root, with no `.github/devlog` folder, the engine's pictures being its
-    committed captures; `.github/devlog/README.md` goes and AGENTS.md's row names `DEVLOG.md`.
+59. **A devlog under `.github/devlog`, with AGENTS.md's row for it.** Asked at about 04:35 on
+    2026-10-24 that the pictures the sessions made be saved with a text in a folder under .github;
+    `.github/devlog/README.md` holds what landed by day, newest first, with the repository's
+    captures and the items closed, written by the reviewing session and carried by the coder's
+    commits like REVIEW.md, and this repository's session was given the word for AGENTS.md's row at
+    about 04:50. At about 07:56 the ask was that the devlog be `DEVLOG.md` at the repository's root,
+    with no `.github/devlog` folder, the engine's pictures being its committed captures;
+    `.github/devlog/README.md` goes and AGENTS.md's row names `DEVLOG.md`.
 
-60. **A session saves the pictures of its work in the repository, N 4.8.** The owner wrote at about
-    18:5x on 2026-10-24 that this session had kept none of the day's radiance cascade captures, item
-    51's readings and pairs, which they would have loved to see, the session answering that no
-    document said the pictures in progress should be saved, and asked for the rule written where the
-    sessions read it and the same in the three repositories. N 4.8 says it, one text in both
-    engines' NORM.md and the voxel game's, the engines' pictures under .github/assets/readings/ and
-    the game's under .github/devlog/, each a WebP named by the date and the item in the commit of
-    its work with the commit's sentence as its caption, DEVLOG.md generated from them; the day's
-    captures still in this session's scratch space go in with the next commit.
+60. **A session saves the pictures of its work in the repository, N 4.8.** Reported at about 18:5x
+    on 2026-10-24, this session had kept none of the day's radiance cascade captures, item 51's
+    readings and pairs, which were to be seen, the session answering that no document said the
+    pictures in progress should be saved, with the ask for the rule written where the sessions read
+    it and the same in the three repositories. N 4.8 says it, one text in both engines' NORM.md and
+    the voxel game's, the engines' pictures under .github/assets/readings/ and the game's under
+    .github/devlog/, each a WebP named by the date and the item in the commit of its work with the
+    commit's sentence as its caption, DEVLOG.md generated from them; the day's captures still in
+    this session's scratch space go in with the next commit.
 
 61. **The feature test's level is redone, the look, the sky, the file, the entities' connections and
-    an editor.** The owner wrote to this session at about 19:30 on 2026-10-24 that they hate the
-    feature test level, it looks ugly, and set its remaking as the work after item 52, ahead of the
-    Now list. The look is Unreal's level prototyping style, orange and gray blockout with rounded
-    doorways, with the best of Source and Hammer, level editing for artists who do not program; the
-    sky photoreal after Hillaire 2020 with Cody Bennett's post as the reference, keeping 3DEngine's
-    vibrance, a lower hemisphere taking the fog's and the horizon's color, and its tone curve and
-    grading; the volumetric clouds, the blurred sun dot, the frame text at the bottom left and the
-    stray pixels in the screen's middle removed, a green FPS number in a top corner added. The
-    owner's answers, the map a level file of brushes and entities the editor opens and edits, built
-    in phases; Source's entity I/O as an engine feature with an editor panel, output, target, input,
-    parameter, delay and fire once; Hammer's four panes and Unreal's single view, switchable;
-    Unreal's palette with a world-aligned meter grid as Source's dev textures have; item 52 first.
-    Items 63 to 68 hold it, the coder proposing the phases when 52 is in.
+    an editor.** Reported to this session at about 19:30 on 2026-10-24, the feature test level looks
+    ugly, with its remaking set as the work after item 52, ahead of the Now list. The look is
+    Unreal's level prototyping style, orange and gray blockout with rounded doorways, with the best
+    of Source and Hammer, level editing for artists who do not program; the sky photoreal after
+    Hillaire 2020 with Cody Bennett's post as the reference, keeping 3DEngine's vibrance, a lower
+    hemisphere taking the fog's and the horizon's color, and its tone curve and grading; the
+    volumetric clouds, the blurred sun dot, the frame text at the bottom left and the stray pixels
+    in the screen's middle removed, a green FPS number in a top corner added. The answers, the map a
+    level file of brushes and entities the editor opens and edits, built in phases; Source's entity
+    I/O as an engine feature with an editor panel, output, target, input, parameter, delay and fire
+    once; Hammer's four panes and Unreal's single view, switchable; Unreal's palette with a
+    world-aligned meter grid as Source's dev textures have; item 52 first. Items 63 to 68 hold it,
+    the coder proposing the phases when 52 is in.
 
 62. **The fog, the clouds and the rest of the weather are written in the engine, and the weather
-    crate goes.** The owner wrote to this session at about 21:3x on 2026-10-24 to implement fog and
-    clouds natively rather than through the crate, using Bevy's sky, and then the other things of
-    the weather crate natively too; asked how GTA does it, the coder said GTA V keys an artist
-    timecycle hourly for sky, fog, light, exposure and grading, RDR2 lights a physical atmosphere
-    with lookup textures, raymarched clouds and froxel fog together under timecycle art direction,
-    and GTA VI's is unpublished. Item 69 holds it after item 64, the volumetric fog and clouds lit
-    by the atmosphere first, then rain, snow, thunder, wind, the stars and the moon, and the
-    vendored crate removed when they stand.
+    crate goes.** Asked of this session at about 21:3x on 2026-10-24, to implement fog and clouds
+    natively rather than through the crate, using Bevy's sky, and then the other things of the
+    weather crate natively too; asked how GTA does it, the coder said GTA V keys an artist timecycle
+    hourly for sky, fog, light, exposure and grading, RDR2 lights a physical atmosphere with lookup
+    textures, raymarched clouds and froxel fog together under timecycle art direction, and GTA VI's
+    is unpublished. Item 69 holds it after item 64, the volumetric fog and clouds lit by the
+    atmosphere first, then rain, snow, thunder, wind, the stars and the moon, and the vendored crate
+    removed when they stand.
 
-63. **Trees and foliage are grown, not loaded.** The owner wrote at 21:26 on 2026-10-24 that
-    BevyCSharp should have trees, and rather than relying on assets and large files a way to use and
-    expand the modeling to create a wide variety of trees and foliage as SpeedTree does, with the
-    Weber and Penn algorithm. Asked by the coder at about 21:5x whether the paper's own branching or
-    a grown one, the owner chose the hybrid, grown method, the paper's parameters as the controls
-    and the branches grown inside them by space colonization with light competition. Item 70 holds
-    it after the weather and before the level file.
+63. **Trees and foliage are grown, not loaded.** Decided at 21:26 on 2026-10-24, BevyCSharp should
+    have trees, and rather than relying on assets and large files a way to use and expand the
+    modeling to create a wide variety of trees and foliage as SpeedTree does, with the Weber and
+    Penn algorithm. Asked by the coder at about 21:5x whether the paper's own branching or a grown
+    one, the hybrid, grown method was chosen, the paper's parameters as the controls and the
+    branches grown inside them by space colonization with light competition. Item 70 holds it after
+    the weather and before the level file.
 
-64. **The devlog written as the work goes.** The owner asked on 2026-10-25 at 05:13 that the
-    sessions write the devlog more often than at a day's end, though not at every commit. N 4.8
-    gains the cadence, an item that changes what is seen ending with at least one captioned picture,
-    a pair before and after where it mends and one a phase where it is built in phases, and
-    DEVLOG.md regenerated by the review as each item is archived, the coder's next commit carrying
-    it as it carries the review's files; the three devlogs were regenerated at 05:16 with the day's
-    pictures and items. The same in 3DEngine (Decision 71) and Voxel-Sandbox (Decision 47).
+64. **The devlog written as the work goes.** Asked on 2026-10-25 at 05:13 that the sessions write
+    the devlog more often than at a day's end, though not at every commit. N 4.8 gains the cadence,
+    an item that changes what is seen ending with at least one captioned picture, a pair before and
+    after where it mends and one a phase where it is built in phases, and DEVLOG.md regenerated by
+    the review as each item is archived, the coder's next commit carrying it as it carries the
+    review's files; the three devlogs were regenerated at 05:16 with the day's pictures and items.
+    The same in 3DEngine (Decision 71) and Voxel-Sandbox (Decision 47).
 
-65. **The devlog carries notes beside the pictures.** The owner asked on 2026-10-25 at about 12:01,
-    shown the table of the screen probes' cost at four resolutions from 3DEngine's item 122, that it
-    be written in a devlog or something along those lines. N 4.8 gains the note, a reading worth the
+65. **The devlog carries notes beside the pictures.** Asked on 2026-10-25 at about 12:01, shown the
+    table of the screen probes' cost at four resolutions from 3DEngine's item 122, that it be
+    written in a devlog or something along those lines. N 4.8 gains the note, a reading worth the
     devlog's reader with no picture to carry it, a table or a few sentences, saved beside the
     pictures as a Markdown file named the same way, and DEVLOG.md carries it on its day under the
     pictures; the generator reads them, and the first note is 3DEngine's
     2026-10-25-item-122-resolution.md. The same in 3DEngine (Decision 73) and Voxel-Sandbox
     (Decision 49).
 
-66. **Free textures ship as a bounded collection; the models stay reference.** The owner put trees'
-    textures and reference models under .ref/Vegetation, vegetation2 and vegetation3, 6 GB of PBR
-    sets, leaf scans and OBJ models, and wrote on 2026-10-25 at about 13:00 that they are free to
+66. **Free textures ship as a bounded collection; the models stay reference.** Trees' textures and
+    reference models were put under .ref/Vegetation, vegetation2 and vegetation3, 6 GB of PBR sets,
+    leaf scans and OBJ models, with the direction of 2026-10-25 at about 13:00 that they are free to
     use, that the review should check them and choose what to implement texture-wise as source
     assets the way the Source engine ships textures, that a collection can grow from them with a
-    document requesting assets the owner then provides, that the review may compress, change the
+    document requesting assets that are then provided, that the review may compress, change the
     resolution, crop, adjust and alter the colors as it likes so the tree generator has textures and
     can build the leaves, that the textures be memory efficient for the repository's size and for
     rendering alike, that the review choose what it needs and skip the rest, and that the models are
     reference and not to be imported into the generation. Decision 63's rule against asset files
     narrows to models and large files; a texture collection ships, bounded at 32 MB with entries at
     most 1024 square as supercompressed KTX2, item 74, and .github/ASSETS.md is the review's request
-    list. Amended at 14:22 on the owner's word to the coder, the sorted folder .vegetation ships as
-    the collection and no document says more of it. The paper's presets take the collection's bark
-    and leaves where an entry fits and the generated ones elsewhere.
+    list. Amended at 14:22 by decision to the coder, the sorted folder .vegetation ships as the
+    collection and no document says more of it. The paper's presets take the collection's bark and
+    leaves where an entry fits and the generated ones elsewhere.
 
 67. **The level file is Valve 220 map text.** Proposed by the coder on 2026-10-26 at item 65's start
     and taken. A level is the text TrenchBroom reads and writes, entities in braces with key and
@@ -5604,9 +5589,9 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     engine's own and over Hammer's vmf, since TrenchBroom is open source on every system and item
     67's editor writes the same file, so a level can be blocked out in it today.
 
-68. **The feature test's open map is legacy and its features move into one generated level.** The
-    owner wrote to the coder's session on 2026-10-26, about 12:5x, having seen the level work and
-    liking the arches made with the modeling, that the terrain, the house with its lighting and the
+68. **The feature test's open map is legacy and its features move into one generated level.**
+    Decided in the coder's session on 2026-10-26, about 12:5x, on the level work and its arches made
+    with the modeling, which were found good, that the terrain, the house with its lighting and the
     open ground around them are legacy, to be deleted and implemented in the generated level as
     rooms and open courtyards, the walls up so no horizon shows as in a prototype level, and the
     structure made interesting to show what the tools can do. So item 68 comes forward, after the
@@ -5615,130 +5600,128 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     to the sky and a scenes hall, joined by corridors, ramps and a raised walkway inside a tall
     boundary wall; the ground plane, the heightmap terrain and the light hall's house go from the
     feature test, the engine's own features staying and each zone's checks moving into its room or
-    going with a note; the layout drawn by the generator into the level's file and pictured to the
-    owner before the zones' content moves in, one commit a zone, the drive's stations and captures
+    going with a note; the layout drawn by the generator into the level's file and shown in a
+    picture before the zones' content moves in, one commit a zone, the drive's stations and captures
     following each, the README and the docs saying the new map at the end.
 
 69. **A reading's picture explains itself, and a plain capture or pair stays where it shows the
-    thing.** The owner wrote on 2026-10-31 that 3DEngine's sheets for item 136, the canopy and the
-    grove with their labeled panels, difference panels and lettered boxes, were liked very much,
-    that plain captures and side-by-side views are liked too, and that each is used where it fits. N
-    4.9 in the three repositories says what a sheet carries. Shown BevyCSharp's item 82 sheet at
-    09:1x the same day, the owner said the rule is not a list of parts to implement, that the plain
-    captures and pairs made before were already right, and answered four questions, a principle and
-    not a checklist, labels where panels could be confused and a box only where a number is read
-    there, a white ground as before, and difference panels and plots where they tell the reading. N
-    4.9 is rewritten so.
+    thing.** Reported on 2026-10-31, 3DEngine's sheets for item 136, the canopy and the grove with
+    their labeled panels, difference panels and lettered boxes, were found good, plain captures and
+    side-by-side views are good too, and each is used where it fits. N 4.9 in the three repositories
+    says what a sheet carries. On BevyCSharp's item 82 sheet shown at 09:1x the same day, the rule
+    was said to be no list of parts to implement, the plain captures and pairs made before being
+    already right, and four questions were answered, a principle and not a checklist, labels where
+    panels could be confused and a box only where a number is read there, a white ground as before,
+    and difference panels and plots where they tell the reading. N 4.9 is rewritten so.
 
-70. **Every picture a session makes goes to the repository's dump folder.** The owner asked on
-    2026-10-31 at 09:3x that all the pictures a session makes be kept apart from the devlog's chosen
-    ones, in a dump folder, for every project, and chose the folder inside each repository and
-    ignored by git, the pictures as captured in PNG named by time, item and a word, and a captions
-    line a picture written as the shot is taken; N 4.10 in the three repositories. At 09:5x the
-    owner added that the sessions had captured and compared pictures without showing them, and asked
-    that every picture a session reads or compares be shown in the session as it is made, none kept
-    behind the scenes; N 4.10 says so.
+70. **Every picture a session makes goes to the repository's dump folder.** Asked on 2026-10-31 at
+    09:3x that all the pictures a session makes be kept apart from the devlog's chosen ones, in a
+    dump folder, for every project, and chose the folder inside each repository and ignored by git,
+    the pictures as captured in PNG named by time, item and a word, and a captions line a picture
+    written as the shot is taken; N 4.10 in the three repositories. Added at 09:5x, the sessions had
+    captured and compared pictures without showing them, with the ask that every picture a session
+    reads or compares be shown in the session as it is made, none kept behind the scenes; N 4.10
+    says so.
 
-71. **Six ideas for later, thought about and not scheduled.** The owner wrote on 2026-10-31 at about
-    11:50 six things to consider in the future, a landscape tool with non-destructive stamps,
+71. **Six ideas for later, thought about and not scheduled.** Written down on 2026-10-31 at about
+    11:50, six things to consider in the future, a landscape tool with non-destructive stamps,
     procedural generation, erosion, vegetation placement and texture mapping; parallax occlusion
     mapping and tessellation for vegetation in tiers; the two engines' levels interchangeable
     through one level-building system; Blender files used live; Unity and UnityEngine namespaces as
     a bridge for Unity packages; and the big parts, radiance cascades, the editor, the modeling and
-    the level builder, as engine-agnostic libraries like BepuPhysics; and said they are thought
-    about, written down for the future and taken when it suits. Written as rows to consider in
-    SHARED.md, with the Valve 220 levels' own row. At 12:0x the owner added the vegetation of
-    BevyCSharp made engine-agnostic too, bridged to and used by both engines; a row of its own, the
-    species, skeleton, meshes, texture sets and placement as one managed package and each engine
-    binding the leaves' material, the wind, the impostors and the light through. Before 12:10 the
-    owner made the repositories `Modeling`, `Vegetation`, `Levels`, `Landscape` and
-    `RadianceCascades` under EggyStudio, cloned beside the engines under `Projects/Modules/`, each
-    with its license alone; they are filled when the GI items are done, the coder owning the code
-    today moving it and the other engine's coder binding the package, the reviewer writing each
-    one's REVIEW.md and NORM.md at its birth. A sixth, `Tools`, made then on the reviewer's
-    proposal, for the scripts and the shared documents' sources the repositories duplicate by hand.
-    The owner then chose git submodules over packages for the modules, since a package's upload,
-    wait, test and pack is slower to iterate; each engine takes a module as a submodule built as a
-    project, a change to a module is a commit in its repository first and the engine's commit that
-    uses it moves the submodule's pointer, the reviewer pushing the module's repository before the
-    engine's, and the workflows check submodules out. At 12:3x the owner said the modules may be
-    tried at once beside the engine's GI work (3DEngine Decision 79), the documents first, then the
-    rest as the other projects have it, then the engines taking them; each module has REVIEW.md and
-    NORM.md from the reviewer, the game's session writes the documents and the skeletons, the owning
-    sessions move the code after their current items, BevyCSharp's Vegetation after item 83 and
-    Levels after 68's phases that touch it. The reviewer's view there in short, the levels and the
-    Blender path small, the landscape tool large and the best candidate for one managed library,
-    tessellation 3DEngine's alone since Bevy's renderer has no tessellation stage, the Unity bridge
-    feasible as a script subset only, and the cascades sharing their CPU side and Slang shaders
-    while each engine keeps its GPU binding; the order when the time comes Blender, the levels with
-    the modeling library, the landscape tool, parallax and the tiers, the Unity subset last, none
-    before the engine's GI items (3DEngine Decision 75).
+    the level builder, as engine-agnostic libraries like BepuPhysics; to be thought about, kept for
+    the future and taken when it suits. Written as rows to consider in SHARED.md, with the Valve 220
+    levels' own row. Added at 12:0x, the vegetation of BevyCSharp made engine-agnostic too, bridged
+    to and used by both engines; a row of its own, the species, skeleton, meshes, texture sets and
+    placement as one managed package and each engine binding the leaves' material, the wind, the
+    impostors and the light through. Before 12:10 the repositories `Modeling`, `Vegetation`,
+    `Levels`, `Landscape` and `RadianceCascades` were made under EggyStudio, cloned beside the
+    engines under `Projects/Modules/`, each with its license alone; they are filled when the GI
+    items are done, the coder owning the code today moving it and the other engine's coder binding
+    the package, the reviewer writing each one's REVIEW.md and NORM.md at its birth. A sixth,
+    `Tools`, made then on the reviewer's proposal, for the scripts and the shared documents' sources
+    the repositories duplicate by hand. Git submodules were then chosen over packages for the
+    modules, since a package's upload, wait, test and pack is slower to iterate; each engine takes a
+    module as a submodule built as a project, a change to a module is a commit in its repository
+    first and the engine's commit that uses it moves the submodule's pointer, the reviewer pushing
+    the module's repository before the engine's, and the workflows check submodules out. Decided at
+    12:3x, the modules may be tried at once beside the engine's GI work (3DEngine Decision 79), the
+    documents first, then the rest as the other projects have it, then the engines taking them; each
+    module has REVIEW.md and NORM.md from the reviewer, the game's session writes the documents and
+    the skeletons, the owning sessions move the code after their current items, BevyCSharp's
+    Vegetation after item 83 and Levels after 68's phases that touch it. The reviewer's view there
+    in short, the levels and the Blender path small, the landscape tool large and the best candidate
+    for one managed library, tessellation 3DEngine's alone since Bevy's renderer has no tessellation
+    stage, the Unity bridge feasible as a script subset only, and the cascades sharing their CPU
+    side and Slang shaders while each engine keeps its GPU binding; the order when the time comes
+    Blender, the levels with the modeling library, the landscape tool, parallax and the tiers, the
+    Unity subset last, none before the engine's GI items (3DEngine Decision 75).
 
-72. **The version's major and minor move by the reviewer's judgment.** The owner wrote on 2026-10-31
-    at 12:4x that the reviewer moves build/version.txt by its judgment of the project, commits it
-    and pushes it, the owner's hand no longer needed. The judgment is a minor at a step the project
-    has taken, a capability or a changed surface that a package or release carries, and the major on
-    the owner's word. The engine stands at 0.6 since `391d6b85`, the owner's own move, and stays
-    until the grass and the levels carry it to its next minor.
+72. **The version's major and minor move by the reviewer's judgment.** Reported on 2026-10-31 at
+    12:4x, the reviewer moves build/version.txt by its judgment of the project, commits it and
+    pushes it, no other hand needed. The judgment is a minor at a step the project has taken, a
+    capability or a changed surface that a package or release carries, and the major by decision.
+    The engine stands at 0.6 since `391d6b85`, a move made by hand, and stays until the grass and
+    the levels carry it to its next minor.
 
-73. **What a scriptable render pipeline has, written down for later.** The owner asked on 2026-10-31
-    at 15:55 what makes Unity's scriptable render pipeline powerful and how ours becomes as
-    powerful, and said yes to the answer being written down. Five things, the frame as code (which
-    the render graph already is), shader passes by tag, declared passes with resource lifetimes and
-    plugin passes, GPU-driven drawing, volumes, and debug views with a graph dump; five rows to
-    consider in SHARED.md, taken in that order after the GI items of 3DEngine's Decision 75,
-    ShaderLab as a text format, keyword explosions and the editor's coupling left uncopied.
+73. **What a scriptable render pipeline has, written down for later.** Asked on 2026-10-31 at 15:55
+    what makes Unity's scriptable render pipeline powerful and how ours becomes as powerful, and the
+    answer was approved to be written down. Five things, the frame as code (which the render graph
+    already is), shader passes by tag, declared passes with resource lifetimes and plugin passes,
+    GPU-driven drawing, volumes, and debug views with a graph dump; five rows to consider in
+    SHARED.md, taken in that order after the GI items of 3DEngine's Decision 75, ShaderLab as a text
+    format, keyword explosions and the editor's coupling left uncopied.
 
 74. **Global illumination is fixed first and used in the feature test after the radiance cascades'
-    fix.** The owner wrote in the coder's session on 2026-10-31 that the white level is blue in
-    shade and the morning sun too warm, chose to fix global illumination and then use it in the
-    feature test, "after radiance cascade fix", and took a near-neutral fill for the time being
-    (item 87). Global illumination on by default in the feature test therefore waits until its hall
-    faults are mended, and the run-time switch's crash is mended before (item 88).
+    fix.** Found in the coder's session on 2026-10-31, the white level is blue in shade and the
+    morning sun too warm; the choice was to fix global illumination and then use it in the feature
+    test, after the radiance cascades' fix, with a near-neutral fill for the time being (item 87).
+    Global illumination on by default in the feature test therefore waits until its hall faults are
+    mended, and the run-time switch's crash is mended before (item 88).
 
-75. **The sky's model is a module, the drawing stays in each engine.** The owner asked on 2026-11-01
-    at 13:4x whether the sky, the atmosphere and the weather belong in a repository of their own so
-    both engines use them, this engine's targets being set already, or whether this engine keeps
-    Bevy's sky and a sky is built for 3DEngine alone. The answer is that the model is shared and the
+75. **The sky's model is a module, the drawing stays in each engine.** Asked on 2026-11-01 at 13:4x
+    whether the sky, the atmosphere and the weather belong in a repository of their own so both
+    engines use them, this engine's targets being set already, or whether this engine keeps Bevy's
+    sky and a sky is built for 3DEngine alone. The answer is that the model is shared and the
     drawing is not. SkyClock, WeatherState and LookCycle reference no engine and move to the module
     as they are (item 91) after items 90 and 68; 3DEngine's item 170 writes the sun's illuminance
     and color temperature by elevation and turbidity, the sky's luminance on the same scale and the
     atmosphere's parameters as data in the module from its first commit, so both engines light from
     one sun and one sky and the reference scene's figures come out of the same astronomy in both.
     The drawing is each engine's, Bevy's atmosphere, sky fog and clouds here in WGSL and 3DEngine's
-    pass in Slang, since neither can be moved and nothing is gained by it. The owner made `Sky`
-    under `Modules/` at 13:47 (its Decisions 1 to 6); a SHARED.md row added.
+    pass in Slang, since neither can be moved and nothing is gained by it. `Sky` was made under
+    `Modules/` at 13:47 (its Decisions 1 to 6); a SHARED.md row added.
 
-76. **No one is named in a picture.** The owner wrote in the 3DEngine coder's session on 2026-11-03
-    before 08:05, seeing a reading sheet whose label called a reference picture theirs, that
-    pictures and comparisons must not mention the owner, as the rule for documents has it. So N 4.10
-    says a picture's labels, its file name and its captions line name no person and no session, a
-    picture the owner sent being a screenshot and their reference picture the reference; the engine
-    session relabelled the sheet, renamed the dump's files and reworded its captions back to
-    2026-10-31, and read the 59 comparison sheets' labels clean.
+76. **No one is named in a picture.** Decided in the 3DEngine coder's session on 2026-11-03 before
+    08:05, on a reading sheet whose label named a person as a reference picture's source, pictures
+    and comparisons must not name a person, as the rule for documents has it. So N 4.10 says a
+    picture's labels, its file name and its captions line name no person and no session, a picture
+    sent in being a screenshot and a reference picture the reference; the engine session relabelled
+    the sheet, renamed the dump's files and reworded its captions back to 2026-10-31, and read the
+    59 comparison sheets' labels clean.
 
-77. **Anisotropic filtering at 16 everywhere.** The owner wrote on 2026-11-04 at 11:07, "Anisotropic
-   filtering is at x16 everywhere because it is cheap and on steep angles it is visually better." So
-   every sampler that reads a texture, color, normal, surface or atlas, filters anisotropically at
-   16, or at the device's most where it offers less, at every quality and with no knob; the shadow,
-   probe and table samplers that are not textures keep their own filters. Item 103.
+77. **Anisotropic filtering at 16 everywhere.** Decided on 2026-11-04 at 11:07, anisotropic
+   filtering is at 16 everywhere, since it is cheap and looks better at steep angles. So every
+   sampler that reads a texture, color, normal, surface or atlas, filters anisotropically at 16, or
+   at the device's most where it offers less, at every quality and with no knob; the shadow, probe
+   and table samplers that are not textures keep their own filters. Item 103.
 
-78. **Crowns read thick and filled.** The owner wrote on 2026-11-05 at 11:03, seeing the four panels
-   of the dump's 09-07-item-105-meadow-levels.png, that they like the top one a lot because it is
-   thick and not see-through where the leaves fill the crown, that its color looks nice, and that
-   they took it for the path-traced one. The top right is the reference as item 100 took it, every
-   level of each tree traced at once while the trees were half dressed, so its crowns carry the full
-   level and the reduced one over each other, twice the leaves and the reduced level's larger ones,
-   in the reference's light; the top left is the picture at Medium, which fills its crowns as well.
-   So a crown reads thick and filled, not see-through, at the distances a meadow shows, as the
-   picture draws it, and the reference's see-through crowns at the eye's level, the bottom right,
-   are no look to move the picture toward; the reference's light, its brighter grass and walls,
-   stays the measure items 105 and 106 bring the picture to. Item 107.
+78. **Crowns read thick and filled.** Reported on 2026-11-05 at 11:03, on the four panels of the
+   dump's 09-07-item-105-meadow-levels.png, the top one is the best because it is thick and not
+   see-through where the leaves fill the crown, its color looks good, and it was taken for the
+   path-traced one. The top right is the reference as item 100 took it, every level of each tree
+   traced at once while the trees were half dressed, so its crowns carry the full level and the
+   reduced one over each other, twice the leaves and the reduced level's larger ones, in the
+   reference's light; the top left is the picture at Medium, which fills its crowns as well. So a
+   crown reads thick and filled, not see-through, at the distances a meadow shows, as the picture
+   draws it, and the reference's see-through crowns at the eye's level, the bottom right, are no
+   look to move the picture toward; the reference's light, its brighter grass and walls, stays the
+   measure items 105 and 106 bring the picture to. Item 107.
 
-79. **Each README cross-references the other engine.** The owner wrote on 2026-11-05 at 11:11 that
-   the two engines' READMEs cross-reference each other at the top, the last link saying the other
-   engine's name and linking to it. So the row of links over each engine's README title ends with
-   the other engine's name linked to its repository, BevyCSharp's with 3DEngine and 3DEngine's with
+79. **Each README cross-references the other engine.** Decided on 2026-11-05 at 11:11, the two
+   engines' READMEs cross-reference each other at the top, the last link saying the other engine's
+   name and linking to it. So the row of links over each engine's README title ends with the other
+   engine's name linked to its repository, BevyCSharp's with 3DEngine and 3DEngine's with
    BevyCSharp, as the game's row ends with 3DEngine. Item 108.
 
 ## Replies archived
@@ -6240,12 +6223,11 @@ the probes' ninety frames in some runs and those read no pass at all.
 
 Item 61's colons, in the commit carrying this line. Each hit of STYLE.md's two checks was read, the
 labels, the named arguments, the quoted strings and the component labels of the shaders' comments
-left, and 36 joints recast, in RENDERING.md, docs/components.md, AGENTS.md's three on the owner's
-word typed in this session, the cheat sheet's three through the summaries it is written from, and
-the comments of the code, the scripts holding none. ASKS.md's two hits are left to the reviewing
-session, since AGENTS.md has this session write nothing there. STYLE.md's grep misses a colon after
-a closing tag, `</c>:` or `/>:`, which twenty XML summaries held, and `[a-z)\`>]` in its class finds
-them.
+left, and 36 joints recast, in RENDERING.md, docs/components.md, AGENTS.md's three by decision typed
+in this session, the cheat sheet's three through the summaries it is written from, and the comments
+of the code, the scripts holding none. ASKS.md's two hits are left to the reviewing session, since
+AGENTS.md has this session write nothing there. STYLE.md's grep misses a colon after a closing tag,
+`</c>:` or `/>:`, which twenty XML summaries held, and `[a-z)\`>]` in its class finds them.
 
 Item 60 in the commit carrying this line, on choice (A). The bridge gives Bevy's
 `emissive_exposure_weight` the emissive's alpha, which `MaterialSettings.Emissive` defaults to 0 as
@@ -6451,9 +6433,9 @@ Item 73: the four shards were started by a command typed on 2026-10-20 at 01:07,
 `podman exec` of a work script kept in each shard's own folder, and no script of the repository
 starts a shard, so there is no line to give an init. Nothing uses them; each holds the idle dotnet
 and VBCSCompiler of that night beside the defunct. `podman rm -f` of the four was refused by this
-run's permissions until the owner allowed it, and the four were removed at 10:37 on 2026-10-25,
-their defunct entries with them. A container started for work from here is started with `--init`
-and removed as its work ends, as BUILDING.md's caches section says.
+run's permissions until it was allowed, and the four were removed at 10:37 on 2026-10-25, their
+defunct entries with them. A container started for work from here is started with `--init` and
+removed as its work ends, as BUILDING.md's caches section says.
 
 Shared: the weather crate's removal, in the commit carrying this line, item 69's last phase.
 native/bevy_weather leaves the workspace with its lock entry, and the bridge loses its render
@@ -6654,7 +6636,7 @@ and a seed. The worldspawn's _units_per_meter key, 32 by default, is named in do
 TrenchBroom as the tool, and a material's picture spans the units a meter, so it repeats once a
 meter at a scale of one, as the prototype grid does; phase two's prototypes settle what TrenchBroom
 shows for them. level.load builds a file from the console and ./bcs. The test on a file TrenchBroom
-itself wrote waits for the owner's, asked in ASSETS.md. The picture is the room in
+itself wrote waits for one to be provided, asked in ASSETS.md. The picture is the room in
 2026-10-26-item-65-room.webp. The suite ran whole in one host at the 3 GB cap, 1,988 passed and 3
 skipped, the host's anonymous memory 2,107 MB at most. The public listing gains Level, LevelEntity,
 LevelBrush, LevelFace, LevelPoint, LevelKeys and Levels, no line removed or reshaped, and AGENTS.md
@@ -7012,9 +6994,9 @@ the horizon. LevelBrush.Moved moves a brush with its mapping taken from the worl
 stands each wall by building it along X, turning it and moving it. The drive runs whole on it, its
 peak 3.83 GB, the hall's bays on the brushes' walls as they were. The picture is
 2026-10-26-item-68-layout.webp with 2026-10-26-item-68-layout.md, a line a room of what it holds,
-sent to the owner. The whole suite ran with it, 1,999 passed and 3 skipped in one host at the 3 GB
-cap, and the level tests pass on the headless bridge. The public listing gains LevelBrush.Moved, no
-line removed or reshaped.
+sent. The whole suite ran with it, 1,999 passed and 3 skipped in one host at the 3 GB cap, and the
+level tests pass on the headless bridge. The public listing gains LevelBrush.Moved, no line removed
+or reshaped.
 
 Decision 68's third phase, its first zone, the light hall, in the commit carrying this line. The
 hall stands at the north corridor's end, its front at z -24 and its back at -56, the corridor
@@ -7065,28 +7047,27 @@ and here it reads 19.82 to 19.83 MB from the tenth app to the hundredth. The who
 it, 1,999 passed and 3 skipped in one host at the 3 GB cap.
 Shared: the two engines' AppLeakTests read the heap the same way.
 
-Item 79's reading, the feature test as the owner runs it, dotnet run in the window as it opens with
-the saved settings, hour 11, the day stopped, PartlyCloudy, High, at the start and a view a court,
+Item 79's reading, the feature test as run by hand, dotnet run in the window as it opens with the
+saved settings, hour 11, the day stopped, PartlyCloudy, High, at the start and a view a court,
 against the same views offscreen and the devlog's pictures. The window draws what the capture draws,
 the views differing by 0.3 to 1.2 percent where nothing moves and more only where the fireflies and
 the clouds' drift do, at 18 to 35 frames a second while 3DEngine's sessions run apps on the GPU; the
-bridge is current for the clouds (the earlier line). What looks wrong, the clouds first:
-- Clouds lit from the eye's side, the sun behind the start's view north at 11:00, read gray and no
-  brighter than the sky, where the pictures at 15:00 faced the sun's side; the march's phase, seven
-  tenths a lobe forward and three a weak one back, and four octaves give a thick cloud about 0.08 of
-  the sun's light back toward it, where a white cloud gives about a quarter. A real fault.
-- The clouds carry a lavender tint since 5a8c6251 lit them from the copied clear sky, the tint gone
-  with that light taken off the march and the gray staying. A real fault, smaller.
-- Near clouds over the walls read as soft smears, the half size march and its history over clouds
-  seen higher and closer than the pictures' clouds at the horizon, which the walls hide. The view.
-- Above the walls, in the spectator camera alone, the level stands in an empty haze, no ground
-  outside it. The level, not seen from any floor.
-The owner is asked for the other glitches; the mends follow in this order.
+bridge is current for the clouds (the earlier line). What looks wrong, the clouds first: - Clouds
+lit from the eye's side, the sun behind the start's view north at 11:00, read gray and no brighter
+than the sky, where the pictures at 15:00 faced the sun's side; the march's phase, seven tenths a
+lobe forward and three a weak one back, and four octaves give a thick cloud about 0.08 of the sun's
+light back toward it, where a white cloud gives about a quarter. A real fault. - The clouds carry a
+lavender tint since 5a8c6251 lit them from the copied clear sky, the tint gone with that light taken
+off the march and the gray staying. A real fault, smaller. - Near clouds over the walls read as soft
+smears, the half size march and its history over clouds seen higher and closer than the pictures'
+clouds at the horizon, which the walls hide. The view. - Above the walls, in the spectator camera
+alone, the level stands in an empty haze, no ground outside it. The level, not seen from any floor.
+The other glitches are asked for; the mends follow in this order.
 
 Item 79's first mend, the clouds, in the commit carrying this line. The march adds the light a cloud
 scatters more times than its four octaves follow, twice the sun's over four pi, even every way and
 fading toward the sun at a fifth of the light taken away, which brings a deep cloud lit from the
-eye's side from 0.09 to 0.11 of the sun's light to 0.23 to 0.25, a white cloud's. At the owner's
+eye's side from 0.09 to 0.11 of the sun's light to 0.23 to 0.25, a white cloud's. At the reported
 view a cloud's top reads 216, 209, 195 where it read 166, 163, 160, and its shaded base 181, 177,
 172 where it read 146, 146, 154, the lavender gone with the gray, since the tint was the weak sun's
 light under the sky's blue; a cosine weighed ring of the clear sky for the ambient changed a base's
@@ -7095,45 +7076,45 @@ overcast and storm stay gray, and the cloud, weather, atmosphere and sky tests p
 picture is 2026-10-30-item-79-clouds.webp. The near clouds read crisp with their light, the softness
 going with the low contrast, so no third mend. Bevy's asset watcher panics on a closed channel as an
 app stops, after its last frame, on every run here, a lead not chased. The whole suite ran with it,
-1,978 passed, 3 skipped and 21 failed, every failure BounceRoomsTests' rooms ending in Bevy's out
-of memory while 3DEngine's sessions' apps held the GPU's memory, the class passing alone after, 55
-of 55.
+1,978 passed, 3 skipped and 21 failed, every failure BounceRoomsTests' rooms ending in Bevy's out of
+memory while 3DEngine's sessions' apps held the GPU's memory, the class passing alone after, 55 of
+55.
 
 Item 81, the grass, in the commit carrying this line. The meadow's blades went dark in patches that
-changed each frame, at the owner's settings, with the sun's shadows on or off, the blades casting
+changed each frame, at the saved settings, with the sun's shadows on or off, the blades casting
 none; with the clock stopped two frames were the same. The grass's main vertex stage added the
 wind's push in the world and its prepass stage in the mesh's own space and back through the
 transform, so a bent point's depth differed by a rounding between them, and where the main pass's
-fell behind the prepass's nothing drew, a dark hole the blade's shape that moved as the wind bent it.
-The main pass places the point by the prepass's own sums. Over consecutive frames of the same view
-the pixels changing by more than a quarter fell from 4.96 to 0.20 percent, and those darker than
-0.6 of the light about them from 0.58 percent of the grass to none. docs/shaders.md says that a
+fell behind the prepass's nothing drew, a dark hole the blade's shape that moved as the wind bent
+it. The main pass places the point by the prepass's own sums. Over consecutive frames of the same
+view the pixels changing by more than a quarter fell from 4.96 to 0.20 percent, and those darker
+than 0.6 of the light about them from 0.58 percent of the grass to none. docs/shaders.md says that a
 prepass moving vertices the same way means by the same sums in the same order, and why. The picture
-is 2026-10-30-item-81-grass.webp, sent to the owner. The whole suite ran with it, 1,999 passed and
-3 skipped in one host at the 3 GB cap.
+is 2026-10-30-item-81-grass.webp, sent. The whole suite ran with it, 1,999 passed and 3 skipped in
+one host at the 3 GB cap.
 
 Item 82, the light hall, in the commit carrying this line. From the aisle at z -40 the floor two
-meters ahead, read every 15 degrees round at the owner's settings, stood at 0.24 to 0.27 and
-dropped to 0.14 to 0.17 from 165 to 315 degrees, about two fifths at once, the same at 15:00 and
-gone at night, and the dark half is where the bay's irradiance volume is in the view's frustum: with
-the volume taken out there is no step, with the reflection probe alone none, with the volume alone
-the step. Bevy 0.20's render/pbr_functions.wesl, lines 702 to 711, sets found_diffuse_indirect after
-irradiance_volume_light whether a volume held the point or not, so while a view holds a volume
-every point outside it loses the environment map's diffuse light. render/mended.rs mends it, the
-diffuse light counted found only where Bevy's search finds a volume holding the point, named in the
-mend so it goes when a release moves that text, and Render.IrradianceFallbackMended reads it in bits
-4 and 5 of bcs_render_shader_mends. With it the floor reads 0.24 to 0.27 at every turn.
-LightProbeTests holds a floor outside an empty volume to within three percent of its light with the
-volume behind the camera, the floor the volume holds dark, and the mend made; the light probe and
-the other mends' tests pass, 17 of 17, and docs/sky-and-reflections.md says the environment's light
-stays outside a volume. The picture is 2026-10-31-item-82-hall.webp, remade to N 4.9 as it
-stands. The editor bridge was built with it, the headless profile checks here and the render and
-editor profiles in the build container, the bridge's tests pass, and the whole suite ran, 1,998
-passed, 3 skipped and 2 failed, GlobalIlluminationTests' floor under the half slab five and a half
-units up at High and at Low, 0.17 and 0.16 of what the solid slab holds back against the test's
-least of 0.2, as 0ed9073c's run read it before this mend; in the whole run the half slab's floor
-reads 0.0303 at both heights where alone it reads 0.0329 and 0.0353, so a test before it leaves
-something the light through reads, a lead for a verdict.
+meters ahead, read every 15 degrees round at the saved settings, stood at 0.24 to 0.27 and dropped
+to 0.14 to 0.17 from 165 to 315 degrees, about two fifths at once, the same at 15:00 and gone at
+night, and the dark half is where the bay's irradiance volume is in the view's frustum: with the
+volume taken out there is no step, with the reflection probe alone none, with the volume alone the
+step. Bevy 0.20's render/pbr_functions.wesl, lines 702 to 711, sets found_diffuse_indirect after
+irradiance_volume_light whether a volume held the point or not, so while a view holds a volume every
+point outside it loses the environment map's diffuse light. render/mended.rs mends it, the diffuse
+light counted found only where Bevy's search finds a volume holding the point, named in the mend so
+it goes when a release moves that text, and Render.IrradianceFallbackMended reads it in bits 4 and 5
+of bcs_render_shader_mends. With it the floor reads 0.24 to 0.27 at every turn. LightProbeTests
+holds a floor outside an empty volume to within three percent of its light with the volume behind
+the camera, the floor the volume holds dark, and the mend made; the light probe and the other mends'
+tests pass, 17 of 17, and docs/sky-and-reflections.md says the environment's light stays outside a
+volume. The picture is 2026-10-31-item-82-hall.webp, remade to N 4.9 as it stands. The editor bridge
+was built with it, the headless profile checks here and the render and editor profiles in the build
+container, the bridge's tests pass, and the whole suite ran, 1,998 passed, 3 skipped and 2 failed,
+GlobalIlluminationTests' floor under the half slab five and a half units up at High and at Low, 0.17
+and 0.16 of what the solid slab holds back against the test's least of 0.2, as 0ed9073c's run read
+it before this mend; in the whole run the half slab's floor reads 0.0303 at both heights where alone
+it reads 0.0329 and 0.0353, so a test before it leaves something the light through reads, a lead for
+a verdict.
 
 Item 84, the light through the slabs, in the commit carrying this line. It is the GPU's load and not
 the order. Each half of the 263 classes before the test, run before it, and all of them together,
@@ -7158,11 +7139,11 @@ the three found as grass, 10 of 10; docs/trees.md names them. The whole suite ra
 skipped and 1 failed, BarkDepthTests holding every set but leaves to a depth map, which grass goes
 without as leaves do; the test says so, and it, the texture, norm and docs tests pass, 39 of 39.
 
-Item 78, in the commit carrying this line. Under the README's header stands the owner's line as the
-item quotes it, the bracketed bcs a plain mark, in place of the line with Bevy's link. Nothing else
-reads that paragraph: FirstGameTests reads the README's first program, and build/check-docs.py
-follows its links, passing with one fewer; NormTests, FirstGameTests and DocsScriptTests pass with
-it, and the package's description keeps its own words.
+Item 78, in the commit carrying this line. Under the README's header stands the line as the item
+quotes it, the bracketed bcs a plain mark, in place of the line with Bevy's link. Nothing else reads
+that paragraph: FirstGameTests reads the README's first program, and build/check-docs.py follows its
+links, passing with one fewer; NormTests, FirstGameTests and DocsScriptTests pass with it, and the
+package's description keeps its own words.
 
 Item 83's second phase, the engine's grass, in the commit carrying this line. Grass.Plant covers a
 stretch with clumps of two cards crossed from a grass set, in square patches of eight meters, a mesh
@@ -7194,26 +7175,26 @@ the meadow's grass. The picture is 2026-10-31-item-83-meadow.webp, the pictures 
 day's dump. The whole suite ran with it, 2,006 passed and 3 skipped in one host at the 3 GB cap.
 
 Item 85, the Levels module's binding, in the commit carrying this line. The module is a git
-submodule at modules/Levels on a01b2df; the library references its project to itself and the
-package carries Levels.dll and Levels.xml in its lib folder with no dependency named for it,
-Directory.Build.targets giving every project here that references the library the module as well,
-so its build lists the assembly it loads; the workflows' ten checkouts take submodules. The format,
-the brushes and their shapes and the pure tests go, and Levels becomes LevelSpawner, Levels' Decision
-6, building the module's meshes, a mesh a material over the pictures the binding answers for
-through ILevelMaterials, drawn as their materials, and colliding as their triangles, one static
-mesh body an entity as before; a body takes one shape and a compound of a hull a brush is the
-module's LevelHull waiting for one, a departure from the proposal's hulls. Level.Load reads a path
-off the disk, so LevelSpawner.Load reads the asset through AssetFiles and parses it. EditMesh.Levels
-goes with the mesh it built. The TrenchBroom folder keeps the tree in BevyCSharp.fgd beside the
-module's Levels.fgd, both in the config. The public listing loses the format's 71 lines to the
-module's namespace and Bevy.Levels becomes Bevy.LevelSpawner with the same members (N 2.4); the
-cheat sheet's Levels group is LevelSpawner. docs/levels.md says the module and the binding, and the
-guide's blocks build on a local package with the module's types; the README and BUILDING.md say a
-clone takes the submodule; AGENTS.md's BevyCSharp/Levels row is the binding's on the owner's word of
-2026-10-31 in the coder's session, with a comma for the asked colon, and the modules row is N 1.5's.
-The drive runs whole on it, its court checks green, its peak 3.87 GB. The whole suite ran with it,
-1,989 passed and 3 skipped in one host at the 3 GB cap, the 17 fewer than item 83's run being the
-format's tests, which run in the module's Levels.Tests.
+submodule at modules/Levels on a01b2df; the library references its project to itself and the package
+carries Levels.dll and Levels.xml in its lib folder with no dependency named for it,
+Directory.Build.targets giving every project here that references the library the module as well, so
+its build lists the assembly it loads; the workflows' ten checkouts take submodules. The format, the
+brushes and their shapes and the pure tests go, and Levels becomes LevelSpawner, Levels' Decision 6,
+building the module's meshes, a mesh a material over the pictures the binding answers for through
+ILevelMaterials, drawn as their materials, and colliding as their triangles, one static mesh body an
+entity as before; a body takes one shape and a compound of a hull a brush is the module's LevelHull
+waiting for one, a departure from the proposal's hulls. Level.Load reads a path off the disk, so
+LevelSpawner.Load reads the asset through AssetFiles and parses it. EditMesh.Levels goes with the
+mesh it built. The TrenchBroom folder keeps the tree in BevyCSharp.fgd beside the module's
+Levels.fgd, both in the config. The public listing loses the format's 71 lines to the module's
+namespace and Bevy.Levels becomes Bevy.LevelSpawner with the same members (N 2.4); the cheat sheet's
+Levels group is LevelSpawner. docs/levels.md says the module and the binding, and the guide's blocks
+build on a local package with the module's types; the README and BUILDING.md say a clone takes the
+submodule; AGENTS.md's BevyCSharp/Levels row is the binding's by the decision of 2026-10-31 in the
+coder's session, with a comma for the asked colon, and the modules row is N 1.5's. The drive runs
+whole on it, its court checks green, its peak 3.87 GB. The whole suite ran with it, 1,989 passed and
+3 skipped in one host at the 3 GB cap, the 17 fewer than item 83's run being the format's tests,
+which run in the module's Levels.Tests.
 
 Decision 68's third phase, the gallery court, in the commit carrying this line. A wall of the level's
 8.6 m high, under the court's 10, stands across the gallery's court at x -64.2 where the spheres'
@@ -7232,64 +7213,63 @@ it, its peak 3.72 GB. The picture is 2026-10-31-item-68-gallery.webp, the views 
 day's dump. The whole suite ran with it and the next commit, 1,990 passed and 3 skipped in one host
 at the 3 GB cap. The public listing is unchanged.
 
-Three asks of the owner's on 2026-10-31 in the coder's session, in the commit carrying this line.
-The feature test's player is a plain capsule, its visor gone. The prototype palette's floors and
-walls are 0.90, 0.90, 0.89 and its ceilings 0.95, 0.95, 0.96, over a grid of the prototypes' own, a
-face of 0.99 with lines of 0.6 and quarter lines of 0.82, where the floor was 0.31, the wall 0.71 and
-the ceiling 0.82 over Images.Grid's defaults of 0.9, 0.35 and 0.68. The owner found the middle gray
-ugly and asked for it whiter or darker, saw both beside the old in four views, and asked the floor
-the walls' white. The face is 0.99, since a white face tinted by a whole tenth, the hazard's 0.9,
-lands a byte of TrenchBroom's pictures on a half, which LevelTests refuses. The floor and the wall
-share a color and so a material, which ModelingTests and ImagesTests say in place of seven colors
-and two materials; Images.Grid's defaults are unchanged, and TrenchBroom's seven pictures are
-written again. Sponza stands two centimeters over the scenes yard's floor, where its ground in that
-floor's plane let the floor through its tiles in blocks, as the owner saw, gone in the drive's hall
-view. The pictures are in the day's dump. The drive runs whole on it, its peak 3.72 GB, and the whole
-suite ran with it and the gallery court's commit, 1,990 passed and 3 skipped in one host at the 3 GB
-cap. The public listing is unchanged.
-Shared: the prototype palette's floors and walls 0.90, 0.90, 0.89 and its ceilings 0.95, 0.95, 0.96
-over a grid face of 0.99 with lines of 0.6 and quarter lines of 0.82, in the commit carrying this
-line, for the row of grid prototyping, for 3DEngine to consider, its tones those of ce142f8a.
+Three asks of 2026-10-31 in the coder's session, in the commit carrying this line. The feature
+test's player is a plain capsule, its visor gone. The prototype palette's floors and walls are 0.90,
+0.90, 0.89 and its ceilings 0.95, 0.95, 0.96, over a grid of the prototypes' own, a face of 0.99
+with lines of 0.6 and quarter lines of 0.82, where the floor was 0.31, the wall 0.71 and the ceiling
+0.82 over Images.Grid's defaults of 0.9, 0.35 and 0.68. The middle gray was found ugly and asked
+whiter or darker, both were shown beside the old in four views, and the floor was asked in the
+walls' white. The face is 0.99, since a white face tinted by a whole tenth, the hazard's 0.9, lands
+a byte of TrenchBroom's pictures on a half, which LevelTests refuses. The floor and the wall share a
+color and so a material, which ModelingTests and ImagesTests say in place of seven colors and two
+materials; Images.Grid's defaults are unchanged, and TrenchBroom's seven pictures are written again.
+Sponza stands two centimeters over the scenes yard's floor, where its ground in that floor's plane
+let the floor through its tiles in blocks, as was seen, gone in the drive's hall view. The pictures
+are in the day's dump. The drive runs whole on it, its peak 3.72 GB, and the whole suite ran with it
+and the gallery court's commit, 1,990 passed and 3 skipped in one host at the 3 GB cap. The public
+listing is unchanged. Shared: the prototype palette's floors and walls 0.90, 0.90, 0.89 and its
+ceilings 0.95, 0.95, 0.96 over a grid face of 0.99 with lines of 0.6 and quarter lines of 0.82, in
+the commit carrying this line, for the row of grid prototyping, for 3DEngine to consider, its tones
+those of ce142f8a.
 
-Item 87, the owner's ask of 2026-10-31 in the coder's session, the white level blue in the shade
-and too warm in the morning sun, in the commit carrying this line. Over near white walls and floors a
+Item 87, the ask of 2026-10-31 in the coder's session, the white level blue in the shade and too
+warm in the morning sun, in the commit carrying this line. Over near white walls and floors a
 surface shows the light's own color, and in the shade that light is the sky's alone, the light the
 sunlit walls would throw in going undrawn while the map's global illumination is off; the day's
-look, the vivid look's saturation of 1.4 made for a block game's grass and roofs, deepened the
-sky's blue in the shade and the low sun's yellow. Under a clear sky with no look a sunlit white floor
-read its blue light 0.86 to 0.92 of its red through the day and the sky's shade 2.2. The feature
-test's ambient light by day is a warm white of 1000, rising and falling with the sun, in place of
-80; its day's look keeps a quarter of the saturation each key adds and, from the sun eight degrees
-up, takes a little red out and adds a little blue as a camera balances its white, the sunset's
-warmth kept. In the drive's views at eight under a partly cloudy sky the gallery's shaded floor
-goes from 2.30 to 1.17 and the course's sunlit floor from 0.58 to 0.79, the haze lit from in front
-by the low sun keeping some of its gold. The owner chose the fill for the time being and global
-illumination on in the feature test once its fault is mended, a lead sent of its own: gi.set at
-run time panics in Bevy's prepass queue, set_deferred switching every material to deferred while
-the light hall's probe's six face cameras hold a prepass and no deferred one. The drive runs whole
-on it, its peak 3.65 GB. The picture is 2026-10-31-item-87-fill.webp, the light hall's aisle and the
-scenes yard before and after, the trials and the drive's four views in the day's dump. The whole
-suite ran with it, 1,990 passed and 3 skipped in one host at the 3 GB cap. The public listing is
-unchanged.
+look, the vivid look's saturation of 1.4 made for a block game's grass and roofs, deepened the sky's
+blue in the shade and the low sun's yellow. Under a clear sky with no look a sunlit white floor read
+its blue light 0.86 to 0.92 of its red through the day and the sky's shade 2.2. The feature test's
+ambient light by day is a warm white of 1000, rising and falling with the sun, in place of 80; its
+day's look keeps a quarter of the saturation each key adds and, from the sun eight degrees up, takes
+a little red out and adds a little blue as a camera balances its white, the sunset's warmth kept. In
+the drive's views at eight under a partly cloudy sky the gallery's shaded floor goes from 2.30 to
+1.17 and the course's sunlit floor from 0.58 to 0.79, the haze lit from in front by the low sun
+keeping some of its gold. The fill was chosen for the time being and global illumination on in the
+feature test once its fault is mended, a lead sent of its own: gi.set at run time panics in Bevy's
+prepass queue, set_deferred switching every material to deferred while the light hall's probe's six
+face cameras hold a prepass and no deferred one. The drive runs whole on it, its peak 3.65 GB. The
+picture is 2026-10-31-item-87-fill.webp, the light hall's aisle and the scenes yard before and
+after, the trials and the drive's four views in the day's dump. The whole suite ran with it, 1,990
+passed and 3 skipped in one host at the 3 GB cap. The public listing is unchanged.
 
 Item 88, in the commit carrying this line. While Bevy's materials are drawn deferred, a system of
-the bridge's gives every 3D camera drawing a prepass of depth, normals or motion and no G-buffer one,
-with depth where it had none and one sample a pixel, and takes what it gave off once materials are
-forward, giving its multisampling back, a camera that asked for the G-buffer itself or reflects the
-screen keeping it. Bevy 0.20's queue_prepass_material_meshes puts a deferred material into the
+the bridge's gives every 3D camera drawing a prepass of depth, normals or motion and no G-buffer
+one, with depth where it had none and one sample a pixel, and takes what it gave off once materials
+are forward, giving its multisampling back, a camera that asked for the G-buffer itself or reflects
+the screen keeping it. Bevy 0.20's queue_prepass_material_meshes puts a deferred material into the
 deferred phase of every camera drawing a prepass and unwraps it, and the camera that had none in the
 feature test was the weather's camera over the roofs, depth alone since it was made while materials
-were forward, not the probe's six face cameras, which draw no prepass and are passed over; feature.gi
-on and gi.set medium ended the app the frame after, as the owner's own session did at 20:48 under
+were forward, not the probe's six face cameras, which draw no prepass and are passed over;
+feature.gi on and gi.set medium ended the app the frame after, as a play session did at 20:48 under
 the screen-space light. A G-buffer alone was not enough for a multisampled camera, whose depth of
 four samples beside a G-buffer of one failed wgpu's validation, so such a camera draws one sample
-while it holds the G-buffer given. GlobalIlluminationTests holds a second camera drawing depth into an
-image of its own, made first, then the scene's distance field and global illumination switched on:
-on the bridge before, the run took its forward picture and panicked at prepass/mod.rs:1425 after the
-switch; on this one it draws on and lights the floor. feature.gi on and gi.set medium in the feature
-test draw on with no error logged. SetDeferredRendering's remarks say it. cargo check passes on the
-three profiles and cargo test with no feature, 118 passed. The whole suite's first run failed the
-new test alone, its lit picture black thirty frames after the switch while every material was
+while it holds the G-buffer given. GlobalIlluminationTests holds a second camera drawing depth into
+an image of its own, made first, then the scene's distance field and global illumination switched
+on: on the bridge before, the run took its forward picture and panicked at prepass/mod.rs:1425 after
+the switch; on this one it draws on and lights the floor. feature.gi on and gi.set medium in the
+feature test draw on with no error logged. SetDeferredRendering's remarks say it. cargo check passes
+on the three profiles and cargo test with no feature, 118 passed. The whole suite's first run failed
+the new test alone, its lit picture black thirty frames after the switch while every material was
 prepared again under the suite's load, and it waits 180 frames, as the light-through test does; the
 whole suite then ran with it, 1,991 passed and 3 skipped in one host at the 3 GB cap. The public
 listing is unchanged.
@@ -7439,35 +7419,34 @@ the day's dump. The whole suite ran with it, 1,996 passed, 0 failed and 3 skippe
 the 3 GB cap, and NormTests passed, 18. The public listing is unchanged.
 
 Decision 68's fourth phase, in the commit carrying this line. The drive ran whole on the GPU at
-58265110, 244 s, and every view it takes of the walled map went to the owner in one sheet, the
-drive's captures being its own and kept nowhere in the tree. A sweep of the README, the guide,
-BUILDING.md, CHEATSHEET.md and the feature test's README found the map said as it stands, each zone
-where Zones and the level put it; what was stale had been measured or pictured on the open map, and
-is taken again here on the GPU. The denoiser's readings (build/denoiser-readings.py, 256 frames a
-view) give a filtered frame 1.3 to 6.4 levels of 255 from the mean where a grainy one lies 8.9 to
-18.0, the teleports opening on courts and the gallery's on the spheres close up, the filtered
-frame's distance there on their rims and reflections; after the strafe the uncovered surfaces lie 18
-to 20 levels from their mean where a grainy frame's lie 38. The guide gives those figures without
-its words that the strafe leaves no trail, since the stopped frames show the back wall's light over
-the strip where the mean shows the tall block's uncovered side. denoiser.webp is taken again from
-the readings' kept frames and scene-field.webp in the gallery court, its slice in the second cascade
-showing the court's walls round the Cornell box and the spheres, which the guide's sentence names.
-The weather's passes at the hub at 15:00 under an overcast read the clouds and their shadow on the
-sun 0.27 ms where the open hub read 0.45, the clouds laid over the sky 0.29 with their copy and
-merge, the froxel fog 0.38 with its integration and the precipitation's compute 0.04; the bolt's
-0.02 stays, as a draw in the view reads no GPU time in the feature test and a bolt's cost is not the
-map's. The RTAO's ray scene holds the hidden ground's plane, the cube and the lamp, the level's
-walls left out of it, which the guide says, its paint at the hub darkening the capsule and the
-walls' feet and leaving the floor along the walls white. Playground's Build and Zones' remarks lose
-the terrain and the empty field. Two leads, for an item if wanted. The Cornell box's lamp shows a
-gray face under rays in a grainy frame, in their mean and in the denoiser's frame, where on
-2026-10-24 it was white, its Emissive alpha of 1 having become Bevy's emissive exposure weight at
-36d783bf that afternoon. And the denoiser's frame brightens the ceiling round the lamp about 24
-levels over the mean, which with the lamp is about 1.3 of the Cornell view's 6.4, the view 5.0 below
-it. The picture is 2026-11-01-item-68-scene-field.webp, the drive's sheet, the denoiser's pair, the
-lamp and the hub's occlusion in the day's dump. The whole suite ran with it, 1,996 passed, 0 failed
-and 3 skipped in 44 m 17 s at the 3 GB cap, and NormTests passed, 18. The public listing is
-unchanged.
+58265110, 244 s, and every view it takes of the walled map went out in one sheet, the drive's
+captures being its own and kept nowhere in the tree. A sweep of the README, the guide, BUILDING.md,
+CHEATSHEET.md and the feature test's README found the map said as it stands, each zone where Zones
+and the level put it; what was stale had been measured or pictured on the open map, and is taken
+again here on the GPU. The denoiser's readings (build/denoiser-readings.py, 256 frames a view) give
+a filtered frame 1.3 to 6.4 levels of 255 from the mean where a grainy one lies 8.9 to 18.0, the
+teleports opening on courts and the gallery's on the spheres close up, the filtered frame's distance
+there on their rims and reflections; after the strafe the uncovered surfaces lie 18 to 20 levels
+from their mean where a grainy frame's lie 38. The guide gives those figures without its words that
+the strafe leaves no trail, since the stopped frames show the back wall's light over the strip where
+the mean shows the tall block's uncovered side. denoiser.webp is taken again from the readings' kept
+frames and scene-field.webp in the gallery court, its slice in the second cascade showing the
+court's walls round the Cornell box and the spheres, which the guide's sentence names. The weather's
+passes at the hub at 15:00 under an overcast read the clouds and their shadow on the sun 0.27 ms
+where the open hub read 0.45, the clouds laid over the sky 0.29 with their copy and merge, the
+froxel fog 0.38 with its integration and the precipitation's compute 0.04; the bolt's 0.02 stays, as
+a draw in the view reads no GPU time in the feature test and a bolt's cost is not the map's. The
+RTAO's ray scene holds the hidden ground's plane, the cube and the lamp, the level's walls left out
+of it, which the guide says, its paint at the hub darkening the capsule and the walls' feet and
+leaving the floor along the walls white. Playground's Build and Zones' remarks lose the terrain and
+the empty field. Two leads, for an item if wanted. The Cornell box's lamp shows a gray face under
+rays in a grainy frame, in their mean and in the denoiser's frame, where on 2026-10-24 it was white,
+its Emissive alpha of 1 having become Bevy's emissive exposure weight at 36d783bf that afternoon.
+And the denoiser's frame brightens the ceiling round the lamp about 24 levels over the mean, which
+with the lamp is about 1.3 of the Cornell view's 6.4, the view 5.0 below it. The picture is
+2026-11-01-item-68-scene-field.webp, the drive's sheet, the denoiser's pair, the lamp and the hub's
+occlusion in the day's dump. The whole suite ran with it, 1,996 passed, 0 failed and 3 skipped in 44
+m 17 s at the 3 GB cap, and NormTests passed, 18. The public listing is unchanged.
 
 Verdicts 49 and 50, in the commit carrying this line. Fedora 44 carries Mesa 26.2.5, and the six
 were captured there again at the head (build/capture-in-fedora.sh from an archive checkout with a
@@ -7745,7 +7724,7 @@ sunlit floor 12% under where it read 2% over but its blue over its red 0.85 agai
 miss, and its far wall in shade at High 18% over where it read 57% over. The hall, lit by its lamps,
 is unchanged, 0.327 at Medium and 0.320 at High. The far wall at Medium, 42% under, is the next
 commit, Medium's reach. The sunlit floor is warmer than it was, as the reference has it, which the
-owner's word on the morning sun may weigh. The yard's pair is 2026-11-03-item-95-air.webp. The whole
+decision on the morning sun may weigh. The yard's pair is 2026-11-03-item-95-air.webp. The whole
 suite ran with it, 1,990 passed and 3 skipped in 57 m 57 s at the 3 GB cap, none aborted, item 95's
 game work held aside. NormTests passed, 18. The public listing is unchanged.
 
@@ -7859,7 +7838,7 @@ it a program that ended, and the drive's effects view under global illumination 
 default's pictures. The captions of the readings and the devlog and the dump's lines name no person
 and no session (N 4.10), the meadow's reading of 2026-10-31 saying 3DEngine's apps where it said
 their sessions' apps, and the dump's lines of 2026-10-31 and 11-01 saying a run where they said a
-session and the feature test where they said the owner. cargo check passed on headless, render and
+session and the feature test where they named a person. cargo check passed on headless, render and
 editor, and cargo test passed, 118 with no feature and 199 with render. The whole suite ran with it,
 1,994 passed and 3 skipped in 48 m 21 s at the 3 GB cap, none aborted, item 95's game work held
 aside. NormTests passed, 18. The public listing is unchanged.
@@ -7941,10 +7920,10 @@ the most memory 3.13 GB and 2.98. Read by their pictures, the meadow is lit, the
 openings are dark, the volume bay shows its probes' pink beside its view with global illumination
 off, and the night's alley wall in the moon's shade is black where the fill left it dark blue, the
 pass taking the night's dim ambient light back where the probes give it little sky, for the review
-to place with the owner's eye. A soak of the feature test at Off for forty seconds put the setting
-back as it found it. The Cornell box's pair is 2026-11-03-item-95-default.webp. The whole suite ran
-with it, 1,999 passed and 3 skipped in 43 m 31 s at the 3 GB cap, none aborted. NormTests passed,
-18. The public listing is unchanged.
+to place by eye. A soak of the feature test at Off for forty seconds put the setting back as it
+found it. The Cornell box's pair is 2026-11-03-item-95-default.webp. The whole suite ran with it,
+1,999 passed and 3 skipped in 43 m 31 s at the 3 GB cap, none aborted. NormTests passed, 18. The
+public listing is unchanged.
 
 Shared: the feature test traces global illumination at Medium by default with the day's fill off
 while the probes light the scene, and its scripted run and its soak on lavapipe at Off by an
@@ -9864,9 +9843,9 @@ meter where 0.0977, the slab's four floors pass as they did, and 107's band read
 did. Run once while two of 3DEngine's examples held 3.8 GB of the GPU, every app after the second
 was refused a device for want of memory, and the run was taken again once they had gone. The reading
 2026-11-08-item-116-crossing.webp shows the meadow's oak at the head, with the mend and their
-difference forty times over, in three panels as the owner asked at 13:50 where a pair's change does
-not show, the wall and the ground behind the crown taking a little more of the light it scatters and
-the leaves changing a pixel here and there either way.
+difference forty times over, in three panels as asked at 13:50 where a pair's change does not show,
+the wall and the ground behind the crown taking a little more of the light it scatters and the
+leaves changing a pixel here and there either way.
 
 The two small findings. The oak's gray with the sun off is named, not mended. At 29.5 meters, in the
 band where its full level is dithered into its reduced one, its leaves keep 0.012 with global
@@ -9972,7 +9951,7 @@ missing a sharp highlight.
 
 Item 121, comments on the code's own terms, in the commit carrying this line. Every comment in the
 sources, kernels, scripts and examples that explained a choice by another product, by the sibling
-engine's readings or its process, by Bevy's default given as the only reason, by the owner, by the
+engine's readings or its process, by Bevy's default given as the only reason, by a person, by the
 sessions' work or by an outside asset is rewritten in the bridge's terms, 143 files with 733 lines
 written and 811 taken out, the scripts' docstrings with them. A comment that gave the sibling's
 figure keeps this engine's reason and its own figures and loses the sibling's, as the probes' carry
@@ -10022,8 +10001,8 @@ summary as item 121 reworded it, which the cheat sheet had not taken. TreeTests 
 cases that build meshes and the kept skeleton's mesh, split from the refusal that moved, as
 AKeptSkeletonBuildsAsOneGrownDoes. The table of areas in AGENTS.md names TreeSpecies and
 TreeSkeleton in the BevyCSharp/Vegetation row, which are the module's after this commit, and the row
-stands as it is until the owner's word, since AGENTS.md adds a row the table lacks by N 1.5 and
-changes nothing else without that word, as the Levels row waited for it on 2026-10-31.
+stands as it is until the decision, since AGENTS.md adds a row the table lacks by N 1.5 and changes
+nothing else without that word, as the Levels row waited for it on 2026-10-31.
 
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
 run gave 2,040 passed and 3 skipped in 50 m 13 s at the 3 GB cap, none aborted, its largest process
@@ -10496,8 +10475,8 @@ The bridge was the editor profile's with meshlets and Solari, its three profiles
 tests run with no feature and with render, the ABI at 322. The whole suite ran with the mend under
 the GPU's shared lock and was stopped by the harness's memory guard when the machine ran short of
 memory, at 1,705 passed and none failed, its largest process at 2,147 MB, so its whole run waits on
-the owner's word, the 67 illumination tests passing apart. NormTests passed, 18. The public listing
-is unchanged.
+a decision, the 67 illumination tests passing apart. NormTests passed, 18. The public listing is
+unchanged.
 
 Shared: a surface reading each probe's reach between the four texels nearest the way, as the gloss's
 reading did, took off the warm triangles a probe under a thin floor drew along a wall's foot at the
@@ -10575,8 +10554,8 @@ map of the directional lights.
 The guide's paragraph on the rain's roofs says so.
 
 The bridge was the editor profile's with meshlets and Solari, its three profiles checked and its
-tests run with no feature and with render. The whole suite waits on the owner's word, the 45 tests
-above passing apart. NormTests passed, 18. The public listing is unchanged.
+tests run with no feature and with render. The whole suite waits on a decision, the 45 tests above
+passing apart. NormTests passed, 18. The public listing is unchanged.
 
 Shared: a camera drawing depth for the rain sees no light where it draws a layer of its own that the
 meshes it draws take beside theirs and no light stands on, which held the frame's shadow maps steady
@@ -10668,7 +10647,7 @@ as with it, the engine having done as they hold, and they hold it, the mend bein
 test's, which the next pack run's course and soak read.
 
 No native file changed. The solution builds with warnings as errors and the two tests pass. The
-whole suite waits on the owner's word. NormTests passed, 18. The public listing is unchanged.
+whole suite waits on a decision. NormTests passed, 18. The public listing is unchanged.
 
 Shared: a program a quality turns off a few frames into a run has been made and compiles all the
 same, for minutes on a device that draws on the CPU, so a scripted run that names a quality off
@@ -10978,16 +10957,15 @@ tests, the script host reading every loaded project as it reads the one, the pac
 every project at the one version, the native libraries in BevyCSharp.Native and the build props and
 targets in BevyCSharp, so the templates and the games keep their one reference, and BUILDING.md's
 package table, the guide's lines and RENDERING.md's names redrawn. AGENTS.md's table of where things
-are lists folders of the one project, and the owner's allowance of 2026-10-05 covers adding a row it
-lacks, not redrawing it, so its rows change with the owner's word, which this plan asks for and does
-not take from the review.
+are lists folders of the one project, and the allowance of 2026-10-05 covers adding a row it lacks,
+not redrawing it, so its rows change with the decision, which this plan asks for and does not take
+from the review.
 
 The cuts are some seven commits, the frame's hooks and Config, the log ring with AssetHandle and
 SaveId, the entry points by area, the commands by area, the extension members with the listing's
 writer, the asset data and the smaller ones, then the norm test, and the split as one or two. Each
-cut runs the whole suite, which waits on the owner's word for its next run. The review is asked to
-confirm the projects, the order and the two cuts that need more than moving files before the first
-cut.
+cut runs the whole suite, which waits on a decision for its next run. The review is asked to confirm
+the projects, the order and the two cuts that need more than moving files before the first cut.
 
 No file of the engine changed, so the suite did not run. NormTests passed, 18. The public listing is
 unchanged.
@@ -11092,8 +11070,8 @@ interface's pointer, widgets and focused keys stay in NativeCore, called from th
 interface's plugins, and they go with it. And NativeLibrary.SetDllImportResolver is set once for
 each assembly, so the split sets the loader's resolver for each project that declares an entry
 point, its classes' static constructors handing the loader their own assembly. AGENTS.md's row for
-Interop, which says Native holds the bcs_* entry points, waits on the owner's word with the rest of
-the table, as the plan says.
+Interop, which says Native holds the bcs_* entry points, waits on a decision with the rest of the
+table, as the plan says.
 
 No native file changed. The solution builds with warnings as errors, and the whole suite passed on
 this commit with the one before it, Verdict 53's mend, 2,039 passed, none failed and 3 skipped,
@@ -11314,9 +11292,9 @@ area's Kernels folder. N 1.6 places a file by its top folder, BevyCSharp's for o
 build/norm/1.6.tsv goes. The test folders whose library folder went follow it, Ecs, Math, Time,
 Input and Behaviors into Tests/Core, Interop into Tests/Native and Ui into Tests/ImGui, so N 1.4
 holds. BUILDING.md, COMPONENTS.md, EDITOR.md and SCENES.md name the moved files' paths. AGENTS.md's
-rows of the library are redrawn as the owner said yes to in this session on 2026-11-11, the
-BevyCSharp row and the new areas' added, Core's, Assets', Diagnostics' and Scenes' reworded and the
-folders inside Core taken off.
+rows of the library are redrawn as approved in this session on 2026-11-11, the BevyCSharp row and
+the new areas' added, Core's, Assets', Diagnostics' and Scenes' reworded and the folders inside Core
+taken off.
 
 The 158 files of Tests/Assets, which test the asset server, the rendering, global illumination, the
 sky, the interface, the animation, the 2D drawing, the gizmos and the audio, stay where they are, N
@@ -11577,9 +11555,9 @@ Items closed without a mend, recorded or parked, and the standing items' texts a
 they were shortened on 2026-11-09, each under its number; the devlog reads the items under Items
 done alone, so nothing here counts as done.
 
-The owner asked that the work does not stop. A batch that ends is followed by the next item here
-with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are taken
-from [SHARED.md](SHARED.md).
+By the project's direction the work does not stop. A batch that ends is followed by the next item
+here with no wait for a reply, and the list is long so that it does not run out. Items 5 to 10 are
+taken from [SHARED.md](SHARED.md).
 
 1. **What the next page says.** The run of `a54dda9e`, the first since `c7f1cbc6` and the first
    green on every system since the bump, passed 1,051 on Linux, 922 on macOS and 929 on Windows with
@@ -11599,7 +11577,7 @@ from [SHARED.md](SHARED.md).
    for (Decision 7). Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green
    and item 3's steps in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The
    cheat sheet is its writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which
-   is in, and the owner's `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. The run of
+   is in, and the hand-made `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. The run of
    `60141490`, with `e9a8508e`'s mesh shaders and Verdict 9's mend, is green on all three, and each
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
    devices run no mesh shaders and those tests and `mesh_shader_intro`'s capture are the laptop's
@@ -11611,48 +11589,48 @@ from [SHARED.md](SHARED.md).
    (Verdict 12), the managed tests green, 1,059, 916 and 909. The run of `68aa5dd5`, pushed at 10:47
    before the mend, is red on all three by the same step, and the run of `7ffd96c6`, pushed at
    11:06, is green on all three with the bridge's tests built, so Verdict 12 is settled. The runs of
-   `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The owner pushed
-   the eleven through `b06ff120` at 15:46 and `21d08b44` at 15:55, whose run cancelled the first's;
+   `9d3e2e5f` and `ff467a5f`, pushed at 11:33 and 12:07, are green on all three. The eleven were
+   pushed through `b06ff120` at 15:46 and `21d08b44` at 15:55, whose run cancelled the first's;
    `21d08b44`'s run reads red on `NormTests.N_4_5`, its padded capture sizes not on the rule's list,
    mended at `04cefc8e` before the page named it. The run of `6641dbcc`, pushed at 18:21, is green
    on all three with N 4.5 cleared, 1,165 passed and 497 skipped on Linux in 4 m 12 s; the runs
    between were cancelled by the pushes after them, and `b134dd4d`'s runs at 19:30. The captures'
    comparison, the README's walk and Courtyard run on the pack run alone (`inputs.pack`), so the
-   comparison since `d17f0d97` is read on the owner's pack run's page (Decision 8). Each push's run
-   is read by the reviewing session, and a failure it names comes first here.
+   comparison since `d17f0d97` is read on the pack run's page (Decision 8). Each push's run is read
+   by the reviewing session, and a failure it names comes first here.
 
-95. **Global illumination on by default in the feature test.** Decision 74. The owner chose on
-    2026-10-31 to fix global illumination and use it in the feature test after the cascades' fix,
-    taking a near-neutral fill for the time being (item 87). With 82, 87, 88 and 92 landed, the
-    hall's faults are read again with the fill off, the white level blue in shade and the morning
-    sun too warm, against the walled map's reference and the owner's eye; where they are mended,
-    global illumination goes on by default and the fill comes off; where one remains, it is named
-    with its cause and mended, each a commit, the drive and the pictures read after. After 91. The
-    first reading at 21:50 on 2026-11-02, a clear sky at 8:00 on the GPU against a reference of 256
-    paths. A regression of 91 found on the way, sky.weather printing the wind as a function since
-    Vector3's Length is a method where Vec3's was a property and interpolation compiles it silently,
-    mended in ConsoleSkyCommands with a test as a commit of its own. A persisted GlobalIllumination
-    setting, default Medium, applying where Solari is not running, the day's ambient back to the
-    sky's own white while the probes light the scene and the fill kept where GI is off. The hall's
-    aisle with the fill off and GI on is warm from the arches' bounce as the reference is, blue over
-    red 0.62 at Medium against the reference's 0.52 where the fill gave 1.25, but the hall reads 16
-    to 28% under the reference at Medium and 13 to 25 at High, the first right-hand bay crimson and
-    the yellow wall 44% over; the yard's shaded far wall at Medium dark and blue, 2.52 and 53%
-    under, at High 1.30 and 24% over, the fill 1.15, so Medium misses the sunlit floor's bounce onto
-    a wall about 30 m off, coverage the lead, three cascades against High's four; the sunlit floor
-    0.91 in all three. Faults of the tools, the reference's sunlit surfaces 30 to 45% over the
-    picture at both qualities, the sun lit above the air without the transmittance Bevy applies at a
-    low sun, and gi.compare with GI off never answering and leaving the reference busy; a dotted
-    seam at High along the yard wall's base, item 97. The order is the Length mend, the reference
-    through the air and gi.compare answering with GI off, Medium's bounce by its cause, the hall's
-    bay and wall against the corrected reference, then GI on by default with the fill off and the
-    drive's GI off on lavapipe through an environment value as the weather is. The Length mend is
-    `e6a458b1`, pushed at 22:36, with a test holding a steady wind to its line; 1,983 in the suite.
-    Found while reading the reference's fault, the bridge's GI lights give the sun as color times
-    illuminance over pi, exposed, with no transmittance, and the reference, the probes' trace and
-    the pass's ground term past the probes take it from there, so the probes' bounce at a low sun is
-    too bright and too white as well; the reference and the light pass are camera passes and read
-    the transmittance at the camera as Bevy does, the probes' trace a world dispatch handed the
+95. **Global illumination on by default in the feature test.** Decision 74. Chosen on 2026-10-31 to
+    fix global illumination and use it in the feature test after the cascades' fix, taking a
+    near-neutral fill for the time being (item 87). With 82, 87, 88 and 92 landed, the hall's faults
+    are read again with the fill off, the white level blue in shade and the morning sun too warm,
+    against the walled map's reference and by eye; where they are mended, global illumination goes
+    on by default and the fill comes off; where one remains, it is named with its cause and mended,
+    each a commit, the drive and the pictures read after. After 91. The first reading at 21:50 on
+    2026-11-02, a clear sky at 8:00 on the GPU against a reference of 256 paths. A regression of 91
+    found on the way, sky.weather printing the wind as a function since Vector3's Length is a method
+    where Vec3's was a property and interpolation compiles it silently, mended in ConsoleSkyCommands
+    with a test as a commit of its own. A persisted GlobalIllumination setting, default Medium,
+    applying where Solari is not running, the day's ambient back to the sky's own white while the
+    probes light the scene and the fill kept where GI is off. The hall's aisle with the fill off and
+    GI on is warm from the arches' bounce as the reference is, blue over red 0.62 at Medium against
+    the reference's 0.52 where the fill gave 1.25, but the hall reads 16 to 28% under the reference
+    at Medium and 13 to 25 at High, the first right-hand bay crimson and the yellow wall 44% over;
+    the yard's shaded far wall at Medium dark and blue, 2.52 and 53% under, at High 1.30 and 24%
+    over, the fill 1.15, so Medium misses the sunlit floor's bounce onto a wall about 30 m off,
+    coverage the lead, three cascades against High's four; the sunlit floor 0.91 in all three.
+    Faults of the tools, the reference's sunlit surfaces 30 to 45% over the picture at both
+    qualities, the sun lit above the air without the transmittance Bevy applies at a low sun, and
+    gi.compare with GI off never answering and leaving the reference busy; a dotted seam at High
+    along the yard wall's base, item 97. The order is the Length mend, the reference through the air
+    and gi.compare answering with GI off, Medium's bounce by its cause, the hall's bay and wall
+    against the corrected reference, then GI on by default with the fill off and the drive's GI off
+    on lavapipe through an environment value as the weather is. The Length mend is `e6a458b1`,
+    pushed at 22:36, with a test holding a steady wind to its line; 1,983 in the suite. Found while
+    reading the reference's fault, the bridge's GI lights give the sun as color times illuminance
+    over pi, exposed, with no transmittance, and the reference, the probes' trace and the pass's
+    ground term past the probes take it from there, so the probes' bounce at a low sun is too bright
+    and too white as well; the reference and the light pass are camera passes and read the
+    transmittance at the camera as Bevy does, the probes' trace a world dispatch handed the
     transmittance toward the sun by the camera's sky copy. So the second commit is the reference and
     gi.compare alone, and the probes' and the ground term's share a commit of its own after it and
     before Medium's coverage, since it changes every GI reading. The second commit is `a3db9697`,
@@ -11684,8 +11662,8 @@ from [SHARED.md](SHARED.md).
     distance 0.153 at Medium and 0.122 at High where 0.138 and 0.143, the sunlit floor 12% under
     where 2% over with its blue over red 0.85 against the reference's 0.80, the shaded far wall at
     High 18% over where 57, the hall unchanged, the far wall at Medium still 42% under, the reach;
-    the sunlit floor warmer as the reference has it, which bears on the owner's word on the morning
-    sun; 1,990 in the suite. Next Medium's reach on the far wall, the coverage lead first. The reach
+    the sunlit floor warmer as the reference has it, which bears on the decision on the morning sun;
+    1,990 in the suite. Next Medium's reach on the far wall, the coverage lead first. The reach
     commit is `43550f11`, pushed at 04:16; Medium traces four cascades, 8, 8, 16 and 16 as
     3DEngine's High, since the yard's far wall at x 104 stood at or past the side of Medium's last
     64-unit box lying 0.35 of its width ahead of the eye, and past the probes the pass used its sky
@@ -12177,90 +12155,89 @@ from [SHARED.md](SHARED.md).
     that nothing reads Render's or EcsWorld's members by reflection and so loses them. The sky's
     edge to the audio for the thunder is cut as the animation's events are, the audio's plugin
     playing an event the sky raises, unless a reason against it is found. Each cut is a commit with
-    the whole suite, so the first cut starts once the suite may run again on the owner's word. And
-    the split comes before 66 and 67, so those are written into the projects. AGENTS.md's table
-    waits on the owner's word. Eased at 03:05 on 2026-11-10 while the suite waits on the owner's
-    word, the first two cuts, the frame's hooks with Config and the log ring with AssetHandle and
-    SaveId, may be written and held on their builds, the norm's tests and the tests of the areas
-    they touch, the entry points' cut and those after it each waiting for the whole suite on what
-    stands before. The third cut is `f33c3847`, 523 entry points in 14 internal classes an area with
-    Native keeping 23, the ABI's check reading each class's static constructor, 523 entry points and
-    72 mirror structs behind it before and after. The fourth is `ed291326`, seven files of 84
-    commands moved to their areas and the command attribute, the catalog and the host into Core,
-    where the plan had them in Diagnostics, since Diagnostics holds the console's view and stands
-    above the areas; the console's own 51 stay there. Next the fifth, the extension members with the
-    listing's writer. The fifth is `04394b88`, global illumination's 5 members of Render in an
-    extension block of RenderGlobalIllumination, the sky's 8 in one of RenderSky and the world's 3
-    spawn helpers in one of EcsWorldSpawning, no call site changed and PublicApi.txt the same line
-    for line, the listing's writer and the cheat sheet reading a block's members as their type's
-    own. The review's three checks hold. The script host's compiler was Roslyn 4.14, which reads a
-    static member of a block as the block's class's alone, so the host and the tests' workspace
-    layer go to 5.0.0, the SDK's compiler, the generator and the code fixes staying on 4.14, with a
-    test that a script calls the members on the types they extend; the host is no part of the
-    library, so N 2.8 is not touched, and the change of version is named to the owner. Nothing reads
-    Render's or EcsWorld's members by reflection. Next the sixth, the asset data and the smaller
-    ones. The sixth is `04d6b73a`. Read from a compile of the sources, no edge points up the order
-    of projects after it, Native, Core, Assets, Rendering, then Render2d, Audio, Animation, Gizmos,
-    ImGui, Ui, GlobalIllumination, Scenes, Physics, Sky, Modeling, Vegetation, Levels, Diagnostics,
-    Cli and BevyCSharp. The mesh and material files stand with the rendering, whose operations they
-    call, where the plan had their data with the asset server; a lower area that calls a higher one
-    at a point of its own work takes a hook the higher area's plugin adds, the forgetters of a
-    released handle, the observers' watchers and the pointer's way into ImGui; and five members go
-    to extension blocks, the listing unchanged. The sky's edge to the audio stays, accepted, the sky
-    standing on the audio down the layers, since the audio's plugin playing an event the sky raises
-    would put the event's type in Core, wire the two in the flat project or stand the audio on the
-    sky for one sound. An app without EnginePlugin reports no clip events and forgets nothing a
-    released handle held, as it runs none of the areas' frame work. The steps of the material and
-    mesh files moved between plugins at the same places in the frame, so a pack run without publish
-    reads the captures on it, 42920356361. Next 134, the norm test and the split. The norm test is
-    `1f061b2c`, pushed at 10:07 on 2026-11-11. NormTests.N_1_6 holds the areas in nine layers,
-    Native, then Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d,
-    Animation, GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and
-    Diagnostics, then Vegetation, then Levels and the flat project, each in the lowest layer what it
-    names allows. build/norm/1.6.tsv places every file, the Assets folder's 298 one by one, a file
-    placed nowhere and a line placing nothing both failing; the edges come from the built library
-    and its portable PDB through System.Reflection.Metadata. It fails for a misplaced SceneField.cs
-    and for a field of Core's Config naming RenderSky, and passes on Debug, Release and a Release
-    built as the runner builds it. The norm's N 1.6 and its row say so. Next the split, whose
-    AGENTS.md rows are the owner's word. The split's plan is the Reply of `514b2110`, accepted at
-    10:12 on 2026-11-11 with four conditions. The layers become BevyCSharp.<Area> projects in their
-    areas' folders, the flat project keeping BevyApp, EnginePlugin and DefaultPlugins and
-    referencing every project, its package carrying the analyzers and the build files; every
-    system's bridge goes in BevyCSharp.Native's package alone with the loader and the ABI's check;
-    every project packs at the one version, twenty packages; the games, the templates and the
-    examples keep their one reference to BevyCSharp. Two commits, the files moved by git inside the
-    one project first, then the projects, the packing and the workflow. The conditions. Nothing is
-    published before the packages are read, the cut getting a pack run without publish, its
-    packages' ids, dependencies and contents read by the review and the ids told to the owner, the
-    run with publish after; each area's package depends on the areas it references at exactly its
-    own version; InternalsVisibleTo is named pair by pair and given only where used; and between the
-    two commits nothing else lands, each with the whole suite. The AGENTS.md rows are the owner's
-    word in the coder's session. The split's first commit is `00f012ff`, pushed at 13:06 on
-    2026-11-11, moves alone, 668 files renamed whole by git, 619 of the library's and 50 of the
-    tests' in all, Interop becoming Native and Ui ImGui, Ecs, Math, Time, Input, Behaviors and
-    Generated folders inside Core, the Assets folder keeping the asset server's 20 files and its
-    others going to their areas, the 27 kernels to their areas' Kernels folders, embedded under
-    their old names. The paths that name them follow, the project file's globs, three tests, N 1.6
-    by top folder with its list gone, and four documents; AGENTS.md's library rows are redrawn on
-    the owner's yes in the coder's session. The tests' Assets folder of 158 files stays, moving it
-    an item after the split. Next the second commit, the projects, with the twenty ids, the
-    exact-version dependencies and the InternalsVisibleTo pairs in its Reply, and a pack run without
-    publish on it. The split's second commit is `7428798d`, pushed at 15:30 on 2026-11-11 with a
-    pack run without publish. Nineteen area projects under BevyCSharp/ and the flat one, a shared
-    Directory.Build.props closing each engine dependency to its exact version, 68 InternalsVisibleTo
-    pairs named in the Reply; the public listing unchanged; Courtyard on the twenty packages
-    answering in a second with the 135 commands of 0.6.91. The review read the twenty local packages
-    at 15:35. The ids are BevyCSharp and BevyCSharp.Animation, Assets, Audio, CliServer, Core,
-    Diagnostics, Gizmos, GlobalIllumination, ImGui, Levels, Modeling, Native, Physics, Render2d,
-    Rendering, Scenes, Sky, Ui and Vegetation; every engine dependency stands at its exact version;
-    the bridge is in Native's runtimes alone, the analyzers and build files in the flat package
-    alone, the three modules' assemblies in the lowest area that names each, and each carries the
-    licence, icon, readme and repository. One condition more before the run with publish. The
-    published 0.6.91 is 249,913,716 bytes against nuget.org's limit of 250 MB, and Native inherits
-    it, so Native is pushed first with the push stopping at a refusal, and the pack job fails before
-    any push where a package is over the limit, the limit in bytes read from nuget.org's documents.
-    A package of the bridge for each system is an item after the split, named to the owner with the
-    ids. As it stood on 2026-11-11 at 16:08, shortened in REVIEW.md.
+    the whole suite, so the first cut starts once the suite may run again by decision. And the split
+    comes before 66 and 67, so those are written into the projects. AGENTS.md's table waits on a
+    decision. Eased at 03:05 on 2026-11-10 while the suite waits on a decision, the first two cuts,
+    the frame's hooks with Config and the log ring with AssetHandle and SaveId, may be written and
+    held on their builds, the norm's tests and the tests of the areas they touch, the entry points'
+    cut and those after it each waiting for the whole suite on what stands before. The third cut is
+    `f33c3847`, 523 entry points in 14 internal classes an area with Native keeping 23, the ABI's
+    check reading each class's static constructor, 523 entry points and 72 mirror structs behind it
+    before and after. The fourth is `ed291326`, seven files of 84 commands moved to their areas and
+    the command attribute, the catalog and the host into Core, where the plan had them in
+    Diagnostics, since Diagnostics holds the console's view and stands above the areas; the
+    console's own 51 stay there. Next the fifth, the extension members with the listing's writer.
+    The fifth is `04394b88`, global illumination's 5 members of Render in an extension block of
+    RenderGlobalIllumination, the sky's 8 in one of RenderSky and the world's 3 spawn helpers in one
+    of EcsWorldSpawning, no call site changed and PublicApi.txt the same line for line, the
+    listing's writer and the cheat sheet reading a block's members as their type's own. The review's
+    three checks hold. The script host's compiler was Roslyn 4.14, which reads a static member of a
+    block as the block's class's alone, so the host and the tests' workspace layer go to 5.0.0, the
+    SDK's compiler, the generator and the code fixes staying on 4.14, with a test that a script
+    calls the members on the types they extend; the host is no part of the library, so N 2.8 is not
+    touched, and the change of version is reported. Nothing reads Render's or EcsWorld's members by
+    reflection. Next the sixth, the asset data and the smaller ones. The sixth is `04d6b73a`. Read
+    from a compile of the sources, no edge points up the order of projects after it, Native, Core,
+    Assets, Rendering, then Render2d, Audio, Animation, Gizmos, ImGui, Ui, GlobalIllumination,
+    Scenes, Physics, Sky, Modeling, Vegetation, Levels, Diagnostics, Cli and BevyCSharp. The mesh
+    and material files stand with the rendering, whose operations they call, where the plan had
+    their data with the asset server; a lower area that calls a higher one at a point of its own
+    work takes a hook the higher area's plugin adds, the forgetters of a released handle, the
+    observers' watchers and the pointer's way into ImGui; and five members go to extension blocks,
+    the listing unchanged. The sky's edge to the audio stays, accepted, the sky standing on the
+    audio down the layers, since the audio's plugin playing an event the sky raises would put the
+    event's type in Core, wire the two in the flat project or stand the audio on the sky for one
+    sound. An app without EnginePlugin reports no clip events and forgets nothing a released handle
+    held, as it runs none of the areas' frame work. The steps of the material and mesh files moved
+    between plugins at the same places in the frame, so a pack run without publish reads the
+    captures on it, 42920356361. Next 134, the norm test and the split. The norm test is `1f061b2c`,
+    pushed at 10:07 on 2026-11-11. NormTests.N_1_6 holds the areas in nine layers, Native, then
+    Core, then Assets, Audio, Gizmos, ImGui and Cli, then Rendering, then Render2d, Animation,
+    GlobalIllumination and Scenes, then Ui, Physics and Sky, then Modeling and Diagnostics, then
+    Vegetation, then Levels and the flat project, each in the lowest layer what it names allows.
+    build/norm/1.6.tsv places every file, the Assets folder's 298 one by one, a file placed nowhere
+    and a line placing nothing both failing; the edges come from the built library and its portable
+    PDB through System.Reflection.Metadata. It fails for a misplaced SceneField.cs and for a field
+    of Core's Config naming RenderSky, and passes on Debug, Release and a Release built as the
+    runner builds it. The norm's N 1.6 and its row say so. Next the split, whose AGENTS.md rows wait
+    on a decision. The split's plan is the Reply of `514b2110`, accepted at 10:12 on 2026-11-11 with
+    four conditions. The layers become BevyCSharp.<Area> projects in their areas' folders, the flat
+    project keeping BevyApp, EnginePlugin and DefaultPlugins and referencing every project, its
+    package carrying the analyzers and the build files; every system's bridge goes in
+    BevyCSharp.Native's package alone with the loader and the ABI's check; every project packs at
+    the one version, twenty packages; the games, the templates and the examples keep their one
+    reference to BevyCSharp. Two commits, the files moved by git inside the one project first, then
+    the projects, the packing and the workflow. The conditions. Nothing is published before the
+    packages are read, the cut getting a pack run without publish, its packages' ids, dependencies
+    and contents read by the review and the ids told to the owner, the run with publish after; each
+    area's package depends on the areas it references at exactly its own version; InternalsVisibleTo
+    is named pair by pair and given only where used; and between the two commits nothing else lands,
+    each with the whole suite. The AGENTS.md rows wait on a decision in the coder's session. The
+    split's first commit is `00f012ff`, pushed at 13:06 on 2026-11-11, moves alone, 668 files
+    renamed whole by git, 619 of the library's and 50 of the tests' in all, Interop becoming Native
+    and Ui ImGui, Ecs, Math, Time, Input, Behaviors and Generated folders inside Core, the Assets
+    folder keeping the asset server's 20 files and its others going to their areas, the 27 kernels
+    to their areas' Kernels folders, embedded under their old names. The paths that name them
+    follow, the project file's globs, three tests, N 1.6 by top folder with its list gone, and four
+    documents; AGENTS.md's library rows are redrawn on approval in the coder's session. The tests'
+    Assets folder of 158 files stays, moving it an item after the split. Next the second commit, the
+    projects, with the twenty ids, the exact-version dependencies and the InternalsVisibleTo pairs
+    in its Reply, and a pack run without publish on it. The split's second commit is `7428798d`,
+    pushed at 15:30 on 2026-11-11 with a pack run without publish. Nineteen area projects under
+    BevyCSharp/ and the flat one, a shared Directory.Build.props closing each engine dependency to
+    its exact version, 68 InternalsVisibleTo pairs named in the Reply; the public listing unchanged;
+    Courtyard on the twenty packages answering in a second with the 135 commands of 0.6.91. The
+    review read the twenty local packages at 15:35. The ids are BevyCSharp and BevyCSharp.Animation,
+    Assets, Audio, CliServer, Core, Diagnostics, Gizmos, GlobalIllumination, ImGui, Levels,
+    Modeling, Native, Physics, Render2d, Rendering, Scenes, Sky, Ui and Vegetation; every engine
+    dependency stands at its exact version; the bridge is in Native's runtimes alone, the analyzers
+    and build files in the flat package alone, the three modules' assemblies in the lowest area that
+    names each, and each carries the licence, icon, readme and repository. One condition more before
+    the run with publish. The published 0.6.91 is 249,913,716 bytes against nuget.org's limit of 250
+    MB, and Native inherits it, so Native is pushed first with the push stopping at a refusal, and
+    the pack job fails before any push where a package is over the limit, the limit in bytes read
+    from nuget.org's documents. A package of the bridge for each system is an item after the split,
+    reported with the ids. As it stood on 2026-11-11 at 16:08, shortened in REVIEW.md.
 
 ## Head records
 
@@ -12275,45 +12252,45 @@ started again at 19:49 as its third attempt and green at 20:08 with Linux in 13 
 and Windows in 18; it keeps the form and carries the review's files. Nothing is pushed after it.
 Before it `bacb6e2d`, item 127's record, read and left out, with its picture, the captions and the
 devlog, documents alone, pushed at 14:47 on 2026-11-09 with a run on it, green at 15:06 with Linux
-and macOS in 14 minutes and Windows in 18; it keeps the form. The owner published the release
-scene-packs with intel-sponza.pack, the bridge's own at 208,923,293 bytes with the manifest's hash,
-at 17:57 on 2026-11-09, so ./bcs scenes fetch works for the first time; the engine's pack is made
-from it. Before it `26e541ef`, item 126's record and its Reply with NORM.md's N 1.1 and N 1.6 row
-and the devlog, documents alone, pushed at 13:53 on 2026-11-09 with a run on it, the devlog's path
-not among those the workflow leaves out, green at 14:11 with Linux in 12 minutes, macOS in 14 and
-Windows in 18; it keeps the form. Before it `5d575d5e`, item 97, a probe left on the middle of a
-wall thinner than a cell taken as inside, pushed at 13:31 on 2026-11-09, its run green at 13:49 with
-Linux and Windows in 14 minutes and macOS in 19; it keeps the form and carries the review's files
-and N 1.6. Before it `710911f8`, item 123, the comments rewritten to their reasons, about 190 in 94
-files with only comment lines changed, pushed at 09:00 on 2026-11-09, its run green at 09:18 with
-Linux in 11 minutes, macOS in 16 and Windows in 18; it keeps the form and carries the review's
-files. Before it `d969c312`, item 124's record and its Reply, the review's file alone, pushed at
-09:31 on 2026-11-09 with no run, as a documents-only push starts none; it keeps the form. Before it
-`fbf47d59`, 122, the drive's stop on the GPU's memory read against the commit that passed on
-2026-11-03 and placed in the desktop's share, pushed at 07:33 on 2026-11-09, its run green at 07:51
-with Linux in 13 minutes, macOS in 17 and Windows in 18; it keeps the form and carries the review's
-files. Before it `da5e4ec2`, 96's fourth part, the trees standing where the Vegetation module's
-planting places them at its 2fba808, the public listing one line fewer, pushed at 06:07 on
-2026-11-09, its run green at 06:26 with Linux in 13 minutes, macOS in 18 and Windows in 18; it keeps
-the form and carries the review's files. Before it `904a291a`, 96's third part, the grass planted
-from the Vegetation module's scatter at its d604e4d, the patches and clumps the same to the bit and
-the public listing 15 lines fewer, pushed at 04:13 on 2026-11-09, its run green at 04:31 with Linux
-in 11 minutes, macOS in 13 and Windows in 17; it keeps the form and carries the review's files.
-Before it `fe279b8e`, 96's second part, the texture sets the Vegetation module's at its f18a993,
-read under the asset root and loaded with their samplers through the bridge, the public listing 25
-lines fewer, pushed at 02:39 on 2026-11-09, its run green at 02:57 with macOS in 11 minutes, Linux
-in 15 and Windows in 18; it keeps the form and carries the review's files. Before it `47c0bf5d`,
-96's first part, the tree species and skeleton moved to the Vegetation module taken as a submodule
-at its c2149be, the public listing 102 lines fewer, pushed at 00:36 on 2026-11-09, its run green at
-00:51 with Linux in 11 minutes, macOS in 10 and Windows in 15; it keeps the form and carries the
-review's files. Before it `652bdd65`, 121, the comments on the code's own terms, 143 source files
-with every changed line a comment line, pushed at 21:46 on 2026-11-08, its run green at 22:06 with
-Linux and macOS in 13 minutes and Windows in 19; it keeps the form and carries the review's files.
-Before it `8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the ray's mirror way
-by its gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at 20:35 with Linux in
-11 minutes, macOS in 15 and Windows in 17; it keeps the form and carries the review's files. Before
-it `a5f277d5`, 116, a crossing lit where its leaves stop the ray and the early crossing's light to
-the probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08, its run green at 16:43 with
+and macOS in 14 minutes and Windows in 18; it keeps the form. The release scene-packs was published
+with intel-sponza.pack, the bridge's own at 208,923,293 bytes with the manifest's hash, at 17:57 on
+2026-11-09, so ./bcs scenes fetch works for the first time; the engine's pack is made from it.
+Before it `26e541ef`, item 126's record and its Reply with NORM.md's N 1.1 and N 1.6 row and the
+devlog, documents alone, pushed at 13:53 on 2026-11-09 with a run on it, the devlog's path not among
+those the workflow leaves out, green at 14:11 with Linux in 12 minutes, macOS in 14 and Windows in
+18; it keeps the form. Before it `5d575d5e`, item 97, a probe left on the middle of a wall thinner
+than a cell taken as inside, pushed at 13:31 on 2026-11-09, its run green at 13:49 with Linux and
+Windows in 14 minutes and macOS in 19; it keeps the form and carries the review's files and N 1.6.
+Before it `710911f8`, item 123, the comments rewritten to their reasons, about 190 in 94 files with
+only comment lines changed, pushed at 09:00 on 2026-11-09, its run green at 09:18 with Linux in 11
+minutes, macOS in 16 and Windows in 18; it keeps the form and carries the review's files. Before it
+`d969c312`, item 124's record and its Reply, the review's file alone, pushed at 09:31 on 2026-11-09
+with no run, as a documents-only push starts none; it keeps the form. Before it `fbf47d59`, 122, the
+drive's stop on the GPU's memory read against the commit that passed on 2026-11-03 and placed in the
+desktop's share, pushed at 07:33 on 2026-11-09, its run green at 07:51 with Linux in 13 minutes,
+macOS in 17 and Windows in 18; it keeps the form and carries the review's files. Before it
+`da5e4ec2`, 96's fourth part, the trees standing where the Vegetation module's planting places them
+at its 2fba808, the public listing one line fewer, pushed at 06:07 on 2026-11-09, its run green at
+06:26 with Linux in 13 minutes, macOS in 18 and Windows in 18; it keeps the form and carries the
+review's files. Before it `904a291a`, 96's third part, the grass planted from the Vegetation
+module's scatter at its d604e4d, the patches and clumps the same to the bit and the public listing
+15 lines fewer, pushed at 04:13 on 2026-11-09, its run green at 04:31 with Linux in 11 minutes,
+macOS in 13 and Windows in 17; it keeps the form and carries the review's files. Before it
+`fe279b8e`, 96's second part, the texture sets the Vegetation module's at its f18a993, read under
+the asset root and loaded with their samplers through the bridge, the public listing 25 lines fewer,
+pushed at 02:39 on 2026-11-09, its run green at 02:57 with macOS in 11 minutes, Linux in 15 and
+Windows in 18; it keeps the form and carries the review's files. Before it `47c0bf5d`, 96's first
+part, the tree species and skeleton moved to the Vegetation module taken as a submodule at its
+c2149be, the public listing 102 lines fewer, pushed at 00:36 on 2026-11-09, its run green at 00:51
+with Linux in 11 minutes, macOS in 10 and Windows in 15; it keeps the form and carries the review's
+files. Before it `652bdd65`, 121, the comments on the code's own terms, 143 source files with every
+changed line a comment line, pushed at 21:46 on 2026-11-08, its run green at 22:06 with Linux and
+macOS in 13 minutes and Windows in 19; it keeps the form and carries the review's files. Before it
+`8b16bd71`, 114, a probe ray's hit reflecting the probes' light along the ray's mirror way by its
+gloss, with 118's dots, pushed at 20:17 on 2026-11-08, its run green at 20:35 with Linux in 11
+minutes, macOS in 15 and Windows in 17; it keeps the form and carries the review's files. Before it
+`a5f277d5`, 116, a crossing lit where its leaves stop the ray and the early crossing's light to the
+probe's faces, with 117's documents, pushed at 16:26 on 2026-11-08, its run green at 16:43 with
 Linux in 11 minutes, macOS in 11 and Windows in 17; it keeps the form and carries the review's
 files. Before it `69d97fec`, 107's shadow mend, one visibility level casting at any distance by
 Bevy's shadow origin, pushed at 11:22 on 2026-11-08, its run green at 11:36 on the three systems in
@@ -12459,7 +12436,7 @@ with `d92ac690`, 83's first phase, its run green at 12:42 with the suites in 14 
 README's line verbatim and the three grass cards in the collection, recorded under the items. Before
 it `1c9b6baf`, item 84, pushed at 11:02, its run green at 11:25, the light-through test at 180
 traced frames, recorded under the item in REVIEW- ARCHIVE.md. Before it `391d6b85`, the version to
-0.6, the owner's change committed by the reviewer and pushed at 11:42, its run green at 11:59.
+0.6, a change made by hand, committed by the reviewer and pushed at 11:42, its run green at 11:59.
 Before it `785a1136`, item 82, pushed at 09:10, its run green at 09:29 with the suites in 13 to 18
 minutes, the irradiance volume's fallback mended in render/mended.rs, recorded under the item in
 REVIEW-ARCHIVE.md. Before it `de14e311`, item 81's grass mend, pushed at 22:31 on 2026-10-30, its
@@ -12467,7 +12444,7 @@ run green at 22:49 with the suites in 12 to 18 minutes, the dark blades gone, re
 item in REVIEW-ARCHIVE.md. Before it `e3ddec48`, item 79's cloud mend, pushed at 21:13 on 2026-10-30
 after the run of `1226ff50` went green, its run green at 21:30 with the suites in 12 to 17 minutes.
 The march adds an isotropic share for the light scattered more often than the four octaves follow, a
-deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the owner's view's cloud
+deep front-lit cloud going from 0.09 to 0.11 of the light to 0.23 to 0.25, the reported view's cloud
 tops from 166, 163, 160 to 216, 209, 195 and the bases from 146, 146, 154 to 181, 177, 172, the
 lavender going with the gray, the 15:00 sun side keeping its shading and overcast and storm staying
 gray; 49 cloud, weather, atmosphere and sky tests pass; the suite's 21 BounceRoomsTests failed out
@@ -12478,11 +12455,11 @@ green at 20:14 on the three suites, Verdict 48 settled; AppLeakTests reads the p
 last full blocking collection as 3DEngine's does, 19.82 to 19.83 MB over a hundred apps, the suite
 1,999 passed; it carries N 7.8 and a Shared line. Reviewed up to `7e35f94b`, pushed with `0ed9073c`
 at 18:15 on 2026-10-30, its run red at 18:35 on macOS alone, Verdict 48. After it `169d5afe`,
-AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by the owner's word
-in the coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court
-(the still stations as brushes, orange where the character climbs and red where it cannot, a wall
-with two arches parting the course from the playground, the terrain gone for a terraced mound with
-the drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
+AGENTS.md's REVIEW.md line reading the head, the batch's items and the Replies by decision in the
+coder's session, held for Verdict 48's mend, and after it `3417d612`, item 68's course court (the
+still stations as brushes, orange where the character climbs and red where it cannot, a wall with
+two arches parting the course from the playground, the terrain gone for a terraced mound with the
+drive's check on its top, the drive green, 1,998 passed with the denoiser's 1080p time read as a
 flake under the other sessions' GPU load), the three to go together. `0ed9073c` is item 68's third
 phase's first zone, the light hall at the north corridor's end with arched bays off the aisle, the
 lights and the drive's eight bay views moved and none gone, the drive green, 23 level tests on the
@@ -12490,17 +12467,16 @@ headless bridge, the suite 1,998 passed with one failure read as a flake, the li
 High 5.5 up at 0.17 against 0.2 that reads 0.24 alone and in its class, a lead if it fails again;
 `7e35f94b` points the tests' user directory from a module initializer so SaveGameTests' FixedLevel
 passes alone, the detail under Replies. build/version.txt stands changed in the tree from 0.5 to 0.6
-by no session's hand, left for the owner's word. Before it `7e082be1`, item 68's second phase,
-pushed at 14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where
-said: `c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the
-drive's zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
+by no session's hand, left for a decision. Before it `7e082be1`, item 68's second phase, pushed at
+14:33 on 2026-10-26, its run green at 14:52. Before it on 2026-10-26, each green but where said:
+`c5cb4888` (65's hub); `c6b95ea9` with `8a287c2f` and `d53a3108` (Verdict 47's mend, the drive's
+zone check, the level helpers); `1092b434` and `ce142f8a` (65's second phase), red at the
 shipped-pictures test, Verdict 47; `25e9f601` (Verdict 46's mend); `f703b3b1` (65's first phase),
 red on the renderer-less bridge, Verdict 46; `f75ebdae` (the README's quick links); `8a85790a` and
 `bc5559d2` (77); `929a1cf7` (70 d2); `fc02fec5` (70 d1); `6777b172` (70 c3); `b9cd8d74` (70's far
 level). Each commit's detail stands in its item in REVIEW-ARCHIVE.md, its devlog note and its own
-words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 the owner wrote the
-README's new words (item 78) and asked that the sessions spend fewer tokens at the same quality, N
-7.7.
+words. The sessions were paused from 2026-10-26 to 2026-10-30; on 2026-10-30 came the README's new
+words (item 78) and the ask that the sessions spend fewer tokens at the same quality, N 7.7.
 
 Items done and verdicts settled before 2026-10-23 stand in REVIEW-ARCHIVE.md beside this file, their
 numbers kept, moved there at 19:30 on 2026-10-23 so this file holds the current work alone and is

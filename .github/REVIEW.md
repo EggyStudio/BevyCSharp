@@ -1,64 +1,72 @@
 # Review
 
-Reviewed up to `fdf68d62`, item 136's first commit, the glow lights' history looked up less the part
-of a texel by which a texel's own sample point lies off its middle, a quarter where the picture is
-twice the images' size, so a still view finds its own texel whole, still, steady and frames reading
-whole where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's change between frames 0.023 levels
-where 0.289, a change of light followed as fast as before, with a test, pushed at 04:09 on
-2026-11-12, green at 04:28 with Linux in 13 minutes, macOS in 17 and Windows in 18; the whole suite
-2,048 passed, 1 failed and 3 skipped, the one a sky light's share under a slab at High reading 0.180
-against 0.2 to 0.5 in a scene the glow pass does not run in, passing alone on both kernels, taken as
-intermittent and to be read after the precision mend; it keeps the form and carries the review's
-files. Before it `8784bdd1`, InternalsVisibleTo's pairs measured by the compiler and narrowed,
-AnimationReader moved to Rendering beside the writers it reads back and FieldCurve and FieldValue to
-Animation, 67 pairs and 217 internal names reached where 68 and 221, the pairs listed with a why
-each in build/norm/1.6.txt and held by N 1.6, build/norm/internals.cs finding them and writing the
-project files' comments, pushed at 22:37 on 2026-11-11, green at 22:54 with Windows and Linux in 12
-minutes each and macOS in 17; the whole suite passed, 2,048 passed, none failed and 3 skipped,
-NormTests 19; it keeps the form and carries the review's files. Before it `064cdae8`, the tests'
-Assets folder moved to the areas, 146 files renamed whole by git to the area each tests and the
-asset server's 12 staying, no file's text changed, pushed at 21:16 on 2026-11-11 once the run with
-publish had started on the commit before it, its run red on the three systems at the step that keeps
-an artifact, their tests passed, Verdict 58, and green at 22:37 on its second attempt, Linux in 14
-minutes, Windows in 19 and macOS in 21; the whole suite passed, 2,048 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `77941f42`, the
-split packed as one package by Decision 88, every area's assembly and the three modules' in the one
-package's lib folder with no dependency on an area, the bridges' pack items in the flat project, a
-size step in the pack job failing a package over 262,139,904 bytes before anything is kept or
-pushed, and the script host walking from every loaded assembly of the engine, pushed at 19:47 on
-2026-11-11, its run green at 20:05 with Linux and Windows in 15 minutes each and macOS in 18, its
-pack run without publish, 43081159142, green at 21:11 with the drive in 59 minutes. Its package read
-from the artifact, BevyCSharp.0.6.106.nupkg, 65 entries, 46 in lib for the 20 assemblies of the
-engine and the modules' Levels, Sky and Vegetation, each a dll with its xml, six bridges, the two
-musl slots empty as before, its only dependencies BepuPhysics 2.5.0-beta.29 and
-Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp alone, 250,121,275 bytes with
-12,018,629 of room, 4.58 percent, and both ids on nuget.org before it, so no new id goes out; the
-run with publish, 43094830090, started at 21:15 on the same head, red by 21:45 in its native jobs by
-an outage of GitHub's Actions, Verdict 58, and green at 00:36 on 2026-11-12 on its second attempt,
-0.6.106 published as the one package with its templates and tagged v0.6.106; the whole suite passed,
-2,048 passed, none failed and 3 skipped, NormTests 19; a local package with the Linux bridge alone
-is 52,739,654 bytes in 60 entries, its only dependencies BepuPhysics and Twizzle.ImGui-Bundle.NET;
-it keeps the form and carries the review's files. Before it `7428798d`, the split's second commit,
-the library's areas as nineteen projects with the flat one, each packed at one version and depending
-on those below it at exactly that version, pushed at 15:30 on 2026-11-11, its run green on Windows
-and macOS at once and on Linux at 18:18 on a third attempt, the runners' package mirror having
-failed from 15:34 to 17:54, which settles Verdict 57; its pack run without publish, 43039130555, red
-by the same fault and not run again, the packages' layout having changed by Decision 88; the whole
-suite passed, 2,045 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
-the review's files. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
+Reviewed up to `2fc9beb0`, item 136's precision commit, a point of the depth as its way from the eye
+in bcs_pass.slang, passEyeOffset, the ray's way taken from it, the clip and the frame before's
+helpers on it and the rain's streaks' and splashes' corners, the world point left through
+world_from_clip since the lighting's weighing moved with it, item 139, the night sky far from the
+origin the one drawn at it, 0.002 levels apart where 1.0 and 6,408 pixels, with its test, pushed at
+10:57 on 2026-11-12, green at 11:18 with Linux in 14 minutes, macOS in 18 and Windows in 21; the
+whole suite passed, 2,050 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
+carries the review's files. Before it `fdf68d62`, item 136's first commit, the glow lights' history
+looked up less the part of a texel by which a texel's own sample point lies off its middle, a
+quarter where the picture is twice the images' size, so a still view finds its own texel whole,
+still, steady and frames reading whole where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's
+change between frames 0.023 levels where 0.289, a change of light followed as fast as before, with a
+test, pushed at 04:09 on 2026-11-12, green at 04:28 with Linux in 13 minutes, macOS in 17 and
+Windows in 18; the whole suite 2,048 passed, 1 failed and 3 skipped, the one a sky light's share
+under a slab at High reading 0.180 against 0.2 to 0.5 in a scene the glow pass does not run in,
+passing alone on both kernels, taken as intermittent and to be read after the precision mend; it
+keeps the form and carries the review's files. Before it `8784bdd1`, InternalsVisibleTo's pairs
+measured by the compiler and narrowed, AnimationReader moved to Rendering beside the writers it
+reads back and FieldCurve and FieldValue to Animation, 67 pairs and 217 internal names reached where
+68 and 221, the pairs listed with a why each in build/norm/1.6.txt and held by N 1.6,
+build/norm/internals.cs finding them and writing the project files' comments, pushed at 22:37 on
+2026-11-11, green at 22:54 with Windows and Linux in 12 minutes each and macOS in 17; the whole
+suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
+the review's files. Before it `064cdae8`, the tests' Assets folder moved to the areas, 146 files
+renamed whole by git to the area each tests and the asset server's 12 staying, no file's text
+changed, pushed at 21:16 on 2026-11-11 once the run with publish had started on the commit before
+it, its run red on the three systems at the step that keeps an artifact, their tests passed, Verdict
+58, and green at 22:37 on its second attempt, Linux in 14 minutes, Windows in 19 and macOS in 21;
+the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
+carries the review's files. Before it `77941f42`, the split packed as one package by Decision 88,
+every area's assembly and the three modules' in the one package's lib folder with no dependency on
+an area, the bridges' pack items in the flat project, a size step in the pack job failing a package
+over 262,139,904 bytes before anything is kept or pushed, and the script host walking from every
+loaded assembly of the engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and
+Windows in 15 minutes each and macOS in 18, its pack run without publish, 43081159142, green at
+21:11 with the drive in 59 minutes. Its package read from the artifact, BevyCSharp.0.6.106.nupkg, 65
+entries, 46 in lib for the 20 assemblies of the engine and the modules' Levels, Sky and Vegetation,
+each a dll with its xml, six bridges, the two musl slots empty as before, its only dependencies
+BepuPhysics 2.5.0-beta.29 and Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp
+alone, 250,121,275 bytes with 12,018,629 of room, 4.58 percent, and both ids on nuget.org before it,
+so no new id goes out; the run with publish, 43094830090, started at 21:15 on the same head, red by
+21:45 in its native jobs by an outage of GitHub's Actions, Verdict 58, and green at 00:36 on
+2026-11-12 on its second attempt, 0.6.106 published as the one package with its templates and tagged
+v0.6.106; the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local
+package with the Linux bridge alone is 52,739,654 bytes in 60 entries, its only dependencies
+BepuPhysics and Twizzle.ImGui-Bundle.NET; it keeps the form and carries the review's files. Before
+it `7428798d`, the split's second commit, the library's areas as nineteen projects with the flat
+one, each packed at one version and depending on those below it at exactly that version, pushed at
+15:30 on 2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a third
+attempt, the runners' package mirror having failed from 15:34 to 17:54, which settles Verdict 57;
+its pack run without publish, 43039130555, red by the same fault and not run again, the packages'
+layout having changed by Decision 88; the whole suite passed, 2,045 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. The pushes before these
+stand in REVIEW-ARCHIVE.md's head records.
 
-Next 136's first commit, the eye's offset and the ray's way from it in bcs_pass.slang, the streaks'
-corners and the night sky's test, the world point left as it is; then 139, three readings at their
-bounds moving with a rounding's change in a pixel's step, sized by the readings before and after,
-with the slab test and the alley's probe read there, and 136's kernels on offsets after it; then
-135, the bridge's size, stripped with offsets in the crash file; then 137, a near wall's light
-moving with where the grids fall; then 120, the live path, each a commit with the whole suite, and
-after them 66 and 67, the connections and the level editor; 93's course drawn smaller after 119, its
-drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.106 from
-`77941f42`, one package with its templates, published at 00:36 on 2026-11-12; the next pack run when
-136 and 135 are in. The engine's illumination read goes first on the GPU (N 7.9). No budget by
-Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
-motion by the engine's Decision 107.
+Next 139, its fault found, a neighbor clamped to the picture's edge giving a step of nothing on the
+bottom row, the whole of the fifth view's 0.011 lying there, mended by taking a clamped neighbor as
+missing, with the two bounds measured again, the slab test read and 136's kernels on offsets after
+it; then 140, the comments swept by N 4.11 as widened, a commit of comments alone; then 135, the
+bridge's size, stripped with offsets in the crash file; then 137, a near wall's light moving with
+where the grids fall; then 120, the live path, each a commit with the whole suite, and after them 66
+and 67, the connections and the level editor; 93's course drawn smaller after 119, its drive at 100
+minutes in the pack run of 16:03 on 2026-11-10. The package stands at 0.6.106 from `77941f42`, one
+package with its templates, published at 00:36 on 2026-11-12; the next pack run when 136 and 135 are
+in. The engine's illumination read goes first on the GPU (N 7.9). No budget by Decision 80; the
+meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in motion by the
+engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -68,9 +76,9 @@ Replies (N 7.7), and the archive when an item, a verdict or a decision named her
 
 ## Now
 
-The owner asked that the work does not stop. A batch that ends is followed by the next item in the
-order under the head with no wait for a reply; global illumination is fixed first (Decision 74), the
-meadow at 8:00 the one target (Decision 81).
+By the project's direction the work does not stop. A batch that ends is followed by the next item in
+the order under the head with no wait for a reply; global illumination is fixed first (Decision 74),
+the meadow at 8:00 the one target (Decision 81).
 
 1. **What the next page says.** Each push's run and each pack run is read by the reviewing session
     from GitHub's API, and a failure it names is a verdict here and comes first. The runs' record
@@ -162,7 +170,7 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     The Windows bridges carry none. The rest is the code, .text 26.5 of linux-x64's 43.95 MB
     compressed, 38 percent of the named code bevy_ecs generics made for the bridge's systems. The
     cost is the crash file's stack, whose frames' names come of that table, the panic's message and
-    its file and line staying. Decided by the review, the owner having chosen to shrink the bridge.
+    its file and line staying. Decided by the review, the bridge's shrinking having been chosen.
     Strip in the release profile; the crash file writes each frame as the bridge's build id and an
     offset, on every system; each pack run keeps the unstripped bridges or their symbols as an
     artifact named by the version, and a script under build names a crash file's frames from them,
@@ -174,7 +182,7 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 136. **A point and a ray's way taken from the depth far from the origin.** From the sibling's item
     257 on 2026-11-11 and a read of the bridge's own shaders by the review the same evening, nothing
     built or run, every figure reasoned from a float's step, 0.0005 at 4,450 units and 0.0078 at
-    71,000. The sibling's noise in the owner's game was normals made from differences of world
+    71,000. The sibling's noise in a player's saved world was normals made from differences of world
     points taken from the depth, several percent off 4,450 units out, where every test scene stands
     at the origin. The bridge has the same. Every depth point comes through passWorldPosition in
     bcs_pass.slang, world_from_clip in floats, and the kernels make ways and normals from
@@ -291,138 +299,147 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     the steps by a few float steps; the emitter room's bound measured again and said with its
     margin; the slab test read in the same pass; then the kernels on offsets. Ahead of 135.
 
+140. **Comments that say what the code is as it stands.** N 4.11 as widened on 2026-11-12. A comment
+    says what the code is and why in its own terms. It does not liken one thing to another's state,
+    tell what the code was before, what a mend changed or which fault led to it, nor name a program
+    built on this one as its example. A sweep of every comment in the sources, the shaders, the
+    tests and the scripts for those three things, the words that give them away among them, as it
+    was, as before, no longer, still, used to, once, already, and a game or a kind of game named.
+    Each rewritten to say what stands, the story going to nothing or to the Reply. A commit of
+    comments alone, with the norm's search added to STYLE.md's so it is found again.
+
 ## Verdicts
 
 Verdicts 2 and 33 to 58 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
 
 ## Decisions
 
-Decisions 1 Commits stay local; 2 AGENTS.md's bullet on SHARED.md is the owner's; 3 A picture opens
-the example's own source, and not Bevy's live demo of it; 4 AGENTS.md's bullet on NORM.md is the
-owner's, with the exception N 7.4 makes; 5 The examples written are brought to B 4 a group at a
-time; 6 A run that fails says what failed in a page, and the reviewing session is given no log; 7
-The page's repeated lines are warnings and errors; 8 The next package is 0.4; 9 A document a game's
-author reads names no one who decided; 10 The tests run on macOS as well; 11 Feathers' crate may be
-enabled, after the other gaps; 12 The free and pan camera controllers may be enabled, after the
-other gaps; 13 System font discovery stays off; 14 The sample becomes a feature test; 15 Graphics
-test scenes come as packs fetched on demand, never checked in; 16 Every tonemapper here comes to
-3DEngine; 17 The embedding is the bridge's own; 18 The weather is vendored and ported; 19 Bevy 0.20
-comes after the deferred batch in flight and before the other gaps; 20 The crates' word for the
-upgrade; 21 No document or comment a reader sees names the owner or a session; 22 Content streamed
-on the go stays in the ledger, and the browser stays out; 23 A run that shows no window makes no
-sound; 24 A game's session writes what the engine lacks in `.github/ASKS.md`, here as in 3DEngine;
-25 A feature of a crate already in the tree that pulls no crate in is the working session's to turn
-on; a feature that pulls a crate in waits on the owner's word as Decision 11 has it; 26 An insert
-from nothing over a resource a plugin made, of a type that reflects no default, is refused and names
-`Resource<T>`; 27 The README's gallery is one scrolling row of pictures a group, in Bevy's order of
-its groups; 28 The bcs skill leaves `.claude` for `.github/BCS.md`, and the gallery's pictures are
-one size; 29 The development machine's GPU is named nowhere a user reads; 30 The examples' counts
-stand under the Examples heading and on each group's heading; 31 A vertex stream of the game's own,
-in both engines; 32 A position is every mesh's, and the packed data a stream beside it; 33 No
-development on either engine until every job is green on every push and pack; 34 Two workflows an
-engine, build and pack, the same shape in both; the tester zips and the scene packs are runs on the
-owner's machine; 35 Decision 33's gate is the new workflows; 36 The docs job goes; the repository's
-links are the suite's to check; 37 Prose is technical and generic; 38 Development resumes, the
-bridge completed first and the mends of the moment made lasting after; 39 The owner's words of
-2026-10-19 on the crates, the order and the mends of the moment; 40 The README's centered parts are
-markdown inside a centering block, since nuget.org draws a README without its HTML; 41 A package's
-release notes are the commits since the package last published on nuget.org; 42 The pack workflow
-publishes through nuget.org's trusted publishing; 43 The reviewer starts the pack runs when a
-package is due; 44 The review's files are committed by the batch that comes next, and by the
-reviewer at most once a day; 45 The feature test lives in the games folder, as 3DEngine's does; 46
-Modeling in both engines, from the kernel to the modifiers, grid prototyping first; 47 The Actions
-bill is not weighed; 48 Animated captures as tooling for documentation and devlogs; 49 A screenshot
-on F2 in every program; 50 F1 hides the interface and F3 shows the debug overlay, in both engines;
-51 3DEngine's radiance cascades come to this engine; 52 A denoiser for the ray-traced tier of global
-illumination, beside the cascades, in both engines; 53 The owner's cloud sessions take GPU-free
-items on branches of their own; 54 Branches are named for their work, never claude/ or a random
-string, and work stays on main where one session writes; 55 Every commit carries the owner's
-identity, and the cloud session's branch was deleted for not carrying it; 56 Slang reads the same in
-both engines, plain names and no module prefix; 57 Until a full release, both engines are used by
-nobody; 58 The two cheat sheets have one form; 59 A devlog under `.github/devlog`, with AGENTS.md's
-row for it; 60 A session saves the pictures of its work in the repository, N 4.8; 61 The feature
-test's level is redone, the look, the sky, the file, the entities' connections and an editor; 62 The
-fog, the clouds and the rest of the weather are written in the engine, and the weather crate goes;
-63 Trees and foliage are grown, not loaded; 64 The devlog written as the work goes; 65 The devlog
-carries notes beside the pictures; 66 Free textures ship as a bounded collection, the models stay
-reference; 67 The level file is Valve 220 map text; 68 The feature test's open map is legacy and its
-features move into one generated level; 69 A reading's picture explains itself, and a plain capture
-or pair stays where it shows the thing; 70 Every picture a session makes goes to the repository's
-dump folder; 71 Six ideas for later, thought about and not scheduled; 72 The version's major and
-minor move by the reviewer's judgment; 73 What a scriptable render pipeline has, written down for
-later; 74 Global illumination is fixed first and used in the feature test after the radiance
-cascades' fix; 75 The sky's model is a module, the drawing stays in each engine; 76 No one is named
-in a picture; 77 Anisotropic filtering at 16 everywhere; 78 Crowns read thick and filled; 79 Each
-README cross-references the other engine, each in full under Decisions in REVIEW-ARCHIVE.md.
+Decisions 1 Commits stay local; 2 AGENTS.md's bullet on SHARED.md changes by the project's direction
+alone; 3 A picture opens the example's own source, and not Bevy's live demo of it; 4 AGENTS.md's
+bullet on NORM.md changes by the project's direction alone, with the exception N 7.4 makes; 5 The
+examples written are brought to B 4 a group at a time; 6 A run that fails says what failed in a
+page, and the reviewing session is given no log; 7 The page's repeated lines are warnings and
+errors; 8 The next package is 0.4; 9 A document a game's author reads names no one who decided; 10
+The tests run on macOS as well; 11 Feathers' crate may be enabled, after the other gaps; 12 The free
+and pan camera controllers may be enabled, after the other gaps; 13 System font discovery stays off;
+14 The sample becomes a feature test; 15 Graphics test scenes come as packs fetched on demand, never
+checked in; 16 Every tonemapper here comes to 3DEngine; 17 The embedding is the bridge's own; 18 The
+weather is vendored and ported; 19 Bevy 0.20 comes after the deferred batch in flight and before the
+other gaps; 20 The crates' word for the upgrade; 21 No document or comment a reader sees names a
+person or a session; 22 Content streamed on the go stays in the ledger, and the browser stays out;
+23 A run that shows no window makes no sound; 24 A game's session writes what the engine lacks in
+`.github/ASKS.md`, here as in 3DEngine; 25 A feature of a crate already in the tree that pulls no
+crate in is the working session's to turn on; a feature that pulls a crate in waits on the owner's
+word as Decision 11 has it; 26 An insert from nothing over a resource a plugin made, of a type that
+reflects no default, is refused and names `Resource<T>`; 27 The README's gallery is one scrolling
+row of pictures a group, in Bevy's order of its groups; 28 The bcs skill leaves `.claude` for
+`.github/BCS.md`, and the gallery's pictures are one size; 29 The development machine's GPU is named
+nowhere a user reads; 30 The examples' counts stand under the Examples heading and on each group's
+heading; 31 A vertex stream of the game's own, in both engines; 32 A position is every mesh's, and
+the packed data a stream beside it; 33 No development on either engine until every job is green on
+every push and pack; 34 Two workflows an engine, build and pack, the same shape in both; the tester
+zips and the scene packs are runs on the development machine; 35 Decision 33's gate is the new
+workflows; 36 The docs job goes; the repository's links are the suite's to check; 37 Prose is
+technical and generic; 38 Development resumes, the bridge completed first and the mends of the
+moment made lasting after; 39 The direction of 2026-10-19 on the crates, the order and the mends of
+the moment; 40 The README's centered parts are markdown inside a centering block, since nuget.org
+draws a README without its HTML; 41 A package's release notes are the commits since the package last
+published on nuget.org; 42 The pack workflow publishes through nuget.org's trusted publishing; 43
+The reviewer starts the pack runs when a package is due; 44 The review's files are committed by the
+batch that comes next, and by the reviewer at most once a day; 45 The feature test lives in the
+games folder, as 3DEngine's does; 46 Modeling in both engines, from the kernel to the modifiers,
+grid prototyping first; 47 The Actions bill is not weighed; 48 Animated captures as tooling for
+documentation and devlogs; 49 A screenshot on F2 in every program; 50 F1 hides the interface and F3
+shows the debug overlay, in both engines; 51 3DEngine's radiance cascades come to this engine; 52 A
+denoiser for the ray-traced tier of global illumination, beside the cascades, in both engines; 53
+The cloud sessions take GPU-free items on branches of their own; 54 Branches are named for their
+work, never claude/ or a random string, and work stays on main where one session writes; 55 Every
+commit carries the repository's author identity, and the cloud session's branch was deleted for not
+carrying it; 56 Slang reads the same in both engines, plain names and no module prefix; 57 Until a
+full release, both engines are used by nobody; 58 The two cheat sheets have one form; 59 A devlog
+under `.github/devlog`, with AGENTS.md's row for it; 60 A session saves the pictures of its work in
+the repository, N 4.8; 61 The feature test's level is redone, the look, the sky, the file, the
+entities' connections and an editor; 62 The fog, the clouds and the rest of the weather are written
+in the engine, and the weather crate goes; 63 Trees and foliage are grown, not loaded; 64 The devlog
+written as the work goes; 65 The devlog carries notes beside the pictures; 66 Free textures ship as
+a bounded collection, the models stay reference; 67 The level file is Valve 220 map text; 68 The
+feature test's open map is legacy and its features move into one generated level; 69 A reading's
+picture explains itself, and a plain capture or pair stays where it shows the thing; 70 Every
+picture a session makes goes to the repository's dump folder; 71 Six ideas for later, thought about
+and not scheduled; 72 The version's major and minor move by the reviewer's judgment; 73 What a
+scriptable render pipeline has, written down for later; 74 Global illumination is fixed first and
+used in the feature test after the radiance cascades' fix; 75 The sky's model is a module, the
+drawing stays in each engine; 76 No one is named in a picture; 77 Anisotropic filtering at 16
+everywhere; 78 Crowns read thick and filled; 79 Each README cross-references the other engine, each
+in full under Decisions in REVIEW-ARCHIVE.md.
 
-80. **No millisecond budget.** The owner wrote on 2026-11-08 at 08:50, "There is no ms limit budget.
-   We first make it work and performant and focus on crunching the numbers after or along the way as
-   much as possible." So a mend that brings a view to its reference lands by its figures, its cost
-   measured and recorded beside them and cut after or along the way where a cut holds the readings;
-   item 114 and the rest land or stay by their figures, the cost a figure and not a gate, and the
-   forest's and the meadow's milliseconds stay in each record.
+80. **No millisecond budget.** Decided on 2026-11-08 at 08:50. There is no millisecond budget. A
+   feature is first made to work and to perform well, and its numbers are worked on after or along
+   the way as much as possible. So a mend that brings a view to its reference lands by its figures,
+   its cost measured and recorded beside them and cut after or along the way where a cut holds the
+   readings; item 114 and the rest land or stay by their figures, the cost a figure and not a gate,
+   and the forest's and the meadow's milliseconds stay in each record.
 
-81. **A stop rule and one target.** The owner wrote on 2026-11-08 at 08:5x, asked why the light
-   leaking had moved little in days, that the review should do what it thinks right and tell them
-   for approval. The owner approved at 08:49 on 2026-11-08 ("Do it"), so a view inside its band
-   lands and a figure that remains is recorded and not chased unless it lies in a scene the owner
-   looks at, the meadow here and Sponza's named views in the engine; one bounded read places a cause
-   and a second is the last before a mend is tried or the figure recorded. The meadow at eight in
-   the morning is the bridge's one target scene, its crowns and its grass against the one reference,
-   the rooms the guard.
+81. **A stop rule and one target.** On 2026-11-08 at 08:5x, on the question why the light leaking
+   had moved little in days, the direction was that the review does what it thinks right and reports
+   it for approval. Approved at 08:49 on 2026-11-08, so a view inside its band lands and a figure
+   that remains is recorded and not chased unless it lies in a scene that is looked at, the meadow
+   here and Sponza's named views in the engine; one bounded read places a cause and a second is the
+   last before a mend is tried or the figure recorded. The meadow at eight in the morning is the
+   bridge's one target scene, its crowns and its grass against the one reference, the rooms the
+   guard.
 
-82. **The difference beside a pair.** The owner wrote to the BevyCSharp session at about 13:50 on
-    2026-11-08, on item 116's meadow pair, that they saw no visible changes in the comparison, the
-    crossing among them, as in the times before, and asked that where there is a difference a third
+82. **The difference beside a pair.** Reported to the BevyCSharp session at about 13:50 on
+    2026-11-08, on item 116's meadow pair, no changes were visible in the comparison, the crossing
+    among them, as in the times before, and the ask was that where there is a difference a third
     image to the right show it. From here a reading's pair carries a third panel, the after's
     luminance less the before's at a gain the caption names, brighter in orange and darker in blue
     on black, in both engines (N 4.9); the earlier readings stand as they are. The change 116 makes
     is small, about one point in the leaves and a little more of the crown's scattered light on the
-    wall and the ground behind it, which the panel shows at a gain of 40, and the owner hears it so.
+    wall and the ground behind it, which the panel shows at a gain of 40, and it is reported so.
 
-83. **Version tags.** The owner wrote at about 14:00 on 2026-11-08, having tagged every commit of
-    the Unity Essentials repositories as `v2.0.30` and the like, that the three projects take tags
-    too, and answered the review's questions at 14:1x. The form is `v6.0.91`, the letter v before
+83. **Version tags.** Decided at about 14:00 on 2026-11-08, after every commit of the Unity
+    Essentials repositories was tagged as `v2.0.30` and the like, the three projects take tags too,
+    with the review's questions answered at 14:1x. The form is `v6.0.91`, the letter v before
     `build/version.sh`'s number. Tags go on each major or minor change and on the commits packages
-    were built from, since "doing every commit clutters it and is unnecessary as we want to focus
-    the version tags to releases time apart with meaningful changes and not commits apart". The
-    major and the minor are the sessions' to raise, "each session working on the project can decide
-    when the time is right to rise that number in minor or major as each commit counts as patch",
-    with "full liberty" when "a step is done and meaningful changes were done". N 6.3 holds the rule
-    and the reviewer sets the tags as it pushes. `v0.6.0` marks the commit that set 0.6 and
-    `v0.6.18` the commit `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set
-    at 14:12.
+    were built from, since a tag on every commit clutters the list and is unnecessary, the tags
+    marking releases some time apart with meaningful changes and not commits apart. The major and
+    the minor are the sessions' to raise, each session working on the project deciding when the time
+    is right to raise the minor or the major, every commit counting as a patch, with full liberty
+    once a step is done and meaningful changes were made. N 6.3 holds the rule and the reviewer sets
+    the tags as it pushes. `v0.6.0` marks the commit that set 0.6 and `v0.6.18` the commit
+    `b8cc8316` the package of 0.6.18 was published from on 2026-11-02, both set at 14:12.
 
-84. **No middle dot.** The owner wrote at 17:57 and 18:00 on 2026-11-08 that the middle dot is not
-    used, the README's top links separated by a space alone and the dot nowhere else; the reviewer
-    changed the README's first line in the tree on their word, for the next commit to carry, and
-    every other middle dot in the repository is item 118's. The rule goes into STYLE.md's
-    Punctuation as the shared text has it everywhere.
+84. **No middle dot.** Decided at 17:57 and 18:00 on 2026-11-08, the middle dot is not used, the
+    README's top links separated by a space alone and the dot nowhere else; the reviewer changed the
+    README's first line in the tree on that decision, for the next commit to carry, and every other
+    middle dot in the repository is item 118's. The rule goes into STYLE.md's Punctuation as the
+    shared text has it everywhere.
 
-85. **One repository, many projects.** The owner wrote at about 18:20 on 2026-11-08, thinking with
-    the review about the engines' future after Unity Essentials, where every feature is a repository
-    of its own, that the engines feel "a bit cluttered" and should be "modulated extendable and
-    stable and easy to use", that splitting everything into repositories "clutters" and makes
-    commits "weird", that the shared modules' repositories are right, that the engine's own content
-    could be modulated the same way inside its repository, and that a "one process approach", one
-    running process edited and seen as it changes, is worth thinking about; at 18:30 they approved
-    the review's recommendation. The direction is that each engine stays one repository and becomes
-    one solution of many projects, each an area with its own public surface and its own plugin,
-    packed as its own package at one version for all, as Bevy's crates are in Bevy's one repository;
-    the dependency direction is held by project references and a norm test over them; the flat API
-    stays unchanged on top and a game names the packages it needs; the names are dotted .NET names
-    and not com.; there is no editor, and the live path is a watcher that recompiles a changed
-    shader, reloads a changed asset or scene and recompiles a changed behavior into the running
-    process, the engine's own code by restart. It is scheduled after the current items and done as
-    one mechanical batch per engine with the public API held identical before and after and the
-    documents' tables redrawn. Items 119 and 120, 3DEngine Decision 102.
+85. **One repository, many projects.** The engines' future was thought through with the review at
+    about 18:20 on 2026-11-08, after Unity Essentials, where every feature is a repository of its
+    own. The points made were that the engines are somewhat cluttered and should be modular,
+    extendable, stable and easy to use, that splitting everything into repositories adds clutter and
+    makes commits awkward, that the shared modules' repositories are right, that the engine's own
+    content could be made modular the same way inside its repository, and that one running process,
+    edited and seen as it changes, is worth thinking about; the review's recommendation was approved
+    at 18:30. The direction is that each engine stays one repository and becomes one solution of
+    many projects, each an area with its own public surface and its own plugin, packed as its own
+    package at one version for all, as Bevy's crates are in Bevy's one repository; the dependency
+    direction is held by project references and a norm test over them; the flat API stays unchanged
+    on top and a game names the packages it needs; the names are dotted .NET names and not com.;
+    there is no editor, and the live path is a watcher that recompiles a changed shader, reloads a
+    changed asset or scene and recompiles a changed behavior into the running process, the engine's
+    own code by restart. It is scheduled after the current items and done as one mechanical batch
+    per engine with the public API held identical before and after and the documents' tables
+    redrawn. Items 119 and 120, 3DEngine Decision 102.
 
-86. **Comments on the code's own terms.** The owner read a comment of scenes_sponza at about 19:00
-    on 2026-11-08, "The frame graded as that scene's HDRP profile grades it, by the look of its AgX
-    - Powerful.exr, a lookup build/unity-lut.py writes from that strip, a gamma of w 0.225, and a
+86. **Comments on the code's own terms.** A comment of scenes_sponza was read at about 19:00 on
+    2026-11-08, "The frame graded as that scene's HDRP profile grades it, by the look of its AgX -
+    Powerful.exr, a lookup build/unity-lut.py writes from that strip, a gamma of w 0.225, and a
     bloom of intensity 0.25, threshold 0.333 and scatter 0.7, worked out as HDRP works them out",
-    and wrote that it "sounds just bad", reads as an em dash, and "is taking too much liberty of
-    outside knowledge and in-process session knowledge", in scenes_sponza explicitly and probably
+    and found to read badly, to read as an em dash does, and to lean too far on outside knowledge
+    and on the sessions' knowledge of work in progress, in scenes_sponza explicitly and probably
     everywhere else. The rule from it, in STYLE.md's Register and as N 4.11, is that a comment
     stands on the code's own terms. It says what the code does and why in the engine's words; a
     number taken from elsewhere stands with the reason it is right here, what it makes the frame or
@@ -431,53 +448,51 @@ README cross-references the other engine, each in full under Decisions in REVIEW
     explanation, "as X works it out", and the facts of the sessions' work are not written in a
     comment. Item 121, 3DEngine Decision 103.
 
-87. **No readings or costs in comments.** The owner wrote at about 05:20 on 2026-11-09, reading
-    scenes_sponza's comment on the far cascade of 100 that carried the lion's end wall's reading
-    from 34.6 to 15.1 times its reference and the mend's 0.6 ms, "I also dont think we need to name
-    the progress and ms count as these are just comments and not protocols". N 4.11 widens so that a
-    comment carries no reading of before and after, no cost figure and no account of the trials,
-    which are the review's records and RENDERING.md's; a number stands in a comment only where the
-    code's choice depends on it, with its reason. Item 123.
+87. **No readings or costs in comments.** Decided at about 05:20 on 2026-11-09, on scenes_sponza's
+    comment on the far cascade of 100 that carried the lion's end wall's reading from 34.6 to 15.1
+    times its reference and the mend's 0.6 ms, a comment need not name the progress or the
+    millisecond count, a comment being no protocol. N 4.11 widens so that a comment carries no
+    reading of before and after, no cost figure and no account of the trials, which are the review's
+    records and RENDERING.md's; a number stands in a comment only where the code's choice depends on
+    it, with its reason. Item 123.
 
-88. **One package on nuget.org.** The owner chose on 2026-11-11 at about 16:20, asked by the review
-    with the twenty ids of item 119's split before them, to keep one package, and wrote, "I want
-    bevy csharp nuget to be one pacakge because habing so many different pacakges is a hassle and
-    not great. It is also not necessary", and then of both engines, "I prefer one nuger only or two
-    with the second being heavy binaries". So the library's areas stay projects of their own inside
-    the repository, their layers held by the project references and N 1.6, and BevyCSharp's one
-    package carries every area's assembly, the modules', the six systems' bridges, the analyzers and
-    the build files; no BevyCSharp.<Area> id is published. Asked about the bridge's size, 249.9 MB
-    against nuget.org's limit of 250, the owner chose to keep one package there too. The pack job
-    says the package's size and fails before the push where it is over the limit. Decision 85's
-    packages at one version give way to this for the bridge. Asked again at about 16:40 between one
-    package and two, the second for the bridges, as the owner had written "Like BevyCSharp.Binaries
-    or something", the owner chose one package with the bridge shrunk, a second package of the
-    bridges alone standing at about 247 MB of the limit by itself; the shrinking is item 135.
+88. **One package on nuget.org.** Chosen on 2026-11-11 at about 16:20, on the review's question with
+    the twenty ids of item 119's split laid out, BevyCSharp keeps one package, since so many
+    different packages are a burden, are not good and are not necessary, and for both engines the
+    preference is one package alone, or two with the second holding heavy binaries. So the library's
+    areas stay projects of their own inside the repository, their layers held by the project
+    references and N 1.6, and BevyCSharp's one package carries every area's assembly, the modules',
+    the six systems' bridges, the analyzers and the build files; no BevyCSharp.<Area> id is
+    published. Asked about the bridge's size, 249.9 MB against nuget.org's limit of 250, the choice
+    was to keep one package there too. The pack job says the package's size and fails before the
+    push where it is over the limit. Decision 85's packages at one version give way to this for the
+    bridge. Asked again at about 16:40 between one package and two, the second for the bridges under
+    a name such as BevyCSharp.Binaries as had been suggested, the choice was one package with the
+    bridge shrunk, a second package of the bridges alone standing at about 247 MB of the limit by
+    itself; the shrinking is item 135.
 
-89. **The lighting's kernels written once.** The owner chose on 2026-11-12 at about 05:40, asked by
-    the review, among this, two copies with a check of their parity, and one engine's lighting
-    alone. The kernels of the radiance cascades stand twice, here and in the sibling, ported by
-    hand, and two faults of one night, the glow history's quarter texel and the depth's points far
-    from the origin, were found and mended in both. They go into the RadianceCascades module,
-    written once in Slang, each engine giving its own bindings, so a mend lands in both. Item 138
-    here and the sibling's item 265, after the sibling's grain, blobs and publish, its places far
-    from the origin first.
+89. **The lighting's kernels written once.** Chosen on 2026-11-12 at about 05:40, on the review's
+    question, among this, two copies with a check of their parity, and one engine's lighting alone.
+    The kernels of the radiance cascades stand twice, here and in the sibling, ported by hand, and
+    two faults of one night, the glow history's quarter texel and the depth's points far from the
+    origin, were found and mended in both. They go into the RadianceCascades module, written once in
+    Slang, each engine giving its own bindings, so a mend lands in both. Item 138 here and the
+    sibling's item 265, after the sibling's grain, blobs and publish, its places far from the origin
+    first.
 
-90. **An editor as a module both engines use, later.** The owner wrote on 2026-11-12 that the editor
-    is no focus yet and will be, and what they aim for, "a full framework that you can build imgui
-    frames for editor tools easily and have helpers to implement their data like ecs and assets in
-    diagnostics windows and a way for a shell to have a surfsce to have a editor layout", "a module
-    used by both engines", made in ImGui as this library's is, giving an engine the functions to
-    build an editor on or a way to show its data in one. The owner thinks further before it is taken
-    up, so no item is made and nothing is moved. BevyCSharp.Editor stands as it is, its shell owning
-    the arrangement and its panels registered in tables, and the two engines stay on one ImGui
-    binding at one version. The owner the same morning, of how it sits and of what there is, "The
-    editor module would provide finctions and drawer calls that the engine then uses in there imgui
-    scope. The process is the same just imgui calls", and "Bevycsharps editor is great progress, but
-    fundamentally crook and for the module I want it sound but that will be explained further down
-    the line". So the engine hosts, the module owning no window, no ImGui context and no process,
-    and this library's editor is progress to learn from and no model to lift as it stands; what is
-    crooked in it and what sound is are the owner's to say.
+90. **An editor as a module both engines use, later.** The direction of 2026-11-12 is that the
+    editor is no focus yet and will be. The aim is a full framework in which ImGui frames for editor
+    tools are built easily, with helpers that show data such as the ECS and assets in diagnostics
+    windows and a way for a shell to have a surface for an editor layout, a module used by both
+    engines, made in ImGui as this library's is, giving an engine the functions to build an editor
+    on or a way to show its data in one. It is thought through further before it is taken up, so no
+    item is made and nothing is moved. BevyCSharp.Editor stands as it is, its shell owning the
+    arrangement and its panels registered in tables, and the two engines stay on one ImGui binding
+    at one version. Added the same morning, of how it sits and of what there is. The editor module
+    provides functions and drawing calls that the engine uses in its own ImGui scope, in the same
+    process and as ImGui calls alone. So the engine hosts, the module owning no window, no ImGui
+    context and no process. This library's editor is not taken as the module's design; it is
+    progress to learn from, and the module's own design is set out when the module is taken up.
 
 ## Replies
 
@@ -535,8 +550,8 @@ CHEATSHEET.md reading the same lines. The split's cut gets a pack run with publi
 The cut is two commits. The first moves the files into their projects' folders inside the one
 project, git moves alone with N 1.6's list read from the folders, and the second makes the projects,
 the packing and the workflow. BUILDING.md's table of packages, the guide's lines, RENDERING.md's
-names and AGENTS.md's table of where things are follow the folders. That table's rows are the
-owner's word, which I ask for in my session before the first commit.
+names and AGENTS.md's table of where things are follow the folders. That table's rows wait on
+approval, which I ask for in my session before the first commit.
 
 No file of the engine changed. NormTests passed, 19. The public listing is unchanged.
 
@@ -632,3 +647,58 @@ Shared: a pass's way into the sky taken from the view's own numbers turned by it
 clip position as the matrix's eye plus its turn of the way, for the sibling's sky and passes, and a
 light pass's weighing by the steps between pixels read for how far a rounding moves it, since here
 one view of the bounce rooms moves by half again.
+
+Item 139 in the commit carrying this line. gi_light.slang's nearerStep, the step from a pixel to its
+nearer neighbor along each axis, which gives the way the surface faces and the slope the screen's
+probes' and the glow texels' distances are expected along, clamped the neighbor to the picture. On
+the picture's last row and column the neighbor past the edge was the pixel itself and its step the
+pixel's point found twice, nothing but a float's rounding, which as the shorter of the two was
+taken, so the way an edge pixel faced, and every weight resting on it, turned as the rounding fell.
+A neighbor clamped onto the pixel counts as missing, and an edge pixel takes its step from the side
+inside the picture.
+
+Read with gi_light's point as committed and as the eye plus passEyeOffset, the change of a hundred
+thousandth of a unit that showed it. BounceRoomsTests' view 5 with the screen's probes lay 0.0197
+and 0.0311 from its reference on High and 0.0235 and 0.0347 on Medium, the whole difference in the
+picture's edge row and column, up to a quarter of a pixel's light apart there, and reads 0.0182 on
+High and 0.0211 on Medium with either, Low unmoved at 0.0220, so it reads both steadier and nearer
+its reference than on either side before. The one-emitter room's right wall read 0.105 and 0.112
+under its reference and reads 0.122 under with either. Without the picture's outermost pixels it
+reads 0.120 under before and after, so its edge pixels, facing where the rounding put them, read
+brighter than the wall and held it inside its bar of 0.11. Its ceiling reads 0.023 under where 0.027
+and its floor 0.022 where 0.026. The bar is measured again at 14 percent, the wall's 12.2 holding
+1.8 points inside it and every other face within 2.3, the test's remark saying so. View 5's bound of
+0.03 holds High's 0.0182 by 0.012 and Medium's 0.0211 by 0.009.
+
+BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps reads view 5
+on Medium and High with its camera as it is and moved three hundred thousandths of a unit along x, a
+few float steps there, which changes each point of the depth by its rounding alone, and holds the
+two within a thousandth of the light. Without the change they stand 0.0045 and 0.0032 apart, and
+with it 0.00001.
+
+The slab test, AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough, reads the
+same four shares alone twice and in its class's run twice, 0.42 two and a half units up and 0.26
+five and a half at Low and at High, 0.06 inside its floor of 0.2, so nothing a test before it leaves
+moves it and it is no edge's, its floor read in the picture's middle. Its frames were counted from
+the probes' making by Looking, which the nine tests on that helper share, and a pass whose pipeline
+is still compiling is skipped while the count goes on, so on a machine busy with something else, as
+in the suite where its share came out 0.180, fewer of its 180 frames traced. Looking counts them
+from the frame every pipeline is ready, and the nine pass on it, the slab's shares unchanged. At 60
+frames so counted the floor under the solid slab five and a half up has not settled, its share 0.29,
+so 180 stays, its comment saying why in the code's terms.
+
+The alley's world probe in the feature test, which reads apart from one start to the next, is not
+read here. gi.probe reads a world probe's own light, which gi_light's weighing of the screen's
+probes and the glow texels by a pixel's steps does not touch, and view 5 read the same at every
+start of six, before the change and after, so the alley's variance is another thing than this one,
+left for a read of its own.
+
+The whole suite passed, 2,052 passed, 0 failed and 3 skipped, 2,055 in all where the listing is
+2,044. NormTests passed, 19. No native file changed, the solution builds with warnings as errors,
+and the public listing and the cheat sheet are unchanged. The GI kernels on offsets come next, if on
+this they move no reading.
+
+Shared: a neighbor clamped to the picture's edge gives a step of nothing, whose facing turns with
+the rounding, for the sibling's model pass and glow kernel, which take a neighbor's step the same
+way, and frames counted for a probe's settling from the frame its pipelines are ready, for the
+sibling's tests that read after a count of frames.
