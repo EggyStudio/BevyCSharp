@@ -6,8 +6,8 @@ namespace Bevy.Tests;
 
 // Global illumination's screen probes, the cascades' light read alone and the glow lights read from
 // probes standing for them alone where the probes are left out, a probe fed a value that is not a
-// number leaving the light it blends into finite, and the land far from the world's origin lit as
-// near it.
+// number leaving the light it blends into finite, the land far from the world's origin lit as near
+// it, and a still view holding a glow light's light from frame to frame.
 public sealed partial class GlobalIlluminationTests
 {
     /// <summary>
@@ -286,6 +286,76 @@ public sealed partial class GlobalIlluminationTests
                 if (picture.Pixels[i] + picture.Pixels[i + 1] + picture.Pixels[i + 2] == 0) black++;
             return black;
         }
+    }
+
+    /// <summary>
+    /// A still view of a wall seen at a slant and lit by a glow light on the floor beside it alone
+    /// holds the wall's light from frame to frame, its middle half's pixels moving by less than a
+    /// tenth of a level between frames on average, as the screen's probes the glow light's light is
+    /// read from step through their sixteen places within a tile.
+    /// </summary>
+    /// <remarks>
+    /// The glow light's light is blended over the frames a texel's place held still, up to 32, which a
+    /// texel looking up its place in the frame before at its own middle, a quarter of a texel off the
+    /// pixel it takes its point from, would never reach, finding its light shared with three other
+    /// texels and keeping one frame's and a seventh, so the wall would move by about 0.29 of a level
+    /// between frames where it moves by 0.02 kept whole.
+    /// </remarks>
+    [SkippableFact]
+    public void AStillViewOfAWallLitByAGlowLightHoldsItsLightFromFrameToFrame()
+    {
+        Needs.Shaders();
+        const float Size = 8f, High = 3f, T = 0.4f;
+        var h = Size / 2f;
+        var eye = new Vec3(-1f, 1.5f, 3f);
+        var run = new PictureRun
+        {
+            Width = 320,
+            Height = 180,
+            Frames = 2400,
+            Scene = ecs =>
+            {
+                var camera = PictureRun.Camera(ecs, eye);
+                ecs.Add(camera, Transform.LookingAt(eye, new Vec3(-h, 1.2f, -2f), Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetAmbientLight((1f, 1f, 1f), 0f);
+                var white = (0.787f, 0.787f, 0.787f);
+                Block(ecs, white, new Vec3(0f, -T / 2f, 0f), new Vec3(Size + 2f * T, T, Size + 2f * T));
+                Block(ecs, white, new Vec3(0f, High + T / 2f, 0f), new Vec3(Size + 2f * T, T, Size + 2f * T));
+                Block(ecs, white, new Vec3(-h - T / 2f, High / 2f, 0f), new Vec3(T, High, Size));
+                Block(ecs, white, new Vec3(h + T / 2f, High / 2f, 0f), new Vec3(T, High, Size));
+                Block(ecs, white, new Vec3(0f, High / 2f, h + T / 2f), new Vec3(Size, High, T));
+                Block(ecs, white, new Vec3(0f, High / 2f, -h - T / 2f), new Vec3(Size, High, T));
+                var lantern = ecs.Spawn();
+                Render.SetMesh(ecs, lantern, Render.CreateMesh(MeshShape.Cuboid, 0.3f, 0.5f, 0.3f));
+                Render.SetMaterial(ecs, lantern, Render.CreateMaterial(new MaterialSettings { BaseColor = (1f, 1f, 1f, 1f), Roughness = 1f, Emissive = (60f, 48f, 30f, 0f) }));
+                ecs.Add(lantern, Transform.At(-h + 0.5f, 0.25f, -1f));
+                Render.SetGlobalIllumination(GlobalIllumination.Medium);
+            },
+        };
+        run.Until("settled", _ => Settled(7))
+            .Until("traced", _ => WorldProbes.TracedFrames >= 120)
+            .Until("drawn", _ => EngineDrawsOn(true))
+            .Wait(120);
+        for (var i = 0; i < 8; i++) run.Capture($"frame {i}").Wait(1);
+        run.Go();
+
+        static double Apart(CapturedImage a, CapturedImage b)
+        {
+            double sum = 0;
+            var count = 0;
+            for (var y = a.Height / 4; y < a.Height * 3 / 4; y++)
+            for (var x = a.Width / 4; x < a.Width * 3 / 4; x++)
+            {
+                var at = (int)(y * a.Width + x) * 4;
+                sum += Math.Abs(0.2126 * (a.Pixels[at] - b.Pixels[at]) + 0.7152 * (a.Pixels[at + 1] - b.Pixels[at + 1]) + 0.0722 * (a.Pixels[at + 2] - b.Pixels[at + 2]));
+                count++;
+            }
+            return sum / count;
+        }
+
+        var apart = Enumerable.Range(0, 7).Average(i => Apart(run.Picture($"frame {i}"), run.Picture($"frame {i + 1}")));
+        Assert.True(apart < 0.1, $"a still view holds the glow light's light from frame to frame, its pixels moving by {apart:0.000} of a level on average");
     }
 
     /// <summary>The mean color of the middle five pixels a side of a picture, in levels.</summary>

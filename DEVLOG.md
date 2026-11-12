@@ -15,6 +15,7 @@ are ready, the same on any device, and on the right their difference at twice it
 
 Done that day
 
+- Item 119 at `8784bdd1`. The bridge as projects.
 - Item 134 at `5f86882d`. A script compiles against every assembly the library's members name.
 
 ## 2026-11-10

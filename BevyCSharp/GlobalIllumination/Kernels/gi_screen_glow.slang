@@ -375,7 +375,14 @@ void main(uint3 id : SV_DispatchThreadID)
         if (clip.w > 1e-5)
         {
             float2 ndc = clip.xy / clip.w;
-            float2 then = float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5) * float2(halfSize) - 0.5;
+            // A texel's point is its pixel's middle (pixelOf), a part of a texel off the texel's own
+            // middle, a quarter of one where the picture is twice the images' size, and each texel of
+            // the frame before held its light at the same part off its own. Its place is looked up
+            // less that part, so a still view finds its own texel whole, where it would share it with
+            // three others, read as still for 0.5625 and steady for 0.125, and keep a frame's light
+            // and a seventh where it is meant to keep 32.
+            float2 sampled = (float2(pixel) + 0.5) / float2(passPictureSize()) * float2(halfSize) - 0.5 - float2(id.xy);
+            float2 then = float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5) * float2(halfSize) - 0.5 - sampled;
             int2 from = int2(floor(then));
             float2 part = then - float2(from);
             float3 t = passPreviousView.view_from_world[3].xyz;
