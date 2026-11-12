@@ -55,11 +55,13 @@ float2 probePixel(int2 id)
     return floor(min((float2(id) + 0.5) * screen.x, size - 0.5)) + 0.5;
 }
 
-// The point a probe stands on, as gi_screen.slang placed it.
+// The point a probe stands on, as gi_screen.slang placed it, as its way from the eye
+// (passEyeOffset), so the points of probes beside each other keep what lies between them however far
+// from the world's origin the view stands.
 float3 standsOn(int2 id)
 {
     int2 pixel = int2(probePixel(id));
-    return passWorldPosition(passUv(pixel), passLoadDepth(pixel));
+    return passEyeOffset(passUv(pixel), passLoadDepth(pixel));
 }
 
 // Where the frame before's eye stood, from its view, which turns the world about the eye and moves it
@@ -110,7 +112,7 @@ float4 earlier(int2 id, int2 grid, float4 surface)
     if (screen.y < 0.5)
         return float4(0.0);
     float3 p = standsOn(id);
-    float4 clip = passTransform(passPreviousView.clip_from_world, float4(p, 1.0));
+    float4 clip = passPreviousClipAt(p);
     if (clip.w <= 1e-5)
         return float4(0.0);
     float2 ndc = clip.xy / clip.w;
@@ -119,7 +121,7 @@ float4 earlier(int2 id, int2 grid, float4 surface)
     base -= select(then < probePixel(base), int2(1), int2(0));
     float2 low = probePixel(base);
     float2 f = saturate((then - low) / max(probePixel(base + 1) - low, float2(1e-3)));
-    float expected = distance(p, eyeBefore());
+    float expected = distance(p, eyeBefore() - passView.world_position);
     float3 sum = float3(0.0);
     float weights = 0.0;
     for (int corner = 0; corner < 4; corner++)

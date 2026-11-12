@@ -274,14 +274,15 @@ float4 reflectedAlong(FieldInfo field, float3 p, float3 n, float3 r, float rough
     return light;
 }
 
-// Where q falls on the picture, its depth there and the depth the picture holds there, or false
-// where it lies behind the eye or off the picture. Bevy's depth runs backwards, nearer greater.
+// Where q, a way from the eye, falls on the picture, its depth there and the depth the picture holds
+// there, or false where it lies behind the eye or off the picture. Bevy's depth runs backwards,
+// nearer greater.
 bool onScreen(float3 q, out float2 uv, out float depth, out float held)
 {
     uv = float2(0.0);
     depth = 0.0;
     held = 0.0;
-    float4 clip = passTransform(passView.clip_from_world, float4(q, 1.0));
+    float4 clip = passClipAt(q);
     if (clip.w <= 1e-4)
         return false;
     float3 ndc = clip.xyz / clip.w;
@@ -298,7 +299,8 @@ bool onScreen(float3 q, out float2 uv, out float depth, out float held)
 // a unit, the step halved five times to find where, the ray met only where the depth does not leap
 // between the halving's ends and the surface there turns toward the ray. A ray that passed behind
 // the depth so, or went off the picture, is left at the last point it stood in front of it in
-// `left`, for the field to find what it passed behind.
+// `left`, for the field to find what it passed behind. The ray's start, its hit and the points it
+// passes are ways from the eye (passEyeOffset), so a distance from the eye is a point's length.
 bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, out float2 hitUv, out float left)
 {
     hit = p;
@@ -306,7 +308,7 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
     left = length;
     float before = 0.0;
     float behindFrom = -1.0;
-    float3 eye = passView.world_position;
+    float3 eye = float3(0.0);
     for (int i = 0; i < steps; i++)
     {
         float s = float(i + 1) / float(steps);
@@ -321,7 +323,7 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
         }
         if (held > 0.0 && depth < held)
         {
-            float3 surface = passWorldPosition(uv, held);
+            float3 surface = passEyeOffset(uv, held);
             float behind = distance(eye, q) - distance(eye, surface);
             if (behind < max(length / float(steps) * 2.0, 0.25))
             {
@@ -343,7 +345,7 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
                     else
                         near = middle;
                 }
-                hit = passWorldPosition(atUv, atHeld);
+                hit = passEyeOffset(atUv, atHeld);
                 // Across a thing's edge the depth leaps between the halving's ends, and a ray that
                 // crossed it passed behind the thing.
                 float2 frontUv;
@@ -351,7 +353,7 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
                 bool leaps = false;
                 if (onScreen(p + way * near, frontUv, frontDepth, frontHeld))
                 {
-                    float frontBy = frontHeld > 0.0 ? distance(eye, p + way * near) - distance(eye, passWorldPosition(frontUv, frontHeld)) : -1e6;
+                    float frontBy = frontHeld > 0.0 ? distance(eye, p + way * near) - distance(eye, passEyeOffset(frontUv, frontHeld)) : -1e6;
                     float behindBy = distance(eye, p + way * far) - distance(eye, hit);
                     leaps = behindBy - frontBy > max(0.25, 8.0 * (far - near));
                 }
@@ -383,8 +385,9 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
 // environment reflect alone. A surface met on the picture reflects the light the frame before's
 // picture showed where it was, faded to its shading by the field at the picture's edge, and one
 // past the picture or hidden from it its color times the light reaching it, as the probes shade a
-// hit (shadeHit).
-float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, float3 r, float roughness)
+// hit (shadeHit). The surface's point is p in the world and o from the eye, which the trace through
+// the depth goes from.
+float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 o, float3 n, float3 r, float roughness)
 {
     if (roughness >= GlossyRoughness)
         return float4(0.0);
@@ -393,8 +396,11 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
     float3 hit;
     float2 hitUv;
     float left;
-    bool onPicture = traceScreen(start, r, reflection.y, int(reflection.x), hit, hitUv, left);
-    if (!onPicture)
+    bool onPicture = traceScreen(o + n * cell, r, reflection.y, int(reflection.x), hit, hitUv, left);
+    float3 hitFromEye = hit;
+    if (onPicture)
+        hit = passView.world_position + hit;
+    else
     {
         float t = traceField(scene_field, scene_field_sampler, info, start, r, left, 1e5);
         if (t < 0.0)
@@ -405,7 +411,7 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
         probe_cubes_at, probe_reach, hit, probes.x, probes.y, probes.z);
     if (!onPicture || reflection.z < 0.5)
         return float4(shaded, 1.0);
-    float2 uv = passPreviousUvOf(hit);
+    float2 uv = passPreviousUvAt(hitFromEye);
     if (any(uv < 0.0) || any(uv > 1.0))
         return float4(shaded, 1.0);
     float edge = saturate(min(min(uv.x, 1.0 - uv.x), min(uv.y, 1.0 - uv.y)) * 12.0);
@@ -419,15 +425,15 @@ float4 tracedReflection(FieldInfo info, GiLights lights, float3 p, float3 n, flo
 // so it takes the one inside. Clamped to the picture, the neighbor past it would be the pixel
 // itself, its step the pixel's point found twice, nothing but a float's rounding, and as the shorter
 // of the two it would be taken, so the way the surface faces, made from it, and every weight that
-// rests on that way would turn as the rounding falls.
+// rests on that way would turn as the rounding falls. Each point is its way from the eye.
 float3 nearerStep(int2 pixel, int2 step, float3 p)
 {
     int2 size = int2(passPictureSize());
     int2 ahead = min(pixel + step, size - 1), behind = max(pixel - step, int2(0));
     float aheadDepth = any(ahead != pixel) ? passLoadDepth(ahead) : 0.0;
     float behindDepth = any(behind != pixel) ? passLoadDepth(behind) : 0.0;
-    float3 forward = aheadDepth > 0.0 ? passWorldPosition(passUv(ahead), aheadDepth) - p : float3(1e10);
-    float3 back = behindDepth > 0.0 ? p - passWorldPosition(passUv(behind), behindDepth) : float3(1e10);
+    float3 forward = aheadDepth > 0.0 ? passEyeOffset(passUv(ahead), aheadDepth) - p : float3(1e10);
+    float3 back = behindDepth > 0.0 ? p - passEyeOffset(passUv(behind), behindDepth) : float3(1e10);
     float3 nearer = dot(forward, forward) < dot(back, back) ? forward : back;
     return dot(nearer, nearer) < 1e18 ? nearer : float3(0.0);
 }
@@ -629,17 +635,18 @@ float4 fragment(FullscreenOutput input) : SV_Target
     if (surface.unlit)
         discard;
 
-    float3 world = passWorldPosition(input.uv, depth);
+    float3 fromEye = passEyeOffset(input.uv, depth);
+    float3 world = passView.world_position + fromEye;
     float3 n = surface.normal;
-    float3 V = normalize(passView.world_position - world);
+    float3 V = normalize(-fromEye);
     float NdotV = max(dot(n, V), 0.0001);
     float3 diffuse = surface.base_color * (1.0 - surface.metallic);
     float occlusion = surface.diffuse_occlusion;
 
     // How the surface's point moves from pixel to pixel, and the way it faces as the depth gives it,
     // which weigh the screen probes and the glow lights' texels around the pixel.
-    float3 toEye = passView.world_position - world;
-    float3 acrossOne = nearerStep(pixel, int2(1, 0), world), downOne = nearerStep(pixel, int2(0, 1), world);
+    float3 toEye = -fromEye;
+    float3 acrossOne = nearerStep(pixel, int2(1, 0), fromEye), downOne = nearerStep(pixel, int2(0, 1), fromEye);
     float3 facing = surfaceNormal(cross(acrossOne, downOne), toEye);
     if (dot(facing, toEye) < 0.0)
         facing = -facing;
@@ -754,7 +761,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 environment = passHasEnvironment() ? passEnvironmentSpecular(r, roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;
     float3 bevySpecular = (viewShare * specularShare * environment + ambientShare) * passView.exposure;
-    float4 traced = tracedReflection(info, lights, world, n, r, roughness);
+    float4 traced = tracedReflection(info, lights, world, fromEye, n, r, roughness);
     float gloss = traced.a * (1.0 - smoothstep(GlossyRoughness * 0.5, GlossyRoughness, roughness));
     float4 along = held > 0.0 ? reflectedAlong(info, world, n, r, roughness, probes.x, probes.y, probes.z) : float4(0.0);
     float3 lobe = along.rgb + bounced * (1.0 - along.a);

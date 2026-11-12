@@ -111,17 +111,20 @@ float depthAt(int2 pixel)
     return passLoadDepth(clamp(pixel, int2(0), size - 1));
 }
 
-// The point the depth holds at a pixel.
+// The point the depth holds at a pixel, as its way from the eye (passEyeOffset), which keeps what
+// lies between it and its neighbors however far from the world's origin the view stands. The kernel
+// works out normals, ways and distances on these, and adds the eye where it reads the field, the
+// probes or a light at a place in the world.
 float3 pointAt(int2 pixel)
 {
-    return passWorldPosition(passUv(pixel), depthAt(pixel));
+    return passEyeOffset(passUv(pixel), depthAt(pixel));
 }
 
 // The way the surface at p, at `pixel`, runs along an axis of the depth, a texel `step` long, toward
 // the side whose next two texels go on in a line from p, so a probe at the foot of a wall takes its
 // floor's way and not the way up the wall, and away from the depth's edge and from the sky. Taken
 // toward the nearer texel, a floor seen at a slant would take the wall's, and its probe, its normal
-// tilted, would see a lamp past the wall that the floor does not.
+// tilted, would see a lamp past the wall that the floor does not. Each point is its way from the eye.
 float3 wayAlong(int2 pixel, float3 p, int2 step)
 {
     int2 size = int2(passPictureSize());
@@ -134,7 +137,8 @@ float3 wayAlong(int2 pixel, float3 p, int2 step)
 }
 
 // The step toward a pixel's neighbor a texel on or back along an axis, the one whose point lies
-// nearer p, so a texel at a thing's edge takes its neighbor on its own surface.
+// nearer p, so a texel at a thing's edge takes its neighbor on its own surface. Each point is its
+// way from the eye.
 float3 nearerStep(int2 pixel, int2 step, float3 p)
 {
     float3 ahead = depthAt(pixel + step) > 0.0 ? pointAt(pixel + step) - p : float3(1e10);
@@ -142,23 +146,23 @@ float3 nearerStep(int2 pixel, int2 step, float3 p)
     return dot(ahead, ahead) < dot(behind, behind) ? ahead : behind;
 }
 
-// The way out from the surface the depth holds at a pixel, where its point is p, turned toward the
-// eye, from its nearer neighbors along each axis.
+// The way out from the surface the depth holds at a pixel, where its point is p from the eye, turned
+// toward the eye, from its nearer neighbors along each axis.
 float3 pictureNormal(int2 pixel, float3 p)
 {
-    float3 toEye = passView.world_position - p;
+    float3 toEye = -p;
     float3 n = surfaceNormal(cross(nearerStep(pixel, int2(1, 0), p), nearerStep(pixel, int2(0, 1), p)), toEye);
     return dot(n, toEye) < 0.0 ? -n : n;
 }
 
-// Where q falls on the picture, the pixel it falls in, its depth and the depth the picture holds
-// there, or false where it lies behind the eye or off the picture.
+// Where q, a way from the eye, falls on the picture, the pixel it falls in, its depth and the depth
+// the picture holds there, or false where it lies behind the eye or off the picture.
 bool onScreen(float3 q, out int2 pixel, out float depth, out float held)
 {
     pixel = int2(0);
     depth = 0.0;
     held = 0.0;
-    float4 clip = passTransform(passView.clip_from_world, float4(q, 1.0));
+    float4 clip = passClipAt(q);
     if (clip.w <= 1e-4)
         return false;
     float3 ndc = clip.xyz / clip.w;
@@ -177,14 +181,16 @@ bool onScreen(float3 q, out int2 pixel, out float depth, out float held)
 // quarter of a unit, the step halved five times to find where, the ray met only where the depth
 // does not leap between the halving's ends and the face there turns toward the ray, the face's way
 // found from the depth. A ray that passed behind the depth so, or went off the picture, is left at
-// the last point it stood in front of it in `left`, for the field to find what it passed behind.
+// the last point it stood in front of it in `left`, for the field to find what it passed behind. The
+// ray's start and its hit are ways from the eye, as are the points it passes, so a distance from the
+// eye is a point's length.
 bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, out float left)
 {
     hit = p;
     left = length;
     float before = 0.0;
     float behindFrom = -1.0;
-    float3 eye = passView.world_position;
+    float3 eye = float3(0.0);
     for (int i = 0; i < steps; i++)
     {
         float s = float(i + 1) / float(steps);
@@ -425,11 +431,13 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     }
 
-    // The surface's normal from the nearer of the texels on either side along each axis, toward the eye.
-    float3 p = pointAt(pixel);
+    // The surface's normal from the nearer of the texels on either side along each axis, toward the eye,
+    // from the points' ways from the eye, fromEye, the point in the world p.
+    float3 fromEye = pointAt(pixel);
     float3 eye = passView.world_position;
-    float3 n = pictureNormal(pixel, p);
-    gi_screen_surfaces.Store(id.xy, float4(n, distance(eye, p)));
+    float3 p = eye + fromEye;
+    float3 n = pictureNormal(pixel, fromEye);
+    gi_screen_surfaces.Store(id.xy, float4(n, length(fromEye)));
 
     // How much of each glow light in reach the surface sees. A light that gives the surface an eighth
     // of the glow lights' light or more is marched to by the halves of its faces, and its byte says how
@@ -443,8 +451,8 @@ void main(uint3 id : SV_DispatchThreadID)
     // probes a march for each. The glow lights take the surface's normal from its way along each axis
     // of the depth, which holds at a wall's foot where the nearer texel's does not. Tilted up the wall,
     // a probe's normal on the floor beside it would see a lamp past the wall that the floor does not.
-    float3 gn = surfaceNormal(cross(wayAlong(pixel, p, int2(1, 0)), wayAlong(pixel, p, int2(0, 1))), eye - p);
-    if (dot(gn, eye - p) < 0.0)
+    float3 gn = surfaceNormal(cross(wayAlong(pixel, fromEye, int2(1, 0)), wayAlong(pixel, fromEye, int2(0, 1))), -fromEye);
+    if (dot(gn, -fromEye) < 0.0)
         gn = -gn;
     float glowCell = fieldCell(info, p);
     float glowMargin = glowCell * 0.5;
@@ -465,12 +473,11 @@ void main(uint3 id : SV_DispatchThreadID)
     // floor past a wall the probe stands before is not taken.
     float2 moved = clamp(middle + jitter.xy, 0.5, size - 0.5);
     int2 movedPixel = int2(moved);
-    float3 q = depthAt(movedPixel) > 0.0 ? pointAt(movedPixel) : p;
+    float3 shifted = depthAt(movedPixel) > 0.0 ? pointAt(movedPixel) : fromEye;
     int2 halfway = int2((middle + moved) * 0.5);
-    float3 between = depthAt(halfway) > 0.0 ? pointAt(halfway) : q;
-    float plane = 0.02 * distance(eye, p) + 0.05;
-    if (abs(dot(q - p, gn)) > plane || abs(dot(between - p, gn)) > plane)
-        q = p;
+    float3 between = depthAt(halfway) > 0.0 ? pointAt(halfway) : shifted;
+    float plane = 0.02 * length(fromEye) + 0.05;
+    float3 q = abs(dot(shifted - fromEye, gn)) > plane || abs(dot(between - fromEye, gn)) > plane ? p : eye + shifted;
     float3 faint = float3(0.0);
     float3 groupWay[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
     float3 grouped[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
@@ -564,7 +571,7 @@ void main(uint3 id : SV_DispatchThreadID)
     float3 side = abs(n.y) < 0.99 ? normalize(cross(n, float3(0.0, 1.0, 0.0))) : float3(1.0, 0.0, 0.0);
     float3 along = cross(n, side);
     float cell = max(fieldCell(info, p), 1e-3);
-    float3 start = p + n * (cell * 0.5);
+    float3 start = p + n * (cell * 0.5), startFromEye = fromEye + n * (cell * 0.5);
     float length = screen.y;
     float3 sum = float3(0.0);
     float weights = 0.0;
@@ -609,8 +616,8 @@ void main(uint3 id : SV_DispatchThreadID)
             float met = 0.0;
             float3 metAt = start + way * length;
             float3 metOwn = float3(0.0);
-            bool onScreen = traceScreen(start, way, length, 12, hit, leftAt);
-            float t = onScreen ? distance(start, hit) : leftAt < length ? traceField(scene_field, scene_field_sampler, info, start, way, leftAt, length) : -1.0;
+            bool onScreen = traceScreen(startFromEye, way, length, 12, hit, leftAt);
+            float t = onScreen ? distance(startFromEye, hit) : leftAt < length ? traceField(scene_field, scene_field_sampler, info, start, way, leftAt, length) : -1.0;
             bool far = false;
             [loop]
             for (int layer = 0; layer < 6; layer++)
@@ -642,7 +649,7 @@ void main(uint3 id : SV_DispatchThreadID)
                         break;
                     }
                 }
-                float3 at = onScreen ? hit : start + way * t;
+                float3 at = onScreen ? eye + hit : start + way * t;
                 if (met == 0.0)
                 {
                     met = onScreen ? MetOnPicture : far ? MetPastReach : MetInField;

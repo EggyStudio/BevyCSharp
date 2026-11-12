@@ -98,10 +98,13 @@ float depthAt(int2 pixel)
     return passLoadDepth(clamp(pixel, int2(0), int2(passPictureSize()) - 1));
 }
 
-// The point the depth holds at a pixel.
+// The point the depth holds at a pixel, as its way from the eye (passEyeOffset), which keeps what
+// lies between it and its neighbors however far from the world's origin the view stands. The kernel
+// works out normals, ways and distances on these, and adds the eye where it reads the field or a
+// light at a place in the world.
 float3 pointAt(int2 pixel)
 {
-    return passWorldPosition(passUv(pixel), depthAt(pixel));
+    return passEyeOffset(passUv(pixel), depthAt(pixel));
 }
 
 // The pixel of the picture under the middle of a texel of the half-sized images.
@@ -114,7 +117,7 @@ int2 pixelOf(int2 texel, int2 halfSize)
 // The way the surface at p, at `pixel`, runs along an axis of the depth, `step` long, toward the side
 // whose next two steps go on in a line from p, so a texel at the foot of a wall takes its floor's way
 // and not the way up the wall, and away from the depth's edge and from the sky, as gi_screen.slang
-// finds a probe's.
+// finds a probe's. Each point is its way from the eye.
 float3 wayAlong(int2 pixel, float3 p, int2 step)
 {
     int2 size = int2(passPictureSize());
@@ -148,7 +151,7 @@ uint seenAt(int2 probe, int word)
 // the probe's pixel, within `alike`, and how near p's plane the depth lies a third and two thirds of
 // the way to where it marched from, so a probe on the floor past a wall, on the floor's plane and
 // seen over the wall's top, does not lend the floor before the wall the light it sees. None for a
-// probe off the grid or on no surface.
+// probe off the grid or on no surface. The point p is its way from the eye.
 float probeLike(int2 probe, int2 grid, float2 at, float3 p, float3 n, float alike)
 {
     if (any(probe < int2(0)) || any(probe >= grid))
@@ -159,9 +162,8 @@ float probeLike(int2 probe, int2 grid, float2 at, float3 p, float3 n, float alik
     float2 size = float2(passPictureSize());
     float2 middle = floor(min((float2(probe) + 0.5) * screen.x, size - 0.5)) + 0.5;
     float3 way = passRayDirection(middle / size);
-    float3 eye = passView.world_position;
     float facing = dot(way, n);
-    float expected = facing < -1e-4 ? dot(p - eye, n) / facing : 1e20;
+    float expected = facing < -1e-4 ? dot(p, n) / facing : 1e20;
     float off = (surface.w - expected) / alike;
     float2 marched = marchedFrom(probe);
     float between = max(abs(dot(pointAt(int2(lerp(at, marched, 1.0 / 3.0))) - p, n)),
@@ -289,13 +291,14 @@ void main(uint3 id : SV_DispatchThreadID)
     }
     // The surface's normal from its way along each axis, toward the eye, a texel of the half-sized
     // images apart.
-    float3 p = pointAt(pixel);
+    float3 fromEye = pointAt(pixel);
     float3 eye = passView.world_position;
+    float3 p = eye + fromEye;
     int2 step = max(int2(passPictureSize()) / halfSize, int2(1));
-    float3 n = surfaceNormal(cross(wayAlong(pixel, p, int2(step.x, 0)), wayAlong(pixel, p, int2(0, step.y))), eye - p);
-    if (dot(n, eye - p) < 0.0)
+    float3 n = surfaceNormal(cross(wayAlong(pixel, fromEye, int2(step.x, 0)), wayAlong(pixel, fromEye, int2(0, step.y))), -fromEye);
+    if (dot(n, -fromEye) < 0.0)
         n = -n;
-    float range = length(eye - p);
+    float range = length(fromEye);
     float alike = 0.02 * range + 0.05;
 
     // The four probes around the point, where they marched from this frame, each weighed by how near
@@ -319,7 +322,7 @@ void main(uint3 id : SV_DispatchThreadID)
         int2 offset = int2(corner & 1, corner >> 1);
         float2 lerps = lerp(1.0 - f, f, float2(offset));
         probe[corner] = clamp(base + offset, int2(0), grid - 1);
-        weight[corner] = lerps.x * lerps.y * probeLike(base + offset, grid, at, p, n, alike);
+        weight[corner] = lerps.x * lerps.y * probeLike(base + offset, grid, at, fromEye, n, alike);
     }
     float total = weight.x + weight.y + weight.z + weight.w;
     // Where none of the four is, as on the floor behind a lamp whose probes stand on the lamp, the
@@ -333,7 +336,7 @@ void main(uint3 id : SV_DispatchThreadID)
             int2 other = base + int2(k % 4 - 1, k / 4 - 1);
             float2 apart = abs(g - float2(other));
             float near = max(2.0 - apart.x, 0.0) * max(2.0 - apart.y, 0.0) * 0.25;
-            float w = near > 0.0 ? near * probeLike(other, grid, at, p, n, alike) : 0.0;
+            float w = near > 0.0 ? near * probeLike(other, grid, at, fromEye, n, alike) : 0.0;
             float least = min(min(weight.x, weight.y), min(weight.z, weight.w));
             if (w <= least)
                 continue;
@@ -371,7 +374,7 @@ void main(uint3 id : SV_DispatchThreadID)
     float furthest = 0.0, held = 0.0, still = 0.0, frames = 1.0 / GlowStill;
     if (screen.y > 0.5)
     {
-        float4 clip = passTransform(passPreviousView.clip_from_world, float4(p, 1.0));
+        float4 clip = passPreviousClipAt(fromEye);
         if (clip.w > 1e-5)
         {
             float2 ndc = clip.xy / clip.w;
@@ -388,7 +391,7 @@ void main(uint3 id : SV_DispatchThreadID)
             float3 t = passPreviousView.view_from_world[3].xyz;
             float3 eyeThen = -float3(dot(passPreviousView.view_from_world[0].xyz, t), dot(passPreviousView.view_from_world[1].xyz, t),
                 dot(passPreviousView.view_from_world[2].xyz, t));
-            float expected = distance(p, eyeThen);
+            float expected = distance(fromEye, eyeThen - eye);
             float most = 0.0;
             [unroll]
             for (int corner = 0; corner < 4; corner++)

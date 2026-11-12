@@ -4302,6 +4302,52 @@ the port is offered upstream (Decision 18).
     `064cdae8`, and InternalsVisibleTo's pairs were measured and narrowed to 67 at `8784bdd1`, held
     by N 1.6.
 
+139. **One view's light by the screen's probes moves by half its distance from the reference on a
+    rounding's change, and two tests stand at their bounds by a hair.** From 136's first commit on
+    2026-11-12. With passWorldPosition made the eye plus an offset, a point moved by at most 1.4e-5
+    units near the origin, three tests fail every time, a room lit by one emitter reading its right
+    wall 0.760 against 0.856 and the bounce rooms' fifth view 0.031 and 0.035 against a bound of
+    0.03. By kernel the change bites in gi_light.slang alone, on the pixel's own point at its line
+    627 and nearerStep's neighbors at 424 to 425 together, so its weighing of the screen's probes
+    and the glow texels by the pixel's steps, the expected distance, the facing and the weight's
+    floor before it falls back, moves a whole wall by 11 percent on a change that is rounding; the
+    mean of near-equal steps in nearerStep did not remove it. Another GPU or driver could move a
+    reading the same way. First the read, which weight swings and at which pixels, a floor crossed
+    or a comparison flipped, with the slab's sky light that read 0.180 once against 0.2 and the
+    alley's probe that varies between starts read there as likely the same. Then the weighing made
+    to hold, a reading within a level under steps changed by a few float steps, with a test that
+    changes them so and holds the three readings. Then 136's second commit, the kernels on offsets,
+    on top of it. Said in terms the sibling can check its model pass by, which weighs its probes and
+    glow texels by the same slopes. After 136's first commit, ahead of 135. Corrected by the coder
+    at 08:36 the same morning, before any work on it. The 0.112 is the wall's distance from its
+    reference and the test fails at 11 percent, the wall reading about 9 percent under as a rule by
+    the test's own remark, and the bounce rooms' fifth view sat inside its bound of 0.03 before, so
+    the rounding's change most likely moved each reading by a point or two across a tight bound and
+    did not swing a wall by a tenth. The readings before and after, with the old formula and the
+    new, come after the first commit's suite, and the item's size and place are set by them. Until
+    then it is three readings standing at their bounds and moved by rounding, which is still to be
+    known, the slab's 0.180 against 0.2 perhaps the same kind. The figures, recorded at 10:57, the
+    old point through world_from_clip against the eye plus the offset in gi_light alone. The room
+    lit by one emitter, its right wall 0.766 against the reference's 0.856 on the old, 0.105 under,
+    and 0.760 on the new, 0.112 under, 0.005 inside its bound of 0.11 before and moved 0.006, the
+    other four faces alike to three places, the test's remark of about 9 percent stale, so a bound
+    standing by a hair and the test's fault, as the slab's 0.180 against 0.2 is. The bounce rooms
+    with the screen's probes, the fifth view, red walls at three distances from white blocks in the
+    sun, at High 0.0197 on the old and 0.0311 on the new against a bound of 0.03, at Medium 0.0235
+    and 0.0347, at Low 0.0220 and 0.0219, every other view at every quality within 0.002 of itself;
+    so at the two qualities that read the screen's probes one view's distance from its reference
+    grows by half on a rounding's change, the reading's fault and the item's subject. In that order
+    then. The fifth view read with the screen's probes, where on the picture the 0.011 lies and
+    which weight of the screen probes' or the glow lights' crosses its line there; that weighing
+    mended so the view reads the same within a hair under such a change, with a test that changes
+    the steps by a few float steps; the emitter room's bound measured again and said with its
+    margin; the slab test read in the same pass; then the kernels on offsets. Ahead of 135. Done at
+    `18364420`, pushed at 14:55 on 2026-11-12. The fifth view reads nearer its reference and the
+    same by either way of finding the point; the emitter room's wall stands 12.2 percent under its
+    reference against a bound measured again at 14; the slab's short reading was the frames counted
+    while a pipeline still compiled, mended in the tests' looking. The alley's probe is another
+    thing, a world probe's own light that this weighing does not touch, left for a read of its own.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -11548,6 +11594,61 @@ public listing and the cheat sheet are unchanged, the three types that move bein
 
 Shared: N 1.6's openings listed with why and found by a compilation of each project against the
 others' built assemblies, for the sibling's projects and their InternalsVisibleTo.
+
+Item 139 in the commit carrying this line. gi_light.slang's nearerStep, the step from a pixel to its
+nearer neighbor along each axis, which gives the way the surface faces and the slope the screen's
+probes' and the glow texels' distances are expected along, clamped the neighbor to the picture. On
+the picture's last row and column the neighbor past the edge was the pixel itself and its step the
+pixel's point found twice, nothing but a float's rounding, which as the shorter of the two was
+taken, so the way an edge pixel faced, and every weight resting on it, turned as the rounding fell.
+A neighbor clamped onto the pixel counts as missing, and an edge pixel takes its step from the side
+inside the picture.
+
+Read with gi_light's point as committed and as the eye plus passEyeOffset, the change of a hundred
+thousandth of a unit that showed it. BounceRoomsTests' view 5 with the screen's probes lay 0.0197
+and 0.0311 from its reference on High and 0.0235 and 0.0347 on Medium, the whole difference in the
+picture's edge row and column, up to a quarter of a pixel's light apart there, and reads 0.0182 on
+High and 0.0211 on Medium with either, Low unmoved at 0.0220, so it reads both steadier and nearer
+its reference than on either side before. The one-emitter room's right wall read 0.105 and 0.112
+under its reference and reads 0.122 under with either. Without the picture's outermost pixels it
+reads 0.120 under before and after, so its edge pixels, facing where the rounding put them, read
+brighter than the wall and held it inside its bar of 0.11. Its ceiling reads 0.023 under where 0.027
+and its floor 0.022 where 0.026. The bar is measured again at 14 percent, the wall's 12.2 holding
+1.8 points inside it and every other face within 2.3, the test's remark saying so. View 5's bound of
+0.03 holds High's 0.0182 by 0.012 and Medium's 0.0211 by 0.009.
+
+BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps reads view 5
+on Medium and High with its camera as it is and moved three hundred thousandths of a unit along x, a
+few float steps there, which changes each point of the depth by its rounding alone, and holds the
+two within a thousandth of the light. Without the change they stand 0.0045 and 0.0032 apart, and
+with it 0.00001.
+
+The slab test, AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough, reads the
+same four shares alone twice and in its class's run twice, 0.42 two and a half units up and 0.26
+five and a half at Low and at High, 0.06 inside its floor of 0.2, so nothing a test before it leaves
+moves it and it is no edge's, its floor read in the picture's middle. Its frames were counted from
+the probes' making by Looking, which the nine tests on that helper share, and a pass whose pipeline
+is still compiling is skipped while the count goes on, so on a machine busy with something else, as
+in the suite where its share came out 0.180, fewer of its 180 frames traced. Looking counts them
+from the frame every pipeline is ready, and the nine pass on it, the slab's shares unchanged. At 60
+frames so counted the floor under the solid slab five and a half up has not settled, its share 0.29,
+so 180 stays, its comment saying why in the code's terms.
+
+The alley's world probe in the feature test, which reads apart from one start to the next, is not
+read here. gi.probe reads a world probe's own light, which gi_light's weighing of the screen's
+probes and the glow texels by a pixel's steps does not touch, and view 5 read the same at every
+start of six, before the change and after, so the alley's variance is another thing than this one,
+left for a read of its own.
+
+The whole suite passed, 2,052 passed, 0 failed and 3 skipped, 2,055 in all where the listing is
+2,044. NormTests passed, 19. No native file changed, the solution builds with warnings as errors,
+and the public listing and the cheat sheet are unchanged. The GI kernels on offsets come next, if on
+this they move no reading.
+
+Shared: a neighbor clamped to the picture's edge gives a step of nothing, whose facing turns with
+the rounding, for the sibling's model pass and glow kernel, which take a neighbor's step the same
+way, and frames counted for a probe's settling from the frame its pipelines are ready, for the
+sibling's tests that read after a count of frames.
 
 ## Items closed, parked or shortened
 
