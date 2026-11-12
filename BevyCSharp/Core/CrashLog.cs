@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -231,7 +232,7 @@ public static unsafe class CrashLog
                 text.AppendLine($"Program:   {Program()}");
                 text.AppendLine($"System:    {RuntimeInformation.OSDescription} ({RuntimeInformation.OSArchitecture})");
                 text.AppendLine($".NET:      {RuntimeInformation.FrameworkDescription}");
-                text.AppendLine($"Bridge:    ABI {Native.ExpectedAbiVersion}, renderer {(App.HasRenderer ? "in" : "left out")}, editor features {(App.HasEditor ? "in" : "left out")}");
+                text.AppendLine($"Bridge:    ABI {Native.ExpectedAbiVersion}, package {Package()}, renderer {(App.HasRenderer ? "in" : "left out")}, editor features {(App.HasEditor ? "in" : "left out")}");
                 text.AppendLine($"Adapter:   {_adapter ?? "not known"}");
                 text.AppendLine($"Backend:   {_backend ?? "not known"} asked for");
             }
@@ -272,6 +273,13 @@ public static unsafe class CrashLog
         if (first) Console.Error.WriteLine($"[BevyCSharp] {title}. What happened is written to {path}");
         return path;
     }
+
+    /// <summary>
+    /// The version of the package the library came in, as its assembly says it, which names the pack
+    /// run whose artifact holds the bridge's symbols for a crash's frames.
+    /// </summary>
+    private static string Package() =>
+        typeof(App).Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "not known";
 
     /// <summary>The program's name and version, as its assembly says them.</summary>
     private static string Program()

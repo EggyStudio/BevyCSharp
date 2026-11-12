@@ -11,7 +11,8 @@ namespace Bevy.Tests;
 /// <remarks>
 /// The script is copied into a folder of its own with files standing in for packages, which it
 /// measures and never opens, and given a limit of a few kilobytes, so no package of hundreds of
-/// megabytes is written to find where it fails.
+/// megabytes is written to find where it fails, and the version published before with its size,
+/// so it reads nothing from nuget.org.
 /// </remarks>
 public sealed class PackageSizeTests : IDisposable
 {
@@ -32,7 +33,7 @@ public sealed class PackageSizeTests : IDisposable
         var (exit, said, errors) = Measure(python, 8192);
 
         Assert.True(exit == 0, $"the script ended with {exit}: {errors}");
-        Assert.Contains("BevyCSharp.1.0.0-t.nupkg 1,000 bytes, 3,096 bytes of room", said);
+        Assert.Contains("BevyCSharp.1.0.0-t.nupkg 1,000 bytes, 3,096 bytes of room (75.59%), where 0.8.4 on nuget.org was 2,000 bytes with 2,096 of room", said);
         Assert.Contains("BevyCSharp.Templates.1.0.0-t.nupkg 500 bytes, 3,596 bytes of room", said);
         Assert.DoesNotContain("0.9.0", said);
     }
@@ -77,6 +78,7 @@ public sealed class PackageSizeTests : IDisposable
         start.ArgumentList.Add(Path.Combine(work, "build", "package-size.py"));
         start.ArgumentList.Add("1.0.0-t");
         start.Environment["PACKAGE_SIZE_LIMIT"] = limit.ToString();
+        start.Environment["PACKAGE_SIZE_PUBLISHED"] = "0.8.4=2000";
         start.Environment.Remove("GITHUB_STEP_SUMMARY");
 
         using var script = Process.Start(start)!;

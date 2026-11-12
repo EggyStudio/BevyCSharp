@@ -64,6 +64,7 @@ public sealed class CrashLogTests : IDisposable
         Assert.Contains("System.Exception: the reason", text);
         Assert.Contains("a line before the crash", text);
         Assert.Contains($"ABI {Native.ExpectedAbiVersion}", text);
+        Assert.Contains(", package ", text);
         Assert.Contains("Vulkan asked for", text);
         Assert.Contains(System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription, text);
 
@@ -82,6 +83,36 @@ public sealed class CrashLogTests : IDisposable
         Assert.Contains("A panic inside Bevy", text);
         Assert.Contains("thread 'panic on purpose' panicked at", text);
         Assert.Contains("stack:", text);
+    }
+
+    /// <summary>
+    /// A panic on a thread of Bevy's writes its frames as offsets into the bridge with the bridge's
+    /// build id, and <c>build/name-crash.py</c> names the frame the panic was made in from the full
+    /// library of that build.
+    /// </summary>
+    /// <remarks>
+    /// A pack's bridge carries no symbol table, so std's stack names none of its frames there, and the
+    /// namer reads the offsets and the build id alone, never std's stack. Stripping moves no code, so
+    /// the offsets the full library the tests run on writes are the ones its stripped copy writes. A
+    /// Windows library's symbols lie in a PDB, which the namer does not read, so there the frames keep
+    /// their offsets and the test is skipped.
+    /// </remarks>
+    [SkippableFact]
+    public void APanicsFramesAreNamedFromTheFullLibraryOfItsBuild()
+    {
+        Skip.If(OperatingSystem.IsWindows(), "a Windows library's symbols lie in a PDB, which the namer does not read");
+        var python = Needs.Python();
+        Native.Check(Native.bcs_panic_on_purpose(0), "panicking on purpose");
+        Assert.NotNull(CrashLog.Crash);
+        Assert.Matches(@"bridge (elf|mach-o) [0-9a-f]{16,}", Read(CrashLog.Crash));
+
+        var library = OperatingSystem.IsMacOS() ? "libbevy_csharp.dylib" : "libbevy_csharp.so";
+        var symbols = Directory.CreateDirectory(_folder.File("symbols")).FullName;
+        File.Copy(Path.Combine(AppContext.BaseDirectory, library), Path.Combine(symbols, library));
+        var named = NameCrash.Run(python, CrashLog.Crash, symbols);
+
+        Assert.Contains(", named from ", named);
+        Assert.Matches(@": bridge\+0x[0-9a-f]+ +\S*bcs_panic_on_purpose", named);
     }
 
     [Fact]

@@ -209,6 +209,22 @@ the things a report from somebody else's machine is read for. The next run says 
 crash's file is as it starts, and `CrashLog.LastCrash` holds it for a game that offers to open it.
 `Config.Logs` names another folder, or an empty string for none.
 
+A panic inside Bevy's side is written with its stack twice. The bridge a package carries holds no
+names for its functions, so the stack std writes names few of its frames, and after it, under
+`frames:`, the panic writes the bridge's build id and each frame as an offset into the bridge, which
+name the frames from the full library kept for that build. To name them:
+
+1. Read the package's version on the crash file's `Bridge` line, the version the game ran on.
+2. Download the artifact `bridge-symbols-<version>` of the pack run that made that version, from the
+   run's page under the repository's Actions. GitHub keeps it ninety days from the run, so a crash
+   file from a version older than that cannot be named this way.
+3. From a checkout, run `build/name-crash.py <crash file> <the artifact's folder>`. It finds the
+   library whose build id the crash file names, by the `.build-id` file beside each, and writes the
+   crash file again with the function each frame lies in.
+
+A Windows bridge's frames keep their offsets, the build id naming the PDB beside the library in the
+artifact, which the script does not read.
+
 A run that might take the machine's memory with it, a test, a scene being tried or a tool
 controlling a game, is given a cap in gigabytes by `Config.MemoryCap` or `BCS_MEMORY_CAP_GB`. A
 thread of its own reads how much memory the process holds four times a second, and past the cap the

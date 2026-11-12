@@ -179,6 +179,14 @@ for itself are still read from the folder or the game's assembly, which a bridge
 render bridge the Play tab's export ships, so a checkout whose projects run on the editor's bridge
 still exports a game without one.
 
+`--strip` takes the symbol table out of the staged copy a package carries and keeps the full
+library under `build/symbols/<rid>/`, with its build id in a `.build-id` file beside it, and a
+Windows library, which carries no symbol table, with its PDB beside it. The pack's native jobs pass
+it, and the pack job keeps the six as one artifact, `bridge-symbols-<version>`, for ninety days,
+from which `build/name-crash.py` names the frames of a crash file a game writes
+([docs/running-a-game.md](../docs/running-a-game.md)). The copy in `build/target/release` keeps its
+symbols, which a profiler reads.
+
 ## Bevy's components after an upgrade
 
 `BevyCSharp/Core/Generated/bevy-components.tsv` describes every component Bevy reflects, and the
@@ -320,8 +328,8 @@ packed last written in, into `build/package` beside it, so the two go out togeth
 
 `build/package-size.py <version>` says the size of each package of a version in `build/package`
 against the size nuget.org takes, 262,144,000 bytes of a push's request less 4,096 for the form the
-push wraps a package in, and fails where one is over, as the pack job does on every run before a
-package is kept or pushed. The engine's package carries the bridge for every system and stood at
+push wraps a package in, beside the last version nuget.org lists of the same package and its size,
+and fails where one is over, as the pack job does on every run before a package is kept or pushed. The engine's package carries the bridge for every system and stood at
 249,913,716 bytes at 0.6.91.
 
 Packing fails with `BCS101` if the staged bridge is older than a file under `native` it is built

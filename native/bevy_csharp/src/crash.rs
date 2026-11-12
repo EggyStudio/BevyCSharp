@@ -21,6 +21,8 @@
 //! server has closed, and written as a crash it would make the next run say the last one crashed
 //! when it ended as it was asked to.
 
+mod frames;
+
 use core::cell::Cell;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::{Mutex, Once};
@@ -130,9 +132,13 @@ fn describe(info: &std::panic::PanicHookInfo<'_>) -> String {
         .unwrap_or_else(|| "a place it did not say".to_string());
 
     // Captured whatever RUST_BACKTRACE says, since a player's machine has it unset and the stack
-    // is the most of what a report from one can say.
+    // is the most of what a report from one can say. Its frames are named from the library's
+    // symbol table where the library carries one, and written again as offsets into the library
+    // with its build id, which name them from the full library kept for the build where it does
+    // not (frames).
     let stack = std::backtrace::Backtrace::force_capture();
-    format!("thread '{name}' panicked at {place}:\n{message}\n\nstack:\n{stack}")
+    let frames = frames::written();
+    format!("thread '{name}' panicked at {place}:\n{message}\n\nstack:\n{stack}\nframes:\n{frames}")
 }
 
 /// Gives the bridge the managed side's writer for a panic outside the guard, and puts the hook in.

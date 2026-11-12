@@ -4405,6 +4405,15 @@ the port is offered upstream (Decision 18).
     offset and the ray's way with the night sky far out at `2fc9beb0`, and the kernels on offsets
     once 139's mend had made the weighing hold, moving no reading.
 
+140. **Comments that say what the code is as it stands.** N 4.11 as widened on 2026-11-12. A comment
+    says what the code is and why in its own terms. It does not liken one thing to another's state,
+    tell what the code was before, what a mend changed or which fault led to it, nor name a program
+    built on this one as its example. A sweep of every comment in the sources, the shaders, the
+    tests and the scripts for those three things, the words that give them away among them, as it
+    was, as before, no longer, still, used to, once, already, and a game or a kind of game named.
+    Each rewritten to say what stands, the story going to nothing or to the Reply. A commit of
+    comments alone, with the norm's search added to STYLE.md's so it is found again.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -11829,6 +11838,39 @@ solution builds with warnings as errors, and the public listing and the cheat sh
 Shared: the kernels' points of the depth named fromEye as the sibling's are, toward item 138's one
 copy, and the A/B on the kernels alone, which found here none of the normals' loss the sibling met,
 for the sibling's read of where the two differ.
+
+Item 140 in the commit carrying this line, comments alone. N 4.11 as widened has a comment say what
+the code is as it stands, not what it was, what a mend changed or which fault led to it, liken
+nothing to another thing's state as its reason, and name no program built on the library as its
+example, its reason given in the code's own terms. A search of the comments of 2,184 files for the
+words that give those away found 1,755 lines in 770 files, each read in place by area. 23 comments
+are rewritten in 23 files of the library, 24 in 19 of the kernels and the native crate, 61 in 49 of
+the tests, and 34 in 24 of the examples, the editor, the tools, the scripts, the workflows and the
+games, and 16 that told a thing's state at run time in a phrase STYLE.md bars are said plainly, 128
+files in all.
+
+The rest read sound, runtime state, a fixed step, bytes read as a float, a game as the library's
+user, a test naming the level it tests, the editor's Play naming the project it opens, a voxel as a
+unit of data. Among those rewritten, bcs_pass.slang's passEyeOffset and passClipOfOffset, which told
+what a point in the world's numbers stepped by 4,450 units out, and gi_screen_glow.slang's quarter
+texel, which told what a still view read as, say what the lookup and the offset must be and what
+goes wrong where they are not. The tests' remarks that told what a reading was before a change,
+which room of the feature test worked round a fault, or what a runner of a push run lacked, say what
+the test holds and why, and the workflows' and scripts' notes on a past run say what the step guards
+against. A test's bound kept with its margin, the emitter room's 12.2 percent inside 14, says what
+stands and stays, and a Cornell box's lamp is kept as a standard scene rather than a program. The
+modules, their own repositories, and the generated wrappers are left out, the generator's template
+for the wrappers' remark rewritten so they follow on the next build.
+
+STYLE.md's checks gain the search, its hits read rather than counted, 622 of them after the sweep,
+each read sound.
+
+No code moved. The bridge is rebuilt, its sources' comments being part of it, the native checks
+clean in the three profiles and cargo's tests passing, 118 with no feature and 205 with render. The
+solution builds with warnings as errors, NormTests passed, 19, and the examples' table's check
+passes.
+
+Shared: N 4.11 as widened and STYLE.md's search for it, for the sibling's comments.
 
 ## Items closed, parked or shortened
 

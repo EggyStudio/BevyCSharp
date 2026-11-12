@@ -132,6 +132,25 @@ jobs:
           path: build/package/*.nupkg
           if-no-files-found: error
 
+      # The full library of each system the package carries stripped, with its build id beside it,
+      # in one artifact named by the version, from which build/name-crash.py names the frames of a
+      # crash file a game on this version writes (docs/running-a-game.md). Kept as long as GitHub
+      # keeps an artifact, ninety days.
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: symbols-*
+          path: build/symbols
+
+      - name: Show the symbols' builds
+        run: find build/symbols -name '*.build-id' -exec sh -c 'echo "$1 $(cat "$1")"' _ {} \;
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: bridge-symbols-${{ steps.version.outputs.version }}
+          path: build/symbols
+          if-no-files-found: error
+          retention-days: 90
+
       # A key for this push alone, which nuget.org gives for the job's token where its trusted
       # publishing policy names the user, this repository and this workflow, and which lasts an
       # hour, so it is asked for right before the push. The policy belongs to the EggyStudio account,

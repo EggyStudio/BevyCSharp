@@ -15,12 +15,22 @@ maxAllowedContentLength the same, and answers 413, the package file exceeding th
 request is the package in a form of one part, as dotnet nuget push sends it, a few hundred bytes of
 framing, and the check leaves 4,096 bytes for it.
 
-PACKAGE_SIZE_LIMIT gives the request's limit in bytes in place of the gallery's, for a test.
+Beside each package it says the last version nuget.org lists of the same package and that one's
+size and room, read from the gallery's flat container, so a run shows what its package weighs
+against the one published before it, and a reader of a later run sees which version it is
+compared with.
+
+PACKAGE_SIZE_LIMIT gives the request's limit in bytes in place of the gallery's, and
+PACKAGE_SIZE_PUBLISHED the version and size published before as `<version>=<bytes>`, or `none`, in
+place of the gallery's, for a test.
 """
 
 import glob
+import json
 import os
+import re
 import sys
+import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FOLDER = os.path.join(ROOT, "build", "package")
@@ -37,6 +47,29 @@ def say(line, summary):
             page.write(summary + "\n")
 
 
+def published(package_id, version):
+    """The last version nuget.org lists of the package other than this one, and its size in bytes,
+    or None where the gallery says none or cannot be read."""
+    given = os.environ.get("PACKAGE_SIZE_PUBLISHED")
+    if given is not None:
+        if given == "none":
+            return None
+        last, size = given.split("=")
+        return last, int(size)
+    flat = f"https://api.nuget.org/v3-flatcontainer/{package_id.lower()}"
+    try:
+        with urllib.request.urlopen(f"{flat}/index.json", timeout=30) as answer:
+            versions = [v for v in json.load(answer)["versions"] if v != version.lower()]
+        if not versions:
+            return None
+        last = versions[-1]
+        asked = urllib.request.Request(f"{flat}/{last}/{package_id.lower()}.{last}.nupkg", method="HEAD")
+        with urllib.request.urlopen(asked, timeout=30) as answer:
+            return last, int(answer.headers["Content-Length"])
+    except (OSError, ValueError, KeyError):
+        return None
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit("usage: build/package-size.py <version>")
@@ -48,7 +81,8 @@ def main():
 
     say(f"{len(files)} packages of {version}, each against {LIMIT:,} bytes, nuget.org's {REQUEST_LIMIT:,} of a request less {FRAMING:,} for its framing",
         f"### The packages against nuget.org's size\n\nEach against {LIMIT:,} bytes, nuget.org's {REQUEST_LIMIT:,} of a request less "
-        f"{FRAMING:,} for its framing.\n\n| Package | Bytes | Room |\n|---|---:|---:|")
+        f"{FRAMING:,} for its framing, beside the last version nuget.org lists of it.\n\n"
+        f"| Package | Bytes | Room | Published before | Its bytes | Its room |\n|---|---:|---:|---|---:|---:|")
     over = []
     for path in files:
         name = os.path.basename(path)
@@ -56,8 +90,16 @@ def main():
         room = LIMIT - size
         if room < 0:
             over.append(name)
-        say(f"  {name} {size:,} bytes, {room:,} bytes of room ({room / LIMIT:.2%})" + (", over" if room < 0 else ""),
-            f"| {name} | {size:,} | {room:,} ({room / LIMIT:.2%}) |")
+        package_id = re.sub(r"\." + re.escape(version) + r"\.nupkg$", "", name)
+        before = published(package_id, version)
+        if before is None:
+            was, was_row = ", nothing published before it read", "| none read | | |"
+        else:
+            last, last_size = before
+            was = f", where {last} on nuget.org was {last_size:,} bytes with {LIMIT - last_size:,} of room"
+            was_row = f"| {last} | {last_size:,} | {LIMIT - last_size:,} ({(LIMIT - last_size) / LIMIT:.2%}) |"
+        say(f"  {name} {size:,} bytes, {room:,} bytes of room ({room / LIMIT:.2%})" + (", over" if room < 0 else "") + was,
+            f"| {name} | {size:,} | {room:,} ({room / LIMIT:.2%}) {was_row}")
     if over:
         sys.exit(f"over the size nuget.org takes, so nothing is pushed: {', '.join(over)}")
 

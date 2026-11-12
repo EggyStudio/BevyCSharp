@@ -108,9 +108,12 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev
 
+      # The six bridges a package carries are stripped of their symbol tables, the full library
+      # kept under build/symbols with its build id beside it, which names a crash file's frames
+      # (build/name-crash.py). The captures' bridge goes in no package and keeps its symbols.
       - name: Build native bridge
         shell: bash
-        run: build/build-native.sh --render ${{ matrix.features }} --target ${{ matrix.target }}
+        run: build/build-native.sh --render ${{ matrix.features }} --target ${{ matrix.target }} ${{ !matrix.artifact && '--strip' || '' }}
 
       - uses: actions/upload-artifact@v7
         with:
@@ -118,6 +121,16 @@ jobs:
           path: build/artifacts/${{ matrix.rid }}/*
           if-no-files-found: error
           # Only the pack run's own jobs read them, so they need not outlive it by much.
+          retention-days: 3
+
+      # The full library and its build id, which the pack job gathers into one artifact named by the
+      # version and keeps as long as an artifact is kept.
+      - uses: actions/upload-artifact@v7
+        if: ${{ !matrix.artifact }}
+        with:
+          name: symbols-${{ matrix.rid }}
+          path: build/symbols/${{ matrix.rid }}/*
+          if-no-files-found: error
           retention-days: 3
 
   # Each named for its system through its entry, since this job is never skipped and its name's

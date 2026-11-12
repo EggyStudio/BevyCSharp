@@ -39,6 +39,8 @@ msbuild.log
 /build/embedded/
 # A render bridge for exported games, built with --game.
 /build/game/
+# The full library a bridge built with --strip keeps, its symbols, with its build id.
+/build/symbols/
 # The Slang compiler build/fetch-slang.sh downloads.
 /build/tools/
 # The copy of templates/ that build/pack-templates.sh packs with the engine's version written in.

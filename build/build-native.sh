@@ -19,6 +19,8 @@
 #   build/build-native.sh --render --embed dir # one game's bridge, its assets compiled in
 #   build/build-native.sh --render --game      # a bridge for exported games, kept apart
 #   build/build-native.sh --render --portable  # build in a container, for older machines
+#   build/build-native.sh --render --strip     # the staged library without its symbol table,
+#                                              # the full one kept under build/symbols/<rid>
 #   build/build-native.sh --local              # override a PORTABLE=1 in build-native.local
 #   build/build-native.sh --clean              # remove build/target and build/artifacts first
 #
@@ -52,6 +54,7 @@ GAME=0
 TARGET=""
 CLEAN=0
 PORTABLE=0
+STRIP=0
 
 # Per-machine defaults, not checked in.
 #
@@ -80,6 +83,7 @@ while [[ $# -gt 0 ]]; do
         --target)   TARGET="$2"; shift 2 ;;
         --clean)    CLEAN=1; shift ;;
         --portable) PORTABLE=1; shift ;;
+        --strip)    STRIP=1; shift ;;
         --local)    PORTABLE=0; shift ;;
         -h|--help)
             sed -n '2,29p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
@@ -308,6 +312,36 @@ fi
 # native, a module only another profile builds among them.
 mkdir -p "$ARTIFACT_DIR/$RID"
 cp "$BUILT" "$ARTIFACT_DIR/$RID/$LIBNAME"
+
+# A pack's bridge carries no symbol table, a large share of a Linux or macOS library's bytes, and
+# the full library is kept under build/symbols/<rid> with its build id in a file beside it, from
+# which build/name-crash.py names the frames a crash file writes as offsets into it. Stripping
+# moves no code, so an offset into the one is an offset into the other. A macOS library is signed
+# again, since its signature covers the bytes the strip takes out and an arm64 Mac loads no library
+# whose signature does not hold. A Windows library carries no symbols, so its PDB is kept beside it.
+# The local copy below keeps its symbols, which a profiler reads.
+if [[ $STRIP -eq 1 ]]; then
+    SYMBOLS="$BUILD_DIR/symbols/$RID"
+    mkdir -p "$SYMBOLS"
+    cp "$BUILT" "$SYMBOLS/$LIBNAME"
+    PYTHON="$(command -v python3 || command -v python || true)"
+    if [[ -n "$PYTHON" ]]; then
+        "$PYTHON" "$BUILD_DIR/name-crash.py" --build-id "$BUILT" > "$SYMBOLS/$LIBNAME.build-id"
+    else
+        echo "unknown" > "$SYMBOLS/$LIBNAME.build-id"
+        echo "!!  No Python to read the build id with, so $SYMBOLS/$LIBNAME.build-id says unknown" >&2
+    fi
+    case "$LIBNAME" in
+        *.so)
+            strip --strip-all "$ARTIFACT_DIR/$RID/$LIBNAME" ;;
+        *.dylib)
+            strip -x "$ARTIFACT_DIR/$RID/$LIBNAME"
+            codesign --force --sign - "$ARTIFACT_DIR/$RID/$LIBNAME" ;;
+        *.dll)
+            if [[ -f "${BUILT%.dll}.pdb" ]]; then cp "${BUILT%.dll}.pdb" "$SYMBOLS/"; fi ;;
+    esac
+    echo "==> stripped $ARTIFACT_DIR/$RID/$LIBNAME, its symbols in $SYMBOLS, build $(cat "$SYMBOLS/$LIBNAME.build-id")"
+fi
 
 # A flat copy for repo-local development. The projects copy this next to their own output, so
 # running the sample or the tests works without packing first. Always under build/target, which

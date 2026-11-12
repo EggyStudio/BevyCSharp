@@ -5,6 +5,7 @@
 
 BevyCSharp.Tests/Build/AnimateScriptTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/DocsScriptTests.cs	tests the build scripts, which are no area of the library
+BevyCSharp.Tests/Build/NameCrashTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/PackageSizeTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ReleaseNotesTests.cs	tests the build scripts, which are no area of the library
 BevyCSharp.Tests/Build/ScriptTests.cs	tests the build scripts, which are no area of the library
