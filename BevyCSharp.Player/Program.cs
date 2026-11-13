@@ -46,6 +46,10 @@ config.AssetRoot = assets;
 config.GameName = "BevyCSharp Player";
 config.Serve = args.Contains("--serve");
 
+// The scene's assets and its scripts are read again as their files change, as the editor reads
+// them, so what is saved in the editor while the scene plays shows in it.
+config.WatchAssets = true;
+
 if (!App.HasRenderer)
 {
     Console.Error.WriteLine("This native bridge has no renderer, so there is nothing to play the scene on.");
@@ -58,17 +62,14 @@ PlayerBoot.View = View(Value("--view"));
 return BevyApp.Run(
     app =>
     {
-        // Scripts reload while the app runs, so their systems can arrive after the schedule is
-        // Bevy's, and the dispatchers have to be there first. The first build is before the run,
-        // so a state a script declares on its enum is added along with the rest.
-        app.EnableDynamicSystems();
-
         // Physics as a game's program adds it, since a scene's scripts can add no plugin of their
         // own and a scene whose bodies never move is not the game being played.
         app.AddPlugin(new Bevy.Physics.PhysicsPlugin());
 
-        PlayerBoot.Host = app;
-        PlayerBoot.Compile(app, config.AssetRoot!);
+        // The asset folder's scripts, compiled before the run, so a state a script declares on its
+        // enum (InitialStateAttribute) is added along with the rest, as it is in the game the
+        // scripts are compiled into. A project with no scripts folder has none to compile.
+        if (Directory.Exists(Path.Combine(assets, "scripts"))) app.AddPlugin(new Bevy.Scripting.ScriptsPlugin());
     },
     config);
 

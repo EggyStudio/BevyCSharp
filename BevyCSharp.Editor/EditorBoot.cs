@@ -15,7 +15,7 @@ namespace BevyCSharp.Editor;
 [Behavior]
 public partial struct EditorBoot
 {
-    /// <summary>The running app, so the script host can register into it.</summary>
+    /// <summary>The running app, which the scripts' plugin is added to as the editor starts.</summary>
     public static App? Host { get; set; }
 
     /// <summary>Builds the scene the panels float over, then opens what starts open.</summary>
@@ -128,10 +128,6 @@ public partial struct EditorBoot
 
         return camera;
     }
-
-    /// <summary>Rebuilds the scripts when one has changed and settled.</summary>
-    [OnUpdate]
-    public static void ReloadScripts(BehaviorContext ctx) => EditorScripts.Poll();
 
     /// <summary>
     /// Hands the interface's reports to the panels, once a frame.

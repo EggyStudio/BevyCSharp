@@ -292,9 +292,14 @@ compiled against is read once for the process and shared by every compilation, s
 again and again costs a compilation and not another copy of the runtime. A `[Command]` in a script
 is not registered, since commands are written into a game's assembly as it is built.
 
-A script that does not compile changes nothing. The errors are reported and the running
-generation stays. The compiler itself lives in `BevyCSharp.Editor`, because a game should not
-carry one in order to run.
+A script that does not compile changes nothing. The errors are said in the log as a warning and the
+running generation stays. The compiler lives in `BevyCSharp.Scripting`, which the package leaves
+out, because a game should not carry one in order to run. The editor and the Player add its
+`ScriptsPlugin`, and a game that references the project adds it the same way, with
+`app.AddPlugin(new ScriptsPlugin())`. It compiles the asset folder's `scripts` as the app is built
+and again when a script is saved where the app watches its assets, says each build in the log, and
+answers `scripts.reload`, which builds again on request, and `scripts.status`, which says what runs
+and how the last build went.
 
 ---
 

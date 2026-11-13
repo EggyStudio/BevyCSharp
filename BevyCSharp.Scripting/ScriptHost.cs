@@ -39,6 +39,9 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>How many behaviors the last successful build registered.</summary>
     public int Registered { get; private set; }
 
+    /// <summary>How many script files the last successful build compiled.</summary>
+    public int Files { get; private set; }
+
     /// <summary>
     /// How many components the last build moved onto the types it declared them as again, or put
     /// back on entities a scene loaded before there were types for them.
@@ -111,6 +114,7 @@ public sealed class ScriptHost(App app, string directory)
         _loaded = context;
         _tag = name;
         Registered = registered;
+        Files = sources.Length;
         LastError = null;
         return true;
     }
@@ -270,7 +274,8 @@ public sealed class ScriptHost(App app, string directory)
     }
 
     /// <summary>
-    /// Invokes the generated registration in a freshly loaded assembly.
+    /// Invokes the generated registration in a freshly loaded assembly, and reports how many
+    /// behaviors the assembly declares.
     /// </summary>
     /// <remarks>
     /// The generator emits one tagged entry point per assembly. Finding it by attribute rather than
@@ -284,10 +289,12 @@ public sealed class ScriptHost(App app, string directory)
         // would have no schema for a level to be read with.
         System.Runtime.CompilerServices.RuntimeHelpers.RunModuleConstructor(assembly.ManifestModule.ModuleHandle);
 
-        var found = 0;
+        var behaviors = 0;
 
         foreach (var type in assembly.GetTypes())
         {
+            if (type.GetCustomAttribute<BehaviorAttribute>() is not null) behaviors++;
+
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.Public
                                                    | BindingFlags.NonPublic))
             {
@@ -296,12 +303,10 @@ public sealed class ScriptHost(App app, string directory)
 
                 using (new SystemRegistrationSourceScope(assembly.GetName().Name!))
                     method.Invoke(null, [app]);
-
-                found++;
             }
         }
 
-        return found;
+        return behaviors;
     }
 
     /// <summary>One generation's assembly, in a context that can be dropped.</summary>

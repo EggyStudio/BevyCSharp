@@ -357,9 +357,9 @@ Known gaps:
   of their own, and a compressed texture a desktop GPU cannot decode is not transcoded.
   [.github/TODO.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/TODO.md) lists what each gap needs.
 - The library compiles no C# at runtime, so a game carries no compiler. Behavior scripts loaded
-  while an app runs go through `BevyCSharp.Scripting`, which the editor and the player reference
-  and a game references only if it loads scripts itself, over `App.EnableDynamicSystems` and
-  `App.RemoveSystemsBySource`.
+  while an app runs go through `ScriptsPlugin` in `BevyCSharp.Scripting`, which the editor and the
+  player add and a game adds only where it references the project, over
+  `App.EnableDynamicSystems` and `App.RemoveSystemsBySource`.
 - The editor's document is a scene file, with the hierarchy, entity references and Bevy's own
   components kept, and primitives and materials made in memory written as how to make them again.
   A mesh built vertex by vertex is written as its geometry, and a material can be kept in a

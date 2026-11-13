@@ -39,3 +39,4 @@ BevyCSharp.Tests/Scripting/ScriptExtensionTests.cs	tests the script host, which 
 BevyCSharp.Tests/Scripting/ScriptGenerationTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReferenceTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptReloadTests.cs	tests the script host, which is no area of the library
+BevyCSharp.Tests/Scripting/ScriptsPluginTests.cs	tests the script host, which is no area of the library

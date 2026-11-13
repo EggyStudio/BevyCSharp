@@ -119,7 +119,7 @@ render = [
     # where its config asks (`Config.WatchAssets`), and the bridge says no outright everywhere
     # else, since Bevy would otherwise watch in every app of a build that carries it. notify, its
     # debouncer, walkdir and the system's watcher, seven crates on Linux and macOS and nine on
-    # Windows, all in the lock with the editor profile before it.
+    # Windows, all of them in the lock.
     "bevy/file_watcher",
     # Asking a window's surface what it can be composited as, before Bevy configures it with
     # something it cannot. The version Bevy builds, so it adds nothing.

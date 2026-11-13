@@ -41,7 +41,7 @@ change made there is seen without being written into code. Built, all of it:
 
 - **A player.** `BevyCSharp.Player` starts an app (`--scene <file> --assets <dir>`, and
   `--offscreen`, `--serve` and `--size` as the sample takes them), compiles the scripts under the
-  asset folder's `scripts` through the script host the editor uses, then loads the scene file
+  asset folder's `scripts` through the `ScriptsPlugin` the editor adds, then loads the scene file
   ([SCENES.md](SCENES.md)) and spawns what it holds, saying by name any type it did not know. A
   scene with no camera of its own, which is every scene made in the editor, since the editor's
   camera is its own and not saved, gets one where `--view` puts it. The script host moved out of

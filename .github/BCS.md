@@ -61,6 +61,7 @@ What is usually there:
 | `model.<operation> <name> <words>`, as `model.box room 8 3 6` or `model.cut room window 1 1 2 0.9` | Shape a model a line of its recipe at a time, each answering the model's counts; `model.new`, `free`, `list`, `info`, `recipe`, `undo`, `redo`, `save`, `load` and `show` besides (docs/modeling.md) |
 | `record <path> <length> [every <step>] [scale <s>] [play <time>]`, `record.stop`, `record.status` | Record the window as an animated GIF or PNG, for `5s`, `120f` or a count of pictures, one every `250ms`, `1s` or `15f` (use `./bcs record`, which waits for the file) |
 | `log.tail <n>` | The last lines the app wrote |
+| `scripts.reload`, `scripts.status` | Where the app compiles behavior scripts, the editor, the Player or a game adding `ScriptsPlugin`: compile them again in place of the running ones, or say the folder, what runs, whether a change is compiled as it is saved, and the last build's errors |
 | `eval <c#>` | Editor only: compile and run a fragment against the live world |
 | `do <Menu/Path>`, `select <name>`, `undo`, `redo`, `world.save`/`world.load` | Editor only |
 | `setting ["Page/Label" [value]]` | Editor only: list, read or change any Settings row, the project's own included |

@@ -9,7 +9,8 @@
       Compiling behavior scripts while an app runs, shared by the editor and the player that plays
       the scene being edited. Its own project rather than part of the library, because it carries
       Roslyn, and a shipped game compiles its scripts ahead of time and has no reason to carry a
-      compiler. The editor and the player reference it, and a game does not.
+      compiler. The editor and the player reference it, and so can a game that references the
+      project, which the package leaves out.
     -->
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0"/>
@@ -18,11 +19,12 @@
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
         <!--
-          Referenced for its generator type rather than loaded as an analyzer, since this project
-          declares no behaviors of its own and runs the generator over the scripts it compiles, so a
-          script becomes a behavior the same way a compiled one does.
+          Referenced as well as loaded as an analyzer, as the editor does. The reference half runs
+          the generator over the scripts this compiles, so a script becomes a behavior the same way
+          a compiled one does, and the analyzer half registers this project's own commands.
         -->
         <ProjectReference Include="../BevyCSharp.Generator/BevyCSharp.Generator.csproj"
+                          OutputItemType="Analyzer"
                           ReferenceOutputAssembly="true"/>
     </ItemGroup>
 

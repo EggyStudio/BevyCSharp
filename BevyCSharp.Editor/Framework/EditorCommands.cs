@@ -185,7 +185,7 @@ public static class EditorCommands
         EditorSettings.Fact(
             "Project",
             "Behaviors from scripts",
-            static () => $"{EditorScripts.Registered} registration(s)",
+            static () => $"{EditorScripts.Registered}",
             11);
 
         EditorSettings.Fact(
