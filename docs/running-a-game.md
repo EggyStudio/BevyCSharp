@@ -235,10 +235,13 @@ every app they start eight gigabytes, or a quarter of the machine's memory where
 
 ## Hot reload
 
-The editor profile watches the asset directory, so a running app picks up what changed on disk.
-`Config.WatchAssets` turns it on.
+A game watches its asset directory where `Config.WatchAssets` is on, so a running game picks up
+what changed on disk. A game built in Debug watches and one built in Release does not, and a program
+that sets `Config.WatchAssets` decides either way.
 
-Assets reload, so a texture, a mesh or a font changed on disk is picked up by the running app.
+Assets reload, so a texture, a mesh or a font changed on disk is picked up by the running app, and
+an `AssetReloaded` message says which. They need a bridge with the renderer, which carries Bevy's
+watcher.
 Shaders reload in every profile, watcher or not, including a Slang shader when a file it imports
 changes. What happens when one fails is under [Drawing](drawing.md).
 

@@ -13,7 +13,7 @@
 # Usage:
 #   build/build-native.sh                      # host, headless profile
 #   build/build-native.sh --render             # host, with Bevy's renderer
-#   build/build-native.sh --editor             # the above plus the HTML and CSS UI
+#   build/build-native.sh --editor             # the above plus Bevy's type documentation
 #   build/build-native.sh --editor --meshlet   # any profile plus Bevy's meshlets
 #   build/build-native.sh --editor --solari    # any profile plus Bevy's ray-traced lighting
 #   build/build-native.sh --render --embed dir # one game's bridge, its assets compiled in

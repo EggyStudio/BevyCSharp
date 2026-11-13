@@ -20,6 +20,7 @@ use crate::state::{with_world, with_world_opt};
 
 pub mod atlas_builder;
 pub mod folders;
+pub mod reloads;
 pub mod unused;
 
 /// Registers an asset type unless the app already has one, and reports whether it did.
@@ -715,8 +716,9 @@ pub unsafe extern "C" fn bcs_asset_source_add(
     })
 }
 
-/// Registers every source [`bcs_asset_source_add`] named, before the asset plugin builds them.
-pub fn install_sources(app: &mut bevy::app::App) {
+/// Registers every source [`bcs_asset_source_add`] named, before the asset plugin builds them, and
+/// the queue of the assets Bevy's watcher read again ([`reloads`]).
+pub fn install(app: &mut bevy::app::App) {
     use bevy::asset::io::AssetSourceBuilder;
     use bevy::asset::AssetApp;
 
@@ -725,4 +727,6 @@ pub fn install_sources(app: &mut bevy::app::App) {
     for (name, root) in sources {
         app.register_asset_source(name, AssetSourceBuilder::platform_default(&root, None));
     }
+
+    reloads::install(app);
 }

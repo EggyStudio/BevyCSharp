@@ -8,10 +8,12 @@ namespace BevyCSharp.Examples.Assets;
 // Shows a scene loaded from a glTF file that is loaded again whenever the file changes, so an edit
 // to torus.gltf shows while the app runs.
 //
-// Bevy watches its asset folder when its file_watcher feature is built, which the editor profile
-// builds here, so a game watching its files runs on that profile.
+// Bevy watches its asset folder where the bridge carries its watcher, the render profile and those
+// over it, and the config asks for it, as Bevy's example asks its asset plugin to watch.
 internal static class HotAssetReloading
 {
+    public static void Configure(Config config) => config.WatchAssets = true;
+
     public static void Build(App app)
     {
         app.Startup(ctx =>

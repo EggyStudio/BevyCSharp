@@ -4,10 +4,21 @@ namespace Bevy;
 /// Posted when Bevy has spawned a scene asset under an entity, with any overrides on it applied.
 /// </summary>
 /// <param name="Entity">The entity the scene was spawned under.</param>
+/// <param name="Reloaded">
+/// True where the scene is ready again under an entity it was ready under before, as it is when its
+/// file changed while the app watches its assets and the scene was spawned again in place.
+/// </param>
 /// <remarks>
+/// <para>
 /// Bevy announces a spawned scene to an observer, which the bridge turns into this message at the
 /// top of the next frame, after the scene's entities are in the world. An instance placed with
 /// <see cref="SceneInstances.Spawn"/> has had its overrides applied by the time this is read, so a
 /// system reacting to it sees the instance as the scene file describes it.
+/// </para>
+/// <para>
+/// A scene spawned again in place has new entities under the same root, so what a system found in
+/// the first copy, a node it kept or a component it put on one, is looked for again where
+/// <paramref name="Reloaded"/> is true.
+/// </para>
 /// </remarks>
-public readonly record struct WorldInstanceReady(Entity Entity);
+public readonly record struct WorldInstanceReady(Entity Entity, bool Reloaded = false);

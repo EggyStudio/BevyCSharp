@@ -5,8 +5,8 @@ using BevyCSharp.Editor.Framework;
 // Opens the editor, a scene filling the window with panels floating over it, on a project of the
 // game's own when given --project <folder>, editing the assets folder in it.
 //
-// The panels need a bridge built with the editor profile, which carries the HTML and CSS
-// surface on top of the renderer:
+// The inspector needs a bridge built with the editor profile, which carries the documentation of
+// Bevy's reflected types on top of the renderer:
 //     build/build-native.sh --editor
 
 // How large to draw, which matters more without a window than with one, because a window can be
@@ -49,8 +49,8 @@ config.AssetSources[EditorPaths.OwnSource] = EditorPaths.Own;
 // outright since an offscreen run has no window title to take it from.
 config.GameName = "BevyCSharp Editor";
 
-// The panels are HTML and CSS, and the point of describing them in files is being able to change
-// them without a rebuild.
+// The panels are Dear ImGui's, and the project's assets are read again as their files change, so a
+// texture, a model or a scene edited outside the editor shows in it without a restart.
 config.Gui = true;
 config.WatchAssets = true;
 
@@ -93,8 +93,8 @@ if (!App.HasRenderer)
 if (!App.HasEditor)
 {
     Console.Error.WriteLine(
-        "This native bridge has the renderer but not the HTML and CSS surface, so the panels "
-        + "cannot open.");
+        "This native bridge has the renderer but not the documentation of Bevy's types, which "
+        + "the inspector shows, so the editor does not open.");
     Console.Error.WriteLine("Rebuild it with build/build-native.sh --editor.");
     return 1;
 }

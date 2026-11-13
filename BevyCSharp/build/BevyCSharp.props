@@ -14,4 +14,15 @@
         <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">false</AppendRuntimeIdentifierToOutputPath>
     </PropertyGroup>
 
+    <!--
+      What the generator reads to tell a game's own executable built in Debug, which watches its
+      assets, from a Release build, a library or a test project, which watch nothing unless their
+      config says so.
+    -->
+    <ItemGroup>
+        <CompilerVisibleProperty Include="Configuration"/>
+        <CompilerVisibleProperty Include="OutputType"/>
+        <CompilerVisibleProperty Include="IsTestProject"/>
+    </ItemGroup>
+
 </Project>

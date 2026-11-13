@@ -66,7 +66,7 @@ public sealed class SubsceneReloadTests : IDisposable
                 written = true;
             }
 
-            if (written && ctx.Read<WorldInstanceReady>().ToArray().Any(message => message.Entity == placed))
+            if (written && ctx.Read<WorldInstanceReady>().ToArray().Any(message => message.Entity == placed && message.Reloaded))
             {
                 ready = true;
                 var table = SceneInstances.Find(ctx.Ecs, placed, "Table");

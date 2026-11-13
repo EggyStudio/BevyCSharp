@@ -12,12 +12,12 @@ pub extern "C" fn bcs_has_render() -> i32 {
     if cfg!(feature = "render") { 1 } else { 0 }
 }
 
-/// Reports whether this library was built with the editor profile, `1` when it carries the asset
-/// watcher and Bevy's reflected documentation, `0` otherwise.
+/// Reports whether this library was built with the editor profile, `1` when it carries Bevy's
+/// reflected documentation, `0` otherwise.
 ///
 /// Separate from [`bcs_has_render`] because the editor profile is a superset of the render one,
-/// which draws Dear ImGui as well, so a game's bridge draws an interface and a panel that edits
-/// files or shows a type's documentation still has to know whether this one carries them.
+/// which draws Dear ImGui and watches assets as well, so a game's bridge draws an interface and a
+/// panel that shows a type's documentation still has to know whether this one carries it.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_has_editor() -> i32 {
     if cfg!(feature = "editor") { 1 } else { 0 }

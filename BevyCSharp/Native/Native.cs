@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 323;
+    internal const int ExpectedAbiVersion = 324;
 
     static Native() => NativeLoader.Initialize(typeof(Native).Assembly);
 
@@ -47,7 +47,7 @@ internal static unsafe partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_is_main_thread();
 
-    /// <summary>Reports whether the HTML and CSS surface is compiled in.</summary>
+    /// <summary>Reports whether the documentation of Bevy's reflected types is compiled in, the editor profile.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_has_editor();

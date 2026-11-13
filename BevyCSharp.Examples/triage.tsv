@@ -139,7 +139,7 @@ custom_asset_reader	n/a	writes a Rust AssetReader
 embedded_asset	can	the picture carried as a resource of the program's assembly, which is how a C# game carries its assets
 extra_asset_source	can	the source a folder of the examples' assets, where Bevy's is a folder beside its example
 generated_assets	can	the cone's vertices worked out on a worker and made a mesh in a system, since a mesh is made where the world is
-hot_asset_reloading	can	the files watched only where the editor profile is built, which builds Bevy's file watcher
+hot_asset_reloading	can	the files watched on every bridge with the renderer, the example's config asking for it
 multi_asset_sync	can	the loads asked for their state each frame, a task waiting on the count in place of Bevy's guards
 repeated_texture	can
 web_asset	missing	declined, since loading assets over https brings twenty-one crates into the bridge, an HTTP client with its TLS stack and the platform's certificate verifiers, for one example

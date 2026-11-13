@@ -40,10 +40,10 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // whatever launched the process, `dotnet` itself under `dotnet test`, not the directory the
     // assembly and its assets are in. Naming the directory outright is the only way to be sure,
     // so the managed side passes one whenever it knows where its assets are.
-    // `None` leaves the decision to Bevy, which watches only when the build carries a watcher
-    // and something asked for one. Saying `false` outright would stop a profile that has the
-    // watcher from ever using it.
-    let watch = if config.watch_assets != 0 { Some(true) } else { None };
+    // The config decides outright either way. Bevy reads `None` as whether the build carries a
+    // watcher, so every app of the render profile would start one and read the asset folder's
+    // changes, a shipped game among them, where the config asked for none.
+    let watch = Some(config.watch_assets != 0);
 
     let asset_plugin = move |root: &Option<String>| match root {
         Some(path) if !path.is_empty() => bevy::asset::AssetPlugin {
@@ -71,7 +71,7 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
 
     // The folders the managed side named as sources of their own, such as the editor's own icons
     // beside a project it opens, registered for the same reason and at the same time.
-    crate::assets::install_sources(&mut app);
+    crate::assets::install(&mut app);
 
     // The two clock systems frame.profile reads, which do nothing until it turns counting on.
     crate::profile::install(&mut app);

@@ -4414,6 +4414,76 @@ the port is offered upstream (Decision 18).
     Each rewritten to say what stands, the story going to nothing or to the Reply. A commit of
     comments alone, with the norm's search added to STYLE.md's so it is found again.
 
+137. **A near wall's indirect light moves with where the grids fall against the room.** From 136's
+    read on 2026-11-11. The same closed room reads its wall 2 units from the eye at 182.1 at the
+    origin and 174.1 at 34 and at 354 units out, 4.4 percent of the indirect light, the same at
+    every quality and no precision, the two places differing only in how the field's cells and the
+    probes' spacing fall against the walls. One read, the room stepped through a cell and through a
+    probe's spacing along each axis, which term moves and by how much, the field's distance at the
+    wall, the probes' light or the screen probes' pick, and whether the alley's probe that varies
+    between starts is the same thing. Then what holds it, as an item of its own. After 135. Widened
+    at 05:23 on 2026-11-12 by 136's mend. With the grids alike, 354 against 4,450 units out, the
+    straight wall still reads 1.8 levels apart with the screen's probes off, 174.20 against 175.94,
+    the same to a hundredth before and after the kernels took their points as offsets from the eye,
+    so it is the field's or the world probes' own loss far from the origin, which 136 had judged
+    safe by reasoning. The one read takes both, the grids' share and this, which lookup loses it and
+    by how much. Done as a read at `cccb0597`, pushed at 23:14 on 2026-11-12. The field's distance
+    at the wall holds within 0.2 mm and the screen's probes add within 0.08 of the reference; the
+    world's probes move the wall from 0.57 to 1.02 of its reference with a period of 8 units along
+    y, the room's half behind the eye lying in the second cascade's outer band and past it, where a
+    hit takes the third cascade's probes, 8 apart, standing over the ceiling or in the corners; with
+    the whole room in the first cascade the wall reads 0.92 to 1.05 at every step and 0.973 at the
+    origin, 34, 354 and 4,450 alike. The 1.8 levels at 4,450 come of rays grazing thin walls in the
+    second cascade's cells, gone with thick walls and with the room in the first cascade, so the
+    kernels far out need nothing more. The alley's probe varies with a box that lies at another turn
+    in each start, the grids alike in four starts. What holds it is item 141.
+
+135. **The bridge's size.** Decision 88 on 2026-11-11. The one package stands at 249,913,716 bytes
+    of nuget.org's 250 MB, each system's bridge about 41 MB compressed, so a publish fails on the
+    day a bridge grows by a tenth of a percent. One read first, on one system, of what a bridge's
+    bytes are, by section and by crate, the symbols and the debug information, the features built in
+    and the optimization's settings; then the cut that takes the most with nothing a game draws
+    changed, held by the captures and the ABI's check, the package's size said in every pack run's
+    log beside the limit. After the split is published. The limit read by the coder at 16:21 on
+    2026-11-11. nuget.org's documents say up to 250 MB and no bytes; its gallery's configuration
+    allows a request of 262,144,000 bytes, 250 times 1024 times 1024, answering 413 past it, so the
+    pack's check fails a package above 262,139,904 and 0.6.91 has 12,226,188 bytes of room, 4.66
+    percent, where the review had counted 86,284 under 250,000,000. So the item is less pressing
+    than it was written and stays, the room being four or five percent of a bridge's growth. The
+    read, by the coder at 22:27 on 2026-11-11 from 0.6.91's six bridges. The Linux and macOS bridges
+    carry their whole symbol tables, .symtab and .strtab 58.9 MB of linux-x64's 179.7 MB unpacked,
+    and stripping them saves 5.20, 6.42, 5.59 and 5.56 MB compressed on linux-x64, linux-arm64,
+    osx-arm64 and osx-x64, about 22.8 MB of the package, the room going from 12.0 MB to about 34.8.
+    The Windows bridges carry none. The rest is the code, .text 26.5 of linux-x64's 43.95 MB
+    compressed, 38 percent of the named code bevy_ecs generics made for the bridge's systems. The
+    cost is the crash file's stack, whose frames' names come of that table, the panic's message and
+    its file and line staying. Decided by the review, the bridge's shrinking having been chosen.
+    Strip in the release profile; the crash file writes each frame as the bridge's build id and an
+    offset, on every system; each pack run keeps the unstripped bridges or their symbols as an
+    artifact named by the version, and a script under build names a crash file's frames from them,
+    with a test that a forced crash on a stripped bridge is named again; the size step says the room
+    before and after. Not the packed relocations, which need glibc 2.36 at run time. Whether the
+    symbols are also kept for good as release assets for each tag, a run's artifacts being gone
+    after 90 days, is the owner's, asked the same evening. After 136. The package read by the review
+    at 21:59 on 2026-11-12 from the pack run without publish, 43279629248, green at 21:52 on
+    `e47d7020`. BevyCSharp.0.6.114.nupkg weighs 227,062,484 bytes with 35,077,420 of room, 13.38
+    percent, where 0.6.106 had 12,005,542, and the pack's size step says both. The two Linux bridges
+    carry no .symtab and no .strtab, the two macOS ones 963 symbols of which 1 is local where
+    285,009 and 285,789 kept, and the Windows ones are the kept files byte for byte with no COFF
+    symbols. Each of the six exports the same set as its kept library, 523 bcs functions on every
+    system. Each packaged bridge's build id equals its kept library's and the id written beside it,
+    the ELF note on Linux, the UUID on macOS and the debug directory's GUID and age on Windows,
+    where the kept pdb's own id is the same. The artifact bridge-symbols-0.6.114 holds the six. The
+    run with publish, 43305639625, started at 21:58 on the same head; its own bridges and symbols
+    are read the same way before the tag. Done with the publish of 0.6.114 at 00:34 on 2026-11-13,
+    the pack run 43305639625 on `e47d7020` green, tagged v0.6.114 at 18:12. The published package
+    read from nuget.org against that run's own symbols, each of the six bridges as in the run
+    without publish, no symbol table on Linux and macOS, 523 bcs functions exported on each, every
+    build id equal to its kept library's and each pdb's to its dll's; the Linux and macOS build ids
+    are those of the run before, the build giving the same library twice. The symbols stand as a
+    run's artifact for 90 days; whether they are also kept as release assets is the owner's, still
+    open.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -11871,6 +11941,134 @@ solution builds with warnings as errors, NormTests passed, 19, and the examples'
 passes.
 
 Shared: N 4.11 as widened and STYLE.md's search for it, for the sibling's comments.
+
+Item 137 read on 2026-11-12, a commit of this line alone, its pictures in the dump and sent. The
+room is 136's closed room, 8 by 8 inside and 3 high, its slabs 0.4 thick and white at 0.787 with a
+rough face, one lamp inside, at High, its back wall 2 units before the eye and filling the picture.
+The wall's light is read before tonemapping against the path traced reference of the same view,
+1.048 of which 0.112 is its first face, so 0.936 is its indirect light, and Bevy's lighting alone
+reads the first face's 0.112 at every place. The room was stepped along each axis by 0.0625 to 16
+units, through a cell of 0.25, the first probes' spacing of 2 and the coarser cascades' 4, 8 and 16,
+and out to 34, 354 and 4,450, each step read with the world's probes alone and with the screen's,
+the field read back and its crossing of the wall found, and each cascade's corner said.
+
+The field's distance at the wall does not move, the first cascade crossing the wall within 0.2 mm of
+its plane at every step. The screen's probes add between 0.07 under and 0.08 over the reference to
+what the world's probes give. The world's probes' light moves, the wall reading 0.57 to 1.02 of its
+reference with the screen's probes out, 0.65 at the origin and 0.54 at 34 and at 354, and the steps
+along y move it most, with a period of 8 units. With the eye 7.4 from the same wall, the whole room
+before it, the wall reads 0.92 to 1.05 of its own reference at every step along every axis, and
+0.973 at the origin, 34, 354 and 4,450 alike. So a cell's phase and a probe's spacing move the near
+wall by about 5 percent where the room lies in the first cascade, and the swing past that comes of
+where the coarser cascades fall against the part of the room behind the eye.
+
+The first cascade lies ahead of the eye and ends 2 units behind it, and the second ends at the front
+wall, its outer band fading into the third from 3 to 5.5 units behind the eye, so a hit in the
+room's half behind the eye takes its bounced light partly or wholly from the third cascade's probes,
+which stand 8 units apart. At y 0 and y 4 the first two cascades lie alike against the room, and
+every image of theirs reads alike at the first bounce, while after forty bounces y 4 reads 30
+percent more light in both cascades' probes and on the wall. The third cascade's probes nearest the
+room's front stand above its ceiling at y 0, holding nothing, and in its lower corners at y 4, moved
+off the faces into the room and holding 2.2 to 4.0. A point whose eight probes all lie past its
+walls takes their mean, so their dark is the light the room's front half sends on, and the bounces
+carry it to the near wall. Walls 2.5 thick widen the swing to 0.51 to 1.23, more of the coarse
+probes standing inside them.
+
+The 1.8 levels at 4,450 against 354, whose cascades' corners lie 4,096 apart. Held at the same
+frame, two runs at 354 are alike bit for bit in every image. At 4,450 the field differs in 4,936 of
+its 1,048,576 texels, most of them by their last bit, and the first bounce differs in 313 of the
+first cascade's 32,768 texels. With the lamp's shadow march left out the same 314 differ, 225 of
+them by under 1 percent and the rest by tens of percent, rays grazing the ceiling and the left wall
+by the lamp that stop 0.02 to 0.24 nearer or further, the march's point stepping by 0.0005 against a
+stop at a tenth of a cell. So the probes' trace loses it at the march's stop, 1.3 percent at the
+first bounce and 3.5 after the bounces carry it. With walls 2.5 thick 354 and 4,450 read 0.512 and
+0.513 of the reference, and with the eye 7.4 from the wall both read 0.973, so it comes of thin
+walls held in the second cascade's cells of 0.5 behind the eye, and the kernels' arithmetic far out
+needs nothing of its own here.
+
+The alley's probe that varies between starts is not the grids. In four starts of the feature test at
+23:00 moonless with its fireflies hidden, the field's four cascades lay at the same corners each
+time, and the probe at 1 1 -15 read 0.0103, 0.0162, 0.0150 and 0.0151 against 0.029 along its ways
+each time. The scene the field holds differs, a box at the alley's end lying at another turn in each
+start and stamped as a moving box, the leaves over the far wall, 183 to 197 meshes, and in two
+starts the field still splatting at the 400th frame.
+
+What holds it, as an item of its own. A hit across a cascade's outer band takes the next cascade's
+light only as far as that cascade's probes see it, keeping the finer cascade's where none of the
+next's does, or a room behind the eye is held by a cascade whose probes stand within it, the first
+two reaching behind the eye as far as a room's depth. Its test is the near wall within 5 percent of
+its reference at every step along each axis, with 354 and 4,450 alike.
+
+Beside the sibling's read of its ambient occlusion by place, its item 264's eighth part, which is
+not yet read there. Here a cell's phase moves the near wall by about 5 percent with the room in the
+first cascade, and the coarse cascades' probes behind the eye move it by a third.
+
+No file of the engine changed. The read's scratch test and an accessor of the probes' images are
+taken out, and the suite of e47d7020's tree stands for this commit. NormTests passed, 19. The read's
+runs kept their caches in the account's own folder, which N 7.11 leaves to the account's programs,
+and the runs from here keep theirs in a folder of the item's.
+
+Shared: a closed room behind the eye held by a cascade whose probes stand outside it, read by the
+near wall at steps along each axis against its reference, for the sibling's radiance cascades.
+
+Item 135 in the commit carrying this line. The one package of 0.6.106, the first with every
+project's assembly in it, weighs 250,121,275 bytes with six bridges, 12,018,629 of room under the
+262,139,904 the size step holds it to, 4.58 percent, and 207,559 more than 0.6.91. The read of
+0.6.91's six bridges from nuget.org found the Linux and macOS libraries carrying their whole symbol
+table, 58.9 MB of linux-x64's 179.7 unpacked, and the Windows ones none, so stripping the four takes
+about 22.8 MB of the package, 5.20, 6.42, 5.59 and 5.56 MB compressed, the rest of each bridge its
+code, 26.5 of linux-x64's 43.95 MB compressed, every feature of the render profile commented with
+its use.
+
+build/build-native.sh's --strip, which the pack's six native jobs pass and the captures' bridge does
+not, keeps the full library under build/symbols/<rid> with its build id in a .build-id file beside
+it, and takes the symbol table out of the copy the package carries, by strip --strip-all on Linux
+and strip -x on macOS, which keeps the C ABI's exports, the macOS copy signed again ad hoc, since
+its signature covers the bytes stripped. A Windows library carries no symbol table, so its PDB is
+kept beside it. Stripped after the build rather than in the release profile, the bridge leaves a
+full library to keep, and the copy in build/target/release keeps its symbols for a profiler. Each
+native job uploads its symbols, and the pack job gathers the six into one artifact,
+bridge-symbols-<version>, kept ninety days. On this machine's build the staged linux-x64 bridge goes
+from 185,416,232 bytes to 125,140,552, the full one kept with the same build id and every one of the
+523 bcs_ exports left.
+
+crash.rs writes after std's stack, under frames, the bridge's format and build id and each frame as
+an offset into the bridge, walked by the system's unwinder, _Unwind_Backtrace on Linux and macOS and
+RtlCaptureStackBackTrace on Windows, the library's place and end read from its image as it is
+loaded, the ELF's program headers and GNU build id note, the Mach-O's segments and UUID, or the PE's
+size and CodeView GUID and age, found through dladdr or GetModuleHandleExW. They are extern
+declarations of the crate's own, so Cargo.lock does not move. The crash file's Bridge line says the
+package's version, which names the run whose artifact holds the symbols. The crate checks clean for
+Windows and macOS from Linux and in the three Linux profiles, and its tests pass, 119 with no
+feature and 206 with render, one of them that the stack names the bridge's build and a frame in it.
+
+build/name-crash.py finds the library whose build id a crash file names among the folders given, by
+the .build-id file beside each or its own image, and writes the crash file again with the function
+each frame lies in, read by nm, each frame past the first looked up a byte before its return
+address. A Windows library's frames keep their offsets, the build id naming the PDB the artifact
+holds, which nm does not read. CrashLogTests.APanicsFramesAreNamedFromTheFullLibraryOfItsBuild
+forces a panic on a thread of its own and has the script name its frame bcs_panic_on_purpose from
+the full library the tests run on, which writes the offsets its stripped copy writes, stripping
+moving no code, and without the change the crash file has no frames to name. NameCrashTests strips a
+copy with GNU strip, reads the same build id from both, and names a frame from the full library and
+from no stripped one.
+
+build/package-size.py says beside each package the last version nuget.org lists of it, with that
+one's size and room, read from the gallery's flat container, the summary naming the version so a
+later run is not taken for the same pair. nuget.org holds 0.6.106 at 250,134,362 bytes, 13,087 more
+than the run's artifact, its repository signature. The crash guide in docs/running-a-game.md says in
+three steps what a person does with a crash file, where the symbols for a version are and for how
+long, and BUILDING.md says what --strip does and what the size step compares. The pack run without
+publish on this commit says the package's size with six stripped bridges, about 227 MB by the read,
+beside 0.6.106's.
+
+The whole suite passed, 2,054 passed, 0 failed and 3 skipped, 2,057 in all where the listing is
+2,046. NormTests passed, 19. The solution builds with warnings as errors, and the public listing and
+the cheat sheet are unchanged.
+
+Shared: a library stripped after its build with the full one kept beside its build id, and a crash
+file writing each frame as an offset into the library with the build id, read from the image as it
+is loaded, for the sibling's native libraries.
 
 ## Items closed, parked or shortened
 

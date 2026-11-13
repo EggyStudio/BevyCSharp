@@ -15,17 +15,13 @@ workspace = true
 [features]
 default = ["headless"]
 
-# The editor profile, the render profile and an interface written in HTML and CSS.
+# The editor profile, the render profile and the documentation of Bevy's reflected types.
 #
 # Its own profile rather than part of `render`, because `render` is what CI builds for six
 # runtime identifiers and what the test suite links against, and this adds a hundred crates and
 # several minutes to a cold build. An editor needs a window regardless, so it starts from render.
-#
-# It also turns on Bevy's asset watcher, which is what lets a document or a stylesheet be edited
-# while the editor runs. That is the whole point of describing an interface in files.
 editor = [
     "render",
-    "bevy/file_watcher",
     # Bevy's doc comments, kept with its reflected types, so the inspector can show what a field of
     # a light or a camera is for. Here rather than in the render profile because a game shipping on
     # that profile has nobody to show them to and would carry every comment in its library.
@@ -118,6 +114,13 @@ headless = [
 # for audio and libudev's for gamepads, each named below where it comes in.
 render = [
     "headless",
+    # Bevy's asset watcher, which reads a texture, a model or a scene again when its file changes
+    # while a program runs, so a game is edited and seen without a restart. An app watches only
+    # where its config asks (`Config.WatchAssets`), and the bridge says no outright everywhere
+    # else, since Bevy would otherwise watch in every app of a build that carries it. notify, its
+    # debouncer, walkdir and the system's watcher, seven crates on Linux and macOS and nine on
+    # Windows, all in the lock with the editor profile before it.
+    "bevy/file_watcher",
     # Asking a window's surface what it can be composited as, before Bevy configures it with
     # something it cannot. The version Bevy builds, so it adds nothing.
     "dep:wgpu",

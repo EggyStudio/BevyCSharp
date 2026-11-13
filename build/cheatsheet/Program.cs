@@ -51,7 +51,7 @@ var extensions = assemblies.SelectMany(assembly => assembly.GetTypes()).SelectMa
 
 var groups = new (string Title, string Page, string[] Types)[]
 {
-    ("Running an app", "running-a-game.md", ["BevyApp", "App", "Config", "World", "IPlugin", "IPluginGroup", "DefaultPlugins", "EnginePlugin", "BehaviorsPlugin", "Time", "FrameProfile"]),
+    ("Running an app", "running-a-game.md", ["BevyApp", "App", "Config", "BuildDefaults", "World", "IPlugin", "IPluginGroup", "DefaultPlugins", "EnginePlugin", "BehaviorsPlugin", "Time", "FrameProfile"]),
     ("Behaviors and systems", "behaviors.md", ["BehaviorContext", "BehaviorConditions", "BehaviorRegistry", "BehaviorRunners", "SystemDescriptor", "StageOrder", "SystemToggleRegistry", "SystemRegistrationSourceScope", "Stepping", "EcsWorld", "EcsCommands", "ChunkSet`1", "ReloadedComponents"]),
     ("States", "states.md", ["StateRegistry"]),
     ("Messages", "messages-and-hierarchy.md", ["MessageBus", "MessageReader`1", "MessageMutator`1", "On`1"]),

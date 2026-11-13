@@ -77,11 +77,12 @@ public sealed unsafe partial class App : IDisposable
     /// <summary>True when the loaded native bridge has Bevy's renderer compiled in.</summary>
     public static bool HasRenderer => Native.bcs_has_render() != 0;
 
-    /// <summary>True when the loaded native bridge was built with the editor profile, the asset watcher and Bevy's reflected documentation.</summary>
+    /// <summary>True when the loaded native bridge was built with the editor profile, which carries Bevy's reflected documentation.</summary>
     /// <remarks>
     /// A separate question from <see cref="HasRenderer"/>. The editor profile is a superset of the
-    /// render one, which draws Dear ImGui as well, so a game's bridge draws an interface without
-    /// the editor's additions, and an editor's panel needing them asks this.
+    /// render one, which draws Dear ImGui and watches assets as well, so a game's bridge draws an
+    /// interface and reloads a changed file without the editor's addition, and an editor's panel
+    /// showing a type's documentation asks this.
     /// </remarks>
     public static bool HasEditor => Native.bcs_has_editor() != 0;
 
@@ -267,6 +268,11 @@ public sealed unsafe partial class App : IDisposable
         }
 
         if (_handle == IntPtr.Zero) throw CreationFailed();
+
+        // Said where the program left watching alone and its build or the environment turned it on,
+        // so a game reading its folder again says why it does.
+        if (Config.WatchAssets && !Config.WatchAssetsSetByProgram)
+            Log.Info($"Watching the assets for changes, turned on by {Config.WatchAssetsSource}. Config.WatchAssets = false leaves it out.");
 
         ComponentRegistry.BeginApp(_handle);
 

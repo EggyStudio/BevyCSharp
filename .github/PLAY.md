@@ -115,8 +115,8 @@ the debug build does.
 
 Without embedding, the bridge a game ships is a render one built for exports
 (`build-native.sh --render --game`), staged under `build/game/<rid>/` apart from the one the
-projects here copy, which on a machine that builds the editor is the editor's and carries an
-interface and an asset watcher a game does not need. The export builds it first when the Rust
+projects here copy, which on a machine that builds the editor is the editor's and carries the
+documentation of Bevy's types, which a game does not need. The export builds it first when the Rust
 sources are newer than it, and puts it over the one the publish copied. Not built:
 
 - **Whether a target can be built for** on this machine, said before the export starts rather

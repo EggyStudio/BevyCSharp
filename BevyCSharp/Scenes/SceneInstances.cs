@@ -635,8 +635,11 @@ public static partial class SceneInstances
             if (DataOf(world, outer) is { Missed.Count: > 0 }) Report(world, outer, Apply(world, outer, retry: true));
         }
 
-        lock (Posted) Posted.Add(entity);
-        bus.Send(new WorldInstanceReady(entity));
+        // A root posted before is a scene spawned again in place, as Bevy spawns a glTF's scene
+        // again once its file is read again.
+        bool again;
+        lock (Posted) again = !Posted.Add(entity);
+        bus.Send(new WorldInstanceReady(entity, again));
     }
 
     /// <summary>Puts a recorded instance on an entity, as a scene file read it.</summary>

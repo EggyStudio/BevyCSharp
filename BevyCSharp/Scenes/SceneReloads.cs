@@ -103,7 +103,7 @@ internal static class SceneReloads
             world.SetParent(entity, node.IsNone ? root : node);
         }
 
-        bus.Send(new WorldInstanceReady(root));
+        bus.Send(new WorldInstanceReady(root, Reloaded: true));
     }
 
     /// <summary>Whether a file is there and reads as JSON, so the old copy is despawned only for one that will spawn.</summary>

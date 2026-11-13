@@ -27,7 +27,12 @@ internal sealed class AssetWork : IPlugin
             }, "Engine.ProjectIcon"));
         }
 
-        app.AreasWork.Add(100, world => PostFailures(world.Resource<MessageBus>()));
+        app.AreasWork.Add(100, world =>
+        {
+            var bus = world.Resource<MessageBus>();
+            PostFailures(bus);
+            PostReloads(bus);
+        });
 
         // The handles a scene made for its entities that none of them draws with any more.
         app.AreasWork.Add(200, _ => AssetServer.Sweep());
@@ -71,6 +76,29 @@ internal sealed class AssetWork : IPlugin
                 "reading what kind of asset failed to load");
 
             bus.Send(new AssetLoadFailed(path, reason, kind));
+        }
+    }
+
+    /// <summary>
+    /// Moves the assets Bevy's watcher read again from their files onto the message bus.
+    /// </summary>
+    /// <remarks>
+    /// Two texts each, read as the failures' are. A frame with none costs one call that answers
+    /// zero, and a run that does not watch never has any.
+    /// </remarks>
+    private static unsafe void PostReloads(MessageBus bus)
+    {
+        var count = NativeAssets.bcs_asset_reloads_drain();
+        for (var i = 0; i < count; i++)
+        {
+            var index = i;
+            var path = Native.ReadText(
+                (buffer, capacity) => NativeAssets.bcs_asset_reload_path(index, buffer, capacity),
+                "reading the path of an asset read again");
+            var kind = Native.ReadText(
+                (buffer, capacity) => NativeAssets.bcs_asset_reload_kind(index, buffer, capacity),
+                "reading what kind of asset was read again");
+            bus.Send(new AssetReloaded(path, kind));
         }
     }
 }

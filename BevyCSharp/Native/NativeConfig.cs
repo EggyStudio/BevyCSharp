@@ -36,10 +36,10 @@ public unsafe struct NativeConfig
     /// <summary>UTF-8 assets directory, or null for Bevy's default.</summary>
     public byte* AssetRoot;
 
-    /// <summary>Non-zero to reload an asset when its file changes on disk.</summary>
+    /// <summary>Non-zero to reload an asset when its file changes on disk, zero to watch nothing.</summary>
     public uint WatchAssets;
 
-    /// <summary>Non-zero to build in the HTML and CSS interface.</summary>
+    /// <summary>Non-zero to draw Dear ImGui's pass.</summary>
     public uint Gui;
 
     /// <summary>Non-zero to draw with no window, into an image a capture reads back.</summary>

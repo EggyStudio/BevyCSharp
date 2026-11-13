@@ -34,6 +34,26 @@ internal static unsafe partial class NativeAssets
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_failure_kind(int index, byte* buffer, int capacity);
 
+    /// <summary>Collects the assets Bevy's watcher read again from their files, and reports how many.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_reloads_drain();
+
+    /// <summary>Writes the path of one drained reload.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_reload_path(int index, byte* buffer, int capacity);
+
+    /// <summary>Writes what kind of asset one drained reload was.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_asset_reload_kind(int index, byte* buffer, int capacity);
+
+    /// <summary>Reports whether Bevy's asset server watches its sources for changes.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_assets_watching();
+
     /// <summary>Starts loading an asset and returns the key the engine knows it by.</summary>
     [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

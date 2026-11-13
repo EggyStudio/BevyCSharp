@@ -213,11 +213,12 @@ pub struct BcsConfig {
     /// Directory assets are loaded from, or null for Bevy's default of `assets` beside the
     /// executable. May be null in any build.
     pub asset_root: *const c_char,
-    /// Non-zero to reload an asset when its file changes on disk. Needs a build whose profile
-    /// carries the watcher, and costs a thread watching the asset directory.
+    /// Non-zero to reload an asset when its file changes on disk, zero to watch nothing. Needs a
+    /// build whose profile carries the watcher, the render one and those over it, and costs a
+    /// thread watching the asset directory.
     pub watch_assets: u32,
-    /// Non-zero to build in the HTML and CSS interface. Needs the editor profile, and brings a
-    /// camera and a set of systems that an app not using it has no reason to carry.
+    /// Non-zero to draw Dear ImGui's pass. Needs the render profile, and brings a camera and a
+    /// set of systems that an app not using it has no reason to carry.
     pub gui: u32,
     /// Non-zero to draw with no window, into an image that a capture reads back. Needs a `render`
     /// build and is ignored when `headless` is set, which asks for no renderer at all. `width` and

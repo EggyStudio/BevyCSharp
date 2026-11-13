@@ -382,6 +382,17 @@ sealed class Bevy.AssetPack : IDisposable
   static int Write(string folder, string pack, Func<string, bool>? include = null)
   string Path { get; }
   void Dispose()
+readonly struct Bevy.AssetReloaded : IEquatable<AssetReloaded>
+  AssetReloaded(string Path, string Kind)
+  bool Equals(AssetReloaded other)
+  override bool Equals(object obj)
+  override int GetHashCode()
+  override string ToString()
+  static bool op_Equality(AssetReloaded left, AssetReloaded right)
+  static bool op_Inequality(AssetReloaded left, AssetReloaded right)
+  string Kind { get; init; }
+  string Path { get; init; }
+  void Deconstruct(out string Path, out string Kind)
 static class Bevy.AssetServer
   static AssetHandle Load(string kind, string path)
   static AssetHandle LoadFolder(string path)
@@ -549,6 +560,9 @@ readonly struct Bevy.BufferRead : IEquatable<BufferRead>
   static bool op_Equality(BufferRead left, BufferRead right)
   static bool op_Inequality(BufferRead left, BufferRead right)
   void Deconstruct(out int Ticket)
+static class Bevy.BuildDefaults
+  static bool WatchAssets { get; }
+  static void ProgramBuiltInDebug(Assembly program)
 sealed class Bevy.ButtonAttribute : Attribute
   ButtonAttribute(string label = "")
   ButtonLine Line { get; init; }
@@ -1066,6 +1080,7 @@ sealed class Bevy.Config
   const string FramesVariable = "BCS_FRAMES"
   const string HoldClockVariable = "BCS_HOLD_CLOCK"
   const string OffscreenVariable = "BCS_OFFSCREEN"
+  const string WatchAssetsVariable = "BCS_WATCH_ASSETS"
   double FixedHz { get; set; }
   double FrameSeconds { get; set; }
   double MemoryCap { get; set; }
@@ -13912,11 +13927,12 @@ sealed class Bevy.World : IDisposable
 readonly struct Bevy.WorldInstance : INativeComponent
 readonly struct Bevy.WorldInstanceReady : IEquatable<WorldInstanceReady>
   Entity Entity { get; init; }
-  WorldInstanceReady(Entity Entity)
+  WorldInstanceReady(Entity Entity, bool Reloaded = false)
   bool Equals(WorldInstanceReady other)
+  bool Reloaded { get; init; }
   override bool Equals(object obj)
   override int GetHashCode()
   override string ToString()
   static bool op_Equality(WorldInstanceReady left, WorldInstanceReady right)
   static bool op_Inequality(WorldInstanceReady left, WorldInstanceReady right)
-  void Deconstruct(out Entity Entity)
+  void Deconstruct(out Entity Entity, out bool Reloaded)

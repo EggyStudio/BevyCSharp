@@ -10,7 +10,10 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 Done that day
 
+- Item 135 at `e47d7020`. The bridge's size.
 - Item 136 at `eb940339`. A point and a ray's way taken from the depth far from the origin.
+- Item 137 at `cccb0597`. A near wall's indirect light moves with where the grids fall against the
+  room.
 - Item 139 at `18364420`. One view's light by the screen's probes moves by half its distance from
   the reference on a rounding's change, and two tests stand at their bounds by a hair.
 

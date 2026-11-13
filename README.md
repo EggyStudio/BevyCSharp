@@ -399,8 +399,8 @@ it, which is why the second line is not optional. The other way round, a managed
 bridge in `build/target/release` with every file under `native` it is built from, its shaders among
 them, and warns with `BCS102` where one is newer, naming it, so a pull that changed the bridge says
 so at `dotnet build` and `dotnet run` rather than drawing its old shaders under the new C#.
-`build/build-native.sh --render` adds the renderer and Dear ImGui's pass, and `--editor` adds the
-asset watcher the editor edits files with on top of it.
+`build/build-native.sh --render` adds the renderer, Dear ImGui's pass and Bevy's asset watcher, and
+`--editor` adds the documentation of Bevy's types the editor's inspector shows on top of it.
 
 [.github/BUILDING.md](https://github.com/EggyStudio/BevyCSharp/blob/main/.github/BUILDING.md) has the rest, the three native profiles and what each
 costs, the platforms and their prerequisites, how the package is assembled for six runtime

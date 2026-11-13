@@ -180,7 +180,7 @@ internal static class Catalog
         new("embedded_asset", EmbeddedAsset.Build),
         new("extra_asset_source", ExtraSource.Build, ExtraSource.Configure),
         new("generated_assets", GeneratedAssets.Build),
-        new("hot_asset_reloading", HotAssetReloading.Build),
+        new("hot_asset_reloading", HotAssetReloading.Build, HotAssetReloading.Configure),
         new("multi_asset_sync", MultiAssetSync.Build),
         new("repeated_texture", RepeatedTexture.Build),
 

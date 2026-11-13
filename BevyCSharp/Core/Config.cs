@@ -145,18 +145,57 @@ public sealed class Config
     /// </summary>
     /// <remarks>
     /// <para>
-    /// What lets a texture, a document or a stylesheet be edited while the app runs. A handle
-    /// keeps pointing at the same asset, so anything holding one picks the new version up without
-    /// being told.
+    /// What lets a texture, a model, a scene or a data file be edited while the app runs and seen
+    /// without a restart. A handle keeps pointing at the same asset, so anything holding one picks
+    /// the new version up without being told, and the <c>AssetReloaded</c> message says that it
+    /// happened.
     /// </para>
     /// <para>
-    /// Needs a bridge whose profile carries the watcher, which today means the editor one. On a
-    /// build without it this does nothing rather than failing, because whether a file changed is
-    /// not a question the app can answer for itself. It costs a thread watching the asset
-    /// directory, which is why it is off unless asked for.
+    /// Textures, models and Bevy's other assets need a bridge whose profile carries Bevy's watcher,
+    /// the render one or one over it, and the files the managed side reads, scenes, materials and
+    /// data assets, are watched on any. It costs a thread watching the asset directory, so a shipped
+    /// game leaves it off unless asked for, and the bridge watches nothing where it is off.
+    /// </para>
+    /// <para>
+    /// Set here, the program decides. Where it is left alone, <see cref="WatchAssetsVariable"/>
+    /// decides, and failing that a program's own executable built in Debug watches and one built in
+    /// Release does not (<see cref="BuildDefaults"/>).
     /// </para>
     /// </remarks>
-    public bool WatchAssets { get; set; }
+    public bool WatchAssets
+    {
+        get => _watchAssets ?? WatchAssetsAsked ?? BuildDefaults.WatchAssets;
+        set => _watchAssets = value;
+    }
+
+    private bool? _watchAssets;
+
+    /// <summary>The environment variable that turns <see cref="WatchAssets"/> on or off where the program left it alone.</summary>
+    /// <remarks>
+    /// <c>1</c> watches and <c>0</c> does not. Read by every app, so a tool starting a program
+    /// decides for it, watching for a session editing a running game and leaving it out for a
+    /// timing read.
+    /// </remarks>
+    public const string WatchAssetsVariable = "BCS_WATCH_ASSETS";
+
+    /// <summary>What the environment says of watching, or nothing where it names nothing it knows.</summary>
+    internal static bool? WatchAssetsAsked =>
+        Environment.GetEnvironmentVariable(WatchAssetsVariable) switch
+        {
+            "1" or "on" or "true" or "yes" => true,
+            "0" or "off" or "false" or "no" => false,
+            _ => null,
+        };
+
+    /// <summary>Whether the program set <see cref="WatchAssets"/> itself.</summary>
+    internal bool WatchAssetsSetByProgram => _watchAssets is not null;
+
+    /// <summary>What decided <see cref="WatchAssets"/>, said by the app as it starts.</summary>
+    internal string WatchAssetsSource =>
+        _watchAssets is not null ? "the program"
+        : WatchAssetsAsked is not null ? $"the environment's {WatchAssetsVariable}"
+        : BuildDefaults.WatchAssets ? "the default of a program built in Debug"
+        : "nothing, so off";
 
     /// <summary>
     /// Draw an interface, Dear ImGui, rasterized by the engine.

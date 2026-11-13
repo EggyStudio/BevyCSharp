@@ -64,6 +64,9 @@ static Config HeadlessFor(uint frames);                         // A windowless 
 static Config OffscreenFor(uint width = 1280, uint height = 720, uint frames = 0);  // A configuration that draws into an image of the given size instead of a window
 static Config Windowed(string title, uint width = 1280, uint height = 720, GraphicsBackend backend = GraphicsBackend.Automatic);  // A window of the given size, drawn with backend
 
+// BuildDefaults
+static void ProgramBuiltInDebug(Assembly program);              // Records that program was built in Debug, where it is the assembly the process started from
+
 // World
 bool IsChanged<T>();                                            // Whether the resource of type T was changed since the running system last ran, as Bevy's Res::is_changed answers, inserting it among the changes
 bool IsAdded<T>();                                              // Whether the resource of type T was inserted since the running system last ran, as Bevy's Res::is_added answers
@@ -1680,7 +1683,7 @@ static void Write(CliSession session);                          // Writes one, r
 static CliSession? Read(string path);                           // Reads one, or nothing when the file is missing or not one of these
 static IReadOnlyList<CliSession> All();                         // Every session written down, newest first, whether or not it is still alive
 static void Remove(int pid);                                    // Takes one back out, on the way down
-static int Prune();                                             // Deletes the files of sessions whose processes are no longer there
+static int Prune();                                             // Deletes the files of sessions whose processes have ended
 ```
 
 ## Everything else
