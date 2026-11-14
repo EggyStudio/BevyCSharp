@@ -63,10 +63,9 @@ fn build_app(config: &BcsConfig, title: Option<String>, cleanup: CleanupList) ->
     // is added, so it is registered before either branch below adds one.
     let user_root = unsafe { crate::interop::cstr_to_string(config.user_root) };
     if let Some(root) = user_root.as_deref().filter(|root| !root.is_empty()) {
-        use bevy::asset::io::AssetSourceBuilder;
         use bevy::asset::AssetApp;
 
-        app.register_asset_source("user", AssetSourceBuilder::platform_default(root, None));
+        app.register_asset_source("user", crate::assets::watching::source(root));
     }
 
     // The folders the managed side named as sources of their own, such as the editor's own icons

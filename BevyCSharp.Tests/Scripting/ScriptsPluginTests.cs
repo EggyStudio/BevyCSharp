@@ -8,7 +8,9 @@ namespace Bevy.Tests;
 /// The scripts' plugin compiles the folder's scripts as the app is built, compiles a script saved
 /// while an app watching its assets runs so that its new system runs, leaves a change alone where
 /// the app does not watch until <c>scripts.reload</c> asks, keeps the running scripts where a build
-/// fails, and says each build in the log and through <c>scripts.status</c>.
+/// fails, whether in compiling, in reading a script or in registering, says each build in the log
+/// and through <c>scripts.status</c>, stops what the last script ran when it is deleted, and starts
+/// unwatched where its folder cannot be watched.
 /// </summary>
 /// <remarks>
 /// The script's system names an entity after the version written, so which generation runs is read
@@ -89,7 +91,9 @@ public sealed class ScriptsPluginTests : IDisposable
         CrashLog.Start(_logs.Path, GraphicsBackend.Vulkan);
         try
         {
-            using (var harness = new EngineHarness(frames: 1200, fps: 120, configure: config => config.WatchAssets = true))
+            // Thirty seconds for the watcher's one event, the settling and the build, a loaded
+            // runner's late event among them, and the run ends as the new system is seen.
+            using (var harness = new EngineHarness(frames: 3600, fps: 120, configure: config => config.WatchAssets = true))
             {
                 harness.App.AddPlugin(new ScriptsPlugin(_folder.Path));
                 harness.OnContext(Stage.Update, ctx =>
@@ -191,6 +195,222 @@ public sealed class ScriptsPluginTests : IDisposable
         Assert.Contains("the last build failed: ", answers[3]);
         Assert.Contains($"Info Compiled the scripts in {_folder.Path} again on request, one file and 2 behaviors.", said);
         Assert.Contains(said, line => line.StartsWith($"Warning The scripts in {_folder.Path} did not compile on request, so the ones running stay: ", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// A build whose registration throws after its first system is in, as a behavior's startup
+    /// throwing does, leaves the running generation alone, its counting system running once a frame
+    /// with none of the failed generation's beside it.
+    /// </summary>
+    [Fact]
+    public void ABuildWhoseRegistrationThrowsLeavesNothingOfItRunning()
+    {
+        File.WriteAllText(_folder.File("Counter.cs"), """
+            using Bevy;
+
+            namespace Counted;
+
+            [Behavior]
+            public partial struct Counter
+            {
+                [OnUpdate]
+                public static void Tick(BehaviorContext ctx) => ctx.Ecs.SetName(ctx.Ecs.Spawn(), "tick");
+            }
+            """);
+
+        var (failure, before, after, frame) = ((string?)null, 0, 0, 0);
+        using (var harness = new EngineHarness(frames: 40, fps: 120))
+        {
+            harness.App.AddPlugin(new ScriptsPlugin(_folder.Path));
+            harness.On(Stage.Update, world =>
+            {
+                var ticks = Names(world.Resource<EcsWorld>()).Count(name => name == "tick");
+                using var lent = ConsoleHost.Lend(world);
+                switch (frame++)
+                {
+                    // Behaviors register by name, so the counter's system is in before the
+                    // starter's startup throws.
+                    case 2:
+                        File.WriteAllText(_folder.File("Starter.cs"), """
+                            using Bevy;
+
+                            namespace Counted;
+
+                            [Behavior]
+                            public partial struct Starter
+                            {
+                                [OnStartup]
+                                public static void Start(BehaviorContext ctx) => throw new InvalidOperationException("a startup that throws");
+                            }
+                            """);
+                        ConsoleCommands.Run("scripts.reload");
+                        failure = ConsoleHost.Failure?.Code;
+                        break;
+
+                    case 10:
+                        before = ticks;
+                        break;
+
+                    case 20:
+                        after = ticks;
+                        break;
+                }
+            });
+            harness.Run();
+        }
+
+        Assert.Equal("NOT_COMPILED", failure);
+        Assert.Equal(10, after - before);
+    }
+
+    /// <summary>
+    /// An editor's lock file beside the scripts is passed over and a script gone by the time it is
+    /// read is too, and a script that cannot be read fails the build as a warning naming it, the
+    /// running scripts kept, where both threw out of the build.
+    /// </summary>
+    /// <remarks>
+    /// A lock file is a link to nothing where links can be made, and a file of no C# where they
+    /// cannot. Where files have no permissions to take away, on Windows, the unreadable half is left
+    /// out.
+    /// </remarks>
+    [Fact]
+    public void ALockFileIsPassedOverAndAnUnreadableScriptFailsAsAWarning()
+    {
+        Write("first");
+        var lockFile = _folder.File(".#Marker.cs");
+        try
+        {
+            File.CreateSymbolicLink(lockFile, "someone@machine.4242:1700000000");
+            File.CreateSymbolicLink(_folder.File("Gone.cs"), _folder.File("Removed.cs"));
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            File.WriteAllText(lockFile, "this is no C#");
+        }
+
+        var unreadable = !OperatingSystem.IsWindows();
+        var answers = new List<string>();
+        var failures = new List<string?>();
+        var frame = 0;
+        string[] said;
+        CrashLog.Start(_logs.Path, GraphicsBackend.Vulkan);
+        try
+        {
+            using (var harness = new EngineHarness(frames: 12, fps: 120))
+            {
+                harness.App.AddPlugin(new ScriptsPlugin(_folder.Path));
+                harness.On(Stage.Update, world =>
+                {
+                    using var lent = ConsoleHost.Lend(world);
+                    switch (frame++)
+                    {
+                        case 2:
+                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            failures.Add(ConsoleHost.Failure?.Code);
+                            break;
+
+                        case 4 when !OperatingSystem.IsWindows():
+                            var shut = _folder.File("Shut.cs");
+                            File.WriteAllText(shut, "namespace Watched; public static class Shut { }");
+                            File.SetUnixFileMode(shut, UnixFileMode.None);
+                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            failures.Add(ConsoleHost.Failure?.Code);
+                            File.SetUnixFileMode(shut, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                            break;
+                    }
+                });
+                harness.Run();
+            }
+
+            said = Said();
+        }
+        finally
+        {
+            CrashLog.Stop();
+        }
+
+        Assert.Equal("compiled one file into 2 behaviors, 0 components carried onto the new types", answers[0]);
+        Assert.Null(failures[0]);
+        if (!unreadable) return;
+
+        Assert.StartsWith($"not compiled, the ones running stay: {_folder.File("Shut.cs")} could not be read: ", answers[1]);
+        Assert.Equal("NOT_COMPILED", failures[1]);
+        Assert.Contains(said, line => line.StartsWith($"Warning The scripts in {_folder.Path} did not compile on request, so the ones running stay: {_folder.File("Shut.cs")} could not be read", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Deleting the last script stops the behaviors it ran, as deleting one of two stops that one's,
+    /// and the commands say none run.
+    /// </summary>
+    [Fact]
+    public void DeletingTheLastScriptStopsItsBehaviors()
+    {
+        Write("first");
+        var (answer, status, seen, frame) = ("", "", Array.Empty<string>(), 0);
+        using (var harness = new EngineHarness(frames: 12, fps: 120))
+        {
+            harness.App.AddPlugin(new ScriptsPlugin(_folder.Path));
+            harness.On(Stage.Update, world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                using var lent = ConsoleHost.Lend(world);
+                switch (frame++)
+                {
+                    case 2:
+                        foreach (var entity in ecs.All().Where(entity => ecs.NameOf(entity) == "first").ToArray()) ecs.Despawn(entity);
+                        File.Delete(_folder.File("Marker.cs"));
+                        answer = ConsoleCommands.Run("scripts.reload") ?? "";
+                        status = ConsoleCommands.Run("scripts.status") ?? "";
+                        break;
+
+                    case 10:
+                        seen = Names(ecs);
+                        break;
+                }
+            });
+            harness.Run();
+        }
+
+        Assert.Equal($"no scripts are left in {_folder.Path}, so none run", answer);
+        Assert.Equal($"{_folder.Path}, none running, the folder emptied, built one time, not watched, so scripts.reload builds a change, the last build compiled", status);
+        Assert.DoesNotContain("first", seen);
+    }
+
+    /// <summary>
+    /// A scripts folder the system will not watch, as one that cannot be made, leaves the app
+    /// starting with its scripts built on request, and says why.
+    /// </summary>
+    [Fact]
+    public void AFolderThatCannotBeWatchedLeavesTheAppStartingUnwatched()
+    {
+        // A folder under a file, which no system makes.
+        File.WriteAllText(_folder.File("plain"), "");
+        var directory = Path.Combine(_folder.File("plain"), "scripts");
+        var status = "";
+        string[] said;
+        CrashLog.Start(_logs.Path, GraphicsBackend.Vulkan);
+        try
+        {
+            using (var harness = new EngineHarness(frames: 8, configure: config => config.WatchAssets = true))
+            {
+                harness.App.AddPlugin(new ScriptsPlugin(directory));
+                harness.On(Stage.Update, world =>
+                {
+                    using var lent = ConsoleHost.Lend(world);
+                    status = ConsoleCommands.Run("scripts.status") ?? "";
+                });
+                harness.Run();
+            }
+
+            said = [.. ConsoleLog.All().Select(line => $"{line.Level} {line.Text}")];
+        }
+        finally
+        {
+            CrashLog.Stop();
+        }
+
+        Assert.Contains("not watched, so scripts.reload builds a change", status);
+        Assert.Contains(said, line => line.StartsWith($"Warning {directory} cannot be watched, so a changed script is compiled by scripts.reload alone: ", StringComparison.Ordinal));
     }
 
     /// <summary>An app that added no plugin answers the commands that it compiles no scripts, as a failure.</summary>

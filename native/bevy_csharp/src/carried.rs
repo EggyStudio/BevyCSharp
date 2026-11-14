@@ -106,18 +106,18 @@ pub unsafe extern "C" fn bcs_assets_carried(
 /// meaning disk alone. Called before the asset plugin is added, which builds the default source
 /// only where none was registered.
 ///
-/// The writer and the watcher are the disk's, so an app that asked to watch its assets still sees
-/// a file changed beside it.
+/// The writer and the watcher are the disk's ([`crate::assets::watching`]), so an app that asked to
+/// watch its assets sees a file changed beside it.
 #[cfg_attr(feature = "embed", allow(dead_code))]
 pub fn install(app: &mut bevy::app::App, root: &str) {
     use bevy::asset::AssetApp;
-    use bevy::asset::io::{AssetSource, AssetSourceBuilder, AssetSourceId};
+    use bevy::asset::io::{AssetSource, AssetSourceId};
 
     let mut disk = AssetSource::get_default_reader(root.to_string());
 
     app.register_asset_source(
         AssetSourceId::Default,
-        AssetSourceBuilder::platform_default(root, None).with_reader(move || {
+        crate::assets::watching::source(root).with_reader(move || {
             Box::new(CarriedReader {
                 disk: disk(),
                 fixed: None,

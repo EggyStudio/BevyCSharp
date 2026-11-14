@@ -12070,6 +12070,189 @@ Shared: a library stripped after its build with the full one kept beside its bui
 file writing each frame as an offset into the library with the build id, read from the image as it
 is loaded, for the sibling's native libraries.
 
+119's split planned on 2026-11-11, before the work. The projects are N 1.6's layers, each in its
+area's folder under BevyCSharp/, named BevyCSharp.<Area>, each referencing what its code names and
+nothing else, the rest coming through those. BevyCSharp.Native, the Interop folder, references
+nothing. BevyCSharp.Core, holding Core, Ecs, Math, Time, Input and Behaviors as its folders,
+references Native. BevyCSharp.Assets, Audio, Gizmos and ImGui (the Ui folder as it stands) reference
+Core and Native, ImGui with the ImGui package, and BevyCSharp.CliServer, the Cli folder, references
+Core, its name the sibling's since BevyCSharp.Cli is the command line's. BevyCSharp.Rendering
+references Assets. Render2d, Animation, GlobalIllumination and Scenes reference Rendering, with
+Assets for the last three and ImGui for global illumination. BevyCSharp.Ui, Bevy's interface from
+the Assets folder, references Render2d and ImGui, Physics references Scenes and Gizmos with
+BepuPhysics, and Sky references GlobalIllumination and Audio with the Sky module. Modeling
+references Physics and ImGui, Diagnostics references Ui, Scenes and GlobalIllumination, Vegetation
+references Sky and Modeling with its module, and Levels references Vegetation with its module.
+build/norm/1.6.tsv is the move list, each file going to its line's project.
+
+The flat project, BevyCSharp, keeps BevyApp, EnginePlugin and DefaultPlugins, which compose the
+rest, references every project, and is the package a game names, carrying the generator and its code
+fixes in its analyzer slot and the props and targets of BevyCSharp/build. A Directory.Build.props
+under BevyCSharp/ runs the generators in every project, so each area's schemas, behaviors and
+commands register from its own assembly, gives every project InternalsVisibleTo the engine's
+projects, the tests, the editor and the script host, and packs the icon, the readme, the license and
+the notices into each package. Each module's assembly is carried in the package of the project that
+references it, as the sibling's Rendering carries Sky. The reflected wrappers' list goes with Core,
+and the library's own kernels go with the area that runs them, embedded in its assembly, the look's
+in Rendering, the field's and the probes' in GlobalIllumination and the weather's in Sky, the kernel
+helpers reading the assembly they are handed.
+
+The bridge's native libraries, every platform's under runtimes/<rid>/native, go in
+BevyCSharp.Native's package alone, with the loader, the ABI check and the copy into bin for a run
+from a clone with its freshness check, and every other package depends on it. Since
+NativeLibrary.SetDllImportResolver is set once for each assembly, NativeLoader.Initialize takes the
+assembly of the area class calling it from its static constructor and sets the resolver for that
+assembly too, so every area's entry points find the one library.
+
+The pack workflow packs every project at the one version from build/version.sh into build/package,
+the push taking every .nupkg there as it does, and a run with publish pushes all of them, so the
+NuGet key's pattern has to cover BevyCSharp.*, as it covers BevyCSharp.Templates. N 6.4 and N 6.5
+read the natives in BevyCSharp.Native's package, the analyzers and build files in BevyCSharp's, and
+every package's dependencies at the one version. The games, the templates and the examples on the
+package keep their one PackageReference to BevyCSharp, a local feed of build/package serving them
+all, and the feature test and the tests keep their reference to the flat project. The script host's
+walk starts from the flat assembly, as item 134 said. N 1.6 then reads the project files' references
+against its layers, as the sibling's does, and build/norm/1.6.tsv goes.
+
+The first run of a game on the split packages shows the game restoring BevyCSharp and the 19 area
+packages at the one version and building with the generator, the bridge found in BevyCSharp.Native's
+runtimes folder on each system with the ABI check passing, ./bcs list naming the same commands as
+before the split, Courtyard and the feature test's scripted run playing their courses, a script
+compiling against the areas, the examples on the package building, and PublicApi.txt and
+CHEATSHEET.md reading the same lines. The split's cut gets a pack run with publish.
+
+The cut is two commits. The first moves the files into their projects' folders inside the one
+project, git moves alone with N 1.6's list read from the folders, and the second makes the projects,
+the packing and the workflow. BUILDING.md's table of packages, the guide's lines, RENDERING.md's
+names and AGENTS.md's table of where things are follow the folders. That table's rows wait on
+approval, which I ask for in my session before the first commit.
+
+No file of the engine changed. NormTests passed, 19. The public listing is unchanged.
+
+Item 120's first commit, the bridge, in the commit carrying this line. Bevy's file_watcher moves
+from the editor profile to render, so the package's six bridges carry Bevy's asset watcher, notify,
+its debouncer, walkdir and the system's watcher, seven crates on Linux and macOS and nine on
+Windows, all in Cargo.lock with the editor profile before, which does not move. The editor profile
+keeps the documentation of Bevy's reflected types, where its hundred crates come from. linux-x64's
+render bridge, built as the pack builds it in the portable container from cccb0597 and from this
+tree and stripped as --strip strips, grows by 346,496 bytes, 121,122,904 to 121,469,400, and by
+138,155 deflated as a package entry is, about a quarter of the half megabyte. The other five are
+read from this commit's pack run against 0.6.114's entries.
+
+The config decides on every bridge, the bridge passing Bevy's asset plugin a yes or a no outright,
+since Bevy reads none as whether the build carries a watcher and every app of the render profile
+would have watched. Config.WatchAssets decides in this order, the program where it sets it, then
+BCS_WATCH_ASSETS, which bcs open sets in the third commit, then the build's default.
+BuildDefaultsGenerator gives a program's executable built in Debug a module initializer calling
+BuildDefaults.ProgramBuiltInDebug with its own assembly, which counts only where it is the assembly
+the process started from, and gives nothing to a Release build, a library or a test project. The
+package's props make Configuration, OutputType and IsTestProject visible to it, and the engine's own
+programs read the generator without those props and keep the default off, the examples, the feature
+test, the editor and the Player among them. An app watching where its program did not ask says so as
+it starts, naming what turned it on, and Config.WatchAssetsSource keeps that for live.status.
+hot_asset_reloading asks for it as Bevy's example asks its asset plugin, its triage row and the
+examples table written again.
+
+assets/reloads.rs keeps a system for each kind the managed side loads, images, meshes and scenes in
+every profile and standard materials, glTF files, animation clips, sounds and fonts in render, each
+reading Bevy's asset messages with a cursor of its own. A load from a file ends with
+LoadedWithDependencies, which code editing an asset never sends, so an id whose load ends a second
+time is one read again, and an id Bevy removes is forgotten. A first form that paired a modification
+with a load within two frames took an image written by code the frame after its load for a reload,
+which its test caught. The reloads are drained as the failures are and posted as AssetReloaded(Path,
+Kind), a glTF one for each asset in it with its label. A scene ready again under a root it was ready
+under before is posted as WorldInstanceReady with Reloaded true, a glTF's scene Bevy spawned again
+and a placed scene file SceneReloads spawned again alike. bcs_assets_watching reads Bevy's
+watching_for_changes, and the ABI is 324.
+
+A red swatch written blue while the app watches is drawn blue under an unlit standard material and
+under a shader material sampling it, so no material keeps the old texture's view and nothing needed
+mending there. AssetReloadTests holds that, a glTF written again spawned again and said reloaded
+with its scene and its mesh said read again, an image written by code saying nothing, and an app
+whose config did not ask watching nothing and starting no notify thread, where one that asked starts
+one, counted from /proc/self/task on Linux and run on any bridge for the app that did not ask.
+WatchAssetsTests holds the order of what decides, a Debug call naming an assembly the process did
+not start from turning nothing on, and the line said as the app starts. BuildDefaultsGeneratorTests
+holds the initializer given to a Debug executable and to nothing else, and sits in the tests'
+Generator folder, which is no area of the library, so build/norm/1.4.txt lists it.
+SubsceneReloadTests waits for its respawn marked as a reload.
+
+The reason the documents gave the watcher, an interface written in HTML and CSS, which no loader
+here reads, is gone from Cargo.toml, interop.rs, Config.cs, the editor's Program.cs, whose refusal
+names the documentation of Bevy's types, and build-native.sh, and from NativeConfig.cs, Native.cs,
+App.HasEditor and capabilities.rs, which said the same. The README, BUILDING.md's profile table,
+PLAY.md and the guide's Hot reload say the watcher is the render profile's, and the guide says the
+rule, Debug on, Release off, the program deciding where it sets it. The cheat sheet lists
+BuildDefaults beside Config, and its line for Prune follows the summary 140 wrote. PublicApi.txt
+gains AssetReloaded, BuildDefaults, Config.WatchAssetsVariable and WorldInstanceReady's Reloaded.
+
+AGENTS.md's build order line names the asset watcher and picking under the editor profile, which
+carries neither after this commit, and that line changes only with the owner's word. The words
+render (window, audio, asset watcher, picking), then editor (Bevy's type documentation) wait on it.
+
+The crate checks clean in the three profiles and for Windows and macOS in render from Linux, its
+tests pass, 119 with no feature and 206 with render, and the solution builds with warnings as
+errors. The whole suite passed, 2,070 passed, 0 failed and 3 skipped, 2,073 in all where the listing
+is 2,062. NormTests passed, 19.
+
+The account's cache, as asked. The runs of 137 and of 135 before it set no XDG_CACHE_HOME, and what
+they left in the account's cache is NVIDIA's shader cache, which the driver keeps under
+XDG_CACHE_HOME, in ~/.cache/nvidia/GLCache/ee579c6f9b8441af518e5e98be76e16b/0778fcf92a0d1666. 137's
+sweeps wrote 1aa5bd4694ac306d.bin, 376,403,042 bytes, and 1aa5bd4694ac306d.toc, 227,616 bytes, both
+at 2026-11-12 20:27, and its alley wrote eebf566ad28581f5.bin, 14,808,185 bytes, and
+eebf566ad28581f5.toc, 22,752 bytes, both at 23:08. In the hour 135's suite ended, likely its,
+6b6cfbafc33446cb.bin, 103,557,340 bytes, and .toc, 24,384 bytes, at 18:22, 31a8b18cf5aa79d0.bin and
+.toc, 32 bytes each, 31a8b18cf5aa79d1.bin, 143,757 bytes, and .toc, 1,408 bytes,
+92f74448a56b9fe6.bin and .toc, 32 bytes each, 92f74448a56b9fe7.bin, 290,682 bytes, and .toc, 1,344
+bytes, 92f74448a56b9fe8.bin and .toc, 32 bytes each, and 92f74448a56b9fe9.bin, 6,261 bytes, and
+.toc, 64 bytes, all at 18:23, and 24decafb900c1f8f.bin, 1,465,576 bytes, and .toc, 2,016 bytes, at
+18:31. They stand as they are. The session's runs from this item keep theirs in
+~/.cache/bevycsharp-i120/xdg.
+
+Shared: a watcher in the profile a game ships, said yes or no outright by the config, a reload told
+apart from an edit by a load ending a second time, a scene spawned again in place said as a reload,
+and a program's Debug build watching by a generated initializer, for the sibling's item 226.
+
+Item 120's second commit, scripts by way (c), in the commit carrying this line. ScriptsPlugin in
+BevyCSharp.Scripting compiles the scripts under the asset folder's scripts, or a folder it is given,
+as it is added, and again when one is saved where Config.WatchAssets is on, the change built at the
+next frame's First stage once the file has sat still. Its resource, Scripts, holds the host and the
+watcher, says every build through Log, the first and each after it with the files, the behaviors and
+the components carried, a build that fails as a warning with the compiler's errors and the running
+generation kept, and a folder with no scripts at Info, and raises Built after each that compiled.
+The world disposes it with the app, which stops the watcher. scripts.reload builds again on request
+and fails as NOT_COMPILED where the build does, and scripts.status says the folder, what runs,
+whether a change is compiled as it is saved and the last build's errors. An app without the plugin
+answers both with NO_SCRIPTS. The project loads the generator as an analyzer as well as referencing
+it, as the editor does, so its commands are written in as any area's are, offered only where the
+assembly is.
+
+The editor adds the plugin from its startup as before, after the app has added its states, so a
+game's states stay unentered while a level is edited, and says the states the scripts declare from
+Built through Log. Its own watcher and poll are gone, and its menu row, settings row and button read
+the plugin's resource. The Player adds the plugin before the run, where its scripts folder stands,
+so a state a script declares is added with the rest, and sets WatchAssets, so a script saved in the
+editor while the scene plays is swapped in as before, its own host, watcher and Watch system gone.
+The console lines both wrote, [editor] scripts and [player] scripts, give way to the plugin's Log
+lines. ScriptHost.Registered counted the generated registration entry points, one an assembly, where
+its summary says behaviors, and counts the behaviors the build declares, and Files counts what it
+compiled.
+
+ScriptsPluginTests holds a script saved while an app watching its assets runs compiled and its new
+system run, both builds said, a change left alone where the app does not watch until scripts.reload
+compiles it, a script that does not compile failing as NOT_COMPILED with the running one kept and
+said as a warning, scripts.status before and after, and an app without the plugin answering
+NO_SCRIPTS. Its script holds two behaviors, and with the host counting registrations as it did the
+second case fails on its status, one behavior said where two run. It sits in the tests' Scripting
+folder with the host's other tests and build/norm/1.4.txt lists it. The guide's scripts section
+names the plugin, how a game referencing the project adds it and the two commands, and the README,
+PLAY.md and BCS.md's table follow. Cargo.toml's comment on the watcher says the lock holds its
+crates, and the bridge is built again since BCS102 reads the manifest.
+
+The whole suite passed, 2,073 passed, 0 failed and 3 skipped, 2,076 in all where the listing is
+2,065. The public listing is unchanged, the Scripting assembly being no part of it. NormTests
+passed, 19.
+
 ## Items closed, parked or shortened
 
 Items closed without a mend, recorded or parked, and the standing items' texts as they stood before

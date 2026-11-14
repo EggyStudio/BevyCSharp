@@ -14,6 +14,7 @@
 use std::collections::HashSet;
 
 use bevy::app::{App, Last};
+use bevy::asset::io::AssetSourceId;
 use bevy::asset::{Asset, AssetEvent, AssetId, AssetServer};
 use bevy::ecs::message::{MessageCursor, Messages};
 use bevy::ecs::resource::Resource;
@@ -54,6 +55,12 @@ pub fn install(app: &mut App) {
             note::<bevy::audio::AudioSource>("Audio"),
             note::<bevy::text::Font>("Font"),
         ),
+    );
+
+    #[cfg(feature = "meshlet")]
+    app.add_systems(
+        Last,
+        note::<bevy::pbr::experimental::meshlet::MeshletMesh>("MeshletMesh"),
     );
 }
 
@@ -133,16 +140,22 @@ pub unsafe extern "C" fn bcs_asset_reload_kind(index: i32, out: *mut u8, capacit
     crate::interop::guard(|| read(index, out, capacity, Text::Kind))
 }
 
-/// Reports whether Bevy's asset server watches its sources for changes, `1` when it does.
+/// Reports whether Bevy watches the default asset source, the asset root, for changes, `1` when it
+/// does.
 ///
-/// It does where the build carries the watcher and the config asked for it, and nowhere else,
-/// since the bridge says no outright where the config did not ask.
+/// Bevy gives a source the receiver of its watcher's changes only where it built the watcher,
+/// which takes a build carrying one, a config asking and a folder the system let it watch
+/// ([`super::watching`]). The server's own flag is only what the config asked, and says yes on a
+/// build with no watcher at all.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_assets_watching() -> i32 {
     crate::interop::guard(|| {
         with_world(|world| match world.get_resource::<AssetServer>() {
-            Some(server) if server.watching_for_changes() => 1,
-            _ => 0,
+            Some(server) => server
+                .get_source(AssetSourceId::Default)
+                .is_ok_and(|source| source.event_receiver().is_some())
+                .into(),
+            None => 0,
         })
     })
 }
@@ -176,4 +189,129 @@ fn read(index: i32, out: *mut u8, capacity: i32, which: Text) -> i32 {
 
         unsafe { crate::interop::write_text(text, out, capacity) }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::{Path, PathBuf};
+    use std::time::Duration;
+
+    use bevy::app::{App, Last, TaskPoolPlugin};
+    use bevy::asset::io::Reader;
+    use bevy::asset::{Asset, AssetApp, AssetLoader, AssetPlugin, AssetServer, Handle, LoadContext};
+    use bevy::reflect::TypePath;
+
+    use super::{AssetReloads, note};
+
+    /// A file's text, the smallest asset a file can be read into.
+    #[derive(Asset, TypePath)]
+    struct Text(String);
+
+    /// Reads a `.txt` file into a [`Text`].
+    #[derive(TypePath)]
+    struct TextLoader;
+
+    impl AssetLoader for TextLoader {
+        type Asset = Text;
+        type Settings = ();
+        type Error = std::io::Error;
+
+        async fn load(&self, reader: &mut dyn Reader, _: &(), _: &mut LoadContext<'_>) -> Result<Text, std::io::Error> {
+            let mut bytes = Vec::new();
+            reader.read_to_end(&mut bytes).await?;
+            Ok(Text(String::from_utf8_lossy(&bytes).into_owned()))
+        }
+
+        fn extensions(&self) -> &[&str] {
+            &["txt"]
+        }
+    }
+
+    /// A folder of its own holding `note.txt`.
+    fn folder(name: &str) -> PathBuf {
+        let path = std::env::temp_dir().join(format!("bcs_reloads_{name}_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&path);
+        std::fs::create_dir_all(&path).unwrap();
+        std::fs::write(path.join("note.txt"), "one").unwrap();
+        path
+    }
+
+    /// An app reading assets from `root` with no watcher, noting texts read again as the bridge's
+    /// apps note their assets.
+    fn app(root: &Path) -> App {
+        let mut app = App::new();
+        app.add_plugins((
+            TaskPoolPlugin::default(),
+            AssetPlugin {
+                file_path: root.to_string_lossy().into_owned(),
+                watch_for_changes_override: Some(false),
+                ..Default::default()
+            },
+        ));
+        app.init_asset::<Text>().register_asset_loader(TextLoader);
+        app.init_resource::<AssetReloads>();
+        app.add_systems(Last, note::<Text>("Text"));
+        app
+    }
+
+    /// Runs the app's frames until `done` holds, and a few more so the frame's messages are read.
+    fn until(app: &mut App, what: &str, done: impl Fn(&App) -> bool) {
+        for _ in 0..1000 {
+            app.update();
+            if done(app) {
+                for _ in 0..3 {
+                    app.update();
+                }
+                return;
+            }
+            std::thread::sleep(Duration::from_millis(5));
+        }
+        panic!("{what} did not happen within the frames given");
+    }
+
+    fn noted(app: &App) -> Vec<(String, &'static str)> {
+        app.world().resource::<AssetReloads>().waiting.clone()
+    }
+
+    /// A file's first load is no reload, and the load Bevy's watcher asks for when the file
+    /// changes, a load of the same path forced again, is noted once with its path and kind.
+    #[test]
+    fn a_file_loaded_again_is_noted_once_and_its_first_load_is_not() {
+        let root = folder("again");
+        let mut app = app(&root);
+
+        let handle: Handle<Text> = app.world().resource::<AssetServer>().load("note.txt");
+        until(&mut app, "the first load", |app| app.world().resource::<AssetServer>().is_loaded_with_dependencies(&handle));
+        let first = noted(&app);
+
+        std::fs::write(root.join("note.txt"), "two").unwrap();
+        app.world().resource::<AssetServer>().reload("note.txt");
+        until(&mut app, "the load again", |app| !noted(app).is_empty());
+        let read = app.world().resource::<bevy::asset::Assets<Text>>().get(&handle).map(|text| text.0.clone());
+
+        let _ = std::fs::remove_dir_all(&root);
+        assert!(first.is_empty(), "a first load was noted as a reload, {first:?}");
+        assert_eq!(noted(&app), vec![("note.txt".to_string(), "Text")]);
+        assert_eq!(read.as_deref(), Some("two"), "the file was not read again");
+    }
+
+    /// An asset dropped and loaded afresh from the same file is a first load again, since Bevy
+    /// removes the asset the last handle let go of.
+    #[test]
+    fn an_asset_dropped_and_loaded_afresh_is_a_first_load() {
+        let root = folder("afresh");
+        let mut app = app(&root);
+
+        let handle: Handle<Text> = app.world().resource::<AssetServer>().load("note.txt");
+        until(&mut app, "the first load", |app| app.world().resource::<AssetServer>().is_loaded_with_dependencies(&handle));
+        let id = handle.id();
+        drop(handle);
+        until(&mut app, "the asset's removal", |app| !app.world().resource::<bevy::asset::Assets<Text>>().contains(id));
+
+        let handle: Handle<Text> = app.world().resource::<AssetServer>().load("note.txt");
+        until(&mut app, "the second load", |app| app.world().resource::<AssetServer>().is_loaded_with_dependencies(&handle));
+
+        let _ = std::fs::remove_dir_all(&root);
+        assert_eq!(noted(&app), vec![], "an asset loaded afresh was noted as a reload");
+    }
 }

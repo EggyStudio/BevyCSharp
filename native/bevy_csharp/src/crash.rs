@@ -19,7 +19,8 @@
 //! Bevy's own is kept and printed as the process's hook prints one, and not written as a crash.
 //! Bevy's file watcher can panic there as the app ends, sending an event on a channel the asset
 //! server has closed, and written as a crash it would make the next run say the last one crashed
-//! when it ended as it was asked to.
+//! when it ended as it was asked to. Its thread lives a tick past the app's destruction as well, so
+//! that one panic is told to no one wherever it falls ([`after_its_server`]).
 
 mod frames;
 
@@ -81,7 +82,7 @@ pub fn install() {
     ONCE.call_once(|| {
         let previous = std::panic::take_hook();
         std::panic::set_hook(Box::new(move |info| {
-            if QUIET.with(Cell::get) {
+            if QUIET.with(Cell::get) || after_its_server(info) {
                 return;
             }
 
@@ -114,17 +115,31 @@ fn said(info: &std::panic::PanicHookInfo<'_>) {
     }
 }
 
+/// Whether a panic is Bevy's file watcher handing a change to an asset server that is gone.
+///
+/// The watcher's thread hands each change over a channel whose one receiver the asset server holds,
+/// and unwraps the send, which fails only once that receiver is dropped with its app. Such a panic
+/// is the end of an app that ended as it was asked to. Any other panic on that thread, a changed
+/// file's path outside the root Bevy strips among them, is a fault and is written.
+fn after_its_server(info: &std::panic::PanicHookInfo<'_>) -> bool {
+    std::thread::current().name() == Some("notify-rs debouncer loop") && message(info).contains("SendError")
+}
+
+/// What a panic said.
+fn message<'a>(info: &'a std::panic::PanicHookInfo<'_>) -> &'a str {
+    let payload = info.payload();
+    payload
+        .downcast_ref::<&str>()
+        .copied()
+        .or_else(|| payload.downcast_ref::<String>().map(String::as_str))
+        .unwrap_or("a panic with no message")
+}
+
 /// A panic as the crash file has it, the thread, where, what it said and the stack.
 fn describe(info: &std::panic::PanicHookInfo<'_>) -> String {
     let thread = std::thread::current();
     let name = thread.name().unwrap_or("unnamed");
-
-    let payload = info.payload();
-    let message = payload
-        .downcast_ref::<&str>()
-        .copied()
-        .or_else(|| payload.downcast_ref::<String>().map(String::as_str))
-        .unwrap_or("a panic with no message");
+    let message = message(info);
 
     let place = info
         .location()
@@ -257,6 +272,29 @@ mod tests {
         assert!(WRITTEN.lock().unwrap().is_empty(), "a panic after the app began ending was written as a crash");
 
         unsafe { bcs_crash_writer(None) };
+    }
+
+    /// Bevy's watcher handing a change to an asset server gone with its app is told to no one, and
+    /// any other panic on the watcher's thread is written.
+    #[test]
+    fn the_watcher_sending_to_a_server_that_is_gone_is_not_written() {
+        let _turn = TURN.lock();
+        unsafe { bcs_crash_writer(Some(keep)) };
+        install();
+
+        let on_the_watchers_thread = |said: &'static str| {
+            WRITTEN.lock().unwrap().clear();
+            let thread = std::thread::Builder::new().name("notify-rs debouncer loop".to_string()).spawn(move || panic!("{said}"));
+            assert!(thread.unwrap().join().is_err());
+            WRITTEN.lock().unwrap().clone()
+        };
+
+        let sent = on_the_watchers_thread("called `Result::unwrap()` on an `Err` value: SendError(..)");
+        let stripped = on_the_watchers_thread("FileWatcher::get_asset_path() failed to strip prefix from absolute path");
+
+        unsafe { bcs_crash_writer(None) };
+        assert!(sent.is_empty(), "the watcher's send to a server that is gone was written as a crash, {sent}");
+        assert!(stripped.contains("failed to strip prefix"), "another panic on the watcher's thread was not written, {stripped}");
     }
 
     #[test]

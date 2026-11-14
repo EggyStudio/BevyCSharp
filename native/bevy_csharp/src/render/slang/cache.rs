@@ -1,4 +1,5 @@
-//! The cache of compiled shaders beside the assets, which a machine without a compiler reads.
+//! The cache of compiled shaders, beside the assets or in the folder the managed side named, which
+//! a machine without a compiler reads.
 //!
 //! An entry is named by the file, the entry point, the defines and the bridge's modules, and holds
 //! the hash of the source and of every file it imported, so it is used only while all of them are
@@ -6,7 +7,7 @@
 
 use std::path::{Path, PathBuf};
 
-use super::{CACHE_DIRECTORY, Compiled, Request, cache_header, modules_hash, next_unique};
+use super::{Compiled, Request, cache_header, modules_hash, next_unique};
 
 /// FNV-1a, 64 bits.
 ///
@@ -66,10 +67,7 @@ fn relative_to_root(path: &Path, root: &Path) -> String {
 }
 
 fn cache_path(request: &Request, key: u64) -> PathBuf {
-    request
-        .root
-        .join(CACHE_DIRECTORY)
-        .join(format!("{key:016x}.wgsl"))
+    request.cache.join(format!("{key:016x}.wgsl"))
 }
 
 /// Writes what a compile produced, and what it was produced from.
@@ -259,7 +257,25 @@ pub(super) fn read_cache(request: &Request, key: u64, source: &[u8]) -> Option<C
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::render::slang::Stage;
+    use crate::render::slang::{CACHE_DIRECTORY, Stage};
+
+    /// A folder the managed side named holds the cache of the apps made after, and the asset
+    /// root's `.slang-cache` holds it again once the name is taken back.
+    #[test]
+    fn the_cache_is_kept_in_the_folder_the_managed_side_names() {
+        use crate::render::slang::{bcs_shader_cache_folder, cache_folder};
+
+        let root = std::env::temp_dir().join("bcs_slang_named_root");
+        let named = std::env::temp_dir().join("bcs_slang_named_cache");
+        let text = std::ffi::CString::new(named.to_str().unwrap()).unwrap();
+
+        unsafe { bcs_shader_cache_folder(text.as_ptr()) };
+        let while_named = cache_folder(&root);
+        unsafe { bcs_shader_cache_folder(std::ptr::null()) };
+
+        assert_eq!(while_named, named);
+        assert_eq!(cache_folder(&root), root.join(CACHE_DIRECTORY));
+    }
 
     #[test]
     fn the_hash_is_the_published_fnv() {
@@ -281,6 +297,7 @@ mod tests {
         let request = Request {
             file: file.clone(),
             root: root.clone(),
+            cache: root.join(CACHE_DIRECTORY),
             stage: Stage::Fragment,
             entry: "fragment".into(),
             defines: vec![("A".into(), "1".into())],
@@ -360,6 +377,7 @@ mod tests {
         let wgsl = Request {
             file: file.clone(),
             root: root.clone(),
+            cache: root.join(CACHE_DIRECTORY),
             stage: Stage::Compute,
             entry: "main".into(),
             defines: Vec::new(),

@@ -1,51 +1,57 @@
 # Review
 
-Reviewed up to `36840712`, item 120's second commit, behavior scripts compiled through a
-ScriptsPlugin that the editor, the Player and a game referencing the project add, built again when
-one is saved while the app watches, each build said in the log, with scripts.reload and
-scripts.status, pushed at 22:56 on 2026-11-13 once the run before it had ended, its build run green
-on the three systems at 23:14; the whole suite passed, 2,073 passed, none failed and 3 skipped,
-NormTests 19; it keeps the form and carries the review's files. Before it `f86269d0`, item 120's
-first commit, the bridge, Bevy's asset watcher in the render profile and so in the package, watching
-where the config asks and by default in a program's Debug build through a generated initializer, a
-file read again said as AssetReloaded and a scene spawned again in place said as a reload, pushed at
-21:27 on 2026-11-13, its build run green on the three systems at 21:49; the linux-x64 bridge grows
-by 138,155 bytes deflated; the whole suite passed, 2,070 passed, none failed and 3 skipped,
-NormTests 19; it keeps the form and carries the review's files. Before it `cccb0597`, item 137's
-read, the near wall's indirect light against its reference as the room steps against the grids, a
-commit of the Reply and the review's files alone that starts no run, pushed at 23:14 on 2026-11-12;
-NormTests passed, 19; it keeps the form. Before it `e47d7020`, item 135, the bridge's size, a pack's
-bridges stripped of their symbol tables after the build with each full library kept under
-build/symbols by its system with its build id beside it and gathered into an artifact named by the
-version, the crash file writing the bridge's build id and each frame as an offset into it through
-extern declarations alone, build/name-crash.py naming the frames from the symbols, the size step
-comparing with the last version nuget.org lists, the linux-x64 bridge 125,140,552 bytes where
-185,416,232 with the same build id and exports, pushed at 19:25 on 2026-11-12, its build run green
-on the three systems at 19:50, with its pack run without publish, 43279629248, started on the same
-head and green at 21:52, its package read under item 135; the whole suite passed, 2,054 passed, none
+Reviewed up to `02f482ab`, item 120's third commit, a scene loaded at the top level spawned again in
+place where its file's bytes changed, the program's own entities kept and an open document left to
+the tool that keeps it, every file read again posted and listed by live.status, --no-watch on ./bcs
+open and the guide's live path, pushed at 03:34 on 2026-11-14 once the run before it had ended, its
+message written again before the push to name no item, its build run green on the three systems at
+03:52; the whole suite passed twice, 2,075 passed, none failed and 3 skipped, NormTests 19; it keeps
+the form and carries the review's files. Before it `36840712`, item 120's second commit, behavior
+scripts compiled through a ScriptsPlugin that the editor, the Player and a game referencing the
+project add, built again when one is saved while the app watches, each build said in the log, with
+scripts.reload and scripts.status, pushed at 22:56 on 2026-11-13 once the run before it had ended,
+its build run green on the three systems at 23:14; the whole suite passed, 2,073 passed, none failed
+and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `f86269d0`,
+item 120's first commit, the bridge, Bevy's asset watcher in the render profile and so in the
+package, watching where the config asks and by default in a program's Debug build through a
+generated initializer, a file read again said as AssetReloaded and a scene spawned again in place
+said as a reload, pushed at 21:27 on 2026-11-13, its build run green on the three systems at 21:49;
+the linux-x64 bridge grows by 138,155 bytes deflated; the whole suite passed, 2,070 passed, none
 failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it
-`05f5e54b`, item 140, the comments of 128 source files swept by N 4.11 as widened, the 1,755
-candidate lines read in place and 142 rewritten with 16 runtime uses of a barred phrase said
-plainly, no line but a comment changed, the bridge rebuilt since its sources' comments count, pushed
-at 17:15 on 2026-11-12, green at 17:31 with Linux in 12 minutes and macOS and Windows in 16; the
-native checks are clean, the solution builds with no warnings and NormTests pass, 19; it keeps the
-form and carries the review's files. Before it `eb940339`, item 136's last commit, the lighting's
-kernels taking their points as ways from the eye, gi_screen, gi_screen_glow, gi_light and
-gi_screen_filter, on top of 139's mend, every bounce view at every quality within 0.0002 of itself
-and the emitter room's faces within 0.001, so it moves no reading, pushed at 15:58 on 2026-11-12,
-green at 16:17 with Linux in 14 minutes, Windows in 18 and macOS in 19; the whole suite passed,
-2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `18364420`, item 139, gi_light's nearer step taking a neighbor clamped onto the
-pixel as missing, so a pixel on the picture's edge takes its step from inside, the bounce rooms'
-fifth view 0.0182 from its reference at High and 0.0211 at Medium by either way of finding the point
-where 0.0197 and 0.0311, 0.0235 and 0.0347, with a test that moves the view's camera by a few float
-steps and holds the reading within 0.001; the emitter room's right wall reads 12.2 percent under its
-reference with the edge's pixels no longer holding it up and its bound is measured again at 14; the
-frames a test looks for counted from the frame every pipeline is ready, which a slab's sky light
-read short of on a busy machine; pushed at 14:55 on 2026-11-12, green at 15:12 with macOS in 11
-minutes, Linux in 15 and Windows in 17; the whole suite passed, 2,052 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `2fc9beb0`, item
-136's precision commit, a point of the depth as its way from the eye in bcs_pass.slang,
+`cccb0597`, item 137's read, the near wall's indirect light against its reference as the room steps
+against the grids, a commit of the Reply and the review's files alone that starts no run, pushed at
+23:14 on 2026-11-12; NormTests passed, 19; it keeps the form. Before it `e47d7020`, item 135, the
+bridge's size, a pack's bridges stripped of their symbol tables after the build with each full
+library kept under build/symbols by its system with its build id beside it and gathered into an
+artifact named by the version, the crash file writing the bridge's build id and each frame as an
+offset into it through extern declarations alone, build/name-crash.py naming the frames from the
+symbols, the size step comparing with the last version nuget.org lists, the linux-x64 bridge
+125,140,552 bytes where 185,416,232 with the same build id and exports, pushed at 19:25 on
+2026-11-12, its build run green on the three systems at 19:50, with its pack run without publish,
+43279629248, started on the same head and green at 21:52, its package read under item 135; the whole
+suite passed, 2,054 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
+the review's files. Before it `05f5e54b`, item 140, the comments of 128 source files swept by N 4.11
+as widened, the 1,755 candidate lines read in place and 142 rewritten with 16 runtime uses of a
+barred phrase said plainly, no line but a comment changed, the bridge rebuilt since its sources'
+comments count, pushed at 17:15 on 2026-11-12, green at 17:31 with Linux in 12 minutes and macOS and
+Windows in 16; the native checks are clean, the solution builds with no warnings and NormTests pass,
+19; it keeps the form and carries the review's files. Before it `eb940339`, item 136's last commit,
+the lighting's kernels taking their points as ways from the eye, gi_screen, gi_screen_glow, gi_light
+and gi_screen_filter, on top of 139's mend, every bounce view at every quality within 0.0002 of
+itself and the emitter room's faces within 0.001, so it moves no reading, pushed at 15:58 on
+2026-11-12, green at 16:17 with Linux in 14 minutes, Windows in 18 and macOS in 19; the whole suite
+passed, 2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
+review's files. Before it `18364420`, item 139, gi_light's nearer step taking a neighbor clamped
+onto the pixel as missing, so a pixel on the picture's edge takes its step from inside, the bounce
+rooms' fifth view 0.0182 from its reference at High and 0.0211 at Medium by either way of finding
+the point where 0.0197 and 0.0311, 0.0235 and 0.0347, with a test that moves the view's camera by a
+few float steps and holds the reading within 0.001; the emitter room's right wall reads 12.2 percent
+under its reference with the edge's pixels no longer holding it up and its bound is measured again
+at 14; the frames a test looks for counted from the frame every pipeline is ready, which a slab's
+sky light read short of on a busy machine; pushed at 14:55 on 2026-11-12, green at 15:12 with macOS
+in 11 minutes, Linux in 15 and Windows in 17; the whole suite passed, 2,052 passed, none failed and
+3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `2fc9beb0`,
+item 136's precision commit, a point of the depth as its way from the eye in bcs_pass.slang,
 passEyeOffset, the ray's way taken from it, the clip and the frame before's helpers on it and the
 rain's streaks' and splashes' corners, the world point left through world_from_clip since the
 lighting's weighing moved with it, item 139, the night sky far from the origin the one drawn at it,
@@ -480,189 +486,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-119's split planned on 2026-11-11, before the work. The projects are N 1.6's layers, each in its
-area's folder under BevyCSharp/, named BevyCSharp.<Area>, each referencing what its code names and
-nothing else, the rest coming through those. BevyCSharp.Native, the Interop folder, references
-nothing. BevyCSharp.Core, holding Core, Ecs, Math, Time, Input and Behaviors as its folders,
-references Native. BevyCSharp.Assets, Audio, Gizmos and ImGui (the Ui folder as it stands) reference
-Core and Native, ImGui with the ImGui package, and BevyCSharp.CliServer, the Cli folder, references
-Core, its name the sibling's since BevyCSharp.Cli is the command line's. BevyCSharp.Rendering
-references Assets. Render2d, Animation, GlobalIllumination and Scenes reference Rendering, with
-Assets for the last three and ImGui for global illumination. BevyCSharp.Ui, Bevy's interface from
-the Assets folder, references Render2d and ImGui, Physics references Scenes and Gizmos with
-BepuPhysics, and Sky references GlobalIllumination and Audio with the Sky module. Modeling
-references Physics and ImGui, Diagnostics references Ui, Scenes and GlobalIllumination, Vegetation
-references Sky and Modeling with its module, and Levels references Vegetation with its module.
-build/norm/1.6.tsv is the move list, each file going to its line's project.
-
-The flat project, BevyCSharp, keeps BevyApp, EnginePlugin and DefaultPlugins, which compose the
-rest, references every project, and is the package a game names, carrying the generator and its code
-fixes in its analyzer slot and the props and targets of BevyCSharp/build. A Directory.Build.props
-under BevyCSharp/ runs the generators in every project, so each area's schemas, behaviors and
-commands register from its own assembly, gives every project InternalsVisibleTo the engine's
-projects, the tests, the editor and the script host, and packs the icon, the readme, the license and
-the notices into each package. Each module's assembly is carried in the package of the project that
-references it, as the sibling's Rendering carries Sky. The reflected wrappers' list goes with Core,
-and the library's own kernels go with the area that runs them, embedded in its assembly, the look's
-in Rendering, the field's and the probes' in GlobalIllumination and the weather's in Sky, the kernel
-helpers reading the assembly they are handed.
-
-The bridge's native libraries, every platform's under runtimes/<rid>/native, go in
-BevyCSharp.Native's package alone, with the loader, the ABI check and the copy into bin for a run
-from a clone with its freshness check, and every other package depends on it. Since
-NativeLibrary.SetDllImportResolver is set once for each assembly, NativeLoader.Initialize takes the
-assembly of the area class calling it from its static constructor and sets the resolver for that
-assembly too, so every area's entry points find the one library.
-
-The pack workflow packs every project at the one version from build/version.sh into build/package,
-the push taking every .nupkg there as it does, and a run with publish pushes all of them, so the
-NuGet key's pattern has to cover BevyCSharp.*, as it covers BevyCSharp.Templates. N 6.4 and N 6.5
-read the natives in BevyCSharp.Native's package, the analyzers and build files in BevyCSharp's, and
-every package's dependencies at the one version. The games, the templates and the examples on the
-package keep their one PackageReference to BevyCSharp, a local feed of build/package serving them
-all, and the feature test and the tests keep their reference to the flat project. The script host's
-walk starts from the flat assembly, as item 134 said. N 1.6 then reads the project files' references
-against its layers, as the sibling's does, and build/norm/1.6.tsv goes.
-
-The first run of a game on the split packages shows the game restoring BevyCSharp and the 19 area
-packages at the one version and building with the generator, the bridge found in BevyCSharp.Native's
-runtimes folder on each system with the ABI check passing, ./bcs list naming the same commands as
-before the split, Courtyard and the feature test's scripted run playing their courses, a script
-compiling against the areas, the examples on the package building, and PublicApi.txt and
-CHEATSHEET.md reading the same lines. The split's cut gets a pack run with publish.
-
-The cut is two commits. The first moves the files into their projects' folders inside the one
-project, git moves alone with N 1.6's list read from the folders, and the second makes the projects,
-the packing and the workflow. BUILDING.md's table of packages, the guide's lines, RENDERING.md's
-names and AGENTS.md's table of where things are follow the folders. That table's rows wait on
-approval, which I ask for in my session before the first commit.
-
-No file of the engine changed. NormTests passed, 19. The public listing is unchanged.
-
-Item 120's first commit, the bridge, in the commit carrying this line. Bevy's file_watcher moves
-from the editor profile to render, so the package's six bridges carry Bevy's asset watcher, notify,
-its debouncer, walkdir and the system's watcher, seven crates on Linux and macOS and nine on
-Windows, all in Cargo.lock with the editor profile before, which does not move. The editor profile
-keeps the documentation of Bevy's reflected types, where its hundred crates come from. linux-x64's
-render bridge, built as the pack builds it in the portable container from cccb0597 and from this
-tree and stripped as --strip strips, grows by 346,496 bytes, 121,122,904 to 121,469,400, and by
-138,155 deflated as a package entry is, about a quarter of the half megabyte. The other five are
-read from this commit's pack run against 0.6.114's entries.
-
-The config decides on every bridge, the bridge passing Bevy's asset plugin a yes or a no outright,
-since Bevy reads none as whether the build carries a watcher and every app of the render profile
-would have watched. Config.WatchAssets decides in this order, the program where it sets it, then
-BCS_WATCH_ASSETS, which bcs open sets in the third commit, then the build's default.
-BuildDefaultsGenerator gives a program's executable built in Debug a module initializer calling
-BuildDefaults.ProgramBuiltInDebug with its own assembly, which counts only where it is the assembly
-the process started from, and gives nothing to a Release build, a library or a test project. The
-package's props make Configuration, OutputType and IsTestProject visible to it, and the engine's own
-programs read the generator without those props and keep the default off, the examples, the feature
-test, the editor and the Player among them. An app watching where its program did not ask says so as
-it starts, naming what turned it on, and Config.WatchAssetsSource keeps that for live.status.
-hot_asset_reloading asks for it as Bevy's example asks its asset plugin, its triage row and the
-examples table written again.
-
-assets/reloads.rs keeps a system for each kind the managed side loads, images, meshes and scenes in
-every profile and standard materials, glTF files, animation clips, sounds and fonts in render, each
-reading Bevy's asset messages with a cursor of its own. A load from a file ends with
-LoadedWithDependencies, which code editing an asset never sends, so an id whose load ends a second
-time is one read again, and an id Bevy removes is forgotten. A first form that paired a modification
-with a load within two frames took an image written by code the frame after its load for a reload,
-which its test caught. The reloads are drained as the failures are and posted as AssetReloaded(Path,
-Kind), a glTF one for each asset in it with its label. A scene ready again under a root it was ready
-under before is posted as WorldInstanceReady with Reloaded true, a glTF's scene Bevy spawned again
-and a placed scene file SceneReloads spawned again alike. bcs_assets_watching reads Bevy's
-watching_for_changes, and the ABI is 324.
-
-A red swatch written blue while the app watches is drawn blue under an unlit standard material and
-under a shader material sampling it, so no material keeps the old texture's view and nothing needed
-mending there. AssetReloadTests holds that, a glTF written again spawned again and said reloaded
-with its scene and its mesh said read again, an image written by code saying nothing, and an app
-whose config did not ask watching nothing and starting no notify thread, where one that asked starts
-one, counted from /proc/self/task on Linux and run on any bridge for the app that did not ask.
-WatchAssetsTests holds the order of what decides, a Debug call naming an assembly the process did
-not start from turning nothing on, and the line said as the app starts. BuildDefaultsGeneratorTests
-holds the initializer given to a Debug executable and to nothing else, and sits in the tests'
-Generator folder, which is no area of the library, so build/norm/1.4.txt lists it.
-SubsceneReloadTests waits for its respawn marked as a reload.
-
-The reason the documents gave the watcher, an interface written in HTML and CSS, which no loader
-here reads, is gone from Cargo.toml, interop.rs, Config.cs, the editor's Program.cs, whose refusal
-names the documentation of Bevy's types, and build-native.sh, and from NativeConfig.cs, Native.cs,
-App.HasEditor and capabilities.rs, which said the same. The README, BUILDING.md's profile table,
-PLAY.md and the guide's Hot reload say the watcher is the render profile's, and the guide says the
-rule, Debug on, Release off, the program deciding where it sets it. The cheat sheet lists
-BuildDefaults beside Config, and its line for Prune follows the summary 140 wrote. PublicApi.txt
-gains AssetReloaded, BuildDefaults, Config.WatchAssetsVariable and WorldInstanceReady's Reloaded.
-
-AGENTS.md's build order line names the asset watcher and picking under the editor profile, which
-carries neither after this commit, and that line changes only with the owner's word. The words
-render (window, audio, asset watcher, picking), then editor (Bevy's type documentation) wait on it.
-
-The crate checks clean in the three profiles and for Windows and macOS in render from Linux, its
-tests pass, 119 with no feature and 206 with render, and the solution builds with warnings as
-errors. The whole suite passed, 2,070 passed, 0 failed and 3 skipped, 2,073 in all where the listing
-is 2,062. NormTests passed, 19.
-
-The account's cache, as asked. The runs of 137 and of 135 before it set no XDG_CACHE_HOME, and what
-they left in the account's cache is NVIDIA's shader cache, which the driver keeps under
-XDG_CACHE_HOME, in ~/.cache/nvidia/GLCache/ee579c6f9b8441af518e5e98be76e16b/0778fcf92a0d1666. 137's
-sweeps wrote 1aa5bd4694ac306d.bin, 376,403,042 bytes, and 1aa5bd4694ac306d.toc, 227,616 bytes, both
-at 2026-11-12 20:27, and its alley wrote eebf566ad28581f5.bin, 14,808,185 bytes, and
-eebf566ad28581f5.toc, 22,752 bytes, both at 23:08. In the hour 135's suite ended, likely its,
-6b6cfbafc33446cb.bin, 103,557,340 bytes, and .toc, 24,384 bytes, at 18:22, 31a8b18cf5aa79d0.bin and
-.toc, 32 bytes each, 31a8b18cf5aa79d1.bin, 143,757 bytes, and .toc, 1,408 bytes,
-92f74448a56b9fe6.bin and .toc, 32 bytes each, 92f74448a56b9fe7.bin, 290,682 bytes, and .toc, 1,344
-bytes, 92f74448a56b9fe8.bin and .toc, 32 bytes each, and 92f74448a56b9fe9.bin, 6,261 bytes, and
-.toc, 64 bytes, all at 18:23, and 24decafb900c1f8f.bin, 1,465,576 bytes, and .toc, 2,016 bytes, at
-18:31. They stand as they are. The session's runs from this item keep theirs in
-~/.cache/bevycsharp-i120/xdg.
-
-Shared: a watcher in the profile a game ships, said yes or no outright by the config, a reload told
-apart from an edit by a load ending a second time, a scene spawned again in place said as a reload,
-and a program's Debug build watching by a generated initializer, for the sibling's item 226.
-
-Item 120's second commit, scripts by way (c), in the commit carrying this line. ScriptsPlugin in
-BevyCSharp.Scripting compiles the scripts under the asset folder's scripts, or a folder it is given,
-as it is added, and again when one is saved where Config.WatchAssets is on, the change built at the
-next frame's First stage once the file has sat still. Its resource, Scripts, holds the host and the
-watcher, says every build through Log, the first and each after it with the files, the behaviors and
-the components carried, a build that fails as a warning with the compiler's errors and the running
-generation kept, and a folder with no scripts at Info, and raises Built after each that compiled.
-The world disposes it with the app, which stops the watcher. scripts.reload builds again on request
-and fails as NOT_COMPILED where the build does, and scripts.status says the folder, what runs,
-whether a change is compiled as it is saved and the last build's errors. An app without the plugin
-answers both with NO_SCRIPTS. The project loads the generator as an analyzer as well as referencing
-it, as the editor does, so its commands are written in as any area's are, offered only where the
-assembly is.
-
-The editor adds the plugin from its startup as before, after the app has added its states, so a
-game's states stay unentered while a level is edited, and says the states the scripts declare from
-Built through Log. Its own watcher and poll are gone, and its menu row, settings row and button read
-the plugin's resource. The Player adds the plugin before the run, where its scripts folder stands,
-so a state a script declares is added with the rest, and sets WatchAssets, so a script saved in the
-editor while the scene plays is swapped in as before, its own host, watcher and Watch system gone.
-The console lines both wrote, [editor] scripts and [player] scripts, give way to the plugin's Log
-lines. ScriptHost.Registered counted the generated registration entry points, one an assembly, where
-its summary says behaviors, and counts the behaviors the build declares, and Files counts what it
-compiled.
-
-ScriptsPluginTests holds a script saved while an app watching its assets runs compiled and its new
-system run, both builds said, a change left alone where the app does not watch until scripts.reload
-compiles it, a script that does not compile failing as NOT_COMPILED with the running one kept and
-said as a warning, scripts.status before and after, and an app without the plugin answering
-NO_SCRIPTS. Its script holds two behaviors, and with the host counting registrations as it did the
-second case fails on its status, one behavior said where two run. It sits in the tests' Scripting
-folder with the host's other tests and build/norm/1.4.txt lists it. The guide's scripts section
-names the plugin, how a game referencing the project adds it and the two commands, and the README,
-PLAY.md and BCS.md's table follow. Cargo.toml's comment on the watcher says the lock holds its
-crates, and the bridge is built again since BCS102 reads the manifest.
-
-The whole suite passed, 2,073 passed, 0 failed and 3 skipped, 2,076 in all where the listing is
-2,065. The public listing is unchanged, the Scripting assembly being no part of it. NormTests
-passed, 19.
-
 Item 120's third commit, scenes, status and documents, in the commit carrying this line. A scene
 file loaded at the top level, SceneFile.Load with no parent, while the app watches its assets is
 kept in LoadedScenes, a resource of the world, with what its load spawned and a SHA-256 digest of
@@ -856,3 +679,86 @@ an overflow builds all of them again, and scripts.status says when the watcher h
 Scripts.Dispose retires the running generation with the watcher, and scripts.reload takes a change
 waiting to settle, so it is not built twice. The flaky tests the audit names are 8 and 17 above, and
 the glTF test's five seconds runs to thirty and ends as the respawn is seen, as 17's does.
+
+The audit's mends, as its Reply laid them out, each test run first against the code without its
+mend. The managed half ran with the head's files for the app, the scripts and the behavior
+generator, and the environment's value read untrimmed, and the eleven new tests of those classes
+failed, each for its own reason, while the eighteen beside them passed. The bridge's half ran in the
+portable image as the host's own user, who cannot read a folder with no read permission, and on a
+headless bridge and the editor bridge built with bcs_assets_watching as the head answers it. With
+the mends every one of them passes.
+
+1 fails without its mend, the program reading the copy beside its build and the shader test running
+its 1,200 frames with main.slang never found. A Debug program reading its project's folder names its
+shader cache on the start line too, its compiled shaders cached in the project's obj/.slang-cache,
+which the test reads on a bridge that draws and build/first-game.sh checks for every step. MSBuild
+hands the generator obj/ as the build folder on Linux, read from a built project's editorconfig. A
+package packed here at 0.0.0-i120 passed build/first-game.sh in all twelve steps, and the last step,
+built and run again in a folder kept, said Watching ~/.cache/bevycsharp-i120/coins/Coins/assets for
+changes, turned on by the default of a program built in Debug, its compiled shaders cached in
+~/.cache/bevycsharp-i120/coins/Coins/obj/.slang-cache. That game compiles no Slang shader, so
+neither folder holds a cache after its sixty frames, and its assets folder holds its sounds alone.
+
+2 fails without the resolving, the root watched through a link being the link,
+/tmp/bcs_watching_link_465, where the test asks for the folder it leads to. 3 fails without its
+mend, the count rising by 20 over the ten frames after the failed build, the failed generation's
+system running beside the old one's, where it rises by 10 with the mend. 4 fails without its mend,
+the dangling .#Marker.cs throwing FileNotFoundException out of the build. 5 fails without the catch,
+the script watcher's DirectoryNotFoundException stopping the app being made. In the bridge, Bevy's
+own builder panicked with Failed to create file watcher and Permission denied for the shut folder,
+and the mended source is left unwatched with its warning said. The test passes over where it runs as
+root, as in the container's checks, and runs whole on the workflow's runners, which are no root.
+
+6's reload tests cover code that held at the head, so they pass without any mend. The test step's
+new parts are read from the first run carrying them, and their macOS and Windows minutes come in the
+next Reply. 9 fails without the filter, the SendError panic on the debouncer's thread written as a
+crash. 10 fails without trimming and lowering, ' 0 ' and 'True' read as naming nothing. 11 fails
+without its mend, scripts.reload answering that nothing compiled and the ones running stay, and the
+emptied generation running on. 13 fails without its mend, live.status saying Bevy's watcher reads
+its assets over a root no watcher was built for, on the headless bridge and the editor bridge both,
+and passes on both with it. 15 fails without its mend, the generator writing an initializer for an
+executable on the testing platform and naming neither of the project's folders. 16 fails without its
+mend, the environment set after the app was made turning watching on.
+
+14's note compiles in the editor bridge built here with meshlets and Solari. It has no test of its
+own, since a MeshletMesh loads only through Bevy's meshlet plugin on a renderer, and it goes through
+the same note the Text asset's test runs through. 8's test counts the watcher threads that started
+while its app runs, by their ids, so a thread an app before left behind, ending meanwhile, changes
+nothing, where the audit's Reply had it wait for the count to hold still, a wait on the clock that N
+3.3 keeps out of tests. 17's wait runs to 3,600 frames and ends as the build is seen. Both are
+races, so neither can be shown failing first. 19's Error event comes only when the system's queue of
+changes overflows, which no test brings about on every system, so it is mended by reading. 7, 12 and
+18 are left, with the guide's words.
+
+COMMITS.md's rule for the message gains N 4.11's sentence, a commit's sentence naming no item,
+verdict or decision of the review by number, nor an audit or which commit of several it is.
+PublicApi.txt and CHEATSHEET.md are written again for BuildDefaults' two folders and
+ProgramBuiltInDebug's two parameters. The bridge checks clean in its three profiles and on every
+target with warnings denied, its tests pass with no feature, 123, and in the render profile, 213,
+the Windows and macOS checks are clean, Cargo.lock does not move, and the solution builds from
+nothing with no warning.
+
+The whole suite passed, 2,089 passed, 0 failed and 3 skipped, 2,092 in all where the listing is
+2,081. NormTests passed, 19.
+
+Shared: the asset sources' watchers built by the bridge, a folder the system will not watch warned
+of and read unwatched where Bevy's builder panics, the watched root resolved through links for the
+paths macOS reports, the debouncer's send after its server is gone kept out of the crash log, a
+Debug program reading and watching its project's assets folder with its shader cache under obj, and
+a script generation whose registration throws taken out whole, for the sibling's live path.
+
+The read for commit 4. A game from the published 0.6.114 ran under dotnet watch on .NET 10.0.112,
+headless at thirty frames a second, each kind of edit made to a behavior while it ran and fourteen
+seconds left after each. A method body changed is applied as hot reload, the new text said within
+three seconds and the behavior's count carrying on. A changed parameter list, ref Transform added to
+the update, is applied the same way. A new update method in the behavior is applied and never runs,
+since a behavior's systems are registered once, as the app is built. A new behavior in a file of its
+own is not said by dotnet watch at all, and runs only after the next restart. A new field asks a
+restart, which DOTNET_WATCH_RESTART_ON_RUDE_EDIT takes without a question, and the game starts again
+with every edit in, the new method and the new behavior running.
+
+So dotnet watch carries a change to a behavior's methods and nothing that adds a system. Commit 4's
+MetadataUpdateHandler registers a changed behavior's systems again, which brings in the new method,
+and its test reads first whether a type in a new file reaches the handler at the next update. The
+guide says which edits ask a restart either way. Carrying Scripting in the package for Debug builds
+is not raised, since the read shows dotnet watch carries a behavior's change.

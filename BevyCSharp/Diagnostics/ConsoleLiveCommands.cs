@@ -23,16 +23,17 @@ internal static class ConsoleLiveCommands
         var world = ConsoleHost.World ?? throw new InvalidOperationException("live.status reads the app, so it can only run inside a system.");
         var config = world.Resource<Config>();
 
-        var asked = config.WatchAssetsSetByProgram || Config.WatchAssetsAsked is not null || BuildDefaults.WatchAssets;
-        var watching = !asked
+        var watching = !config.WatchAssetsAskedOfAnything
             ? "not watching the assets, since nothing asked"
             : $"{(config.WatchAssets ? "watching" : "not watching")} the assets, as {config.WatchAssetsSource} asks";
 
-        // Bevy's watcher reads textures, models and the rest of Bevy's assets, and only a bridge
-        // of the render profile or one over it carries it.
-        var bevy = NativeAssets.bcs_assets_watching() == 1
-            ? "Bevy's watcher reads its assets"
-            : config.WatchAssets ? "Bevy's assets are not read again, since this bridge carries no watcher" : "Bevy's watcher is off";
+        // Bevy's watcher reads textures, models and the rest of Bevy's assets. Only a bridge of the
+        // render profile or one over it carries it, and the system can refuse it a folder, which
+        // the log says as the app starts.
+        var bevy = NativeAssets.bcs_assets_watching() == 1 ? "Bevy's watcher reads its assets"
+            : !config.WatchAssets ? "Bevy's watcher is off"
+            : App.HasRenderer ? "Bevy's assets are not read again, since the asset folder could not be watched, as the log says"
+            : "Bevy's assets are not read again, since this bridge carries no watcher";
 
         var reloads = world.TryResource<LiveReloads>();
         var latest = reloads is null || reloads.Count == 0

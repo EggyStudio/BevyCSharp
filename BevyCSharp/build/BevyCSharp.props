@@ -8,7 +8,7 @@
     <PropertyGroup>
         <!--
           The native bridge is loaded by an explicit resolver, so nothing here is required for
-          correctness. This just makes the RID-specific asset land next to the output for a
+          correctness. This makes the RID-specific asset land next to the output for a
           plain `dotnet run`, which is what most people expect.
         -->
         <AppendRuntimeIdentifierToOutputPath Condition="'$(AppendRuntimeIdentifierToOutputPath)' == ''">false</AppendRuntimeIdentifierToOutputPath>
@@ -17,12 +17,16 @@
     <!--
       What the generator reads to tell a game's own executable built in Debug, which watches its
       assets, from a Release build, a library or a test project, which watch nothing unless their
-      config says so.
+      config says so, and the project's folder and build folder, whose assets folder a Debug game
+      reads in place of the copy beside its build and under which it caches its shaders.
     -->
     <ItemGroup>
         <CompilerVisibleProperty Include="Configuration"/>
         <CompilerVisibleProperty Include="OutputType"/>
         <CompilerVisibleProperty Include="IsTestProject"/>
+        <CompilerVisibleProperty Include="IsTestingPlatformApplication"/>
+        <CompilerVisibleProperty Include="MSBuildProjectDirectory"/>
+        <CompilerVisibleProperty Include="BaseIntermediateOutputPath"/>
     </ItemGroup>
 
 </Project>

@@ -65,7 +65,7 @@ static Config OffscreenFor(uint width = 1280, uint height = 720, uint frames = 0
 static Config Windowed(string title, uint width = 1280, uint height = 720, GraphicsBackend backend = GraphicsBackend.Automatic);  // A window of the given size, drawn with backend
 
 // BuildDefaults
-static void ProgramBuiltInDebug(Assembly program);              // Records that program was built in Debug, where it is the assembly the process started from
+static void ProgramBuiltInDebug(Assembly program, string? project = null, string? intermediate = null);  // Records that program was built in Debug, where it is the assembly the process started from, with the project it was built from
 
 // World
 bool IsChanged<T>();                                            // Whether the resource of type T was changed since the running system last ran, as Bevy's Res::is_changed answers, inserting it among the changes

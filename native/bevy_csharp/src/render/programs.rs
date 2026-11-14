@@ -189,6 +189,8 @@ pub struct ShaderPrograms {
     units: Vec<Unit>,
     unit_by_key: HashMap<(PathBuf, Role, String, Vec<Define>, bool), usize>,
     root: PathBuf,
+    /// The folder compiled shaders are cached in, read as the app is made.
+    cache: PathBuf,
     sender: Sender<Finished>,
     receiver: Mutex<Receiver<Finished>>,
     last_poll: Instant,
@@ -216,6 +218,7 @@ impl ShaderPrograms {
             by_description: HashMap::new(),
             units: Vec::new(),
             unit_by_key: HashMap::new(),
+            cache: slang::cache_folder(&root),
             root,
             sender,
             receiver: Mutex::new(receiver),
@@ -425,6 +428,7 @@ fn unit_for(
     let request = slang::Request {
         file: file.clone(),
         root: programs.root.clone(),
+        cache: programs.cache.clone(),
         stage: role.stage(),
         entry: entry.to_string(),
         defines: defines.iter().filter_map(Define::to_slang).collect(),

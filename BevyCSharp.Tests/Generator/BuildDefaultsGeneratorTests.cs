@@ -9,8 +9,8 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The build defaults' generator gives a program's executable built in Debug the initializer that
-/// has it watch its assets, and nothing to a Release build, a library, a test project or a project
-/// whose build says none of it.
+/// has it watch its project's assets, and nothing to a Release build, a library, a test project,
+/// one on Microsoft's Testing Platform among them, or a project whose build says none of it.
 /// </summary>
 /// <remarks>
 /// The build's properties reach the generator as the package's props make them visible, which a
@@ -27,6 +27,58 @@ public sealed class BuildDefaultsGeneratorTests
     [InlineData(null, null, null, false)]
     public void OnlyAProgramsExecutableBuiltInDebugIsGivenTheInitializer(string? configuration, string? output, string? test, bool given)
     {
+        var properties = new Dictionary<string, string>();
+        if (configuration is not null) properties["build_property.Configuration"] = configuration;
+        if (output is not null) properties["build_property.OutputType"] = output;
+        if (test is not null) properties["build_property.IsTestProject"] = test;
+
+        var initializer = Generate(properties);
+
+        Assert.Equal(given, initializer is not null);
+        if (initializer is not null) Assert.Contains("global::Bevy.BuildDefaults.ProgramBuiltInDebug(typeof(BuildDefaultsRegistration).Assembly)", initializer);
+    }
+
+    /// <summary>
+    /// A test executable on Microsoft's Testing Platform, which sets IsTestingPlatformApplication
+    /// and may leave IsTestProject unset, is given nothing.
+    /// </summary>
+    [Fact]
+    public void ATestExecutableOnTheTestingPlatformIsGivenNothing()
+    {
+        var initializer = Generate(new Dictionary<string, string>
+        {
+            ["build_property.Configuration"] = "Debug",
+            ["build_property.OutputType"] = "Exe",
+            ["build_property.IsTestingPlatformApplication"] = "true",
+        });
+
+        Assert.Null(initializer);
+    }
+
+    /// <summary>
+    /// The initializer hands over the project's folder and its build folder as the build named them,
+    /// a quote in a folder's name kept, and compiles.
+    /// </summary>
+    [Fact]
+    public void TheInitializerHandsOverTheProjectsFolders()
+    {
+        var initializer = Generate(new Dictionary<string, string>
+        {
+            ["build_property.Configuration"] = "Debug",
+            ["build_property.OutputType"] = "Exe",
+            ["build_property.MSBuildProjectDirectory"] = "/home/someone/My \"Game\"",
+            ["build_property.BaseIntermediateOutputPath"] = "obj/",
+        });
+
+        Assert.Contains("ProgramBuiltInDebug(typeof(BuildDefaultsRegistration).Assembly, @\"/home/someone/My \"\"Game\"\"\", @\"obj/\")", initializer);
+    }
+
+    /// <summary>
+    /// Runs the generator over a small program with the build's properties, and answers the
+    /// initializer it gave, or nothing, having checked the program compiles with it.
+    /// </summary>
+    private static string? Generate(Dictionary<string, string> properties)
+    {
         // The engine's Core named outright, where the generator finds what it calls.
         var references = AppDomain.CurrentDomain.GetAssemblies()
             .Append(typeof(BuildDefaults).Assembly)
@@ -39,21 +91,12 @@ public sealed class BuildDefaultsGeneratorTests
             references,
             new CSharpCompilationOptions(OutputKind.ConsoleApplication));
 
-        var properties = new Dictionary<string, string>();
-        if (configuration is not null) properties["build_property.Configuration"] = configuration;
-        if (output is not null) properties["build_property.OutputType"] = output;
-        if (test is not null) properties["build_property.IsTestProject"] = test;
-
         var run = CSharpGeneratorDriver.Create([new BuildDefaultsGenerator().AsSourceGenerator()], optionsProvider: new Options(properties))
             .RunGeneratorsAndUpdateCompilation(compilation, out var generated, out var errors);
 
         Assert.Empty(errors);
-        var initializer = run.GetRunResult().GeneratedTrees.SingleOrDefault(tree => tree.FilePath.EndsWith("BuildDefaults.g.cs", StringComparison.Ordinal));
-        Assert.Equal(given, initializer is not null);
-        if (initializer is null) return;
-
-        Assert.Contains("global::Bevy.BuildDefaults.ProgramBuiltInDebug(typeof(BuildDefaultsRegistration).Assembly)", initializer.ToString());
         Assert.Empty(generated.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        return run.GetRunResult().GeneratedTrees.SingleOrDefault(tree => tree.FilePath.EndsWith("BuildDefaults.g.cs", StringComparison.Ordinal))?.ToString();
     }
 
     /// <summary>The build's properties as the compiler hands an analyzer's options over.</summary>

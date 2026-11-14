@@ -175,9 +175,22 @@ public sealed unsafe partial class App : IDisposable
         if (Config.FrameSeconds == 0 && Config.FrameSecondsAsked > 0)
             Config.FrameSeconds = Config.FrameSecondsAsked;
 
-        var assetRootBytes = Config.AssetRoot is null
+        // Whether to watch, decided once for the app's whole run (Config.WatchAssets).
+        Config.SettleWatchAssets();
+
+        // A program built in Debug naming no root reads and watches its project's assets folder,
+        // where a person saves, since the copy its build put beside it changes only with a build.
+        // Its compiled shaders are cached under the project's build folder instead, so the assets
+        // folder holds only what was put there, and every other app caches them under its root.
+        var projectAssets = Config.AssetRoot is null && Config.WatchAssets && BuildDefaults.ProjectAssets is { } project && Directory.Exists(project)
+            ? project
+            : null;
+        var root = Config.AssetRoot ?? projectAssets;
+        Native.Check(NativeCore.bcs_shader_cache_folder(projectAssets is null ? null : BuildDefaults.ShaderCache), "naming the folder compiled shaders are cached in");
+
+        var assetRootBytes = root is null
             ? null
-            : Encoding.UTF8.GetBytes(Config.AssetRoot + "\0");
+            : Encoding.UTF8.GetBytes(root + "\0");
 
         // The player's directory, made before Bevy is told of it so the source it builds over the
         // directory finds one there. Named first, so a game's files go under its own name.
@@ -206,9 +219,9 @@ public sealed unsafe partial class App : IDisposable
         // Where Bevy reads assets from, and where a streamed read's path starts too, is the
         // directory asked for, or `assets` beside the executable, which is Bevy's own default.
         // Known before the native app is, so the project's settings can be read from there first.
-        Streaming.AssetRoot = string.IsNullOrEmpty(Config.AssetRoot)
+        Streaming.AssetRoot = string.IsNullOrEmpty(root)
             ? Path.Combine(AppContext.BaseDirectory, "assets")
-            : Path.GetFullPath(Config.AssetRoot);
+            : Path.GetFullPath(root);
 
         // What the project says about itself, whose fixed step stands where the config left it
         // to Bevy. A project file that does not read is a broken install, which is said once and
@@ -270,9 +283,12 @@ public sealed unsafe partial class App : IDisposable
         if (_handle == IntPtr.Zero) throw CreationFailed();
 
         // Said where the program left watching alone and its build or the environment turned it on,
-        // so a game reading its folder again says why it does.
+        // so a game reading its folder again says why it does, and which folder it reads. Where that
+        // is the project's own, the line names the folder its shaders are cached in too, since a
+        // person looking in the assets folder finds no cache there.
+        var shaders = projectAssets is not null && HasRenderer ? $", its compiled shaders cached in {BuildDefaults.ShaderCache}" : "";
         if (Config.WatchAssets && !Config.WatchAssetsSetByProgram)
-            Log.Info($"Watching the assets for changes, turned on by {Config.WatchAssetsSource}. Config.WatchAssets = false leaves it out.");
+            Log.Info($"Watching {Streaming.AssetRoot} for changes, turned on by {Config.WatchAssetsSource}{shaders}. Config.WatchAssets = false leaves it out.");
 
         ComponentRegistry.BeginApp(_handle);
 

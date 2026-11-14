@@ -22,7 +22,8 @@
 //! the `PATH`, and then in `build/tools/slang/bin` above the running program or the working
 //! directory, which is where `build/fetch-slang.sh` puts it. A machine with none of those still
 //! runs a game whose shaders were compiled once, because every successful compile is written to a
-//! cache beside the assets and read back when there is no compiler. A hash of the source and of
+//! cache, beside the assets unless the managed side names another folder, and read back when there
+//! is no compiler. A hash of the source and of
 //! every file it imported decides whether a cached result still applies, so a shipped game with
 //! its cache needs no compiler, and a stale entry is never used.
 //!
@@ -33,7 +34,7 @@
 
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::sync::OnceLock;
+use std::sync::{Mutex, OnceLock, PoisonError};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 mod cache;
@@ -123,6 +124,33 @@ fn modules_hash() -> u64 {
 /// The name of the cache directory, under the asset root.
 pub const CACHE_DIRECTORY: &str = ".slang-cache";
 
+/// The cache's folder the managed side named for the apps made after, in place of the asset
+/// root's.
+static CACHE_FOLDER: Mutex<Option<PathBuf>> = Mutex::new(None);
+
+/// The folder compiled shaders are cached in for an app whose assets are under `root`.
+pub fn cache_folder(root: &Path) -> PathBuf {
+    let named = CACHE_FOLDER.lock().unwrap_or_else(PoisonError::into_inner).clone();
+    named.unwrap_or_else(|| root.join(CACHE_DIRECTORY))
+}
+
+/// Names the folder compiled shaders are cached in for the apps made after, or the asset root's
+/// `.slang-cache` again where `path` is null or empty.
+///
+/// A program reading its project's assets folder, as one built in Debug does, keeps the cache in
+/// its project's build folder, so the assets folder holds only what was put there.
+///
+/// # Safety
+/// `path` must be null or a NUL-terminated UTF-8 string.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn bcs_shader_cache_folder(path: *const core::ffi::c_char) -> i32 {
+    crate::interop::guard(|| {
+        let path = unsafe { crate::interop::cstr_to_string(path) }.filter(|path| !path.is_empty());
+        *CACHE_FOLDER.lock().unwrap_or_else(PoisonError::into_inner) = path.map(PathBuf::from);
+        crate::interop::status::OK
+    })
+}
+
 /// The first line of a cache entry, which says which layout the rest of it has, before the hash
 /// of the bridge's modules it was compiled against.
 ///
@@ -165,8 +193,10 @@ impl Stage {
 pub struct Request {
     /// The file, as a path on disk.
     pub file: PathBuf,
-    /// The asset root, which is searched for imports and holds the cache.
+    /// The asset root, which is searched for imports.
     pub root: PathBuf,
+    /// The folder the compile is cached in ([`cache_folder`]).
+    pub cache: PathBuf,
     pub stage: Stage,
     pub entry: String,
     /// Name and value pairs, handed to `slangc` as `-D`.

@@ -159,28 +159,54 @@ public sealed class Config
     /// <para>
     /// Set here, the program decides. Where it is left alone, <see cref="WatchAssetsVariable"/>
     /// decides, and failing that a program's own executable built in Debug watches and one built in
-    /// Release does not (<see cref="BuildDefaults"/>).
+    /// Release does not (<see cref="BuildDefaults"/>). A program built in Debug that names no
+    /// <see cref="AssetRoot"/> watches its project's assets folder rather than the copy beside its
+    /// build.
+    /// </para>
+    /// <para>
+    /// The app decides it once, as it is made from this config, so Bevy's watcher, the managed
+    /// watchers and what the app says of them agree for its whole run. Set after that, it throws.
     /// </para>
     /// </remarks>
+    /// <exception cref="InvalidOperationException">Set after an app was made from this config.</exception>
     public bool WatchAssets
     {
-        get => _watchAssets ?? WatchAssetsAsked ?? BuildDefaults.WatchAssets;
-        set => _watchAssets = value;
+        get => _settled?.Watching ?? _watchAssets ?? WatchAssetsAsked ?? BuildDefaults.WatchAssets;
+        set
+        {
+            if (_settled is not null)
+                throw new InvalidOperationException("WatchAssets is decided as the app is made, so a program sets it on the config it hands new App, before the app is made.");
+            _watchAssets = value;
+        }
     }
 
     private bool? _watchAssets;
 
+    /// <summary>Watching as the app decided it when it was made, what decided it and whether anything asked.</summary>
+    private (bool Watching, string Source, bool Asked)? _settled;
+
+    /// <summary>
+    /// Decides <see cref="WatchAssets"/> for an app being made from this config, which every reader
+    /// takes after, whatever the environment says later.
+    /// </summary>
+    internal void SettleWatchAssets()
+    {
+        _settled = null;
+        _settled = (WatchAssets, WatchAssetsSource, WatchAssetsSetByProgram || WatchAssetsAsked is not null || BuildDefaults.WatchAssets);
+    }
+
     /// <summary>The environment variable that turns <see cref="WatchAssets"/> on or off where the program left it alone.</summary>
     /// <remarks>
-    /// <c>1</c> watches and <c>0</c> does not. Read by every app, so a tool starting a program
-    /// decides for it, watching for a session editing a running game and leaving it out for a
-    /// timing read.
+    /// <c>1</c> watches and <c>0</c> does not, as <c>on</c>, <c>true</c> and <c>yes</c> and
+    /// <c>off</c>, <c>false</c> and <c>no</c> do, in any letter case and with any spaces around it,
+    /// as a shell can leave them. Read by every app, so a tool starting a program decides for it,
+    /// watching for a session editing a running game and leaving it out for a timing read.
     /// </remarks>
     public const string WatchAssetsVariable = "BCS_WATCH_ASSETS";
 
     /// <summary>What the environment says of watching, or nothing where it names nothing it knows.</summary>
     internal static bool? WatchAssetsAsked =>
-        Environment.GetEnvironmentVariable(WatchAssetsVariable) switch
+        Environment.GetEnvironmentVariable(WatchAssetsVariable)?.Trim().ToLowerInvariant() switch
         {
             "1" or "on" or "true" or "yes" => true,
             "0" or "off" or "false" or "no" => false,
@@ -190,12 +216,17 @@ public sealed class Config
     /// <summary>Whether the program set <see cref="WatchAssets"/> itself.</summary>
     internal bool WatchAssetsSetByProgram => _watchAssets is not null;
 
+    /// <summary>Whether the program, the environment or the build asked anything of watching.</summary>
+    internal bool WatchAssetsAskedOfAnything =>
+        _settled?.Asked ?? (WatchAssetsSetByProgram || WatchAssetsAsked is not null || BuildDefaults.WatchAssets);
+
     /// <summary>What decided <see cref="WatchAssets"/>, said by the app as it starts.</summary>
     internal string WatchAssetsSource =>
-        _watchAssets is not null ? "the program"
+        _settled?.Source
+        ?? (_watchAssets is not null ? "the program"
         : WatchAssetsAsked is not null ? $"the environment's {WatchAssetsVariable}"
         : BuildDefaults.WatchAssets ? "the default of a program built in Debug"
-        : "nothing, so off";
+        : "nothing, so off");
 
     /// <summary>
     /// Draw an interface, Dear ImGui, rasterized by the engine.

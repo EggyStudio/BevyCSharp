@@ -56,8 +56,10 @@ Three lines, of which the first reads as nothing and the third says what the com
 The sentence has no colons, no headings, no lists, no prefixes such as `feat` or `fix`, and no
 trailers. It names no tool, model or assistant, and carries no `Co-Authored-By` line. It gives the
 reason for a change and names no one who asked for it or decided it, since the release notes are
-made from the messages (NORM.md, N 4.7). It is short, and it follows [STYLE.md](STYLE.md) like the
-rest of the prose here.
+made from the messages (NORM.md, N 4.7). Nor does it name an item, a verdict or a decision of the
+review by number, an audit, or which commit of several it is, since a reader of the notes knows none
+of them (NORM.md, N 4.11). It is short, and it follows [STYLE.md](STYLE.md) like the rest of the
+prose here.
 
 A commit that changes the library's public surface carries `BevyCSharp/PublicApi.txt` written again
 by `build/api.sh`, which the suite holds the library to, so the change is in the diff where it is

@@ -118,7 +118,9 @@ public sealed class AssetReloadTests : IDisposable
         var ready = new List<WorldInstanceReady>();
         var reloads = new List<AssetReloaded>();
         var written = false;
-        using var harness = new EngineHarness(frames: 600, fps: 120, configure: config =>
+        // Thirty seconds for the load, the first spawn, the watcher's wait, the reload and the
+        // second spawn beside other runs, and the run ends as the second is seen.
+        using var harness = new EngineHarness(frames: 3600, fps: 120, configure: config =>
         {
             config.WatchAssets = true;
             config.AssetRoot = _folder.Path;
@@ -150,9 +152,10 @@ public sealed class AssetReloadTests : IDisposable
     /// <remarks>
     /// Bevy watches in every app of a bridge carrying its watcher unless told no, so the bridge says
     /// no outright where the config did not ask. The watcher's threads are named by the notify crate,
-    /// and Linux lists a process's threads by name, so there they are counted before each app starts
-    /// and while it runs, a thread an app before left behind counted in both. A bridge without the
-    /// watcher, as the headless one, has the app that did not ask alone.
+    /// and Linux lists a process's threads by id and name, so there the test counts the watcher
+    /// threads that started while the app runs. A thread is told by its id, so one an app before left
+    /// behind, ending a tick after that app is gone, changes nothing. A bridge without the watcher, as
+    /// the headless one, has the app that did not ask alone.
     /// </remarks>
     [Fact]
     public void AnAppWhoseConfigDidNotAskWatchesNothingAndStartsNoWatcher()
@@ -161,20 +164,20 @@ public sealed class AssetReloadTests : IDisposable
         // the watcher.
         foreach (var asked in App.HasRenderer ? new[] { false, true } : [false])
         {
-            var (watching, before, during) = (-1, Watchers(), -1);
+            var (watching, before, started) = (-1, Watchers(), -1);
             using var harness = new EngineHarness(frames: 30, configure: asked ? config => config.WatchAssets = true : null);
             harness.OnContext(Stage.Update, ctx =>
             {
                 if (ctx.Time.FrameCount < 10) return;
                 watching = NativeAssets.bcs_assets_watching();
-                during = Watchers();
+                started = Watchers().Except(before).Count();
                 ctx.Exit();
             });
             harness.Run();
 
             Assert.Equal(asked ? 1 : 0, watching);
             if (OperatingSystem.IsLinux())
-                Assert.True(asked ? during > before : during == before, $"{(asked ? "an app that asked" : "an app that did not ask")} had {during} watcher threads where {before} stood before it");
+                Assert.True(asked ? started > 0 : started == 0, $"{(asked ? "an app that asked" : "an app that did not ask")} started {started} watcher threads");
         }
     }
 
@@ -212,13 +215,28 @@ public sealed class AssetReloadTests : IDisposable
         Assert.Empty(reloads);
     }
 
-    /// <summary>The watcher threads standing in this process, by the names the notify crate gives them.</summary>
-    private static int Watchers()
+    /// <summary>
+    /// The ids of the watcher threads standing in this process, by the names the notify crate gives
+    /// them, or none off Linux.
+    /// </summary>
+    private static HashSet<string> Watchers()
     {
-        if (!OperatingSystem.IsLinux()) return 0;
-        return Directory.EnumerateDirectories("/proc/self/task")
-            .Count(task => File.Exists(Path.Combine(task, "comm"))
-                           && File.ReadAllText(Path.Combine(task, "comm")).StartsWith("notify-rs", StringComparison.Ordinal));
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        if (!OperatingSystem.IsLinux()) return ids;
+        foreach (var task in Directory.EnumerateDirectories("/proc/self/task"))
+        {
+            try
+            {
+                if (File.ReadAllText(Path.Combine(task, "comm")).StartsWith("notify-rs", StringComparison.Ordinal))
+                    ids.Add(Path.GetFileName(task));
+            }
+            catch (IOException)
+            {
+                // The thread ended between the listing and the read, so it is gone.
+            }
+        }
+
+        return ids;
     }
 
     /// <summary>The pixels of either half of a picture, left or right, that pass a test of their color.</summary>

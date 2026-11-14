@@ -58,8 +58,9 @@ using Bevy.Interop;
 /// <para>
 /// <b>The compiler.</b> <c>slangc</c> compiles each stage in the background. The build fetches a
 /// pinned release into <c>build/tools/slang</c>, and every compile is cached under the asset root
-/// in <c>.slang-cache</c> with its layout, so a game shipped with the cache needs no compiler. See
-/// <see cref="SlangAvailable"/>.
+/// in <c>.slang-cache</c> with its layout, so a game shipped with the cache needs no compiler. A
+/// program built in Debug reading its project's assets folder keeps the cache under the project's
+/// <c>obj</c> folder instead (<see cref="BuildDefaults"/>). See <see cref="SlangAvailable"/>.
 /// </para>
 /// </remarks>
 public static unsafe partial class Shaders

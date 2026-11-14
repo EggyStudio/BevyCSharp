@@ -51,6 +51,12 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>What went wrong with the last build, or null when it worked.</summary>
     public string? LastError { get; private set; }
 
+    /// <summary>Whether the last build failed because a script could not be read, which a later try may get past.</summary>
+    public bool Unread { get; private set; }
+
+    /// <summary>Whether a generation runs.</summary>
+    public bool Running => _tag is not null;
+
     /// <summary>
     /// Compiles the directory and puts the result in place of whatever was there.
     /// </summary>
@@ -58,6 +64,7 @@ public sealed class ScriptHost(App app, string directory)
     public bool Reload()
     {
         var sources = Sources();
+        Unread = false;
         if (sources.Length == 0)
         {
             LastError = $"no .cs files under {Directory}";
@@ -70,7 +77,14 @@ public sealed class ScriptHost(App app, string directory)
         // descriptions take their names.
         var before = ReloadedComponents.Before();
 
-        if (!Compile(sources, name, out var image, out var error))
+        if (!ReadSources(sources, out var texts, out var unread))
+        {
+            LastError = unread;
+            Unread = true;
+            return false;
+        }
+
+        if (!Compile(texts, name, out var image, out var error))
         {
             LastError = error;
             return false;
@@ -86,6 +100,12 @@ public sealed class ScriptHost(App app, string directory)
         }
         catch (Exception e)
         {
+            // What the generation put in before it threw goes, its systems, what the app keeps by
+            // its types, and the descriptions its initializer laid over the running generation's,
+            // so the running generation is the only one left, its systems running once a frame.
+            app.RemoveSystemsBySource(name);
+            foreach (var assembly in context.Assemblies) app.ForgetAssembly(assembly);
+            PutBack(before);
             context.Unload();
 
             // What the script's own code threw, which a registration run by reflection or a
@@ -114,9 +134,31 @@ public sealed class ScriptHost(App app, string directory)
         _loaded = context;
         _tag = name;
         Registered = registered;
-        Files = sources.Length;
+        Files = texts.Length;
         LastError = null;
         return true;
+    }
+
+    /// <summary>Retires the running generation and forgets what it was built from, as a folder emptied of scripts asks.</summary>
+    public void Clear()
+    {
+        Retire();
+        Registered = 0;
+        Files = 0;
+        Carried = 0;
+        LastError = null;
+        Unread = false;
+    }
+
+    /// <summary>
+    /// Lets go of the running generation's context, for an app ending, whose systems go with it,
+    /// so a process making several apps does not keep each one's scripts loaded.
+    /// </summary>
+    internal void Release()
+    {
+        _loaded?.Unload();
+        _loaded = null;
+        _tag = null;
     }
 
     /// <summary>Retires the running generation and unloads it.</summary>
@@ -133,13 +175,63 @@ public sealed class ScriptHost(App app, string directory)
         _tag = null;
     }
 
-    /// <summary>The script files, in a fixed order so a build is reproducible.</summary>
+    /// <summary>
+    /// The script files, in a fixed order so a build is reproducible, passing over an editor's lock
+    /// files, whose names begin <c>.#</c>, a link to nothing while a buffer is unsaved.
+    /// </summary>
     private string[] Sources() => System.IO.Directory.Exists(Directory)
-        ? [.. System.IO.Directory.GetFiles(Directory, "*.cs", SearchOption.AllDirectories).Order()]
+        ? [.. System.IO.Directory.GetFiles(Directory, "*.cs", SearchOption.AllDirectories)
+            .Where(path => !Path.GetFileName(path).StartsWith(".#", StringComparison.Ordinal))
+            .Order()]
         : [];
 
+    /// <summary>
+    /// Reads each script, passing over one gone between the listing and the read, and fails naming
+    /// one that is there and cannot be read, as a file another program holds.
+    /// </summary>
+    private static bool ReadSources(string[] sources, out (string Path, string Text)[] texts, out string? unread)
+    {
+        var read = new List<(string Path, string Text)>(sources.Length);
+        foreach (var path in sources)
+        {
+            try
+            {
+                read.Add((path, File.ReadAllText(path)));
+            }
+            catch (Exception error) when (error is FileNotFoundException or DirectoryNotFoundException)
+            {
+                // Removed since the listing, as a switch of branches removes it, which the next
+                // change's build says in full.
+            }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+            {
+                texts = [];
+                unread = $"{path} could not be read: {error.Message}";
+                return false;
+            }
+        }
+
+        texts = [.. read];
+        unread = null;
+        return true;
+    }
+
+    /// <summary>
+    /// Puts back the descriptions of the running generation's components a failed generation's
+    /// initializer replaced, and takes back the ones it added.
+    /// </summary>
+    private static void PutBack(IReadOnlyList<ComponentSchema> before)
+    {
+        var running = before.Select(schema => schema.QualifiedName).ToHashSet(StringComparer.Ordinal);
+        foreach (var added in ReloadedComponents.Before().Where(schema => !running.Contains(schema.QualifiedName)))
+            ComponentSchemas.Remove(added.QualifiedName);
+
+        foreach (var schema in before)
+            if (!ReferenceEquals(ComponentSchemas.For(schema.QualifiedName), schema)) ComponentSchemas.Add(schema);
+    }
+
     /// <summary>Builds the scripts into an assembly image, generators and all.</summary>
-    private static bool Compile(string[] sources, string name, out byte[]? image, out string? error)
+    private static bool Compile((string Path, string Text)[] sources, string name, out byte[]? image, out string? error)
     {
         image = null;
         error = null;
@@ -154,7 +246,7 @@ public sealed class ScriptHost(App app, string directory)
             + "global using Bevy;\n";
 
         var trees = sources
-            .Select(path => CSharpSyntaxTree.ParseText(File.ReadAllText(path), path: path))
+            .Select(source => CSharpSyntaxTree.ParseText(source.Text, path: source.Path))
             .Prepend(CSharpSyntaxTree.ParseText(Preamble, path: "<preamble>"))
             .ToArray();
 

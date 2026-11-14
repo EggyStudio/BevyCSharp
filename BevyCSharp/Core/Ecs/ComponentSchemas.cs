@@ -69,6 +69,19 @@ public static class ComponentSchemas
         }
     }
 
+    /// <summary>
+    /// Takes back the schema registered for a type's qualified name, as a script generation that
+    /// failed to register takes back what its initializer declared.
+    /// </summary>
+    internal static void Remove(string qualifiedName)
+    {
+        lock (Gate)
+        {
+            Registered.RemoveAll(existing => existing.QualifiedName == qualifiedName);
+            _generation = -1;
+        }
+    }
+
     /// <summary>The schema for a component id, or <see langword="null"/> when none describes it.</summary>
     public static ComponentSchema? For(int componentId)
     {

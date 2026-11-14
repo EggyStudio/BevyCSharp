@@ -138,9 +138,10 @@ jobs:
   test:
     name: ${{ matrix.system }}
     runs-on: ${{ matrix.os }}
-    # An hour, several times what the three take with their caches, so a headless bridge built with
-    # no cache and a lost suite run again in parts (build/test.py) both fit, and a test that hangs
-    # ends the job within it rather than at GitHub's six hours.
+    # An hour, several times what the three take with their caches, the renderer's tests among them,
+    # so a headless bridge and the renderer's crates built with no cache and a lost suite run again
+    # in parts (build/test.py) all fit, and a test that hangs ends the job within it rather than at
+    # GitHub's six hours.
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -262,21 +263,19 @@ jobs:
 
       # N 6.7 and N 6.8 of NORM.md. build/test.py runs the bridge's own tests, which cover what no
       # managed test can reach, the bridge's again with the renderer's crates, where shader
-      # reflection and the packing of values by name live, and the managed suite, each a process
-      # held to a time and a memory. A suite that is lost runs again in parts, and the log ends with
-      # a page of what failed, which is the job's summary and its annotations. The renderer's part
-      # runs on Linux alone, since it is the longer build and its tests read saved compiler output
-      # that is the same on every system.
+      # reflection, the packing of values by name and Bevy's file watcher live, and the managed
+      # suite, each a process held to a time and a memory. A suite that is lost runs again in parts,
+      # and the log ends with a page of what failed, which is the job's summary and its
+      # annotations. The renderer's part runs on every system, since the file watcher is each
+      # system's own, macOS reporting a changed file by the path a link leads to.
       # A Mac has python3 and no python, and Windows the other way round.
       - name: Test
         shell: bash
         run: |
-          if [ "$RUNNER_OS" = Linux ]; then
-            python3 build/test.py --no-build --configuration Release --timeout-minutes 30
-          elif [ "$RUNNER_OS" = macOS ]; then
-            python3 build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
+          if [ "$RUNNER_OS" = Windows ]; then
+            python build/test.py --no-build --configuration Release --timeout-minutes 30
           else
-            python build/test.py bridge suite --no-build --configuration Release --timeout-minutes 30
+            python3 build/test.py --no-build --configuration Release --timeout-minutes 30
           fi
 
       # The page, from every run, for the digest job below, and any prototype pictures a run drew

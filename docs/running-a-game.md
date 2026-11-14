@@ -243,11 +243,21 @@ so is a game's compiled C#.
 ### What decides
 
 `Config.WatchAssets` decides. A program that sets it decides either way. Where it leaves it alone,
-the environment's `BCS_WATCH_ASSETS` decides, `1` watching and `0` not, which `./bcs open` sets to
-`1` and to `0` with `--no-watch`, as a capture or a timing read asks. Failing both, a game built in
-Debug watches and one built in Release does not, so a shipped game starts no watcher. An app the
-environment or the Debug default turned watching on for says so in the log as it starts, and
-`live.status` says what decided.
+the environment's `BCS_WATCH_ASSETS` decides, `1` watching and `0` not in any letter case, which
+`./bcs open` sets to `1` and to `0` with `--no-watch`, as a capture or a timing read asks. Failing
+both, a game built in Debug watches and one built in Release does not, so a shipped game starts no
+watcher. An app the environment or the Debug default turned watching on for says so in the log as it
+starts, naming the folder it watches, and `live.status` says what decided. The app decides as it is
+made, so `Config.WatchAssets` is set on the config handed to it, and set after, it throws.
+
+The Debug default reads the project's folder. A game built in Debug whose config names no
+`AssetRoot` reads and watches its project's `assets` folder, where a file is saved, rather than the
+copy its build puts beside it, and caches its compiled shaders under the project's `obj` folder, so
+the assets folder holds only what was put there. Its first lines name both folders. A Debug build is
+not what is shipped, and a published game reads the copy beside it. A program that reaches the
+package through a library of its own is given no Debug default, and sets `WatchAssets` or
+`BCS_WATCH_ASSETS` to watch. A folder the system will not watch, its limit on watchers met, is said
+in the log as a warning and read without watching, the app starting all the same.
 
 ### What is read again
 
@@ -256,7 +266,11 @@ bridge with the renderer carries, and each is posted as an `AssetReloaded` messa
 handle keeps pointing at the same asset, so whatever draws with it shows the new version, and the
 message is for what worked something out from the old one, a size read from an image or a collider
 fitted to a mesh. A glTF's scene is spawned again under the same root and posted as
-`WorldInstanceReady` with `Reloaded` set.
+`WorldInstanceReady` with `Reloaded` set. An asset whose dependency failed to load, a glTF naming a
+missing texture, is read again without being posted until its dependencies load. Bevy's watcher
+waits for a file to sit still a third of a second, so a file written over longer than that is read
+before it is whole and again after, and a file replaced by renaming can be read and posted twice for
+one save.
 
 Shaders reload in every profile, watcher or not, including a Slang shader when a file it imports
 changes, each said in the log as the bridge compiles it again, and since the bridge compiles them
@@ -326,13 +340,15 @@ again and again costs a compilation and not another copy of the runtime. A `[Com
 is not registered, since commands are written into a game's assembly as it is built.
 
 A script that does not compile changes nothing. The errors are said in the log as a warning and the
-running generation stays. The compiler lives in `BevyCSharp.Scripting`, which the package leaves
-out, because a game should not carry one in order to run. The editor and the Player add its
-`ScriptsPlugin`, and a game that references the project adds it the same way, with
-`app.AddPlugin(new ScriptsPlugin())`. It compiles the asset folder's `scripts` as the app is built
-and again when a script is saved where the app watches its assets, says each build in the log, posts
-each after the first as `AssetReloaded` of the kind `Scripts`, and answers `scripts.reload`, which
-builds again on request, and `scripts.status`, which says what runs and how the last build went.
+running generation stays, as it does for a script that cannot be read or a generation whose
+registration throws. Deleting a script stops what it ran, the last one too. The compiler lives in
+`BevyCSharp.Scripting`, which the package leaves out, because a game should not carry one in order
+to run. The editor and the Player add its `ScriptsPlugin`, and a game that references the project
+adds it the same way, with `app.AddPlugin(new ScriptsPlugin())`. It compiles the asset folder's
+`scripts` as the app is built and again when a script is saved where the app watches its assets,
+says each build in the log, posts each after the first as `AssetReloaded` of the kind `Scripts`, and
+answers `scripts.reload`, which builds again on request, and `scripts.status`, which says what runs
+and how the last build went.
 
 ---
 

@@ -562,7 +562,9 @@ readonly struct Bevy.BufferRead : IEquatable<BufferRead>
   void Deconstruct(out int Ticket)
 static class Bevy.BuildDefaults
   static bool WatchAssets { get; }
-  static void ProgramBuiltInDebug(Assembly program)
+  static string? ProjectAssets { get; }
+  static string? ShaderCache { get; }
+  static void ProgramBuiltInDebug(Assembly program, string? project = null, string? intermediate = null)
 sealed class Bevy.ButtonAttribute : Attribute
   ButtonAttribute(string label = "")
   ButtonLine Line { get; init; }

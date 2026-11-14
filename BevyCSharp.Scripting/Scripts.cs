@@ -35,7 +35,17 @@ public sealed class Scripts : IDisposable
     {
         _app = app;
         _host = new ScriptHost(app, directory);
-        if (watching) _watcher = new ScriptWatcher(directory);
+
+        // A folder the system will not watch, its limit on watchers met or the folder not to be
+        // made, leaves the scripts built on request alone, which is no reason to refuse to start.
+        try
+        {
+            if (watching) _watcher = new ScriptWatcher(directory);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            Log.Warn($"{directory} cannot be watched, so a changed script is compiled by scripts.reload alone: {error.Message}");
+        }
 
         var under = Path.GetRelativePath(assets, directory).Replace('\\', '/');
         _named = under.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(under) ? directory : under;
@@ -46,6 +56,9 @@ public sealed class Scripts : IDisposable
 
     /// <summary>Whether a change to a script builds them again, as it does where the app watches its assets.</summary>
     public bool Watching => _watcher is not null;
+
+    /// <summary>Whether the system's watcher stopped, its folder removed, until it is started again.</summary>
+    public bool WatcherStopped => _watcher?.Stopped == true;
 
     /// <summary>How many behaviors the running generation registered.</summary>
     public int Registered => _host.Registered;
@@ -67,13 +80,23 @@ public sealed class Scripts : IDisposable
     public event Action<Scripts>? Built;
 
     /// <summary>Compiles the scripts again and puts them in place of the running generation.</summary>
-    /// <returns>Whether they compiled. Where they did not, the running generation stays.</returns>
-    public bool Reload() => Build("on request");
+    /// <returns>Whether they compiled, or a folder emptied of scripts stopped them. Where they did not, the running generation stays.</returns>
+    /// <remarks>A change waiting to settle is taken in by this build, so it is not built again.</remarks>
+    public bool Reload()
+    {
+        _watcher?.Forget();
+        return Build("on request");
+    }
 
     /// <summary>Builds when a script changed and has since sat still.</summary>
     internal void Poll()
     {
-        if (_watcher?.TakeChange() == true) Build("after a change");
+        if (_watcher is null) return;
+
+        if (_watcher.TakeLost() is { } lost)
+            Log.Warn($"The watcher of {Directory} lost track of its changes, so every script is compiled again: {lost}");
+
+        if (_watcher.TakeChange() && !Build("after a change") && _host.Unread) _watcher.Again();
     }
 
     /// <summary>Compiles the scripts and says how it went, <paramref name="why"/> naming what asked.</summary>
@@ -81,11 +104,19 @@ public sealed class Scripts : IDisposable
     {
         var again = Builds > 0;
 
-        // A folder with nothing in it yet, as a new project's, is no failure to warn of.
+        // A folder with nothing in it yet, as a new project's, is no failure to warn of, and one
+        // emptied of its scripts stops what they ran, as removing one of two stops that one's.
         if (!System.IO.Directory.Exists(Directory) || !System.IO.Directory.EnumerateFiles(Directory, "*.cs", SearchOption.AllDirectories).Any())
         {
-            Log.Info(again
-                ? $"No scripts are left in {Directory}, so the ones running stay."
+            if (_host.Running)
+            {
+                _host.Clear();
+                Log.Info($"No scripts are left in {Directory}, so the behaviors they ran stop.");
+                _app.World.Resource<MessageBus>().Send(new AssetReloaded(_named, "Scripts"));
+                return true;
+            }
+
+            Log.Info(again ? $"No scripts are left in {Directory}."
                 : Watching ? $"No scripts in {Directory} yet, and one written there is compiled." : $"No scripts in {Directory}.");
             return false;
         }
@@ -113,6 +144,10 @@ public sealed class Scripts : IDisposable
     /// <summary>A count with its noun, made plural past one.</summary>
     internal static string Count(int count, string noun) => count == 1 ? $"one {noun}" : $"{count} {noun}s";
 
-    /// <summary>Stops watching. The running generation goes with the app.</summary>
-    public void Dispose() => _watcher?.Dispose();
+    /// <summary>Stops watching and lets go of the running generation, whose systems go with the app.</summary>
+    public void Dispose()
+    {
+        _watcher?.Dispose();
+        _host.Release();
+    }
 }

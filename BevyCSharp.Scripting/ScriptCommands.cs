@@ -19,8 +19,10 @@ internal static class ScriptCommands
         if (Find() is not { } scripts) return None();
 
         if (scripts.Reload())
-            return $"compiled {Scripts.Count(scripts.Files, "file")} into {Scripts.Count(scripts.Registered, "behavior")}, "
-                   + $"{Scripts.Count(scripts.Carried, "component")} carried onto the new types";
+            return scripts.Files == 0
+                ? $"no scripts are left in {scripts.Directory}, so none run"
+                : $"compiled {Scripts.Count(scripts.Files, "file")} into {Scripts.Count(scripts.Registered, "behavior")}, "
+                  + $"{Scripts.Count(scripts.Carried, "component")} carried onto the new types";
 
         var why = scripts.LastError ?? $"there are no scripts in {scripts.Directory}";
         ConsoleHost.Fail("NOT_COMPILED", $"The scripts did not compile, so the ones running stay: {why}");
@@ -33,11 +35,13 @@ internal static class ScriptCommands
     {
         if (Find() is not { } scripts) return None();
 
-        var running = scripts.Builds == 0
-            ? "nothing compiled yet"
+        var running = scripts.Builds == 0 ? "nothing compiled yet"
+            : scripts.Files == 0 ? $"none running, the folder emptied, built {Scripts.Count(scripts.Builds, "time")}"
             : $"{Scripts.Count(scripts.Registered, "behavior")} from {Scripts.Count(scripts.Files, "file")} running, "
               + $"built {Scripts.Count(scripts.Builds, "time")}";
-        var watched = scripts.Watching ? "a change compiled as it is saved" : "not watched, so scripts.reload builds a change";
+        var watched = !scripts.Watching ? "not watched, so scripts.reload builds a change"
+            : scripts.WatcherStopped ? "watched, though the watcher stopped, so scripts.reload builds a change until it starts again"
+            : "a change compiled as it is saved";
         var last = scripts.LastError is { } error ? $"the last build failed: {error}" : "the last build compiled";
 
         return $"{scripts.Directory}, {running}, {watched}, {last}";

@@ -42,7 +42,9 @@ public sealed class ScriptsPlugin(string? directory = null) : IPlugin
 
         app.EnableDynamicSystems();
 
-        var assets = app.Config.AssetRoot ?? Path.Combine(AppContext.BaseDirectory, "assets");
+        // The asset root the app settled on as it was made, its config's, a program built in Debug's
+        // project's assets folder, or the copy beside the program.
+        var assets = Streaming.AssetRoot;
         var scripts = new Scripts(app, Path.GetFullPath(directory ?? Path.Combine(assets, "scripts")), Path.GetFullPath(assets), app.Config.WatchAssets);
 
         // A resource, so the world disposes it with the app and the watcher stops with it, and the

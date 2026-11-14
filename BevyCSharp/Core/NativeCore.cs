@@ -36,6 +36,11 @@ internal static unsafe partial class NativeCore
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_asset_source_add(string? name, string? root);
 
+    /// <summary>Names the folder compiled shaders are cached in for the next app, or the asset root's again with a null path.</summary>
+    [LibraryImport(Library, StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_cache_folder(string? path);
+
     // -- The graphics adapter
 
     /// <summary>Describes the graphics adapter the renderer chose, as UTF-8.</summary>

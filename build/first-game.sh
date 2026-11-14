@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Builds every step of docs/first-game.md's game, each a whole program under games/FirstGame/steps,
 # in a copy of the game's project against the package in build/package, and runs it offscreen for
-# sixty frames, so no step the page shows can stop compiling or starting. With --shots it also
+# sixty frames, so no step the page shows can stop compiling or starting, and each says it watches
+# its project's assets folder by the default of a Debug build and caches its shaders under the
+# project's obj folder. With --shots it also
 # plays each through ./bcs, walking the player to the right as the step's picture shows, and
 # writes the picture into .github/assets/first-game.
 #
@@ -38,6 +40,12 @@ for step in games/FirstGame/steps/*.cs; do
     out="$project/bin/Debug/net10.0"
     (cd "$out" && BCS_OFFSCREEN=1 BCS_FRAMES=60 ./Coins >run.log 2>&1) || { cat "$out/run.log"; fail "$n" "it did not run"; }
     if grep -E "ERROR|failed:|panicked|Unhandled exception" "$out/run.log"; then fail "$n" "it logged an error"; fi
+    # A program built in Debug from the package watches its project's assets folder by its build's
+    # default and caches its shaders under the project's obj folder, which its first lines say, so
+    # the generator's initializer is seen to run and to hand over both folders.
+    if ! grep -qF "Watching $project/assets for changes, turned on by the default of a program built in Debug, its compiled shaders cached in $project/obj/.slang-cache." "$out/run.log"; then
+        cat "$out/run.log"; fail "$n" "it did not say it watches $project/assets by the Debug default with its shaders cached in $project/obj"
+    fi
 
     if [ "$shots" = "--shots" ]; then
         (cd "$out" && { BCS_OFFSCREEN=1 BCS_SERVE=1 ./Coins >serve.log 2>&1 & })
