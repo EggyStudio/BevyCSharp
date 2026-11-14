@@ -77,13 +77,14 @@ public sealed class ScriptsPluginTests : IDisposable
 
     /// <summary>
     /// A script saved again while an app watching its assets runs is compiled, its new system runs
-    /// in place of the old one's, and both builds are said.
+    /// in place of the old one's, both builds are said and the second is posted.
     /// </summary>
     [Fact]
     public void AScriptSavedWhileTheAppWatchesIsCompiledAndItsNewSystemRuns()
     {
         Write("first");
         var (seen, written, after) = (Array.Empty<string>(), false, 0);
+        var reloads = new List<AssetReloaded>();
         string[] said;
         CrashLog.Start(_logs.Path, GraphicsBackend.Vulkan);
         try
@@ -94,6 +95,7 @@ public sealed class ScriptsPluginTests : IDisposable
                 harness.OnContext(Stage.Update, ctx =>
                 {
                     seen = Names(ctx.Ecs);
+                    reloads.AddRange(ctx.Read<AssetReloaded>().ToArray());
                     if (!written && seen.Contains("first"))
                     {
                         Write("second");
@@ -118,6 +120,9 @@ public sealed class ScriptsPluginTests : IDisposable
         Assert.Contains("second", seen);
         Assert.Contains($"Info Compiled the scripts in {_folder.Path}, one file and 2 behaviors.", said);
         Assert.Contains($"Info Compiled the scripts in {_folder.Path} again after a change, one file and 2 behaviors.", said);
+
+        // The folder outside the asset root, so named in full.
+        Assert.Equal([new AssetReloaded(_folder.Path, "Scripts")], reloads);
     }
 
     /// <summary>

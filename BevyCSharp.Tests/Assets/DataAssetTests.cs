@@ -235,15 +235,20 @@ public sealed class DataAssetTests : IDisposable
         DataAssets.PostChanges(bus);
         var before = DataAssets.Get(sword);
 
-        // Written by this side, which the watcher passes over, so the loaded value stays the same one.
+        // Written by this side, which the watcher passes over, so the loaded value stays the same one
+        // and nothing is said read again.
+        var reloads = new List<AssetReloaded>();
         DataAssets.Save(sword, before);
         for (var i = 0; i < 10; i++)
         {
             DataAssets.PostChanges(bus);
+            bus.Swap();
+            reloads.AddRange(bus.Read<AssetReloaded>().ToArray());
             Thread.Sleep(30);
         }
 
         Assert.Same(before, DataAssets.Get(sword));
+        Assert.Empty(reloads);
 
         // Edited outside, as a text editor or a pull would.
         var file = _folder.File("watched.data.json");
@@ -254,10 +259,13 @@ public sealed class DataAssetTests : IDisposable
         {
             Thread.Sleep(30);
             DataAssets.PostChanges(bus);
+            bus.Swap();
+            reloads.AddRange(bus.Read<AssetReloaded>().ToArray());
             seen = DataAssets.Get(sword).Damage;
         }
 
         Assert.Equal(77f, seen);
+        Assert.Equal([new AssetReloaded("watched.data.json", "DataAsset")], reloads);
     }
 
     [Fact]

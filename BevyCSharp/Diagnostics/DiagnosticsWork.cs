@@ -11,5 +11,9 @@ internal sealed class DiagnosticsWork : IPlugin
         {
             if (App.HasRenderer && !world.Resource<Config>().Headless) Debug.TickOverlay(world);
         });
+
+        // The files read again, kept for live.status from the reloads each frame posts.
+        app.World.InsertResource(new LiveReloads());
+        app.AreasWork.Add(3100, world => world.Resource<LiveReloads>().Read(world));
     }
 }

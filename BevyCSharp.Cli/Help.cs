@@ -21,6 +21,7 @@ internal static class Help
                 [--offscreen]            Draw into an image instead of a window, with no display
                 [--frame-time <seconds>] Each frame advances the clock by that much, not the machine's
                 [--hold loads,commands]  That clock held still while a load runs, or between commands
+                [--no-watch]             The app does not read its files again as they change
               list                       Every command the connected app offers, with its arguments
               command <name> [args]      Run one against the live world
               shot <path> [frame]        Capture the window, at a frame of the clock counted from

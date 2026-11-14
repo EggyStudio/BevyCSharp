@@ -83,6 +83,19 @@ public static partial class SceneFile
     public static bool KeepsAssets { get; set; }
 
     /// <summary>
+    /// Where set, a scene loaded at the top level is left as it is when its file changes on disk
+    /// while the app watches its assets, and this is told the path the scene was loaded by.
+    /// </summary>
+    /// <remarks>
+    /// Nothing by default, so such a scene is spawned again in place (<see cref="Load"/>). The
+    /// editor sets it, since the scene it has open is the document a person is editing, and a file
+    /// changed from outside spawned over it would take unsaved work from under them. A change is
+    /// one where the file's bytes differ from what this process last read or wrote, so a save of
+    /// the app's own tells it nothing.
+    /// </remarks>
+    public static Action<string>? KeptWhenChanged { get; set; }
+
+    /// <summary>
     /// Bevy's components a scene does not write, by short name, because the engine works them out
     /// for itself or the file says them another way.
     /// </summary>
@@ -192,6 +205,9 @@ public static partial class SceneFile
         var temporary = full + ".tmp";
         File.WriteAllText(temporary, Encoding.UTF8.GetString(buffer.WrittenSpan) + "\n");
         File.Move(temporary, full, overwrite: true);
+
+        // What a load of this file at the top level follows, so the save is no change to spawn.
+        LoadedScenes.Saved(world, target);
         return written;
     }
 

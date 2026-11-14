@@ -18,6 +18,7 @@ namespace Bevy.Tests;
 public sealed class AssetReloadTests : IDisposable
 {
     private readonly TestFolder _folder = new("bcs-asset-reload-");
+    private readonly TestFolder _logs = new("bcs-asset-reload-logs-");
     private readonly string? _asked = Environment.GetEnvironmentVariable(Config.WatchAssetsVariable);
 
     public AssetReloadTests() => Environment.SetEnvironmentVariable(Config.WatchAssetsVariable, null);
@@ -26,15 +27,19 @@ public sealed class AssetReloadTests : IDisposable
     {
         Environment.SetEnvironmentVariable(Config.WatchAssetsVariable, _asked);
         _folder.Dispose();
+        _logs.Dispose();
     }
 
     /// <summary>
     /// A red swatch written again blue while the app watches is drawn blue on the cube its standard
-    /// material colors and on the one a shader material samples it on, and the reload is said.
+    /// material colors and on the one a shader material samples it on, and the reload is posted and
+    /// said in the log.
     /// </summary>
     /// <remarks>
     /// A reloaded image is a new texture on the GPU under the same handle, so a material that kept
-    /// the old texture's view in its bindings would go on drawing red.
+    /// the old texture's view in its bindings would go on drawing red. Bevy's log reaches the
+    /// console's ring where the run's log is started, which the suite's apps leave off, so the case
+    /// starts it in a folder of its own.
     /// </remarks>
     [SkippableFact]
     public void ATextureWrittenWhileTheAppWatchesIsDrawnAgainUnderBothMaterialsAndSaid()
@@ -63,17 +68,26 @@ public sealed class AssetReloadTests : IDisposable
             EachFrame = world => reloads.AddRange(world.Resource<MessageBus>().Read<AssetReloaded>()),
         };
 
-        run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
-            .Until("ready", _ => Render.PipelinesReady())
-            .Wait(10)
-            .Capture("red")
-            .Do("writing it blue", _ => File.WriteAllBytes(_folder.File("swatch.png"), Swatch(0, 0, 255)))
-            .Until("read again", _ => reloads.Count > 0)
-            .Wait(10)
-            .Capture("blue")
-            .Go();
+        CrashLog.Start(_logs.Path, GraphicsBackend.Vulkan);
+        try
+        {
+            run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+                .Until("ready", _ => Render.PipelinesReady())
+                .Wait(10)
+                .Capture("red")
+                .Do("writing it blue", _ => File.WriteAllBytes(_folder.File("swatch.png"), Swatch(0, 0, 255)))
+                .Until("read again", _ => reloads.Count > 0)
+                .Wait(10)
+                .Capture("blue")
+                .Go();
+        }
+        finally
+        {
+            CrashLog.Stop();
+        }
 
         Assert.Contains(new AssetReloaded("swatch.png", "Image"), reloads);
+        Assert.Contains(ConsoleLog.All(), line => line.Text == "Read swatch.png again after its file changed, as an Image.");
         var (red, blue) = (run.Picture("red"), run.Picture("blue"));
         foreach (var (half, name) in new[] { (0u, "standard"), (1u, "shader") })
         {

@@ -29,6 +29,6 @@ internal sealed class RenderWork : IPlugin
         });
 
         // The material files changed on disk since the frame before, after the data files are.
-        app.AreasWork.Add(4200, _ => MaterialFiles.ReloadTouched());
+        app.AreasWork.Add(4200, world => MaterialFiles.ReloadTouched(world.Resource<MessageBus>()));
     }
 }

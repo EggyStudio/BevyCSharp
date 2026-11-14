@@ -84,11 +84,13 @@ internal sealed class AssetWork : IPlugin
     /// </summary>
     /// <remarks>
     /// Two texts each, read as the failures' are. A frame with none costs one call that answers
-    /// zero, and a run that does not watch never has any.
+    /// zero, and a run that does not watch never has any. Each file is said in the log once, with
+    /// the assets in it read again, a glTF's scene and meshes on one line.
     /// </remarks>
     private static unsafe void PostReloads(MessageBus bus)
     {
         var count = NativeAssets.bcs_asset_reloads_drain();
+        var byFile = new SortedDictionary<string, List<string>>(StringComparer.Ordinal);
         for (var i = 0; i < count; i++)
         {
             var index = i;
@@ -99,6 +101,17 @@ internal sealed class AssetWork : IPlugin
                 (buffer, capacity) => NativeAssets.bcs_asset_reload_kind(index, buffer, capacity),
                 "reading what kind of asset was read again");
             bus.Send(new AssetReloaded(path, kind));
+
+            var cut = path.IndexOf('#', StringComparison.Ordinal);
+            var file = cut < 0 ? path : path[..cut];
+            if (!byFile.TryGetValue(file, out var assets)) byFile[file] = assets = [];
+            assets.Add(cut < 0 ? $"as {(kind is ['A' or 'E' or 'I' or 'O' or 'U', ..] ? "an" : "a")} {kind}" : $"{path[(cut + 1)..]} ({kind})");
+        }
+
+        foreach (var (file, assets) in byFile)
+        {
+            var listed = assets.Count == 1 ? assets[0] : $"{string.Join(", ", assets.Take(assets.Count - 1))} and {assets[^1]}";
+            Log.Info($"Read {file} again after its file changed, {listed}.");
         }
     }
 }

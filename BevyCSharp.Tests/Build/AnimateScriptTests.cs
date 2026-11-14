@@ -22,7 +22,7 @@ namespace Bevy.Tests;
 /// never builds one. The checkout's <c>./bcs</c> builds a client where there is none, which on the
 /// workflow's Linux runner, whose suite is built in Release where the launcher looks for Debug, it
 /// did inside this test, and an MSBuild worker node that build started held the script's output
-/// open while it idled for reuse, so the test read on until the suite was lost (Verdict 41). The
+/// open while it idled for reuse, so the test read on until the suite was lost. The
 /// script is held to a minute and ended with all it started past that, the test failing with what
 /// it printed.
 /// </para>

@@ -61,6 +61,10 @@ public partial struct EditorBoot
         // the assets those handles name after the entity goes.
         SceneFile.KeepsAssets = true;
 
+        // The open scene is the document being edited, so a change to its file from outside is said
+        // and not spawned over the work in it.
+        SceneFile.KeptWhenChanged = static path => Log.Warn($"{path} changed on disk, and the open document was left as it is.");
+
         EditorProject.RestoreLayout();
 
         Console.WriteLine("[editor] the interface is up");

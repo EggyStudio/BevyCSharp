@@ -14,12 +14,33 @@ public static partial class SceneFile
     /// What was spawned, or, for a file that is missing, empty, cut short or not a scene in this
     /// format, nothing and why, naming the file (<see cref="SceneLoad.Problem"/>).
     /// </returns>
+    /// <remarks>
+    /// A scene loaded at the top level, under no parent, while the app watches its assets
+    /// (<see cref="Config.WatchAssets"/>) is spawned again in place when its file changes on disk,
+    /// what this load spawned despawned and the file read again, and what the program spawned
+    /// itself left where it is, unless <see cref="KeptWhenChanged"/> says otherwise.
+    /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path, Entity parent = default)
     {
         ArgumentNullException.ThrowIfNull(world);
 
+        var top = parent.IsNone && Depth == 0;
         using var document = AssetFiles.TryReadJson(Resolve(path), "a scene", out var problem);
-        return document is null ? SceneLoad.Unread(problem!) : Read(world, document.RootElement, parent, path, worldResources: true);
+        if (document is null) return SceneLoad.Unread(problem!);
+
+        var load = Read(world, document.RootElement, parent, path, worldResources: true);
+        if (top && load.Problem is null) LoadedScenes.Note(world, path, load.Entities);
+        return load;
+    }
+
+    /// <summary>
+    /// Spawns a scene file's entities again at the top level, as one spawned again in place when
+    /// its file changes is, the world's resources left as the game has them.
+    /// </summary>
+    internal static SceneLoad Respawn(EcsWorld world, string path)
+    {
+        using var document = AssetFiles.TryReadJson(Resolve(path), "a scene", out var problem);
+        return document is null ? SceneLoad.Unread(problem!) : Read(world, document.RootElement, Entity.None, path, worldResources: false);
     }
 
     /// <summary>Spawns everything a scene document holds.</summary>

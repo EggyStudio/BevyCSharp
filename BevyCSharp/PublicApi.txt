@@ -12337,6 +12337,7 @@ sealed class Bevy.ScatteringTerm
 static class Bevy.SceneFile
   const string AssetsPrefix = "assets://"
   const string Format = "bevycsharp.scene.2"
+  static Action<string>? KeptWhenChanged { get; set; }
   static Func<EcsWorld, Entity, bool>? Excluded { get; set; }
   static SceneLoad Load(EcsWorld world, string path, Entity parent = default)
   static SceneLoad Read(EcsWorld world, JsonElement scene, Entity parent = default)

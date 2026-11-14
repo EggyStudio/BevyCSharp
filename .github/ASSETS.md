@@ -1,10 +1,10 @@
 # Asset requests
 
-What the engine asks for in textures and reference models, written by the review and answered by
-whoever brings the files. An answer is a folder under `.ref/`, which the repository ignores; the
-review sorts what is usable into `.vegetation` and the import takes it from there. The engine keeps
-no asset as it came; every texture is cut, resized, packed and recolored into the collection
-described below, so send the largest and cleanest source you have and let the import do the rest.
+What the engine asks for in textures and reference models, answered by whoever brings the files. An
+answer is a folder under `.ref/`, which the repository ignores; what is usable in it is sorted into
+`.vegetation` and the import takes it from there. The engine keeps no asset as it came; every
+texture is cut, resized, packed and recolored into the collection described below, so send the
+largest and cleanest source you have and let the import do the rest.
 
 ## What the engine makes of a texture
 
@@ -53,12 +53,12 @@ JPEG, tileable where it is bark or ground.
 | ivy or a climbing vine | walls and trunks | a leaf set with alpha |
 | a spruce or fir branch with its bark | a conifer beside the pine | a branch card set and a tileable bark |
 | a palm frond and trunk | a tropical preset | a frond set and a tileable bark |
-| a small level saved by TrenchBroom, the Generic game in the Valve format, a few brushes with one face's texture rotated and scaled, a point entity with two keys and a brush entity | the level loader's fixture of item 65, so the round trip is read against the tool's own file | the .map text file as saved |
+| a small level saved by TrenchBroom, the Generic game in the Valve format, a few brushes with one face's texture rotated and scaled, a point entity with two keys and a brush entity | the level loader's fixture, so the round trip is read against the tool's own file | the .map text file as saved |
 
 ## How to hand an asset over
 
-Put the files in a folder under `.ref/` and say so; the review sorts what is usable into
-`.vegetation` and the import takes it from there.
+Put the files in a folder under `.ref/` and say so; what is usable is sorted into `.vegetation` and
+the import takes it from there.
 
 | Delivery | Holds | Sorted |
 |---|---|---|

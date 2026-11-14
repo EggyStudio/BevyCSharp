@@ -22,7 +22,7 @@ shows each written example's capture beside Bevy's to compare.
   time.
 - **Behaviors compiled and reloaded while the game runs.** A behavior script changed on disk is
   compiled into the running app, the entities that carried the old type are given the new one with
-  their values kept, and the engine is not rebuilt ([Hot reload](running-a-game.md#hot-reload)).
+  their values kept, and the engine is not rebuilt ([The live path](running-a-game.md#the-live-path)).
 - **An editor.** A hierarchy, details, an asset browser, play in the editor and undo, itself an
   ordinary app of this engine ([The editor](tools.md#the-editor)).
 - **Scene files, saves and data assets**, with entity references and Bevy's components kept, and

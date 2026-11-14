@@ -85,6 +85,11 @@ internal static class Launch
             extra.RemoveRange(holds, 2);
         }
 
+        // The app reads its files again as they change, since a session opened here is one editing
+        // a running game, unless asked not to, as a capture or a timing read asks. Handed over the
+        // same way, so the program's own config still decides where it sets one.
+        var watch = !extra.Remove("--no-watch");
+
         // Always, because an app that is not serving is an app this tool cannot reach.
         if (!extra.Contains("--serve")) extra.Add("--serve");
 
@@ -112,7 +117,7 @@ internal static class Launch
         var log = Repo.LogFor(project);
         var started = DateTimeOffset.UtcNow;
 
-        if (Start(project, extra, log, frameTime, hold) is { Length: > 0 } failure)
+        if (Start(project, extra, log, frameTime, hold, watch) is { Length: > 0 } failure)
         {
             return Output.Refuse(options, "open", "LAUNCH_FAILED", failure);
         }
@@ -272,8 +277,9 @@ internal static class Launch
     /// </summary>
     /// <param name="frameTime">The seconds each frame advances the app's clock by, or nothing for the machine's.</param>
     /// <param name="hold">What holds that clock still, <c>loads</c>, <c>commands</c> or both, or nothing.</param>
+    /// <param name="watch">Whether the app reads its files again as they change.</param>
     /// <returns>What went wrong, or an empty string.</returns>
-    private static string Start(string project, IReadOnlyList<string> arguments, string log, string? frameTime, string? hold)
+    private static string Start(string project, IReadOnlyList<string> arguments, string log, string? frameTime, string? hold, bool watch)
     {
         var binary = Repo.BinaryFor(project);
         var start = new ProcessStartInfo
@@ -284,6 +290,7 @@ internal static class Launch
 
         if (frameTime is not null) start.Environment[Config.FrameTimeVariable] = frameTime;
         if (hold is not null) start.Environment[Config.HoldClockVariable] = hold;
+        start.Environment[Config.WatchAssetsVariable] = watch ? "1" : "0";
 
         if (binary is null)
         {

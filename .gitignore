@@ -121,5 +121,5 @@ BevyCSharp.Examples/bevy-assets/
 # them and never in the repository.
 /.vegetation/
 
-# The pictures a session makes while it works (N 4.10), which the owner reads and prunes by day.
+# The pictures a session makes while it works (N 4.10), which are read and pruned by day.
 .github/dump/

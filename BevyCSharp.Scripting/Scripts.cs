@@ -17,16 +17,28 @@ namespace Bevy.Scripting;
 /// build registers systems and touches the world. A build asked for by <c>scripts.reload</c> or by
 /// <see cref="Reload"/> is made at once, inside the system that asked.
 /// </para>
+/// <para>
+/// Each build after the first is posted as <see cref="AssetReloaded"/> of the kind <c>Scripts</c>,
+/// the folder's path under the asset root as its path, as every file the app reads again is.
+/// </para>
 /// </remarks>
 public sealed class Scripts : IDisposable
 {
+    private readonly App _app;
     private readonly ScriptHost _host;
     private readonly ScriptWatcher? _watcher;
 
-    internal Scripts(App app, string directory, bool watching)
+    /// <summary>The folder as a reload names it, under the asset root where it is there.</summary>
+    private readonly string _named;
+
+    internal Scripts(App app, string directory, string assets, bool watching)
     {
+        _app = app;
         _host = new ScriptHost(app, directory);
         if (watching) _watcher = new ScriptWatcher(directory);
+
+        var under = Path.GetRelativePath(assets, directory).Replace('\\', '/');
+        _named = under.StartsWith("..", StringComparison.Ordinal) || Path.IsPathRooted(under) ? directory : under;
     }
 
     /// <summary>The folder the scripts are compiled from.</summary>
@@ -91,6 +103,8 @@ public sealed class Scripts : IDisposable
         Log.Info(again
             ? $"Compiled the scripts in {Directory} again {why}, {Count(Files, "file")} and {Count(Registered, "behavior")}{carried}."
             : $"Compiled the scripts in {Directory}, {Count(Files, "file")} and {Count(Registered, "behavior")}{carried}.");
+
+        if (again) _app.World.Resource<MessageBus>().Send(new AssetReloaded(_named, "Scripts"));
 
         Built?.Invoke(this);
         return true;

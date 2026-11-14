@@ -351,9 +351,10 @@ public static class MaterialFiles
 
     /// <summary>
     /// Reads every loaded material file that changed on disk since the last frame and lays it over
-    /// its material. Called by the app each frame.
+    /// its material, each said in the log and posted as <see cref="AssetReloaded"/>. Called by the
+    /// app each frame.
     /// </summary>
-    internal static void ReloadTouched()
+    internal static void ReloadTouched(MessageBus bus)
     {
         Watch();
 
@@ -375,6 +376,8 @@ public static class MaterialFiles
             try
             {
                 Render.WriteMaterial(material, Read(relative));
+                Log.Info($"Read {relative} again after its file changed, as a material file.");
+                bus.Send(new AssetReloaded(relative, "MaterialFile"));
             }
             catch (Exception error) when (error is IOException or JsonException or InvalidDataException)
             {

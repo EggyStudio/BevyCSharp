@@ -327,7 +327,9 @@ def main(arguments):
 
     # The session is written under the same folder, where every bcs after this one looks for it.
     os.environ["XDG_DATA_HOME"] = data
-    opened = subprocess.run([BCS, "open", "--feature-test", "--offscreen", "--frames", "0",
+    # Its files not watched, as a reading's are not, so no thread watching the folder takes from
+    # the frames timed.
+    opened = subprocess.run([BCS, "open", "--feature-test", "--offscreen", "--no-watch", "--frames", "0",
                              "--frame-time", "0.0166667", "--hold", "loads,commands"],
                             cwd=ROOT, capture_output=True, text=True)
     if opened.returncode != 0:

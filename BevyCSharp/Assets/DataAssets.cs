@@ -438,9 +438,18 @@ public static class DataAssets
     }
 
     /// <summary>Sends what changed since last frame onto the bus. Called by the app each frame.</summary>
+    /// <remarks>
+    /// A file read again since it changed on disk is said in the log and posted as
+    /// <see cref="AssetReloaded"/> as well, as every file the app reads again is.
+    /// </remarks>
     internal static void PostChanges(MessageBus bus)
     {
-        ReloadTouched();
+        foreach (var relative in ReloadTouched())
+        {
+            Log.Info($"Read {relative} again after its file changed, as a data asset.");
+            bus.Send(new AssetReloaded(relative, "DataAsset"));
+        }
+
         while (Changed.TryDequeue(out var id)) bus.Send(new DataAssetChanged(id));
     }
 
@@ -564,11 +573,15 @@ public static class DataAssets
         _watcher.EnableRaisingEvents = true;
     }
 
-    /// <summary>Drops each loaded asset whose file changed on disk since the last frame.</summary>
-    private static void ReloadTouched()
+    /// <summary>
+    /// Drops each loaded asset whose file changed on disk since the last frame, and reports their
+    /// paths under the asset root.
+    /// </summary>
+    private static List<string> ReloadTouched()
     {
         Watch();
 
+        var read = new List<string>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
         while (Touched.TryDequeue(out var full))
         {
@@ -595,7 +608,12 @@ public static class DataAssets
             // One answered with its defaults is read again too, since the change may mend it.
             bool loaded;
             lock (Gate) loaded = Cache.ContainsKey(id) || Fallbacks.Keys.Any(key => key.Id == id);
-            if (loaded) Reload(id);
+            if (!loaded) continue;
+
+            Reload(id);
+            read.Add(relative);
         }
+
+        return read;
     }
 }

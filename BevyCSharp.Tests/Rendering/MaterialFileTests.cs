@@ -91,10 +91,11 @@ public sealed class MaterialFileTests : IDisposable
         Assert.True(ran);
     }
 
+    /// <summary>A material file changed on disk changes its material in place, and the reload is posted.</summary>
     [SkippableFact]
     public void AMaterialFileChangedOnDiskChangesTheMaterialInPlace()
     {
-        var seen = 0f;
+        var (seen, posted) = (0f, false);
 
         using var harness = new EngineHarness(frames: 200, fps: 120);
         Needs.Renderer();
@@ -124,10 +125,12 @@ public sealed class MaterialFileTests : IDisposable
             }
 
             if (Render.TryReadMaterial(material, out var settings)) seen = settings!.Roughness;
-            if (seen == 0.9f) ctx.Exit();
+            posted |= ctx.Read<AssetReloaded>().ToArray().Contains(new AssetReloaded("blue.material.json", "MaterialFile"));
+            if (seen == 0.9f && posted) ctx.Exit();
         });
 
         harness.Run();
         Assert.Equal(0.9f, seen);
+        Assert.True(posted, "the material file read again was not posted");
     }
 }

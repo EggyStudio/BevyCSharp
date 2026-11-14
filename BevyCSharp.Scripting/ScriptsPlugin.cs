@@ -43,7 +43,7 @@ public sealed class ScriptsPlugin(string? directory = null) : IPlugin
         app.EnableDynamicSystems();
 
         var assets = app.Config.AssetRoot ?? Path.Combine(AppContext.BaseDirectory, "assets");
-        var scripts = new Scripts(app, Path.GetFullPath(directory ?? Path.Combine(assets, "scripts")), app.Config.WatchAssets);
+        var scripts = new Scripts(app, Path.GetFullPath(directory ?? Path.Combine(assets, "scripts")), Path.GetFullPath(assets), app.Config.WatchAssets);
 
         // A resource, so the world disposes it with the app and the watcher stops with it, and the
         // commands find the app's own scripts and no other app's.

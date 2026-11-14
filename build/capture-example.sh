@@ -101,7 +101,9 @@ esac
 # the clock on a device that loads in fewer frames, and the frames counted are the clock's.
 # One that does not start ends this with 3, which build/capture-examples.sh tells from one that
 # started and could not be captured, and stops on when examples do not start one after another.
-./bcs open --example "$example" --offscreen --quiet --frame-time 0.0166667 --hold loads -- --size 1280x720 "${arguments[@]}" || exit 3
+# Its files are not watched, so a picture is of what the example loaded and a thread watching the
+# folder takes nothing from the frames counted.
+./bcs open --example "$example" --offscreen --quiet --no-watch --frame-time 0.0166667 --hold loads -- --size 1280x720 "${arguments[@]}" || exit 3
 
 # One drawn with what this device or this bridge has not, meshlets or ray-traced lighting, says so
 # as its app is built, and is captured as those words, with the times and colors taken off, beside

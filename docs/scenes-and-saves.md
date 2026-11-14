@@ -117,7 +117,12 @@ reported by `SceneInstances.Missed`.
 With the asset root watched, as the editor watches it, a placed scene file written while the level
 runs is spawned again under the entity that placed it. The old copy's entities go, and what they
 held with them, the overrides are applied again, what the level added under the old nodes goes back
-under the new ones, and `WorldInstanceReady` is posted again for code waiting on the new copy.
+under the new ones, and `WorldInstanceReady` is posted again, with `Reloaded` set, for code waiting
+on the new copy.
+
+The scene loaded at the top level, `SceneFile.Load` with no parent, is spawned again in place when
+its file's bytes change, what its load spawned despawned and the program's own entities kept, and
+the app's own save is no change. [The live path](running-a-game.md#the-live-path) has the rest.
 
 ## Saving a game
 

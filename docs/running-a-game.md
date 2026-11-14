@@ -233,17 +233,50 @@ would have ended whatever process the system chose, the terminal or the editor a
 has no cap unless it asks for one. `bcs`, `build/drive-feature-test.sh` and the test suite give
 every app they start eight gigabytes, or a quarter of the machine's memory where that is less.
 
-## Hot reload
+## The live path
 
-A game watches its asset directory where `Config.WatchAssets` is on, so a running game picks up
-what changed on disk. A game built in Debug watches and one built in Release does not, and a program
-that sets `Config.WatchAssets` decides either way.
+A running game is edited and seen without a restart where it watches its asset directory. A file
+saved on disk is read again in the running app and said in the log, and the `live.status` command
+lists the latest. The bridge's own code, the Rust under `native/`, is a rebuild and a restart, and
+so is a game's compiled C#.
 
-Assets reload, so a texture, a mesh or a font changed on disk is picked up by the running app, and
-an `AssetReloaded` message says which. They need a bridge with the renderer, which carries Bevy's
-watcher.
+### What decides
+
+`Config.WatchAssets` decides. A program that sets it decides either way. Where it leaves it alone,
+the environment's `BCS_WATCH_ASSETS` decides, `1` watching and `0` not, which `./bcs open` sets to
+`1` and to `0` with `--no-watch`, as a capture or a timing read asks. Failing both, a game built in
+Debug watches and one built in Release does not, so a shipped game starts no watcher. An app the
+environment or the Debug default turned watching on for says so in the log as it starts, and
+`live.status` says what decided.
+
+### What is read again
+
+Bevy's assets, a texture, a model, a sound or a font, are read again through Bevy's watcher, which a
+bridge with the renderer carries, and each is posted as an `AssetReloaded` message naming it. A
+handle keeps pointing at the same asset, so whatever draws with it shows the new version, and the
+message is for what worked something out from the old one, a size read from an image or a collider
+fitted to a mesh. A glTF's scene is spawned again under the same root and posted as
+`WorldInstanceReady` with `Reloaded` set.
+
 Shaders reload in every profile, watcher or not, including a Slang shader when a file it imports
-changes. What happens when one fails is under [Drawing](drawing.md).
+changes, each said in the log as the bridge compiles it again, and since the bridge compiles them
+they are not posted or listed. What happens when one fails is under [Drawing](drawing.md). Material
+files, data assets and scene files are read by the engine itself and reload on any bridge, each
+posted as `AssetReloaded` of the kinds `MaterialFile`, `DataAsset` and `SceneFile`. A scene file
+placed in a level is spawned again under each entity placing it, with the level's overrides applied
+again ([Scenes and saves](scenes-and-saves.md)).
+
+The scene a game loads at the top level, `SceneFile.Load` with no parent, is spawned again in place
+when its file's bytes change. What that load spawned is despawned and the file's entities are read
+again, the world's resources left as the game has them. What the program spawned itself stays, and
+an entity it put under one of the scene's goes back under the entity holding the same id in the
+file. The app's own save is no change, nor is another hand writing the same bytes again, so a scene
+saved from a running game is not spawned over itself. A saved game laid over the scene is not laid
+again, since loading the save is the game's to do, and `scene.load` loads a file by hand. The editor
+keeps the scene it has open as it is, since it is the document being edited, and says in the log
+that its file changed.
+
+### Behavior scripts
 
 Behavior scripts reload too. A script is an ordinary `[Behavior]` struct in a `.cs` file that is
 compiled while the app runs, with the same source generator the compiled projects use, so what it
@@ -297,9 +330,9 @@ running generation stays. The compiler lives in `BevyCSharp.Scripting`, which th
 out, because a game should not carry one in order to run. The editor and the Player add its
 `ScriptsPlugin`, and a game that references the project adds it the same way, with
 `app.AddPlugin(new ScriptsPlugin())`. It compiles the asset folder's `scripts` as the app is built
-and again when a script is saved where the app watches its assets, says each build in the log, and
-answers `scripts.reload`, which builds again on request, and `scripts.status`, which says what runs
-and how the last build went.
+and again when a script is saved where the app watches its assets, says each build in the log, posts
+each after the first as `AssetReloaded` of the kind `Scripts`, and answers `scripts.reload`, which
+builds again on request, and `scripts.status`, which says what runs and how the last build went.
 
 ---
 
