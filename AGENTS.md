@@ -35,8 +35,8 @@ dotnet build                      # this moves the .so where apps will find it
 
 `./bcs build --editor` does both in that order, and [.github/BUILDING.md](.github/BUILDING.md) has
 the rest. `--meshlet` and `--solari` add Bevy's meshlets and ray-traced lighting to any profile; without
-them their tests are skipped, and a run's summary counts them. Each profile holds the one before it, `headless`, then `render` (window, audio), then `editor`
-(asset watcher, picking). `App.HasRenderer` and `App.HasEditor`
+them their tests are skipped, and a run's summary counts them. Each profile holds the one before it, `headless`, then `render` (window, audio, asset watcher, picking), then
+`editor` (Bevy's type documentation). `App.HasRenderer` and `App.HasEditor`
 report which one is loaded; `Native.ExpectedAbiVersion` must match what the bridge reports, and a
 mismatch means the bridge needs rebuilding.
 

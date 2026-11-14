@@ -215,15 +215,17 @@ names for its functions, so the stack std writes names few of its frames, and af
 name the frames from the full library kept for that build. To name them:
 
 1. Read the package's version on the crash file's `Bridge` line, the version the game ran on.
-2. Download the artifact `bridge-symbols-<version>` of the pack run that made that version, from the
-   run's page under the repository's Actions. GitHub keeps it ninety days from the run, so a crash
-   file from a version older than that cannot be named this way.
-3. From a checkout, run `build/name-crash.py <crash file> <the artifact's folder>`. It finds the
-   library whose build id the crash file names, by the `.build-id` file beside each, and writes the
-   crash file again with the function each frame lies in.
+2. Download the symbols of that version. Its release on the repository's Releases page, from
+   v0.6.114 on, carries them as a zip for each system, `bridge-symbols-<version>-<rid>.zip`, to be
+   unpacked into a folder, and the pack run that made it carries the six as the artifact
+   `bridge-symbols-<version>` on the run's page under the repository's Actions, which GitHub keeps
+   ninety days from the run.
+3. From a checkout, run `build/name-crash.py <crash file> <the folder>`. It finds the library whose
+   build id the crash file names, by the `.build-id` file beside each, and writes the crash file
+   again with the function each frame lies in.
 
 A Windows bridge's frames keep their offsets, the build id naming the PDB beside the library in the
-artifact, which the script does not read.
+zip or the artifact, which the script does not read.
 
 A run that might take the machine's memory with it, a test, a scene being tried or a tool
 controlling a game, is given a cap in gigabytes by `Config.MemoryCap` or `BCS_MEMORY_CAP_GB`. A
@@ -237,8 +239,9 @@ every app they start eight gigabytes, or a quarter of the machine's memory where
 
 A running game is edited and seen without a restart where it watches its asset directory. A file
 saved on disk is read again in the running app and said in the log, and the `live.status` command
-lists the latest. The bridge's own code, the Rust under `native/`, is a rebuild and a restart, and
-so is a game's compiled C#.
+lists the latest. A game's compiled C# is changed as it runs where `dotnet watch` runs it, as the
+last part of this page says. The bridge's own code, the Rust under `native/`, is a rebuild and a
+restart.
 
 ### What decides
 
@@ -349,6 +352,26 @@ adds it the same way, with `app.AddPlugin(new ScriptsPlugin())`. It compiles the
 says each build in the log, posts each after the first as `AssetReloaded` of the kind `Scripts`, and
 answers `scripts.reload`, which builds again on request, and `scripts.status`, which says what runs
 and how the last build went.
+
+### A game's code under dotnet watch
+
+A game run with `dotnet watch run` takes an edit to its own C# as it runs, through .NET's hot
+reload, and the app has the edit reach its schedule. A method's new body runs from its next call, a
+behavior's among them. A method a behavior gains is a system the generator writes into the
+assembly's registration, and the app runs the registration again at the start of the next frame, so
+an `[OnUpdate]` method added runs from that frame, one taken out stops, and one moved to another
+stage runs there in its place. The log says what each change added and took out.
+
+A system the registration names again keeps its place in the schedule, with the order and the
+condition it was first given, so an edit to a method's `[After]`, `[Before]`, `[RunIf]`, `[InState]`
+or `[ToggleKey]` is seen at the next start. So is an `[OnStartup]` method added, since the app
+started before it, which the log names, and a file added while the game runs, which `dotnet watch`
+compiles at the next start. A field added to a behavior is an edit hot reload cannot make to a
+running program, a struct's layout being fixed, and `dotnet watch` says a restart is needed, which
+run with `--non-interactive` it makes at once.
+
+An app follows changes only where its process can take one, as a program `dotnet watch` runs can,
+and an app run on its own, a shipped game among them, has nothing of it in its frames.
 
 ---
 

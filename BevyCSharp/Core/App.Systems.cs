@@ -26,6 +26,9 @@ public sealed unsafe partial class App : IDisposable
         ArgumentNullException.ThrowIfNull(descriptor);
         ObjectDisposedException.ThrowIf(_disposed, this);
 
+        // Kept as it stands where a registration run again names it, and passed over where it is a
+        // startup system the registration adds (RegisterAgain).
+        if (IsRunning && NamedAgain(descriptor, stage is Stage.PreStartup or Stage.Startup)) return this;
         if (IsRunning && _dynamicStages is not null) return AddDynamicSystem(stage, descriptor);
 
         if (IsRunning)
@@ -296,7 +299,7 @@ public sealed unsafe partial class App : IDisposable
 
                 for (var i = 0; i < waiting.Count; i++)
                 {
-                    if (!waiting[i].IsRemoved) waiting[i].Descriptor.Invoke(world);
+                    if (!waiting[i].IsRemoved) RunAdded(waiting[i], world);
                 }
             }, $"DynamicSystems.{stage}")
             {
@@ -326,18 +329,31 @@ public sealed unsafe partial class App : IDisposable
             // one after, as Bevy orders them.
             foreach (var edge in _dynamicEdges.ToArray())
             {
-                if (edge.Slot == slot && edge.From is null && !edge.Entering && edge.Value == was) edge.System.Descriptor.Invoke(World);
+                if (edge.Slot == slot && edge.From is null && !edge.Entering && edge.Value == was) RunAdded(edge.System, World);
             }
 
             foreach (var edge in _dynamicEdges.ToArray())
             {
-                if (edge.Slot == slot && edge.From is { } from && was == from && edge.Value == now) edge.System.Descriptor.Invoke(World);
+                if (edge.Slot == slot && edge.From is { } from && was == from && edge.Value == now) RunAdded(edge.System, World);
             }
 
             foreach (var edge in _dynamicEdges.ToArray())
             {
-                if (edge.Slot == slot && edge.From is null && edge.Entering && edge.Value == now) edge.System.Descriptor.Invoke(World);
+                if (edge.Slot == slot && edge.From is null && edge.Entering && edge.Value == now) RunAdded(edge.System, World);
             }
+        }
+    }
+
+    /// <summary>Runs a system added while the app runs, passing over the throw <see cref="PassedOver"/> names.</summary>
+    private void RunAdded(RegisteredSystem system, World world)
+    {
+        try
+        {
+            system.Descriptor.Invoke(world);
+        }
+        catch (Exception exception)
+        {
+            if (!PassedOver(system, exception)) throw;
         }
     }
 
@@ -416,6 +432,122 @@ public sealed unsafe partial class App : IDisposable
 
         World.Forget(assembly);
         if (World.TryGetResource<MessageBus>(out var bus)) bus.Forget(assembly);
+    }
+
+    /// <summary>Whether the app follows the changes hot reload makes, as <see cref="BehaviorReload"/> has it do.</summary>
+    internal bool FollowsChanges { get; set; }
+
+    /// <summary>
+    /// True where <paramref name="system"/> threw for a change having taken its method out, and it
+    /// is then taken out of the app and said in the log.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// A method a change takes out is left in the program with a body that throws, and the change is
+    /// applied on a thread of its own, so a frame can call the method before the app's next frame
+    /// registers the behaviors again (<see cref="RegisterAgain"/>) and takes its system out. That
+    /// throw is a MissingMethodException or the compiler's own HotReloadException, or a
+    /// TypeLoadException where the runtime cannot load the latter, as under .NET 10's dotnet watch.
+    /// </para>
+    /// <para>
+    /// Only an app that follows changes passes one over, and only one thrown by the system's own
+    /// method, the generated one that calls a behavior's, so a fault of the behavior's own is said
+    /// as any other is.
+    /// </para>
+    /// </remarks>
+    [System.Diagnostics.CodeAnalysis.UnconditionalSuppressMessage(
+        "Trimming", "IL2026:RequiresUnreferencedCode",
+        Justification = "Read only in an app that follows changes, which a trimmed program is not, since trimming turns hot reload off.")]
+    private bool PassedOver(RegisteredSystem system, Exception exception)
+    {
+        if (!FollowsChanges || exception.TargetSite != system.Descriptor.System.Method) return false;
+        if (exception is not (TypeLoadException or MissingMethodException)
+            && exception.GetType().FullName != "System.Runtime.CompilerServices.HotReloadException") return false;
+
+        system.Remove();
+        Log.Info($"System '{system.Descriptor.Name}' is taken out, a change having taken out its method.");
+        return true;
+    }
+
+    /// <summary>
+    /// What a registration run again found standing, its systems by name, those it named again and
+    /// the startup systems it added, which it passes over.
+    /// </summary>
+    private (Dictionary<string, RegisteredSystem> Standing, HashSet<RegisteredSystem> Named, List<string> Passed)? _again;
+
+    /// <summary>
+    /// Runs an assembly's registration again while the app runs, once hot reload has changed the
+    /// assembly, keeping each system it names again, adding each it names that was not there and
+    /// removing each it names no more.
+    /// </summary>
+    /// <remarks>
+    /// A system is named again where the registration adds one of the same name running the same
+    /// method, and it stays where it stood, in the order the app gave it, running the method's new
+    /// body, which hot reload put in place of the old one. One added is run by its stage's
+    /// dispatcher, among the systems added while the app runs, and a method that moved to another
+    /// stage is a new method, its system one added. A startup system is passed over, named again
+    /// or not, since the app started before the change, and one added runs at the next start. What
+    /// the change added and took out is said in the log, and a change to bodies alone says nothing.
+    /// </remarks>
+    /// <param name="assembly">The assembly the change named.</param>
+    /// <param name="source">The tag its systems carry, which those it adds carry too.</param>
+    /// <param name="register">Its registration, as it stands after the change.</param>
+    internal void RegisterAgain(System.Reflection.Assembly assembly, string source, Action<App> register)
+    {
+        var standing = new Dictionary<string, RegisteredSystem>(StringComparer.Ordinal);
+        foreach (var system in _systems)
+        {
+            if (system.IsRemoved || system.Descriptor.Source != source || system.Descriptor.System.Method.Module.Assembly != assembly) continue;
+            standing.TryAdd(system.Descriptor.Name, system);
+        }
+
+        var (named, passed, before) = (new HashSet<RegisteredSystem>(), new List<string>(), _systems.Count);
+        _again = (standing, named, passed);
+        try
+        {
+            using (new SystemRegistrationSourceScope(source)) register(this);
+        }
+        finally
+        {
+            _again = null;
+        }
+
+        var removed = 0;
+        foreach (var system in standing.Values)
+        {
+            if (named.Contains(system)) continue;
+            system.Remove();
+            removed++;
+        }
+
+        var added = _systems.Count - before;
+        if (added + removed + passed.Count == 0) return;
+
+        Log.Info($"The behaviors of {assembly.GetName().Name} are registered again after a change, {added} "
+            + $"{(added == 1 ? "system" : "systems")} added and {removed} taken out."
+            + passed.Count switch
+            {
+                0 => "",
+                1 => $" The startup system it added, {passed[0]}, runs at the next start.",
+                _ => $" The startup systems it added, {string.Join(", ", passed)}, run at the next start.",
+            });
+    }
+
+    /// <summary>
+    /// True where a registration run again names a system that stands, which it keeps, or adds a
+    /// startup system, which it passes over.
+    /// </summary>
+    private bool NamedAgain(SystemDescriptor descriptor, bool startup = false)
+    {
+        if (_again is not { } again) return false;
+        if (again.Standing.TryGetValue(descriptor.Name, out var system) && system.Descriptor.System.Method == descriptor.System.Method)
+        {
+            again.Named.Add(system);
+            return true;
+        }
+
+        if (startup) again.Passed.Add(descriptor.Name);
+        return startup;
     }
 
     /// <summary>The descriptors registered for <paramref name="stage"/>, in registration order.</summary>

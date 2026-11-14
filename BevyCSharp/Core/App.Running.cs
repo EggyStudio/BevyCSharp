@@ -303,10 +303,10 @@ public sealed unsafe partial class App : IDisposable
             {
                 try
                 {
-                    if (GCHandle.FromIntPtr(user).Target is RegisteredSystem system)
-                        system.Owner.OnSystemException(system.Descriptor, ex);
-                    else
+                    if (GCHandle.FromIntPtr(user).Target is not RegisteredSystem system)
                         EngineLog.Error(null, "system", $"[BevyCSharp] System callback failed: {ex}", ex);
+                    else if (!system.Owner.PassedOver(system, ex))
+                        system.Owner.OnSystemException(system.Descriptor, ex);
                 }
                 catch (Exception)
                 {

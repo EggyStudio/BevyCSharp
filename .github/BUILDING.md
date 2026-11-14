@@ -179,13 +179,15 @@ for itself are still read from the folder or the game's assembly, which a bridge
 render bridge the Play tab's export ships, so a checkout whose projects run on the editor's bridge
 still exports a game without one.
 
-`--strip` takes the symbol table out of the staged copy a package carries and keeps the full
-library under `build/symbols/<rid>/`, with its build id in a `.build-id` file beside it, and a
-Windows library, which carries no symbol table, with its PDB beside it. The pack's native jobs pass
-it, and the pack job keeps the six as one artifact, `bridge-symbols-<version>`, for ninety days,
-from which `build/name-crash.py` names the frames of a crash file a game writes
-([docs/running-a-game.md](../docs/running-a-game.md)). The copy in `build/target/release` keeps its
-symbols, which a profiler reads.
+`--strip` takes the symbol table out of the staged copy a package carries and keeps the full library
+under `build/symbols/<rid>/`, with its build id in a `.build-id` file beside it, and a Windows
+library, which carries no symbol table, with its PDB beside it. The pack's native jobs pass it, and
+the pack job keeps the six as one artifact, `bridge-symbols-<version>`, for ninety days. The GitHub
+release of each published version, from v0.6.114 on, keeps them past that as a zip a system,
+`bridge-symbols-<version>-<rid>.zip`, made from the publishing run's artifact once the version is
+tagged. From either, the artifact's folder or a zip unpacked, `build/name-crash.py` names the frames
+of a crash file a game writes ([docs/running-a-game.md](../docs/running-a-game.md)). The copy in
+`build/target/release` keeps its symbols, which a profiler reads.
 
 ## Bevy's components after an upgrade
 

@@ -47,22 +47,33 @@ public sealed class BehaviorsPlugin : IPlugin
     /// <summary>How many registration methods the last <see cref="Build"/> invoked.</summary>
     public int RegistrationsFound { get; private set; }
 
+    /// <summary>
+    /// Whether a change hot reload makes to an assembly has the app run its registration again,
+    /// which is so where the process can take one (<see cref="BehaviorReload"/>).
+    /// </summary>
+    internal bool Reloads { get; init; } = BehaviorReload.Possible;
+
+    /// <summary>The registrations announced, which a test hands its own in place of the process's.</summary>
+    internal Func<IReadOnlyList<Action<App>>> Announced { get; init; } = BehaviorRegistry.Snapshot;
+
     /// <inheritdoc/>
     public void Build(App app)
     {
         ArgumentNullException.ThrowIfNull(app);
 
         var found = 0;
+        var ran = new List<Action<App>>();
         using (new SystemRegistrationSourceScope(StaticSourceTag))
         {
             // The fast path, everything whose module initializer has already run.
-            foreach (var register in BehaviorRegistry.Snapshot())
+            foreach (var register in Announced())
             {
                 // A script's, which its host registers, as the scan below leaves them too.
                 if (register.Method.DeclaringType?.Assembly.IsCollectible == true) continue;
                 if (Assemblies is { } only && register.Method.DeclaringType?.Assembly is { } from && !only.Contains(from)) continue;
 
                 register(app);
+                ran.Add(register);
                 found++;
             }
 
@@ -72,6 +83,10 @@ public sealed class BehaviorsPlugin : IPlugin
         }
 
         RegistrationsFound = found;
+
+        // Those the scan found are left out, being registrations the process never announced, so
+        // a change to one of their assemblies is seen at the next start.
+        if (Reloads) BehaviorReload.Follow(app, StaticSourceTag, ran);
     }
 
     /// <summary>Invokes registrations found by scanning that the registry did not already have.</summary>

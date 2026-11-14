@@ -476,6 +476,9 @@ public sealed unsafe partial class App : IDisposable
 
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
+        // Kept as it stands where a registration run again names it (RegisterAgain).
+        if (IsRunning && NamedAgain(descriptor)) return this;
+
         // Added while running, as a script reloaded during play is, it is watched for rather than
         // scheduled, since Bevy's transition schedules take nothing once the app runs. The value
         // the state holds as it arrives is not an edge, as Bevy would not run it either.
@@ -544,7 +547,9 @@ public sealed unsafe partial class App : IDisposable
 
         descriptor.Source ??= SystemRegistrationSourceScope.Current;
 
-        // Watched for while running, as an entry or an exit added then is.
+        // Kept as it stands where a registration run again names it, and otherwise watched for while
+        // running, as an entry or an exit added then is.
+        if (IsRunning && NamedAgain(descriptor)) return this;
         if (IsRunning && _dynamicStages is not null)
         {
             var slot = StateRegistry.SlotForRegistration<TState>();
