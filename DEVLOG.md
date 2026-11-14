@@ -10,6 +10,7 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
 Done that day
 
+- Item 120 at `997d407e`. The live path.
 - Item 142 at `997d407e`. The ambient's sums take every ray of a probe.
 
 ## 2026-11-12

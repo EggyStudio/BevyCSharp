@@ -43,8 +43,13 @@ for _ in $(seq 1 90); do ./bcs status 2>/dev/null | grep -q "ready.*Swarm" && br
 ./bcs status | grep -q "ready.*Swarm" || fail "the game never answered; its log is $shots/game.log"
 
 # Each frame a sixtieth of a second of the game, however long the machine took to draw it, so the
-# walk round the square is the same length on a software renderer as on a graphics card.
+# walk round the square is the same length on a software renderer as on a graphics card. The clock
+# is held between the play's commands and moves only while a hold of the keys, a wait or the
+# profile waits for its frames, since a graphics card draws many frames between two commands, and a
+# clock running through them would let the swarm close in while no key is held and pass its most
+# between two readings.
 quiet app.frametime 0.0166667
+quiet app.hold commands
 quiet frames.wait 30
 shot "$shots/1-menu.png"
 [ "$(status mode)" = Menu ] || fail "the game did not start on its menu"

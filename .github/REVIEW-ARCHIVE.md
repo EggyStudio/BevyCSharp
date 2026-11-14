@@ -4502,6 +4502,74 @@ the port is offered upstream (Decision 18).
     the mend, 120.20 down to 10.88, offered by the coder as an item of its own and taken into 138's
     read of the kernels.
 
+120. **The live path.** Decision 85 on 2026-11-08. What Bevy's asset watching gives the bridge, a
+    changed texture, model, scene or shader reloaded in the running program, is exposed and read,
+    and a changed behavior script is recompiled into the running world through the bridge's runtime
+    compiler, each change said in the log and reachable through the CLI, so a running program is
+    edited and seen without a restart; the bridge's own code stays a restart. After 119. The coder's
+    read of what exists and its plan, answered at 23:24 on 2026-11-12. Shaders reload in every app
+    that draws; scripts only where the editor or the Player wire them, with no log line and no
+    command; data, material and placed subscene files only under Config.WatchAssets, which the
+    editor alone sets; textures and glTF only on an editor bridge, with no event forwarded to C#;
+    the package's bridges, built for render, have no asset watcher. Three commits, each with the
+    whole suite. The bridge, bevy's file_watcher moved to the render profile, WatchAssets deciding
+    on every bridge, AssetEvent::Modified forwarded as a bus event AssetReloaded and a glTF scene's
+    respawn marked a reload, a rewritten texture tested to draw its new pixels. Scripts in any app,
+    a ScriptsPlugin watching the scripts folder while WatchAssets is on, scripts.reload and
+    scripts.status, each swap logged, the watcher's first test. Scenes, status and documents, every
+    scene placed from a file respawned in place, live.status, the documents' five places losing a
+    reason that names a loader that does not exist. Decided by the review from Decisions 85 and 88.
+    The watcher goes into the render profile and the package, a separate development bridge being a
+    second set of six or a new package id, its size measured from a stripped build and said for each
+    bridge, the coder going ahead under half a megabyte compressed a bridge. WatchAssets stays off
+    unless asked; the templates ask for it in Debug builds and ./bcs open by default with --no-watch
+    to leave it out. The top-level scene respawns in place on a change while watching is on, what
+    the program spawned itself staying, a saved game not covered. Asked beside, a test that a
+    Release build of a template watches nothing. Changed at 23:26, the templates' first program
+    being held equal to the README's by a test. The behavior generator's module initializer sets the
+    watch default in a Debug build of a program and nothing in Release, the templates staying one
+    line; it applies to a program's own project and not to a test project, a library or the suite's
+    apps, a Log line at startup says when the default turned watching on, live.status says where the
+    setting came from, and the guide says the rule. Commit 2 answered at 20:27 on 2026-11-13.
+    BevyCSharp.Scripting is not in the package, a shipped game carrying no compiler, and carrying it
+    would add the compiler to what every game restores. Decided by the review, it stays out;
+    ScriptsPlugin and its commands serve the editor, the Player and a game that references the
+    project. A game from the package edits its own behaviors under dotnet watch, a fourth commit of
+    this item, first a read of which edits it applies to a running game and which ask a restart,
+    then a MetadataUpdateHandler that registers a changed behavior again with a test and the guide's
+    words. Carrying Scripting in the package in Debug builds alone goes to the owner only if that
+    read shows dotnet watch cannot carry a behavior's change. The first commit read at 21:28 on
+    2026-11-13, `f86269d0`, pushed at 21:27. Accepted. AGENTS.md's build order line names the
+    watcher under the editor profile and waits on the owner's word, put before the owner; the
+    coder's old scratch under the home's cache, about 100 GB beside a build's cache in use, is
+    deleted only on the owner's yes, an inventory written first. An independent read of `f86269d0`
+    and `36840712`, recorded at 00:17 on 2026-11-14, its list at
+    ~/.cache/claude-reviewer/audits-2026-11-13/bridge-live-path-review.md, 19 findings. The first,
+    checked by the review, holds. The package's targets copy a game's assets beside its build and an
+    app with no AssetRoot reads that copy, so a game from the package in Debug watches the copy and
+    an edit to the project's own assets reloads nothing until a build, the case the default was made
+    for. Beside it, a watcher that cannot be made stopping a Debug game that never asked from
+    starting, a generation that throws while registering left half registered, a script file that
+    cannot be read throwing out of the build, a root reached through a symlink on macOS getting no
+    reloads, and the runners' suites on the headless bridge, which carries no watcher, so the reload
+    tests skip on every system. Asked, a Reply saying of each whether it holds, then a commit of
+    this item before its fourth's code with each mend's test failing first, the watched folder's
+    mend said before it is written, and the suites' bridge weighed for the watcher. Answered at
+    01:54 on 2026-11-14, all nineteen findings confirmed by the coder. The watched folder's mend as
+    planned, the Debug initializer handing the project's assets folder, taken as the root where no
+    AssetRoot is named, watching is on and the folder exists, the start line naming it, Release, a
+    publish and a moved program reading the copy; the shader cache under the project's obj folder
+    and not in its assets; the bridge making each source's watcher itself, a failure a warning; the
+    renderer's cargo part run on macOS and Windows beside Linux in the build workflow. Done with
+    `86551153`, pushed at 10:42 on 2026-11-14, six commits, `f86269d0`, `36840712`, `02f482ab`,
+    `247c6112` and this one with `997d407e` of item 142 between. A game under dotnet watch takes a
+    changed body, an added or moved method and one taken out within a frame, a new startup method
+    named in the log and passed over, a new field by a restart and a behavior in a new file at the
+    next start, which the guide says. The trial found a method taken out thrown into in the frame
+    the change came, the change applied on another thread, mended by passing such a system over at
+    its throw. The coder's old scratch under the home's cache was removed by the rule approved that
+    morning, 1,629 entries and 104,613,345,277 bytes, its list written first.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -5226,6 +5294,30 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     captures going from 22:33. The pack run's second attempt was green at 00:36 on 2026-11-12, its
     drive in 100 minutes, and BevyCSharp and BevyCSharp.Templates list 0.6.106 on nuget.org, so with
     the build run of `064cdae8` green at 22:37 the verdict is settled.
+
+59. **The pack run of `86551153` is red in its games, Blockout's play failing, so 0.6.121 is not
+    published.** Run 43581803258, started at 10:42 on 2026-11-14 with publish on. The job that plays
+    the games ended at 11:24, Courtyard and Swarm played, Blockout's play ending with exit code 1
+    and the words that the saved recipe holds no window's line; the game's own lines say the level
+    was saved to games/Blockout/assets/levels/blockout.model, the project's folder. The play reads
+    the level from the build's folder,
+    games/Blockout/bin/Debug/net10.0/assets/levels/blockout.model, where it had been saved before.
+    Since `247c6112` a program built in Debug reads and watches its project's assets folder where it
+    names no root, so the game saves there and the play reads the copy the save no longer touches.
+    The suite and first-game.sh passed here; the three games' plays run in the pack run alone, and
+    none was played here on the commits that moved the root. The pack job waits on the build's jobs,
+    so nothing was published and nuget.org stands at 0.6.114. Asked, a mend that goes up at once.
+    Where a Debug game writes a file it saves, the project's folder or the build's, is said first as
+    a line of the Reply, since a save lands in a tracked file of the checkout since that commit;
+    then the play reads where the game says it saved and puts the file back as it was, or the game's
+    save goes where the play reads, whichever the answer gives. The three games' plays are run here
+    on the render bridge before the mend is reported, and from here before any commit that moves
+    where a program reads or writes its files. Then a pack run with publish again. The run ended at
+    12:32 with the games' job its one red, the six bridges built, the drive, the captures, the storm
+    and the README's job green. Settled at 18:53 on 2026-11-14 by the mend `770aef21`, its pack run
+    43608448173 green in every job by 18:45, the games' job with Blockout's play passing, 0.6.122
+    published on nuget.org with its templates, tagged v0.6.122 and released with the six bridges'
+    symbols, each read against the published package, its build id, exports and symbol table alike.
 
 ## Decisions
 
