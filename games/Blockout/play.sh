@@ -10,15 +10,19 @@
 #   games/Blockout/play.sh [folder the game was built or exported to]
 #
 # The game is started offscreen and serving and stopped at the end whatever happened, and the
-# level's file the save wrote over is put back as it was built. Captures of each step are left in
-# the folder named by SHOTS, or in a temporary one.
+# file the save wrote, which a game built in Debug keeps in the project's own assets folder, is
+# put back as it was. Captures of each step are left in the folder named by SHOTS, or in a
+# temporary one.
 set -eEuo pipefail
 cd "$(dirname "$0")/../.."
 
 game="${1:-games/Blockout/bin/Debug/net10.0}"
 shots="${SHOTS:-$(mktemp -d)}"
 said="$shots/said.txt"
-level="$game/assets/levels/blockout.model"
+# The recipe as the checkout holds it, which the build copies beside the game and which the file
+# the save writes over is put back from.
+kept="$shots/blockout.model.kept"
+cp -p games/Blockout/assets/levels/blockout.model "$kept"
 
 fail() { echo "FAILED: $*" >&2; grep -h "^\[play\]\|^\[blockout\]" "$shots/game.log" >&2 || true; exit 1; }
 
@@ -43,6 +47,13 @@ walk() {
     fail "the walker did not finish $1 in four minutes of the game, $(tr '\n' ' ' <<<"$status")"
 }
 
+# The file the game says it saved the level to, where the game's own folder holds a relative one.
+saved() {
+    local path
+    path=$(sed -n 's/^\[blockout\] saved the level to //p' "$shots/game.log" 2>/dev/null | tail -n 1)
+    case "$path" in "" | /*) echo "$path" ;; *) echo "$game/$path" ;; esac
+}
+
 # How high the walker's feet are, from the status's first line.
 height() { c blockout.status | sed -n 's/^at [^ ]* \([^ ]*\) .*/\1/p'; }
 
@@ -50,7 +61,7 @@ height() { c blockout.status | sed -n 's/^at [^ ]* \([^ ]*\) .*/\1/p'; }
 faces() { sed -n 's/^[^:]*: [0-9]* vertices, [0-9]* edges, \([0-9]*\) faces.*/\1/p'; }
 
 trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
-trap './bcs stop >/dev/null 2>&1 || true; cp games/Blockout/assets/levels/blockout.model "$level" 2>/dev/null || true' EXIT
+trap './bcs stop >/dev/null 2>&1 || true; level=$(saved); [ -z "$level" ] || cp -p "$kept" "$level"' EXIT
 
 ./bcs stop >/dev/null 2>&1 || true
 (cd "$game" && { BCS_OFFSCREEN=1 BCS_SERVE=1 ./Blockout; echo "[play] the game exited with $?"; } >"$shots/game.log" 2>&1 &)
@@ -98,11 +109,14 @@ shot "$shots/4-modeling.png"
 quiet input.key Tab
 quiet frames.wait 5
 
-# F5 writes the recipe, the window's lines among it.
+# F5 writes the recipe, the window's lines among it, to the file the game names, which is read
+# where the game says it wrote it, the project's folder for a game built in Debug and the copy
+# beside the game for one built in Release.
 quiet input.key F5
 quiet frames.wait 5
-grep -q "^\[blockout\] saved the level to" "$shots/game.log" || fail "F5 did not save the level"
-grep -q "^cut window 1.4 1.2 4 1$" "$level" || fail "the saved recipe holds no window's line"
+level=$(saved)
+[ -n "$level" ] || fail "F5 did not save the level"
+grep -q "^cut window 1.4 1.2 4 1$" "$level" || fail "the recipe saved to $level holds no window's line"
 
 # Back down to the middle of the hall.
 walk downstairs

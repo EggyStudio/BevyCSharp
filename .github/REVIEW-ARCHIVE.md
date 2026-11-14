@@ -4484,6 +4484,24 @@ the port is offered upstream (Decision 18).
     run's artifact for 90 days; whether they are also kept as release assets is the owner's, still
     open.
 
+142. **The ambient's sums take every ray of a probe.** From the two engines' kernels read side by
+    side on 2026-11-14, the RadianceCascades module's .github/KERNELS.md. Kernels/gi_ambient.slang's
+    follow sums `texels * texels` rays, which for a cascade of 8 texels a side with four rays a
+    texel is the first of four workgroups' partial sums, a band of the sphere, and divides by every
+    texel's share; the sibling mended the same on 2026-11-01, summing `texels * texels *
+    RaysAt(texels)`. First a read, whether it holds and what it does to the ambient by one room's
+    figures with and without, as a Reply. Where it holds it is a plain fault with a known mend, one
+    small commit with its test and the references that move, not waiting for 138. Its test, by the
+    same document, is the sibling's test of light that changes over frames at Low carried over, the
+    bridge having none, since the sum feeds the kept share alone, which reads 1 while the light
+    holds still. After item 120's third commit. Done at `997d407e`, pushed on 2026-11-14. The
+    sibling's room with its 1.2 m panel reads the same with and without the mend, the panel being
+    carried as a glow light there, so the test is a room of 8 m with a 4.4 m panel that is not
+    carried, 37.03 two frames after the panel goes dark on the kernel before against a bar of 3.77,
+    and 0.72 with the mend. A room under a field of 0.0625 cells keeps its light for six frames with
+    the mend, 120.20 down to 10.88, offered by the coder as an item of its own and taken into 138's
+    read of the kernels.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of

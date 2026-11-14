@@ -256,11 +256,14 @@ made, so `Config.WatchAssets` is set on the config handed to it, and set after, 
 The Debug default reads the project's folder. A game built in Debug whose config names no
 `AssetRoot` reads and watches its project's `assets` folder, where a file is saved, rather than the
 copy its build puts beside it, and caches its compiled shaders under the project's `obj` folder, so
-the assets folder holds only what was put there. Its first lines name both folders. A Debug build is
-not what is shipped, and a published game reads the copy beside it. A program that reaches the
-package through a library of its own is given no Debug default, and sets `WatchAssets` or
-`BCS_WATCH_ASSETS` to watch. A folder the system will not watch, its limit on watchers met, is said
-in the log as a warning and read without watching, the app starting all the same.
+the assets folder holds only what was put there. Its first lines name both folders. A file the game
+saves under its asset root itself, a model's recipe, a scene or a material, is written there too,
+into the project, where its next run reads it, while a player's saves and settings go under
+`user://`, the player's own folder, in either build. A Debug build is not what is shipped, and a
+published game reads the copy beside it. A program that reaches the package through a library of its
+own is given no Debug default, and sets `WatchAssets` or `BCS_WATCH_ASSETS` to watch. A folder the
+system will not watch, its limit on watchers met, is said in the log as a warning and read without
+watching, the app starting all the same.
 
 ### What is read again
 

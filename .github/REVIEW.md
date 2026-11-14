@@ -1,8 +1,16 @@
 # Review
 
-Reviewed up to `997d407e`, item 142, the ambient's kernel summing every workgroup of a probe's rays,
-with a test of a room lit by a panel too wide to be carried as a glow light, its light gone within
-two frames of the panel going dark, 0.72 where 37.03 on the kernel before, pushed at 09:00 on
+Reviewed up to `86551153`, item 120's last commit, a game run under dotnet watch having its changed
+behaviors registered again at the next frame, a system named again kept where it stands and one
+whose method a change took out passed over at its throw, with the guide's words on which edits wait
+for the next start, BUILDING.md naming the release that keeps the symbols and AGENTS.md's build
+order line as approved, pushed at 10:42 on 2026-11-14 once the run before it had ended, with the
+pack run with publish, 43581803258, started on the same head and red in its games at 11:24, Verdict
+59, nothing published, its build run green on the three systems at 11:13; the whole suite passed,
+2,093 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
+files. Before it `997d407e`, item 142, the ambient's kernel summing every workgroup of a probe's
+rays, with a test of a room lit by a panel too wide to be carried as a glow light, its light gone
+within two frames of the panel going dark, 0.72 where 37.03 on the kernel before, pushed at 09:00 on
 2026-11-14 once the run before it had ended, its build run green on the three systems at 09:29; the
 whole suite passed, 2,090 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
 carries the review's files. Before it `247c6112`, item 120's mends of the independent read's
@@ -119,14 +127,16 @@ by the same fault and not run again, the packages' layout having changed by Deci
 suite passed, 2,045 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
 the review's files. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
 
-Next 120, the live path, three commits each with the whole suite, and after it 66 and 67, the
+Next the pack run with publish on `86551153`, 43581803258, started at 10:42 on 2026-11-14, its
+package read against 0.6.114 for the six bridges' growth, its tag and its release with the symbols;
+then 143, the renderer's tests on a runner, 93, the drive's course drawn smaller, and 66 and 67, the
 connections and the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in
 the pack run of 16:03 on 2026-11-10. The package stands at 0.6.114 from `e47d7020`, one package of
 227,075,572 bytes with its templates, published at 00:34 on 2026-11-13 by the pack run 43305639625
 and tagged v0.6.114, its bridges stripped and their symbols kept in the run's artifact
-bridge-symbols-0.6.114; the next pack run when 120 is in. The engine's illumination read goes first
-on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a
-fault seen in motion is read in motion by the engine's Decision 107.
+bridge-symbols-0.6.114; the next pack run started with 120 in. The engine's illumination read goes
+first on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision
+81; a fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -263,7 +273,15 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     AssetRoot is named, watching is on and the folder exists, the start line naming it, Release, a
     publish and a moved program reading the copy; the shader cache under the project's obj folder
     and not in its assets; the bridge making each source's watcher itself, a failure a warning; the
-    renderer's cargo part run on macOS and Windows beside Linux in the build workflow.
+    renderer's cargo part run on macOS and Windows beside Linux in the build workflow. Done with
+    `86551153`, pushed at 10:42 on 2026-11-14, six commits, `f86269d0`, `36840712`, `02f482ab`,
+    `247c6112` and this one with `997d407e` of item 142 between. A game under dotnet watch takes a
+    changed body, an added or moved method and one taken out within a frame, a new startup method
+    named in the log and passed over, a new field by a restart and a behavior in a new file at the
+    next start, which the guide says. The trial found a method taken out thrown into in the frame
+    the change came, the change applied on another thread, mended by passing such a system over at
+    its throw. The coder's old scratch under the home's cache was removed by the rule approved that
+    morning, 1,629 entries and 104,613,345,277 bytes, its list written first.
 
 138. **The lighting's kernels written once.** Decision 89 on 2026-11-12. The radiance cascades'
     kernels go into the RadianceCascades module as Slang written once, each engine giving its
@@ -289,24 +307,6 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     test serve both engines, the sibling reading the same room on its own merge at its item 265.
     After 138.
 
-142. **The ambient's sums take every ray of a probe.** From the two engines' kernels read side by
-    side on 2026-11-14, the RadianceCascades module's .github/KERNELS.md. Kernels/gi_ambient.slang's
-    follow sums `texels * texels` rays, which for a cascade of 8 texels a side with four rays a
-    texel is the first of four workgroups' partial sums, a band of the sphere, and divides by every
-    texel's share; the sibling mended the same on 2026-11-01, summing `texels * texels *
-    RaysAt(texels)`. First a read, whether it holds and what it does to the ambient by one room's
-    figures with and without, as a Reply. Where it holds it is a plain fault with a known mend, one
-    small commit with its test and the references that move, not waiting for 138. Its test, by the
-    same document, is the sibling's test of light that changes over frames at Low carried over, the
-    bridge having none, since the sum feeds the kept share alone, which reads 1 while the light
-    holds still. After item 120's third commit. Done at `997d407e`, pushed on 2026-11-14. The
-    sibling's room with its 1.2 m panel reads the same with and without the mend, the panel being
-    carried as a glow light there, so the test is a room of 8 m with a 4.4 m panel that is not
-    carried, 37.03 two frames after the panel goes dark on the kernel before against a bar of 3.77,
-    and 0.72 with the mend. A room under a field of 0.0625 cells keeps its light for six frames with
-    the mend, 120.20 down to 10.88, offered by the coder as an item of its own and taken into 138's
-    read of the kernels.
-
 143. **The tests that need a renderer run on a runner.** From the two engines' tests read side by
     side on 2026-11-14, the RadianceCascades module's .github/KERNELS.md, What holds each kernel.
     The runners' suites build the headless bridge, so every test behind Needs.Shaders skips there,
@@ -318,9 +318,40 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     workflow, its classes dealt into parts under 45 minutes each as the sibling deals its Windows
     suite, each bound that moves said anew as a count of pixels with its reason. After item 120.
 
+144. **The cascades' rays traced by the adapter, as a backend beside the field.** Decision 92 on
+    2026-11-14. After 138, with the sibling's item 271, in the shared kernels, one interface a ray
+    is traced through with two forms, the field's march and a ray query through Bevy's acceleration
+    structures where the adapter offers them, a setting choosing between them. First a read as a
+    Reply, what Bevy 0.20 and wgpu give for ray queries on each system, which of the bridge's meshes
+    have their structures built today and what building the rest takes, and each form's cost in the
+    meadow and the bounce rooms against the traced reference. Its tests run the adapter's form where
+    it is offered and the field's on the runners.
+
 ## Verdicts
 
-Verdicts 2 and 33 to 58 are settled, said under each in REVIEW-ARCHIVE.md; none is open.
+Verdict 59 is open, the pack run of `86551153` red in its games, 0.6.121 not published. Verdicts 2
+and 33 to 58 are settled, said under each in REVIEW-ARCHIVE.md.
+
+59. **The pack run of `86551153` is red in its games, Blockout's play failing, so 0.6.121 is not
+    published.** Run 43581803258, started at 10:42 on 2026-11-14 with publish on. The job that plays
+    the games ended at 11:24, Courtyard and Swarm played, Blockout's play ending with exit code 1
+    and the words that the saved recipe holds no window's line; the game's own lines say the level
+    was saved to games/Blockout/assets/levels/blockout.model, the project's folder. The play reads
+    the level from the build's folder,
+    games/Blockout/bin/Debug/net10.0/assets/levels/blockout.model, where it had been saved before.
+    Since `247c6112` a program built in Debug reads and watches its project's assets folder where it
+    names no root, so the game saves there and the play reads the copy the save no longer touches.
+    The suite and first-game.sh passed here; the three games' plays run in the pack run alone, and
+    none was played here on the commits that moved the root. The pack job waits on the build's jobs,
+    so nothing was published and nuget.org stands at 0.6.114. Asked, a mend that goes up at once.
+    Where a Debug game writes a file it saves, the project's folder or the build's, is said first as
+    a line of the Reply, since a save lands in a tracked file of the checkout since that commit;
+    then the play reads where the game says it saved and puts the file back as it was, or the game's
+    save goes where the play reads, whichever the answer gives. The three games' plays are run here
+    on the render bridge before the mend is reported, and from here before any commit that moves
+    where a program reads or writes its files. Then a pack run with publish again. The run ended at
+    12:32 with the games' job its one red, the six bridges built, the drive, the captures, the storm
+    and the README's job green.
 
 ## Decisions
 
@@ -515,6 +546,14 @@ in full under Decisions in REVIEW-ARCHIVE.md.
     editor's, and the removal of the coder's scratch last changed before 2026-11-11 under the home's
     cache, about 105 GB, its build cache in use kept.
 
+92. **Hardware ray tracing is a backend of the radiance cascades, chosen by what the device can
+    do.** Decided on 2026-11-14, with the sibling's Decision 115. A device that traces rays is used
+    for it, the cascades' rays traced through the meshes' acceleration structures where the adapter
+    offers ray queries and that way is chosen, and through the scene's distance field elsewhere, the
+    headless and the software paths among them, the field staying beside it wherever another part of
+    the lighting needs it. A program chooses by a setting, the adapter's ability the limit. Written
+    once in the shared kernels after they have moved. Item 144.
+
 ## Replies
 
 The read for commit 4. A game from the published 0.6.114 ran under dotnet watch on .NET 10.0.112,
@@ -637,3 +676,51 @@ Shared: a game's own behaviors followed under dotnet watch by a MetadataUpdateHa
 assembly's registration again, keeping what it names again where it stands, and the pass-over of a
 taken method's throw in the frame its change comes in. The sibling reloads behaviors from a scripts
 folder alone, so this is offered for it to take.
+
+Verdict 59, mended in the commit carrying this Reply. A game built in Debug writes a file it saves
+under its asset root, a model's recipe, a scene or a material, into its project's assets folder, the
+folder it reads and watches, so a level being built is saved into the checkout and its next run
+reads it, while a player's saves and settings go under user://, the player's own folder, in either
+build. A game built in Release saves into the copy beside it, which it reads, and one whose config
+names a root saves into that root.
+
+So games/Blockout/play.sh reads the recipe where the game says it saved it, from the game's line
+naming the file, and puts that file back from a copy of the checkout's recipe taken before the game
+starts, its time kept. The old trap copied the project's recipe over the build's copy, which the
+mended play leaves alone. docs/running-a-game.md says in its paragraph on the Debug default that a
+file the game saves under its asset root is written into the project, and that a player's saves go
+under user:// in either build. Courtyard saves its game under user:// through SaveGame, so its play
+reads nothing the root moved, and the soak's Blockout round cuts and undoes without saving.
+
+The play as it stood fails in run 43581803258 itself, the game saying it saved the level to
+games/Blockout/assets/levels/blockout.model and the play reading the build's copy, which holds no
+window's line, so the pack run stands as the play without the mend. The three games were played here
+from a package of the head packed as the games job packs one, on that run's Linux render bridge,
+each game built on the package and each play under the GPU lock shared on its own. Blockout's mended
+play passed in 27 seconds on the graphics card, the game saying it saved the level to the project's
+recipe and the window's line found there, and after the play the project's recipe and the build's
+copy are both as the head holds them. The first mended play found the copy of the recipe kept under
+a name the play gives the count of faces before the window's cut, so its trap looked for a file
+named 100, put back nothing and left the saved recipe in the project, and the copy is named kept.
+Courtyard played to its win in 29 seconds on the graphics card. Swarm played to its third wave on
+lavapipe held to four cores, as the games job draws it, in 679 seconds, 218 creatures alive at most
+and its frame profiled at 538 ms a frame. The pictures of the three plays are in the dump folder.
+
+The first try of the plays here met a checkout reached under /home, which links to /var/home on this
+machine. Its restore met the library under both spellings and dropped the command line's reference
+to it, so bcs did not build, the play waited for an answer it could not get and its trap could not
+stop the game, which held the GPU lock shared for 38 minutes until it was stopped at 14:23. The
+plays ran again from the checkout's own path, the command line built first as a step of its own.
+
+Swarm's play holds on a slow device alone. On the graphics card it reached the third wave with 217
+creatures alive at most and failed, no check after a hold of the keys finding 200 alive, since the
+game runs many frames there between two of the play's commands, its clock set to a sixtieth of a
+second a frame, and the swarm closes in while no key is held. It takes app.hold commands after the
+play's app.frametime, as the feature test's course run asks for it, so the clock moves only while
+input.hold, frames.wait or frame.profile waits, each a command whose answer is held, and every check
+finds the swarm where the last hold left it on either device. Then the play on the graphics card and
+on lavapipe in the runner's image, its wave, most alive and felled read against each other.
+Courtyard's and Blockout's plays passed on the graphics card as they stand.
+
+NormTests passed, 19. ScriptTests passed 22, WorkflowTests 8, FirstGameTests 5, DocsScriptTests 3
+and CheatsheetTests 3, 60 in all with NormTests, on the suite built with warnings as errors.
