@@ -132,9 +132,13 @@ public static class SceneValue
     private static bool Named(FieldKind key) => key is FieldKind.String or FieldKind.Int or FieldKind.Enum;
 
     /// <summary>A key as a property name.</summary>
-    private static string KeyText(object key) => key is IConvertible number and not string and not Enum
-        ? number.ToInt64(CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture)
-        : key.ToString() ?? string.Empty;
+    /// <remarks>A <see langword="ulong"/> as itself, since one past what a long holds has no long to be.</remarks>
+    private static string KeyText(object key) => key switch
+    {
+        ulong wide => wide.ToString(CultureInfo.InvariantCulture),
+        IConvertible number and not string and not Enum => number.ToInt64(CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture),
+        _ => key.ToString() ?? string.Empty,
+    };
 
     /// <summary>Writes one value of a kind, reporting whether it had a form to write.</summary>
     private static bool Write(Utf8JsonWriter json, FieldKind kind, object value, SceneReferences references)
@@ -145,6 +149,12 @@ public static class SceneValue
         {
             case FieldKind.Bool when value is bool on:
                 json.WriteBooleanValue(on);
+                return true;
+
+            // A ulong as itself, since half of what one holds is past a long, a seed or a hash
+            // among them.
+            case FieldKind.Int when value is ulong past:
+                json.WriteNumberValue(past);
                 return true;
 
             case FieldKind.Int when value is IConvertible whole:
@@ -256,7 +266,8 @@ public static class SceneValue
                 foreach (var property in json.EnumerateObject())
                 {
                     object? key = field.KeyKind == FieldKind.Int
-                        ? long.TryParse(property.Name, CultureInfo.InvariantCulture, out var whole) ? whole : null
+                        ? long.TryParse(property.Name, CultureInfo.InvariantCulture, out var whole) ? whole
+                            : ulong.TryParse(property.Name, CultureInfo.InvariantCulture, out var wide) ? wide : null
                         : property.Name;
                     var held = Item(property.Value, field, references);
                     if (key is null || held is null) return null;
@@ -295,7 +306,7 @@ public static class SceneValue
             return kind switch
             {
                 FieldKind.Bool => json.GetBoolean(),
-                FieldKind.Int => json.GetInt64(),
+                FieldKind.Int => json.TryGetInt64(out var whole) ? whole : json.GetUInt64(),
                 FieldKind.Float => json.GetSingle(),
                 FieldKind.Double => json.GetDouble(),
                 FieldKind.String => json.GetString(),

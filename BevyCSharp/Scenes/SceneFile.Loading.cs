@@ -30,6 +30,10 @@ public static partial class SceneFile
 
         var load = Read(world, document.RootElement, parent, path, worldResources: true);
         if (top && load.Problem is null) LoadedScenes.Note(world, path, load.Entities);
+
+        // A load of the game's own, under a parent or not, and not a scene another places, which
+        // its placing's load holds.
+        if (Depth == 0 && load.Problem is null) SaveGame.Noted(world, path, load.Entities);
         return load;
     }
 

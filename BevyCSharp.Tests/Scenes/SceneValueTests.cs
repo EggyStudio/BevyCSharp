@@ -89,6 +89,20 @@ public partial struct EveryReference
     public DataRef<WeaponStats> Weapon;
 }
 
+/// <summary>A component holding whole numbers at the ends of a ulong's range and a long's, as a seed or a hash is.</summary>
+[Behavior]
+public partial struct WideNumbers
+{
+    /// <summary>A seed past what a long holds.</summary>
+    public ulong Seed;
+
+    /// <summary>The least a long holds.</summary>
+    public long Least;
+
+    /// <summary>Counts by a hash, which a scene writes as an object.</summary>
+    public EcsMap<ulong, int> ByHash;
+}
+
 /// <summary>
 /// Covers writing a component's values to JSON and reading them back.
 /// </summary>
@@ -252,6 +266,41 @@ public sealed class SceneValueTests
             var back = ctx.Ecs.GetOrDefault<EveryReference>(held);
             Assert.True(back.Target.IsNone);
             Assert.Equal(0ul, back.Weapon.Id);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>
+    /// A ulong past what a long holds, in a field and as a map's key, is written as itself and read
+    /// back, where it was turned into a long on the way out, which threw and ended the save.
+    /// </summary>
+    [Fact]
+    public void AUlongPastWhatALongHoldsIsWrittenAndReadBack()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var source = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(source, new WideNumbers { Seed = ulong.MaxValue, Least = long.MinValue });
+            ctx.Ecs.GetRef<WideNumbers>(source).ByHash.Set(0xF000_0000_0000_0001ul, 3);
+
+            var schema = ComponentSchemas.For("Bevy.Tests.WideNumbers")!;
+            var text = Written(json => SceneValue.WriteComponent(json, schema, ctx.Ecs, source));
+            Assert.Contains("\"Seed\":18446744073709551615", text);
+            Assert.Contains("\"Least\":-9223372036854775808", text);
+            Assert.Contains("\"ByHash\":{\"17293822569102704641\":3}", text);
+
+            var copy = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(copy, default(WideNumbers));
+            using var document = JsonDocument.Parse(text);
+            SceneValue.ReadComponent(document.RootElement, schema, ctx.Ecs, copy);
+
+            var back = ctx.Ecs.GetOrDefault<WideNumbers>(copy);
+            Assert.Equal(ulong.MaxValue, back.Seed);
+            Assert.Equal(long.MinValue, back.Least);
+            Assert.Equal(3, back.ByHash[0xF000_0000_0000_0001ul]);
         });
 
         harness.Run();

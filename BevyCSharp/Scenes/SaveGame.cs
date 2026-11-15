@@ -35,7 +35,8 @@ namespace Bevy;
 /// A load ends the game in progress first, despawning what its scenes spawned and every entity
 /// with a <see cref="SaveId"/>, so a game loads from its pause menu as from its title screen. What
 /// the game spawned itself without an id, such as its camera or its interface, is left for the
-/// game, which knows whether it still belongs.
+/// game, which knows whether it still belongs, and so is a scene the game loaded itself and did
+/// not start the game from, such as its interface's.
 /// </para>
 /// <para>
 /// A <see cref="Persistent{T}"/> given to <see cref="Carry"/> belongs to the save slot, and is
@@ -98,6 +99,25 @@ public static class SaveGame
     /// <summary>What the scenes of the game in progress spawned, which a load despawns.</summary>
     private static readonly List<Entity> Spawned = [];
 
+    /// <summary>
+    /// What each scene file loaded by a call of the game's own spawned, by the file, which
+    /// <see cref="Begin"/> takes the game's entities from, the loads whose entities have all gone
+    /// passed over.
+    /// </summary>
+    private static readonly List<(string File, Entity[] Entities)> Loads = [];
+
+    /// <summary>
+    /// The entries of the save loaded last for entities no scene holds, by their ids, as the save
+    /// had them, which the next save writes back.
+    /// </summary>
+    /// <remarks>
+    /// A scene the save names that could not be read holds the entities these were for, so a save
+    /// made while it is missing keeps the player's progress in it for a load that reads it again.
+    /// An entity an update took out of its scene leaves one here as well, which costs a save a few
+    /// lines and finds the entity again should it come back.
+    /// </remarks>
+    private static readonly Dictionary<SaveId, JsonElement> Unplaced = [];
+
     /// <summary>The scenes the game in progress was started from, which a save names.</summary>
     public static IReadOnlyList<string> Scenes => [.. StartedFrom];
 
@@ -111,23 +131,55 @@ public static class SaveGame
     public static IReadOnlyList<Entity> Start(EcsWorld world, params string[] scenes)
     {
         ArgumentNullException.ThrowIfNull(world);
+        return Open(world, scenes).Entities;
+    }
 
+    /// <summary>
+    /// Loads the scenes and starts the game from them, with what each load could not read, every
+    /// scene's problem said in one, naming its file.
+    /// </summary>
+    private static SceneLoad Open(EcsWorld world, string[] scenes)
+    {
         var spawned = new List<Entity>();
-        foreach (var scene in scenes) spawned.AddRange(SceneFile.Load(world, scene).Entities);
+        var unknown = new SortedSet<string>(StringComparer.Ordinal);
+        var refused = new List<string>();
+        var problems = new List<string>();
+        foreach (var scene in scenes)
+        {
+            var load = SceneFile.Load(world, scene);
+            spawned.AddRange(load.Entities);
+            unknown.UnionWith(load.Unknown);
+            refused.AddRange(load.Refused);
+            if (load.Problem is { } problem) problems.Add(problem);
+        }
 
         Begin(world, scenes);
-        Spawned.AddRange(spawned);
-        return spawned;
+        return new SceneLoad(spawned, [.. unknown], refused, problems.Count > 0 ? string.Join(" ", problems) : null);
     }
+
+    /// <summary>
+    /// Keeps what a load of a scene file by a call of the game's own spawned, called by
+    /// <see cref="SceneFile.Load"/>, for <see cref="Begin"/> to find the game's entities among.
+    /// </summary>
+    internal static void Noted(EcsWorld world, string path, IReadOnlyList<Entity> spawned)
+    {
+        Loads.RemoveAll(each => !each.Entities.Any(world.IsAlive));
+        Loads.Add((FileOf(path), [.. spawned]));
+    }
+
+    /// <summary>A scene path as the file it names, so two ways of naming one file match.</summary>
+    private static string FileOf(string path) => Path.GetFullPath(SceneFile.Resolve(path));
 
     /// <summary>
     /// Starts a game from scenes already loaded, remembering them and the saved entities they hold,
     /// as <see cref="Start"/> does after it loads them.
     /// </summary>
     /// <remarks>
-    /// For a host that loads the scenes itself and reports what each held, as the player does when
-    /// the editor plays a scene, so a save made there lays itself over the same scene a game's
-    /// would.
+    /// For a host that loads the scenes itself with <see cref="SceneFile.Load"/> and reports what
+    /// each held, as the player does when the editor plays a scene, so a save made there lays
+    /// itself over the same scene a game's would. The game's entities are the ones those loads of
+    /// the named files spawned, so another scene the game loaded, such as its interface's, stays
+    /// the game's own and a load leaves it standing.
     /// </remarks>
     /// <param name="world">The world they were loaded into.</param>
     /// <param name="scenes">The scene files, as they were loaded.</param>
@@ -137,11 +189,13 @@ public static class SaveGame
 
         StartedFrom.Clear();
         StartedFrom.AddRange(scenes);
+        Unplaced.Clear();
 
-        // Everything loaded from a scene, which covers what a host loading them itself spawned,
-        // since a scene marks each entity it spawns with the id it had in the file.
+        // What the loads of the named files spawned, the scenes they place among it, and not
+        // every entity with a scene's id, which another scene the game loaded holds as well.
+        var named = scenes.Select(FileOf).ToHashSet(StringComparer.Ordinal);
         Spawned.Clear();
-        Spawned.AddRange(world.All().Where(entity => world.Has<SceneId>(entity)));
+        Spawned.AddRange(Loads.Where(each => named.Contains(each.File)).SelectMany(each => each.Entities).Where(world.IsAlive).Distinct());
 
         // Every saved entity there is once the scenes are in, including the ones inside a subscene,
         // with what it holds, written as a save writes it so the two compare value for value.
@@ -221,8 +275,15 @@ public static class SaveGame
                 written++;
             }
 
-            // What the scenes hold that play took away.
+            // What the save loaded last had for entities no scene holds, as it had it.
             var present = ids.Select(pair => pair.Id).ToHashSet();
+            foreach (var (_, entry) in Unplaced.Where(pair => !present.Contains(pair.Key)).OrderBy(pair => pair.Key.Value))
+            {
+                entry.WriteTo(json);
+                written++;
+            }
+
+            // What the scenes hold that play took away.
             foreach (var gone in FromScenes.Where(id => !present.Contains(id)).OrderBy(id => id.Value))
             {
                 json.WriteStartObject();
@@ -264,10 +325,18 @@ public static class SaveGame
     /// (<see cref="SceneLoad.Problem"/>).
     /// </returns>
     /// <remarks>
+    /// <para>
     /// The game in progress is ended only once the file has been read as a save, so a missing or
     /// broken one leaves the game being played as it was, and is said on the log as well for a game
     /// that does not look at what is returned. <see cref="SaveLoaded"/> is sent the frame after a
     /// save is laid, for what the game builds itself.
+    /// </para>
+    /// <para>
+    /// A scene the save names that cannot be read is named in the problem returned, with the save
+    /// laid over the scenes that could be, and the save's entries for that scene's entities are
+    /// kept as they were, so the next save writes them back and the player's progress there comes
+    /// back once the scene can be read again.
+    /// </para>
     /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path = "user://saves/slot.save.json")
     {
@@ -286,7 +355,8 @@ public static class SaveGame
         var scenes = root.TryGetProperty("scenes", out var named)
             ? named.EnumerateArray().Select(SceneReferences.ReadFile).OfType<string>().ToArray()
             : [];
-        var spawned = new List<Entity>(Start(world, scenes));
+        var opened = Open(world, scenes);
+        var spawned = new List<Entity>(opened.Entities);
 
         var entries = root.TryGetProperty("entities", out var listed) ? listed.EnumerateArray().ToArray() : [];
         var byId = Kept(Ids(world)).ToDictionary(pair => pair.Id, pair => pair.Entity);
@@ -306,12 +376,17 @@ public static class SaveGame
         }
 
         var references = new SaveReferences(byId.Select(pair => (pair.Value, pair.Key)).ToList());
-        var unknown = new SortedSet<string>(StringComparer.Ordinal);
-        var refused = new List<string>();
+        var unknown = new SortedSet<string>(opened.Unknown, StringComparer.Ordinal);
+        var refused = new List<string>(opened.Refused);
 
         foreach (var entry in entries)
         {
-            if (Id(entry) is not { } id || !byId.TryGetValue(id, out var entity)) continue;
+            if (Id(entry) is not { } id) continue;
+            if (!byId.TryGetValue(id, out var entity))
+            {
+                Unplaced[id] = entry.Clone();
+                continue;
+            }
 
             if (Flag(entry, "deleted"))
             {
@@ -340,7 +415,7 @@ public static class SaveGame
             }
         }
 
-        var load = new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused);
+        var load = new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused, opened.Problem);
         Loaded.Enqueue(new SaveLoaded(path, load.Entities));
         return load;
     }
@@ -352,6 +427,8 @@ public static class SaveGame
         FromScenes.Clear();
         AsLoaded.Clear();
         Spawned.Clear();
+        Loads.Clear();
+        Unplaced.Clear();
         Loaded.Clear();
     }
 

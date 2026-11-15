@@ -151,10 +151,13 @@ save is written through a temporary file renamed over the old one.
 A load ends the game in progress first, despawning what its scenes spawned and every entity with a
 `SaveId`, so a pause menu loads as a title screen does. It does so only once the file has read as a
 save, so a slot that is empty or was cut short leaves the game being played as it was, with why in
-the `Problem` of what `Load` returns. What the game spawned for itself without
-an id, its camera and its interface, is left for it, since only the game knows whether that still
-belongs. A load enters no state, so what a game builds on entering one is not built for what came
-back, and `SaveLoaded` is sent the frame after for the game to build it there, once:
+the `Problem` of what `Load` returns. A scene the save names that cannot be read is named there as
+well, with the save laid over the scenes that could be, and the save's entries for its entities are
+kept, so the next save writes them back. What the game spawned for itself without an id, its camera
+and its interface, is left for it, as is a scene it loaded itself and did not start the game from,
+since only the game knows whether that still belongs. A load enters no state, so what a game builds
+on entering one is not built for what came back, and `SaveLoaded` is sent the frame after for the
+game to build it there, once:
 
 <!-- compiled with:
 public enum Mode { Menu, Playing }
@@ -169,9 +172,9 @@ public void Loaded(BehaviorContext ctx)
 ```
 
 The bodies a level holds as components need none of this, since the physics plugin makes them for
-whatever the load spawned. A host that loads
-its scenes itself, as the editor's player does, names them with `SaveGame.Begin` so a save made
-there lays itself over the same scenes a game's would.
+whatever the load spawned. A host that loads its scenes itself with `SceneFile.Load`, as the
+editor's player does, names them with `SaveGame.Begin` so a save made there lays itself over the
+same scenes a game's would, and what those loads spawned is the game a load ends.
 
 Settings that outlive a run go in a `Persistent<T>`, read from `user://` when made and written
 when asked, through a `System.Text.Json` source-generated context so nothing reflects:

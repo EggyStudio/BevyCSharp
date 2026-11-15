@@ -402,6 +402,109 @@ public sealed class SaveGameTests : IDisposable
         Assert.True(ran);
     }
 
+    /// <summary>
+    /// A scene the game loaded itself and did not start the game from, as its interface's, stays
+    /// through a load, which ends only what the game was started from, where every entity with a
+    /// scene's id was taken for the game's and despawned.
+    /// </summary>
+    [Fact]
+    public void ASceneTheGameLoadedItselfStaysThroughALoad()
+    {
+        var hud = Path.Combine(_folder.Path, "hud.scene.json");
+        File.WriteAllText(hud, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Health bar", "components": { "Bevy.Transform": { "Translation": [0, 0, 0] } } } ] }
+            """);
+        var level = Path.Combine(_folder.Path, "keep.scene.json");
+        File.WriteAllText(level, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Hero",
+                "components": { "Bevy.Transform": { "Translation": [0, 0, 0] }, "Bevy.SaveId": { "Id": "00000000000000a1" } } } ] }
+            """);
+
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var bar = Assert.Single(SceneFile.Load(ctx.Ecs, hud).Entities);
+            SaveGame.Start(ctx.Ecs, level);
+            SaveGame.Save(ctx.Ecs);
+
+            Assert.Null(SaveGame.Load(ctx.Ecs).Problem);
+            Assert.True(ctx.Ecs.IsAlive(bar));
+            Assert.Single(ctx.Ecs.All(), entity => ctx.Ecs.NameOf(entity) == "Hero");
+        });
+
+        harness.Run();
+        Assert.True(ran);
+    }
+
+    /// <summary>
+    /// A scene the save names that cannot be read is named in what the load returns, with what the
+    /// other scene could not read, and the save's entries for its entities are kept, so a save made
+    /// meanwhile writes them back and the player's progress there comes back once the scene is
+    /// read again, where the load said nothing and the next save dropped that progress.
+    /// </summary>
+    [Fact]
+    public void ASceneTheSaveNamesThatCannotBeReadIsSaidAndItsProgressKept()
+    {
+        var yard = Path.Combine(_folder.Path, "yard.scene.json");
+        File.WriteAllText(yard, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Hero",
+                "components": { "Bevy.Transform": { "Translation": [0, 0, 0] }, "Game.Gone": { "Value": 1 },
+                  "Bevy.SaveId": { "Id": "00000000000000b1" } } } ] }
+            """);
+        var vault = Path.Combine(_folder.Path, "vault.scene.json");
+        var whole = """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Chest",
+                "components": { "Bevy.Tests.Wallet": { "Coins": 5 }, "Bevy.SaveId": { "Id": "00000000000000b2" } } } ] }
+            """;
+        File.WriteAllText(vault, whole);
+
+        using (var playing = new EngineHarness(frames: 2))
+        {
+            playing.OnContext(Stage.Startup, ctx =>
+            {
+                var chest = SaveGame.Start(ctx.Ecs, yard, vault).Single(entity => ctx.Ecs.NameOf(entity) == "Chest");
+                ctx.Ecs.GetRef<Wallet>(chest).Coins = 0;
+                SaveGame.Save(ctx.Ecs);
+            });
+            playing.Run();
+        }
+
+        // The vault cut short by an update, loaded and saved again while it is.
+        File.WriteAllText(vault, whole[..40]);
+        using (var broken = new EngineHarness(frames: 2))
+        {
+            broken.OnContext(Stage.Startup, ctx =>
+            {
+                var loaded = SaveGame.Load(ctx.Ecs);
+                Assert.Contains("vault.scene.json", loaded.Problem);
+                Assert.Contains("Game.Gone", loaded.Unknown);
+                Assert.Single(loaded.Entities, entity => ctx.Ecs.NameOf(entity) == "Hero");
+                SaveGame.Save(ctx.Ecs);
+            });
+            broken.Run();
+        }
+
+        File.WriteAllText(vault, whole);
+        using var mended = new EngineHarness(frames: 2);
+        mended.OnContext(Stage.Startup, ctx =>
+        {
+            var loaded = SaveGame.Load(ctx.Ecs);
+            Assert.Null(loaded.Problem);
+            var chest = Assert.Single(loaded.Entities, entity => ctx.Ecs.NameOf(entity) == "Chest");
+            Assert.Equal(0, ctx.Ecs.GetOrDefault<Wallet>(chest).Coins);
+        });
+        mended.Run();
+    }
+
     [Fact]
     public void ALoadIsSentTheFrameAfterOnce()
     {
