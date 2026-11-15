@@ -152,6 +152,7 @@ public sealed class TreeCardsTests(ITestOutputHelper output)
     public void TheFarLevelsCostIsReadInADistantForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
 
         // Forty-eight tupelos planted on a disc 160 meters off, past six of their heights, drawn in
         // their far level of limbs and cards, and the same trees in their reduced level built by

@@ -687,6 +687,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     public void TheLeavesLitAsACrownCostIsReadInAForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
         var standard = LeavesOpaquePass(crown: false);
         var crown = LeavesOpaquePass(crown: true);
         Skip.If(standard is null || crown is null, "needs a GPU whose passes the app can time");
@@ -703,6 +704,7 @@ public sealed class TreeLeavesTests(ITestOutputHelper output)
     public void TheLeavesReadingOfTheProbesCostIsReadInAForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
         double? unread, read;
         try
         {

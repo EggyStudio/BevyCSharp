@@ -161,6 +161,7 @@ public sealed class TreeImpostorsTests(ITestOutputHelper output)
     public void TheImpostorsCostIsReadInAFarForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
 
         // A thousand tupelos planted on a disc thirty-eight of their heights off and twelve across
         // its half, some fifteen meters apart, drawn as impostors, then the same trees as their

@@ -1,28 +1,33 @@
 # Review
 
-Reviewed up to `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3` and `8bdb3e21`, five commits of
-the audit's medium findings from one tree after one whole suite of 2,114 passed and 3 skipped, asset
-fields sharing one handle for each asset, a query's buffer for each walk with a copy written back
-only where changed and a sound's volume kept over a pause, the hooks reaching every handle of a
-layout, the export's bridge built again when its sources are newer, and a pair bouncing as the
-bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382 green by 19:02, the form
-kept and the messages free of numbers. Before them `3ec197c2`, the editor history's three mends, an
-inspector edit spread over the selection undone on every entity, a loaded scene starting with
-nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15, its
-build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a scene the game
-loaded itself left standing by a load, a ulong past a long kept, and an unreadable scene's entries
-kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and the messages free
-of numbers. Before them `773313da`, item 146's six high findings, each with a test that failed
-without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the
-run before it had ended, its build run 43665738473 green on the three systems at 03:26; it keeps the
-form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's
-clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its
-build run 43625597437 green on the three systems at 19:38, the games played in the pack run alone;
-built on the published 0.6.122 and played from a copy of the head, on the card it passed in 70 s,
-wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309,
-and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and 312;
-NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps the
-form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
+Reviewed up to `f9769f26`, the session file its owner's alone from the moment it is made, a panic
+that ends the run written to the crash file and thrown, and a canceled streamed read never landing
+after its cancel, and before it `349406a9`, the three tests mended for a device that draws on the
+processor with the read's Reply, two commits from one tree after a whole suite of 2,117 passed and 3
+skipped, pushed at 21:08 on 2026-11-15, their build run 43756313618 green by 22:02, the form kept
+and the messages free of numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3`
+and `8bdb3e21`, five commits of the audit's medium findings from one tree after one whole suite of
+2,114 passed and 3 skipped, asset fields sharing one handle for each asset, a query's buffer for
+each walk with a copy written back only where changed and a sound's volume kept over a pause, the
+hooks reaching every handle of a layout, the export's bridge built again when its sources are newer,
+and a pair bouncing as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382
+green by 19:02, the form kept and the messages free of numbers. Before them `3ec197c2`, the editor
+history's three mends, an inspector edit spread over the selection undone on every entity, a loaded
+scene starting with nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05
+on 2026-11-15, its build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a
+scene the game loaded itself left standing by a load, a ulong past a long kept, and an unreadable
+scene's entries kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and
+the messages free of numbers. Before them `773313da`, item 146's six high findings, each with a test
+that failed without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15
+once the run before it had ended, its build run 43665738473 green on the three systems at 03:26; it
+keeps the form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding
+the game's clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had
+ended, its build run 43625597437 green on the three systems at 19:38, the games played in the pack
+run alone; built on the published 0.6.122 and played from a copy of the head, on the card it passed
+in 70 s, wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220
+and 309, and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and
+312; NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps
+the form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
 reading the recipe where the game says it saved it and putting that file back, a game built in Debug
 saving into its project's assets folder, which the guide says, pushed at 16:07 on 2026-11-14 with
 the pack run with publish, 43608448173, started on the same head and green by 18:45, 0.6.122
@@ -969,3 +974,80 @@ Shared: a session file holding the command line's token is made readable by its 
 made, before the token goes in, in a folder made its owner's alone, where its mode was set once the
 token was in it. The sibling's command line keeps a session with a token as well and may meet the
 same, so this is offered for it to read.
+
+143, the Linux job, in the commit carrying this Reply. Every test that needs a renderer runs on
+every push on Linux's render bridge under lavapipe, in fourteen parts laid out by the read's
+minutes, the aspen's leaves held to a bound of their own on a CPU device and the ten cases that
+would take hours there skipped on one.
+
+A job builds the render bridge for Linux on every run, render-bridge, with a cache of its own, where
+the native job builds the six for a pack alone, and the renderer job runs the parts on it, each a
+build/test.py run of build/renderer-parts.tsv on the runner's lavapipe after the solution is built
+with warnings as errors, as the test job builds it, and slangc is fetched. A case is held to 35
+minutes before it counts as hung, since the longest takes 24 there and test.py's five would end a
+part at its first long case. A push runs a part to a job, fourteen beside the test job's three,
+seventeen at once at the most, within the twenty jobs GitHub's free plan runs at once. A pack runs
+two parts to a job, seven, since its ten jobs on the native job's bridge start beside them once that
+bridge is built, and with the test job's three they come to twenty, where a part to a job would come
+to twenty-seven and hold some in the queue. The token here cannot read the account's plan, and on
+Pro's forty a pack too could run a part to a job. The sibling's runs take from the same account's
+jobs when both are pushed at once. The digest job puts each part's page beside the three systems',
+each named for its parts, as lavapipe, part 3.
+
+build/test.py gains --layout, --only and --system. A line of the layout holds a part's number and a
+test class or one case of a class by its display name, matched with vstest's escapes as the read's
+pieces were, and the part holding * takes every test no other line names, so the classes that draw
+nothing, a class or a case added since the read and the cases that skip on a CPU device run there,
+and no test falls between two parts. The fourteen parts' listings through their filters came to the
+whole listing's 2,110 between them, each test in one part. The parts are as many as first fit from
+the longest needs under 38 minutes, and the classes and cases are dealt from the longest, each to
+the part holding least, which makes them alike at some 36 minutes where first fit left thirteen of
+38 and a sliver, so the jobs' wall time is the shorter. Four classes go by their cases, global
+illumination's, the trees' leaves', the level shadow's and the bounce rooms', each theory's case by
+its arguments. TestScriptTests.ALayoutsPartsRunTheirLinesAndThePartWithTheStarEveryOtherTest runs a
+layout of two parts on the stand-in, whose filter reader takes parentheses, & and | and a case by
+its whole display name, and fails without the options, which test.py refused before them.
+
+A trial ran a part as a job runs one, in the runner's image on the read's render bridge, whose
+sources are the tree's, lavapipe held to four cores, from a Mesa cache and a Slang cache that
+started empty, in a clone of the tree with its modules and these changes laid on it. The first was
+lost at test.py's five minutes a case to
+TreeLeavesTests.ACrownShadedByTheSkyItSeesDarkensItsMiddleMoreThanItsEdge, ten minutes there, which
+gave the job its 35. In the second the solution built in 123 seconds with no warning, and the part
+holding *, laid out with ten minutes guessed for the tests no line names, took 26 minutes. Its named
+lines took 24.8 minutes, the read's own to the tenth, so a cache that starts empty costs a part
+nothing the read did not count, and the 919 tests no line names took 1.6 minutes in their cases. 974
+passed and 13 were skipped, 5 of them the skips on a CPU device below, 4 for what the image lacks,
+Pillow and strip, and 4 as the Linux test job skips them, a package to open or build on, a headless
+bridge and a window storm not asked for. 2 failed for the image alone,
+CrashLogTests.APanicsFramesAreNamedFromTheFullLibraryOfItsBuild finding no nm and
+ScriptsPluginTests.ALockFileIsPassedOverAndAnUnreadableScriptFailsAsAWarning reading a script of
+mode none as root, where the runner has binutils and runs as an account of its own, and the test job
+passes both on Linux. The layout was laid again with 2 minutes for the rest, fourteen parts of 35.2
+to 35.7 minutes, about 39 on the slowest runner's processor, under test.py's 45 a part and the job's
+hour with its setup.
+
+The aspen's bound is 25% where the device filters as the card does and 29% on a CPU device. Lavapipe
+in the runner's image reports samplerAnisotropy true and maxSamplerAnisotropy 16, as the card does,
+so what it reports of its filtering cannot tell the two apart, and the bound goes by the adapter's
+device type, which Needs.DrawsOnTheProcessor reads once a run in an app of three frames. The aspen's
+leaves cover 2,380 pixels on both, and their mean light reads 0.0585 on the card and 0.0602 on
+lavapipe against the reference's 0.0471, +24% and +28%, inside 25% and 29%. On lavapipe in the
+runner's image it passed in 10 minutes 33 seconds.
+
+Needs.Gpu skips a test on a CPU device with its reason. The three cases past 41 minutes say they
+take past forty minutes there where a graphics card takes seconds, and the seven readings of a cost
+say they read what their passes cost a GPU, where a device that draws on the processor would take
+hours to time its processor instead. On lavapipe each of the ten skipped with its reason, the first
+in a second for the app that reads the device and the rest in milliseconds, and on the card all ten
+ran and passed, the three long cases in 11 to 17 seconds and the seven readings in 7 to 36.
+
+The whole suite passed over these changes, 2,118 passed, 0 failed and 3 skipped, 2,121 in all where
+the listing is 2,110, the solution built from nothing with warnings as errors, a part at a time
+under the GPU lock once it had been free of timings for three minutes. NormTests passed, 19.
+
+Shared: the tests that need a renderer run on lavapipe on every push in parts a file lays out by
+each class's or case's minutes there, a class whole where it fits a part and by its cases where it
+does not, a part holding * taking every test no line names, with build/test.py's --layout and
+--only. The sibling deals its classes to its parts in turn with --split and --only, so this is
+offered for it to read.

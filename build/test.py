@@ -2,6 +2,7 @@
 """Runs the tests and writes a page of what happened, at most 200 lines.
 
     build/test.py [PART ...] [--parts] [--no-build] [--filter F]   # every part, or the parts named
+    build/test.py suite --layout FILE [--only N ...] [--system S]  # the suite in the parts a file lays out
     build/test.py --read DIR                                       # the page of results in a folder
     build/test.py --digest DIR ...                                 # one page from several digests
 
@@ -24,6 +25,14 @@ job's summary, with each cause, whole, an error annotation. What the processes p
 TestResults/output*.txt. It exits 0 when every test passed and no process was lost.
 
 Its parts are the three processes from the start, as NORM.md's N 6.7 and N 6.8 have it.
+
+With --layout the suite runs in the parts a file lays out, each a process, as the renderer job runs
+build/renderer-parts.tsv's on lavapipe, a part to a job or two. A line of the file holds a part's
+number and a test class, or one case of a class by its display name, and the part holding * takes
+every test no other line names, so a class or a case added later runs there and no test falls
+between two parts. --only runs the parts of those numbers alone, so the jobs given every number
+between them run the whole suite, and --system names the run on its page with the parts it ran,
+where the system's own name would call each of those jobs Linux.
 """
 
 import argparse
@@ -248,12 +257,13 @@ def last_ended(text):
     return ended[-1] if ended else None
 
 
-def list_tests(args):
+def list_tests(args, filter_=None):
+    filter_ = filter_ or args.filter
     command = shlex.split(args.dotnet, posix=os.name != "nt") + ["test", args.project, "-c", args.configuration, "--list-tests"]
     if args.no_build:
         command.append("--no-build")
-    if args.filter:
-        command += ["--filter", args.filter]
+    if filter_:
+        command += ["--filter", filter_]
     text = subprocess.run(command, cwd=ROOT, capture_output=True, text=True, errors="replace").stdout
     names, listing = [], False
     for line in text.splitlines():
@@ -282,16 +292,46 @@ def parts_of(names, held_to=None):
     if current:
         parts.append(current)
 
-    def within(filter_):
-        if not held_to:
-            return filter_
-        return f"({filter_})&({held_to})" if filter_ else held_to
-
     processes = [Process(f"{group[0]} to {group[-1]}" if len(group) > 1 else group[0], "dotnet",
-                         within("|".join(f"FullyQualifiedName~{PREFIX}{name}." for name in group))) for group in parts]
+                         within("|".join(f"FullyQualifiedName~{PREFIX}{name}." for name in group), held_to)) for group in parts]
     rest = "&".join(f"FullyQualifiedName!~{PREFIX}{name}." for name in counts)
-    processes.append(Process("everything else", "dotnet", within(rest or None)))
+    processes.append(Process("everything else", "dotnet", within(rest or None, held_to)))
     return processes
+
+
+def laid_out(path, chosen, held_to=None):
+    """
+    The parts a file lays out, each a process, those chosen names or every one. A case is matched
+    by its whole display name with vstest's escapes, which a theory's case needs, since its
+    arguments are in its display name and not in its full name.
+    """
+    parts = {}
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            fields = line.rstrip("\n").split("\t")
+            if fields[0] and not fields[0].startswith("#") and len(fields) > 1:
+                parts.setdefault(fields[0], []).append(fields[1])
+    if unknown := [part for part in chosen if part not in parts]:
+        sys.exit(f"{path} lays out no part {', '.join(unknown)}; its parts are {', '.join(parts)}")
+    if sum(names.count("*") for names in parts.values()) != 1:
+        sys.exit(f"{path} gives * to {sum(names.count('*') for names in parts.values())} parts, where one takes what no other line names")
+
+    def matched(name, sense):
+        if "." not in name:
+            return f"FullyQualifiedName{sense}~{PREFIX}{name}."
+        return f"DisplayName{sense}=" + re.sub(r"([\\()&|=!~])", r"\\\1", PREFIX + name)
+
+    rest = "&".join(matched(name, "!") for names in parts.values() for name in names if name != "*")
+    return [Process(f"part {part}", "dotnet",
+                    within("|".join(matched(name, "") if name != "*" else f"({rest})" for name in names), held_to))
+            for part, names in parts.items() if not chosen or part in chosen]
+
+
+def within(filter_, held_to):
+    """A part's filter held to the one the run was given, where it was given one."""
+    if not held_to:
+        return filter_
+    return f"({filter_})&({held_to})" if filter_ else held_to
 
 
 def segment(name):
@@ -533,7 +573,7 @@ def repeated_lines(texts):
 
 # -- The page
 
-def digest(results_dir, processes, listed, seconds):
+def digest(results_dir, processes, listed, seconds, system=None):
     """What the run comes to, as the page and its annotations read it."""
     # The suite's results are its parts' where it ran again in parts, and its own otherwise.
     suite_parts = any(p.kind == "dotnet" and p.label != "the suite" for p in processes)
@@ -576,7 +616,7 @@ def digest(results_dir, processes, listed, seconds):
     no_result = sum(1 for name in set(listed) if name not in results and name.split("(")[0] not in methods)
 
     return {
-        "system": {"Darwin": "macOS"}.get(platform.system(), platform.system()),
+        "system": system or {"Darwin": "macOS"}.get(platform.system(), platform.system()),
         "commit": commit(),
         "passed": outcomes["Passed"], "failed": outcomes["Failed"], "skipped": outcomes["NotExecuted"], "no_result": no_result,
         "seconds": round(seconds), "peak_mb": max((p.peak_mb for p in processes), default=0),
@@ -723,6 +763,9 @@ def main():
     parser.add_argument("--parts", dest="all_parts", action="store_true", help="run the suite in its parts, each a process")
     parser.add_argument("--no-build", action="store_true", help="pass --no-build to dotnet test")
     parser.add_argument("--filter", help="the suite's tests to run, as dotnet test's --filter takes them")
+    parser.add_argument("--layout", metavar="FILE", help="run the suite in the parts FILE lays out, each a process")
+    parser.add_argument("--only", nargs="+", default=[], metavar="N", help="of the parts --layout lays out, these alone")
+    parser.add_argument("--system", help="the name the page gives the run, the system's own where none is given")
     parser.add_argument("--read", metavar="DIR", help="write the page of the results already in DIR")
     parser.add_argument("--digest", metavar="DIR", nargs="+", help="one page from the digest.json in each DIR")
     parser.add_argument("--results", default=RESULTS, help="where results, output and the page go")
@@ -737,6 +780,8 @@ def main():
     for name in args.names:
         if name not in PARTS:
             parser.error(f"{name} is no part; the parts are {', '.join(PARTS)}")
+    if args.only and not args.layout:
+        parser.error("--only chooses among the parts of --layout")
     # A Windows console's code page may lack what the page writes, and Windows ends a line with
     # \r\n, so the log is UTF-8 with \n alone everywhere, as the files are, and reads the same
     # wherever it was made.
@@ -773,7 +818,11 @@ def main():
     started = time.monotonic()
     processes, listed = [], []
     for name in [n for n in PARTS if n in names]:
-        if name == "suite" and args.all_parts:
+        if name == "suite" and args.layout:
+            laid = laid_out(args.layout, args.only, args.filter)
+            listed = list_tests(args, "|".join(f"({p.filter})" for p in laid))
+            processes += laid
+        elif name == "suite" and args.all_parts:
             listed = list_tests(args)
             processes += parts_of(listed, args.filter)
         elif name == "suite":
@@ -792,7 +841,10 @@ def main():
                 done.append(run(part, args, results))
                 print(part.summary(), flush=True)
 
-    d = digest(results, done, listed, time.monotonic() - started)
+    system = args.system
+    if args.only:
+        system = f"{system or platform.system()}, part{'s' if len(args.only) > 1 else ''} {' and '.join(args.only)}"
+    d = digest(results, done, listed, time.monotonic() - started, system)
     publish(page(d), annotations([p for p in d["processes"] if p["lost"]], d["causes"], head(d), d["repeated"]), results, d)
     return 0 if d["failed"] == 0 and d["no_result"] == 0 and not any(p.lost for p in done) else 1
 

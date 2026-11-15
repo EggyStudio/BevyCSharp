@@ -32,6 +32,7 @@ public sealed partial class GlobalIlluminationTests
     public void ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter()
     {
         Needs.Shaders();
+        Needs.Gpu("takes past forty minutes on a device that draws on the processor, where a graphics card takes seconds");
         var species = TreeSpecies.CaliforniaBlackOak;
         var cards = Trees.BuildLeaves(TreeSkeleton.Grow(species, 75), species, 75).Positions;
         var (low, high) = (new Vec3(float.MaxValue), new Vec3(float.MinValue));

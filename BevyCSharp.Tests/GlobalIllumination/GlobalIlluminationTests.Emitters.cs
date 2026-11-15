@@ -105,6 +105,7 @@ public sealed partial class GlobalIlluminationTests
     public void TheGlowLightsCostIsReadInARoomOfFortyEmitters()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
         IReadOnlyList<PassTiming> timings = [];
         var ready = 0;
         new PictureRun

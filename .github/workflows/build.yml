@@ -1,5 +1,6 @@
 # A push or a pull request tests the library on Linux, Windows and macOS on the headless bridge each
-# test job builds (test), and puts the three systems' pages on one (digest). The pack workflow calls
+# test job builds (test), the tests that need a renderer on Linux's render bridge under lavapipe
+# (render-bridge, renderer), and puts every page on one (digest). The pack workflow calls
 # this one with `pack` (pack.yml), which adds the render bridge built for all six platforms (native)
 # and, on the Linux one, Courtyard, Swarm and Blockout played from a package of this commit with
 # the games soaked and Courtyard published native (games), the feature test run through its course (drive),
@@ -290,10 +291,109 @@ jobs:
             BevyCSharp.Tests/TestResults/prototype-pictures/*.png
           if-no-files-found: ignore
 
-  # One page for the commit from each system's page, a line for each system and each cause with
-  # the systems it was seen on, the one place that says where a commit fails.
+  # The render bridge for Linux, which the renderer job tests on, built on every run, where the
+  # native job builds its six for a pack alone.
+  render-bridge:
+    runs-on: ubuntu-24.04
+    # A cold render build compiles the whole of Bevy, wgpu and winit, roughly a quarter of an hour,
+    # as the native job's does.
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # The target directory as the native job names it, since build-native.sh writes there.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native -> ../build/target
+          key: render-linux-x64
+
+      # ALSA and libudev, which the renderer's audio and gamepads link against, as the native job
+      # has them.
+      - name: Install ALSA and libudev headers
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libasound2-dev libudev-dev
+
+      - name: Build native bridge
+        run: build/build-native.sh --render
+
+      # Only this run's renderer jobs read it.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: render-bridge-linux-x64
+          path: build/artifacts/linux-x64/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # Every test that needs a renderer, which the test job's headless bridge skips, on the render
+  # bridge under lavapipe, in the parts build/renderer-parts.tsv lays out by what each class or case
+  # took there on four cores, each part some 35 minutes. A push runs a part to a job, fourteen jobs
+  # beside the test job's three, within the twenty jobs a free account runs at once. A pack runs
+  # two parts to a job, since its ten jobs on the native job's bridge run beside these, and a part
+  # to a job would hold some of either in the queue. Three cases and seven readings of a cost skip
+  # themselves on a device that draws on the processor, each saying why.
+  renderer:
+    needs: [render-bridge]
+    runs-on: ubuntu-24.04
+    # A part takes some 40 minutes on the slowest of the runners' processors, so the limit holds it,
+    # or two in a pack, with the setup and the build, and a part that hangs ends within it.
+    timeout-minutes: ${{ inputs.pack && 105 || 60 }}
+    strategy:
+      fail-fast: false
+      matrix:
+        parts: ${{ fromJSON(inputs.pack && '["1 2", "3 4", "5 6", "7 8", "9 10", "11 12", "13 14"]' || '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]') }}
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          submodules: true
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: render-bridge-linux-x64
+          path: build/artifacts/linux-x64
+
+      # Lavapipe and ALSA, as the drive job has them.
+      - name: Install a software Vulkan and ALSA
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends mesa-vulkan-drivers libasound2-dev
+
+      # The tests behind Needs.Shaders compile their .slang shaders as they run.
+      - name: Fetch slangc
+        run: build/fetch-slang.sh
+
+      # The solution, as the test job builds it, since the suite's tests of the command line and of
+      # the programs run what it builds beside the tests.
+      - name: Build the solution
+        run: dotnet build BevyCSharp.slnx -c Release -warnaserror
+
+      # Each part a process held to a time and a memory, as the test job's suite is, a case held to
+      # 35 minutes before it counts as hung, since the longest takes 24 on lavapipe, and the page
+      # named for the parts, which the digest below puts beside the systems'.
+      - name: Test
+        run: >-
+          python3 build/test.py suite --no-build --configuration Release --timeout-minutes 45 --hang-minutes 35
+          --layout build/renderer-parts.tsv --only ${{ matrix.parts }} --system lavapipe
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-digest-renderer-${{ strategy.job-index }}
+          path: |
+            BevyCSharp.Tests/TestResults/digest.md
+            BevyCSharp.Tests/TestResults/digest.json
+          if-no-files-found: ignore
+
+  # One page for the commit from each system's page and each renderer part's, a line for each and
+  # each cause with where it was seen, the one place that says where a commit fails.
   digest:
-    needs: [test]
+    needs: [test, renderer]
     if: always()
     runs-on: ubuntu-24.04
     # Ten minutes for a download and a script that take seconds, so one that stalls fails soon.

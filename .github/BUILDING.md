@@ -31,11 +31,14 @@ its own part's tests, and every listed test without a result is counted. A host 
 said with the guard's reading and its cap in the part's line and the guard's own line under its
 loss, which the guard writes to a file the script names in `BCS_MEMORY_CAP_SAID`, since
 `dotnet test` quotes only a window of a crashed host's output and may cut the line off. `--filter`
-holds the suite and its parts to a filter, as `dotnet test` takes one. `./bcs test` runs the suite
-this way, so a count there is the page's. `dotnet test` and `cargo test` still run as they always
-did, and a host the cap stopped prints a tally of the tests that ran before it as though they were
-the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during which
-the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
+holds the suite and its parts to a filter, as `dotnet test` takes one. `--layout` runs the suite in
+the parts a file lays out instead, a line holding a part's number and a test class or one case by
+its display name, the part with `*` taking every test no other line names, and `--only` runs the
+parts of those numbers alone, as the renderer job runs `build/renderer-parts.tsv`. `./bcs test` runs
+the suite this way, so a count there is the page's. `dotnet test` and `cargo test` still run as they
+always did, and a host the cap stopped prints a tally of the tests that ran before it as though they
+were the run, which only its last line, the cap's, and `Test Run Aborted` tell apart. A test during
+which the engine logs an error fails unless it says it expects that error with `[ExpectsError]`.
 
 `cargo test` with no feature named builds the default profile, the headless one, which is the one
 the workflow tests the bridge in, and it has none of the renderer's crates. A test reaching them
@@ -407,9 +410,12 @@ and the guide into this repository among its tests (`DocsScriptTests`), and each
 put on one for the commit. On Windows it also opens the feature test through `bcs`, headless, and
 asks how it is, since that is the one system where `bcs` starts a program through `cmd.exe`, within
 a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump` for the leak test,
-which names the types that grew where the heap's floor rose. A push tests the library alone, on the
-headless bridge each test job builds, since the render bridge costs a quarter of an hour cold on
-each of six runners and only a package needs it, and nothing a commit message says changes that.
+which names the types that grew where the heap's floor rose. A push tests the library on the
+headless bridge each test job builds, and builds the render bridge for Linux, on which the renderer
+job runs every test that needs a renderer under lavapipe, in the parts `build/renderer-parts.tsv`
+lays out by what each class or case took there, some 35 minutes each, a part to a job, or two to a
+job in a pack. The other render bridges cost a quarter of an hour cold each and only a package needs
+them, and nothing a commit message says changes that.
 
 A package is made by the pack workflow, `pack.yml`, run by hand from the Actions tab ("Run
 workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves out.

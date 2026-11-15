@@ -70,6 +70,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
     public void AWindBendsATreeDownwindAndTwoTreesAlikeSwayOutOfStep()
     {
         Needs.Renderer();
+        Needs.Gpu("takes past forty minutes on a device that draws on the processor, where a graphics card takes seconds");
 
         // Two aspens of one seed, so of one variant, turn and size, ten meters apart, seen from 25
         // meters, first in still air and then in a wind of 20 meters a second blowing to the right,
@@ -135,6 +136,7 @@ public sealed class TreeWindTests(ITestOutputHelper output)
     public void TheWindsCostIsReadInAForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
 
         // Twenty-four tupelos planted in four rows going away, near enough to be drawn whole, at
         // 1920 by 1080, in still air and then in a wind of 15 meters a second.

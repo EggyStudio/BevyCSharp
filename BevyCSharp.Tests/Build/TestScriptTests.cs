@@ -167,6 +167,43 @@ public sealed class TestScriptTests : IDisposable
     }
 
     /// <summary>
+    /// The parts a layout lays out run its lines, a class whole or one case by its display name, and
+    /// the part holding * runs every test no line names, so each test runs in one part. --only runs
+    /// the parts named alone, and the page names them after the system it was given.
+    /// </summary>
+    /// <remarks>
+    /// The case Answers3 is matched whole, so Answers30 to Answers34 stay in the part with the star,
+    /// and a theory's case by its arguments, with the parentheses vstest takes escaped.
+    /// </remarks>
+    [SkippableFact]
+    public void ALayoutsPartsRunTheirLinesAndThePartWithTheStarEveryOtherTest()
+    {
+        var python = Needs.Python();
+        var layout = _folder.File("parts.tsv");
+        File.WriteAllText(layout, "# part\tclass or case\tminutes\n1\tAlphaTests\t9.5\n1\tBravoTests.Answers3\t0.1\n2\t*\t1.0\n2\tCharlieTests.Loads(at: 7)\t0.2\n");
+        string[] Run(params string[] more)
+        {
+            var (exit, log) = Script(python, new(), ["suite", "--dotnet", $"{python} BevyCSharp.Tests/Build/dotnet_standin.py", "--results", _folder.Path, "--layout", layout, .. more]);
+            Assert.True(exit == 0, log);
+            return File.ReadAllLines(_folder.File("digest.md"));
+        }
+
+        var whole = Run();
+        Assert.Contains("110 passed, 0 failed, 0 skipped, 0 without a result", whole[0]);
+        Assert.Contains(whole, line => line.StartsWith("- part 1: 41 passed, 0 failed", StringComparison.Ordinal));
+        Assert.Contains(whole, line => line.StartsWith("- part 2: 69 passed, 0 failed", StringComparison.Ordinal));
+
+        var second = Run("--only", "2", "--system", "lavapipe");
+        Assert.StartsWith("## Tests on lavapipe, part 2 at ", second[0]);
+        Assert.Contains("69 passed, 0 failed, 0 skipped, 0 without a result", second[0]);
+        Assert.DoesNotContain(second, line => line.StartsWith("- part 1", StringComparison.Ordinal));
+
+        var (missing, said) = Script(python, new(), "suite", "--dotnet", $"{python} BevyCSharp.Tests/Build/dotnet_standin.py", "--results", _folder.Path, "--layout", layout, "--only", "3");
+        Assert.NotEqual(0, missing);
+        Assert.Contains("lays out no part 3; its parts are 1, 2", said);
+    }
+
+    /// <summary>
     /// A process created before the parent its recorded id names is no child of it, so the memory
     /// the tree is held to is read without it, and a process whose system gives no creation time is
     /// taken by its parent's id alone.

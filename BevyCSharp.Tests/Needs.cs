@@ -56,6 +56,39 @@ internal static class Needs
             "needs an X11 display, which gives a minimized window back where Wayland does not, as xvfb-run gives one");
     }
 
+    /// <summary>
+    /// A device other than the processor, for a test that runs for hours on one that draws on the
+    /// processor, as Mesa's lavapipe does, a hundred times as slowly as a graphics card or more.
+    /// </summary>
+    internal static void Gpu(string why)
+    {
+        Renderer();
+        Skip.If(DrawsOnTheProcessor, why);
+    }
+
+    /// <summary>
+    /// Whether the device the renderer draws on is the processor, by the type its adapter reports,
+    /// read once a run in an app of its own.
+    /// </summary>
+    /// <remarks>
+    /// A test asks before it builds its engine, and the adapter is known only once a renderer has
+    /// started, so the first to ask runs an app of three frames for it. It is asked on the test's
+    /// thread and never from a system, since a second app cannot run inside the first.
+    /// </remarks>
+    internal static bool DrawsOnTheProcessor => OnTheProcessor.Value;
+
+    private static readonly Lazy<bool> OnTheProcessor = new(() =>
+    {
+        if (!App.HasRenderer) return false;
+
+        string? adapter = null;
+        using var app = new App(Config.OffscreenFor(16, 16, frames: 3));
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ => adapter ??= App.DescribeAdapter(), "Test.Adapter"));
+        app.Run();
+        return adapter?.Split(" | ") is [_, _, "Cpu", ..];
+    });
+
     /// <summary>A bridge that draws and a Slang compiler to compile shaders with.</summary>
     internal static void Shaders()
     {

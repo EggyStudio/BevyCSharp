@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Stands for dotnet in the tests of build/test.py, so they need no dotnet and no suite.
 
-Its tests are 40 of AlphaTests, 35 of BravoTests, 30 of CharlieTests and 5 of NormTests. Asked for
-them with --list-tests it lists them. Asked to run them with no filter, as the suite whole, it hangs,
+Its tests are 40 of AlphaTests, 35 of BravoTests, 30 cases of a theory of CharlieTests and 5 of
+NormTests. Asked for them with --list-tests it lists them, those a filter takes where it is given
+one. Asked to run them with no filter, as the suite whole, it hangs,
 grows until it is ended, dies with exit code 134, or ends as dotnet test does once MemoryGuard has
 stopped its host at the cap, its line in the output or cut from it and in the file the script names,
 as BCS_STANDIN says. With a filter, as a part, it passes the tests the
@@ -15,7 +16,7 @@ import time
 
 TESTS = ([f"Bevy.Tests.AlphaTests.Draws{i}" for i in range(40)]
          + [f"Bevy.Tests.BravoTests.Answers{i}" for i in range(35)]
-         + [f"Bevy.Tests.CharlieTests.Loads{i}" for i in range(30)]
+         + [f"Bevy.Tests.CharlieTests.Loads(at: {i})" for i in range(30)]
          + [f"Bevy.Tests.NormTests.N_1_{i}" for i in range(5)])
 
 
@@ -24,26 +25,71 @@ def value(flag):
     return args[args.index(flag) + 1] if flag in args else None
 
 
+def tokens(filter_):
+    """A filter's parentheses, its & and |, and its clauses, a backslash keeping the character after
+    it in a clause, as vstest reads one."""
+    found, clause, escaped = [], "", False
+    for c in filter_:
+        if escaped:
+            clause, escaped = clause + c, False
+        elif c == "\\":
+            escaped = True
+        elif c in "()&|":
+            if clause:
+                found.append(("clause", clause))
+            found.append((c, c))
+            clause = ""
+        else:
+            clause += c
+    if clause:
+        found.append(("clause", clause))
+    return found
+
+
 def clause_takes(name, clause):
-    if clause.startswith("FullyQualifiedName!~"):
-        return clause[len("FullyQualifiedName!~"):] not in name
-    if clause.startswith("FullyQualifiedName~"):
-        return clause[len("FullyQualifiedName~"):] in name
+    # A test's full name leaves out a theory's arguments, which its display name holds.
+    for operator in ("!~", "~", "!=", "="):
+        if operator in clause:
+            field, wanted = clause.split(operator, 1)
+            held = name.split("(")[0] if field == "FullyQualifiedName" else name
+            match = wanted in held if "~" in operator else wanted == held
+            return match != operator.startswith("!")
     return True
 
 
 def taken(name, filter_):
-    # A filter is clauses joined by | or by &, as the script writes them, never both.
-    if "|" in filter_:
-        return any(clause_takes(name, clause) for clause in filter_.split("|"))
-    return all(clause_takes(name, clause) for clause in filter_.split("&"))
+    """Whether a filter takes a test, & binding before | and parentheses before both."""
+    found = tokens(filter_)
+
+    def either(at):
+        value, at = both(at)
+        while at < len(found) and found[at][0] == "|":
+            other, at = both(at + 1)
+            value = value or other
+        return value, at
+
+    def both(at):
+        value, at = one(at)
+        while at < len(found) and found[at][0] == "&":
+            other, at = one(at + 1)
+            value = value and other
+        return value, at
+
+    def one(at):
+        if found[at][0] == "(":
+            value, at = either(at + 1)
+            return value, at + 1
+        return clause_takes(name, found[at][1]), at + 1
+
+    return either(0)[0]
 
 
 def main():
     if "--list-tests" in sys.argv:
         print("The following Tests are available:")
         for name in TESTS:
-            print("    " + name)
+            if value("--filter") is None or taken(name, value("--filter")):
+                print("    " + name)
         return 0
 
     filter_ = value("--filter")

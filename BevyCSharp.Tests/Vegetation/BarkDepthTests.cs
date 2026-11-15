@@ -40,6 +40,7 @@ public sealed class BarkDepthTests(ITestOutputHelper output)
     public void TheDepthsCostIsReadInAForest()
     {
         Needs.Shaders();
+        Needs.Gpu("reads what its passes cost a GPU, where a device that draws on the processor would take hours to time its processor instead");
         var flat = OpaquePass(deep: false);
         var deep = OpaquePass(deep: true);
         Skip.If(flat is null || deep is null, "needs a GPU whose passes the app can time");
