@@ -12,6 +12,7 @@ Done that day
 
 - Item 120 at `997d407e`. The live path.
 - Item 142 at `997d407e`. The ambient's sums take every ray of a probe.
+- Item 145 at `bac110e7`. Swarm's play holds on a fast device.
 
 ## 2026-11-12
 

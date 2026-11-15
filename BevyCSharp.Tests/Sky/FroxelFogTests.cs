@@ -27,7 +27,28 @@ public sealed class FroxelFogTests
         Needs.Shaders();
         var closed = Picture(Red(), ground: true);
         var froxels = Picture(Red(froxels: new FroxelFogSettings { Lumps = 0f, Distance = 150f }), ground: true);
+        AssertTheClosedForm(closed, froxels);
+    }
 
+    /// <summary>
+    /// The fog set again every frame, as a weather sets it, still meets the closed form, since its
+    /// froxels move on a frame at a time and the image written last frame is the history this frame
+    /// reads. Moved on twice a frame they would write one image only and read the other, never
+    /// written, as their history, which would hold the fog at about an eighth of its strength.
+    /// </summary>
+    [SkippableFact]
+    public void SetEveryFrameTheFroxelsStillMeetTheClosedForm()
+    {
+        Needs.Shaders();
+        var closed = Picture(Red(), ground: true);
+        var froxels = Picture(Red(froxels: new FroxelFogSettings { Lumps = 0f, Distance = 150f }), ground: true, everyFrame: true);
+        AssertTheClosedForm(closed, froxels);
+    }
+
+    // The froxels' picture within six of the closed form's on every channel below the horizon, and
+    // within two above it, where the sky holds the layer's haze and both leave it as it was.
+    private static void AssertTheClosedForm(CapturedImage closed, CapturedImage froxels)
+    {
         var worst = (Difference: 0, X: 0u, Y: 0u);
         for (var y = closed.Height / 2 + 2; y < closed.Height; y += 2)
             for (var x = 0u; x < closed.Width; x += 4)
@@ -38,7 +59,6 @@ public sealed class FroxelFogTests
             }
         Assert.True(worst.Difference <= 6, $"the froxels drew {froxels.At(worst.X, worst.Y)} where the closed form drew {closed.At(worst.X, worst.Y)} at ({worst.X}, {worst.Y})");
 
-        // Above the horizon the sky holds the layer's haze, and both leave it as it was.
         var (above, sky) = (froxels.At(froxels.Width / 2, froxels.Height / 4), closed.At(closed.Width / 2, closed.Height / 4));
         Assert.True(Math.Abs(above.R - sky.R) <= 2 && Math.Abs(above.B - sky.B) <= 2, $"the sky reads {above} under the froxels and {sky} under the closed form");
     }
@@ -134,17 +154,22 @@ public sealed class FroxelFogTests
 
     // A level view from a height under a fog, with no tonemapping so a level reads as the fog left
     // it, over unlit ground or none, under a high sun with shadows, a roof forty meters up over the
-    // way ahead, or a lamp twenty meters ahead.
-    private static CapturedImage Picture(SkyFogSettings fog, float eye = 10f, bool ground = false, bool sun = false, bool roof = false, bool lamp = false)
+    // way ahead, or a lamp twenty meters ahead, the fog set once or set again every frame.
+    private static CapturedImage Picture(SkyFogSettings fog, float eye = 10f, bool ground = false, bool sun = false, bool roof = false, bool lamp = false, bool everyFrame = false)
     {
+        var camera = Entity.None;
         var run = new PictureRun
         {
             Width = 480,
             Height = 270,
             Frames = 1500,
+            EachFrame = _ =>
+            {
+                if (everyFrame && !camera.IsNone) Render.SetSkyFog(camera, fog);
+            },
             Scene = ecs =>
             {
-                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
                 ecs.Add(camera, Transform.LookingAt(new Vec3(0f, eye, 0f), new Vec3(0f, eye, -1f), Vec3.UnitY));
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
 

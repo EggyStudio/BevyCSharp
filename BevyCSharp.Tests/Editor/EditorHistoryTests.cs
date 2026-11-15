@@ -288,6 +288,64 @@ public sealed class EditorHistoryTests
     }
 
     /// <summary>
+    /// The same field edited on one entity and then on another is two edits, each undone and redone
+    /// on its own entity, since a run of edits is one only while it stays on one field of one entity.
+    /// Under one key the second would join the first, which would then undo the first entity and
+    /// redo the second, and leave the second's change out of the history.
+    /// </summary>
+    [Fact]
+    public void OneFieldEditedOnTwoEntitiesInARowIsTwoEdits()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var steps = new List<string>();
+        var ran = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            var (a, b) = (ecs.Spawn(), ecs.Spawn());
+            ecs.Add(a, new EveryKind { Count = 0 });
+            ecs.Add(b, new EveryKind { Count = 2 });
+
+            var schema = ecs.ComponentsOf(a).Select(ComponentSchemas.For).First(found => found?.Name == "EveryKind")!;
+            var count = schema.Field("Count")!;
+
+            // Each through the path the details panel records a row by, under the row's own id.
+            foreach (var (entity, value) in new[] { (a, 5), (b, 7) })
+            {
+                var before = count.Read(ecs, entity);
+                count.Write(ecs, entity, value);
+                ComponentFields.Recorded(ctx, entity, schema, count, "##EveryKind.Count", before);
+            }
+
+            string State() => $"{ecs.GetRef<EveryKind>(a).Count} {ecs.GetRef<EveryKind>(b).Count}";
+
+            steps.Add(State());
+            for (var i = 0; i < 2; i++)
+            {
+                EditorHistory.Undo(ecs);
+                steps.Add(State());
+            }
+
+            for (var i = 0; i < 2; i++)
+            {
+                EditorHistory.Redo(ecs);
+                steps.Add(State());
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(["5 7", "5 2", "0 2", "5 2", "5 7"], steps);
+    }
+
+    /// <summary>
     /// The edits made before a delete still undo once the delete is undone, on the entity that came
     /// back rather than the one that went, and redo again in order.
     /// </summary>

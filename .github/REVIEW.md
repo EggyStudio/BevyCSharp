@@ -1,149 +1,155 @@
 # Review
 
-Reviewed up to `770aef21`, Verdict 59's mend, Blockout's play reading the recipe where the game says
-it saved it and putting that file back, a game built in Debug saving into its project's assets
-folder, which the guide says, pushed at 16:07 on 2026-11-14 with the pack run with publish,
-43608448173, started on the same head and green by 18:45, 0.6.122 published, tagged v0.6.122 and
-released with the six bridges' symbols at 18:53, its build run green on the three systems at 16:35;
-the three games played here before it, Blockout in 27 s and Courtyard in 29 on the graphics card and
-Swarm in 679 on the software device, NormTests 19 and the script and document classes passing; it
-keeps the form and carries the review's files. Before it `86551153`, item 120's last commit, a game
-run under dotnet watch having its changed behaviors registered again at the next frame, a system
-named again kept where it stands and one whose method a change took out passed over at its throw,
-with the guide's words on which edits wait for the next start, BUILDING.md naming the release that
-keeps the symbols and AGENTS.md's build order line as approved, pushed at 10:42 on 2026-11-14 once
-the run before it had ended, with the pack run with publish, 43581803258, started on the same head
-and red in its games at 11:24, Verdict 59, nothing published, its build run green on the three
-systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3 skipped, NormTests 19; it
-keeps the form and carries the review's files. Before it `997d407e`, item 142, the ambient's kernel
-summing every workgroup of a probe's rays, with a test of a room lit by a panel too wide to be
-carried as a glow light, its light gone within two frames of the panel going dark, 0.72 where 37.03
-on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it had ended, its build run
-green on the three systems at 09:29; the whole suite passed, 2,090 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `247c6112`, item
-120's mends of the independent read's findings, the bridge making each asset source's watcher
-itself, a folder that cannot be watched a warning and a root reached through a link resolved, a
-Debug game reading and watching its project's assets with its shader cache under obj, a script build
-that throws or cannot read a file leaving nothing of itself running, and the renderer's tests run on
-every system, pushed at 07:07 on 2026-11-14 once the run before it had ended, its build run green at
-07:40, Linux in 14 minutes, macOS in 27 and Windows in 32 with the renderer's tests, where 14, 17
-and 19 without them; eleven new tests each failing on the files before; the whole suite passed,
-2,089 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `02f482ab`, item 120's third commit, a scene loaded at the top level spawned again
-in place where its file's bytes changed, the program's own entities kept and an open document left
-to the tool that keeps it, every file read again posted and listed by live.status, --no-watch on
-./bcs open and the guide's live path, pushed at 03:34 on 2026-11-14 once the run before it had
-ended, its message written again before the push to name no item, its build run green on the three
-systems at 03:52; the whole suite passed twice, 2,075 passed, none failed and 3 skipped, NormTests
-19; it keeps the form and carries the review's files. Before it `36840712`, item 120's second
-commit, behavior scripts compiled through a ScriptsPlugin that the editor, the Player and a game
-referencing the project add, built again when one is saved while the app watches, each build said in
-the log, with scripts.reload and scripts.status, pushed at 22:56 on 2026-11-13 once the run before
-it had ended, its build run green on the three systems at 23:14; the whole suite passed, 2,073
-passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files.
-Before it `f86269d0`, item 120's first commit, the bridge, Bevy's asset watcher in the render
-profile and so in the package, watching where the config asks and by default in a program's Debug
-build through a generated initializer, a file read again said as AssetReloaded and a scene spawned
-again in place said as a reload, pushed at 21:27 on 2026-11-13, its build run green on the three
-systems at 21:49; the linux-x64 bridge grows by 138,155 bytes deflated; the whole suite passed,
-2,070 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `cccb0597`, item 137's read, the near wall's indirect light against its reference
-as the room steps against the grids, a commit of the Reply and the review's files alone that starts
-no run, pushed at 23:14 on 2026-11-12; NormTests passed, 19; it keeps the form. Before it
-`e47d7020`, item 135, the bridge's size, a pack's bridges stripped of their symbol tables after the
-build with each full library kept under build/symbols by its system with its build id beside it and
-gathered into an artifact named by the version, the crash file writing the bridge's build id and
-each frame as an offset into it through extern declarations alone, build/name-crash.py naming the
-frames from the symbols, the size step comparing with the last version nuget.org lists, the
-linux-x64 bridge 125,140,552 bytes where 185,416,232 with the same build id and exports, pushed at
-19:25 on 2026-11-12, its build run green on the three systems at 19:50, with its pack run without
-publish, 43279629248, started on the same head and green at 21:52, its package read under item 135;
-the whole suite passed, 2,054 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `05f5e54b`, item 140, the comments of 128 source files swept
-by N 4.11 as widened, the 1,755 candidate lines read in place and 142 rewritten with 16 runtime uses
-of a barred phrase said plainly, no line but a comment changed, the bridge rebuilt since its
-sources' comments count, pushed at 17:15 on 2026-11-12, green at 17:31 with Linux in 12 minutes and
-macOS and Windows in 16; the native checks are clean, the solution builds with no warnings and
-NormTests pass, 19; it keeps the form and carries the review's files. Before it `eb940339`, item
-136's last commit, the lighting's kernels taking their points as ways from the eye, gi_screen,
-gi_screen_glow, gi_light and gi_screen_filter, on top of 139's mend, every bounce view at every
-quality within 0.0002 of itself and the emitter room's faces within 0.001, so it moves no reading,
-pushed at 15:58 on 2026-11-12, green at 16:17 with Linux in 14 minutes, Windows in 18 and macOS in
-19; the whole suite passed, 2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form
-and carries the review's files. Before it `18364420`, item 139, gi_light's nearer step taking a
-neighbor clamped onto the pixel as missing, so a pixel on the picture's edge takes its step from
-inside, the bounce rooms' fifth view 0.0182 from its reference at High and 0.0211 at Medium by
-either way of finding the point where 0.0197 and 0.0311, 0.0235 and 0.0347, with a test that moves
-the view's camera by a few float steps and holds the reading within 0.001; the emitter room's right
-wall reads 12.2 percent under its reference with the edge's pixels no longer holding it up and its
-bound is measured again at 14; the frames a test looks for counted from the frame every pipeline is
-ready, which a slab's sky light read short of on a busy machine; pushed at 14:55 on 2026-11-12,
-green at 15:12 with macOS in 11 minutes, Linux in 15 and Windows in 17; the whole suite passed,
+Reviewed up to `bac110e7`, item 145, Swarm's play holding the game's clock between its commands,
+pushed at 19:15 on 2026-11-14 once the run before it had ended, its build run 43625597437 green on
+the three systems at 19:38, the games played in the pack run alone; built on the published 0.6.122
+and played from a copy of the head, on the card it passed in 70 s, wave 3, 219 alive at most and 315
+felled, a frame profiled at 16.8 ms, a second play 220 and 309, and on the software device at four
+cores in the runner's image in 396 s, wave 3, 217 and 312; NormTests 19 and the script, workflow and
+document script classes passed, 52 in all; it keeps the form and carries the review's files. Before
+it `770aef21`, Verdict 59's mend, Blockout's play reading the recipe where the game says it saved it
+and putting that file back, a game built in Debug saving into its project's assets folder, which the
+guide says, pushed at 16:07 on 2026-11-14 with the pack run with publish, 43608448173, started on
+the same head and green by 18:45, 0.6.122 published, tagged v0.6.122 and released with the six
+bridges' symbols at 18:53, its build run green on the three systems at 16:35; the three games played
+here before it, Blockout in 27 s and Courtyard in 29 on the graphics card and Swarm in 679 on the
+software device, NormTests 19 and the script and document classes passing; it keeps the form and
+carries the review's files. Before it `86551153`, item 120's last commit, a game run under dotnet
+watch having its changed behaviors registered again at the next frame, a system named again kept
+where it stands and one whose method a change took out passed over at its throw, with the guide's
+words on which edits wait for the next start, BUILDING.md naming the release that keeps the symbols
+and AGENTS.md's build order line as approved, pushed at 10:42 on 2026-11-14 once the run before it
+had ended, with the pack run with publish, 43581803258, started on the same head and red in its
+games at 11:24, Verdict 59, nothing published, its build run green on the three systems at 11:13;
+the whole suite passed, 2,093 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
+carries the review's files. Before it `997d407e`, item 142, the ambient's kernel summing every
+workgroup of a probe's rays, with a test of a room lit by a panel too wide to be carried as a glow
+light, its light gone within two frames of the panel going dark, 0.72 where 37.03 on the kernel
+before, pushed at 09:00 on 2026-11-14 once the run before it had ended, its build run green on the
+three systems at 09:29; the whole suite passed, 2,090 passed, none failed and 3 skipped, NormTests
+19; it keeps the form and carries the review's files. Before it `247c6112`, item 120's mends of the
+independent read's findings, the bridge making each asset source's watcher itself, a folder that
+cannot be watched a warning and a root reached through a link resolved, a Debug game reading and
+watching its project's assets with its shader cache under obj, a script build that throws or cannot
+read a file leaving nothing of itself running, and the renderer's tests run on every system, pushed
+at 07:07 on 2026-11-14 once the run before it had ended, its build run green at 07:40, Linux in 14
+minutes, macOS in 27 and Windows in 32 with the renderer's tests, where 14, 17 and 19 without them;
+eleven new tests each failing on the files before; the whole suite passed, 2,089 passed, none failed
+and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `02f482ab`,
+item 120's third commit, a scene loaded at the top level spawned again in place where its file's
+bytes changed, the program's own entities kept and an open document left to the tool that keeps it,
+every file read again posted and listed by live.status, --no-watch on ./bcs open and the guide's
+live path, pushed at 03:34 on 2026-11-14 once the run before it had ended, its message written again
+before the push to name no item, its build run green on the three systems at 03:52; the whole suite
+passed twice, 2,075 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
+the review's files. Before it `36840712`, item 120's second commit, behavior scripts compiled
+through a ScriptsPlugin that the editor, the Player and a game referencing the project add, built
+again when one is saved while the app watches, each build said in the log, with scripts.reload and
+scripts.status, pushed at 22:56 on 2026-11-13 once the run before it had ended, its build run green
+on the three systems at 23:14; the whole suite passed, 2,073 passed, none failed and 3 skipped,
+NormTests 19; it keeps the form and carries the review's files. Before it `f86269d0`, item 120's
+first commit, the bridge, Bevy's asset watcher in the render profile and so in the package, watching
+where the config asks and by default in a program's Debug build through a generated initializer, a
+file read again said as AssetReloaded and a scene spawned again in place said as a reload, pushed at
+21:27 on 2026-11-13, its build run green on the three systems at 21:49; the linux-x64 bridge grows
+by 138,155 bytes deflated; the whole suite passed, 2,070 passed, none failed and 3 skipped,
+NormTests 19; it keeps the form and carries the review's files. Before it `cccb0597`, item 137's
+read, the near wall's indirect light against its reference as the room steps against the grids, a
+commit of the Reply and the review's files alone that starts no run, pushed at 23:14 on 2026-11-12;
+NormTests passed, 19; it keeps the form. Before it `e47d7020`, item 135, the bridge's size, a pack's
+bridges stripped of their symbol tables after the build with each full library kept under
+build/symbols by its system with its build id beside it and gathered into an artifact named by the
+version, the crash file writing the bridge's build id and each frame as an offset into it through
+extern declarations alone, build/name-crash.py naming the frames from the symbols, the size step
+comparing with the last version nuget.org lists, the linux-x64 bridge 125,140,552 bytes where
+185,416,232 with the same build id and exports, pushed at 19:25 on 2026-11-12, its build run green
+on the three systems at 19:50, with its pack run without publish, 43279629248, started on the same
+head and green at 21:52, its package read under item 135; the whole suite passed, 2,054 passed, none
+failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it
+`05f5e54b`, item 140, the comments of 128 source files swept by N 4.11 as widened, the 1,755
+candidate lines read in place and 142 rewritten with 16 runtime uses of a barred phrase said
+plainly, no line but a comment changed, the bridge rebuilt since its sources' comments count, pushed
+at 17:15 on 2026-11-12, green at 17:31 with Linux in 12 minutes and macOS and Windows in 16; the
+native checks are clean, the solution builds with no warnings and NormTests pass, 19; it keeps the
+form and carries the review's files. Before it `eb940339`, item 136's last commit, the lighting's
+kernels taking their points as ways from the eye, gi_screen, gi_screen_glow, gi_light and
+gi_screen_filter, on top of 139's mend, every bounce view at every quality within 0.0002 of itself
+and the emitter room's faces within 0.001, so it moves no reading, pushed at 15:58 on 2026-11-12,
+green at 16:17 with Linux in 14 minutes, Windows in 18 and macOS in 19; the whole suite passed,
 2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `2fc9beb0`, item 136's precision commit, a point of the depth as its way from the
-eye in bcs_pass.slang, passEyeOffset, the ray's way taken from it, the clip and the frame before's
-helpers on it and the rain's streaks' and splashes' corners, the world point left through
-world_from_clip since the lighting's weighing moved with it, item 139, the night sky far from the
-origin the one drawn at it, 0.002 levels apart where 1.0 and 6,408 pixels, with its test, pushed at
-10:57 on 2026-11-12, green at 11:18 with Linux in 14 minutes, macOS in 18 and Windows in 21; the
-whole suite passed, 2,050 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `fdf68d62`, item 136's first commit, the glow lights' history
-looked up less the part of a texel by which a texel's own sample point lies off its middle, a
-quarter where the picture is twice the images' size, so a still view finds its own texel whole,
-still, steady and frames reading whole where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's
-change between frames 0.023 levels where 0.289, a change of light followed as fast as before, with a
-test, pushed at 04:09 on 2026-11-12, green at 04:28 with Linux in 13 minutes, macOS in 17 and
-Windows in 18; the whole suite 2,048 passed, 1 failed and 3 skipped, the one a sky light's share
-under a slab at High reading 0.180 against 0.2 to 0.5 in a scene the glow pass does not run in,
-passing alone on both kernels, taken as intermittent and to be read after the precision mend; it
-keeps the form and carries the review's files. Before it `8784bdd1`, InternalsVisibleTo's pairs
-measured by the compiler and narrowed, AnimationReader moved to Rendering beside the writers it
-reads back and FieldCurve and FieldValue to Animation, 67 pairs and 217 internal names reached where
-68 and 221, the pairs listed with a why each in build/norm/1.6.txt and held by N 1.6,
-build/norm/internals.cs finding them and writing the project files' comments, pushed at 22:37 on
-2026-11-11, green at 22:54 with Windows and Linux in 12 minutes each and macOS in 17; the whole
-suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
-the review's files. Before it `064cdae8`, the tests' Assets folder moved to the areas, 146 files
-renamed whole by git to the area each tests and the asset server's 12 staying, no file's text
-changed, pushed at 21:16 on 2026-11-11 once the run with publish had started on the commit before
-it, its run red on the three systems at the step that keeps an artifact, their tests passed, Verdict
-58, and green at 22:37 on its second attempt, Linux in 14 minutes, Windows in 19 and macOS in 21;
-the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `77941f42`, the split packed as one package by Decision 88,
-every area's assembly and the three modules' in the one package's lib folder with no dependency on
-an area, the bridges' pack items in the flat project, a size step in the pack job failing a package
-over 262,139,904 bytes before anything is kept or pushed, and the script host walking from every
-loaded assembly of the engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and
-Windows in 15 minutes each and macOS in 18, its pack run without publish, 43081159142, green at
-21:11 with the drive in 59 minutes. Its package read from the artifact, BevyCSharp.0.6.106.nupkg, 65
-entries, 46 in lib for the 20 assemblies of the engine and the modules' Levels, Sky and Vegetation,
-each a dll with its xml, six bridges, the two musl slots empty as before, its only dependencies
-BepuPhysics 2.5.0-beta.29 and Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp
-alone, 250,121,275 bytes with 12,018,629 of room, 4.58 percent, and both ids on nuget.org before it,
-so no new id goes out; the run with publish, 43094830090, started at 21:15 on the same head, red by
-21:45 in its native jobs by an outage of GitHub's Actions, Verdict 58, and green at 00:36 on
-2026-11-12 on its second attempt, 0.6.106 published as the one package with its templates and tagged
-v0.6.106; the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local
-package with the Linux bridge alone is 52,739,654 bytes in 60 entries, its only dependencies
-BepuPhysics and Twizzle.ImGui-Bundle.NET; it keeps the form and carries the review's files. Before
-it `7428798d`, the split's second commit, the library's areas as nineteen projects with the flat
-one, each packed at one version and depending on those below it at exactly that version, pushed at
-15:30 on 2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a third
-attempt, the runners' package mirror having failed from 15:34 to 17:54, which settles Verdict 57;
-its pack run without publish, 43039130555, red by the same fault and not run again, the packages'
-layout having changed by Decision 88; the whole suite passed, 2,045 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. The pushes before these
-stand in REVIEW-ARCHIVE.md's head records.
+files. Before it `18364420`, item 139, gi_light's nearer step taking a neighbor clamped onto the
+pixel as missing, so a pixel on the picture's edge takes its step from inside, the bounce rooms'
+fifth view 0.0182 from its reference at High and 0.0211 at Medium by either way of finding the point
+where 0.0197 and 0.0311, 0.0235 and 0.0347, with a test that moves the view's camera by a few float
+steps and holds the reading within 0.001; the emitter room's right wall reads 12.2 percent under its
+reference with the edge's pixels no longer holding it up and its bound is measured again at 14; the
+frames a test looks for counted from the frame every pipeline is ready, which a slab's sky light
+read short of on a busy machine; pushed at 14:55 on 2026-11-12, green at 15:12 with macOS in 11
+minutes, Linux in 15 and Windows in 17; the whole suite passed, 2,052 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. Before it `2fc9beb0`, item
+136's precision commit, a point of the depth as its way from the eye in bcs_pass.slang,
+passEyeOffset, the ray's way taken from it, the clip and the frame before's helpers on it and the
+rain's streaks' and splashes' corners, the world point left through world_from_clip since the
+lighting's weighing moved with it, item 139, the night sky far from the origin the one drawn at it,
+0.002 levels apart where 1.0 and 6,408 pixels, with its test, pushed at 10:57 on 2026-11-12, green
+at 11:18 with Linux in 14 minutes, macOS in 18 and Windows in 21; the whole suite passed, 2,050
+passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files.
+Before it `fdf68d62`, item 136's first commit, the glow lights' history looked up less the part of a
+texel by which a texel's own sample point lies off its middle, a quarter where the picture is twice
+the images' size, so a still view finds its own texel whole, still, steady and frames reading whole
+where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's change between frames 0.023 levels where
+0.289, a change of light followed as fast as before, with a test, pushed at 04:09 on 2026-11-12,
+green at 04:28 with Linux in 13 minutes, macOS in 17 and Windows in 18; the whole suite 2,048
+passed, 1 failed and 3 skipped, the one a sky light's share under a slab at High reading 0.180
+against 0.2 to 0.5 in a scene the glow pass does not run in, passing alone on both kernels, taken as
+intermittent and to be read after the precision mend; it keeps the form and carries the review's
+files. Before it `8784bdd1`, InternalsVisibleTo's pairs measured by the compiler and narrowed,
+AnimationReader moved to Rendering beside the writers it reads back and FieldCurve and FieldValue to
+Animation, 67 pairs and 217 internal names reached where 68 and 221, the pairs listed with a why
+each in build/norm/1.6.txt and held by N 1.6, build/norm/internals.cs finding them and writing the
+project files' comments, pushed at 22:37 on 2026-11-11, green at 22:54 with Windows and Linux in 12
+minutes each and macOS in 17; the whole suite passed, 2,048 passed, none failed and 3 skipped,
+NormTests 19; it keeps the form and carries the review's files. Before it `064cdae8`, the tests'
+Assets folder moved to the areas, 146 files renamed whole by git to the area each tests and the
+asset server's 12 staying, no file's text changed, pushed at 21:16 on 2026-11-11 once the run with
+publish had started on the commit before it, its run red on the three systems at the step that keeps
+an artifact, their tests passed, Verdict 58, and green at 22:37 on its second attempt, Linux in 14
+minutes, Windows in 19 and macOS in 21; the whole suite passed, 2,048 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. Before it `77941f42`, the
+split packed as one package by Decision 88, every area's assembly and the three modules' in the one
+package's lib folder with no dependency on an area, the bridges' pack items in the flat project, a
+size step in the pack job failing a package over 262,139,904 bytes before anything is kept or
+pushed, and the script host walking from every loaded assembly of the engine, pushed at 19:47 on
+2026-11-11, its run green at 20:05 with Linux and Windows in 15 minutes each and macOS in 18, its
+pack run without publish, 43081159142, green at 21:11 with the drive in 59 minutes. Its package read
+from the artifact, BevyCSharp.0.6.106.nupkg, 65 entries, 46 in lib for the 20 assemblies of the
+engine and the modules' Levels, Sky and Vegetation, each a dll with its xml, six bridges, the two
+musl slots empty as before, its only dependencies BepuPhysics 2.5.0-beta.29 and
+Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp alone, 250,121,275 bytes with
+12,018,629 of room, 4.58 percent, and both ids on nuget.org before it, so no new id goes out; the
+run with publish, 43094830090, started at 21:15 on the same head, red by 21:45 in its native jobs by
+an outage of GitHub's Actions, Verdict 58, and green at 00:36 on 2026-11-12 on its second attempt,
+0.6.106 published as the one package with its templates and tagged v0.6.106; the whole suite passed,
+2,048 passed, none failed and 3 skipped, NormTests 19; a local package with the Linux bridge alone
+is 52,739,654 bytes in 60 entries, its only dependencies BepuPhysics and Twizzle.ImGui-Bundle.NET;
+it keeps the form and carries the review's files. Before it `7428798d`, the split's second commit,
+the library's areas as nineteen projects with the flat one, each packed at one version and depending
+on those below it at exactly that version, pushed at 15:30 on 2026-11-11, its run green on Windows
+and macOS at once and on Linux at 18:18 on a third attempt, the runners' package mirror having
+failed from 15:34 to 17:54, which settles Verdict 57; its pack run without publish, 43039130555, red
+by the same fault and not run again, the packages' layout having changed by Decision 88; the whole
+suite passed, 2,045 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
+the review's files. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
 
-Next 145, the small commit after the publish, then 143, the renderer's tests on a runner, 93, the
-drive's course drawn smaller, and 66 and 67, the connections and the level editor; 93's course drawn
-smaller after 119, its drive at 100 minutes in the pack run of 16:03 on 2026-11-10. The package
-stands at 0.6.122 from `770aef21`, one package of 227,976,275 bytes with its templates, published by
-18:45 on 2026-11-14 by the pack run 43608448173 and tagged v0.6.122, its six bridges 299,008 to
-487,936 bytes larger than 0.6.114's, stripped, and their symbols on the release v0.6.122, read
-against the package. The engine's illumination read goes first on the GPU (N 7.9). No budget by
-Decision 80; the meadow at 8:00 the one target by Decision 81; a fault seen in motion is read in
-motion by the engine's Decision 107.
+Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
+classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
+the level editor; 93's course drawn smaller after 119, its drive at 100 minutes in the pack run of
+16:03 on 2026-11-10. The package stands at 0.6.122 from `770aef21`, one package of 227,976,275 bytes
+with its templates, published by 18:45 on 2026-11-14 by the pack run 43608448173 and tagged
+v0.6.122, its six bridges 299,008 to 487,936 bytes larger than 0.6.114's, stripped, and their
+symbols on the release v0.6.122, read against the package. The engine's illumination read goes first
+on the GPU (N 7.9). No budget by Decision 80; the meadow at 8:00 the one target by Decision 81; a
+fault seen in motion is read in motion by the engine's Decision 107.
 
 REVIEW-ARCHIVE.md beside this file holds, their numbers kept, the items done, the items closed or
 parked, the verdicts settled, Decisions 1 to 79, the Replies before those here and the head records,
@@ -230,7 +236,12 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     the interface is. Then the move, a kernel at a time, the bridge's tests and rooms holding before
     and after, the two engines' pictures of one room compared. It starts when the sibling reaches
     its item 265, after its grain, its blobs, its publish and its places far from the origin; until
-    then 135, 137 and 120 as ordered.
+    then 135, 137 and 120 as ordered. The review's design read,
+    ~/.cache/claude-reviewer/audits-2026-11-14/kernels-design-and-research.md, done at 20:09 on
+    2026-11-14, gives each of the move's twelve questions a recommendation with both engines' lines,
+    its parts 9, 10 and 11 the forms of 141, 144 and the glow lights' buried faces, its research the
+    platforms' ray queries; the read with the sibling's coder takes it in, saying of each part what
+    it takes.
 
 141. **A hit across a cascade's band takes the next cascade's light only as far as its probes see
     the point.** From 137's read on 2026-11-12. A hit past a cascade's outer band takes the next
@@ -266,15 +277,22 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     meadow and the bounce rooms against the traced reference. Its tests run the adapter's form where
     it is offered and the field's on the runners.
 
-145. **Swarm's play holds on a fast device.** From Verdict 59's mend on 2026-11-14. On a graphics
-    card the game runs many frames between two of the play's commands, so the play fails where it
-    asks for a frame profiled with the creatures in their hundreds, and holds only on the software
-    device the games job draws on. The play holds the game's clock between its commands, app.hold
-    after its app.frametime as the feature test's course does, the clock moving only inside
-    input.hold, frames.wait and frame.profile; then it is played on the card and on the software
-    device in the runner's image, the wave, the most alive and the felled read alike. A play is to
-    hold on both, since the three games are played here before a commit that moves where a program
-    reads or writes its files. After the publish of 0.6.122, a small commit.
+146. **The deep audit's findings.** From the review's read-only audit of 2026-11-14 at `770aef21`,
+    ~/.cache/claude-reviewer/audits-2026-11-14/BevyCSharp-deep-audit.md, thirteen areas each read by
+    a finder and every finding put to three verifiers, one reading the code, one its reach and one
+    the records. 75 held, 6 of high severity, 44 of medium and 25 of low, two known already and one
+    dropped, each with its file and line, its scenario and a direction for the mend. The high ones
+    are the fog's froxel history held still whenever SetSkyFog runs each frame, as SetWeather does;
+    a storm's next strike timed once from the rate it starts with; the state machines' step catching
+    only ArgumentException, so a machine on an entity with no animated scene throws each frame and
+    cuts off the rest of the frame's sync and the message swap, which the review checked against the
+    code; a SaveId given twice to a subscene placed twice; a field play cleared saved as null and
+    its scene's value coming back on load; and the inspector's undo key leaving out the entity.
+    First those six, each with a test that fails first. Then a Reply saying of each other finding
+    whether it holds at the head, and the mends a few to a commit in the report's order, those of
+    global illumination taken with 138 where they touch the kernels; a finding that does not hold
+    says why. The six high ones beside 143's sweep, which runs in its containers on its own; the
+    rest after 143, ahead of 93.
 
 ## Verdicts
 
@@ -483,191 +501,67 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-The read for commit 4. A game from the published 0.6.114 ran under dotnet watch on .NET 10.0.112,
-headless at thirty frames a second, each kind of edit made to a behavior while it ran and fourteen
-seconds left after each. A method body changed is applied as hot reload, the new text said within
-three seconds and the behavior's count carrying on. A changed parameter list, ref Transform added to
-the update, is applied the same way. A new update method in the behavior is applied and never runs,
-since a behavior's systems are registered once, as the app is built. A new behavior in a file of its
-own is not said by dotnet watch at all, and runs only after the next restart. A new field asks a
-restart, which DOTNET_WATCH_RESTART_ON_RUDE_EDIT takes without a question, and the game starts again
-with every edit in, the new method and the new behavior running.
+146, the deep audit's six high findings, in the commit carrying this Reply, each with a test that
+failed without its mend, read at the head first as the report gives it.
 
-So dotnet watch carries a change to a behavior's methods and nothing that adds a system. Commit 4's
-MetadataUpdateHandler registers a changed behavior's systems again, which brings in the new method,
-and its test reads first whether a type in a new file reaches the handler at the next update. The
-guide says which edits ask a restart either way. Carrying Scripting in the package for Debug builds
-is not raised, since the read shows dotnet watch carries a behavior's change.
+The fog's froxels move on once a frame, in SkyFog.Tick. SetSkyFog binds them for the frame they are
+in without moving them on, where it moved them on at every call as well, so under a weather, which
+sets the fog every frame, they traded their images twice a frame, wrote one only and read the other,
+never written, as their history, and the fog settled at about an eighth of its strength.
+FroxelFogTests.SetEveryFrameTheFroxelsStillMeetTheClosedForm sets the fog again every frame, as a
+weather does, and holds the froxels to the closed form as the test beside it holds a fog set once.
+Without the mend the froxels drew (119, 162, 82) where the closed form drew (178, 81, 53), the fog
+thin enough to show the ground's green, and with it they meet it within the six the test beside it
+allows.
 
-The run on the audit's mends, 43564787638, is the first to carry the renderer's tests on every
-system. Their part took 11 m 33 s on macOS, 212 passing, and 13 m 43 s on Windows, 211 passing, so
-the jobs ran 27 and 32 minutes where the run before took 17 and 19, and Linux 14 as before, every
-one inside the hour the job is held to.
+A storm's strikes are a Poisson process at the rate it has each frame. It holds a share of one
+strike drawn from an exponential spread and spends it at the frame's rate a minute, striking when it
+is spent, where it drew one gap from the rate it had when it began, a few thousandths of a strike a
+minute for a storm a weather eases into, and so stayed silent for hours.
+ThunderTests.AStormAWeatherEasesIntoStrikesOnceItsRateHasClimbed eases a weather into a thunderstorm
+over three minutes of the game at a fifth of a second a frame. Without the mend it struck no time,
+and with it the storm strikes as its rate climbs. The test of the gaps' mean reads the share spent
+at six a minute.
 
-142, read and mended in the commit carrying this Reply. Kernels/gi_ambient.slang's follow summed the
-trace's workgroups as `texels * texels` rays fill them, so in a cascade of 8 texels a side, whose
-texels send four rays each, it read the first workgroup's sum of four, a band of the sphere, for the
-whole probe's. Both of Low's cascades are of 8, as is the first of Medium and of High. The mend is
-the sibling's line, `texels * texels * RaysAt(texels)`, with its comment.
+The state machines' step stops a machine whose entity has no animated scene under it, as it stops
+one whose model lacks a clip, said once on the log, and the frame goes on. The bridge answers such
+an entity's clips as not there, which Native.Check throws as a BevyNativeException the step did not
+catch, so the machine threw every frame and took the rest of the frame's areas and its message swap
+with it. AnimationMachineTests.AMachineOnAnEntityWithNoAnimatedSceneStopsAndTheFrameGoesOn runs a
+machine on a plain entity and sends a message at the fifth frame. Without the mend the machine was
+still running at the tenth frame and nothing was said on the log, and with it the machine is stopped
+once, said on the log, and the message is read at the sixth frame.
 
-Three rooms were read at Low, the mean of the picture in the frame the panel went dark and the six
-after. The sibling's room, 4 across with a panel 1.2 across, reads alike with the mend and without,
-112.53, 86.18 and then 0.72, since a panel of that size is no wider than twice the first cascade's
-probe spacing and is carried as a glow light, whose light every probe takes in closed form in every
-band. A room 8 across with a panel 4.4 across, giving the light of the 1.2 one, has no glow light.
-It reads 75.32 lit, and 69.95, 52.44, 37.03, 28.07, 22.35, 17.46 and 13.65 after at the head, the
-light kept over the frames each bounce takes, and 69.95, 52.44 and then 0.72 with every workgroup
-summed.
+The entities of a scene placed in another as a subscene are kept by save ids mixed with the
+placing's id in the file placing it, so a prefab placed twice keeps two chests apart, and each
+placing's ids are the same in every run. A subscene inside a subscene is mixed again at each placing
+out. SaveGame keeps one entity of each id where two share one, which a game's own placing of a scene
+twice while it runs can still give, said on the log, rather than throwing after the game in progress
+has ended. SaveGameTests.AScenePlacedTwiceKeepsEachPlacingsSavedEntitiesApart places a chest twice,
+loots one and loads. Without the mend both chests held the id 01fb3e4134bdb5d1, and with it each
+holds its own, and the looted chest loads looted and the other full.
 
-That room is the test, TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark in
-GlobalIlluminationTests.Frames.cs, the room under a twentieth of its lit level within two frames of
-the panel going dark. It fails on the head's kernel, the room reading 37.03 two frames after against
-a bar of 3.77, and passes with the mend, reading 0.72 there, so the bar lies ten times under the one
-and five times over the other. A picture is asked for once a frame, since Bevy drops a second
-screenshot of one target asked for in the same frame, which the first read of the rooms met, its
-seventh picture never coming.
+A reference play cleared to none, of an entity, an asset or a data asset, is written as {"none":
+true}, which reads back as none over what a component holds, where a null is passed over. A null
+still says a field had nothing that could be written, as an asset built in memory or an entity the
+writer did not number. SaveGameTests.AReferencePlayClearedLoadsBackAsNone clears a lookout's target
+and loads, and SceneValueTests.AReferenceClearedToNoneIsWrittenAsNoneAndReadBackOverOneHeld writes
+each kind cleared and reads it over one holding a value. Without the mend the lookout watched the
+hero again after the load and each kind was written as null, and with it the lookout watches nothing
+after the load and each kind is written as none and read back as none. docs/scenes-and-saves.md says
+both in its paragraph on what a save holds.
 
-The third room, the sibling's room with the field's cells at 0.0625, keeps its light with the mend
-as well, 120.20 lit and 120.20, 118.78, 91.00, 34.16, 21.77, 13.75 and 10.88 after, against 104.74
-down to 65.85 six frames after at the head. Its panel is wider than that field carries, so the
-mend's sum reaches it and takes part of the light away, and something more holds the rest. It is not
-chased here and is offered as an item of its own.
+The inspector's undo key is the field's id on the entity it is on, or on the data asset whose schema
+is bound to it where a row is drawn with no entity, so the same field edited on two entities in a
+row is two edits. EditorHistoryTests.OneFieldEditedOnTwoEntitiesInARowIsTwoEdits edits one field on
+two boxes and undoes and redoes twice. Without the mend the steps read 5 7, 0 7, 0 7, 0 7 and 0 7,
+the first undo putting the first box back and leaving the second at 7, and the second box's edit in
+no step, and with it they read 5 7, 5 2, 0 2, 5 2 and 5 7.
 
-The GPU tests of global illumination and of the scene field pass with the mend, so no reference
-moves. The whole suite passed, 2,090 passed, 0 failed and 3 skipped, 2,093 in all where the listing
-is 2,082. NormTests passed, 19.
+The whole suite passed, 2,100 passed, 0 failed and 3 skipped, 2,103 in all where the listing is
+2,092, the solution built from nothing with warnings as errors, a part at a time under the GPU lock
+once it had been free of timings for three minutes. NormTests passed, 19.
 
-Shared: the ambient's sum as the sibling has it, carried here with its comment. The sibling carries
-an emitter as a glow light by the same rule, its longest side no more than twice the first cascade's
-probe spacing, so its test of the room 4 across with a panel 1.2 across may pass without the mend
-there as it does here, which a panel too wide to carry would hold. And a room under a fine field
-keeps its light here with the mend, for the sibling to read on its own.
-
-120, its fourth commit, in the commit carrying this Reply. BehaviorReload, a MetadataUpdateHandler
-in the library's Core, keeps the assemblies each change hot reload makes names, and where the
-process can take a change the behaviors plugin puts a system in First that runs the changed
-assemblies' registrations again at the start of the next frame. App.RegisterAgain keeps each system
-the registration names again with the same method where it stands in Bevy's schedule, adds each new
-one through the dispatchers EnableDynamicSystems puts in, takes out each it names no more and passes
-over a startup system, and the log says what a change added and took out. A process that takes no
-change, a game run on its own or the suite, has nothing of it in its frames.
-
-Three tests in Core/Behaviors/BehaviorReloadTests.cs. The first runs a registration whose body
-changes at frame 10, as the generated one's does, and calls the handler as the runtime does. A
-system named again runs every frame, one taken out stops at the change's frame, one added and one
-moved to PostUpdate run from the frame after, and neither startup system runs again. It fails with
-the plugin following no changes, the system taken out running on. The third says an app follows
-changes exactly where its process can take one, which the suite's cannot.
-
-The trial is a game from a package packed here, run by dotnet watch run with --non-interactive, with
-seven edits 14 seconds apart. A body changed, a method added, that method moved to PostUpdate and
-then taken out each took within a frame of the change, the log saying 1 system added and 0 taken
-out, 1 and 1, then 0 and 1, and the moved method ran once a frame as before, its line coming every
-thirtieth frame. A new OnStartup method was passed over and named in the log. A field added asked a
-restart, which dotnet watch made. A behavior in a new file ran only from that restart, dotnet watch
-saying nothing of the file when it came, in this trial and in the read before it, so the question
-the read left open is answered, the new file's type never reaching the handler, and the guide says a
-file added is compiled at the next start.
-
-The trial's first run met a throw the handler alone leaves open. A method a change takes out is left
-with a body that throws, and the change is applied on a thread of its own, so the frame it came in
-called the taken method in PostUpdate before the next First followed the change. It threw a
-TypeLoadException naming Invalid_Token.0x0200013A, a type the runtime could not load, and the
-headless game, which stops on a system's throw, exited. A system whose own method throws a
-MissingMethodException, a TypeLoadException or the compiler's HotReloadException in an app that
-follows changes is taken out at that throw and said in the log at info, in the trampoline and in the
-dispatchers. The second test makes that throw in the frame of a change from a system the app started
-with and from one added while it ran, and fails without the pass-over, both throws logged as errors.
-The trial run again took the method out with nothing thrown.
-
-docs/running-a-game.md says in a part of its own that a game's compiled C# changes as it runs under
-dotnet watch, which edits reach the schedule at the next frame, that a system named again keeps its
-place, order and condition, and which edits wait for the next start, an order or a condition
-changed, a startup method or a file added, and a field added, which asks a restart. BUILDING.md
-names the release's zips beside the run's artifact, and the guide's steps for a crash file name them
-too, since they said a crash from a version older than ninety days could not be named, which the
-release makes wrong from v0.6.114 on. Each zip holds the library and its build id, the Windows one
-its PDB as well, and the linux-x64 library's build id as build/name-crash.py reads it matches the
-.build-id file beside it, by which the script finds it in an unpacked zip. AGENTS.md's build order
-line is changed as asked.
-
-The old scratch under ~/.cache/bevycsharp is removed by the rule, the list written first to
-~/.cache/bevycsharp-i120/removed.txt, 1,629 entries. The folder held 187,578,822,360 bytes and holds
-82,965,477,083, so 104,613,345,277 bytes are freed. check-target-c, render-target and the 22 folders
-of runs since 2026-11-11 stay. Nothing of mine ran from those folders while it went.
-
-The whole suite passed, 2,093 passed, 0 failed and 3 skipped, 2,096 in all where the listing is
-2,085, the solution built from nothing with warnings as errors. NormTests passed, 19.
-
-Shared: a game's own behaviors followed under dotnet watch by a MetadataUpdateHandler that runs an
-assembly's registration again, keeping what it names again where it stands, and the pass-over of a
-taken method's throw in the frame its change comes in. The sibling reloads behaviors from a scripts
-folder alone, so this is offered for it to take.
-
-Verdict 59, mended in the commit carrying this Reply. A game built in Debug writes a file it saves
-under its asset root, a model's recipe, a scene or a material, into its project's assets folder, the
-folder it reads and watches, so a level being built is saved into the checkout and its next run
-reads it, while a player's saves and settings go under user://, the player's own folder, in either
-build. A game built in Release saves into the copy beside it, which it reads, and one whose config
-names a root saves into that root.
-
-So games/Blockout/play.sh reads the recipe where the game says it saved it, from the game's line
-naming the file, and puts that file back from a copy of the checkout's recipe taken before the game
-starts, its time kept. The old trap copied the project's recipe over the build's copy, which the
-mended play leaves alone. docs/running-a-game.md says in its paragraph on the Debug default that a
-file the game saves under its asset root is written into the project, and that a player's saves go
-under user:// in either build. Courtyard saves its game under user:// through SaveGame, so its play
-reads nothing the root moved, and the soak's Blockout round cuts and undoes without saving.
-
-The play as it stood fails in run 43581803258 itself, the game saying it saved the level to
-games/Blockout/assets/levels/blockout.model and the play reading the build's copy, which holds no
-window's line, so the pack run stands as the play without the mend. The three games were played here
-from a package of the head packed as the games job packs one, on that run's Linux render bridge,
-each game built on the package and each play under the GPU lock shared on its own. Blockout's mended
-play passed in 27 seconds on the graphics card, the game saying it saved the level to the project's
-recipe and the window's line found there, and after the play the project's recipe and the build's
-copy are both as the head holds them. The first mended play found the copy of the recipe kept under
-a name the play gives the count of faces before the window's cut, so its trap looked for a file
-named 100, put back nothing and left the saved recipe in the project, and the copy is named kept.
-Courtyard played to its win in 29 seconds on the graphics card. Swarm played to its third wave on
-lavapipe held to four cores, as the games job draws it, in 679 seconds, 218 creatures alive at most
-and its frame profiled at 538 ms a frame. The pictures of the three plays are in the dump folder.
-
-The first try of the plays here met a checkout reached under /home, which links to /var/home on this
-machine. Its restore met the library under both spellings and dropped the command line's reference
-to it, so bcs did not build, the play waited for an answer it could not get and its trap could not
-stop the game, which held the GPU lock shared for 38 minutes until it was stopped at 14:23. The
-plays ran again from the checkout's own path, the command line built first as a step of its own.
-
-Swarm's play holds on a slow device alone. On the graphics card it reached the third wave with 217
-creatures alive at most and failed, no check after a hold of the keys finding 200 alive, since the
-game runs many frames there between two of the play's commands, its clock set to a sixtieth of a
-second a frame, and the swarm closes in while no key is held. It takes app.hold commands after the
-play's app.frametime, as the feature test's course run asks for it, so the clock moves only while
-input.hold, frames.wait or frame.profile waits, each a command whose answer is held, and every check
-finds the swarm where the last hold left it on either device. Then the play on the graphics card and
-on lavapipe in the runner's image, its wave, most alive and felled read against each other.
-Courtyard's and Blockout's plays passed on the graphics card as they stand.
-
-NormTests passed, 19. ScriptTests passed 22, WorkflowTests 8, FirstGameTests 5, DocsScriptTests 3
-and CheatsheetTests 3, 60 in all with NormTests, on the suite built with warnings as errors.
-
-145, in the commit carrying this Reply. Swarm's play holds the game's clock between its commands,
-app.hold commands after its app.frametime as the feature test's course run asks for it, so the clock
-moves only while input.hold, frames.wait or frame.profile waits for its frames, and a reading
-between two commands finds the swarm where the last hold left it on either device. Swarm draws
-nothing at random and its scripts read only the game's clock.
-
-Played here on the published 0.6.122, the head's library, the game built on it as the games job
-builds one on a package, from a copy of the head with this play in it. On the graphics card the play
-passed in 70 seconds, the third wave with 219 creatures alive at most and 315 felled and the frame
-profiled at 16.8 ms, and a second play on the card passed with 220 and 309. On lavapipe held to four
-cores in the runner's image it passed in 396 seconds, the third wave with 217 alive at most and 312
-felled and the frame profiled at 235 ms. The wave is the same in all three, and the most alive and
-the felled lie a few apart, two plays on the same card differing about as much as the card and
-lavapipe do. Without the hold the play failed on the card in Verdict 59's plays, the third wave
-reached with 217 alive at most and no reading after a hold of the keys finding 200, which stands as
-the play without the mend. The pictures are in the dump folder.
-
-NormTests passed, 19. ScriptTests passed 22, WorkflowTests 8 and DocsScriptTests 3, 52 in all with
-NormTests, on the suite built with warnings as errors.
+Shared: a saved game keeps each placing of one scene apart by mixing its entities' ids with the
+placing's, and writes a reference play cleared as none rather than as a null a load passes over. The
+sibling's save is keyed by scene and id and may meet both, so this is offered for it to read.

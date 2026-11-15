@@ -140,11 +140,13 @@ carries a `SaveId`, which the editor gives it with Add Component and code with `
 fields play changed of its components marked `[Persist]` (or named in `SaveGame.Persisted`, for
 one such as `Bevy.Transform`) are written, a component play took off is written as `null`, an
 entity spawned during play is written whole, and one of the scene's that was despawned is written
-as deleted. A field play left as the scene had it comes from the scene on a load, so a level fixed
-in an update reaches a save made before it. `user://` is the platform's data directory under
-`Config.GameName`, which Bevy loads from as well (`AssetServer.Load(AssetKind.Image,
-"user://shots/one.png")`), and a save is written through a temporary file renamed over the old
-one.
+as deleted. A reference play cleared to none, of an entity, an asset or a data asset, is written as
+none and loads back as none. The entities of a scene placed in another as a subscene are kept by
+their ids mixed with the placing's, so a chest placed twice from one scene saves as two chests. A
+field play left as the scene had it comes from the scene on a load, so a level fixed in an update
+reaches a save made before it. `user://` is the platform's data directory under `Config.GameName`,
+which Bevy loads from as well (`AssetServer.Load(AssetKind.Image, "user://shots/one.png")`), and a
+save is written through a temporary file renamed over the old one.
 
 A load ends the game in progress first, despawning what its scenes spawned and every entity with a
 `SaveId`, so a pause menu loads as a title screen does. It does so only once the file has read as a

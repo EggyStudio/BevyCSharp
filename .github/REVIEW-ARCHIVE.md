@@ -4570,6 +4570,20 @@ the port is offered upstream (Decision 18).
     its throw. The coder's old scratch under the home's cache was removed by the rule approved that
     morning, 1,629 entries and 104,613,345,277 bytes, its list written first.
 
+145. **Swarm's play holds on a fast device.** From Verdict 59's mend on 2026-11-14. On a graphics
+    card the game runs many frames between two of the play's commands, so the play fails where it
+    asks for a frame profiled with the creatures in their hundreds, and holds only on the software
+    device the games job draws on. The play holds the game's clock between its commands, app.hold
+    after its app.frametime as the feature test's course does, the clock moving only inside
+    input.hold, frames.wait and frame.profile; then it is played on the card and on the software
+    device in the runner's image, the wave, the most alive and the felled read alike. A play is to
+    hold on both, since the three games are played here before a commit that moves where a program
+    reads or writes its files. After the publish of 0.6.122, a small commit. Done at `bac110e7`,
+    pushed at 19:15 on 2026-11-14 and its build run green at 19:38, the play holding the clock with
+    app.hold after its app.frametime, played on the card in 70 s, wave 3 with 219 alive at most and
+    315 felled and a second play 220 and 309, and on the software device at four cores in 396 s,
+    wave 3 with 217 and 312.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -12623,6 +12637,195 @@ of and read unwatched where Bevy's builder panics, the watched root resolved thr
 paths macOS reports, the debouncer's send after its server is gone kept out of the crash log, a
 Debug program reading and watching its project's assets folder with its shader cache under obj, and
 a script generation whose registration throws taken out whole, for the sibling's live path.
+
+The read for commit 4. A game from the published 0.6.114 ran under dotnet watch on .NET 10.0.112,
+headless at thirty frames a second, each kind of edit made to a behavior while it ran and fourteen
+seconds left after each. A method body changed is applied as hot reload, the new text said within
+three seconds and the behavior's count carrying on. A changed parameter list, ref Transform added to
+the update, is applied the same way. A new update method in the behavior is applied and never runs,
+since a behavior's systems are registered once, as the app is built. A new behavior in a file of its
+own is not said by dotnet watch at all, and runs only after the next restart. A new field asks a
+restart, which DOTNET_WATCH_RESTART_ON_RUDE_EDIT takes without a question, and the game starts again
+with every edit in, the new method and the new behavior running.
+
+So dotnet watch carries a change to a behavior's methods and nothing that adds a system. Commit 4's
+MetadataUpdateHandler registers a changed behavior's systems again, which brings in the new method,
+and its test reads first whether a type in a new file reaches the handler at the next update. The
+guide says which edits ask a restart either way. Carrying Scripting in the package for Debug builds
+is not raised, since the read shows dotnet watch carries a behavior's change.
+
+The run on the audit's mends, 43564787638, is the first to carry the renderer's tests on every
+system. Their part took 11 m 33 s on macOS, 212 passing, and 13 m 43 s on Windows, 211 passing, so
+the jobs ran 27 and 32 minutes where the run before took 17 and 19, and Linux 14 as before, every
+one inside the hour the job is held to.
+
+142, read and mended in the commit carrying this Reply. Kernels/gi_ambient.slang's follow summed the
+trace's workgroups as `texels * texels` rays fill them, so in a cascade of 8 texels a side, whose
+texels send four rays each, it read the first workgroup's sum of four, a band of the sphere, for the
+whole probe's. Both of Low's cascades are of 8, as is the first of Medium and of High. The mend is
+the sibling's line, `texels * texels * RaysAt(texels)`, with its comment.
+
+Three rooms were read at Low, the mean of the picture in the frame the panel went dark and the six
+after. The sibling's room, 4 across with a panel 1.2 across, reads alike with the mend and without,
+112.53, 86.18 and then 0.72, since a panel of that size is no wider than twice the first cascade's
+probe spacing and is carried as a glow light, whose light every probe takes in closed form in every
+band. A room 8 across with a panel 4.4 across, giving the light of the 1.2 one, has no glow light.
+It reads 75.32 lit, and 69.95, 52.44, 37.03, 28.07, 22.35, 17.46 and 13.65 after at the head, the
+light kept over the frames each bounce takes, and 69.95, 52.44 and then 0.72 with every workgroup
+summed.
+
+That room is the test, TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark in
+GlobalIlluminationTests.Frames.cs, the room under a twentieth of its lit level within two frames of
+the panel going dark. It fails on the head's kernel, the room reading 37.03 two frames after against
+a bar of 3.77, and passes with the mend, reading 0.72 there, so the bar lies ten times under the one
+and five times over the other. A picture is asked for once a frame, since Bevy drops a second
+screenshot of one target asked for in the same frame, which the first read of the rooms met, its
+seventh picture never coming.
+
+The third room, the sibling's room with the field's cells at 0.0625, keeps its light with the mend
+as well, 120.20 lit and 120.20, 118.78, 91.00, 34.16, 21.77, 13.75 and 10.88 after, against 104.74
+down to 65.85 six frames after at the head. Its panel is wider than that field carries, so the
+mend's sum reaches it and takes part of the light away, and something more holds the rest. It is not
+chased here and is offered as an item of its own.
+
+The GPU tests of global illumination and of the scene field pass with the mend, so no reference
+moves. The whole suite passed, 2,090 passed, 0 failed and 3 skipped, 2,093 in all where the listing
+is 2,082. NormTests passed, 19.
+
+Shared: the ambient's sum as the sibling has it, carried here with its comment. The sibling carries
+an emitter as a glow light by the same rule, its longest side no more than twice the first cascade's
+probe spacing, so its test of the room 4 across with a panel 1.2 across may pass without the mend
+there as it does here, which a panel too wide to carry would hold. And a room under a fine field
+keeps its light here with the mend, for the sibling to read on its own.
+
+120, its fourth commit, in the commit carrying this Reply. BehaviorReload, a MetadataUpdateHandler
+in the library's Core, keeps the assemblies each change hot reload makes names, and where the
+process can take a change the behaviors plugin puts a system in First that runs the changed
+assemblies' registrations again at the start of the next frame. App.RegisterAgain keeps each system
+the registration names again with the same method where it stands in Bevy's schedule, adds each new
+one through the dispatchers EnableDynamicSystems puts in, takes out each it names no more and passes
+over a startup system, and the log says what a change added and took out. A process that takes no
+change, a game run on its own or the suite, has nothing of it in its frames.
+
+Three tests in Core/Behaviors/BehaviorReloadTests.cs. The first runs a registration whose body
+changes at frame 10, as the generated one's does, and calls the handler as the runtime does. A
+system named again runs every frame, one taken out stops at the change's frame, one added and one
+moved to PostUpdate run from the frame after, and neither startup system runs again. It fails with
+the plugin following no changes, the system taken out running on. The third says an app follows
+changes exactly where its process can take one, which the suite's cannot.
+
+The trial is a game from a package packed here, run by dotnet watch run with --non-interactive, with
+seven edits 14 seconds apart. A body changed, a method added, that method moved to PostUpdate and
+then taken out each took within a frame of the change, the log saying 1 system added and 0 taken
+out, 1 and 1, then 0 and 1, and the moved method ran once a frame as before, its line coming every
+thirtieth frame. A new OnStartup method was passed over and named in the log. A field added asked a
+restart, which dotnet watch made. A behavior in a new file ran only from that restart, dotnet watch
+saying nothing of the file when it came, in this trial and in the read before it, so the question
+the read left open is answered, the new file's type never reaching the handler, and the guide says a
+file added is compiled at the next start.
+
+The trial's first run met a throw the handler alone leaves open. A method a change takes out is left
+with a body that throws, and the change is applied on a thread of its own, so the frame it came in
+called the taken method in PostUpdate before the next First followed the change. It threw a
+TypeLoadException naming Invalid_Token.0x0200013A, a type the runtime could not load, and the
+headless game, which stops on a system's throw, exited. A system whose own method throws a
+MissingMethodException, a TypeLoadException or the compiler's HotReloadException in an app that
+follows changes is taken out at that throw and said in the log at info, in the trampoline and in the
+dispatchers. The second test makes that throw in the frame of a change from a system the app started
+with and from one added while it ran, and fails without the pass-over, both throws logged as errors.
+The trial run again took the method out with nothing thrown.
+
+docs/running-a-game.md says in a part of its own that a game's compiled C# changes as it runs under
+dotnet watch, which edits reach the schedule at the next frame, that a system named again keeps its
+place, order and condition, and which edits wait for the next start, an order or a condition
+changed, a startup method or a file added, and a field added, which asks a restart. BUILDING.md
+names the release's zips beside the run's artifact, and the guide's steps for a crash file name them
+too, since they said a crash from a version older than ninety days could not be named, which the
+release makes wrong from v0.6.114 on. Each zip holds the library and its build id, the Windows one
+its PDB as well, and the linux-x64 library's build id as build/name-crash.py reads it matches the
+.build-id file beside it, by which the script finds it in an unpacked zip. AGENTS.md's build order
+line is changed as asked.
+
+The old scratch under ~/.cache/bevycsharp is removed by the rule, the list written first to
+~/.cache/bevycsharp-i120/removed.txt, 1,629 entries. The folder held 187,578,822,360 bytes and holds
+82,965,477,083, so 104,613,345,277 bytes are freed. check-target-c, render-target and the 22 folders
+of runs since 2026-11-11 stay. Nothing of mine ran from those folders while it went.
+
+The whole suite passed, 2,093 passed, 0 failed and 3 skipped, 2,096 in all where the listing is
+2,085, the solution built from nothing with warnings as errors. NormTests passed, 19.
+
+Shared: a game's own behaviors followed under dotnet watch by a MetadataUpdateHandler that runs an
+assembly's registration again, keeping what it names again where it stands, and the pass-over of a
+taken method's throw in the frame its change comes in. The sibling reloads behaviors from a scripts
+folder alone, so this is offered for it to take.
+
+Verdict 59, mended in the commit carrying this Reply. A game built in Debug writes a file it saves
+under its asset root, a model's recipe, a scene or a material, into its project's assets folder, the
+folder it reads and watches, so a level being built is saved into the checkout and its next run
+reads it, while a player's saves and settings go under user://, the player's own folder, in either
+build. A game built in Release saves into the copy beside it, which it reads, and one whose config
+names a root saves into that root.
+
+So games/Blockout/play.sh reads the recipe where the game says it saved it, from the game's line
+naming the file, and puts that file back from a copy of the checkout's recipe taken before the game
+starts, its time kept. The old trap copied the project's recipe over the build's copy, which the
+mended play leaves alone. docs/running-a-game.md says in its paragraph on the Debug default that a
+file the game saves under its asset root is written into the project, and that a player's saves go
+under user:// in either build. Courtyard saves its game under user:// through SaveGame, so its play
+reads nothing the root moved, and the soak's Blockout round cuts and undoes without saving.
+
+The play as it stood fails in run 43581803258 itself, the game saying it saved the level to
+games/Blockout/assets/levels/blockout.model and the play reading the build's copy, which holds no
+window's line, so the pack run stands as the play without the mend. The three games were played here
+from a package of the head packed as the games job packs one, on that run's Linux render bridge,
+each game built on the package and each play under the GPU lock shared on its own. Blockout's mended
+play passed in 27 seconds on the graphics card, the game saying it saved the level to the project's
+recipe and the window's line found there, and after the play the project's recipe and the build's
+copy are both as the head holds them. The first mended play found the copy of the recipe kept under
+a name the play gives the count of faces before the window's cut, so its trap looked for a file
+named 100, put back nothing and left the saved recipe in the project, and the copy is named kept.
+Courtyard played to its win in 29 seconds on the graphics card. Swarm played to its third wave on
+lavapipe held to four cores, as the games job draws it, in 679 seconds, 218 creatures alive at most
+and its frame profiled at 538 ms a frame. The pictures of the three plays are in the dump folder.
+
+The first try of the plays here met a checkout reached under /home, which links to /var/home on this
+machine. Its restore met the library under both spellings and dropped the command line's reference
+to it, so bcs did not build, the play waited for an answer it could not get and its trap could not
+stop the game, which held the GPU lock shared for 38 minutes until it was stopped at 14:23. The
+plays ran again from the checkout's own path, the command line built first as a step of its own.
+
+Swarm's play holds on a slow device alone. On the graphics card it reached the third wave with 217
+creatures alive at most and failed, no check after a hold of the keys finding 200 alive, since the
+game runs many frames there between two of the play's commands, its clock set to a sixtieth of a
+second a frame, and the swarm closes in while no key is held. It takes app.hold commands after the
+play's app.frametime, as the feature test's course run asks for it, so the clock moves only while
+input.hold, frames.wait or frame.profile waits, each a command whose answer is held, and every check
+finds the swarm where the last hold left it on either device. Then the play on the graphics card and
+on lavapipe in the runner's image, its wave, most alive and felled read against each other.
+Courtyard's and Blockout's plays passed on the graphics card as they stand.
+
+NormTests passed, 19. ScriptTests passed 22, WorkflowTests 8, FirstGameTests 5, DocsScriptTests 3
+and CheatsheetTests 3, 60 in all with NormTests, on the suite built with warnings as errors.
+
+145, in the commit carrying this Reply. Swarm's play holds the game's clock between its commands,
+app.hold commands after its app.frametime as the feature test's course run asks for it, so the clock
+moves only while input.hold, frames.wait or frame.profile waits for its frames, and a reading
+between two commands finds the swarm where the last hold left it on either device. Swarm draws
+nothing at random and its scripts read only the game's clock.
+
+Played here on the published 0.6.122, the head's library, the game built on it as the games job
+builds one on a package, from a copy of the head with this play in it. On the graphics card the play
+passed in 70 seconds, the third wave with 219 creatures alive at most and 315 felled and the frame
+profiled at 16.8 ms, and a second play on the card passed with 220 and 309. On lavapipe held to four
+cores in the runner's image it passed in 396 seconds, the third wave with 217 alive at most and 312
+felled and the frame profiled at 235 ms. The wave is the same in all three, and the most alive and
+the felled lie a few apart, two plays on the same card differing about as much as the card and
+lavapipe do. Without the hold the play failed on the card in Verdict 59's plays, the third wave
+reached with 217 alive at most and no reading after a hold of the keys finding 200, which stands as
+the play without the mend. The pictures are in the dump folder.
+
+NormTests passed, 19. ScriptTests passed 22, WorkflowTests 8 and DocsScriptTests 3, 52 in all with
+NormTests, on the suite built with warnings as errors.
 
 ## Items closed, parked or shortened
 

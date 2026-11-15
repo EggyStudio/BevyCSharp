@@ -1,4 +1,5 @@
 using Bevy;
+using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -26,10 +27,41 @@ public sealed class ThunderTests
     public void StrikesComeAtTheirRateOnAverage()
     {
         var random = new Random(3);
-        var gaps = Enumerable.Range(0, 4000).Select(_ => SkyThunder.Gap(6f, random)).ToArray();
+        // Each share of a strike spent at six a minute.
+        var gaps = Enumerable.Range(0, 4000).Select(_ => SkyThunder.Share(random) * 60f / 6f).ToArray();
         var mean = gaps.Average();
         Assert.InRange(mean, 9.4, 10.6);
         Assert.True(gaps.Min() < 0.5f && gaps.Max() > 40f, "the gaps keep to a beat rather than spreading as a storm's do");
+    }
+
+    /// <summary>
+    /// A storm a weather eases into strikes once its rate has climbed, its strikes a Poisson process
+    /// at the rate it has each frame. A gap drawn once from the first frame's rate, a few thousandths
+    /// of a strike a minute, would keep it silent for hours. Three minutes of the game at a fifth of
+    /// a second a frame, which Bevy's longest step lets through whole, bring about nine strikes as
+    /// the thunderstorm's rate of four a minute comes in over its half-life of thirty seconds.
+    /// </summary>
+    [SkippableFact]
+    public void AStormAWeatherEasesIntoStrikesOnceItsRateHasClimbed()
+    {
+        Needs.Renderer();
+        var weather = new WeatherState();
+        var strikes = new List<LightningStrike>();
+        var run = new PictureRun
+        {
+            Frames = 1100,
+            Configure = config => config.FrameSeconds = 0.2,
+            Scene = _ =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings());
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetWeather(camera, weather, thunder: new ThunderSettings { Struck = strikes.Add, Sound = false, Bolts = false });
+                weather.Set(WeatherPreset.Thunderstorm);
+            },
+        };
+        run.Wait(900).Go();
+
+        Assert.True(strikes.Count > 0, $"a thunderstorm eased in over three minutes of the game struck {strikes.Count} times");
     }
 
     [Fact]

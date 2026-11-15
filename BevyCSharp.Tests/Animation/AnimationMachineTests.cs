@@ -140,6 +140,43 @@ public sealed class AnimationMachineTests
     }
 
     /// <summary>
+    /// A machine on an entity with no animated scene under it is stopped and said on the log, and the
+    /// frame goes on past it, a message sent in one frame read in the next. The bridge answers that
+    /// such an entity's clips are not there as a fault of its own, and the step moving the machines
+    /// on comes before the rest of the frame's areas and its message swap.
+    /// </summary>
+    [SkippableFact]
+    [ExpectsError("bevy", "The animation state machine on")]
+    public void AMachineOnAnEntityWithNoAnimatedSceneStopsAndTheFrameGoesOn()
+    {
+        Needs.Renderer();
+        var plain = Entity.None;
+        var (frames, readAt) = (0, -1);
+        var running = true;
+        var run = new PictureRun
+        {
+            EachFrame = world =>
+            {
+                frames++;
+                var bus = world.Resource<MessageBus>();
+                if (readAt < 0 && bus.Count<Ping>() > 0) readAt = frames;
+                if (frames == 5) bus.Send(new Ping(frames));
+            },
+            Scene = ecs =>
+            {
+                plain = ecs.Spawn();
+                Animation.Run(plain, Machine());
+            },
+        };
+        run.Wait(10).Do("reading it", _ => running = Animation.StopMachine(plain)).Go();
+
+        Assert.False(running, "the machine on an entity with no animated scene was still running");
+        Assert.Equal(6, readAt);
+    }
+
+    private readonly record struct Ping(int Frame);
+
+    /// <summary>
     /// A model carrying a player that names a machine file runs that machine once it arrives, and
     /// stops when the player is taken off, while one naming no file is said on the log once and
     /// left as it is.

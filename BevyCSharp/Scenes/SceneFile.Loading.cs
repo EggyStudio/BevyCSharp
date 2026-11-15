@@ -127,10 +127,11 @@ public static partial class SceneFile
         {
             // An instance is spawned from its scene, with its overrides kept to apply once Bevy
             // has spawned the scene's entities under it.
-            var entity = entry.TryGetProperty("instance", out var instance)
+            var placing = entry.TryGetProperty("instance", out var instance)
                 && SceneReferences.ReadFile(instance) is { Length: > 0 } placed
-                    ? SpawnInstance(world, placed, entry)
-                    : world.Spawn();
+                    ? placed
+                    : null;
+            var entity = placing is not null ? SpawnInstance(world, placing, entry) : world.Spawn();
             spawned.Add(entity);
 
             if (entry.TryGetProperty("id", out var idElement) && idElement.TryGetInt32(out var id))
@@ -138,6 +139,16 @@ public static partial class SceneFile
                 byId[id] = entity;
                 references.Spawned(id, entity);
                 world.Add(entity, new SceneId { Value = id });
+
+                // A subscene's entities, read from its file at the placing, kept by save ids of the
+                // placing's own, each mixed with the placing's id here. A subscene placed inside
+                // this one was mixed as its file was read, and is mixed again here, so ids stay
+                // apart however deep the placings go (see SaveId).
+                if (placing is not null && SceneInstances.IsSubscene(placing))
+                {
+                    foreach (var inside in world.Descendants(entity))
+                        if (world.Has<SaveId>(inside)) world.Set(inside, world.GetRef<SaveId>(inside).PlacedAt(id));
+                }
             }
 
             if (entry.TryGetProperty("name", out var name) && name.GetString() is { Length: > 0 } named)

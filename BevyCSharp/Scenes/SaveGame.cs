@@ -147,7 +147,7 @@ public static class SaveGame
         // with what it holds, written as a save writes it so the two compare value for value.
         FromScenes.Clear();
         AsLoaded.Clear();
-        var ids = Ids(world);
+        var ids = Kept(Ids(world));
         var references = new SaveReferences(ids);
         foreach (var (entity, id) in ids)
         {
@@ -164,7 +164,7 @@ public static class SaveGame
     {
         ArgumentNullException.ThrowIfNull(world);
 
-        var ids = Ids(world);
+        var ids = Kept(Ids(world));
         var references = new SaveReferences(ids);
 
         var buffer = new ArrayBufferWriter<byte>();
@@ -289,7 +289,7 @@ public static class SaveGame
         var spawned = new List<Entity>(Start(world, scenes));
 
         var entries = root.TryGetProperty("entities", out var listed) ? listed.EnumerateArray().ToArray() : [];
-        var byId = Ids(world).ToDictionary(pair => pair.Id, pair => pair.Entity);
+        var byId = Kept(Ids(world)).ToDictionary(pair => pair.Id, pair => pair.Entity);
 
         // Spawned ones made first, so a component referring to one finds it whatever the order.
         foreach (var entry in entries)
@@ -523,6 +523,31 @@ public static class SaveGame
             .Where(entity => world.Has<SaveId>(entity))
             .Select(entity => (entity, world.GetRef<SaveId>(entity)))
             .OrderBy(pair => pair.Item2.Value)];
+
+    // One entity of each save id, the first, where a scene a game placed more than once while it
+    // ran gave two the same, said on the log rather than ending a load after the game in progress
+    // has ended or keeping one entity's state for both. A placing in a scene file gives each of its
+    // entities an id of its own (SaveId).
+    private static List<(Entity Entity, SaveId Id)> Kept(List<(Entity Entity, SaveId Id)> ids)
+    {
+        var seen = new HashSet<SaveId>();
+        var kept = new List<(Entity Entity, SaveId Id)>(ids.Count);
+        var repeated = new SortedSet<string>(StringComparer.Ordinal);
+        foreach (var pair in ids)
+        {
+            if (seen.Add(pair.Id)) kept.Add(pair);
+            else repeated.Add(pair.Id.ToString());
+        }
+
+        if (repeated.Count > 0)
+        {
+            Log.Warn($"The save ids {string.Join(", ", repeated.Take(4))}{(repeated.Count > 4 ? " and more" : "")} are each held by more "
+                + "than one entity, and the save keeps the first of each. A scene placed more than once while the game runs "
+                + "gives its entities the same ids, where each placing in a scene file gives them ids of its own.");
+        }
+
+        return kept;
+    }
 
     private static SaveId? Id(JsonElement entry) =>
         entry.TryGetProperty("save", out var id) && id.GetString() is { } text ? SaveId.Parse(text) : null;

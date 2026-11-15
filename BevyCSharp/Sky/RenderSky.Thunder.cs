@@ -90,7 +90,8 @@ internal static class SkyThunder
     {
         internal required ThunderSettings Settings { get; set; }
         internal required Random Random { get; init; }
-        internal float NextIn { get; set; } = float.NaN;
+        // What is left of the share of a strike the storm spends at its rate, none until it is drawn.
+        internal float Left { get; set; } = float.NaN;
         internal Flash? Flash { get; set; }
         internal Entity Light { get; set; } = Entity.None;
         internal float Shown { get; set; }
@@ -201,18 +202,20 @@ internal static class SkyThunder
             var camera = new Entity(bits);
             if (!ecs.IsAlive(camera)) continue;
 
-            // The next strike's time, a gap from an exponential spread, so the strikes are a Poisson
-            // process, as many a minute on average with no beat to them.
+            // The strikes a Poisson process at the rate the storm has each frame, as many a minute on
+            // average with no beat to them however the rate moves. The storm holds a share of one
+            // strike drawn from an exponential spread and spends it at the frame's rate, striking
+            // when it is spent, so a storm a weather eases into strikes as its rate climbs rather
+            // than after a gap drawn once from the first, smallest rate it had.
             var rate = storm.Settings.Rate;
-            if (rate <= 0f) storm.NextIn = float.NaN;
-            else if (float.IsNaN(storm.NextIn)) storm.NextIn = Gap(rate, storm.Random);
-            else
+            if (float.IsNaN(storm.Left)) storm.Left = Share(storm.Random);
+            if (rate > 0f)
             {
-                storm.NextIn -= delta;
-                if (storm.NextIn <= 0f)
+                storm.Left -= rate / 60f * delta;
+                if (storm.Left <= 0f)
                 {
                     Begin(ecs, camera, storm, null, storm.Random.NextSingle() < 2f / 3f);
-                    storm.NextIn = Gap(rate, storm.Random);
+                    storm.Left = Share(storm.Random);
                 }
             }
 
@@ -241,9 +244,10 @@ internal static class SkyThunder
         return Math.Clamp(rise * fall * flicker, 0f, 1f);
     }
 
-    /// <summary>A gap until the next strike at a rate a minute, from an exponential spread.</summary>
-    internal static float Gap(float rate, Random random) =>
-        -MathF.Log(Math.Clamp(random.NextSingle(), 1e-6f, 1f - 1e-6f)) / (rate / 60f);
+    /// <summary>A share of one strike from an exponential spread, one on average.</summary>
+    /// <remarks>Spent at a steady rate a minute, it is a gap of sixty over the rate seconds on average.</remarks>
+    internal static float Share(Random random) =>
+        -MathF.Log(Math.Clamp(random.NextSingle(), 1e-6f, 1f - 1e-6f));
 
     // Begins a strike about the camera, at a place or at a distance spread as evenly over the ground
     // as rings of it grow, and tells the game.

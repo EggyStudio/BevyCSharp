@@ -74,6 +74,21 @@ public partial struct EveryKind
     public Entity Target;
 }
 
+/// <summary>A component holding a reference of each kind a scene names, an entity, an asset and a data asset.</summary>
+[Behavior]
+public partial struct EveryReference
+{
+    /// <summary>Another entity.</summary>
+    public Entity Target;
+
+    /// <summary>A picture.</summary>
+    [Asset("image")]
+    public AssetHandle Picture;
+
+    /// <summary>A data asset.</summary>
+    public DataRef<WeaponStats> Weapon;
+}
+
 /// <summary>
 /// Covers writing a component's values to JSON and reading them back.
 /// </summary>
@@ -204,6 +219,39 @@ public sealed class SceneValueTests
             var text = Written(json => SceneValue.WriteComponent(json, schema, ctx.Ecs, source));
 
             Assert.Contains("\"Target\":null", text);
+        });
+
+        harness.Run();
+    }
+
+    /// <summary>
+    /// A reference cleared to none, of an entity, an asset or a data asset, is written as none and
+    /// read back as none over a component holding one, where a null is passed over and would leave
+    /// what the component held.
+    /// </summary>
+    [Fact]
+    public void AReferenceClearedToNoneIsWrittenAsNoneAndReadBackOverOneHeld()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var cleared = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(cleared, new EveryReference());
+
+            var schema = ComponentSchemas.For("Bevy.Tests.EveryReference")!;
+            var text = Written(json => SceneValue.WriteComponent(json, schema, ctx.Ecs, cleared));
+            foreach (var field in new[] { "Target", "Picture", "Weapon" })
+                Assert.Contains($"\"{field}\":{{\"none\":true}}", text);
+
+            var held = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(held, new EveryReference { Target = cleared, Weapon = new DataRef<WeaponStats>(0x5eed) });
+            using var document = JsonDocument.Parse(text);
+            SceneValue.ReadComponent(document.RootElement, schema, ctx.Ecs, held);
+
+            var back = ctx.Ecs.GetOrDefault<EveryReference>(held);
+            Assert.True(back.Target.IsNone);
+            Assert.Equal(0ul, back.Weapon.Id);
         });
 
         harness.Run();

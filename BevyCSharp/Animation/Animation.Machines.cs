@@ -1,3 +1,5 @@
+using Bevy.Interop;
+
 namespace Bevy;
 
 public static partial class Animation
@@ -24,8 +26,9 @@ public static partial class Animation
     /// <para>
     /// It moves once a frame, as the engine's messages are posted, so a parameter set during a
     /// frame is read at the start of the next. A model despawned takes its machine with it. A clip
-    /// the model does not have is found once the model arrives, said as an error on the log, and
-    /// the machine stopped, rather than ending the frame.
+    /// the model does not have is found once the model arrives, and an entity with no animated
+    /// scene under it at the machine's first step, each said as an error on the log and the machine
+    /// stopped, rather than ending the frame.
     /// </para>
     /// </remarks>
     /// <exception cref="ArgumentException">
@@ -89,9 +92,12 @@ public static partial class Animation
             {
                 running.Advance(scene);
             }
-            catch (ArgumentException error)
+            catch (Exception error) when (error is ArgumentException or BevyNativeException)
             {
-                // A clip the model lacks, which only the model can say and only once it arrives.
+                // A clip the model lacks, which only the model can say and only once it arrives, or
+                // an entity with no animated scene under it, whose clips the bridge answers are not
+                // there. Either stops this machine alone, said once, and the frame goes on to the
+                // rest of the machines, the areas after them and the message swap.
                 Log.Error($"The animation state machine on {scene} stopped. {error.Message}");
                 Machines.Remove(scene);
             }

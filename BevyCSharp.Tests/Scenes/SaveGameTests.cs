@@ -14,6 +14,15 @@ public partial struct Wallet
     public int Coins;
 }
 
+/// <summary>A component a save game keeps that names another entity, as a guard's mark is.</summary>
+[Behavior]
+[Persist]
+public partial struct Lookout
+{
+    /// <summary>The entity watched, or none.</summary>
+    public Entity Watching;
+}
+
 /// <summary>
 /// Covers saving a game as what play changed over the scenes it started from, and loading it back
 /// over the same scenes.
@@ -126,6 +135,118 @@ public sealed class SaveGameTests : IDisposable
             Assert.Equal(hero, ctx.Ecs.GetOrDefault<EveryKind>(arrow).Target);
         });
 
+        loading.Run();
+    }
+
+    /// <summary>
+    /// A scene placed twice in a level keeps each placing's saved entities apart, so play that loots
+    /// one of two chests a prefab places loads back with that chest looted and the other full. Each
+    /// placing gives the prefab's ids its own, mixed with its id in the level, which stays the same
+    /// between runs, where the prefab's ids alone would stand for both chests.
+    /// </summary>
+    [Fact]
+    public void AScenePlacedTwiceKeepsEachPlacingsSavedEntitiesApart()
+    {
+        var chest = Path.Combine(_folder.Path, "chest.scene.json");
+        var level = Path.Combine(_folder.Path, "level.scene.json");
+
+        using (var prefab = new EngineHarness(frames: 2))
+        {
+            prefab.OnContext(Stage.Startup, ctx =>
+            {
+                var full = ctx.Ecs.Spawn();
+                ctx.Ecs.SetName(full, "Chest");
+                ctx.Ecs.Add(full, Transform.Identity);
+                ctx.Ecs.Add(full, new Wallet { Coins = 5 });
+                ctx.Ecs.Add(full, SaveId.New());
+                SceneFile.Save(ctx.Ecs, chest);
+            });
+            prefab.Run();
+        }
+
+        using (var making = new EngineHarness(frames: 2))
+        {
+            making.OnContext(Stage.Startup, ctx =>
+            {
+                ctx.Ecs.GetRef<Transform>(SceneInstances.Spawn(ctx.Ecs, chest)).Translation = new Vec3(-5f, 0f, 0f);
+                ctx.Ecs.GetRef<Transform>(SceneInstances.Spawn(ctx.Ecs, chest)).Translation = new Vec3(5f, 0f, 0f);
+                SceneFile.Save(ctx.Ecs, level);
+            });
+            making.Run();
+        }
+
+        // The chest on one side or the other, by where its placing stands.
+        static Entity Chest(EcsWorld ecs, float side) => ecs.All().Single(entity => ecs.NameOf(entity) == "Chest"
+            && Math.Sign(ecs.GetRef<Transform>(ecs.ParentOf(entity)).Translation.X) == Math.Sign(side));
+
+        using (var playing = new EngineHarness(frames: 2))
+        {
+            playing.OnContext(Stage.Startup, ctx =>
+            {
+                SaveGame.Start(ctx.Ecs, level);
+                Assert.NotEqual(ctx.Ecs.GetRef<SaveId>(Chest(ctx.Ecs, -1f)), ctx.Ecs.GetRef<SaveId>(Chest(ctx.Ecs, 1f)));
+                ctx.Ecs.GetRef<Wallet>(Chest(ctx.Ecs, 1f)).Coins = 0;
+                SaveGame.Save(ctx.Ecs);
+            });
+            playing.Run();
+        }
+
+        using var loading = new EngineHarness(frames: 2);
+        loading.OnContext(Stage.Startup, ctx =>
+        {
+            var loaded = SaveGame.Load(ctx.Ecs);
+            Assert.Empty(loaded.Unknown);
+            Assert.Equal(5, ctx.Ecs.GetOrDefault<Wallet>(Chest(ctx.Ecs, -1f)).Coins);
+            Assert.Equal(0, ctx.Ecs.GetOrDefault<Wallet>(Chest(ctx.Ecs, 1f)).Coins);
+        });
+        loading.Run();
+    }
+
+    /// <summary>
+    /// A reference play cleared to none is saved as none and loads back as none over the scene's,
+    /// so a lookout that stopped watching the hero is not watching again after a load.
+    /// </summary>
+    [Fact]
+    public void AReferencePlayClearedLoadsBackAsNone()
+    {
+        var level = Path.Combine(_folder.Path, "level.scene.json");
+
+        using (var making = new EngineHarness(frames: 2))
+        {
+            making.OnContext(Stage.Startup, ctx =>
+            {
+                var hero = ctx.Ecs.Spawn();
+                ctx.Ecs.SetName(hero, "Hero");
+                ctx.Ecs.Add(hero, SaveId.New());
+
+                var lookout = ctx.Ecs.Spawn();
+                ctx.Ecs.SetName(lookout, "Lookout");
+                ctx.Ecs.Add(lookout, new Lookout { Watching = hero });
+                ctx.Ecs.Add(lookout, SaveId.New());
+
+                SceneFile.Save(ctx.Ecs, level);
+            });
+            making.Run();
+        }
+
+        using (var playing = new EngineHarness(frames: 2))
+        {
+            playing.OnContext(Stage.Startup, ctx =>
+            {
+                var lookout = SaveGame.Start(ctx.Ecs, level).Single(entity => ctx.Ecs.NameOf(entity) == "Lookout");
+                Assert.False(ctx.Ecs.GetRef<Lookout>(lookout).Watching.IsNone);
+                ctx.Ecs.GetRef<Lookout>(lookout).Watching = Entity.None;
+                Assert.Equal(1, SaveGame.Save(ctx.Ecs));
+            });
+            playing.Run();
+        }
+
+        using var loading = new EngineHarness(frames: 2);
+        loading.OnContext(Stage.Startup, ctx =>
+        {
+            var lookout = Assert.Single(SaveGame.Load(ctx.Ecs).Entities, entity => ctx.Ecs.NameOf(entity) == "Lookout");
+            Assert.True(ctx.Ecs.GetOrDefault<Lookout>(lookout).Watching.IsNone);
+        });
         loading.Run();
     }
 

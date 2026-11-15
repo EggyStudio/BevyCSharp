@@ -193,6 +193,13 @@ public static class SceneValue
                 json.WriteEndArray();
                 return true;
 
+            // A reference cleared to none is written as none, which reads back as none over what a
+            // component holds, where a null is passed over and leaves it, so a save keeps a target
+            // play cleared or a chest play emptied rather than the scene's coming back on a load.
+            case FieldKind.Entity or FieldKind.Asset or FieldKind.Data
+                when value is Entity { IsNone: true } or AssetHandle { IsValid: false } or IDataRef { Id: 0 }:
+                return WriteNone(json);
+
             case FieldKind.Entity when value is Entity entity:
                 return references.WriteEntity(json, entity);
 
@@ -299,9 +306,9 @@ public static class SceneValue
                 FieldKind.Color => Numbers(json, 4) is { } n ? new Color(n[0], n[1], n[2], n[3]) : null,
                 FieldKind.Enum => json.GetString(),
                 FieldKind.Flags => string.Join(", ", json.EnumerateArray().Select(name => name.GetString())),
-                FieldKind.Entity => references.ReadEntity(json),
-                FieldKind.Asset => references.ReadAsset(json, asset ?? AssetKind.Mesh),
-                FieldKind.Data => DataId(json),
+                FieldKind.Entity => IsNone(json) ? Entity.None : references.ReadEntity(json),
+                FieldKind.Asset => IsNone(json) ? AssetHandle.None : references.ReadAsset(json, asset ?? AssetKind.Mesh),
+                FieldKind.Data => IsNone(json) ? 0ul : DataId(json),
                 _ => null,
             };
         }
@@ -607,6 +614,21 @@ public static class SceneValue
 
         return id;
     }
+
+    // The name a reference cleared to none is written under, in an object of its own.
+    private const string NoneName = "none";
+
+    // A reference to nothing, as an object saying so rather than a null, which a reader passes over.
+    private static bool WriteNone(Utf8JsonWriter json)
+    {
+        json.WriteStartObject();
+        json.WriteBoolean(NoneName, true);
+        json.WriteEndObject();
+        return true;
+    }
+
+    private static bool IsNone(JsonElement json) =>
+        json.ValueKind == JsonValueKind.Object && json.TryGetProperty(NoneName, out var none) && none.ValueKind == JsonValueKind.True;
 
     /// <summary>Writes numbers as an array, refusing one JSON cannot hold.</summary>
     private static bool Numbers(Utf8JsonWriter json, params ReadOnlySpan<float> numbers)

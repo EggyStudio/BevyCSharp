@@ -84,7 +84,11 @@ internal static partial class SkyFog
             .SetNumbers("counts", 4, (ReadOnlySpan<uint>)[(uint)asked.Boxes.Count, 0u, 0u, 0u])
             .SetSampler("fog_sampler", SamplerSettings.ClampedTable);
         froxels.Integrate.Set("grid", reach);
-        Turn(camera, froxels, 0f);
+
+        // Bound for the frame they are in and not moved on, since a weather sets the fog every frame
+        // and Tick moves the froxels on once a frame. Moved on here as well, they would trade their
+        // images twice a frame, write one only and read the other, never written, as their history.
+        Bind(camera, froxels);
 
         draw.Set("froxels", new Vector4(1f, grid.Z, asked.Distance, 0f))
             .Set("boxes", boxes)
@@ -115,6 +119,13 @@ internal static partial class SkyFog
     {
         froxels.Frames++;
         froxels.Carried += froxels.Settings.Wind * delta;
+        Bind(camera, froxels);
+    }
+
+    // The frame's images and numbers on the froxels' dispatches, the image this frame writes and the
+    // one the last frame wrote as its history, which trade places as the frames go up by one.
+    private static void Bind(Entity camera, Froxels froxels)
+    {
         var now = froxels.Frames % 2;
         var settings = froxels.Settings;
 

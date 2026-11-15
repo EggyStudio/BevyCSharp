@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Bevy;
 using ImGuiNET;
 
@@ -112,9 +113,10 @@ public static class ComponentFields
     /// drawn and what is there after it.
     /// </para>
     /// <para>
-    /// Under the field's own name as the key, so a drag along a handle or a number typed one
-    /// character at a time is one edit rather than one per frame. The key on an edit exists for
-    /// that.
+    /// Under the field's own name on the entity it is on as the key, so a drag along a handle or a
+    /// number typed one character at a time is one edit rather than one per frame, while the same
+    /// field edited next on another entity, or on another data asset, is an edit of its own. The
+    /// key on an edit exists for that.
     /// </para>
     /// </remarks>
     /// <param name="ctx">This frame.</param>
@@ -158,7 +160,7 @@ public static class ComponentFields
                     field.Write(world, at, now);
                     SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
                 },
-                id);
+                KeyOf(entity, schema, id));
         }
 
         // And whatever the field asked to have run once it had changed, which is how a component
@@ -203,6 +205,16 @@ public static class ComponentFields
                 SceneInstances.Mark(redo, at, schema.QualifiedName, field.Name);
             });
     }
+
+    // The key a run of edits to one field is one edit under, the field's id on the entity it is on,
+    // or on the data asset whose schema is bound to it where a row is drawn with no entity, so the
+    // same field edited on two entities or two assets in a row is two edits, each undone on its own.
+    private static string KeyOf(Entity entity, ComponentSchema schema, string id) =>
+        (entity.IsNone ? Bound.GetValue(schema, _ => $"data{Interlocked.Increment(ref _bound)}") : $"entity{entity.Bits}") + id;
+
+    // A number for each schema bound to one data asset, held only while the schema is.
+    private static readonly ConditionalWeakTable<ComponentSchema, string> Bound = [];
+    private static int _bound;
 
     /// <summary>One field, drawn as what it is.</summary>
     internal static void Row(
