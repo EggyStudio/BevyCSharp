@@ -48,6 +48,8 @@ public sealed class OtherComponentTests
         var frame = 0;
         FrameCosts? costs = null;
         var wrong = new List<string>();
+        var stepped = 0f;
+        var spread = Interlocked.Read(ref BehaviorRunners.ParallelChunkCount);
 
         harness.OnContext(Stage.Startup, ctx =>
         {
@@ -72,6 +74,7 @@ public sealed class OtherComponentTests
             // Every one moved by its own speed the same number of times, so a transform handed to
             // the wrong entity's method would show.
             var runs = ecs.GetOrDefault<Transform>(movers[0]).Translation.X;
+            stepped = runs;
             for (var i = 0; i < Count; i++)
             {
                 var x = ecs.GetOrDefault<Transform>(movers[i]).Translation.X;
@@ -81,6 +84,11 @@ public sealed class OtherComponentTests
 
         harness.Run();
 
+        // The four updates before the fifth frame's start each moved the first entity by its speed
+        // of one, so a spread that wrote nothing, which leaves every entity agreeing at zero, fails
+        // here rather than passing the comparison below.
+        Assert.Equal(4f, stepped);
+        Assert.True(Interlocked.Read(ref BehaviorRunners.ParallelChunkCount) > spread, "no chunk was spread across threads");
         Assert.Empty(wrong);
         Assert.NotNull(costs);
 

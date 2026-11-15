@@ -73,8 +73,10 @@ public sealed class StreamingTests
                 // Nothing is taken until both have finished, so both compete for the same frame.
                 if (Streaming.Pending > 0) return;
 
-                if (highFrame is null && Streaming.TryTake(high, out _)) highFrame = frame;
+                // The low one asked for first, so the budget would hand it over before the high one
+                // and only the priority rule can make it wait.
                 if (lowFrame is null && Streaming.TryTake(low, out _)) lowFrame = frame;
+                if (highFrame is null && Streaming.TryTake(high, out _)) highFrame = frame;
 
                 if (lowFrame is not null && highFrame is not null) App.RequestExit();
             });

@@ -309,21 +309,44 @@ public static class EditorPlay
         Script() is { } script ? Path.Combine(Path.GetDirectoryName(script)!, "game", rid) : null;
 
     /// <summary>
-    /// Whether the bridge in a folder is newer than every Rust source, so building it again would
-    /// make the same library.
+    /// Whether the bridge in a folder is newer than everything it is built from, so building it
+    /// again would make the same library.
     /// </summary>
     private static bool Current(string? folder)
     {
         if (folder is null || !Directory.Exists(folder)) return false;
         if (Directory.GetFiles(folder).FirstOrDefault() is not { } library) return false;
 
-        var sources = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Script()!)!)!, "native", "bevy_csharp");
-        if (!Directory.Exists(sources)) return true;
+        return Current(library, Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(Script()!)!)!, "native"));
+    }
 
-        var newest = Directory.GetFiles(sources, "*.rs", SearchOption.AllDirectories)
-            .Append(Path.Combine(sources, "Cargo.toml"))
+    /// <summary>
+    /// Whether a library is newer than every file the bridge in a native folder is built from, the
+    /// files the library's own build holds a staged bridge to, everything under the crate's
+    /// sources but their tests and fixtures, the crate's Cargo.toml and build.rs, and the
+    /// workspace's Cargo.toml and Cargo.lock.
+    /// </summary>
+    /// <remarks>
+    /// The shaders count as the Rust does, since the bridge carries its Slang and WGSL in itself,
+    /// and so does the workspace's lock, since a crate it moves builds another library. A folder
+    /// holding no crate is a checkout without the bridge's sources, whose library is as current
+    /// as it can be.
+    /// </remarks>
+    internal static bool Current(string library, string native)
+    {
+        var crate = Path.Combine(native, "bevy_csharp");
+        var sources = Path.Combine(crate, "src");
+        if (!Directory.Exists(crate)) return true;
+
+        string[] built = Directory.Exists(sources) ? Directory.GetFiles(sources, "*", SearchOption.AllDirectories) : [];
+        var newest = built
+            .Where(file => Path.GetFileName(file) != "tests.rs"
+                && !Path.GetRelativePath(sources, file).Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).Contains("fixtures"))
+            .Concat([Path.Combine(crate, "Cargo.toml"), Path.Combine(crate, "build.rs"), Path.Combine(native, "Cargo.toml"), Path.Combine(native, "Cargo.lock")])
             .Where(File.Exists)
-            .Max(File.GetLastWriteTimeUtc);
+            .Select(File.GetLastWriteTimeUtc)
+            .DefaultIfEmpty(DateTime.MinValue)
+            .Max();
 
         return File.GetLastWriteTimeUtc(library) >= newest;
     }

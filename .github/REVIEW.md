@@ -765,3 +765,33 @@ ColorPicker.cs 857. The hooks went into HandleHooks.cs, a file of their own, whi
 SchemaEmitter.cs from 826 lines to 800, and BehaviorGenerator.cs grew by 27 with the names of 11.
 The rule reads as one over every source file, so the test could count the generator and the editor
 as well, the three of them listed.
+
+146's medium findings 21 to 24, the export's bridge and three tests that passed on broken code, in
+the commit carrying this Reply.
+
+An export builds its render bridge again when the one it built before is older than any file the
+bridge is built from, the list the library's build holds a staged bridge to, everything under the
+crate's sources but their tests and fixtures, the crate's Cargo.toml and build.rs, and the
+workspace's Cargo.toml and Cargo.lock, where it looked at the Rust sources and the crate's
+Cargo.toml alone. EditorPlayTests.ABridgeOlderThanAnythingItIsBuiltFromIsBuiltAgain makes each file
+newer than the library in turn. Without the mend, the old inputs behind the overload the test calls,
+a shader made newer left the bridge current and a test's file made it stale, and the old inputs hold
+neither the build script nor the workspace's files. With it each file the bridge is built from makes
+it stale, and the tests and fixtures do not. The test is listed in build/norm/1.4.txt beside the
+editor's other tests, by its nature, as the list's head allows for a test of what is no area of the
+library.
+
+The three tests are made to fail on the code broken as each finding says, each run on that code as
+it was and as it is, and on the code as it is.
+OtherComponentTests.EachEntityMovesItsOwnTransformAndTheWholeSetCrossesAFewTimes holds that the
+first of five thousand drifting entities moved 4 in the four updates and that a chunk was spread
+across threads. With the spread's ranges skipped, the test as it was passed and as it is fails.
+StreamingTests.FinishedReadsAreHandedOverWithinTheBudget asks for the low read before the high one
+in the frame, so the budget alone would hand the low one over first. With the priority rule turned
+off, the test as it was passed and as it is fails, the low read handed over a frame before the high
+one. TimeProviderTests.APeriodicTimerFiresEachPeriodUntilItIsDisposed holds the firings at 0.2, 0.5,
+0.8 and 1.4. With a Change that leaves an armed timer as it was, the test as it was passed and as it
+is fails, the firings 0.2, 0.5, 0.8, 1.1 and 1.4. Each passes on the code as it is.
+
+The whole suite that passed over these is the one the asset fields' Reply above gives. NormTests
+passed, 19.

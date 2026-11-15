@@ -74,12 +74,13 @@ public sealed class TimeProviderTests
 
         harness.Run();
 
-        // Every 0.3 seconds from 0.2 until the change in the tenth frame, then 0.5 seconds after
-        // the change, and nothing after the sixteenth frame.
-        Assert.True(fired.Count >= 4, $"the timer fired at {string.Join(", ", fired)}");
-        for (var i = 1; i < fired.Count; i++)
-            Assert.True(fired[i] - fired[i - 1] >= 0.3 - 1e-6, $"the timer fired at {string.Join(", ", fired)}");
-        Assert.All(fired, at => Assert.True(at <= 1.6 + 1e-6, $"the timer fired at {at} seconds after it was disposed"));
+        // Every 0.3 seconds from 0.2 until the change in the tenth frame, at 0.9 seconds, then 0.5
+        // seconds after the change, and nothing after the sixteenth frame, at 1.5 seconds. A change
+        // that left the timer as it was would fire at 1.1 as well.
+        double[] due = [0.2, 0.5, 0.8, 1.4];
+        Assert.True(
+            fired.Count == due.Length && fired.Zip(due).All(pair => Math.Abs(pair.First - pair.Second) < 1e-6),
+            $"the timer fired at {string.Join(", ", fired)}, not {string.Join(", ", due)}");
     }
 
     /// <summary>
