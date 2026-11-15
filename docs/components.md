@@ -273,14 +273,16 @@ public partial struct Patrol
 }
 ```
 
-An inline list costs nothing to keep and iterates with everything else, and its capacity is part
-of its type, from `InlineList4<T>` to `InlineList64<T>`. An `EcsList<T>` or `EcsMap<K, V>` grows
-without bound and holds any type, and is made on its first write. The component holds a handle to it, which a hook
-frees when the component leaves its entity, by removal or despawn, and a handle used after that
-throws rather than reading a list that has since gone to another entity. Cloning the entity
-(`ctx.Ecs.Clone(entity)`) gives the copy lists of its own. Both are drawn by the
-inspector as rows, a list with a grip to reorder each item and a map with its keys beside its
-values, and written to a scene as an array or an object.
+An inline list costs nothing to keep and iterates with everything else, and its capacity is part of
+its type, from `InlineList4<T>` to `InlineList64<T>`. An `EcsList<T>` or `EcsMap<K, V>` grows
+without bound and holds any type, and is made on its first write. The component holds a handle to
+it, which a hook frees when the component leaves its entity, by removal or despawn, and a handle
+used after that throws rather than reading a list that has since gone to another entity. Cloning the
+entity (`ctx.Ecs.Clone(entity)`) gives the copy lists of its own. Both are drawn by the inspector as
+rows, a list with a grip to reorder each item and a map with its keys beside its values, and written
+to a scene as an array or an object. The hooks find a handle wherever the component holds it, in a
+private field, an auto-property, a struct inside it or an inline list's items, and the build warns
+of one inside a type no code outside it can name (BCS010), which no hook can reach.
 
 An item can be a struct or a class with fields of its own, such as an `InlineList8<Waypoint>`, or a
 `List<LootEntry>` in a data asset. Each is drawn as a fold of its fields, named by its first text,

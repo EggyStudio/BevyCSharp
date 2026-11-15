@@ -719,3 +719,49 @@ Shared: a behavior method's copy of its component, and of those it takes by refe
 back only where the method changed it, so a write made through the world while it ran, or by an
 observer it set off, stays. The sibling hands a method its entity's other components too, so this is
 offered for it to read.
+
+146's medium findings 9 and 11, the generator's, in the commit carrying this Reply, each with a test
+that failed without its mend.
+
+A component's remove and clone hooks are built from its whole layout, where they were built from the
+inspector's rows. HandleHooks follows every instance field whatever its access, through the structs
+it holds however deep and into an inline list's items, and reaches a field that code outside its
+type cannot name through an UnsafeAccessor, which the runtime binds by name and which reflects on
+nothing. A handle inside a type no code outside it can name is said as BCS010, a warning.
+EcsListTests.HandlesOutOfTheInspectorsReachAreFreedWithTheirEntityAndCopiedForAClone holds a list in
+a private field, a text in a private auto-property, a note in a struct marked Hidden and words in
+two items of an inline list, clones the entity, changes the copy's words and despawns both. Without
+the mend the clone took no slot of its own, five where ten were due, and with it the five made were
+ten after the clone, the first entity's words stayed Exit, and the store came back to where it
+began. GeneratorAttributeTests.AHandleNoHookCanReachIsSaid holds a text in a private struct and
+finds BCS010 naming the component and the path, where nothing was said without the mend.
+docs/components.md says both. A public auto-property holding text makes the generated schema read it
+through text's conversion to a string with a null beside it, a warning CS8625 that a build with
+warnings as errors refuses, which the test's private one does not meet, left for a mend of its own.
+
+Two behaviors of one name in one namespace, each declared in a type of its own, are told apart by
+the types they are declared in, in the file and the runner each is given, its systems' names and the
+schema's full name, which is the CLR name Bevy knows the component by, such as
+Game.Player+Controller. The namespace and the name alone gave both one file, and the second took
+every behavior of the assembly with it. A scene written before finds a nested behavior by the name
+it had, kept as a former name, and a behavior declared in its namespace keeps every name it had.
+GeneratorAttributeTests.TwoBehaviorsOfOneNameDeclaredInTypesOfTheirOwnAreBothGenerated declares a
+Controller in Player and one in Vehicle. Without the mend the generator failed with CS8785, and with
+it both are generated under Game.Player+Controller and Game.Vehicle+Controller, their systems
+Player.Controller.Tick and Vehicle.Controller.Tick. docs/behaviors.md names a nested behavior's
+systems so.
+
+The whole suite that passed over these mends is the one the asset fields' Reply above gives.
+NormTests passed, 19.
+
+Shared: a component's remove and clone hooks are built from its whole layout, through private
+fields, auto-properties, nested structs and inline lists' items, and a behavior declared in another
+type is named by the types it is declared in, so two of one name in one namespace both build. The
+sibling's generator may meet both, so this is offered for it to read.
+
+Rule: N 1.3's test counts the library, the tests, the examples and the bridge, and leaves out the
+generator and the editor, where BehaviorGenerator.cs holds 1,346 lines, DetailsPanel.cs 928 and
+ColorPicker.cs 857. The hooks went into HandleHooks.cs, a file of their own, which brought
+SchemaEmitter.cs from 826 lines to 800, and BehaviorGenerator.cs grew by 27 with the names of 11.
+The rule reads as one over every source file, so the test could count the generator and the editor
+as well, the three of them listed.

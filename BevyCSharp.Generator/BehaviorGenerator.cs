@@ -841,7 +841,7 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
     /// Whether a type is a handle into the managed store, which has to be freed when the component
     /// holding it goes.
     /// </summary>
-    private static bool IsStored(ITypeSymbol type) =>
+    internal static bool IsStored(ITypeSymbol type) =>
         type is INamedTypeSymbol { Name: "EcsList" or "EcsMap" or "EcsText" } named
         && named.ContainingNamespace?.ToDisplayString() == "Bevy";
 
@@ -966,6 +966,13 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
 
         var fields = ReadFields(type);
 
+        var (handles, unreached) = HandleHooks.Of(type, context.SemanticModel.Compilation);
+        if (unreached is not null)
+        {
+            diagnostics.Add(Diagnostic.Create(
+                BehaviorDiagnostics.HandleOutOfReach, declaration.Identifier.GetLocation(), type.Name, unreached));
+        }
+
         // A behavior with fields and no methods is a plain data component, and one with neither is
         // a marker, such as a wall a game's script finds by it. Both are described for the editor
         // and a scene, so neither is warned about.
@@ -986,10 +993,12 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
                 ? null
                 : type.ContainingNamespace.ToDisplayString(),
             Name = type.Name,
+            Within = WithinOf(type),
             QualifiedName = type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat),
             Methods = methods,
             Fields = fields,
-            FormerNames = FormerNamesOf(type),
+            FormerNames = [.. FormerNamesOf(type), .. NestedFormerName(type)],
+            Handles = handles,
             Version = VersionOf(type),
             Migrates = Migration(type) is not null,
             Persisted = type.GetAttributes().Any(attribute => attribute.AttributeClass?.Name == RecognizedAttributes.Persist),
@@ -1029,6 +1038,24 @@ public sealed class BehaviorGenerator : IIncrementalGenerator
         type.Name == "JsonObject" && type.ContainingNamespace?.ToDisplayString() == "System.Text.Json.Nodes";
 
     /// <summary>The names a type's <c>[FormerName]</c> attributes say it had.</summary>
+    /// <summary>The types a type is declared in, outermost first and joined by dots, or empty.</summary>
+    private static string WithinOf(INamedTypeSymbol type)
+    {
+        var names = new List<string>();
+        for (var outer = type.ContainingType; outer is not null; outer = outer.ContainingType) names.Insert(0, outer.Name);
+        return string.Join(".", names);
+    }
+
+    /// <summary>
+    /// The name a behavior declared in another type was given before its name was the one Bevy
+    /// knows it by, its namespace and its own name alone, so a scene written then still finds it.
+    /// </summary>
+    private static IEnumerable<string> NestedFormerName(INamedTypeSymbol type)
+    {
+        if (type.ContainingType is null) yield break;
+        yield return type.ContainingNamespace.IsGlobalNamespace ? type.Name : type.ContainingNamespace.ToDisplayString() + "." + type.Name;
+    }
+
     private static IReadOnlyList<string> FormerNamesOf(INamedTypeSymbol type) =>
     [
         .. type.GetAttributes()

@@ -174,7 +174,8 @@ app.AddSystem(settle, new SystemDescriptor(world => Settle(new BehaviorContext(w
 
 Systems in one stage run in an order Bevy picks as it builds the schedule, which is not the order
 they were written or added in and may differ between runs. A system that reads what another wrote
-this frame names it with `[After]` or `[Before]`, by its system's name, `Behavior.Method`:
+this frame names it with `[After]` or `[Before]`, by its system's name, `Behavior.Method`, or
+`Outer.Behavior.Method` for a behavior declared in another type:
 
 ```csharp
 [OnUpdate]

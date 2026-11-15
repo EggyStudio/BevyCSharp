@@ -566,6 +566,82 @@ public sealed class GeneratorAttributeTests
         Assert.Contains("Weather", reported.GetMessage(), StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// Two behaviors of one name in one namespace, each declared in a type of its own, are both
+    /// generated, each under the name Bevy knows it by and with systems named after its type.
+    /// </summary>
+    [Fact]
+    public void TwoBehaviorsOfOneNameDeclaredInTypesOfTheirOwnAreBothGenerated()
+    {
+        const string source = """
+            using Bevy;
+
+            namespace Game;
+
+            public static class Player
+            {
+                [Behavior]
+                public partial struct Controller { public int Speed; [OnUpdate] public void Tick(BehaviorContext ctx) { } }
+            }
+
+            public static class Vehicle
+            {
+                [Behavior]
+                public partial struct Controller { public int Gear; [OnUpdate] public void Tick(BehaviorContext ctx) { } }
+            }
+            """;
+
+        var references = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+            .Select(assembly => MetadataReference.CreateFromFile(assembly.Location));
+        var compilation = CSharpCompilation.Create(
+            "Nested", [CSharpSyntaxTree.ParseText(source)], references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        CSharpGeneratorDriver.Create(new BehaviorGenerator().AsSourceGenerator())
+            .RunGeneratorsAndUpdateCompilation(compilation, out var generated, out var diagnostics);
+
+        Assert.Empty(diagnostics.Where(d => d.Severity >= DiagnosticSeverity.Warning).Select(d => d.ToString()));
+        Assert.Empty(generated.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).Select(d => d.ToString()));
+        var written = string.Join("\n", generated.SyntaxTrees.Select(tree => tree.ToString()));
+        foreach (var name in new[] { "\"Game.Player+Controller\"", "\"Game.Vehicle+Controller\"", "\"Player.Controller.Tick\"", "\"Vehicle.Controller.Tick\"" })
+            Assert.Contains(name, written, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// A handle inside a type no code outside it can name, which no hook can reach, is said as a
+    /// warning naming the component and the path to it.
+    /// </summary>
+    [Fact]
+    public void AHandleNoHookCanReachIsSaid()
+    {
+        const string source = """
+            using Bevy;
+
+            namespace Game;
+
+            [Behavior]
+            public partial struct Stash
+            {
+                private Inner _inner;
+
+                private struct Inner { public EcsText Text; }
+            }
+            """;
+
+        var references = AppDomain.CurrentDomain.GetAssemblies()
+            .Where(assembly => !assembly.IsDynamic && !string.IsNullOrEmpty(assembly.Location))
+            .Select(assembly => MetadataReference.CreateFromFile(assembly.Location));
+        var compilation = CSharpCompilation.Create(
+            "Unreached", [CSharpSyntaxTree.ParseText(source)], references, new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+
+        CSharpGeneratorDriver.Create(new BehaviorGenerator().AsSourceGenerator())
+            .RunGeneratorsAndUpdateCompilation(compilation, out _, out var diagnostics);
+
+        var reported = Assert.Single(diagnostics, diagnostic => diagnostic.Id == "BCS010");
+        Assert.Contains("'Stash'", reported.GetMessage(), StringComparison.Ordinal);
+        Assert.Contains("'_inner.Text'", reported.GetMessage(), StringComparison.Ordinal);
+    }
+
     /// <summary>What the behavior generator writes for a source, every file of it together.</summary>
     private static string Generated(string source)
     {

@@ -58,41 +58,7 @@ internal static class SchemaEmitter
                 .Append(SchemaMethodName(model)).Append("());\n");
         }
 
-        // A component holding a stored list frees it as it leaves its entity, or every despawn
-        // leaks the list. The value the hook is handed is read-only, so each handle is copied out
-        // before it is freed.
-        foreach (var model in described)
-        {
-            var held = model.Fields.Where(field => field.IsHandle && !field.IsProperty).ToList();
-            if (held.Count == 0) continue;
-
-            source.Append("        global::Bevy.ComponentHooks.OnRemove<").Append(model.QualifiedName)
-                .Append(">(static (in ").Append(model.QualifiedName).Append(" component) =>\n")
-                .Append("        {\n");
-
-            for (var i = 0; i < held.Count; i++)
-            {
-                source.Append("            var held").Append(i).Append(" = component.")
-                    .Append(held[i].Name).Append(";\n")
-                    .Append("            held").Append(i).Append(".Free();\n");
-            }
-
-            source.Append("        });\n");
-
-            // And a clone gets copies of its own, or the clone and the original would share a
-            // list the first of them to go frees for both.
-            source.Append("        global::Bevy.ComponentHooks.OnClone<").Append(model.QualifiedName)
-                .Append(">(static (ref ").Append(model.QualifiedName).Append(" component) =>\n")
-                .Append("        {\n");
-
-            foreach (var field in held)
-            {
-                source.Append("            component.").Append(field.Name).Append(" = component.")
-                    .Append(field.Name).Append(".Copy();\n");
-            }
-
-            source.Append("        });\n");
-        }
+        var accessors = HandleHooks.Emit(source, described);
 
         source.Append("    }\n");
 
@@ -101,6 +67,8 @@ internal static class SchemaEmitter
             source.Append('\n');
             EmitSchema(source, model);
         }
+
+        HandleHooks.EmitAccessors(source, accessors);
 
         source.Append("}\n");
         return source.ToString();
@@ -793,9 +761,15 @@ internal static class SchemaEmitter
         return text.ToString();
     }
 
-    /// <summary>The name Bevy knows the component by, which is its CLR full name.</summary>
-    private static string FullName(BehaviorModel model) =>
-        model.Namespace is null ? model.Name : model.Namespace + "." + model.Name;
+    /// <summary>
+    /// The name Bevy knows the component by, which is its CLR full name, each type it is declared
+    /// in joined to it by a plus.
+    /// </summary>
+    private static string FullName(BehaviorModel model)
+    {
+        var name = model.Within.Length == 0 ? model.Name : model.Within.Replace('.', '+') + "+" + model.Name;
+        return model.Namespace is null ? name : model.Namespace + "." + name;
+    }
 
     /// <summary>
     /// The full names a type's <c>[FormerName]</c> attributes give, with a name given alone placed in

@@ -106,4 +106,16 @@ internal static class BehaviorDiagnostics
         category: Category,
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    /// <summary>BCS010: a handle the component's hooks cannot reach.</summary>
+    internal static readonly DiagnosticDescriptor HandleOutOfReach = new(
+        id: "BCS010",
+        title: "A component holds a handle its hooks cannot reach",
+        messageFormat:
+        "'{0}' holds a stored list, map or text at '{1}' inside a type no code outside it can name, so "
+        + "the hook that frees it as the component leaves its entity cannot reach it, and it is kept "
+        + "for the life of the process and shared by a clone. Make that type internal or public.",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true);
 }

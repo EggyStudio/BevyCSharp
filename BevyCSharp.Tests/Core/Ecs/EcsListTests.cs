@@ -28,6 +28,47 @@ public partial struct Ledger
     public EcsMap<Vec3, float> Heights;
 }
 
+/// <summary>An item an inline list holds, with words of its own.</summary>
+public struct Placard
+{
+    /// <summary>What it says.</summary>
+    public EcsText Words;
+}
+
+/// <summary>A note in a struct of its own.</summary>
+public struct Folded
+{
+    /// <summary>The note.</summary>
+    public EcsText Note;
+}
+
+/// <summary>A component holding handles where the inspector's rows do not reach.</summary>
+[Behavior]
+public partial struct Tucked
+{
+    private EcsList<int> _visited;
+
+    /// <summary>A caption, kept by an auto-property no code outside the component reads.</summary>
+    private EcsText Caption { get; set; }
+
+    /// <summary>A note in a struct the inspector does not take apart.</summary>
+    [Hidden]
+    public Folded Fold;
+
+    /// <summary>Placards, each holding words of its own.</summary>
+    public InlineList8<Placard> Placards;
+
+    /// <summary>Notes a place as visited, in a list no code outside the component reads, under a caption.</summary>
+    public void Visit(int place, string caption)
+    {
+        _visited.Add(place);
+        Caption = caption;
+    }
+
+    /// <summary>How many places were visited.</summary>
+    public readonly int Visits() => _visited.Count;
+}
+
 /// <summary>
 /// Covers the lists and dictionaries a component holds a handle to, and the hook that frees them
 /// with it.
@@ -35,6 +76,49 @@ public partial struct Ledger
 [Collection("engine")]
 public sealed class EcsListTests
 {
+    /// <summary>
+    /// A handle in a private field, an auto-property, a struct the inspector leaves whole or an
+    /// inline list's item is freed with its entity and copied for a clone, as one in a public field is.
+    /// </summary>
+    [Fact]
+    public void HandlesOutOfTheInspectorsReachAreFreedWithTheirEntityAndCopiedForAClone()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var (made, cloned, freed, kept) = (0, 0, -1, "");
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var before = EcsStore.Live;
+
+            var entity = ctx.Ecs.Spawn();
+            ctx.Ecs.Add(entity, default(Tucked));
+            ref var tucked = ref ctx.Ecs.GetRef<Tucked>(entity);
+            tucked.Visit(3, "Harbor");
+            tucked.Fold.Note.Value = "Low tide";
+            tucked.Placards.Add(new Placard { Words = "Exit" });
+            tucked.Placards.Add(new Placard { Words = "Shop" });
+            made = EcsStore.Live - before;
+
+            var copy = ctx.Ecs.Clone(entity);
+            cloned = EcsStore.Live - before;
+
+            // The copy's words are its own, so changing them leaves the first entity's as they were.
+            ctx.Ecs.GetRef<Tucked>(copy).Placards[0].Words.Value = "Entrance";
+            kept = ctx.Ecs.GetOrDefault<Tucked>(entity).Placards.ItemAt(0).Words.Value;
+
+            ctx.Ecs.Despawn(copy);
+            ctx.Ecs.Despawn(entity);
+            freed = EcsStore.Live - before;
+        });
+
+        harness.Run();
+
+        Assert.Equal(5, made);
+        Assert.Equal(10, cloned);
+        Assert.Equal("Exit", kept);
+        Assert.Equal(0, freed);
+    }
+
     [Fact]
     public void AListIsFreedWhenItsEntityIsDespawned()
     {

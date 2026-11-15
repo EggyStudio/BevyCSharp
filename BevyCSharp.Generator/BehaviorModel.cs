@@ -351,15 +351,30 @@ internal sealed record BehaviorModel
     /// <summary>The struct's simple name.</summary>
     public string Name { get; init; } = string.Empty;
 
+    /// <summary>
+    /// The types a behavior is declared in, outermost first and joined by dots, or empty for one
+    /// declared in its namespace itself.
+    /// </summary>
+    /// <remarks>
+    /// Two behaviors of one name in one namespace, each declared in a type of its own, are told
+    /// apart by it, in the file, the runner and the systems each is given and in the name Bevy
+    /// knows it by, where a key of the namespace and the name alone would be the same for both and
+    /// the second file of that name would take every behavior of the assembly with it.
+    /// </remarks>
+    public string Within { get; init; } = string.Empty;
+
+    /// <summary>The struct's name in its namespace, the types it is declared in first, joined by dots.</summary>
+    public string NestedName => Within.Length == 0 ? Name : Within + "." + Name;
+
     /// <summary>The fully qualified struct name, with a <c>global::</c> prefix.</summary>
     public string QualifiedName { get; init; } = string.Empty;
 
     /// <summary>Name of the generated runner class.</summary>
-    public string RunnerName => Name + "_Behavior";
+    public string RunnerName => NestedName.Replace('.', '_') + "_Behavior";
 
     /// <summary>A globally unique, identifier-safe key for this behavior.</summary>
     public string UniqueKey =>
-        (Namespace is null ? Name : Namespace + "." + Name).Replace('.', '_');
+        (Namespace is null ? NestedName : Namespace + "." + NestedName).Replace('.', '_');
 
     /// <summary>The stage methods found on the struct.</summary>
     public IReadOnlyList<StageMethod> Methods { get; init; } = [];
@@ -397,6 +412,12 @@ internal sealed record BehaviorModel
     /// </remarks>
     public IReadOnlyList<BehaviorInvokable> Invokables { get; init; } = [];
 
+    /// <summary>
+    /// The handles into the managed store the struct holds, each the path to it through every
+    /// field, whatever its access, which its remove and clone hooks free and copy.
+    /// </summary>
+    public EquatableArray<EquatableArray<HandleStep>> Handles { get; init; }
+
     /// <summary>Value equality over the contents, so incremental caching works.</summary>
     public bool Equals(BehaviorModel? other) =>
         other is not null
@@ -405,7 +426,8 @@ internal sealed record BehaviorModel
         && QualifiedName == other.QualifiedName
         && Methods.SequenceEqual(other.Methods)
         && Fields.SequenceEqual(other.Fields)
-        && Invokables.SequenceEqual(other.Invokables);
+        && Invokables.SequenceEqual(other.Invokables)
+        && Handles.Equals(other.Handles);
 
     /// <inheritdoc/>
     public override int GetHashCode()

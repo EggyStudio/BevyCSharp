@@ -22,7 +22,7 @@ internal static class BehaviorEmitter
 
         source.Append('\n')
             .Append("/// <summary>Generated Bevy systems for <see cref=\"")
-            .Append(model.Name).Append("\"/>.</summary>\n")
+            .Append(model.QualifiedName).Append("\"/>.</summary>\n")
             .Append("internal static class ").Append(model.RunnerName).Append('\n')
             .Append("{\n");
 
@@ -238,7 +238,7 @@ internal static class BehaviorEmitter
 
     /// <summary>The stable identifier a system is registered and toggled under.</summary>
     private static string SystemId(BehaviorModel model, StageMethod method) =>
-        $"{model.Name}.{method.Name}";
+        $"{model.NestedName}.{method.Name}";
 
     /// <summary>The name of the generated system method for one stage method.</summary>
     private static string SystemMethodName(BehaviorModel model, StageMethod method) =>
