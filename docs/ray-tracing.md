@@ -188,7 +188,11 @@ ray asking for that bit alone meets the meshes that cast shadows, as Bevy's shad
 and one given no mask meets them all. A mesh a compute shader
 deforms in the pool is traced as it was until `Shaders.RebuildRayScene(scene, mesh)` builds it
 again. `Shaders.SupportsRayQueries`
-says whether the device can build one, which takes ray tracing hardware on Vulkan.
+says whether the device can build one, which takes ray tracing hardware on Vulkan or Mesa's
+lavapipe, which traces on the processor. The scene fills an empty slot with a stand-in of mask zero,
+which no ray meets, so a slot keeps its number whatever is empty before it, and lavapipe meets
+nothing in an instance laid after such a stand-in, so a scene meant to be traced there fills its
+slots from zero with none empty between them.
 
 SPIR-V passed through reaches the driver without the checks WGSL gets, so a shader reading past a
 buffer's end reads whatever is there. The bridge builds the layout from Slang's reflection, so

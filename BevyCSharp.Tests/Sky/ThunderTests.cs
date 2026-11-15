@@ -113,6 +113,11 @@ public sealed class ThunderTests
             Width = 320,
             Height = 180,
             Frames = 1500,
+
+            // On a set frame time, since the flash dies away over half a second of the game's
+            // clock, and four frames of a device that draws slowly, as a CPU device does, can
+            // pass that before the lit picture is taken.
+            Configure = config => config.FrameSeconds = 1.0 / 60.0,
             Scene = ecs =>
             {
                 camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f, Far = 5_000f });

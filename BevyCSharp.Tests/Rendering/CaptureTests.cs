@@ -32,7 +32,7 @@ public sealed class CaptureTests
 
         CapturedImage? picture = null;
 
-        using var app = new App(Config.OffscreenFor(320, 180, frames: 120));
+        using var app = new App(Config.OffscreenFor(320, 180, frames: 3000));
 
         app.AddPlugin(new EnginePlugin());
 
@@ -52,21 +52,25 @@ public sealed class CaptureTests
             },
             "Test.Scene"));
 
+        var ready = 0;
         app.AddSystem(Stage.Update, new SystemDescriptor(
             world =>
             {
                 var asked = world.Resource<Asked>();
 
-                if (world.Resource<Time>().FrameCount == 10)
+                // Asked for once every pipeline has been ready three frames running, as
+                // PictureRun.Capture asks, since the camera draws nothing into its target until
+                // they are, and a device compiling them slowly from a cold shader cache is still
+                // compiling at any frame counted from the start.
+                if (!world.TryGetResource<Ticket>(out var ticket))
                 {
-                    world.InsertResource(new Ticket(Render.BeginCapture(asked.Target)));
+                    ready = world.Resource<Time>().FrameCount >= 3 && Render.PipelinesReady() ? ready + 1 : 0;
+                    if (ready >= 3) world.InsertResource(new Ticket(Render.BeginCapture(asked.Target)));
                     return;
                 }
 
-                if (picture is not null) return;
-                if (!world.TryGetResource<Ticket>(out var ticket)) return;
-
-                if (Render.TryReadCapture(ticket.Capture, out var arrived)) picture = arrived;
+                if (picture is null && Render.TryReadCapture(ticket.Capture, out var arrived)) picture = arrived;
+                if (picture is not null) App.RequestExit();
             },
             "Test.Read"));
 

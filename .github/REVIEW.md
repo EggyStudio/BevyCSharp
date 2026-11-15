@@ -1,74 +1,80 @@
 # Review
 
-Reviewed up to `3ec197c2`, the editor history's three mends, an inspector edit spread over the
-selection undone on every entity, a loaded scene starting with nothing to undo and a redone
-duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15, its build run 43717197640 green
-by 15:02, and `392b8885`, the saves' three mends, a scene the game loaded itself left standing by a
-load, a ulong past a long kept, and an unreadable scene's entries kept, pushed at 13:35, its build
-run 43714466210 green at 14:05, the form kept and the messages free of numbers. Before them
-`773313da`, item 146's six high findings, each with a test that failed without its mend, the suite
-at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the run before it had ended, its
-build run 43665738473 green on the three systems at 03:26; it keeps the form and carries the
-review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's clock between its
-commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its build run 43625597437
-green on the three systems at 19:38, the games played in the pack run alone; built on the published
-0.6.122 and played from a copy of the head, on the card it passed in 70 s, wave 3, 219 alive at most
-and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309, and on the software device
-at four cores in the runner's image in 396 s, wave 3, 217 and 312; NormTests 19 and the script,
-workflow and document script classes passed, 52 in all; it keeps the form and carries the review's
-files. Before it `770aef21`, Verdict 59's mend, Blockout's play reading the recipe where the game
-says it saved it and putting that file back, a game built in Debug saving into its project's assets
-folder, which the guide says, pushed at 16:07 on 2026-11-14 with the pack run with publish,
-43608448173, started on the same head and green by 18:45, 0.6.122 published, tagged v0.6.122 and
-released with the six bridges' symbols at 18:53, its build run green on the three systems at 16:35;
-the three games played here before it, Blockout in 27 s and Courtyard in 29 on the graphics card and
-Swarm in 679 on the software device, NormTests 19 and the script and document classes passing; it
-keeps the form and carries the review's files. Before it `86551153`, item 120's last commit, a game
-run under dotnet watch having its changed behaviors registered again at the next frame, a system
-named again kept where it stands and one whose method a change took out passed over at its throw,
-with the guide's words on which edits wait for the next start, BUILDING.md naming the release that
-keeps the symbols and AGENTS.md's build order line as approved, pushed at 10:42 on 2026-11-14 once
-the run before it had ended, with the pack run with publish, 43581803258, started on the same head
-and red in its games at 11:24, Verdict 59, nothing published, its build run green on the three
-systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3 skipped, NormTests 19; it
-keeps the form and carries the review's files. Before it `997d407e`, item 142, the ambient's kernel
-summing every workgroup of a probe's rays, with a test of a room lit by a panel too wide to be
-carried as a glow light, its light gone within two frames of the panel going dark, 0.72 where 37.03
-on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it had ended, its build run
-green on the three systems at 09:29; the whole suite passed, 2,090 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `247c6112`, item
-120's mends of the independent read's findings, the bridge making each asset source's watcher
-itself, a folder that cannot be watched a warning and a root reached through a link resolved, a
-Debug game reading and watching its project's assets with its shader cache under obj, a script build
-that throws or cannot read a file leaving nothing of itself running, and the renderer's tests run on
-every system, pushed at 07:07 on 2026-11-14 once the run before it had ended, its build run green at
-07:40, Linux in 14 minutes, macOS in 27 and Windows in 32 with the renderer's tests, where 14, 17
-and 19 without them; eleven new tests each failing on the files before; the whole suite passed,
-2,089 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `02f482ab`, item 120's third commit, a scene loaded at the top level spawned again
-in place where its file's bytes changed, the program's own entities kept and an open document left
-to the tool that keeps it, every file read again posted and listed by live.status, --no-watch on
-./bcs open and the guide's live path, pushed at 03:34 on 2026-11-14 once the run before it had
-ended, its message written again before the push to name no item, its build run green on the three
-systems at 03:52; the whole suite passed twice, 2,075 passed, none failed and 3 skipped, NormTests
-19; it keeps the form and carries the review's files. Before it `36840712`, item 120's second
-commit, behavior scripts compiled through a ScriptsPlugin that the editor, the Player and a game
-referencing the project add, built again when one is saved while the app watches, each build said in
-the log, with scripts.reload and scripts.status, pushed at 22:56 on 2026-11-13 once the run before
-it had ended, its build run green on the three systems at 23:14; the whole suite passed, 2,073
-passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files.
-Before it `f86269d0`, item 120's first commit, the bridge, Bevy's asset watcher in the render
-profile and so in the package, watching where the config asks and by default in a program's Debug
-build through a generated initializer, a file read again said as AssetReloaded and a scene spawned
-again in place said as a reload, pushed at 21:27 on 2026-11-13, its build run green on the three
-systems at 21:49; the linux-x64 bridge grows by 138,155 bytes deflated; the whole suite passed,
-2,070 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `cccb0597`, item 137's read, the near wall's indirect light against its reference
-as the room steps against the grids, a commit of the Reply and the review's files alone that starts
-no run, pushed at 23:14 on 2026-11-12; NormTests passed, 19; it keeps the form. Before it
-`e47d7020`, item 135, the bridge's size, a pack's bridges stripped of their symbol tables after the
-build with each full library kept under build/symbols by its system with its build id beside it and
-gathered into an artifact named by the version, the crash file writing the bridge's build id and
+Reviewed up to `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3` and `8bdb3e21`, five commits of
+the audit's medium findings from one tree after one whole suite of 2,114 passed and 3 skipped, asset
+fields sharing one handle for each asset, a query's buffer for each walk with a copy written back
+only where changed and a sound's volume kept over a pause, the hooks reaching every handle of a
+layout, the export's bridge built again when its sources are newer, and a pair bouncing as the
+bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382 green by 19:02, the form
+kept and the messages free of numbers. Before them `3ec197c2`, the editor history's three mends, an
+inspector edit spread over the selection undone on every entity, a loaded scene starting with
+nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15, its
+build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a scene the game
+loaded itself left standing by a load, a ulong past a long kept, and an unreadable scene's entries
+kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and the messages free
+of numbers. Before them `773313da`, item 146's six high findings, each with a test that failed
+without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the
+run before it had ended, its build run 43665738473 green on the three systems at 03:26; it keeps the
+form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's
+clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its
+build run 43625597437 green on the three systems at 19:38, the games played in the pack run alone;
+built on the published 0.6.122 and played from a copy of the head, on the card it passed in 70 s,
+wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309,
+and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and 312;
+NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps the
+form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
+reading the recipe where the game says it saved it and putting that file back, a game built in Debug
+saving into its project's assets folder, which the guide says, pushed at 16:07 on 2026-11-14 with
+the pack run with publish, 43608448173, started on the same head and green by 18:45, 0.6.122
+published, tagged v0.6.122 and released with the six bridges' symbols at 18:53, its build run green
+on the three systems at 16:35; the three games played here before it, Blockout in 27 s and Courtyard
+in 29 on the graphics card and Swarm in 679 on the software device, NormTests 19 and the script and
+document classes passing; it keeps the form and carries the review's files. Before it `86551153`,
+item 120's last commit, a game run under dotnet watch having its changed behaviors registered again
+at the next frame, a system named again kept where it stands and one whose method a change took out
+passed over at its throw, with the guide's words on which edits wait for the next start, BUILDING.md
+naming the release that keeps the symbols and AGENTS.md's build order line as approved, pushed at
+10:42 on 2026-11-14 once the run before it had ended, with the pack run with publish, 43581803258,
+started on the same head and red in its games at 11:24, Verdict 59, nothing published, its build run
+green on the three systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. Before it `997d407e`, item
+142, the ambient's kernel summing every workgroup of a probe's rays, with a test of a room lit by a
+panel too wide to be carried as a glow light, its light gone within two frames of the panel going
+dark, 0.72 where 37.03 on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it
+had ended, its build run green on the three systems at 09:29; the whole suite passed, 2,090 passed,
+none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it
+`247c6112`, item 120's mends of the independent read's findings, the bridge making each asset
+source's watcher itself, a folder that cannot be watched a warning and a root reached through a link
+resolved, a Debug game reading and watching its project's assets with its shader cache under obj, a
+script build that throws or cannot read a file leaving nothing of itself running, and the renderer's
+tests run on every system, pushed at 07:07 on 2026-11-14 once the run before it had ended, its build
+run green at 07:40, Linux in 14 minutes, macOS in 27 and Windows in 32 with the renderer's tests,
+where 14, 17 and 19 without them; eleven new tests each failing on the files before; the whole suite
+passed, 2,089 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
+review's files. Before it `02f482ab`, item 120's third commit, a scene loaded at the top level
+spawned again in place where its file's bytes changed, the program's own entities kept and an open
+document left to the tool that keeps it, every file read again posted and listed by live.status,
+--no-watch on ./bcs open and the guide's live path, pushed at 03:34 on 2026-11-14 once the run
+before it had ended, its message written again before the push to name no item, its build run green
+on the three systems at 03:52; the whole suite passed twice, 2,075 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. Before it `36840712`, item
+120's second commit, behavior scripts compiled through a ScriptsPlugin that the editor, the Player
+and a game referencing the project add, built again when one is saved while the app watches, each
+build said in the log, with scripts.reload and scripts.status, pushed at 22:56 on 2026-11-13 once
+the run before it had ended, its build run green on the three systems at 23:14; the whole suite
+passed, 2,073 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
+review's files. Before it `f86269d0`, item 120's first commit, the bridge, Bevy's asset watcher in
+the render profile and so in the package, watching where the config asks and by default in a
+program's Debug build through a generated initializer, a file read again said as AssetReloaded and a
+scene spawned again in place said as a reload, pushed at 21:27 on 2026-11-13, its build run green on
+the three systems at 21:49; the linux-x64 bridge grows by 138,155 bytes deflated; the whole suite
+passed, 2,070 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
+review's files. Before it `cccb0597`, item 137's read, the near wall's indirect light against its
+reference as the room steps against the grids, a commit of the Reply and the review's files alone
+that starts no run, pushed at 23:14 on 2026-11-12; NormTests passed, 19; it keeps the form. Before
+it `e47d7020`, item 135, the bridge's size, a pack's bridges stripped of their symbol tables after
+the build with each full library kept under build/symbols by its system with its build id beside it
+and gathered into an artifact named by the version, the crash file writing the bridge's build id and
 each frame as an offset into it through extern declarations alone, build/name-crash.py naming the
 frames from the symbols, the size step comparing with the last version nuget.org lists, the
 linux-x64 bridge 125,140,552 bytes where 185,416,232 with the same build id and exports, pushed at
@@ -815,3 +821,114 @@ where it said a hundred. It is a comment alone, which no test reads.
 
 The whole suite that passed over these is the one the asset fields' Reply above gives. NormTests
 passed, 19.
+
+143, the read of the tests that need a renderer on the render bridge under lavapipe held to four
+cores, in the commit carrying this Reply, with the mends of three tests the read found at fault, and
+the plan of the Linux job's parts by minutes, which comes in a commit after it.
+
+The 172 classes whose tests call Needs.Shaders, 58, or Needs.Renderer alone, 114, ran on the pack
+run's render bridge for linux-x64 in a container of the runner's image, Ubuntu 24.04 with Mesa
+25.2.8, lavapipe held to four cores by LP_NUM_THREADS and by taskset inside the container. The suite
+was built in that image, and Mesa's shader cache started empty and was kept from class to class, as
+a job's would be. Each class was a build/test.py run of its own in a container of its own, killed at
+a quarter hour, under the GPU lock shared once no exclusive lock had been held or waiting for three
+minutes, so a timing got in between any two. The seven readings of a cost in a forest or a room were
+left out, each drawing hundreds of frames at 1080p to time a GPU's passes, which tells nothing of a
+device that draws on the processor.
+
+A piece is one case, or a few cases of one class packed by their earlier times under the cap, run as
+a class is, a test.py run in a container of its own. 168 classes ran whole, and 5 of them, four of
+the trees' classes and the wind's, ran past the quarter hour, their cases that ended counted from
+that run and the rest dealt into pieces. The other 4, the bounce rooms', the reference's, global
+illumination's and the canopy's, were set aside as too long for one run and read in pieces alone. So
+9 classes came to 93 pieces. 11 of them ran past the quarter hour and 2 lost their cases to a filter
+MSBuild could not read, a theory case's quoted argument, and those 13 ran again a case at a time,
+held to 41 minutes, of which 10 ended and 3 ran past it.
+
+The 114 classes that need a renderer alone take 46 minutes of processes, 40 of them in their cases.
+The 58 that need shaders take 562 minutes, 436 of them in their cases, global illumination's class
+242 alone. 21 of their cases take five minutes or more each, 247 minutes together, each a reading
+against a traced reference, a forest or a tree between its levels, and the thousand-tree forest of
+TreeMemoryTests takes 24 minutes. Three cases ran out the 41 minutes,
+GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter,
+GlobalIlluminationTests.ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes and
+TreeWindTests.AWindBendsATreeDownwindAndTwoTreesAlikeSwayOutOfStep, which take 19.6, 12.7 and 22.8
+seconds on the card, more than a hundred times as long here, where the lone aspen under the sky
+takes 631 seconds against the card's 16. 1,161 cases passed, 3 failed and 22 were skipped, 12 of
+them Solari's and 4 the meshlets', which the pack's render bridge is built without, and 6 needing
+what the image lacks, a sound device, Feathers' source in the cargo registry, the examples'
+textures, Python 3.14 for build/textures.py in two, and a headless bridge.
+
+SpirvComputeTests.ARaySceneOfItsOwnIsTracedAndFollowsWhatMoves failed, the slab met by no ray. A
+trial laid the scene five ways, and the slab is met in slot 1 of 2, in slot 1 of 4 with the
+stand-ins after it, alone in slot 0, and in slot 3 with real cubes far off in slots 1 and 2, and
+missed only in slot 3 with the stand-ins of mask zero in slots 1 and 2. The Vulkan specification has
+an instance whose mask shares no bit with the ray's cull mask never met, and says nothing more of a
+mask of zero, so the fault is lavapipe's. The test lays the slab in slot 1 on a CPU device, the
+stand-ins after it, so ray four still passes through the stand-in at the origin and finds it never
+met, and keeps slot 3 everywhere else, where the slot the empty ones leave as it was is held.
+docs/ray-tracing.md says a scene meant to be traced on lavapipe fills its slots from zero. In a copy
+of the read's tree from a Mesa cache that started empty, the test as it was failed on lavapipe as
+the read had it, and mended it passes there and on the card.
+
+A report for Mesa, drafted and not filed. Lavapipe in Mesa 25.2.8 commits no hit on an instance of a
+top-level acceleration structure laid after instances whose mask is zero. A structure of four
+instances, a cube in instance 0, the same cube with mask 0 in instances 1 and 2 at the origin, and a
+slab of mask 0xFF in instance 3, traced with rayQueryInitializeEXT and a cull mask of 0xFF straight
+down onto the slab, commits nothing, where the slab in instance 1 with the instances of mask 0 after
+it, or in instance 3 with instances of mask 0xFF in 1 and 2 placed away from the rays, is met. An
+instance of mask 0 is never met by the specification, which makes nothing of the instances after it.
+
+GlobalIlluminationTests.ALoneAspensLeavesUnderAUniformSkyReadTheirReference read +28% against its
+bound of 25%, where the card reads +24% on the same reference, 0.0471 on both. A trial wrote the
+picture at Medium, the picture with global illumination off and the reference whole on both devices.
+The reference, the floor and the stems read alike, the floor within 0.2% and the stems within about
+1%, and the leaves read 3.0% higher on lavapipe at Medium and 3.6% with global illumination off, so
+it is neither the probes nor their rays. It grows with the slant, 2.4% on the leaves that face the
+eye and 5 to 10% on those seen side on, and the leaves' textures are filtered with sixteen samples
+at a slant. With one sample on both devices the two read alike within 0.2%, 0.0599 and 0.0600, and
+to the fourth place with global illumination off. On the card the sixteen samples take 3.1 points
+off the test's +27.2%, and on lavapipe 0.3, so the leaves read 27% over their reference with their
+textures filtered alike, and the card's filtering at a slant brings them to 24%. The bound stays as
+it is in this commit, and the job's commit bounds the filtering's share apart, 25% on a device whose
+filtering at a slant darkens the leaves as the card's does and 29% on a CPU device, whose filtering
+leaves them as one sample does, where lavapipe read 27.7% in the trial and 27.8% in the read.
+
+ThunderTests.AStrikeLightsTheNightAndDrawsItsBolt failed, the strike not lighting the ground. The
+flash dies away over half a second of Time.Delta, and the test waits four frames before its lit
+picture, which on lavapipe took 0.55 seconds of the machine's clock, so the test read the machine's
+clock in effect, as N 3.3 bars. It runs on a set frame time of a sixtieth of a second. As it was,
+the test passed on lavapipe at four cores in one run of two and failed at one core, and mended it
+passes at one core and on the card.
+
+CaptureTests.WhatWasDrawnCanBeReadBack read its red channel as 0 once, on the first whole run's cold
+cache, and passed on the clean pass. It asked for its capture at frame 10 whatever its pipelines'
+state, and the camera draws nothing into its target until they are ready. It asks once every
+pipeline has been ready three frames running, as PictureRun.Capture does, and the app runs until the
+picture arrives. From a Mesa cache that started empty the test as it was read its red channel as 0
+again, and mended it asked for its capture at frame 42 and passed.
+
+The job is planned by these minutes. A part holds at most 38 minutes here, which the slowest Linux
+runner read, an EPYC 7763 drawing about 1.1 times as slowly as this container, takes in 42, under
+the 45. A class goes whole into a part where it fits one and by its cases where it does not, as
+global illumination's, the bounce rooms', the reference's and the trees' leaves and levels do, first
+fit from the longest. Every class comes to 13 full parts and a sliver, 494 minutes of the runners'
+time, 271 of them the 22 cases of five minutes or more, each a reading against a traced reference, a
+forest or a tree between its levels. All of them run on every push, the long cases among them, laid
+out by wall time, a part a job where the account's concurrent jobs allow it beside the build's other
+legs and two a job where they would queue each other, and the three cases past 41 minutes run on the
+card alone, skipped on a CPU device with the reason said where they are skipped, as the seven
+readings of a cost are. build/test.py has --parts and --filter and no way to name a part, so that
+commit gives it one, as the sibling's --split and --only do, and a bound that moves on lavapipe is
+said there as a count of pixels with its reason.
+
+The whole suite passed over these mends and those of 146's medium findings 32, 37 and 38 in the
+commit after it, from one tree, 2,117 passed, 0 failed and 3 skipped, 2,120 in all where the listing
+is 2,109, the solution built from nothing with warnings as errors, a part at a time under the GPU
+lock once it had been free of timings for three minutes. NormTests passed, 19.
+
+Shared: lavapipe in Mesa 25.2.8 meets nothing in a ray scene's instance laid after one of mask zero,
+and its filtering at a slant leaves a texture as one sample does where a card's sixteen samples
+darken a leaf seen side on by a few percent, so a bound read on a card over textured cards seen at a
+slant reads higher on lavapipe. The sibling runs its tests on lavapipe and reads its bounds on the
+card, so this is offered for it to read.

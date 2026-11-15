@@ -105,6 +105,7 @@ public sealed class SpirvComputeTests
         var trace = default(ShaderInstance);
         var hits = AssetHandle.None;
         var lifted = Entity.None;
+        var slabSlot = 3;
         var read = default(BufferRead);
         Vector4[]? before = null;
         Vector4[]? after = null;
@@ -128,9 +129,16 @@ public sealed class SpirvComputeTests
                 var flat = ecs.Spawn();
                 ecs.Add(flat, Transform.At(2.5f, 0f, 0f));
 
+                // The slab goes in slot three, past two empty slots, which the scene fills with
+                // stand-ins of mask zero that no ray meets, so a hit on it reports the slot it was
+                // given. Mesa's lavapipe, a CPU device, meets nothing in an instance laid after one
+                // of mask zero, where the Vulkan specification has such an instance never met and
+                // nothing more, so on a CPU device the slab goes in slot one with the stand-ins
+                // after it. Ray four still passes through the stand-in at the origin there.
+                if (App.DescribeAdapter()?.Split(" | ") is [_, _, "Cpu", ..]) slabSlot = 1;
                 var scene = Shaders.CreateRayScene(pool, 4);
                 Shaders.SetRaySceneInstance(scene, 0, lifted, cube);
-                Shaders.SetRaySceneInstance(scene, 3, flat, slab);
+                Shaders.SetRaySceneInstance(scene, slabSlot, flat, slab);
 
                 // Nine rays a unit apart, from four to the left to four to the right.
                 hits = Shaders.CreateBuffer<Vector4>(new Vector4[9]);
@@ -189,11 +197,11 @@ public sealed class SpirvComputeTests
             Assert.True(before[index].W < 0f, $"ray {index} met something ({before[index]}) where nothing is");
         }
 
-        // The cube is in slot zero and is pool mesh zero, and the slab slot three and mesh one,
-        // with the empty slots between them leaving the slab's slot as it was.
+        // The cube is in slot zero and is pool mesh zero, and the slab in its slot and mesh one,
+        // with any empty slots before it leaving the slab's slot as it was.
         Assert.Equal(new Vector4(0f, 0f, 9.5f, 1f), before[2], new ApproximateComparer());
-        Assert.Equal(new Vector4(3f, 1f, 9.9f, 1f), before[6], new ApproximateComparer());
-        Assert.Equal(new Vector4(3f, 1f, 9.9f, 1f), before[7], new ApproximateComparer());
+        Assert.Equal(new Vector4(slabSlot, 1f, 9.9f, 1f), before[6], new ApproximateComparer());
+        Assert.Equal(new Vector4(slabSlot, 1f, 9.9f, 1f), before[7], new ApproximateComparer());
 
         // A unit higher, so a unit sooner.
         Assert.InRange(after[2].Z, 8.49f, 8.51f);
