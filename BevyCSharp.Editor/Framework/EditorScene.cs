@@ -52,9 +52,16 @@ public static class EditorScene
 
     /// <summary>Takes away the scene that is there and spawns the one in a file.</summary>
     /// <remarks>
+    /// <para>
     /// The file is spawned first and the scene that was there taken away after, so one that does
     /// not read leaves the scene being edited as it was, with why in <see
     /// cref="SceneLoad.Problem"/>.
+    /// </para>
+    /// <para>
+    /// A scene loaded starts with nothing to undo, since every edit in the history was made to
+    /// entities the load took away, and undoing one would write to an entity that has gone or
+    /// bring a deleted one back into the scene loaded.
+    /// </para>
     /// </remarks>
     public static SceneLoad Load(EcsWorld world, string path)
     {
@@ -72,6 +79,7 @@ public static class EditorScene
         }
 
         EditorSelection.Clear();
+        EditorHistory.Clear();
         return loaded;
     }
 

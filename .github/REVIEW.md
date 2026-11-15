@@ -618,3 +618,31 @@ no file in common, and passed, 2,106 passed, 0 failed and 3 skipped, 2,109 in al
 is 2,098, the solution built from nothing with warnings as errors, a part at a time under the GPU
 lock once it had been free of timings for three minutes, held to the processors 143's run leaves
 free. NormTests passed, 19.
+
+146's medium findings 18 to 20, the editor's history, in the commit carrying this Reply, each with a
+test that failed without its mend.
+
+An inspector edit with several entities selected is one step that undoes on every entity it reached,
+Recorded reading each other's value before Spread writes the shown one's onto it, and a run of such
+edits keeps the first one's values to undo to, so a drag undoes to where each began.
+EditorHistoryTests.AnEditSpreadOverTheSelectionIsUndoneOnEveryEntityItReached sets 9 on the shown
+one of three selected, through Recorded with the rest of the selection and Spread as the details
+panel's row calls them, and undoes and redoes. Without the mend, Recorded called as the row called
+it before, the steps read 9 9 9, 1 9 9 and 9 9 9, and with it 9 9 9, 1 2 3 and 9 9 9. Spread still
+gives each other node of an instance the shown entity's earlier value as the model's, which Revert
+would put back, left for a test of its own.
+
+A scene loaded in the editor starts with nothing to undo, EditorScene.Load clearing the history once
+the file has read. EditorHistoryTests.ALoadedSceneStartsWithNothingToUndo renames a box and loads
+another scene. Without the mend the undo wrote the name to the box the load had despawned and threw,
+and with it there is nothing to undo.
+
+A duplicate redone maps each copy the undo took away to the one made again, through
+EditorHistory.CameBack as a delete's undo does, so an edit made on a copy after the duplicate is
+redone on the copy made again. EditorHistoryTests.ARedoneDuplicateTakesTheEditsMadeOnTheCopyAfterIt
+duplicates a box, renames the copy, undoes both and redoes both. Without the mend the rename's redo
+wrote to the copy the undo had despawned and threw, and with it the steps read Box Crate, Box Box 2,
+Box, Box Box 2 and Box Crate.
+
+The whole suite that passed over these mends is the one the saves' Reply above gives, run over both.
+NormTests passed, 19.

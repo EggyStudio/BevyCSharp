@@ -118,6 +118,12 @@ public static class ComponentFields
     /// field edited next on another entity, or on another data asset, is an edit of its own. The
     /// key on an edit exists for that.
     /// </para>
+    /// <para>
+    /// The rest of the selection the value is about to be spread onto is in the same edit, each
+    /// with what it held, read before <see cref="Spread"/> writes it, so one undo puts back
+    /// every entity the edit reached. A run of edits keeps the first one's values to undo to, so a
+    /// drag across several entities undoes to where each began.
+    /// </para>
     /// </remarks>
     /// <param name="ctx">This frame.</param>
     /// <param name="entity">What the field belongs to.</param>
@@ -125,13 +131,15 @@ public static class ComponentFields
     /// <param name="field">Which field.</param>
     /// <param name="id">What the field is called, which makes a run of edits one edit.</param>
     /// <param name="before">What it held before the widget was drawn.</param>
+    /// <param name="others">The rest of the selection carrying the same component, or none.</param>
     internal static void Recorded(
         BehaviorContext ctx,
         Entity entity,
         ComponentSchema schema,
         ComponentField field,
         string id,
-        object? before)
+        object? before,
+        IReadOnlyList<Entity>? others = null)
     {
         var after = field.Read(ctx.Ecs, entity);
 
@@ -146,19 +154,31 @@ public static class ComponentFields
 
         if (before is { } was && after is { } now)
         {
+            // Each other with a value to put back, as the shown one has to have.
+            var rest = new List<(Entity Entity, object Was)>();
+            foreach (var other in others ?? [])
+            {
+                if (ctx.Ecs.IsAlive(other) && field.Read(ctx.Ecs, other) is { } theirs) rest.Add((other, theirs));
+            }
+
+            void Put(EcsWorld world, Entity on, object value)
+            {
+                var at = EditorHistory.Resolve(on);
+                field.Write(world, at, value);
+                SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
+            }
+
             EditorHistory.Record(
                 $"{schema.Name}.{field.Title}",
                 world =>
                 {
-                    var at = EditorHistory.Resolve(entity);
-                    field.Write(world, at, was);
-                    SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
+                    Put(world, entity, was);
+                    foreach (var (other, theirs) in rest) Put(world, other, theirs);
                 },
                 world =>
                 {
-                    var at = EditorHistory.Resolve(entity);
-                    field.Write(world, at, now);
-                    SceneInstances.Mark(world, at, schema.QualifiedName, field.Name);
+                    Put(world, entity, now);
+                    foreach (var (other, _) in rest) Put(world, other, now);
                 },
                 KeyOf(entity, schema, id));
         }
@@ -302,9 +322,9 @@ public static class ComponentFields
         // longer in use.
         FieldNumbers.Close(id);
 
-        if (editable) Recorded(ctx, entity, schema, field, id, value);
+        if (editable) Recorded(ctx, entity, schema, field, id, value, others);
 
-        // And the same value onto everything else selected.
+        // And the same value onto everything else selected, which the edit recorded above covers.
         if (editable) Spread(ctx, entity, others, field, value);
 
         if (!editable) ImGui.EndDisabled();

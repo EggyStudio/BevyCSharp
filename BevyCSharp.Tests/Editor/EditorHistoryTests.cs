@@ -346,6 +346,145 @@ public sealed class EditorHistoryTests
     }
 
     /// <summary>
+    /// An edit made with several entities selected, spread from the shown one onto the rest, is
+    /// one step that undoes on every entity it reached, each back to what it held, where the step
+    /// held the shown entity alone and an undo left the rest changed.
+    /// </summary>
+    [Fact]
+    public void AnEditSpreadOverTheSelectionIsUndoneOnEveryEntityItReached()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var steps = new List<string>();
+        var ran = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            var (shown, other, third) = (ecs.Spawn(), ecs.Spawn(), ecs.Spawn());
+            ecs.Add(shown, new EveryKind { Count = 1 });
+            ecs.Add(other, new EveryKind { Count = 2 });
+            ecs.Add(third, new EveryKind { Count = 3 });
+
+            var schema = ecs.ComponentsOf(shown).Select(ComponentSchemas.For).First(found => found?.Name == "EveryKind")!;
+            var count = schema.Field("Count")!;
+
+            // As the details panel's row does it, the widget writing the shown entity, then the edit
+            // recorded and the value spread onto the rest of the selection.
+            var before = count.Read(ecs, shown);
+            count.Write(ecs, shown, 9);
+            ComponentFields.Recorded(ctx, shown, schema, count, "##EveryKind.Count", before, [other, third]);
+            ComponentFields.Spread(ctx, shown, [other, third], count, before);
+
+            string State() => $"{ecs.GetRef<EveryKind>(shown).Count} {ecs.GetRef<EveryKind>(other).Count} {ecs.GetRef<EveryKind>(third).Count}";
+
+            steps.Add(State());
+            EditorHistory.Undo(ecs);
+            steps.Add(State());
+            EditorHistory.Redo(ecs);
+            steps.Add(State());
+        });
+
+        harness.Run();
+
+        Assert.Equal(["9 9 9", "1 2 3", "9 9 9"], steps);
+    }
+
+    /// <summary>
+    /// A scene loaded starts with nothing to undo, where the edits made to the scene before it
+    /// stayed and an undo wrote to an entity the load had taken away.
+    /// </summary>
+    [Fact]
+    public void ALoadedSceneStartsWithNothingToUndo()
+    {
+        using var folder = new TestFolder("bcs-history-");
+        var file = Path.Combine(folder.Path, "other.scene.json");
+        File.WriteAllText(file, """
+            { "format": "bevycsharp.scene.2",
+              "entities": [ { "id": 1, "name": "Barrel", "components": { "Bevy.Tests.EveryKind": { "Count": 4 } } } ] }
+            """);
+
+        using var harness = new EngineHarness(frames: 2);
+        var ran = false;
+        var answered = "not asked";
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            var box = ecs.Spawn();
+            ecs.Add(box, new EveryKind { Count = 1 });
+            EditorEntity.Rename(ecs, box, "Box");
+
+            Assert.Null(EditorScene.Load(ecs, file).Problem);
+            Assert.False(ecs.IsAlive(box));
+            answered = EditorHistory.Undo(ecs) ?? "nothing";
+        });
+
+        harness.Run();
+
+        Assert.Equal("nothing", answered);
+    }
+
+    /// <summary>
+    /// A duplicate undone and redone makes new copies, and an edit made on a copy after the
+    /// duplicate is redone on the copy made again, where it wrote to the copy the undo took away
+    /// and was lost.
+    /// </summary>
+    [Fact]
+    public void ARedoneDuplicateTakesTheEditsMadeOnTheCopyAfterIt()
+    {
+        using var harness = new EngineHarness(frames: 2);
+
+        var steps = new List<string>();
+        var ran = false;
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ran) return;
+            ran = true;
+
+            var ecs = ctx.Ecs;
+            EditorHistory.Clear();
+
+            var box = ecs.Spawn();
+            ecs.SetName(box, "Box");
+            ecs.Add(box, new EveryKind { Count = 1 });
+
+            var copy = Assert.Single(EditorEntity.Duplicate(ecs, [box]));
+            EditorEntity.Rename(ecs, copy, "Crate");
+
+            string State() => string.Join(" ", ecs.All().Select(ecs.NameOf).OfType<string>().Where(name => name is "Box" or "Box 2" or "Crate").Order(StringComparer.Ordinal));
+
+            steps.Add(State());
+            for (var i = 0; i < 2; i++)
+            {
+                EditorHistory.Undo(ecs);
+                steps.Add(State());
+            }
+
+            for (var i = 0; i < 2; i++)
+            {
+                EditorHistory.Redo(ecs);
+                steps.Add(State());
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(["Box Crate", "Box Box 2", "Box", "Box Box 2", "Box Crate"], steps);
+    }
+
+    /// <summary>
     /// The edits made before a delete still undo once the delete is undone, on the entity that came
     /// back rather than the one that went, and redo again in order.
     /// </summary>

@@ -65,7 +65,8 @@ public static class EditorEntity
     /// A named entity's copy is given the next free name in the same style, "Cube 2" for "Cube", so
     /// the world list tells the two apart and a selection remembered by name finds the right one.
     /// Undoing despawns the copies and redoing makes them again from the originals, which are new
-    /// entities each time, as a new entity always is.
+    /// entities each time, as a new entity always is, and the edits made on the copies after the
+    /// duplicate reach the new ones.
     /// </para>
     /// </remarks>
     /// <param name="world">The world the entities are in.</param>
@@ -91,7 +92,11 @@ public static class EditorEntity
             },
             redo =>
             {
+                // New copies each time, which stand for the ones the undo took away, so an edit
+                // made on a copy after the duplicate is redone on the copy made again.
+                var undone = held;
                 held = [.. Copies(redo, [.. sources.Select(EditorHistory.Resolve)])];
+                EditorHistory.CameBack(undone.Zip(held, KeyValuePair.Create));
                 Choose(held);
             });
 
