@@ -74,10 +74,11 @@ public static partial class SceneFile
             return SceneLoad.Unread($"{from} is not a scene in the {Format} format.");
 
         var spawned = new List<Entity>();
+        SceneLoad load;
         Depth++;
         try
         {
-            return Spawn(world, scene, parent, spawned, worldResources);
+            load = Spawn(world, scene, parent, spawned, worldResources);
         }
         catch (InvalidDataException error)
         {
@@ -89,12 +90,18 @@ public static partial class SceneFile
                 if (world.IsAlive(entity)) world.Despawn(entity);
 
             if (Depth > 1) throw;
-            return SceneLoad.Unread(error.Message);
+            load = SceneLoad.Unread(error.Message);
         }
         finally
         {
             Depth--;
         }
+
+        // The assets the fields of the scenes read before named and no field holds once this one
+        // and the scenes it places are read, so an asset this scene names as well is shared with
+        // it rather than read again. The editor keeps them, as it keeps the meshes it makes.
+        if (Depth == 0 && !KeepsAssets) FieldAssets.Release(world);
+        return load;
     }
 
     /// <summary>
@@ -123,7 +130,7 @@ public static partial class SceneFile
         {
             foreach (var handle in made.Values) AssetServer.ReleaseWhenUnused(handle);
         }
-        var references = new SceneReferences();
+        var references = new SceneReferences { SharesAssets = true };
         var byId = new Dictionary<int, Entity>();
 
         // Every entity first, so a component referring to one listed later finds it.

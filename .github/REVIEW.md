@@ -1,37 +1,43 @@
 # Review
 
-Reviewed up to `773313da`, item 146's six high findings, each with a test that failed without its
-mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the run before it
-had ended, its build run 43665738473 green on the three systems at 03:26; it keeps the form and
-carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's clock
-between its commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its build run
-43625597437 green on the three systems at 19:38, the games played in the pack run alone; built on
-the published 0.6.122 and played from a copy of the head, on the card it passed in 70 s, wave 3, 219
-alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309, and on the
-software device at four cores in the runner's image in 396 s, wave 3, 217 and 312; NormTests 19 and
-the script, workflow and document script classes passed, 52 in all; it keeps the form and carries
-the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play reading the recipe
-where the game says it saved it and putting that file back, a game built in Debug saving into its
-project's assets folder, which the guide says, pushed at 16:07 on 2026-11-14 with the pack run with
-publish, 43608448173, started on the same head and green by 18:45, 0.6.122 published, tagged
-v0.6.122 and released with the six bridges' symbols at 18:53, its build run green on the three
-systems at 16:35; the three games played here before it, Blockout in 27 s and Courtyard in 29 on the
-graphics card and Swarm in 679 on the software device, NormTests 19 and the script and document
-classes passing; it keeps the form and carries the review's files. Before it `86551153`, item 120's
-last commit, a game run under dotnet watch having its changed behaviors registered again at the next
-frame, a system named again kept where it stands and one whose method a change took out passed over
-at its throw, with the guide's words on which edits wait for the next start, BUILDING.md naming the
-release that keeps the symbols and AGENTS.md's build order line as approved, pushed at 10:42 on
-2026-11-14 once the run before it had ended, with the pack run with publish, 43581803258, started on
-the same head and red in its games at 11:24, Verdict 59, nothing published, its build run green on
-the three systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3 skipped,
-NormTests 19; it keeps the form and carries the review's files. Before it `997d407e`, item 142, the
-ambient's kernel summing every workgroup of a probe's rays, with a test of a room lit by a panel too
-wide to be carried as a glow light, its light gone within two frames of the panel going dark, 0.72
-where 37.03 on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it had ended,
-its build run green on the three systems at 09:29; the whole suite passed, 2,090 passed, none failed
-and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it `247c6112`,
-item 120's mends of the independent read's findings, the bridge making each asset source's watcher
+Reviewed up to `3ec197c2`, the editor history's three mends, an inspector edit spread over the
+selection undone on every entity, a loaded scene starting with nothing to undo and a redone
+duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15, its build run 43717197640 green
+by 15:02, and `392b8885`, the saves' three mends, a scene the game loaded itself left standing by a
+load, a ulong past a long kept, and an unreadable scene's entries kept, pushed at 13:35, its build
+run 43714466210 green at 14:05, the form kept and the messages free of numbers. Before them
+`773313da`, item 146's six high findings, each with a test that failed without its mend, the suite
+at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the run before it had ended, its
+build run 43665738473 green on the three systems at 03:26; it keeps the form and carries the
+review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's clock between its
+commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its build run 43625597437
+green on the three systems at 19:38, the games played in the pack run alone; built on the published
+0.6.122 and played from a copy of the head, on the card it passed in 70 s, wave 3, 219 alive at most
+and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309, and on the software device
+at four cores in the runner's image in 396 s, wave 3, 217 and 312; NormTests 19 and the script,
+workflow and document script classes passed, 52 in all; it keeps the form and carries the review's
+files. Before it `770aef21`, Verdict 59's mend, Blockout's play reading the recipe where the game
+says it saved it and putting that file back, a game built in Debug saving into its project's assets
+folder, which the guide says, pushed at 16:07 on 2026-11-14 with the pack run with publish,
+43608448173, started on the same head and green by 18:45, 0.6.122 published, tagged v0.6.122 and
+released with the six bridges' symbols at 18:53, its build run green on the three systems at 16:35;
+the three games played here before it, Blockout in 27 s and Courtyard in 29 on the graphics card and
+Swarm in 679 on the software device, NormTests 19 and the script and document classes passing; it
+keeps the form and carries the review's files. Before it `86551153`, item 120's last commit, a game
+run under dotnet watch having its changed behaviors registered again at the next frame, a system
+named again kept where it stands and one whose method a change took out passed over at its throw,
+with the guide's words on which edits wait for the next start, BUILDING.md naming the release that
+keeps the symbols and AGENTS.md's build order line as approved, pushed at 10:42 on 2026-11-14 once
+the run before it had ended, with the pack run with publish, 43581803258, started on the same head
+and red in its games at 11:24, Verdict 59, nothing published, its build run green on the three
+systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3 skipped, NormTests 19; it
+keeps the form and carries the review's files. Before it `997d407e`, item 142, the ambient's kernel
+summing every workgroup of a probe's rays, with a test of a room lit by a panel too wide to be
+carried as a glow light, its light gone within two frames of the panel going dark, 0.72 where 37.03
+on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it had ended, its build run
+green on the three systems at 09:29; the whole suite passed, 2,090 passed, none failed and 3
+skipped, NormTests 19; it keeps the form and carries the review's files. Before it `247c6112`, item
+120's mends of the independent read's findings, the bridge making each asset source's watcher
 itself, a folder that cannot be watched a warning and a root reached through a link resolved, a
 Debug game reading and watching its project's assets with its shader cache under obj, a script build
 that throws or cannot read a file leaving nothing of itself running, and the renderer's tests run on
@@ -646,3 +652,33 @@ Box, Box Box 2 and Box Crate.
 
 The whole suite that passed over these mends is the one the saves' Reply above gives, run over both.
 NormTests passed, 19.
+
+146's medium finding 17, the asset fields' handles, in the commit carrying this Reply, with a test
+that failed without its mend.
+
+An asset a C# component's field names in a scene file, a save, an instance's overrides or a
+component a script reload brings back is read with one handle that every field naming it shares,
+which FieldAssets keeps by kind and path while it is held. Once a scene the game loads has been
+read, and once a save has been laid, the shared handles no field of a C# component holds are
+released. Bevy's own components are not read for it, since reading a handle out of one takes a
+handle the program then keeps, and a data asset's fields and the resources a scene was saved with
+keep handles of their own, which no entity holds. The editor keeps them, as it keeps the meshes a
+load makes. SceneAssetsReleaseTests.ALevelsFieldsShareOneHandleForAnAssetThatGoesOnceNoFieldHoldsIt
+loads a level of two signs naming one picture, loads it again once the first load's signs are gone,
+then loads another scene whose sign names another picture. Without the mend the handles held past
+those before the first load read 2, 4 and 5, and with it 1, 1 and 1, the level's picture released
+and the other sign's held. docs/assets-and-models.md says so beside the scene's meshes and
+materials.
+
+The comment over the entities SaveGame.Begin takes says only what it takes.
+
+The whole suite passed over this mend and those of the four commits after it, from one tree, 2,114
+passed, 0 failed and 3 skipped, 2,117 in all where the listing is 2,106, the solution built from
+nothing with warnings as errors, a part at a time under the GPU lock once it had been free of
+timings for three minutes, held to the processors 143's run leaves free. NormTests passed, 19.
+
+Shared: a field of a scene's, a save's or an instance's component that names an asset shares one
+handle for it with every other field naming it, and once a load has been read the shared handles no
+C# component's field holds are released, so a level loaded again over itself takes no more handles.
+The sibling's scene fields name assets as well and may meet the same growth, so this is offered for
+it to read.

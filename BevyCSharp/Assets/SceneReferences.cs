@@ -80,6 +80,16 @@ public class SceneReferences
     /// </summary>
     internal bool SameRun { get; init; }
 
+    /// <summary>
+    /// Whether an asset a field names is read with the handle every other field naming it holds,
+    /// as a scene file, a save and an instance's overrides are read, rather than a handle of its
+    /// own, so a level loaded again takes no more handles (<see cref="FieldAssets"/>).
+    /// </summary>
+    internal bool SharesAssets { get; init; }
+
+    /// <summary>References with no entities numbered whose assets are shared, as an instance's overrides are read.</summary>
+    internal static SceneReferences Sharing { get; } = new() { SharesAssets = true };
+
     /// <summary>Writes a reference to an asset by its file, reporting whether it has one.</summary>
     public virtual bool WriteAsset(Utf8JsonWriter json, AssetHandle asset)
     {
@@ -91,8 +101,11 @@ public class SceneReferences
     }
 
     /// <summary>Reads a reference to an asset by loading its file as the kind of asset given.</summary>
-    public virtual object? ReadAsset(JsonElement json, string kind) =>
-        ReadFile(json) is { Length: > 0 } file ? AssetServer.Load(kind, file) : null;
+    public virtual object? ReadAsset(JsonElement json, string kind)
+    {
+        if (ReadFile(json) is not { Length: > 0 } file) return null;
+        return SharesAssets ? FieldAssets.Load(kind, file) : AssetServer.Load(kind, file);
+    }
 
     /// <summary>
     /// Writes a reference to a file under the asset root as its id and its path, or as its path

@@ -422,7 +422,7 @@ public static partial class SceneInstances
         if (!data.Originals.TryGetValue(key, out var original)) return false;
 
         using var document = JsonDocument.Parse(original);
-        if (SceneValue.Read(document.RootElement, described) is not { } value || !described.Write(world, node, value))
+        if (SceneValue.Read(document.RootElement, described, SceneReferences.Sharing) is not { } value || !described.Write(world, node, value))
             return false;
 
         Unset(data, at, schema.QualifiedName, field);

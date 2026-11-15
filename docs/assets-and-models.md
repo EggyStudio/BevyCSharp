@@ -406,6 +406,13 @@ and materials it makes, so a level loaded again holds one load's and not every l
 editor, whose undo puts an entity back with the handles it had, keeps them
 (`SceneFile.KeepsAssets`).
 
+An asset a C# component's field names in a scene file, a save or an instance's overrides is read
+with one handle that every field naming it shares, and once a scene the game loads has been read,
+the shared handles no field holds are released. So a level loaded again over itself takes no more
+handles, and the assets of a level left behind go once nothing else holds them. A handle read off
+such a field and kept past the entities naming it names nothing once they have gone, so a game
+keeping an asset loads one of its own with `AssetServer.Load`.
+
 `Mesh` and `Image` load in any build. `StandardMaterial`, `Gltf`, `Audio` and `Font` need a render
 build, and asking for one without it reports which build would support it. Scenes load too. `Scene`
 is a trait in Bevy 0.20 and the loadable asset behind `.scn`, `.scn.ron` and a glTF file's scenes

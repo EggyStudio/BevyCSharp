@@ -13,8 +13,10 @@ internal sealed class AssetWork : IPlugin
         AssetIds.Reindex();
         DataAssets.Watching = app.Config.WatchAssets;
 
-        // The failures said belong to the app whose loads failed.
+        // The failures said belong to the app whose loads failed, and the handles the scenes'
+        // fields share to the app whose table holds them.
         AssetServer.ForgetFailed();
+        FieldAssets.Forget();
 
         // The project's icon on the window it opens, where there is one. An offscreen or headless
         // run has none to show it on.

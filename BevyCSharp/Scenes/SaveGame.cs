@@ -191,8 +191,7 @@ public static class SaveGame
         StartedFrom.AddRange(scenes);
         Unplaced.Clear();
 
-        // What the loads of the named files spawned, the scenes they place among it, and not
-        // every entity with a scene's id, which another scene the game loaded holds as well.
+        // What the loads of the named files spawned, the scenes they place among it.
         var named = scenes.Select(FileOf).ToHashSet(StringComparer.Ordinal);
         Spawned.Clear();
         Spawned.AddRange(Loads.Where(each => named.Contains(each.File)).SelectMany(each => each.Entities).Where(world.IsAlive).Distinct());
@@ -414,6 +413,9 @@ public static class SaveGame
                 else if (!carried.Read(value.Value)) refused.Add($"{value.Name}: the saved value could not be read.");
             }
         }
+
+        // The assets the scenes' fields named and the save replaced, which no field holds once it is laid.
+        if (!SceneFile.KeepsAssets) FieldAssets.Release(world);
 
         var load = new SceneLoad([.. spawned.Where(world.IsAlive)], [.. unknown], refused, opened.Problem);
         Loaded.Enqueue(new SaveLoaded(path, load.Entities));
@@ -640,6 +642,7 @@ public static class SaveGame
 
         public SaveReferences(IEnumerable<(Entity Entity, SaveId Id)> ids)
         {
+            SharesAssets = true;
             foreach (var (entity, id) in ids)
             {
                 _ids[entity] = id;

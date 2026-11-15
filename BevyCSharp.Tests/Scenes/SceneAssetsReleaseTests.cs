@@ -5,9 +5,19 @@ using Xunit;
 
 namespace Bevy.Tests;
 
+/// <summary>A component holding a picture, as a sign's face is.</summary>
+[Behavior]
+public partial struct Signboard
+{
+    /// <summary>The picture.</summary>
+    [Asset(AssetKind.Image)]
+    public AssetHandle Face;
+}
+
 /// <summary>
 /// Covers the meshes and materials a scene load makes going with the last entity drawn with them,
-/// so a level loaded again does not hold every earlier load's.
+/// and the assets its components' fields name going once no field holds them, so a level loaded
+/// again does not hold every earlier load's.
 /// </summary>
 /// <remarks>
 /// A game loading saves over a level would hold a level's look more for each save it loads, every
@@ -16,8 +26,12 @@ namespace Bevy.Tests;
 /// load's entity despawned before the second, as a save loaded over a level does.
 /// </remarks>
 [Collection("engine")]
-public sealed class SceneAssetsReleaseTests
+public sealed class SceneAssetsReleaseTests : IDisposable
 {
+    private readonly TestFolder _folder = new("bcs-field-assets-");
+
+    public void Dispose() => _folder.Dispose();
+
     [SkippableFact]
     public void ALoadsMeshAndMaterialGoOnceItsEntitiesHaveAndTheNextLoadsStay()
     {
@@ -84,6 +98,69 @@ public sealed class SceneAssetsReleaseTests
         }
 
         Assert.True(alive, "a kept mesh went with its entity");
+    }
+
+    [Fact]
+    public void ALevelsFieldsShareOneHandleForAnAssetThatGoesOnceNoFieldHoldsIt()
+    {
+        var level = _folder.File("level.scene.json");
+        var other = _folder.File("other.scene.json");
+        var held = new List<int>();
+        var (checkerAlive, signAlive) = (true, false);
+
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            var world = ctx.Ecs;
+            Signs(world, level, "textures/checker.png", "textures/checker.png");
+            Signs(world, other, "textures/cubemap.png");
+            var before = AssetServer.LiveHandleCount;
+
+            // The level twice, the first load's signs gone before the second, as a save loaded
+            // over a level takes them.
+            var first = SceneFile.Load(world, level).Entities;
+            held.Add(AssetServer.LiveHandleCount - before);
+            foreach (var entity in first) world.Despawn(entity);
+
+            var second = SceneFile.Load(world, level).Entities;
+            held.Add(AssetServer.LiveHandleCount - before);
+            var checker = world.GetRef<Signboard>(second[0]).Face;
+            foreach (var entity in second) world.Despawn(entity);
+
+            // Then another scene once the level has gone, whose sign names another picture.
+            var sign = world.GetRef<Signboard>(SceneFile.Load(world, other).Entities[0]).Face;
+            held.Add(AssetServer.LiveHandleCount - before);
+            (checkerAlive, signAlive) = (AssetServer.IsAlive(checker), AssetServer.IsAlive(sign));
+        });
+
+        harness.Run();
+
+        Assert.Equal([1, 1, 1], held);
+        Assert.False(checkerAlive, "the level's picture is still held once the level has gone");
+        Assert.True(signAlive, "the other scene's picture went while its sign held it");
+    }
+
+    /// <summary>
+    /// Writes a scene of a sign for each picture named, each holding the picture in a field, and
+    /// takes the signs and their handles away again.
+    /// </summary>
+    private static void Signs(EcsWorld world, string path, params string[] pictures)
+    {
+        var signs = new List<Entity>();
+        foreach (var picture in pictures)
+        {
+            var sign = world.Spawn();
+            world.Add(sign, new Signboard { Face = AssetServer.Load(AssetKind.Image, picture) });
+            signs.Add(sign);
+        }
+
+        SceneFile.Save(world, path, signs.Contains);
+
+        foreach (var sign in signs)
+        {
+            AssetServer.Release(world.GetRef<Signboard>(sign).Face);
+            world.Despawn(sign);
+        }
     }
 
     /// <summary>

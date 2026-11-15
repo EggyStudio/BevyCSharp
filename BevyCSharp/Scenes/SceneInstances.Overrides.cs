@@ -82,7 +82,7 @@ public static partial class SceneInstances
             }
         }
 
-        SceneValue.ReadComponent(document.RootElement, schema, world, node);
+        SceneValue.ReadComponent(document.RootElement, schema, world, node, SceneReferences.Sharing);
         return true;
     }
 

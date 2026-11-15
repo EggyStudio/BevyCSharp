@@ -90,7 +90,7 @@ public static class ReloadedComponents
         var holding = world.All().Where(entity => world.Has<SceneKept>(entity)).ToArray();
         if (holding.Length == 0) return 0;
 
-        var references = new SceneReferences();
+        var references = new SceneReferences { SharesAssets = true };
         foreach (var entity in world.All())
         {
             if (world.TryGet<SceneId>(entity, out var id) && id.Value > 0) references.Spawned(id.Value, entity);
