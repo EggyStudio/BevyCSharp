@@ -932,3 +932,40 @@ and its filtering at a slant leaves a texture as one sample does where a card's 
 darken a leaf seen side on by a few percent, so a bound read on a card over textured cards seen at a
 slant reads higher on lavapipe. The sibling runs its tests on lavapipe and reads its bounds on the
 card, so this is offered for it to read.
+
+146's medium findings 32, 37 and 38, the session file, a panic that ends the run and a canceled
+read, in the commit carrying this Reply, each with a test that failed without its mend.
+
+The session file is opened anew with the owner's read and write alone from the moment it is made,
+before the token goes into it, a temporary file a crashed write left deleted first, and the sessions
+folder is made the owner's alone where it is missing, where the file was made under the process's
+umask, 0644 here, and its mode set only once the token was in it, and the folder made 0755. A folder
+that is there keeps its mode, since BCS_SESSIONS may name one somebody else made.
+CliSessionTests.TheTokenIsNeverWhereAnotherAccountCouldReadIt reads the file's mode as the token is
+about to go in, through a call CliSessionFile makes for a test, and the folder's once it is written.
+Without the mend the token went into a file of mode 0644, which the group and others read, and with
+it the file is its owner's alone as the token goes in and so is the folder.
+
+A panic on the main thread inside Bevy's run, which the guard around the run hears as the bridge's
+status and the hook leaves unwritten, is written to the crash file whole and thrown from App.Run as
+a BevyNativeException, where the status went back as the code the process ends with.
+CrashLogTests.APanicThatEndsTheRunIsWrittenAndThrown runs an app for two frames through the bridge's
+run followed by a panic inside the guard, the bridge's own panic made on purpose, which stands for
+one that unwinds out of Bevy's run as the bridge's status and its last panic. Without the mend the
+run handed back the bridge's status and threw nothing, and with it the run throws the panic's words
+and the crash file holds them under a heading of their own.
+
+A streamed read keeps what it brought back only while it is not canceled, under a lock
+Streaming.Cancel takes to drop a finished read, so a read canceled while its file read ran, or
+before a slice too short to read was kept, never lands after its cancel.
+StreamingTests.ACanceledReadNeverLandsAfterItsCancel asks for eight empty slices at a priority of 1,
+canceling each as it is asked for, and then a read at 0. Without the mend 7 of the 8 canceled reads
+landed after their cancel, and with it none does and the read at 0 is handed over.
+
+The whole suite that passed over these mends is the one 143's Reply above gives. NormTests passed,
+19.
+
+Shared: a session file holding the command line's token is made readable by its owner alone as it is
+made, before the token goes in, in a folder made its owner's alone, where its mode was set once the
+token was in it. The sibling's command line keeps a session with a token as well and may meet the
+same, so this is offered for it to read.

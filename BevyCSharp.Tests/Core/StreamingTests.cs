@@ -93,6 +93,61 @@ public sealed class StreamingTests
         }
     }
 
+    /// <summary>
+    /// A read canceled before it brought anything back is never handed over afterwards, nor holds
+    /// back a read of lower priority.
+    /// </summary>
+    [Fact]
+    public void ACanceledReadNeverLandsAfterItsCancel()
+    {
+        var empty = WriteFile(0);
+        var file = WriteFile(40);
+        var canceled = new List<StreamRead>();
+
+        try
+        {
+            var low = default(StreamRead);
+            byte[]? bytes = null;
+            var started = false;
+
+            using var engine = new EngineHarness(frames: 200, fps: 120);
+            engine.On(Stage.Update, world =>
+            {
+                if (!started)
+                {
+                    started = true;
+
+                    // An empty slice reads nothing, so no token is checked on its way, and each is
+                    // canceled as it is asked for, before its worker has opened the file.
+                    for (var i = 0; i < 8; i++)
+                    {
+                        var read = Streaming.Read(Path.GetFileName(empty), priority: 1);
+                        Streaming.Cancel(read);
+                        canceled.Add(read);
+                    }
+
+                    low = Streaming.Read(Path.GetFileName(file), priority: 0);
+                    return;
+                }
+
+                if (Streaming.Pending > 0) return;
+                if (Streaming.TryTake(low, out var arrived)) bytes = arrived;
+                if (bytes is not null || world.Resource<Time>().FrameCount > 20) App.RequestExit();
+            });
+            engine.Run();
+
+            // Taken here, so none is left to hold back another test's reads.
+            var landed = canceled.Count(read => Streaming.TryTake(read, out _));
+            Assert.True(landed == 0, $"{landed} of the {canceled.Count} canceled reads landed after their cancel");
+            Assert.NotNull(bytes);
+        }
+        finally
+        {
+            File.Delete(empty);
+            File.Delete(file);
+        }
+    }
+
     /// <summary>A file that is not there is reported when the read is taken.</summary>
     [Fact]
     public void AMissingFileIsReportedWhenTaken()

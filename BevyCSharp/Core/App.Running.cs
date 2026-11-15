@@ -46,7 +46,15 @@ public sealed unsafe partial class App : IDisposable
     /// Runs the engine. Blocks until the window closes or <see cref="RequestExit()"/> is called,
     /// then runs the <see cref="Stage.Cleanup"/> systems.
     /// </summary>
+    /// <remarks>
+    /// A panic on the main thread inside Bevy's run, in one of Bevy's exclusive systems or the
+    /// bridge's, unwinds out through the guard around the run, which hears it as the bridge's
+    /// status rather than handing it to the crash log as a panic on another thread is. So the run
+    /// writes it to the crash file whole and throws it, where the status would otherwise pass for
+    /// the code the process ends with.
+    /// </remarks>
     /// <returns>The process exit code Bevy reported; 0 for a clean shutdown.</returns>
+    /// <exception cref="BevyNativeException">The bridge failed during the run, as a panic inside it does.</exception>
     public int Run()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
@@ -79,9 +87,10 @@ public sealed unsafe partial class App : IDisposable
         IsRunning = true;
         Running = this;
         ComponentRegistry.EnterRunning();
+        int code;
         try
         {
-            return Native.bcs_app_run(_handle);
+            code = RunBridge(_handle);
         }
         finally
         {
@@ -90,7 +99,16 @@ public sealed unsafe partial class App : IDisposable
             EngineLog.TakeBevys(this);
             Running = null;
         }
+
+        if (code == NativeStatus.Panic) CrashLog.Write("A panic inside Bevy on the main thread, which ended the run", Native.LastPanic());
+        return Native.Check(code, "running the app");
     }
+
+    /// <summary>
+    /// The bridge's run, which a test follows with a panic the guard catches, as one on the main
+    /// thread inside Bevy's run comes back.
+    /// </summary>
+    internal static Func<IntPtr, int> RunBridge { get; set; } = Native.bcs_app_run;
 
     /// <summary>Asks the engine to shut down after the current frame.</summary>
     public static void RequestExit() =>

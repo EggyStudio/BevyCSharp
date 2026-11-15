@@ -27,6 +27,7 @@ public static class Streaming
 
     private static readonly ConcurrentDictionary<long, Finished> Done = new();
     private static readonly ConcurrentDictionary<long, CancellationTokenSource> Running = new();
+    private static readonly object Gate = new();
     private static long _next;
     private static long _takenThisFrame;
 
@@ -65,6 +66,19 @@ public static class Streaming
 
         Running[ticket] = cancel;
 
+        // What a read brought back is kept under the gate Cancel takes, and only while the read is
+        // not canceled. The token is checked as a file read starts, and one under way, or a slice
+        // too short to read at all, comes back whatever happened since, so without the gate
+        // a read canceled meanwhile would land after its cancel, nobody holding its ticket, and a
+        // read of higher priority left there would hold back every one below it.
+        void Keep(Finished finished)
+        {
+            lock (Gate)
+            {
+                if (!cancel.IsCancellationRequested) Done[ticket] = finished;
+            }
+        }
+
         _ = Task.Run(async () =>
         {
             try
@@ -73,7 +87,7 @@ public static class Streaming
                 // embeds its assets leaves every one but its scripts.
                 if (!File.Exists(full) && AssetFiles.OpenCarried(full) is { } carried)
                 {
-                    using (carried) Done[ticket] = new Finished(await Slice(carried, offset, length, cancel.Token), null, priority);
+                    using (carried) Keep(new Finished(await Slice(carried, offset, length, cancel.Token), null, priority));
                     return;
                 }
 
@@ -91,7 +105,7 @@ public static class Streaming
                     read += got;
                 }
 
-                Done[ticket] = new Finished(read == bytes.Length ? bytes : bytes[..read], null, priority);
+                Keep(new Finished(read == bytes.Length ? bytes : bytes[..read], null, priority));
             }
             catch (OperationCanceledException)
             {
@@ -99,7 +113,7 @@ public static class Streaming
             }
             catch (Exception error)
             {
-                Done[ticket] = new Finished(null, error, priority);
+                Keep(new Finished(null, error, priority));
             }
             finally
             {
@@ -151,6 +165,10 @@ public static class Streaming
     }
 
     /// <summary>Stops a read, or forgets one that finished and was never taken.</summary>
+    /// <remarks>
+    /// A read canceled while its file read runs, or before a slice too short to read was kept, is
+    /// never handed over, and what it brought back is dropped.
+    /// </remarks>
     public static void Cancel(StreamRead read)
     {
         if (Running.TryGetValue(read.Ticket, out var cancel))
@@ -165,7 +183,9 @@ public static class Streaming
             }
         }
 
-        Done.TryRemove(read.Ticket, out _);
+        // Under the gate a read is kept under, so one kept before the cancel goes and one after
+        // it sees the cancel.
+        lock (Gate) Done.TryRemove(read.Ticket, out _);
     }
 
     /// <summary>Starts a new frame's budget. Called by the engine before any system runs.</summary>

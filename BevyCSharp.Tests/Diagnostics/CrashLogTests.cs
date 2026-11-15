@@ -127,6 +127,39 @@ public sealed class CrashLogTests : IDisposable
         Assert.Null(CrashLog.Crash);
     }
 
+    /// <summary>
+    /// A panic on the main thread inside Bevy's run, which the guard around the run turns into the
+    /// bridge's status and the hook leaves unwritten, is written to the crash file and thrown from
+    /// the run rather than handed back as the code the process ends with.
+    /// </summary>
+    [Fact]
+    public void APanicThatEndsTheRunIsWrittenAndThrown()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var bridge = App.RunBridge;
+        App.RunBridge = handle =>
+        {
+            bridge(handle);
+            return Native.bcs_panic_on_purpose(1);
+        };
+
+        BevyNativeException thrown;
+        try
+        {
+            thrown = Assert.Throws<BevyNativeException>(() => harness.App.Run());
+        }
+        finally
+        {
+            App.RunBridge = bridge;
+        }
+
+        Assert.Contains("a panic asked for, to try the crash log", thrown.Message);
+        Assert.NotNull(CrashLog.Crash);
+        var text = Read(CrashLog.Crash);
+        Assert.Contains("== A panic inside Bevy on the main thread, which ended the run", text);
+        Assert.Contains("a panic asked for, to try the crash log", text);
+    }
+
     [Fact]
     public void TheNextRunSaysWhereTheLastCrashIsAndKeepsTheLastRunsLog()
     {

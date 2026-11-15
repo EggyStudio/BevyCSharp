@@ -1,3 +1,4 @@
+using System.Runtime.Versioning;
 using Bevy;
 using Xunit;
 
@@ -120,6 +121,39 @@ public sealed class CliSessionTests : IDisposable
         }
 
         Assert.Equal(13u, Assert.Single(CliSessionFile.All()).Frame);
+    }
+
+    /// <summary>
+    /// The file is its owner's alone from the moment it is made, before the token goes into it,
+    /// and so is the folder made for it, so no other account on the machine catches the token on
+    /// its way into place.
+    /// </summary>
+    [SkippableFact]
+    [UnsupportedOSPlatform("windows")]
+    public void TheTokenIsNeverWhereAnotherAccountCouldReadIt()
+    {
+        Skip.If(OperatingSystem.IsWindows(), "a Windows file is shut to others by its folder's list, which has no mode");
+        CliSessionFile.Directory = _folder.File("sessions");
+
+        const UnixFileMode others = UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute
+                                    | UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+        UnixFileMode? opened = null;
+        var was = CliSessionFile.Opened;
+        CliSessionFile.Opened = path => opened = File.GetUnixFileMode(path);
+
+        try
+        {
+            CliSessionFile.Write(Session(Environment.ProcessId));
+        }
+        finally
+        {
+            CliSessionFile.Opened = was;
+        }
+
+        Assert.NotNull(opened);
+        Assert.True((opened & others) == UnixFileMode.None, $"the token went into a file of mode {opened}");
+        var folder = File.GetUnixFileMode(CliSessionFile.Directory);
+        Assert.True((folder & others) == UnixFileMode.None, $"the folder was made with mode {folder}");
     }
 
     [Fact]

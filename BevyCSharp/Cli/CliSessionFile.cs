@@ -36,8 +36,12 @@ public static class CliSessionFile
     /// <summary>Writes one, replacing whatever was there.</summary>
     /// <remarks>
     /// <para>
-    /// Written whole and moved into place, so a reader never catches a half-written file. The mode
-    /// is set on the temporary file before the move, so it is never briefly readable by others.
+    /// Written whole and moved into place, so a reader never catches a half-written file. The
+    /// temporary file is made readable by its owner alone as it is made, before the token goes into
+    /// it, and the folder is made its owner's alone as well, so another account on the machine
+    /// neither opens the file while the token is on its way into place nor lists the sessions. A
+    /// temporary file a crashed write left is deleted first, since one opened again keeps the mode
+    /// it was made with.
     /// </para>
     /// <para>
     /// On Windows a move over a file that something else has open is refused with access denied,
@@ -49,14 +53,16 @@ public static class CliSessionFile
     public static void Write(CliSession session)
     {
         ArgumentNullException.ThrowIfNull(session);
-        System.IO.Directory.CreateDirectory(Directory);
+        MakeFolder();
 
         var final = PathFor(session.Pid);
         var temporary = final + ".tmp";
 
-        using (var stream = File.Create(temporary))
+        File.Delete(temporary);
+        using (var stream = new FileStream(temporary, Made()))
         using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
         {
+            Opened?.Invoke(temporary);
             writer.WriteStartObject();
             writer.WriteNumber("pid", session.Pid);
             writer.WriteNumber("port", session.Port);
@@ -73,8 +79,6 @@ public static class CliSessionFile
             writer.WriteString("heartbeat", session.Heartbeat.ToString("O"));
             writer.WriteEndObject();
         }
-
-        Restrict(temporary);
 
         for (var attempt = 1; ; attempt++)
         {
@@ -101,6 +105,12 @@ public static class CliSessionFile
 
     /// <summary>The wait between two tries of a move, which a test makes the moment it lets the file go.</summary>
     internal static Action Pause { get; set; } = static () => Thread.Sleep(10);
+
+    /// <summary>
+    /// Called with the temporary file once it is made and before anything goes into it, where a
+    /// test reads the mode the token is written under.
+    /// </summary>
+    internal static Action<string>? Opened { get; set; }
 
     /// <summary>Reads one, or nothing when the file is missing or not one of these.</summary>
     /// <remarks>
@@ -204,19 +214,32 @@ public static class CliSessionFile
         return swept;
     }
 
-    /// <summary>Makes a file readable by its owner and nobody else, where that means anything.</summary>
-    private static void Restrict(string path)
+    /// <summary>
+    /// Makes the folder where it is missing, with the folders above it that are, its owner's alone
+    /// where modes mean anything. A folder that is there keeps its mode, since <c>BCS_SESSIONS</c>
+    /// may name one somebody else made.
+    /// </summary>
+    private static void MakeFolder()
     {
-        if (OperatingSystem.IsWindows()) return;
+        if (OperatingSystem.IsWindows())
+        {
+            System.IO.Directory.CreateDirectory(Directory);
+            return;
+        }
 
-        try
-        {
-            File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-        }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
-        {
-            // A filesystem that has no opinion about modes. The token still applies.
-        }
+        System.IO.Directory.CreateDirectory(Directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+    }
+
+    /// <summary>
+    /// How the temporary file is opened, made anew, and readable and writable by its owner alone
+    /// from the moment it is made where modes mean anything. A filesystem that has no opinion about
+    /// modes makes it as it makes any file, and the token still applies.
+    /// </summary>
+    private static FileStreamOptions Made()
+    {
+        var options = new FileStreamOptions { Mode = FileMode.CreateNew, Access = FileAccess.Write };
+        if (!OperatingSystem.IsWindows()) options.UnixCreateMode = UnixFileMode.UserRead | UnixFileMode.UserWrite;
+        return options;
     }
 
     /// <summary>A string property, or an empty one.</summary>
