@@ -155,9 +155,9 @@ physics.SetMaterial(floor, new PhysicsMaterial(Friction: 0.05f));   // ice
 ```
 
 Two bodies touching slide with the geometric mean of their frictions and bounce as the bouncier
-does. Bepu's contacts are stiff springs that take a bounce's speed out, so a bounce is given back
-after the step, along the surface's normal, to a body that struck it faster than a fifth of a unit
-a second.
+does, so a bouncy pad throws back a crate of no bounce of its own. Bepu's contacts are stiff springs
+that take a bounce's speed out, so a bounce is given back after the step, along the surface's
+normal, to a body that struck it faster than a fifth of a unit a second.
 
 Bodies that start or stop touching are reported on the message bus, and a body added as a sensor
 reports what enters it without pushing it, which is a trigger volume:

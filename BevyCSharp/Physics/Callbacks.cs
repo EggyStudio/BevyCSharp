@@ -49,14 +49,14 @@ internal sealed class ContactLog
     public readonly Dictionary<uint, Bevy.Physics.PhysicsMaterial> Materials = [];
 
     /// <summary>
-    /// For each bouncy collidable touching something this step, which way the surface it touched
-    /// faces, out toward it.
+    /// For each dynamic collidable touching something this step where either of the two is bouncy,
+    /// which way the surface it touched faces, out toward it, and the bounce of the pair.
     /// </summary>
-    public readonly Dictionary<uint, Vector3> Struck = [];
+    public readonly Dictionary<uint, (Vector3 Outward, float Bounce)> Struck = [];
 
-    public void Strike(CollidableReference body, Vector3 outward)
+    public void Strike(CollidableReference body, Vector3 outward, float bounce)
     {
-        lock (Struck) Struck[body.Packed] = outward;
+        lock (Struck) Struck[body.Packed] = (outward, bounce);
     }
 
     /// <summary>
@@ -147,10 +147,12 @@ internal struct ContactCallbacks : INarrowPhaseCallbacks
             var touching = depth >= -0.01f;
             Log.Add(pair.A, pair.B, point, normal, MathF.Max(0f, closing), touching);
 
-            // Which way the surface faces, for the bounce the world gives a bouncy body after the
-            // step, out of the second's surface toward the first.
-            if (touching && first.Bounce > 0f && pair.A.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.A, normal);
-            if (touching && second.Bounce > 0f && pair.B.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.B, -normal);
+            // Which way the surface faces, for the bounce the world gives a dynamic body of the pair
+            // after the step, out of the second's surface toward the first. The pair bounces as the
+            // bouncier of the two does, so a bouncy pad throws back a body of no bounce of its own.
+            var bounce = MathF.Max(first.Bounce, second.Bounce);
+            if (touching && bounce > 0f && pair.A.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.A, normal, bounce);
+            if (touching && bounce > 0f && pair.B.Mobility == CollidableMobility.Dynamic) Log.Strike(pair.B, -normal, bounce);
         }
 
         // A sensor reports what it touches and pushes nothing, so no constraint is made for it.

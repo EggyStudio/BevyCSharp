@@ -428,15 +428,19 @@ public sealed partial class PhysicsWorld : IDisposable
             foreach (var entity in gone) Remove(entity);
         }
 
-        // How fast each bouncy body was going before the step, which with the step before is the
-        // speed it hit with.
+        // How fast each awake dynamic body was going before the step, which with the step before is
+        // the speed it hit with, where anything in the world is bouncy. A pair bounces as the
+        // bouncier of its two does, so a body of no bounce of its own may strike a bouncy pad, and
+        // a world with nothing bouncy records nothing.
         Dictionary<Entity, Vector3>? before = null;
-        foreach (var (packed, material) in _contacts.Materials)
+        if (_contacts.Materials.Values.Any(material => material.Bounce > 0f))
         {
-            if (material.Bounce <= 0f || Entity(packed) is not { } bouncy || !_bodies.TryGetValue(bouncy, out var body)) continue;
-            if (body.Kind != BodyKind.Dynamic) continue;
+            foreach (var (entity, body) in _bodies)
+            {
+                if (body.Kind != BodyKind.Dynamic || !_simulation.Bodies[body.Moving].Awake) continue;
 
-            (before ??= [])[bouncy] = _simulation.Bodies[body.Moving].Velocity.Linear;
+                (before ??= [])[entity] = _simulation.Bodies[body.Moving].Velocity.Linear;
+            }
         }
 
         // Characters walked toward what their games ask, which needs the world's ground as it is
@@ -473,7 +477,8 @@ public sealed partial class PhysicsWorld : IDisposable
     }
 
     /// <summary>
-    /// Gives each bouncy body that struck something this step its speed back out of the surface.
+    /// Gives each dynamic body that struck something this step, where either is bouncy, its speed
+    /// back out of the surface by the bouncier of the two.
     /// </summary>
     /// <remarks>
     /// A body already resting on the surface struck it at no speed, which is under the threshold,
@@ -483,13 +488,13 @@ public sealed partial class PhysicsWorld : IDisposable
     {
         if (before is null) return;
 
-        foreach (var (packed, outward) in _contacts.Struck)
+        foreach (var (packed, (outward, bounce)) in _contacts.Struck)
         {
             // Once a contact, on the step it began. One that goes on is a body resting or rolling.
             if (_struckLast.Contains(packed)) continue;
 
             if (Entity(packed) is not { } entity || !before.TryGetValue(entity, out var hit)) continue;
-            if (!_bodies.TryGetValue(entity, out var body) || !_contacts.Materials.TryGetValue(packed, out var material)) continue;
+            if (!_bodies.TryGetValue(entity, out var body)) continue;
 
             // A speculative contact slows a body the step before it touches, closing the gap
             // exactly, so the speed it hit with may be the one it had a step earlier.
@@ -500,7 +505,7 @@ public sealed partial class PhysicsWorld : IDisposable
 
             var reference = _simulation.Bodies[body.Moving];
             var now = reference.Velocity.Linear;
-            reference.Velocity.Linear = now - (Vector3.Dot(now, normal) * normal) - (material.Bounce * into * normal);
+            reference.Velocity.Linear = now - (Vector3.Dot(now, normal) * normal) - (bounce * into * normal);
             reference.Awake = true;
         }
     }

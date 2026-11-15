@@ -795,3 +795,23 @@ is fails, the firings 0.2, 0.5, 0.8, 1.1 and 1.4. Each passes on the code as it 
 
 The whole suite that passed over these is the one the asset fields' Reply above gives. NormTests
 passed, 19.
+
+146's medium findings 30 and 31, physics' bounce and the spatial scale, in the commit carrying this
+Reply.
+
+Two touching bodies bounce as the bouncier of the two does, as the guide and PhysicsMaterial say,
+each dynamic body of the pair struck with the pair's bounce, where only a dynamic body whose own
+material was bouncy bounced, and by its own. The speed a body came into the step with is recorded
+for every awake dynamic body while anything in the world is bouncy, and for none in a world with
+nothing bouncy. BounceTests.ATouchingPairBouncesAsTheBouncierOfTheTwo drops a ball of no bounce and
+one of 0.3 on pads of 0.9, and a ball of no bounce on a dull floor. Without the mend the dull ball
+on the bouncy pad came back up only to 0.59 of a unit, where the test asks for more than 2.1, and
+with it the test passes, as do the physics, contact, sleep and kinematic body classes beside it, 44
+in all. docs/physics.md says a bouncy pad throws back a crate of no bounce of its own.
+
+Config.SpatialScale is said as what a world unit is multiplied by to give meters, 0.01 for a world
+measured in centimeters or pixels, since Bevy multiplies the sound's and the ears' positions by it,
+where it said a hundred. It is a comment alone, which no test reads.
+
+The whole suite that passed over these is the one the asset fields' Reply above gives. NormTests
+passed, 19.

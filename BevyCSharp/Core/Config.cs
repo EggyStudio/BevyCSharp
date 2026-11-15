@@ -424,13 +424,15 @@ public sealed class Config
         && value is not ("0" or "off" or "false" or "no");
 
     /// <summary>
-    /// How many world units a meter is, for every spatial sound that does not say otherwise.
+    /// What a world unit is multiplied by to give meters, for every spatial sound that does not say
+    /// otherwise.
     /// </summary>
     /// <remarks>
     /// How far away a sound is depends on what the world is measured in, which is a fact about the
     /// game rather than about any one sound, so it is set once here. Zero keeps Bevy's own of one,
-    /// which suits a world measured in meters; a world measured in centimeters needs a hundred. A
-    /// sound may still say otherwise for itself.
+    /// which suits a world measured in meters, and a world measured in centimeters or pixels needs
+    /// <c>0.01</c>, which makes a hundred units a meter, as a sound's own
+    /// <c>AudioSettings.SpatialScale</c> does. A sound may still say otherwise for itself.
     /// </remarks>
     public float SpatialScale { get; set; }
 
