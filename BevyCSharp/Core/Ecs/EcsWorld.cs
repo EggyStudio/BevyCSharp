@@ -752,8 +752,12 @@ public sealed unsafe partial class EcsWorld
     ///     row.Component.X += speed * dt;
     /// </code>
     /// </example>
-    public ComponentQuery<T> Query<T>(bool markChanged = true) where T : unmanaged =>
-        new(Chunks<T>(markChanged: markChanged));
+    public ComponentQuery<T> Query<T>(bool markChanged = true) where T : unmanaged
+    {
+        // A sparse component is refused as the query is asked for, before any walk takes chunks.
+        _ = ComponentType<T>.ChunkId;
+        return new(this, markChanged);
+    }
 
     /// <summary>The entities carrying <typeparamref name="T"/>.</summary>
     /// <remarks>

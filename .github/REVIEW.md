@@ -682,3 +682,40 @@ handle for it with every other field naming it, and once a load has been read th
 C# component's field holds are released, so a level loaded again over itself takes no more handles.
 The sibling's scene fields name assets as well and may meet the same growth, so this is offered for
 it to read.
+
+146's medium findings 8, 10 and 13, the runtime's, in the commit carrying this Reply, each with a
+test that failed without its mend. Finding 7, the order of PreStartup systems, waits for 143's long
+run to end, since its mend rebuilds the bridge in a container that taskset cannot hold to the
+processors the run leaves free, and 12, the clouds' drift, waits for a free GPU.
+
+A ComponentQuery takes its chunks as each walk starts, in a buffer of its own that the walk's
+enumerator gives back once, where the one buffer the query held went back to the pool at the end of
+every walk. Count and IsEmpty read the chunks as they are asked, and a sparse component is refused
+as the query is asked for, as SparseComponentTests holds, where a walk would refuse it later.
+EcsWorldTests.AQueryWalkedTwiceGivesBackABufferOfItsOwnForEachWalk walks one query twice and then
+rents two buffers of that size. Without the mend both rents were handed one array, and with it each
+has its own.
+
+A behavior method's copy of its component, and of one it takes by reference, is written back four
+bytes at a time where it differs from what the row held before the call, so a write made to the same
+row through ctx.Ecs, or by an observer the method set off, stays, and where both wrote the same four
+bytes the method's is kept.
+RowMoveTests.AWriteThroughTheWorldToAComponentAMethodHoldsStaysBesideItsOwn runs, for four frames, a
+method that counts its frames and takes ten health through the world, and one that moves its
+transform along x by reference and along y through the world. Without the mend the health read 100
+after the four frames, and with it 60, the count 4 and the transform at 4 on both axes.
+
+Audio.Pause and Audio.Resume keep the sound's own volume where none is given, their volume a float?
+that defaults to none where it defaulted to 1. AudioTests.ABusScalesItsSoundsAndKeepsTheirPauses
+pauses and then resumes a sound at 0.8 on a bus at 0.5, giving no volume. Without the mend the
+paused sound read 0.5, its own volume set to full, and with it 0.4, and 0.8 once resumed with the
+bus at full. docs/audio.md says it. Their two lines of CHEATSHEET.md change with the signature,
+which N 2.4 asks to be said here, so the version can be set before the next package.
+
+The whole suite that passed over these mends is the one the asset fields' Reply above gives.
+NormTests passed, 19.
+
+Shared: a behavior method's copy of its component, and of those it takes by reference, is written
+back only where the method changed it, so a write made through the world while it ran, or by an
+observer it set off, stays. The sibling hands a method its entity's other components too, so this is
+offered for it to read.

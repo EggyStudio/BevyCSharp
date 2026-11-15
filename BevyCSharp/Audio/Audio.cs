@@ -234,11 +234,15 @@ public static unsafe class Audio
         Control(playing, volume, paused: null, $"setting the volume of {playing}");
 
     /// <summary>Pauses a playing sound, keeping its place.</summary>
-    public static void Pause(Entity playing, float volume = 1f) =>
+    /// <param name="playing">The sound.</param>
+    /// <param name="volume">Its own volume from here on, or none to keep the one it has.</param>
+    public static void Pause(Entity playing, float? volume = null) =>
         Control(playing, volume, paused: true, $"pausing {playing}");
 
     /// <summary>Resumes a paused sound.</summary>
-    public static void Resume(Entity playing, float volume = 1f) =>
+    /// <param name="playing">The sound.</param>
+    /// <param name="volume">Its own volume from here on, or none to keep the one it has.</param>
+    public static void Resume(Entity playing, float? volume = null) =>
         Control(playing, volume, paused: false, $"resuming {playing}");
 
     /// <summary>
@@ -246,15 +250,16 @@ public static unsafe class Audio
     /// </summary>
     /// <remarks>
     /// The bridge sets both at once, so a volume change keeps whatever the sound was last told
-    /// about pausing rather than starting it again.
+    /// about pausing rather than starting it again, and a pause given no volume keeps the sound's
+    /// own, a sound this side never started heard at full.
     /// </remarks>
-    private static void Control(Entity playing, float volume, bool? paused, string doing)
+    private static void Control(Entity playing, float? volume, bool? paused, string doing)
     {
-        var known = Sounds.GetValueOrDefault(playing.Bits) ?? new Mixed(null, volume, false);
-        var now = known with { Volume = volume, Paused = paused ?? known.Paused };
+        var known = Sounds.GetValueOrDefault(playing.Bits) ?? new Mixed(null, volume ?? 1f, false);
+        var now = known with { Volume = volume ?? known.Volume, Paused = paused ?? known.Paused };
 
         Native.Check(
-            NativeAudio.bcs_audio_control(playing.Bits, volume * BusVolume(now.Bus), now.Paused ? 1 : 0),
+            NativeAudio.bcs_audio_control(playing.Bits, now.Volume * BusVolume(now.Bus), now.Paused ? 1 : 0),
             doing);
 
         Sounds[playing.Bits] = now;

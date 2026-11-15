@@ -58,6 +58,42 @@ public partial struct SelfMover
     }
 }
 
+/// <summary>Counts its frames and takes a wound through the world, as a helper the method calls would.</summary>
+[Behavior]
+public partial struct Wounded
+{
+    /// <summary>The frames it ran in.</summary>
+    public int Ticks;
+
+    /// <summary>What it has left.</summary>
+    public int Health;
+
+    /// <summary>Counts the frame on itself, and takes ten from the row the world holds of it.</summary>
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx)
+    {
+        Ticks++;
+        ctx.Ecs.GetRef<Wounded>(ctx.Entity).Health -= 10;
+    }
+}
+
+/// <summary>Moves its transform a unit along x, taken by reference, and a unit along y through the world.</summary>
+[Behavior]
+public partial struct Pushed
+{
+    /// <summary>The frames it ran in.</summary>
+    public int Ticks;
+
+    /// <summary>Counts the frame, and moves the transform both ways.</summary>
+    [OnUpdate]
+    public void Tick(BehaviorContext ctx, ref Transform transform)
+    {
+        Ticks++;
+        transform.Translation.X += 1f;
+        ctx.Ecs.GetRef<Transform>(ctx.Entity).Translation.Y += 1f;
+    }
+}
+
 /// <summary>Counts its frames, and where it grows, fills its own table until the table's columns move.</summary>
 [Behavior]
 public partial struct Grower
@@ -212,6 +248,49 @@ public sealed class RowMoveTests
             Assert.True(entity.Marked, "the method's write to itself after the call landed elsewhere");
             Assert.Equal(frames, entity.X);
         });
+    }
+
+    /// <summary>
+    /// A write a method makes through the world to its own component, or to another it takes by
+    /// reference, stays beside what it wrote to its copy of each, as a helper's write would.
+    /// </summary>
+    [Fact]
+    public void AWriteThroughTheWorldToAComponentAMethodHoldsStaysBesideItsOwn()
+    {
+        using var harness = new EngineHarness(frames: 4, discoverBehaviors: true);
+        var wounded = new List<(int Ticks, int Health)>();
+        var pushed = new List<(int Ticks, float X, float Y)>();
+        var frames = 0;
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            for (var i = 0; i < 8; i++)
+            {
+                ctx.Ecs.Add(ctx.Ecs.Spawn(), new Wounded { Health = 100 });
+                var entity = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(entity, new Pushed());
+                ctx.Ecs.Add(entity, Transform.Identity);
+            }
+        });
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            frames++;
+            (wounded, pushed) = ([], []);
+            foreach (var row in ctx.Ecs.Query<Wounded>(markChanged: false))
+                wounded.Add((row.Component.Ticks, row.Component.Health));
+            foreach (var row in ctx.Ecs.Query<Pushed>(markChanged: false))
+            {
+                var at = ctx.Ecs.GetOrDefault<Transform>(row.Entity).Translation;
+                pushed.Add((row.Component.Ticks, at.X, at.Y));
+            }
+        });
+
+        harness.Run();
+
+        Assert.Equal(8, wounded.Count);
+        Assert.All(wounded, entity => Assert.Equal((frames, 100 - 10 * frames), entity));
+        Assert.Equal(8, pushed.Count);
+        Assert.All(pushed, entity => Assert.Equal((frames, (float)frames, (float)frames), entity));
     }
 
     /// <summary>

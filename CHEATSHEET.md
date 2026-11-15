@@ -1369,8 +1369,8 @@ static int QueuedSamples(AssetHandle stream);                   // How many samp
 static Entity Play(AssetHandle clip);                           // Plays a sound and returns the entity playing it
 static Entity Play(AssetHandle clip, AudioSettings settings);   // Plays a sound as settings describes
 static void SetVolume(Entity playing, float volume);            // Sets a playing sound's volume
-static void Pause(Entity playing, float volume = 1f);           // Pauses a playing sound, keeping its place
-static void Resume(Entity playing, float volume = 1f);          // Resumes a paused sound
+static void Pause(Entity playing, float? volume = null);        // Pauses a playing sound, keeping its place
+static void Resume(Entity playing, float? volume = null);       // Resumes a paused sound
 static float VolumeOf(Entity playing);                          // A sound's volume, its own times its bus's, before the global volume
 static bool HasStarted(Entity playing);                         // Whether Bevy has attached the sink that plays a sound, which the calls that reach the sink need
 static bool IsPaused(Entity playing);                           // Whether a sound is paused

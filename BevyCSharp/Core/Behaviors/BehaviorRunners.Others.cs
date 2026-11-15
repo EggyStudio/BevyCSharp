@@ -220,26 +220,27 @@ public static partial class BehaviorRunners
             ref var row = ref components[i];
             ref var firstRow = ref firstComponents[i];
             ref var secondRow = ref secondComponents[i];
-            var copy = row;
-            var firstCopy = firstRow;
-            var secondCopy = secondRow;
+            var (before, firstBefore, secondBefore) = (row, firstRow, secondRow);
+            var copy = before;
+            var firstCopy = firstBefore;
+            var secondCopy = secondBefore;
             guard->Entity = entity.Bits;
             guard->Address = (nint)Unsafe.AsPointer(ref row);
             body(ref copy, ref firstCopy, ref secondCopy, entity, context);
 
             if (guard->Moved == 0)
             {
-                WriteBack(ref row, in copy);
-                if (writesFirst) WriteBack(ref firstRow, in firstCopy);
-                if (writesSecond) WriteBack(ref secondRow, in secondCopy);
+                WriteBack(ref row, in before, in copy);
+                if (writesFirst) WriteBack(ref firstRow, in firstBefore, in firstCopy);
+                if (writesSecond) WriteBack(ref secondRow, in secondBefore, in secondCopy);
                 (previous, hasPrevious) = (entity, true);
                 continue;
             }
 
             rows.Stop(entity, i, previous, hasPrevious);
-            Put(entity, copy);
-            if (writesFirst) Put(entity, firstCopy);
-            if (writesSecond) Put(entity, secondCopy);
+            Put(entity, before, copy);
+            if (writesFirst) Put(entity, firstBefore, firstCopy);
+            if (writesSecond) Put(entity, secondBefore, secondCopy);
             return false;
         }
 

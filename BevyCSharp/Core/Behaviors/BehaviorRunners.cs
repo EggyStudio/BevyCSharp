@@ -152,20 +152,21 @@ public static partial class BehaviorRunners
 
             context.Entity = entity;
             ref var row = ref components[i];
-            var copy = row;
+            var before = row;
+            var copy = before;
             guard->Entity = entity.Bits;
             guard->Address = (nint)Unsafe.AsPointer(ref row);
             body(ref copy, entity, context);
 
             if (guard->Moved == 0)
             {
-                WriteBack(ref row, in copy);
+                WriteBack(ref row, in before, in copy);
                 (previous, hasPrevious) = (entity, true);
                 continue;
             }
 
             rows.Stop(entity, i, previous, hasPrevious);
-            Put(entity, copy);
+            Put(entity, before, copy);
             return false;
         }
 

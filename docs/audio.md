@@ -55,12 +55,12 @@ draws from each on the game's clock as a device would, so everything below answe
 window, a sound ends when it would have been heard to end, and `Audio.IsSilent` says which a run
 does.
 
-`SetVolume`, `Pause` and `Resume` reach the sink Bevy attaches once playback has started, so they
-report `NotPresent` if called in the same frame the sound was started in, and in a window on a
-machine with no device to play on, which never attaches one. `Audio.HasStarted` asks first. So do
-`PositionOf` and `Seek`, which read and move the point a clip has reached, `SetSpeed`, which plays
-it faster or slower with its pitch, and `SetMuted`, which silences it and keeps its volume for when
-it is heard again:
+`Pause` and `Resume` keep a sound's own volume unless they are given another. `SetVolume`, `Pause`
+and `Resume` reach the sink Bevy attaches once playback has started, so they report `NotPresent` if
+called in the same frame the sound was started in, and in a window on a machine with no device to
+play on, which never attaches one. `Audio.HasStarted` asks first. So do `PositionOf` and `Seek`,
+which read and move the point a clip has reached, `SetSpeed`, which plays it faster or slower with
+its pitch, and `SetMuted`, which silences it and keeps its volume for when it is heard again:
 
 <!-- compiled with:
 Entity music = default;

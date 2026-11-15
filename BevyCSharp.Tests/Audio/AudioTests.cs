@@ -244,7 +244,8 @@ public sealed class AudioTests
 
     /// <summary>
     /// A sound on a bus is heard at its own volume times the bus's, a bus change reaches it while
-    /// it plays, and neither a bus change nor a volume change undoes a pause.
+    /// it plays, neither a bus change nor a volume change undoes a pause, and a pause and a resume
+    /// given no volume keep the sound's own.
     /// </summary>
     /// <remarks>
     /// The global volume is zero, so the volumes read back are each sound's own.
@@ -271,7 +272,7 @@ public sealed class AudioTests
 
         harness.OnContext(Stage.Update, _ =>
         {
-            if (step > 4) return;
+            if (step > 5) return;
 
             try
             {
@@ -287,19 +288,21 @@ public sealed class AudioTests
             {
                 case 0: Audio.SetBusVolume("music", 0.5f); break;
                 case 1: Audio.SetVolume(music, 0.8f); break;
-                case 2: Audio.Pause(music, 0.8f); break;
+                case 2: Audio.Pause(music); break;
                 case 3: Audio.SetBusVolume("music", 1f); break;
+                case 4: Audio.Resume(music); break;
             }
         });
 
         harness.Run();
 
-        Assert.Equal(5, readings.Count);
+        Assert.Equal(6, readings.Count);
         Assert.Equal((0.5f, 0.8f, false), readings[0]);
         Assert.Equal((0.25f, 0.8f, false), readings[1]);
         Assert.Equal((0.4f, 0.8f, false), readings[2]);
         Assert.Equal((0.4f, 0.8f, true), readings[3]);
         Assert.Equal((0.8f, 0.8f, true), readings[4]);
+        Assert.Equal((0.8f, 0.8f, false), readings[5]);
     }
 
     [SkippableFact]

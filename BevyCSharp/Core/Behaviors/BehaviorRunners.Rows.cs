@@ -162,31 +162,58 @@ public static partial class BehaviorRunners
         }
     }
 
-    /// <summary>Writes a method's copy of a component back to the row it was copied from.</summary>
+    /// <summary>Writes to a row what a method changed in its copy of it.</summary>
     /// <remarks>
-    /// Four bytes at a time up to sixty four, the width of the fields a method writes, since the
-    /// copy is read back the moment the method returns, while its last writes may still be on their
-    /// way to memory, and a read wider than a write still on its way waits for it to land. A larger
-    /// component is read whole, where four bytes at a time would cost more than the wait.
+    /// <para>
+    /// The parts the copy holds other than they were before the method ran are written and the
+    /// parts it left as they were are not, so a write that reached the row itself while the method
+    /// ran, made through <c>ctx.Ecs</c> or by an observer the method set off, stays. Where both
+    /// wrote the same part the method's is kept.
+    /// </para>
+    /// <para>
+    /// A part is four bytes, the width of most fields a method writes, since the copy is read back
+    /// the moment the method returns, while its last writes may still be on their way to memory,
+    /// and a read wider than a write still on its way waits for it to land. A component whose size
+    /// is not a multiple of four is compared a byte at a time.
+    /// </para>
     /// </remarks>
-    private static void WriteBack<T>(ref T row, in T copy) where T : unmanaged
+    private static void WriteBack<T>(ref T row, in T before, in T copy) where T : unmanaged
     {
-        if (Unsafe.SizeOf<T>() <= 64 && Unsafe.SizeOf<T>() % 4 == 0)
+        if (Unsafe.SizeOf<T>() % 4 == 0)
         {
             ref var to = ref Unsafe.As<T, int>(ref row);
+            ref var was = ref Unsafe.As<T, int>(ref Unsafe.AsRef(in before));
             ref var from = ref Unsafe.As<T, int>(ref Unsafe.AsRef(in copy));
-            for (var k = 0; k < Unsafe.SizeOf<T>() / 4; k++) Unsafe.Add(ref to, k) = Unsafe.Add(ref from, k);
+            for (var k = 0; k < Unsafe.SizeOf<T>() / 4; k++)
+            {
+                var written = Unsafe.Add(ref from, k);
+                if (written != Unsafe.Add(ref was, k)) Unsafe.Add(ref to, k) = written;
+            }
         }
         else
         {
-            row = copy;
+            ref var to = ref Unsafe.As<T, byte>(ref row);
+            ref var was = ref Unsafe.As<T, byte>(ref Unsafe.AsRef(in before));
+            ref var from = ref Unsafe.As<T, byte>(ref Unsafe.AsRef(in copy));
+            for (var k = 0; k < Unsafe.SizeOf<T>(); k++)
+            {
+                var written = Unsafe.Add(ref from, k);
+                if (written != Unsafe.Add(ref was, k)) Unsafe.Add(ref to, k) = written;
+            }
         }
     }
 
-    /// <summary>Writes a method's copy of a component to its entity, where the entity still carries it.</summary>
-    private static unsafe void Put<T>(Entity entity, in T value) where T : unmanaged
+    /// <summary>
+    /// Writes what a method changed in its copy of a component to its entity, where the entity
+    /// still carries it, as <see cref="WriteBack{T}"/> writes it to the row.
+    /// </summary>
+    private static unsafe void Put<T>(Entity entity, in T before, in T copy) where T : unmanaged
     {
         var pointer = NativeCore.bcs_ecs_get_ptr(entity.Bits, ComponentType<T>.ChunkId);
-        if (pointer is not null) Unsafe.WriteUnaligned(pointer, value);
+        if (pointer is null) return;
+
+        var now = Unsafe.ReadUnaligned<T>(pointer);
+        WriteBack(ref now, in before, in copy);
+        Unsafe.WriteUnaligned(pointer, now);
     }
 }

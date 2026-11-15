@@ -1,3 +1,4 @@
+using System.Buffers;
 using Bevy;
 using Bevy.Interop;
 using Xunit;
@@ -202,6 +203,34 @@ public sealed class EcsWorldTests
 
         harness.Run();
         Assert.Equal(7, counted);
+    }
+
+    [Fact]
+    public void AQueryWalkedTwiceGivesBackABufferOfItsOwnForEachWalk()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        var (walked, shared) = (0, true);
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            for (var i = 0; i < 3; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new Health());
+
+            var query = ctx.Ecs.Query<Health>();
+            foreach (var _ in query) walked++;
+            foreach (var _ in query) walked++;
+
+            // A buffer given back twice is in the pool twice, and the next two listings both get it.
+            var first = ArrayPool<NativeChunk>.Shared.Rent(8);
+            var second = ArrayPool<NativeChunk>.Shared.Rent(8);
+            shared = ReferenceEquals(first, second);
+            ArrayPool<NativeChunk>.Shared.Return(first);
+            if (!shared) ArrayPool<NativeChunk>.Shared.Return(second);
+        });
+
+        harness.Run();
+
+        Assert.Equal(6, walked);
+        Assert.False(shared, "the pool handed one buffer to two listings");
     }
 
     [Fact]
