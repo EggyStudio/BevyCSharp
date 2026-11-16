@@ -1128,3 +1128,16 @@ from nothing with warnings as errors, a part at a time under the GPU lock once i
 timings for three minutes. The run before it failed one test, whose mend the shader targets' Reply
 gives. The most a host held of its own, as the guard counts it, was part 18's 2,063 MB under the 3
 GB cap the run gives its hosts, with 2,691 MB resident. NormTests passed, 19.
+
+Verdict 60's capture, compute_shader_game_of_life, in the commit carrying this Reply. Its steps
+start once its programs are ready, a frame the held clock leaves to the device, so its shot in frame
+120 held 117 steps here and 118 on the runner, and showed the other image of the two it swaps
+between, 7.6 percent of its pixels apart. Under GITHUB_ACTIONS, which build/capture-example.sh
+exports here as well, it stops at 60 steps and shows the image the last of them wrote, and says the
+steps and the frame it reached them by in the capture's log. Two takes here, their programs ready a
+frame apart, in frames 65 and 66, and one on lavapipe drew it alike to the pixel. The picture is
+retaken at 60 steps, the gallery's copy and its line in captures.tsv with it, and
+build/examples-table.py --check passes.
+
+The whole suite that passed over this is the one the memory cap's Reply above gives. NormTests
+passed, 19.

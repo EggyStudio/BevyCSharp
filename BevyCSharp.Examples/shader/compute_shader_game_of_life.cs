@@ -25,9 +25,14 @@ internal static class ComputeShaderGameOfLife
     private static int _index;
     private static bool _showingA;
 
-    // The steps run, and whether they were said, which a capture's log carries beside its picture.
+    // The steps run. Where the workflow runs, as a capture does, they stop at a count, and the image
+    // the last of them wrote is shown from then on, so a picture holds that generation whichever frame
+    // the programs were ready in. The capture's frame is one of the set clock's, held while what the
+    // example loads arrives, and the programs' compiles are not among what it holds for, so without
+    // the stop a runner ready a frame sooner takes a step more by the same frame and shows the other
+    // image.
+    private const int CapturedSteps = 60;
     private static int _steps;
-    private static bool _said;
 
     public static void Configure(Config config) => (config.Width, config.Height) = (Width * DisplayFactor, Height * DisplayFactor);
 
@@ -36,7 +41,7 @@ internal static class ComputeShaderGameOfLife
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_stage, _index, _showingA, _steps, _said) = (Stage.Loading, 1, true, 0, false);
+            (_stage, _index, _showingA, _steps) = (Stage.Loading, 1, true, 0);
             Render.SetClearColor((0f, 0f, 0f, 1f));
 
             _a = Shaders.CreateImage(Width, Height, ShaderImageFormat.Rgba32Float);
@@ -61,24 +66,17 @@ internal static class ComputeShaderGameOfLife
 
         app.Update(ctx =>
         {
+            var stopped = _steps == CapturedSteps && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true";
+
             // Bevy swaps the sprite's image every frame, so it shows the one written a frame ago
             // on one frame and the newest on the next. The swaps start once the programs are ready,
             // since both images are blank until then and a swap shows nothing, while a clock held
             // as they compile runs as many frames as the device takes, which would decide the image
             // shown at a given moment of the clock.
-            if (_stage != Stage.Loading)
+            if (_stage != Stage.Loading && !stopped)
             {
                 _showingA = !_showingA;
                 Render2d.SetSprite(ctx.Ecs, _sprite, _showingA ? _a : _b, new SpriteSettings { Size = (Width, Height) });
-            }
-
-            // Where the workflow runs, as a capture does, the steps run by two seconds of the game's
-            // clock, the moment the capture is taken in, and the image shown, so its log says which
-            // generation the picture holds.
-            if (!_said && ctx.Time.ElapsedSeconds >= 2.0 && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
-            {
-                _said = true;
-                Console.WriteLine($"[compute_shader_game_of_life] {_steps} steps by two seconds, in frame {ctx.Time.FrameCount}, showing {(_showingA ? "a" : "b")}");
             }
 
             switch (_stage)
@@ -93,9 +91,20 @@ internal static class ComputeShaderGameOfLife
                     break;
 
                 default:
+                    if (stopped) break;
+                    var wrote = _index == 0 ? _b : _a;
                     Shaders.Dispatch(_index == 0 ? _aToB : _bToA, Width / WorkgroupSize, Height / WorkgroupSize);
                     _index = 1 - _index;
                     _steps++;
+
+                    // The last of a capture's steps, its image shown from here on, which the log
+                    // carries beside the picture.
+                    if (_steps == CapturedSteps && Environment.GetEnvironmentVariable("GITHUB_ACTIONS") == "true")
+                    {
+                        _showingA = wrote == _a;
+                        Render2d.SetSprite(ctx.Ecs, _sprite, wrote, new SpriteSettings { Size = (Width, Height) });
+                        Console.WriteLine($"[compute_shader_game_of_life] {_steps} steps by frame {ctx.Time.FrameCount}, showing {(_showingA ? "a" : "b")} from then on");
+                    }
                     break;
             }
         }, "compute_shader_game_of_life.Step");

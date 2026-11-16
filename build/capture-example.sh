@@ -210,7 +210,7 @@ shot="${out%.webp}.shot.png"
     || { echo "capture-example.sh: ./bcs shot of frame $frames ended with $? in $example" >&2; exit 1; }
 
 # What the example says of itself, in a line beginning with its name, as the game of life says the
-# steps it ran by its shot, carried into the job's log beside the picture.
+# steps it stops at and the frame it reached them by, carried into the job's log beside the picture.
 sed -E 's/\x1b\[[0-9;]*m//g' build/sessions/BevyCSharp.Examples.log 2>/dev/null | grep -a "^\[$example\] " || true
 
 # Every picture sixteen by nine, as the README's gallery shows each in a box of that shape, so a
