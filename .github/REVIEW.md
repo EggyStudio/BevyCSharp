@@ -1241,3 +1241,24 @@ pages of the guide say an instance and a scene stand until they are taken away.
 
 The whole suite that passed over these mends is the one the memory cap's Reply above gives.
 NormTests passed, 19.
+
+146's medium findings 29 and 33, an interface text set to what it says and a stream of samples
+running dry, in the commit carrying this Reply, each with a test that failed without its mend.
+
+bcs_ui_set_text compares the text with what the entity says before it writes, so a label set every
+frame to what it says is left unchanged, and Bevy neither shapes it nor lays its node out again,
+where every call marked it changed. UiTextTests.TextSetToWhatItSaysIsLeftUnchanged sets one label to
+its own words every frame and another to the frame's number, and reads Bevy's Text changed or not in
+Last from the third frame on. Without the mend both read changed every frame, and with it the first
+read unchanged and the second changed.
+
+A stream of samples the game writes takes them from its queue a stretch of whole frames at a time,
+and where the queue has run dry plays a frame of silence, a sample for every channel, so what the
+game writes next starts on the first channel, where a dry spell ended part of the way through a
+frame left a stereo stream's left and right swapped for the rest of it. The bridge's test
+a_stream_that_runs_dry_comes_back_on_its_first_channel plays one stereo frame, asks for a third
+sample, then queues two frames. Without the mend it heard the frames from the right channel, -1, 1,
+0, -1, 1, -1, 1, 0, and with it -1, 1, 0, 0, -1, 1, -1, 1. A mono stream plays as it did.
+
+The whole suite that passed over these mends is the one the memory cap's Reply above gives.
+NormTests passed, 19.

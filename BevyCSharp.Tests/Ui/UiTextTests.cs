@@ -61,6 +61,43 @@ public sealed class UiTextTests
         Assert.True(sameEntity);
     }
 
+    /// <summary>
+    /// A label set every frame to what it says is left unchanged, so Bevy neither shapes it nor lays
+    /// it out again, and one given other words is changed.
+    /// </summary>
+    [SkippableFact]
+    public void TextSetToWhatItSaysIsLeftUnchanged()
+    {
+        using var harness = new EngineHarness(frames: 6);
+        Needs.Renderer();
+
+        var (same, other) = (Entity.None, Entity.None);
+        var changed = new List<(bool Same, bool Other)>();
+
+        harness.OnContext(Stage.Startup, _ =>
+        {
+            same = Ui.SpawnText("score 10", new UiSettings(), 18f);
+            other = Ui.SpawnText("frame 0", new UiSettings(), 18f);
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            Ui.SetText(same, "score 10");
+            Ui.SetText(other, $"frame {ctx.Time.FrameCount}");
+        });
+
+        harness.OnContext(Stage.Last, ctx =>
+        {
+            var text = Native.Check(NativeCore.bcs_component_id_of("bevy_ui::widget::text::Text"), "finding Text");
+            if (ctx.Time.FrameCount > 2) changed.Add((ctx.Ecs.ChangedById(same, text), ctx.Ecs.ChangedById(other, text)));
+        });
+
+        harness.Run();
+
+        Assert.NotEmpty(changed);
+        Assert.All(changed, frame => Assert.Equal((false, true), frame));
+    }
+
     [SkippableFact]
     public void SettingTextOnSomethingThatIsNotTextIsRefused()
     {

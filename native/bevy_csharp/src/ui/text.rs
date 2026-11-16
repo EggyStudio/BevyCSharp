@@ -295,7 +295,9 @@ pub unsafe extern "C" fn bcs_ui_spawn_text_span(
 /// Replaces what a text entity says.
 ///
 /// Written in place rather than by respawning, because a score or a timer changes every frame and
-/// the entity behind it should not.
+/// the entity behind it should not. Text that says what it is given before it is asked is left
+/// unmarked, since Bevy shapes a changed text again and lays its node out again, which a label set
+/// every frame to what it says would cost every frame.
 ///
 /// # Safety
 /// `text` must be a NUL-terminated UTF-8 string.
@@ -325,7 +327,9 @@ pub unsafe extern "C" fn bcs_ui_set_text(entity: u64, text: *const core::ffi::c_
                     return status::NOT_PRESENT;
                 };
 
-                value.0 = text.clone();
+                if value.0 != text {
+                    value.0 = text;
+                }
                 status::OK
             })
         }

@@ -8,7 +8,9 @@
 //! carries on for as long as it is played, as Bevy's sine never ends.
 //!
 //! The decoder takes the queue's samples a stretch at a time into its own, so the audio thread meets
-//! the game's writes once a stretch rather than once a sample.
+//! the game's writes once a stretch rather than once a sample. A stretch and the silence where the
+//! queue has run dry are each whole frames, a sample for every channel, so the game's next frame
+//! starts on the first channel however long the stream went without.
 
 #[cfg(feature = "render")]
 use std::collections::VecDeque;
@@ -48,13 +50,21 @@ impl Iterator for SamplesDecoder {
 
     fn next(&mut self) -> Option<f32> {
         if self.taken.is_empty() {
+            // The queue holds whole frames, since a write of part of one is refused, so a stretch of
+            // whole frames leaves it holding whole frames too.
+            let channels = usize::from(self.channels.get());
             let mut queue = self.queue.lock().unwrap_or_else(|poisoned| poisoned.into_inner());
-            let stretch = queue.len().min(STRETCH);
+            let stretch = queue.len().min((STRETCH / channels).max(1) * channels);
             self.taken.extend(queue.drain(..stretch));
+
+            // A frame of silence where the game has written nothing yet, so the sound goes on and
+            // what the game writes next is heard on the channels it was written for.
+            if self.taken.is_empty() {
+                self.taken.extend(std::iter::repeat_n(0.0, channels));
+            }
         }
 
-        // Silence where the game has written nothing yet, so the sound goes on.
-        Some(self.taken.pop_front().unwrap_or(0.0))
+        self.taken.pop_front()
     }
 }
 
@@ -231,5 +241,23 @@ mod tests {
 
         stream.queue.lock().unwrap().push_back(0.75);
         assert_eq!(decoder.next(), Some(0.75));
+    }
+
+    /// A stereo stream that runs dry part of the way through what the device asks for comes back
+    /// with its left samples on the left, its silence a frame at a time.
+    #[test]
+    fn a_stream_that_runs_dry_comes_back_on_its_first_channel() {
+        let stream = BcsSamples {
+            rate: SampleRate::new(4).unwrap(),
+            channels: ChannelCount::new(2).unwrap(),
+            queue: Arc::new(Mutex::new([-1.0, 1.0].into())),
+        };
+        let mut decoder = stream.decoder();
+
+        let mut heard: Vec<f32> = (0..3).filter_map(|_| decoder.next()).collect();
+        stream.queue.lock().unwrap().extend([-1.0, 1.0, -1.0, 1.0]);
+        heard.extend((0..7).filter_map(|_| decoder.next()));
+
+        assert_eq!(heard, [-1.0, 1.0, 0.0, 0.0, -1.0, 1.0, -1.0, 1.0, 0.0, 0.0]);
     }
 }
