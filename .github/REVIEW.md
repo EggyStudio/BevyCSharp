@@ -1293,3 +1293,11 @@ Shared: slangc is looked for only in the checkout a program stands in, found by 
 and on Unix only where its user owns it, so a compiler planted in a folder above a game is never
 run. The sibling's SlangCompiler looks in build/tools/slang/bin in every folder above the program
 and the working folder, so this is offered for it to read.
+
+The readings of 2026-11-12 to 2026-11-15 that N 4.8 asks for, in the commit carrying this Reply,
+seven WebP files under .github/assets/readings named by their day and item, each with its line in
+captions.md, one or two of the pictures each item made, item 136's night sky, item 137's near wall
+and the alley's two starts, Verdict 59's Blockout, item 145's Swarm and item 143's two of the lone
+aspen. Verdict 60's pair of the game of life went with its capture.
+
+NormTests passed, 19.

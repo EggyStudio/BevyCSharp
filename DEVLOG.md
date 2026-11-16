@@ -6,7 +6,40 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-16
+
+![](.github/assets/readings/2026-11-16-verdict-60-life.webp)
+Bevy's compute_shader_game_of_life as captured for the gallery, on the left as checked in on
+2026-11-11 at 117 steps by its shot, in the middle stopping at 60 steps and showing the image the
+last of them wrote, which two takes ready a frame apart and one on lavapipe draw alike to the pixel,
+and on the right the middle's luminance less the left's four times over, brighter in red and darker
+in blue.
+
+## 2026-11-15
+
+![](.github/assets/readings/2026-11-15-item-143-aspen-lavapipe.webp)
+The lone aspen under a uniform sky at Medium, the graphics card on the left, lavapipe in the middle,
+and lavapipe less the card ten times over on the right, red where lavapipe is brighter, the leaves
+alone differing texel by texel, 3% brighter on lavapipe over the leaf pixels the test counts, with
+the floor alike within 0.2%.
+
+![](.github/assets/readings/2026-11-15-item-143-aspen-samples.webp)
+The lone aspen on the graphics card at Medium, its leaves' textures filtered with sixteen samples at
+a slant on the left and with one in the middle, and one less sixteen ten times over on the right,
+red where one sample is brighter, the sixteen samples darkening the side-on leaves by 2.5% over the
+leaf pixels the test counts.
+
 ## 2026-11-14
+
+![](.github/assets/readings/2026-11-14-item-145-swarm.webp)
+Swarm's third wave at the shot after the profile in three plays with the game's clock held between
+their commands, on the graphics card, on it again and on lavapipe, each passing with the same wave
+and alike in the most alive and the felled.
+
+![](.github/assets/readings/2026-11-14-verdict-59-blockout.webp)
+Blockout's play built on a package of the head with Verdict 59's mend, its five shots in one sheet,
+the hall, upstairs, the window cut by a command, the modeling window and back down, the project's
+recipe left as the head holds it.
 
 Done that day
 
@@ -15,6 +48,23 @@ Done that day
 - Item 145 at `bac110e7`. Swarm's play holds on a fast device.
 
 ## 2026-11-12
+
+![](.github/assets/readings/2026-11-12-item-136-night-sky.webp)
+Item 136's mend, the night sky at the origin, 4,450 units out on two axes and their difference eight
+times over, a pixel's way into the sky taken from the view's own numbers, a mean of 0.002 levels
+apart and 5 of 76,800 pixels apart by three, where it was 1.0 and 6,870.
+
+![](.github/assets/readings/2026-11-12-item-137-alley-starts.webp)
+Item 137's alley at 23:00 moonless with its fireflies hidden, in the feature test's first start and
+its second and their difference eight times over, the field's cascades at the same corners in all
+four starts and the leaves over the far wall and the box at the alley's end differing, the probe at
+1 1 -15 reading 0.0103, 0.0162, 0.0150 and 0.0151 against 0.029 each time.
+
+![](.github/assets/readings/2026-11-12-item-137-near-wall.webp)
+Item 137's read, a closed room's back wall's indirect light over its path traced reference with the
+world's probes alone as the room steps along each axis, reading 0.57 to 1.02 with walls 0.4 thick
+and 0.51 to 1.23 with walls 2.5 with the eye 2 from the wall, and 0.92 to 1.05 with the eye 7.4 from
+it, the whole room before the eye in the first cascade.
 
 Done that day
 
