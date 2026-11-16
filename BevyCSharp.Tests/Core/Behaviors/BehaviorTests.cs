@@ -1,4 +1,5 @@
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -39,6 +40,35 @@ public partial struct OneThreaded
     {
         Ticks++;
         Threads.Add(Environment.CurrentManagedThreadId);
+    }
+}
+
+/// <summary>A behavior spread across the thread pool whose method asks the world about its entity.</summary>
+[Behavior]
+public partial struct Reaching
+{
+    /// <summary>How many of the method's calls into the world were answered.</summary>
+    internal static int Answered;
+
+    /// <summary>How many were told there is no world.</summary>
+    internal static int Refused;
+
+    /// <summary>How many times this entity's method has run.</summary>
+    public int Ticks;
+
+    [OnUpdate]
+    public void Reach(BehaviorContext ctx)
+    {
+        Ticks++;
+        try
+        {
+            ctx.Ecs.IsAlive(ctx.Entity);
+            Interlocked.Increment(ref Answered);
+        }
+        catch (BevyNativeException e) when (e.Status == NativeStatus.NoWorld)
+        {
+            Interlocked.Increment(ref Refused);
+        }
     }
 }
 
@@ -411,5 +441,28 @@ public sealed class BehaviorTests
 
         Assert.True(OneThreaded.Threads.Count > BehaviorRunners.DefaultParallelThreshold, $"ran {OneThreaded.Threads.Count} times");
         Assert.Single(OneThreaded.Threads.Distinct());
+    }
+
+    /// <summary>
+    /// A method spread across the thread pool reaches no world from any share of its entities, the
+    /// share the pool runs on the thread that holds the world among them.
+    /// </summary>
+    [Fact]
+    public void AMethodSpreadAcrossThreadsReachesNoWorldOnAnyOfThem()
+    {
+        (Reaching.Answered, Reaching.Refused) = (0, 0);
+        var spread = Interlocked.Read(ref BehaviorRunners.ParallelChunkCount);
+
+        using var harness = new EngineHarness(frames: 3, discoverBehaviors: true);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            for (var i = 0; i < BehaviorRunners.DefaultParallelThreshold + 1000; i++) ctx.Ecs.Add(ctx.Ecs.Spawn(), new Reaching());
+        });
+
+        harness.Run();
+
+        Assert.True(Interlocked.Read(ref BehaviorRunners.ParallelChunkCount) > spread, "no chunk was spread across threads");
+        Assert.True(Reaching.Refused > BehaviorRunners.DefaultParallelThreshold, $"refused {Reaching.Refused} times");
+        Assert.Equal(0, Reaching.Answered);
     }
 }

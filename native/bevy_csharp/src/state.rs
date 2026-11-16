@@ -7,9 +7,10 @@
 //!
 //! The pointer is deliberately *thread-local*: behavior methods that the generator runs on worker
 //! threads see a null world and get [`status::NO_WORLD`] back, which pushes users toward the
-//! thread-safe command buffer instead of racing on the world.
+//! thread-safe command buffer instead of racing on the world. The share of such a walk that runs
+//! on the thread holding the loan has it set aside for as long ([`bcs_world_set_aside`]).
 
-use core::cell::{Cell, UnsafeCell};
+use core::cell::{Cell, RefCell, UnsafeCell};
 use core::ptr;
 use std::sync::{Arc, Mutex};
 
@@ -21,6 +22,10 @@ use crate::interop::status;
 thread_local! {
     /// The world currently loaned to a C# callback on this thread, or null.
     static CURRENT_WORLD: Cell<*mut World> = const { Cell::new(ptr::null_mut()) };
+
+    /// The loans [`bcs_world_set_aside`] took off this thread, the latest last, which
+    /// [`bcs_world_put_back`] gives back.
+    static SET_ASIDE: RefCell<Vec<*mut World>> = const { RefCell::new(Vec::new()) };
 
     /// The row a behavior's method holds on this thread while it runs ([`BcsRowGuard`]).
     static ROW_GUARD: UnsafeCell<BcsRowGuard> = const {
@@ -131,6 +136,36 @@ pub fn without_world<R>(f: impl FnOnce() -> R) -> R {
     let previous = CURRENT_WORLD.with(|c| c.replace(ptr::null_mut()));
     let _restore = Restore(previous);
     f()
+}
+
+/// Takes the world's loan off this thread until [`bcs_world_put_back`], so a call the thread makes
+/// into the world in between answers [`status::NO_WORLD`], as a call from a worker thread does.
+///
+/// For a behavior's method spread across the thread pool. The pool runs some of the walk's entities
+/// on the thread that asked for the walk, which holds the loan, and a call into the world from there
+/// would despawn, spawn or move entities in the table the other threads are writing through the
+/// walk's pointers. With the loan set aside every share of the walk is refused alike. Each set aside
+/// is given back by one put back, the latest first.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_world_set_aside() -> i32 {
+    crate::interop::guard(|| {
+        let loaned = CURRENT_WORLD.with(|c| c.replace(ptr::null_mut()));
+        SET_ASIDE.with(|kept| kept.borrow_mut().push(loaned));
+        status::OK
+    })
+}
+
+/// Gives back the loan the latest [`bcs_world_set_aside`] on this thread took off it, or answers
+/// [`status::INVALID_STATE`] where nothing is set aside.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_world_put_back() -> i32 {
+    crate::interop::guard(|| {
+        let Some(loaned) = SET_ASIDE.with(|kept| kept.borrow_mut().pop()) else {
+            return status::INVALID_STATE;
+        };
+        CURRENT_WORLD.with(|c| c.set(loaned));
+        status::OK
+    })
 }
 
 /// Runs `f` against the loaned world, or returns [`status::NO_WORLD`] if there is none.
@@ -282,6 +317,25 @@ mod tests {
         assert!(moved_by(&mut world, entity, |world| {
             world.despawn(entity);
         }));
+    }
+
+    #[test]
+    fn a_loan_set_aside_answers_no_world_until_it_is_put_back() {
+        let mut world = World::new();
+        let entity = world.spawn(Held(1)).id();
+        let alive = || with_world(|world| i32::from(world.get_entity(entity).is_ok()));
+
+        loan_world(&mut world, || {
+            assert_eq!(bcs_world_set_aside(), status::OK);
+            assert_eq!(bcs_world_set_aside(), status::OK);
+            assert_eq!(alive(), status::NO_WORLD);
+            assert_eq!(bcs_world_put_back(), status::OK);
+            assert_eq!(alive(), status::NO_WORLD);
+            assert_eq!(bcs_world_put_back(), status::OK);
+            assert_eq!(alive(), 1);
+            assert_eq!(bcs_world_put_back(), status::INVALID_STATE);
+            assert_eq!(alive(), 1);
+        });
     }
 
     #[test]

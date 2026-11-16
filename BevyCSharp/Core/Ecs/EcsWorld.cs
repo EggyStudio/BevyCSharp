@@ -14,13 +14,13 @@ namespace Bevy;
 /// behavior and its components.
 /// </para>
 /// <para>
-/// <b>Threading.</b> These methods are only valid on the main thread while a system is
-/// running, because that is when Bevy loans its world out. A behavior method running on a
-/// worker thread (the generator parallelizes large iterations) must not call them, and should
-/// instead write through the component reference it was handed, queueing structural changes
-/// on <see cref="EcsCommands"/>. Calling anyway throws
-/// <see cref="BevyNativeException"/> with <see cref="NativeStatus.NoWorld"/> rather than
-/// corrupting the world.
+/// <b>Threading.</b> These methods are only valid on the main thread while a system is running,
+/// because that is when Bevy loans its world out. A behavior method spread across worker threads
+/// (the generator parallelizes large iterations) must not call them, on whichever thread a share of
+/// its entities runs, the main one included, and should instead write through the component
+/// reference it was handed, queueing structural changes on <see cref="EcsCommands"/>. Calling
+/// anyway throws <see cref="BevyNativeException"/> with <see cref="NativeStatus.NoWorld"/> rather
+/// than corrupting the world.
 /// </para>
 /// </remarks>
 public sealed unsafe partial class EcsWorld

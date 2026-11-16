@@ -54,6 +54,23 @@ public sealed class SystemOrderTests
     }
 
     [Fact]
+    public void PreStartupSystemsRunInTheOrderTheyAsk()
+    {
+        var ran = new List<string>();
+        using var app = new App(Config.HeadlessFor(1));
+        app.AddPlugin(new EnginePlugin());
+
+        SystemDescriptor Log(string name) => new(_ => { lock (ran) ran.Add(name); }, name);
+
+        app.AddSystem(Stage.PreStartup, Log("Last").After("Two"));
+        app.Chain(Stage.PreStartup, Log("One"), Log("Two"));
+        app.AddSystem(Stage.PreStartup, Log("First").Before("One"));
+
+        Assert.Equal(0, app.Run());
+        Assert.Equal(["First", "One", "Two", "Last"], ran);
+    }
+
+    [Fact]
     public void ANameNothingCarriesStopsTheAppStartingAndSaysWhich()
     {
         using var app = new App(Config.HeadlessFor(1));

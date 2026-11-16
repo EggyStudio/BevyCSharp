@@ -120,7 +120,8 @@ pub unsafe extern "C" fn bcs_app_add_system(
 /// [`bcs_app_add_system`] gave them.
 ///
 /// Through their sets, so the order holds in Bevy's own schedule, as `.before` on a Rust system
-/// does. Startup, the frame stages and the fixed step each have a schedule the order is put in.
+/// does. The two startup stages, the frame stages and the fixed step each have a schedule the order
+/// is put in.
 /// The engine's two internal stages and `Cleanup`, which runs its callbacks from a list in the
 /// order they were added, are refused, since a game has no systems of its own in the first two and
 /// nothing to order in the third.
@@ -145,6 +146,7 @@ pub unsafe extern "C" fn bcs_app_order_systems(handle: *mut BcsApp, stage: i32, 
 
         let order = BcsSystem(first).before(BcsSystem(then));
         match Stage::from_i32(stage) {
+            Some(Stage::PreStartup) => app.app.configure_sets(PreStartup, order),
             Some(Stage::Startup) => app.app.configure_sets(Startup, order),
             Some(Stage::First) => app.app.configure_sets(First, order),
             Some(Stage::PreUpdate) => app.app.configure_sets(PreUpdate, order),

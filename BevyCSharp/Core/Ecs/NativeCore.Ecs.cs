@@ -172,6 +172,16 @@ internal static unsafe partial class NativeCore
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_ecs_row_guard(NativeRowGuard** guard);
 
+    /// <summary>Takes the world's loan off this thread until <see cref="bcs_world_put_back"/>, so a call from it answers that there is no world.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_world_set_aside();
+
+    /// <summary>Gives back the loan the latest <see cref="bcs_world_set_aside"/> on this thread took off it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_world_put_back();
+
     /// <summary>Spawns a scene asset under a new entity, returning it or 0.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

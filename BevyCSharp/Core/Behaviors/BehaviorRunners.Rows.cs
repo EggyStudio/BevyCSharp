@@ -35,10 +35,11 @@ public static partial class BehaviorRunners
     /// </para>
     /// <para>
     /// Only the walk on the calling thread is kept. A method spread across the thread pool reaches
-    /// no world on the pool's threads, every call there answering that it has none, so a method
-    /// that calls into the world is marked <c>[MainThread]</c> and walked here, and a walk across
-    /// the pool runs on its rows as they are. A method that throws leaves its components as they
-    /// were before it ran, since its copy is not written back.
+    /// no world on any thread it runs on, the calling thread's share among them, every call there
+    /// answering that it has none, so a method that calls into the world is marked
+    /// <c>[MainThread]</c> and walked here, and a walk across the pool runs on its rows as they
+    /// are. A method that throws leaves its components as they were before it ran, since its copy
+    /// is not written back.
     /// </para>
     /// <para>
     /// The copy is the cost, a walk on the calling thread taking several times as long an entity

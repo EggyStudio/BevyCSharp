@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Bevy.Interop;
 
 namespace Bevy;
 
@@ -192,15 +193,12 @@ public static partial class BehaviorRunners
         Interop.NativeChunk chunk,
         BehaviorRunner<T> body) where T : unmanaged
     {
-        Interlocked.Increment(ref ParallelChunkCount);
-
         var data = chunk.DataPointer;
         var entityData = chunk.EntityPointer;
         var length = chunk.Length;
-        var grain = Math.Max(256, length / (Environment.ProcessorCount * 4));
 
-        Parallel.ForEach(
-            Partitioner.Create(0, length, grain),
+        Spread(
+            length,
             range =>
             {
                 var context = new BehaviorContext(world, ecs, commands, time, input);
@@ -214,6 +212,33 @@ public static partial class BehaviorRunners
                     body(ref components[i], entity, context);
                 }
             });
+    }
+
+    /// <summary>
+    /// Runs <paramref name="range"/> over the shares of a run of <paramref name="length"/> entities
+    /// across the thread pool, with the world set aside on this thread for as long.
+    /// </summary>
+    /// <remarks>
+    /// The pool runs some of the shares on this thread, which holds the world's loan, and a call into
+    /// the world from one of them would spawn, despawn or move entities in the table the other threads
+    /// are writing through the run's pointers. With the loan set aside a call from any share throws
+    /// <see cref="BevyNativeException"/> with <see cref="NativeStatus.NoWorld"/> alike, as
+    /// <see cref="EcsWorld"/> says.
+    /// </remarks>
+    private static void Spread(int length, Action<Tuple<int, int>> range)
+    {
+        Interlocked.Increment(ref ParallelChunkCount);
+
+        var grain = Math.Max(256, length / (Environment.ProcessorCount * 4));
+        Native.Check(NativeCore.bcs_world_set_aside(), "setting the world aside for a walk across threads");
+        try
+        {
+            Parallel.ForEach(Partitioner.Create(0, length, grain), range);
+        }
+        finally
+        {
+            NativeCore.bcs_world_put_back();
+        }
     }
 
     /// <summary>True when any of <paramref name="componentIds"/> changed on the entity.</summary>

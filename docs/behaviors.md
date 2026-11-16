@@ -429,8 +429,9 @@ A system runs on Bevy's main thread with the world loaned to it. When the genera
 per-entity loop out across worker threads, those threads can safely write through the component
 reference they were handed, the partitions are disjoint, but they cannot touch the world.
 
-- `ctx.Ecs` immediate, main thread only. From a worker it throws with a message telling you so,
-  rather than corrupting the world.
+- `ctx.Ecs` immediate, main thread only. From a loop split across workers it throws with a
+  message telling you so, on the main thread's share of the loop as on the workers', rather than
+  corrupting the world.
 - `ctx.Cmd` a thread-safe queue, applied at the end of `PostUpdate`.
 - `ctx.Time`, `ctx.Input` plain snapshots, safe to read anywhere.
 

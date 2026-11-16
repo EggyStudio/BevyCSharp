@@ -1141,3 +1141,34 @@ build/examples-table.py --check passes.
 
 The whole suite that passed over this is the one the memory cap's Reply above gives. NormTests
 passed, 19.
+
+146's medium findings 7 and 39, ordering PreStartup systems and a behavior method spread over
+threads reaching the world on the calling thread's share, in the commit carrying this Reply, each
+with a test that failed without its mend. The bridge's other findings follow in the three commits
+after it, 26 to 28 the shader targets', 29 and 33 an interface text set again and a stream of
+samples running dry, and 48 and 49 the Slang module's. The bridge's ABI goes to 326 here and to 327
+with the shader targets, the managed side's beside it.
+
+bcs_app_order_systems orders PreStartup systems in Bevy's PreStartup schedule, where it had no arm
+for the stage and answered that a pointer was null, so App.Run threw for any Chain, After or Before
+among PreStartup systems though each was taken when added.
+SystemOrderTests.PreStartupSystemsRunInTheOrderTheyAsk chains two PreStartup systems and puts one
+after the second and one before the first, added out of order. Without the mend Run threw that
+ordering 'Two' before 'Last' failed, a required pointer argument being null, and with it they ran in
+the order asked.
+
+A behavior method spread across the thread pool runs with the world's loan set aside on the calling
+thread for the length of the loop, through a pair of entry points, bcs_world_set_aside and
+bcs_world_put_back, so a call into the world from the share the pool runs on that thread answers
+NoWorld as the other threads' calls do. It reached the world, where a despawn or an entity spawned
+into the table moves the rows the other threads are writing through the walk's pointers. The walk of
+one component and the walk with others both go through one Spread that does it, and a put back
+answers INVALID_STATE where nothing was set aside, which the bridge's own test holds.
+BehaviorTests.AMethodSpreadAcrossThreadsReachesNoWorldOnAnyOfThem walks 5,096 entities whose method
+asks whether its entity is alive. Without the mend 2,024 of the calls over its frames were refused
+and the rest, those of the calling thread's share, were answered, and with it every call was refused
+and none answered. EcsWorld, the runner's remark and the behaviors guide say the calling thread's
+share is refused with the rest.
+
+The whole suite that passed over these mends is the one the memory cap's Reply above gives.
+NormTests passed, 19.

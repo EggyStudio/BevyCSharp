@@ -1,6 +1,4 @@
-using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 
 namespace Bevy;
 
@@ -281,17 +279,14 @@ public static partial class BehaviorRunners
         where T1 : unmanaged
         where T2 : unmanaged
     {
-        Interlocked.Increment(ref ParallelChunkCount);
-
         var data = chunk.DataPointer;
         var firstData = first.DataPointer;
         var secondData = second.DataPointer;
         var entityData = chunk.EntityPointer;
         var length = chunk.Length;
-        var grain = Math.Max(256, length / (Environment.ProcessorCount * 4));
 
-        Parallel.ForEach(
-            Partitioner.Create(0, length, grain),
+        Spread(
+            length,
             range =>
             {
                 var context = new BehaviorContext(world, ecs, commands, time, input);
