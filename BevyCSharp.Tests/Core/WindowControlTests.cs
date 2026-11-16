@@ -84,48 +84,24 @@ public sealed class WindowControlTests
         Assert.Null(Record.Exception(Window.WakeUp));
     }
 
+    /// <summary>
+    /// A run with no window counts no monitor rather than failing, so a settings screen can ask
+    /// without guarding first.
+    /// </summary>
+    /// <remarks>
+    /// The monitors of a real window are described in <see cref="WindowStormTests"/>, which opens one
+    /// under xvfb-run where a run asks for it.
+    /// </remarks>
     [Fact]
     public void MonitorsAreCountedWithoutThrowing()
     {
-        // A windowless run reports none rather than failing, so a settings screen can ask without
-        // guarding first. With a window this is however many the platform sees.
         using var harness = new EngineHarness(frames: 2);
         var count = -1;
 
         harness.OnContext(Stage.Update, _ => count = Window.MonitorCount());
         harness.Run();
 
-        Assert.True(count >= 0, "monitor count came back negative");
-
-        if (count == 0) return;
-
-        // Anything reported has to be describable, and past the end has to be refused.
-        using var second = new EngineHarness(frames: 2);
-        second.OnContext(Stage.Update, _ =>
-        {
-            var first = Window.Monitor(0);
-            Assert.True(first.Width > 0 && first.Height > 0);
-            Assert.Throws<BevyNativeException>(() => Window.Monitor(Window.MonitorCount()));
-
-            // A name is optional, so the only thing guaranteed is that asking is safe and that
-            // past the end is refused the same way the rest of the monitor surface refuses it.
-            Assert.NotNull(Window.MonitorName(0));
-            Assert.Throws<BevyNativeException>(() => Window.MonitorName(Window.MonitorCount()));
-
-            // The video modes are the same shape of answer. A platform may report none, so what
-            // is guaranteed is that every mode reported describes a screen somebody could see.
-            var modes = Window.MonitorModes(0);
-            Assert.All(modes, mode => Assert.True(mode.Width > 0 && mode.Height > 0));
-
-            Assert.Throws<BevyNativeException>(
-                () => Window.MonitorModes(Window.MonitorCount()));
-
-            // And a mode past the end of the list is refused rather than taken as the last one.
-            Assert.Throws<BevyNativeException>(
-                () => Window.SetVideoMode(0, modes.Length));
-        });
-
-        second.Run();
+        Assert.Equal(0, count);
     }
 
     [Fact]

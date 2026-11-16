@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Xunit;
 
@@ -5,7 +6,8 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// Every expression in the workflows names only the contexts GitHub gives the place it stands in,
-/// so a file GitHub refuses is seen here before a push rather than as a run with no jobs after it.
+/// so a file GitHub refuses is seen here before a push rather than as a run with no jobs after it,
+/// and the workflows hold what a run's checks and its page rest on.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -90,6 +92,146 @@ public sealed class WorkflowTests
             .ToList();
         Assert.Equal(refused is null ? [] : [refused], found);
     }
+
+    /// <summary>
+    /// The build workflow's test job checks out the whole history, which N 7.2 reads every commit
+    /// message of since the rule began, where a checkout of the last commit alone left it skipped.
+    /// </summary>
+    [Fact]
+    public void TheTestJobChecksOutTheWholeHistoryTheMessageRuleReads()
+    {
+        var checkout = Steps(Jobs(Workflow("build.yml"))["test"]).Single(step => step.Contains("uses: actions/checkout@", StringComparison.Ordinal));
+        Assert.Matches(@"\n +fetch-depth: 0\n", checkout);
+    }
+
+    /// <summary>
+    /// A publish is refused off the default branch by a job the build needs, so before the build's
+    /// hour, since a branch's version is one the default branch gives a commit of its own.
+    /// </summary>
+    [Fact]
+    public void APublishOffTheDefaultBranchIsRefusedBeforeTheBuild()
+    {
+        var jobs = Jobs(Workflow("pack.yml"));
+        var needs = Regex.Match(jobs["build"], @"\n    needs: \[([^\]]*)\]").Groups[1].Value.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        Assert.Contains(needs, need => jobs.TryGetValue(need, out var job) && Steps(job).Any(step =>
+            step.Contains("inputs.publish", StringComparison.Ordinal)
+            && step.Contains("github.event.repository.default_branch", StringComparison.Ordinal)
+            && step.Contains("exit 1", StringComparison.Ordinal)));
+    }
+
+    /// <summary>
+    /// The pack run's page says the packages were pushed only where the push said so of each, and
+    /// names those whose versions nuget.org held, which a push that skips a version it holds
+    /// passes over with no failure.
+    /// </summary>
+    [SkippableTheory]
+    [InlineData("pushed", "Pushed to nuget.org.")]
+    [InlineData("held pushed", "Pushed 1 to nuget.org, the rest left as they were, since nuget.org held their versions, BevyCSharp.0.6.9.nupkg.")]
+    [InlineData("held held", "Nothing pushed, since nuget.org held the version of every package, BevyCSharp.0.6.9.nupkg, BevyCSharp.Templates.0.6.9.nupkg.")]
+    public void ThePageSaysWhichPackagesWerePushedAndWhichNuGetHeld(string pushes, string said)
+    {
+        Skip.If(OperatingSystem.IsWindows(), "runs the step in bash, as the workflow runs it on Linux");
+
+        // What dotnet nuget push says of a package it pushed and of one whose version the feed held.
+        string[] packages = ["BevyCSharp.0.6.9.nupkg", "BevyCSharp.Templates.0.6.9.nupkg"];
+        var output = string.Concat(pushes.Split(' ').Select((push, i) =>
+            $"Pushing {packages[i]} to 'https://www.nuget.org/api/v2/package'...\n  PUT https://www.nuget.org/api/v2/package/\n" + (push == "held"
+                ? $"  Conflict https://www.nuget.org/api/v2/package/ 512ms\nPackage '/home/runner/work/BevyCSharp/BevyCSharp/build/package/{packages[i]}' already exists at feed 'https://www.nuget.org/api/v2/package/'.\n"
+                : "  Created https://www.nuget.org/api/v2/package/ 2048ms\nYour package was pushed.\n")));
+
+        var script = Run(Steps(Jobs(Workflow("pack.yml"))["pack"]).Single(step => step.Contains("name: Say what was made", StringComparison.Ordinal)))
+            .Replace("${{ steps.version.outputs.version }}", "0.6.9", StringComparison.Ordinal)
+            .Replace("${{ inputs.publish }}", "true", StringComparison.Ordinal);
+        Assert.DoesNotContain("${{", script, StringComparison.Ordinal);
+
+        using var folder = new TestFolder("bcs-pushed-");
+        File.WriteAllText(folder.File("push.txt"), output);
+        var start = new ProcessStartInfo("bash") { RedirectStandardError = true };
+        foreach (var argument in new[] { "-e", "-o", "pipefail", "-c", script }) start.ArgumentList.Add(argument);
+        start.Environment["RUNNER_TEMP"] = folder.Path;
+        start.Environment["GITHUB_STEP_SUMMARY"] = folder.File("summary.md");
+        using var bash = Process.Start(start)!;
+        var error = bash.StandardError.ReadToEnd();
+        bash.WaitForExit();
+
+        Assert.True(bash.ExitCode == 0, $"the step ended with {bash.ExitCode}: {error}");
+        Assert.Equal(["### BevyCSharp 0.6.9", said], File.ReadAllLines(folder.File("summary.md")));
+    }
+
+    /// <summary>
+    /// Every folder a step of a job puts its captures or its logs in is kept by an upload of that
+    /// job that runs whether the job passed or failed, so a failed play leaves what says why.
+    /// </summary>
+    [Fact]
+    public void EveryFolderAStepLogsIntoIsKeptByAnUploadThatRunsAlways()
+    {
+        var found = new List<string>();
+        var checkedCount = 0;
+        foreach (var name in new[] { "build.yml", "pack.yml" })
+        {
+            foreach (var (job, text) in Jobs(Workflow(name)))
+            {
+                var steps = Steps(text);
+                var kept = steps
+                    .Where(step => step.Contains("uses: actions/upload-artifact@", StringComparison.Ordinal) && step.Contains("if: always()", StringComparison.Ordinal))
+                    .SelectMany(step => Regex.Matches(step, @"(?:path: |\n {12})(\S[^\n]*)").Select(match => Folder(match.Groups[1].Value)))
+                    .ToList();
+                foreach (Match logs in steps.SelectMany(step => Regex.Matches(step, @"\n +(?:SHOTS|BCS_STEP_LOGS): ([^\n]+)")))
+                {
+                    checkedCount++;
+                    var folder = Folder(logs.Groups[1].Value);
+                    if (!kept.Any(path => folder == path || folder.StartsWith(path + "/", StringComparison.Ordinal)))
+                        found.Add($"{name}'s {job} logs into {folder}, which no upload of the job that runs always keeps");
+                }
+            }
+        }
+
+        Assert.True(checkedCount > 5, $"only {checkedCount} folders were found, so the walk lost its way");
+        Assert.True(found.Count == 0, string.Join("\n", found));
+    }
+
+    /// <summary>
+    /// Every action from outside GitHub is named by a commit, so a tag moved or a branch pushed
+    /// elsewhere changes nothing that builds the bridges or holds the token nuget.org takes.
+    /// </summary>
+    [Fact]
+    public void EveryActionFromOutsideGitHubIsNamedByACommit()
+    {
+        var actions = Directory.EnumerateFiles(Path.Combine(Root, ".github", "workflows"), "*.yml")
+            .SelectMany(workflow => Regex.Matches(File.ReadAllText(workflow), @"uses: (\S+)").Select(match => match.Groups[1].Value))
+            .ToList();
+        var named = actions.Where(action => !action.StartsWith("./", StringComparison.Ordinal) && !action.StartsWith("actions/", StringComparison.Ordinal)).ToList();
+
+        Assert.True(named.Count >= 3, $"only {named.Count} actions from outside GitHub were found, so the walk lost its way");
+        Assert.All(named, action => Assert.Matches(@"^[\w.-]+/[\w.-]+@[0-9a-f]{40}$", action));
+    }
+
+    // A workflow's text, its lines ended by \n alone.
+    private static string Workflow(string name) => File.ReadAllText(Path.Combine(Root, ".github", "workflows", name)).ReplaceLineEndings("\n");
+
+    // Each job's text by its name, from its key two spaces in under jobs to the next.
+    private static Dictionary<string, string> Jobs(string workflow)
+    {
+        var body = workflow[(workflow.IndexOf("\njobs:\n", StringComparison.Ordinal) + 1)..];
+        var keys = Regex.Matches(body, @"^  ([\w-]+):\n", RegexOptions.Multiline);
+        return keys.Select((key, i) => (key.Groups[1].Value, body[key.Index..(i + 1 < keys.Count ? keys[i + 1].Index : body.Length)]))
+            .ToDictionary(job => job.Item1, job => job.Item2);
+    }
+
+    // Each step's text, from its dash six spaces in to the next, a newline before each line.
+    private static List<string> Steps(string job) =>
+        [.. Regex.Split(job, @"(?=\n      - )").Skip(1)];
+
+    // A step's run block, its lines taken out of the step's indent.
+    private static string Run(string step)
+    {
+        var block = Regex.Match(step, @"\n        run: \|\n((?: {10}.*\n|\n)+)");
+        Assert.True(block.Success, "the step has no run block");
+        return string.Join('\n', block.Groups[1].Value.Split('\n').Select(line => line.Length >= 10 ? line[10..] : line));
+    }
+
+    // A folder as an upload names it, the workspace's own folders by their paths within it.
+    private static string Folder(string path) => path.Trim().Replace("${{ github.workspace }}/", "", StringComparison.Ordinal);
 
     private static HashSet<string>? Allowed(IReadOnlyList<string> place)
     {

@@ -1,6 +1,6 @@
 # Review
 
-Reviewed up to `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
+Reviewed up to `9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on 2026-11-17, its build run 43978434240 started, the form kept. Before it `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
 faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build run
 43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept. Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
 library counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31
@@ -569,3 +569,64 @@ The whole suite passed over this mend and those of the commit after it, from one
 0 failed and 4 skipped, 2,175 in all where the listing is 2,164, the solution built from nothing
 with warnings as errors, a part at a time under the GPU lock, and the native checks passed in all
 three profiles, with the bridge's tests with no feature and with render. NormTests passed, 19.
+
+146's low findings 60 to 64, the workflows' and a test's, in the commit carrying this Reply, each
+with a test that failed without its mend.
+
+The build workflow's test job checks out the whole history, whose commit messages since the rule
+began N 7.2 reads, where its checkout of the last commit alone left the rule skipped on all three
+systems. N 7.2 says so where it skips a checkout that holds too little, where it said the checkout
+had no git, and fails in the test job in place of skipping.
+WorkflowTests.TheTestJobChecksOutTheWholeHistoryTheMessageRuleReads reads the job's checkout.
+Without the mend it found no fetch-depth, and with it 0. In a clone of the last commit N 7.2 skipped
+outside the test job and failed in it.
+
+MonitorsAreCountedWithoutThrowing holds that a run with no window counts no monitor, where it held
+the count at zero or more and returned at zero, which every run's count is, before its monitor half.
+That half is WindowStormTests.AWindowsMonitorsAreDescribedAndAnIndexPastTheLastIsRefused, which the
+pack run's storm job runs in its window under xvfb-run, whose screen winit lists as one monitor, and
+the step looks for two tests passed. The two tests read one run of the storm, since winit makes one
+event loop a process and refused the second app where each made its own. On a bridge whose
+bcs_monitor_info took an index past the last as the last, the test as it was passed and as it is
+failed, the monitor past the last described where it is refused, and on the bridge as it is both
+tests passed in their one run.
+
+A publish runs from the default branch alone, a job the build needs refusing one on another branch
+before the build's hour, since the version counts commits and a branch's count is one the default
+branch reaches at a commit of its own. The push keeps --skip-duplicate, so a second run of a commit
+that published passes, and the page counts the packages the push said it pushed and names each that
+nuget.org held, where it said Pushed to nuget.org whatever the push did. BUILDING.md says both.
+WorkflowTests.APublishOffTheDefaultBranchIsRefusedBeforeTheBuild reads the build job's needs, and
+ThePageSaysWhichPackagesWerePushedAndWhichNuGetHeld runs the page's step in bash on the lines dotnet
+nuget push prints, those a push here printed against a server answering 201 and 409. Without the
+mend no job refused, and the page said Pushed to nuget.org of one package held and of two, and with
+it the page counted one pushed and named the one held, and said nothing was pushed of two.
+
+The games job's upload of the plays keeps Blockout's folder beside the others.
+WorkflowTests.EveryFolderAStepLogsIntoIsKeptByAnUploadThatRunsAlways reads each folder a step names
+for its captures or its logs against the uploads of its job that run always. Without the mend it
+named the games job's blockout, and with it none.
+
+dtolnay/rust-toolchain, Swatinem/rust-cache and NuGet/login are named by the commits that stable, v2
+and v1 named at 21:00 on 2026-11-16, v2.9.3 and v1.2.0, each name beside its commit, and GitHub's
+own actions keep their tags, as the finding's direction allows.
+WorkflowTests.EveryActionFromOutsideGitHubIsNamedByACommit reads every action the workflows use.
+Without the mend it found seven named by a tag or a branch, and with it none.
+
+BUILDING.md's line on the renderer's parts gives some 21 minutes each on the faster of the runners'
+processors, where it gave 32 after the parts were dealt again in ca9f5d44.
+
+The whole suite passed over these mends and those of the commit before them, from one tree, 2,171
+passed, 0 failed and 4 skipped, 2,175 in all where the listing is 2,164, the solution built from
+nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
+in all three profiles, with the bridge's tests with no feature and with render. The storm's two
+tests are among the skipped, since they run where xvfb-run is asked for, and passed in their run
+above. NormTests passed, 19.
+
+Shared: a publish from the default branch alone, a page that names the packages nuget.org held, the
+actions from outside GitHub named by commit and the test job's checkout of the whole history its
+message rule reads, which the sibling's pack.yml, pushing with --skip-duplicate through
+NuGet/login@v1, reads the same way.
+
+Of the 75, 60 are mended, none was found not to hold, and 15 remain, 65 to 75 and 34 to 36 and 40 of
+global illumination, which go with 138.

@@ -417,9 +417,10 @@ a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump`
 which names the types that grew where the heap's floor rose. A push tests the library on the
 headless bridge each test job builds, and builds the render bridge for Linux, on which the renderer
 job runs every test that needs a renderer under lavapipe, in the parts `build/renderer-parts.tsv`
-lays out by what each class or case took on the runner, some 32 minutes each, a part to a job, or
-two to a job in a pack. The other render bridges cost a quarter of an hour cold each and only a
-package needs them, and nothing a commit message says changes that.
+lays out by what each class or case took on the runner, some 21 minutes each on the faster of the
+runners' processors, a part to a job, or two to a job in a pack. The other render bridges cost a
+quarter of an hour cold each and only a package needs them, and nothing a commit message says
+changes that.
 
 A package is made by the pack workflow, `pack.yml`, run by hand from the Actions tab ("Run
 workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves out.
@@ -435,7 +436,12 @@ both to nuget.org from the run instead, through nuget.org's trusted publishing, 
 secret. A policy on nuget.org, made by the EggyStudio account for the repository
 EggyStudio/BevyCSharp and the workflow `pack.yml`, with no environment, the push scope and the
 packages `BevyCSharp*`, lets the pack job trade the token GitHub issues it (`id-token: write`) for a
-key that lasts an hour, through `NuGet/login`, right before the push.
+key that lasts an hour, through `NuGet/login`, right before the push. A publish runs from the
+default branch alone, a run on another branch refused before its build, since the version's patch
+counts commits and a branch's count is one the default branch reaches at a commit of its own. A
+version nuget.org holds is left as it is, and the run's summary names each package so left. The
+actions from outside GitHub are named by the commit their tag named, the tag beside it, so a tag
+moved elsewhere changes nothing that builds the bridges or holds the token.
 
 A game under `games/` names in its own project the version it builds on where nothing sets
 `BevyCSharpVersion`, the newest published on nuget.org it builds on, so a reader cloning the

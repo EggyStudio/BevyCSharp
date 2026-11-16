@@ -3,10 +3,10 @@
 # bridge built for all six platforms, Courtyard, Swarm and Blockout played from a package of this
 # commit, the feature test run through its course, every example captured, a window stormed and the
 # README walked (build.yml). Then it packs, only once every one of those passed, so no package is
-# made before its games are played on it, and pushes the packages to nuget.org when asked to,
-# through nuget.org's trusted publishing, a policy on nuget.org for this repository and this file
-# that trades the job's token from GitHub for a key lasting an hour, so no key is stored as a
-# secret.
+# made before its games are played on it, and pushes the packages to nuget.org when asked to on the
+# default branch, through nuget.org's trusted publishing, a policy on nuget.org for this repository
+# and this file that trades the job's token from GitHub for a key lasting an hour, so no key is
+# stored as a secret.
 #
 # The version is build/version.sh's, the major and minor in build/version.txt and as the patch the
 # commits since that file last changed. The package is kept as the run's artifact either way, so a
@@ -35,8 +35,22 @@ env:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 jobs:
+  # A publish from the default branch alone, refused before the build's hour, since the version's
+  # patch counts commits, so a branch's version is one the default branch gives a later commit of
+  # its own, which nuget.org would then hold as the branch's.
+  branch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Refuse a publish off the default branch
+        if: ${{ inputs.publish && github.ref != format('refs/heads/{0}', github.event.repository.default_branch) }}
+        run: |
+          echo "::error::A publish runs from ${{ github.event.repository.default_branch }} alone, and this run is on ${{ github.ref }}, whose version the default branch gives a commit of its own."
+          exit 1
+
   # GitHub takes no time limit on a job that calls a workflow, and each job it calls has its own.
   build:
+    needs: [branch]
     uses: ./.github/workflows/build.yml
     with:
       pack: true
@@ -155,27 +169,41 @@ jobs:
       # publishing policy names the user, this repository and this workflow, and which lasts an
       # hour, so it is asked for right before the push. The policy belongs to the EggyStudio account,
       # with the push scope over the packages named BevyCSharp*, which takes the templates as well.
+      # The action is named by the commit its tag named when it was taken, so a tag moved elsewhere
+      # runs nothing new in the job that holds the token.
       - name: Log in to nuget.org through its trusted publishing
         id: login
         if: ${{ inputs.publish }}
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: EggyStudio
 
       # The key through the environment, so the command a failure names holds its name and not it.
+      # A package whose version nuget.org holds is left as it is, and what the push says of each is
+      # kept for the summary below, which names the packages left.
       - name: Push to nuget.org
         if: ${{ inputs.publish }}
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
-        run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        run: dotnet nuget push "build/package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate | tee "$RUNNER_TEMP/push.txt"
 
       # Said before the games are built, so a run whose wait for nuget.org's listing ends red still
-      # says on its page that the package was pushed.
+      # says on its page that the package was pushed. A package whose version nuget.org held before
+      # the push, as an earlier run of the same commit leaves it, is named as left, so a run that
+      # pushed nothing does not read as one that did.
       - name: Say what was made
         run: |
           echo "### BevyCSharp ${{ steps.version.outputs.version }}" >> "$GITHUB_STEP_SUMMARY"
           if [ "${{ inputs.publish }}" = "true" ]; then
-            echo "Pushed to nuget.org." >> "$GITHUB_STEP_SUMMARY"
+            pushed=$(grep -c "^Your package was pushed" "$RUNNER_TEMP/push.txt" || true)
+            held=$(sed -n "s|^Package '.*/\([^/']*\)' already exists at feed.*|\1|p" "$RUNNER_TEMP/push.txt" | paste -sd ',' - | sed 's/,/, /g')
+            if [ -z "$held" ]; then
+              echo "Pushed to nuget.org." >> "$GITHUB_STEP_SUMMARY"
+            elif [ "$pushed" -eq 0 ]; then
+              echo "Nothing pushed, since nuget.org held the version of every package, $held." >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "Pushed $pushed to nuget.org, the rest left as they were, since nuget.org held their versions, $held." >> "$GITHUB_STEP_SUMMARY"
+            fi
           else
             echo "Packed and kept as this run's artifact, not pushed." >> "$GITHUB_STEP_SUMMARY"
           fi

@@ -88,15 +88,18 @@ jobs:
         with:
           submodules: true
 
+      # Each action from outside GitHub is named by the commit its tag or branch named when it was
+      # taken, that name beside it, so a tag moved or a branch pushed elsewhere changes nothing that
+      # builds the bridges a package ships.
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
         with:
           targets: ${{ matrix.target }}
 
       # The target directory is named as well as the workspace, because build-native.sh writes to
       # build/target rather than to native/target and a cache pointed at the crate would save an
       # empty directory and restore it over a build that had to start from nothing every time.
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: native -> ../build/target
           key: ${{ matrix.target }}${{ matrix.features && '-captures' || '' }}
@@ -153,19 +156,22 @@ jobs:
           - { system: macos, os: macos-latest }
 
     steps:
+      # The whole history, since N 7.2 reads the message of every commit since the rule began, which
+      # a checkout of the last commit alone leaves out.
       - uses: actions/checkout@v5
         with:
           submodules: true
+          fetch-depth: 0
 
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
 
       # Two directories, because this job builds the bridge through the script and then runs the
       # crate's own tests through cargo, and those write to build/target and native/target.
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: |
             native -> ../build/target
@@ -304,10 +310,10 @@ jobs:
         with:
           submodules: true
 
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@39008827e6b4319a349e9a42dfc90579dd25f1ca # stable
 
       # The target directory as the native job names it, since build-native.sh writes there.
-      - uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
           workspaces: native -> ../build/target
           key: render-linux-x64
@@ -561,6 +567,7 @@ jobs:
             ${{ runner.temp }}/courtyard
             ${{ runner.temp }}/courtyard-native
             ${{ runner.temp }}/swarm
+            ${{ runner.temp }}/blockout
           if-no-files-found: ignore
 
       # The soak's readings, the games' logs, each soak's errors and each check's words.
@@ -830,10 +837,12 @@ jobs:
           if-no-files-found: ignore
 
   # A real window stormed while it draws, resized through odd sizes, minimized and given back,
-  # moved and set to a last size it must then draw at with nothing logged (WindowStormTests). Only
-  # where the bridges are built, since the test job's headless bridge draws nothing, and in X11
-  # under xvfb-run, which gives a minimized window back where nothing else on the runner would show
-  # one. The test skips where it is not asked for, so the step asks and fails when it was skipped.
+  # moved and set to a last size it must then draw at with nothing logged, and the monitor that
+  # window is on described, a monitor past the last refused (WindowStormTests). Only where the
+  # bridges are built, since the test job's headless bridge draws nothing and knows no monitor, and
+  # in X11 under xvfb-run, which gives a minimized window back where nothing else on the runner
+  # would show one and lists its screen as a monitor. The tests skip where they are not asked for,
+  # so the step asks and fails when one was skipped.
   storm:
     if: ${{ inputs.pack }}
     runs-on: ubuntu-24.04
@@ -899,8 +908,8 @@ jobs:
             echo "::error title=The window storm failed::dotnet test ended with $tested. What it printed, then the test host's standard error:%0A${said//$'\n'/%0A}"
             exit 1
           fi
-          if ! grep -Eq "Passed: +1, Skipped: +0" "$out"; then
-            echo "::error::The window storm did not run, so nothing was stormed. The test skips where it is not asked for or has no X11 display."
+          if ! grep -Eq "Passed: +2, Skipped: +0" "$out"; then
+            echo "::error::The window storm and the monitors' test did not both run, so a window or a monitor went unchecked. The tests skip where they are not asked for or have no X11 display."
             exit 1
           fi
 

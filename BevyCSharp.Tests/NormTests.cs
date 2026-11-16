@@ -478,7 +478,14 @@ public sealed partial class NormTests
     public void N_7_2()
     {
         var log = Git("log", "--format=%H%x1f%s%x1f%b%x1e", $"{MessagesFrom}..HEAD");
-        Skip.If(log is null, "N 7.2 reads the commits with git, which this checkout does not have");
+        Skip.If(log is null && Git("rev-parse", "HEAD") is null, "N 7.2 reads the commits with git, which this checkout does not have");
+
+        // A checkout of the last commits alone, as a runner makes by default, holds no commit as old
+        // as the rule's first, and is skipped but in the build workflow's test job, whose checkout
+        // holds the whole history for this rule.
+        Skip.If(log is null && Environment.GetEnvironmentVariable("GITHUB_JOB") != "test",
+            $"N 7.2 reads the commits since {MessagesFrom[..8]}, which this checkout does not hold, as the build workflow's test job's does");
+        Assert.True(log is not null, $"N 7.2 reads the commits since {MessagesFrom[..8]}, which the test job's checkout of the whole history holds, and this one does not");
 
         var found = new List<string>();
         foreach (var entry in log!.Split('\u001e', StringSplitOptions.RemoveEmptyEntries))
