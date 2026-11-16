@@ -141,6 +141,42 @@ public sealed class AnimationClipTests
     }
 
     /// <summary>
+    /// An event placed on a loaded clip before it has arrived is refused and keeps nothing, so a
+    /// game placing it again each frame until it is placed, as the call asks, holds the one event.
+    /// </summary>
+    [SkippableFact]
+    public void AnEventRefusedBeforeItsClipArrivesKeepsNothing()
+    {
+        Needs.Renderer();
+
+        var (refused, before, after) = (0, 0, -1);
+        var clip = AssetHandle.None;
+        void Place()
+        {
+            if (after >= 0) return;
+            if (!Animation.AddEvent(clip, 0.1f, new Ping(3))) refused++;
+            else after = ClipEvents.Held;
+        }
+
+        var config = Config.OffscreenFor(64, 64, frames: 60);
+        config.AssetRoot = EngineHarness.AssetDirectory;
+        using var app = new App(config);
+        app.AddPlugin(new EnginePlugin());
+        app.AddSystem(Stage.Startup, new SystemDescriptor(_ =>
+        {
+            clip = Animation.LoadClip("models/bend.gltf#Animation0");
+            before = ClipEvents.Held;
+            Place();
+        }, "Test.Load"));
+        app.AddSystem(Stage.Update, new SystemDescriptor(_ => Place(), "Test.Place"));
+
+        Assert.Equal(0, app.Run());
+
+        Assert.True(refused > 0, "the event was placed before its clip could have arrived");
+        Assert.Equal(before + 1, after);
+    }
+
+    /// <summary>
     /// Two clips played at once from a graph built in code are mixed by their weights, a weight set
     /// as they play moves the mix, and a clip's node masking the group its target is in leaves the
     /// target alone until the mask is lifted.

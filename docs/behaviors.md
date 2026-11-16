@@ -199,6 +199,10 @@ Names are looked up as the app starts, so the other system may be added later, a
 nothing in its stage, or a system in another stage, stops the app with a message saying which. A
 system added while the app runs is ordered among the others added that way to its stage.
 
+Two systems may share a name, as two behaviors of one name in different namespaces do, or one method
+name in two stages. A name then orders against every system in the stage called that, and a
+`[ToggleKey]` on them turns them on and off together.
+
 Two systems where one writes what the other reads give different results by whichever runs first,
 and an order nobody stated may change between builds. `App.DetectAmbiguities` lists each such pair
 in the log as the app starts, as Bevy's `ambiguity_detection` does, from what the systems declare

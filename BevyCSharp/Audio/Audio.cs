@@ -37,12 +37,20 @@ public static unsafe class Audio
     /// <summary>What the mixer knows of a sound, its bus, its own volume, and whether it is paused.</summary>
     private sealed record Mixed(string? Bus, float Volume, bool Paused);
 
-    /// <summary>Every sound played since the app was made, by its entity's bits.</summary>
+    /// <summary>Every sound played since the app was made and not known to be gone, by its entity's bits.</summary>
     /// <remarks>
-    /// Kept so a bus can reach its sounds. A sound that ends on its own is not reported, so one is
-    /// forgotten the first time reaching it finds its entity gone.
+    /// Kept so a bus can reach its sounds and a sound keeps its own volume through a pause. A sound
+    /// that ends on its own is not reported, so one is forgotten the first time reaching it finds
+    /// its entity gone, and the table is swept of those whose entities are gone once it has doubled
+    /// since it was last swept (<see cref="Sweep"/>).
     /// </remarks>
     private static readonly Dictionary<ulong, Mixed> Sounds = [];
+
+    /// <summary>How many sounds the table held after it was last swept.</summary>
+    private static int _swept;
+
+    /// <summary>How many sounds the mixer knows of, which a test reads.</summary>
+    internal static int SoundsKnown => Sounds.Count;
 
     /// <summary>Every bus somebody has set, by name.</summary>
     private static readonly Dictionary<string, float> Buses = new(StringComparer.Ordinal);
@@ -52,6 +60,29 @@ public static unsafe class Audio
     {
         Sounds.Clear();
         Buses.Clear();
+        _swept = 0;
+    }
+
+    /// <summary>
+    /// Forgets the sounds whose entities are gone, as a sound that ends on its own and despawns is,
+    /// once the table holds twice as many as it did after the last sweep, and at least 64.
+    /// </summary>
+    /// <remarks>
+    /// A game firing effects with no bus at ten a second would otherwise hold an entry for each it
+    /// ever played, which nothing reaches again, and a bus's volume walks the table. Swept at a
+    /// doubling, it holds about twice the sounds alive at most, and the bridge is asked about each
+    /// entry once for every entry added since the last sweep.
+    /// </remarks>
+    private static void Sweep()
+    {
+        if (Sounds.Count < Math.Max(64, 2 * _swept)) return;
+
+        foreach (var bits in Sounds.Keys.ToList())
+        {
+            if (NativeAudio.bcs_audio_state(bits, null, null) == NativeStatus.NoEntity) Sounds.Remove(bits);
+        }
+
+        _swept = Sounds.Count;
     }
 
     /// <summary>A bus's volume, which is one for a bus nobody has set and for no bus at all.</summary>
@@ -222,6 +253,7 @@ public static unsafe class Audio
                 + "has no audio. Rebuild the bridge with build/build-native.sh --render.");
 
         Sounds[bits] = new Mixed(settings.Bus, settings.Volume, settings.Paused);
+        Sweep();
         return new Entity(bits);
     }
 

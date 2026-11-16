@@ -156,10 +156,11 @@ public static unsafe class ImGuiRuntime
     /// <remarks>
     /// The atlas is handed to the engine of the app that started the interface, so an app after it
     /// in the same process, as a test suite makes, starts the interface again rather than drawing
-    /// with a texture its engine never had.
+    /// with a texture its engine never had, and loads its pictures again for the same reason.
     /// </remarks>
     internal static void Forget()
     {
+        ImGuiTextures.Forget();
         if (!IsRunning) return;
 
         ImGui.DestroyContext();

@@ -48,7 +48,8 @@ public static unsafe class ImGuiTextures
     /// The other half of <see cref="Load"/>, which takes a path. This takes a handle, and a render
     /// target is one, so a thumbnail or a preview is a small scene drawn every frame rather than a
     /// picture somebody saved. Asked for once per handle and kept, because what it names does not
-    /// change when the picture behind it is redrawn.
+    /// change when the picture behind it is redrawn. A zero is not kept, as <see cref="Load"/> keeps
+    /// none.
     /// </remarks>
     /// <param name="image">The image, usually from <c>Render.CreateTarget</c>.</param>
     /// <returns>A name ImGui can draw with, or zero when the handle names no image.</returns>
@@ -58,9 +59,20 @@ public static unsafe class ImGuiTextures
         if (Assets.TryGetValue(image.Key, out var picture)) return picture;
 
         picture = NativeImGui.bcs_imgui_asset_texture(image.Key);
-        Assets[image.Key] = picture;
+        if (picture != 0) Assets[image.Key] = picture;
 
         return picture;
+    }
+
+    /// <summary>Forgets every picture kept, for an app starting, whose table holds none of them.</summary>
+    /// <remarks>
+    /// Each app numbers its pictures from one, the font atlas first, and asset keys start again
+    /// with it, so a number kept from the last app names nothing in the next or another picture.
+    /// </remarks>
+    internal static void Forget()
+    {
+        Loaded.Clear();
+        Assets.Clear();
     }
 
     /// <summary>

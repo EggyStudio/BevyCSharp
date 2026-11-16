@@ -1227,3 +1227,49 @@ in all three profiles. NormTests passed, 19.
 Shared: an entity handed across the boundary as zero is no such entity at every entry point, and a
 wake reaches a reactive loop from any thread, which a sibling taking entities across a C ABI reads
 the same way.
+
+146's low findings 55 to 59, in the commit carrying this Reply, each with a test that failed without
+its mend.
+
+A system's name stays Behavior.Method, as the guide gives it and [After] names it, rather than the
+qualified name the finding's direction gives, so two systems may share one, two behaviors of one
+name in two namespaces or one method name in two stages. A hot reload names each standing system
+again by its name and its method, where it kept the first of a name alone and added the second again
+at each change, and a toggle key flips a name's toggle once a frame, where each system of the name
+flipped it. behaviors.md says a shared name orders against every system called that and a toggle key
+turns them on and off together. BehaviorReloadTests.TwoSystemsOfOneNameAreEachNamedAgainByAChange
+changes a registration of two such systems twice, and
+EngineTests.AToggleKeyFlipsSystemsSharingANameOnceAPress presses the key two of them share. Without
+the mends one of the two ran twice a frame from the first change, and the two ran on after the
+press, one missing a frame, and with them each ran once a frame and both stopped from the frame the
+key went down.
+
+The mixer forgets the sounds whose entities are gone once its table holds twice what it held after
+the last sweep, and at least 64, where a sound on no bus stayed until the next app.
+AudioPlaybackTests.SoundsThatEndOnTheirOwnAreForgottenAsMoreArePlayed plays a tone of a thirtieth of
+a second every frame. Without the mend the mixer held all 240, and with it 64 at most.
+
+An event the bridge refuses gives its number back for the next, where its delegate was kept for
+good. AnimationClipTests.AnEventRefusedBeforeItsClipArrivesKeepsNothing places an event on a clip
+loaded from a file every frame until it is placed. Without the mend the event refused before its
+clip arrived stayed kept beside the one placed, two where one was placed, and with it one.
+
+ImGui's pictures are forgotten as each app starts, and a picture answered as none for a handle is
+not kept, where a later app drew with the earlier app's numbers.
+ImGuiTests.APictureIsLoadedAgainForEachApp loads the checker in one app and the cube map and then
+the checker in the next. Without the mend the checker read the cube map's size, 16 by 96, and with
+it its own, 2 by 2.
+
+The inspector's count of the entities sharing a data asset is kept for a second, as its count of the
+assets holding it is, and Make unique forgets both.
+DataReferenceCountTests.TheEntitiesSharingAnAssetAreCountedOnceForCallsInARow asks three times in a
+row and once after the counts are forgotten. Without the mend the world was walked at each of the
+three, and with it once, and once more after the counts were forgotten.
+
+The whole suite passed over these mends and those of the commit before them, from one tree, 2,163
+passed, 0 failed and 3 skipped, 2,166 in all where the listing is 2,155, the solution built from
+nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
+in all three profiles. NormTests passed, 19.
+
+Of the 75, 55 are mended, none was found not to hold, and 20 remain, 60 to 75 and 34 to 36 and 40 of
+global illumination, which go with 138.

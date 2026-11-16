@@ -154,7 +154,7 @@ public static class EditorDataAssets
             {
                 var copy = DataAssets.Copy(id, Unused(path));
                 field.Write(ctx.Ecs, entity, copy);
-                Counted.Clear();
+                Forget();
                 Console.WriteLine($"[editor] copied {path} to {AssetIds.PathOf(copy)} for this one");
             }
 
@@ -168,8 +168,17 @@ public static class EditorDataAssets
     private static string Count(int count, string one, string many) => count == 1 ? $"1 {one}" : $"{count} {many}";
 
     /// <summary>How many entities have a field referring to a data asset.</summary>
-    private static int Users(EcsWorld world, ulong id)
+    /// <remarks>
+    /// Every field of every component of every entity is read to answer, which the fold drawn every
+    /// frame under a reference would ask every frame, so the answer is kept for a second, as
+    /// <see cref="Holders"/> keeps its own, and "Make unique" forgets it at once.
+    /// </remarks>
+    internal static int Users(EcsWorld world, ulong id)
     {
+        var now = Environment.TickCount64;
+        if (Used.TryGetValue(id, out var kept) && now - kept.At < 1000) return kept.Count;
+
+        Walks++;
         var users = 0;
         foreach (var entity in world.All())
         {
@@ -182,7 +191,20 @@ public static class EditorDataAssets
             if (uses) users++;
         }
 
+        Used[id] = (now, users);
         return users;
+    }
+
+    private static readonly Dictionary<ulong, (long At, int Count)> Used = [];
+
+    /// <summary>How many times <see cref="Users"/> walked a world, which a test reads.</summary>
+    internal static int Walks { get; private set; }
+
+    /// <summary>Forgets the counts kept, as a reference changed here changes them.</summary>
+    internal static void Forget()
+    {
+        Used.Clear();
+        Counted.Clear();
     }
 
     /// <summary>How many data assets have a field referring to a data asset, itself left out.</summary>

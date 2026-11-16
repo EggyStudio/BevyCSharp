@@ -7,20 +7,51 @@ namespace Bevy;
 /// <remarks>
 /// A clip holds the number alone, since the event is a C# value Bevy cannot hold, and the number
 /// finds what to trigger. The table outlives an app, as the clips placed in one do not, which
-/// costs a delegate for each event ever placed, of which a game places few.
+/// costs a delegate for each event ever placed, of which a game places few. An event the bridge
+/// refused, as one placed on a loaded clip that has not arrived, gives its number back for the
+/// next, since a game places it again every frame until it is placed.
 /// </remarks>
 internal static unsafe class ClipEvents
 {
     private static readonly Lock Gate = new();
-    private static readonly List<Action<ObserverRegistry, Entity>> Placed = [];
+    private static readonly List<Action<ObserverRegistry, Entity>?> Placed = [];
+
+    /// <summary>The numbers given back, for the next events kept.</summary>
+    private static readonly Stack<uint> Free = [];
+
+    /// <summary>How many events are kept, which a test reads.</summary>
+    internal static int Held
+    {
+        get
+        {
+            lock (Gate) return Placed.Count - Free.Count;
+        }
+    }
 
     /// <summary>Keeps an event, answering the number the bridge reports it under.</summary>
     internal static uint Keep<TEvent>(TEvent value) where TEvent : IAnimationEvent
     {
         lock (Gate)
         {
-            Placed.Add((registry, at) => registry.TriggerAt(value, at));
+            Action<ObserverRegistry, Entity> fire = (registry, at) => registry.TriggerAt(value, at);
+            if (Free.TryPop(out var number))
+            {
+                Placed[(int)number] = fire;
+                return number;
+            }
+
+            Placed.Add(fire);
             return (uint)(Placed.Count - 1);
+        }
+    }
+
+    /// <summary>Lets go of an event the bridge refused to place, its number given back.</summary>
+    internal static void Forget(uint number)
+    {
+        lock (Gate)
+        {
+            Placed[(int)number] = null;
+            Free.Push(number);
         }
     }
 

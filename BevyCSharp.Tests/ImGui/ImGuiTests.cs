@@ -83,4 +83,44 @@ public sealed class ImGuiTests
         Assert.True(asked);
         Assert.False(left);
     }
+
+    /// <summary>
+    /// A picture an earlier app in the process loaded is loaded again for the next, so its path
+    /// draws what it holds, where the earlier app's number named another picture in the new table.
+    /// </summary>
+    [SkippableFact]
+    public void APictureIsLoadedAgainForEachApp()
+    {
+        Needs.Renderer();
+
+        Assert.Equal((2u, 2u), SizeOfTheLast("textures/checker.png"));
+        Assert.Equal((2u, 2u), SizeOfTheLast("textures/cubemap.png", "textures/checker.png"));
+    }
+
+    /// <summary>
+    /// The size of the last of <paramref name="paths"/>, loaded in that order by an app with the
+    /// interface running, once it has arrived.
+    /// </summary>
+    private static (uint Width, uint Height) SizeOfTheLast(params string[] paths)
+    {
+        var (pictures, size) = (new ulong[paths.Length], (0u, 0u));
+        new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Configure = config => config.Gui = true,
+            Scene = _ =>
+            {
+                ImGuiRuntime.Start();
+                for (var i = 0; i < paths.Length; i++) pictures[i] = ImGuiTextures.Load(paths[i]);
+            },
+            EachFrame = world =>
+            {
+                ImGuiRuntime.Begin(new BehaviorContext(world));
+                ImGuiRuntime.End();
+            },
+        }.Until("the pictures arriving", _ => (size = ImGuiTextures.SizeOf(pictures[^1])) != (0u, 0u)).Go();
+
+        return size;
+    }
 }

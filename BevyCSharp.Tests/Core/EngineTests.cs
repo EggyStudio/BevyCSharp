@@ -270,6 +270,35 @@ public sealed class EngineTests
         Assert.Equal(0, removedRuns);
     }
 
+    /// <summary>
+    /// A press of a toggle key flips the toggle of two systems sharing a name once, as two behaviors
+    /// of one name in two namespaces share one, so both stop from the frame it goes down.
+    /// </summary>
+    [SkippableFact]
+    public void AToggleKeyFlipsSystemsSharingANameOnceAPress()
+    {
+        Needs.Renderer();
+
+        var (first, second, pressed) = (new List<ulong>(), new List<ulong>(), 0ul);
+        using var harness = new EngineHarness(frames: 10);
+        foreach (var ran in new[] { first, second })
+        {
+            var system = new SystemDescriptor(world => ran.Add(new BehaviorContext(world).Time.FrameCount), "Shared.Tick");
+            harness.App.AddSystem(Stage.Update, system.RunIf(BehaviorConditions.KeyToggle("Shared.Tick", Key.F6)));
+        }
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ctx.Input.KeyPressed(Key.F6)) pressed = ctx.Time.FrameCount;
+            if (ctx.Time.FrameCount == 3) SyntheticInput.Tap(Key.F6);
+        });
+        harness.Run();
+
+        Assert.NotEqual(0ul, pressed);
+        Assert.Equal(first, second);
+        Assert.All(first, frame => Assert.True(frame < pressed, $"ran on frame {frame}, the key went down on {pressed}"));
+    }
+
     /// <summary>A plugin that declares a dependency, for the ordering test.</summary>
     private sealed class NeedsEnginePlugin : IPlugin
     {

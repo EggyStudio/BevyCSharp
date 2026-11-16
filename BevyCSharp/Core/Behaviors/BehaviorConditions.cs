@@ -111,7 +111,8 @@ public static class BehaviorConditions
     /// <remarks>
     /// The flip happens on the frame <paramref name="key"/> goes down while the modifiers are
     /// already held. That is the same shape as Bevy's own <c>input_toggle_active</c>, plus the
-    /// modifier check Bevy does not offer.
+    /// modifier check Bevy does not offer. A press flips the toggle once, however many systems
+    /// share <paramref name="systemId"/>, which turns them all on or off together.
     /// </remarks>
     public static Func<World, bool> KeyToggle(
         string systemId,
@@ -127,7 +128,8 @@ public static class BehaviorConditions
                 && input.KeyPressed(key)
                 && ModifiersHeld(input, modifiers))
             {
-                registry.Flip(systemId, defaultEnabled);
+                var frame = world.TryGetResource<Time>(out var time) ? time.FrameCount : 0;
+                registry.FlipOnce(systemId, defaultEnabled, frame);
             }
 
             return registry.Get(systemId, defaultEnabled);

@@ -39,4 +39,28 @@ public sealed class AudioPlaybackTests
         harness.Run();
         Assert.True(ran);
     }
+
+    /// <summary>
+    /// Sounds on no bus that end on their own and despawn are forgotten as more are played, as a
+    /// game firing effects plays them, so the mixer holds about the sounds alive and not every one.
+    /// </summary>
+    [SkippableFact]
+    public void SoundsThatEndOnTheirOwnAreForgottenAsMoreArePlayed()
+    {
+        Needs.Renderer();
+
+        var (tone, played, known) = (default(AssetHandle), 0, 0);
+        using var harness = new EngineHarness(frames: 240, frameSeconds: 1.0 / 60);
+        harness.OnContext(Stage.Startup, _ => tone = Audio.CreatePitch(220f, TimeSpan.FromSeconds(1.0 / 30)));
+        harness.OnContext(Stage.Update, _ =>
+        {
+            Audio.Play(tone, new AudioSettings { Mode = PlaybackMode.Despawn, Volume = 0f });
+            played++;
+            known = Math.Max(known, Audio.SoundsKnown);
+        });
+        harness.Run();
+
+        Assert.True(played > 200, $"{played} sounds were played");
+        Assert.InRange(known, 1, 64);
+    }
 }

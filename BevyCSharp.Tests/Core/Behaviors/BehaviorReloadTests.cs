@@ -65,6 +65,37 @@ public sealed class BehaviorReloadTests
     }
 
     /// <summary>
+    /// Two systems of one name, as two behaviors of one name in two namespaces make, are each named
+    /// again by a change and run once a frame on, the second added again by none.
+    /// </summary>
+    [Fact]
+    public void TwoSystemsOfOneNameAreEachNamedAgainByAChange()
+    {
+        var changes = 0;
+        var (first, second) = (new List<ulong>(), new List<ulong>());
+        void Register(App app)
+        {
+            app.AddSystem(Stage.Update, new SystemDescriptor(world => first.Add(Frame(world)), "Reloaded.Shared"));
+            app.AddSystem(Stage.Update, new SystemDescriptor(world => second.Add(Frame(world)), "Reloaded.Shared"));
+        }
+
+        using var harness = new EngineHarness(frames: 20);
+        harness.App.AddPlugin(new BehaviorsPlugin { Reloads = true, ScanLoadedAssemblies = false, Announced = () => [Register] });
+        harness.On(Stage.Update, world =>
+        {
+            if (Frame(world) is not (8 or 12)) return;
+            changes++;
+            BehaviorReload.UpdateApplication([typeof(BehaviorReloadTests)]);
+        }, "Reloaded.Change");
+        harness.Run();
+
+        Assert.Equal(2, changes);
+        Assert.Equal(Frames(first.Min(), first.Max()), first);
+        Assert.Equal(first, second);
+        Assert.Equal(2, harness.App.SystemsIn(Stage.Update).Count(system => system.Name == "Reloaded.Shared"));
+    }
+
+    /// <summary>
     /// A system whose method a change took out, called in the frame the change comes in before the
     /// app registers its behaviors again, is taken out at its throw with no error logged, one the
     /// app started with and one added while it ran alike.

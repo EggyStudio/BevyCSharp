@@ -69,4 +69,41 @@ public sealed class DataReferenceCountTests : IDisposable
         Assert.Equal(1, EditorDataAssets.Holders(nowhere, sword.Id));
         Assert.Equal(0, EditorDataAssets.Holders(nowhere, axe.Id));
     }
+
+    /// <summary>
+    /// The entities sharing a data asset are counted by one walk of the world for calls in a row,
+    /// as the fold under a reference asks every frame it is drawn, and by another once the count is
+    /// forgotten, as "Make unique" forgets it.
+    /// </summary>
+    [Fact]
+    public void TheEntitiesSharingAnAssetAreCountedOnceForCallsInARow()
+    {
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            // The app sets the asset root as it starts, so it is pointed back here.
+            Streaming.AssetRoot = _folder.Path;
+            AssetIds.Reindex();
+            EditorDataAssets.Forget();
+
+            var sword = DataAssets.Create<WeaponStats>("sword.data.json");
+            var weapon = ComponentSchemas.For("Bevy.Tests.Armed")!.Field("Weapon")!;
+            for (var i = 0; i < 2; i++)
+            {
+                var armed = ctx.Ecs.Spawn();
+                ctx.Ecs.Add(armed, default(Armed));
+                Assert.True(weapon.Write(ctx.Ecs, armed, sword.Id));
+            }
+
+            var walks = EditorDataAssets.Walks;
+            for (var call = 0; call < 3; call++) Assert.Equal(2, EditorDataAssets.Users(ctx.Ecs, sword.Id));
+            Assert.Equal(walks + 1, EditorDataAssets.Walks);
+
+            EditorDataAssets.Forget();
+            Assert.Equal(2, EditorDataAssets.Users(ctx.Ecs, sword.Id));
+            Assert.Equal(walks + 2, EditorDataAssets.Walks);
+        });
+
+        harness.Run();
+    }
 }

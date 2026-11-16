@@ -470,10 +470,12 @@ public sealed unsafe partial class App : IDisposable
     }
 
     /// <summary>
-    /// What a registration run again found standing, its systems by name, those it named again and
-    /// the startup systems it added, which it passes over.
+    /// What a registration run again found standing, its systems by name and method, those it named
+    /// again and the startup systems it added, which it passes over.
     /// </summary>
-    private (Dictionary<string, RegisteredSystem> Standing, HashSet<RegisteredSystem> Named, List<string> Passed)? _again;
+    private (Dictionary<(string Name, System.Reflection.MethodInfo Method), RegisteredSystem> Standing,
+        HashSet<RegisteredSystem> Named,
+        List<string> Passed)? _again;
 
     /// <summary>
     /// Runs an assembly's registration again while the app runs, once hot reload has changed the
@@ -494,11 +496,13 @@ public sealed unsafe partial class App : IDisposable
     /// <param name="register">Its registration, as it stands after the change.</param>
     internal void RegisterAgain(System.Reflection.Assembly assembly, string source, Action<App> register)
     {
-        var standing = new Dictionary<string, RegisteredSystem>(StringComparer.Ordinal);
+        // By name and method, since two systems may share a name, two behaviors of one name in two
+        // namespaces or one method name in two stages, and each is named again by its own.
+        var standing = new Dictionary<(string Name, System.Reflection.MethodInfo Method), RegisteredSystem>();
         foreach (var system in _systems)
         {
             if (system.IsRemoved || system.Descriptor.Source != source || system.Descriptor.System.Method.Module.Assembly != assembly) continue;
-            standing.TryAdd(system.Descriptor.Name, system);
+            standing.TryAdd((system.Descriptor.Name, system.Descriptor.System.Method), system);
         }
 
         var (named, passed, before) = (new HashSet<RegisteredSystem>(), new List<string>(), _systems.Count);
@@ -540,7 +544,7 @@ public sealed unsafe partial class App : IDisposable
     private bool NamedAgain(SystemDescriptor descriptor, bool startup = false)
     {
         if (_again is not { } again) return false;
-        if (again.Standing.TryGetValue(descriptor.Name, out var system) && system.Descriptor.System.Method == descriptor.System.Method)
+        if (again.Standing.TryGetValue((descriptor.Name, descriptor.System.Method), out var system))
         {
             again.Named.Add(system);
             return true;

@@ -338,8 +338,9 @@ public static unsafe partial class Animation
 
     private static bool PlaceEvent<TEvent>(AssetHandle clip, float time, TEvent value, AnimationTarget? target) where TEvent : IAnimationEvent
     {
-        var at = target ?? default;
-        var status = NativeAnimation.bcs_animation_clip_add_event(clip.Key, time, ClipEvents.Keep(value), target is null ? 0 : 1, at.High, at.Low);
+        var (at, number) = (target ?? default, ClipEvents.Keep(value));
+        var status = NativeAnimation.bcs_animation_clip_add_event(clip.Key, time, number, target is null ? 0 : 1, at.High, at.Low);
+        if (status != NativeStatus.Ok) ClipEvents.Forget(number);
         if (status == NativeStatus.Unsupported) throw NoRenderer();
         if (status == NativeStatus.NotPresent) return false;
         Native.Check(status, $"placing a {typeof(TEvent).Name} on clip {clip.Key}");
