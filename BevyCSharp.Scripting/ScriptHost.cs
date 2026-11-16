@@ -100,13 +100,7 @@ public sealed class ScriptHost(App app, string directory)
         }
         catch (Exception e)
         {
-            // What the generation put in before it threw goes, its systems, what the app keeps by
-            // its types, and the descriptions its initializer laid over the running generation's,
-            // so the running generation is the only one left, its systems running once a frame.
-            app.RemoveSystemsBySource(name);
-            foreach (var assembly in context.Assemblies) app.ForgetAssembly(assembly);
-            PutBack(before);
-            context.Unload();
+            Undo(name, context, before);
 
             // What the script's own code threw, which a registration run by reflection or a
             // module initializer hands back wrapped in an exception that says only that it threw.
@@ -122,10 +116,19 @@ public sealed class ScriptHost(App app, string directory)
         // a level's walls stay walls and its player keeps what it carried. Only while the app
         // runs, since before then nothing can carry anything and the world is not on loan.
         // A scene loaded before the scripts were holds their components as the file had them,
-        // and those go on their entities now that there are types for them.
-        Carried = app.IsRunning
-            ? ReloadedComponents.Carry(app.World.Resource<EcsWorld>(), before) + ReloadedComponents.Revive(app.World.Resource<EcsWorld>())
-            : 0;
+        // and those go on their entities once there are types for them. A migration that
+        // throws does so before anything is moved, so the generation goes as one that failed to
+        // load does.
+        try
+        {
+            Carried = app.IsRunning ? ReloadedComponents.CarryAndRevive(app.World.Resource<EcsWorld>(), before) : 0;
+        }
+        catch (InvalidDataException e)
+        {
+            Undo(name, context, before);
+            LastError = $"carrying the components into {name} failed: {e.Message}";
+            return false;
+        }
 
         // Only once the new generation is in. Retiring the old one first would leave a frame
         // with neither, and a failure above would leave the app with nothing at all.
@@ -214,6 +217,19 @@ public sealed class ScriptHost(App app, string directory)
         texts = [.. read];
         unread = null;
         return true;
+    }
+
+    /// <summary>
+    /// Takes out what a failed generation put in, its systems, what the app keeps by its types,
+    /// and the descriptions its initializer laid over the running generation's, so the running
+    /// generation is the only one left, its systems running once a frame.
+    /// </summary>
+    private void Undo(string name, ScriptLoadContext context, IReadOnlyList<ComponentSchema> before)
+    {
+        app.RemoveSystemsBySource(name);
+        foreach (var assembly in context.Assemblies) app.ForgetAssembly(assembly);
+        PutBack(before);
+        context.Unload();
     }
 
     /// <summary>

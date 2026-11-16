@@ -1129,3 +1129,30 @@ says, a matrix whose second row sends x to y under mul(m, v), and the page alone
 
 The whole suite that passed over these is the one the clips' Reply above gives. NormTests passed,
 19.
+
+146's medium finding 50, a script reload whose carry-over throws, in the commit carrying this Reply,
+with a test that failed without its mend. The rest of the medium findings are the bridge's, 7, 26 to
+29, 33, 39, 48 and 49, global illumination's kernels, 34 to 36 and 40, which go with 138, and 12, 25
+and 41, which wait for a free GPU.
+
+A reload carries the running generation's components and revives a scene's kept ones in two steps,
+every value written down and brought up to its type's version first and only then moved or put on,
+through ReloadedComponents.CarryAndRevive, so a migration that throws leaves every entity as it was.
+The script host takes such a generation back as it takes back one that fails to load, its systems,
+what the app keeps by its types and the descriptions it laid over the running one's, and says why in
+LastError, where the carry-over ran outside the host's guard, an entity lost its values to a
+component removed before its migration threw, and the new generation's systems ran beside the old
+for the rest of the app. Carry and Revive keep their lines and take the same two steps.
+ScriptReloadTests.AReloadWhoseMigrationThrowsLeavesTheRunningScriptAsItWas counts by ones, then
+reloads the counter at a second version whose migration throws. Without the mend the migration's
+InvalidDataException came out of Reload, and with it Reload answers false with the migration's words
+in LastError and the count goes on by ones from where it stood.
+
+CHEATSHEET.md and BevyCSharp/PublicApi.txt gain ReloadedComponents.CarryAndRevive's line, and
+Revive's line in the first is worded again with its summary, a type that has described a held
+component since its scene loaded, which N 2.4 asks to be said here. A scenes project opening to the
+scripting one would have added a line to build/norm/1.6.txt, which only gets shorter, so the method
+is public on the class that was.
+
+The whole suite that passed over this mend is the one the clips' Reply above gives. NormTests
+passed, 19.

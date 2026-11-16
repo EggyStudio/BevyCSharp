@@ -280,7 +280,8 @@ void Dispose();                                                 // Returns the p
 // ReloadedComponents
 static IReadOnlyList<ComponentSchema> Before();                 // The schemas there are, taken before the new assembly registers its own over them
 static int Carry(EcsWorld world, IReadOnlyList<ComponentSchema> before);  // Moves every component of a type registered again since before onto the type registered in its place
-static int Revive(EcsWorld world);                              // Puts on their entities the components a scene held that no type described when it was loaded and one does now
+static int CarryAndRevive(EcsWorld world, IReadOnlyList<ComponentSchema> before);  // Carry and Revive together, every migration of both run before any component is moved or put back
+static int Revive(EcsWorld world);                              // Puts on their entities the components a scene held that no type described when it was loaded and one has described since
 ```
 
 ## States

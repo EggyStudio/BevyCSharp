@@ -86,12 +86,12 @@ public sealed class ScriptReloadTests : IDisposable
     /// A component that counts, by one before the reload and by a thousand after it, twice, the
     /// second count one a scene leaves out and a reload keeps all the same.
     /// </summary>
-    private void WriteCounter(int step, string extra = "") => File.WriteAllText(Path.Combine(_folder.Path, "Counter.cs"), $$"""
+    private void WriteCounter(int step, string extra = "", string attributes = "") => File.WriteAllText(Path.Combine(_folder.Path, "Counter.cs"), $$"""
         using Bevy;
 
         namespace Reloaded;
 
-        [Behavior]
+        [Behavior]{{attributes}}
         public partial struct Counter
         {
             public int Count;
@@ -167,6 +167,55 @@ public sealed class ScriptReloadTests : IDisposable
         Assert.Equal(before, after % 1000);
         Assert.Equal(after, unsaved);
         Assert.Equal(target, pointed);
+    }
+
+    /// <summary>
+    /// A reload whose migration throws leaves the running generation alone, its component on its
+    /// entity with its value and its systems running once a frame, and says why.
+    /// </summary>
+    [Fact]
+    public void AReloadWhoseMigrationThrowsLeavesTheRunningScriptAsItWas()
+    {
+        using var harness = new EngineHarness(frames: 20);
+        harness.App.EnableDynamicSystems();
+
+        WriteCounter(1);
+        var host = new ScriptHost(harness.App, _folder.Path);
+        Assert.True(host.Reload(), host.LastError);
+
+        var counted = Entity.None;
+        bool? reloaded = null;
+        var counts = new List<int>();
+
+        harness.OnContext(Stage.Startup, ctx =>
+        {
+            counted = ctx.Ecs.Spawn();
+            Assert.True(ComponentSchemas.For("Reloaded.Counter")!.Add(ctx.Ecs, counted));
+        });
+
+        harness.OnContext(Stage.Update, ctx =>
+        {
+            if (ctx.Time.FrameCount == 6 && reloaded is null)
+            {
+                WriteCounter(1000, "public static System.Text.Json.Nodes.JsonObject Migrate(int from, System.Text.Json.Nodes.JsonObject value) => throw new System.InvalidOperationException(\"no way up\");", "\n[DataVersion(2)]");
+                reloaded = host.Reload();
+                return;
+            }
+
+            if (reloaded is not null) counts.Add((int)ComponentSchemas.For("Reloaded.Counter")!.Read(ctx.Ecs, counted, "Count")!);
+        });
+
+        harness.Run();
+        host.Retire();
+
+        Assert.False(reloaded);
+        Assert.Contains("from version 1 to 2 failed", host.LastError);
+        Assert.Contains("no way up", host.LastError);
+
+        // Counted by ones after the reload as before it, on the value it had.
+        Assert.True(counts.Count > 5, $"{counts.Count} frames were read after the reload");
+        Assert.InRange(counts[0], 1, 999);
+        Assert.All(counts.Zip(counts.Skip(1)), pair => Assert.Equal(pair.First + 1, pair.Second));
     }
 
     [Fact]

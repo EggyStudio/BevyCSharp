@@ -12031,6 +12031,7 @@ readonly struct Bevy.Release : IEquatable<Release>, IPointerEvent
 static class Bevy.ReloadedComponents
   static IReadOnlyList<ComponentSchema> Before()
   static int Carry(EcsWorld world, IReadOnlyList<ComponentSchema> before)
+  static int CarryAndRevive(EcsWorld world, IReadOnlyList<ComponentSchema> before)
   static int Revive(EcsWorld world)
 delegate void Bevy.RemoveHook<T>(in T component)
 readonly struct Bevy.Remove<T> : IEntityEvent, IEquatable<Remove<T>>, IReportedEvent where T : struct
