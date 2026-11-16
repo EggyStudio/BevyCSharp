@@ -186,13 +186,14 @@ draws once a pixel, and stand-ins otherwise. Depth stands in as zeros, the depth
 nothing in front of it, so a shader that treats an empty pixel as sky asks `passHasDepth()` first,
 and `passHasNormals()` and `passHasMotion()` tell the same of the other two.
 
-An image a camera owns is made at a fraction of its picture, made again when the picture changes
-size (starting over from zeros), and bound wherever a shader on that camera declares its name, as a
-texture to read or a storage image to write. One made with `History: true` is two images that trade
-places every frame, so `name_previous` holds what `name` held last frame, and one made with mips is
-reachable a level at a time as `name_mip0`, `name_mip1` and on, so a depth pyramid can be built one
-level from the last. Every camera has its own, however many there are. A dispatch or a pass must not
-read and write the same image, which the GPU refuses, and history exists to avoid that.
+An image a camera owns is made at a fraction of its view, its viewport where it has one, made again
+when the view changes size (starting over from zeros), and bound wherever a shader on that camera
+declares its name, as a texture to read or a storage image to write. One made with `History: true`
+is two images that trade places every frame, so `name_previous` holds what `name` held last frame,
+and one made with mips is reachable a level at a time as `name_mip0`, `name_mip1` and on, so a depth
+pyramid can be built one level from the last. Every camera has its own, however many there are. A
+dispatch or a pass must not read and write the same image, which the GPU refuses, and history exists
+to avoid that.
 
 An image can also be filled from the picture itself, at a point of the frame:
 
@@ -268,7 +269,7 @@ normals, motion, shadows and Bevy's own ambient occlusion exist and before anyth
 after Bevy's temporal antialiasing and before the passes before tonemapping, where a draw of sparks
 or rain shows as drawn, since they move with no motion of their own in the prepass and the
 antialiasing's history would average them away. Its workgroups cover a fraction of the
-picture (`PerPixel`), are fixed (`Fixed`), or come from a buffer (`Indirect`). It reads the same
+view (`PerPixel`), are fixed (`Fixed`), or come from a buffer (`Indirect`). It reads the same
 inputs a pass does through `import bcs_pass;`, and a compute shader importing `bcs_compute` runs on
 a camera as well, reading only time.
 

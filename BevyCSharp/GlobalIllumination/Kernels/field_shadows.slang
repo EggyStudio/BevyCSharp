@@ -144,12 +144,12 @@ float4 fragment(FullscreenOutput input) : SV_Target
         through[i] = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
 
     FieldInfo info = scene_field_info[0];
-    int2 pixel = int2(input.position.xy);
+    int2 pixel = passPixelAt(input.position);
     float depth = passLoadDepth(pixel);
     if (depth <= 0.0 || !fieldOn(info))
         discard;
 
-    PassSurface surface = passSurfaceOf(gbuffer.Load(int3(pixel, 0)));
+    PassSurface surface = passSurfaceOf(gbuffer.Load(int3(passTexel(pixel), 0)));
     if (surface.unlit || !surface.shadow_receiver)
         discard;
 

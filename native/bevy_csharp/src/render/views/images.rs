@@ -10,6 +10,7 @@ use bevy::ecs::query::{With, Without};
 use bevy::ecs::resource::Resource;
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
 use bevy::pbr::ScreenSpaceAmbientOcclusionResources;
+use bevy::render::camera::ExtractedCamera;
 use bevy::render::extract_component::ExtractComponent;
 use bevy::render::render_resource::{
     Extent3d, PipelineCache, Texture, TextureDescriptor, TextureDimension, TextureFormat,
@@ -26,7 +27,8 @@ use super::FramePoint;
 pub struct ViewImageSpec {
     pub name: String,
     pub format: TextureFormat,
-    /// A fraction of the picture's size, one for the same size and a half for half of it.
+    /// A fraction of the view's size (`view_size`), one for the same size and a half for half of
+    /// it.
     pub scale: f32,
     /// Two images that trade places every frame, so last frame's is readable as `name_previous`.
     pub history: bool,
@@ -61,6 +63,21 @@ pub struct ViewImageTextures {
     pub(super) slots: Vec<ViewImageSlot>,
     /// Every name a shader on this view can read an image by, this frame.
     pub names: HashMap<String, ViewTexture>,
+    /// The picture inside the camera's viewport, which the images copied from the picture are
+    /// copied from, on a camera with a viewport that copies its picture.
+    pub(super) region: Option<(Texture, TextureView)>,
+}
+
+/// The size of a camera's view, its viewport's where it has one and its picture's otherwise, which
+/// its images, its dispatches a pixel at a time and the pass library's `passPictureSize` count by.
+///
+/// The cameras splitting a window share its picture, so the picture is the whole window's, and a
+/// camera's view is the part of it its viewport covers.
+pub(super) fn view_size(target: &ViewTarget, camera: Option<&ExtractedCamera>) -> (u32, u32) {
+    match camera.and_then(|camera| camera.viewport.as_ref()) {
+        Some(viewport) => (viewport.physical_size.x, viewport.physical_size.y),
+        None => (target.main_texture().width(), target.main_texture().height()),
+    }
 }
 
 /// The size of an image `scale` of a picture `width` by `height`, which is never nothing.
@@ -84,18 +101,19 @@ pub(super) fn prepare_view_images(
         &ViewTarget,
         &BcsViewImages,
         Option<&mut ViewImageTextures>,
+        Option<&ExtractedCamera>,
     )>,
 ) {
-    for (entity, target, asked, kept) in &mut views {
-        let picture = target.main_texture();
-        let mut slots: Vec<ViewImageSlot> = kept
-            .map(|mut kept| std::mem::take(&mut kept.slots))
+    for (entity, target, asked, kept, camera) in &mut views {
+        let (width, height) = view_size(target, camera);
+        let (mut slots, region) = kept
+            .map(|mut kept| (std::mem::take(&mut kept.slots), kept.region.take()))
             .unwrap_or_default();
 
         let mut next = Vec::with_capacity(asked.0.len());
 
         for spec in &asked.0 {
-            let size = scaled(picture.width(), picture.height(), spec.scale);
+            let size = scaled(width, height, spec.scale);
 
             let reusable = slots
                 .iter()
@@ -185,7 +203,30 @@ pub(super) fn prepare_view_images(
             }
         }
 
-        commands.entity(entity).insert(ViewImageTextures { slots: next, names });
+        // The viewport's part of the picture, in the picture's format, kept while its size and
+        // format hold.
+        let copies = next.iter().any(|slot| slot.spec.copy.is_some());
+        let format = target.main_texture_format();
+        let region = (copies && camera.is_some_and(|camera| camera.viewport.is_some())).then(|| {
+            region
+                .filter(|(texture, _)| (texture.width(), texture.height()) == (width, height) && texture.format() == format)
+                .unwrap_or_else(|| {
+                    let texture = render_device.create_texture(&TextureDescriptor {
+                        label: Some("bcs_view_region"),
+                        size: Extent3d { width, height, depth_or_array_layers: 1 },
+                        mip_level_count: 1,
+                        sample_count: 1,
+                        dimension: TextureDimension::D2,
+                        format,
+                        usage: TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST,
+                        view_formats: &[],
+                    });
+                    let view = texture.create_view(&TextureViewDescriptor::default());
+                    (texture, view)
+                })
+        });
+
+        commands.entity(entity).insert(ViewImageTextures { slots: next, names, region });
     }
 }
 
@@ -308,9 +349,11 @@ pub(super) fn prepare_picture_copies(
 ///
 /// Before the point's dispatches, so they read the picture as the frame reached them. Into this
 /// frame's image, so with history the image's `_previous` is the picture of the frame before, which
-/// a dispatch at any point reads.
+/// a dispatch at any point reads. On a camera with a viewport the picture is the whole window's,
+/// so the viewport's part of it is copied out first and the images are copied from that, as large
+/// as the view they are fractions of.
 pub(super) fn copy_pictures<const POINT: u8>(
-    view: ViewQuery<(&ViewTarget, &ViewImageTextures)>,
+    view: ViewQuery<(&ViewTarget, &ViewImageTextures, Option<&ExtractedCamera>)>,
     copies: Res<PictureCopyPipelines>,
     blit: Option<Res<bevy::core_pipeline::blit::BlitPipeline>>,
     cache: Res<PipelineCache>,
@@ -320,9 +363,32 @@ pub(super) fn copy_pictures<const POINT: u8>(
         LoadOp, Operations, RenderPassColorAttachment, RenderPassDescriptor, StoreOp,
     };
 
-    let (target, owned) = view.into_inner();
+    let (target, owned, camera) = view.into_inner();
     let Some(blit) = blit else { return };
     let mut group = None;
+
+    if !owned.slots.iter().any(|slot| slot.spec.copy.map(|point| point as u8) == Some(POINT)) {
+        return;
+    }
+
+    let source = match (camera.and_then(|camera| camera.viewport.as_ref()), &owned.region) {
+        (None, _) => target.main_texture_view(),
+        (Some(viewport), Some((region, view))) => {
+            let at = viewport.physical_position;
+            ctx.command_encoder().copy_texture_to_texture(
+                bevy::render::render_resource::TexelCopyTextureInfo {
+                    texture: target.main_texture(),
+                    mip_level: 0,
+                    origin: bevy::render::render_resource::Origin3d { x: at.x, y: at.y, z: 0 },
+                    aspect: bevy::render::render_resource::TextureAspect::All,
+                },
+                region.as_image_copy(),
+                Extent3d { width: region.width(), height: region.height(), depth_or_array_layers: 1 },
+            );
+            view
+        }
+        (Some(_), None) => return,
+    };
 
     for slot in &owned.slots {
         if slot.spec.copy.map(|point| point as u8) != Some(POINT) {
@@ -338,7 +404,7 @@ pub(super) fn copy_pictures<const POINT: u8>(
         };
 
         let group = group.get_or_insert_with(|| {
-            blit.create_bind_group(ctx.render_device(), target.main_texture_view(), &cache)
+            blit.create_bind_group(ctx.render_device(), source, &cache)
         });
 
         let into = level_view(&slot.textures[slot.current], 0);

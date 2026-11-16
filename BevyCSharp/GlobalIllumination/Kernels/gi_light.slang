@@ -362,7 +362,7 @@ bool traceScreen(float3 p, float3 way, float length, int steps, out float3 hit, 
                 // met, its facing unknown, where the cleared texel's normal had turned away every
                 // ray meeting it along -z.
                 int2 pixel = min(int2(atUv * float2(passPictureSize())), int2(passPictureSize()) - 1);
-                uint4 met = gbuffer.Load(int3(pixel, 0));
+                uint4 met = gbuffer.Load(int3(passTexel(pixel), 0));
                 float3 facing = passSurfaceOf(met).normal;
                 if (!leaps && (!passHasSurface(met) || dot(facing, way) < 0.0))
                 {
@@ -626,9 +626,9 @@ float4 fragment(FullscreenOutput input) : SV_Target
         through[i] = passAtmosphereTransmittance(passView.world_position, passLights.directional_lights[i].direction_to_light);
 
     FieldInfo info = scene_field_info[0];
-    int2 pixel = int2(input.position.xy);
+    int2 pixel = passPixelAt(input.position);
     float depth = passLoadDepth(pixel);
-    uint4 gpixel = gbuffer.Load(int3(pixel, 0));
+    uint4 gpixel = gbuffer.Load(int3(passTexel(pixel), 0));
     if (depth <= 0.0 || !fieldOn(info) || !passHasSurface(gpixel))
         discard;
 
@@ -661,7 +661,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 bounced = float3(0.0);
     if (held > 0.0)
     {
-        ScreenProbes around = screenProbesHere(input.position.xy, toEye, facing, acrossOne, downOne);
+        ScreenProbes around = screenProbesHere(input.position.xy - passView.viewport.xy, toEye, facing, acrossOne, downOne);
         float3 near = screenBounced(around);
         float screened = near.x >= 0.0 ? probesHold(probesOf(info, int(probes.z)), world, n, probes.y, min(1, int(probes.z) - 1)) : 0.0;
         bounced = screened > 0.0 ? near : float3(0.0);
@@ -718,7 +718,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // texels instead, at a cost the lights do not change (glowLightsHere).
     if (lights.counts.w > 0.5)
     {
-        float3 glowing = screen.z > 0.5 ? glowLightsHere(info, input.position.xy, world, n, toEye, facing, acrossOne, downOne) : float3(-1.0);
+        float3 glowing = screen.z > 0.5 ? glowLightsHere(info, input.position.xy - passView.viewport.xy, world, n, toEye, facing, acrossOne, downOne) : float3(-1.0);
         if (glowing.x < 0.0)
             glowing = glowLightsAt(scene_field, scene_field_sampler, info, glow_lights, uint(lights.counts.w), world, n, 4, false, float3(0.0)) / Pi;
         added += diffuse * glowing;

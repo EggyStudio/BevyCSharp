@@ -22,7 +22,7 @@ public readonly record struct ViewDispatch
     /// <summary>The workgroups deep, for a fixed dispatch.</summary>
     public uint Z { get; init; }
 
-    /// <summary>The fraction of the picture a per-pixel dispatch covers.</summary>
+    /// <summary>The fraction of the camera's view a per-pixel dispatch covers.</summary>
     public float Scale { get; init; }
 
     /// <summary>The buffer an indirect dispatch reads its counts from.</summary>
@@ -33,11 +33,13 @@ public readonly record struct ViewDispatch
 
     /// <summary>
     /// Enough workgroups of <paramref name="groupX"/> by <paramref name="groupY"/> pixels to cover
-    /// <paramref name="scale"/> of the picture, for a shader working a pixel at a time.
+    /// <paramref name="scale"/> of the camera's view, for a shader working a pixel at a time.
     /// </summary>
     /// <remarks>
     /// The workgroup size here matches the shader's <c>numthreads</c>, and the shader checks that
-    /// its pixel is inside the picture, since the last workgroups across and down reach past it.
+    /// its pixel is inside the view, since the last workgroups across and down reach past it. The
+    /// view is the camera's viewport where it has one, whose pixels count from its corner, so a
+    /// dispatch works the camera's own part of the window.
     /// </remarks>
     public static ViewDispatch PerPixel(
         ShaderInstance instance,

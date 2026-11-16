@@ -1,12 +1,15 @@
 # Review
 
-Reviewed up to `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
+Reviewed up to `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
+pushed at 13:49 on 2026-11-16, its build run 43870104421 started, the form kept. Before it `7908f95a`, Verdict 62's
+mend, the memory guard's test taking its block from the system, pushed at 12:51, its build run
+43861457506 green at 13:49 and the pack run with publish 43869994859 started on it, the form kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
 the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
 tester's settings back, pushed at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form
 kept. Before it `db8afed6`, seven pictures of four days' items kept among the readings, with
 `0eb296a3`, the Slang scratch folder the user's own and slangc looked for only in the checkout a
 program stands in, pushed together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05,
-the pack run with publish for 0.6.145 started after it, the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
+the pack run with publish 43828541813 after it red at 11:21 with nothing published (Verdict 62), the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
 back on its first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory
 its GPU driver freed as it ends and the renderer's hosts held to a cap fitted to the runner,
 `093262d8`, the game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further
@@ -1068,3 +1071,55 @@ nothing with warnings as errors, a part at a time under the GPU lock. NormTests 
 Shared: a camera's own draws and passes keep to its viewport, a pass copying the picture outside it
 across first, since the cameras splitting a window share its picture, which a sibling drawing a
 camera's effects over a shared target reads the same way.
+
+147's second mend, in the commit carrying this Reply. A camera's images and its dispatches a pixel
+at a time are its view's size, its viewport's where it has one, and the pass library counts the
+view's pixels from the viewport's corner, uv, passPictureSize, passSample and the loads of depth,
+normals and motion alike, passTexel turning a pixel of the view into the window's and passPixelAt a
+fragment's position into the view's. A copy of the picture into a camera's image copies the
+viewport's part out first. The kernels reading the camera's buffers at a fragment's position take
+the pixel from passPixelAt, the clouds' draw, the night sky, the sky fog, the field's shadows and
+the lighting's resolve, whose screen probes and glow lights are found from it too. A draw into
+targets of different sizes is refused with a line in the log, a camera's images being its view's
+size and the prepass's buffers the whole window's.
+
+Bevy 0.20's auto exposure meters a block the viewport's size from the picture's corner. mended.rs
+replaces its two lines exactly, the size read from the view's viewport and each texel loaded from
+the viewport's corner, the mend named for auto_exposure.wesl of Bevy 0.20, so a release that moves
+the text refuses it and it goes. Render.ExposureMeteringMended reads it from the mends' bits 6 and
+7.
+
+Four tests hold it, each on the left or right of two cameras splitting a window and held to the
+camera alone in a window of the half's size. ViewShaderTests.AComputeShaderWorksItsCamerasViewport
+marks the camera's depth from a dispatch into an image,
+ViewShaderTests.APictureCopiedOnACameraWithAViewportIsItsView copies the picture into an image of
+half the view and shows it, and ShaderPassTests.APassReadsTheCamerasOwnPicture inverts the picture.
+ExposureTests.AutoExposureMetersItsCamerasViewport gives auto exposure to the right camera, looking
+at a dark cube beside a left one looking at a white cube, and reads the mend made. Without the mend
+0.125 of the half differed in each of the first three, and the right camera read 78.4 beside the
+white cube against 190.6 alone. With it none differed and the camera read as alone, and the first
+commit's tests and the classes beside them passed, 114 of 114.
+
+The first commit's probe, run again, puts every pass's half at the camera alone, the clouds' 0.80
+levels apart, the inversion's 4.01 and the exposure's 112 becoming 0.00, 0.00 and 0.51, which the
+exposure's bare pair reads as well, 0.69. The rain's half shows other drops than the camera alone,
+alike in size and number, 3.99 levels apart where it was 4.00 before either mend, which the viewport
+does not change. A camera drawing the whole window takes no new path, its pictures byte-equal to the
+first commit's but for the clouds, the night sky, the froxel fog and the rain, by up to 43, 1, 1 and
+2 levels, as two runs of the first commit's build differ.
+
+The sheet 13-58-item-147-the-view-inside-the-viewport.png in the day's dump shows the exposure, the
+clouds and the inversion with the first commit and with this one and their difference, and the
+item's reading stays the clouds' pair of the first commit.
+
+CHEATSHEET.md's line for ViewDispatch.PerPixel reads "of the camera's view" for "of the picture",
+its summary changed with the documentation of a camera's images, dispatches and draws, and
+compute.md, shaders.md and cameras-and-light.md say the view's size and the viewport's corner.
+
+The whole suite passed over these mends, 2,153 passed, 0 failed and 3 skipped, 2,156 in all where
+the listing is 2,145, the solution built from nothing with warnings as errors, a part at a time
+under the GPU lock, and the native checks passed in all three profiles. NormTests passed, 19.
+
+Shared: a camera's images, its dispatches a pixel at a time and the pass library count the view from
+its viewport's corner, and Bevy's auto exposure is mended to meter the viewport, which a sibling
+with cameras splitting a window over a shared picture reads the same way.

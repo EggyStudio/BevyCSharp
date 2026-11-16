@@ -378,7 +378,8 @@ public float3 passPointLightRadiance(uint light_index, float3 world)
 public struct FullscreenOutput
 {
     public float4 position : SV_Position;
-    /// Where the pixel is on the picture, from zero at the top left to one at the bottom right.
+    /// Where the pixel is in the view, from zero at the top left of the camera's viewport to one at
+    /// its bottom right.
     public float2 uv : TEXCOORD0;
 };
 
@@ -388,27 +389,46 @@ public float4 passTransform(float4 columns[4], float4 v)
     return columns[0] * v.x + columns[1] * v.y + columns[2] * v.z + columns[3] * v.w;
 }
 
-/// The picture so far at a point, from zero to one across it.
-public float4 passSample(float2 uv)
-{
-    return passPicture.Sample(passPictureSampler, uv);
-}
-
-/// How large the picture is, in pixels.
+/// The picture so far at a point of the view, from zero to one across it.
 ///
-/// A draw on a camera draws into the picture, so it cannot read it, and a texel stands in for it;
-/// there the size is the view's, so `passUv` and `passPixelSize` mean the same in a draw as in a
-/// pass.
-public uint2 passPictureSize()
+/// The picture is the whole window's, which the cameras splitting it share, so the point is found
+/// in it from the camera's viewport, which for a camera drawing the whole window is all of it, and
+/// the point the one asked for.
+public float4 passSample(float2 uv)
 {
     uint width;
     uint height;
     passPicture.GetDimensions(width, height);
+    let size = float2(width, height);
+    return passPicture.Sample(passPictureSampler, passView.viewport.xy / size + uv * (passView.viewport.zw / size));
+}
 
-    if (width <= 1 && height <= 1)
-        return uint2(passView.viewport.zw);
+/// How large the view is, in pixels, its camera's viewport's size, which is the whole picture's
+/// for a camera drawing the whole window.
+///
+/// The pixels of the view count from the viewport's top left corner, as the camera's images, its
+/// compute shaders' pixels and `uv` do, so a shader works the same on a camera splitting the window
+/// with another as on one drawing the whole of it.
+public uint2 passPictureSize()
+{
+    return uint2(passView.viewport.zw);
+}
 
-    return uint2(width, height);
+/// Where a pixel of the view lies in a texture the size of the whole window, which the picture,
+/// Bevy's depth, normals and motion and its deferred buffers are, from the viewport's corner.
+public int2 passTexel(int2 pixel)
+{
+    return pixel + int2(passView.viewport.xy);
+}
+
+/// The pixel of the view a fragment shader is drawing, given its `SV_Position`, in a pass or a draw
+/// into the picture or the prepass's buffers, which count it from the window's corner.
+///
+/// A draw into the camera's own images counts it from the view's corner, since the images are the
+/// view's size, so there the position is the pixel itself.
+public int2 passPixelAt(float4 position)
+{
+    return int2(position.xy - passView.viewport.xy);
 }
 
 /// How far apart two neighboring pixels are in `uv`, which a blur steps by.
@@ -424,41 +444,42 @@ public float2 passUv(int2 pixel)
     return (float2(pixel) + 0.5) * passPixelSize();
 }
 
-/// The depth at a pixel.
+/// The depth at a pixel of the view.
 public float passLoadDepth(int2 pixel)
 {
-    return passDepth.Load(int3(pixel, 0));
+    return passDepth.Load(int3(passTexel(pixel), 0));
 }
 
-/// The world-space normal at a pixel.
+/// The world-space normal at a pixel of the view.
 public float3 passLoadNormal(int2 pixel)
 {
-    return passNormals.Load(int3(pixel, 0)).xyz * 2.0 - 1.0;
+    return passNormals.Load(int3(passTexel(pixel), 0)).xyz * 2.0 - 1.0;
 }
 
-/// How far a pixel moved since the previous frame, in UV units.
+/// How far a pixel of the view moved since the previous frame, in UV units.
 public float2 passLoadMotion(int2 pixel)
 {
-    return passMotion.Load(int3(pixel, 0));
+    return passMotion.Load(int3(passTexel(pixel), 0));
 }
 
-/// The depth at a pixel, given the pixel's `SV_Position`.
+/// The depth at a pixel, given the pixel's `SV_Position` as `passPixelAt` takes it.
 public float passDepthAt(float4 position)
 {
-    return passLoadDepth(int2(position.xy));
+    return passLoadDepth(passPixelAt(position));
 }
 
-/// The world-space normal of the surface at a pixel, given its `SV_Position`.
+/// The world-space normal of the surface at a pixel, given its `SV_Position` as `passPixelAt` takes
+/// it.
 public float3 passNormalAt(float4 position)
 {
-    return passLoadNormal(int2(position.xy));
+    return passLoadNormal(passPixelAt(position));
 }
 
 /// How far the surface at a pixel moved since the previous frame, in UV units, given its
-/// `SV_Position`.
+/// `SV_Position` as `passPixelAt` takes it.
 public float2 passMotionAt(float4 position)
 {
-    return passLoadMotion(int2(position.xy));
+    return passLoadMotion(passPixelAt(position));
 }
 
 /// Where the surface at `uv` was on the previous frame's picture.

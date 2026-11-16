@@ -18,7 +18,7 @@ FullscreenOutput vertex(uint index : SV_VertexID)
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
-    if (!passHasDepth() || passLoadDepth(int2(input.position.xy)) > 0.0)
+    if (!passHasDepth() || passDepthAt(input.position) > 0.0)
         discard;
     float4 cloud = clouds.SampleLevel(clouds_sampler, input.uv, 0.0);
     if (cloud.a <= 1e-3)

@@ -163,6 +163,46 @@ public sealed class ShaderPassTests
     }
 
     /// <summary>
+    /// An inversion on the camera drawing the left half of a window reads the picture where the
+    /// camera's view lies, so the half shows what the camera shows inverted in a window of that
+    /// size alone.
+    /// </summary>
+    [SkippableFact]
+    public void APassReadsTheCamerasOwnPicture()
+    {
+        Needs.Shaders();
+
+        CapturedImage Picture(bool leftHalf)
+        {
+            var run = new PictureRun
+            {
+                Width = leftHalf ? 192u : 96u,
+                Scene = ecs =>
+                {
+                    var settings = new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) };
+                    var camera = Render.SpawnCamera3d(leftHalf ? PictureRun.LeftHalf(settings, 192, 96) : settings);
+                    ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                    var post = new PostSettings { Hdr = true, Msaa = 1 };
+                    Render.SetPostProcessing(camera, post);
+                    if (leftHalf) PictureRun.Beside(192, 96, post);
+                    PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Green), 2f, new Vec3(-1f, 0f, 0f));
+                    Shaders.SetPasses(camera, new ShaderPass(Invert().Set("amount", 1f), AfterTonemapping: true));
+                },
+            };
+
+            run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+                .Wait(Settled)
+                .Capture("picture")
+                .Go();
+            return run.Picture("picture");
+        }
+
+        var (alone, half) = (Picture(false), Picture(true));
+        var apart = PictureRun.Changed(alone, half, 0, alone.Width, 2);
+        Assert.True(apart == 0, $"{apart:0.000} of the camera's half differs from its picture alone");
+    }
+
+    /// <summary>
     /// A pass reads the camera's depth where the camera draws it, and the far plane where it does
     /// not.
     /// </summary>

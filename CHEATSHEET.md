@@ -1127,7 +1127,7 @@ void Reload();                                                  // Compiles ever
 static ShaderStage Slang(string source, string? entry = null);  // A stage made from Slang handed over as text
 
 // ViewDispatch
-static ViewDispatch PerPixel(ShaderInstance instance, FramePoint point, uint groupX = 8, uint groupY = 8, float scale = 1f);  // Enough workgroups of groupX by groupY pixels to cover scale of the picture, for a shader working a pixel at a time
+static ViewDispatch PerPixel(ShaderInstance instance, FramePoint point, uint groupX = 8, uint groupY = 8, float scale = 1f);  // Enough workgroups of groupX by groupY pixels to cover scale of the camera's view, for a shader working a pixel at a time
 static ViewDispatch Fixed(ShaderInstance instance, FramePoint point, uint x, uint y = 1, uint z = 1);  // Exactly this many workgroups
 static ViewDispatch Indirect(ShaderInstance instance, FramePoint point, AssetHandle buffer, uint offset = 0);  // As many workgroups as three unsigned integers in a buffer say, when it runs
 

@@ -25,6 +25,9 @@ const DEFERRED_FUNCTIONS: &str = "embedded://bevy_pbr/deferred/functions.wesl";
 /// Where `bevy_pbr` loads the functions its lighting is worked out with, forward and deferred.
 const PBR_FUNCTIONS: &str = "embedded://bevy_pbr/render/pbr_functions.wesl";
 
+/// Where `bevy_post_process` loads the shader its auto exposure meters the picture with.
+const AUTO_EXPOSURE: &str = "embedded://bevy_post_process/auto_exposure/auto_exposure.wesl";
+
 /// The mend of an exposed emissive drawn deferred, in Bevy 0.20's `deferred/functions.wesl`.
 ///
 /// A material's emissive alpha says how much of the camera's exposure its light takes, all of it at
@@ -106,6 +109,27 @@ const IRRADIANCE_FALLBACK: [(&str, &str); 2] = [
     ),
 ];
 
+/// The mend of auto exposure on a camera with a viewport, in Bevy 0.20's
+/// `auto_exposure/auto_exposure.wesl`.
+///
+/// The cameras splitting a window share its picture, and Bevy's histogram reads a block the size of
+/// the camera's viewport from the picture's top left corner, so a camera drawing the right half of
+/// the window meters the left half, whatever another camera drew there, and a camera beside a
+/// bright one is exposed for the bright one's picture. The mend reads the block from the
+/// viewport's corner, which for a camera drawing the whole window is the picture's, so nothing
+/// else changes. A release of Bevy that meters the viewport moves that text, the mend is refused,
+/// and it goes.
+const EXPOSURE_METERING: [(&str, &str); 2] = [
+    (
+        "    let dim = vec2<u32>(textureDimensions(tex_color));\n",
+        "    let dim = vec2<u32>(view.viewport.zw);\n",
+    ),
+    (
+        "        let col = textureLoad(tex_color, vec2<i32>(global_invocation_id.xy), 0).rgb;\n",
+        "        let col = textureLoad(tex_color, vec2<i32>(global_invocation_id.xy) + vec2<i32>(view.viewport.xy), 0).rgb;\n",
+    ),
+];
+
 /// Whether each mend has been made, refused, or waits for its shader to load.
 #[derive(Resource, Default)]
 pub struct ShaderMends {
@@ -115,6 +139,8 @@ pub struct ShaderMends {
     emissive_exposure: Option<bool>,
     pbr_functions: Option<Handle<Shader>>,
     irradiance_fallback: Option<bool>,
+    auto_exposure: Option<Handle<Shader>>,
+    exposure_metering: Option<bool>,
 }
 
 pub(crate) fn install(app: &mut App) {
@@ -167,6 +193,15 @@ fn mend(server: Res<AssetServer>, mut shaders: ResMut<Assets<Shader>>, mut mends
         &mut mends.irradiance_fallback,
         "the sky's light leaves everything an irradiance volume does not hold while one is in view",
     );
+    mend_one(
+        &server,
+        &mut shaders,
+        AUTO_EXPOSURE,
+        &EXPOSURE_METERING,
+        &mut mends.auto_exposure,
+        &mut mends.exposure_metering,
+        "a camera with a viewport is exposed for the part of the window at the picture's corner rather than its own",
+    );
 }
 
 /// Makes one mend in the shader at `path` once it has loaded, or refuses it where the text is not
@@ -213,8 +248,9 @@ fn mend_one(
 /// Writes whether each of Bevy's shaders the bridge mends was mended, two bits a mend, the first
 /// set where it was made and the second where it was refused, its text not the one the mend was
 /// written for, the standard material's anisotropy under a normal prepass in bits 0 and 1, an
-/// exposed emissive drawn deferred in bits 2 and 3, and the sky's light outside an irradiance volume
-/// in bits 4 and 5. Neither set is a mend whose shader has not loaded yet.
+/// exposed emissive drawn deferred in bits 2 and 3, the sky's light outside an irradiance volume
+/// in bits 4 and 5, and auto exposure on a camera with a viewport in bits 6 and 7. Neither set is a
+/// mend whose shader has not loaded yet.
 ///
 /// # Safety
 /// `mends` must be writable.
@@ -236,6 +272,7 @@ pub unsafe extern "C" fn bcs_render_shader_mends(mends: *mut u32) -> i32 {
                     bits_of(mends.anisotropy)
                         | bits_of(mends.emissive_exposure) << 2
                         | bits_of(mends.irradiance_fallback) << 4
+                        | bits_of(mends.exposure_metering) << 6
                 });
             unsafe { mends.write(bits) };
             status::OK

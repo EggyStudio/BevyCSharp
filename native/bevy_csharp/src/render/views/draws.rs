@@ -319,6 +319,19 @@ pub(super) fn prepare_view_draws(
                 continue;
             }
 
+            // A render pass's targets are all one size, and a camera's images are its view's, its
+            // viewport's on a camera with one, where the prepass's buffers are the whole window's.
+            if slots.windows(2).any(|pair| pair[0].2 != pair[1].2) {
+                say_once(format!(
+                    "A draw on a camera of shader program {} targets images of different sizes, \
+                     which a draw cannot, so it draws nothing. A camera's images are its view's \
+                     size times their scale, its viewport's on a camera with one, and the \
+                     prepass's buffers the whole window's.",
+                    draw.program
+                ));
+                continue;
+            }
+
             let picture = target.main_texture();
             let (formats, samples, has_depth) = if slots.is_empty() {
                 (vec![format], samples, true)

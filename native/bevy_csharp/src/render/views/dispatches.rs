@@ -29,6 +29,7 @@ use bevy::render::view::{ViewTarget, ViewUniformOffset, ViewUniforms};
 use crate::render::material::say_once;
 use crate::render::programs::{self, Role};
 use crate::render::values::{PackContext, PackError, Stand, Values, pack};
+use super::images::view_size;
 use super::{
     SceneLights, ViewImageTextures, ViewInputSources, ViewInputs, ViewLights, scaled, view_names,
 };
@@ -72,7 +73,8 @@ impl FramePoint {
 /// How many workgroups a dispatch on a camera runs.
 #[derive(Clone, Debug)]
 pub enum Workgroups {
-    /// Enough of `size` to cover `scale` of the picture, for a shader working a pixel at a time.
+    /// Enough of `size` to cover `scale` of the view, its camera's viewport where it has one, for a
+    /// shader working a pixel at a time.
     PerPixel { size: [u32; 2], scale: f32 },
     /// Exactly these.
     Fixed([u32; 3]),
@@ -198,6 +200,7 @@ pub(super) fn prepare_view_dispatches(
         Option<&ViewImageTextures>,
         (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
+        Option<&bevy::render::camera::ExtractedCamera>,
     )>,
 ) {
     let Some(stand) = stand else {
@@ -220,7 +223,7 @@ pub(super) fn prepare_view_dispatches(
         }
     }
 
-    for (entity, target, asked, owned, occlusion, prepass) in &views {
+    for (entity, target, asked, owned, occlusion, prepass, camera) in &views {
         let names = view_names(owned, occlusion, prepass);
         let mut prepared = Vec::with_capacity(asked.0.len());
 
@@ -279,8 +282,8 @@ pub(super) fn prepare_view_dispatches(
 
             let workgroups = match &dispatch.workgroups {
                 Workgroups::PerPixel { size, scale } => {
-                    let picture = target.main_texture();
-                    let (width, height) = scaled(picture.width(), picture.height(), *scale);
+                    let (width, height) = view_size(target, camera);
+                    let (width, height) = scaled(width, height, *scale);
                     PreparedWorkgroups::Direct([
                         width.div_ceil(size[0].max(1)),
                         height.div_ceil(size[1].max(1)),

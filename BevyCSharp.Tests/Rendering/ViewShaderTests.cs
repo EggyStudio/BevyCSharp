@@ -482,4 +482,78 @@ public sealed class ViewShaderTests
 
         Assert.Throws<ArgumentException>(() => Shaders.DispatchIndirect(default, AssetHandle.None));
     }
+
+    /// <summary>
+    /// A compute shader on the camera drawing the left half of a window works the pixels of its
+    /// view, the camera's image its viewport's size and the depth read where the view lies, so the
+    /// half shows what the camera shows in a window of that size alone.
+    /// </summary>
+    [SkippableFact]
+    public void AComputeShaderWorksItsCamerasViewport()
+    {
+        Needs.Shaders();
+
+        void Marked(Entity camera)
+        {
+            Shaders.SetPrepass(camera, depth: true);
+            Shaders.SetViewImages(camera, new ViewImage("marked", ShaderImageFormat.R32Float));
+            Shaders.SetViewDispatches(camera, ViewDispatch.PerPixel(Compute("shaders/mark_depth.slang"), FramePoint.AfterPrepass));
+            Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_marked.slang"), AfterTonemapping: true));
+        }
+
+        var (alone, half) = (InTheView(false, Marked), InTheView(true, Marked));
+        var apart = PictureRun.Changed(alone, half, 0, alone.Width, 2);
+        Assert.True(PictureRun.Green(alone) > 500, $"{PictureRun.Green(alone)} pixels of the camera alone are marked where the cube stands");
+        Assert.True(apart == 0, $"{apart:0.000} of the camera's half differs from its picture alone");
+    }
+
+    /// <summary>
+    /// A copy of the picture into an image on the camera drawing the left half of a window is the
+    /// camera's own view, at half its size, so a pass showing it shows what the camera shows in a
+    /// window of that size alone.
+    /// </summary>
+    [SkippableFact]
+    public void APictureCopiedOnACameraWithAViewportIsItsView()
+    {
+        Needs.Shaders();
+
+        void Copied(Entity camera)
+        {
+            Shaders.SetViewImages(camera, new ViewImage("copied", ShaderImageFormat.Rgba16Float, Scale: 0.5f, CopyAt: FramePoint.BeforeTonemapping));
+            Shaders.SetPasses(camera, new ShaderPass(Pass("shaders/show_copied.slang"), AfterTonemapping: true));
+        }
+
+        var (alone, half) = (InTheView(false, Copied, hdr: true), InTheView(true, Copied, hdr: true));
+        var apart = PictureRun.Changed(alone, half, 0, alone.Width, 2);
+        Assert.True(PictureRun.Red(alone) > 500, $"{PictureRun.Red(alone)} pixels of the camera alone show the red cube");
+        Assert.True(apart == 0, $"{apart:0.000} of the camera's half differs from its picture alone");
+    }
+
+    /// <summary>
+    /// A red cube left of the middle of a camera's view over black, the camera drawing a window of
+    /// 128 by 128 alone or the left half of one twice as wide beside a camera seeing nothing
+    /// (<see cref="PictureRun.Beside"/>), with what <paramref name="give"/> gives it.
+    /// </summary>
+    private static CapturedImage InTheView(bool leftHalf, Action<Entity> give, bool hdr = false)
+    {
+        var run = new PictureRun
+        {
+            Width = leftHalf ? 256u : 128u,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var settings = new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) };
+                var camera = Render.SpawnCamera3d(leftHalf ? PictureRun.LeftHalf(settings, 256, 128) : settings);
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                var post = new PostSettings { Hdr = hdr, Msaa = 1 };
+                Render.SetPostProcessing(camera, post);
+                if (leftHalf) PictureRun.Beside(256, 128, post);
+                PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Red), 2f, new Vec3(-1f, 0f, 0f));
+                give(camera);
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+        return run.Picture("picture");
+    }
 }

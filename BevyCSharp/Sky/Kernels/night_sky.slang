@@ -164,7 +164,7 @@ float3 galaxy(float3 c)
 [shader("fragment")]
 float4 fragment(FullscreenOutput input) : SV_Target
 {
-    if (!passHasDepth() || passLoadDepth(int2(input.position.xy)) > 0.0)
+    if (!passHasDepth() || passDepthAt(input.position) > 0.0)
         discard;
     float3 way = normalize(passRayDirection(input.uv));
     if (way.y < (passHasAtmosphere() ? -0.1 : 0.0))

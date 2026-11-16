@@ -22,5 +22,5 @@ void main(uint3 id : SV_DispatchThreadID)
     frame.GetDimensions(width, height);
     if (id.x >= min(width, picture.x) || id.y >= min(height, picture.y))
         return;
-    frame.Store(id.xy, float4(passPicture.Load(int3(id.xy, 0)).rgb, 1.0));
+    frame.Store(id.xy, float4(passPicture.Load(int3(passTexel(int2(id.xy)), 0)).rgb, 1.0));
 }

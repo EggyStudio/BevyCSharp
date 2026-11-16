@@ -70,7 +70,9 @@ public readonly record struct ViewDraw
     /// <para>
     /// It is drawn once a pixel, and tested against the camera's depth, and writes it if
     /// <see cref="WritesDepth"/> says so, where the image is the picture's size and the camera
-    /// draws once a pixel too; otherwise it draws without depth. An integer image cannot be
+    /// draws once a pixel too; otherwise it draws without depth. A camera with a viewport draws
+    /// into its images without depth, since they are its view's size and its depth the whole
+    /// window's. An integer image cannot be
     /// blended, so a draw into one replaces what is there. Consecutive draws into the same target
     /// share one render pass.
     /// </para>
@@ -86,7 +88,9 @@ public readonly record struct ViewDraw
     /// For a draw writing more than one thing a pixel, such as a visibility buffer's ids and the
     /// barycentrics beside them, or a G-buffer of its own. Every image is drawn once a pixel; they
     /// are tested against the camera's depth only where all of them are the picture's size, and
-    /// none is blended where any is an integer image.
+    /// none is blended where any is an integer image. They are all one size, or the draw draws
+    /// nothing, and on a camera with a viewport the camera's images are its view's size and the
+    /// prepass's buffers the whole window's.
     /// </para>
     /// <para>
     /// The camera's prepass is drawn into by the same names, <c>normals</c> and <c>motion</c>

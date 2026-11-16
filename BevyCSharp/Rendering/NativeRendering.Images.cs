@@ -117,7 +117,7 @@ internal static unsafe partial class NativeRendering
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_pipelines_waiting(uint* waiting);
 
-    /// <summary>Writes which of Bevy's shaders the bridge mended, 1 for anisotropy under a normal prepass and 2 where that was refused.</summary>
+    /// <summary>Writes which of Bevy's shaders the bridge mended, two bits a mend, the first set where it was made and the second where it was refused, as render/mended.rs lists them.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_render_shader_mends(uint* mends);

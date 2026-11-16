@@ -131,6 +131,29 @@ public static unsafe partial class Render
     }
 
     /// <summary>
+    /// Whether the bridge mended Bevy's auto exposure to meter a camera's own viewport, true once
+    /// mended, false where Bevy's shader is not the text the mend was written for, and null before
+    /// the shader has loaded or where nothing is drawn.
+    /// </summary>
+    /// <remarks>
+    /// The cameras splitting a window share its picture, and Bevy 0.20's auto exposure meters a
+    /// block the size of the camera's viewport from the picture's top left corner, so a camera
+    /// drawing the right half of the window would be exposed for the left half. The bridge meters
+    /// from the viewport's corner (<c>render/mended.rs</c>), and a release whose text moved refuses
+    /// the mend, which a test holds.
+    /// </remarks>
+    internal static bool? ExposureMeteringMended
+    {
+        get
+        {
+            if (!App.HasRenderer) return null;
+            uint mends;
+            Native.Check(NativeRendering.bcs_render_shader_mends(&mends), "Render.ExposureMeteringMended");
+            return (mends & 64) != 0 ? true : (mends & 128) != 0 ? false : null;
+        }
+    }
+
+    /// <summary>
     /// Whether Bevy's ray-traced lighting is running, meaning the bridge was built with it
     /// (<c>--solari</c>), the app asked for it with <see cref="Config.RayTracedLighting"/>, and the
     /// adapter traces rays.

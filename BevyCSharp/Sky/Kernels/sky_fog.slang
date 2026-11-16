@@ -136,7 +136,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     // ground, so it gets no fog at all.
     if (!passHasDepth())
         discard;
-    int2 pixel = int2(input.position.xy);
+    int2 pixel = passPixelAt(input.position);
     float depth = passLoadDepth(pixel);
     float3 way = normalize(passRayDirection(input.uv));
     float3 sky = skyAlong(way);

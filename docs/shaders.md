@@ -609,7 +609,11 @@ as a picture. `At: FramePoint.AfterOpaque` runs one on the lit opaque geometry, 
 geometry is drawn over it. Something about the lit surfaces goes there, so glass in front is not
 under a fog or a reflection meant for what is behind it, and it needs a camera drawn once a pixel. A
 pass still compiling is skipped rather than drawn wrong, and passes run in the order given, each
-over what the last wrote.
+over what the last wrote. On a camera with a viewport a pass draws inside it, its `uv` and
+`passPictureSize()` are the view's, and the pixels the library loads count from the viewport's
+corner, so a pass reading the camera's images or depth where it draws turns its `SV_Position`,
+which counts from the window's corner, into the view's pixel with `passPixelAt`, as `passDepthAt`
+does.
 
 ---
 

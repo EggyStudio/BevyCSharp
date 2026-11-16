@@ -72,7 +72,10 @@ Render.SetLayers(ctx.Ecs, player, 1u | Minimap);   // both do
 ```
 
 A viewport is measured in physical pixels rather than logical ones, because a framebuffer is divided
-into those. A camera draws an entity only where their layers overlap.
+into those. A camera draws an entity only where their layers overlap. Its effects keep to its
+viewport, the sky's, the weather's, the lighting's and its shaders', and count its pixels from the
+viewport's corner, so a camera drawing half of a window shows what it shows in a window of that
+size alone.
 
 `Render.SetPerspective(camera, fieldOfView, near, far)` changes a camera's lens while it runs,
 since `CameraSettings` only decides it when the camera is made.
