@@ -23,6 +23,9 @@ public static unsafe partial class Debug
     /// <summary>The passes the profiler lists, the slowest, with a line saying how many more there are.</summary>
     private const int ProfilerPasses = 24;
 
+    /// <summary>How far each frame moves the overlay's rate toward its own, as <see cref="Time.SmoothedFps"/> is smoothed.</summary>
+    private const double FpsSmoothing = 0.1;
+
     private static App? _app;
     private static Entity _root = Entity.None;
     private static Entity _leftColumn = Entity.None;
@@ -41,6 +44,8 @@ public static unsafe partial class Debug
     private static int _timesNext;
     private static int _timesHeld;
     private static double _written = double.NegativeInfinity;
+    private static double _realSeconds;
+    private static double _realFps;
     private static bool _rootShown;
     private static bool _chord;
     private static bool _folded;
@@ -76,6 +81,7 @@ public static unsafe partial class Debug
             (_root, _leftColumn, _rightColumn, _written, _rootShown) = (Entity.None, Entity.None, Entity.None, double.NegativeInfinity, false);
             (_headColumn, _besideColumn, _restColumn, _stripNode, _strip) = (Entity.None, Entity.None, Entity.None, Entity.None, default);
             (_timesNext, _timesHeld, _folded, _fpsOverlay) = (0, 0, false, null);
+            (_realSeconds, _realFps) = (0.0, 0.0);
             HeadLines.Clear();
             BesideLines.Clear();
             LeftLines.Clear();
@@ -83,10 +89,16 @@ public static unsafe partial class Debug
         }
 
         // Every frame's time is kept whether the overlay shows or not, so the strip it opens on is
-        // the last four seconds and not an empty one. The first frame, which has no time, is not.
-        if (time.Delta > 0f)
+        // the last four seconds and not an empty one. The first frame, which has no time, is not,
+        // nor is a frame the clock was held still for. The time is the machine's and not the game's,
+        // which stops while the game is paused, is scaled by its speed and is cut at a quarter of a
+        // second, so the overlay goes on and says how long a frame took however the game runs.
+        var real = time.RawDeltaSeconds;
+        if (real > 0.0)
         {
-            Times[_timesNext] = time.Delta * 1000f;
+            _realSeconds += real;
+            _realFps = _realFps <= 0.0 ? 1.0 / real : _realFps + (1.0 / real - _realFps) * FpsSmoothing;
+            Times[_timesNext] = (float)(real * 1000.0);
             _timesNext = (_timesNext + 1) % StripFrames;
             _timesHeld = Math.Min(_timesHeld + 1, StripFrames);
         }
@@ -118,10 +130,9 @@ public static unsafe partial class Debug
         DrawStrip();
         Render.WriteImagePixels(_strip, StripPixels);
 
-        var now = time.ElapsedSeconds;
-        if (now - _written < 0.25) return;
+        if (_realSeconds - _written < 0.25) return;
 
-        _written = now;
+        _written = _realSeconds;
         var said = Lines(world);
         Write(ecs, _headColumn, HeadLines, said.Head);
         Write(ecs, _besideColumn, BesideLines, said.Beside);
@@ -225,13 +236,13 @@ public static unsafe partial class Debug
         NativeSceneCounts scene = default;
         var counted = App.HasRenderer && NativeGlobalIllumination.bcs_render_scene_counts(&scene) == NativeStatus.Ok;
 
+        var (now, average, lowFps) = Stats(FrameTimes());
         var head = new List<string>
         {
             Say($"BevyCSharp {Version()} ({(App.HasEditor ? "editor" : App.HasRenderer ? "render" : "headless")} bridge, ABI {Native.ExpectedAbiVersion})"),
-            Say($"{time.SmoothedFps:0} fps, {time.Delta * 1000f:0.0} ms a frame, frame {time.FrameCount}"),
+            Say($"{_realFps:0} fps, {now:0.0} ms a frame, frame {time.FrameCount}"),
         };
 
-        var (now, average, lowFps) = Stats(FrameTimes());
         var beside = new List<string>
         {
             Say($"Now {now:0.0} ms, average {average:0.0} ms, 1% low {lowFps:0} fps"),

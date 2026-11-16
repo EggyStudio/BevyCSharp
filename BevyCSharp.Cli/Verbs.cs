@@ -195,8 +195,9 @@ internal static class Verbs
 
         if (session.Running)
         {
-            // By the id in the session file, never by name, because killing every process that
-            // looks like an editor takes other people's unsaved work with it.
+            // By the id in the session file while its process is the one that came up, never by
+            // name, because killing every process that looks like an editor takes other people's
+            // unsaved work with it.
             try
             {
                 System.Diagnostics.Process.GetProcessById(session.Pid).Kill();

@@ -155,12 +155,26 @@ public static unsafe partial class Animation
             for (var i = 0; i < count; i++)
             {
                 var scene = new Entity(roots[i]);
-                var name = TryClips(scene, out var names) && clips[i] < names.Count ? names[clips[i]] : string.Empty;
-                bus.Send(new AnimationFinished(scene, name));
+                bus.Send(new AnimationFinished(scene, FinishedClip(scene, clips[i])));
             }
 
             if (count < Capacity) break;
         }
+    }
+
+    /// <summary>The name of the clip that ended, or nothing where its scene went first.</summary>
+    /// <remarks>
+    /// The bridge notes an end in PostUpdate and the names are read the next frame, in First, so
+    /// the command flush beside it in PostUpdate, or a system in Last, can despawn the scene or take
+    /// it apart between the two. The clip still ended, and is said without its name, since a throw
+    /// here would lose the rest of the batch and the frame's message swap after it.
+    /// </remarks>
+    private static string FinishedClip(Entity scene, int clip)
+    {
+        var length = NativeAnimation.bcs_animation_clips(scene.Bits, null, 0);
+        if (length is NativeStatus.NoEntity or NativeStatus.NotPresent) return string.Empty;
+
+        return TryClips(scene, out var names) && clip < names.Count ? names[clip] : string.Empty;
     }
 
     /// <summary>Makes an empty clip, which <see cref="AddCurve"/> fills.</summary>

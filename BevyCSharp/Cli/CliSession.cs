@@ -60,11 +60,25 @@ public sealed record CliSession(
     /// <summary>True when nothing has been heard from it for longer than <see cref="Patience"/>.</summary>
     public bool Stale => DateTimeOffset.UtcNow - Heartbeat > Patience;
 
-    /// <summary>True when a process with this id is still there.</summary>
+    /// <summary>
+    /// How much later than <see cref="Started"/> the system may say the process started, for the
+    /// rounding of its start, where the app writes its file after its runtime and its engine are up.
+    /// </summary>
+    private static readonly TimeSpan StartAllowance = TimeSpan.FromSeconds(1);
+
+    /// <summary>True when the process with this id is still there and is the one that came up.</summary>
     /// <remarks>
+    /// <para>
     /// Asked separately from <see cref="Stale"/>, because the two say different things. A process
     /// that is gone leaves a file that will never be touched again, while one that is merely busy
     /// leaves a file that will be.
+    /// </para>
+    /// <para>
+    /// A process that started after the session came up holds the id alone, handed on once the app
+    /// was gone, as a file left by a killed app meets after the machine restarts or its ids come
+    /// round, and is another program, which <c>bcs stop</c> leaves alone. One whose start cannot
+    /// be read is another account's.
+    /// </para>
     /// </remarks>
     public bool Running
     {
@@ -72,9 +86,11 @@ public sealed record CliSession(
         {
             try
             {
-                return !Process.GetProcessById(Pid).HasExited;
+                using var process = Process.GetProcessById(Pid);
+                return !process.HasExited && process.StartTime.ToUniversalTime() <= Started.UtcDateTime + StartAllowance;
             }
-            catch (Exception error) when (error is ArgumentException or InvalidOperationException)
+            catch (Exception error) when (error is ArgumentException or InvalidOperationException
+                                              or NotSupportedException or System.ComponentModel.Win32Exception)
             {
                 return false;
             }

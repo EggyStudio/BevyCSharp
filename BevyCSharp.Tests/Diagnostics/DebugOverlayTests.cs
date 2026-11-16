@@ -141,8 +141,8 @@ public sealed class DebugOverlayTests : IDisposable
             Scene = ecs => PictureRun.Camera(ecs),
             EachFrame = world =>
             {
-                var delta = world.Resource<Time>().Delta;
-                if (delta > 0f) kept.Add(delta * 1000f);
+                var real = world.Resource<Time>().RawDeltaSeconds;
+                if (real > 0.0) kept.Add((float)(real * 1000.0));
             },
         };
         run.Wait(300)
@@ -159,6 +159,43 @@ public sealed class DebugOverlayTests : IDisposable
             kept.Take(frames).Skip(frames - Debug.StripFrames).SequenceEqual(strip)
                 || kept.Take(frames - 1).Skip(frames - 1 - Debug.StripFrames).SequenceEqual(strip),
             "The strip is not the last 240 frames' times in order.");
+    }
+
+    /// <summary>
+    /// The overlay times frames on the machine's clock, so a frame of a game slowed to a quarter is
+    /// said at its own length, and the strip goes on while the game is paused.
+    /// </summary>
+    [SkippableFact]
+    public void TheOverlayTimesFramesOnTheMachinesClockWhateverTheGamesDoes()
+    {
+        Needs.Renderer();
+        string slowed = "", paused = "";
+        float[] strip = [];
+
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 48,
+            Configure = config => config.FrameSeconds = 0.02,
+            Scene = ecs => PictureRun.Camera(ecs),
+        };
+        run.Wait(10)
+            .Do("slowing the game to a quarter", world => world.Resource<Time>().SetSpeed(0.25f))
+            .Wait(30)
+            .Do("reading the frame's line", world => slowed = Debug.Lines(world).Head[1])
+            .Do("pausing the game", world => world.Resource<Time>().Pause())
+            .Wait(60)
+            .Do("reading the frame's line and the strip", world =>
+            {
+                paused = Debug.Lines(world).Head[1];
+                strip = Debug.FrameTimes();
+            })
+            .Go();
+
+        Assert.StartsWith("50 fps, 20.0 ms a frame", slowed);
+        Assert.StartsWith("50 fps, 20.0 ms a frame", paused);
+        Assert.True(strip.Length >= 60, $"the strip holds {strip.Length} frames");
+        Assert.All(strip[^60..], ms => Assert.Equal(20f, ms, 0.01f));
     }
 
     /// <summary>

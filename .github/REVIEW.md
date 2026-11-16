@@ -1,33 +1,37 @@
 # Review
 
-Reviewed up to `f9769f26`, the session file its owner's alone from the moment it is made, a panic
-that ends the run written to the crash file and thrown, and a canceled streamed read never landing
-after its cancel, and before it `349406a9`, the three tests mended for a device that draws on the
-processor with the read's Reply, two commits from one tree after a whole suite of 2,117 passed and 3
-skipped, pushed at 21:08 on 2026-11-15, their build run 43756313618 green by 22:02, the form kept
-and the messages free of numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3`
-and `8bdb3e21`, five commits of the audit's medium findings from one tree after one whole suite of
-2,114 passed and 3 skipped, asset fields sharing one handle for each asset, a query's buffer for
-each walk with a copy written back only where changed and a sound's volume kept over a pause, the
-hooks reaching every handle of a layout, the export's bridge built again when its sources are newer,
-and a pair bouncing as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382
-green by 19:02, the form kept and the messages free of numbers. Before them `3ec197c2`, the editor
-history's three mends, an inspector edit spread over the selection undone on every entity, a loaded
-scene starting with nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05
-on 2026-11-15, its build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a
-scene the game loaded itself left standing by a load, a ulong past a long kept, and an unreadable
-scene's entries kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and
-the messages free of numbers. Before them `773313da`, item 146's six high findings, each with a test
-that failed without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15
-once the run before it had ended, its build run 43665738473 green on the three systems at 03:26; it
-keeps the form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding
-the game's clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had
-ended, its build run 43625597437 green on the three systems at 19:38, the games played in the pack
-run alone; built on the published 0.6.122 and played from a copy of the head, on the card it passed
-in 70 s, wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220
-and 309, and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and
-312; NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps
-the form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
+Reviewed up to `ca8c50b4`, the tests that need a renderer run on every push on Linux's render bridge
+under lavapipe in fourteen parts laid out by a file, the long cases skipping themselves on a device
+that draws on the processor, pushed at 23:04 on 2026-11-15, its build run 43767207459 green at 00:15
+on 2026-11-16, the longest renderer part 35 minutes, the form kept. Before it `f9769f26`, the
+session file its owner's alone from the moment it is made, a panic that ends the run written to the
+crash file and thrown, and a canceled streamed read never landing after its cancel, and before it
+`349406a9`, the three tests mended for a device that draws on the processor with the read's Reply,
+two commits from one tree after a whole suite of 2,117 passed and 3 skipped, pushed at 21:08 on
+2026-11-15, their build run 43756313618 green by 22:02, the form kept and the messages free of
+numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3` and `8bdb3e21`, five
+commits of the audit's medium findings from one tree after one whole suite of 2,114 passed and 3
+skipped, asset fields sharing one handle for each asset, a query's buffer for each walk with a copy
+written back only where changed and a sound's volume kept over a pause, the hooks reaching every
+handle of a layout, the export's bridge built again when its sources are newer, and a pair bouncing
+as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382 green by 19:02, the
+form kept and the messages free of numbers. Before them `3ec197c2`, the editor history's three
+mends, an inspector edit spread over the selection undone on every entity, a loaded scene starting
+with nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15,
+its build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a scene the game
+loaded itself left standing by a load, a ulong past a long kept, and an unreadable scene's entries
+kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and the messages free
+of numbers. Before them `773313da`, item 146's six high findings, each with a test that failed
+without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the
+run before it had ended, its build run 43665738473 green on the three systems at 03:26; it keeps the
+form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's
+clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its
+build run 43625597437 green on the three systems at 19:38, the games played in the pack run alone;
+built on the published 0.6.122 and played from a copy of the head, on the card it passed in 70 s,
+wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309,
+and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and 312;
+NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps the
+form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
 reading the recipe where the game says it saved it and putting that file back, a game built in Debug
 saving into its project's assets folder, which the guide says, pushed at 16:07 on 2026-11-14 with
 the pack run with publish, 43608448173, started on the same head and green by 18:45, 0.6.122
@@ -1051,3 +1055,46 @@ each class's or case's minutes there, a class whole where it fits a part and by 
 does not, a part holding * taking every test no line names, with build/test.py's --layout and
 --only. The sibling deals its classes to its parts in turn with --split and --only, so this is
 offered for it to read.
+
+146's medium findings 42 to 44, a clip ending as its model goes, the overlay's clock and a stop by a
+left-over id, in the commit carrying this Reply, each with a test that failed without its mend.
+Finding 39, a behavior method spread over threads reaching the world on the main thread's share,
+goes with the bridge's batch, since its mend is an entry point that takes the world's loan off the
+calling thread for the length of the loop, beside 48 and 49 in the bridge's Slang module.
+
+The clips that ended are posted with an empty name where the scene was despawned or taken apart
+between the bridge noting the end in PostUpdate and the next frame's First reading the names, where
+the lookup threw, which lost the rest of the batch and the frame's message swap. AnimationFinished
+says the name is empty then. AnimationTests.AClipEndingAsItsModelIsDespawnedIsSaidWithoutItsName
+plays a clip once and despawns the model in Last on the second frame its state reads finished, since
+the bridge's noting runs before Bevy's animation step, which nothing orders it against, and notes
+the end in the frame after. Without the mend Engine.FrameSync threw reading the clips of the
+despawned entity and the clip was never said, and with it the clip is said once, for that entity,
+with no name.
+
+The F3 overlay times frames on the machine's clock, the real one Bevy keeps beside the game's, its
+strip, its rate, its head line and the pace it writes its lines at, as ImGui's step does, where they
+read the game's clock, which stops while the game is paused, is scaled by its speed and is cut at a
+quarter of a second. DebugOverlayTests.TheOverlayTimesFramesOnTheMachinesClockWhateverTheGamesDoes
+runs frames of 20 milliseconds, slows the game to a quarter and then pauses it. Without the mend the
+slowed game's line read 194 fps and 5.0 ms a frame, and with it 50 fps and 20.0 ms slowed and paused
+alike, the strip's last 60 frames 20 milliseconds each while the game was paused. The strip's test
+reads the same clock.
+
+A session is running while its id is held by a process that started no later than a second after the
+session came up, so a process handed the id of a killed app, after the machine restarts or its ids
+come round, is gone to bcs stop, status and doctor, and stop kills nothing and takes the file away,
+where a process with that id was killed. CliSessionTests.AFileWhoseIdAProcessStartedSinceHoldsIsGone
+writes a session for the test's own process that came up an hour before it started. Without the mend
+that session read as running, so a stop would have killed the test's own process, and with it the
+session is gone and pruning sweeps it up.
+
+The whole suite passed over these mends and the changes of the three commits after them, from one
+tree, 2,123 passed, 0 failed and 3 skipped, 2,126 in all where the listing is 2,115, the solution
+built from nothing with warnings as errors, a part at a time under the GPU lock once it had been
+free of timings for three minutes. NormTests passed, 19.
+
+Shared: a session file left by a killed app names an id the system may hand to another program, so
+the command line takes the process for the app only when it started no later than the session came
+up. The sibling's CliSession reads a process by its id alone, and its stop kills by that id, so this
+is offered for it to read.

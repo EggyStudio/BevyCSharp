@@ -4,5 +4,8 @@ namespace Bevy;
 /// A clip that plays once reached its end, posted as a message the frame after it did.
 /// </summary>
 /// <param name="Scene">The entity the model's scene was spawned under, as it was played on.</param>
-/// <param name="Clip">The clip, by name.</param>
+/// <param name="Clip">
+/// The clip, by name, or empty where the scene was despawned or taken apart before its names were
+/// read.
+/// </param>
 public readonly record struct AnimationFinished(Entity Scene, string Clip);

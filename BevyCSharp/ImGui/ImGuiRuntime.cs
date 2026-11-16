@@ -219,7 +219,9 @@ public static unsafe class ImGuiRuntime
 
         io.DisplaySize = Size;
         io.DisplayFramebufferScale = new Vector2(scale, scale);
-        io.DeltaTime = ctx.Time.Delta > 0f ? ctx.Time.Delta : 1f / 60f;
+        // The machine's clock, since a double click's window and a key's repeat are the player's time
+        // and go on at their pace while the game is paused or slowed.
+        io.DeltaTime = ctx.Time.RawDeltaSeconds > 0.0 ? (float)ctx.Time.RawDeltaSeconds : 1f / 60f;
 
         ImGuiInput.Feed(io, ctx.Input, scale, ctx.Read<ImeCommit>());
 

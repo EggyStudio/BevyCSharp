@@ -132,6 +132,51 @@ public sealed class AnimationTests
     }
 
     /// <summary>
+    /// A clip that ends on the frame its model is despawned, after the bridge noted the end and
+    /// before its names were read, is said without its name.
+    /// </summary>
+    [SkippableFact]
+    public void AClipEndingAsItsModelIsDespawnedIsSaidWithoutItsName()
+    {
+        Needs.Renderer();
+
+        var scene = Entity.None;
+        bool bending = false, despawned = false;
+        var finishedFrames = 0;
+        var finished = new List<AnimationFinished>();
+
+        var run = new PictureRun
+        {
+            Scene = ecs => scene = Spawn(ecs),
+            // In Last, after the bridge noted the end in PostUpdate and before the next frame's First
+            // reads the clip's name. The bridge's noting runs before Bevy's animation step, which
+            // nothing orders it against, so it notes the end in the frame after the step marks it,
+            // the second whose Last reads the clip finished.
+            Build = app => app.AddSystem(Stage.Last, new SystemDescriptor(
+                world =>
+                {
+                    if (!bending || despawned || Animation.StateOf(scene) is not { Finished: true } || ++finishedFrames < 2) return;
+                    despawned = world.Resource<EcsWorld>().Despawn(scene);
+                },
+                "Test.DespawnAsItEnds")),
+            EachFrame = world =>
+            {
+                foreach (var message in world.Resource<MessageBus>().Read<AnimationFinished>()) finished.Add(message);
+            },
+        };
+
+        run.Until("the clips arrive", world => Animation.TryClips(scene, out _))
+            .Do("bending once, fast", _ => bending = Animation.Play(scene, "Bend", new AnimationSettings { Speed = 4f }))
+            .Until("the bend is said", _ => finished.Count > 0)
+            .Go();
+
+        Assert.True(despawned);
+        var ended = Assert.Single(finished);
+        Assert.Equal(scene, ended.Scene);
+        Assert.Equal(string.Empty, ended.Clip);
+    }
+
+    /// <summary>
     /// A clip played a number of times finishes after that many plays and says so once, and one
     /// set to play for ever while it plays goes on past where it would have ended.
     /// </summary>

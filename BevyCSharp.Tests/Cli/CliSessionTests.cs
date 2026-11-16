@@ -77,6 +77,26 @@ public sealed class CliSessionTests : IDisposable
         Assert.Equal("gone", read.Report);
     }
 
+    /// <summary>
+    /// A file whose id a process started since holds is gone, as a file a killed app left meets once
+    /// the machine restarts or its ids come round, so stop kills nothing and pruning sweeps it up.
+    /// </summary>
+    [Fact]
+    public void AFileWhoseIdAProcessStartedSinceHoldsIsGone()
+    {
+        using var self = System.Diagnostics.Process.GetCurrentProcess();
+        var before = self.StartTime.ToUniversalTime() - TimeSpan.FromHours(1);
+
+        CliSessionFile.Write(Session(Environment.ProcessId) with { Started = before });
+
+        var read = Assert.Single(CliSessionFile.All());
+
+        Assert.False(read.Running);
+        Assert.Equal("gone", read.Report);
+        Assert.Equal(1, CliSessionFile.Prune());
+        Assert.Empty(CliSessionFile.All());
+    }
+
     [Fact]
     public void PruningSweepsUpWhatIsGoneAndLeavesWhatIsNot()
     {
