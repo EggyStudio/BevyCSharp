@@ -7,7 +7,8 @@ one. Asked to run them with no filter, as the suite whole, it hangs,
 grows until it is ended, dies with exit code 134, or ends as dotnet test does once MemoryGuard has
 stopped its host at the cap, its line in the output or cut from it and in the file the script names,
 as BCS_STANDIN says. With a filter, as a part, it passes the tests the
-filter takes and writes their results file.
+filter takes and writes their results file, holding 120 MB for a second and a half first where
+BCS_STANDIN is hold.
 """
 
 import os
@@ -128,6 +129,12 @@ def main():
             print("Test Run Aborted.", flush=True)
             return 1
 
+    if os.environ.get("BCS_STANDIN") == "hold":
+        # Written a byte a page, so its pages are the process's own, for the script to read.
+        held = bytearray(120 * 1024 * 1024)
+        for at in range(0, len(held), 4096):
+            held[at] = 1
+        time.sleep(1.5)
     names = [name for name in TESTS if filter_ is None or taken(name, filter_)]
     results = value("--results-directory")
     logger = next(arg for arg in sys.argv if arg.startswith("trx;LogFileName="))

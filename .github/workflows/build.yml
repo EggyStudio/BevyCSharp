@@ -376,10 +376,17 @@ jobs:
 
       # Each part a process held to a time and a memory, as the test job's suite is, a case held to
       # 35 minutes before it counts as hung, since the longest takes 24 on lavapipe, and the page
-      # named for the parts, which the digest below puts beside the systems'.
+      # named for the parts, which the digest below puts beside the systems'. Lavapipe holds a
+      # scene's buffers and images in the host's own memory, a forest's three gigabytes and more, so
+      # the host is held to five gigabytes of the runner's sixteen, which it has to itself as a job
+      # runs its parts one after another, where MemoryGuard's default, a quarter of the runner, some
+      # 3.9, holds a forest's host at four fifths of it. Its largest process is held to seven, past
+      # what the cap counts by the files it maps, so the guard's own line says a host that grows too
+      # far, and the page says a part past four fifths of its cap.
       - name: Test
         run: >-
           python3 build/test.py suite --no-build --configuration Release --timeout-minutes 45 --hang-minutes 35
+          --memory-cap-gb 5 --memory-mb 7168
           --layout build/renderer-parts.tsv --only ${{ matrix.parts }} --system lavapipe
 
       - uses: actions/upload-artifact@v7

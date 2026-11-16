@@ -1,170 +1,26 @@
 # Review
 
-Reviewed up to `ca8c50b4`, the tests that need a renderer run on every push on Linux's render bridge
-under lavapipe in fourteen parts laid out by a file, the long cases skipping themselves on a device
-that draws on the processor, pushed at 23:04 on 2026-11-15, its build run 43767207459 green at 00:15
-on 2026-11-16, the longest renderer part 35 minutes, the form kept. Before it `f9769f26`, the
-session file its owner's alone from the moment it is made, a panic that ends the run written to the
-crash file and thrown, and a canceled streamed read never landing after its cancel, and before it
-`349406a9`, the three tests mended for a device that draws on the processor with the read's Reply,
-two commits from one tree after a whole suite of 2,117 passed and 3 skipped, pushed at 21:08 on
-2026-11-15, their build run 43756313618 green by 22:02, the form kept and the messages free of
-numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3` and `8bdb3e21`, five
-commits of the audit's medium findings from one tree after one whole suite of 2,114 passed and 3
-skipped, asset fields sharing one handle for each asset, a query's buffer for each walk with a copy
-written back only where changed and a sound's volume kept over a pause, the hooks reaching every
-handle of a layout, the export's bridge built again when its sources are newer, and a pair bouncing
-as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382 green by 19:02, the
-form kept and the messages free of numbers. Before them `3ec197c2`, the editor history's three
-mends, an inspector edit spread over the selection undone on every entity, a loaded scene starting
-with nothing to undo and a redone duplicate taking its copies' edits, pushed at 14:05 on 2026-11-15,
-its build run 43717197640 green by 15:02, and `392b8885`, the saves' three mends, a scene the game
-loaded itself left standing by a load, a ulong past a long kept, and an unreadable scene's entries
-kept, pushed at 13:35, its build run 43714466210 green at 14:05, the form kept and the messages free
-of numbers. Before them `773313da`, item 146's six high findings, each with a test that failed
-without its mend, the suite at 2,100 passed and 3 skipped, pushed at 03:00 on 2026-11-15 once the
-run before it had ended, its build run 43665738473 green on the three systems at 03:26; it keeps the
-form and carries the review's files. Before it `bac110e7`, item 145, Swarm's play holding the game's
-clock between its commands, pushed at 19:15 on 2026-11-14 once the run before it had ended, its
-build run 43625597437 green on the three systems at 19:38, the games played in the pack run alone;
-built on the published 0.6.122 and played from a copy of the head, on the card it passed in 70 s,
-wave 3, 219 alive at most and 315 felled, a frame profiled at 16.8 ms, a second play 220 and 309,
-and on the software device at four cores in the runner's image in 396 s, wave 3, 217 and 312;
-NormTests 19 and the script, workflow and document script classes passed, 52 in all; it keeps the
-form and carries the review's files. Before it `770aef21`, Verdict 59's mend, Blockout's play
-reading the recipe where the game says it saved it and putting that file back, a game built in Debug
-saving into its project's assets folder, which the guide says, pushed at 16:07 on 2026-11-14 with
-the pack run with publish, 43608448173, started on the same head and green by 18:45, 0.6.122
-published, tagged v0.6.122 and released with the six bridges' symbols at 18:53, its build run green
-on the three systems at 16:35; the three games played here before it, Blockout in 27 s and Courtyard
-in 29 on the graphics card and Swarm in 679 on the software device, NormTests 19 and the script and
-document classes passing; it keeps the form and carries the review's files. Before it `86551153`,
-item 120's last commit, a game run under dotnet watch having its changed behaviors registered again
-at the next frame, a system named again kept where it stands and one whose method a change took out
-passed over at its throw, with the guide's words on which edits wait for the next start, BUILDING.md
-naming the release that keeps the symbols and AGENTS.md's build order line as approved, pushed at
-10:42 on 2026-11-14 once the run before it had ended, with the pack run with publish, 43581803258,
-started on the same head and red in its games at 11:24, Verdict 59, nothing published, its build run
-green on the three systems at 11:13; the whole suite passed, 2,093 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `997d407e`, item
-142, the ambient's kernel summing every workgroup of a probe's rays, with a test of a room lit by a
-panel too wide to be carried as a glow light, its light gone within two frames of the panel going
-dark, 0.72 where 37.03 on the kernel before, pushed at 09:00 on 2026-11-14 once the run before it
-had ended, its build run green on the three systems at 09:29; the whole suite passed, 2,090 passed,
-none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's files. Before it
-`247c6112`, item 120's mends of the independent read's findings, the bridge making each asset
-source's watcher itself, a folder that cannot be watched a warning and a root reached through a link
-resolved, a Debug game reading and watching its project's assets with its shader cache under obj, a
-script build that throws or cannot read a file leaving nothing of itself running, and the renderer's
-tests run on every system, pushed at 07:07 on 2026-11-14 once the run before it had ended, its build
-run green at 07:40, Linux in 14 minutes, macOS in 27 and Windows in 32 with the renderer's tests,
-where 14, 17 and 19 without them; eleven new tests each failing on the files before; the whole suite
-passed, 2,089 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
-review's files. Before it `02f482ab`, item 120's third commit, a scene loaded at the top level
-spawned again in place where its file's bytes changed, the program's own entities kept and an open
-document left to the tool that keeps it, every file read again posted and listed by live.status,
---no-watch on ./bcs open and the guide's live path, pushed at 03:34 on 2026-11-14 once the run
-before it had ended, its message written again before the push to name no item, its build run green
-on the three systems at 03:52; the whole suite passed twice, 2,075 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. Before it `36840712`, item
-120's second commit, behavior scripts compiled through a ScriptsPlugin that the editor, the Player
-and a game referencing the project add, built again when one is saved while the app watches, each
-build said in the log, with scripts.reload and scripts.status, pushed at 22:56 on 2026-11-13 once
-the run before it had ended, its build run green on the three systems at 23:14; the whole suite
-passed, 2,073 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
-review's files. Before it `f86269d0`, item 120's first commit, the bridge, Bevy's asset watcher in
-the render profile and so in the package, watching where the config asks and by default in a
-program's Debug build through a generated initializer, a file read again said as AssetReloaded and a
-scene spawned again in place said as a reload, pushed at 21:27 on 2026-11-13, its build run green on
-the three systems at 21:49; the linux-x64 bridge grows by 138,155 bytes deflated; the whole suite
-passed, 2,070 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the
-review's files. Before it `cccb0597`, item 137's read, the near wall's indirect light against its
-reference as the room steps against the grids, a commit of the Reply and the review's files alone
-that starts no run, pushed at 23:14 on 2026-11-12; NormTests passed, 19; it keeps the form. Before
-it `e47d7020`, item 135, the bridge's size, a pack's bridges stripped of their symbol tables after
-the build with each full library kept under build/symbols by its system with its build id beside it
-and gathered into an artifact named by the version, the crash file writing the bridge's build id and
-each frame as an offset into it through extern declarations alone, build/name-crash.py naming the
-frames from the symbols, the size step comparing with the last version nuget.org lists, the
-linux-x64 bridge 125,140,552 bytes where 185,416,232 with the same build id and exports, pushed at
-19:25 on 2026-11-12, its build run green on the three systems at 19:50, with its pack run without
-publish, 43279629248, started on the same head and green at 21:52, its package read under item 135;
-the whole suite passed, 2,054 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `05f5e54b`, item 140, the comments of 128 source files swept
-by N 4.11 as widened, the 1,755 candidate lines read in place and 142 rewritten with 16 runtime uses
-of a barred phrase said plainly, no line but a comment changed, the bridge rebuilt since its
-sources' comments count, pushed at 17:15 on 2026-11-12, green at 17:31 with Linux in 12 minutes and
-macOS and Windows in 16; the native checks are clean, the solution builds with no warnings and
-NormTests pass, 19; it keeps the form and carries the review's files. Before it `eb940339`, item
-136's last commit, the lighting's kernels taking their points as ways from the eye, gi_screen,
-gi_screen_glow, gi_light and gi_screen_filter, on top of 139's mend, every bounce view at every
-quality within 0.0002 of itself and the emitter room's faces within 0.001, so it moves no reading,
-pushed at 15:58 on 2026-11-12, green at 16:17 with Linux in 14 minutes, Windows in 18 and macOS in
-19; the whole suite passed, 2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form
-and carries the review's files. Before it `18364420`, item 139, gi_light's nearer step taking a
-neighbor clamped onto the pixel as missing, so a pixel on the picture's edge takes its step from
-inside, the bounce rooms' fifth view 0.0182 from its reference at High and 0.0211 at Medium by
-either way of finding the point where 0.0197 and 0.0311, 0.0235 and 0.0347, with a test that moves
-the view's camera by a few float steps and holds the reading within 0.001; the emitter room's right
-wall reads 12.2 percent under its reference with the edge's pixels no longer holding it up and its
-bound is measured again at 14; the frames a test looks for counted from the frame every pipeline is
-ready, which a slab's sky light read short of on a busy machine; pushed at 14:55 on 2026-11-12,
-green at 15:12 with macOS in 11 minutes, Linux in 15 and Windows in 17; the whole suite passed,
-2,052 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries the review's
-files. Before it `2fc9beb0`, item 136's precision commit, a point of the depth as its way from the
-eye in bcs_pass.slang, passEyeOffset, the ray's way taken from it, the clip and the frame before's
-helpers on it and the rain's streaks' and splashes' corners, the world point left through
-world_from_clip since the lighting's weighing moved with it, item 139, the night sky far from the
-origin the one drawn at it, 0.002 levels apart where 1.0 and 6,408 pixels, with its test, pushed at
-10:57 on 2026-11-12, green at 11:18 with Linux in 14 minutes, macOS in 18 and Windows in 21; the
-whole suite passed, 2,050 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `fdf68d62`, item 136's first commit, the glow lights' history
-looked up less the part of a texel by which a texel's own sample point lies off its middle, a
-quarter where the picture is twice the images' size, so a still view finds its own texel whole,
-still, steady and frames reading whole where 0.58, 0.14 to 0.16 and 1.2 to 1.26, a still view's
-change between frames 0.023 levels where 0.289, a change of light followed as fast as before, with a
-test, pushed at 04:09 on 2026-11-12, green at 04:28 with Linux in 13 minutes, macOS in 17 and
-Windows in 18; the whole suite 2,048 passed, 1 failed and 3 skipped, the one a sky light's share
-under a slab at High reading 0.180 against 0.2 to 0.5 in a scene the glow pass does not run in,
-passing alone on both kernels, taken as intermittent and to be read after the precision mend; it
-keeps the form and carries the review's files. Before it `8784bdd1`, InternalsVisibleTo's pairs
-measured by the compiler and narrowed, AnimationReader moved to Rendering beside the writers it
-reads back and FieldCurve and FieldValue to Animation, 67 pairs and 217 internal names reached where
-68 and 221, the pairs listed with a why each in build/norm/1.6.txt and held by N 1.6,
-build/norm/internals.cs finding them and writing the project files' comments, pushed at 22:37 on
-2026-11-11, green at 22:54 with Windows and Linux in 12 minutes each and macOS in 17; the whole
-suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and carries
-the review's files. Before it `064cdae8`, the tests' Assets folder moved to the areas, 146 files
-renamed whole by git to the area each tests and the asset server's 12 staying, no file's text
-changed, pushed at 21:16 on 2026-11-11 once the run with publish had started on the commit before
-it, its run red on the three systems at the step that keeps an artifact, their tests passed, Verdict
-58, and green at 22:37 on its second attempt, Linux in 14 minutes, Windows in 19 and macOS in 21;
-the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; it keeps the form and
-carries the review's files. Before it `77941f42`, the split packed as one package by Decision 88,
-every area's assembly and the three modules' in the one package's lib folder with no dependency on
-an area, the bridges' pack items in the flat project, a size step in the pack job failing a package
-over 262,139,904 bytes before anything is kept or pushed, and the script host walking from every
-loaded assembly of the engine, pushed at 19:47 on 2026-11-11, its run green at 20:05 with Linux and
-Windows in 15 minutes each and macOS in 18, its pack run without publish, 43081159142, green at
-21:11 with the drive in 59 minutes. Its package read from the artifact, BevyCSharp.0.6.106.nupkg, 65
-entries, 46 in lib for the 20 assemblies of the engine and the modules' Levels, Sky and Vegetation,
-each a dll with its xml, six bridges, the two musl slots empty as before, its only dependencies
-BepuPhysics 2.5.0-beta.29 and Twizzle.ImGui-Bundle.NET 1.91.5.2, the templates naming BevyCSharp
-alone, 250,121,275 bytes with 12,018,629 of room, 4.58 percent, and both ids on nuget.org before it,
-so no new id goes out; the run with publish, 43094830090, started at 21:15 on the same head, red by
-21:45 in its native jobs by an outage of GitHub's Actions, Verdict 58, and green at 00:36 on
-2026-11-12 on its second attempt, 0.6.106 published as the one package with its templates and tagged
-v0.6.106; the whole suite passed, 2,048 passed, none failed and 3 skipped, NormTests 19; a local
-package with the Linux bridge alone is 52,739,654 bytes in 60 entries, its only dependencies
-BepuPhysics and Twizzle.ImGui-Bundle.NET; it keeps the form and carries the review's files. Before
-it `7428798d`, the split's second commit, the library's areas as nineteen projects with the flat
-one, each packed at one version and depending on those below it at exactly that version, pushed at
-15:30 on 2026-11-11, its run green on Windows and macOS at once and on Linux at 18:18 on a third
-attempt, the runners' package mirror having failed from 15:34 to 17:54, which settles Verdict 57;
-its pack run without publish, 43039130555, red by the same fault and not run again, the packages'
-layout having changed by Decision 88; the whole suite passed, 2,045 passed, none failed and 3
-skipped, NormTests 19; it keeps the form and carries the review's files. The pushes before these
-stand in REVIEW-ARCHIVE.md's head records.
+Reviewed up to `44484bf1`, the renderer's tests laid out again in ten parts, with `8e6fb6df`,
+`3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07 on
+2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
+(Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a renderer run on every
+push on Linux's render bridge under lavapipe in fourteen parts laid out by a file, the long cases
+skipping themselves on a device that draws on the processor, pushed at 23:04 on 2026-11-15, its
+build run 43767207459 green at 00:15 on 2026-11-16, the longest renderer part 35 minutes, its pack
+run with publish 43773833500 red at 02:06 in two jobs (Verdict 60), no package published, the form
+kept. Before it `f9769f26`, the session file its owner's alone from the moment it is made, a panic
+that ends the run written to the crash file and thrown, and a canceled streamed read never landing
+after its cancel, and before it `349406a9`, the three tests mended for a device that draws on the
+processor with the read's Reply, two commits from one tree after a whole suite of 2,117 passed and 3
+skipped, pushed at 21:08 on 2026-11-15, their build run 43756313618 green by 22:02, the form kept
+and the messages free of numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3`
+and `8bdb3e21`, five commits of the audit's medium findings from one tree after one whole suite of
+2,114 passed and 3 skipped, asset fields sharing one handle for each asset, a query's buffer for
+each walk with a copy written back only where changed and a sound's volume kept over a pause, the
+hooks reaching every handle of a layout, the export's bridge built again when its sources are newer,
+and a pair bouncing as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382
+green by 19:02, the form kept and the messages free of numbers. The pushes before these stand in
+REVIEW-ARCHIVE.md's head records.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -321,7 +177,42 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-No verdict is open. Verdicts 2 and 33 to 59 are settled, said under each in REVIEW-ARCHIVE.md.
+Verdicts 60 and 61 are open, the pack run with publish 43773833500 red in a renderer pair's memory
+cap and one capture, and the build run 43784334694 red in two renderer parts at the same cap.
+Verdicts 2 and 33 to 59 are settled, said under each in REVIEW-ARCHIVE.md.
+
+60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
+    its memory cap and the first captures job one picture off, so no package is published.** Run
+    43773833500 ended at 02:06 on 2026-11-16 with the pack job skipped, 0.6.134 not on nuget. In the
+    pair of parts 3 and 4, part 3 passed 91 in 26 m 11 s, and part 4 was stopped by the guard after
+    9 m 9 s, reading 3.91 GB past its cap of 3.90 GB, 4,715 MB at most, 44 tests without a result;
+    the same part passed alone in the push's run, and the other six pairs ended whole, the largest
+    at 5,524 MB. By the coder's first reading the guard counts its own test host alone and a pair's
+    parts run one after the other, so the part crossed the cap by itself, in the tree canopy's test,
+    4,394 MB resident on the push and 4,715 in the pack, with five other parts at 4.2 to 5.5 GB. The
+    coder samples the part's memory against each test's end, mends what is kept across tests where
+    it climbs, and sets the renderer job's cap by what the runner gives one host. In the first
+    captures job compute_shader_game_of_life differs in 7.6 percent of its pixels where 2.0 are
+    allowed, the log saying 118 steps by two seconds in frame 125; the same picture moved by the
+    same share on 2026-11-11, when the runner ran a step apart from the picture's. The coder says
+    how many steps the picture holds and makes the capture take its shot at a count of steps and not
+    at a time, so a runner a step ahead draws the same picture. The digest job failed only as the
+    sum of these. Every other job is green, the fourteen parts' other pairs, the three systems,
+    Fedora's captures, the games and the soak. The commits waiting are pushed for their build run,
+    and the pack run with publish follows the mend of both. Written at 02:07 on 2026-11-16.
+
+61. **The build run of `44484bf1` is red in two of the ten renderer parts, each stopped at the
+    memory cap of Verdict 60.** In run 43784334694, ended at 02:59 on 2026-11-16, part 2 stopped
+    after 15 m 31 s with the guard reading 3.91 GB past its cap of 3.90 GB, 4,768 MB resident at
+    most, 1 test passed and 156 without a result; part 9 stopped after 11 m 39 s at 3.95 GB, 4,384
+    MB at most, 1 passed and 133 without a result. The digest is red after them and all else is
+    green. Fourteen parts held under the cap on the push before and ten do not, a part's test host
+    holding more the more tests it runs, so memory climbs with the tests run and the re-lay moved
+    two parts over the line. It is the cause Verdict 60 names, met on a push. Asked with Verdict
+    60's mend and before any other commit, the climb found by the sample of memory per test and
+    mended if it is held memory, the cap then set by what a runner gives one host, and a part that
+    passes 80% of its cap saying so in the digest, so the next re-lay is warned before it is
+    stopped. Checked at 03:00.
 
 ## Decisions
 
@@ -1181,3 +1072,59 @@ layout laid again reads each case's own time on the runner.
 
 The whole suite that passed over this layout is the one the clips' Reply above gives. NormTests
 passed, 19.
+
+Verdicts 60 and 61, the renderer's parts stopped at the memory cap, in the commit carrying this
+Reply, each with a test that failed without its mend. The game of life's capture follows in the
+commit after it, and 146's bridge findings in the four after that.
+
+The guard counts its own host alone, its anonymous resident pages against a cap of a quarter of what
+.NET sees, 3.90 GB on a runner of 15.6, and build/test.py runs a job's parts one after another, each
+its own process, so the two parts of a pair never shared a host or a cap. A host's memory climbs
+with the apps it runs. Sampled twice a second on lavapipe held to four threads here, the ten-part
+layout's part 2 was stopped at 3.81 GB of its cap of 3.75 in its seventeenth minute, in
+TreeCanopyTests' forest after a case of TreeLevelShadowTests. The forest's test alone held 2.09,
+2.97 and 3.34 GB across its three apps and fell between none of them, and with glibc held to two
+arenas 3.14. A probe reading the host as each app had ended found 2.7 to 3.2 GB held beside 21 MB of
+managed heap and 1.4 MB of the bridge's own allocations, what lavapipe had freed and glibc's heaps
+kept for the next app, and malloc_trim gave back all but 0.4 to 0.6 GB of it.
+
+So an app that ends gives back what the C allocator holds free, on Linux, through
+MemoryGuard.GiveBackFreed in App.Dispose, whose documentation says so and what it costs. With it the
+forest's apps peak at 2.79 and 3.08 GB, each falling to half a gigabyte as it ends, and the call
+took 176 and 168 milliseconds after two forest apps on lavapipe here, giving back 2.27 and 2.24 GB.
+MemoryGuardTests.WhatTheCAllocatorHoldsFreeIsGivenBackAsAnAppEnds writes 8,192 C blocks of 64 KB,
+frees every other one, the last kept, so each freed block lies inside the heap, and ends an app.
+Without the mend the host held 575 MB with half the blocks freed and 581 MB once the app had ended,
+and with it the test passed three runs of three. A C library without the call, musl's, or no C
+library to load, answers the first time with a missing entry point or library, which is caught and
+the call not tried again, as MemoryGuardTests.ACLibraryWithoutTheCallIsAskedOnce holds through two
+apps with a call standing in that throws. The portable image builds the bridge against glibc 2.36,
+and the call is looked up in the player's own C library as the app ends.
+
+One forest needs some 3.1 GB on lavapipe, four fifths of the default cap, so the renderer job holds
+its hosts to 5 GB of the runner's 15.6, which a host has to itself as the parts run one after
+another, and its largest process to 7 GB resident, past what the guard counts by the files it maps.
+build/test.py takes --memory-cap-gb and gives it to the hosts as BCS_MEMORY_CAP_GB, reads the
+anonymous memory each host holds on Linux, and says a part past four fifths of its cap under the
+parts' lines, in the digest the renderer jobs' pages are merged into and in a warning, so a layout
+putting more in a host is told before the guard stops one.
+TestScriptTests.APartNearItsMemoryCapIsSaid has a stand-in host hold 120 MB under caps of 128 MB and
+of 4 GB. Without the change test.py refused --memory-cap-gb, and with it the part under 128 MB is
+said near its cap and the part under 4 GB is not. The pairs stay as they are laid, as the verdict's
+line on them is read again. CHEATSHEET.md's line for App.Dispose takes the summary it is given here,
+which N 2.4 asks to be said.
+
+No game or template needs a change for these commits or the four of the bridge after them. A game
+built on the package carries the package's bridge, whose ABI moves to 327 with its managed side, the
+two Shaders calls are added beside the rest, a behavior method spread across threads that reached
+the world on the calling thread's share throws there as on the others, and none of the games' or
+templates' does, and the Slang scratch folder is found by the bridge where the user's runtime or
+cache folder is, which no game names. The tree reckons its version 0.6.143 with the first five of
+these commits.
+
+The whole suite passed over these mends and the changes of the commits after them, from one tree,
+2,134 passed, 0 failed and 3 skipped, 2,137 in all where the listing is 2,126, the solution built
+from nothing with warnings as errors, a part at a time under the GPU lock once it had been free of
+timings for three minutes. The run before it failed one test, whose mend the shader targets' Reply
+gives. The most a host held of its own, as the guard counts it, was part 18's 2,063 MB under the 3
+GB cap the run gives its hosts, with 2,691 MB resident. NormTests passed, 19.

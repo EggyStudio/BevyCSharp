@@ -30,7 +30,11 @@ memory or the cap MemoryGuard holds the test host to, runs again in parts, so on
 its own part's tests, and every listed test without a result is counted. A host the cap stopped is
 said with the guard's reading and its cap in the part's line and the guard's own line under its
 loss, which the guard writes to a file the script names in `BCS_MEMORY_CAP_SAID`, since
-`dotnet test` quotes only a window of a crashed host's output and may cut the line off. `--filter`
+`dotnet test` quotes only a window of a crashed host's output and may cut the line off.
+`--memory-cap-gb` gives the hosts their cap as `BCS_MEMORY_CAP_GB`, the guard's default otherwise,
+and a part whose host held past four fifths of its cap, by the anonymous memory the guard counts on
+Linux, is said under the parts' lines and in a warning, so a layout putting more in a host is told
+before one is stopped. `--filter`
 holds the suite and its parts to a filter, as `dotnet test` takes one. `--layout` runs the suite in
 the parts a file lays out instead, a line holding a part's number and a test class or one case by
 its display name, the part with `*` taking every test no other line names, and `--only` runs the

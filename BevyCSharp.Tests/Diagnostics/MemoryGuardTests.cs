@@ -72,6 +72,79 @@ public sealed class MemoryGuardTests
     }
 
     /// <summary>
+    /// Memory the C allocator holds free inside its heap is given back to the system as an app ends,
+    /// where glibc kept it for whatever came next, as it keeps what a GPU driver drawing on the
+    /// processor freed with an app, so a test host running app after app held more with each.
+    /// </summary>
+    [SkippableFact]
+    public unsafe void WhatTheCAllocatorHoldsFreeIsGivenBackAsAnAppEnds()
+    {
+        Skip.IfNot(OperatingSystem.IsLinux(), "glibc keeps freed memory in its heaps, where the other systems' allocators choose for themselves");
+
+        // Half a gigabyte in blocks smaller than glibc maps alone, so they come from its heap, and
+        // every other one freed, the last kept, so each freed block lies between two that stay and
+        // inside the heap, where a free keeps it, and none joins another or the heap's end, which a
+        // free gives back at once. A byte a page written, so their pages are the machine's and not
+        // only promised.
+        const int count = 8192;
+        const nuint size = 64 << 10;
+        var blocks = new byte*[count];
+        for (var i = 0; i < count; i++)
+        {
+            blocks[i] = (byte*)NativeMemory.Alloc(size);
+            for (nuint at = 0; at < size; at += 4096) blocks[i][at] = 1;
+        }
+
+        try
+        {
+            for (var i = 0; i < count; i += 2) NativeMemory.Free(blocks[i]);
+            var freed = MemoryGuard.ResidentBytes();
+
+            using (var harness = new EngineHarness(frames: 1)) harness.Run();
+            var after = MemoryGuard.ResidentBytes();
+
+            Assert.True(freed - after > 128L << 20, $"the process held {freed} bytes with half the blocks freed and {after} once an app had ended");
+        }
+        finally
+        {
+            for (var i = 1; i < count; i += 2) NativeMemory.Free(blocks[i]);
+        }
+    }
+
+    /// <summary>
+    /// A C library without glibc's call, as musl is, or none to load, answers so the first time an app
+    /// ends and is not asked again, and the app ends as it would.
+    /// </summary>
+    [SkippableFact]
+    public void ACLibraryWithoutTheCallIsAskedOnce()
+    {
+        Skip.IfNot(OperatingSystem.IsLinux(), "the memory is given back on Linux alone");
+
+        var trim = MemoryGuard.Trim;
+        var asked = 0;
+        try
+        {
+            MemoryGuard.Trim = _ =>
+            {
+                asked++;
+                throw new EntryPointNotFoundException("Unable to find an entry point named 'malloc_trim' in shared library 'libc'.");
+            };
+            MemoryGuard.TrimMissing = false;
+
+            for (var app = 0; app < 2; app++)
+                using (var harness = new EngineHarness(frames: 1)) harness.Run();
+
+            Assert.Equal(1, asked);
+            Assert.True(MemoryGuard.TrimMissing);
+        }
+        finally
+        {
+            MemoryGuard.Trim = trim;
+            MemoryGuard.TrimMissing = false;
+        }
+    }
+
+    /// <summary>
     /// The peak is never below a resident size read, the readings being all it has where the
     /// system answers no peak of its own, as macOS does.
     /// </summary>

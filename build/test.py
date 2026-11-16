@@ -85,6 +85,8 @@ class Process:
         self.exit_code = None
         self.seconds = 0.0
         self.peak_mb = 0
+        self.held_mb = 0          # the most its largest process held as MemoryGuard counts it
+        self.cap_mb = None        # the cap MemoryGuard holds a suite's host to, where it can be told
         self.past_mb = None       # the reading that passed the memory limit, and the limit
         self.lost = None          # None, or "crash", "hang", "time", "memory", "cap" or "build"
         self.said = None          # what MemoryGuard said as it stopped the host at its cap
@@ -123,6 +125,72 @@ def past(reading):
 # may end before it.
 CAP_SAID = re.compile(r"\[BevyCSharp\] The process holds ([\d.]+) GB of the machine's memory, past its cap of ([\d.]+) GB[^\n]*")
 CAP_SAID_VARIABLE = "BCS_MEMORY_CAP_SAID"
+CAP_VARIABLE = "BCS_MEMORY_CAP_GB"
+
+# The share of its cap past which a part is said to be near it, so a layout that puts more in a host
+# is told before the guard stops one.
+NEAR_CAP = 0.8
+
+
+def memory_cap_mb(args):
+    """The cap MemoryGuard holds a suite's host to, in MB: the one given, the environment's, or the
+    guard's default, a quarter of the memory .NET reckons the machine has and eight gigabytes at most,
+    or None where that cannot be read."""
+    named = args.memory_cap_gb
+    if not named:
+        try:
+            named = float(os.environ.get(CAP_VARIABLE, ""))
+        except ValueError:
+            named = None
+    if named and named > 0:
+        return round(named * 1024)
+    total = machine_memory()
+    return round(min(8 * 1024, total / 4 / (1024 * 1024))) if total else None
+
+
+def machine_memory():
+    """The bytes .NET reckons the machine has: its physical memory, or three quarters of the
+    smallest limit of the control groups the process is in, as the runtime's heap limit is taken in a
+    container. None where it cannot be read."""
+    if os.name == "nt":
+        import ctypes
+
+        class Status(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong), ("ullTotalPhys", ctypes.c_ulonglong),
+                        ("ullAvailPhys", ctypes.c_ulonglong), ("ullTotalPageFile", ctypes.c_ulonglong),
+                        ("ullAvailPageFile", ctypes.c_ulonglong), ("ullTotalVirtual", ctypes.c_ulonglong),
+                        ("ullAvailVirtual", ctypes.c_ulonglong), ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+        status = Status()
+        status.dwLength = ctypes.sizeof(Status)
+        return status.ullTotalPhys if ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(status)) else None
+    try:
+        total = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES")
+    except (ValueError, OSError, AttributeError):
+        return None
+    try:
+        with open("/proc/self/cgroup", encoding="ascii") as groups:
+            path = next((line.strip().split(":", 2)[2] for line in groups if line.startswith("0::")), None)
+    except OSError:
+        path = None
+    while path:
+        try:
+            with open(f"/sys/fs/cgroup{path}/memory.max", encoding="ascii") as limit:
+                read = limit.read().strip()
+            if read.isdigit():
+                total = min(total, int(read) * 3 // 4)
+        except OSError:
+            pass
+        path = path.rsplit("/", 1)[0]
+    return total
+
+
+def near_cap(p):
+    """What a process that held past four fifths of its cap held, said, or None."""
+    held, cap = p.get("held_mb") or 0, p.get("cap_mb")
+    if not cap or held <= NEAR_CAP * cap or p.get("lost") == "cap":
+        return None
+    return f"{p['label']} held {held:,} MB of its cap of {cap:,} MB, {held / cap:.0%} of it, past the {NEAR_CAP:.0%} a host is said near it at"
 
 
 def command_of(process, args, results):
@@ -151,7 +219,12 @@ def run(process, args, results):
     said_path = os.path.join(results, process.name + ".cap.txt")
     if os.path.exists(said_path):
         os.remove(said_path)
-    environment = dict(os.environ, **{CAP_SAID_VARIABLE: said_path}) if process.kind == "dotnet" else None
+    environment = None
+    if process.kind == "dotnet":
+        environment = dict(os.environ, **{CAP_SAID_VARIABLE: said_path})
+        if args.memory_cap_gb:
+            environment[CAP_VARIABLE] = f"{args.memory_cap_gb:g}"
+        process.cap_mb = memory_cap_mb(args)
     started = time.monotonic()
     with open(output_path, "w", encoding="utf-8", errors="replace", newline="\n") as output:
         # A cargo part is compiled first, held to the time alone, since compiling the renderer's
@@ -192,9 +265,11 @@ def watch(command, output, process, args, started, memory, environment=None):
     limit_seconds = args.timeout_minutes * 60
     while child.poll() is None:
         time.sleep(0.25)
-        held = largest_in_tree(child.pid) if memory else None
+        table = readable_table() if memory else {}
+        held = largest_in_tree(child.pid, table) if table else None
         if held is not None:
             process.peak_mb = max(process.peak_mb, held)
+            process.held_mb = max(process.held_mb, largest_held_in_tree(child.pid, table) or 0)
         if time.monotonic() - started > limit_seconds:
             process.lost = "time"
         elif held is not None and held > args.memory_mb:
@@ -345,15 +420,27 @@ def segment(name):
 
 # -- What a process holds
 
-def largest_in_tree(pid):
-    """The resident memory of the largest process in the tree under pid, in MB, or None where it cannot be read."""
+def readable_table():
+    """The process table, or none where it cannot be read."""
     try:
-        table = process_table()
+        return process_table()
     except Exception:
-        return None
+        return {}
+
+
+def largest_in_tree(pid, table=None):
+    """The resident memory of the largest process in the tree under pid, in MB, or None where it cannot be read."""
+    table = readable_table() if table is None else table
     if not table:
         return None
     sizes = [table[p][1] for p in tree_under(pid, table) if p in table]
+    return max(sizes) // (1024 * 1024) if sizes else None
+
+
+def largest_held_in_tree(pid, table):
+    """The memory the largest process in the tree under pid holds as MemoryGuard counts it, in MB,
+    its anonymous resident pages on Linux, and its resident size where the table carries no more."""
+    sizes = [(table[p][3] if len(table[p]) > 3 else table[p][1]) for p in tree_under(pid, table) if p in table]
     return max(sizes) // (1024 * 1024) if sizes else None
 
 
@@ -370,7 +457,8 @@ def tree_under(pid, table):
     while frontier:
         parent = frontier.pop()
         born = table[parent][2] if parent in table else None
-        for child, (ppid, _, created) in table.items():
+        for child, entry in table.items():
+            ppid, created = entry[0], entry[2]
             if ppid != parent or child in tree:
                 continue
             if born is not None and created is not None and created < born:
@@ -390,7 +478,9 @@ def process_table():
             try:
                 with open(f"/proc/{entry}/status", encoding="ascii", errors="replace") as status:
                     fields = dict(line.split(":", 1) for line in status if ":" in line)
-                table[int(entry)] = (int(fields["PPid"]), int(fields.get("VmRSS", "0 kB").split()[0]) * 1024, None)
+                resident = int(fields.get("VmRSS", "0 kB").split()[0]) * 1024
+                anonymous = int(fields.get("RssAnon", "0 kB").split()[0]) * 1024 if "RssAnon" in fields else resident
+                table[int(entry)] = (int(fields["PPid"]), resident, None, anonymous)
             except (OSError, KeyError, ValueError):
                 continue
         return table
@@ -625,7 +715,8 @@ def digest(results_dir, processes, listed, seconds, system=None):
         "commit": commit(),
         "passed": outcomes["Passed"], "failed": outcomes["Failed"], "skipped": outcomes["NotExecuted"], "no_result": no_result,
         "seconds": round(seconds), "peak_mb": max((p.peak_mb for p in processes), default=0),
-        "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "said": p.said, "seconds": round(p.seconds), "peak_mb": p.peak_mb, "exit_code": p.exit_code,
+        "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "said": p.said, "seconds": round(p.seconds), "peak_mb": p.peak_mb,
+                       "held_mb": p.held_mb, "cap_mb": p.cap_mb, "exit_code": p.exit_code,
                        "running": p.running, "after": p.after, "last_lines": p.last_lines, "summary": p.summary()} for p in processes],
         "causes": sorted(causes.values(), key=lambda c: (-c["count"], c["key"])),
         "repeated": repeated_lines(read_text(path) for path in outputs),
@@ -668,6 +759,11 @@ def page(d):
     lines = [f"## {head(d)}", ""]
     lines += [f"- {p['summary']}" for p in d["processes"]]
     lines.append("")
+    near = [said for said in map(near_cap, d["processes"]) if said]
+    if near:
+        lines.append("### Near its memory cap")
+        lines += [f"- {said}" for said in near]
+        lines.append("")
     for p in d["processes"]:
         if not p["lost"]:
             continue
@@ -701,6 +797,7 @@ def merged_page(digests):
     lines = ["## Tests by system", ""]
     lines += [f"- {head(d)}" for d in digests] or ["No system wrote a page, so each job ended before its tests did."]
     lines += [f"- Lost on {d['system']}: {p['summary']}" for d in digests for p in d["processes"] if p["lost"]]
+    lines += [f"- Near its memory cap on {d['system']}: {said}" for d in digests for said in map(near_cap, d["processes"]) if said]
     causes = {}
     for d in digests:
         for cause in d["causes"]:
@@ -735,6 +832,9 @@ def publish(lines, notes, results_dir=None, d=None):
     print(BEGIN)
     print("\n".join(lines))
     print(END)
+    for said in (map(near_cap, d["processes"]) if d else []):
+        if said:
+            annotate("warning", "Near its memory cap", [said])
     if results_dir is not None:
         with open(os.path.join(results_dir, "digest.md"), "w", encoding="utf-8", newline="\n") as f:
             f.write("\n".join(lines) + "\n")
@@ -781,6 +881,8 @@ def main():
     parser.add_argument("--timeout-minutes", type=float, default=40)
     parser.add_argument("--hang-minutes", type=float, default=5)
     parser.add_argument("--memory-mb", type=int, default=6144)
+    parser.add_argument("--memory-cap-gb", type=float, help="the cap MemoryGuard holds each of the suite's hosts to, as "
+                        "BCS_MEMORY_CAP_GB, the environment's or the guard's default where none is given")
     args = parser.parse_args()
     for name in args.names:
         if name not in PARTS:

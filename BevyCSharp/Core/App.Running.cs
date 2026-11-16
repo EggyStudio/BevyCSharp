@@ -219,7 +219,14 @@ public sealed unsafe partial class App : IDisposable
             EngineLog.Error(this, "system", $"[BevyCSharp] System '{system}' threw {type.Name} {count} times in all");
     }
 
-    /// <inheritdoc/>
+    /// <summary>Ends the app, its systems and its world, and the engine's app behind them.</summary>
+    /// <remarks>
+    /// On Linux the memory its GPU driver freed as it came down is given back to the system, which
+    /// glibc would keep for whatever runs next, so a process running app after app, a test host
+    /// among them, holds what the app it runs needs and not what every app before it freed. It takes
+    /// some two tenths of a second after a forest drawn on Mesa's lavapipe, which holds a scene's
+    /// buffers and images in the process's own memory.
+    /// </remarks>
     public void Dispose()
     {
         if (_disposed) return;
@@ -241,6 +248,9 @@ public sealed unsafe partial class App : IDisposable
 
             // What Bevy said as the app came down, laid to it.
             EngineLog.TakeBevys(this);
+
+            // What its GPU driver freed with it, which the C allocator keeps for the next app.
+            MemoryGuard.GiveBackFreed();
         }
 
         ComponentRegistry.EndApp();

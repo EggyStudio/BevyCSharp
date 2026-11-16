@@ -299,6 +299,50 @@ public static partial class MemoryGuard
     }
 
     /// <summary>
+    /// Gives the system back the memory the C allocator holds free, on Linux, as an app has come
+    /// down.
+    /// </summary>
+    /// <remarks>
+    /// glibc keeps what is freed inside its heaps for the next allocation, and a GPU driver drawing on
+    /// the processor, as Mesa's lavapipe does, holds a scene's buffers and images there. So a process
+    /// running one app after another, a test host among them, holds what the largest app's driver
+    /// freed, and more with every app, unless it is given back as each ends. A forest's app on
+    /// lavapipe leaves 2.9 gigabytes held as it ends, beside 21 megabytes of managed heap and 1.4 of
+    /// the bridge's own, and 0.6 once given back. A C library without the call, as musl is, or a
+    /// process with no C library to load, answers so the first time, and is not asked again, keeping
+    /// its memory as it chooses.
+    /// </remarks>
+    internal static void GiveBackFreed()
+    {
+        if (!OperatingSystem.IsLinux() || Volatile.Read(ref _trimMissing)) return;
+
+        try
+        {
+            _ = Trim(0);
+        }
+        catch (Exception error) when (error is DllNotFoundException or EntryPointNotFoundException)
+        {
+            Volatile.Write(ref _trimMissing, true);
+        }
+    }
+
+    /// <summary>The call that gives the C allocator's free memory back, glibc's, which a test stands another in for.</summary>
+    internal static Func<nuint, int> Trim { get; set; } = pad => MallocTrim(pad);
+
+    /// <summary>Whether the C library answered that it has no such call, so it is not asked again.</summary>
+    internal static bool TrimMissing
+    {
+        get => Volatile.Read(ref _trimMissing);
+        set => Volatile.Write(ref _trimMissing, value);
+    }
+
+    private static bool _trimMissing;
+
+    /// <summary>glibc's call that gives free memory in its heaps back to the system, past a pad left at the top.</summary>
+    [LibraryImport("libc", EntryPoint = "malloc_trim")]
+    private static partial int MallocTrim(nuint pad);
+
+    /// <summary>
     /// Ends the process with a code, running no handler, finalizer or destructor.
     /// </summary>
     [LibraryImport("libc", EntryPoint = "_exit")]

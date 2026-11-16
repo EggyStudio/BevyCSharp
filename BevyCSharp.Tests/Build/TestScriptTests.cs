@@ -204,6 +204,33 @@ public sealed class TestScriptTests : IDisposable
     }
 
     /// <summary>
+    /// A part whose host holds past four fifths of the cap it is held to is said to be near it, on the
+    /// page and in the digest a renderer job's pages are merged from, so a layout putting more in a
+    /// host is told before the guard stops one, and a part well under its cap is not said.
+    /// </summary>
+    [SkippableFact]
+    public void APartNearItsMemoryCapIsSaid()
+    {
+        var python = Needs.Python();
+        var layout = _folder.File("parts.tsv");
+        File.WriteAllText(layout, "# part\tclass or case\tminutes\n1\tAlphaTests\t9.5\n2\t*\t1.0\n");
+        string[] Run(string cap)
+        {
+            var (exit, log) = Script(python, new() { ["BCS_STANDIN"] = "hold" }, "suite", "--dotnet", $"{python} BevyCSharp.Tests/Build/dotnet_standin.py",
+                "--results", _folder.Path, "--layout", layout, "--only", "1", "--memory-cap-gb", cap);
+            Assert.True(exit == 0, log);
+            return File.ReadAllLines(_folder.File("digest.md"));
+        }
+
+        var near = Run("0.125");
+        Assert.Contains("### Near its memory cap", near);
+        Assert.Contains(near, line => line.StartsWith("- part 1 held ", StringComparison.Ordinal) && line.Contains("MB of its cap of 128 MB", StringComparison.Ordinal));
+        Assert.Contains("\"cap_mb\": 128", File.ReadAllText(_folder.File("digest.json")));
+
+        Assert.DoesNotContain("### Near its memory cap", Run("4"));
+    }
+
+    /// <summary>
     /// A process created before the parent its recorded id names is no child of it, so the memory
     /// the tree is held to is read without it, and a process whose system gives no creation time is
     /// taken by its parent's id alone.
