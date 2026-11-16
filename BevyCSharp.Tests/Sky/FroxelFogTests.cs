@@ -182,6 +182,21 @@ public sealed class FroxelFogTests
         Assert.True(drift * along >= 3, $"the fog's lumps moved {drift} pixels across the picture, where the wind carries them {(along > 0 ? "right" : "left")}");
     }
 
+    /// <summary>
+    /// Fog given to the camera drawing the left half of a window lies over that half alone, the
+    /// right half's camera, which sees nothing, showing what it showed without it.
+    /// </summary>
+    [SkippableFact]
+    public void TheFogKeepsToItsCamerasViewport()
+    {
+        Needs.Shaders();
+        var bare = Picture(null, ground: true, split: true);
+        var fogged = Picture(Red(froxels: new FroxelFogSettings { Lumps = 0f }), ground: true, split: true);
+        var (left, right) = (PictureRun.Changed(bare, fogged, 0, 240, 10), PictureRun.Changed(bare, fogged, 240, 480, 2));
+        Assert.True(left > 0.2, $"the fog changes {left:0.00} of the left half");
+        Assert.True(right == 0, $"{right:0.000} of the right half changed with fog given to the left half's camera");
+    }
+
     private static int Redness((byte R, byte G, byte B, byte A) pixel) => pixel.R - Math.Max(pixel.G, pixel.B);
 
     private static double Luma((byte R, byte G, byte B, byte A) pixel) => (0.2126 * pixel.R) + (0.7152 * pixel.G) + (0.0722 * pixel.B);
@@ -193,8 +208,9 @@ public sealed class FroxelFogTests
 
     // A level view from a height under a fog, with no tonemapping so a level reads as the fog left
     // it, over unlit ground or none, under a high sun with shadows, a roof forty meters up over the
-    // way ahead, or a lamp twenty meters ahead, the fog set once or set again every frame.
-    private static CapturedImage Picture(SkyFogSettings fog, float eye = 10f, bool ground = false, bool sun = false, bool roof = false, bool lamp = false, bool everyFrame = false)
+    // way ahead, or a lamp twenty meters ahead, the fog set once or set again every frame or none,
+    // over the whole window or its left half beside a camera seeing nothing (PictureRun.Beside).
+    private static CapturedImage Picture(SkyFogSettings? fog, float eye = 10f, bool ground = false, bool sun = false, bool roof = false, bool lamp = false, bool everyFrame = false, bool split = false)
     {
         var camera = Entity.None;
         var run = new PictureRun
@@ -204,13 +220,16 @@ public sealed class FroxelFogTests
             Frames = 1500,
             EachFrame = _ =>
             {
-                if (everyFrame && !camera.IsNone) Render.SetSkyFog(camera, fog);
+                if (everyFrame && !camera.IsNone && fog is not null) Render.SetSkyFog(camera, fog);
             },
             Scene = ecs =>
             {
-                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                var settings = new CameraSettings { FieldOfView = 60f };
+                camera = Render.SpawnCamera3d(split ? PictureRun.LeftHalf(settings, 480, 270) : settings);
                 ecs.Add(camera, Transform.LookingAt(new Vec3(0f, eye, 0f), new Vec3(0f, eye, -1f), Vec3.UnitY));
-                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
+                var post = new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None };
+                Render.SetPostProcessing(camera, post);
+                if (split) PictureRun.Beside(480, 270, post);
 
                 if (ground)
                 {
@@ -240,7 +259,7 @@ public sealed class FroxelFogTests
                     ecs.Add(light, Transform.At(0f, eye + 1f, -20f));
                 }
 
-                Render.SetSkyFog(camera, fog);
+                if (fog is not null) Render.SetSkyFog(camera, fog);
             },
         };
         run.Wait(10)

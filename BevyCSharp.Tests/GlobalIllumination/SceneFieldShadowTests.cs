@@ -264,6 +264,25 @@ public sealed class SceneFieldShadowTests(ITestOutputHelper output)
         }
         """;
 
+    /// <summary>
+    /// The field's shadows on a camera drawing the left half of a window fall where they fall on the
+    /// same camera drawing a window of that half's size.
+    /// </summary>
+    /// <remarks>
+    /// The field lies around the camera drawn last, whose half of the window is shown before any
+    /// other camera draws, so the camera is alone in its window here and the right half is no
+    /// camera's.
+    /// </remarks>
+    [SkippableFact]
+    public void TheFieldsShadowsFallWhereTheyFallOnTheCameraAlone()
+    {
+        Needs.Shaders();
+        var alone = Shadowed(false, FieldShadows.Everywhere);
+        var half = Shadowed(false, FieldShadows.Everywhere, leftHalf: true);
+        var apart = PictureRun.Changed(alone, half, 0, alone.Width, 2);
+        Assert.True(apart == 0, $"{apart:0.000} of the camera's half differs from its picture alone");
+    }
+
     // Whether the field's shadows are on the camera, read through the runner's own record.
     private static bool ShadowsOn() => SceneField.ShadowCamera != Entity.None;
 
@@ -272,17 +291,19 @@ public sealed class SceneFieldShadowTests(ITestOutputHelper output)
     /// not and by the field as asked, and the picture once the field is built. The camera is
     /// deferred and draws in high dynamic range either way, so both pictures are lit by the same
     /// path, with no tone mapping and the sun dim enough that the lit ground stays under white, so a
-    /// level is the light itself.
+    /// level is the light itself. Drawn into a window of 160 by 120, or into the left half of one
+    /// twice as wide.
     /// </summary>
-    private static CapturedImage Shadowed(bool mapShadows, FieldShadows? field)
+    private static CapturedImage Shadowed(bool mapShadows, FieldShadows? field, bool leftHalf = false)
     {
         var run = new PictureRun
         {
-            Width = 160,
+            Width = leftHalf ? 320u : 160u,
             Height = 120,
             Scene = ecs =>
             {
-                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) });
+                var settings = new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) };
+                var camera = Render.SpawnCamera3d(leftHalf ? PictureRun.LeftHalf(settings, 320, 120) : settings);
                 ecs.Add(camera, Transform.LookingAt(new Vec3(4f, 4f, 6f), new Vec3(-0.5f, 0.3f, -0.5f), Vec3.UnitY));
                 Shaders.SetPrepass(camera, depth: true, deferred: true);
                 Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Tonemapper = Tonemapper.None });

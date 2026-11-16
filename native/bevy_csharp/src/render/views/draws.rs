@@ -116,6 +116,9 @@ pub(super) struct PreparedViewDraw {
     /// The camera images it draws into instead of the picture, and whether it is tested against
     /// the camera's depth there.
     target: Option<(Vec<TextureView>, bool)>,
+    /// Whether it draws into the picture or the prepass's buffers, which are the whole window's,
+    /// so that a camera with a viewport draws into them inside it, where it draws its geometry.
+    in_viewport: bool,
     /// Which prepass inputs it writes, normals in the first bit and motion in the second, which
     /// its inputs bind a stand-in for, since a pass cannot read what it draws into.
     writes_prepass: u8,
@@ -274,6 +277,7 @@ pub(super) fn prepare_view_draws(
             // and normals are targets as well, which is how geometry drawn out of buffers gives
             // Bevy's temporal effects the motion they read.
             let mut slots: Vec<(TextureView, TextureFormat, (u32, u32))> = Vec::with_capacity(draw.targets.len());
+            let mut in_viewport = draw.targets.is_empty();
 
             for name in &draw.targets {
                 let own = owned.and_then(|owned| owned.slots.iter().find(|slot| &slot.spec.name == name)).map(|slot| {
@@ -297,7 +301,7 @@ pub(super) fn prepare_view_draws(
                     })
                 };
 
-                match own.or_else(engine) {
+                match own.or_else(|| engine().inspect(|_| in_viewport = true)) {
                     Some(found) => slots.push(found),
                     None => {
                         say_once(format!(
@@ -533,6 +537,7 @@ pub(super) fn prepare_view_draws(
                 ),
                 count,
                 target: (!slots.is_empty()).then(|| (slots.iter().map(|slot| slot.0.clone()).collect(), has_depth)),
+                in_viewport,
                 shadow_pipeline,
                 writes_depth: draw.depth_write && has_depth,
                 writes_prepass: draw.targets.iter().fold(0, |bits, name| match name.as_str() {
@@ -571,6 +576,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
         Option<&ViewLightsUniformOffset>,
         Option<&ViewShadowBindings>,
         (Option<&ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>, Option<&super::ViewLightProbeTextures>),
+        Option<&bevy::render::camera::ExtractedCamera>,
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -583,7 +589,7 @@ pub(super) fn run_view_draws<const POINT: u8>(
 ) {
     use bevy::render::render_resource::{RenderPassDescriptor, StoreOp};
 
-    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes)) =
+    let (target, offset, prepared, depth, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes), camera) =
         view.into_inner();
 
     if !prepared.0.iter().any(|draw| draw.point as u8 == POINT) {
@@ -712,6 +718,15 @@ pub(super) fn run_view_draws<const POINT: u8>(
             occlusion_query_set: None,
             multiview_mask: None,
         });
+
+        // Inside the camera's viewport where it has one, as Bevy draws the camera's geometry, since
+        // the cameras splitting a window share its picture and each draws its own part of it.
+        if here[start].in_viewport
+            && let Some(viewport) = camera.and_then(|camera| camera.viewport.as_ref())
+        {
+            let (at, size) = (viewport.physical_position.as_vec2(), viewport.physical_size.as_vec2());
+            pass.set_viewport(at.x, at.y, size.x, size.y, viewport.depth.start, viewport.depth.end);
+        }
 
         // One span for the run, named after its first draw, since draws sharing a pass share its
         // timing.

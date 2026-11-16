@@ -120,6 +120,49 @@ public sealed class ShaderPassTests
     }
 
     /// <summary>
+    /// An inversion on the camera drawing the left half of a window inverts that half alone, the
+    /// right half's camera, which sees nothing, showing the black the left camera cleared it to.
+    /// </summary>
+    [SkippableTheory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void APassKeepsToItsCamerasViewport(bool afterTonemapping)
+    {
+        Needs.Shaders();
+
+        CapturedImage Picture(bool inverted)
+        {
+            var run = new PictureRun
+            {
+                Width = 192,
+                Scene = ecs =>
+                {
+                    var camera = Render.SpawnCamera3d(PictureRun.LeftHalf(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f) }, 192, 96));
+                    ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                    var post = new PostSettings { Hdr = true, Msaa = 1 };
+                    Render.SetPostProcessing(camera, post);
+                    PictureRun.Beside(192, 96, post);
+                    PictureRun.Cube(ecs, ShaderMaterialTests.Flat(ShaderMaterialTests.Green));
+                    if (inverted) Shaders.SetPasses(camera, new ShaderPass(Invert().Set("amount", 1f), AfterTonemapping: afterTonemapping));
+                },
+            };
+
+            run.Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+                .Wait(Settled)
+                .Capture("picture")
+                .Go();
+            return run.Picture("picture");
+        }
+
+        // Black inverted before tonemapping is one, which Bevy's tonemapper shows as a light gray.
+        var (plain, inverted) = (Picture(false), Picture(true));
+        var corner = inverted.At(2, 2);
+        var right = PictureRun.Changed(plain, inverted, 96, 192, 2);
+        Assert.True(corner.R > 150 && corner.G > 150 && corner.B > 150, $"the left half's empty corner came out {corner} rather than light");
+        Assert.True(right == 0, $"{right:0.000} of the right half changed with a pass on the left half's camera");
+    }
+
+    /// <summary>
     /// A pass reads the camera's depth where the camera draws it, and the far plane where it does
     /// not.
     /// </summary>

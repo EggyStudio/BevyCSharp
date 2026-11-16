@@ -165,6 +165,52 @@ public sealed class ThunderTests
         Assert.True(bolt > 20, $"{bolt} pixels show the bolt");
     }
 
+    /// <summary>
+    /// A strike seen by the camera drawing the left half of a window draws its bolt in that half
+    /// alone, the right half's camera, which sees nothing, showing what it showed before.
+    /// </summary>
+    /// <remarks>
+    /// The bolt stands to the right of the middle of the camera's view, which across the whole
+    /// window would be its right half.
+    /// </remarks>
+    [SkippableFact]
+    public void ABoltKeepsToItsCamerasViewport()
+    {
+        Needs.Shaders();
+        Entity camera = default;
+        var run = new PictureRun
+        {
+            Width = 320,
+            Height = 180,
+            Frames = 1500,
+            Configure = config => config.FrameSeconds = 1.0 / 60.0,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(PictureRun.LeftHalf(new CameraSettings { FieldOfView = 60f, Far = 5_000f }, 320, 180));
+                var eye = new Vec3(0f, 1.7f, 0f);
+                ecs.Add(camera, Transform.LookingAt(eye, eye + new Vec3(0f, 0.3f, -1f), Vec3.UnitY));
+                var post = new PostSettings { Hdr = true, Msaa = 1, Dither = false };
+                Render.SetPostProcessing(camera, post);
+                PictureRun.Beside(320, 180, post);
+                Render.SetThunder(camera, new ThunderSettings { Sound = false });
+            },
+        };
+        run.Wait(10)
+            .Until("compiled", _ => SkyThunder.Ready())
+            .Until("ready", _ => Render.PipelinesReady())
+            .Wait(10)
+            .Capture("dark")
+            .Do("strike", _ => Render.StrikeLightning(camera, new Vec3(154f, 0f, -600f)))
+            .Wait(4)
+            .Capture("lit")
+            .Go();
+
+        var (dark, lit) = (run.Picture("dark"), run.Picture("lit"));
+        var (left, right) = (PictureRun.Changed(dark, lit, 0, 160, 60), PictureRun.Changed(dark, lit, 160, 320, 2));
+        Assert.True(left > 0.005, $"the bolt shows over {left:0.000} of the left half");
+        Assert.True(right == 0, $"{right:0.000} of the right half changed with a strike seen by the left half's camera");
+    }
+
     [Fact]
     public void SettingsOutOfRangeAreRefused()
     {

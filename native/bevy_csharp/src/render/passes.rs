@@ -27,20 +27,22 @@ use bevy::anti_alias::contrast_adaptive_sharpening::cas;
 use bevy::anti_alias::fxaa::fxaa;
 use bevy::anti_alias::smaa::smaa;
 use bevy::core_pipeline::tonemapping::{Tonemapping, tonemapping};
+use bevy::core_pipeline::blit::{BlitPipeline, BlitPipelineKey};
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems, FullscreenShader};
 use bevy::ecs::component::Component;
 use bevy::ecs::entity::Entity;
-use bevy::ecs::query::{With, Without};
+use bevy::ecs::query::{Has, With, Without};
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::{IntoScheduleConfigs, SystemSet};
 use bevy::ecs::system::{Commands, Query, Res, ResMut};
+use bevy::render::camera::ExtractedCamera;
 use bevy::render::extract_component::{ExtractComponent, ExtractComponentPlugin};
 use bevy::render::globals::GlobalsBuffer;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
     BindGroup, BindGroupLayoutDescriptor, CachedRenderPipelineId, ColorTargetState, ColorWrites,
     FragmentState, Operations, PipelineCache, RenderPassColorAttachment, RenderPassDescriptor,
-    RenderPipelineDescriptor, ShaderStages, TextureFormat,
+    RenderPipelineDescriptor, ShaderStages, SpecializedRenderPipelines, TextureFormat,
 };
 use bevy::render::diagnostic::RecordDiagnostics;
 use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
@@ -140,6 +142,11 @@ struct PreparedPass {
 #[derive(Component)]
 pub struct PreparedShaderPasses(Vec<PreparedPass>);
 
+/// The copy that carries the picture outside a camera's viewport into the picture each of its
+/// passes writes, Bevy's blit for the picture's format.
+#[derive(Component)]
+struct PassOutside(CachedRenderPipelineId);
+
 /// Adds what runs shader passes.
 pub fn install(app: &mut App) {
     app.add_plugins(ExtractComponentPlugin::<BcsShaderPasses>::default());
@@ -152,7 +159,7 @@ pub fn install(app: &mut App) {
         .add_systems(RenderStartup, init_pipelines)
         .add_systems(
             Render,
-            (prepare_passes, forget_passes).in_set(RenderSystems::PrepareBindGroups),
+            (prepare_passes, prepare_outsides, forget_passes).in_set(RenderSystems::PrepareBindGroups),
         )
         // Before the tonemapper's pipeline is prepared for the view, which the view's tonemapper,
         // extracted again every frame, decides.
@@ -392,12 +399,41 @@ fn prepare_passes(
 /// comes back the frame the look goes. A view drawing without a high dynamic range keeps Bevy's,
 /// which its materials apply as they draw.
 fn leave_out_tonemapper(
-    mut views: Query<(&BcsShaderPasses, &bevy::render::camera::ExtractedCamera, &mut Tonemapping)>,
+    mut views: Query<(&BcsShaderPasses, &ExtractedCamera, &mut Tonemapping)>,
 ) {
     for (passes, camera, mut tonemapper) in &mut views {
         if camera.hdr && passes.passes.iter().any(|pass| pass.place == PassPlace::Look) {
             *tonemapper = Tonemapping::None;
         }
+    }
+}
+
+/// Asks for the copy of the picture outside the viewport on each view whose camera has a viewport
+/// and passes, and takes it off a view whose camera has passes and no viewport.
+fn prepare_outsides(
+    mut commands: Commands,
+    mut specialized: ResMut<SpecializedRenderPipelines<BlitPipeline>>,
+    blit: Option<Res<BlitPipeline>>,
+    cache: Res<PipelineCache>,
+    views: Query<(Entity, &ViewTarget, &ExtractedCamera, Has<PassOutside>), With<BcsShaderPasses>>,
+) {
+    let Some(blit) = blit else { return };
+
+    for (entity, target, camera, had) in &views {
+        if camera.viewport.is_none() {
+            if had {
+                commands.entity(entity).remove::<PassOutside>();
+            }
+            continue;
+        }
+
+        let key = BlitPipelineKey {
+            target_format: target.main_texture_format(),
+            blend_state: None,
+            samples: 1,
+            source_space: None,
+        };
+        commands.entity(entity).insert(PassOutside(specialized.specialize(&cache, &blit, key)));
     }
 }
 
@@ -407,7 +443,7 @@ fn forget_passes(
     views: Query<Entity, (With<PreparedShaderPasses>, Without<BcsShaderPasses>)>,
 ) {
     for entity in &views {
-        commands.entity(entity).remove::<PreparedShaderPasses>();
+        commands.entity(entity).remove::<(PreparedShaderPasses, PassOutside)>();
     }
 }
 
@@ -423,6 +459,7 @@ fn run_passes<const PLACE: u8>(
         Option<&bevy::pbr::ViewLightsUniformOffset>,
         Option<&bevy::pbr::ViewShadowBindings>,
         (Option<&super::views::ViewEnvironmentTextures>, Option<&bevy::pbr::resources::GpuAtmosphere>, Option<&bevy::pbr::resources::AtmosphereTextures>, Option<&super::views::ViewLightProbeTextures>),
+        (Option<&ExtractedCamera>, Option<&PassOutside>),
     )>,
     inputs: Res<ViewInputs>,
     fallback: Res<FallbackImage>,
@@ -431,9 +468,10 @@ fn run_passes<const PLACE: u8>(
     view_uniforms: Res<ViewUniforms>,
     previous_uniforms: Option<Res<PreviousViewUniforms>>,
     scene: SceneLights,
+    blit: Option<Res<BlitPipeline>>,
     mut ctx: RenderContext,
 ) {
-    let (target, offset, prepared, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes)) = view.into_inner();
+    let (target, offset, prepared, prepass, previous, light_offset, shadows, (environment, atmosphere, atmosphere_textures, light_probes), (camera, outside)) = view.into_inner();
 
     if !prepared
         .0
@@ -470,6 +508,20 @@ fn run_passes<const PLACE: u8>(
         (globals.buffer.binding(), view_uniforms.uniforms.binding())
     else {
         return;
+    };
+
+    // The cameras splitting a window share its picture, and a pass writes the whole of the next one
+    // from the one before, so on a camera with a viewport the picture outside it is copied across
+    // as it was and the pass draws inside it, leaving the rest of the window to the cameras drawing
+    // there. Left out of the frame while the copy compiles, as a pass is.
+    let viewport = camera.and_then(|camera| camera.viewport.as_ref());
+    let copy = match (viewport, outside, blit.as_deref()) {
+        (None, ..) => None,
+        (Some(_), Some(outside), Some(blit)) => match cache.get_render_pipeline(outside.0) {
+            Some(copy) => Some((copy, blit)),
+            None => return,
+        },
+        (Some(_), ..) => return,
     };
 
     let sources = ViewInputSources::gather(
@@ -510,6 +562,8 @@ fn run_passes<const PLACE: u8>(
             return;
         };
 
+        let copied = copy.map(|(copy, blit)| (copy, blit.create_bind_group(ctx.render_device(), post.source, &cache)));
+
         let descriptor = RenderPassDescriptor {
             label: Some("bcs_shader_pass"),
             color_attachments: &[Some(RenderPassColorAttachment {
@@ -529,6 +583,15 @@ fn run_passes<const PLACE: u8>(
 
         let mut render_pass = ctx.command_encoder().begin_render_pass(&descriptor);
         let span = diagnostics.pass_span(&mut render_pass, pass.label.clone());
+
+        if let (Some((copy, copied)), Some(viewport)) = (&copied, viewport) {
+            render_pass.set_pipeline(copy);
+            render_pass.set_bind_group(0, copied, &[]);
+            render_pass.draw(0..3, 0..1);
+            let (at, size) = (viewport.physical_position.as_vec2(), viewport.physical_size.as_vec2());
+            render_pass.set_viewport(at.x, at.y, size.x, size.y, viewport.depth.start, viewport.depth.end);
+        }
+
         render_pass.set_pipeline(pipeline);
         render_pass.set_bind_group(0, &pass.own, &[]);
         render_pass.set_bind_group(1, &group, &offsets);

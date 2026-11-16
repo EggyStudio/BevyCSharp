@@ -237,6 +237,68 @@ internal sealed class PictureRun
         return count;
     }
 
+    // -- Two cameras splitting a window
+
+    /// <summary>
+    /// <paramref name="settings"/> drawing the left half of a window <paramref name="width"/> by
+    /// <paramref name="height"/>, for what is given to the camera to be looked for in the right
+    /// half, which a camera from <see cref="Beside"/> draws.
+    /// </summary>
+    public static CameraSettings LeftHalf(CameraSettings settings, uint width, uint height)
+    {
+        settings.Viewport = (0, 0, width / 2, height);
+        return settings;
+    }
+
+    /// <summary>
+    /// A camera drawing the right half of a window <paramref name="width"/> by
+    /// <paramref name="height"/> after the one drawing its left half, keeping the picture and
+    /// seeing nothing, so its half shows what the left camera's passes left there, which is the
+    /// left camera's clear color alone where each keeps to its viewport.
+    /// </summary>
+    /// <remarks>
+    /// Given the left camera's <paramref name="post"/>, or none where the left camera has none,
+    /// because cameras share a window's picture only where they draw it alike, in or out of a high
+    /// dynamic range and at the same samples a pixel, and one drawing a picture of its own would
+    /// show nothing the other left in it.
+    /// </remarks>
+    public static Entity Beside(uint width, uint height, PostSettings? post = null)
+    {
+        var camera = Render.SpawnCamera3d(new CameraSettings
+        {
+            Viewport = (width / 2, 0, width - (width / 2), height),
+            Order = 1,
+            Clear = ClearMode.Keep,
+            Layers = NothingsLayer,
+        });
+
+        if (post is not null) Render.SetPostProcessing(camera, post);
+        return camera;
+    }
+
+    /// <summary>A render layer nothing is put on.</summary>
+    private const uint NothingsLayer = 1u << 30;
+
+    /// <summary>
+    /// The share of the pixels from <paramref name="fromX"/> to before <paramref name="toX"/> that
+    /// two pictures differ at by more than <paramref name="levels"/> in a channel.
+    /// </summary>
+    public static double Changed(CapturedImage a, CapturedImage b, uint fromX, uint toX, int levels)
+    {
+        var changed = 0;
+
+        for (var y = 0u; y < a.Height; y++)
+        {
+            for (var x = fromX; x < toX; x++)
+            {
+                var (p, q) = (a.At(x, y), b.At(x, y));
+                if (Math.Abs(p.R - q.R) > levels || Math.Abs(p.G - q.G) > levels || Math.Abs(p.B - q.B) > levels) changed++;
+            }
+        }
+
+        return (double)changed / ((toX - fromX) * a.Height);
+    }
+
     /// <summary>A fresh directory for assets a test writes, removed by disposing the result.</summary>
     public static TemporaryAssets Temporary() => new();
 

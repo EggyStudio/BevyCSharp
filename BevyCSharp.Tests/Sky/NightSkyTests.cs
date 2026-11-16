@@ -90,6 +90,22 @@ public sealed class NightSkyTests
         Assert.True(lit > dark + 60, $"the moon reads {lit:0} toward the sun and {dark:0} away from it");
     }
 
+    /// <summary>
+    /// The stars given to the camera drawing the left half of a window shine in that half alone,
+    /// the right half's camera, which sees nothing, showing what it showed without them.
+    /// </summary>
+    [SkippableFact]
+    public void TheStarsKeepToTheirCamerasViewport()
+    {
+        Needs.Shaders();
+        var clock = new SkyClock { Hour = 0f };
+        var bare = Sky(null, clock, split: true);
+        var starry = Sky(new NightSkySettings { Clock = clock, Moon = 0f }, clock, split: true);
+        var (left, right) = (PictureRun.Changed(bare, starry, 0, 160, 10), PictureRun.Changed(bare, starry, 160, 320, 2));
+        Assert.True(left > 0.002, $"the stars change {left:0.0000} of the left half");
+        Assert.True(right == 0, $"{right:0.0000} of the right half changed with stars given to the left half's camera");
+    }
+
     [Fact]
     public void ASkyOutOfRangeIsRefused()
     {
@@ -110,8 +126,9 @@ public sealed class NightSkyTests
     }
 
     // The sky from two meters over `at`, looking sixty degrees up toward the south, or at the moon,
-    // under an atmosphere lit by the clock's sun or under none, with the night sky or none.
-    private static CapturedImage Sky(NightSkySettings? settings, SkyClock clock, bool atmosphere = false, bool towardMoon = false, Vec3 at = default)
+    // under an atmosphere lit by the clock's sun or under none, with the night sky or none, over the
+    // whole window or its left half beside a camera seeing nothing (PictureRun.Beside).
+    private static CapturedImage Sky(NightSkySettings? settings, SkyClock clock, bool atmosphere = false, bool towardMoon = false, Vec3 at = default, bool split = false)
     {
         var run = new PictureRun
         {
@@ -120,11 +137,14 @@ public sealed class NightSkyTests
             Frames = 1200,
             Scene = ecs =>
             {
-                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = towardMoon ? 30f : 60f });
+                var asked = new CameraSettings { FieldOfView = towardMoon ? 30f : 60f };
+                var camera = Render.SpawnCamera3d(split ? PictureRun.LeftHalf(asked, 320, 240) : asked);
                 var eye = at + new Vec3(0f, 2f, 0f);
                 var toward = towardMoon ? Of(clock.MoonDirection) : new Vec3(0f, MathF.Sin(MathF.PI / 3f), MathF.Cos(MathF.PI / 3f));
                 ecs.Add(camera, Transform.LookingAt(eye, eye + toward, Vec3.UnitY));
-                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
+                var post = new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None };
+                Render.SetPostProcessing(camera, post);
+                if (split) PictureRun.Beside(320, 240, post);
                 if (atmosphere)
                 {
                     Render.SetAtmosphere(camera, new AtmosphereSettings());

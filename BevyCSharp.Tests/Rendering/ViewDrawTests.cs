@@ -87,6 +87,54 @@ public sealed class ViewDrawTests
     }
 
     /// <summary>
+    /// The camera drawing the left half of a window draws the squares in that half, where the
+    /// buffer puts them in its view, the right half's camera, which sees nothing, showing none.
+    /// </summary>
+    [SkippableFact]
+    public void ACameraDrawsInItsViewport()
+    {
+        Needs.Shaders();
+
+        var run = new PictureRun
+        {
+            Width = 256,
+            Height = 128,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(PictureRun.LeftHalf(new CameraSettings
+                {
+                    Projection = CameraProjection.Orthographic,
+                    Height = 8f,
+                    Clear = ClearMode.Custom,
+                    ClearColor = (0f, 0f, 0f, 1f),
+                }, 256, 128));
+
+                ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 0f, 6f), Vec3.Zero, Vec3.UnitY));
+                PictureRun.Beside(256, 128);
+                var centers = Shaders.CreateBuffer<Vector4>([new(-2f, 0f, 0f, 1f), new(2f, 0f, 0f, 1f)]);
+
+                var squares = Draw("shaders/draw_quads.slang")
+                    .SetBuffer("centers", centers)
+                    .Set("size", 0.5f)
+                    .Set("color", ShaderMaterialTests.Green);
+
+                Shaders.SetViewDraws(camera, ViewDraw.Fixed(squares, FramePoint.AfterOpaque, 6, 2));
+            },
+        };
+
+        run.Until("compiled", _ => Ready()).Wait(Settled).Capture("picture").Go();
+
+        var picture = run.Picture("picture");
+        var right = 0;
+        for (var y = 0u; y < 128; y += 2)
+            for (var x = 128u; x < 256; x += 2)
+                if (GreenAt(picture, x, y)) right++;
+
+        Assert.True(GreenAt(picture, 32, 64) && GreenAt(picture, 96, 64), "the squares were not where the buffer puts them in the left half");
+        Assert.True(right == 0, $"{right} of the right half's pixels looked at are green");
+    }
+
+    /// <summary>
     /// A compute shader writes how many squares a draw draws, and the draw reads the count when it
     /// runs.
     /// </summary>

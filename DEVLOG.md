@@ -29,6 +29,14 @@ after them, on the left with one noise for the app, the last seed's, so the came
 and it drew no cloud, in the middle with finding 41's noise for each seed, and on the right the
 middle less the left twice over, brighter in red and darker in blue.
 
+![](.github/assets/readings/2026-11-16-item-147-clouds-in-the-viewport.webp)
+Two cameras splitting a window of 480 by 270, clouds given to the left one and both under an
+atmosphere, on the left as the view draws stood, the left camera's clouds reaching across the whole
+window and showing through the right camera's own sky, in the middle with the draws set to the
+camera's viewport, the clouds in the left half alone where the camera alone puts them and the right
+half's sky clear, and on the right the middle less the left at a gain of 4, red where brighter and
+blue where darker.
+
 ## 2026-11-15
 
 ![](.github/assets/readings/2026-11-15-item-143-aspen-lavapipe.webp)

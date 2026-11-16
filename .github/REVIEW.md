@@ -1021,3 +1021,50 @@ KB grown, and with the mend it passed alone in three of three and in its class.
 The whole suite passed over this mend and those of the commit after it, from one tree, 2,149 passed,
 0 failed and 3 skipped, 2,152 in all where the listing is 2,141, the solution built from nothing
 with warnings as errors, a part at a time under the GPU lock. NormTests passed, 19.
+
+147's first mend, in the commit carrying this Reply, the probe first. One picture of each named pass
+given to the left of two cameras splitting a window confirmed the list. The clouds, the night sky,
+both fogs, the bolt, a game's draw and both shader passes reached the right half, the rain wherever
+the other camera leaves a pixel uncovered, and the right camera's exposure metered the left half.
+The scene field's shadows and light reach none of it that can be seen, the field lying around the
+camera drawn last, whose half of the window is shown before another camera draws. The sheet is
+09-45-item-147-viewport-probe.png in the day's dump.
+
+The view draws set the camera's viewport where they draw into the picture or the prepass's buffers,
+and a shader pass on a camera with a viewport first copies the picture across with Bevy's blit and
+then draws inside the viewport, so the rest of the window stays as the camera found it. The
+fullscreen triangle's uv then runs across the viewport, so the draws place each pixel in the view
+rightly too, and the night sky, both fogs, the field's shadows, a game's draw and the bolt match the
+camera drawing alone to the level. The second commit takes what stays, the dispatches and images the
+size of the whole window, which the clouds' march is, 0.8 levels from the camera alone, a pass
+sampling the picture, 4.0, and the exposure.
+
+Seven tests give a pass to the left half's camera beside one seeing nothing, PictureRun.Beside, so
+the right half shows what the left camera left there. These are
+CloudTests.CloudsKeepToTheirCamerasViewport, NightSkyTests.TheStarsKeepToTheirCamerasViewport,
+FroxelFogTests.TheFogKeepsToItsCamerasViewport, PrecipitationTests.RainKeepsToItsCamerasViewport,
+ThunderTests.ABoltKeepsToItsCamerasViewport, ViewDrawTests.ACameraDrawsInItsViewport and
+ShaderPassTests.APassKeepsToItsCamerasViewport before tonemapping and after. Without the mend the
+right half changed by 0.42 under the clouds, 0.06 under the stars, 0.50 under the fog, 0.24 under
+the rain, 0.14 under the bolt and all of it under the pass, and the draw's squares were not where
+the buffer puts them, and with it nothing in the right half changed.
+SceneFieldShadowTests.TheFieldsShadowsFallWhereTheyFallOnTheCameraAlone gives the field's shadows to
+a camera drawing the left half of a window, alone in it, since the field lies around the camera
+drawn last, and holds its half to the camera's picture in a window of that size. Without the mend
+0.073 of the half differed, and with it none did.
+
+A camera drawing the whole window takes no new path. The probe's pictures of each pass on such a
+camera alone were byte-equal before and with the mend, but for those of the clouds, the rain, the
+night sky and the froxel fog, which differ by up to 44, 2, 1 and 1 levels between two runs of the
+mended build as well, each blending in the frames before it.
+
+The reading 2026-11-16-item-147-clouds-in-the-viewport.webp shows the clouds' pair, as the draws
+stood and with the mend, with their difference.
+
+The whole suite passed over these mends and that of the commit before them, from one tree, 2,149
+passed, 0 failed and 3 skipped, 2,152 in all where the listing is 2,141, the solution built from
+nothing with warnings as errors, a part at a time under the GPU lock. NormTests passed, 19.
+
+Shared: a camera's own draws and passes keep to its viewport, a pass copying the picture outside it
+across first, since the cameras splitting a window share its picture, which a sibling drawing a
+camera's effects over a shared target reads the same way.

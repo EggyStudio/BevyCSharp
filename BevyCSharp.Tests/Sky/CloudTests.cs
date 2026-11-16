@@ -150,6 +150,21 @@ public sealed class CloudTests
         Assert.Equal([images[0], images[0], images[0]], images);
     }
 
+    /// <summary>
+    /// Clouds given to the camera drawing the left half of a window draw in that half alone, the
+    /// right half's camera, which sees nothing, showing what it showed without them.
+    /// </summary>
+    [SkippableFact]
+    public void CloudsKeepToTheirCamerasViewport()
+    {
+        Needs.Shaders();
+        var bare = Sky(null, split: true);
+        var clouded = Sky(new CloudSettings { Coverage = 0.6f }, split: true);
+        var (left, right) = (PictureRun.Changed(bare, clouded, 0, 240, 10), PictureRun.Changed(bare, clouded, 240, 480, 2));
+        Assert.True(left > 0.1, $"the clouds cover {left:0.00} of the left half");
+        Assert.True(right == 0, $"{right:0.000} of the right half changed with clouds given to the left half's camera");
+    }
+
     [Fact]
     public void CloudsOutOfRangeAreRefused()
     {
@@ -241,8 +256,9 @@ public sealed class CloudTests
     // The sky looked at from two meters up, tilted up by a pitch, under an atmosphere with the sky's
     // light, a sun 45 degrees up or 25 ahead of the view, with clouds or none, a wall over the left of
     // the view, on a camera with some samples a pixel, and where other clouds are given, a second
-    // camera drawn before it looking the same way, its clouds given after the first's.
-    private static CapturedImage Sky(CloudSettings? clouds, bool wall = false, float pitch = 30f, bool facingSun = false, int msaa = 1, CloudSettings? other = null)
+    // camera drawn before it looking the same way, its clouds given after the first's, or on the
+    // left half of the window beside a camera seeing nothing (PictureRun.Beside).
+    private static CapturedImage Sky(CloudSettings? clouds, bool wall = false, float pitch = 30f, bool facingSun = false, int msaa = 1, CloudSettings? other = null, bool split = false)
     {
         var run = new PictureRun
         {
@@ -251,10 +267,13 @@ public sealed class CloudTests
             Frames = 1500,
             Scene = ecs =>
             {
-                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                var settings = new CameraSettings { FieldOfView = 60f };
+                var camera = Render.SpawnCamera3d(split ? PictureRun.LeftHalf(settings, 480, 270) : settings);
                 var tilt = pitch * MathF.PI / 180f;
                 ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 2f, 0f), new Vec3(-MathF.Cos(tilt), 2f + MathF.Sin(tilt), 0f), Vec3.UnitY));
-                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = msaa, Tonemapper = Tonemapper.TonyMcMapface });
+                var post = new PostSettings { Hdr = true, Msaa = msaa, Tonemapper = Tonemapper.TonyMcMapface };
+                Render.SetPostProcessing(camera, post);
+                if (split) PictureRun.Beside(480, 270, post);
                 Render.SetAtmosphere(camera, new AtmosphereSettings());
                 Render.SetSkyLighting(camera);
 

@@ -21,6 +21,21 @@ public sealed class PrecipitationTests
         Assert.True(counts[1] > 500, $"{counts[1]} drops are drawn");
     }
 
+    /// <summary>
+    /// Rain given to the camera drawing the left half of a window falls in that half alone, the
+    /// right half's camera, which sees nothing, showing what it showed without it.
+    /// </summary>
+    [SkippableFact]
+    public void RainKeepsToItsCamerasViewport()
+    {
+        Needs.Shaders();
+        var (bare, _) = Look(null, split: true);
+        var (rainy, _) = Look(new PrecipitationSettings { Rain = 0.8f }, split: true);
+        var (left, right) = (PictureRun.Changed(bare, rainy, 0, 160, 10), PictureRun.Changed(bare, rainy, 160, 320, 2));
+        Assert.True(left > 0.005, $"the rain changes {left:0.000} of the left half");
+        Assert.True(right == 0, $"{right:0.000} of the right half changed with rain given to the left half's camera");
+    }
+
     [SkippableFact]
     public void SnowFallsInFlakes()
     {
@@ -196,8 +211,9 @@ public sealed class PrecipitationTests
 
     // A dark wall 8 meters off across ground lit by the sky and a lamp, from 1.7 meters up, with the
     // rain or snow given or none, under a roof 3 meters up and 40 across, which reaches past the wall,
-    // or under the open sky. The picture, and the drops' counts as they were drawn.
-    private static (CapturedImage Picture, uint[] Counts) Look(PrecipitationSettings? settings, bool roof = false)
+    // or under the open sky, over the whole window or its left half beside a camera seeing nothing
+    // (PictureRun.Beside). The picture, and the drops' counts as they were drawn.
+    private static (CapturedImage Picture, uint[] Counts) Look(PrecipitationSettings? settings, bool roof = false, bool split = false)
     {
         Entity camera = default;
         BufferRead read = default;
@@ -209,10 +225,13 @@ public sealed class PrecipitationTests
             Frames = 1500,
             Scene = ecs =>
             {
-                camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                var asked = new CameraSettings { FieldOfView = 60f };
+                camera = Render.SpawnCamera3d(split ? PictureRun.LeftHalf(asked, 320, 180) : asked);
                 var eye = new Vec3(0f, 1.7f, 0f);
                 ecs.Add(camera, Transform.LookingAt(eye, eye + new Vec3(0f, 0.1f, -1f), Vec3.UnitY));
-                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Dither = false });
+                var post = new PostSettings { Hdr = true, Msaa = 1, Dither = false };
+                Render.SetPostProcessing(camera, post);
+                if (split) PictureRun.Beside(320, 180, post);
                 Render.SetAtmosphere(camera, new AtmosphereSettings());
                 Render.SetSkyLighting(camera);
                 var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 12_500f, Shadows = false });
