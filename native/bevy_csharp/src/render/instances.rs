@@ -35,6 +35,7 @@
 #![cfg(feature = "render")]
 
 use std::collections::HashMap;
+use std::sync::Arc;
 
 use bevy::asset::{AssetId, Assets, Handle};
 use bevy::ecs::entity::Entity;
@@ -87,6 +88,16 @@ struct Tracked {
 /// Every buffer the engine keeps filled with transforms.
 #[derive(Resource, Default)]
 pub struct InstanceBuffers(HashMap<AssetId<ShaderBuffer>, Tracked>);
+
+impl InstanceBuffers {
+    /// Forgets every buffer that nothing but this holds, its key released and no value of a
+    /// material or an instance naming it, so it goes, and the textures its slots named with it,
+    /// and the frame stops filling it.
+    fn forget_released(&mut self) {
+        self.0
+            .retain(|_, tracked| !matches!(&tracked.handle, Handle::Strong(strong) if Arc::strong_count(strong) == 1));
+    }
+}
 
 /// Makes a buffer with `capacity` slots of transforms and answers its asset key.
 pub fn create(world: &mut World, capacity: u32) -> i32 {
@@ -172,6 +183,7 @@ pub fn write_instances(
     let Some(mut buffers) = buffers else {
         return;
     };
+    buffers.forget_released();
 
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Transforms) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * SLOT_BYTES);
@@ -213,6 +225,7 @@ pub fn write_materials(
     let Some(mut buffers) = buffers else {
         return;
     };
+    buffers.forget_released();
     let (standards, leaf_materials, bark_materials, images) = materials;
 
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
@@ -443,6 +456,37 @@ mod tests {
         assert_eq!(mask_of(&mut masks, &mut unmasked, &textures[MOST_MASKS + 1]), -1.0);
         assert_eq!(masks.len(), MOST_MASKS);
         assert_eq!(unmasked.len(), 2);
+    }
+
+    /// A buffer whose key is released and whose handle no value holds is forgotten, its textures
+    /// with it, and one something else still holds is kept and filled.
+    #[test]
+    fn a_buffer_nothing_else_holds_is_forgotten() {
+        let mut assets = Assets::<ShaderBuffer>::default();
+        let kept = assets.add(ShaderBuffer::default());
+        let released = assets.add(ShaderBuffer::default());
+
+        let mut buffers = InstanceBuffers::default();
+        for handle in [kept.clone(), released] {
+            let tracked = Tracked {
+                kind: Kind::Transforms,
+                handle,
+                slots: vec![None; 4],
+                previous: vec![Mat4::ZERO; 4],
+                written: Vec::new(),
+                masks: Vec::new(),
+                unmasked: 0,
+            };
+            buffers.0.insert(tracked.handle.id(), tracked);
+        }
+
+        buffers.forget_released();
+        assert_eq!(buffers.0.len(), 1);
+        assert!(buffers.0.contains_key(&kept.id()));
+
+        drop(kept);
+        buffers.forget_released();
+        assert!(buffers.0.is_empty());
     }
 
     /// The managed side and `bcs_scene` both read a slot as two column-major matrices.

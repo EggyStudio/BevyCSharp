@@ -26,7 +26,7 @@ internal static unsafe partial class Native
     internal const string Library = "bevy_csharp";
 
     /// <summary>ABI revision this assembly was built against.</summary>
-    internal const int ExpectedAbiVersion = 326;
+    internal const int ExpectedAbiVersion = 327;
 
     static Native() => NativeLoader.Initialize(typeof(Native).Assembly);
 
@@ -192,10 +192,19 @@ internal static unsafe partial class Native
     /// pointer would leave the question of who frees it. So the caller owns the buffer and the
     /// bridge reports the length, so one call covers anything short and only longer text pays for a
     /// second call against a buffer sized from the first answer.
+    /// <para>
+    /// The two calls are not one read, and a text can grow between them, as the memory figures do
+    /// while the render thread allocates. A writer given too little writes nothing and answers the
+    /// length again, so an answer longer than the buffer is asked for again against a buffer of
+    /// that length, until one fits. A text longer at each of eight asks after the first grows
+    /// faster than it is read, and is an error rather than a reader that never returns.
+    /// </para>
     /// </remarks>
+    /// <exception cref="InvalidOperationException">The text was longer at each of the eight asks after the first.</exception>
     internal static string ReadText(TextWriter write, string operation)
     {
         const int Probe = 256;
+        const int Asks = 8;
 
         byte* probe = stackalloc byte[Probe];
         var length = Check(write(probe, Probe), operation);
@@ -203,12 +212,19 @@ internal static unsafe partial class Native
         if (length == 0) return string.Empty;
         if (length <= Probe) return System.Text.Encoding.UTF8.GetString(probe, length);
 
-        var buffer = new byte[length];
-        fixed (byte* target = buffer)
+        for (var ask = 0; ask < Asks; ask++)
         {
-            var written = Check(write(target, length), operation);
-            return System.Text.Encoding.UTF8.GetString(target, Math.Min(written, length));
+            var buffer = new byte[length];
+            fixed (byte* target = buffer)
+            {
+                var written = Check(write(target, length), operation);
+                if (written <= length) return System.Text.Encoding.UTF8.GetString(target, written);
+                length = written;
+            }
         }
+
+        throw new InvalidOperationException(
+            $"{operation} failed, the text being longer at each of the {Asks} times it was asked for after the first.");
     }
 
     /// <summary>Throws if <paramref name="status"/> is a failure code.</summary>

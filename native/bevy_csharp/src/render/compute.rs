@@ -634,7 +634,7 @@ pub(crate) fn rebind_buffer(world: &mut World, handle: &Handle<ShaderBuffer>) {
     }
 
     if let Some(mut instances) = world.get_resource_mut::<super::shaders::ShaderInstances>() {
-        for instance in instances.0.iter_mut().filter(|instance| holds(&instance.values)) {
+        for instance in instances.iter_mut().filter(|instance| holds(&instance.values)) {
             instance.version += 1;
         }
     }

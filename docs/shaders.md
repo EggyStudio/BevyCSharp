@@ -568,6 +568,9 @@ Shaders.SetPasses(camera, new ShaderPass(crt, AfterTonemapping: true));
 crt.Set("strength", strength);                  // while it runs
 ```
 
+An instance stands, and what its values name with it, until `Shaders.DestroyInstance(crt)` takes it
+away, so a pass made again at another size or quality takes the one it replaces away.
+
 ```slang
 import bcs_pass;
 

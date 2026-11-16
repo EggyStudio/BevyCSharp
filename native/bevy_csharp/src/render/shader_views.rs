@@ -3,7 +3,7 @@
 
 use crate::interop::status;
 #[cfg(feature = "render")]
-use super::shaders::ShaderInstances;
+use super::shaders::{ShaderInstances, instance_stands};
 
 /// One image a camera owns, as the managed side describes it.
 #[repr(C)]
@@ -197,15 +197,10 @@ pub unsafe extern "C" fn bcs_render_set_view_dispatches(
                     return refusal;
                 }
 
-                let known = world
-                    .get_resource::<ShaderInstances>()
-                    .map(|instances| instances.0.len())
-                    .unwrap_or(0);
-
                 let mut list = Vec::with_capacity(given.len());
 
                 for dispatch in given {
-                    if dispatch.instance < 0 || dispatch.instance as usize >= known {
+                    if !instance_stands(world, dispatch.instance) {
                         return status::NO_COMPONENT;
                     }
 
@@ -320,15 +315,10 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                     return refusal;
                 }
 
-                let known = world
-                    .get_resource::<ShaderInstances>()
-                    .map(|instances| instances.0.len())
-                    .unwrap_or(0);
-
                 let mut list = Vec::with_capacity(given.len());
 
                 for draw in given {
-                    if draw.instance < 0 || draw.instance as usize >= known {
+                    if !instance_stands(world, draw.instance) {
                         return status::NO_COMPONENT;
                     }
 
@@ -441,7 +431,7 @@ pub fn sync_view_draws(
             .0
             .iter()
             .filter_map(|(id, point, count, blend, (depth_write, casts_shadows), target)| {
-                let instance = instances.0.get(*id)?;
+                let instance = instances.get(*id)?;
                 Some(ViewDraw {
                     program: instance.program,
                     values: instance.values.clone(),
@@ -592,7 +582,7 @@ pub fn sync_view_dispatches(
             .0
             .iter()
             .filter_map(|(id, point, workgroups)| {
-                let instance = instances.0.get(*id)?;
+                let instance = instances.get(*id)?;
                 Some(ViewDispatch {
                     program: instance.program,
                     values: instance.values.clone(),
@@ -653,12 +643,7 @@ pub unsafe extern "C" fn bcs_render_set_shader_passes(
                     return refusal;
                 }
 
-                let known = world
-                    .get_resource::<ShaderInstances>()
-                    .map(|instances| instances.0.len())
-                    .unwrap_or(0);
-
-                if ids.iter().any(|id| *id < 0 || *id as usize >= known) {
+                if ids.iter().any(|id| !instance_stands(world, *id)) {
                     return status::NO_COMPONENT;
                 }
 
@@ -714,7 +699,7 @@ pub fn sync_passes(
             .0
             .iter()
             .filter_map(|(id, place)| {
-                let instance = instances.0.get(*id)?;
+                let instance = instances.get(*id)?;
                 Some(ShaderPass {
                     program: instance.program,
                     values: instance.values.clone(),

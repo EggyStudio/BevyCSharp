@@ -148,6 +148,16 @@ pub fn set(world: &mut World, key: i32, slot: u32, entity: Option<Entity>, mesh:
     status::OK
 }
 
+/// Takes scene `key` away, so it is neither extracted nor built again, and the render world lets
+/// its structures go the next frame. Returns [`status::NO_COMPONENT`] for a scene that does not
+/// exist.
+pub fn destroy(world: &mut World, key: i32) -> i32 {
+    let removed = world
+        .get_resource_mut::<RayScenes>()
+        .is_some_and(|mut scenes| scenes.scenes.remove(&key).is_some());
+    if removed { status::OK } else { status::NO_COMPONENT }
+}
+
 /// Builds pool mesh `mesh` of scene `key` again from what the pool's buffers hold, or every mesh
 /// where `mesh` is `None`, for geometry a compute shader has moved.
 ///
@@ -201,8 +211,10 @@ struct Extracted {
     rebuild: Vec<u32>,
 }
 
+/// The scenes extracted this frame, and the key of every scene the main world holds, those whose
+/// pool has nothing in it yet among them, which the render world keeps what it built of.
 #[derive(Resource, Default)]
-struct ExtractedScenes(Vec<Extracted>);
+struct ExtractedScenes(Vec<Extracted>, Vec<i32>);
 
 /// What the render world has built of one scene.
 struct Built {
@@ -236,12 +248,15 @@ pub fn install(app: &mut App) {
 /// Takes every scene's pool and where its entities are over to the render world.
 fn extract_scenes(mut main_world: ResMut<MainWorld>, mut extracted: ResMut<ExtractedScenes>) {
     extracted.0.clear();
+    extracted.1.clear();
 
     let world: &mut World = &mut main_world;
 
     let Some(mut scenes) = world.get_resource_mut::<RayScenes>() else {
         return;
     };
+
+    extracted.1.extend(scenes.scenes.keys());
 
     let described: Vec<(i32, i32, Vec<Option<(Entity, u32)>>, Vec<u32>)> = scenes
         .scenes
@@ -302,6 +317,15 @@ fn build_scenes(
     device: Res<RenderDevice>,
     queue: Res<RenderQueue>,
 ) {
+    // A scene taken away lets go of its structures, and of its place among those a dispatch binds.
+    let before = built.0.len();
+    built.0.retain(|key, _| extracted.1.contains(key));
+    if built.0.len() != before
+        && let Ok(mut published) = BUILT.write()
+    {
+        published.retain(|(key, _)| extracted.1.contains(key));
+    }
+
     if extracted.0.is_empty() {
         return;
     }

@@ -293,6 +293,25 @@ pub extern "C" fn bcs_shader_ray_scene_rebuild(scene: i32, mesh: i32) -> i32 {
     })
 }
 
+/// Takes a ray scene away, its slots and what the render world built of it, which goes the next
+/// frame. A name it was put under then binds no scene. Answers [`status::NO_COMPONENT`] for a scene
+/// that does not exist.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_ray_scene_destroy(scene: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = scene;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| super::rays::destroy(world, scene))
+        }
+    })
+}
+
 /// Puts a ray scene from [`bcs_shader_ray_scene_create`] under a name. A key of zero or less takes
 /// it off again.
 ///

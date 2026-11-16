@@ -112,6 +112,7 @@ internal static class Precipitation
     private sealed class Roofs
     {
         internal required Entity Camera { get; init; }
+        internal required AssetHandle Target { get; init; }
         internal required ShaderInstance Map { get; init; }
         internal required AssetHandle Heights { get; init; }
         internal required AssetHandle Frame { get; init; }
@@ -137,6 +138,7 @@ internal static class Precipitation
         if (!had || rain.Capacity != capacity)
         {
             var roofs = had ? rain.Roofs : null;
+            if (had) Free(found!);
             rain = Make(capacity, settings);
             rain.Roofs = roofs;
             Cameras[camera.Bits] = rain;
@@ -230,6 +232,7 @@ internal static class Precipitation
         ForgetOtherApps();
         if (!Cameras.Remove(camera.Bits, out var rain)) return;
         if (rain.Roofs is { } roofs) Drop(roofs);
+        Free(rain);
         Shaders.SetEngineViewDraws(camera, Owner);
         Shaders.SetEngineViewDispatches(camera, Owner);
     }
@@ -334,7 +337,8 @@ internal static class Precipitation
             Order = -100,
         });
         Native.Check(NativeSky.bcs_render_set_roof_camera(camera.Bits, layers), "making the roofs' camera");
-        Render.SetCameraTarget(camera, Render.CreateTarget(RoofTexels, RoofTexels));
+        var target = Render.CreateTarget(RoofTexels, RoofTexels);
+        Render.SetCameraTarget(camera, target);
         Render.SetPostProcessing(camera, new PostSettings { Msaa = 1, Tonemapper = Tonemapper.None, Dither = false });
 
         var heights = Shaders.CreateImage(RoofTexels, RoofTexels, ShaderImageFormat.R32Float);
@@ -345,15 +349,32 @@ internal static class Precipitation
             .Set("roof_size", new Vector4(RoofSize, RoofTexels, 0f, 0f));
         Shaders.SetEnginePrepass(camera, Owner, 1u);
         Shaders.SetEngineViewDispatches(camera, Owner, ViewDispatch.Fixed(map, FramePoint.AfterPrepass, RoofTexels / 8, RoofTexels / 8));
-        return new Roofs { Camera = camera, Map = map, Heights = heights, Frame = frame, Layers = layers };
+        return new Roofs { Camera = camera, Target = target, Map = map, Heights = heights, Frame = frame, Layers = layers };
     }
 
-    // Lets a roofs camera go, its lists taken off it now and the camera despawned at the next tick.
+    // Lets a roofs camera go, its lists taken off it at once and the camera despawned at the next tick,
+    // its map's instance taken away and its images and buffer let go, which a camera's rain still
+    // reads until its next frame's numbers name the map that follows.
     private static void Drop(Roofs roofs)
     {
         Shaders.SetEngineViewDispatches(roofs.Camera, Owner);
         Shaders.SetEnginePrepass(roofs.Camera, Owner, 0);
         Dropped.Add(roofs.Camera);
+        Shaders.DestroyInstance(roofs.Map);
+        AssetServer.Release(roofs.Target);
+        AssetServer.Release(roofs.Heights);
+        AssetServer.Release(roofs.Frame);
+    }
+
+    // Lets a camera's rain go, its programs' instances taken away and its buffers let go, where it
+    // is made again at another quality or taken off. Its map of the roofs goes apart, since rain made
+    // again keeps it.
+    private static void Free(Camera rain)
+    {
+        foreach (var instance in new[] { rain.Clear, rain.Simulate, rain.Drops, rain.Splashes })
+            Shaders.DestroyInstance(instance);
+        foreach (var buffer in new[] { rain.Particles, rain.Drawn, rain.Counts, rain.SplashBuffer })
+            AssetServer.Release(buffer);
     }
 
     // What a camera with no map, or no clouds' shadow, is bound, which it never reads.

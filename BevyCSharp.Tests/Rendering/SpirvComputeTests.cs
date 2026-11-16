@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Bevy.Interop;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -206,6 +207,50 @@ public sealed class SpirvComputeTests
         // A unit higher, so a unit sooner.
         Assert.InRange(after[2].Z, 8.49f, 8.51f);
         Assert.InRange(after[6].Z, 9.89f, 9.91f);
+    }
+
+    /// <summary>
+    /// A ray scene taken away is gone to whatever names it after, and taking it away again answers
+    /// that there was nothing to take.
+    /// </summary>
+    [SkippableFact]
+    public void ARaySceneTakenAwayIsGone()
+    {
+        Needs.Renderer();
+
+        var supported = false;
+        var (first, again) = (false, true);
+        BevyNativeException? rebuilt = null;
+
+        new PictureRun
+        {
+            Width = 64,
+            Height = 36,
+            Frames = 100,
+            Scene = ecs =>
+            {
+                supported = Shaders.SupportsRayQueries;
+                if (!supported) return;
+
+                var pool = Shaders.CreateGeometryPool();
+                var cube = Shaders.AddToGeometryPool(pool, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                var entity = ecs.Spawn();
+                ecs.Add(entity, Transform.At(0f, 0f, 0f));
+                var scene = Shaders.CreateRayScene(pool, 1);
+                Shaders.SetRaySceneInstance(scene, 0, entity, cube);
+
+                first = Shaders.DestroyRayScene(scene);
+                again = Shaders.DestroyRayScene(scene);
+                rebuilt = Record.Exception(() => Shaders.RebuildRayScene(scene)) as BevyNativeException;
+            },
+        }
+            .Wait(3)
+            .Go();
+
+        Needs.RayQueries(supported);
+        Assert.True(first);
+        Assert.False(again);
+        Assert.Equal(NativeStatus.NoComponent, rebuilt?.Status);
     }
 
     /// <summary>

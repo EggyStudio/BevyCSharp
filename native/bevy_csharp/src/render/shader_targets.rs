@@ -71,13 +71,18 @@ fn material_handle(world: &bevy::ecs::world::World, kind: i32, id: i64) -> Optio
     }
 }
 
-/// Runs `f` on a copy of the material `handle` names, the part of it `part` picks out, and puts
-/// the copy back when `f` answers [`status::OK`].
-///
-/// Put back through `Assets::get_mut`, which marks it changed and has Bevy prepare its bind group
-/// again.
+/// What a change answers where the target holds what it was given before it was asked, which leaves
+/// the target unmarked, and which [`with_target`] answers as [`status::OK`].
 #[cfg(feature = "render")]
-fn edit<A: bevy::asset::Asset + Clone>(
+const UNCHANGED: i32 = i32::MIN;
+
+/// Runs `f` on the material `handle` names, the part of it `part` picks out, where it stands, and
+/// marks it changed when `f` answers [`status::OK`].
+///
+/// Marked through `Assets::get_mut`, which has Bevy prepare its bind group again. A material that
+/// answers [`UNCHANGED`] or a refusal is left unmarked.
+#[cfg(feature = "render")]
+fn edit<A: bevy::asset::Asset>(
     world: &mut bevy::ecs::world::World,
     handle: &bevy::asset::Handle<A>,
     part: fn(&mut A) -> &mut super::material::BcsMaterial,
@@ -87,22 +92,24 @@ fn edit<A: bevy::asset::Asset + Clone>(
         return status::UNSUPPORTED;
     };
 
-    let Some(mut copy) = assets.get(handle).cloned() else {
+    let Some(mut slot) = assets.get_mut(handle) else {
         return status::NO_COMPONENT;
     };
 
-    let answer = f(Target::Material(part(&mut copy)));
-
-    if answer == status::OK
-        && let Some(mut slot) = assets.get_mut(handle)
-    {
-        *slot = copy;
+    match f(Target::Material(part(slot.bypass_change_detection()))) {
+        status::OK => {
+            slot.into_inner();
+            status::OK
+        }
+        UNCHANGED => status::OK,
+        refused => refused,
     }
-
-    answer
 }
 
-/// Runs `f` on a target, and keeps what it changed when it answers [`status::OK`].
+/// Runs `f` on a target where it stands, and marks it changed when `f` answers [`status::OK`].
+///
+/// Every `f` changes nothing where it answers anything else, refusing before it writes, so the
+/// target is never copied, which it was for every value set, its every value with it.
 #[cfg(feature = "render")]
 pub(super) fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32) -> i32 {
     crate::state::with_world(|world| {
@@ -113,20 +120,19 @@ pub(super) fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32)
 
             let Some(instance) = usize::try_from(id)
                 .ok()
-                .and_then(|id| instances.0.get_mut(id))
+                .and_then(|id| instances.get_mut(id))
             else {
                 return status::NO_COMPONENT;
             };
 
-            let mut copy = instance.clone();
-            let answer = f(Target::Instance(&mut copy));
-
-            if answer == status::OK {
-                copy.version = instance.version + 1;
-                *instance = copy;
-            }
-
-            return answer;
+            return match f(Target::Instance(&mut *instance)) {
+                status::OK => {
+                    instance.version += 1;
+                    status::OK
+                }
+                UNCHANGED => status::OK,
+                refused => refused,
+            };
         }
 
         match material_handle(world, kind, id) {
@@ -141,21 +147,10 @@ pub(super) fn with_target(kind: i32, id: i64, f: impl FnOnce(Target<'_>) -> i32)
 /// Reads a target without changing it.
 #[cfg(feature = "render")]
 pub(super) fn read_target(kind: i32, id: i64, f: impl FnOnce(&Target<'_>)) -> i32 {
-    let mut f = Some(f);
-
-    // Answering something other than OK keeps the target unchanged, as a read should.
-    let answer = with_target(kind, id, |target| {
-        if let Some(f) = f.take() {
-            f(&target);
-        }
-        status::NOT_PRESENT
-    });
-
-    if answer == status::NOT_PRESENT {
-        status::OK
-    } else {
-        answer
-    }
+    with_target(kind, id, |target| {
+        f(&target);
+        UNCHANGED
+    })
 }
 
 /// The layout a target's values are checked against, where its program has compiled.
@@ -164,22 +159,22 @@ fn layout_of(target: &Target<'_>) -> Option<std::sync::Arc<super::reflect::Layou
     use super::material::Surface;
 
     match target {
-        Target::Material(material) => {
-            let program = super::programs::lookup(material.program)?;
+        Target::Material(material) => super::programs::with_program(material.program, |program| {
             match material.surface {
-                Surface::Mesh => program.material,
-                Surface::Flat => program.material2d,
-                Surface::Node => program.material_ui,
+                Surface::Mesh => program.material.clone(),
+                Surface::Flat => program.material2d.clone(),
+                Surface::Node => program.material_ui.clone(),
             }
-        }
-        Target::Instance(instance) => {
-            let program = super::programs::lookup(instance.program)?;
-            program.pass.or(program.compute)
-        }
+        })?,
+        Target::Instance(instance) => super::programs::with_program(instance.program, |program| {
+            program.pass.clone().or_else(|| program.compute.clone())
+        })?,
     }
 }
 
-/// Puts a value on a target under a name, checking it where the program can say.
+/// Puts a value on a target under a name, checking it where the program can say, and leaves the
+/// target unmarked where it held that value under the name before, as a game setting what a frame
+/// needs every frame does.
 #[cfg(feature = "render")]
 pub(super) fn put(kind: i32, id: i64, name: String, value: super::values::Value) -> i32 {
     with_target(kind, id, |mut target| {
@@ -204,6 +199,10 @@ pub(super) fn put(kind: i32, id: i64, name: String, value: super::values::Value)
             Target::Material(material) => &mut material.values,
             Target::Instance(instance) => &mut instance.values,
         };
+
+        if values.entries.get(&name) == Some(&value) {
+            return UNCHANGED;
+        }
 
         values.entries.insert(name, value);
         status::OK
@@ -470,8 +469,7 @@ pub(super) fn unset(kind: i32, id: i64, name: String) -> i32 {
             Target::Instance(instance) => &mut instance.values,
         };
 
-        values.entries.remove(&name);
-        status::OK
+        if values.entries.remove(&name).is_some() { status::OK } else { UNCHANGED }
     })
 }
 
@@ -643,4 +641,81 @@ pub unsafe extern "C" fn bcs_shader_target_names(
             unsafe { crate::interop::write_text(&lines.join("\n"), out, capacity) }
         }
     })
+}
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use super::*;
+    use crate::render::reflect::Scalar;
+    use crate::render::values::Value;
+    use bevy::ecs::world::World;
+
+    /// A world holding one instance of a program no table names, so nothing a test sets is checked.
+    fn one_instance() -> World {
+        let mut world = World::new();
+        world.init_resource::<ShaderInstances>();
+        world.resource_mut::<ShaderInstances>().push(Instance {
+            program: u32::MAX,
+            values: Default::default(),
+            version: 0,
+        });
+        world
+    }
+
+    fn number(value: f32) -> Value {
+        Value::Numbers {
+            scalar: Scalar::F32,
+            components: 1,
+            data: value.to_le_bytes().to_vec(),
+        }
+    }
+
+    fn version(world: &World) -> u64 {
+        world.resource::<ShaderInstances>().get(0).map_or(u64::MAX, |instance| instance.version)
+    }
+
+    /// A value set again as it stands, a name taken off that has none and a read leave the instance
+    /// at its version, so the pass that runs it keeps the bind group it built, and every change
+    /// moves it on once.
+    #[test]
+    fn only_a_change_moves_an_instance_on() {
+        let mut world = one_instance();
+
+        let mut versions = Vec::new();
+        for step in 0..6 {
+            crate::state::loan_world(&mut world, || match step {
+                0 | 1 => assert_eq!(put(TARGET_INSTANCE, 0, "radius".into(), number(2.0)), status::OK),
+                2 => assert_eq!(put(TARGET_INSTANCE, 0, "radius".into(), number(3.0)), status::OK),
+                3 => assert_eq!(read_target(TARGET_INSTANCE, 0, |_| {}), status::OK),
+                _ => assert_eq!(unset(TARGET_INSTANCE, 0, "radius".into()), status::OK),
+            });
+            versions.push(version(&world));
+        }
+
+        assert_eq!(versions, [1, 1, 2, 2, 3, 3]);
+    }
+
+    /// An instance taken away answers that it is gone to whatever names its number after, and lets
+    /// go of the images its values name.
+    #[test]
+    fn a_destroyed_instance_lets_go_of_its_values() {
+        let mut world = one_instance();
+        let image = bevy::asset::Assets::<bevy::image::Image>::default().add(bevy::image::Image::default());
+        let bevy::asset::Handle::Strong(strong) = &image else {
+            panic!("an added asset's handle is strong");
+        };
+
+        crate::state::loan_world(&mut world, || {
+            assert_eq!(put(TARGET_INSTANCE, 0, "picture".into(), Value::Image(image.clone(), None)), status::OK);
+        });
+        assert_eq!(std::sync::Arc::strong_count(strong), 2);
+
+        crate::state::loan_world(&mut world, || {
+            assert_eq!(super::super::shaders::bcs_shader_instance_destroy(0), status::OK);
+            assert_eq!(super::super::shaders::bcs_shader_instance_destroy(0), status::NO_COMPONENT);
+            assert_eq!(put(TARGET_INSTANCE, 0, "radius".into(), number(1.0)), status::NO_COMPONENT);
+        });
+        assert_eq!(std::sync::Arc::strong_count(strong), 1);
+        assert!(world.resource::<ShaderInstances>().get(0).is_none());
+    }
 }

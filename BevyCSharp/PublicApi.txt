@@ -12725,6 +12725,8 @@ static class Bevy.Shaders
   static ShaderProgram CreateProgram(ShaderProgramSettings settings)
   static ShaderProgram CreateProgram(ShaderStage fragment)
   static ShaderProgram ProgramOn(Entity entity)
+  static bool DestroyInstance(ShaderInstance instance)
+  static bool DestroyRayScene(RayScene scene)
   static bool KeepRenderingAfterErrors { get; set; }
   static bool SlangAvailable { get; }
   static bool SupportsMeshShaders { get; }

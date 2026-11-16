@@ -118,6 +118,59 @@ public sealed class PrecipitationTests
         Assert.True(held.All(lights => lights == 0), $"the frame holds {string.Join(" ", held)} lights over the frames after the move");
     }
 
+    /// <summary>
+    /// Rain made again, at another quality and over the roofs of other layers, lets go of the rain
+    /// and the roofs' map it replaces, their programs' instances and the images and buffers they
+    /// name, so going back and forth holds no more than the first change did.
+    /// </summary>
+    [SkippableFact]
+    public void RainMadeAgainLetsGoOfWhatItReplaces()
+    {
+        Needs.Shaders();
+        Entity camera = default;
+        var held = new List<(long Images, long Buffers)>();
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 36,
+            Frames = 300,
+            Scene = ecs =>
+            {
+                camera = Render.SpawnCamera3d(new CameraSettings());
+                ecs.Add(camera, Transform.At(0f, 1.7f, 0f));
+                Render.SetPrecipitation(camera, Changed(0));
+            },
+        }.Wait(5);
+
+        for (var change = 1; change <= 4; change++)
+        {
+            var settings = Changed(change);
+            run.Do($"made again {change}", _ => Render.SetPrecipitation(camera, settings))
+                .Wait(5)
+                .Do($"counted {change}", world =>
+                {
+                    using (ConsoleHost.Lend(world))
+                    {
+                        var pairs = MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "");
+                        held.Add((pairs.GetValueOrDefault("asset.Image"), pairs.GetValueOrDefault("asset.ShaderBuffer")));
+                    }
+                });
+        }
+
+        run.Go();
+
+        Assert.Equal(held[0], held[2]);
+        Assert.Equal(held[1], held[3]);
+    }
+
+    // Rain at one quality or the other, over the roofs of one layer or the other, by the change.
+    private static PrecipitationSettings Changed(int change) => new()
+    {
+        Rain = 1f,
+        Quality = change % 2 == 0 ? PrecipitationQuality.Low : PrecipitationQuality.High,
+        RoofLayers = change % 2 == 0 ? 1u : 2u,
+    };
+
     [Fact]
     public void SettingsOutOfRangeAreRefused()
     {

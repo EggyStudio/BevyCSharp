@@ -1057,6 +1057,7 @@ static int AddToGeometryPool(GeometryPool pool, AssetHandle mesh);  // Adds a me
 static RayScene CreateRayScene(GeometryPool pool, int capacity);  // Makes a scene rays are traced through, over the meshes of a geometry pool, with capacity slots for the entities in it
 static void SetRaySceneInstance(RayScene scene, int slot, Entity entity, int mesh);  // Puts an entity made of pool mesh mesh in a slot of a ray scene, where rays meet it at its transform every frame, or empties the slot with None
 static void RebuildRayScene(RayScene scene, int? mesh = null);  // Builds a ray scene's pool mesh again from what the pool's buffers hold now, or every mesh with null
+static bool DestroyRayScene(RayScene scene);                    // Takes a ray scene away, its slots and the structures built of it, which the GPU lets go of the next frame
 static AssetHandle CreateMaterialBuffer(int capacity);          // Makes a buffer with capacity slots that the engine fills every frame with what the entities put in them are made of, from their standard materials
 static AssetHandle MaterialBufferMask(AssetHandle buffer, int index);  // Mask index of a material buffer, the base color texture, the metallic and roughness texture, the diffuse transmission texture or the normal map of a cut-out material its slots hold, which a slot's mask, surface_mask, transmission_mask or normal_mask names, or None where it has no such mask
 static int MaterialBufferUnmasked(AssetHandle buffer);          // How many cut-out textures a material buffer's slots name past its 32 masks (MaterialBufferMask), each texture counted once, as of the frame the buffer was last written
@@ -1079,6 +1080,7 @@ static ShaderMaterial CreateUiMaterial(ShaderProgram program);  // Makes a mater
 static ShaderMaterial MaterialOn(Entity entity);                // The shader material an entity is drawn with, to read or set its values
 static ShaderProgram ProgramOn(Entity entity);                  // Which program draws an entity's material, or None where the entity is not drawn by one
 static ShaderInstance CreateInstance(ShaderProgram program);    // Makes an instance of a program, which a pass over a camera's picture or a compute dispatch runs
+static bool DestroyInstance(ShaderInstance instance);           // Takes an instance away, its values with it, so the images and buffers they name go once nothing else holds them
 static void SetPasses(Entity camera, params ShaderPass[] passes);  // Replaces the full-screen passes a camera runs over what it drew, in the order given
 static void SetPrepass(Entity camera, bool depth, bool normals = false, bool motion = false, bool deferred = false, bool previous = false, bool pyramid = false);  // Asks a camera to draw its depth, its normals, its motion vectors or any of them before the scene, for its passes and its compute shaders to read
 static void SetViewImages(Entity camera, params ViewImage[] images);  // Gives a camera images that its passes and compute shaders keep from frame to frame, replacing any it had

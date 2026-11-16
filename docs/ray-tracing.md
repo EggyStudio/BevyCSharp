@@ -187,7 +187,8 @@ distances, and an entity that casts no shadow leaves out `RayCastsShadows` from 
 ray asking for that bit alone meets the meshes that cast shadows, as Bevy's shadow maps hold them,
 and one given no mask meets them all. A mesh a compute shader
 deforms in the pool is traced as it was until `Shaders.RebuildRayScene(scene, mesh)` builds it
-again. `Shaders.SupportsRayQueries`
+again, and a scene stands until `Shaders.DestroyRayScene(scene)` takes it away, as one made again
+with more slots takes the one it replaces. `Shaders.SupportsRayQueries`
 says whether the device can build one, which takes ray tracing hardware on Vulkan or Mesa's
 lavapipe, which traces on the processor. The scene fills an empty slot with a stand-in of mask zero,
 which no ray meets, so a slot keeps its number whatever is empty before it, and lavapipe meets

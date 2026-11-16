@@ -452,12 +452,41 @@ pub extern "C" fn bcs_shader_instance_create(program: i32) -> i32 {
 
             crate::state::with_world(|world| {
                 let mut instances = world.get_resource_or_init::<ShaderInstances>();
-                instances.0.push(Instance {
+                instances.push(Instance {
                     program: program as u32,
                     values: Default::default(),
                     version: 0,
+                }) as i32
+            })
+        }
+    })
+}
+
+/// Takes a shader instance away, and with it its values and the images and buffers they name,
+/// which go once nothing else holds them. A pass, a draw or a dispatch of it a camera was given is
+/// left out of the frame from then on.
+///
+/// Its number names nothing after, and is never handed out again, so a number kept past this
+/// answers [`status::NO_COMPONENT`] rather than reaching another instance. Answers
+/// [`status::NO_COMPONENT`] where the number names no instance.
+#[unsafe(no_mangle)]
+pub extern "C" fn bcs_shader_instance_destroy(instance: i32) -> i32 {
+    crate::interop::guard(|| {
+        #[cfg(not(feature = "render"))]
+        {
+            let _ = instance;
+            status::UNSUPPORTED
+        }
+
+        #[cfg(feature = "render")]
+        {
+            crate::state::with_world(|world| {
+                let destroyed = usize::try_from(instance).is_ok_and(|instance| {
+                    world
+                        .get_resource_mut::<ShaderInstances>()
+                        .is_some_and(|mut instances| instances.destroy(instance))
                 });
-                (instances.0.len() - 1) as i32
+                if destroyed { status::OK } else { status::NO_COMPONENT }
             })
         }
     })
@@ -482,7 +511,6 @@ pub extern "C" fn bcs_shader_instance_set_program(instance: i32, program: i32) -
             with_target(TARGET_INSTANCE, instance as i64, |target| match target {
                 Target::Instance(current) => {
                     current.program = program as u32;
-                    current.version += 1;
                     status::OK
                 }
                 Target::Material(_) => status::NO_COMPONENT,
@@ -554,7 +582,7 @@ fn queue_dispatch(
 
     let Some(found) = world
         .get_resource::<ShaderInstances>()
-        .and_then(|instances| instances.0.get(usize::try_from(instance).ok()?))
+        .and_then(|instances| instances.get(usize::try_from(instance).ok()?))
         .cloned()
     else {
         return status::NO_COMPONENT;
@@ -571,10 +599,47 @@ fn queue_dispatch(
     )
 }
 
-/// Every shader instance the app has made, by number.
+/// Every shader instance the app has made, by number, and none where one was destroyed.
 #[cfg(feature = "render")]
 #[derive(bevy::ecs::resource::Resource, Default)]
-pub struct ShaderInstances(pub Vec<Instance>);
+pub struct ShaderInstances(Vec<Option<Instance>>);
+
+#[cfg(feature = "render")]
+impl ShaderInstances {
+    /// Keeps a new instance and answers its number.
+    pub fn push(&mut self, instance: Instance) -> usize {
+        self.0.push(Some(instance));
+        self.0.len() - 1
+    }
+
+    /// The instance a number names, unless it was destroyed.
+    pub fn get(&self, id: usize) -> Option<&Instance> {
+        self.0.get(id)?.as_ref()
+    }
+
+    /// The instance a number names, to change, unless it was destroyed.
+    pub fn get_mut(&mut self, id: usize) -> Option<&mut Instance> {
+        self.0.get_mut(id)?.as_mut()
+    }
+
+    /// Every instance that stands.
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Instance> {
+        self.0.iter_mut().flatten()
+    }
+
+    /// Drops an instance and what its values hold, keeping its number from being handed out
+    /// again, and answers whether it stood.
+    fn destroy(&mut self, id: usize) -> bool {
+        self.0.get_mut(id).and_then(Option::take).is_some()
+    }
+}
+
+/// Whether a number a game gave names an instance that stands.
+#[cfg(feature = "render")]
+pub fn instance_stands(world: &bevy::ecs::world::World, id: i32) -> bool {
+    let instances = world.get_resource::<ShaderInstances>();
+    usize::try_from(id).is_ok_and(|id| instances.is_some_and(|instances| instances.get(id).is_some()))
+}
 
 /// What a pass or a dispatch runs, a program and values by name.
 #[cfg(feature = "render")]

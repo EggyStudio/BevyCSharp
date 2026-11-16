@@ -58,7 +58,7 @@ pub use queries::*;
 pub use role::{ROLE_COUNT, Role};
 pub use table::{
     PipelineProgram, StageBinding, forget_all, label, lookup, mark_compute_failed,
-    mark_compute_ready, table_len,
+    mark_compute_ready, table_len, with_program,
 };
 use table::{TABLE, compute_marked};
 pub use wgsl::stand_ins;

@@ -343,6 +343,7 @@ internal static unsafe partial class GiReference
         if (placed.Count > rays.Capacity)
         {
             rays.Capacity = Math.Max(placed.Count, rays.Capacity * 2);
+            if (rays.Scene.IsValid) Shaders.DestroyRayScene(rays.Scene);
             rays.Scene = Shaders.CreateRayScene(rays.Pool, rays.Capacity);
             if (rays.Instances.IsValid) AssetServer.Release(rays.Instances);
             if (rays.Materials.IsValid) AssetServer.Release(rays.Materials);

@@ -189,6 +189,11 @@ internal static unsafe partial class NativeRendering
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_instance_set_program(int instance, int program);
 
+    /// <summary>Takes a shader instance away, and its values with it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_instance_destroy(int instance);
+
     /// <summary>Sets numbers under a name.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
@@ -287,6 +292,11 @@ internal static unsafe partial class NativeRendering
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_ray_scene_rebuild(int scene, int mesh);
+
+    /// <summary>Takes a ray scene away, and what the render world built of it.</summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_shader_ray_scene_destroy(int scene);
 
     // -- Views and passes
 

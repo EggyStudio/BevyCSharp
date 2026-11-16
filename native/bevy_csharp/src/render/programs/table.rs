@@ -58,6 +58,12 @@ pub fn lookup(id: u32) -> Option<PipelineProgram> {
     TABLE.read().ok()?.get(id as usize).cloned()
 }
 
+/// Reads a part of a program where it stands, for a caller that needs a layout or a number of it
+/// and not a copy of all of it.
+pub fn with_program<R>(id: u32, f: impl FnOnce(&PipelineProgram) -> R) -> Option<R> {
+    TABLE.read().ok()?.get(id as usize).map(f)
+}
+
 /// What a program's GPU time is recorded under, `shader` and its file's name, or its number where
 /// it has not compiled yet.
 pub fn label(id: u32) -> std::borrow::Cow<'static, str> {

@@ -252,6 +252,26 @@ public static unsafe partial class Shaders
             NativeRendering.bcs_shader_ray_scene_rebuild(scene.Key, mesh ?? -1),
             "building a ray scene's meshes again");
 
+    /// <summary>
+    /// Takes a ray scene away, its slots and the structures built of it, which the GPU lets go of the
+    /// next frame. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// A scene stands until it is taken away, its slots read and its structure built every frame, so
+    /// one made again with more slots takes the one it replaces away. A name it was put under binds
+    /// no scene after.
+    /// </remarks>
+    /// <returns>Whether the scene stood to be taken away.</returns>
+    public static bool DestroyRayScene(RayScene scene)
+    {
+        if (!scene.IsValid) return false;
+
+        var status = NativeRendering.bcs_shader_ray_scene_destroy(scene.Key);
+        if (status == NativeStatus.NoComponent) return false;
+        Native.Check(status, "taking a ray scene away");
+        return true;
+    }
+
     /// <summary>How many bytes one slot of a material buffer takes.</summary>
     /// <remarks>
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and

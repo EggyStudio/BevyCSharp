@@ -1172,3 +1172,72 @@ share is refused with the rest.
 
 The whole suite that passed over these mends is the one the memory cap's Reply above gives.
 NormTests passed, 19.
+
+146's medium findings 26 to 28, the shader targets' copies, instances that could never be freed and
+buffers never forgotten, in the commit carrying this Reply, each with a test that failed without its
+mend, and the bridge's ABI at 327.
+
+A value set by name on a material or an instance is written where the target stands, since every
+change refuses before it writes, and its layout is read from the program table without copying the
+program, where each set copied the whole target with every value it held and the whole program
+beside it. A value set again as it stands, a name taken off that has none and a read leave the
+target unmarked, so a pass keeps the bind group it built and a material is not prepared again, where
+every set marked it. The bridge's test only_a_change_moves_an_instance_on sets one number twice,
+another, reads, and takes the name off twice. Without the mend the instance's version went 1, 2, 3,
+3, 4 and 5, every set and taking off moving it on, and with it 1, 1, 2, 2, 3 and 3. A pass or a
+material whose image is changed in place keeps reading it, since Bevy writes the new texels into the
+texture it has, and a buffer grown is bound again as before.
+
+bcs_shader_instance_destroy takes an instance away, its values and the images and buffers they name
+with it, through Shaders.DestroyInstance, and its number names nothing after, so a value set on it
+or a camera given it is refused and a pass, a draw or a dispatch of it a camera has is left out.
+Nothing could take an instance away, so the strong handles in its values kept every image and buffer
+it last named for the rest of the app. The rain takes its instances away and lets its buffers go
+where it is made again at another quality or taken off, and its roofs' map does the same with its
+instance, its images and its camera's target where it is made again over other layers, which each
+kept before. Of the places the finding names, the sky's rain is where an instance is dropped within
+an app. WorldProbes making its instances again is finding 40, which goes with 138, the clouds' noise
+made again for every seed is 41, which waits for a free GPU, and the look keeps each camera's pass
+by design, so it is taken off and put back with no compile.
+PrecipitationTests.RainMadeAgainLetsGoOfWhatItReplaces makes a camera's rain again four times, at
+two qualities over two layers' roofs, and counts the images and shader buffers the app holds after
+each. Without the mend the app held 18 images and 11 shader buffers after the first change and 22
+and 21 after the third, the same settings again, and with it as many after the third as after the
+first, and after the fourth as after the second.
+
+An instance buffer or a material buffer is forgotten once nothing but the bridge holds it, its key
+released and no value naming it, and the textures its slots named go with it, where every buffer
+ever made stayed and was filled every frame. A ray scene is taken away by Shaders.DestroyRayScene,
+through bcs_shader_ray_scene_destroy, and the render world lets go of its structures the next frame,
+so GiReference takes away the scene it replaces as its capacity doubles.
+ComputeShaderTests.AnInstanceBufferNothingHoldsGoes makes an instance buffer and a material buffer
+and releases both. Without the mend the app's shader buffers read 0 before, 2 with both made and 2
+once both were released, and with it 0, 2 and 0. SpirvComputeTests.ARaySceneTakenAwayIsGone takes a
+scene away and finds it gone to RebuildRayScene, and taking it away again answers false, on a device
+with ray queries, and the bridge's a_buffer_nothing_else_holds_is_forgotten holds the forgetting to
+the handle's count.
+
+The whole suite over these commits failed ComputeShaderTests.AnInstanceBufferNothingHoldsGoes once,
+the memory command's answer reading as NULs after the figures of the managed side. Native.ReadText
+asks a writer for the text's length and then for the text, and the memory text grew between the two
+while the render thread allocated, so its writer, given too little, wrote nothing and the buffer
+came back as it was made. An answer longer than the buffer is asked for again against a buffer of
+that length until one fits, eight times at most after the first, and a text longer at each of those
+eight asks throws an InvalidOperationException naming what was read, as one growing faster than it
+is read, in this commit.
+TextConventionTests.TextThatGrowsBetweenCallsIsTruncatedRatherThanOverrunning had its stand-in write
+into a buffer too small for its text, which no writer of the bridge does, and it gives way to three.
+TextThatGrowsBetweenCallsIsAskedForAgain has a writer keeping the convention whose text grows
+between the first call and the second, TextThatShrinksBetweenCallsIsReadAsWritten one whose text
+shrinks, and TextLongerAtEveryAskIsAnError one whose text is longer at each of its first twenty
+calls. Without the asking again the first read 300 NULs where its writer's text was 900 letters,
+without the count the third returned the text of its writer's twenty-first call, and with both the
+class's eight passed, and that test of the instance buffers with MemoryCommandTests, the memory
+command's readers, passed three runs of three before the count and one after it.
+
+CHEATSHEET.md and BevyCSharp/PublicApi.txt gain Shaders.DestroyInstance's and
+Shaders.DestroyRayScene's lines, and none of their lines is reshaped. The shaders and ray tracing
+pages of the guide say an instance and a scene stand until they are taken away.
+
+The whole suite that passed over these mends is the one the memory cap's Reply above gives.
+NormTests passed, 19.

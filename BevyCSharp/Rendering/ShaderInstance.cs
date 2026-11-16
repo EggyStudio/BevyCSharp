@@ -8,7 +8,8 @@ using Bevy.Interop;
 /// </summary>
 /// <remarks>
 /// A number rather than an object, since it names something that lives in the engine. It belongs
-/// to the app that made it, and means nothing to another.
+/// to the app that made it, and means nothing to another. It stands until
+/// <see cref="Shaders.DestroyInstance"/> takes it away.
 /// </remarks>
 public readonly struct ShaderInstance : IShaderValues, IEquatable<ShaderInstance>
 {

@@ -30,6 +30,16 @@ public sealed unsafe class TextConventionTests
         };
     }
 
+    /// <summary>
+    /// Builds a writer whose text is the next of <paramref name="texts"/> at each call and the last
+    /// after them, as a text read while something else changes it.
+    /// </summary>
+    private static Native.TextWriter Changing(params string[] texts)
+    {
+        var calls = 0;
+        return (buffer, capacity) => Writing(texts[Math.Min(calls++, texts.Length - 1)])(buffer, capacity);
+    }
+
     [Fact]
     public void ShortTextIsReadInOneCall()
     {
@@ -80,21 +90,32 @@ public sealed unsafe class TextConventionTests
     }
 
     [Fact]
-    public void TextThatGrowsBetweenCallsIsTruncatedRatherThanOverrunning()
+    public void TextThatGrowsBetweenCallsIsAskedForAgain()
     {
         // The two calls are not one atomic read, so the second can report more than the buffer
-        // sized from the first. Reading only what was asked for keeps that safe.
-        var calls = 0;
-        var text = Native.ReadText(
-            (buffer, capacity) =>
-            {
-                if (calls++ == 0) return 300;
+        // sized from the first, and a writer given too little writes nothing, as the memory
+        // command's text grows while the render thread allocates.
+        var text = Native.ReadText(Changing(new('a', 300), new('b', 900), new('c', 900)), "test");
 
-                new Span<byte>(buffer, capacity).Fill((byte)'x');
-                return 900;
-            },
-            "test");
+        Assert.Equal(new string('c', 900), text);
+    }
 
-        Assert.Equal(new string('x', 300), text);
+    [Fact]
+    public void TextThatShrinksBetweenCallsIsReadAsWritten()
+    {
+        Assert.Equal(new string('b', 600), Native.ReadText(Changing(new('a', 900), new('b', 600)), "test"));
+    }
+
+    [Fact]
+    public void TextLongerAtEveryAskIsAnError()
+    {
+        // Longer at each of its first twenty calls, more than a reader asks for it before it gives
+        // up, so an error rather than a loop that ends only when the writer's text stops growing.
+        var texts = Enumerable.Range(0, 20).Select(i => new string('g', 300 + i)).ToArray();
+
+        var failure = Assert.Throws<InvalidOperationException>(
+            () => Native.ReadText(Changing(texts), "reading a growing text"));
+
+        Assert.Contains("reading a growing text", failure.Message);
     }
 }

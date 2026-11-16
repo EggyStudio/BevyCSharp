@@ -295,6 +295,41 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>
+    /// An instance buffer and a material buffer whose keys are released, with no value naming them,
+    /// go, rather than staying and being filled every frame for the rest of the app.
+    /// </summary>
+    [SkippableFact]
+    public void AnInstanceBufferNothingHoldsGoes()
+    {
+        Needs.Renderer();
+
+        var held = new List<long>();
+        var (instances, materials) = (AssetHandle.None, AssetHandle.None);
+        void Count(World world)
+        {
+            using (ConsoleHost.Lend(world))
+                held.Add(MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "").GetValueOrDefault("asset.ShaderBuffer"));
+        }
+
+        new PictureRun { Width = 64, Height = 36, Frames = 100, Scene = _ => { } }
+            .Wait(3)
+            .Do("before", Count)
+            .Do("made", _ => (instances, materials) = (Shaders.CreateInstanceBuffer(4), Shaders.CreateMaterialBuffer(4)))
+            .Wait(3)
+            .Do("held", Count)
+            .Do("released", _ =>
+            {
+                AssetServer.Release(instances);
+                AssetServer.Release(materials);
+            })
+            .Wait(5)
+            .Do("after", Count)
+            .Go();
+
+        Assert.Equal([held[0], held[0] + 2, held[0]], held);
+    }
+
+    /// <summary>
     /// An instance buffer holds an entity's transform this frame and on the previous one, which a
     /// compute shader reads through <c>bcs_scene</c>.
     /// </summary>

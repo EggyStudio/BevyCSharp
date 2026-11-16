@@ -491,4 +491,26 @@ public static unsafe partial class Shaders
         ThrowIfNoProgram(id, program);
         return new ShaderInstance(Native.Check(id, $"making an instance of shader program {program.Id}"));
     }
+
+    /// <summary>
+    /// Takes an instance away, its values with it, so the images and buffers they name go once
+    /// nothing else holds them. Only valid inside a system.
+    /// </summary>
+    /// <remarks>
+    /// An instance keeps what its values name for as long as it stands, so one made again in place
+    /// of another, as an effect remade at another size or quality is, takes the one it replaces away
+    /// or holds its images and buffers for the rest of the app. A pass, a draw or a dispatch of it a
+    /// camera was given is left out of the frame from then on, and its number names nothing again,
+    /// so a value set on it or a camera given it is refused.
+    /// </remarks>
+    /// <returns>Whether the instance stood to be taken away.</returns>
+    public static bool DestroyInstance(ShaderInstance instance)
+    {
+        if (!instance.IsValid) return false;
+
+        var status = NativeRendering.bcs_shader_instance_destroy(instance.Id);
+        if (status == NativeStatus.NoComponent) return false;
+        Native.Check(status, $"taking shader instance {instance.Id} away");
+        return true;
+    }
 }
