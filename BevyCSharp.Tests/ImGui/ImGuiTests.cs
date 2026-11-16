@@ -93,17 +93,31 @@ public sealed class ImGuiTests
     {
         Needs.Renderer();
 
-        Assert.Equal((2u, 2u), SizeOfTheLast("textures/checker.png"));
-        Assert.Equal((2u, 2u), SizeOfTheLast("textures/cubemap.png", "textures/checker.png"));
+        Assert.Equal((2u, 2u), SizesOfTheLast("textures/checker.png").Arrived);
+        Assert.Equal((2u, 2u), SizesOfTheLast("textures/cubemap.png", "textures/checker.png").Arrived);
+    }
+
+    /// <summary>
+    /// A picture answers zero by zero in the frame it is asked for, before its file can have
+    /// arrived, so a wait for its size ends with the size it has.
+    /// </summary>
+    [SkippableFact]
+    public void APictureNotArrivedIsZeroByZero()
+    {
+        Needs.Renderer();
+
+        var (asked, arrived) = SizesOfTheLast("textures/checker.png");
+        Assert.Equal((0u, 0u), asked);
+        Assert.Equal((2u, 2u), arrived);
     }
 
     /// <summary>
     /// The size of the last of <paramref name="paths"/>, loaded in that order by an app with the
-    /// interface running, once it has arrived.
+    /// interface running, in the frame it is asked for and once it has arrived.
     /// </summary>
-    private static (uint Width, uint Height) SizeOfTheLast(params string[] paths)
+    private static ((uint Width, uint Height) Asked, (uint Width, uint Height) Arrived) SizesOfTheLast(params string[] paths)
     {
-        var (pictures, size) = (new ulong[paths.Length], (0u, 0u));
+        var (pictures, asked, arrived) = (new ulong[paths.Length], (0u, 0u), (0u, 0u));
         new PictureRun
         {
             Width = 64,
@@ -113,14 +127,15 @@ public sealed class ImGuiTests
             {
                 ImGuiRuntime.Start();
                 for (var i = 0; i < paths.Length; i++) pictures[i] = ImGuiTextures.Load(paths[i]);
+                asked = ImGuiTextures.SizeOf(pictures[^1]);
             },
             EachFrame = world =>
             {
                 ImGuiRuntime.Begin(new BehaviorContext(world));
                 ImGuiRuntime.End();
             },
-        }.Until("the pictures arriving", _ => (size = ImGuiTextures.SizeOf(pictures[^1])) != (0u, 0u)).Go();
+        }.Until("the pictures arriving", _ => (arrived = ImGuiTextures.SizeOf(pictures[^1])) != (0u, 0u)).Go();
 
-        return size;
+        return (asked, arrived);
     }
 }

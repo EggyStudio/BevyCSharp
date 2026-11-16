@@ -350,15 +350,20 @@ pub unsafe extern "C" fn bcs_imgui_picture_size(
                     return status::NOT_PRESENT;
                 };
 
-                let size = world
+                // Zero by zero for a picture whose file has not arrived, and not the one by one an
+                // Extent3d is by default.
+                let (across, down) = world
                     .get_resource::<bevy::asset::Assets<bevy::image::Image>>()
                     .and_then(|images| images.get(&handle))
-                    .map(|image| image.texture_descriptor.size)
-                    .unwrap_or_default();
+                    .map(|image| {
+                        let size = image.texture_descriptor.size;
+                        (size.width, size.height)
+                    })
+                    .unwrap_or((0, 0));
 
                 unsafe {
-                    width.write(size.width);
-                    height.write(size.height);
+                    width.write(across);
+                    height.write(down);
                 }
 
                 status::OK
