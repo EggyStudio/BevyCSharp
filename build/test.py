@@ -18,9 +18,10 @@ limits, so a part that is lost costs only its own tests. A part of the suite is 
 classes in order, at least a hundred tests, and the last part takes whatever no other names, so no
 test falls between two parts.
 
-The page has the run's counts and a line for each part, the lost processes, the failures by cause,
-the most frequent first, and the warnings, errors and unlogged lines the output repeated most, where
-any repeat. It ends the log between two marking lines, and is written to TestResults/digest.md and digest.json. Under GitHub Actions it is also the
+The page has the run's counts, its time and the processor it ran on, and a line for each part, the
+lost processes, the failures by cause, the most frequent first, and the warnings, errors and
+unlogged lines the output repeated most, where any repeat. It ends the log between two marking
+lines, and is written to TestResults/digest.md and digest.json. Under GitHub Actions it is also the
 job's summary, with each cause, whole, an error annotation. What the processes print goes to
 TestResults/output*.txt. It exits 0 when every test passed and no process was lost.
 
@@ -713,6 +714,7 @@ def digest(results_dir, processes, listed, seconds, system=None):
     return {
         "system": system or {"Darwin": "macOS"}.get(platform.system(), platform.system()),
         "commit": commit(),
+        "processor": processor(),
         "passed": outcomes["Passed"], "failed": outcomes["Failed"], "skipped": outcomes["NotExecuted"], "no_result": no_result,
         "seconds": round(seconds), "peak_mb": max((p.peak_mb for p in processes), default=0),
         "processes": [{"label": p.label, "lost": p.lost, "past_mb": p.past_mb, "said": p.said, "seconds": round(p.seconds), "peak_mb": p.peak_mb,
@@ -731,6 +733,7 @@ def tested(name, label):
 def head(d):
     return (f"Tests on {d['system']} at {d['commit']}: {d['passed']:,} passed, {d['failed']:,} failed, {d['skipped']:,} skipped, "
             f"{d['no_result']:,} without a result, in {duration(d['seconds'])}"
+            + (f" on {d['processor']}" if d.get("processor") else "")
             + (f", {d['peak_mb']:,} MB at most" if d["peak_mb"] else ""))
 
 
@@ -849,6 +852,30 @@ def publish(lines, notes, results_dir=None, d=None):
 def duration(seconds):
     seconds = round(seconds)
     return f"{seconds // 60} m {seconds % 60} s" if seconds >= 60 else f"{seconds} s"
+
+
+def processor():
+    """
+    The machine's processor by the name of its model, as the system gives it, or nothing where it
+    gives none, so a run that took long is read with what it ran on, the runners' processors
+    drawing one part of the renderer's tests up to 1.78 times as slowly as each other.
+    """
+    try:
+        if sys.platform.startswith("linux"):
+            with open("/proc/cpuinfo", encoding="utf-8", errors="replace") as info:
+                for line in info:
+                    if line.startswith("model name") and ":" in line:
+                        return " ".join(line.split(":", 1)[1].split())
+        elif sys.platform == "darwin":
+            said = subprocess.run(["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True, timeout=10)
+            return " ".join(said.stdout.split())
+        elif sys.platform == "win32":
+            import winreg
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0") as key:
+                return " ".join(str(winreg.QueryValueEx(key, "ProcessorNameString")[0]).split())
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return ""
 
 
 def commit():

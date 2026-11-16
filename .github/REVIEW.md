@@ -1,7 +1,9 @@
 # Review
 
-Reviewed up to `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
-pushed at 13:49 on 2026-11-16, its build run 43870104421 started, the form kept. Before it `7908f95a`, Verdict 62's
+Reviewed up to `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
+library counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31
+on 2026-11-16, its build run 43897251535 started, the form kept. Before it `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
+pushed at 13:49 on 2026-11-16, its build run 43870104421 red at 15:21 in one renderer part at its time limit (Verdict 63) and green at 16:30 with that part run again in 33 minutes, the form kept. Before it `7908f95a`, Verdict 62's
 mend, the memory guard's test taking its block from the system, pushed at 12:51, its build run
 43861457506 green at 13:49 and the pack run with publish 43869994859 started on it, the form kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
 the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
@@ -176,10 +178,11 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 62 is open, the pack run with publish 43828541813 red in the memory guard's own test on
-Linux. Verdict 60 is open until a pack run publishes, the pack run with publish 43773833500 red in a
-renderer pair's memory cap and one capture. Verdict 61 is settled at 08:14 on 2026-11-16, the ten
-renderer parts green in build run 43815745451 once an app gives back the memory its driver freed.
+Verdict 63 is settled at 16:30 on 2026-11-16, the part run again green in 33 minutes on the same commit, a slow runner and not the viewport's change. Verdict 64 is open, the pack run with publish 43869994859 on `7908f95a` red in two renderer parts at their time limit, its failed jobs started again at 16:31, and the parts' room under the limit to be dealt wider. Verdict 62 is open until a pack run publishes,
+the pack run with publish 43828541813 red in the memory guard's own test on Linux, its mend in
+`7908f95a`. Verdict 60 is open until a pack run publishes, the pack run with publish 43773833500 red
+in a renderer pair's memory cap and one capture. Verdict 61 is settled at 08:14 on 2026-11-16, the
+ten renderer parts green in run 43815745451.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -225,6 +228,33 @@ renderer parts green in build run 43815745451 once an app gives back the memory 
     job against the build run's the second), a test that fails the same way on this machine, and the
     mend, which may be the test's (memory taken where the allocator cannot reuse held pages) or the
     guard's reading. The pack run starts again on the mend's commit once its build run is green.
+
+63. **The build run on `e0618f1b` is red in one renderer part, ended at its time limit.** Run
+    43870104421, ended at 15:21 on 2026-11-16, job 133313157886, renderer part 7 on lavapipe, with
+    the digest job red after it. The part ended at its limit of 45 minutes with 71 tests without a
+    result, the last to end `BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound`,
+    holding 1,411 MB. The same part took 31 m 15 s at `7908f95a` and 31 m 21 s at `6677ae12` with 69
+    passed and 2 skipped, and part 4 took 41 minutes in this run, so the commit that keeps a
+    camera's passes to its viewport made drawing slower on a device that draws on the processor, or
+    one test stands. Asked, at 15:22 on 2026-11-16, the part's classes timed on lavapipe at
+    `7908f95a` and at `e0618f1b`, the test or the pass that carries the difference named (the copy
+    of the picture outside a viewport, where a camera without a viewport may take it too), and the
+    mend, a camera drawing the whole window doing no more than before. The second commit of the item
+    is held until then.
+
+64. **The pack run with publish on `7908f95a` is red in renderer parts 9 and 10, both ended at their
+    time limit.** Run 43869994859, job 133313146830, read at 15:54 on 2026-11-16 while its drive job
+    still ran, nothing published. Part 9 ended at 45 minutes holding 4,628 MB, the last test to end
+    `GlobalIlluminationTests.AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference`,
+    and part 10 at 45 minutes holding 1,237 MB, the last to end
+    `BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound`, the test Verdict 63's
+    part ended after, with output written until the end in each. This commit holds none of the
+    viewport's change and its own build run 43861457506 passed the same classes in 31 minutes two
+    hours before, so Verdict 63's reading, the viewport's commit as the cause, does not stand alone.
+    Either the runners of that hour drew slowly or the classes of global illumination stand at times
+    after that test. The failed jobs of run 43870104421 are started again to tell the two apart.
+    Asked, the same timing as Verdict 63's at both commits, and whether a test after the bounce
+    rooms' can wait on a frame that does not come.
 
 ## Decisions
 
@@ -1123,3 +1153,39 @@ under the GPU lock, and the native checks passed in all three profiles. NormTest
 Shared: a camera's images, its dispatches a pixel at a time and the pass library count the view from
 its viewport's corner, and Bevy's auto exposure is mended to meter the viewport, which a sibling
 with cameras splitting a window over a shared picture reads the same way.
+
+Verdicts 63 and 64, in the commit carrying this Reply. The lost parts were moving from test to test
+as their time ran out, and the two commits draw part 7 alike, so the mend is the room and not the
+code.
+
+Each lost part's last lines are an app starting in its last seconds, the red part 7's kernels
+compiling at 14:17:57, the pack run's part 10 giving deferred rendering's notice at 14:38:09 and its
+part 9 starting a renderer at 13:52:17. Part 7 timed here at 7908f95a and at e0618f1b side by side,
+each from git with the render bridge its build run made, in the runner's image on four lavapipe
+threads held to two cores of its own, took 54 m 52 s and 54 m 40 s, 69 passed and 2 skipped in each,
+every test within 4% of its time at the other, so a camera drawing the whole window does no more at
+e0618f1b than before.
+
+The time goes to the runners' processors. Over the build runs of 6ae94ed5, db8afed6, 6677ae12,
+7908f95a and e0618f1b one part took up to 1.78 times as long on one runner as on another, parts 2
+and 10 the most, where a part laid out at 32 minutes had 1.4 times its time under its limit of 45.
+
+build/renderer-parts.tsv deals the tests into twelve parts by the least each took in those runs,
+which stands for the faster processor, global illumination's, the bounce rooms', the trees' leaves'
+and their level shadows' by their cases and every other class whole. Each part comes to 20.8 to 21.1
+minutes there and 37.6 at most at 1.78 times, the trees' leaves in parts 2, 6, 10 and 12 and global
+illumination in the other eight. A push runs a part to a job, twelve, and a pack two to a job, six
+pairs of 41.8 to 42.1 minutes. The limit of 45 minutes a part stays. Listed through test.py's own
+filters, each of the 2,154 tests of the listing is in one part.
+
+build/test.py writes the processor's model beside the time on the page's first line and in its
+digest, read from /proc/cpuinfo, sysctl or the registry, so the merged page reads each part's time
+with what it ran on. TestScriptTests.ThePageNamesTheProcessorTheRunWasOn reads it from the digest
+and the page, and it failed on the script as it stood, the digest holding no processor.
+
+TestScriptTests passed, 19. The whole suite runs after 146's findings 51 to 59, from one tree with
+them. NormTests passed, 19.
+
+Shared: the renderer's parts are dealt from the least each test took over several runs, the longest
+21 minutes on the faster processor, and the page names the runner's processor beside each part's
+time, which a sibling dealing its tests on lavapipe reads the same way.

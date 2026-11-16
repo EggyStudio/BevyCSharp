@@ -204,6 +204,31 @@ public sealed class TestScriptTests : IDisposable
     }
 
     /// <summary>
+    /// The page's first line names the processor the run was on beside its time, by its model's
+    /// name as the system gives it, so a part that ran slowly is read with what it ran on, and the
+    /// digest a renderer job's pages are merged from carries it.
+    /// </summary>
+    [SkippableFact]
+    public void ThePageNamesTheProcessorTheRunWasOn()
+    {
+        var python = Needs.Python();
+        File.WriteAllText(_folder.File("results-the-suite.trx"),
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?><TestRun xmlns=\"http://microsoft.com/schemas/VisualStudio/TeamTest/2010\"><Results>"
+            + "<UnitTestResult testName=\"Bevy.Tests.AlphaTests.Answers\" outcome=\"Passed\" /></Results></TestRun>");
+
+        var (exit, log) = Script(python, new(), "--read", _folder.Path);
+        Assert.True(exit == 0, log);
+
+        using var digest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(_folder.File("digest.json")));
+        var processor = digest.RootElement.GetProperty("processor").GetString();
+        if (OperatingSystem.IsLinux() && File.ReadLines("/proc/cpuinfo").FirstOrDefault(line => line.StartsWith("model name", StringComparison.Ordinal)) is { } model)
+            Assert.Equal(string.Join(' ', model.Split(':', 2)[1].Split([' ', '\t'], StringSplitOptions.RemoveEmptyEntries)), processor);
+
+        Skip.If(string.IsNullOrEmpty(processor), "the system names no processor");
+        Assert.Contains($" on {processor}", File.ReadAllLines(_folder.File("digest.md"))[0]);
+    }
+
+    /// <summary>
     /// A part whose host holds past four fifths of the cap it is held to is said to be near it, on the
     /// page and in the digest a renderer job's pages are merged from, so a layout putting more in a
     /// host is told before the guard stops one, and a part well under its cap is not said.

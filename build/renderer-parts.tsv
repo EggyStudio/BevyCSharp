@@ -1,322 +1,330 @@
 # The renderer job's parts (.github/workflows/build.yml), each a process of build/test.py's --layout
 # on lavapipe. A line holds a part's number, a test class or one case of a class by its display
-# name, and its minutes on the runner, what it took on lavapipe held to four cores here scaled by
-# what its part took in the build run of ca8c50b4 against what its lines came to. A class goes whole
-# into a part where it fits one and by its cases where it does not. The lines are dealt from the
-# longest into ten parts, each to the part holding least, so the parts come out alike, some 32
-# minutes each. The part holding * takes every test no other line names, the classes that draw
-# nothing, a class or a case added since, and the cases that skip themselves on a device that draws
-# on the processor, its minutes theirs.
-1	AnimationMachineTests	0.1
-1	AssetFilesTests	0.1
-1	AssetReloadTests	0.2
-1	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: Low, bound: 0.14000000000000001)	0.3
-1	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: Low, bound: 0.070000000000000007)	0.4
-1	GiReferenceTests	29.2
-1	GlobalIlluminationTests.TheFieldKeepsEachCellsNearestSurfacesGlossBesideItsFace	0.1
-1	GltfTests	0.1
-1	LevelCameraTests	0.1
-1	Mesh2dTests	0.2
-1	ModelingTests	0.1
-1	RenderReadTests	0.1
-1	ShaderSpriteMaterialTests	0.3
-1	ShaderUiMaterialTests	0.2
-1	ShaderValueTests	0.4
-1	TreeLeavesTests.EveryPresetsLeavesKeepToTheirBound	0.0
-1	UiTextTests	0.1
-1	VolumetricFogPrepassTests	0.1
-1	WatchAssetsTests	0.1
-2	BarkDepthTests	0.1
-2	BounceRoomsTests.ALitRoomsFloorLiesWithinTheBoundOfItsReference	0.8
-2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: Low, bound: 0.059999999999999998)	0.6
-2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: High, bound: 0.059999999999999998)	0.6
-2	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 9, quality: High, bound: 0.089999999999999997)	0.5
-2	CliServerTests	0.1
-2	CloudShadowTests	0.3
-2	DeferredEmissiveTests	0.5
-2	FeathersTests	0.2
-2	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: Low, height: 5.5)	2.3
-2	GlobalIlluminationTests.AWallInShadeTakesTheFloorsLightAsItsReferenceDoesUnderALowSun	1.1
-2	GlobalIlluminationTests.AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor	1.7
-2	GlobalIlluminationTests.GlobalIlluminationTurnedOffTracesNoMoreAndLetsItsFieldGo	0.3
-2	GlobalIlluminationTests.TheLightBevysLightProbesGaveIsTakenBackAsTheyGaveIt	1.3
-2	GlobalIlluminationTests.WithTheScreensProbesLeftOutAGlowLightIsReadFromProbesStandingForItAlone	0.4
-2	InstanceTests	0.0
-2	LightTextureTests	0.1
-2	MaterialFileTests	0.1
-2	MaterialMapTests	0.2
-2	RayTracingTests	0.4
-2	ReflectedWrapperTests	0.2
+# name, and its minutes on the runner, the least its tests took in the build runs of 6ae94ed5,
+# db8afed6, 6677ae12, 7908f95a and e0618f1b, whose runners' processors drew one part up to 1.78
+# times as slowly as each other, so the least stands for the faster processor. A class goes whole
+# into a part, and global illumination's, the bounce rooms', the trees' leaves' and the trees' level
+# shadows' by their cases. The lines are dealt from the longest into twelve parts, each to the part
+# holding least, the trees' leaves never in a part with global illumination, so the parts come out
+# alike, some 21 minutes each on the faster processor and 38 on the slowest. The part holding *
+# takes every test no other line names, the classes that draw nothing, a class or a case added
+# since, and the cases that skip themselves on a device that draws on the processor, its minutes
+# theirs.
+1	GiReferenceTests	18.4
+1	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 9, quality: High, bound: 0.089999999999999997)	0.5
+1	GlobalIlluminationTests.AProbeInsideASolidBlockHoldsNothing	0.4
+1	GlobalIlluminationTests.GlobalIlluminationTurnedOffTracesNoMoreAndLetsItsFieldGo	0.4
+1	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: Low, bound: 0.070000000000000007)	0.3
+1	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: Low, bound: 0.029999999999999999)	0.3
+1	GlobalIlluminationTests.AScreenProbeFedAValueThatIsNotANumberLeavesTheLightItBlendsIntoFinite	0.2
+1	DebugOverlayTests	0.2
+1	PointerTests	0.1
+1	PreviewRendererTests	0.1
+1	OverlayTests	0.0
+1	ModelingPictureTests	0.0
+1	OffscreenTests	0.0
+1	ImGuiConsoleTests	0.0
+1	TreeTexturesTests	0.0
+1	SubsceneTests	0.0
+1	MeshFileTests	0.0
+1	RenderReadTests	0.0
+1	MeshCompressionTests	0.0
+1	ProjectionTests	0.0
+2	TreeLeavesTests.ACrownKeepsItsLeavesWithDistance	12.9
+2	TreeImpostorsTests	1.3
+2	TreePlantingTests	1.0
+2	BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps(quality: High)	0.8
+2	ShaderPassTests	0.6
+2	GBufferTests	0.6
+2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: High, bound: 0.14000000000000001)	0.5
+2	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: High, bound: 0.11)	0.5
+2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 9, quality: High, bound: 0.089999999999999997)	0.5
+2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: High, bound: 0.11)	0.4
+2	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: Medium, bound: 0.19)	0.4
+2	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: Low, bound: 0.12)	0.4
+2	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: Low, bound: 0.40000000000000002)	0.3
+2	AnisotropyPrepassTests	0.2
 2	ShaderMaterial2dTests	0.2
-2	ShaderMaterialTests	0.7
-2	SpriteFrameTests	0.1
-2	SpriteTests	0.1
-2	ThunderTests	0.1
-2	TreeCanopyTests	14.7
-2	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 30.2999992)	4.0
-2	UiTests	0.1
-2	WidgetTests	0.1
-3	*	1.1
-3	AtlasPackingTests	0.1
-3	AudioTests	0.2
-3	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: High, bound: 0.11)	0.5
-3	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 5, quality: Medium, bound: 0.029999999999999999)	0.4
-3	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 9, quality: High, bound: 0.089999999999999997)	0.6
-3	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: High, bound: 0.029999999999999999)	0.8
-3	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: Medium, bound: 0.029999999999999999)	0.7
-3	ClockHoldTests	0.1
-3	ComponentArrayTests	0.2
-3	FroxelFogTests	0.5
-3	GBufferTests	0.6
-3	GizmoShapeTests	1.3
-3	GlobalIlluminationTests.AClosedRoomReflectsNoSky	0.3
-3	GlobalIlluminationTests.ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside	1.8
-3	GlobalIlluminationTests.AStripThinnerThanACellLendsItsLightToTheCellsBesideIt	0.4
-3	GlobalIlluminationTests.AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle	2.5
-3	InputMessageTests	0.1
-3	MeshCompressionTests	0.1
-3	MeshShapeTests	0.0
-3	MipGenerationTests	0.1
-3	ModelingPictureTests	0.1
-3	NativeComponentTests	0.1
-3	NightSkyTests	0.2
+2	DeferredMaterialTests	0.1
+2	ComponentArrayTests	0.1
+2	AfterTemporalAntialiasingTests	0.1
+2	TreeLeavesTests.EveryPresetsLeavesKeepToTheirBound	0.0
+2	TreeLeavesTests.ATreeCarriesThePapersLeavesUpToTheirBound	0.0
+2	UiTests	0.0
+2	WireframeTests	0.0
+2	TreeLeavesTests.TheLeavesReadingOfTheProbesCostIsReadInAForest	0.0
+2	RenderControlTests	0.0
+2	LevelCameraTests	0.0
+2	TreeLeavesTests.AFernsFrondsRunTheLengthOfItsStems	0.0
+3	TreeMemoryTests	10.9
+3	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: High, height: 5.5)	2.6
+3	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 16)	1.5
+3	GlobalIlluminationTests.ARoomLitByABallReadsAsItsReference	1.2
+3	GlobalIlluminationTests.ALampOutsideAThinWalledRoomIsHiddenFromTheHitsBesideItsWalls	1.0
+3	GlobalIlluminationTests.AClosedRoomReflectsNoSky	0.6
+3	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: High, bound: 0.26000000000000001)	0.5
+3	GlobalIlluminationTests.AProbeBeforeASunlitRedWallTakesItsRedOnTheFaceTowardIt	0.5
+3	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: Medium, bound: 0.10000000000000001)	0.4
+3	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: Medium, bound: 0.41999999999999998)	0.4
+3	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: Low, bound: 0.10000000000000001)	0.3
+3	DeferredDrawTests	0.3
+3	GlobalIlluminationTests.AnOpenFloorReadsAsBevysAmbientLightGivesIt	0.2
+3	ShaderUiMaterialTests	0.2
+3	MeshletTests	0.1
 3	RenderRecoveryTests	0.1
-3	TonemapRampTests	0.3
-3	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 29.5)	4.1
-3	TreeMemoryTests	14.4
-3	VertexStreamTests	0.1
-3	ViewShaderTests	0.4
-4	AfterAntialiasingTests	0.1
-4	AnimationTests	0.2
-4	AudioPlaybackTests	0.1
-4	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: High, bound: 0.14000000000000001)	0.7
-4	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: High, bound: 0.25)	0.5
-4	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: Low, bound: 0.040000000000000001)	0.4
-4	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: Medium, bound: 0.040000000000000001)	0.5
-4	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: Medium, bound: 0.26000000000000001)	0.6
-4	CompressedFormatsTests	0.1
-4	ComputeImageTests	0.1
-4	DrawnTests	0.0
-4	GlobalIlluminationTests.AFrameWithTheScreensProbesLeftOutDrawsTheCascadesLightAlone	0.4
-4	GlobalIlluminationTests.AGlowingBlockLightsTheFloorBesideIt	0.2
-4	GlobalIlluminationTests.ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls	1.2
-4	GlobalIlluminationTests.ALeafGivesBackTheLightBevyLetsThroughItFromAllAround	0.8
-4	GlobalIlluminationTests.ARoomLitBySixEmittersReadsAsItsReference	1.5
-4	GlobalIlluminationTests.AScreenProbeInAClosedRoomSumsItsReferencesLightAlongItsWays	3.8
-4	GlobalIlluminationTests.TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark	0.4
-4	InputTests	0.3
-4	LightProbeTests	0.8
-4	MeshTangentTests	0.1
-4	MessageTests	0.2
-4	OverlayTests	0.1
-4	RenderTargetTests	0.1
-4	ShaderPassTests	0.7
-4	TilemapTests	0.0
-4	TransformGizmoTests	0.1
-4	TreeCardsTests	2.0
-4	TreeLeavesTests.ACrownShadedByTheSkyItSeesDarkensItsMiddleMoreThanItsEdge	4.7
-4	TreeTexturesTests	0.1
-4	TreeWayOutTests	11.1
-4	WindowControlTests	0.1
-5	AssetEditTests	0.1
-5	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: Low, bound: 0.11)	0.4
-5	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: High, bound: 0.40999999999999998)	0.7
-5	BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps(quality: Medium)	1.1
-5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: High, bound: 0.11)	0.5
-5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: Low, bound: 0.20000000000000001)	0.4
-5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: High, bound: 0.089999999999999997)	0.4
-5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: High, bound: 0.10000000000000001)	0.8
-5	ClickCommandTests	0.1
-5	EditableTextTests	0.2
-5	ExposureTests	0.1
-5	FontAtlasTests	0.1
-5	GizmoRunTests	0.1
-5	GlobalIlluminationTests.ALoneAspensLeavesUnderAUniformSkyReadTheirReference	5.5
-5	GlobalIlluminationTests.AProbeBeforeASunlitRedWallTakesItsRedOnTheFaceTowardIt	0.3
-5	GlobalIlluminationTests.AProbeInAClosedRoomHoldsItsReferencesLightAtEachBounceItIsHeldAt	3.2
-5	GlobalIlluminationTests.AnEmissivePanelLightsTheProbesOfAClosedRoom	0.5
-5	GlobalIlluminationTests.SwitchingItOnWhileASecondCameraDrawsDepthDrawsOn	0.2
-5	MeshletTests	0.2
-5	ModelCommandTests	0.1
-5	ProjectionTests	0.1
-5	SceneFieldTests	0.5
-5	SkinTests	0.1
-5	SkyWeatherTests	0.6
-5	SpawnedWindowTests	0.2
-5	SubsceneTests	0.1
-5	TreeImpostorsTests	2.2
-5	TreeLeavesTests.ATreeInLeafCoversItsCrownWithItsSetsOrTheGeneratedLooks	1.6
-5	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 26.5)	10.4
-5	TreePlantingTests	1.3
-5	WireframeTests	0.0
-6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: Medium, bound: 0.059999999999999998)	0.5
-6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: Medium, bound: 0.40999999999999998)	0.5
-6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: Medium, bound: 0.23999999999999999)	0.7
-6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: Low, bound: 0.080000000000000002)	0.7
-6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: High, bound: 0.41999999999999998)	0.6
-6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: Medium, bound: 0.41999999999999998)	0.9
-6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: Medium, bound: 0.14000000000000001)	0.4
-6	DepthOfFieldTests	0.1
-6	FileHandleTests	0.1
-6	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 16)	2.7
-6	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 4)	2.3
-6	GlobalIlluminationTests.AFarCascadesCellsReachItsDistanceAheadOfTheEye	0.0
-6	GlobalIlluminationTests.AMaterialsShareOfLightLetThroughIsReadBack	0.0
-6	GlobalIlluminationTests.AMirrorFloorReflectsARedWallDrawnForward	0.3
-6	GlobalIlluminationTests.APicturesScreenProbesStandEveryTileItsHeightGives(height: 1440, tile: 11)	0.2
-6	GlobalIlluminationTests.AReferenceOfASceneWithNothingDrawnIsRefused	0.0
-6	GlobalIlluminationTests.ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay	1.5
-6	GlobalIlluminationTests.AnAppWithGlobalIlluminationOffMakesNoneOfItsPrograms	0.0
-6	GlobalIlluminationTests.EachQualityTracesItsCascadesAndDirections	0.0
-6	GlobalIlluminationTests.FarFromTheWorldsOriginGlowLightsLeaveNoMoreOfTheLandBlackThanNearIt	1.8
-6	GlobalIlluminationTests.TheFieldPaintsEachCellItsNearestSurfacesColor	0.1
-6	GlobalIlluminationTests.TheScreenProbesTileHoldsUpTo1080RowsAndGrowsWithTheHeightPastThem	0.0
-6	GlobalIlluminationTests.TouchingGlowingBlocksAreOneGlowLight	0.0
-6	HiddenScopeTests	0.1
-6	ImGuiConsoleTests	0.1
-6	LoadingTests	0.1
-6	MaterialSurfaceTests	0.1
-6	MeshShaderTests	0.2
-6	PickRayTests	0.1
-6	PrecipitationTests	5.7
-6	SampleLightTests	0.2
-6	SceneAssetsReleaseTests	0.1
-6	SceneFieldShadowTests	0.5
-6	ShaderImportTests	0.2
-6	ShadowTests	0.1
-6	SkyFogTests	0.3
-6	TreeLeavesTests.ACrownsDiffuseLightBentOutOfItShowsTheSunsSideAndMirrorsNoSky	10.2
-6	TreeLeavesTests.AFernsFrondsRunTheLengthOfItsStems	0.0
-6	TreeLeavesTests.ALeafDeepInACrownTakesLessOfTheSkyThanOneOnItsRimAndCarriesTheWayOut	0.0
-6	TreeLeavesTests.AReducedCrownIsEveryOtherLeafAtItsPlaceTwiceTheArea	0.0
-6	TreeLeavesTests.ASeedPlacesTheSameLeavesEachTime	0.0
-6	TreeLeavesTests.ATreeCarriesThePapersLeavesUpToTheirBound	0.0
-6	TreeLeavesTests.LeafControlsOutOfRangeAreRefused	0.0
-6	TreeLeavesTests.LeavesStandOnTheTwigsAndFaceUpAndOut	0.0
-6	UiPixelTests	0.8
-7	AssetPackTests	0.1
-7	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: High, bound: 0.059999999999999998)	0.7
-7	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: Medium, bound: 0.14000000000000001)	0.4
+3	ComputeImageTests	0.1
+3	ClickCommandTests	0.0
+3	TransformGizmoTests	0.0
+3	GlobalIlluminationTests.AnAppWithGlobalIlluminationOffMakesNoneOfItsPrograms	0.0
+3	WatchAssetsTests	0.0
+3	WindowControlTests	0.0
+3	TilemapTests	0.0
+3	RenderTests	0.0
+3	MeshTangentTests	0.0
+4	TreeCanopyTests	10.2
+4	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 29.5)	3.3
+4	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 8)	1.6
+4	GlobalIlluminationTests.ARoomLitBySixEmittersReadsAsItsReference	1.3
+4	GlobalIlluminationTests.ARoomLitByOneEmitterKeepsItsReading	1.0
+4	GlobalIlluminationTests.TheLightBevysLightProbesGaveIsTakenBackAsTheyGaveIt	0.7
+4	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: High, bound: 0.059999999999999998)	0.5
+4	ViewShaderTests	0.4
+4	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 9, quality: Low, bound: 0.11)	0.4
+4	GlobalIlluminationTests.APicturesScreenProbesStandEveryTileItsHeightGives(height: 720, tile: 8)	0.4
+4	TonemapRampTests	0.3
+4	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: Low, bound: 0.12)	0.3
+4	GlobalIlluminationTests.AMirrorFloorReflectsARedWallStandingOnIt	0.2
+4	SunShadowTests	0.2
+4	DepthOfFieldTests	0.1
+4	ShadowTests	0.1
+4	RenderCornerTests	0.1
+4	PickRayTests	0.0
+4	LightTextureTests	0.0
+4	FontAtlasTests	0.0
+4	BarkDepthTests	0.0
+4	InstanceTests	0.0
+4	ModelingTests	0.0
+4	MaterialTests	0.0
+4	AssetPackTests	0.0
+4	GlobalIlluminationTests.AFarCascadesCellsReachItsDistanceAheadOfTheEye	0.0
+5	GlobalIlluminationTests.AForestFloorUnderAUniformSkyReadsItsReference	8.6
+5	GlobalIlluminationTests.AScreenProbeInAClosedRoomSumsItsReferencesLightAlongItsWays	3.5
+5	GlobalIlluminationTests.AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference(white: 0.949999988, bound: 0.5)	1.8
+5	GlobalIlluminationTests.AnOpenFloorUnderTheSkyReadsItsReferenceNearTheEyeAndAtAGrazingAngle	1.4
+5	GlobalIlluminationTests.ALampOutsideAThinWalledRoomLightsNothingUnderItsWalls	1.1
+5	GlobalIlluminationTests.ALitBoardOutsideAThinWalledRoomLightsNothingInside	0.9
+5	GlobalIlluminationTests.AClosedRoomUnderAnEnvironmentMapIsDarkInside	0.6
+5	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: High, bound: 0.059999999999999998)	0.5
+5	GlobalIlluminationTests.AFarWallInShadeTakesTheYardsLightAtLow	0.5
+5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: High, bound: 0.41999999999999998)	0.4
+5	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 5, quality: Low, bound: 0.029999999999999999)	0.4
+5	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: Low, bound: 0.059999999999999998)	0.3
+5	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: Low, bound: 0.40999999999999998)	0.3
+5	GlobalIlluminationTests.AGlowingBlockLightsTheFloorBesideIt	0.3
+5	RenderTargetTests	0.1
+5	ShaderImportTests	0.1
+5	PipelineConstantTests	0.1
+5	AnimationClipTests	0.1
+5	PrepassStageTests	0.0
+5	ImagesTests	0.0
+5	TextureFilteringTests	0.0
+5	InputTests	0.0
+5	ReflectedComponentTests	0.0
+5	DecalTests	0.0
+5	GltfTests	0.0
+5	MeshShapeTests	0.0
+5	SpriteFrameTests	0.0
+5	GlobalIlluminationTests.EachQualityTracesItsCascadesAndDirections	0.0
+5	GlobalIlluminationTests.ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes	0.0
+6	TreeLeavesTests.ACrownsDiffuseLightBentOutOfItShowsTheSunsSideAndMirrorsNoSky	7.9
+6	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 28.0499992)	3.5
+6	TreeCardsTests	1.7
+6	GrassTests	1.2
+6	BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps(quality: Medium)	1.0
+6	BounceRoomsTests.ALitRoomsFloorLiesWithinTheBoundOfItsReference	0.7
+6	FroxelFogTests	0.6
+6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: High, bound: 0.089999999999999997)	0.6
+6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: High, bound: 0.10000000000000001)	0.5
+6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 9, quality: Medium, bound: 0.089999999999999997)	0.5
+6	ShaderValueTests	0.5
+6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 5, quality: Medium, bound: 0.029999999999999999)	0.4
+6	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: Low, bound: 0.040000000000000001)	0.4
+6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: Low, bound: 0.080000000000000002)	0.4
+6	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: Low, bound: 0.14000000000000001)	0.3
+6	LensTests	0.3
+6	AnimationTests	0.2
+6	UiTextTests	0.1
+6	GltfMaterialDrawnTests	0.1
+6	TreeWindTests	0.1
+6	MipGenerationTests	0.0
+6	FileHandleTests	0.0
+6	ClockHoldTests	0.0
+6	LightCountTests	0.0
+6	CompressedFormatsTests	0.0
+6	GltfExportTests	0.0
+6	MaterialSlotTests	0.0
+7	TreeWayOutTests	7.2
+7	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 30.2999992)	3.6
+7	GlobalIlluminationTests.AProbeInAClosedRoomHoldsItsReferencesLightAtEachBounceItIsHeldAt	3.1
+7	GlobalIlluminationTests.FarFromTheWorldsOriginGlowLightsLeaveNoMoreOfTheLandBlackThanNearIt	1.4
+7	GlobalIlluminationTests.AProbeOnTheMiddleOfAWallThinnerThanACellHoldsNoLight	1.2
+7	GlobalIlluminationTests.AFarWallInShadeTakesTheYardsLightAtMedium	0.9
 7	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 5, quality: High, bound: 0.02)	0.5
-7	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 5, quality: Low, bound: 0.029999999999999999)	0.4
-7	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: High, bound: 0.10000000000000001)	0.5
-7	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: High, bound: 0.17000000000000001)	0.5
-7	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 9, quality: Low, bound: 0.11)	0.6
 7	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 9, quality: Medium, bound: 0.10000000000000001)	0.5
-7	DebugOverlayTests	0.1
-7	GlobalIlluminationTests.AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference	1.4
-7	GlobalIlluminationTests.AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference(white: 0.787, bound: 0.20000000000000001)	2.6
-7	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 8)	1.7
-7	GlobalIlluminationTests.AFarWallInShadeTakesTheYardsLightAtMedium	1.1
-7	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: High, height: 5.5)	2.3
-7	GlobalIlluminationTests.ALeafInShadeTakesTheProbesLightAsTheSurfaceBesideIt	0.7
-7	GlobalIlluminationTests.ARedWallTintsAWhiteBlocksSideTowardIt	0.2
-7	GlobalIlluminationTests.AnAisleReadsAlikeWithACascadesSideOnTheWallBehindTheEye	6.1
-7	GlobalIlluminationTests.AnOpenFloorReadsAsBevysAmbientLightGivesIt	0.3
-7	GltfExportTests	0.1
-7	GltfMaterialDrawnTests	0.1
-7	GradingTests	0.2
-7	MeshFileTests	0.0
-7	MeshTagTests	0.1
-7	ModelingWindowTests	0.1
-7	PipelineConstantTests	0.1
-7	PrepassStageTests	0.1
-7	RenderCornerTests	0.1
-7	SpirvComputeTests	0.2
-7	SunShadowTests	0.1
-7	TreeLeavesTests.ACrownKeepsItsLeavesWithDistance	10.1
-8	AnimationClipTests	0.1
-8	AnisotropyPrepassTests	0.2
-8	BadFileTests	0.1
-8	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: Low, bound: 0.40000000000000002)	0.3
-8	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: Low, bound: 0.23999999999999999)	0.6
-8	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: Medium, bound: 0.10000000000000001)	0.4
-8	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: Medium, bound: 0.059999999999999998)	0.5
-8	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: Low, bound: 0.12)	0.4
-8	CaptureTests	0.0
-8	CloudTests	9.7
-8	GlobalIlluminationTests.AClosedRoomUnderAnEnvironmentMapIsDarkInside	0.5
-8	GlobalIlluminationTests.ACorridorNarrowerThanTheProbesAboveReadsItsLightPastTheDirectAsItsReference	1.7
-8	GlobalIlluminationTests.AFarWallInShadeTakesTheYardsLightAtLow	0.8
-8	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: Low, height: 2.5)	3.2
-8	GlobalIlluminationTests.ALitBoardOutsideAThinWalledRoomLightsNothingInside	1.0
-8	GlobalIlluminationTests.AProbeOnTheMiddleOfAWallThinnerThanACellHoldsNoLight	1.5
-8	GlobalIlluminationTests.AStillViewOfAWallLitByAGlowLightHoldsItsLightFromFrameToFrame	2.0
-8	ImagesTests	0.1
-8	LensTests	0.2
-8	LightCountTests	0.1
-8	LitShaderTests	0.2
-8	LookTests	0.4
-8	MaterialSlotTests	0.1
-8	PreviewRendererTests	0.1
-8	ReflectedLayoutTests	0.1
-8	RenderTests	0.0
-8	ResourceTests	0.1
-8	SkyboxTests	0.6
-8	TextureFilteringTests	0.1
-8	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 28.0499992)	6.2
-8	TreeWindTests	0.1
-8	ViewDrawTests	0.7
-9	AfterTemporalAntialiasingTests	0.1
-9	AmbientOcclusionPrepassTests	0.2
-9	AtmosphereTests	0.5
-9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: Medium, bound: 0.12)	0.5
-9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: Medium, bound: 0.059999999999999998)	0.7
+7	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: High, bound: 0.029999999999999999)	0.5
+7	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 8, quality: Medium, bound: 0.14000000000000001)	0.4
+7	GlobalIlluminationTests.TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark	0.4
+7	GlobalIlluminationTests.AFarCascadeHoldsAWallPastTheCountedOnes	0.4
+7	ThunderTests	0.3
+7	GlobalIlluminationTests.AFrameWithTheScreensProbesLeftOutDrawsTheCascadesLightAlone	0.3
+7	SampleLightTests	0.1
+7	GlobalIlluminationTests.APicturesScreenProbesStandEveryTileItsHeightGives(height: 1440, tile: 11)	0.1
+7	TimingTests	0.1
+7	CliServerTests	0.1
+7	MeshTagTests	0.0
+7	DevToolsTests	0.0
+7	UiDebugOutlineTests	0.0
+7	ModelingWindowTests	0.0
+7	EditorHistoryTests	0.0
+7	EditorWorldTests	0.0
+7	NativeComponentTests	0.0
+7	AudioPlaybackTests	0.0
+7	MorphTargetTests	0.0
+7	GlobalIlluminationTests.TheScreenProbesTileHoldsUpTo1080RowsAndGrowsWithTheHeightPastThem	0.0
+8	CloudTests	7.2
+8	PrecipitationTests	3.8
+8	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: High, height: 2.5)	2.0
+8	GlobalIlluminationTests.AWallsFootOverAThinFloorReadsEvenWithALampUnderTheFloor	1.7
+8	GlobalIlluminationTests.AClosedCornellBoxOnTheWorldsProbesReadsItsLightPastTheDirectAsItsReference	1.3
+8	GlobalIlluminationTests.ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay	1.1
+8	GlobalIlluminationTests.ALeafGivesBackTheLightBevyLetsThroughItFromAllAround	0.8
+8	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: High, bound: 0.17000000000000001)	0.5
+8	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 4, quality: Medium, bound: 0.14000000000000001)	0.5
+8	SceneFieldTests	0.4
+8	GlobalIlluminationTests.AnEmissivePanelLightsTheProbesOfAClosedRoom	0.4
+8	GlobalIlluminationTests.AStripThinnerThanACellLendsItsLightToTheCellsBesideIt	0.4
+8	GlobalIlluminationTests.WithTheScreensProbesLeftOutAGlowLightIsReadFromProbesStandingForItAlone	0.3
+8	GlobalIlluminationTests.SwitchingItOnWhileASecondCameraDrawsDepthDrawsOn	0.2
+8	VolumetricFogPrepassTests	0.1
+8	RecordingTests	0.1
+8	FeathersTests	0.1
+8	SkinTests	0.1
+8	AssetReloadTests	0.0
+8	AnimationMachineTests	0.0
+8	GlobalIlluminationTests.TheFieldPaintsEachCellItsNearestSurfacesColor	0.0
+8	RowMoveTests	0.0
+8	GlobalIlluminationTests.AReferenceOfASceneWithNothingDrawnIsRefused	0.0
+8	SceneAssetsReleaseTests	0.0
+8	AssetFilesTests	0.0
+8	AtlasPackingTests	0.0
+8	GlobalIlluminationTests.TouchingGlowingBlocksAreOneGlowLight	0.0
+8	GlobalIlluminationTests.TheGlowLightsCostIsReadInARoomOfFortyEmitters	0.0
+9	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 26.5)	7.2
+9	GlobalIlluminationTests.AnAisleReadsAlikeWithACascadesSideOnTheWallBehindTheEye	3.9
+9	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: Low, height: 2.5)	1.9
+9	GlobalIlluminationTests.AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference(white: 0.787, bound: 0.20000000000000001)	1.6
+9	GlobalIlluminationTests.ACorridorNarrowerThanTheProbesAboveReadsItsLightPastTheDirectAsItsReference	1.3
+9	GlobalIlluminationTests.AStillViewOfAWallLitByAGlowLightHoldsItsLightFromFrameToFrame	1.0
+9	GlobalIlluminationTests.AWallInShadeTakesTheFloorsLightAsItsReferenceDoesUnderALowSun	0.9
+9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: High, bound: 0.40999999999999998)	0.5
+9	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: Medium, bound: 0.26000000000000001)	0.5
 9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 9, quality: Low, bound: 0.089999999999999997)	0.4
-9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 9, quality: Medium, bound: 0.089999999999999997)	0.4
-9	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: High, bound: 0.029999999999999999)	0.5
-9	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: High, bound: 0.26000000000000001)	0.8
-9	ComputeShaderTests	0.4
-9	DecalTests	0.1
-9	DeferredMaterialTests	0.2
-9	DevToolsTests	0.0
-9	DrawnMeshTests	0.1
-9	EditorHistoryTests	0.1
-9	EditorWorldTests	0.1
-9	GlobalIlluminationTests.AClosedRoomOfSmoothWhiteWallsReadsItsLightPastTheDirectAsItsReference(white: 0.949999988, bound: 0.5)	2.0
-9	GlobalIlluminationTests.AForestFloorUnderAUniformSkyReadsItsReference	9.6
-9	GlobalIlluminationTests.AProbeInsideASolidBlockHoldsNothing	0.2
-9	GlobalIlluminationTests.ARoomLitByABallReadsAsItsReference	1.5
-9	GlobalIlluminationTests.ASurfaceDrawnForwardKeepsTheLightBevyGaveIt	0.6
-9	GlobalIlluminationTests.AnOpenFloorReadsAsAnEnvironmentMapLightsIt	0.3
-9	GlobalIlluminationTests.TwoBlocksMeetingAlongAnEdgeCloseItToAGlowLightsLight	1.2
-9	GrassTests	0.9
-9	NavigationTests	0.1
-9	PhysicsTests	0.3
-9	RenderControlTests	0.1
+9	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 2, quality: Medium, bound: 0.059999999999999998)	0.4
+9	ShaderSpriteMaterialTests	0.4
+9	LookTests	0.3
+9	MaterialMapTests	0.2
+9	NightSkyTests	0.2
+9	SpirvComputeTests	0.1
+9	Mesh2dTests	0.1
+9	GlobalIlluminationTests.TheFieldKeepsEachCellsNearestSurfacesGlossBesideItsFace	0.1
+9	VertexStreamTests	0.0
+9	BadFileTests	0.0
+9	HiddenScopeTests	0.0
 9	SceneFileTests	0.0
-9	ScreenshotKeyTests	0.1
-9	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 27.8500004)	3.8
-9	TreeLevelShadowTests.TheShadowChangesLevelInTheFrameTheEyeCrossesTheBandsMiddle	6.2
-9	UiDebugOutlineTests	0.1
-10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: Low, bound: 0.10000000000000001)	0.7
-10	BounceRoomsTests.WithTheScreenProbesAViewReadsTheSameWithItsCameraMovedByAFewFloatSteps(quality: High)	0.8
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: Low, bound: 0.12)	0.5
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: Medium, bound: 0.13)	0.5
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 3, quality: Low, bound: 0.40999999999999998)	0.6
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: Medium, bound: 0.19)	0.7
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: Low, bound: 0.029999999999999999)	0.4
-10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: Low, bound: 0.27000000000000002)	0.4
-10	DeferredDrawTests	0.3
-10	GlobalIlluminationTests.AFarCascadeHoldsAWallPastTheCountedOnes	0.5
-10	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: High, height: 2.5)	2.5
-10	GlobalIlluminationTests.AGrassPatchUnderAUniformSkyReadsItsReference	8.4
-10	GlobalIlluminationTests.ALampOutsideAThinWalledRoomIsHiddenFromTheHitsBesideItsWalls	1.2
-10	GlobalIlluminationTests.AMirrorFloorReflectsARedWallStandingOnIt	0.3
-10	GlobalIlluminationTests.APicturesScreenProbesStandEveryTileItsHeightGives(height: 720, tile: 8)	0.2
-10	GlobalIlluminationTests.ARoomLitByOneEmitterKeepsItsReading	1.9
-10	GlobalIlluminationTests.AScreenProbeFedAValueThatIsNotANumberLeavesTheLightItBlendsIntoFinite	0.2
-10	ImageShapeTests	0.1
-10	MaterialTests	0.1
-10	MorphTargetTests	0.1
-10	OffscreenTests	0.1
-10	PersistentTests	0.1
-10	PointerTests	0.2
-10	RecordingTests	0.2
-10	ReflectedComponentTests	0.1
-10	ReflectionTests	0.1
-10	RowMoveTests	0.1
-10	SkyLightingTests	1.5
-10	SpawnTests	0.1
-10	TimingTests	0.1
-10	TreeLeavesTests.AReducedTreeCoversItsCrownAsTheFullOneDoesWhereTheyChange	9.2
+9	InputMessageTests	0.0
+9	MaterialFileTests	0.0
+9	ReflectedLayoutTests	0.0
+9	MaterialSurfaceTests	0.0
+9	ImageShapeTests	0.0
+10	TreeLeavesTests.AReducedTreeCoversItsCrownAsTheFullOneDoesWhereTheyChange	6.8
+10	TreeLevelShadowTests.AnOakBetweenItsLevelsTakesTheSunAsTheReferenceDoes(distance: 27.8500004)	4.1
+10	GizmoShapeTests	2.3
+10	TreeLeavesTests.ATreeInLeafCoversItsCrownWithItsSetsOrTheGeneratedLooks	1.1
+10	ViewDrawTests	0.9
+10	UiPixelTests	0.8
+10	RayTracingTests	0.6
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 8, quality: High, bound: 0.10000000000000001)	0.5
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 7, quality: Medium, bound: 0.059999999999999998)	0.5
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: High, bound: 0.25)	0.5
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: Medium, bound: 0.12)	0.5
+10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 7, quality: Medium, bound: 0.059999999999999998)	0.4
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 3, quality: Medium, bound: 0.40999999999999998)	0.4
+10	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 1, quality: Medium, bound: 0.13)	0.4
+10	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: Low, bound: 0.23999999999999999)	0.3
+10	CloudShadowTests	0.3
+10	SkyFogTests	0.2
+10	MeshShaderTests	0.1
+10	ExposureTests	0.1
+10	AfterAntialiasingTests	0.1
+10	TreeLeavesTests.ALeafDeepInACrownTakesLessOfTheSkyThanOneOnItsRimAndCarriesTheWayOut	0.0
+10	SpawnedWindowTests	0.0
+10	DrawnMeshTests	0.0
+10	MessageTests	0.0
+10	AssetEditTests	0.0
+10	TreeLeavesTests.ASeedPlacesTheSameLeavesEachTime	0.0
+10	TreeLeavesTests.LeafControlsOutOfRangeAreRefused	0.0
+11	GlobalIlluminationTests.AGrassPatchUnderAUniformSkyReadsItsReference	6.8
+11	GlobalIlluminationTests.ALoneAspensLeavesUnderAUniformSkyReadTheirReference	5.1
+11	GlobalIlluminationTests.AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough(quality: Low, height: 5.5)	1.9
+11	GlobalIlluminationTests.TwoBlocksMeetingAlongAnEdgeCloseItToAGlowLightsLight	1.4
+11	GlobalIlluminationTests.AClosedRoomReadsItsLightPastTheDirectAsItsReferenceThroughEveryBounce(size: 4)	1.2
+11	GlobalIlluminationTests.ALampOutsideAThinWalledRoomOfGlossyFacesIsReflectedNowhereInside	1.0
+11	GlobalIlluminationTests.ALeafInShadeTakesTheProbesLightAsTheSurfaceBesideIt	0.7
+11	GlobalIlluminationTests.AMirrorFloorReflectsARedWallDrawnForward	0.5
+11	GlobalIlluminationTests.ASurfaceDrawnForwardKeepsTheLightBevyGaveIt	0.4
+11	SceneFieldShadowTests	0.4
+11	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 6, quality: Medium, bound: 0.23999999999999999)	0.4
+11	GlobalIlluminationTests.AnOpenFloorReadsAsAnEnvironmentMapLightsIt	0.3
+11	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 6, quality: Low, bound: 0.27000000000000002)	0.3
+11	GlobalIlluminationTests.ARedWallTintsAWhiteBlocksSideTowardIt	0.2
+11	LitShaderTests	0.1
+11	EditableTextTests	0.1
+11	AmbientOcclusionPrepassTests	0.1
+11	AudioTests	0.1
+11	DrawnTests	0.0
+11	ScreenshotKeyTests	0.0
+11	ResourceTests	0.0
+11	ModelCommandTests	0.0
+11	NavigationTests	0.0
+11	GlobalIlluminationTests.AMaterialsShareOfLightLetThroughIsReadBack	0.0
+11	SpriteTests	0.0
+11	SpawnTests	0.0
+11	GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter	0.0
+12	TreeLevelShadowTests.TheShadowChangesLevelInTheFrameTheEyeCrossesTheBandsMiddle	6.6
+12	TreeLeavesTests.ACrownShadedByTheSkyItSeesDarkensItsMiddleMoreThanItsEdge	5.6
+12	*	1.4
+12	SkyLightingTests	1.0
+12	SkyboxTests	0.8
+12	ShaderMaterialTests	0.6
+12	LightProbeTests	0.6
+12	SkyWeatherTests	0.5
+12	AtmosphereTests	0.5
+12	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: High, bound: 0.029999999999999999)	0.5
+12	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 2, quality: Medium, bound: 0.040000000000000001)	0.5
+12	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 5, quality: Medium, bound: 0.029999999999999999)	0.4
+12	BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound(view: 4, quality: Low, bound: 0.20000000000000001)	0.4
+12	BounceRoomsTests.EachRoomLiesWithinItsMeasuredDistanceFromItsReference(view: 1, quality: Low, bound: 0.11)	0.4
+12	PhysicsTests	0.3
+12	GradingTests	0.2
+12	DeferredEmissiveTests	0.2
+12	ComputeShaderTests	0.1
+12	ReflectionTests	0.1
+12	LoadingTests	0.1
+12	WidgetTests	0.0
+12	GizmoRunTests	0.0
+12	ReflectedWrapperTests	0.0
+12	CaptureTests	0.0
+12	TreeLeavesTests.LeavesStandOnTheTwigsAndFaceUpAndOut	0.0
+12	TreeLeavesTests.AReducedCrownIsEveryOtherLeafAtItsPlaceTwiceTheArea	0.0
+12	PersistentTests	0.0
+12	TreeLeavesTests.TheLeavesLitAsACrownCostIsReadInAForest	0.0
