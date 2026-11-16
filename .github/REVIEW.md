@@ -1,6 +1,9 @@
 # Review
 
-Reviewed up to `db8afed6`, seven pictures of four days' items kept among the readings, with
+Reviewed up to `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
+the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
+tester's settings back, pushed at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form
+kept. Before it `db8afed6`, seven pictures of four days' items kept among the readings, with
 `0eb296a3`, the Slang scratch folder the user's own and slangc looked for only in the checkout a
 program stands in, pushed together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05,
 the pack run with publish for 0.6.145 started after it, the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
@@ -170,10 +173,10 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 60 is open until the pack run of 0.6.145, the pack run with publish 43773833500 red in a
+Verdict 62 is open, the pack run with publish 43828541813 red in the memory guard's own test on
+Linux. Verdict 60 is open until a pack run publishes, the pack run with publish 43773833500 red in a
 renderer pair's memory cap and one capture. Verdict 61 is settled at 08:14 on 2026-11-16, the ten
 renderer parts green in build run 43815745451 once an app gives back the memory its driver freed.
-Verdicts 2 and 33 to 59 are settled, said under each in REVIEW-ARCHIVE.md.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -207,6 +210,18 @@ Verdicts 2 and 33 to 59 are settled, said under each in REVIEW-ARCHIVE.md.
     mended if it is held memory, the cap then set by what a runner gives one host, and a part that
     passes 80% of its cap saying so in the digest, so the next re-lay is warned before it is
     stopped. Checked at 03:00.
+
+62. **The pack run with publish on `db8afed6` is red in the Linux job alone, the memory guard's own
+    test reading no growth.** Run 43828541813, ended at 11:21 on 2026-11-16, job 133168010121,
+    nothing published. `MemoryGuardTests.TheMemoryHeldIsReadAsItGrows` wrote a byte a page into 256
+    MB taken from the system and read the process at 595,763,200 bytes before and 595,832,832 after,
+    where 192 MB of growth are asked. The suite had 1,285 passed, 1 failed, 851 skipped. The same
+    test passed in the build runs of `6ae94ed5`, `db8afed6` and `6677ae12`. Asked, the cause shown
+    and not guessed (the C allocator handing the block from pages an earlier test freed and the
+    process still held resident is the first to rule in or out, the order of the pack run's Linux
+    job against the build run's the second), a test that fails the same way on this machine, and the
+    mend, which may be the test's (memory taken where the allocator cannot reuse held pages) or the
+    guard's reading. The pack run starts again on the mend's commit once its build run is green.
 
 ## Decisions
 
@@ -938,3 +953,71 @@ under the GPU lock. NormTests passed, 19.
 Shared: the clouds' and the fog's noise is read at the point less the carried wind, so both drift
 with it, and the clouds' noise is kept for each seed while a camera's clouds are given it, which a
 sibling drawing clouds over a carried offset or a seed reads the same way.
+
+147's passes, read before a mend. Every pass of the bridge's own that draws into a camera's picture,
+but its rounded corners (corners.rs), takes the whole picture for the camera's view, so on a camera
+with a viewport it draws over the whole window and finds a pixel's place in the view from where the
+pixel lies on the whole picture. Bevy's own sky, opaque geometry, bloom and the copy to the window
+keep to the viewport.
+
+The view draws (run_view_draws in views/draws.rs) open their pass with no viewport, so a draw of the
+fullscreen triangle covers the whole picture and a draw of geometry lands where the camera's
+projection reaches across all of it. These are the clouds' draw, the night sky, the froxel fog's
+draw, the rain's drops and splashes, the lightning's bolts and the lighting's resolve, the scene
+field's shadows and light (SceneField.cs:315), beside any draw a game gives a camera. What a later
+camera does not cover opaquely keeps what they drew in its half, Bevy's sky adding itself to what is
+there times the air's transmittance, which is the item's 0.49. In the camera's own half a draw shows
+the part of its view that the pixel's place on the whole window names, so a left camera's clouds
+show the left half of its view spread across its viewport.
+
+A camera's images and its per-pixel dispatches take the whole picture's size (views/images.rs:98 and
+views/dispatches.rs:282, both from main_texture), and the pass library's passPictureSize, passUv and
+its loads of depth, normals and motion count pixels from the picture's corner across it. So the
+clouds' march, the world probes' screen trace, filter and glows and the reference's trace work every
+pixel of the window and place each one in the view the same wrong way, and the copy of the picture
+into a camera's image (copy_pictures, the lighting's gi_picture) copies all of it.
+
+A camera's shader passes (run_passes in passes.rs), the look and a game's own, write the whole
+picture as Bevy's tonemapping does, which keeps the rest of a picture the cameras share whole, but
+place a pixel in the view by its place on the whole picture, so a pass reading depth or a pixel's
+neighbors is wrong on a camera with a viewport. The look reads each pixel alone and is right.
+
+Bevy's auto exposure meters a block the viewport's size from the picture's top left corner
+(compute_histogram in auto_exposure.wesl), so a camera in the right half meters the left half. It
+reads past its viewport where the others draw past it, and render/mended.rs can mend it as it mends
+Bevy's other shaders, an exact replacement adding the viewport's corner.
+
+The mend makes a camera's view its viewport throughout. The draws and the shader passes set the
+camera's viewport, a shader pass copying the picture outside it first so the rest stays as the
+camera found it. A camera's images, its per-pixel dispatches and the copies into them take the
+viewport's size, and the pass library counts uv and pixels from the viewport's corner across its
+size, adding the corner where it loads Bevy's depth, normals, motion or the picture, with a helper
+for a fragment's pixel that the kernels read in place of SV_Position. The tests give each of these
+to the left of two cameras splitting the window, the exposure among them, and check that the right
+half is as it was and that the left half shows what the camera shows filling a window of the
+viewport's size, with a reading of the clouds' pair.
+
+Verdict 62's cause and mend, in the commit carrying this Reply. glibc hands a request from a free
+stretch inside its heap that fits before it maps memory anew, so the quarter gigabyte
+MemoryGuardTests.TheMemoryHeldIsReadAsItGrows asked of NativeMemory.Alloc came back on pages the
+process held, which a byte a page written leaves as they were. The reading was right, 68 KB grown
+where nothing new was held. A probe on this machine left half a gigabyte of 64 KB blocks freed in
+glibc's main heap, as WhatTheCAllocatorHoldsFreeIsGivenBackAsAnAppEnds leaves it, and the 256 MB
+block asked after lay in the heap with 34,848 of its 65,536 pages resident before a byte was
+written, the reading 119 MB grown, where a block glibc mapped anew grew it by all 256 MB.
+
+The order is ruled out, the pack run calling the build run's own workflow on the same commit and
+xunit ordering a collection's tests by their ids, so both ran the suite alike. Two runs differ in
+what the host's heap holds free and in which of glibc's arenas the test's thread draws from, the
+main heap alone holding a stretch that large, and glibc shares its arenas among a host's threads
+past eight a processor, four on the runner.
+
+The test first leaves a third of a gigabyte freed and resident in glibc's heap, a block kept above
+it, then maps its quarter gigabyte from the system with mmap, VirtualAlloc on Windows, where no
+allocator can hand it pages the process holds, and gives the heap's freed pages back after. With the
+block from NativeMemory.Alloc as it stood it failed alone in three runs of three here, the reading 8
+KB grown, and with the mend it passed alone in three of three and in its class.
+
+The whole suite passed over this mend and those of the commit after it, from one tree, 2,149 passed,
+0 failed and 3 skipped, 2,152 in all where the listing is 2,141, the solution built from nothing
+with warnings as errors, a part at a time under the GPU lock. NormTests passed, 19.

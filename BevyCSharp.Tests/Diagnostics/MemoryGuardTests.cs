@@ -14,7 +14,7 @@ namespace Bevy.Tests;
 /// app instead, and what it decides and says is tried here.
 /// </remarks>
 [Collection("engine")]
-public sealed class MemoryGuardTests
+public sealed partial class MemoryGuardTests
 {
     [Fact]
     public unsafe void TheMemoryHeldIsReadAsItGrows()
@@ -36,20 +36,23 @@ public sealed class MemoryGuardTests
             GC.WaitForPendingFinalizers();
         }
 
+        var above = OperatingSystem.IsLinux() ? LeaveFreedResident() : null;
         var still = GC.TryStartNoGCRegion(16 << 20);
         try
         {
             var before = MemoryGuard.ResidentBytes();
 
-            // A quarter of a gigabyte from the system rather than from the GC, which may hand an
-            // array pages it kept resident from earlier tests, so the growth read would be what it
-            // held back rather than what the guard reads. A byte a page written, so its pages are
-            // the machine's and not only promised. Read on Windows as the private bytes committed,
+            // A quarter of a gigabyte mapped from the system rather than asked of an allocator, the
+            // GC's or the C library's, either of which hands a request pages it holds where they
+            // fit, glibc from what it keeps freed inside its heap before it maps anew, so the pages
+            // written would read as nothing grown. A byte a page written, so its pages are the
+            // machine's and not only promised. Read on Windows as the private bytes committed,
             // which Windows cannot trim as it trims a working set, which can read a fraction of
             // this, and on macOS as the physical footprint, which counts the pages the system
             // compressed under pressure, which the resident size leaves out on a runner short of
             // memory.
-            var held = (byte*)NativeMemory.Alloc(size);
+            var held = MapFresh(size);
+            Assert.True(held != null, "the system mapped nothing");
             try
             {
                 for (nuint at = 0; at < size; at += 4096) held[at] = 1;
@@ -62,14 +65,82 @@ public sealed class MemoryGuardTests
             }
             finally
             {
-                NativeMemory.Free(held);
+                Unmap(held, size);
             }
         }
         finally
         {
             if (still && GCSettings.LatencyMode == GCLatencyMode.NoGCRegion) GC.EndNoGCRegion();
+
+            if (above != null)
+            {
+                NativeMemory.Free(above);
+                MemoryGuard.GiveBackFreed();
+            }
         }
     }
+
+    /// <summary>
+    /// Leaves glibc's heap holding a third of a gigabyte freed and resident, as an earlier test's
+    /// frees can leave it, and answers the block kept above it, which the caller frees.
+    /// </summary>
+    /// <remarks>
+    /// In blocks smaller than glibc maps alone, so they come from its heap, each written a byte a
+    /// page so its pages are the machine's, and freed with the block above them kept, so they join
+    /// into one free stretch inside the heap rather than its end, which a free gives back at once.
+    /// </remarks>
+    private static unsafe byte* LeaveFreedResident()
+    {
+        const int count = 5120;
+        const nuint size = 64 << 10;
+        var blocks = new byte*[count];
+        for (var i = 0; i < count; i++)
+        {
+            blocks[i] = (byte*)NativeMemory.Alloc(size);
+            for (nuint at = 0; at < size; at += 4096) blocks[i][at] = 1;
+        }
+
+        var above = (byte*)NativeMemory.Alloc(size);
+        for (var i = 0; i < count; i++) NativeMemory.Free(blocks[i]);
+        return above;
+    }
+
+    /// <summary>
+    /// <paramref name="size"/> bytes mapped from the system, pages the process held none of before,
+    /// none resident until written, or null where the system maps none.
+    /// </summary>
+    private static unsafe byte* MapFresh(nuint size)
+    {
+        const uint Commit = 0x1000, Reserve = 0x2000, ReadWrite = 0x04;
+        if (OperatingSystem.IsWindows()) return (byte*)VirtualAlloc(0, size, Commit | Reserve, ReadWrite);
+
+        // Readable and writable, private and anonymous, whose flag is another number on macOS.
+        const int Read = 1, Write = 2, Private = 2;
+        var anonymous = OperatingSystem.IsMacOS() ? 0x1000 : 0x20;
+        var mapped = Mmap(0, size, Read | Write, Private | anonymous, -1, 0);
+        return mapped == -1 ? null : (byte*)mapped;
+    }
+
+    /// <summary>Gives back what <see cref="MapFresh"/> mapped.</summary>
+    private static unsafe void Unmap(byte* block, nuint size)
+    {
+        const uint Release = 0x8000;
+        if (OperatingSystem.IsWindows()) VirtualFree((nint)block, 0, Release);
+        else Munmap((nint)block, size);
+    }
+
+    [LibraryImport("libc", EntryPoint = "mmap")]
+    private static partial nint Mmap(nint address, nuint length, int protection, int flags, int descriptor, nint offset);
+
+    [LibraryImport("libc", EntryPoint = "munmap")]
+    private static partial int Munmap(nint address, nuint length);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "VirtualAlloc")]
+    private static partial nint VirtualAlloc(nint address, nuint size, uint type, uint protection);
+
+    [LibraryImport("kernel32.dll", EntryPoint = "VirtualFree")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool VirtualFree(nint address, nuint size, uint type);
 
     /// <summary>
     /// Memory the C allocator holds free inside its heap is given back to the system as an app ends,
