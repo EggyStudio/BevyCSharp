@@ -30,7 +30,6 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::mesh::{Mesh, Mesh3d};
             use bevy::pbr::{MeshMaterial3d, StandardMaterial};
 
@@ -43,7 +42,7 @@ pub unsafe extern "C" fn bcs_ecs_insert_asset(
                     return status::NO_ENTITY;
                 };
 
-                let entity = Entity::from_bits(entity);
+                let entity = crate::ecs::entity_from(entity);
                 let Ok(mut entity_mut) = world.get_entity_mut(entity) else {
                     return status::NO_ENTITY;
                 };
@@ -252,7 +251,7 @@ pub extern "C" fn bcs_render_set_mesh_flags(entity: u64, flags: u32) -> i32 {
             use bevy::render::batching::NoAutomaticBatching;
 
             with_world(|world| {
-                let Ok(mut entity) = world.get_entity_mut(bevy::ecs::entity::Entity::from_bits(entity))
+                let Ok(mut entity) = world.get_entity_mut(crate::ecs::entity_from(entity))
                 else {
                     return status::NO_ENTITY;
                 };

@@ -707,10 +707,14 @@ pub unsafe extern "C" fn bcs_app_create(config: *const BcsConfig) -> *mut BcsApp
         // The last app's vertex streams, whose names this app may give other shapes.
         crate::render::streams::forget_all();
 
-        // A new app, whose panics are crashes again until it, too, begins ending.
+        // A new app, whose panics are crashes again until it, too, begins ending, and which has
+        // the interface only where it asks for one.
         crate::crash::ending(false);
+        crate::capabilities::INTERFACE_INSTALLED.store(false, std::sync::atomic::Ordering::Relaxed);
 
+        // The app, and what wakes its loop from a thread outside its updates, where it has one.
         let app = build_app(&config, title, cleanup.clone());
+        crate::window::updates::keep_waker(&app);
         Box::into_raw(Box::new(BcsApp::new(app, cleanup)))
     })
 }

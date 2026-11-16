@@ -52,6 +52,7 @@ mod observers {
     use bevy::input_focus::FocusedInput;
     use bevy::prelude::Entity;
 
+    use crate::input_messages::copy;
     use crate::state::loan_world;
 
     /// The callback and the handle C# finds its handlers through, carried into the observer.
@@ -72,13 +73,6 @@ mod observers {
         fn call(&self, key: &BcsFocusedKey) {
             unsafe { (self.callback)(key, self.user) };
         }
-    }
-
-    /// Copies as much of `text` as fits, answering how much that was.
-    fn copy(into: &mut [u8; KEY_TEXT_CAPACITY], text: &str) -> u8 {
-        let len = text.len().min(KEY_TEXT_CAPACITY);
-        into[..len].copy_from_slice(&text.as_bytes()[..len]);
-        len as u8
     }
 
     /// Spawns the observer of keys reaching the focused entity, and returns its entity.

@@ -53,6 +53,37 @@ public sealed class WindowControlTests
         Assert.Equal((120u, 80u), size);
     }
 
+    /// <summary>
+    /// A wake is sent from a thread that has no world, as work finishing on a thread of its own
+    /// sends it, one started while the app runs and the test's own once the app has run.
+    /// </summary>
+    /// <remarks>
+    /// A thread of its own rather than a task waited on, since a task not yet started when it is
+    /// waited on may run on the waiting thread, which in a system has the world on loan.
+    /// </remarks>
+    [SkippableFact]
+    public void AWakeIsSentFromAThreadWithNoWorld()
+    {
+        Needs.Renderer();
+
+        Exception? during = null;
+        var sent = false;
+        using var harness = new EngineHarness(frames: 2);
+        harness.OnContext(Stage.Update, _ =>
+        {
+            if (sent) return;
+            sent = true;
+            var thread = new Thread(() => during = Record.Exception(Window.WakeUp));
+            thread.Start();
+            thread.Join();
+        });
+        harness.Run();
+
+        Assert.True(sent);
+        Assert.Null(during);
+        Assert.Null(Record.Exception(Window.WakeUp));
+    }
+
     [Fact]
     public void MonitorsAreCountedWithoutThrowing()
     {

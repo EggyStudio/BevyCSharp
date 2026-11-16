@@ -574,7 +574,7 @@ mod tests {
         });
 
         let world = app.world();
-        let entity = bevy::ecs::entity::Entity::from_bits(decal);
+        let entity = crate::ecs::entity_from(decal);
         assert!(world.get::<ForwardDecal>(entity).is_some());
         let handle = &world.get::<MeshMaterial3d<ForwardDecalMaterial<StandardMaterial>>>(entity).unwrap().0;
         let material = world.resource::<bevy::asset::Assets<ForwardDecalMaterial<StandardMaterial>>>().get(handle).unwrap();

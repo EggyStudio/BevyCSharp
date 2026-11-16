@@ -137,7 +137,7 @@ pub extern "C" fn bcs_render_set_prepass(camera: u64, flags: u32) -> i32 {
             use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceReflections};
             use bevy::post_process::motion_blur::MotionBlur;
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = refuse_unless_camera(world, entity) {
@@ -238,7 +238,7 @@ pub extern "C" fn bcs_render_set_camera_flags(camera: u64, flags: u32) -> i32 {
             use bevy::camera::visibility::NoCpuCulling;
             use bevy::render::view::NoIndirectDrawing;
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = refuse_unless_camera(world, entity) {

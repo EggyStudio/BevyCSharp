@@ -34,11 +34,10 @@ pub extern "C" fn bcs_render_set_sky_lighting(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::AtmosphereEnvironmentMapLight;
             use bevy::math::UVec2;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -92,10 +91,9 @@ pub extern "C" fn bcs_render_sky_lighting_cube(camera: u64) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::{AtmosphereEnvironmentMapLight, GeneratedEnvironmentMapLight};
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -150,7 +148,6 @@ pub unsafe extern "C" fn bcs_render_set_image_lighting(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::GeneratedEnvironmentMapLight;
             use bevy::math::Quat;
 
@@ -161,7 +158,7 @@ pub unsafe extern "C" fn bcs_render_set_image_lighting(
                 Quat::from_xyzw(parts[0], parts[1], parts[2], parts[3])
             };
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -507,7 +504,6 @@ pub unsafe extern "C" fn bcs_render_set_skybox(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::Skybox;
             use bevy::math::Quat;
 
@@ -518,7 +514,7 @@ pub unsafe extern "C" fn bcs_render_set_skybox(
                 Quat::from_xyzw(parts[0], parts[1], parts[2], parts[3])
             };
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -588,10 +584,9 @@ pub unsafe extern "C" fn bcs_render_set_environment_map(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::math::Quat;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             let turn = if rotation.is_null() {
                 Quat::IDENTITY

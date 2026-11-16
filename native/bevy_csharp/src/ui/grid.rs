@@ -141,7 +141,7 @@ pub unsafe extern "C" fn bcs_ui_set_grid(
             crate::state::with_world(|world| {
                 use bevy::ui::{Display, GridAutoFlow, Node};
 
-                let entity = bevy::ecs::entity::Entity::from_bits(entity);
+                let entity = crate::ecs::entity_from(entity);
                 let Some(mut node) = world.get_mut::<Node>(entity) else {
                     return status::NO_COMPONENT;
                 };
@@ -205,7 +205,7 @@ pub extern "C" fn bcs_ui_set_grid_placement(
             crate::state::with_world(|world| {
                 use bevy::ui::{GridPlacement, JustifySelf, Node};
 
-                let entity = bevy::ecs::entity::Entity::from_bits(entity);
+                let entity = crate::ecs::entity_from(entity);
                 let Some(mut node) = world.get_mut::<Node>(entity) else {
                     return status::NO_COMPONENT;
                 };

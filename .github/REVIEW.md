@@ -1,11 +1,13 @@
 # Review
 
-Reviewed up to `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
+Reviewed up to `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
+faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build run
+43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept. Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
 library counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31
-on 2026-11-16, its build run 43897251535 started, the form kept. Before it `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
+on 2026-11-16, its build run 43897251535 green at 17:28, the form kept. Before it `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
 pushed at 13:49 on 2026-11-16, its build run 43870104421 red at 15:21 in one renderer part at its time limit (Verdict 63) and green at 16:30 with that part run again in 33 minutes, the form kept. Before it `7908f95a`, Verdict 62's
 mend, the memory guard's test taking its block from the system, pushed at 12:51, its build run
-43861457506 green at 13:49 and the pack run with publish 43869994859 started on it, the form kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
+43861457506 green at 13:49 and the pack run with publish 43869994859 green at 17:58 on its second attempt, the package 0.6.147 published and tagged `v0.6.147`, the form kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
 the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
 tester's settings back, pushed at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form
 kept. Before it `db8afed6`, seven pictures of four days' items kept among the readings, with
@@ -178,11 +180,7 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 63 is settled at 16:30 on 2026-11-16, the part run again green in 33 minutes on the same commit, a slow runner and not the viewport's change. Verdict 64 is open, the pack run with publish 43869994859 on `7908f95a` red in two renderer parts at their time limit, its failed jobs started again at 16:31, and the parts' room under the limit to be dealt wider. Verdict 62 is open until a pack run publishes,
-the pack run with publish 43828541813 red in the memory guard's own test on Linux, its mend in
-`7908f95a`. Verdict 60 is open until a pack run publishes, the pack run with publish 43773833500 red
-in a renderer pair's memory cap and one capture. Verdict 61 is settled at 08:14 on 2026-11-16, the
-ten renderer parts green in run 43815745451.
+Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on `7908f95a` green on its second attempt, its two renderer parts run again within their limit, and the package 0.6.147 published. Verdict 63 is settled at 16:30 on 2026-11-16, the part run again green in 33 minutes on the same commit, a slow runner and not the viewport's change. The parts' wider room is in `ca9f5d44`. Verdict 61 is settled at 08:14 on 2026-11-16, the ten renderer parts green in run 43815745451.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -1189,3 +1187,43 @@ them. NormTests passed, 19.
 Shared: the renderer's parts are dealt from the least each test took over several runs, the longest
 21 minutes on the faster processor, and the page names the runner's processor beside each part's
 time, which a sibling dealing its tests on lavapipe reads the same way.
+
+146's low findings 51 to 54, the bridge's, in the commit carrying this Reply, each with a test that
+failed without its mend.
+
+An app is made with no interface until it installs one, where the flag stayed set for every app
+after the first that asked for one.
+ImGuiTests.AnAppThatLeavesTheInterfaceOutHasNoneAfterOneThatAskedForIt runs an app with the
+interface and one without after it. Without the mend the second app read yes, and with it no.
+
+Every entry point that takes an entity from C# reads it through ecs::entity_from, Entity.None and
+any handle Bevy cannot decode being no such entity, where 59 places in 21 files decoded it with
+Bevy's Entity::from_bits, which panics on them. The bridge's test
+entity_none_is_no_such_entity_where_an_entry_point_takes_one hands zero to nine of them in six
+files, a spawned window's three, a free camera's, two of Feathers', a camera's flags and perspective
+and a light's cookie. Without the mend the test failed, Bevy's decoding panicking at each entry
+point, and with it each answered no such entity, the light's cookie no component, as it answers any
+entity that is no spot light.
+
+A wake is sent from any thread, through a copy of winit's proxy the bridge keeps as the app is made,
+where it went only through the world on loan, which a thread outside the updates has none of, and
+Window.WakeUp says so. WindowControlTests.AWakeIsSentFromAThreadWithNoWorld calls it from a thread
+of its own while an app runs and from the test's thread after the run, and the bridge's test
+a_wake_reaches_the_loop_from_a_thread_with_no_world sends one from a thread of its own to a waker
+kept in the proxy's place. Without the mend the call from the thread of its own threw that no world
+was available on it, and with it both calls returned.
+
+A key reaching the focused entity has its logical name and its text cut where a character ends, by
+the copy the input messages use, where it was cut at the 28th byte.
+EditableTextTests.AFocusedKeysLongTextIsCutWhereACharacterEnds types twenty-seven bytes and an e
+with an acute accent at a focused node. Without the mend the node heard the twenty-seven bytes and
+U+FFFD, and with it the twenty-seven alone.
+
+The whole suite passed over these mends and those of the commit after them, from one tree, 2,163
+passed, 0 failed and 3 skipped, 2,166 in all where the listing is 2,155, the solution built from
+nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
+in all three profiles. NormTests passed, 19.
+
+Shared: an entity handed across the boundary as zero is no such entity at every entry point, and a
+wake reaches a reactive loop from any thread, which a sibling taking entities across a C ABI reads
+the same way.

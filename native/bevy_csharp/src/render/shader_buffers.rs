@@ -265,7 +265,7 @@ pub extern "C" fn bcs_shader_ray_scene_set(scene: i32, slot: i32, entity: u64, m
                 return status::NULL_ARG;
             }
 
-            let entity = (entity != 0 && mesh >= 0).then(|| bevy::ecs::entity::Entity::from_bits(entity));
+            let entity = (entity != 0 && mesh >= 0).then(|| crate::ecs::entity_from(entity));
 
             crate::state::with_world(|world| {
                 super::rays::set(world, scene, slot as u32, entity, mesh.max(0) as u32)
@@ -435,7 +435,7 @@ pub extern "C" fn bcs_shader_instance_buffer_set(buffer: i32, slot: i32, entity:
                 return status::NOT_PRESENT;
             }
 
-            let entity = (entity != 0).then(|| bevy::ecs::entity::Entity::from_bits(entity));
+            let entity = (entity != 0).then(|| crate::ecs::entity_from(entity));
 
             crate::state::with_world(|world| {
                 super::instances::set(world, buffer, slot as u32, entity)

@@ -5,8 +5,9 @@ using Xunit;
 namespace Bevy.Tests;
 
 /// <summary>
-/// What the interface does when there is no interface. The entry points exist either way, so the
-/// managed side links against one library and finds out at the call rather than at load.
+/// What the interface does when there is no interface, and what an app's interface leaves to the
+/// next app in the process. The entry points exist either way, so the managed side links against
+/// one library and finds out at the call rather than at load.
 /// </summary>
 /// <remarks>
 /// In the engine collection, because it runs a real app and two of those at once is not something
@@ -53,5 +54,33 @@ public sealed class ImGuiTests
         });
 
         harness.Run();
+    }
+
+    /// <summary>
+    /// An app that leaves the interface out has none, after an app in the same process that asked
+    /// for it as well, so starting the interface there says what the app left out.
+    /// </summary>
+    [SkippableFact]
+    public void AnAppThatLeavesTheInterfaceOutHasNoneAfterOneThatAskedForIt()
+    {
+        Needs.Renderer();
+
+        bool? asked = null, left = null;
+        new PictureRun
+        {
+            Width = 64,
+            Height = 64,
+            Configure = config => config.Gui = true,
+            Scene = _ => asked = App.HasInterface,
+        }.Wait(2).Go();
+
+        using (var harness = new EngineHarness(frames: 2))
+        {
+            harness.OnContext(Stage.Startup, _ => left = App.HasInterface);
+            harness.Run();
+        }
+
+        Assert.True(asked);
+        Assert.False(left);
     }
 }

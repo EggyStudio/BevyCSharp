@@ -635,3 +635,44 @@ pub unsafe extern "C" fn bcs_ecs_chunks(
         })
     })
 }
+
+#[cfg(all(test, feature = "render"))]
+mod tests {
+    use bevy::ecs::world::World;
+
+    use crate::interop::status;
+    use crate::render::{lights, post, scene};
+    use crate::state::loan_world;
+    use crate::{camera_controllers, feathers, spawned_windows as windows};
+
+    /// `Entity.None`, zero, handed to an entry point that takes an entity is no such entity, read
+    /// through [`super::entity_from`], where Bevy's own decoding panicked at the boundary. Nine of
+    /// them, from six of the files that read one.
+    #[test]
+    fn entity_none_is_no_such_entity_where_an_entry_point_takes_one() {
+        let mut world = World::new();
+        let (token, mut contents) = (b"none", 0u64);
+
+        let answers = loan_world(&mut world, || unsafe {
+            [
+                ("bcs_render_set_camera_window", windows::bcs_render_set_camera_window(0, 0), status::NO_ENTITY),
+                ("bcs_window_screenshot", windows::bcs_window_screenshot(c"none.png".as_ptr(), 0), status::NO_ENTITY),
+                ("bcs_window_fullscreen_on", windows::bcs_window_fullscreen_on(0, 0), status::NO_ENTITY),
+                ("bcs_free_camera_remove", camera_controllers::bcs_free_camera_remove(0), status::NO_ENTITY),
+                (
+                    "bcs_feathers_theme_color",
+                    feathers::bcs_feathers_theme_color(0, 0, token.as_ptr(), token.len() as i32),
+                    status::NO_ENTITY,
+                ),
+                ("bcs_feathers_contents", feathers::bcs_feathers_contents(0, &mut contents), status::NO_ENTITY),
+                ("bcs_render_set_camera_flags", post::bcs_render_set_camera_flags(0, 0), status::NO_ENTITY),
+                ("bcs_render_set_perspective", scene::bcs_render_set_perspective(0, 60.0, 0.1, 100.0), status::NO_ENTITY),
+                ("bcs_render_set_light_cookie", lights::bcs_render_set_light_cookie(0, -1), status::NO_COMPONENT),
+            ]
+        });
+
+        for (name, answer, expected) in answers {
+            assert_eq!(answer, expected, "{name} answered {answer} for Entity.None");
+        }
+    }
+}

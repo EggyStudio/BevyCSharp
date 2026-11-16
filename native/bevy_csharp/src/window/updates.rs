@@ -90,10 +90,35 @@ pub extern "C" fn bcs_window_request_redraw() -> i32 {
     })
 }
 
+/// What wakes the running app's loop, a copy of the proxy winit made for it, kept as the app is
+/// made, since a thread outside the updates has no world on loan to find the proxy in. Nothing for
+/// an app with no winit, as an offscreen or headless one, and the last app's is let go as the next
+/// is made.
+#[cfg(feature = "render")]
+static WAKER: std::sync::Mutex<Option<Box<dyn Fn() + Send>>> = std::sync::Mutex::new(None);
+
+/// Keeps what wakes `app`'s loop, as [`WAKER`] holds it.
+pub(crate) fn keep_waker(app: &bevy::app::App) {
+    #[cfg(not(feature = "render"))]
+    let _ = app;
+
+    #[cfg(feature = "render")]
+    {
+        let waker = app.world().get_resource::<bevy::winit::EventLoopProxyWrapper>().map(|proxy| {
+            let proxy = (**proxy).clone();
+            Box::new(move || {
+                let _ = proxy.send_event(bevy::winit::WinitUserEvent::WakeUp);
+            }) as Box<dyn Fn() + Send>
+        });
+        *WAKER.lock().unwrap_or_else(std::sync::PoisonError::into_inner) = waker;
+    }
+}
+
 /// Wakes winit's loop for one more update, as Bevy's `WinitUserEvent::WakeUp` sent through its
 /// event loop's proxy does, which is how something outside the app's own updates, as a thread
-/// that finished its work, asks for one. A run with no winit, as an offscreen one, never waits and
-/// has nothing to wake, so the call does nothing there.
+/// that finished its work, asks for one. It is sent from any thread, through the proxy kept as
+/// the app was made. A run with no winit, as an offscreen one, never waits and has nothing to
+/// wake, so the call does nothing there.
 #[unsafe(no_mangle)]
 pub extern "C" fn bcs_window_wake_up() -> i32 {
     crate::interop::guard(|| {
@@ -104,12 +129,10 @@ pub extern "C" fn bcs_window_wake_up() -> i32 {
 
         #[cfg(feature = "render")]
         {
-            with_world(|world| {
-                if let Some(proxy) = world.get_resource::<bevy::winit::EventLoopProxyWrapper>() {
-                    let _ = proxy.send_event(bevy::winit::WinitUserEvent::WakeUp);
-                }
-                status::OK
-            })
+            if let Some(wake) = WAKER.lock().unwrap_or_else(std::sync::PoisonError::into_inner).as_ref() {
+                wake();
+            }
+            status::OK
         }
     })
 }
@@ -123,8 +146,7 @@ mod tests {
     use crate::state::loan_world;
 
     /// The modes land in winit's settings as Bevy's desktop preset makes them, a bad wait is
-    /// refused, and a wake with no loop to reach and a redraw with no message to carry it do
-    /// nothing.
+    /// refused, and a redraw with no message to carry it does nothing.
     #[test]
     fn the_update_modes_land_in_winits_settings() {
         let mut world = World::new();
@@ -139,7 +161,27 @@ mod tests {
         assert_eq!(loan_world(&mut world, || super::bcs_window_set_update_modes(1, 0.0, 0, 1, 0.0, 0)), status::OK);
         assert_eq!(world.resource::<WinitSettings>().focused_mode, UpdateMode::Continuous);
 
-        assert_eq!(loan_world(&mut world, || super::bcs_window_wake_up()), status::OK);
         assert_eq!(loan_world(&mut world, || super::bcs_window_request_redraw()), status::OK);
+    }
+
+    /// A wake with no loop to reach does nothing, and one sent from a thread with no world on loan,
+    /// as a thread that finished its work sends it, reaches what wakes the loop.
+    #[test]
+    fn a_wake_reaches_the_loop_from_a_thread_with_no_world() {
+        use std::sync::atomic::{AtomicU32, Ordering};
+
+        static SENT: AtomicU32 = AtomicU32::new(0);
+        let keep = |waker: Option<Box<dyn Fn() + Send>>| *super::WAKER.lock().unwrap() = waker;
+
+        assert_eq!(std::thread::spawn(|| super::bcs_window_wake_up()).join().unwrap(), status::OK);
+
+        keep(Some(Box::new(|| {
+            SENT.fetch_add(1, Ordering::Relaxed);
+        })));
+        let answer = std::thread::spawn(|| super::bcs_window_wake_up()).join().unwrap();
+        keep(None);
+
+        assert_eq!(answer, status::OK);
+        assert_eq!(SENT.load(Ordering::Relaxed), 1);
     }
 }

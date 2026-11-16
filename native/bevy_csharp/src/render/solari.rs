@@ -192,7 +192,7 @@ pub extern "C" fn bcs_render_set_ray_traced_lighting(camera: u64, on: i32) -> i3
                 return status::NULL_ARG;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = super::refuse_unless_camera(world, entity) {
@@ -257,7 +257,7 @@ pub extern "C" fn bcs_render_set_ray_traced(entity: u64, mesh: i32) -> i32 {
                 return status::UNSUPPORTED;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
 
             with_world(|world| {
                 let Some(handle) = crate::assets::clone_handle(world, mesh).and_then(|handle| handle.try_typed::<Mesh>().ok())

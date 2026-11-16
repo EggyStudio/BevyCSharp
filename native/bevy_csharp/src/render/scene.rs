@@ -30,10 +30,9 @@ pub extern "C" fn bcs_render_set_camera_target(entity: u64, image: i32, layer: i
         #[cfg(feature = "render")]
         {
             use bevy::camera::RenderTarget;
-            use bevy::ecs::entity::Entity;
             use bevy::window::WindowRef;
 
-            let entity = Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -642,7 +641,7 @@ pub extern "C" fn bcs_render_set_rounded_corners(camera: u64, radius: f32, r: f3
                 return crate::interop::status::NULL_ARG;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -698,7 +697,7 @@ pub extern "C" fn bcs_render_set_perspective(camera: u64, fov_degrees: f32, near
                 return crate::interop::status::NULL_ARG;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {

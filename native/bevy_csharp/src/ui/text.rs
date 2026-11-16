@@ -233,7 +233,7 @@ pub unsafe extern "C" fn bcs_ui_spawn_text_span(
             let color = unsafe { core::slice::from_raw_parts(color, 4) };
 
             with_world_opt(|world| {
-                let parent = bevy::ecs::entity::Entity::from_bits(parent);
+                let parent = crate::ecs::entity_from(parent);
                 if world.get_entity(parent).is_err() {
                     return None;
                 }

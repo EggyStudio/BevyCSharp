@@ -102,8 +102,9 @@ impl BcsInputMessage {
     }
 }
 
-/// Copies text into a fixed buffer, cut at a character's end, and answers how many bytes it took.
-fn copy<const N: usize>(into: &mut [u8; N], text: &str) -> u8 {
+/// Copies text into a fixed buffer, cut at a character's end, and answers how many bytes it took,
+/// as a message and a key reaching the focused entity carry it.
+pub(crate) fn copy<const N: usize>(into: &mut [u8; N], text: &str) -> u8 {
     let mut end = text.len().min(N).min(u8::MAX as usize);
     while !text.is_char_boundary(end) {
         end -= 1;

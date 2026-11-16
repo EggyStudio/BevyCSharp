@@ -337,7 +337,7 @@ fn target_camera(entity: &mut bevy::ecs::world::EntityWorldMut, config: &BcsUiNo
     }
 
     entity.insert(bevy::ui::UiTargetCamera(
-        bevy::ecs::entity::Entity::from_bits(config.camera),
+        crate::ecs::entity_from(config.camera),
     ));
 }
 

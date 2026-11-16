@@ -121,6 +121,42 @@ public sealed class EditableTextTests
     }
 
     /// <summary>
+    /// A key's text longer than a focused key carries is cut where a character ends, so the focused
+    /// entity hears whole characters, as the key's message does.
+    /// </summary>
+    [SkippableFact]
+    public void AFocusedKeysLongTextIsCutWhereACharacterEnds()
+    {
+        Needs.Renderer();
+
+        string? text = null;
+        var run = new PictureRun
+        {
+            Width = 64,
+            Height = 32,
+            Scene = ecs =>
+            {
+                Render2d.SpawnCamera2d();
+                var node = Ui.SpawnNode(new UiSettings { Width = Length.Px(60f) });
+                Ui.Focus(node);
+
+                ecs.Observe<FocusedInput<KeyboardInput>>(node, on =>
+                {
+                    if (on.Event.Input.State == ButtonState.Pressed) text = on.Event.Input.Text;
+                });
+            },
+        };
+
+        // Twenty-seven bytes and a character of two, which the 28 a focused key carries cut in two.
+        run.Wait(2)
+            .Do("typing", _ => SyntheticInput.Tap(Key.A, new string('a', 27) + "\u00e9"))
+            .Wait(3)
+            .Go();
+
+        Assert.Equal(new string('a', 27), text);
+    }
+
+    /// <summary>
     /// Tab in a run with no window moves the focus along the tab order, from nothing to the first
     /// node and on to the second, and Shift with it back, as Bevy's observer on the window moves it
     /// in a run with one.

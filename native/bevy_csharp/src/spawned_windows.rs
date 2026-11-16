@@ -101,10 +101,9 @@ pub extern "C" fn bcs_render_set_camera_window(camera: u64, window: u64) -> i32 
         #[cfg(feature = "render")]
         {
             use bevy::camera::RenderTarget;
-            use bevy::ecs::entity::Entity;
             use bevy::window::WindowRef;
 
-            let (camera, window) = (Entity::from_bits(camera), Entity::from_bits(window));
+            let (camera, window) = (crate::ecs::entity_from(camera), crate::ecs::entity_from(window));
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, camera) {
@@ -148,7 +147,7 @@ pub unsafe extern "C" fn bcs_window_screenshot(path: *const core::ffi::c_char, w
             let Some(path) = (unsafe { crate::interop::cstr_to_string(path) }) else {
                 return status::NULL_ARG;
             };
-            let window = bevy::ecs::entity::Entity::from_bits(window);
+            let window = crate::ecs::entity_from(window);
 
             with_world(|world| {
                 if let Some(refusal) = refuse_unless_window(world, window) {
@@ -189,10 +188,9 @@ pub extern "C" fn bcs_window_fullscreen_on(window: u64, monitor: u64) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::window::{Monitor, MonitorSelection, VideoModeSelection, Window, WindowMode, WindowPosition};
 
-            let (window, monitor) = (Entity::from_bits(window), Entity::from_bits(monitor));
+            let (window, monitor) = (crate::ecs::entity_from(window), crate::ecs::entity_from(monitor));
 
             with_world(|world| {
                 if let Some(refusal) = refuse_unless_window(world, window) {

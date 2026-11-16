@@ -187,7 +187,7 @@ pub extern "C" fn bcs_render_set_contact_shadows(camera: u64, steps: u32, thickn
         {
             use bevy::pbr::ContactShadows;
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = refuse_unless_camera(world, entity) {
@@ -237,10 +237,9 @@ pub unsafe extern "C" fn bcs_render_set_screen_space_reflections(
         #[cfg(feature = "render")]
         {
             use bevy::core_pipeline::prepass::{DeferredPrepass, DepthPrepass};
-            use bevy::ecs::entity::Entity;
             use bevy::pbr::ScreenSpaceReflections;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
             let config = (!config.is_null()).then(|| unsafe { *config });
 
             with_world(|world| {
@@ -307,7 +306,6 @@ pub extern "C" fn bcs_render_set_ambient_light(camera: u64, r: f32, g: f32, b: f
         #[cfg(feature = "render")]
         {
             use bevy::color::Color;
-            use bevy::ecs::entity::Entity;
             use bevy::light::{AmbientLight, GlobalAmbientLight};
 
             let color = Color::linear_rgb(r, g, b);
@@ -323,7 +321,7 @@ pub extern "C" fn bcs_render_set_ambient_light(camera: u64, r: f32, g: f32, b: f
                     return status::OK;
                 }
 
-                let entity = Entity::from_bits(camera);
+                let entity = crate::ecs::entity_from(camera);
 
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
                     return refusal;
@@ -374,10 +372,9 @@ pub extern "C" fn bcs_render_set_ambient_occlusion(camera: u64, quality: i32, th
         #[cfg(feature = "render")]
         {
             use bevy::core_pipeline::prepass::{DepthPrepass, NormalPrepass};
-            use bevy::ecs::entity::Entity;
             use bevy::pbr::{ScreenSpaceAmbientOcclusion, ScreenSpaceAmbientOcclusionQualityLevel};
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -464,9 +461,8 @@ pub extern "C" fn bcs_render_set_sorted_transparency(
         #[cfg(feature = "render")]
         {
             use bevy::core_pipeline::oit::OrderIndependentTransparencySettings;
-            use bevy::ecs::entity::Entity;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
             let stock = OrderIndependentTransparencySettings::default();
 
             with_world(|world| {

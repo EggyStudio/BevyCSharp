@@ -51,7 +51,7 @@ fn material_handle(world: &bevy::ecs::world::World, kind: i32, id: i64) -> Optio
         // A sprite's material before its 2D mesh's, which on a sprite is the copy the sprite is
         // drawn with and is made again from the material whenever either changes.
         TARGET_ENTITY => {
-            let entity = bevy::ecs::entity::Entity::from_bits(id as u64);
+            let entity = crate::ecs::entity_from(id as u64);
             world
                 .get::<BcsMaterial3d>(entity)
                 .map(|material| MaterialHandle::Mesh(material.0.clone()))

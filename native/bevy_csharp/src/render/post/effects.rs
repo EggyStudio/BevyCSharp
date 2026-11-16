@@ -35,7 +35,6 @@ pub unsafe extern "C" fn bcs_render_set_grading(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::render::view::{ColorGrading, ColorGradingGlobal, ColorGradingSection};
 
             let config = if config.is_null() {
@@ -44,7 +43,7 @@ pub unsafe extern "C" fn bcs_render_set_grading(
                 Some(unsafe { *config })
             };
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -104,9 +103,8 @@ pub extern "C" fn bcs_render_set_exposure(camera: u64, ev100: f32) -> i32 {
         #[cfg(feature = "render")]
         {
             use bevy::camera::Exposure;
-            use bevy::ecs::entity::Entity;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -149,9 +147,8 @@ pub extern "C" fn bcs_render_set_lens_exposure(
         #[cfg(feature = "render")]
         {
             use bevy::camera::{Exposure, PhysicalCameraParameters};
-            use bevy::ecs::entity::Entity;
 
-            let entity = Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
             let stock = PhysicalCameraParameters::default();
 
             let lens = PhysicalCameraParameters {

@@ -97,12 +97,11 @@ pub unsafe extern "C" fn bcs_render_set_reflection_probe(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::{EnvironmentMapLight, LightProbe};
 
             use super::post::{PendingCubemaps, PendingEnvironment, PendingEnvironments};
 
-            let entity = Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             // SAFETY: forwarded from the caller's promise.
             let falloff = unsafe { falloff_of(falloff) };
 
@@ -193,10 +192,9 @@ pub unsafe extern "C" fn bcs_render_set_irradiance_volume(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::light::{IrradianceVolume, LightProbe};
 
-            let entity = Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             // SAFETY: forwarded from the caller's promise.
             let falloff = unsafe { falloff_of(falloff) };
 
@@ -377,9 +375,7 @@ pub unsafe extern "C" fn bcs_render_set_probe_capture(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
-
-            let entity = Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             // SAFETY: forwarded from the caller's promise.
             let falloff = unsafe { falloff_of(falloff) };
 
@@ -422,7 +418,7 @@ pub extern "C" fn bcs_render_recapture_probe(entity: u64) -> i32 {
 
         #[cfg(feature = "render")]
         {
-            let entity = bevy::ecs::entity::Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
 
             with_world(|world| {
                 let Ok(mut probe) = world.get_entity_mut(entity) else {

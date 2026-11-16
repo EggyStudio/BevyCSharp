@@ -18,7 +18,6 @@ pub extern "C" fn bcs_feathers_number_set(entity: u64, kind: i32, value: f64, wh
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::feathers::controls::NumberInputValue;
 
             let number = match kind {
@@ -29,7 +28,7 @@ pub extern "C" fn bcs_feathers_number_set(entity: u64, kind: i32, value: f64, wh
                 _ => return status::NULL_ARG,
             };
             crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
+                let Ok(mut input) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
                 input.insert(number);
@@ -59,11 +58,10 @@ pub unsafe extern "C" fn bcs_feathers_number_get(entity: u64, kind: *mut i32, va
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::feathers::controls::NumberInputValue;
 
             crate::state::with_world(|world| {
-                let Ok(input) = world.get_entity(Entity::from_bits(entity)) else {
+                let Ok(input) = world.get_entity(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
                 let Some(number) = input.get::<NumberInputValue>() else {
@@ -109,7 +107,6 @@ pub extern "C" fn bcs_feathers_number_limit(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::feathers::controls::{HardLimit, NumberInputRange, SoftLimit};
 
             let range = match kind {
@@ -120,7 +117,7 @@ pub extern "C" fn bcs_feathers_number_limit(
                 _ => return status::NULL_ARG,
             };
             crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
+                let Ok(mut input) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
                 if hard != 0 {
@@ -158,11 +155,10 @@ pub unsafe extern "C" fn bcs_feathers_number_units(entity: u64, units: *const u8
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::feathers::controls::NumberInputUnits;
 
             crate::state::with_world(|world| {
-                let Ok(mut input) = world.get_entity_mut(Entity::from_bits(entity)) else {
+                let Ok(mut input) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
                 input.insert(NumberInputUnits(units.into()));

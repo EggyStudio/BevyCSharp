@@ -338,7 +338,7 @@ fn on_camera(camera: u64, f: impl FnOnce(&mut bevy::ecs::world::World, bevy::ecs
 
     #[cfg(feature = "render")]
     {
-        let entity = bevy::ecs::entity::Entity::from_bits(camera);
+        let entity = crate::ecs::entity_from(camera);
         crate::state::with_world(|world| {
             if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
                 return refusal;

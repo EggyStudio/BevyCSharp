@@ -573,13 +573,11 @@ pub unsafe extern "C" fn bcs_feathers_spawn(
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
-
             crate::state::with_world(|world| {
                 if !world.contains_resource::<bevy::feathers::theme::UiTheme>() {
                     return status::INVALID_STATE;
                 }
-                let parent = if parent == 0 { None } else { Some(Entity::from_bits(parent)) };
+                let parent = if parent == 0 { None } else { Some(crate::ecs::entity_from(parent)) };
                 if let Some(parent) = parent
                     && world.get_entity(parent).is_err()
                 {
@@ -620,13 +618,12 @@ pub unsafe extern "C" fn bcs_feathers_theme_color(entity: u64, slot: i32, token:
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::feathers::theme::{
                 InheritableThemeTextColor, ThemeBackgroundColor, ThemeBorderColor, ThemeTextColor, ThemeToken,
             };
 
             crate::state::with_world(|world| {
-                let Ok(mut node) = world.get_entity_mut(Entity::from_bits(entity)) else {
+                let Ok(mut node) = world.get_entity_mut(crate::ecs::entity_from(entity)) else {
                     return status::NO_ENTITY;
                 };
                 let token = ThemeToken::new(token.into());
@@ -666,7 +663,6 @@ pub unsafe extern "C" fn bcs_feathers_contents(entity: u64, out: *mut u64) -> i3
 
         #[cfg(feature = "render")]
         {
-            use bevy::ecs::entity::Entity;
             use bevy::ecs::hierarchy::Children;
             use bevy::ecs::world::EntityRef;
             use bevy::feathers::controls::{FeathersDialog, FeathersDialogBody, FeathersFloatingDialog};
@@ -674,7 +670,7 @@ pub unsafe extern "C" fn bcs_feathers_contents(entity: u64, out: *mut u64) -> i3
             use std::collections::VecDeque;
 
             crate::state::with_world(|world| {
-                let root = Entity::from_bits(entity);
+                let root = crate::ecs::entity_from(entity);
                 let Ok(control) = world.get_entity(root) else {
                     return status::NO_ENTITY;
                 };

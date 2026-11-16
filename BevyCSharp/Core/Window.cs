@@ -250,13 +250,14 @@ public static unsafe partial class Window
     public static void RequestRedraw() => Native.Check(NativeCore.bcs_window_request_redraw(), "Window.RequestRedraw");
 
     /// <summary>
-    /// Wakes winit's loop for one more update, as Bevy's <c>WinitUserEvent::WakeUp</c> does. Only
-    /// valid inside a system.
+    /// Wakes winit's loop for one more update, as Bevy's <c>WinitUserEvent::WakeUp</c> does. Sent
+    /// from any thread.
     /// </summary>
     /// <remarks>
-    /// The event an app's own work sends where it finishes outside the updates, and which wakes a
-    /// reactive mode reacting to the app's own events. A run with no window never waits, so this
-    /// does nothing there.
+    /// The event an app's own work sends where it finishes outside the updates, from the thread it
+    /// ran on, which has no world, and which wakes a reactive mode reacting to the app's own events.
+    /// The bridge keeps winit's proxy for it as the app is made. A run with no window never waits,
+    /// so this does nothing there.
     /// </remarks>
     /// <exception cref="BevyNativeException">This build has no windows.</exception>
     public static void WakeUp() => Native.Check(NativeCore.bcs_window_wake_up(), "Window.WakeUp");

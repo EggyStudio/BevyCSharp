@@ -143,7 +143,7 @@ pub unsafe extern "C" fn bcs_tilemap_insert(
             }
 
             let chunk = unsafe { *chunk };
-            let entity = bevy::ecs::entity::Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             let tiles = match unsafe { tiles_from(tiles, count) } {
                 Ok(tiles) => tiles,
                 Err(refusal) => return refusal,
@@ -213,7 +213,7 @@ pub unsafe extern "C" fn bcs_tilemap_write(entity: u64, start: i32, tiles: *cons
         {
             use bevy::sprite_render::TilemapChunkTileData;
 
-            let entity = bevy::ecs::entity::Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             let tiles = match unsafe { tiles_from(tiles, count) } {
                 Ok(tiles) => tiles,
                 Err(refusal) => return refusal,
@@ -262,7 +262,7 @@ pub unsafe extern "C" fn bcs_tilemap_read(entity: u64, start: i32, out: *mut Bcs
                 return status::NULL_ARG;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(entity);
+            let entity = crate::ecs::entity_from(entity);
             with_world(|world| {
                 let Ok(found) = world.get_entity(entity) else {
                     return status::NO_ENTITY;

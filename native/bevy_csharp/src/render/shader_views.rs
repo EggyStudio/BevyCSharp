@@ -136,7 +136,7 @@ pub unsafe extern "C" fn bcs_render_set_view_images(
                 });
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -190,7 +190,7 @@ pub unsafe extern "C" fn bcs_render_set_view_dispatches(
                 &[]
             };
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -308,7 +308,7 @@ pub unsafe extern "C" fn bcs_render_set_view_draws(
                 &[]
             };
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -484,7 +484,7 @@ pub unsafe extern "C" fn bcs_render_watch_view_image(
                 return status::NULL_ARG;
             }
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -539,7 +539,7 @@ pub unsafe extern "C" fn bcs_render_unwatch_view_image(camera: u64, name: *const
                 return status::NULL_ARG;
             };
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
@@ -636,7 +636,7 @@ pub unsafe extern "C" fn bcs_render_set_shader_passes(
                 (&[], &[])
             };
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             crate::state::with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {

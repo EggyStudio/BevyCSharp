@@ -167,7 +167,7 @@ pub extern "C" fn bcs_render_set_shadow_cascades(
             use bevy::light::{CascadeShadowConfigBuilder, DirectionalLight};
 
             crate::state::with_world(|world| {
-                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                let entity = crate::ecs::entity_from(light);
 
                 // The component says this is the kind of light cascades mean anything to, so a
                 // point light asked for them is refused rather than silently given a component
@@ -249,7 +249,7 @@ pub extern "C" fn bcs_render_set_light_cookie(light: u64, image: i32) -> i32 {
             };
 
             crate::state::with_world(|world| {
-                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                let entity = crate::ecs::entity_from(light);
 
                 if world.get::<SpotLight>(entity).is_none() {
                     return status::NO_COMPONENT;
@@ -326,7 +326,7 @@ pub extern "C" fn bcs_render_set_directional_cookie(light: u64, image: i32, half
             };
 
             crate::state::with_world(|world| {
-                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                let entity = crate::ecs::entity_from(light);
                 if world.get::<DirectionalLight>(entity).is_none() {
                     return status::NO_COMPONENT;
                 }
@@ -375,7 +375,7 @@ pub extern "C" fn bcs_render_set_soft_shadows(light: u64, size: f32) -> i32 {
             let soft = size > 0.0;
 
             crate::state::with_world(|world| {
-                let entity = bevy::ecs::entity::Entity::from_bits(light);
+                let entity = crate::ecs::entity_from(light);
                 let Ok(mut light) = world.get_entity_mut(entity) else {
                     return status::NO_COMPONENT;
                 };
@@ -425,7 +425,7 @@ pub extern "C" fn bcs_render_set_shadow_filtering(camera: u64, method: i32) -> i
                 _ => return status::NULL_ARG,
             };
 
-            let entity = bevy::ecs::entity::Entity::from_bits(camera);
+            let entity = crate::ecs::entity_from(camera);
 
             with_world(|world| {
                 if let Some(refusal) = crate::render::refuse_unless_camera(world, entity) {
