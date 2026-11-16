@@ -1,12 +1,15 @@
 # Review
 
-Reviewed up to `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
+Reviewed up to `db8afed6`, seven pictures of four days' items kept among the readings, with
+`0eb296a3`, the Slang scratch folder the user's own and slangc looked for only in the checkout a
+program stands in, pushed together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05,
+the pack run with publish for 0.6.145 started after it, the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
 back on its first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory
 its GPU driver freed as it ends and the renderer's hosts held to a cap fitted to the runner,
 `093262d8`, the game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further
 findings of the audit mended and a text that grows while it is read asked for again, pushed together
-at 07:17 on 2026-11-16, their build run 43815745451 started, 0.6.143 to be packed once it is green,
-the form kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
+at 07:17 on 2026-11-16, their build run 43815745451 green at 08:14 with the ten renderer parts among it, the form
+kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
 `8e6fb6df`, `3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07
 on 2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
 (Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a renderer run on every
@@ -132,17 +135,6 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     test serve both engines, the sibling reading the same room on its own merge at its item 265.
     After 138.
 
-143. **The tests that need a renderer run on a runner.** From the two engines' tests read side by
-    side on 2026-11-14, the RadianceCascades module's .github/KERNELS.md, What holds each kernel.
-    The runners' suites build the headless bridge, so every test behind Needs.Shaders skips there,
-    global illumination's GPU tests among them, and what holds the bridge's lighting is held on one
-    machine alone, where the sibling's Vulkan tests run on lavapipe on every push. First a read as a
-    Reply, the tests behind Needs.Shaders run on the render bridge under lavapipe as the drive job
-    has it, how long each class takes held to four cores, which bounds measured on the GPU do not
-    hold there and by how much, and what a job of them would take. Then a job on Linux in the build
-    workflow, its classes dealt into parts under 45 minutes each as the sibling deals its Windows
-    suite, each bound that moves said anew as a count of pixels with its reason. After item 120.
-
 144. **The cascades' rays traced by the adapter, as a backend beside the field.** Decision 92 on
     2026-11-14. After 138, with the sibling's item 271, in the shared kernels, one interface a ray
     is traced through with two forms, the field's march and a ray query through Bevy's acceleration
@@ -169,10 +161,18 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     says why. The six high ones beside 143's sweep, which runs in its containers on its own; the
     rest after 143, ahead of 93.
 
+147. **Clouds given to one camera show in another camera's half.** Two cameras split the window by
+    viewports and clouds are given to the left one alone, yet 0.49 of the right half's upper pixels
+    change. Find whether the cloud pass draws over the whole target without the camera's viewport or
+    scissor, and read the other passes of a camera's own (fog, bloom, the lighting's resolve,
+    exposure) for the same. A Reply first naming each pass that draws past its viewport, then the
+    mend with a test of two viewports for each, and a reading.
+
 ## Verdicts
 
-Verdicts 60 and 61 are open, the pack run with publish 43773833500 red in a renderer pair's memory
-cap and one capture, and the build run 43784334694 red in two renderer parts at the same cap.
+Verdict 60 is open until the pack run of 0.6.145, the pack run with publish 43773833500 red in a
+renderer pair's memory cap and one capture. Verdict 61 is settled at 08:14 on 2026-11-16, the ten
+renderer parts green in build run 43815745451 once an app gives back the memory its driver freed.
 Verdicts 2 and 33 to 59 are settled, said under each in REVIEW-ARCHIVE.md.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
@@ -716,413 +716,6 @@ where it said a hundred. It is a comment alone, which no test reads.
 The whole suite that passed over these is the one the asset fields' Reply above gives. NormTests
 passed, 19.
 
-143, the read of the tests that need a renderer on the render bridge under lavapipe held to four
-cores, in the commit carrying this Reply, with the mends of three tests the read found at fault, and
-the plan of the Linux job's parts by minutes, which comes in a commit after it.
-
-The 172 classes whose tests call Needs.Shaders, 58, or Needs.Renderer alone, 114, ran on the pack
-run's render bridge for linux-x64 in a container of the runner's image, Ubuntu 24.04 with Mesa
-25.2.8, lavapipe held to four cores by LP_NUM_THREADS and by taskset inside the container. The suite
-was built in that image, and Mesa's shader cache started empty and was kept from class to class, as
-a job's would be. Each class was a build/test.py run of its own in a container of its own, killed at
-a quarter hour, under the GPU lock shared once no exclusive lock had been held or waiting for three
-minutes, so a timing got in between any two. The seven readings of a cost in a forest or a room were
-left out, each drawing hundreds of frames at 1080p to time a GPU's passes, which tells nothing of a
-device that draws on the processor.
-
-A piece is one case, or a few cases of one class packed by their earlier times under the cap, run as
-a class is, a test.py run in a container of its own. 168 classes ran whole, and 5 of them, four of
-the trees' classes and the wind's, ran past the quarter hour, their cases that ended counted from
-that run and the rest dealt into pieces. The other 4, the bounce rooms', the reference's, global
-illumination's and the canopy's, were set aside as too long for one run and read in pieces alone. So
-9 classes came to 93 pieces. 11 of them ran past the quarter hour and 2 lost their cases to a filter
-MSBuild could not read, a theory case's quoted argument, and those 13 ran again a case at a time,
-held to 41 minutes, of which 10 ended and 3 ran past it.
-
-The 114 classes that need a renderer alone take 46 minutes of processes, 40 of them in their cases.
-The 58 that need shaders take 562 minutes, 436 of them in their cases, global illumination's class
-242 alone. 21 of their cases take five minutes or more each, 247 minutes together, each a reading
-against a traced reference, a forest or a tree between its levels, and the thousand-tree forest of
-TreeMemoryTests takes 24 minutes. Three cases ran out the 41 minutes,
-GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter,
-GlobalIlluminationTests.ALoneAspenLitFromBehindLetsThroughTheSunItsReferenceDoes and
-TreeWindTests.AWindBendsATreeDownwindAndTwoTreesAlikeSwayOutOfStep, which take 19.6, 12.7 and 22.8
-seconds on the card, more than a hundred times as long here, where the lone aspen under the sky
-takes 631 seconds against the card's 16. 1,161 cases passed, 3 failed and 22 were skipped, 12 of
-them Solari's and 4 the meshlets', which the pack's render bridge is built without, and 6 needing
-what the image lacks, a sound device, Feathers' source in the cargo registry, the examples'
-textures, Python 3.14 for build/textures.py in two, and a headless bridge.
-
-SpirvComputeTests.ARaySceneOfItsOwnIsTracedAndFollowsWhatMoves failed, the slab met by no ray. A
-trial laid the scene five ways, and the slab is met in slot 1 of 2, in slot 1 of 4 with the
-stand-ins after it, alone in slot 0, and in slot 3 with real cubes far off in slots 1 and 2, and
-missed only in slot 3 with the stand-ins of mask zero in slots 1 and 2. The Vulkan specification has
-an instance whose mask shares no bit with the ray's cull mask never met, and says nothing more of a
-mask of zero, so the fault is lavapipe's. The test lays the slab in slot 1 on a CPU device, the
-stand-ins after it, so ray four still passes through the stand-in at the origin and finds it never
-met, and keeps slot 3 everywhere else, where the slot the empty ones leave as it was is held.
-docs/ray-tracing.md says a scene meant to be traced on lavapipe fills its slots from zero. In a copy
-of the read's tree from a Mesa cache that started empty, the test as it was failed on lavapipe as
-the read had it, and mended it passes there and on the card.
-
-A report for Mesa, drafted and not filed. Lavapipe in Mesa 25.2.8 commits no hit on an instance of a
-top-level acceleration structure laid after instances whose mask is zero. A structure of four
-instances, a cube in instance 0, the same cube with mask 0 in instances 1 and 2 at the origin, and a
-slab of mask 0xFF in instance 3, traced with rayQueryInitializeEXT and a cull mask of 0xFF straight
-down onto the slab, commits nothing, where the slab in instance 1 with the instances of mask 0 after
-it, or in instance 3 with instances of mask 0xFF in 1 and 2 placed away from the rays, is met. An
-instance of mask 0 is never met by the specification, which makes nothing of the instances after it.
-
-GlobalIlluminationTests.ALoneAspensLeavesUnderAUniformSkyReadTheirReference read +28% against its
-bound of 25%, where the card reads +24% on the same reference, 0.0471 on both. A trial wrote the
-picture at Medium, the picture with global illumination off and the reference whole on both devices.
-The reference, the floor and the stems read alike, the floor within 0.2% and the stems within about
-1%, and the leaves read 3.0% higher on lavapipe at Medium and 3.6% with global illumination off, so
-it is neither the probes nor their rays. It grows with the slant, 2.4% on the leaves that face the
-eye and 5 to 10% on those seen side on, and the leaves' textures are filtered with sixteen samples
-at a slant. With one sample on both devices the two read alike within 0.2%, 0.0599 and 0.0600, and
-to the fourth place with global illumination off. On the card the sixteen samples take 3.1 points
-off the test's +27.2%, and on lavapipe 0.3, so the leaves read 27% over their reference with their
-textures filtered alike, and the card's filtering at a slant brings them to 24%. The bound stays as
-it is in this commit, and the job's commit bounds the filtering's share apart, 25% on a device whose
-filtering at a slant darkens the leaves as the card's does and 29% on a CPU device, whose filtering
-leaves them as one sample does, where lavapipe read 27.7% in the trial and 27.8% in the read.
-
-ThunderTests.AStrikeLightsTheNightAndDrawsItsBolt failed, the strike not lighting the ground. The
-flash dies away over half a second of Time.Delta, and the test waits four frames before its lit
-picture, which on lavapipe took 0.55 seconds of the machine's clock, so the test read the machine's
-clock in effect, as N 3.3 bars. It runs on a set frame time of a sixtieth of a second. As it was,
-the test passed on lavapipe at four cores in one run of two and failed at one core, and mended it
-passes at one core and on the card.
-
-CaptureTests.WhatWasDrawnCanBeReadBack read its red channel as 0 once, on the first whole run's cold
-cache, and passed on the clean pass. It asked for its capture at frame 10 whatever its pipelines'
-state, and the camera draws nothing into its target until they are ready. It asks once every
-pipeline has been ready three frames running, as PictureRun.Capture does, and the app runs until the
-picture arrives. From a Mesa cache that started empty the test as it was read its red channel as 0
-again, and mended it asked for its capture at frame 42 and passed.
-
-The job is planned by these minutes. A part holds at most 38 minutes here, which the slowest Linux
-runner read, an EPYC 7763 drawing about 1.1 times as slowly as this container, takes in 42, under
-the 45. A class goes whole into a part where it fits one and by its cases where it does not, as
-global illumination's, the bounce rooms', the reference's and the trees' leaves and levels do, first
-fit from the longest. Every class comes to 13 full parts and a sliver, 494 minutes of the runners'
-time, 271 of them the 22 cases of five minutes or more, each a reading against a traced reference, a
-forest or a tree between its levels. All of them run on every push, the long cases among them, laid
-out by wall time, a part a job where the account's concurrent jobs allow it beside the build's other
-legs and two a job where they would queue each other, and the three cases past 41 minutes run on the
-card alone, skipped on a CPU device with the reason said where they are skipped, as the seven
-readings of a cost are. build/test.py has --parts and --filter and no way to name a part, so that
-commit gives it one, as the sibling's --split and --only do, and a bound that moves on lavapipe is
-said there as a count of pixels with its reason.
-
-The whole suite passed over these mends and those of 146's medium findings 32, 37 and 38 in the
-commit after it, from one tree, 2,117 passed, 0 failed and 3 skipped, 2,120 in all where the listing
-is 2,109, the solution built from nothing with warnings as errors, a part at a time under the GPU
-lock once it had been free of timings for three minutes. NormTests passed, 19.
-
-Shared: lavapipe in Mesa 25.2.8 meets nothing in a ray scene's instance laid after one of mask zero,
-and its filtering at a slant leaves a texture as one sample does where a card's sixteen samples
-darken a leaf seen side on by a few percent, so a bound read on a card over textured cards seen at a
-slant reads higher on lavapipe. The sibling runs its tests on lavapipe and reads its bounds on the
-card, so this is offered for it to read.
-
-146's medium findings 32, 37 and 38, the session file, a panic that ends the run and a canceled
-read, in the commit carrying this Reply, each with a test that failed without its mend.
-
-The session file is opened anew with the owner's read and write alone from the moment it is made,
-before the token goes into it, a temporary file a crashed write left deleted first, and the sessions
-folder is made the owner's alone where it is missing, where the file was made under the process's
-umask, 0644 here, and its mode set only once the token was in it, and the folder made 0755. A folder
-that is there keeps its mode, since BCS_SESSIONS may name one somebody else made.
-CliSessionTests.TheTokenIsNeverWhereAnotherAccountCouldReadIt reads the file's mode as the token is
-about to go in, through a call CliSessionFile makes for a test, and the folder's once it is written.
-Without the mend the token went into a file of mode 0644, which the group and others read, and with
-it the file is its owner's alone as the token goes in and so is the folder.
-
-A panic on the main thread inside Bevy's run, which the guard around the run hears as the bridge's
-status and the hook leaves unwritten, is written to the crash file whole and thrown from App.Run as
-a BevyNativeException, where the status went back as the code the process ends with.
-CrashLogTests.APanicThatEndsTheRunIsWrittenAndThrown runs an app for two frames through the bridge's
-run followed by a panic inside the guard, the bridge's own panic made on purpose, which stands for
-one that unwinds out of Bevy's run as the bridge's status and its last panic. Without the mend the
-run handed back the bridge's status and threw nothing, and with it the run throws the panic's words
-and the crash file holds them under a heading of their own.
-
-A streamed read keeps what it brought back only while it is not canceled, under a lock
-Streaming.Cancel takes to drop a finished read, so a read canceled while its file read ran, or
-before a slice too short to read was kept, never lands after its cancel.
-StreamingTests.ACanceledReadNeverLandsAfterItsCancel asks for eight empty slices at a priority of 1,
-canceling each as it is asked for, and then a read at 0. Without the mend 7 of the 8 canceled reads
-landed after their cancel, and with it none does and the read at 0 is handed over.
-
-The whole suite that passed over these mends is the one 143's Reply above gives. NormTests passed,
-19.
-
-Shared: a session file holding the command line's token is made readable by its owner alone as it is
-made, before the token goes in, in a folder made its owner's alone, where its mode was set once the
-token was in it. The sibling's command line keeps a session with a token as well and may meet the
-same, so this is offered for it to read.
-
-143, the Linux job, in the commit carrying this Reply. Every test that needs a renderer runs on
-every push on Linux's render bridge under lavapipe, in fourteen parts laid out by the read's
-minutes, the aspen's leaves held to a bound of their own on a CPU device and the ten cases that
-would take hours there skipped on one.
-
-A job builds the render bridge for Linux on every run, render-bridge, with a cache of its own, where
-the native job builds the six for a pack alone, and the renderer job runs the parts on it, each a
-build/test.py run of build/renderer-parts.tsv on the runner's lavapipe after the solution is built
-with warnings as errors, as the test job builds it, and slangc is fetched. A case is held to 35
-minutes before it counts as hung, since the longest takes 24 there and test.py's five would end a
-part at its first long case. A push runs a part to a job, fourteen beside the test job's three,
-seventeen at once at the most, within the twenty jobs GitHub's free plan runs at once. A pack runs
-two parts to a job, seven, since its ten jobs on the native job's bridge start beside them once that
-bridge is built, and with the test job's three they come to twenty, where a part to a job would come
-to twenty-seven and hold some in the queue. The token here cannot read the account's plan, and on
-Pro's forty a pack too could run a part to a job. The sibling's runs take from the same account's
-jobs when both are pushed at once. The digest job puts each part's page beside the three systems',
-each named for its parts, as lavapipe, part 3.
-
-build/test.py gains --layout, --only and --system. A line of the layout holds a part's number and a
-test class or one case of a class by its display name, matched with vstest's escapes as the read's
-pieces were, and the part holding * takes every test no other line names, so the classes that draw
-nothing, a class or a case added since the read and the cases that skip on a CPU device run there,
-and no test falls between two parts. The fourteen parts' listings through their filters came to the
-whole listing's 2,110 between them, each test in one part. The parts are as many as first fit from
-the longest needs under 38 minutes, and the classes and cases are dealt from the longest, each to
-the part holding least, which makes them alike at some 36 minutes where first fit left thirteen of
-38 and a sliver, so the jobs' wall time is the shorter. Four classes go by their cases, global
-illumination's, the trees' leaves', the level shadow's and the bounce rooms', each theory's case by
-its arguments. TestScriptTests.ALayoutsPartsRunTheirLinesAndThePartWithTheStarEveryOtherTest runs a
-layout of two parts on the stand-in, whose filter reader takes parentheses, & and | and a case by
-its whole display name, and fails without the options, which test.py refused before them.
-
-A trial ran a part as a job runs one, in the runner's image on the read's render bridge, whose
-sources are the tree's, lavapipe held to four cores, from a Mesa cache and a Slang cache that
-started empty, in a clone of the tree with its modules and these changes laid on it. The first was
-lost at test.py's five minutes a case to
-TreeLeavesTests.ACrownShadedByTheSkyItSeesDarkensItsMiddleMoreThanItsEdge, ten minutes there, which
-gave the job its 35. In the second the solution built in 123 seconds with no warning, and the part
-holding *, laid out with ten minutes guessed for the tests no line names, took 26 minutes. Its named
-lines took 24.8 minutes, the read's own to the tenth, so a cache that starts empty costs a part
-nothing the read did not count, and the 919 tests no line names took 1.6 minutes in their cases. 974
-passed and 13 were skipped, 5 of them the skips on a CPU device below, 4 for what the image lacks,
-Pillow and strip, and 4 as the Linux test job skips them, a package to open or build on, a headless
-bridge and a window storm not asked for. 2 failed for the image alone,
-CrashLogTests.APanicsFramesAreNamedFromTheFullLibraryOfItsBuild finding no nm and
-ScriptsPluginTests.ALockFileIsPassedOverAndAnUnreadableScriptFailsAsAWarning reading a script of
-mode none as root, where the runner has binutils and runs as an account of its own, and the test job
-passes both on Linux. The layout was laid again with 2 minutes for the rest, fourteen parts of 35.2
-to 35.7 minutes, about 39 on the slowest runner's processor, under test.py's 45 a part and the job's
-hour with its setup.
-
-The aspen's bound is 25% where the device filters as the card does and 29% on a CPU device. Lavapipe
-in the runner's image reports samplerAnisotropy true and maxSamplerAnisotropy 16, as the card does,
-so what it reports of its filtering cannot tell the two apart, and the bound goes by the adapter's
-device type, which Needs.DrawsOnTheProcessor reads once a run in an app of three frames. The aspen's
-leaves cover 2,380 pixels on both, and their mean light reads 0.0585 on the card and 0.0602 on
-lavapipe against the reference's 0.0471, +24% and +28%, inside 25% and 29%. On lavapipe in the
-runner's image it passed in 10 minutes 33 seconds.
-
-Needs.Gpu skips a test on a CPU device with its reason. The three cases past 41 minutes say they
-take past forty minutes there where a graphics card takes seconds, and the seven readings of a cost
-say they read what their passes cost a GPU, where a device that draws on the processor would take
-hours to time its processor instead. On lavapipe each of the ten skipped with its reason, the first
-in a second for the app that reads the device and the rest in milliseconds, and on the card all ten
-ran and passed, the three long cases in 11 to 17 seconds and the seven readings in 7 to 36.
-
-The whole suite passed over these changes, 2,118 passed, 0 failed and 3 skipped, 2,121 in all where
-the listing is 2,110, the solution built from nothing with warnings as errors, a part at a time
-under the GPU lock once it had been free of timings for three minutes. NormTests passed, 19.
-
-Shared: the tests that need a renderer run on lavapipe on every push in parts a file lays out by
-each class's or case's minutes there, a class whole where it fits a part and by its cases where it
-does not, a part holding * taking every test no line names, with build/test.py's --layout and
---only. The sibling deals its classes to its parts in turn with --split and --only, so this is
-offered for it to read.
-
-146's medium findings 42 to 44, a clip ending as its model goes, the overlay's clock and a stop by a
-left-over id, in the commit carrying this Reply, each with a test that failed without its mend.
-Finding 39, a behavior method spread over threads reaching the world on the main thread's share,
-goes with the bridge's batch, since its mend is an entry point that takes the world's loan off the
-calling thread for the length of the loop, beside 48 and 49 in the bridge's Slang module.
-
-The clips that ended are posted with an empty name where the scene was despawned or taken apart
-between the bridge noting the end in PostUpdate and the next frame's First reading the names, where
-the lookup threw, which lost the rest of the batch and the frame's message swap. AnimationFinished
-says the name is empty then. AnimationTests.AClipEndingAsItsModelIsDespawnedIsSaidWithoutItsName
-plays a clip once and despawns the model in Last on the second frame its state reads finished, since
-the bridge's noting runs before Bevy's animation step, which nothing orders it against, and notes
-the end in the frame after. Without the mend Engine.FrameSync threw reading the clips of the
-despawned entity and the clip was never said, and with it the clip is said once, for that entity,
-with no name.
-
-The F3 overlay times frames on the machine's clock, the real one Bevy keeps beside the game's, its
-strip, its rate, its head line and the pace it writes its lines at, as ImGui's step does, where they
-read the game's clock, which stops while the game is paused, is scaled by its speed and is cut at a
-quarter of a second. DebugOverlayTests.TheOverlayTimesFramesOnTheMachinesClockWhateverTheGamesDoes
-runs frames of 20 milliseconds, slows the game to a quarter and then pauses it. Without the mend the
-slowed game's line read 194 fps and 5.0 ms a frame, and with it 50 fps and 20.0 ms slowed and paused
-alike, the strip's last 60 frames 20 milliseconds each while the game was paused. The strip's test
-reads the same clock.
-
-A session is running while its id is held by a process that started no later than a second after the
-session came up, so a process handed the id of a killed app, after the machine restarts or its ids
-come round, is gone to bcs stop, status and doctor, and stop kills nothing and takes the file away,
-where a process with that id was killed. CliSessionTests.AFileWhoseIdAProcessStartedSinceHoldsIsGone
-writes a session for the test's own process that came up an hour before it started. Without the mend
-that session read as running, so a stop would have killed the test's own process, and with it the
-session is gone and pruning sweeps it up.
-
-The whole suite passed over these mends and the changes of the three commits after them, from one
-tree, 2,123 passed, 0 failed and 3 skipped, 2,126 in all where the listing is 2,115, the solution
-built from nothing with warnings as errors, a part at a time under the GPU lock once it had been
-free of timings for three minutes. NormTests passed, 19.
-
-Shared: a session file left by a killed app names an id the system may hand to another program, so
-the command line takes the process for the app only when it started no later than the session came
-up. The sibling's CliSession reads a process by its id alone, and its stop kills by that id, so this
-is offered for it to read.
-
-146's medium findings 45 to 47, a crashed bridge test on Windows and two pages of the guide, in the
-commit carrying this Reply, the first with a test that failed without its mend.
-
-build/test.py takes a cargo part as lost to a crash where cargo exited with an error and no test
-failed, or where a test binary ended other than with 101, the code a binary whose tests failed exits
-with, by a signal on Linux and macOS or an exception's code on Windows, where it looked only for a
-signal or a missing result, and the doctests cargo runs after a crashed binary print a result.
-TestScriptTests.ABridgeTestBinaryThatCrashesOnWindowsIsSaidAsLost runs the bridge's part on the
-cargo stand-in, which prints a binary overflowing its stack after its first test, as cargo on
-Windows prints it, then the doctests' result. Without the mend the script passed the part and exited
-with 0, and with it the part is lost to a crash after log::tests::an_error_is_kept and the script
-exits with 1.
-
-docs/messages-and-hierarchy.md and MessageBus say that every reader sees a frame's set once a frame,
-that a system in FixedUpdate is handed it as many times as it runs, twice after a slow frame and not
-at all after a fast one, and that a fixed step acting on messages has them read in a stage that runs
-once a frame, into a component or a resource the steps read, where they said exactly once whatever
-the stage. A MessageReader in a fixed step would read each message once, but a message is kept for
-the frame it was sent in and the next, so at a frame rate past twice the fixed one it would be gone
-before a step came, and the page does not send a fixed step there. It is a page and a comment alone,
-which no test reads.
-
-docs/shaders.md says that the shader's m[3] is a C# matrix's fourth row, where CreateTranslation
-puts its offset, that System.Numerics applies a matrix to a row vector, so mul(v, m) is
-Vector4.Transform(v, m), and that mul(m, v) applies it transposed, as ShaderValues says, where it
-said mul(m, v) was m applied to v. ShaderValueTests.AMatrixArrivesTheRightWayRound holds what it
-says, a matrix whose second row sends x to y under mul(m, v), and the page alone changes.
-
-The whole suite that passed over these is the one the clips' Reply above gives. NormTests passed,
-19.
-
-146's medium finding 50, a script reload whose carry-over throws, in the commit carrying this Reply,
-with a test that failed without its mend. The rest of the medium findings are the bridge's, 7, 26 to
-29, 33, 39, 48 and 49, global illumination's kernels, 34 to 36 and 40, which go with 138, and 12, 25
-and 41, which wait for a free GPU.
-
-A reload carries the running generation's components and revives a scene's kept ones in two steps,
-every value written down and brought up to its type's version first and only then moved or put on,
-through ReloadedComponents.CarryAndRevive, so a migration that throws leaves every entity as it was.
-The script host takes such a generation back as it takes back one that fails to load, its systems,
-what the app keeps by its types and the descriptions it laid over the running one's, and says why in
-LastError, where the carry-over ran outside the host's guard, an entity lost its values to a
-component removed before its migration threw, and the new generation's systems ran beside the old
-for the rest of the app. Carry and Revive keep their lines and take the same two steps.
-ScriptReloadTests.AReloadWhoseMigrationThrowsLeavesTheRunningScriptAsItWas counts by ones, then
-reloads the counter at a second version whose migration throws. Without the mend the migration's
-InvalidDataException came out of Reload, and with it Reload answers false with the migration's words
-in LastError and the count goes on by ones from where it stood.
-
-CHEATSHEET.md and BevyCSharp/PublicApi.txt gain ReloadedComponents.CarryAndRevive's line, and
-Revive's line in the first is worded again with its summary, a type that has described a held
-component since its scene loaded, which N 2.4 asks to be said here. A scenes project opening to the
-scripting one would have added a line to build/norm/1.6.txt, which only gets shorter, so the method
-is public on the class that was.
-
-The whole suite that passed over this mend is the one the clips' Reply above gives. NormTests
-passed, 19.
-
-143's renderer job laid out again from its first run, in the commit carrying this Reply. Build run
-43767207459 of ca8c50b4 took 17.1 to 35.7 minutes a renderer job, their tests 15.6 to 33.6, where
-the layout gave each part 35.2 to 35.7 from lavapipe held to four cores here. The runner's lavapipe
-took 0.44 to 0.95 of a part's minutes by what the part held, part 1 the slowest, GiReferenceTests 29
-of its minutes. Parts 1, 5, 12 and 14 waited 13 to 18 minutes for a job while the sibling's build
-run held 7 of the account's twenty, and the run took 70 minutes in all.
-
-build/renderer-parts.tsv lays the same 313 lines into ten parts of some 32 minutes, each line's
-minutes the read's scaled by what its part took on the runner against what its lines came to, dealt
-from the longest, each to the part holding least. A push runs ten jobs beside the test job's three
-and a pack five of two parts, as the reviewer asked. The limits stay, a part's 45 minutes and a
-case's 35, and a job's 60 on a push and 105 in a pack, which hold a part of some 34 minutes with its
-setup and a pair of some 66 at half as long again on the slowest of the runners' processors. No
-class split by its cases fits a part whole, GlobalIlluminationTests at 97 minutes on the runner,
-TreeLeavesTests at 36, TreeLevelShadowTests at 35 and BounceRoomsTests at 32. The ten parts'
-listings through their filters came to the whole listing's 2,115 between them, each test in one
-part.
-
-A part's minutes are shared among its lines by the read's, since the job kept no case's time, so
-each renderer job keeps its parts' results files for a week as test-results-renderer, from which a
-layout laid again reads each case's own time on the runner.
-
-The whole suite that passed over this layout is the one the clips' Reply above gives. NormTests
-passed, 19.
-
-Verdicts 60 and 61, the renderer's parts stopped at the memory cap, in the commit carrying this
-Reply, each with a test that failed without its mend. The game of life's capture follows in the
-commit after it, and 146's bridge findings in the four after that.
-
-The guard counts its own host alone, its anonymous resident pages against a cap of a quarter of what
-.NET sees, 3.90 GB on a runner of 15.6, and build/test.py runs a job's parts one after another, each
-its own process, so the two parts of a pair never shared a host or a cap. A host's memory climbs
-with the apps it runs. Sampled twice a second on lavapipe held to four threads here, the ten-part
-layout's part 2 was stopped at 3.81 GB of its cap of 3.75 in its seventeenth minute, in
-TreeCanopyTests' forest after a case of TreeLevelShadowTests. The forest's test alone held 2.09,
-2.97 and 3.34 GB across its three apps and fell between none of them, and with glibc held to two
-arenas 3.14. A probe reading the host as each app had ended found 2.7 to 3.2 GB held beside 21 MB of
-managed heap and 1.4 MB of the bridge's own allocations, what lavapipe had freed and glibc's heaps
-kept for the next app, and malloc_trim gave back all but 0.4 to 0.6 GB of it.
-
-So an app that ends gives back what the C allocator holds free, on Linux, through
-MemoryGuard.GiveBackFreed in App.Dispose, whose documentation says so and what it costs. With it the
-forest's apps peak at 2.79 and 3.08 GB, each falling to half a gigabyte as it ends, and the call
-took 176 and 168 milliseconds after two forest apps on lavapipe here, giving back 2.27 and 2.24 GB.
-MemoryGuardTests.WhatTheCAllocatorHoldsFreeIsGivenBackAsAnAppEnds writes 8,192 C blocks of 64 KB,
-frees every other one, the last kept, so each freed block lies inside the heap, and ends an app.
-Without the mend the host held 575 MB with half the blocks freed and 581 MB once the app had ended,
-and with it the test passed three runs of three. A C library without the call, musl's, or no C
-library to load, answers the first time with a missing entry point or library, which is caught and
-the call not tried again, as MemoryGuardTests.ACLibraryWithoutTheCallIsAskedOnce holds through two
-apps with a call standing in that throws. The portable image builds the bridge against glibc 2.36,
-and the call is looked up in the player's own C library as the app ends.
-
-One forest needs some 3.1 GB on lavapipe, four fifths of the default cap, so the renderer job holds
-its hosts to 5 GB of the runner's 15.6, which a host has to itself as the parts run one after
-another, and its largest process to 7 GB resident, past what the guard counts by the files it maps.
-build/test.py takes --memory-cap-gb and gives it to the hosts as BCS_MEMORY_CAP_GB, reads the
-anonymous memory each host holds on Linux, and says a part past four fifths of its cap under the
-parts' lines, in the digest the renderer jobs' pages are merged into and in a warning, so a layout
-putting more in a host is told before the guard stops one.
-TestScriptTests.APartNearItsMemoryCapIsSaid has a stand-in host hold 120 MB under caps of 128 MB and
-of 4 GB. Without the change test.py refused --memory-cap-gb, and with it the part under 128 MB is
-said near its cap and the part under 4 GB is not. The pairs stay as they are laid, as the verdict's
-line on them is read again. CHEATSHEET.md's line for App.Dispose takes the summary it is given here,
-which N 2.4 asks to be said.
-
-No game or template needs a change for these commits or the four of the bridge after them. A game
-built on the package carries the package's bridge, whose ABI moves to 327 with its managed side, the
-two Shaders calls are added beside the rest, a behavior method spread across threads that reached
-the world on the calling thread's share throws there as on the others, and none of the games' or
-templates' does, and the Slang scratch folder is found by the bridge where the user's runtime or
-cache folder is, which no game names. The tree reckons its version 0.6.143 with the first five of
-these commits.
-
-The whole suite passed over these mends and the changes of the commits after them, from one tree,
-2,134 passed, 0 failed and 3 skipped, 2,137 in all where the listing is 2,126, the solution built
-from nothing with warnings as errors, a part at a time under the GPU lock once it had been free of
-timings for three minutes. The run before it failed one test, whose mend the shader targets' Reply
-gives. The most a host held of its own, as the guard counts it, was part 18's 2,063 MB under the 3
-GB cap the run gives its hosts, with 2,691 MB resident. NormTests passed, 19.
-
 Verdict 60's capture, compute_shader_game_of_life, in the commit carrying this Reply. Its steps
 start once its programs are ready, a frame the held clock leaves to the device, so its shot in frame
 120 held 117 steps here and 118 on the runner, and showed the other image of the two it swaps
@@ -1301,3 +894,47 @@ and the alley's two starts, Verdict 59's Blockout, item 145's Swarm and item 143
 aspen. Verdict 60's pair of the game of life went with its capture.
 
 NormTests passed, 19.
+
+146's medium findings 12, 25 and 41, the clouds' and the fog's drift, the scripted run's settings
+and the clouds' noise, in the commit carrying this Reply, each with a test that failed without its
+mend.
+
+The clouds and the fog's lumps read their noise at the point less the way the wind has carried them,
+so they drift with the wind. CloudShadowTests.TheCloudsShadowDriftsWithTheWind and
+FroxelFogTests.TheFogsLumpsDriftWithTheWind take two pictures two seconds apart, each frame a
+sixtieth of a second, and find the shift at which they agree best, the way the world's x runs across
+the picture read from the camera's turn. Without the mend the shadow moved 25 pixels and the lumps
+21 against the wind, and with it both moved with it.
+
+The clouds' noise is kept for each seed a camera's clouds are given, made once, and let go of once
+no camera's are given that seed, its makers taken away and its volumes released, so each camera
+reads the noise it was fed and clouds given again make none.
+CloudTests.CloudsDrawFromTheirSeedWhereAnotherCameraIsGivenAnother gives a camera's clouds seed 0
+and then another camera's seed 7, the other drawn first and over. Without the mend the camera's
+noise was never made and its clouds covered none of its sky, and with it 0.37 of the upper half.
+CloudTests.CloudsGivenAgainEveryFrameMakeNoNoiseOfTheirOwn gives two cameras' clouds again every
+frame with seeds 7 and 0, then the first seed 9, and counts the app's images. Without the mend the
+noise was made again at every call and never finished, and the device ran out of memory, and with it
+the count stood still throughout.
+
+build/drive-feature-test.sh copies the tester's settings file aside once the feature test says where
+it is, through the feature test's new setting.file command, and its exit trap puts the file back
+after the program stops, or takes away one the run made where there was none, however the run ends.
+A failed run left every setting it changed in the file, and a run naming a quality wrote the named
+one over the tester's. The restores of the day and the weather at the run's end go, the trap doing
+it. ScriptedRunTests runs the script in a checkout of its own beside a stand-in for bcs that keeps
+the settings in a file and a player standing still, so it fails at the hub's walk, listed in
+build/norm/1.4.txt by its nature beside the build scripts' other tests. Without the mend the file
+held the run's changes, DaySpeed 0 among them, and a file was left where there was none, and with it
+the file was as it was and none was left.
+
+The readings 2026-11-16-item-146-cloud-drift.webp and 2026-11-16-item-146-cloud-seeds.webp show the
+two mends that change what is seen.
+
+The whole suite passed over these mends, 2,140 passed, 0 failed and 3 skipped, 2,143 in all where
+the listing is 2,132, the solution built from nothing with warnings as errors, a part at a time
+under the GPU lock. NormTests passed, 19.
+
+Shared: the clouds' and the fog's noise is read at the point less the carried wind, so both drift
+with it, and the clouds' noise is kept for each seed while a camera's clouds are given it, which a
+sibling drawing clouds over a carried offset or a seed reads the same way.

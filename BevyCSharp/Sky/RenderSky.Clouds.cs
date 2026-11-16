@@ -82,7 +82,7 @@ public static partial class RenderSky
     }
 }
 
-/// <summary>The clouds <see cref="RenderSky.extension(Render).SetClouds"/> puts on cameras, the noise an app's and the march and draw a camera's.</summary>
+/// <summary>The clouds <see cref="RenderSky.extension(Render).SetClouds"/> puts on cameras, the noise each seed's and the march and draw each camera's.</summary>
 internal static class Clouds
 {
     /// <summary>The name the clouds' image, dispatch, draw and prepass are kept under on a camera beside the engine's other parts.</summary>
@@ -97,11 +97,11 @@ internal static class Clouds
     private const uint SkyTexels = 64;
 
     private static App? _app;
-    private static Noise? _noise;
+    private static readonly Dictionary<uint, Noise> Noises = [];
     private static readonly Dictionary<ulong, Camera> Cameras = [];
 
-    // The noise volumes, made once an app and again for another seed, and whether the dispatches
-    // that make them have run.
+    // The noise volumes for a seed, made once while a camera's clouds are given that seed and let
+    // go of once none are, and whether the dispatches that make them have run.
     private sealed class Noise
     {
         internal required uint Seed { get; init; }
@@ -117,6 +117,7 @@ internal static class Clouds
         internal required ShaderInstance March { get; init; }
         internal required ShaderInstance Draw { get; init; }
         internal required CloudSettings Settings { get; set; }
+        internal required Noise Noise { get; set; }
         internal int Frames { get; set; }
         internal Vec3 Carried { get; set; }
 
@@ -150,6 +151,7 @@ internal static class Clouds
                 March = Shaders.CreateInstance(Shaders.KernelProgram(typeof(RenderSky).Assembly, "clouds.slang")),
                 Draw = Shaders.KernelDraw(typeof(RenderSky).Assembly, "clouds_draw.slang"),
                 Settings = settings,
+                Noise = noise,
             };
             Cameras[camera.Bits] = clouds;
         }
@@ -158,6 +160,8 @@ internal static class Clouds
         var standing = had && clouds.Settings.ShadowLight == settings.ShadowLight && clouds.Shadow.IsValid == !settings.ShadowLight.IsNone;
         if (!clouds.Shadowed.IsNone && clouds.Shadowed != settings.ShadowLight) Uncookie(clouds);
         clouds.Settings = settings;
+        clouds.Noise = noise;
+        LetGoOfUnused();
         if (!settings.ShadowLight.IsNone && !clouds.Shadow.IsValid)
         {
             clouds.Shadow = Shaders.CreateInstance(Shaders.KernelProgram(typeof(RenderSky).Assembly, "clouds.slang", entry: "shadows"));
@@ -226,7 +230,7 @@ internal static class Clouds
             clouds.SkyCopy.SetTexture("sky_source", cube).SetTexture("sky_held", held).SetSampler("sky_sampler", SamplerSettings.ClampedTable);
             clouds.SkyMerge.SetTexture("sky_cube", cube).SetTexture("sky_copied", held).SetTexture("sky_cloud_layer", small)
                 .SetSampler("sky_sampler", SamplerSettings.ClampedTable);
-            Feed(clouds, clouds.SkyClouds, NoiseFor(clouds.Settings.Seed));
+            Feed(clouds, clouds.SkyClouds, clouds.Noise);
 
             // Both marches read the clear sky from the copy made before them.
             foreach (var marching in new[] { clouds.March, clouds.SkyClouds })
@@ -257,6 +261,7 @@ internal static class Clouds
     {
         ForgetOtherApps();
         if (!Cameras.Remove(camera.Bits, out var clouds)) return;
+        LetGoOfUnused();
         Uncookie(clouds);
         Shaders.SetEngineViewDraws(camera, Owner);
         Shaders.SetEngineViewDispatches(camera, Owner);
@@ -271,23 +276,24 @@ internal static class Clouds
         return Cameras.Select(clouds => (new Entity(clouds.Key), clouds.Value.Settings));
     }
 
-    /// <summary>Whether the noise is made and every camera's march and draw have compiled, so a frame draws the clouds.</summary>
+    /// <summary>Whether there are clouds and every camera's noise is made and its march and draw have compiled, so a frame draws the clouds.</summary>
     internal static bool Ready()
     {
         ForgetOtherApps();
-        return (_noise?.Made ?? false) && Cameras.Values.All(c =>
-            c.March.Program.State == ShaderProgramState.Ready && c.Draw.Program.State == ShaderProgramState.Ready);
+        return Cameras.Count > 0 && Cameras.Values.All(c => c.Noise.Made
+            && c.March.Program.State == ShaderProgramState.Ready && c.Draw.Program.State == ShaderProgramState.Ready);
     }
 
     /// <summary>
-    /// Makes the noise once its program has compiled, and moves every camera's clouds on a frame,
-    /// the wind carrying them and the history read from the third frame on.
+    /// Makes each seed's noise once its program has compiled, and moves every camera's clouds on a
+    /// frame, the wind carrying them and the history read from the third frame on.
     /// </summary>
     internal static void Tick(World world)
     {
         ForgetOtherApps();
-        if (_noise is { Made: false } noise && noise.Makers.All(m => m.Program.State == ShaderProgramState.Ready))
+        foreach (var noise in Noises.Values)
         {
+            if (noise.Made || !noise.Makers.All(m => m.Program.State == ShaderProgramState.Ready)) continue;
             Shaders.Dispatch(noise.Makers[0], 32, 32, 32);
             Shaders.Dispatch(noise.Makers[1], 8, 8, 8);
             Shaders.Dispatch(noise.Makers[2], 128, 128, 1);
@@ -374,7 +380,7 @@ internal static class Clouds
             CloudQuality.High => (128f, 6f),
             _ => (72f, 6f),
         };
-        var history = clouds.Frames > 2 && (_noise?.Made ?? false) && glow is null ? 1f : 0f;
+        var history = clouds.Frames > 2 && clouds.Noise.Made && glow is null ? 1f : 0f;
         var instances = new List<ShaderInstance> { clouds.March };
         if (clouds.Shadow.IsValid) instances.Add(clouds.Shadow);
         if (clouds.SkyClouds.IsValid) instances.Add(clouds.SkyClouds);
@@ -386,10 +392,10 @@ internal static class Clouds
         }
     }
 
-    // The noise for a seed, made again where the seed differs from the one the app has.
+    // The noise for a seed, the one a camera's clouds were given it with or one made for it.
     private static Noise NoiseFor(uint seed)
     {
-        if (_noise is { } noise && noise.Seed == seed) return noise;
+        if (Noises.TryGetValue(seed, out var noise)) return noise;
         ShaderInstance Maker(uint size, uint which, uint depth) =>
             Shaders.CreateInstance(Shaders.KernelProgram(typeof(RenderSky).Assembly, "cloud_noise.slang")).SetNumbers("size", 4, (ReadOnlySpan<uint>)[size, which, depth, seed]);
         var shape = Shaders.CreateImage(128, 128, ShaderImageFormat.Rgba8, depth: 128);
@@ -400,15 +406,29 @@ internal static class Clouds
         makers[0].SetTexture("cloud_noise", shape);
         makers[1].SetTexture("cloud_noise", detail);
         makers[2].SetTexture("cloud_noise", weather);
-        _noise = new Noise { Seed = seed, Shape = shape, Detail = detail, Weather = weather, Makers = makers };
-        return _noise;
+        return Noises[seed] = new Noise { Seed = seed, Shape = shape, Detail = detail, Weather = weather, Makers = makers };
+    }
+
+    // Lets go of the noise of each seed no camera's clouds are given, the dispatches that made it
+    // taken away and its volumes let go, which a march fed them reads until its next frame's names
+    // the noise that follows.
+    private static void LetGoOfUnused()
+    {
+        foreach (var unused in Noises.Values.Where(noise => !Cameras.Values.Any(clouds => clouds.Noise == noise)).ToList())
+        {
+            foreach (var maker in unused.Makers)
+                Shaders.DestroyInstance(maker);
+            foreach (var volume in new[] { unused.Shape, unused.Detail, unused.Weather })
+                AssetServer.Release(volume);
+            Noises.Remove(unused.Seed);
+        }
     }
 
     private static void ForgetOtherApps()
     {
         if (ReferenceEquals(_app, App.Running)) return;
         _app = App.Running;
-        _noise = null;
+        Noises.Clear();
         Cameras.Clear();
     }
 }

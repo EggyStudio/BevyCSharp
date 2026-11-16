@@ -335,6 +335,14 @@ public static class Settings
         Changed?.Invoke(was);
     }
 
+    /// <summary>The file the settings are kept in, which each change is written to.</summary>
+    /// <remarks>
+    /// For build/drive-feature-test.sh, which copies it aside as a run begins and puts it back as
+    /// the run ends, however it ends, so a run leaves the tester's settings as it found them.
+    /// </remarks>
+    [Command("setting.file", "The file the panel's settings are kept in, which each change is written to")]
+    internal static string SettingsFile() => Store.FullPath;
+
     /// <summary>
     /// Reads one setting, or changes it as the panel would, for a tester at the console and for
     /// build/drive-feature-test.sh.

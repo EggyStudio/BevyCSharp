@@ -57,6 +57,29 @@ public sealed class CloudShadowTests
         Assert.True(Math.Abs(bareMean - litMean) < 2, $"with the clouds off the ground reads {bareMean:0.0} where {litMean:0.0} lit");
     }
 
+    [SkippableFact]
+    public void TheCloudsShadowDriftsWithTheWind()
+    {
+        Needs.Shaders();
+        // Along the world's x at a hundred meters a second, a shadow crosses some twelve pixels a
+        // second of a picture two kilometers wide, each frame a sixtieth of a second of the clock
+        // so it moves as far between the pictures on any device.
+        var run = Run(new CloudSettings { Coverage = 0.6f, Wind = new Vec3(100f, 0f, 0f) }, null, setClock: true);
+        run.Wait(10)
+            .Until("compiled", _ => Clouds.Ready())
+            .Until("ready", _ => Render.PipelinesReady())
+            .Wait(30)
+            .Capture("first")
+            .Wait(120)
+            .Capture("later")
+            .Go();
+
+        // Which way the world's x runs across the picture, by the camera's right.
+        var along = Math.Sign((Above.Rotation * Vec3.UnitX).X);
+        var drift = Drift(run.Picture("first"), run.Picture("later"), 80);
+        Assert.True(drift * along >= 3, $"the shadow moved {drift} pixels across the picture, where the wind carries it {(along > 0 ? "right" : "left")}");
+    }
+
     // The mean light of the picture and how far its pixels spread from it, in levels of luma.
     private static (double Mean, double Spread) Spread(CapturedImage picture)
     {
@@ -71,6 +94,54 @@ public sealed class CloudShadowTests
         return (mean, Math.Sqrt(levels.Average(l => (l - mean) * (l - mean))));
     }
 
+    /// <summary>
+    /// How many pixels to the right <paramref name="after"/> lies from <paramref name="before"/>, the
+    /// shift up to <paramref name="reach"/> either way at which the two pictures' luma agree best
+    /// over what they share.
+    /// </summary>
+    internal static int Drift(CapturedImage before, CapturedImage after, int reach)
+    {
+        var (width, height) = ((int)before.Width, (int)before.Height);
+        var a = Lumas(before);
+        var b = Lumas(after);
+        var (best, bestAgreement) = (0, double.MinValue);
+        for (var shift = -reach; shift <= reach; shift++)
+        {
+            double sumA = 0, sumB = 0, sumAa = 0, sumBb = 0, sumAb = 0;
+            var count = 0;
+            for (var y = 0; y < height; y++)
+                for (var x = Math.Max(0, shift); x < Math.Min(width, width + shift); x++)
+                {
+                    var one = a[(y * width) + x - shift];
+                    var other = b[(y * width) + x];
+                    sumA += one;
+                    sumB += other;
+                    sumAa += one * one;
+                    sumBb += other * other;
+                    sumAb += one * other;
+                    count++;
+                }
+
+            var spreadA = sumAa - (sumA * sumA / count);
+            var spreadB = sumBb - (sumB * sumB / count);
+            var agreement = (sumAb - (sumA * sumB / count)) / Math.Sqrt(Math.Max(spreadA * spreadB, 1e-12));
+            if (agreement > bestAgreement) (best, bestAgreement) = (shift, agreement);
+        }
+        return best;
+
+        static double[] Lumas(CapturedImage picture)
+        {
+            var lumas = new double[picture.Width * picture.Height];
+            for (var y = 0u; y < picture.Height; y++)
+                for (var x = 0u; x < picture.Width; x++)
+                {
+                    var (r, g, b, _) = picture.At(x, y);
+                    lumas[(y * picture.Width) + x] = (0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+                }
+            return lumas;
+        }
+    }
+
     private static CapturedImage Ground(CloudSettings? clouds)
     {
         var run = Run(clouds, null);
@@ -83,17 +154,21 @@ public sealed class CloudShadowTests
         return run.Picture("ground");
     }
 
+    // Straight down from a kilometer up.
+    private static readonly Transform Above = Transform.LookingAt(new Vec3(0f, 1000f, 0f), new Vec3(0f, 0f, 0.001f), Vec3.UnitY);
+
     // Gray ground under a high sun seen straight down from a kilometer up, the clouds, where there
-    // are any, shadowing the sun.
-    private static PictureRun Run(CloudSettings? clouds, Action<Entity>? spawned) => new()
+    // are any, shadowing the sun, on the machine's clock or with each frame a sixtieth of a second.
+    private static PictureRun Run(CloudSettings? clouds, Action<Entity>? spawned, bool setClock = false) => new()
     {
         Width = 240,
         Height = 240,
         Frames = 1500,
+        Configure = setClock ? config => config.FrameSeconds = 1.0 / 60 : null,
         Scene = ecs =>
         {
             var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 90f });
-            ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 1000f, 0f), new Vec3(0f, 0f, 0.001f), Vec3.UnitY));
+            ecs.Add(camera, Above);
             Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
 
             var ground = ecs.Spawn();

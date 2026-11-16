@@ -119,8 +119,23 @@ shot() {
   ./bcs shot "$shots/$1.png" --timeout 300 > "$said" || fail "./bcs shot $1 ended with $? within its 300 seconds, $(head -n 1 "$said")"
 }
 
+# The file the feature test keeps the tester's settings in, which every change the run makes is
+# written to. It is copied aside once the program says where it is, and put back as the run found it
+# when the run ends, however it ends, after the program has stopped, or taken away where the run
+# found none, so a run leaves the settings of the machine it runs on as it found them, the qualities
+# the environment names among them.
+settings_file=""
+kept=$(mktemp -d)
+put_back() {
+  ./bcs stop > /dev/null 2>&1 || true
+  if [ -n "$settings_file" ]; then
+    if [ -f "$kept/settings.json" ]; then cp -p "$kept/settings.json" "$settings_file"; else rm -f "$settings_file"; fi
+  fi
+  rm -rf "$kept"
+}
+
 trap 'code=$?; echo "FAILED: $BASH_COMMAND ended with $code on line $LINENO" >&2' ERR
-trap './bcs stop > /dev/null 2>&1 || true' EXIT
+trap put_back EXIT
 ./bcs stop > /dev/null 2>&1 || true
 
 (cd "$program" && { ./BevyCSharp.FeatureTest --offscreen --frames 0 --serve; echo "[course] the feature test exited with $?"; } > "$log" 2>&1 &)
@@ -132,6 +147,8 @@ answered=0
 for _ in $(seq 1 180); do ./bcs status 2> /dev/null | grep -q "ready.*BevyCSharp.FeatureTest" && { answered=1; break; }; sleep 1; done
 [ "$answered" = 1 ] || fail "the feature test never answered"
 took "the start"
+settings_file=$(c setting.file)
+if [ -f "$settings_file" ]; then cp -p "$settings_file" "$kept/settings.json"; fi
 
 quiet app.frametime 0.0166667
 took "the first command"
@@ -140,20 +157,13 @@ echo "[course] drawn by ${adapter:-a device the log does not name}"
 quiet app.hold commands
 
 # The day held still at eight in the morning, the sun low in the east as the views were framed
-# under, so each run captures the same light, and put back as it was at the end, as the effects
-# page's settings are.
-day_speed=$(c setting DaySpeed | sed -n 's/^DaySpeed = //p')
-day_hour=$(c setting Hour | sed -n 's/^Hour = //p')
+# under, so each run captures the same light.
 quiet setting "DaySpeed 0"
 quiet day.hour 8
 
 # The weather held to a partly cloudy sky with the forecast off, so each run captures the same sky,
 # at the quality WEATHER_QUALITY names, and global illumination at the quality GLOBAL_ILLUMINATION
-# names, each put back as it was at the end with the day.
-settings_was=()
-for name in WeatherKind Procedural WeatherQuality GlobalIllumination; do
-  settings_was+=("$name $(c setting "$name" | sed -n "s/^$name = //p")")
-done
+# names.
 quiet setting "WeatherKind PartlyCloudy"
 quiet setting "Procedural false"
 if [ -n "${WEATHER_QUALITY:-}" ]; then quiet setting "WeatherQuality $WEATHER_QUALITY"; fi
@@ -413,7 +423,7 @@ fi
 view 15-meadow 12 1.5 80 0 0.5 70
 
 # The effects page's ambient occlusion and dusk sky through the setting command, each put back as it
-# was after, so a run leaves the settings of the machine it runs on as it found them.
+# was after, so the views after it are drawn as before.
 occlusion=$(setting AmbientOcclusion)
 backdrop=$(setting Backdrop)
 quiet setting "AmbientOcclusion true"
@@ -460,12 +470,6 @@ weathered() {
 }
 weathered 21-rain Rain
 weathered 22-snow Snow
-
-# The day, the weather and global illumination put back as they were.
-quiet setting "DaySpeed $day_speed"
-quiet setting "Hour $day_hour"
-for was in "${settings_was[@]}"; do quiet setting "$was"; done
-took "the settings put back"
 
 # The most memory the run held, beside the frame times, so a run that climbed toward its cap shows
 # in what it kept before a run passes the cap and is stopped.

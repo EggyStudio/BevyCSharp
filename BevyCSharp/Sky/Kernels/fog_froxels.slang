@@ -146,7 +146,7 @@ float density(float3 at)
     float above = (at.y - layer.z) / max(layer.y, 1e-3);
     // Held ten scale heights under the base, so a point far down a valley stays finite.
     float thick = layer.x * exp(-clamp(above, -10.0, 40.0));
-    thick *= lerp(1.0, 2.0 * lumpy((at + wind.xyz) * lumps.y), saturate(lumps.x));
+    thick *= lerp(1.0, 2.0 * lumpy((at - wind.xyz) * lumps.y), saturate(lumps.x));
 
     for (uint i = 0u; i < counts.x; i++)
     {

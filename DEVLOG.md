@@ -15,6 +15,20 @@ last of them wrote, which two takes ready a frame apart and one on lavapipe draw
 and on the right the middle's luminance less the left's four times over, brighter in red and darker
 in blue.
 
+![](.github/assets/readings/2026-11-16-item-146-cloud-drift.webp)
+The clouds' shadow on gray ground seen straight down from a kilometer up under a wind along the
+world's x, which runs to the left of the picture, each frame a sixtieth of a second, the kernels as
+they stood on the top row and with finding 12's mend on the bottom, the first picture on the left,
+the one two seconds later in the middle and the later less the first four times over on the right,
+brighter in red and darker in blue, the shadow moving 25 pixels against the wind as they stood and
+25 with it mended.
+
+![](.github/assets/readings/2026-11-16-item-146-cloud-seeds.webp)
+A camera's sky with clouds given seed 0 and another camera's, drawn first and over, given seed 7
+after them, on the left with one noise for the app, the last seed's, so the camera's was never made
+and it drew no cloud, in the middle with finding 41's noise for each seed, and on the right the
+middle less the left twice over, brighter in red and darker in blue.
+
 ## 2026-11-15
 
 ![](.github/assets/readings/2026-11-15-item-143-aspen-lavapipe.webp)

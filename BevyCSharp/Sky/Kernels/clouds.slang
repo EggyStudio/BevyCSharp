@@ -125,7 +125,7 @@ float within(float3 planet)
 float density(float3 world, float3 planet, bool detailed)
 {
     float h = within(planet);
-    float3 drifted = world + wind.xyz;
+    float3 drifted = world - wind.xyz;
     // A soft threshold over the weather, which lies evenly between none and one, set lower than the
     // coverage alone would set it, since a cloud's dome fills less than its patch, and none at a
     // coverage of none.

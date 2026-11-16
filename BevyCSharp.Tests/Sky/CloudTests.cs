@@ -84,6 +84,72 @@ public sealed class CloudTests
         Assert.True(Covered(bare, clouded) == 0, $"{Covered(bare, clouded)} of the sky's pixels changed on a multisampled camera");
     }
 
+    /// <summary>
+    /// A camera's clouds draw from their own seed's noise where another camera's clouds are given
+    /// another seed after them, the other camera drawn first and drawn over.
+    /// </summary>
+    [SkippableFact]
+    public void CloudsDrawFromTheirSeedWhereAnotherCameraIsGivenAnother()
+    {
+        Needs.Shaders();
+        var bare = Sky(null);
+        var clouded = Sky(new CloudSettings { Coverage = 0.6f }, other: new CloudSettings { Coverage = 0.6f, Seed = 7 });
+        Assert.True(Covered(bare, clouded) > 0.1, $"the camera's clouds cover {Covered(bare, clouded):0.00} of its sky with another camera's given seed 7");
+    }
+
+    /// <summary>
+    /// Clouds given again every frame to two cameras with seeds of their own, as the weather gives
+    /// them, make no noise past each seed's, and a camera given another seed lets go of the noise
+    /// of the one it had.
+    /// </summary>
+    [SkippableFact]
+    public void CloudsGivenAgainEveryFrameMakeNoNoiseOfTheirOwn()
+    {
+        Needs.Shaders();
+        var (first, second) = (Entity.None, Entity.None);
+        var (firstClouds, secondClouds) = (new CloudSettings { Seed = 7 }, new CloudSettings());
+        var images = new List<long>();
+        void Count(World world)
+        {
+            using (ConsoleHost.Lend(world))
+                images.Add(MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "").GetValueOrDefault("asset.Image"));
+        }
+
+        new PictureRun
+        {
+            Width = 64,
+            Height = 36,
+            Frames = 600,
+            EachFrame = _ =>
+            {
+                if (first.IsNone) return;
+                Render.SetClouds(first, firstClouds);
+                Render.SetClouds(second, secondClouds);
+            },
+            Scene = ecs =>
+            {
+                first = Render.SpawnCamera3d();
+                second = Render.SpawnCamera3d(new CameraSettings { Order = -1 });
+                foreach (var camera in new[] { first, second })
+                    ecs.Add(camera, Transform.LookingAt(new Vec3(0f, 2f, 0f), new Vec3(0f, 3f, -2f), Vec3.UnitY));
+            },
+        }
+            .Wait(10)
+            .Until("compiled", _ => Clouds.Ready())
+            .Wait(5)
+            .Do("before", Count)
+            .Wait(30)
+            .Do("given again", Count)
+            .Do("another seed", _ => firstClouds = new CloudSettings { Seed = 9 })
+            .Wait(10)
+            .Until("its noise made", _ => Clouds.Ready())
+            .Wait(5)
+            .Do("after", Count)
+            .Go();
+
+        Assert.Equal([images[0], images[0], images[0]], images);
+    }
+
     [Fact]
     public void CloudsOutOfRangeAreRefused()
     {
@@ -174,8 +240,9 @@ public sealed class CloudTests
 
     // The sky looked at from two meters up, tilted up by a pitch, under an atmosphere with the sky's
     // light, a sun 45 degrees up or 25 ahead of the view, with clouds or none, a wall over the left of
-    // the view, on a camera with some samples a pixel.
-    private static CapturedImage Sky(CloudSettings? clouds, bool wall = false, float pitch = 30f, bool facingSun = false, int msaa = 1)
+    // the view, on a camera with some samples a pixel, and where other clouds are given, a second
+    // camera drawn before it looking the same way, its clouds given after the first's.
+    private static CapturedImage Sky(CloudSettings? clouds, bool wall = false, float pitch = 30f, bool facingSun = false, int msaa = 1, CloudSettings? other = null)
     {
         var run = new PictureRun
         {
@@ -206,10 +273,19 @@ public sealed class CloudTests
                 }
 
                 if (clouds is not null) Render.SetClouds(camera, clouds);
+                if (other is not null)
+                {
+                    var before = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f, Order = -1 });
+                    ecs.Add(before, ecs.GetOrDefault<Transform>(camera));
+                    Render.SetPostProcessing(before, new PostSettings { Hdr = true, Msaa = msaa, Tonemapper = Tonemapper.TonyMcMapface });
+                    Render.SetAtmosphere(before, new AtmosphereSettings());
+                    Render.SetClouds(before, other);
+                }
             },
         };
+        var given = (clouds is null ? 0 : 1) + (other is null ? 0 : 1);
         run.Wait(10)
-            .Until("compiled", _ => Clouds.All().Count() == (clouds is null ? 0 : 1) && (clouds is null || Clouds.Ready()))
+            .Until("compiled", _ => Clouds.All().Count() == given && (given == 0 || Clouds.Ready()))
             .Until("ready", _ => Render.PipelinesReady())
             .Wait(60)
             .Capture("sky")

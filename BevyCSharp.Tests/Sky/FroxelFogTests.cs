@@ -143,6 +143,45 @@ public sealed class FroxelFogTests
         }));
     }
 
+    [SkippableFact]
+    public void TheFogsLumpsDriftWithTheWind()
+    {
+        Needs.Shaders();
+        // Lumps a third as wide as the froxels reach, carried along the world's x at three meters a
+        // second across a level view, which moves those nearer across the picture faster, each
+        // frame a sixtieth of a second of the clock so they move as far between the pictures on any
+        // device.
+        var fog = Red(60f, new FroxelFogSettings { Lumps = 1f, LumpSize = 20f, Distance = 60f, Wind = new Vec3(3f, 0f, 0f) });
+        var level = Transform.LookingAt(new Vec3(0f, 10f, 0f), new Vec3(0f, 10f, -1f), Vec3.UnitY);
+        var run = new PictureRun
+        {
+            Width = 480,
+            Height = 270,
+            Frames = 1500,
+            Configure = config => config.FrameSeconds = 1.0 / 60,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { FieldOfView = 60f });
+                ecs.Add(camera, level);
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1, Tonemapper = Tonemapper.None });
+                Render.SetSkyFog(camera, fog);
+            },
+        };
+        run.Wait(10)
+            .Until("compiled", _ => SkyFog.All().All(f => f.Ready) && SkyFog.FroxelsReady())
+            .Until("ready", _ => Render.PipelinesReady())
+            .Wait(60)
+            .Capture("first")
+            .Wait(120)
+            .Capture("later")
+            .Go();
+
+        // Which way the world's x runs across the picture, by the camera's right.
+        var along = Math.Sign((level.Rotation * Vec3.UnitX).X);
+        var drift = CloudShadowTests.Drift(run.Picture("first"), run.Picture("later"), 120);
+        Assert.True(drift * along >= 3, $"the fog's lumps moved {drift} pixels across the picture, where the wind carries them {(along > 0 ? "right" : "left")}");
+    }
+
     private static int Redness((byte R, byte G, byte B, byte A) pixel) => pixel.R - Math.Max(pixel.G, pixel.B);
 
     private static double Luma((byte R, byte G, byte B, byte A) pixel) => (0.2126 * pixel.R) + (0.7152 * pixel.G) + (0.0722 * pixel.B);
