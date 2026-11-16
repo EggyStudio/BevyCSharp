@@ -1,26 +1,20 @@
 # Review
 
-Reviewed up to `44484bf1`, the renderer's tests laid out again in ten parts, with `8e6fb6df`,
-`3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07 on
-2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
+Reviewed up to `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
+back on its first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory
+its GPU driver freed as it ends and the renderer's hosts held to a cap fitted to the runner,
+`093262d8`, the game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further
+findings of the audit mended and a text that grows while it is read asked for again, pushed together
+at 07:17 on 2026-11-16, their build run 43815745451 started, 0.6.143 to be packed once it is green,
+the form kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
+`8e6fb6df`, `3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07
+on 2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
 (Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a renderer run on every
 push on Linux's render bridge under lavapipe in fourteen parts laid out by a file, the long cases
 skipping themselves on a device that draws on the processor, pushed at 23:04 on 2026-11-15, its
 build run 43767207459 green at 00:15 on 2026-11-16, the longest renderer part 35 minutes, its pack
 run with publish 43773833500 red at 02:06 in two jobs (Verdict 60), no package published, the form
-kept. Before it `f9769f26`, the session file its owner's alone from the moment it is made, a panic
-that ends the run written to the crash file and thrown, and a canceled streamed read never landing
-after its cancel, and before it `349406a9`, the three tests mended for a device that draws on the
-processor with the read's Reply, two commits from one tree after a whole suite of 2,117 passed and 3
-skipped, pushed at 21:08 on 2026-11-15, their build run 43756313618 green by 22:02, the form kept
-and the messages free of numbers. Before them `6f9021a0`, with `310ef7db`, `aba74821`, `fb76a1f3`
-and `8bdb3e21`, five commits of the audit's medium findings from one tree after one whole suite of
-2,114 passed and 3 skipped, asset fields sharing one handle for each asset, a query's buffer for
-each walk with a copy written back only where changed and a sound's volume kept over a pause, the
-hooks reaching every handle of a layout, the export's bridge built again when its sources are newer,
-and a pair bouncing as the bouncier does, pushed at 17:37 on 2026-11-15, their build run 43736520382
-green by 19:02, the form kept and the messages free of numbers. The pushes before these stand in
-REVIEW-ARCHIVE.md's head records.
+kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -1262,3 +1256,40 @@ sample, then queues two frames. Without the mend it heard the frames from the ri
 
 The whole suite that passed over these mends is the one the memory cap's Reply above gives.
 NormTests passed, 19.
+
+146's medium findings 48 and 49, the Slang module's scratch folder and its search for slangc, in the
+commit carrying this Reply, each with a test that failed without its mend, which moves where the
+bridge writes its modules and slangc its output.
+
+The scratch folder is made in a folder of the user's own, the runtime folder the session gives the
+user, then the user's cache folder, at 0700, where it was one name in the shared temporary folder
+that another account could make first, failing every compile or swapping the modules every shader
+imports. Windows and macOS give each account a temporary folder of its own, which it stays in there,
+and where neither folder is named it is a new one in the temporary folder made for the process
+alone, a name another account took passed over. The bridge's test
+the_scratch_folder_is_the_users_own finds it in the user's folder at 0700, and a taken name passed
+over. Without the mend it stood in /tmp, and with it in the user's folder.
+
+slangc is looked for in the build/tools of the checkout the program or the working folder is in, the
+nearest folder above holding BevyCSharp.slnx, and on Unix only where the user running the program
+owns it and no other account can write it, where every folder above was looked in, so a build/tools
+another account made at the root of a disk or in a shared temporary folder ran beside any game below
+it. The bridge's test only_the_checkouts_own_compiler_is_found plants a compiler above a marked
+checkout, then puts one in the checkout and makes it writable by all. Without the mend the planted
+one was found, and with it none, the checkout's own, and none once anyone could write it.
+Shaders.SlangAvailable says where it is looked for.
+
+Courtyard, Swarm and Blockout were played on a render bridge built with these mends, from a package
+of this tree, each to its end with exit 0 and no app left serving, Courtyard from its menu to the
+win, Swarm to its third wave and the profile after it, and Blockout from the hall through the window
+cut and the modeling window and back down. None of the three compiles a Slang program as it plays,
+so none reached the scratch folder or slangc, and the suite's Slang tests made theirs in the user's
+runtime folder at 0700.
+
+The whole suite that passed over these mends is the one the memory cap's Reply above gives.
+NormTests passed, 19.
+
+Shared: slangc is looked for only in the checkout a program stands in, found by its solution file,
+and on Unix only where its user owns it, so a compiler planted in a folder above a game is never
+run. The sibling's SlangCompiler looks in build/tools/slang/bin in every folder above the program
+and the working folder, so this is offered for it to read.

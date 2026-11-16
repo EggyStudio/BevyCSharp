@@ -19,8 +19,9 @@
 //! is also what keeps a compiler crash out of the game.
 //!
 //! **Where `slangc` comes from.** `BCS_SLANGC` names it outright, and otherwise it is looked up on
-//! the `PATH`, and then in `build/tools/slang/bin` above the running program or the working
-//! directory, which is where `build/fetch-slang.sh` puts it. A machine with none of those still
+//! the `PATH`, and then in `build/tools/slang/bin` of the checkout the running program or the
+//! working directory is in, which is where `build/fetch-slang.sh` puts it. A machine with none of
+//! those still
 //! runs a game whose shaders were compiled once, because every successful compile is written to a
 //! cache, beside the assets unless the managed side names another folder, and read back when there
 //! is no compiler. A hash of the source and of
@@ -263,11 +264,19 @@ fn executable_name(name: &str) -> String {
     }
 }
 
-/// Where `build/fetch-slang.sh` puts the compiler, looked for above the running program and above
-/// the working directory.
+/// The file that marks the folder a checkout of the engine stands in.
+const CHECKOUT_MARKER: &str = "BevyCSharp.slnx";
+
+/// Where `build/fetch-slang.sh` puts the compiler, in the checkout the running program is in and
+/// the one the working directory is in.
 ///
 /// Both, because a test host runs from a project's `bin` and a tool may be run from anywhere in the
-/// checkout, and either way the checkout's `build/tools` is some number of directories up.
+/// checkout, and either way the checkout's `build/tools` is some number of directories up. The
+/// checkout is the nearest folder above holding [`CHECKOUT_MARKER`], and no folder above it is
+/// looked in, so a game installed outside a checkout finds no compiler this way, and a
+/// `build/tools` another account made where every account can make folders, the root of a disk or
+/// a shared temporary folder, is not run beside a game below it. On Unix a compiler is taken only
+/// where the user running the program owns it and no other account can write it.
 fn fetched_candidates() -> Vec<PathBuf> {
     let starts = [
         std::env::current_exe()
@@ -278,22 +287,48 @@ fn fetched_candidates() -> Vec<PathBuf> {
 
     let mut found = Vec::new();
 
-    for start in starts.into_iter().flatten() {
-        for directory in start.ancestors() {
-            let candidate = directory
-                .join("build")
-                .join("tools")
-                .join("slang")
-                .join("bin")
-                .join(executable_name("slangc"));
-
-            if candidate.is_file() && !found.contains(&candidate) {
-                found.push(candidate);
-            }
+    for candidate in starts.iter().flatten().filter_map(|start| fetched_in(start)) {
+        if !found.contains(&candidate) {
+            found.push(candidate);
         }
     }
 
     found
+}
+
+/// The compiler `build/fetch-slang.sh` put in the checkout `start` is in, where there is one the
+/// user running the program owns.
+fn fetched_in(start: &Path) -> Option<PathBuf> {
+    let checkout = start
+        .ancestors()
+        .find(|directory| directory.join(CHECKOUT_MARKER).is_file())?;
+
+    let candidate = checkout
+        .join("build")
+        .join("tools")
+        .join("slang")
+        .join("bin")
+        .join(executable_name("slangc"));
+
+    (candidate.is_file() && owned_here(&candidate)).then_some(candidate)
+}
+
+/// Whether the user running the program owns a file and no other account can write it, told by
+/// the owner of the scratch folder this process uses, which only that user can have made.
+#[cfg(unix)]
+fn owned_here(path: &Path) -> bool {
+    use std::os::unix::fs::MetadataExt;
+
+    let mine = scratch_directory().ok().and_then(|scratch| std::fs::metadata(scratch).ok());
+    let file = std::fs::metadata(path).ok();
+    matches!((file, mine), (Some(file), Some(mine)) if file.uid() == mine.uid() && file.mode() & 0o002 == 0)
+}
+
+/// Windows names no owner the standard library reads, and an account there can make a folder at
+/// the root of a disk but not a file, so a planted checkout's marker is the guard.
+#[cfg(not(unix))]
+fn owned_here(_: &Path) -> bool {
+    true
 }
 
 /// Compiles one entry point, or reads it from the cache when there is no compiler.
@@ -426,18 +461,26 @@ pub fn compile(request: &Request) -> Result<Compiled, String> {
 /// Where the bridge's modules are written and where `slangc` writes its output.
 ///
 /// Named after a hash of the modules, so two bridges of different versions running at once never
-/// hand each other's to a compile.
+/// hand each other's to a compile, in a folder of the user's own ([`private_root`]), so no other
+/// account can stand a folder there first, which would fail every compile or let that account swap
+/// the modules every shader imports. Where the user has no such folder it is a new one in the
+/// temporary folder, made for this process alone.
 fn scratch_directory() -> Result<PathBuf, String> {
     static READY: OnceLock<Result<PathBuf, String>> = OnceLock::new();
 
     READY
         .get_or_init(|| {
-            let directory = std::env::temp_dir()
-                .join(format!("bevy_csharp_slang_{:016x}", modules_hash()));
-
-            std::fs::create_dir_all(&directory).map_err(|error| {
-                format!("{} could not be created: {error}", directory.display())
-            })?;
+            let name = format!("bevy_csharp_slang_{:016x}", modules_hash());
+            let directory = match private_root() {
+                Some(root) => {
+                    let directory = root.join(name);
+                    private_folder(true).create(&directory).map_err(|error| {
+                        format!("{} could not be created: {error}", directory.display())
+                    })?;
+                    directory
+                }
+                None => fresh_folder(&std::env::temp_dir(), &name)?,
+            };
 
             // Written to a temporary name and renamed, so a compile in another process never
             // reads half a file.
@@ -455,6 +498,55 @@ fn scratch_directory() -> Result<PathBuf, String> {
             Ok(directory)
         })
         .clone()
+}
+
+/// A folder of the user's own that no other account can write in, for the scratch folder.
+///
+/// Windows and macOS give each account a temporary folder of its own. Elsewhere every account
+/// shares one, so it is the runtime folder the session gives the user, then the user's cache
+/// folder, or nothing where neither is named.
+fn private_root() -> Option<PathBuf> {
+    if cfg!(any(windows, target_os = "macos")) {
+        return Some(std::env::temp_dir());
+    }
+
+    let named = |variable: &str| {
+        std::env::var_os(variable)
+            .map(PathBuf::from)
+            .filter(|path| path.is_absolute())
+    };
+
+    named("XDG_RUNTIME_DIR")
+        .or_else(|| named("XDG_CACHE_HOME"))
+        .or_else(|| named("HOME").map(|home| home.join(".cache")))
+}
+
+/// Makes folders that only their owner reads or writes, on Unix, with the folders above them where
+/// `parents` is set.
+fn private_folder(parents: bool) -> std::fs::DirBuilder {
+    let mut builder = std::fs::DirBuilder::new();
+    builder.recursive(parents);
+
+    #[cfg(unix)]
+    std::os::unix::fs::DirBuilderExt::mode(&mut builder, 0o700);
+
+    builder
+}
+
+/// Makes a folder in `parent` that did not stand before, named `name` and this process's number,
+/// with a count after where that name is taken, so a folder another account made first is passed
+/// over rather than written in.
+fn fresh_folder(parent: &Path, name: &str) -> Result<PathBuf, String> {
+    for attempt in 0..64 {
+        let directory = parent.join(format!("{name}_{}_{attempt}", std::process::id()));
+        match private_folder(false).create(&directory) {
+            Ok(()) => return Ok(directory),
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(format!("{} could not be created: {error}", directory.display())),
+        }
+    }
+
+    Err(format!("no folder for {name} could be made in {}", parent.display()))
 }
 
 /// Writes Slang handed over as text to a file `slangc` can compile, and answers where.
@@ -559,5 +651,60 @@ mod tests {
     fn a_drive_letter_is_not_taken_for_the_target() {
         let files = parse_depfile("C:\\out.wgsl: C:\\a\\b.slang\n");
         assert_eq!(files, vec![PathBuf::from("C:\\a\\b.slang")]);
+    }
+    /// A compiler planted above a checkout is never looked at, and the checkout's own is found from
+    /// anywhere below it, unless any account can write it.
+    #[test]
+    fn only_the_checkouts_own_compiler_is_found() {
+        let parent = std::env::temp_dir().join(format!("bcs_slang_search_{}", next_unique()));
+        let checkout = parent.join("checkout");
+        let start = checkout.join("games").join("bin");
+        let compiler = |root: &Path| {
+            let bin = root.join("build").join("tools").join("slang").join("bin");
+            std::fs::create_dir_all(&bin).unwrap();
+            let file = bin.join(executable_name("slangc"));
+            std::fs::write(&file, b"").unwrap();
+            file
+        };
+
+        std::fs::create_dir_all(&start).unwrap();
+        std::fs::write(parent.join(CHECKOUT_MARKER), b"").unwrap();
+        std::fs::write(checkout.join(CHECKOUT_MARKER), b"").unwrap();
+        compiler(&parent);
+        assert_eq!(fetched_in(&start), None, "found above the checkout");
+
+        let own = compiler(&checkout);
+        assert_eq!(fetched_in(&start), Some(own.clone()));
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            std::fs::set_permissions(&own, std::fs::Permissions::from_mode(0o777)).unwrap();
+            assert_eq!(fetched_in(&start), None, "found where any account can write it");
+        }
+
+        let _ = std::fs::remove_dir_all(&parent);
+    }
+
+    /// The scratch folder is in a folder of the user's own, and a name another account took first
+    /// in the temporary folder is passed over for one made for this process.
+    #[test]
+    fn the_scratch_folder_is_the_users_own() {
+        let scratch = scratch_directory().unwrap();
+        if let Some(root) = private_root() {
+            assert_eq!(scratch.parent(), Some(root.as_path()));
+        }
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            assert_eq!(std::fs::metadata(&scratch).unwrap().permissions().mode() & 0o077, 0);
+        }
+
+        let parent = std::env::temp_dir().join(format!("bcs_slang_fresh_{}", next_unique()));
+        let taken = parent.join(format!("taken_{}_0", std::process::id()));
+        std::fs::create_dir_all(&taken).unwrap();
+        assert_eq!(fresh_folder(&parent, "taken").unwrap(), parent.join(format!("taken_{}_1", std::process::id())));
+        let _ = std::fs::remove_dir_all(&parent);
     }
 }

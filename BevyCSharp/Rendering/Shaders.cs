@@ -69,8 +69,10 @@ public static unsafe partial class Shaders
     /// <remarks>
     /// <para>
     /// <c>slangc</c> is found through the <c>BCS_SLANGC</c> environment variable, which names it
-    /// outright, then on the <c>PATH</c>, then in a <c>build/tools/slang</c> above the app or the
-    /// working directory, which is where the build fetches it. It is looked for once per process.
+    /// outright, then on the <c>PATH</c>, then in the <c>build/tools/slang</c> of the checkout the
+    /// app or the working directory is in, the nearest folder above holding
+    /// <c>BevyCSharp.slnx</c>, which is where the build fetches it, and on Unix only where the user
+    /// running the app owns it and no other account can write it. It is looked for once per process.
     /// </para>
     /// <para>
     /// False does not mean shaders fail. One compiled on a machine that had <c>slangc</c> is read
