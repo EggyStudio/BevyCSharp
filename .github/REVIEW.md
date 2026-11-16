@@ -1156,3 +1156,28 @@ is public on the class that was.
 
 The whole suite that passed over this mend is the one the clips' Reply above gives. NormTests
 passed, 19.
+
+143's renderer job laid out again from its first run, in the commit carrying this Reply. Build run
+43767207459 of ca8c50b4 took 17.1 to 35.7 minutes a renderer job, their tests 15.6 to 33.6, where
+the layout gave each part 35.2 to 35.7 from lavapipe held to four cores here. The runner's lavapipe
+took 0.44 to 0.95 of a part's minutes by what the part held, part 1 the slowest, GiReferenceTests 29
+of its minutes. Parts 1, 5, 12 and 14 waited 13 to 18 minutes for a job while the sibling's build
+run held 7 of the account's twenty, and the run took 70 minutes in all.
+
+build/renderer-parts.tsv lays the same 313 lines into ten parts of some 32 minutes, each line's
+minutes the read's scaled by what its part took on the runner against what its lines came to, dealt
+from the longest, each to the part holding least. A push runs ten jobs beside the test job's three
+and a pack five of two parts, as the reviewer asked. The limits stay, a part's 45 minutes and a
+case's 35, and a job's 60 on a push and 105 in a pack, which hold a part of some 34 minutes with its
+setup and a pair of some 66 at half as long again on the slowest of the runners' processors. No
+class split by its cases fits a part whole, GlobalIlluminationTests at 97 minutes on the runner,
+TreeLeavesTests at 36, TreeLevelShadowTests at 35 and BounceRoomsTests at 32. The ten parts'
+listings through their filters came to the whole listing's 2,115 between them, each test in one
+part.
+
+A part's minutes are shared among its lines by the read's, since the job kept no case's time, so
+each renderer job keeps its parts' results files for a week as test-results-renderer, from which a
+layout laid again reads each case's own time on the runner.
+
+The whole suite that passed over this layout is the one the clips' Reply above gives. NormTests
+passed, 19.

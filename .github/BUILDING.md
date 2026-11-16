@@ -413,9 +413,9 @@ a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump`
 which names the types that grew where the heap's floor rose. A push tests the library on the
 headless bridge each test job builds, and builds the render bridge for Linux, on which the renderer
 job runs every test that needs a renderer under lavapipe, in the parts `build/renderer-parts.tsv`
-lays out by what each class or case took there, some 35 minutes each, a part to a job, or two to a
-job in a pack. The other render bridges cost a quarter of an hour cold each and only a package needs
-them, and nothing a commit message says changes that.
+lays out by what each class or case took on the runner, some 32 minutes each, a part to a job, or
+two to a job in a pack. The other render bridges cost a quarter of an hour cold each and only a
+package needs them, and nothing a commit message says changes that.
 
 A package is made by the pack workflow, `pack.yml`, run by hand from the Actions tab ("Run
 workflow"). It runs the build workflow whole with `pack` set, which adds the jobs a push leaves out.

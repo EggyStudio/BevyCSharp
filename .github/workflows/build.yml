@@ -330,21 +330,22 @@ jobs:
 
   # Every test that needs a renderer, which the test job's headless bridge skips, on the render
   # bridge under lavapipe, in the parts build/renderer-parts.tsv lays out by what each class or case
-  # took there on four cores, each part some 35 minutes. A push runs a part to a job, fourteen jobs
-  # beside the test job's three, within the twenty jobs a free account runs at once. A pack runs
-  # two parts to a job, since its ten jobs on the native job's bridge run beside these, and a part
-  # to a job would hold some of either in the queue. Three cases and seven readings of a cost skip
-  # themselves on a device that draws on the processor, each saying why.
+  # took on the runner, each part some 32 minutes. A push runs a part to a job, ten jobs beside the
+  # test job's three, which leaves room in the twenty jobs the account runs at once for the runs of
+  # its other repositories. A pack runs two parts to a job, five, since its ten jobs on the native
+  # job's bridge run beside these. Three cases and seven readings of a cost skip themselves on a
+  # device that draws on the processor, each saying why.
   renderer:
     needs: [render-bridge]
     runs-on: ubuntu-24.04
-    # A part takes some 40 minutes on the slowest of the runners' processors, so the limit holds it,
-    # or two in a pack, with the setup and the build, and a part that hangs ends within it.
+    # A part takes some 34 minutes with the setup and the build and a pair some 66, and half as long
+    # again on the slowest of the runners' processors, so the limit holds a part, or two in a pack,
+    # and a part that hangs ends within it.
     timeout-minutes: ${{ inputs.pack && 105 || 60 }}
     strategy:
       fail-fast: false
       matrix:
-        parts: ${{ fromJSON(inputs.pack && '["1 2", "3 4", "5 6", "7 8", "9 10", "11 12", "13 14"]' || '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]') }}
+        parts: ${{ fromJSON(inputs.pack && '["1 2", "3 4", "5 6", "7 8", "9 10"]' || '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]') }}
 
     steps:
       - uses: actions/checkout@v5
@@ -389,6 +390,15 @@ jobs:
             BevyCSharp.Tests/TestResults/digest.md
             BevyCSharp.Tests/TestResults/digest.json
           if-no-files-found: ignore
+
+      # Each case's own time on the runner, from which the parts are laid out again.
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results-renderer-${{ strategy.job-index }}
+          path: BevyCSharp.Tests/TestResults/results-*.trx
+          if-no-files-found: ignore
+          retention-days: 7
 
   # One page for the commit from each system's page and each renderer part's, a line for each and
   # each cause with where it was seen, the one place that says where a commit fails.
