@@ -283,6 +283,23 @@ public sealed class TestScriptTests : IDisposable
         Assert.Contains("`log::tests::a_line_too_long`", text);
     }
 
+    /// <summary>
+    /// A test binary of the bridge's that overflows its stack is said as lost, where cargo on
+    /// Windows names its end by an exception's code and the doctests after it print a result.
+    /// </summary>
+    [SkippableFact]
+    public void ABridgeTestBinaryThatCrashesOnWindowsIsSaidAsLost()
+    {
+        var python = Needs.Python();
+        var (exit, _) = Script(python, new() { ["BCS_CARGO_STANDIN"] = "crash" },
+            "bridge", "--cargo", $"{python} BevyCSharp.Tests/Build/cargo_standin.py", "--results", _folder.Path);
+
+        Assert.Equal(1, exit);
+        var text = File.ReadAllText(_folder.File("digest.md"));
+        Assert.Contains("### Lost: the bridge, lost to a crash", text);
+        Assert.Contains("After `log::tests::an_error_is_kept`, the last test to end", text);
+    }
+
     [SkippableFact]
     public void ABridgeThatDoesNotBuildIsSaidAsLostWithItsErrors()
     {

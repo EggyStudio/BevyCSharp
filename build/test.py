@@ -222,8 +222,13 @@ def read_cargo(process, text):
 
     process.counts = Counter(outcome for outcome, _, _ in process.results.values())
     if process.lost is None and process.exit_code != 0:
-        if not re.search(r"^test result: ", text, re.M) or "(signal: " in text:
-            # A test binary ended by a signal, which reports no result for the tests it had left.
+        # A test binary ended other than by its tests failing, by a signal on Linux and macOS or by
+        # an exception's code on Windows, as 0xc00000fd for a stack overflow, reports no result for
+        # the tests it had left, and cargo goes on to the doctests, which print a result of their
+        # own. A binary whose tests failed exits with 101.
+        ended = re.findall(r"process didn't exit successfully: .*\((?:exit (?:code|status): (\w+)|signal: [^)]*)\)", text)
+        if (not re.search(r"^test result: ", text, re.M) or not process.counts["Failed"]
+                or any(code != "101" for code in ended)):
             process.lost = "crash"
     if process.lost:
         ran = re.findall(r"^test (\S+) \.\.\. ", text, re.M)

@@ -1098,3 +1098,34 @@ Shared: a session file left by a killed app names an id the system may hand to a
 the command line takes the process for the app only when it started no later than the session came
 up. The sibling's CliSession reads a process by its id alone, and its stop kills by that id, so this
 is offered for it to read.
+
+146's medium findings 45 to 47, a crashed bridge test on Windows and two pages of the guide, in the
+commit carrying this Reply, the first with a test that failed without its mend.
+
+build/test.py takes a cargo part as lost to a crash where cargo exited with an error and no test
+failed, or where a test binary ended other than with 101, the code a binary whose tests failed exits
+with, by a signal on Linux and macOS or an exception's code on Windows, where it looked only for a
+signal or a missing result, and the doctests cargo runs after a crashed binary print a result.
+TestScriptTests.ABridgeTestBinaryThatCrashesOnWindowsIsSaidAsLost runs the bridge's part on the
+cargo stand-in, which prints a binary overflowing its stack after its first test, as cargo on
+Windows prints it, then the doctests' result. Without the mend the script passed the part and exited
+with 0, and with it the part is lost to a crash after log::tests::an_error_is_kept and the script
+exits with 1.
+
+docs/messages-and-hierarchy.md and MessageBus say that every reader sees a frame's set once a frame,
+that a system in FixedUpdate is handed it as many times as it runs, twice after a slow frame and not
+at all after a fast one, and that a fixed step acting on messages has them read in a stage that runs
+once a frame, into a component or a resource the steps read, where they said exactly once whatever
+the stage. A MessageReader in a fixed step would read each message once, but a message is kept for
+the frame it was sent in and the next, so at a frame rate past twice the fixed one it would be gone
+before a step came, and the page does not send a fixed step there. It is a page and a comment alone,
+which no test reads.
+
+docs/shaders.md says that the shader's m[3] is a C# matrix's fourth row, where CreateTranslation
+puts its offset, that System.Numerics applies a matrix to a row vector, so mul(v, m) is
+Vector4.Transform(v, m), and that mul(m, v) applies it transposed, as ShaderValues says, where it
+said mul(m, v) was m applied to v. ShaderValueTests.AMatrixArrivesTheRightWayRound holds what it
+says, a matrix whose second row sends x to y under mul(m, v), and the page alone changes.
+
+The whole suite that passed over these is the one the clips' Reply above gives. NormTests passed,
+19.

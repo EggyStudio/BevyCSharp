@@ -15,9 +15,12 @@ namespace Bevy;
 /// </para>
 /// <para>
 /// <b>A reader sees the previous frame's messages.</b> The queue is swapped once at the top of
-/// each frame, so every reader sees the same complete set, exactly once, whatever stage it runs in
+/// each frame, so every reader sees the same complete set once a frame, whatever stage it runs in
 /// and whatever order the systems happen to run. That costs a frame of latency, because a message
-/// sent during a frame is not readable until the next one, including by the sender.
+/// sent during a frame is not readable until the next one, including by the sender. A system in
+/// <see cref="Stage.FixedUpdate"/> runs zero or more times a frame, so <see cref="Read{T}"/> there
+/// hands it a frame's set as many times as it runs, and a fixed step that acts on messages has them
+/// read in a stage that runs once a frame, into a component or a resource the steps read.
 /// </para>
 /// <para>
 /// A reader that keeps its own place reads as Bevy's do instead. <see cref="MessageReader{T}"/>

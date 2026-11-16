@@ -56,8 +56,10 @@ the shapes C# has no type for, such as `int2` or `float3x3`. A struct can be set
 `SetStruct` or `SetBytes`, laid out the way the shader lays it out. A value that does not fit is
 refused with an `ArgumentException` that lists what the shader does declare. Anything not set
 reads as zero, a texture as a stand-in of its shape, and a sampler as linear and repeating, so a
-shader draws something whatever has been set. A matrix crosses row by row, which is how
-`System.Numerics` holds one, so `mul(m, v)` in the shader is `m` applied to `v`.
+shader draws something whatever has been set. A matrix crosses row by row, as `System.Numerics`
+holds one, so `m[3]` in the shader is the C# matrix's fourth row, where `CreateTranslation` puts its
+offset. `System.Numerics` applies a matrix to a row vector, so `mul(v, m)` in the shader is
+`Vector4.Transform(v, m)`, and `mul(m, v)` applies the matrix transposed.
 
 `material.Parameters` lists what the shader declares, and the editor's inspector draws a widget for
 each of them, and `program.Layout` (or `shader.layout` in the console) says where every name is,

@@ -3,7 +3,8 @@
 
 Asked to compile the tests with --no-run it fails to compile where BCS_CARGO_STANDIN says `build`,
 and compiles otherwise. Asked to run them, it prints a run of three tests as cargo does, one of them
-failing with an assertion where it says `fail`, and all passing otherwise.
+failing with an assertion where it says `fail`, the binary overflowing its stack in the second where
+it says `crash`, as cargo on Windows says it before it runs the doctests, and all passing otherwise.
 """
 
 import os
@@ -27,6 +28,23 @@ def main():
     print()
     print("running 3 tests")
     print("test log::tests::an_error_is_kept ... ok")
+    if MODE == "crash":
+        print()
+        print("thread 'log::tests::a_line_too_long' has overflowed its stack")
+        print("fatal runtime error: stack overflow, aborting")
+        print("error: test failed, to rerun pass `-p bevy_csharp --lib`")
+        print()
+        print("Caused by:")
+        print("  process didn't exit successfully: `D:\\a\\native\\target\\debug\\deps\\bevy_csharp-0.exe` (exit code: 0xc00000fd, STATUS_STACK_OVERFLOW)")
+        print("   Doc-tests bevy_csharp")
+        print()
+        print("running 0 tests")
+        print()
+        print("test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s")
+        print()
+        print("error: 1 target failed:")
+        print("    `-p bevy_csharp --lib`")
+        return 101
     print(f"test log::tests::a_line_too_long ... {'FAILED' if failing else 'ok'}")
     print("test render::shaders::tests::the_layout ... ok")
     if failing:

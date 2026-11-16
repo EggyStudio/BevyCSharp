@@ -22,10 +22,13 @@ foreach (var hit in ctx.Read<Collided>())
     Console.WriteLine($"{hit.A} hit {hit.B}");
 ```
 
-A reader sees the previous frame's messages. The queue is swapped once at the top of each frame,
-so every reader sees the same complete set, exactly once, whatever stage it runs in and whatever
-order the systems happen to run in. The cost is a frame of latency, since a message is not readable in
-the frame it was sent, including by the sender.
+A reader sees the previous frame's messages. The queue is swapped once at the top of each frame, so
+every reader sees the same complete set once a frame, whatever stage it runs in and whatever order
+the systems happen to run in. The cost is a frame of latency, since a message is not readable in the
+frame it was sent, including by the sender. A system in `Stage.FixedUpdate` runs zero or more times
+a frame, twice after a slow frame and not at all after a fast one, so `ctx.Read` there hands it a
+frame's set as many times as it runs. A fixed step that acts on messages has them read in a stage
+that runs once a frame, such as `Update`, into a component or a resource the steps read.
 
 A reader that keeps its own place reads as Bevy's do instead, catching up within the frame. A
 `MessageReader<T>` is made for the system that reads with it and kept there, and reads the
