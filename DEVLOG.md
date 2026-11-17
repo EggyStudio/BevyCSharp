@@ -13,6 +13,17 @@ The Amazon Lumberyard Bistro's exterior in the feature test's scenes zone, down 
 restaurant at noon under the engine's sky and sun on the left, and at night on the right, lit by its
 own lamps, string lights and signs through global illumination with the moon's light put out.
 
+![](.github/assets/readings/2026-11-17-item-148-bistro-alone.webp)
+The Amazon Lumberyard Bistro's exterior standing alone far from the feature test's rooms, the street
+the player is carried into at noon on the left and at night on the right, the night lit by its lamps
+through global illumination's glow lights, which give about a hundred times a lamp's light until
+item 149 mends them.
+
+![](.github/assets/readings/2026-11-17-item-148-bistro-occlusion.webp)
+The Bistro's pack with its empty Specular red as occlusion and without it, by day above and by night
+below, the third panel red where the mended pack is lighter, every surface's light from all around
+given back.
+
 ## 2026-11-16
 
 ![](.github/assets/readings/2026-11-16-verdict-60-life.webp)

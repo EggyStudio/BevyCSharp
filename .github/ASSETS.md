@@ -63,3 +63,11 @@ the import takes it from there.
 | Delivery | Holds | Sorted |
 |---|---|---|
 | 2026-10-25, three folders | fifteen trees' sets, leaf scans, twelve models | yes, 284 files |
+
+The Amazon Lumberyard Bistro's pack is made from NVIDIA's ORCA archive `Bistro_v5_2.zip`, fetched by
+the page's Download link (https://developer.nvidia.com/bistro), 894,377,473 bytes, SHA-256
+`0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1`, its exterior turned into glTF by
+`build/fbx-to-gltf.sh`, set to the archive's texture convention by `build/orca-gltf.py` and packed
+by `build/make-scene-pack.py`.
+The pack is `bistro-exterior.pack` on the `scene-packs` release, 310,843,168 bytes, SHA-256
+`58ef6eab4a1692696abb0918bf36f12bf5d199c55e93822a0c9a4b94872f84a0`, uploaded on 2026-11-17.

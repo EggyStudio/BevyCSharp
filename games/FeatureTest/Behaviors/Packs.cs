@@ -24,10 +24,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// main door, at the end of its long axis, turned down the corridor from the hub and swung open, so
 /// the player walks in, and its floors, walls, columns and arches are mesh colliders once their
 /// meshes have loaded. Its attribution is written over the doorway while it stands, as its license
-/// asks. The Bistro's exterior is larger than the yard, so its streets lie in the yard and its outer
-/// buildings stand through the yard's walls, the player coming in past the arch the hub's corridor
-/// ends in, where its attribution is written, and round a building's corner into its street. A
-/// scene's own sun is taken off, since the zone's sky has the sun of the hour.
+/// asks. The Bistro's exterior is larger than the yard, so it stands alone far from the level's
+/// rooms, the player carried into one of its streets once it stands, where its attribution is
+/// written behind them, and back to the scenes yard when it is taken away. A scene's own sun is
+/// taken off, since the zone's sky has the sun of the hour.
 /// </para>
 /// <para>
 /// Where meshlets run (the graphics page, from the next start), the scene's heaviest meshes, of
@@ -52,22 +52,24 @@ public partial struct Packs
     /// </summary>
     private const float Lift = 0.02f;
 
-    /// <summary>
-    /// What the zone makes of each scene it knows, by its pack's name: the pieces the player stands
-    /// on or is stopped by, by their names, and where the attribution is written, in the scene's own
-    /// frame, turned about its Y to face the way it is read from.
-    /// </summary>
+    /// <summary>What the zone makes of each scene it knows, by its pack's name.</summary>
     /// <remarks>
     /// Sponza's names say what each piece is, its outer walls named exterior among them. Every piece
     /// of the Bistro's exterior carries the scene's name, exterior and all, so its street, sidewalks
-    /// and buildings are taken by their own words. A scene the zone does not know is drawn with no
-    /// piece solid and its attribution over its middle.
+    /// and buildings are taken by their own words. The Bistro is larger than the scenes yard, so it
+    /// stands alone three kilometers north of the hub, out of sight of the level's rooms, the player
+    /// carried into one of its streets facing the restaurant. A scene the zone does not know is drawn
+    /// with no piece solid and its attribution over its middle.
     /// </remarks>
-    private static readonly Dictionary<string, (Regex Solid, Vec3 Credit, float Turn)> Fittings = new(StringComparer.Ordinal)
+    private static readonly Dictionary<string, Fitting> Fittings = new(StringComparer.Ordinal)
     {
-        ["intel-sponza"] = (Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f),
-        ["bistro-exterior"] = (Words("street|sidewalk|building"), new Vec3(31f, 4f, -1.5f), MathF.PI / 2f),
+        ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f),
+        ["bistro-exterior"] = new(Words("street|sidewalk|building"), new Vec3(26f, 3.2f, 20f), -3f * MathF.PI / 4f,
+            Alone: new Vec3(0f, Scene.GroundHeight, -3000f), Start: new Vec3(15f, 0.5f, 15f), Toward: new Vec3(0f, 1f, 0f)),
     };
+
+    /// <summary>The solid pieces of the scene standing, each a body once the physics has made it.</summary>
+    private static readonly List<Entity> Solids = [];
 
     private static readonly ConcurrentDictionary<string, double> Fetching = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, string> Problems = new(StringComparer.Ordinal);
@@ -99,6 +101,9 @@ public partial struct Packs
     private static AssetHandle _scene = AssetHandle.None;
     private static Entity _root = Entity.None;
     private static bool _fitted;
+
+    /// <summary>Whether the player has been carried into the scene standing, where it stands alone.</summary>
+    private static bool _carried;
 
     /// <summary>Where the scene standing stands and how it is turned.</summary>
     private static (Vec3 At, Quat Facing) _site;
@@ -221,7 +226,8 @@ public partial struct Packs
 
             if (state != AssetLoadState.Loaded) return;
 
-            if (SiteOf(ecs) is not { } site)
+            var alone = FittingOf(pack).Alone;
+            if ((alone is { } far ? (far + new Vec3(0f, Lift, 0f), Quat.Identity) : SiteOf(ecs)) is not { } site)
             {
                 Problems[pack.Name] = $"The level has no {SiteClass} for {pack.Title} to stand at.";
                 Console.WriteLine($"[Packs] {Problems[pack.Name]}");
@@ -233,7 +239,7 @@ public partial struct Packs
             _root = ecs.SpawnScene(_scene);
             ecs.Add(_root, new Transform(site.At, site.Facing, Vec3.One));
             ecs.SetName(_root, pack.Title);
-            Console.WriteLine($"[Packs] {pack.Title} stands in the scenes zone. {pack.Attribution}");
+            Console.WriteLine($"[Packs] {pack.Title} stands {(alone is null ? "in the scenes zone" : "alone, far from the level's rooms")}. {pack.Attribution}");
             return;
         }
 
@@ -241,6 +247,12 @@ public partial struct Packs
         {
             _fitted = Fit(ecs);
             return;
+        }
+
+        if (!_carried)
+        {
+            if (!Carry(ctx, pack)) return;
+            _carried = true;
         }
 
         if (!Render.MeshletsActive) return;
@@ -342,8 +354,8 @@ public partial struct Packs
     {
         if (_shown is not { } pack || !ctx.Ecs.IsAlive(_root) || !App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        // Over Sponza's main door, or past the arch where the hub's corridor comes into the yard
-        // the Bistro's street lies beyond, each facing out along the scene's axis toward the hub.
+        // Over Sponza's main door, facing out along its axis toward the hub, or behind where the
+        // player is put in the Bistro's street, facing them.
         var (site, facing) = _site;
         var fitting = FittingOf(pack);
         var turned = facing * Quat.FromRotationY(fitting.Turn);
@@ -392,8 +404,28 @@ public partial struct Packs
     private static Regex Words(string pattern) => new(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     /// <summary>The fitting of a scene, or that of one the zone does not know.</summary>
-    private static (Regex Solid, Vec3 Credit, float Turn) FittingOf(ScenePack pack) =>
-        Fittings.TryGetValue(pack.Name, out var fitting) ? fitting : (Words("(?!)"), new Vec3(0f, 4.2f, 0f), 0f);
+    private static Fitting FittingOf(ScenePack pack) =>
+        Fittings.TryGetValue(pack.Name, out var fitting) ? fitting : new(Words("(?!)"), new Vec3(0f, 4.2f, 0f), 0f);
+
+    /// <summary>
+    /// Carries the player into a scene that stands alone, once each of its solid pieces is a body
+    /// to stand on, answering whether the player was carried or the scene stands in the yard.
+    /// </summary>
+    /// <remarks>
+    /// The pieces become bodies on the physics' next steps, and a player put on a street with no
+    /// body under it falls through it and is put back at the scenes yard.
+    /// </remarks>
+    private static bool Carry(BehaviorContext ctx, ScenePack pack)
+    {
+        var fitting = FittingOf(pack);
+        if (fitting.Alone is null) return true;
+        if (ctx.World.TryGetResource<PhysicsWorld>(out var physics) && !Solids.All(physics.Has)) return false;
+
+        var (site, facing) = _site;
+        var start = site + (facing * fitting.Start);
+        Zones.Go(ctx, new Zone(pack.Title, site + (facing * fitting.Toward), start + new Vec3(0f, 1.7f, 0f), start, 80f));
+        return true;
+    }
 
     /// <summary>
     /// Opens Sponza's main door, makes the scene's solid pieces mesh colliders and takes off the
@@ -432,6 +464,7 @@ public partial struct Packs
 
             ecs.Add(piece, new RigidBody { Kind = BodyKind.Static });
             ecs.Add(piece, new Collider { Shape = ColliderShape.Mesh });
+            Solids.Add(piece);
             solid++;
         }
 
@@ -469,6 +502,8 @@ public partial struct Packs
         _scene = AssetServer.LoadGltfScene(model);
         _shown = pack;
         _fitted = false;
+        _carried = false;
+        Solids.Clear();
         _asMeshlets = false;
         Heaviest.Clear();
         Cut.Clear();
@@ -483,9 +518,12 @@ public partial struct Packs
         if (_shown is not { } pack) return "no scene pack stands in the zone";
 
         if (ctx.Ecs.IsAlive(_root)) ctx.Ecs.Despawn(_root);
+        if (_carried && FittingOf(pack).Alone is not null) Zones.Go(ctx, Zones.All.First(zone => zone.Name == "Scenes"));
         _root = Entity.None;
         _scene = AssetHandle.None;
         _shown = null;
+        _carried = false;
+        Solids.Clear();
         Heaviest.Clear();
         Cut.Clear();
         ScenePacks.Unmount(pack);
@@ -521,6 +559,14 @@ public partial struct Packs
         public void Report(double value) => Fetching[name] = value;
     }
 }
+
+/// <summary>
+/// How the zone fits a scene, the pieces the player stands on or is stopped by, by their names,
+/// where the attribution is written in the scene's own frame, turned about its Y to face the way it
+/// is read from, and, for a scene that stands alone, where it stands and where in it the player is
+/// put and looks, in its own frame.
+/// </summary>
+internal readonly record struct Fitting(Regex Solid, Vec3 Credit, float Turn, Vec3? Alone = null, Vec3 Start = default, Vec3 Toward = default);
 
 /// <summary>The time with plain meshes and with meshlets, as each was last measured.</summary>
 internal sealed record TimingRow() : Row("Time")

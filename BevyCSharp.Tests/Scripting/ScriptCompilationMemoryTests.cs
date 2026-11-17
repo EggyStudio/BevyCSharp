@@ -1,3 +1,4 @@
+using System.Runtime;
 using Bevy;
 using Bevy.Scripting;
 using Xunit;
@@ -11,7 +12,10 @@ namespace Bevy.Tests;
 /// while the GC's heap stays small and a full collection comes late, so a host that read every
 /// loaded assembly again at each compilation would gather them with each save. The host reads each
 /// file once for the process, and the test holds it to that. The process's resident memory is read
-/// before any collection, as a program that allocates little on the heap would hold it.
+/// after a full blocking collection, the large object heap compacted, so what the heap holds
+/// uncollected from the compilations, which a runner's memory moves by tens of megabytes from run
+/// to run, is not read as held. No finalizer is waited for, so the native images of references
+/// read again and dropped stay where their finalizers have not yet given them back.
 /// </remarks>
 [Collection("engine")]
 public sealed class ScriptCompilationMemoryTests(ITestOutputHelper output) : IDisposable
@@ -49,6 +53,8 @@ public sealed class ScriptCompilationMemoryTests(ITestOutputHelper output) : IDi
                 Assert.True(host.Reload(), host.LastError);
                 if (i % 10 != 0) continue;
 
+                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+                GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
                 var resident = Environment.WorkingSet / 1e6;
                 output.WriteLine($"{i,3} compilations: resident {resident:0} MB, {GC.CollectionCount(2)} full collections");
                 if (i == 10) atTen = resident;
@@ -60,9 +66,9 @@ public sealed class ScriptCompilationMemoryTests(ITestOutputHelper output) : IDi
             host.Retire();
         }
 
-        // A compilation reading the references again each time grows the process by hundreds of
-        // megabytes over ninety compilations, where read once they leave a few tens of megabytes,
-        // the heap no full collection has come for, under the bound of 48.
+        // A compilation reading the references again each time grows the process by about 260
+        // megabytes over ninety compilations, where read once it grows by about a dozen, each
+        // reading after a full collection, under the bound of 48.
         Assert.True(atHundred - atTen < 48, $"the process held {atTen:0} MB after ten compilations and {atHundred:0} MB after a hundred");
     }
 }

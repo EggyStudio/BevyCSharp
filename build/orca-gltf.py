@@ -9,13 +9,15 @@ one name and a suffix, BaseColor with the opacity in its alpha, Specular with oc
 and metalness in red, green and blue, Normal in DirectX's form, and Emissive. Blender's FBX import
 reads Specular as a specular level and every alpha as a blend, so its glTF puts Specular under
 KHR_materials_specular, blends all of it and leaves metalness at glTF's default of one. This pass
-makes Specular each material's metallic-roughness texture and its occlusion texture, which read the
-same channels as ORCA writes them, cuts a material out at half its alpha where its base color falls
-below that anywhere, as Falcor's raster tests it, and keeps every other material opaque, so nothing
-is blended. Both sides of a face are drawn where the material's name says `.DoubleSided`, as ORCA
-marks its foliage, where it is cut out, or where --double-sided names it, and one side elsewhere, as
-Falcor culls them, the closed shapes of the scene's glass and walls hiding their insides. Images are
-pointed at the archive's textures where they lie, and those no material uses are dropped, so
+makes Specular each material's metallic-roughness texture, which reads the same channels as ORCA
+writes them, and its occlusion texture where the red holds any. The Bistro's archive writes every
+Specular's red as nothing, which as occlusion would put out every surface's light from all around.
+The pass cuts a material out at half its alpha where its base color falls below that anywhere, as
+Falcor's raster tests it, and keeps every other material opaque, so nothing is blended. Both sides
+of a face are drawn where the material's name says `.DoubleSided`, as ORCA marks its foliage, where
+it is cut out, or where --double-sided names it, and one side elsewhere, as Falcor culls them, the
+closed shapes of the scene's glass and walls hiding their insides. Images are pointed at the
+archive's textures where they lie, and those no material uses are dropped, so
 build/make-scene-pack.py finds each one it is asked for. The normals' green stays as DirectX writes
 it, for make-scene-pack.py's --directx-normals to turn over while it encodes them.
 
@@ -43,6 +45,11 @@ def stem(uri):
         if name.endswith('_' + suffix):
             return name[:-len(suffix) - 1], suffix
     return name, None
+
+
+def occludes(path):
+    """Whether a Specular texture's red, its occlusion, holds anything, a texel of it reaching 8."""
+    return Image.open(path).convert('RGB').getchannel('R').getextrema()[1] >= 8
 
 
 def cut_out(path):
@@ -94,7 +101,8 @@ def main():
         specular = images.get((name, 'Specular'))
         if specular is not None and specular in texture_of:
             pbr['metallicRoughnessTexture'] = {'index': texture_of[specular]}
-            material['occlusionTexture'] = {'index': texture_of[specular]}
+            if occludes(path_of(gltf['images'][specular]['uri'])):
+                material['occlusionTexture'] = {'index': texture_of[specular]}
         else:
             pbr['metallicFactor'] = 0.0
 

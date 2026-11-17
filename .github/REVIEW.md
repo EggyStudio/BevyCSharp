@@ -1,6 +1,6 @@
 # Review
 
-Reviewed up to `03ce47be`, item 146's findings 65 to 67, bind groups and number buffers kept from frame to frame, the memory command counting what shaders made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run 44019662768 green at 06:36, the pack run with publish 44025382883 started at 06:37, the form kept, 63 of the 75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
+Reviewed up to `768eb421`, item 148's exterior, the Amazon Lumberyard Bistro as a scene pack beside Sponza's and the feature test's scene.pack, its pack on the scene-packs release since 06:51, pushed at 07:49 on 2026-11-17, its build run 44034027479 red at 08:27 on Linux in one memory test (Verdict 67), the form kept and its sheet in the tree. Before it `03ce47be`, item 146's findings 65 to 67, bind groups and number buffers kept from frame to frame, the memory command counting what shaders made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run 44019662768 green at 06:36, the pack run with publish 44025382883 green at 09:08, the package 0.6.156 published and tagged, its release made with the six symbol files, the form kept, 63 of the 75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
 git's text as UTF-8 with a test of a subject's marks by their bytes, pushed at 03:02 on 2026-11-17,
 its build run 43999997556 green at 03:44, the form kept. Before it `1ed3310d`, item 146's findings
 60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real
@@ -204,13 +204,27 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     leave the upload. The interior follows as its own pack where the exterior's stands. It comes
     after the audit's findings in hand.
 
+149. **A glow light gives the cascades about a hundred times a lamp's light.** Item 148's night has
+    the Bistro's paving near 0.06 of white at an exposure of about EV 9 from lanterns whose glass is
+    500 cd/m², where a glass of 0.15 m² at that luminance is about 75 cd and gives about 5 lux at 4
+    m, paving of about 0.3 cd/m² and 0.0005 of white. 3DEngine reads 0.07 to 0.21 cd/m² on the same
+    paving from the same pack. Asked, the read first, the power a glow light is given from its
+    material's emission and its faces' area followed through to what a surface at a distance takes,
+    against the arithmetic, in a scene of one emissive square over a floor, then the mend where the
+    factor is lost, with a test that holds a floor's luminance under a square of known luminance and
+    area within a fifth of the closed form at three distances. Sponza's and the feature test's lit
+    rooms read again after it, their sheets retaken where they move, and the Bistro's strengths set
+    once more after it, a lantern's glass near what gives a street 10 to 30 lux. The pack keeps 500,
+    200 and 100 until then.
+
 ## Verdicts
 
-Verdict 66 is settled at 03:44 on 2026-11-17, the build run 43999997556 on `88955a57` green, git's
-text read as UTF-8. No verdict is open. Verdict 65 is settled at 01:16 on 2026-11-17, the build run
-43978434240 on `9bba0d78` green, a picture not arrived answering zero by zero. Verdicts 60, 62 and
-64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on `7908f95a` green on
-its second attempt and the package 0.6.147 published, Verdict 63 at 16:30 by the part run again,
+Verdict 67 is open, the build run 44034027479 on `768eb421` red on Linux in one memory test three
+megabytes over its bound. Verdict 66 is settled at 03:44 on 2026-11-17, the build run 43999997556 on
+`88955a57` green, git's text read as UTF-8. Verdict 65 is settled at 01:16 on 2026-11-17, the build
+run 43978434240 on `9bba0d78` green, a picture not arrived answering zero by zero. Verdicts 60, 62
+and 64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on `7908f95a` green
+on its second attempt and the package 0.6.147 published, Verdict 63 at 16:30 by the part run again,
 Verdict 61 earlier.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
@@ -284,6 +298,19 @@ Verdict 61 earlier.
     after that test. The failed jobs of run 43870104421 are started again to tell the two apart.
     Asked, the same timing as Verdict 63's at both commits, and whether a test after the bounce
     rooms' can wait on a frame that does not come.
+
+67. **The build run 44034027479 on `768eb421` is red on Linux in one test, a bound three megabytes
+    short.** `ScriptCompilationMemoryTests.AScriptCompiledAHundredTimesHoldsWhatItHeldAfterTen` read
+    598 MB of resident memory after ten compilations and 649 MB after a hundred, 51 against its
+    bound of 48, 1,650 passed beside it and macOS and Windows green; the digest job fails after it.
+    The commit touches no scripting, and the test passed on the same runner image in the run before,
+    so the reading moved by what the runner's heap held uncollected, the working set being read with
+    no collection asked for first. Asked, the test made to read what it means, each reading taken
+    after a full blocking collection with the large object heap compacted, or the bound set on the
+    heap's size after a collection in place of the working set, with the fault it guards against
+    (the references read again at every compilation, hundreds of megabytes) still failing it, shown
+    by a run with the fault put back. Run ten times in a row on the Linux container before the
+    commit. Written at 08:28 on 2026-11-17.
 
 ## Decisions
 
@@ -818,5 +845,55 @@ pack's encoder drawing every texture a block wide at least.
 The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178 in all where the
 listing is 2,167, the solution built from nothing with warnings as errors, in 15 parts dealt by the
 last run's times, each of 2 m 14 s to 5 m 15 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+148's Bistro given a place of its own and its empty occlusion left out, and Verdict 67's mend, in
+the commit carrying this Reply.
+
+The Bistro's exterior stands alone three kilometers north of the hub, where nothing of the level
+stands or shows, rather than at the scenes yard's point, through whose walls its outer buildings
+stood. Its fitting in the feature test names the far point, where in the scene the player is put and
+where they look, and once each of its 1,018 solid pieces is a body, the player is carried into one
+of its streets facing the restaurant, or the camera in spectator mode. Taking it away carries the
+player back to the scenes yard's start. Its attribution stands behind where the player is put, over
+the square, facing them. Sponza keeps the yard and its door. In walking mode the player was carried
+to 15.0, -1.00, -2985.0, grounded on the street, and back to 45.0, -1.2, -45.0, grounded in the
+yard, and from 140 m over the Bistro nothing but the sky stands round it. A fall from its streets
+puts the player back at the scenes yard, the last zone they stood in. The course script's two views
+stand at the far point, and the guide's sentence says where the Bistro stands. The sheet,
+`2026-11-17-item-148-bistro-alone.webp`, is the street the player is carried into at noon and at
+night, its caption saying the night's glow lights give about a hundred times a lamp's light, which
+item 149 mends.
+
+The archive's Specular textures, all 201 of them, 198 of 16 texels a side and 3 of 2K, hold nothing
+in their red, which the archive's README names occlusion, so the pack's occlusion texture put out
+every surface's light from all around, the bridge reading glTF's occlusion through Bevy's material.
+`build/orca-gltf.py` gives a material Specular as its occlusion only where its red reaches 8, which
+none does, and the pack is made again, 310,838,881 bytes, SHA-256
+d71c6c5b641263c214565129d521eeca8445048546fe54c1ac3cd71abc5faadd, on the release since 08:54 and
+named so by the manifest. At the alone place the picture's mean luma went from 59.7 to 112.6 of 255
+by day and from 40.8 to 92.1 by night, `2026-11-17-item-148-bistro-occlusion.webp` the pair with its
+difference. The strengths stay 500, 200 and 100. With no emission at all the night reads 1.5, with
+the signs alone 1.2, and with the string lights out 88.2, so the lamps' and spotlights' glass gives
+the night nearly all its light as the cascades' glow lights, about a hundred times what a lantern's
+glass of 0.15 m² at 500 nits gives paving 4 m off at Bevy's ev100 of 9.7.
+
+Verdict 67's test reads the process's resident memory after a full blocking collection with the
+large object heap compacted, waiting for no finalizer, so the heap left uncollected is not read as
+held and the native images a fault drops stay counted. Here it read 22 to 27 MB of growth over
+ninety compilations before and 11 to 13 after. With the fault put back, every reference read again
+at each compilation, it failed twice, 815 MB after ten compilations and 1,078 MB after a hundred. In
+the runner's image, Ubuntu 24.04.5 with the SDK, ten runs in a row passed, 6 to 13 MB of growth
+each.
+
+The feature test with the Bistro stopped twice on wgpu's out-of-memory while the sibling's own
+Bistro example ran beside it under the shared lock, which N 7.9's sentence on programs over 1.5 GiB
+settles, and the runs after it took the lock exclusive. Alone it held 3,423 MiB.
+
+The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178 in all where the
+listing is 2,167, the solution built from nothing with warnings as errors, in 16 parts and the rest
+dealt by the last run's times, each part of 2 m 8 s to 4 m 51 s, a part at a time under the GPU
+lock.
 
 NormTests passed, 19.

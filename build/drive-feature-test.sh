@@ -446,20 +446,20 @@ if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END
   quiet scene.unload
 fi
 
-# The Bistro's exterior, where its pack has been fetched, down one of its streets toward the
-# restaurant at noon, the sun over the street, and at night, the night lit by its lamps, string
-# lights and signs through global illumination alone, so the moon's light is put out for the view,
-# the next hour set giving it back. Each view settles over 300 frames, the probes' light gathering
-# from the lamps over that many.
+# The Bistro's exterior, where its pack has been fetched, standing alone three kilometers north of
+# the hub, down one of its streets toward the restaurant at noon, the sun over the street, and at
+# night, lit by its lamps, string lights and signs through global illumination alone, so the moon's
+# light is put out for the view, the next hour set giving it back. Each view settles over 300
+# frames, the probes' light gathering from the lamps over that many.
 if ./bcs scenes | awk '$1 == "bistro-exterior" && $4 == "fetched" { found = 1 } END { exit !found }'; then
   quiet scene.pack bistro-exterior
   for _ in $(seq 1 60); do grep -q "Bistro, exterior stands" "$log" && break; quiet frames.wait 10; done
   grep -q "Bistro, exterior stands" "$log" || fail "the Bistro did not load from its pack"
   quiet day.hour 12
-  timed 20-bistro-day 48.8 0.5 -70 70 1.3 -70 300
+  timed 20-bistro-day 15 0.5 -2985 0 1.3 -3000 300
   quiet day.hour 23
   quiet entity.set Moon DirectionalLight.illuminance 0
-  timed 20-bistro-night 48.8 0.5 -70 70 1.3 -70 300
+  timed 20-bistro-night 15 0.5 -2985 0 1.3 -3000 300
   quiet day.hour 8
   quiet scene.unload
 fi
