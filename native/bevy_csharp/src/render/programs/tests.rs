@@ -56,3 +56,47 @@ fn the_mesh_stand_ins_are_mesh_shaders_naga_reads() {
         naga::front::wgsl::parse_str(&text).unwrap_or_else(|error| panic!("{role:?}: {error}"));
     }
 }
+
+/// A program looked up shares its stages with the table rather than copying each one, since the
+/// render side looks every program up every frame.
+#[test]
+fn a_program_looked_up_shares_its_stages() {
+    let mut stages: [Option<StageBinding>; ROLE_COUNT] = Default::default();
+    stages[Role::Compute as usize] = Some(StageBinding {
+        shader: bevy::asset::Handle::default(),
+        entry: std::borrow::Cow::Owned("an_entry_of_its_own".into()),
+        spirv: None,
+        constants: Vec::new().into(),
+    });
+
+    let id = {
+        let mut table = super::table::TABLE.write().unwrap();
+        table.push(PipelineProgram { stages: stages.into(), ..Default::default() });
+        table.len() as u32 - 1
+    };
+
+    let entry = |program: &PipelineProgram| {
+        program.stages[Role::Compute as usize].as_ref().map(|stage| stage.entry.as_ptr())
+    };
+    let (first, second) = (lookup(id).unwrap(), lookup(id).unwrap());
+    assert_eq!(entry(&first), entry(&second));
+}
+
+/// A program marked ready again for the generation it is marked for is left as it is, with no
+/// write, since the render side marks every ready program every frame.
+#[test]
+fn a_mark_that_stands_is_not_written_again() {
+    let writes = || super::table::WRITES.with(std::cell::Cell::get);
+    // Past any program a test makes, so no other test marks it.
+    let id = 4096;
+
+    mark_compute_ready(id, 7);
+    let first = writes();
+    mark_compute_ready(id, 7);
+    mark_compute_ready(id, 7);
+    assert_eq!(writes(), first);
+
+    mark_compute_ready(id, 8);
+    assert_eq!(writes(), first + 1);
+    assert_eq!(super::table::compute_marked().0.get(id as usize), Some(&8));
+}

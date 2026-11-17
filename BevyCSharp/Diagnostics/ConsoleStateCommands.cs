@@ -35,21 +35,32 @@ internal static unsafe class ConsoleStateCommands
     }
 
     /// <summary>Moves a state to a value at its next transition.</summary>
+    /// <remarks>
+    /// The value is a member's name and nothing else, as <see cref="ConsoleWorldCommands.TryName{T}"/>
+    /// reads one, since <c>Enum.TryParse</c> takes a number and names joined by commas as well, either
+    /// of which can give a value no member has, which no system of the state was written for. A
+    /// value naming no member fails the command, so a script reading the exit code stops there.
+    /// </remarks>
     [Command("state.set", "Moves a state to a value at its next transition: state.set <State> <Value>")]
     internal static string Set(string state, string value)
     {
         if (Find(StateRegistry.Claimed(), state, out var type, out var slot) is { } missing) return missing;
 
-        if (!Enum.TryParse(type!, value, ignoreCase: true, out var parsed))
-            return $"{type!.Name} has no value {value}, only {string.Join(", ", Enum.GetNames(type))}";
+        if (Array.Find(Enum.GetNames(type!), name => name.Equals(value.Trim(), StringComparison.OrdinalIgnoreCase)) is not { } member)
+        {
+            var refused = $"{type!.Name} has no value {value}, only {string.Join(", ", Enum.GetNames(type))}";
+            ConsoleHost.Fail("BAD_ARGUMENT", refused);
+            return refused;
+        }
 
+        var parsed = Enum.Parse(type!, member);
         Native.Check(
             NativeCore.bcs_state_set(slot, Convert.ToInt32(parsed, CultureInfo.InvariantCulture)),
             $"setting state {type!.Name}");
         return $"{type.Name} goes to {parsed} at its next transition";
     }
 
-    /// <summary>The state named, or the sentence that says why there is none.</summary>
+    /// <summary>The state named, or the sentence that says why there is none, which fails the command.</summary>
     private static string? Find(List<(Type State, int Slot)> claimed, string name, out Type? type, out int slot)
     {
         var byName = claimed.Where(each => string.Equals(each.State.Name, name, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -64,9 +75,11 @@ internal static unsafe class ConsoleStateCommands
         }
 
         (type, slot) = (null, 0);
-        return byName.Count > 1
+        var refused = byName.Count > 1
             ? $"more than one state is called {name}, so name it in full"
             : $"no state is called {name}, only {string.Join(", ", claimed.Select(each => each.State.Name).Order(StringComparer.Ordinal))}";
+        ConsoleHost.Fail(byName.Count > 1 ? "BAD_ARGUMENT" : "NOT_FOUND", refused);
+        return refused;
     }
 
     /// <summary>The member a state's slot holds, or a word for a state that is not there right now.</summary>

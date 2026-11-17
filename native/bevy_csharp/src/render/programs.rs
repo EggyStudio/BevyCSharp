@@ -668,7 +668,7 @@ fn rebuild(programs: &mut ShaderPrograms, id: usize) {
             entry.name = stem.into();
         }
 
-        entry.stages[role as usize] = Some(StageBinding {
+        Arc::make_mut(&mut entry.stages)[role as usize] = Some(StageBinding {
             shader: unit.shader.clone().expect("every stage has a shader"),
             entry: Cow::Owned(unit.request.entry.clone()),
             spirv: unit.spirv.clone(),

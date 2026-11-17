@@ -3,6 +3,8 @@
 //! world to look in.
 
 use std::borrow::Cow;
+#[cfg(test)]
+use std::cell::Cell;
 use std::sync::{Arc, RwLock};
 
 use bevy::asset::Handle;
@@ -27,7 +29,9 @@ pub struct StageBinding {
 /// What the render side needs of a program.
 #[derive(Clone, Debug, Default)]
 pub struct PipelineProgram {
-    pub stages: [Option<StageBinding>; ROLE_COUNT],
+    /// Shared, so the copy of a program the render side takes for each program every frame copies
+    /// none of its stages.
+    pub stages: Arc<[Option<StageBinding>; ROLE_COUNT]>,
     /// The layout of a material's own group, merged from every material stage, once each has a
     /// result to be merged.
     pub material: Option<Arc<Layout>>,
@@ -101,9 +105,24 @@ pub fn mark_compute_failed(id: u32, generation: u32) {
     mark(&COMPUTE_FAILED, id, generation);
 }
 
+#[cfg(test)]
+thread_local! {
+    /// How many marks this thread has written, which the tests count.
+    pub(super) static WRITES: Cell<usize> = const { Cell::new(0) };
+}
+
 fn mark(table: &RwLock<Vec<u32>>, id: u32, generation: u32) {
+    let index = id as usize;
+
+    // Read first, since the render side marks every ready program every frame, and a write would
+    // hold off the main side's readers each time for a mark that stands.
+    if table.read().is_ok_and(|marked| marked.get(index) == Some(&generation)) {
+        return;
+    }
+
     if let Ok(mut marked) = table.write() {
-        let index = id as usize;
+        #[cfg(test)]
+        WRITES.with(|writes| writes.set(writes.get() + 1));
 
         if marked.len() <= index {
             marked.resize(index + 1, u32::MAX);

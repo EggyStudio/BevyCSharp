@@ -22,14 +22,14 @@ use bevy::render::render_resource::{
     BindGroup, BindGroupLayoutDescriptor, Buffer, PipelineCache, RenderPipeline, ShaderStages,
     TextureFormat, TextureSampleType, TextureView,
 };
-use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue, ViewQuery};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::view::{ViewTarget, ViewUniformOffset, ViewUniforms};
 
 use crate::render::material::say_once;
 use crate::render::programs::{self, Role};
-use crate::render::values::{PackContext, PackError, Stand, Values, pack};
+use crate::render::values::{KeptGroups, PackContext, PackError, Stand, Values, pack};
 use super::images::level_view;
 use super::{
     FramePoint, SceneLights, ViewEnvironmentTextures, ViewImageTextures, ViewInputSources,
@@ -149,9 +149,9 @@ impl PreparedDrawCount {
     }
 }
 
-/// A view's draws, ready to run.
+/// A view's draws, ready to run, and each one's group kept by its place in the camera's list.
 #[derive(Component)]
-pub struct PreparedViewDraws(pub(super) Vec<PreparedViewDraw>);
+pub struct PreparedViewDraws(pub(super) Vec<PreparedViewDraw>, KeptGroups);
 
 /// The layout of a program's own group for a draw on a camera, seen by its task and mesh stages
 /// where it draws with mesh shaders.
@@ -172,11 +172,12 @@ pub(super) fn prepare_view_draws(
     inputs: Res<ViewInputs>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
+    queue: Res<RenderQueue>,
     images: Res<RenderAssets<GpuImage>>,
     buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
     stand: Option<Res<Stand>>,
-    views: Query<(
+    mut views: Query<(
         Entity,
         &ViewTarget,
         &BcsViewDraws,
@@ -184,6 +185,7 @@ pub(super) fn prepare_view_draws(
         Option<&ViewImageTextures>,
         (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
+        Option<&mut PreparedViewDraws>,
     )>,
 ) {
     use bevy::render::render_resource::{
@@ -196,13 +198,14 @@ pub(super) fn prepare_view_draws(
         return;
     };
 
-    for (entity, target, asked, msaa, owned, occlusion, prepass) in &views {
+    for (entity, target, asked, msaa, owned, occlusion, prepass, kept) in &mut views {
         let names = view_names(owned, occlusion, prepass);
         let format = target.main_texture_format();
         let samples = msaa.map_or(1, |msaa| msaa.samples());
         let mut prepared = Vec::with_capacity(asked.0.len());
+        let mut groups = KeptGroups::taken(kept.map(|kept| &mut kept.into_inner().1), asked.0.len());
 
-        for draw in &asked.0 {
+        for (place, draw) in asked.0.iter().enumerate() {
             let Some(program) = programs::lookup(draw.program) else {
                 continue;
             };
@@ -543,11 +546,8 @@ pub(super) fn prepare_view_draws(
             prepared.push(PreparedViewDraw {
                 point: draw.point,
                 pipeline,
-                own: packed.bind_group(
-                    &render_device,
-                    "bcs_view_draw_own",
-                    &cache.get_bind_group_layout(&draw_layout(&layout, meshes)),
-                ),
+                own: groups.group(place, &packed, (&render_device, &queue), "bcs_view_draw_own",
+                    &cache.get_bind_group_layout(&draw_layout(&layout, meshes))),
                 count,
                 target: (!slots.is_empty()).then(|| (slots.iter().map(|slot| slot.0.clone()).collect(), has_depth)),
                 in_viewport,
@@ -562,7 +562,7 @@ pub(super) fn prepare_view_draws(
             });
         }
 
-        commands.entity(entity).insert(PreparedViewDraws(prepared));
+        commands.entity(entity).insert(PreparedViewDraws(prepared, groups));
     }
 }
 

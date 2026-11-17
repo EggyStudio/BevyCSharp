@@ -18,11 +18,10 @@ use bevy::ecs::resource::Resource;
 use bevy::image::Image;
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::render_resource::{
-    AddressMode, BindGroup, BindGroupEntry, BindGroupLayout, BindingResource, Buffer,
-    BufferDescriptor, BufferInitDescriptor, BufferUsages, CompareFunction, Extent3d, FilterMode,
+    AddressMode, Buffer, BufferDescriptor, BufferUsages, CompareFunction, Extent3d, FilterMode,
     MipmapFilterMode, Sampler, SamplerDescriptor, TextureDescriptor, TextureDimension,
-    TextureFormat, TextureSampleType, TextureUsages, TextureView, TextureViewDescriptor,
-    TextureViewDimension,
+    TextureFormat, TextureId, TextureSampleType, TextureUsages, TextureView, TextureViewDescriptor,
+    TextureViewDimension, TextureViewId,
 };
 use bevy::render::renderer::RenderDevice;
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
@@ -31,10 +30,12 @@ use bevy::render::texture::{FallbackImage, GpuImage};
 use super::reflect::{Binding, BindingKind, FieldType, Layout, Scalar, Target};
 
 mod checks;
+mod groups;
 #[cfg(test)]
 mod tests;
 
 pub use checks::{check, listing};
+pub use groups::{KeptGroups, made, made_buffer};
 
 /// How a sampler reads, as a game describes it.
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -233,6 +234,12 @@ pub struct Packed {
     /// Open to the rest of the renderer, which binds what it makes itself beside what values made,
     /// as a sprite's material binds the sprite.
     pub(super) buffers: Vec<(u32, Buffer)>,
+    /// Each block of numbers as the bytes its buffer holds, which a group kept from the last frame
+    /// writes into the buffer it has (see [`KeptGroups`]).
+    numbers: Vec<(u32, Vec<u8>)>,
+    /// The views of one mip level made for this frame, each with its texture and level, which say
+    /// what it binds where the view itself is new each time.
+    levels: Vec<(TextureViewId, TextureId, u32)>,
     structures: Vec<(u32, bevy::render::render_resource::Tlas)>,
     pub(super) views: Vec<(u32, Vec<TextureView>)>,
     pub(super) samplers: Vec<(u32, Vec<Sampler>)>,
@@ -427,16 +434,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
             BindingKind::Uniform { size, .. } => {
                 let mut bytes = vec![0u8; (*size as usize).max(16)];
                 fill_uniform(layout, *number, binding, values, &mut bytes);
-
-                let buffer = context.device.create_buffer_with_data(&BufferInitDescriptor {
-                    label: Some("bcs_shader_numbers"),
-                    contents: &bytes,
-                    // Uniform as well, for a shader handed over as SPIR-V, which keeps its blocks
-                    // of numbers as the uniform buffers Slang declared.
-                    usage: BufferUsages::STORAGE | BufferUsages::UNIFORM | BufferUsages::COPY_DST,
-                });
-
-                packed.buffers.push((*number, buffer));
+                packed.numbers.push((*number, bytes));
             }
 
             BindingKind::Storage { .. } => {
@@ -509,7 +507,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                             {
                                 match mip {
                                     None => Some(image.texture_view.clone()),
-                                    Some(mip) => level_of(image, *mip, None, &mut packed.problems, &binding.name),
+                                    Some(mip) => level_of(image, *mip, None, &mut packed, &binding.name),
                                 }
                             } else {
                                 packed.problems.push(format!(
@@ -579,7 +577,7 @@ pub fn pack(layout: &Layout, values: &Values, context: &PackContext) -> Result<P
                     let array = cube_as_array.then_some(TextureViewDimension::D2Array);
                     let level = match (mip, image.texture_descriptor.mip_level_count) {
                         (None, 1) if !cube_as_array => Some(image.texture_view.clone()),
-                        (mip, _) => level_of(image, mip.unwrap_or(0), array, &mut packed.problems, &key),
+                        (mip, _) => level_of(image, mip.unwrap_or(0), array, &mut packed, &key),
                     };
 
                     let Some(level) = level else {
@@ -638,11 +636,11 @@ fn level_of(
     image: &GpuImage,
     mip: u32,
     dimension: Option<TextureViewDimension>,
-    problems: &mut Vec<String>,
+    packed: &mut Packed,
     name: &str,
 ) -> Option<TextureView> {
     if mip >= image.texture_descriptor.mip_level_count {
-        problems.push(format!(
+        packed.problems.push(format!(
             "{name}: mip level {mip} was asked for, and the image has {}",
             image.texture_descriptor.mip_level_count
         ));
@@ -650,12 +648,15 @@ fn level_of(
     }
 
     let seen = image.texture_view_descriptor.clone().unwrap_or_default();
-    Some(image.texture.create_view(&TextureViewDescriptor {
+    let view = image.texture.create_view(&TextureViewDescriptor {
         base_mip_level: mip,
         mip_level_count: Some(1),
         dimension: dimension.or(seen.dimension),
         ..seen
-    }))
+    });
+
+    packed.levels.push((view.id(), image.texture.id(), mip));
+    Some(view)
 }
 
 /// What stands in for a texture nobody set.
@@ -735,66 +736,5 @@ fn fill_uniform(layout: &Layout, number: u32, binding: &Binding, values: &Values
 
             _ => {}
         }
-    }
-}
-
-impl Packed {
-    /// Makes the bind group, against the layout the pipeline was made with.
-    pub fn bind_group(&self, device: &RenderDevice, label: &str, layout: &BindGroupLayout) -> BindGroup {
-        let views: Vec<(u32, Vec<&bevy::render::render_resource::WgpuTextureView>)> = self
-            .views
-            .iter()
-            .map(|(number, views)| (*number, views.iter().map(|view| &**view).collect()))
-            .collect();
-
-        let samplers: Vec<(u32, Vec<&bevy::render::render_resource::WgpuSampler>)> = self
-            .samplers
-            .iter()
-            .map(|(number, samplers)| (*number, samplers.iter().map(|sampler| &**sampler).collect()))
-            .collect();
-
-        let mut entries = Vec::new();
-
-        for (number, buffer) in &self.buffers {
-            entries.push(BindGroupEntry {
-                binding: *number,
-                resource: buffer.as_entire_binding(),
-            });
-        }
-
-        for (number, list) in &views {
-            entries.push(BindGroupEntry {
-                binding: *number,
-                resource: if list.len() == 1 && !self.is_array(*number) {
-                    BindingResource::TextureView(list[0])
-                } else {
-                    BindingResource::TextureViewArray(list)
-                },
-            });
-        }
-
-        for (number, tlas) in &self.structures {
-            entries.push(BindGroupEntry {
-                binding: *number,
-                resource: BindingResource::AccelerationStructure(tlas),
-            });
-        }
-
-        for (number, list) in &samplers {
-            entries.push(BindGroupEntry {
-                binding: *number,
-                resource: if list.len() == 1 && !self.is_array(*number) {
-                    BindingResource::Sampler(list[0])
-                } else {
-                    BindingResource::SamplerArray(list)
-                },
-            });
-        }
-
-        device.create_bind_group(label, layout, &entries)
-    }
-
-    fn is_array(&self, number: u32) -> bool {
-        self.arrays.contains(&number)
     }
 }

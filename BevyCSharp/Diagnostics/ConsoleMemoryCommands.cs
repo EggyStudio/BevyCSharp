@@ -23,9 +23,11 @@ namespace Bevy;
 /// out the files it maps and the memory it shares with the driver. The rest is the bridge's, the
 /// bytes Rust's allocator holds, the entities and their indices, the asset handles this side keeps,
 /// the assets of each kind Bevy holds, and where a renderer runs what wgpu has asked the GPU for,
-/// its allocator's bytes and how many of each resource are alive, as <c>gpu.</c> pairs. A process
+/// its allocator's bytes and how many of each resource are alive, as <c>gpu.</c> pairs, and the
+/// buffers and bind groups the bridge has made for shaders, as <c>shaders.</c> pairs. A process
 /// figure that climbs while every <c>gpu.</c> count stands still is memory the driver keeps for
-/// itself.
+/// itself, and a <c>shaders.</c> count that climbs while the scene stands still is something made
+/// again every frame.
 /// </para>
 /// </remarks>
 internal static unsafe class ConsoleMemoryCommands

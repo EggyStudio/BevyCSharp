@@ -68,6 +68,8 @@ pub struct ViewInputs {
     empty_volume: TextureView,
     /// Bound where Bevy lights with no table of F_AB, which a shader tells by `passHasDfgLut`.
     empty_dfg: TextureView,
+    /// The buffers of the scene's information, bound again from one frame to the next.
+    pub(super) scene_info: super::scene_info::SceneInfo,
 }
 
 /// Finds Bevy's blue noise on the GPU once, for every shader on a camera to read.
@@ -438,6 +440,7 @@ pub(super) fn init_inputs(
         arrays,
         empty_light_probes,
         empty_dfg: texture("bcs_view_empty_dfg", TextureFormat::Rg16Float),
+        scene_info: super::scene_info::SceneInfo::new((*queue).clone()),
         empty_volume,
         empty_blue_noise: {
             let texture = render_device.create_texture_with_data(
@@ -647,11 +650,7 @@ impl<'a> ViewInputSources<'a> {
             .and_then(|lut| scene.images.get(&lut.texture));
         info[29] = u32::from(dfg.is_some());
 
-        let counts = device.create_buffer_with_data(&bevy::render::render_resource::BufferInitDescriptor {
-            label: Some("bcs_view_scene_info"),
-            contents: bytemuck::cast_slice(&info),
-            usage: BufferUsages::UNIFORM,
-        });
+        let counts = inputs.scene_info.buffer(device, &info);
 
         let (environment_diffuse, environment_specular) = match self.environment {
             Some(environment) => (&environment.diffuse, &environment.specular),

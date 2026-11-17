@@ -157,12 +157,17 @@ pub unsafe extern "C" fn bcs_memory_describe(out: *mut u8, capacity: i32) -> i32
     })
 }
 
-/// What wgpu holds on the GPU, as `gpu.<what> <count>` pairs.
+/// What wgpu holds on the GPU, as `gpu.<what> <count>` pairs, and what the bridge has made for
+/// shaders, as `shaders.<what> <count>` pairs.
 ///
 /// The bytes its allocator has given out and the bytes it has reserved from the driver for them,
 /// then how many of each kind of resource are alive and the bytes of buffers and textures, as wgpu
 /// counts them. A count that climbs while a scene stands still names the resource a frame makes
 /// and never drops, and memory that climbs while every count stands still is the driver's own.
+/// Then the buffers of a shader's numbers and the bind groups of its values the bridge has made
+/// since the process started, which a frame adds to only where a material changed or something a
+/// dispatch, a draw or a pass binds is another than the last frame's, a camera's history image
+/// among them.
 #[cfg(feature = "render")]
 fn gpu(world: &World, text: &mut String) {
     let Some(device) = world.get_resource::<bevy::render::renderer::RenderDevice>() else {
@@ -196,6 +201,9 @@ fn gpu(world: &World, text: &mut String) {
     ] {
         let _ = write!(text, " gpu.{name} {}", counter.read());
     }
+
+    let (buffers, groups) = crate::render::values::made();
+    let _ = write!(text, " shaders.buffersMade {buffers} shaders.groupsMade {groups}");
 }
 
 /// How many assets of each kind the world holds, by the kind's name.

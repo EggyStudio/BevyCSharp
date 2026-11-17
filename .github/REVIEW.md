@@ -1,25 +1,42 @@
 # Review
 
-Reviewed up to `1ed3310d`, item 146's findings 60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real window's monitors tested, pushed at 01:17 on 2026-11-17, its build run 43986373303 red at 01:39 on Windows in one test (Verdict 66), the form kept, 60 of the 75 findings mended and 15 left. Before it `9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on 2026-11-17, its build run 43978434240 green at 01:16, the form kept. Before it `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
-faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build run
-43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept. Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
-library counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31
-on 2026-11-16, its build run 43897251535 green at 17:28, the form kept. Before it `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
-pushed at 13:49 on 2026-11-16, its build run 43870104421 red at 15:21 in one renderer part at its time limit (Verdict 63) and green at 16:30 with that part run again in 33 minutes, the form kept. Before it `7908f95a`, Verdict 62's
+Reviewed up to `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
+git's text as UTF-8 with a test of a subject's marks by their bytes, pushed at 03:02 on 2026-11-17,
+its build run 43999997556 green at 03:44, the form kept. Before it `1ed3310d`, item 146's findings
+60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real
+window's monitors tested, pushed at 01:17 on 2026-11-17, its build run 43986373303 red at 01:39 on
+Windows in one test (Verdict 66), the form kept, 60 of the 75 findings mended and 15 left. Before it
+`9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on
+2026-11-17, its build run 43978434240 green at 01:16 on 2026-11-17, the form kept. Before it
+`c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole
+suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at
+21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended
+and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes
+on the faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build
+run 43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept.
+Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass library
+counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31 on
+2026-11-16, its build run 43897251535 green at 17:28, the form kept. Before it `e0618f1b`, item
+147's first commit, a camera's draws and passes kept to its viewport, pushed at 13:49 on 2026-11-16,
+its build run 43870104421 red at 15:21 in one renderer part at its time limit (Verdict 63) and green
+at 16:30 with that part run again in 33 minutes, the form kept. Before it `7908f95a`, Verdict 62's
 mend, the memory guard's test taking its block from the system, pushed at 12:51, its build run
-43861457506 green at 13:49 and the pack run with publish 43869994859 green at 17:58 on its second attempt, the package 0.6.147 published and tagged `v0.6.147`, the form kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
-the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
-tester's settings back, pushed at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form
-kept. Before it `db8afed6`, seven pictures of four days' items kept among the readings, with
-`0eb296a3`, the Slang scratch folder the user's own and slangc looked for only in the checkout a
-program stands in, pushed together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05,
-the pack run with publish 43828541813 after it red at 11:21 with nothing published (Verdict 62), the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples
-back on its first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory
-its GPU driver freed as it ends and the renderer's hosts held to a cap fitted to the runner,
-`093262d8`, the game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further
-findings of the audit mended and a text that grows while it is read asked for again, pushed together
-at 07:17 on 2026-11-16, their build run 43815745451 green at 08:14 with the ten renderer parts among it, the form
-kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
+43861457506 green at 13:49 and the pack run with publish 43869994859 green at 17:58 on its second
+attempt, the package 0.6.147 published and tagged `v0.6.147`, the form kept. Before it `6677ae12`,
+three findings of item 146 mended, the clouds and the fog drifting with the wind, each camera's
+clouds on the noise of their own seed and a scripted run putting the tester's settings back, pushed
+at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form kept. Before it
+`db8afed6`, seven pictures of four days' items kept among the readings, with `0eb296a3`, the Slang
+scratch folder the user's own and slangc looked for only in the checkout a program stands in, pushed
+together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05, the pack run with
+publish 43828541813 after it red at 11:21 with nothing published (Verdict 62), the form kept. Before
+them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples back on its
+first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory its GPU
+driver freed as it ends and the renderer's hosts held to a cap fitted to the runner, `093262d8`, the
+game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further findings of the
+audit mended and a text that grows while it is read asked for again, pushed together at 07:17 on
+2026-11-16, their build run 43815745451 green at 08:14 with the ten renderer parts among it, the
+form kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
 `8e6fb6df`, `3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07
 on 2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
 (Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a renderer run on every
@@ -171,14 +188,30 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     says why. The six high ones beside 143's sweep, which runs in its containers on its own; the
     rest after 143, ahead of 93.
 
+148. **A second scene pack, the Amazon Lumberyard Bistro.** The scene is published in NVIDIA's Open
+    Research Content Archive, an exterior and an interior as FBX with DDS textures. Asked, in this
+    order. First the read, the archive fetched into a folder of its own and treated as untrusted,
+    its license file read and the license, the attribution it asks and whether it allows a changed
+    copy to be published written down before anything else is made; where the page gives the file
+    only to a signed-in reader, say so and stop, since the file then comes from the repository's
+    holder. Then the pack as the Sponza's was made, `build/make-scene-pack.py` and
+    `build/scenes.sh`, the exterior first, the FBX turned into glTF by a tool named with its
+    version, the textures resized and compressed for the GPU so the scene fits a device of 8 GB with
+    the cascades on, its emissive lamps and signs kept as lights, the license and the attribution
+    inside the pack. Then a scene's file beside `intel-sponza.json` and an example that opens it,
+    with one picture by day and one by night as a sheet. The pack is published to the `scene-packs`
+    release by the review once the license reads as allowing it, so report its size and hash and
+    leave the upload. The interior follows as its own pack where the exterior's stands. It comes
+    after the audit's findings in hand.
+
 ## Verdicts
 
-Verdict 66 is open, the build run 43986373303 on `1ed3310d` red on Windows in the rule of the
-commits' form, the marks read through the console's code page. Verdict 65 is settled at 01:16 on
-2026-11-17, the build run 43978434240 on `9bba0d78` green, a picture not arrived reading zero by
-zero. Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish
-43869994859 on `7908f95a` green on its second attempt and the package 0.6.147 published, Verdict 63
-at 16:30 by the part run again, Verdict 61 earlier.
+Verdict 66 is settled at 03:44 on 2026-11-17, the build run 43999997556 on `88955a57` green, git's
+text read as UTF-8. No verdict is open. Verdict 65 is settled at 01:16 on 2026-11-17, the build run
+43978434240 on `9bba0d78` green, a picture not arrived answering zero by zero. Verdicts 60, 62 and
+64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on `7908f95a` green on
+its second attempt and the package 0.6.147 published, Verdict 63 at 16:30 by the part run again,
+Verdict 61 earlier.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -251,32 +284,6 @@ at 16:30 by the part run again, Verdict 61 earlier.
     after that test. The failed jobs of run 43870104421 are started again to tell the two apart.
     Asked, the same timing as Verdict 63's at both commits, and whether a test after the bounce
     rooms' can wait on a frame that does not come.
-
-65. **The build run 43944344562 on `c0d73a9f` is red in renderer part 12 by one test, read at 21:49
-    on 2026-11-16.** `ImGuiTests.APictureIsLoadedAgainForEachApp`, new in that commit, fails at its
-    first comparison, ImGuiTests.cs line 96, a lone app's `textures/checker.png` read as 1 by 1
-    where 2 by 2 is expected, on lavapipe on the runner. The part's other 1,066 tests passed in 21
-    minutes and the eleven other parts and the three systems' jobs are green, the digest red only by
-    carrying the part's failure. The local suite passed it. The first app of the test reading a
-    picture of one pixel says the picture had not arrived in the frames the test waits, or the place
-    holder's size was read, on a slower device. Asked, the cause read from the test and
-    `SizeOfTheLast` first, the test run on lavapipe under a slowed processor until it fails locally,
-    then the mend, the test waiting on the picture's arrival and not on a count of frames, or the
-    code's fault where one shows, and a line in the Reply saying which. No rerun of the part before
-    the cause is read.
-
-66. **The build run 43986373303 on `1ed3310d` is red in one test on Windows, `NormTests.N_7_2`,
-    naming 769 commits as off the form, at 01:39 on 2026-11-17.** Linux and macOS are green on the
-    same commit, and Windows ran 1,631 tests green beside it. The commit gave the test job's
-    checkout the whole history, so the rule read every message since its first for the first time on
-    a runner, where the checkout of one commit had skipped it. The read, from the test's code,
-    `NormTests.Git` starts git with its output redirected and no encoding named, so the text is
-    decoded by the console's code page on Windows and as UTF-8 elsewhere, and the three marks of
-    every subject arrive as other characters and no subject equals the form's. The mend, the
-    reader's encoding named as UTF-8 in `Git` (`StandardOutputEncoding`, and the error stream's the
-    same), with nothing added to `build/norm/7.2.txt`, and any other test that reads git's or
-    another program's text looked at for the same. A test of it where one fits, a commit's subject
-    read through `Git` compared by its bytes. Open.
 
 ## Decisions
 
@@ -658,3 +665,54 @@ with the mend it passed. The tests' other readers of a program's text name UTF-8
 numbers or an exit code alone. The contributors example reads its authors from git as UTF-8 the same
 way, so a name past ASCII arrives whole on Windows, with no test of its own, since no test reaches
 its read. NormTests passed, 19.
+
+146's low findings 65 to 67, in the commit carrying this Reply, each with a test that failed without
+its mend.
+
+Each dispatch of a frame, and each dispatch, draw and pass of a camera, keeps its bind group and the
+buffers of its numbers from one frame to the next by its place in its list, where a new buffer and
+group were made for each every frame. Numbers that moved are written into the buffer kept for them,
+and the group is made again over the same buffers only where something else it binds is another than
+the last frame's, a camera's history image among them, or where it binds a ray scene, to which wgpu
+gives no identity to compare. The scene's information a camera's inputs bind is held in buffers
+bound again while they hold it and written where one was not bound that frame, where one was made at
+each point of the frame. The group of a camera's inputs is still made at each point, since it binds
+that point's picture. A pass's kept group is looked for by its place in the camera's list, where the
+list of the passes built was read at that place, which after a pass held back for a frame is another
+pass's. The memory command says the buffers and groups made for shaders as shaders. pairs, as
+docs/tools.md and the command's remarks say.
+KeptGroupTests.WhatRunsEveryFrameMakesNoBufferOrGroupOnceMade dispatches a number that moves every
+frame beside a camera's dispatch and draw, counts what was made over 60 frames, and reads the last
+number back. On a bridge with the counts and without the keeping the 60 frames made 300 buffers and
+180 groups, and with it none, the last number read back.
+
+A program's stages are shared between the table and each copy of it, so the copy of each program the
+render side looks up every frame copies none of them, where each stage's entry point, shader handle,
+SPIR-V and constants were copied, and a dispatch's stage is copied only where its pipeline is built.
+A compute program's ready mark is read first and written only where its generation moves, where the
+table's write lock was taken for every ready program every frame. The walk over a camera's
+dispatches reads in place whether a program reads the camera, where it copied the program to read
+it. A dispatch's label is still made each frame, since Bevy's span takes its name as a string of its
+own. The bridge's tests a_program_looked_up_shares_its_stages and
+a_mark_that_stands_is_not_written_again look a program up twice and compare where its entry point
+lies, and mark a program ready three times for one generation and count the writes. With the stages
+copied and every mark written both failed, the two entry points lying apart and one generation's
+mark written three times where once, and with the mend both passed, as the bridge's tests did with
+no feature and with render.
+
+state.set reads a value by its member's name alone, in any case, where Enum.TryParse took 7 for a
+value no member has and Playing,Paused for both members at once, and set either. A value refused
+fails the command with BAD_ARGUMENT, and a state named by none fails state.set and state.get with
+NOT_FOUND, or one named by two with BAD_ARGUMENT, where each refusal answered as a success and a
+script typing it went on. StateCommandTests.AValueOrAStateNamingNoneIsRefusedAndFailsTheCommand sets
+Screen to 7, to Playing,Paused and to a word naming no member, names a state there is none of to
+both commands, and reads Screen after. Without the mend it failed, "Screen goes to 7 at its next
+transition" answered with no failure, and with it passed.
+
+The whole suite passed over these mends, from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178
+in all where the listing is 2,167, the solution built from nothing with warnings as errors, a part
+at a time under the GPU lock, and the native checks passed in all three profiles, with the bridge's
+tests with no feature and with render. NormTests passed, 19.
+
+Of the 75, 63 are mended, none was found not to hold, and 12 remain, 68 to 75 and 34 to 36 and 40 of
+global illumination, which go with 138.

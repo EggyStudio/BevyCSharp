@@ -47,14 +47,14 @@ use bevy::render::render_resource::{
     ComputePipelineDescriptor, PipelineCache, ShaderStages, ShaderType,
 };
 use bevy::render::diagnostic::RecordDiagnostics;
-use bevy::render::renderer::{RenderContext, RenderDevice, RenderGraph, RenderGraphSystems};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderGraph, RenderGraphSystems, RenderQueue};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::{ExtractSchedule, MainWorld, Render, RenderApp, RenderStartup, RenderSystems};
 
 use super::material::say_once;
 use super::programs::{self, Role};
-use super::values::{PackContext, PackError, Stand, Values, pack};
+use super::values::{KeptGroups, PackContext, PackError, Stand, Values, pack};
 use super::spirv_compute::ComputePipelineRef;
 use crate::interop::status;
 
@@ -122,8 +122,9 @@ struct PreparedDispatch {
     label: std::borrow::Cow<'static, str>,
 }
 
+/// The frame's dispatches ready to run, and each one's group kept by its place in the frame's list.
 #[derive(Resource, Default)]
-struct PreparedDispatches(Vec<PreparedDispatch>);
+struct PreparedDispatches(Vec<PreparedDispatch>, KeptGroups);
 
 /// Buffers and images being read back, and what has arrived.
 #[derive(Resource, Default)]
@@ -211,7 +212,6 @@ fn pipeline_for(
 ) -> Option<(ComputePipelineRef, programs::PipelineProgram)> {
     let program = programs::lookup(id)?;
     let layout = program.compute.clone()?;
-    let stage = program.stages[Role::Compute as usize].clone()?;
 
     // One reading a camera's inputs has nothing to read here, and its pipeline is built against
     // the camera's inputs instead, by `super::views`.
@@ -224,6 +224,9 @@ fn pipeline_for(
     if let Some(pipeline) = pipelines.pipelines.get(&key) {
         return Some((pipeline.clone(), program));
     }
+
+    // Copied only to build the pipeline, which every frame after this one finds above.
+    let stage = program.stages[Role::Compute as usize].clone()?;
 
     let mut groups = vec![own_layout(&layout), pipelines.inputs.clone()];
 
@@ -265,6 +268,7 @@ fn prepare_dispatches(
     extracted: Res<ExtractedDispatches>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
+    queue: Res<RenderQueue>,
     images: Res<RenderAssets<GpuImage>>,
     buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
@@ -299,7 +303,9 @@ fn prepare_dispatches(
         }],
     );
 
-    for dispatch in &extracted.0 {
+    let mut groups = KeptGroups::taken(Some(&mut prepared.1), extracted.0.len());
+
+    for (place, dispatch) in extracted.0.iter().enumerate() {
         let Some((pipeline, program)) = pipeline_for(&mut pipelines, &cache, &render_device, dispatch.program)
         else {
             // Silent while the program is still compiling, which is every program's first few
@@ -361,8 +367,10 @@ fn prepare_dispatches(
             ));
         }
 
-        let own = packed.bind_group(
-            &render_device,
+        let own = groups.group(
+            place,
+            &packed,
+            (&render_device, &queue),
             "bcs_compute_own",
             &cache.get_bind_group_layout(&own_layout(&layout)),
         );
@@ -387,6 +395,8 @@ fn prepare_dispatches(
             label: super::programs::label(dispatch.program),
         });
     }
+
+    prepared.1 = groups;
 }
 
 /// Why a dispatch tracing rays through `bcs_ray` does nothing in this app.

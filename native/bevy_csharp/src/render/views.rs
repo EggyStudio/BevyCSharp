@@ -58,6 +58,7 @@ mod images;
 mod inputs;
 mod light_probes;
 mod mesh_draws;
+mod scene_info;
 
 pub use dispatches::{BcsViewDispatches, FramePoint, PreparedViewDispatches, ViewDispatch, Workgroups};
 pub use draws::{BcsViewDraws, DrawBlend, DrawCount, PreparedViewDraws, ViewDraw};
@@ -79,6 +80,7 @@ use images::{
 };
 use inputs::{extract_view_environments, init_inputs, prepare_blue_noise, prepare_view_environments};
 use light_probes::prepare_view_light_probes;
+use scene_info::unbind_scene_info;
 
 use bevy::app::App;
 use bevy::core_pipeline::{Core2d, Core2dSystems, Core3d, Core3dSystems};
@@ -154,6 +156,7 @@ pub fn install(app: &mut App) {
                     prepare_picture_copies,
                     prepare_view_environments,
                     prepare_blue_noise,
+                    unbind_scene_info,
                 )
                     .in_set(RenderSystems::PrepareResources),
                 (

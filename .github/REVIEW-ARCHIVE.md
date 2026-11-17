@@ -5351,6 +5351,34 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     published on nuget.org with its templates, tagged v0.6.122 and released with the six bridges'
     symbols, each read against the published package, its build id, exports and symbol table alike.
 
+66. **The build run 43986373303 on `1ed3310d` is red in one test on Windows, `NormTests.N_7_2`,
+    naming 769 commits as off the form, at 01:39 on 2026-11-17.** Linux and macOS are green on the
+    same commit, and Windows ran 1,631 tests green beside it. The commit gave the test job's
+    checkout the whole history, so the rule read every message since its first for the first time on
+    a runner, where the checkout of one commit had skipped it. The read, from the test's code,
+    `NormTests.Git` starts git with its output redirected and no encoding named, so the text is
+    decoded by the console's code page on Windows and as UTF-8 elsewhere, and the three marks of
+    every subject arrive as other characters and no subject equals the form's. The mend, the
+    reader's encoding named as UTF-8 in `Git` (`StandardOutputEncoding`, and the error stream's the
+    same), with nothing added to `build/norm/7.2.txt`, and any other test that reads git's or
+    another program's text looked at for the same. A test of it where one fits, a commit's subject
+    read through `Git` compared by its bytes. Open. Settled at 03:44 on 2026-11-17, the build run
+    43999997556 on `88955a57` green on Windows with the rule run over the whole history.
+
+65. **The build run 43944344562 on `c0d73a9f` is red in renderer part 12 by one test, read at 21:49
+    on 2026-11-16.** `ImGuiTests.APictureIsLoadedAgainForEachApp`, new in that commit, fails at its
+    first comparison, ImGuiTests.cs line 96, a lone app's `textures/checker.png` read as 1 by 1
+    where 2 by 2 is expected, on lavapipe on the runner. The part's other 1,066 tests passed in 21
+    minutes and the eleven other parts and the three systems' jobs are green, the digest red only by
+    carrying the part's failure. The local suite passed it. The first app of the test reading a
+    picture of one pixel says the picture had not arrived in the frames the test waits, or the place
+    holder's size was read, on a slower device. Asked, the cause read from the test and
+    `SizeOfTheLast` first, the test run on lavapipe under a slowed processor until it fails locally,
+    then the mend, the test waiting on the picture's arrival and not on a count of frames, or the
+    code's fault where one shows, and a line in the Reply saying which. No rerun of the part before
+    the cause is read. Settled at 01:16 on 2026-11-17, the build run 43978434240 on `9bba0d78`
+    green.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` by hand, and the working session commits and does

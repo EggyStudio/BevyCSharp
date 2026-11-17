@@ -254,9 +254,14 @@ the memory the process holds of its own, which leaves out the files it maps and 
 with a graphics driver, and the most it has held, the bytes the bridge has allocated, the entities
 with the indices handed out, the asset handles held and the assets of each kind Bevy holds, and
 where a renderer runs, the GPU memory wgpu has allocated and how many buffers, textures, pipelines
-and other GPU resources are alive, as `gpu.` pairs. Read at intervals while a game is played, as
-`build/soak.sh` does, a value that keeps climbing is a leak, and a process figure that climbs while
-every `gpu.` count stands still is memory the graphics driver keeps for itself.
+and other GPU resources are alive, as `gpu.` pairs. The `shaders.` pairs count the buffers of
+shaders' numbers and the bind groups of their values the bridge has made since the program started,
+which a frame adds to only where a material changed or something a dispatch, a draw or a pass binds
+is another than the last frame's, a camera's history image among them. Read at intervals while a
+game is played, as `build/soak.sh` does, a value held that keeps climbing is a leak, a `shaders.`
+count that climbs while the scene stands still is something made again every frame, and a process
+figure that climbs while every `gpu.` count stands still is memory the graphics driver keeps for
+itself.
 
 Each of those is answered inside the next frame of the app that is already running, which is the
 point, because a fresh process per question costs a second of startup, a new world, and a guess

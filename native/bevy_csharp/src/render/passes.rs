@@ -45,7 +45,7 @@ use bevy::render::render_resource::{
     RenderPipelineDescriptor, ShaderStages, SpecializedRenderPipelines, TextureFormat,
 };
 use bevy::render::diagnostic::RecordDiagnostics;
-use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue, ViewQuery};
 use bevy::render::storage::GpuShaderBuffer;
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::view::{ViewTarget, ViewUniformOffset, ViewUniforms};
@@ -53,7 +53,7 @@ use bevy::render::{Render, RenderApp, RenderStartup, RenderSystems};
 
 use super::material::say_once;
 use super::programs::{self, Role};
-use super::values::{PackContext, PackError, Stand, Values, pack};
+use super::values::{KeptGroups, PackContext, PackError, Stand, Values, pack};
 use super::views::{SceneLights, ViewImageTextures, ViewInputSources, ViewInputs, ViewLights};
 
 /// Where the passes that run before tonemapping are, so a dispatch on a camera can run before them.
@@ -132,15 +132,17 @@ pub struct ShaderPassPipelines {
 struct PreparedPass {
     pipeline: CachedRenderPipelineId,
     own: BindGroup,
-    /// What the bind group was built from, which says whether it can be kept.
-    built_from: (u32, u64),
+    /// What the bind group was built from, the pass's place in the camera's list, its program's
+    /// generation and its values' version, which say whether it can be kept.
+    built_from: (usize, u32, u64),
     place: PassPlace,
     label: std::borrow::Cow<'static, str>,
 }
 
-/// The passes of one view, ready to run.
+/// The passes of one view, ready to run, and each one's group as it was last made, kept by its
+/// place in the camera's list, for a camera whose images make it again every frame.
 #[derive(Component)]
-pub struct PreparedShaderPasses(Vec<PreparedPass>);
+pub struct PreparedShaderPasses(Vec<PreparedPass>, KeptGroups);
 
 /// The copy that carries the picture outside a camera's viewport into the picture each of its
 /// passes writes, Bevy's blit for the picture's format.
@@ -289,6 +291,7 @@ fn prepare_passes(
     inputs: Res<ViewInputs>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
+    queue: Res<RenderQueue>,
     images: Res<RenderAssets<GpuImage>>,
     buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
@@ -311,8 +314,8 @@ fn prepare_passes(
         let names = super::views::view_names(owned, occlusion, prepass);
         let format = target.main_texture_format();
 
-        let kept: Vec<PreparedPass> = prepared
-            .map(|mut prepared| std::mem::take(&mut prepared.0))
+        let (kept, mut groups) = prepared
+            .map(|mut prepared| (std::mem::take(&mut prepared.0), KeptGroups::taken(Some(&mut prepared.1), asked.passes.len())))
             .unwrap_or_default();
 
         let mut built = Vec::with_capacity(asked.passes.len());
@@ -326,13 +329,14 @@ fn prepare_passes(
                 continue;
             };
 
-            let built_from = (program.generation, pass.version);
+            let built_from = (index, program.generation, pass.version);
 
-            // Built again every frame on a camera that owns images, because a history image is a
-            // different texture from one frame to the next and a resized one is a new texture.
+            // Packed again every frame on a camera that owns images, because a history image is a
+            // different texture from one frame to the next and a resized one is a new texture, and
+            // its group kept where it binds the same ones (see `KeptGroups`).
             let reusable = kept
-                .get(index)
-                .filter(|old| {
+                .iter()
+                .find(|old| {
                     names.is_none() && old.built_from == built_from && old.pipeline == pipeline
                 })
                 .map(|old| old.own.clone());
@@ -371,8 +375,10 @@ fn prepare_passes(
                         ));
                     }
 
-                    packed.bind_group(
-                        &render_device,
+                    groups.group(
+                        index,
+                        &packed,
+                        (&render_device, &queue),
                         "bcs_shader_pass_own",
                         &cache.get_bind_group_layout(&own_layout(&layout)),
                     )
@@ -388,7 +394,7 @@ fn prepare_passes(
             });
         }
 
-        commands.entity(entity).insert(PreparedShaderPasses(built));
+        commands.entity(entity).insert(PreparedShaderPasses(built, groups));
     }
 }
 

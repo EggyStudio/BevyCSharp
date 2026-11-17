@@ -21,14 +21,14 @@ use bevy::render::render_resource::{
     BindGroup, BindGroupLayoutDescriptor, Buffer, ComputePassDescriptor,
     ComputePipelineDescriptor, PipelineCache, ShaderStages,
 };
-use bevy::render::renderer::{RenderContext, RenderDevice, ViewQuery};
+use bevy::render::renderer::{RenderContext, RenderDevice, RenderQueue, ViewQuery};
 use bevy::render::storage::{GpuShaderBuffer, ShaderBuffer};
 use bevy::render::texture::{FallbackImage, GpuImage};
 use bevy::render::view::{ViewTarget, ViewUniformOffset, ViewUniforms};
 
 use crate::render::material::say_once;
 use crate::render::programs::{self, Role};
-use crate::render::values::{PackContext, PackError, Stand, Values, pack};
+use crate::render::values::{KeptGroups, PackContext, PackError, Stand, Values, pack};
 use super::images::view_size;
 use super::{
     SceneLights, ViewImageTextures, ViewInputSources, ViewInputs, ViewLights, scaled, view_names,
@@ -116,9 +116,9 @@ enum PreparedWorkgroups {
     Indirect(Buffer, u64),
 }
 
-/// A view's dispatches, ready to run.
+/// A view's dispatches, ready to run, and each one's group kept by its place in the camera's list.
 #[derive(Component)]
-pub struct PreparedViewDispatches(Vec<PreparedViewDispatch>);
+pub struct PreparedViewDispatches(Vec<PreparedViewDispatch>, KeptGroups);
 
 /// One compute pipeline per program and version of it, for dispatches on a camera.
 #[derive(Resource, Default)]
@@ -140,13 +140,14 @@ fn view_pipeline_for(
 ) -> Option<(crate::render::spirv_compute::ComputePipelineRef, programs::PipelineProgram)> {
     let program = programs::lookup(id)?;
     let layout = program.compute.clone()?;
-    let stage = program.stages[Role::Compute as usize].clone()?;
-
     let key = (id, program.generation);
 
     if let Some(pipeline) = pipelines.0.get(&key) {
         return Some((pipeline.clone(), program));
     }
+
+    // Copied only to build the pipeline, which every frame after this one finds above.
+    let stage = program.stages[Role::Compute as usize].clone()?;
 
     let mut groups = vec![own_layout(&layout), inputs.layout.clone()];
 
@@ -189,11 +190,12 @@ pub(super) fn prepare_view_dispatches(
     inputs: Res<ViewInputs>,
     cache: Res<PipelineCache>,
     render_device: Res<RenderDevice>,
+    queue: Res<RenderQueue>,
     images: Res<RenderAssets<GpuImage>>,
     buffers: Res<RenderAssets<GpuShaderBuffer>>,
     fallback: Res<FallbackImage>,
     stand: Option<Res<Stand>>,
-    views: Query<(
+    mut views: Query<(
         Entity,
         &ViewTarget,
         &BcsViewDispatches,
@@ -201,6 +203,7 @@ pub(super) fn prepare_view_dispatches(
         (Option<&ScreenSpaceAmbientOcclusionResources>, Option<&bevy::core_pipeline::mip_generation::experimental::depth::ViewDepthPyramid>),
         Option<&ViewPrepassTextures>,
         Option<&bevy::render::camera::ExtractedCamera>,
+        Option<&mut PreparedViewDispatches>,
     )>,
 ) {
     let Some(stand) = stand else {
@@ -211,9 +214,10 @@ pub(super) fn prepare_view_dispatches(
     // as soon as it exists, which is also what says it is ready. One that does not is built by
     // `crate::render::compute` against time alone, and built here too only once a camera runs it.
     for id in 0..programs::table_len() {
-        let reads_view = programs::lookup(id)
-            .and_then(|program| program.compute)
-            .is_some_and(|layout| layout.reads_view);
+        let reads_view = programs::with_program(id, |program| {
+            program.compute.as_ref().is_some_and(|layout| layout.reads_view)
+        })
+        .unwrap_or(false);
 
         if reads_view
             && let Some((pipeline, program)) = view_pipeline_for(&mut pipelines, &inputs, &cache, &render_device, id)
@@ -223,11 +227,12 @@ pub(super) fn prepare_view_dispatches(
         }
     }
 
-    for (entity, target, asked, owned, occlusion, prepass, camera) in &views {
+    for (entity, target, asked, owned, occlusion, prepass, camera, kept) in &mut views {
         let names = view_names(owned, occlusion, prepass);
         let mut prepared = Vec::with_capacity(asked.0.len());
+        let mut groups = KeptGroups::taken(kept.map(|kept| &mut kept.into_inner().1), asked.0.len());
 
-        for dispatch in &asked.0 {
+        for (place, dispatch) in asked.0.iter().enumerate() {
             let Some((pipeline, program)) =
                 view_pipeline_for(&mut pipelines, &inputs, &cache, &render_device, dispatch.program)
             else {
@@ -300,8 +305,10 @@ pub(super) fn prepare_view_dispatches(
             prepared.push(PreparedViewDispatch {
                 point: dispatch.point,
                 pipeline,
-                own: packed.bind_group(
-                    &render_device,
+                own: groups.group(
+                    place,
+                    &packed,
+                    (&render_device, &queue),
                     "bcs_view_compute_own",
                     &cache.get_bind_group_layout(&own_layout(&layout)),
                 ),
@@ -311,7 +318,7 @@ pub(super) fn prepare_view_dispatches(
             });
         }
 
-        commands.entity(entity).insert(PreparedViewDispatches(prepared));
+        commands.entity(entity).insert(PreparedViewDispatches(prepared, groups));
     }
 }
 
