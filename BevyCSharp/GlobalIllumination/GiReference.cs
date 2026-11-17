@@ -25,21 +25,22 @@ namespace Bevy;
 /// The ray scene holds every shown entity that draws a 3D mesh of triangles, a mesh of a visibility
 /// range at the level the camera's distance gives, as the picture draws it, with its standard
 /// material's base color, emissive light, roughness, metallic and reflectance as the engine's
-/// material buffer has them, so a texture counts as its base color and a mesh's vertices' colors
-/// are left out. What it says when it is done counts the cut-out textures past the material
-/// buffer's masks (<see cref="Shaders.MaterialBufferUnmasked"/>), traced whole by their base color,
-/// and the trees not dressed yet when it began, which neither it nor the picture holds. It honors
-/// the materials' own models rather than a physical surface's, a face's diffuse transmission let
-/// through from behind and a leaf's or a grass card's diffuse share lit by its normal bent toward
-/// its way out of the crown as the leaf material lights it, and a mesh Bevy draws no shadow of is
-/// met by the camera's own rays alone, as Bevy's shadow maps and the scene's distance field leave
-/// it out. Every path, a camera's or a probe's, is lit at every face as Bevy's lighting lights it
-/// and scatters there by its material, its diffuse share or its GGX lobe drawn by their weights, so
-/// the sky a gloss reflects and the light a glossy wall carries between bounces come in, as global
-/// illumination's probes carry a face's gloss and the light pass reflects it. The lights are those
-/// global illumination's probes are lit by, the sun, the light from all around and the sixteen
-/// point and spot lights nearest the camera, the sun dimmed through the camera's air as Bevy's
-/// lighting dims it for the picture. It needs a GPU that traces rays (<see
+/// material buffer has them, each its factor times its texture's mean as global illumination's
+/// field paints it, but for a cut-out material's textures, which it reads where a path meets them,
+/// and a mesh's vertices' colors are left out. What it says when it is done counts the cut-out
+/// textures past the material buffer's masks (<see cref="Shaders.MaterialBufferUnmasked"/>), traced
+/// whole, and the trees not dressed yet when it began, which neither it nor the picture holds. It
+/// honors the materials' own models rather than a physical surface's, a face's diffuse transmission
+/// let through from behind and a leaf's or a grass card's diffuse share lit by its normal bent
+/// toward its way out of the crown as the leaf material lights it, and a mesh Bevy draws no shadow
+/// of is met by the camera's own rays alone, as Bevy's shadow maps and the scene's distance field
+/// leave it out. Every path, a camera's or a probe's, is lit at every face as Bevy's lighting
+/// lights it and scatters there by its material, its diffuse share or its GGX lobe drawn by their
+/// weights, so the sky a gloss reflects and the light a glossy wall carries between bounces come
+/// in, as global illumination's probes carry a face's gloss and the light pass reflects it. The
+/// lights are those global illumination's probes are lit by, the sun, the light from all around and
+/// the sixteen point and spot lights nearest the camera, the sun dimmed through the camera's air as
+/// Bevy's lighting dims it for the picture. It needs a GPU that traces rays (<see
 /// cref="Shaders.SupportsRayQueries"/>). A ray scene cannot be freed, so the app keeps one, with
 /// its geometry pool, from one reference to the next, and makes a larger one where a scene has more
 /// meshes than it holds.
@@ -522,7 +523,7 @@ internal static unsafe partial class GiReference
                 if (Shaders.MaterialBufferMask(held.Materials, i).IsValid) past++;
             if (held.Masks < Masks) fewer = $", {held.Masks} masks bound of {Masks}, the device sampling {held.Limit} textures a stage";
         }
-        var unmasked = past == 0 ? "" : $", {past} cut-out textures past the masks traced by their base color alone";
+        var unmasked = past == 0 ? "" : $", {past} cut-out textures past the masks traced whole";
         var undressed = job.Undressed == 0 ? "" : $", {job.Undressed} trees not dressed yet";
         var said = $"traced {job.Width} by {job.Height} at {samples} paths a pixel in {seconds:0.0} s, {job.Slots.Length} meshes{skipped}{unmasked}{fewer}{undressed}, {names.Count} regions";
         if (job.Path is { } path)

@@ -297,18 +297,22 @@ public static unsafe partial class Shaders
     /// material by one index.
     /// </para>
     /// <para>
-    /// A shader reads it as a <c>StructuredBuffer&lt;Material&gt;</c>. Textures are not in it,
-    /// since the base color is the factor the material multiplies its texture by, and an entity
-    /// drawn by a shader program, or with no material, holds zeros. A tree's leaves, its bark and
-    /// the grass hold the standard material theirs extends. A material cut out under an alpha
-    /// (<see cref="MaterialSettings.AlphaMode"/>) holds its cutoff, and its base color texture, its
-    /// metallic and roughness texture and its diffuse transmission texture are among the buffer's
-    /// masks (<see cref="MaterialBufferMask"/>), so a ray reads at a hit whether it is cut out
-    /// there and what the surface is there. A slot holds its diffuse transmission, the share of its
-    /// light a face lets through from behind, and a leaf's and a grass card's say their diffuse
-    /// share is lit by the way out of the crown their meshes carry in their second texture
-    /// coordinates, as the leaf material lights them. A tree's impostor holds a cutoff above any
-    /// alpha, since it stands in for a far tree turned to the eye as it draws, and a ray passes it.
+    /// A shader reads it as a <c>StructuredBuffer&lt;Material&gt;</c>. A texture is in it as its
+    /// mean, the base color, the emission, the roughness and the metal each the material's factor
+    /// times its texture's mean, a color's in linear light by its image's sRGB flag, as global
+    /// illumination's field paints the surface, since a scene made to be drawn holds its colors in
+    /// its textures and leaves its factors white and its metal at one for its maps to say. An
+    /// entity drawn by a shader program, or with no material, holds zeros. A tree's leaves, its
+    /// bark and the grass hold the standard material theirs extends. A material cut out under an
+    /// alpha (<see cref="MaterialSettings.AlphaMode"/>) holds its cutoff, and its base color
+    /// texture, its metallic and roughness texture and its diffuse transmission texture are among
+    /// the buffer's masks (<see cref="MaterialBufferMask"/>), its slot holding the factors they
+    /// multiply, so a ray reads at a hit whether it is cut out there and what the surface is there.
+    /// A slot holds its diffuse transmission, the share of its light a face lets through from
+    /// behind, and a leaf's and a grass card's say their diffuse share is lit by the way out of the
+    /// crown their meshes carry in their second texture coordinates, as the leaf material lights
+    /// them. A tree's impostor holds a cutoff above any alpha, since it stands in for a far tree
+    /// turned to the eye as it draws, and a ray passes it.
     /// </para>
     /// </remarks>
     public static AssetHandle CreateMaterialBuffer(int capacity)

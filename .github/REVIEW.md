@@ -65,7 +65,10 @@ painting each material by its textures' means, with eleven readings on a white g
 sheets of the Bistro's night and Sponza's atrium, pushed with the form kept, its build run
 44128319302 started; the crown's probe test skipped with its reason and item 152 written for it;
 Decision 93 recorded. At the tick of 18:33 on 2026-11-17, run 44128319302 of `259dcb25` green; item
-149 archived.
+149 archived. `e19b2575`, item 152, the field lighting a leaf by the share its diffuse transmission
+sends through, the crown's test running again, with its sheet on a white ground, pushed at 21:33 on
+2026-11-17, the form kept; item 153 written for what it left open. Run 44170517651 of `e19b2575`
+ended green; item 152 archived.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -273,16 +276,19 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     item 150's first step, with STYLE's own searches run over the tree and their counts in the
     Reply.
 
-152. **A front-lit crown's probes read above their reference with the leaves painted as they are
-    drawn.** With the surface maps' means in the scene field (item 150), the oak's leaves and bark
-    are painted as dielectric, and the probes about the crown rise, the front half to 1.470 of its
-    reference against a bar of 1.25, the front to 1.151 and the core to 0.769.
-    `ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter` stands skipped with that reason and its
-    bar kept. Asked, the cause of the front half's excess read against the reference a texel at a
-    time, whether the leaves' cutouts count as solid in the field, whether a leaf sends from both
-    sides at full, and whether the probe takes the sun's light twice, then the mend, the test run
-    again with its bar as it stands, and a sheet of the crown before and after beside the reference.
-    Before item 150's second step.
+153. **What the leaf mend left open.** Three findings stand after item 152. The sun that crosses a
+    crown's outer leaves into its core is not carried by the field, so the core's probes read under
+    the reference, 0.50 at the third place of the crown's test. The field's density holds a leaf
+    cover of 0.6 where the oak's measured cover is 0.45. The trace costs about 0.8 ms more in the
+    meadow at High with the light-through share read. And the sheet of item 152 says the oak's
+    leaves facing the eye read 31% under the reference in the drawn picture, before and after alike,
+    which no item explains. Asked, each read to its cause first and told in the Reply with numbers;
+    the cover taken from the tree's own measure where the field is built, with the crown's and the
+    wall's tests held; the 31% split into what the probes give and what the leaf's own shading
+    gives, on one leaf under the reference's light; the cost read for where it goes, and mended
+    where a cheaper read gives the same readings to the third figure. Tests fail first for each
+    mend, and a sheet on a white ground shows the crown before and after beside the reference. After
+    item 150's second step.
 
 ## Verdicts
 
@@ -1041,77 +1047,75 @@ with warnings as errors and the crown's test reports itself skipped with its rea
 
 NormTests passed, 19.
 
-152, a front-lit crown's probes read with the leaves lit as their material lights them, in the
-commit carrying this Reply.
+150, its reference mend, the path-traced reference painting a face its factors times its textures'
+means and holding every pixel a number, in the commit carrying this Reply.
 
-The cause. The field lit a surface its probes' rays meet by its whole color from either side, by its
-normal out of the crown, where the leaf material, and the reference that follows it, lights the
-diffuse share less what its diffuse transmission sends through by that normal, and the share sent
-through by the side away from the ray. Seen from inside a crown the two agree, and seen from outside
-the field sent about twice what the leaf does. The full metal of the field's leaves before 150
-halved them and hid it. A scratch copy of the test writing each probe's ways against the reference
-put the excess in the front half's ways up and back into the crown's top, at 2 to 13 times their
-reference. The sun is taken once, and the cutouts are counted by the field's density. In a scratch
-kernel, before the front, in the front half and among the core's cards, the unmended field read
-1.152, 1.471 and 0.768 of the reference, a leaf met from behind lit by its back alone 0.841, 1.057
-and 0.289, the share split by the side the ray met 0.694, 0.864 and 0.367, and the material's model
-0.817, 0.971 and 0.501.
+The cause was not as 150's Reply said. The reference read no sRGB texture as linear, since it reads
+no texture of an opaque material at all. The material buffer it takes its faces from held a
+material's factors alone but for a cut-out material's masks, and a pack's factors are white and full
+metal with the color and the metal in the maps, so Sponza's sunlit floor was a white mirror of
+roughness 1 to the reference, which sends about three times the light of the stone's 0.105 under a
+sun 84 degrees up, as an sRGB mean of 0.34 happens to. The Bistro's lanterns emitted white for the
+same reason, the emissive factor without its map.
 
-The mend. `field_means.rs` takes a texture's alpha over the texels another shows, and the field's
-gather gives each material the share its diffuse transmission sends through, the factor times its
-texture's alpha over the texels its base color shows, 0.527 for the oak's leaves. The share rides
-the draw's gloss in its fourth channel, and the splat paints it in the low byte of a cell's gloss
-word, which that word leaves free since the face's way comes from the cell's code. The resolve and
-the stamp write it into an image of half floats of its own with its still copy, 4 MB at four
-cascades, and no byte of a face's word holds two things. `shadeProbeHit` lights a surface sending a
-share through as the leaf material does, the direct light read on both of its sides and the probes
-once, on the side the ray met, and one sending none as before, to the bit. A mesh counts as changed
-when its gloss or its share changes, as when its color does, since each is a texture's mean once it
-has loaded. The guide's field paragraph names the share, and its cascade's memory reads 8 MB where
-it read 5, which it had not been since the glow's image came in.
+The pixels that are not a number came from the reference's draw. Its hash rounds to 1 as a float
+within 128 of 2^32, 128 of the 2^32 states counted on the processor, one draw in 2^25. A path at a
+face of full metal chooses its gloss where its draw falls under the gloss's weight, a share over
+itself there, which the GPU dividing by a reciprocal makes exactly 1 at some faces, and there a draw
+of 1 took the diffuse share the face does not have, 0 over 0, and the pixel's sum read not a number
+from then on. The Bistro's night reference held four such pixels of 921,600, on the wet paving, a
+door, a roof and concrete, which turned each region's mean to NaN, and Sponza's atrium held four in
+two regions, a dirt decal and a brick wall, every face full metal by its factors in both.
 
-`GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter` runs again with its
-skip taken away and its bar as it stood, reading 0.817, 0.972 and 0.500 of its reference where the
-head read 1.152, 1.471 and 0.768.
-`GlobalIlluminationTests.AProbeBeforeASunlitWallSendingHalfItsLightThroughHoldsAboutHalfTheLight`
-holds a probe before a sunlit wall sending half its light through to 0.45 to 0.6 of the light it
-holds before the same wall sending none, and reads 0.508, where the head takes no share and holds
-the same before both.
-`GlobalIlluminationTests.TheFieldKeepsTheShareEachCellsNearestSurfaceSendsThrough` reads the share
-back beside an opaque block and a block sending 0.6 through, 0 and 0.6. `field_means`'
-`a_transmission_is_averaged_over_the_texels_its_base_color_shows` holds the share over the texels
-shown, cut out and blended. The three profiles check with no warning, the bridge's tests pass with
-no feature and with render, 126 and 230, and Cargo.lock is unmoved.
+The mend. The textures' means are one resource of the app's, the field's and the material buffers'
+alike, and `TextureMeans::painted` gives what a standard material's textures make of its factors, a
+color's mean in linear light by its image's sRGB flag. A material buffer's slot holds its base
+color, emission, roughness, metal and the share it sends through each its factor times its texture's
+mean, where no mask holds that texture, and a mask's texture is read at the hit as before. The
+reference's draw is held under 1, which leaves every other draw as it was.
+`Shaders.CreateMaterialBuffer`'s remarks, `bcs_scene`'s `Material`, the compute guide's paragraph
+and the ray tracing guide's reference say a texture is in the buffer as its mean, and no listing
+line changes.
 
-The cost, gi_trace's mean over 600 frames in the feature test's meadow at 8:00 at High at 1280 by
-720, two runs a session, sessions by turns with the head's build under the lock taken exclusive.
-Reading the probes on both sides of a surface sending light through took 5.24 to 5.35 ms where the
-head took 4.07 to 4.12, and reading them once, which the commit holds, takes 4.74 to 4.88 where the
-head took 3.99 to 4.12, about 0.8 ms or a fifth more, since every leaf and blade of grass in the
-meadow sends light through and each such hit reads the light on both of its sides. The crown's
-probes and the wall's read the same either way, to the third figure.
+`ComputeShaderTests.AMaterialBufferTakesEachTextureAtItsMean` holds a slot's base color, emission,
+roughness and metal at their textures' means, an sRGB level of 188 at 0.503 and a linear one of 128
+at 0.502, where the head's buffer held the factor of 1.
+`GiReferenceTests.ATexturedFloorAndAPatchEmittingByItsTextureReadInTheReferenceAsThePictureDrawsThem`
+holds a floor white and full metal by its factors with its color and its metal in its maps, and a
+patch emitting by an orange emissive texture, within 8% of the picture, reading 0.998 and 1.000 of
+it, where the head's floor read 1.171.
+`GiReferenceTests.AReferenceOfAWallOfFullMetalHoldsEveryPixelANumber` traces the first eight seeds
+whose paths draw that 1 at a wall of full metal, found by the reference's own draws mirrored in the
+test, and holds every pixel a number, where the head's draw left one pixel not a number in seven of
+the eight, the eighth's weight a little under 1 as the GPU divides it, so the draw took the diffuse
+share at a weight of nothing. The reference's other tests pass, and the crown's test reads 0.855,
+1.086 and 0.561 of its reference where it read 0.817, 0.972 and 0.500, within its bars, since the
+oak's bark, white and full metal by its factors, stands in the reference painted its maps' means as
+it stands in the field. The three profiles check with no warning, the bridge's tests pass with no
+feature and with render, 126 and 230, and Cargo.lock is unmoved.
 
-The sheet is `2026-11-17-item-152-meadow-oak.webp`, the meadow's oak before the texture means, with
-them and with the mend, then the mend beside the path-traced reference, each pair with its
-difference at four times, red lighter and blue darker. The means and the mend each move the leaves
-and the grass by a few levels. Against the reference, the oak's leaves facing the eye read 30% under
-before the means, 30% under with them and 31% under with the mend, and the far trees stand red where
-the reference draws no fog. It stands for the meadow's pair 150's Reply named.
+Sponza's atrium at the sibling's view, noon and lens, cascades on, and the Bistro's night at the
+sibling's camera were each traced at 64 paths a pixel in a session of their own. The atrium's floor
+reads within 4% of the picture, 2.120 against 2.210 in the comparison's units, where the head's
+reference read 6.750, three times it. Against the mended reference the atrium's shade reads the
+picture over it, the walls, arches and frames by 36% to 158% and the ceiling by 102% to 153%, which
+150's later steps take up, the take-back floor first. The dirt decals are blended and traced whole
+at their texture's mean by its alpha, so the reference reads them as dark dirt where the picture
+shows the floor through them, 0.023 against 0.354, a fault of the reference's own left open. The
+Bistro's lanterns read red 3.69 times their green where the head's reference read them white, 14.2 a
+channel, near their emissive map's 3.53, and the wet paving reads within 4% of the picture. Neither
+reference holds a pixel that is not a number. The sheet is
+`2026-11-17-item-150-reference-mend.webp`, each scene's reference at the head and mended with their
+difference, red lighter and blue darker, the light drawn as x / (1 + x) and Sponza's at a quarter of
+it, so the sunlit floor keeps its level.
 
-Findings left open. The sun crossing a crown into its core, where a face's ray to the sun stops at
-the crown whole and the reference lets in the light between the leaves, which a scratch kernel
-crossing it at the crown's share a meter took the core's probe from 0.501 to 0.754 and the front
-half's from 0.971 to 0.682. The field's density, which takes a leaf as covering 0.6 of its card,
-where the oak's covers about 0.45 of its box in the atlas. And the trace's 0.8 ms more in a meadow
-of leaves and grass.
+Shared: the reference global illumination is measured against paints a face its factors times its
+textures' means, as both fields paint it, and draws under 1. 3DEngine's reference draws by the same
+hash and meets the same 1, and holds the gloss's weight between 0.05 and 0.95, so its draw of 1
+never takes 0 over 0.
 
-Shared: the field holds the share of its diffuse light a surface sends through to its far side, a
-half float a cell beside its faces, and a probe's hit lights such a surface as the leaf material
-does. 3DEngine's field holds no such share, and a shared module's interface would carry it beside
-the face.
-
-The whole suite passed from one tree, 2,178 passed, 0 failed and 4 skipped, 2,182 in all where the
-listing is 2,171, the solution built from nothing with warnings as errors, in 17 parts and the rest
-dealt by the last run's times, each part of 23 s to 4 m 48 s, a part at a time under the GPU lock.
+The whole suite passed from one tree, 2,181 passed, 0 failed and 4 skipped, 2,185 in all where the
+listing is 2,174, the solution built from nothing with warnings as errors, in 17 parts and the rest
+dealt by the last run's times, each part of 21 s to 4 m 49 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.

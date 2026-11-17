@@ -298,7 +298,6 @@ mod built {
         bounds: Vec<Option<[f32; 6]>>,
         triangles: Vec<Option<u32>>,
         surfaces: Vec<Option<f32>>,
-        means: TextureMeans,
     }
 
     impl FieldMeshes {
@@ -336,12 +335,12 @@ mod built {
         app.init_resource::<FieldMeshes>();
         app.init_resource::<FieldPool>();
         app.add_systems(bevy::app::Last, track);
+        crate::render::field_means::install(app);
     }
 
     /// Moves a mesh's generation on where Bevy says its data changed or it went, so the plan takes
-    /// it as another mesh and the pool holds it again, and forgets a texture's mean so, so it is
-    /// measured again.
-    fn track(mut events: MessageReader<AssetEvent<Mesh>>, mut images: MessageReader<AssetEvent<Image>>, mut meshes: ResMut<FieldMeshes>) {
+    /// it as another mesh and the pool holds it again.
+    fn track(mut events: MessageReader<AssetEvent<Mesh>>, mut meshes: ResMut<FieldMeshes>) {
         for event in events.read() {
             let (AssetEvent::Modified { id } | AssetEvent::Removed { id }) = event else {
                 continue;
@@ -352,11 +351,6 @@ mod built {
                 meshes.bounds[number as usize] = None;
                 meshes.triangles[number as usize] = None;
                 meshes.surfaces[number as usize] = None;
-            }
-        }
-        for event in images.read() {
-            if let AssetEvent::Modified { id } | AssetEvent::Removed { id } = event {
-                meshes.means.forget(*id);
             }
         }
     }
@@ -413,6 +407,7 @@ mod built {
         }
 
         world.init_resource::<FieldMeshes>();
+        let mut means = world.remove_resource::<TextureMeans>().unwrap_or_default();
         let mut query = world.query_filtered::<(
             &Mesh3d,
             &GlobalTransform,
@@ -487,16 +482,10 @@ mod built {
                     (None, None)
                 };
                 let look = id.and_then(|id| looks.and_then(|looks| looks.0.get(&id))).copied().unwrap_or_default();
-                // Each texture's mean, where the material has the texture and it has loaded, the
-                // base color's by each texel's alpha where the material cuts or blends by it.
-                let mut mean = |texture: Option<&Handle<Image>>| texture.and_then(|texture| meshes.means.of(images, texture.id()));
-                let cut = standard.is_some_and(|standard| !matches!(standard.alpha_mode, bevy::material::AlphaMode::Opaque));
-                let painted = mean(standard.and_then(|standard| standard.base_color_texture.as_ref()))
-                    .map(|mean| if cut { mean.solid } else { mean.all });
-                let glowing = mean(standard.and_then(|standard| standard.emissive_texture.as_ref())).map(|mean| mean.all);
-                let surfaced = mean(standard.and_then(|standard| standard.metallic_roughness_texture.as_ref())).map(|mean| mean.all);
+                // What the material's textures make of its factors, from those that have loaded.
+                let painted = standard.map(|standard| means.painted(images, standard));
                 let mut color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
-                if let Some(times) = look.tint.or(painted) {
+                if let Some(times) = look.tint.or(painted.map(|painted| painted.color)) {
                     for (channel, times) in color.iter_mut().zip(times) {
                         *channel *= times;
                     }
@@ -507,29 +496,13 @@ mod built {
                 let emission = standard.map_or([0.0; 4], |standard| {
                     let [r, g, b, _] = standard.emissive.to_f32_array();
                     let shown = 1.0 + (exposure - 1.0) * standard.emissive_exposure_weight;
-                    let [tr, tg, tb] = glowing.unwrap_or([1.0; 3]);
+                    let [tr, tg, tb] = painted.map_or([1.0; 3], |painted| painted.emission);
                     [r * shown * tr, g * shown * tg, b * shown * tb, 0.0]
                 });
-                // The share of its diffuse light the material sends through to its far side, its
-                // diffuse transmission times its texture's alpha over the texels its base color
-                // shows, every one of them where it cuts nothing, as Bevy lights a leaf's back where
-                // the leaf is.
-                let transmission = standard.map_or(0.0, |standard| {
-                    let cutoff = match standard.alpha_mode {
-                        bevy::material::AlphaMode::Opaque => Some(0.0),
-                        bevy::material::AlphaMode::Mask(cutoff) => Some(cutoff),
-                        _ => None,
-                    };
-                    let share = standard.diffuse_transmission_texture.as_ref().and_then(|texture| {
-                        let shown = standard.base_color_texture.as_ref().unwrap_or(texture);
-                        let cutoff = if shown == texture { Some(0.0) } else { cutoff };
-                        meshes.means.alpha_where(images, texture.id(), shown.id(), cutoff)
-                    });
-                    standard.diffuse_transmission * share.unwrap_or(1.0)
-                });
+                let transmission = painted.map_or(0.0, |painted| painted.transmission);
                 // Green the roughness and blue the metal, as a glTF metallic and roughness map holds
                 // them.
-                let [_, rough, metal] = surfaced.unwrap_or([1.0; 3]);
+                let [_, rough, metal] = painted.map_or([1.0; 3], |painted| painted.surface);
                 let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| {
                     [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, transmission]
                 });
@@ -559,6 +532,7 @@ mod built {
 
             found
         });
+        world.insert_resource(means);
 
         (found, eye)
     }

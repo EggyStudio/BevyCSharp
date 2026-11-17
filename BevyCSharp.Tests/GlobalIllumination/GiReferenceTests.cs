@@ -12,7 +12,7 @@ namespace Bevy.Tests;
 /// alone, and the reference lit by the sun as Bevy lights the picture, through the camera's air.
 /// </summary>
 [Collection("engine")]
-public sealed class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output)
+public sealed partial class GiReferenceTests(Xunit.Abstractions.ITestOutputHelper output)
 {
     private const uint Width = 64, Height = 36;
 

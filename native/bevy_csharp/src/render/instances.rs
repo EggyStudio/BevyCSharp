@@ -27,10 +27,13 @@
 //! among the buffer's masks, the first [`MOST_MASKS`] such textures among its slots, which a shader
 //! binds to read the cutout, the color, how metallic and rough the surface is, how much it lets
 //! through and which way it faces at a hit, a leaf's metal its texture's to say where the
-//! material's own is one. Other textures are not in it, since a texture's average color is work on
-//! the GPU, and the material multiplies them by the base color. A tree's impostor stands in for a
-//! far tree, turned to the eye as it draws, and its slot's cutoff is above any alpha, so a ray
-//! passes it.
+//! material's own is one. Every other texture is in it as its mean (`field_means`), the slot's
+//! base color, emission, roughness and metal and the share it lets through each its factor times
+//! its texture's mean, a color's in linear light by its image's sRGB flag, as global
+//! illumination's field paints the surface, since a scene made to be drawn holds its colors in its
+//! textures and leaves its factors white and its metal at one for its map to say. A tree's
+//! impostor stands in for a far tree, turned to the eye as it draws, and its slot's cutoff is above
+//! any alpha, so a ray passes it.
 
 #![cfg(feature = "render")]
 
@@ -205,8 +208,8 @@ pub fn write_instances(
 }
 
 /// Writes every material buffer's slots from its entities' standard materials, a leaf's, a grass
-/// card's and a bark's the standard material each extends. A slot whose entity has none, or is
-/// drawn by a shader program, holds zeros.
+/// card's and a bark's the standard material each extends, each texture no mask holds taken at its
+/// mean. A slot whose entity has none, or is drawn by a shader program, holds zeros.
 #[allow(clippy::too_many_arguments)]
 pub fn write_materials(
     buffers: Option<ResMut<InstanceBuffers>>,
@@ -221,12 +224,18 @@ pub fn write_materials(
         bevy::ecs::system::Res<Assets<bevy::image::Image>>,
     ),
     mut assets: ResMut<Assets<ShaderBuffer>>,
+    means: Option<ResMut<super::field_means::TextureMeans>>,
 ) {
     let Some(mut buffers) = buffers else {
         return;
     };
     buffers.forget_released();
     let (standards, leaf_materials, bark_materials, images) = materials;
+    let mut unkept = super::field_means::TextureMeans::default();
+    let means = match means {
+        Some(means) => means.into_inner(),
+        None => &mut unkept,
+    };
 
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * MATERIAL_SLOT_BYTES);
@@ -253,6 +262,7 @@ pub fn write_materials(
                 }
                 None => [0.0; 20],
                 Some(material) => {
+                    let painted = means.painted(Some(&images), material);
                     let base = material.base_color.to_linear();
                     let emissive = material.emissive;
                     let reflectance = material.reflectance;
@@ -270,20 +280,25 @@ pub fn write_materials(
                     let bumps = normal_map.map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
                     let two = normal_map.and_then(|texture| images.get(texture)).is_some_and(|image| two_component(image.texture_descriptor.format));
                     let flags = (if leaf { WAY_OUT } else { 0 }) | (if two { TWO_COMPONENT } else { 0 }) | (if material.flip_normal_map_y { FLIP_Y } else { 0 });
+                    // A texture a mask holds is read where a ray hits, and every other is taken at
+                    // its mean.
+                    let [r, g, b] = if mask >= 0.0 { [1.0; 3] } else { painted.color };
+                    let [er, eg, eb] = painted.emission;
+                    let [_, rough, metal] = if surface >= 0.0 { [1.0; 3] } else { painted.surface };
 
                     [
-                        base.red,
-                        base.green,
-                        base.blue,
+                        base.red * r,
+                        base.green * g,
+                        base.blue * b,
                         base.alpha,
-                        emissive.red,
-                        emissive.green,
-                        emissive.blue,
+                        emissive.red * er,
+                        emissive.green * eg,
+                        emissive.blue * eb,
                         // The share of the camera's exposure the emission takes, as Bevy's
                         // shaders read it in the emission's fourth.
                         material.emissive_exposure_weight,
-                        material.perceptual_roughness,
-                        material.metallic,
+                        material.perceptual_roughness * rough,
+                        material.metallic * metal,
                         reflectance,
                         if material.unlit { 1.0 } else { 0.0 },
                         cutoff,
@@ -292,7 +307,7 @@ pub fn write_materials(
                         0.0,
                         // The share let through, its texture's alpha scaling it as Bevy reads it,
                         // how its diffuse share and its normal map are read, and its normal map.
-                        material.diffuse_transmission,
+                        if through >= 0.0 { material.diffuse_transmission } else { painted.transmission },
                         through,
                         flags as f32,
                         bumps,

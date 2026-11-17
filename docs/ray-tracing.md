@@ -406,12 +406,14 @@ for it.
 GPU's rays where it has them, every face lit as Bevy lights it and scattering by its gloss and its
 diffuse share, each face past the first keeping for its diffuse share what its gloss leaves, and
 `gi.compare shots/reference.png` says how far the picture lies from it, region by region, with a
-picture of the difference beside it. Given `true` after its count of bounces, as `gi.reference
-shots/reference.png 256 -1 true`, it traces leaf by leaf, a pixel's light that of its paths meeting
-a leaf or a grass card first, and the comparison reads only the pixels its paths found all leaf,
-since a far crown's pixels hold more of the sky between its leaves in the reference than in the
-picture, whose leaves keep their share of a card in the distance. A mesh a shader places as it
-draws, as particles drawn from a buffer are, is traced where its own corners lie, so it is hidden
+picture of the difference beside it. A face is painted its material's factors times its textures'
+means, as the field paints it, but for a cut-out material's textures, which are read where a path
+meets them. Given `true` after its count of bounces, as
+`gi.reference shots/reference.png 256 -1 true`, it traces leaf by leaf, a pixel's light that of its
+paths meeting a leaf or a grass card first, and the comparison reads only the pixels its paths found
+all leaf, since a far crown's pixels hold more of the sky between its leaves in the reference than
+in the picture, whose leaves keep their share of a card in the distance. A mesh a shader places as
+it draws, as particles drawn from a buffer are, is traced where its own corners lie, so it is hidden
 for a reading. A mesh of a visibility range, a tree's levels among them, is traced at the level the
 camera's distance gives, as the picture draws it, and the reference's answer says how many cut-out
 textures went past the material buffer's masks and how many trees were not dressed yet, since a

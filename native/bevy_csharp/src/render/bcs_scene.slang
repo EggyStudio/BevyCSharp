@@ -21,10 +21,12 @@ public struct Instance
 /// One slot of a material buffer, what an entity's standard material says it is made of, a leaf's,
 /// a grass card's and a bark's the standard material each extends.
 ///
-/// All zeros for a slot with no entity, or one whose entity has no standard material. Textures are
-/// not in it, but a cut-out material's base color texture, its metallic and roughness texture, its
-/// diffuse transmission texture and its normal map, which are among the buffer's masks, and the
-/// material multiplies its texture by `base_color`.
+/// All zeros for a slot with no entity, or one whose entity has no standard material. A texture is
+/// in it as its mean, `base_color`, `emissive`, `perceptual_roughness`, `metallic` and
+/// `diffuse_transmission` each the material's factor times its texture's mean, but a cut-out
+/// material's base color texture, its metallic and roughness texture, its diffuse transmission
+/// texture and its normal map, which are among the buffer's masks, its slot holding the factors a
+/// shader multiplies by the texel it reads at a hit.
 public struct Material
 {
     /// Linear, with alpha.

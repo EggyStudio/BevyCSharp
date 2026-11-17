@@ -21,12 +21,13 @@
 // what it met into the image of regions, the slot's number times eight and the axis its face turns
 // toward most, plus one, or 0 for nothing. Both images start at zero for each reference. Compiled
 // to SPIR-V, since ray queries exist nowhere else. A mesh's vertices' colors are not in the pool,
-// so a face is its material's color alone, and a texture's light is left to its base color, but for
-// a cut-out material's, a leaf's or a grass card's, whose base color texture is one of the material
-// buffer's masks, which colors the face and lets a path or a shadow ray through where its alpha is
-// under the cutoff, as the forward pass discards those texels, its metallic and roughness texture
-// another mask. A tree's impostor, which stands in
-// for a far tree turned to the eye as it draws, is passed, so the reference holds no far trees.
+// so a face is its material's color alone, its factors times its textures' means as the material
+// buffer holds them, as global illumination's field paints it, but for a cut-out material's, a
+// leaf's or a grass card's, whose base color texture is one of the material buffer's masks, which
+// colors the face and lets a path or a shadow ray through where its alpha is under the cutoff, as
+// the forward pass discards those texels, its metallic and roughness texture another mask. A tree's
+// impostor, which stands in for a far tree turned to the eye as it draws, is passed, so the
+// reference holds no far trees.
 //
 // It honors the materials' own models rather than a physical surface's. A cut-out material's
 // normal map bends the face's normal as Bevy's does. A face lets through from behind the share its
@@ -384,12 +385,15 @@ float4 hemisphereAt(float2 uv)
 // as a bulb's own sphere around it, casts no shadow.
 static const float NearShadow = 0.1;
 
-// A random number from 0 to 1 and the state moved on, by the PCG hash.
+// A random number from 0 to under 1 and the state moved on, by the PCG hash. A hash within 128 of
+// 2^32 rounds to 1 as a float, one draw in 2^25, so the draw is held under 1, since a path at a
+// face of full metal draws its gloss by a weight of 1 and would take the diffuse share it does not
+// have, 0 over 0, its pixel not a number.
 float random(inout uint state)
 {
     state = state * 747796405u + 2891336453u;
     uint packed = ((state >> ((state >> 28u) + 4u)) ^ state) * 277803737u;
-    return float((packed >> 22u) ^ packed) / 4294967296.0;
+    return min(float((packed >> 22u) ^ packed) / 4294967296.0, 0.99999994);
 }
 
 // A way about n drawn by the cosine.

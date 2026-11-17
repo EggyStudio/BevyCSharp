@@ -461,6 +461,84 @@ public sealed class ComputeShaderTests
     }
 
     /// <summary>
+    /// A material buffer holds a material's base color, emission, roughness and metal each times its
+    /// texture's mean, a color's in linear light by its image's sRGB flag, as global
+    /// illumination's field paints the surface.
+    /// </summary>
+    /// <remarks>
+    /// A scene made to be drawn holds its colors in its textures and leaves its factors white and
+    /// its metal at one for its maps to say, so a slot of the factors alone holds such a surface as
+    /// a white mirror. An sRGB level of 188 is 0.503 in linear light and one of 128 is 0.216, and a
+    /// linear one of 128 is 0.502.
+    /// </remarks>
+    [SkippableFact]
+    public void AMaterialBufferTakesEachTextureAtItsMean()
+    {
+        Needs.Shaders();
+
+        AssetHandle into = default;
+        ShaderInstance copy = default;
+        BufferRead read = default;
+        Vector4[]? copied = null;
+        static AssetHandle Flat(byte r, byte g, byte b, bool srgb) =>
+            Render.CreateImage([r, g, b, 255, r, g, b, 255, r, g, b, 255, r, g, b, 255], 2, 2, srgb);
+
+        new PictureRun
+        {
+            Scene = ecs =>
+            {
+                var painted = ecs.Spawn();
+                Render.SetMesh(ecs, painted, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                Render.SetMaterial(ecs, painted, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColorTexture = Flat(188, 128, 255, srgb: true),
+                    Emissive = (2f, 2f, 2f, 0f),
+                    EmissiveTexture = Flat(255, 128, 0, srgb: true),
+                    Roughness = 1f,
+                    Metallic = 1f,
+                    MetallicRoughnessTexture = Flat(0, 128, 64, srgb: false),
+                }));
+
+                var linear = ecs.Spawn();
+                Render.SetMesh(ecs, linear, Render.CreateMesh(MeshShape.Cuboid, 1f, 1f, 1f));
+                Render.SetMaterial(ecs, linear, Render.CreateMaterial(new MaterialSettings
+                {
+                    BaseColor = (0.5f, 1f, 1f, 1f),
+                    BaseColorTexture = Flat(128, 128, 128, srgb: false),
+                }));
+
+                var materials = Shaders.CreateMaterialBuffer(2);
+                Shaders.SetInstance(materials, 0, painted);
+                Shaders.SetInstance(materials, 1, linear);
+
+                into = Shaders.CreateBuffer(6 * 16);
+                copy = Compute("shaders/read_materials.slang").SetBuffer("materials", materials).SetBuffer("into", into);
+            },
+        }
+            .Until("compiled", _ => ShaderMaterialTests.ProgramsReady())
+            .Wait(5)
+            .Do("copying the slots", _ => Shaders.Dispatch(copy, 1))
+            .Wait(2)
+            .Do("asking for the copy", _ => read = Shaders.BeginBufferRead(into))
+            .Until("read back", _ => Shaders.TryReadBuffer(read, out copied))
+            .Go();
+
+        Assert.NotNull(copied);
+
+        Assert.Equal(0.503f, copied[0].X, 0.003f);
+        Assert.Equal(0.216f, copied[0].Y, 0.003f);
+        Assert.Equal(1f, copied[0].Z, 0.003f);
+        Assert.Equal(2f, copied[1].X, 0.006f);
+        Assert.Equal(0.432f, copied[1].Y, 0.006f);
+        Assert.Equal(0f, copied[1].Z, 0.006f);
+        Assert.Equal(128f / 255f, copied[2].X, 0.003f);
+        Assert.Equal(64f / 255f, copied[2].Y, 0.003f);
+
+        Assert.Equal(0.251f, copied[3].X, 0.003f);
+        Assert.Equal(0.502f, copied[3].Y, 0.003f);
+    }
+
+    /// <summary>
     /// Slang's wave operations reach the GPU as subgroup operations, so a sum over a subgroup is
     /// its size, and one thread in each is its first.
     /// </summary>

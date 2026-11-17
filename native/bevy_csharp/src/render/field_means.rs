@@ -1,5 +1,7 @@
 //! The mean of a texture, which global illumination's field paints a surface with where the picture
-//! paints it the texture, since the field holds one color a mesh and reads no texel.
+//! paints it the texture, since the field holds one color a mesh and reads no texel, and which a
+//! material buffer gives a ray's hit for each texture it holds no mask of (`instances`), so the
+//! reference global illumination is measured against meets the surfaces the field holds.
 //!
 //! A material's base color, its metal and roughness and its emission are each a factor times a
 //! texel, and a scene made to be drawn, as the scene packs are, holds its colors in its textures
@@ -14,6 +16,9 @@
 //! carries is that alpha's mean over the texels its base color shows, since a leaf's card lets its
 //! light through only where the leaf is (`alpha_where`).
 //!
+//! The means are one resource of the app's (`install`), the field's and the material buffers'
+//! alike, and `painted` gives what a standard material's textures make of its factors.
+//!
 //! The mean is taken over the level of the image's mipmaps of 64 texels a side or fewer where it
 //! has one, and over 64 texels along each row and column of the level it stops at otherwise, so a
 //! large texture costs no more than a small one. The formats read are those of eight bits a channel
@@ -23,8 +28,13 @@
 
 use std::collections::HashMap;
 
-use bevy::asset::{AssetId, Assets};
+use bevy::asset::{AssetEvent, AssetId, Assets, Handle};
+use bevy::ecs::message::MessageReader;
+use bevy::ecs::resource::Resource;
+use bevy::ecs::system::ResMut;
 use bevy::image::Image;
+use bevy::material::AlphaMode;
+use bevy::pbr::StandardMaterial;
 use bevy::render::render_resource::{TextureDataOrder, TextureFormat};
 
 #[cfg(test)]
@@ -32,10 +42,42 @@ mod tests;
 
 /// Each image's mean by its asset, measured once, none where its format or data is not read, and
 /// each image's alpha over the texels another shows (`alpha_where`), by the two and the cutoff.
-#[derive(Default)]
+#[derive(Resource, Default)]
 pub struct TextureMeans {
     means: HashMap<AssetId<Image>, Option<Mean>>,
     shares: HashMap<(AssetId<Image>, AssetId<Image>, Option<u32>), Option<f32>>,
+}
+
+/// Keeps the textures' means for the app, forgetting an image's where Bevy says it changed or
+/// went, so it is measured again.
+pub fn install(app: &mut bevy::app::App) {
+    app.init_resource::<TextureMeans>();
+    app.add_systems(bevy::app::Last, forget_changed);
+}
+
+fn forget_changed(mut images: MessageReader<AssetEvent<Image>>, mut means: ResMut<TextureMeans>) {
+    for event in images.read() {
+        if let AssetEvent::Modified { id } | AssetEvent::Removed { id } = event {
+            means.forget(*id);
+        }
+    }
+}
+
+/// What a standard material's textures make of its factors on average, each a channel's
+/// multiplier, one where it has no such texture or its texture is not read yet.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Painted {
+    /// The base color texture's mean, each texel by its alpha where the material cuts or blends
+    /// by it.
+    pub color: [f32; 3],
+    pub emission: [f32; 3],
+    /// The metallic and roughness texture's mean, its green the roughness's multiplier and its
+    /// blue the metal's, as a glTF map holds them.
+    pub surface: [f32; 3],
+    /// The share of its diffuse light it sends through to its far side, its diffuse transmission
+    /// times its texture's alpha over the texels its base color shows, every one of them where it
+    /// cuts nothing, as Bevy lights a leaf's back where the leaf is.
+    pub transmission: f32,
 }
 
 /// A texture's mean, from 0 to 1 a channel, of every texel alike and of each texel by its alpha.
@@ -75,6 +117,27 @@ impl TextureMeans {
     pub fn forget(&mut self, id: AssetId<Image>) {
         self.means.remove(&id);
         self.shares.retain(|&(image, shown, _), _| image != id && shown != id);
+    }
+
+    /// What a material's textures make of its factors, from those of its textures that have
+    /// loaded.
+    pub fn painted(&mut self, images: Option<&Assets<Image>>, material: &StandardMaterial) -> Painted {
+        let cut = !matches!(material.alpha_mode, AlphaMode::Opaque);
+        let mut mean = |texture: Option<&Handle<Image>>| texture.and_then(|texture| self.of(images, texture.id()));
+        let color = mean(material.base_color_texture.as_ref()).map_or([1.0; 3], |mean| if cut { mean.solid } else { mean.all });
+        let emission = mean(material.emissive_texture.as_ref()).map_or([1.0; 3], |mean| mean.all);
+        let surface = mean(material.metallic_roughness_texture.as_ref()).map_or([1.0; 3], |mean| mean.all);
+        let cutoff = match material.alpha_mode {
+            AlphaMode::Opaque => Some(0.0),
+            AlphaMode::Mask(cutoff) => Some(cutoff),
+            _ => None,
+        };
+        let share = material.diffuse_transmission_texture.as_ref().and_then(|texture| {
+            let shown = material.base_color_texture.as_ref().unwrap_or(texture);
+            let cutoff = if shown == texture { Some(0.0) } else { cutoff };
+            self.alpha_where(images, texture.id(), shown.id(), cutoff)
+        });
+        Painted { color, emission, surface, transmission: material.diffuse_transmission * share.unwrap_or(1.0) }
     }
 }
 
