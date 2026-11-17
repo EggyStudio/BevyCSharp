@@ -24,6 +24,18 @@ The Bistro's pack with its empty Specular red as occlusion and without it, by da
 below, the third panel red where the mended pack is lighter, every surface's light from all around
 given back.
 
+![](.github/assets/readings/2026-11-17-item-149-bistro-street-lens.webp)
+The Bistro at 23:00 with the moon and without it, unmended with its glass of 500 shown unexposed at
+EV 9.7 and mended with its street lantern at 10,000 under a lamp-lit street's ISO 3200, 1/60 s and
+f/2.8, the street reading near as before, with the paving's lux read from the render beneath it
+beside the closed form.
+
+![](.github/assets/readings/2026-11-17-item-149-examples.webp)
+Bevy's four examples whose glTF file emits, each unmended beside mended at the file's own strength,
+where the light panel, the lava, the water and the filament go dark under Bevy's exposure of EV 9.7,
+and beside mended at that strength in nits, which reads as unmended, the third panel red where
+lighter and blue where darker.
+
 ## 2026-11-16
 
 ![](.github/assets/readings/2026-11-16-verdict-60-life.webp)

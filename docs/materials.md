@@ -54,6 +54,16 @@ never sorted, so overlapping leaves fade with soft edges in the right order, and
 is `Mask` at half alpha. `DoubleSided` draws back faces, for anything modeled as a single sheet, lit
 by the normal turned round to face the eye, and `Unlit` shows the base color flat.
 
+A surface's light of its own is `Emissive`, and its alpha is the share of the camera's exposure
+that light takes, which depends on where the material came from. A material made in code keeps
+the alpha its maker sets, 0 unless set, where the color is the light as written, in multiples of
+white, which suits a glow tuned by eye. A material a glTF file brings takes 1, its emissive color
+times `KHR_materials_emissive_strength` a luminance in nits, as glTF means it, exposed as a lamp's
+light is, so a lantern's glass of 500 nits shows about half of white under Bevy's exposure of EV
+9.7 and lights what stands round it through global illumination by the same measure. A file made
+to read right as written, as Bevy's examples' files are, reads the same at EV 9.7 with its
+emission given again at about a thousand times its strength.
+
 The finer surface is there as well. `Reflectance` is how much a non-metal reflects head on,
 `Clearcoat` and `ClearcoatRoughness` lay a glossy varnish over the base, as on a car's paint, and
 `Transmission`, `DiffuseTransmission`, `Thickness` and `RefractiveIndex` let light through, straight

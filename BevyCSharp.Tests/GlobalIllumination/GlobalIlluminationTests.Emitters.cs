@@ -83,6 +83,197 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// A glTF file's emissive panel lights a floor of the level's white under it within a fifth of
+    /// its closed form at three heights, in the picture's light, its emission in nits taking the
+    /// camera's exposure.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// The panel is 0.3 square and a millimeter thick, every face emitting 4,000 nits by
+    /// <c>KHR_materials_emissive_strength</c>, so global illumination carries it as a glow light of
+    /// its box. A point at a height d under the middle of a square of half side s, emitting L, takes
+    /// E = 4 L t atan(t) lux, where t = a / sqrt(1 + a²) and a = s / d, and a floor of white ρ shows
+    /// ρ E / π times the camera's exposure, the panel's thin sides adding under half a percent.
+    /// </para>
+    /// <para>
+    /// The floor reads its closed form only where a glTF material's emission takes the camera's
+    /// exposure, drawn and in the cascades alike, since an exposure weight of 0, which Bevy's glTF
+    /// loader gives a file's emission, shows it as written, about a thousand times its light under
+    /// Bevy's exposure of EV 9.7.
+    /// </para>
+    /// </remarks>
+    [SkippableFact]
+    public void AGltfPanelLightsTheFloorUnderItAsItsClosedForm()
+    {
+        Needs.Shaders();
+        const float half = 0.15f, nits = 4_000f, white = 0.787f;
+        var exposure = 1f / (1.2f * MathF.Pow(2f, 9.7f));
+        using var assets = PictureRun.Temporary();
+        assets.Write("panel.gltf", Panel(half, 0.001f, nits));
+
+        var faults = new List<string>();
+        foreach (var height in new[] { 0.5f, 1f, 2f })
+        {
+            var t = half / height / MathF.Sqrt(1f + (half / height * half / height));
+            var wanted = white / MathF.PI * 4f * nits * t * MathF.Atan(t) * exposure;
+            var shown = UnderPanel(assets.Root, height, white);
+            output.WriteLine($"the floor {height} under the glTF panel reads {shown:0.0000} against its closed form's {wanted:0.0000}, {shown / wanted - 1:+0.000;-0.000}");
+            if (Math.Abs(shown / wanted - 1) >= 0.2) faults.Add($"{height} under the panel the floor reads {shown / wanted:0.000} of its closed form");
+        }
+
+        Assert.True(faults.Count == 0, string.Join("; ", faults));
+    }
+
+    /// <summary>
+    /// The mean light of the middle of the picture, five pixels a side, before tonemapping, of a
+    /// floor of <paramref name="white"/> under the panel of the file at <paramref name="root"/>, its
+    /// lower face <paramref name="height"/> over the floor, looked at from the side along a line that
+    /// passes under the panel, at Bevy's exposure of EV 9.7, with no other light.
+    /// </summary>
+    private static double UnderPanel(string root, float height, float white)
+    {
+        var (read, ready) = (false, 0);
+        new PictureRun
+        {
+            AssetRoot = root,
+            Width = 160,
+            Height = 90,
+            Frames = 3000,
+            Scene = ecs =>
+            {
+                var camera = Render.SpawnCamera3d(new CameraSettings { Clear = ClearMode.Custom, ClearColor = (0f, 0f, 0f, 1f), FieldOfView = 20f });
+                ecs.Add(camera, Transform.LookingAt(new Vec3(2.4f, 1.2f, 0f), Vec3.Zero, Vec3.UnitY));
+                Render.SetPostProcessing(camera, new PostSettings { Hdr = true, Msaa = 1 });
+                Render.SetExposure(camera, 9.7f);
+                Render.SetAmbientLight(camera, (1f, 1f, 1f), 0f);
+                var floor = ecs.Spawn();
+                Render.SetMesh(ecs, floor, Render.CreateMesh(MeshShape.Cuboid, 12f, 0.4f, 12f));
+                Render.SetMaterial(ecs, floor, Render.CreateMaterial(white, white, white, roughness: 0.9f));
+                ecs.Add(floor, Transform.At(0f, -0.2f, 0f));
+                var panel = ecs.SpawnScene(AssetServer.LoadGltfScene("panel.gltf"));
+                ecs.Add(panel, Transform.At(0f, height + 0.0005f, 0f));
+                Render.SetGlobalIllumination(GlobalIllumination.Medium);
+            },
+        }
+            .Until("settled", _ => Settled(2))
+            .Until("traced", _ => WorldProbes.TracedFrames >= 120)
+            .Until("drawn", _ => EngineDrawsOn(traced: true))
+            .Until("ready", _ => (ready = Render.PipelinesReady() ? ready + 1 : 0) >= 3)
+            .Until("read", world =>
+            {
+                var ecs = world.Resource<EcsWorld>();
+                if (!read)
+                {
+                    read = true;
+                    Assert.Null(GiReference.BeginPicture(ecs, null));
+                    return false;
+                }
+                return GiReference.Step(ecs) is not null;
+            })
+            .Go();
+
+        var (width, high, light) = GiReference.LastPicture!.Value;
+        var sum = 0.0;
+        for (var y = high / 2 - 2; y <= high / 2 + 2; y++)
+        for (var x = width / 2 - 2; x <= width / 2 + 2; x++)
+        for (var c = 0; c < 3; c++)
+            sum += light[(y * width + x) * 3 + c];
+        return sum / 75;
+    }
+
+    /// <summary>
+    /// A glTF file of one panel <paramref name="half"/> either way of its middle across and
+    /// <paramref name="thick"/> through, black, every face emitting <paramref name="nits"/> in white.
+    /// </summary>
+    private static string Panel(float half, float thick, float nits)
+    {
+        // Each face its four corners and its normal, wound counterclockwise seen from outside.
+        var (x, y, z) = (half, thick / 2f, half);
+        (Vec3 Normal, Vec3[] Corners)[] faces =
+        [
+            (Vec3.UnitY, [new(-x, y, -z), new(-x, y, z), new(x, y, z), new(x, y, -z)]),
+            (-Vec3.UnitY, [new(-x, -y, -z), new(x, -y, -z), new(x, -y, z), new(-x, -y, z)]),
+            (Vec3.UnitX, [new(x, -y, -z), new(x, y, -z), new(x, y, z), new(x, -y, z)]),
+            (-Vec3.UnitX, [new(-x, -y, -z), new(-x, -y, z), new(-x, y, z), new(-x, y, -z)]),
+            (Vec3.UnitZ, [new(-x, -y, z), new(x, -y, z), new(x, y, z), new(-x, y, z)]),
+            (-Vec3.UnitZ, [new(-x, -y, -z), new(-x, y, -z), new(x, y, -z), new(x, -y, -z)]),
+        ];
+        var (positions, normals, indices) = (new List<float>(), new List<float>(), new List<ushort>());
+        foreach (var (normal, corners) in faces)
+        {
+            var first = (ushort)(positions.Count / 3);
+            foreach (var corner in corners)
+            {
+                positions.AddRange([corner.X, corner.Y, corner.Z]);
+                normals.AddRange([normal.X, normal.Y, normal.Z]);
+            }
+            indices.AddRange([first, (ushort)(first + 1), (ushort)(first + 2), first, (ushort)(first + 2), (ushort)(first + 3)]);
+        }
+
+        var bytes = new byte[(positions.Count + normals.Count) * 4 + indices.Count * 2];
+        Buffer.BlockCopy(positions.ToArray(), 0, bytes, 0, positions.Count * 4);
+        Buffer.BlockCopy(normals.ToArray(), 0, bytes, positions.Count * 4, normals.Count * 4);
+        Buffer.BlockCopy(indices.ToArray(), 0, bytes, (positions.Count + normals.Count) * 4, indices.Count * 2);
+        var view = (int offset, int length) => new Dictionary<string, object> { ["buffer"] = 0, ["byteOffset"] = offset, ["byteLength"] = length };
+        var gltf = new Dictionary<string, object>
+        {
+            ["asset"] = new Dictionary<string, object> { ["version"] = "2.0" },
+            ["extensionsUsed"] = new[] { "KHR_materials_emissive_strength" },
+            ["scene"] = 0,
+            ["scenes"] = new[] { new Dictionary<string, object> { ["nodes"] = new[] { 0 } } },
+            ["nodes"] = new[] { new Dictionary<string, object> { ["mesh"] = 0 } },
+            ["meshes"] = new[]
+            {
+                new Dictionary<string, object>
+                {
+                    ["primitives"] = new[]
+                    {
+                        new Dictionary<string, object>
+                        {
+                            ["attributes"] = new Dictionary<string, object> { ["POSITION"] = 0, ["NORMAL"] = 1 },
+                            ["indices"] = 2,
+                            ["material"] = 0,
+                        },
+                    },
+                },
+            },
+            ["materials"] = new[]
+            {
+                new Dictionary<string, object>
+                {
+                    ["pbrMetallicRoughness"] = new Dictionary<string, object> { ["baseColorFactor"] = new[] { 0f, 0f, 0f, 1f }, ["metallicFactor"] = 0f, ["roughnessFactor"] = 1f },
+                    ["emissiveFactor"] = new[] { 1f, 1f, 1f },
+                    ["extensions"] = new Dictionary<string, object>
+                    {
+                        ["KHR_materials_emissive_strength"] = new Dictionary<string, object> { ["emissiveStrength"] = nits },
+                    },
+                },
+            },
+            ["buffers"] = new[]
+            {
+                new Dictionary<string, object>
+                {
+                    ["byteLength"] = bytes.Length,
+                    ["uri"] = "data:application/octet-stream;base64," + Convert.ToBase64String(bytes),
+                },
+            },
+            ["bufferViews"] = new[] { view(0, positions.Count * 4), view(positions.Count * 4, normals.Count * 4), view((positions.Count + normals.Count) * 4, indices.Count * 2) },
+            ["accessors"] = new[]
+            {
+                new Dictionary<string, object>
+                {
+                    ["bufferView"] = 0, ["componentType"] = 5126, ["count"] = positions.Count / 3, ["type"] = "VEC3",
+                    ["min"] = new[] { -x, -y, -z }, ["max"] = new[] { x, y, z },
+                },
+                new Dictionary<string, object> { ["bufferView"] = 1, ["componentType"] = 5126, ["count"] = normals.Count / 3, ["type"] = "VEC3" },
+                new Dictionary<string, object> { ["bufferView"] = 2, ["componentType"] = 5123, ["count"] = indices.Count, ["type"] = "SCALAR" },
+            },
+        };
+
+        return System.Text.Json.JsonSerializer.Serialize(gltf);
+    }
+
+    /// <summary>
     /// A closed room of the level's white, eight units across and three high, lit by a ball 0.6 in
     /// radius emitting a warm lamp's light at a tenth of a lamp's, 1.2 over the floor.
     /// </summary>

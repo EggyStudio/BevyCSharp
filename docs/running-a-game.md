@@ -29,7 +29,10 @@ zones, things to spawn and the time, each setting kept in the player's folder fo
 day passes over the map, an hour a minute unless the Time page sets another speed, the hour or the
 latitude, the sun and a full moon carried across Bevy's atmosphere as two directional lights whose
 strength and color follow the hour, the scene lit from the sky as it changes and the stars out at
-night, and `./bcs command day.hour 22` sets the hour from a terminal. The engine's weather runs
+night, the camera held at Bevy's exposure of EV 9.7 by day, at a moonlit ground's ISO 3200, 1/15 s
+and f/1.4 from 18:45 to 5:30, and at a lamp-lit street's ISO 3200, 1/60 s and f/2.8 in the Bistro's
+streets at night, and `./bcs command day.hour 22` sets the hour from a terminal.
+The engine's weather runs
 over it where meshlets do not, clouds, fog, rain, snow and thunder from the kind of weather its page
 sets, or from a forecast by the day's clock, as finely as the page's quality asks or not at all,
 and `./bcs command sky.weather Storm now` sets it from

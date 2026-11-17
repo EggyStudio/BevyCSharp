@@ -480,7 +480,28 @@ street by day and by night, with their frame times. A pack itself is made by
 and is published by hand as an asset of the release `scene-packs`, at the address its manifest
 names. A scene published as FBX is turned into glTF first by `build/fbx-to-gltf.sh`, Blender from
 Fedora's repository in a container with no network, and one of NVIDIA's ORCA is then set to the
-archive's texture convention by `build/orca-gltf.py`, whose own words name the steps.
+archive's texture convention by `build/orca-gltf.py`, whose own words name the steps. The
+Bistro's pack is made from its archive unpacked into a folder of its own, `Bistro_v5_2` here:
+
+```bash
+build/fbx-to-gltf.sh Bistro_v5_2/BistroExterior.fbx gltf
+build/orca-gltf.py gltf/BistroExterior.gltf Bistro_v5_2/Textures gltf/orca.gltf --scale 0.01 \
+    --emissive streetlight=10000 spotlight=500 stringlights=200 shopsign=100 --double-sided awning
+build/make-scene-pack.py gltf/orca.gltf bistro-exterior.pack --name bistro-exterior --directx-normals \
+    --extra Bistro_v5_2/LICENSE.txt Bistro_v5_2/README.txt Bistro_v5_2/CHANGELOG.txt \
+    --manifest scenes/bistro-exterior.json   # with the manifest's url, title, source, license and attribution
+```
+
+Each strength is KHR_materials_emissive_strength, which the engine reads as nits times the
+material's emissive texture, so a glass's light is its strength times its texture's mean linear
+luminance.
+
+| Material | Strength | Glass | Why |
+|---|---|---|---|
+| Emissive_StreetLight | 10,000 | 4,200 nits, its texture 0.42 | A street lantern's 0.61 m² of glass 3.4 to 4.1 m up gives about 8,000 lumens, a street lamp's, which light the street 2 m off it some 20 lux |
+| Spotlight_Glass_Emissive | 500 | 500 nits, its texture white | A spotlight's 0.024 m² of glass lights the paving 2 to 4 m under it 0.6 to 2.5 lux |
+| Paris_StringLights_01_* | 200 | 17 to 200 nits by color | Small bulbs on a string, seen rather than lighting the street |
+| Shopsign_* | 100 | 7 to 32 nits on average | A shop's lit sign, seen rather than lighting the street |
 
 The testers' zips are made by hand as well, each on the system it is for, since native code is
 published for the system it is made on. A zip holds the feature test published as native code from

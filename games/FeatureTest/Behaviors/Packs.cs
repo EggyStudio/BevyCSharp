@@ -58,15 +58,22 @@ public partial struct Packs
     /// of the Bistro's exterior carries the scene's name, exterior and all, so its street, sidewalks
     /// and buildings are taken by their own words. The Bistro is larger than the scenes yard, so it
     /// stands alone three kilometers north of the hub, out of sight of the level's rooms, the player
-    /// carried into one of its streets facing the restaurant. A scene the zone does not know is drawn
-    /// with no piece solid and its attribution over its middle.
+    /// carried into one of its streets facing the restaurant. Its streets are lit by lanterns of some
+    /// 8,000 lumens, as a town's are, some 20 lux on the paving, which the moonlit ground's lens of the
+    /// night shows three stops over, so at a night hour the camera there holds a lamp-lit street's,
+    /// f/2.8 at a sixtieth of a second and ISO 3200. A scene the zone does not know is drawn with no
+    /// piece solid and its attribution over its middle.
     /// </remarks>
     private static readonly Dictionary<string, Fitting> Fittings = new(StringComparer.Ordinal)
     {
         ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f),
         ["bistro-exterior"] = new(Words("street|sidewalk|building"), new Vec3(26f, 3.2f, 20f), -3f * MathF.PI / 4f,
-            Alone: new Vec3(0f, Scene.GroundHeight, -3000f), Start: new Vec3(15f, 0.5f, 15f), Toward: new Vec3(0f, 1f, 0f)),
+            Alone: new Vec3(0f, Scene.GroundHeight, -3000f), Start: new Vec3(15f, 0.5f, 15f), Toward: new Vec3(0f, 1f, 0f),
+            NightLens: new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 60f, Sensitivity: 3200f)),
     };
+
+    /// <summary>How near the place of a scene standing alone the eye is in it, so its lens is held.</summary>
+    private const float LensReach = 500f;
 
     /// <summary>The solid pieces of the scene standing, each a body once the physics has made it.</summary>
     private static readonly List<Entity> Solids = [];
@@ -110,6 +117,13 @@ public partial struct Packs
 
     /// <summary>The packs the manifests name.</summary>
     internal static IReadOnlyList<ScenePack> Known { get; private set; } = [];
+
+    /// <summary>
+    /// The lens of the night the place the eye stands in holds, the scene standing alone's where it
+    /// names one, none elsewhere, which <see cref="Applied"/> holds at a night hour in place of the
+    /// moonlit ground's.
+    /// </summary>
+    internal static PhysicalLens? NightLens { get; private set; }
 
     /// <summary>
     /// Whether the heaviest meshes are to be drawn as meshlets, where meshlets run.
@@ -348,6 +362,27 @@ public partial struct Packs
     /// <summary>Where that folder is mounted under the asset root while the pack stands.</summary>
     private static string CacheFolder(ScenePack pack) => $"{ScenePacks.MountFolder}/{pack.Name}-meshlets";
 
+    /// <summary>
+    /// Gives the camera the lens of the place the eye stands in, the scene standing alone's while the
+    /// eye is within <see cref="LensReach"/> of it, and the night's own once it is carried out or the
+    /// scene is taken away.
+    /// </summary>
+    [OnUpdate]
+    public static void Lens(BehaviorContext ctx)
+    {
+        PhysicalLens? lens = null;
+        if (_shown is { } pack && FittingOf(pack) is { Alone: not null, NightLens: { } own }
+            && Scene.Camera is { } camera && ctx.Ecs.IsAlive(camera))
+        {
+            var eye = ctx.Ecs.GetOrDefault<Transform>(camera).Translation;
+            if (new Vec2(eye.X - _site.At.X, eye.Z - _site.At.Z).Length < LensReach) lens = own;
+        }
+
+        if (lens == NightLens) return;
+        NightLens = lens;
+        Applied.Due();
+    }
+
     /// <summary>Writes the attribution over the doorway, every frame, while a scene stands.</summary>
     [OnUpdate]
     public static void Credit(BehaviorContext ctx)
@@ -563,10 +598,11 @@ public partial struct Packs
 /// <summary>
 /// How the zone fits a scene, the pieces the player stands on or is stopped by, by their names,
 /// where the attribution is written in the scene's own frame, turned about its Y to face the way it
-/// is read from, and, for a scene that stands alone, where it stands and where in it the player is
-/// put and looks, in its own frame.
+/// is read from, and, for a scene that stands alone, where it stands, where in it the player is
+/// put and looks, in its own frame, and the lens the camera holds there at a night hour.
 /// </summary>
-internal readonly record struct Fitting(Regex Solid, Vec3 Credit, float Turn, Vec3? Alone = null, Vec3 Start = default, Vec3 Toward = default);
+internal readonly record struct Fitting(Regex Solid, Vec3 Credit, float Turn, Vec3? Alone = null, Vec3 Start = default, Vec3 Toward = default,
+    PhysicalLens? NightLens = null);
 
 /// <summary>The time with plain meshes and with meshlets, as each was last measured.</summary>
 internal sealed record TimingRow() : Row("Time")

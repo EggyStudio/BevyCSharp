@@ -30,7 +30,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// atmosphere the scene starts with, lighting the scene from its sky with the stars behind it, or
 /// a dusk sky drawn in code as a cubemap, made the first time it is asked for, and the dusk sky
 /// alone where meshlets run, since Bevy's meshlet pipelines end the app under an atmosphere.
-/// <see cref="DayNight"/> keeps the stars to the hour.
+/// <see cref="DayNight"/> keeps the stars to the hour, and the camera's exposure, Bevy's EV 9.7 by
+/// day and a moonlit ground's lens by night, or the lens of the place the eye stands in where it
+/// names one (<see cref="Packs.NightLens"/>), the stars', the galaxy's, the moon's and the dusk sky's
+/// nits taken down by the moonlit ground's lens as the day's lights are.
 /// </para>
 /// <para>
 /// The engine's weather runs over the atmosphere's sky at the quality the weather page sets, or not
@@ -47,6 +50,9 @@ public partial struct Applied
     private static bool _reflections;
     private static Backdrop? _backdrop;
     private static AssetHandle _dusk = AssetHandle.None;
+
+    /// <summary>The lens's scale the backdrop's nits were last given, none before the first pass.</summary>
+    private static float _lensScale = -1f;
 
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
     private static float _focus = 10f;
@@ -67,6 +73,7 @@ public partial struct Applied
         // the scene was made with.
         _backdrop = null;
         _dusk = AssetHandle.None;
+        _lensScale = -1f;
         _kind = null;
         MapWeatherOn = false;
         _focus = 10f;
@@ -154,6 +161,8 @@ public partial struct Applied
             _ => null,
         });
         Render.SetEffects(camera, Lens(settings));
+        if (DayNight.Night) Render.SetLens(camera, Packs.NightLens ?? DayNight.NightLens);
+        else Render.SetExposure(camera, DayNight.DayEv100);
 
         if (!RayTracedOcclusion.Tracing)
             Render.SetAmbientOcclusion(camera, settings.AmbientOcclusion ? AmbientOcclusionQuality.High : null);
@@ -176,20 +185,35 @@ public partial struct Applied
                 Render.ClearAtmosphere(camera);
                 Render.ClearSkyFog(camera);
                 Render.SetNightSky(camera, null);
-                Render.SetSkybox(camera, _dusk, brightness: 600f);
             }
             else
             {
-                // The stars, the galaxy and the moon behind the atmosphere, standing by the day's
-                // clock and coming out as the sun goes down.
                 Render.SetSkybox(camera, AssetHandle.None, brightness: 0f);
-                Render.SetNightSky(camera, new NightSkySettings { Clock = DayNight.Clock, MoonSize = 1.5f });
                 Render.SetAtmosphere(camera, Applied.Sky());
                 Render.SetSkyLighting(camera);
-
             }
 
             _backdrop = backdrop;
+            _lensScale = -1f;
+        }
+
+        // The dusk sky, or the stars, the galaxy and the moon behind the atmosphere, standing by the
+        // day's clock and coming out as the sun goes down, their nits taken by the lens's scale.
+        if (DayNight.LensScale != _lensScale)
+        {
+            var scale = DayNight.LensScale;
+            if (backdrop == Backdrop.Dusk)
+            {
+                Render.SetSkybox(camera, _dusk, brightness: 600f * scale);
+            }
+            else
+            {
+                var night = new NightSkySettings { Clock = DayNight.Clock, MoonSize = 1.5f };
+                (night.Stars, night.Galaxy, night.Moon) = (night.Stars * scale, night.Galaxy * scale, night.Moon * scale);
+                Render.SetNightSky(camera, night);
+            }
+
+            _lensScale = scale;
         }
 
         // The engine's weather over the atmosphere's sky, its kind from the panel or its forecast

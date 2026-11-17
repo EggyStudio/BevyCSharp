@@ -16,11 +16,14 @@ internal static class Lightmaps
     private const float Exposure = 250f;
 
     private static Entity _box = Entity.None;
+    private static bool _lit;
 
     public static void Build(App app)
     {
         app.Startup(ctx =>
         {
+            _lit = false;
+
             // No light at all but what was baked, so a dark corner stays dark.
             Render.SetAmbientLight((1f, 1f, 1f), 0f);
             ctx.Ecs.SpawnCamera3d(Transform.At(-278f, 273f, 800f));
@@ -39,6 +42,17 @@ internal static class Lightmaps
         var ecs = ctx.Ecs;
         foreach (var entity in ecs.Descendants(_box))
         {
+            // The file's light panel glows at 100 as Bevy shows it, unexposed, and its emission is
+            // read here as nits the camera's exposure takes, so it is given the 100,000 nits that
+            // Bevy's exposure of EV 9.7 brings to that.
+            if (!_lit && ecs.Get<GltfMaterialNameRef>(entity)?.Value == "Emitter_Light_temp"
+                && Render.TryReadMaterial(Render.MaterialOf(ecs, entity), out var panel))
+            {
+                panel.Emissive = (100_000f, 100_000f, 100_000f, 1f);
+                Render.WriteMaterial(Render.MaterialOf(ecs, entity), panel);
+                _lit = true;
+            }
+
             if (ecs.Get<GltfMeshNameRef>(entity) is not { } meshName || ecs.Get<LightmapRef>(entity) is not null) continue;
 
             var name = meshName.Value;

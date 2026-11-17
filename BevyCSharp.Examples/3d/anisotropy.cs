@@ -97,6 +97,16 @@ internal static class Anisotropy
                 var material = Render.MaterialOf(ecs, entity);
                 if (material == AssetHandle.None || !Render.TryReadMaterial(material, out var settings) || settings is null) continue;
 
+                // The file's filament glows at 25 as Bevy shows it, unexposed, and its emission is
+                // read here as nits the camera's exposure takes, so it is given the 25,000 nits that
+                // Bevy's exposure of EV 9.7 brings to that, in the file's warm color, before the
+                // copy without anisotropy is made from it.
+                if (ecs.Get<GltfMaterialNameRef>(entity)?.Value == "Lamp Filament")
+                {
+                    settings.Emissive = (25_000f, 12_500f, 6_250f, 1f);
+                    Render.WriteMaterial(material, settings);
+                }
+
                 settings.AnisotropyTexture = AssetHandle.None;
                 settings.AnisotropyStrength = 0f;
                 settings.AnisotropyRotation = 0f;

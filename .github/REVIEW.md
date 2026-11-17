@@ -1,50 +1,63 @@
 # Review
 
-Reviewed up to `768eb421`, item 148's exterior, the Amazon Lumberyard Bistro as a scene pack beside Sponza's and the feature test's scene.pack, its pack on the scene-packs release since 06:51, pushed at 07:49 on 2026-11-17, its build run 44034027479 red at 08:27 on Linux in one memory test (Verdict 67). After it `364cac79`, the Bistro alone far from the level's rooms with the player carried in, its pack made again without the empty occlusion, and the script memory test read after a full compacting collection, ten of ten in the runner's image, pushed at 10:50, its build run 44059324245 started, the form kept, the form kept and its sheet in the tree. Before it `03ce47be`, item 146's findings 65 to 67, bind groups and number buffers kept from frame to frame, the memory command counting what shaders made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run 44019662768 green at 06:36, the pack run with publish 44025382883 green at 09:08, the package 0.6.156 published and tagged, its release made with the six symbol files, the form kept, 63 of the 75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
-git's text as UTF-8 with a test of a subject's marks by their bytes, pushed at 03:02 on 2026-11-17,
-its build run 43999997556 green at 03:44, the form kept. Before it `1ed3310d`, item 146's findings
-60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real
-window's monitors tested, pushed at 01:17 on 2026-11-17, its build run 43986373303 red at 01:39 on
-Windows in one test (Verdict 66), the form kept, 60 of the 75 findings mended and 15 left. Before it
-`9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on
-2026-11-17, its build run 43978434240 green at 01:16 on 2026-11-17, the form kept. Before it
-`c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole
-suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at
-21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended
-and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes
-on the faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build
-run 43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept.
-Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass library
-counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31 on
-2026-11-16, its build run 43897251535 green at 17:28, the form kept. Before it `e0618f1b`, item
-147's first commit, a camera's draws and passes kept to its viewport, pushed at 13:49 on 2026-11-16,
-its build run 43870104421 red at 15:21 in one renderer part at its time limit (Verdict 63) and green
-at 16:30 with that part run again in 33 minutes, the form kept. Before it `7908f95a`, Verdict 62's
-mend, the memory guard's test taking its block from the system, pushed at 12:51, its build run
-43861457506 green at 13:49 and the pack run with publish 43869994859 green at 17:58 on its second
-attempt, the package 0.6.147 published and tagged `v0.6.147`, the form kept. Before it `6677ae12`,
-three findings of item 146 mended, the clouds and the fog drifting with the wind, each camera's
-clouds on the noise of their own seed and a scripted run putting the tester's settings back, pushed
-at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the form kept. Before it
-`db8afed6`, seven pictures of four days' items kept among the readings, with `0eb296a3`, the Slang
-scratch folder the user's own and slangc looked for only in the checkout a program stands in, pushed
-together at 08:14 on 2026-11-16, their build run 43822419755 green at 09:05, the pack run with
-publish 43828541813 after it red at 11:21 with nothing published (Verdict 62), the form kept. Before
-them `6ae94ed5`, a text set to what it says left unchanged and a dry stream of samples back on its
-first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app giving back the memory its GPU
-driver freed as it ends and the renderer's hosts held to a cap fitted to the runner, `093262d8`, the
-game of life's capture stopped at sixty steps, `98a5f995` and `b87c7f20`, further findings of the
-audit mended and a text that grows while it is read asked for again, pushed together at 07:17 on
-2026-11-16, their build run 43815745451 green at 08:14 with the ten renderer parts among it, the
-form kept. Before them `44484bf1`, the renderer's tests laid out again in ten parts, with
-`8e6fb6df`, `3c918c93` and `49460ff2`, nine findings of the audit mended, pushed together at 02:07
-on 2026-11-16, their build run 43784334694 red at 02:59 in two renderer parts at their memory cap
-(Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a renderer run on every
-push on Linux's render bridge under lavapipe in fourteen parts laid out by a file, the long cases
-skipping themselves on a device that draws on the processor, pushed at 23:04 on 2026-11-15, its
-build run 43767207459 green at 00:15 on 2026-11-16, the longest renderer part 35 minutes, its pack
-run with publish 43773833500 red at 02:06 in two jobs (Verdict 60), no package published, the form
-kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
+Reviewed up to `768eb421`, item 148's exterior, the Amazon Lumberyard Bistro as a scene pack beside
+Sponza's and the feature test's scene.pack, its pack on the scene-packs release since 06:51, pushed
+at 07:49 on 2026-11-17, its build run 44034027479 red at 08:27 on Linux in one memory test (Verdict
+67). After it `364cac79`, the Bistro alone far from the level's rooms with the player carried in,
+its pack made again without the empty occlusion, and the script memory test read after a full
+compacting collection, ten of ten in the runner's image, pushed at 10:50, its build run 44059324245
+green at 11:39, the form kept. After it `5e7a40ec`, the five games that pin a package building on
+0.6.156, pushed at 11:39, its build run 44066850119 green at 12:28, the pack run with publish
+44074294998 started at 12:28, the form kept. Before it `03ce47be`, item 146's findings 65 to 67,
+bind groups and number buffers kept from frame to frame, the memory command counting what shaders
+made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run
+44019662768 green at 06:36, the pack run with publish 44025382883 green at 09:08, the package
+0.6.156 published and tagged, its release made with the six symbol files, the form kept, 63 of the
+75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the
+contributors example reading git's text as UTF-8 with a test of a subject's marks by their bytes,
+pushed at 03:02 on 2026-11-17, its build run 43999997556 green at 03:44, the form kept. Before it
+`1ed3310d`, item 146's findings 60 to 64, the workflows' actions named by commit, a publish from the
+default branch alone and a real window's monitors tested, pushed at 01:17 on 2026-11-17, its build
+run 43986373303 red at 01:39 on Windows in one test (Verdict 66), the form kept, 60 of the 75
+findings mended and 15 left. Before it `9bba0d78`, Verdict 65's mend, a picture not arrived reading
+zero by zero, pushed at 00:20 on 2026-11-17, its build run 43978434240 green at 01:16 on 2026-11-17,
+the form kept. Before it `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings
+51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run
+43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the
+75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts
+of some 21 minutes on the faster runner with the processor named on the page, pushed at 17:28 on
+2026-11-16, its build run 43907954584 green at 18:09 with each of the twelve parts in 21 to 29
+minutes, the form kept. Before it `37a947b0`, item 147's second commit, a camera's images,
+dispatches and the pass library counting from its viewport's corner and the exposure metering the
+viewport, pushed at 16:31 on 2026-11-16, its build run 43897251535 green at 17:28, the form kept.
+Before it `e0618f1b`, item 147's first commit, a camera's draws and passes kept to its viewport,
+pushed at 13:49 on 2026-11-16, its build run 43870104421 red at 15:21 in one renderer part at its
+time limit (Verdict 63) and green at 16:30 with that part run again in 33 minutes, the form kept.
+Before it `7908f95a`, Verdict 62's mend, the memory guard's test taking its block from the system,
+pushed at 12:51, its build run 43861457506 green at 13:49 and the pack run with publish 43869994859
+green at 17:58 on its second attempt, the package 0.6.147 published and tagged `v0.6.147`, the form
+kept. Before it `6677ae12`, three findings of item 146 mended, the clouds and the fog drifting with
+the wind, each camera's clouds on the noise of their own seed and a scripted run putting the
+tester's settings back, pushed at 09:27 on 2026-11-16, its build run 43831372671 green at 10:23, the
+form kept. Before it `db8afed6`, seven pictures of four days' items kept among the readings, with
+`0eb296a3`, the Slang scratch folder the user's own and slangc looked for only in the checkout a
+program stands in, pushed together at 08:14 on 2026-11-16, their build run 43822419755 green at
+09:05, the pack run with publish 43828541813 after it red at 11:21 with nothing published (Verdict
+62), the form kept. Before them `6ae94ed5`, a text set to what it says left unchanged and a dry
+stream of samples back on its first channel, with `1fe7b111`, Verdicts 60 and 61's mend, an app
+giving back the memory its GPU driver freed as it ends and the renderer's hosts held to a cap fitted
+to the runner, `093262d8`, the game of life's capture stopped at sixty steps, `98a5f995` and
+`b87c7f20`, further findings of the audit mended and a text that grows while it is read asked for
+again, pushed together at 07:17 on 2026-11-16, their build run 43815745451 green at 08:14 with the
+ten renderer parts among it, the form kept. Before them `44484bf1`, the renderer's tests laid out
+again in ten parts, with `8e6fb6df`, `3c918c93` and `49460ff2`, nine findings of the audit mended,
+pushed together at 02:07 on 2026-11-16, their build run 43784334694 red at 02:59 in two renderer
+parts at their memory cap (Verdict 61), the form kept. Before them `ca8c50b4`, the tests that need a
+renderer run on every push on Linux's render bridge under lavapipe in fourteen parts laid out by a
+file, the long cases skipping themselves on a device that draws on the processor, pushed at 23:04 on
+2026-11-15, its build run 43767207459 green at 00:15 on 2026-11-16, the longest renderer part 35
+minutes, its pack run with publish 43773833500 red at 02:06 in two jobs (Verdict 60), no package
+published, the form kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -217,15 +230,40 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     once more after it, a lantern's glass near what gives a street 10 to 30 lux. The pack keeps 500,
     200 and 100 until then.
 
+150. **The cascades show as little in the packs' scenes, and why.** From the review's read-only
+    audit of 2026-11-17, ~/.cache/claude-reviewer/audits-2026-11-17/gi-look-gap.md, ten causes
+    ranked with both engines' lines. The composition is alike in both engines; the inputs and the
+    settings are not. In order, each part with its sheet of Sponza's atrium at the sibling's view,
+    hour and camera, cascades on, off and the red and blue difference, titled and labeled. First,
+    the field takes a material's factors alone (scene_field.rs, the base color, the metal and the
+    roughness as numbers, no texture read), and the packs' factors are white and full metal with the
+    color and the metal in their maps, Sponza 25 of 28 materials and the Bistro 132 of 132, so a
+    hit's diffuse color is nothing and every wall returns one gray. Asked, the mean of the base
+    color, the metal and roughness map and the emissive texture times the factors, taken once as a
+    glTF material loads, as the sibling's field does, with a test of a red textured wall beside a
+    white floor whose floor reads red within a fifth of the same wall painted by its factor. Second,
+    a pack's fitting names its field and quality, cells of 0.125, the far cascade and High for
+    Sponza and the Bistro, where the feature test holds Medium, cells of 0.25 and no far cascade.
+    Third, the day in physical numbers for the packs' places, the sun at 120,000 lux under ISO 200,
+    1/200 s, f/16, the look's 1.6 and white of 1.3 read against a plain curve on the sheet, and
+    which stays is the review's after the sheet. Fourth, a read of whether the probes' light
+    survives Applied.cs turning deferred rendering off with the reflections, and of the ambient
+    occlusion left off by default and outside the light taken back. Fifth, item 149's finding, a
+    lantern carried as its box sends from a lower face its upright panels lack, 34 lux of the box
+    against 16 of the glass 2 m off, mended with 146's glow light parts. The kernels' later mends,
+    the screen probes' filter and turned rays, the merge's reach read and the sky past the cascade
+    above, come with 138's move and are not ported here by hand. After 149; before 146's findings 68
+    to 75.
+
 ## Verdicts
 
-Verdict 67 is open, the build run 44034027479 on `768eb421` red on Linux in one memory test three
-megabytes over its bound. Verdict 66 is settled at 03:44 on 2026-11-17, the build run 43999997556 on
-`88955a57` green, git's text read as UTF-8. Verdict 65 is settled at 01:16 on 2026-11-17, the build
-run 43978434240 on `9bba0d78` green, a picture not arrived answering zero by zero. Verdicts 60, 62
-and 64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on `7908f95a` green
-on its second attempt and the package 0.6.147 published, Verdict 63 at 16:30 by the part run again,
-Verdict 61 earlier.
+Verdict 67 is settled at 11:39 on 2026-11-17, the build run 44059324245 on `364cac79` green, the
+memory test read after a full compacting collection. Verdict 66 is settled at 03:44 on 2026-11-17,
+the build run 43999997556 on `88955a57` green, git's text read as UTF-8. Verdict 65 is settled at
+01:16 on 2026-11-17, the build run 43978434240 on `9bba0d78` green, a picture not arrived answering
+zero by zero. Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish
+43869994859 on `7908f95a` green on its second attempt and the package 0.6.147 published, Verdict 63
+at 16:30 by the part run again, Verdict 61 earlier.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -298,19 +336,6 @@ Verdict 61 earlier.
     after that test. The failed jobs of run 43870104421 are started again to tell the two apart.
     Asked, the same timing as Verdict 63's at both commits, and whether a test after the bounce
     rooms' can wait on a frame that does not come.
-
-67. **The build run 44034027479 on `768eb421` is red on Linux in one test, a bound three megabytes
-    short.** `ScriptCompilationMemoryTests.AScriptCompiledAHundredTimesHoldsWhatItHeldAfterTen` read
-    598 MB of resident memory after ten compilations and 649 MB after a hundred, 51 against its
-    bound of 48, 1,650 passed beside it and macOS and Windows green; the digest job fails after it.
-    The commit touches no scripting, and the test passed on the same runner image in the run before,
-    so the reading moved by what the runner's heap held uncollected, the working set being read with
-    no collection asked for first. Asked, the test made to read what it means, each reading taken
-    after a full blocking collection with the large object heap compacted, or the bound set on the
-    heap's size after a collection in place of the working set, with the fault it guards against
-    (the references read again at every compilation, hundreds of megabytes) still failing it, shown
-    by a run with the fault put back. Run ten times in a row on the Linux container before the
-    commit. Written at 08:28 on 2026-11-17.
 
 ## Decisions
 
@@ -903,5 +928,103 @@ carrying this Reply. Blockout moves from 0.5.193, and Courtyard, Coins, Stress a
 0.5.174. Each built on it from nuget.org with warnings as errors, 0 warnings and 0 errors, and
 Courtyard, Swarm and Blockout each played to its end by its own script, with no warning or error in
 its log. The templates take the version they are packed beside, so none of them pins one.
+
+NormTests passed, 19.
+
+149, a glTF material's emission read as nits and exposed, the feature test's two night lenses, and
+the Bistro's street lantern at 10,000, in the commit carrying this Reply.
+
+The factor was lost where the bridge makes a glTF file's materials. Bevy's glTF loader gives each
+standard material an emissive_exposure_weight of 0, which shows the emission as written, and
+`scene_field` hands the cascades a material's emission as the picture shows it, so a glTF emitter
+entered the picture and the cascades about a thousand times its light at EV 9.7.
+`native/bevy_csharp/src/render/exposure.rs` puts a glTF extension handler after Bevy's, which makes
+each material of a file again with a weight of 1 under the label Bevy's gave it, so its emission
+takes the camera's exposure, drawn and in the cascades alike. A material made in code keeps the
+weight its maker sets, as MaterialSettings.Emissive's remarks and a paragraph of docs/materials.md
+say. The three profiles check with no warning, the bridge's tests pass with no feature and with
+render, and Cargo.lock is unmoved.
+
+No test loads an emissive glTF, GlobalIlluminationTests' Cornell box being made in code. Of the
+examples, lightmaps draws CornellBox's Emitter_Light_temp at 100, depth_of_field its lava at 20
+times a texture, pcss PalmTree's water at 1 times a texture, anisotropy the barn lamp's filament at
+25 in a warm color, and solari robot_01's material at 1, which the example puts out in code as it
+traces it, its robot's light set in code at a weight of 0. The first four move by the camera's
+exposure, 1/998 at the EV 9.7 each camera stands at, and solari does not move. Each of the four was
+tuned by eye against the unexposed value, so each gives its glTF material its strength in nits, the
+panel 100,000, the lava 20,000, the water 1,000 and the filament 25,000, 12,500 and 6,250, each
+within 0.3% of 998 times the file's. Captured on the mended bridge, with the file's value at a
+weight of 0 standing for before, the mean luma goes from 53.5, 60.7, 176.4 and 47.3 to 53.1, 59.3,
+171.5 and 47.2 at the file's strength, and reads 53.5, 60.7, 176.4 and 47.3 at the strengths in
+nits, no more than 0.06% of the pixels past 8 levels. The four pictures and their gallery's are
+retaken, lightmaps' the same byte for byte, and `build/examples-table.py --check` passes. The sheet
+is `2026-11-17-item-149-examples.webp`.
+
+`GlobalIlluminationTests.AGltfPanelLightsTheFloorUnderItAsItsClosedForm` writes a glTF of one panel
+0.3 square and a millimeter thick, every face emitting 4,000 nits, and reads the floor of the
+level's white under its middle at 0.5, 1 and 2 m against E = 4 L t atan(t), where t = a / sqrt(1 +
+a²) and a = s / d, in the picture's light at EV 9.7. Without the mend it read 969, 1,005 and 993
+times its closed form and failed, and with it 0.966, 1.007 and 0.995.
+
+The feature test's day is held at EV 9.7 and its night at a moonlit ground's ISO 3200, 1/15 s and
+f/1.4, EV -0.12, from 18:45 to 5:30, set from the C# side in Applied.cs. By night DayNight takes the
+sun, the moon, the ambient light and the night sky's and the dusk sky's nits down by 1/905, what
+that lens takes the picture up by, so the moon gives 0.99 lux and the night ambient 0.022, and they
+read as before. The Bistro's fitting holds a lamp-lit street's ISO 3200, 1/60 s and f/2.8, EV 3.88,
+while the eye is within 500 m of its place at a night hour, and the moonlit ground's lens comes back
+as the eye leaves or the pack is taken away. The guide's paragraph on the feature test's day names
+both.
+
+The lit rooms' lamps are numbers set against EV 9.7, which the night's lens shows some 905 times as
+bright, blown out. Setting them is a later item. Each is here with its light at its floor and a real
+lamp of its kind beside it.
+
+| Lamp | Set | At its floor | A real lamp of its kind | |---|---|---|---| | The hall's three aisle
+lamps | 60,000 lm, 5.1 m up | 184 lux | 6,000 lm, 18 lux | | Red, green and blue | 250,000 lm each,
+3.6 m up | 1,535 lux | a stage lamp's 10,000 lm, 61 lux | | Spot through a cookie | 900,000 lm, 7.9
+m from the wall | 1,148 lux on the wall | 20,000 lm, 26 lux | | The panel bay's light | 400,000 lm,
+5.2 m up | 1,177 lux | 3,000 lm, 9 lux | | The panel bay's panel, 1.6 m square | 30,000 nits, 5.4 m
+up | 2,450 lux | an office panel's 3,500 nits, 290 lux | | Spot into the fog | 1,200,000 lm, 5.3 m
+up | 3,400 lux | 20,000 lm, 57 lux | | The probe and decal bays' lights | 300,000 lm each, 4.9 m up
+| 994 lux | 3,000 lm, 10 lux | | The neon bay's two lights | 30,000 lm each, 2 and 3.6 m up | 597
+and 184 lux | a neon tube's 300 lm, 6 and 2 lux | | The Cornell box's light | 120,000 lm, 4.6 m up |
+451 lux | 3,000 lm, 11 lux | | The Cornell box's panel, 1.2 m square | 40,000 nits, 4.9 m up | 2,210
+lux | an office panel's 3,500 nits, 204 lux |
+
+At noon the light hall's eight bays read the same to a tenth before and after. The render gallery's
+room and Cornell box read 156.9 and 189.2 before and 169.8 and 206.5 after, the first session's
+weather still easing to clear under cloud there, and 169.7 and 206.5 again in a third session, and
+both are made in code, which the mend leaves as it was. Sponza reads 184.9 and 180.6 outside its
+door, 28.9 and 27.0 in its hall and 74.8 and 75.0 in its gallery, its light_bulb's emission of 1,
+which entered the cascades unexposed, gone.
+
+The Bistro's Emissive_StreetLight is 10,000, its texture's mean linear luminance of 0.42 making the
+glass 4,200 nits and a lantern of 0.61 m² of glass about 8,000 lumens, a street lamp's, and the
+spotlights, string lights and signs keep 500, 200 and 100. BUILDING.md gives the Bistro's three
+commands and a table of the strengths with their reasons. The pack is 310,838,883 bytes, SHA-256
+a93668915528079d60632c4cc25ac6a857394d9c58da012d895b9bf00bd07947, which the manifest names. At 23:00
+the street reads a mean luma of 88.0 with the moon and 87.9 without under its lens, where it read
+95.1 and 92.0 unmended and 213.5 under the moonlit ground's lens. The sheet is
+`2026-11-17-item-149-bistro-street-lens.webp`. Read from the render's light over the paving
+texture's mean albedo, the moon out, the cobbles 2 m off a street lantern take 91 lux, where its
+glass gives 16 in closed form and every lamp's 37, and the bricks under a wall lantern take 86 lux,
+where its glass gives 58 and every lamp's 97. The six wall lanterns share the material, so each
+gives about 58 lux under it, some three times a wall lamp's 1,000 lumens 2 m up, which a material of
+their own would mend, not made in this item. The path-traced reference read NaN on the blend-shader
+paving, so it stands beside neither reading.
+
+A finding, not mended here. Global illumination carries a lantern as its box, every face emitting by
+the share of the box its glass makes. The street lantern's four upright panels make 0.91 of its box,
+so the box's lower face, which the lantern lacks, gives the cobbles 2 m off 15.9 lux of the box's
+34, about twice the glass's 16. Under the wall lantern the box gives 56 against the glass's 58.
+
+Shared: a glTF material's emission is read as nits and exposed here, drawn and in the cascades, as
+3DEngine reads it, and the Bistro's pack gives its street lantern 10,000 for the sibling's pack to
+follow.
+
+The whole suite passed from one tree, 2,175 passed, 0 failed and 4 skipped, 2,179 in all where the
+listing is 2,168, the solution built from nothing with warnings as errors, in 15 parts and the rest
+dealt by the last run's times, each part of 2 m 15 s to 5 m 21 s, a part at a time under the GPU
+lock.
 
 NormTests passed, 19.

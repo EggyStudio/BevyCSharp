@@ -27,8 +27,8 @@ internal static class Pcss
 
     private static LightType _lightType;
     private static ShadowFilter _filter;
-    private static bool _soft;
-    private static Entity _camera, _light;
+    private static bool _soft, _watered;
+    private static Entity _camera, _light, _tree = Entity.None;
 
     public static void Configure(Config config) => config.Feathers = true;
 
@@ -37,7 +37,7 @@ internal static class Pcss
         app.Startup(ctx =>
         {
             var ecs = ctx.Ecs;
-            (_lightType, _filter, _soft) = (LightType.Directional, ShadowFilter.NonTemporal, true);
+            (_lightType, _filter, _soft, _watered) = (LightType.Directional, ShadowFilter.NonTemporal, true, false);
 
             var at = new Vec3(-12.912f, 4.466f, -10.624f) * 0.7f;
             _camera = ecs.SpawnCamera3d(new Transform(at, Quat.FromEuler(-0.175f, -134.76f / 180f * MathF.PI, 0f), Vec3.One));
@@ -60,7 +60,27 @@ internal static class Pcss
             ecs.Observe<ValueChange<Entity>>(on => HandlePcssToggle(on.Ecs, on.Event.Value));
         });
 
-        app.SpawnGltf("models/PalmTree/PalmTree.gltf");
+        app.SpawnGltf("models/PalmTree/PalmTree.gltf", (_, root) => _tree = root);
+        app.Update(ctx => GlowWater(ctx.Ecs), "pcss.GlowWater");
+    }
+
+    // The file's water glows at 1 as Bevy shows it, unexposed, and its emission is read here as nits
+    // the camera's exposure takes, so it is given the 1,000 nits that Bevy's exposure of EV 9.7
+    // brings to that, once its material can be read.
+    private static void GlowWater(EcsWorld ecs)
+    {
+        if (_tree == Entity.None || _watered) return;
+
+        foreach (var entity in ecs.Descendants(_tree))
+        {
+            if (ecs.Get<GltfMaterialNameRef>(entity)?.Value != "Water") continue;
+
+            var material = Render.MaterialOf(ecs, entity);
+            if (!Render.TryReadMaterial(material, out var settings)) return;
+            settings.Emissive = (1_000f, 1_000f, 1_000f, 1f);
+            Render.WriteMaterial(material, settings);
+            _watered = true;
+        }
     }
 
     private static void HandleLightTypeChange(EcsWorld ecs, Entity button)

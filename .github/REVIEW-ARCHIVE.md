@@ -5379,6 +5379,21 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     the cause is read. Settled at 01:16 on 2026-11-17, the build run 43978434240 on `9bba0d78`
     green.
 
+67. **The build run 44034027479 on `768eb421` is red on Linux in one test, a bound three megabytes
+    short.** `ScriptCompilationMemoryTests.AScriptCompiledAHundredTimesHoldsWhatItHeldAfterTen` read
+    598 MB of resident memory after ten compilations and 649 MB after a hundred, 51 against its
+    bound of 48, 1,650 passed beside it and macOS and Windows green; the digest job fails after it.
+    The commit touches no scripting, and the test passed on the same runner image in the run before,
+    so the reading moved by what the runner's heap held uncollected, the working set being read with
+    no collection asked for first. Asked, the test made to read what it means, each reading taken
+    after a full blocking collection with the large object heap compacted, or the bound set on the
+    heap's size after a collection in place of the working set, with the fault it guards against
+    (the references read again at every compilation, hundreds of megabytes) still failing it, shown
+    by a run with the fault put back. Run ten times in a row on the Linux container before the
+    commit. Written at 08:28 on 2026-11-17. Settled at 11:39 on 2026-11-17, the build run
+    44059324245 on `364cac79` green, the test reading after a full compacting collection and failing
+    with the fault put back.
+
 ## Decisions
 
 1. **Commits stay local.** The owner pushes `main` by hand, and the working session commits and does

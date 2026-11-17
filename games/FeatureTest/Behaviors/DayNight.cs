@@ -35,6 +35,16 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// stays the dusk one, and the sun and the moon go on moving.
 /// </para>
 /// <para>
+/// The camera is held at Bevy's own exposure of EV 9.7 by day and at a moonlit ground's camera,
+/// f/1.4 at a fifteenth of a second and ISO 3200, about EV -0.12, while the moon gives its whole
+/// light, from 18:45 to 5:30, or at the lens of the place the eye stands in where it names one, as
+/// the Bistro's lamp-lit streets do (<see cref="Applied"/> sets it). The curves here are in the
+/// day's terms, and by night the sun, the moon, the ambient light and the night sky are taken down
+/// by as much as the moonlit ground's lens takes the picture up, some 905 times, so they read under
+/// it as they do by day, the moon giving about a lux. What is lit in nits or lumens of its own, a
+/// lamp's glass from a glTF file or a lamp of the level, takes the lens whole.
+/// </para>
+/// <para>
 /// Where the weather runs, the day hands it the sun and the moon, marked as its own, and its clock,
 /// held still and set each frame to this hour and latitude, so the panel's Time page and
 /// <c>day.hour</c> go on setting the hour. The earth's tilt is taken off its clock, so every day of
@@ -67,10 +77,10 @@ public partial struct DayNight
         new(24f, 0f, 1f, 0.6f, 0.4f),
     ];
 
-    /// <summary>The moon's illuminance in lux and its color, by the hour.</summary>
+    /// <summary>The moon's illuminance in lux and its color, by the hour, in the day's terms.</summary>
     /// <remarks>
-    /// Far brighter than a real moon, which lights a scene a few thousand times more dimly than
-    /// this, so a night here can still be walked in by a tester.
+    /// Under the night's lens it gives about a lux, some three times a full moon's 0.31, so a night
+    /// here can still be walked in by a tester.
     /// </remarks>
     private static readonly Key[] Moonlight =
     [
@@ -131,11 +141,34 @@ public partial struct DayNight
     private static Entity _moon = Entity.None;
 
     /// <summary>
-    /// What was last given each light, so a light is written only where it changed.
+    /// What was last given each light, in the day's terms with the lens's scale, so a light is
+    /// written only where it changed.
     /// </summary>
-    private static readonly Dictionary<Entity, (float Light, Color Color, bool Shadows)> Given = [];
+    private static readonly Dictionary<Entity, (float Light, Color Color, bool Shadows, float Scale)> Given = [];
 
-    private static (float Light, Color Color) _ambient = (-1f, default);
+    // Whether the night's lens was held at the last turn, so its change is put on the camera once.
+    private static bool _night;
+
+    private static (float Light, Color Color, float Scale) _ambient = (-1f, default, 1f);
+
+    /// <summary>The camera's exposure by day, Bevy's own, in EV-100.</summary>
+    internal const float DayEv100 = 9.7f;
+
+    /// <summary>A moonlit ground's camera, f/1.4 at a fifteenth of a second and ISO 3200.</summary>
+    internal static readonly PhysicalLens NightLens = new(Aperture: 1.4f, Shutter: 1f / 15f, Sensitivity: 3200f);
+
+    /// <summary>The night's lens in EV-100, about -0.12.</summary>
+    private static readonly float NightEv100 =
+        MathF.Log2(NightLens.Aperture * NightLens.Aperture / NightLens.Shutter) - MathF.Log2(NightLens.Sensitivity / 100f);
+
+    /// <summary>Whether the camera holds the night's lens, from 18:45 to 5:30, while the moon gives its whole light.</summary>
+    internal static bool Night => Sky.Hour is >= 18.75f or <= 5.5f;
+
+    /// <summary>
+    /// What the lights the day steers and the night sky's nits are taken by, 1 by day and about 1/905
+    /// by night, what the moonlit ground's lens takes the picture up by.
+    /// </summary>
+    internal static float LensScale => Night ? MathF.Pow(2f, NightEv100 - DayEv100) : 1f;
 
     /// <summary>The hour of the day now, from midnight at zero.</summary>
     internal static float Hour => Sky.Hour;
@@ -153,7 +186,8 @@ public partial struct DayNight
         Sky.DayOfYear = 79f;
         Sky.Latitude = Settings.Current.Latitude;
         _moon = Entity.None;
-        _ambient = (-1f, default);
+        _ambient = (-1f, default, 1f);
+        _night = Night;
         Given.Clear();
         Settings.Changed -= OnChanged;
         Settings.Changed += OnChanged;
@@ -186,6 +220,14 @@ public partial struct DayNight
         Sky.Advance(settings.DaySpeed * ctx.Time.Delta / 60f);
         var hour = Sky.Hour;
 
+        // The camera's lens follows the hour, which the settings' pass puts on it.
+        if (Night != _night)
+        {
+            _night = Night;
+            Applied.Due();
+        }
+
+        var scale = LensScale;
         var sun = Of(Sky.SunDirection);
         var moon = Of(Sky.MoonDirection);
         var shadows = settings.Shadows && !Render.RayTracingActive;
@@ -195,15 +237,15 @@ public partial struct DayNight
         // it behind the planet, so the curve's reddening and its fade at the horizon, which would
         // count the air twice and leave the sunset no light to scatter, are kept for the dusk sky.
         var raw = Applied.AtmosphereDrawn;
-        Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, hour), shadows && sun.Y > 0f, fade: !raw);
+        Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, hour), scale, shadows && sun.Y > 0f, fade: !raw);
         var (moonlight, moonColor) = At(Moonlight, hour);
-        Shine(ctx.Ecs, _moon, moon, (moonlight * Sky.MoonLit, moonColor), shadows && sun.Y <= 0f && moon.Y > 0f);
+        Shine(ctx.Ecs, _moon, moon, (moonlight * Sky.MoonLit, moonColor), scale, shadows && sun.Y <= 0f && moon.Y > 0f);
 
         var (light, color) = At(Applied.Probed ? SkyAmbient : Ambient, hour);
-        if (MathF.Abs(light - _ambient.Light) > 0.1f)
+        if (MathF.Abs(light - _ambient.Light) > 0.1f || scale != _ambient.Scale)
         {
-            Render.SetAmbientLight((color.R, color.G, color.B), light);
-            _ambient = (light, color);
+            Render.SetAmbientLight((color.R, color.G, color.B), light * scale);
+            _ambient = (light, color, scale);
         }
 
         // The look follows the sun's height, its numbers alone changing on the camera.
@@ -295,9 +337,10 @@ public partial struct DayNight
 
     /// <summary>
     /// Points a light from a direction and gives it its strength and color, brought to nothing at
-    /// the horizon, writing each only where it changed.
+    /// the horizon and taken by the lens's <paramref name="scale"/>, writing each only where it
+    /// changed.
     /// </summary>
-    private static void Shine(EcsWorld ecs, Entity light, Vec3 toward, (float Light, Color Color) given, bool shadows, bool fade = true)
+    private static void Shine(EcsWorld ecs, Entity light, Vec3 toward, (float Light, Color Color) given, float scale, bool shadows, bool fade = true)
     {
         if (light == Entity.None || !ecs.IsAlive(light)) return;
 
@@ -309,13 +352,14 @@ public partial struct DayNight
         if (Given.TryGetValue(light, out var was)
             && MathF.Abs(was.Light - strength) <= MathF.Max(0.5f, strength * 0.002f)
             && was.Color == given.Color
-            && was.Shadows == shadows) return;
+            && was.Shadows == shadows
+            && was.Scale == scale) return;
 
         var wrapped = ecs.Wrap<DirectionalLightRef>(light);
-        wrapped.Illuminance = strength;
+        wrapped.Illuminance = strength * scale;
         wrapped.Color = given.Color;
         wrapped.ShadowMapsEnabled = shadows;
-        Given[light] = (strength, given.Color, shadows);
+        Given[light] = (strength, given.Color, shadows, scale);
     }
 
     /// <summary>

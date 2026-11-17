@@ -106,6 +106,17 @@ internal static class DepthOfField
                 ecs.Insert<LightmapRef>(entity).Image = AssetServer.Load(AssetKind.Image, "models/DepthOfFieldExample/CircuitBoardLightmap.hdr");
                 Tweaked.Add(entity);
             }
+            else if (ecs.Get<GltfMaterialNameRef>(entity)?.Value == "Lava")
+            {
+                // The file's lava glows at 20 as Bevy shows it, unexposed, and its emission is read
+                // here as nits the camera's exposure takes, so it is given the 20,000 nits that
+                // Bevy's exposure of EV 9.7 brings to that.
+                var material = Render.MaterialOf(ecs, entity);
+                if (!Render.TryReadMaterial(material, out var settings)) continue;
+                settings.Emissive = (20_000f, 20_000f, 20_000f, 1f);
+                Render.WriteMaterial(material, settings);
+                Tweaked.Add(entity);
+            }
         }
     }
 
