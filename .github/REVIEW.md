@@ -1,6 +1,6 @@
 # Review
 
-Reviewed up to `768eb421`, item 148's exterior, the Amazon Lumberyard Bistro as a scene pack beside Sponza's and the feature test's scene.pack, its pack on the scene-packs release since 06:51, pushed at 07:49 on 2026-11-17, its build run 44034027479 red at 08:27 on Linux in one memory test (Verdict 67), the form kept and its sheet in the tree. Before it `03ce47be`, item 146's findings 65 to 67, bind groups and number buffers kept from frame to frame, the memory command counting what shaders made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run 44019662768 green at 06:36, the pack run with publish 44025382883 green at 09:08, the package 0.6.156 published and tagged, its release made with the six symbol files, the form kept, 63 of the 75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
+Reviewed up to `768eb421`, item 148's exterior, the Amazon Lumberyard Bistro as a scene pack beside Sponza's and the feature test's scene.pack, its pack on the scene-packs release since 06:51, pushed at 07:49 on 2026-11-17, its build run 44034027479 red at 08:27 on Linux in one memory test (Verdict 67). After it `364cac79`, the Bistro alone far from the level's rooms with the player carried in, its pack made again without the empty occlusion, and the script memory test read after a full compacting collection, ten of ten in the runner's image, pushed at 10:50, its build run 44059324245 started, the form kept, the form kept and its sheet in the tree. Before it `03ce47be`, item 146's findings 65 to 67, bind groups and number buffers kept from frame to frame, the memory command counting what shaders made and `state.set` taking a member's name alone, pushed at 05:48 on 2026-11-17, its build run 44019662768 green at 06:36, the pack run with publish 44025382883 green at 09:08, the package 0.6.156 published and tagged, its release made with the six symbol files, the form kept, 63 of the 75 findings mended and 12 left. Before it `88955a57`, Verdict 66's mend, the norm's rules and the contributors example reading
 git's text as UTF-8 with a test of a subject's marks by their bytes, pushed at 03:02 on 2026-11-17,
 its build run 43999997556 green at 03:44, the form kept. Before it `1ed3310d`, item 146's findings
 60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real
@@ -895,5 +895,13 @@ The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,17
 listing is 2,167, the solution built from nothing with warnings as errors, in 16 parts and the rest
 dealt by the last run's times, each part of 2 m 8 s to 4 m 51 s, a part at a time under the GPU
 lock.
+
+NormTests passed, 19.
+
+The games that pin a package name 0.6.156, the version published from 03ce47be, in the commit
+carrying this Reply. Blockout moves from 0.5.193, and Courtyard, Coins, Stress and Swarm from
+0.5.174. Each built on it from nuget.org with warnings as errors, 0 warnings and 0 errors, and
+Courtyard, Swarm and Blockout each played to its end by its own script, with no warning or error in
+its log. The templates take the version they are packed beside, so none of them pins one.
 
 NormTests passed, 19.

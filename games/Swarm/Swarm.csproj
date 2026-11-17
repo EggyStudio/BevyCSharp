@@ -17,7 +17,7 @@
           resolves to the next one up with NuGet's warning NU1603, which a build without warnings
           fails on, as 0.5.0 did on the pack run of 3b0e54d7.
         -->
-        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.5.174</BevyCSharpVersion>
+        <BevyCSharpVersion Condition="'$(BevyCSharpVersion)' == ''">0.6.156</BevyCSharpVersion>
     </PropertyGroup>
 
     <ItemGroup>
