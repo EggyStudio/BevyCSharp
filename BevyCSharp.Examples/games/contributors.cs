@@ -116,6 +116,10 @@ internal static class Contributors
                 WorkingDirectory = AppContext.BaseDirectory,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                // The bytes git writes a name in, which Windows reads by the console's code page
+                // where no encoding is named.
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
             });
             if (git is null) return fallback;
             var authors = git.StandardOutput.ReadToEnd().Split('\n', StringSplitOptions.RemoveEmptyEntries);

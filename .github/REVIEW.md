@@ -1,6 +1,6 @@
 # Review
 
-Reviewed up to `9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on 2026-11-17, its build run 43978434240 started, the form kept. Before it `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
+Reviewed up to `1ed3310d`, item 146's findings 60 to 64, the workflows' actions named by commit, a publish from the default branch alone and a real window's monitors tested, pushed at 01:17 on 2026-11-17, its build run 43986373303 red at 01:39 on Windows in one test (Verdict 66), the form kept, 60 of the 75 findings mended and 15 left. Before it `9bba0d78`, Verdict 65's mend, a picture not arrived reading zero by zero, pushed at 00:20 on 2026-11-17, its build run 43978434240 green at 01:16, the form kept. Before it `c0d73a9f`, item 146's findings 55 to 59, and `4ac4727c` under it, findings 51 to 54, the whole suite at 2,163 passed over both, pushed at 20:55 on 2026-11-16, their build run 43944344562 red at 21:43 in one new test of renderer part 12 (Verdict 65), the form kept, 55 of the 75 findings mended and 20 left. Before them `ca9f5d44`, the renderer's tests dealt in twelve parts of some 21 minutes on the
 faster runner with the processor named on the page, pushed at 17:28 on 2026-11-16, its build run
 43907954584 green at 18:09 with each of the twelve parts in 21 to 29 minutes, the form kept. Before it `37a947b0`, item 147's second commit, a camera's images, dispatches and the pass
 library counting from its viewport's corner and the exposure metering the viewport, pushed at 16:31
@@ -173,10 +173,12 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 65 is open, the build run 43944344562 on `c0d73a9f` red in one new test of renderer part 12.
-Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish 43869994859 on
-`7908f95a` green on its second attempt and the package 0.6.147 published, Verdict 63 at 16:30 by the
-part run again, Verdict 61 earlier.
+Verdict 66 is open, the build run 43986373303 on `1ed3310d` red on Windows in the rule of the
+commits' form, the marks read through the console's code page. Verdict 65 is settled at 01:16 on
+2026-11-17, the build run 43978434240 on `9bba0d78` green, a picture not arrived reading zero by
+zero. Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish
+43869994859 on `7908f95a` green on its second attempt and the package 0.6.147 published, Verdict 63
+at 16:30 by the part run again, Verdict 61 earlier.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -262,6 +264,19 @@ part run again, Verdict 61 earlier.
     then the mend, the test waiting on the picture's arrival and not on a count of frames, or the
     code's fault where one shows, and a line in the Reply saying which. No rerun of the part before
     the cause is read.
+
+66. **The build run 43986373303 on `1ed3310d` is red in one test on Windows, `NormTests.N_7_2`,
+    naming 769 commits as off the form, at 01:39 on 2026-11-17.** Linux and macOS are green on the
+    same commit, and Windows ran 1,631 tests green beside it. The commit gave the test job's
+    checkout the whole history, so the rule read every message since its first for the first time on
+    a runner, where the checkout of one commit had skipped it. The read, from the test's code,
+    `NormTests.Git` starts git with its output redirected and no encoding named, so the text is
+    decoded by the console's code page on Windows and as UTF-8 elsewhere, and the three marks of
+    every subject arrive as other characters and no subject equals the form's. The mend, the
+    reader's encoding named as UTF-8 in `Git` (`StandardOutputEncoding`, and the error stream's the
+    same), with nothing added to `build/norm/7.2.txt`, and any other test that reads git's or
+    another program's text looked at for the same. A test of it where one fits, a commit's subject
+    read through `Git` compared by its bytes. Open.
 
 ## Decisions
 
@@ -630,3 +645,16 @@ NuGet/login@v1, reads the same way.
 
 Of the 75, 60 are mended, none was found not to hold, and 15 remain, 65 to 75 and 34 to 36 and 40 of
 global illumination, which go with 138.
+
+Verdict 66 is mended in the commit carrying this Reply. NormTests.Git starts git with both its
+streams read as UTF-8, the bytes git writes a commit's message in, where Windows read them by the
+console's code page, and build/norm/7.2.txt is as it was.
+NormGitTests.ASubjectsMarksReadThroughGitAreTheirOwnBytes makes a commit of the three marks in a
+folder of its own, reads its subject through Git and compares it with the marks by its bytes, and
+asks the start Git makes what it reads both streams as, since Linux and macOS read UTF-8 whatever is
+named. It sits at the tests' root beside the norm's own class, listed in build/norm/1.4.txt as N 1.4
+has it. With git started as it was the test failed, no encoding named where UTF-8 was asked, and
+with the mend it passed. The tests' other readers of a program's text name UTF-8, or read a hash,
+numbers or an exit code alone. The contributors example reads its authors from git as UTF-8 the same
+way, so a name past ASCII arrives whole on Windows, with no test of its own, since no test reaches
+its read. NormTests passed, 19.

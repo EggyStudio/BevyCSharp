@@ -35,6 +35,7 @@ BevyCSharp.Tests/Examples/ExampleCatalogTests.cs	tests the examples, which are n
 BevyCSharp.Tests/Examples/ExampleStringPathTests.cs	tests the examples, which are no area of the library
 BevyCSharp.Tests/Generator/BuildDefaultsGeneratorTests.cs	tests the generators, which are no area of the library
 BevyCSharp.Tests/Generator/GeneratorAttributeTests.cs	tests the generators, which are no area of the library
+BevyCSharp.Tests/NormGitTests.cs	tests how the norm's own class reads git, at the root beside it
 BevyCSharp.Tests/NormTests.cs	the norm's own class, at the root as N 1.4 has it
 BevyCSharp.Tests/Scripting/ScriptCompilationMemoryTests.cs	tests the script host, which is no area of the library
 BevyCSharp.Tests/Scripting/ScriptExtensionTests.cs	tests the script host, which is no area of the library

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -650,13 +651,11 @@ public sealed partial class NormTests
     private static string Text(string relative) => File.ReadAllText(Full(relative)).ReplaceLineEndings("\n");
 
     /// <summary>What git answers, or nothing where git is not there or this is no checkout.</summary>
-    private static string? Git(params string[] arguments)
+    internal static string? Git(params string[] arguments)
     {
         try
         {
-            var start = new ProcessStartInfo("git") { WorkingDirectory = Root, RedirectStandardOutput = true, RedirectStandardError = true };
-            foreach (var argument in arguments) start.ArgumentList.Add(argument);
-            using var git = Process.Start(start);
+            using var git = Process.Start(GitStart(arguments));
             if (git is null) return null;
             var output = git.StandardOutput.ReadToEnd();
             git.WaitForExit();
@@ -666,6 +665,25 @@ public sealed partial class NormTests
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// git started in the checkout with both its streams read as UTF-8, the bytes git writes a
+    /// commit's message in, which Windows reads by the console's code page where no encoding is
+    /// named, so the three marks of a subject arrive there as other characters.
+    /// </summary>
+    internal static ProcessStartInfo GitStart(params string[] arguments)
+    {
+        var start = new ProcessStartInfo("git")
+        {
+            WorkingDirectory = Root,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+        };
+        foreach (var argument in arguments) start.ArgumentList.Add(argument);
+        return start;
     }
 
     /// <summary>A WebP picture's size, from its first chunk, lossy, lossless or extended.</summary>
