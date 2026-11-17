@@ -572,8 +572,8 @@ public static unsafe partial class Render
         Native.Check(NativeRendering.bcs_material_set_light_through(material.Key, share), $"letting light through {material}");
 
     /// <summary>
-    /// Gives a material the color the scene's distance field paints its base color times, as the
-    /// mean of a texture the field does not read, which the trees give their bark and leaves.
+    /// Gives a material the color the scene's distance field paints its base color times in place of
+    /// its texture's mean, as the trees give their bark and leaves the mean of their pictures.
     /// </summary>
     internal static void SetFieldTint(AssetHandle material, (float R, float G, float B) tint) =>
         Native.Check(NativeRendering.bcs_material_set_field_tint(material.Key, tint.R, tint.G, tint.B), $"tinting {material} in the scene's distance field");

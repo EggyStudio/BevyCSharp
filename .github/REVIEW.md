@@ -57,7 +57,10 @@ renderer run on every push on Linux's render bridge under lavapipe in fourteen p
 file, the long cases skipping themselves on a device that draws on the processor, pushed at 23:04 on
 2026-11-15, its build run 43767207459 green at 00:15 on 2026-11-16, the longest renderer part 35
 minutes, its pack run with publish 43773833500 red at 02:06 in two jobs (Verdict 60), no package
-published, the form kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records.
+published, the form kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records. At the
+tick of 15:34 on 2026-11-17, run 44095899592 of `6992d7ba` green, the pack run 44074294998 green at
+15:02 with 0.6.159 on nuget.org from `5e7a40ec`, tagged and released with its six symbol files; item
+151 written.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -254,6 +257,40 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     the screen probes' filter and turned rays, the merge's reach read and the sky past the cascade
     above, come with 138's move and are not ported here by hand. After 149; before 146's findings 68
     to 75.
+
+151. **The day's sweep against the norm.** A read of the tree against NORM.md found these, each to
+    mend in place with no change of behavior. Comments that liken to another product or carry a cost
+    or one machine's reading (N 4.11), `Debug.Overlay.cs:390`, `MemoryGuard.cs:309` to 311,
+    `ScenePack.cs:8`, `RenderGlobalIllumination.SceneField.cs:25`, `Config.cs:495`,
+    `render/mended.rs:98`, `Cargo.toml:247` and 249, `many_meshlet_materials.cs:23`,
+    `SceneFieldShadowTests.cs:84` to 86, `RecipeTests.cs:12`, `EcsWorldTests.cs:34` and 343,
+    `Needs.cs:61`, `build.yml:339` and 788, `build/capture-in-fedora.sh:7`; a bound's reason keeps
+    its number and drops the card's name, as in `RayTracingTests.cs:145`. The account named in
+    `pack.yml:170` becomes the publishing account. A four-byte value called a word in
+    `Shaders.Buffers.cs:21`, `render/compute.rs:527`, `imgui/render.rs:337`,
+    `render/scene_field.rs:15` and 286, `ComputeShaderTests.cs:541`; SPIR-V's own words stay.
+    British spellings, "grey", "synthesised", "maths", "modelling", "travelling" and "travelled",
+    "towards" in the overlay's string with its test, and "afterwards", "upwards" and "downwards" in
+    some forty comment lines; the namespace "Examples.Maths" and round as a preposition stay. The
+    guides' GPU times with no command beside them (N 3.6), `docs/sky-and-reflections.md:186`, 208,
+    216, 329, 353 and `docs/ray-tracing.md:231`, 380, 393, name the command or point at the page
+    that does. In the modules, Levels' likenings to other engines and games in `Level.Shapes.cs:4`
+    and `Level.cs:13` and the middle dots in `LevelFace.cs:25`; Modeling's texture script and guide
+    explained by this repository's collection and citing an ignored folder; Vegetation's ignored
+    folder cited and the papers' authors kept to one comment a type. One commit a repository, after
+    item 150's first step, with STYLE's own searches run over the tree and their counts in the
+    Reply.
+
+152. **A front-lit crown's probes read above their reference with the leaves painted as they are
+    drawn.** With the surface maps' means in the scene field (item 150), the oak's leaves and bark
+    are painted as dielectric, and the probes about the crown rise, the front half to 1.470 of its
+    reference against a bar of 1.25, the front to 1.151 and the core to 0.769.
+    `ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter` stands skipped with that reason and its
+    bar kept. Asked, the cause of the front half's excess read against the reference a texel at a
+    time, whether the leaves' cutouts count as solid in the field, whether a leaf sends from both
+    sides at full, and whether the probe takes the sun's light twice, then the mend, the test run
+    again with its bar as it stands, and a sheet of the crown before and after beside the reference.
+    Before item 150's second step.
 
 ## Verdicts
 
@@ -537,6 +574,13 @@ in full under Decisions in REVIEW-ARCHIVE.md.
     headless and the software paths among them, the field staying beside it wherever another part of
     the lighting needs it. A program chooses by a setting, the adapter's ability the limit. Written
     once in the shared kernels after they have moved. Item 144.
+
+93. **The kernels' move keeps its place, and commits are held to the norm by a script and fresh
+    readers.** Decided at 17:29 on 2026-11-17, asked by the review as selections. Item 138, the
+    lighting kernels written once in the RadianceCascades module, stays after the lighting items in
+    hand and is not moved to the front. Every commit is read by the review's mechanical checks, a
+    larger one by a fresh read-only reader given NORM.md and the diff, and the whole tree by such
+    readers once a day; no standing session is kept for it.
 
 ## Replies
 
@@ -979,17 +1023,18 @@ The lit rooms' lamps are numbers set against EV 9.7, which the night's lens show
 bright, blown out. Setting them is a later item. Each is here with its light at its floor and a real
 lamp of its kind beside it.
 
-| Lamp | Set | At its floor | A real lamp of its kind | |---|---|---|---| | The hall's three aisle
-lamps | 60,000 lm, 5.1 m up | 184 lux | 6,000 lm, 18 lux | | Red, green and blue | 250,000 lm each,
-3.6 m up | 1,535 lux | a stage lamp's 10,000 lm, 61 lux | | Spot through a cookie | 900,000 lm, 7.9
-m from the wall | 1,148 lux on the wall | 20,000 lm, 26 lux | | The panel bay's light | 400,000 lm,
-5.2 m up | 1,177 lux | 3,000 lm, 9 lux | | The panel bay's panel, 1.6 m square | 30,000 nits, 5.4 m
-up | 2,450 lux | an office panel's 3,500 nits, 290 lux | | Spot into the fog | 1,200,000 lm, 5.3 m
-up | 3,400 lux | 20,000 lm, 57 lux | | The probe and decal bays' lights | 300,000 lm each, 4.9 m up
-| 994 lux | 3,000 lm, 10 lux | | The neon bay's two lights | 30,000 lm each, 2 and 3.6 m up | 597
-and 184 lux | a neon tube's 300 lm, 6 and 2 lux | | The Cornell box's light | 120,000 lm, 4.6 m up |
-451 lux | 3,000 lm, 11 lux | | The Cornell box's panel, 1.2 m square | 40,000 nits, 4.9 m up | 2,210
-lux | an office panel's 3,500 nits, 204 lux |
+| Lamp | Set | At its floor | A real lamp of its kind |
+|---|---|---|---|
+| The hall's three aisle lamps | 60,000 lm, 5.1 m up | 184 lux | 6,000 lm, 18 lux |
+| Red, green and blue | 250,000 lm each, 3.6 m up | 1,535 lux | a stage lamp's 10,000 lm, 61 lux |
+| Spot through a cookie | 900,000 lm, 7.9 m from the wall | 1,148 lux on the wall | 20,000 lm, 26 lux |
+| The panel bay's light | 400,000 lm, 5.2 m up | 1,177 lux | 3,000 lm, 9 lux |
+| The panel bay's panel, 1.6 m square | 30,000 nits, 5.4 m up | 2,450 lux | an office panel's 3,500 nits, 290 lux |
+| Spot into the fog | 1,200,000 lm, 5.3 m up | 3,400 lux | 20,000 lm, 57 lux |
+| The probe and decal bays' lights | 300,000 lm each, 4.9 m up | 994 lux | 3,000 lm, 10 lux |
+| The neon bay's two lights | 30,000 lm each, 2 and 3.6 m up | 597 and 184 lux | a neon tube's 300 lm, 6 and 2 lux |
+| The Cornell box's light | 120,000 lm, 4.6 m up | 451 lux | 3,000 lm, 11 lux |
+| The Cornell box's panel, 1.2 m square | 40,000 nits, 4.9 m up | 2,210 lux | an office panel's 3,500 nits, 204 lux |
 
 At noon the light hall's eight bays read the same to a tenth before and after. The render gallery's
 room and Cornell box read 156.9 and 189.2 before and 169.8 and 206.5 after, the first session's
@@ -1026,5 +1071,79 @@ The whole suite passed from one tree, 2,175 passed, 0 failed and 4 skipped, 2,17
 listing is 2,168, the solution built from nothing with warnings as errors, in 15 parts and the rest
 dealt by the last run's times, each part of 2 m 15 s to 5 m 21 s, a part at a time under the GPU
 lock.
+
+NormTests passed, 19.
+
+150, its first step, global illumination's field painting each material by its textures' means, with
+Sponza's and the Bistro's sheets and eleven pushed sheets on white, in the commit carrying this
+Reply.
+
+`native/bevy_csharp/src/render/field_means.rs` averages a texture once its image has loaded and
+keeps the mean by the image's asset until Bevy says it changed or went, in linear light by the
+image's sRGB flag, by alpha where the material cuts or blends, over the level of 64 texels a side or
+fewer, from eight-bit texels and from BC1, BC3, BC4, BC5 and BC7 blocks. The field's gather paints
+each standard material its factors times the means of its base color, metallic and roughness, and
+emissive textures, a tree's field color standing for its base color's. The BC7 decoder reads 1,600
+random blocks of every mode as Pillow does, and the other four kinds within a level. Five tests of
+the module come with it. The three profiles check with no warning, the bridge's tests pass with no
+feature and with render, 126 and 229, and Cargo.lock is unmoved.
+
+`GlobalIlluminationTests.ATexturedWallColorsTheFloorBesideItAsTheSameWallPaintedByItsFactors` stands
+a glTF wall, white and full metal by its factors with a checker of two reds and a map of no metal,
+beside the same wall painted the checker's mean, and holds the floor's red past its green within a
+fifth. Without the mend it read 0.000 against 0.508 and failed, and with it the two floors read
+alike to the fourth figure, 0.5084 each. A wall textured with Sponza's own floor KTX2 files lit the
+floor as their means painted as factors do, to the fourth figure.
+
+The field builds Sponza's 1.3 million triangles at the budget of 32,768 a frame in about 400 frames,
+its meshes standing as their boxes until then, so each picture of the sheets is taken once gi.state
+says nothing waits. Built, at the sibling's view, noon and lens, the means take the atrium's shade
+darker with the cascades on, the shaded floor from 36 nits to -90 and an upper gallery wall from 360
+to 164, against 883 and 1,942 with them off, as the walls' white mirrors give way to stone whose
+floor is 0.105 and its metal 0.04. The shaded floor below zero is the take-back of the sky's light
+outweighing the probes, a fault of its own and the step after the next. The fills change nothing
+with the cascades on. The lens is EV 9.7 graded 4.944 stops down, since the camera's Exposure lies
+out of entity.set's reach, which part two asks of the bridge. The sheet is
+`2026-11-17-item-150-sponza-atrium.webp`.
+
+The path-traced reference reads a pack's sRGB textures as linear, the sunlit floor 12,684 nits there
+against 4,177 here, where 119,000 lux on 0.105 gives 4,000, takes the emissive factor without its
+map and reads NaN on the Bistro's blended paving. Neither sheet is judged against it until it is
+mended, the next step, and their titles say so. The atmosphere costs the sunlit floor 14% at 84
+degrees, which reads 5,039 nits under the dusk backdrop.
+
+The Bistro at 23:00 at the camera the sibling solved for the scene's night picture reads the
+paving's red over green in levels, over that picture's three boxes, 1.02, 1.04 and 1.02 before the
+means and 2.01, 2.33 and 1.95 after, where the picture reads 1.77, 1.93 and 2.11. The lantern's
+emissive mean is red 3.53 times green in linear light and the paving's own 1.04. The street's
+luminance falls to about a third, the field's lanterns emitting their glass's mean of 0.42 in place
+of white, which is judged once the reference is mended. The sheet is
+`2026-11-17-item-150-bistro-night.webp`.
+
+ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter is skipped with its bar untouched, its reason
+saying the probe in the crown's front half reads 1.47 of its reference's light with the leaves
+painted as dielectric. The oak's leaves and bark carry a metal and a roughness of 1 with a surface
+map whose blue is the metal, and the field read the factors alone, so it painted both full metal
+with no diffuse share. Their maps' means are a metal of 0.0008 and a roughness of 0.73 for the
+leaves and 0 and 0.85 for the bark, so the field paints them as Bevy draws them and as the reference
+reads them texel by texel. The probe two meters before the front reads 1.151 of its reference's
+light, the one in the front half 1.470 against its bar of 1.25 and the one among the core's cards
+0.769, where they read 0.98, 1.11 and 0.54 when the test came in. 152 finds why and takes the skip
+away, and the meadow's pair, which shows the bark's change, comes with it.
+
+The nine sheets pushed on a dark ground stand on white under their names, item 148's three, 147's
+clouds, 145's swarm, 143's two and Verdicts 59 and 60, and item 146's cloud drift and seeds take a
+title and labels. Eight of the nine had no words, so their titles and labels come from their
+captions alone, and every panel keeps its size, so each sheet is a little larger. The 149 Reply's
+table of lamps stands in rows again, which its append had joined.
+
+Shared: the field paints a surface its factors times its textures' means, as 3DEngine's field does,
+and a shared module's interface would say that a hit's color, metal and emission are texture means.
+
+The whole suite ran from one tree before the skip, 2,175 passed, 1 failed and 4 skipped, 2,180 in
+all where the listing is 2,169, the crown's test the one that failed, the solution built from
+nothing with warnings as errors, in 15 parts and the rest dealt by the last run's times, each part
+of 2 m 12 s to 5 m 9 s, a part at a time under the GPU lock. With the skip the test project builds
+with warnings as errors and the crown's test reports itself skipped with its reason.
 
 NormTests passed, 19.

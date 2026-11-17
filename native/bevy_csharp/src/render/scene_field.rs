@@ -271,11 +271,13 @@ mod built {
     use bevy::ecs::resource::Resource;
     use bevy::ecs::system::ResMut;
     use bevy::ecs::world::World;
+    use bevy::image::Image;
     use bevy::mesh::Mesh;
     use bevy::render::storage::ShaderBuffer;
 
     use super::{BcsFieldDraw, BcsFieldEye};
     use crate::interop::status;
+    use crate::render::field_means::TextureMeans;
     use crate::render::field_triangles::{bounds_of, corners_of, surface_of, triangles_of};
 
     /// Bytes of one corner in the pool.
@@ -295,6 +297,7 @@ mod built {
         bounds: Vec<Option<[f32; 6]>>,
         triangles: Vec<Option<u32>>,
         surfaces: Vec<Option<f32>>,
+        means: TextureMeans,
     }
 
     impl FieldMeshes {
@@ -326,7 +329,8 @@ mod built {
         pub(super) capacity: usize,
     }
 
-    /// Numbers the meshes and keeps their generations, from nothing for a new app.
+    /// Numbers the meshes and keeps their generations and the textures' means, from nothing for a new
+    /// app.
     pub fn install(app: &mut bevy::app::App) {
         app.init_resource::<FieldMeshes>();
         app.init_resource::<FieldPool>();
@@ -334,8 +338,9 @@ mod built {
     }
 
     /// Moves a mesh's generation on where Bevy says its data changed or it went, so the plan takes
-    /// it as another mesh and the pool holds it again.
-    fn track(mut events: MessageReader<AssetEvent<Mesh>>, mut meshes: ResMut<FieldMeshes>) {
+    /// it as another mesh and the pool holds it again, and forgets a texture's mean so, so it is
+    /// measured again.
+    fn track(mut events: MessageReader<AssetEvent<Mesh>>, mut images: MessageReader<AssetEvent<Image>>, mut meshes: ResMut<FieldMeshes>) {
         for event in events.read() {
             let (AssetEvent::Modified { id } | AssetEvent::Removed { id }) = event else {
                 continue;
@@ -348,12 +353,17 @@ mod built {
                 meshes.surfaces[number as usize] = None;
             }
         }
+        for event in images.read() {
+            if let AssetEvent::Modified { id } | AssetEvent::Removed { id } = event {
+                meshes.means.forget(*id);
+            }
+        }
     }
 
     /// What the field takes from a material beyond Bevy's own settings, by the material's asset, the
     /// share of global illumination's light that passes a unit of its depth, as a canopy's leaves
-    /// let it through, and a color its base color is painted times, as the trees give the mean of
-    /// their pictures, since the field paints a surface its base color and reads no texture.
+    /// let it through, and a color its base color is painted times in place of its texture's mean,
+    /// as the trees give the mean of their pictures.
     #[derive(Resource, Default)]
     pub struct FieldLooks(pub HashMap<bevy::asset::UntypedAssetId, FieldLook>);
 
@@ -368,8 +378,9 @@ mod built {
     /// camera the field lies around.
     ///
     /// A mesh drawn with the standard material, or with one of the trees' materials built over it,
-    /// the leaves' and the bark's, is painted its base color, times its field color where it has
-    /// one, and lets through the share its material was given. A tree's impostor is left out, its
+    /// the leaves' and the bark's, is painted its base color times its texture's mean, or times its
+    /// field color where it has one, its roughness, metal and emission times their textures' means
+    /// alike (`field_means`), and lets through the share its material was given. A tree's impostor is left out, its
     /// one quad standing for the whole tree only as it is drawn. A mesh with a visibility range is
     /// taken where the eye the field lies around stands within it, as Bevy draws it for that eye,
     /// since its visibility range hides it from each view and not from what it inherits, and a
@@ -421,6 +432,7 @@ mod built {
             let barks = world.get_resource::<Assets<crate::render::sway::BarkMaterial>>();
             let looks = world.get_resource::<FieldLooks>();
             let data = world.get_resource::<Assets<Mesh>>();
+            let images = world.get_resource::<Assets<Image>>();
             let mut found = 0usize;
 
             for (mesh, place, visible, (standard, leaf, bark, impostor), bounds, skinned, range) in query.iter(world) {
@@ -473,9 +485,17 @@ mod built {
                     (None, None)
                 };
                 let look = id.and_then(|id| looks.and_then(|looks| looks.0.get(&id))).copied().unwrap_or_default();
+                // Each texture's mean, where the material has the texture and it has loaded, the
+                // base color's by each texel's alpha where the material cuts or blends by it.
+                let mut mean = |texture: Option<&Handle<Image>>| texture.and_then(|texture| meshes.means.of(images, texture.id()));
+                let cut = standard.is_some_and(|standard| !matches!(standard.alpha_mode, bevy::material::AlphaMode::Opaque));
+                let painted = mean(standard.and_then(|standard| standard.base_color_texture.as_ref()))
+                    .map(|mean| if cut { mean.solid } else { mean.all });
+                let glowing = mean(standard.and_then(|standard| standard.emissive_texture.as_ref())).map(|mean| mean.all);
+                let surfaced = mean(standard.and_then(|standard| standard.metallic_roughness_texture.as_ref())).map(|mean| mean.all);
                 let mut color = standard.map_or([1.0; 4], |standard| standard.base_color.to_linear().to_f32_array());
-                if let Some(tint) = look.tint {
-                    for (channel, times) in color.iter_mut().zip(tint) {
+                if let Some(times) = look.tint.or(painted) {
+                    for (channel, times) in color.iter_mut().zip(times) {
                         *channel *= times;
                     }
                 }
@@ -485,9 +505,15 @@ mod built {
                 let emission = standard.map_or([0.0; 4], |standard| {
                     let [r, g, b, _] = standard.emissive.to_f32_array();
                     let shown = 1.0 + (exposure - 1.0) * standard.emissive_exposure_weight;
-                    [r * shown, g * shown, b * shown, 0.0]
+                    let [tr, tg, tb] = glowing.unwrap_or([1.0; 3]);
+                    [r * shown * tr, g * shown * tg, b * shown * tb, 0.0]
                 });
-                let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| [standard.perceptual_roughness, standard.metallic, standard.reflectance, 0.0]);
+                // Green the roughness and blue the metal, as a glTF metallic and roughness map holds
+                // them.
+                let [_, rough, metal] = surfaced.unwrap_or([1.0; 3]);
+                let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| {
+                    [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, 0.0]
+                });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
                 // The surface an emitter emits from, read once a generation and for an emitter
                 // alone, which global illumination carries as a light from its box by this share of

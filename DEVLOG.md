@@ -36,6 +36,19 @@ where the light panel, the lava, the water and the filament go dark under Bevy's
 and beside mended at that strength in nits, which reads as unmended, the third panel red where
 lighter and blue where darker.
 
+![](.github/assets/readings/2026-11-17-item-150-bistro-night.webp)
+The Bistro at 23:00 at the camera the sibling solved for the scene's night picture, under the
+street's lens, before and after the texture means, the third panel blue where the street darkens as
+its lanterns emit their glass's orange mean, the wet cobbles' red going from 1.03 to 3.7 times their
+green, the lantern's emissive mean 3.53 and the paving's own 1.04, not judged against the reference.
+
+![](.github/assets/readings/2026-11-17-item-150-sponza-atrium.webp)
+Sponza's atrium at the sibling's view and noon under ISO 200, 1/200 s and f/16 and AgX, the cascades
+off, on and their difference before and after the texture means, with the fills and without them,
+the shaded floor and an upper gallery wall read in nits beneath, the means taking the shade darker
+as the walls' white mirrors give way to their dark stone, not judged against the reference until it
+reads sRGB textures by their flag.
+
 ## 2026-11-16
 
 ![](.github/assets/readings/2026-11-16-verdict-60-life.webp)

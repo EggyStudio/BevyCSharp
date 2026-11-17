@@ -69,5 +69,6 @@ the page's Download link (https://developer.nvidia.com/bistro), 894,377,473 byte
 `0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1`, its exterior turned into glTF by
 `build/fbx-to-gltf.sh`, set to the archive's texture convention by `build/orca-gltf.py` and packed
 by `build/make-scene-pack.py`.
-The pack is `bistro-exterior.pack` on the `scene-packs` release, 310,838,881 bytes, SHA-256
-`d71c6c5b641263c214565129d521eeca8445048546fe54c1ac3cd71abc5faadd`, uploaded on 2026-11-17.
+The pack is `bistro-exterior.pack` on the `scene-packs` release, 310,838,883 bytes, SHA-256
+`a93668915528079d60632c4cc25ac6a857394d9c58da012d895b9bf00bd07947`, uploaded at 14:45 on 2026-11-17
+with its street lantern's emission at 10,000, in place of the pack of the same morning.
