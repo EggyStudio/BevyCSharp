@@ -37,6 +37,9 @@ SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 Texture3D<float4> albedo;
 Texture3D<uint> faces;
+// The share of its diffuse light each cell's surface sends through to its far side
+// (transmissionAt).
+Texture3D<float> transmission;
 // The light each cell's surfaces emit, as field_resolve.slang writes it beside the colors.
 Texture3D<float4> glow;
 StructuredBuffer<GiLights> lights;
@@ -351,7 +354,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
         // through, so such a frame's light is that light to the bit.
         if (t >= 0.0)
         {
-            light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
+            light = float4(shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, transmission, glow, lit, glow_lights,
                 bounced, bounced_at, ways, origin + way * t, way, float(probes), interval.z, interval.w, share, own), t < interval.x ? 0.5 : 0.0);
             through = 0.0;
         }
@@ -391,7 +394,7 @@ void main(uint3 id : SV_DispatchThreadID, uint lane : SV_GroupIndex)
             // would cost the trace several times as much for no nearer a reading.
             float3 itsOwn;
             float lost = 1.0 - passes;
-            float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, glow, lit, glow_lights,
+            float3 itsLight = shadeProbeHit(field, field_sampler, fieldInfo, gatheredAt(fieldInfo, lit), albedo, faces, transmission, glow, lit, glow_lights,
                 bounced, bounced_at, ways, origin + way * (t + stopped), way, float(probes), interval.z, interval.w, share, itsOwn) * lost;
             itsOwn *= lost;
             if (depth >= 0.0 && t < interval.x)

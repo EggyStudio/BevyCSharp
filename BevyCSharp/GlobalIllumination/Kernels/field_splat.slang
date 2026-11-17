@@ -46,7 +46,8 @@ struct FieldInstance
     // thinnest extent in world units, its mesh's bounds along each of its own axes scaled into the
     // world.
     float4 emission;
-    // xyz: the surface's perceptual roughness, metallic share and reflectance.
+    // xyz: the surface's perceptual roughness, metallic share and reflectance. w: the share of its
+    // diffuse light it sends through to its far side, its diffuse transmission.
     float4 gloss;
 };
 
@@ -80,7 +81,10 @@ RWStructuredBuffer<Atomic<uint>> leaf_area;
 RWStructuredBuffer<float4> glow;
 
 // The gloss of a cell's nearest surface in the bits a cell of the faces image keeps it in
-// (glossBits), which the painting dispatch writes and field_resolve.slang puts beside the face.
+// (glossBits), which the painting dispatch writes and field_resolve.slang puts beside the face, and
+// in bits 0 to 7, which the faces image keeps the face's way in and this leaves free, the share of
+// its diffuse light the surface sends through to its far side in 255ths, which field_resolve.slang
+// puts in the image of that share.
 RWStructuredBuffer<uint> gloss;
 
 // What the emitters thinner than a cell lend each cell they lie near, six codes a cell, the most
@@ -384,7 +388,7 @@ void main(uint3 group : SV_GroupID, uint lane : SV_GroupIndex)
             float3 painted = instance.color.rgb * (weights.x * cornerColor(ca.w) + weights.y * cornerColor(cb.w) + weights.z * cornerColor(cc.w));
             uint4 bytes = uint4(uint3(saturate(painted * coverage) * 255.0 + 0.5), uint(coverage * 255.0 + 0.5));
             albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (bytes.a << 24);
-            gloss[index] = glossBits(instance.gloss.xyz);
+            gloss[index] = glossBits(instance.gloss.xyz) | uint(saturate(instance.gloss.w) * 255.0 + 0.5);
             // Alpha 1 where global illumination carries the emitter as a glow light, which a probe's
             // ray that meets it leaves out (surfaceGlowUncarried).
             float3 e = max(instance.emission.rgb, 0.0);

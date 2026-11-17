@@ -57,6 +57,51 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
+    /// Each cell of the field keeps the share of its diffuse light its nearest surface sends through
+    /// to its far side, a cell nearer an opaque block's face holding none and one nearer a block of
+    /// a material sending 0.6 through, as a leaf's does, holding 0.6, read back from the image the
+    /// probes' rays read.
+    /// </summary>
+    /// <remarks>
+    /// The share has its own image of half floats beside the faces (<c>transmissionAt</c> in
+    /// bcs_field.slang), painted by the triangle that painted the cell's color, so a probe's ray
+    /// lights a leaf's far side by it (<c>shadeProbeHit</c>) and no byte of a face's word holds two
+    /// things.
+    /// </remarks>
+    [SkippableFact]
+    public void TheFieldKeepsTheShareEachCellsNearestSurfaceSendsThrough()
+    {
+        Needs.Shaders();
+        var origin = Vector3.Zero;
+        var shares = ReadBack(
+            ecs =>
+            {
+                PictureRun.Camera(ecs, new Vec3(0f, 2f, 6f));
+                Glossy(ecs, new MaterialSettings { BaseColor = (0.6f, 0.6f, 0.6f, 1f) }, new Vec3(-1f, 1f, 0f));
+                Glossy(ecs, new MaterialSettings { BaseColor = (0.3f, 0.6f, 0.2f, 1f), DiffuseTransmission = 0.6f }, new Vec3(2f, 1f, 0f));
+                Render.SetSceneField(1, 0.25f);
+            },
+            stills: 2,
+            () =>
+            {
+                origin = SceneField.Plan!.BuiltOrigin(0)!.Value;
+                return SceneField.Transmission;
+            });
+
+        float At(Vector3 p)
+        {
+            var cell = (p - origin) / 0.25f;
+            var at = (((int)cell.Z * SceneFieldPlan.Resolution + (int)cell.Y) * SceneFieldPlan.Resolution + (int)cell.X) * 2;
+            return (float)BitConverter.ToHalf(shares, at);
+        }
+
+        var opaque = At(new Vector3(0.3f, 1f, 0.1f));
+        Assert.True(opaque == 0f, $"a cell beside the opaque block's face holds a share of {opaque}");
+        var leaf = At(new Vector3(0.7f, 1f, 0.1f));
+        Assert.True(MathF.Abs(leaf - 0.6f) < 0.005f, $"a cell beside the block sending 0.6 through holds a share of {leaf}");
+    }
+
+    /// <summary>
     /// A probe in a closed room of 8 of smooth walls of the level's white, at a roughness of 0.1,
     /// reads the light its second bounce adds within 12% of its reference's, the walls its rays meet
     /// reflecting by their gloss the light the probes around them hold along each ray's mirror way.

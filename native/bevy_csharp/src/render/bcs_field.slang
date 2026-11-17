@@ -349,6 +349,20 @@ public float paintAlphaAt(Texture3D<float4> albedo, FieldInfo info, float3 p)
     return albedo.Load(int4(cell.xy, cell.z + c * size, 0)).a;
 }
 
+/// The share of its diffuse light the surface met at `p` sends through to its far side, its diffuse
+/// transmission as the cell `p` lies in holds it, 0 where no cascade holds it. A leaf sends that
+/// share of the light reaching its back to the side away from it.
+public float transmissionAt(Texture3D<float> transmission, FieldInfo info, float3 p)
+{
+    int c = fieldCascade(info, p, 1.0);
+    if (c < 0)
+        return 0.0;
+    float4 oc = info.cascades[c].origin_and_cell;
+    int size = int(info.counts.y);
+    int3 cell = clamp(int3(floor((p - oc.xyz) / oc.w)), int3(0), int3(size - 1));
+    return transmission.Load(int4(cell.xy, cell.z + c * size, 0));
+}
+
 /// How far a ray along `way` from `origin` that met such a surface at `t` runs before it has left
 /// it, half a cell a step while the field holds the point within half a cell of a surface or inside
 /// one, and in `inside` whether it is still within at `t` plus `most`, its interval's end, or after

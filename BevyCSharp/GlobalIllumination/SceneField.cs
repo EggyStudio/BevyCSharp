@@ -82,8 +82,8 @@ internal static unsafe partial class SceneField
     {
         public readonly (int Cascades, float CellSize, int Budget, float FarCell, int Triangles) Made = made;
         public readonly SceneFieldPlan Plan = plan;
-        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Glow, Info, Cells, Behind, Paint, LeafArea, Gloss, Emission, Lent, Instances, Shapes,
-            Bricks, Pool = AssetHandle.None;
+        public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Transmission, StillTransmission, Glow, Info, Cells, Behind, Paint, LeafArea, Gloss,
+            Emission, Lent, Instances, Shapes, Bricks, Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
         // Whether a build's parts were splatted into the buffers and no resolve has read and cleared
         // them since, which the next build's first part clears where that build was left unfinished.
@@ -149,6 +149,13 @@ internal static unsafe partial class SceneField
     /// </summary>
     internal static AssetHandle Faces => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Faces : AssetHandle.None;
 
+    /// <summary>
+    /// The share of its diffuse light each cell's nearest surface sends through to its far side, its
+    /// diffuse transmission, laid out as the field, or none where no field is built, a half float a
+    /// cell, as <c>bcs_field</c>'s <c>transmissionAt</c> reads it.
+    /// </summary>
+    internal static AssetHandle Transmission => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Transmission : AssetHandle.None;
+
     /// <summary>The camera the contact shadows and global illumination's light are drawn on, or none.</summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
 
@@ -178,9 +185,10 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>
-    /// The bytes of GPU memory the field holds, its two images of half floats, its two of colors and
-    /// two of faces with their gloss, four bytes a cell each, its image of light in four half floats,
-    /// a cascade's cells' codes, faces behind, colors, leaf cards' area and gloss, four bytes a cell
+    /// The bytes of GPU memory the field holds, its four images of half floats, the distances and
+    /// the shares its surfaces send through each with its still copy, its two of colors and two of
+    /// faces with their gloss, four bytes a cell each, its image of light in four half floats, a
+    /// cascade's cells' codes, faces behind, colors, leaf cards' area and gloss, four bytes a cell
     /// each, their light in four floats and what thin emitters lend them in six codes, and the pool
     /// of triangles.
     /// </summary>
@@ -190,7 +198,7 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(NativeGlobalIllumination.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return (2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
+        return (4 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
     /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
@@ -336,6 +344,8 @@ internal static unsafe partial class SceneField
         built.StillPaint = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
         built.Faces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
         built.StillFaces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
+        built.Transmission = Shaders.CreateImage(size, size, ShaderImageFormat.R16Float, depth);
+        built.StillTransmission = Shaders.CreateImage(size, size, ShaderImageFormat.R16Float, depth);
         built.Glow = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, depth);
 
         // A cell's word cleared to the band's distance in front, and its face behind to none, as the
@@ -363,11 +373,12 @@ internal static unsafe partial class SceneField
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
             .SetTexture("albedo_field", built.Albedo).SetTexture("still_paint", built.StillPaint)
             .SetTexture("face_field", built.Faces).SetTexture("still_faces", built.StillFaces)
+            .SetTexture("transmission_field", built.Transmission).SetTexture("still_transmission", built.StillTransmission)
             .SetBuffer("glow", built.Emission).SetBuffer("emitted", built.Lent).SetTexture("glow_field", built.Glow);
         _stamp.SetBuffer("bricks", built.Bricks).SetBuffer("shapes", built.Shapes).SetBuffer("info", built.Info)
             .SetTexture("still_field", built.Still).SetTexture("field", built.Field)
-            .SetTexture("still_paint", built.StillPaint).SetTexture("still_faces", built.StillFaces)
-            .SetTexture("albedo_field", built.Albedo).SetTexture("face_field", built.Faces);
+            .SetTexture("still_paint", built.StillPaint).SetTexture("still_faces", built.StillFaces).SetTexture("still_transmission", built.StillTransmission)
+            .SetTexture("albedo_field", built.Albedo).SetTexture("face_field", built.Faces).SetTexture("transmission_field", built.Transmission);
         return built;
     }
 
@@ -377,7 +388,8 @@ internal static unsafe partial class SceneField
         if (_built is not { } built) return;
         _drawFor = (null, Entity.None);
         DrawEngine(ecs, null, Entity.None);
-        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces, built.Glow,
+        foreach (var handle in (ReadOnlySpan<AssetHandle>)[built.Field, built.Still, built.Albedo, built.StillPaint, built.Faces, built.StillFaces,
+                     built.Transmission, built.StillTransmission, built.Glow,
                      built.Info, built.Cells, built.Behind, built.Paint, built.LeafArea, built.Gloss, built.Emission, built.Lent, built.Instances, built.Shapes, built.Bricks])
             AssetServer.Release(handle);
         _built = null;
@@ -414,11 +426,11 @@ internal static unsafe partial class SceneField
                 draw.Rows[3], draw.Rows[7], draw.Rows[11], 1);
             var bounds = new SceneFieldPlan.Box(new Vector3(draw.Low[0], draw.Low[1], draw.Low[2]), new Vector3(draw.High[0], draw.High[1], draw.High[2]));
             // The color's fourth channel is the share of light the surface lets pass a unit of its
-            // depth, and the emission's the surface an emitter emits from, as the bridge writes
-            // them.
+            // depth, the emission's the surface an emitter emits from, and the gloss's the share of
+            // its diffuse light it sends through to its far side, as the bridge writes them.
             var instance = new SceneFieldPlan.Instance(draw.Mesh, draw.Generation, world, (draw.Flags & 1) != 0, bounds,
                 new Vector3(draw.Color[0], draw.Color[1], draw.Color[2]), new Vector3(draw.Emission[0], draw.Emission[1], draw.Emission[2]), Math.Clamp(draw.Color[3], 0f, 1f),
-                Math.Max(draw.Emission[3], 0f), new Vector3(draw.Gloss[0], draw.Gloss[1], draw.Gloss[2]));
+                Math.Max(draw.Emission[3], 0f), new Vector3(draw.Gloss[0], draw.Gloss[1], draw.Gloss[2]), Math.Clamp(draw.Gloss[3], 0f, 1f));
             through |= instance.Through > 0f;
             if (once && !Once.Add(instance)) continue;
             Drawn.Add((instance, (draw.Flags & 2) != 0));
@@ -515,7 +527,7 @@ internal static unsafe partial class SceneField
                     BitConverter.UInt32BitsToSingle(sides), BitConverter.UInt32BitsToSingle((uint)triangles)]);
                 records.AddRange([instance.Color.X, instance.Color.Y, instance.Color.Z, Carried(instance, plan.CellSize) ? 2 : 1,
                     instance.Emission.X, instance.Emission.Y, instance.Emission.Z, instance.Emission == Vector3.Zero ? 0 : Thinnest(instance),
-                    instance.Gloss.X, instance.Gloss.Y, instance.Gloss.Z, 0]);
+                    instance.Gloss.X, instance.Gloss.Y, instance.Gloss.Z, instance.Transmission]);
                 triangles += (int)many;
                 count++;
             }
@@ -608,9 +620,9 @@ internal static unsafe partial class SceneField
         var shapes = _shapes.AsSpan(0, floats);
         for (var s = 0; s < plan.Shapes.Count; s++)
         {
-            var (m, center, extents, scale, color, through, gloss) = plan.Shapes[s];
+            var (m, center, extents, scale, color, through, gloss, transmission) = plan.Shapes[s];
             ReadOnlySpan<float> values = [m.M11, m.M21, m.M31, m.M41, m.M12, m.M22, m.M32, m.M42, m.M13, m.M23, m.M33, m.M43,
-                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, through, gloss.X, gloss.Y, gloss.Z, 0];
+                center.X, center.Y, center.Z, scale, extents.X, extents.Y, extents.Z, 0, color.X, color.Y, color.Z, through, gloss.X, gloss.Y, gloss.Z, transmission];
             values.CopyTo(shapes[(s * (ShapeBytes / 4))..]);
         }
 

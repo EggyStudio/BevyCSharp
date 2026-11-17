@@ -440,6 +440,7 @@ internal static unsafe partial class WorldProbes
         Shaders.WriteBuffer<byte>(made.Lights, bytes);
 
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
+        var transmission = SceneField.Transmission;
         var parity = (uint)(_frame & 1);
 
         // Whether the field holds every mesh in reach, each cascade built and no triangle waiting,
@@ -462,7 +463,7 @@ internal static unsafe partial class WorldProbes
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 1u : 0u];
             ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, BitConverter.SingleToUInt32Bits(made.Intervals[last].End), parity, whole ? 1u : 0u];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
-                .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
+                .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("transmission", transmission).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
                 .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
                 .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("bounced_at", made.CubesAt).SetTexture("distances", made.Distances[c])
                 .SetTexture("kept", made.Kept[c]).SetTexture("ways", made.Ways).SetTexture("reach", made.Reach).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)

@@ -1,8 +1,9 @@
 // Turns the codes field_splat.slang left in one cascade's cells into distances in world units,
 // below zero behind a face and within half a cell of a double-sided one or a wall thinner than a
-// cell, and writes them into the cascade's place in the field the meshes alone make and in the field
-// the shaders read, with the color and the emission it painted and the way the cell's nearest face
-// looks, a thread a cell, or clears the codes for the next build.
+// cell, and writes them into the cascade's place in the field the meshes alone make and in the
+// field the shaders read, with the color and the emission it painted, the way the cell's nearest
+// face looks and the share of its light that face sends through, a thread a cell, or clears the
+// codes for the next build.
 //
 // The codes are cleared for the next build by a dispatch of this that clears alone, since a
 // dispatch here has no call that fills a buffer. It follows each resolve, whose cells read their
@@ -36,6 +37,12 @@ RWStructuredBuffer<uint> leaf_area;
 RWStructuredBuffer<uint> gloss;
 [format("r32ui")] RWTexture3D<uint> face_field;
 [format("r32ui")] RWTexture3D<uint> still_faces;
+
+// The share of its diffuse light each cell's nearest surface sends through to its far side, which
+// field_splat.slang painted in the lowest byte of its gloss, into the image the passes read and the
+// still meshes' own (transmissionAt in bcs_field.slang).
+[format("r16f")] RWTexture3D<float> transmission_field;
+[format("r16f")] RWTexture3D<float> still_transmission;
 
 // The light each cell's nearest surface emits, as field_splat.slang painted it, what the emitters
 // thinner than a cell lend it, the most light any emits in 256ths and the area of their faces near
@@ -171,9 +178,13 @@ void resolve(uint3 id, uint index, uint e)
     }
     still_paint[at] = paint;
     albedo_field[at] = paint;
-    uint face = (code & 255u) | gloss[index];
+    uint word = gloss[index];
+    uint face = (code & 255u) | (word & ~255u);
     still_faces[at] = face;
     face_field[at] = face;
+    float sends = float(word & 255u) / 255.0;
+    still_transmission[at] = sends;
+    transmission_field[at] = sends;
 
     // The lent light times the share of the cell's face the emitters cover along the axis they cover
     // most of, a whole face at most, as the faces of a strip along a wall lend a cell beside it what

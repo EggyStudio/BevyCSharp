@@ -227,12 +227,13 @@ and as wide as the one before, so four cascades of a quarter meter reach 16 mete
 finest and 128 in the fourth. A distance is exact within four cells of a surface and held at four
 beyond. Each cell is painted the color of its nearest surface, its material's base color times its
 base color texture's mean and its vertices' colors, its metal, roughness and emission times their
-textures' means alike, with the way that surface faces, which global illumination reads a ray's hit
-by, so a cascade takes 5 MB of the GPU's memory. The cascades sit a third of their width ahead of
-the camera, eight of their cells behind it at least, and move a few of their cells at a time as it
-moves. A far cascade after them, where asked, has cells as wide as reaching its distance ahead of
-the camera takes, at least twice the last counted cascade's, held to the camera's far plane, so a
-ray or a contact shadow that leaves the counted cascades meets what lies far off.
+textures' means alike, with the way that surface faces and the share of its light it sends through
+to its far side, which global illumination reads a ray's hit by, so a cascade takes 8 MB of the
+GPU's memory. The cascades sit a third of their width ahead of the camera, eight of their cells
+behind it at least, and move a few of their cells at a time as it moves. A far cascade after them,
+where asked, has cells as wide as reaching its distance ahead of the camera takes, at least twice
+the last counted cascade's, held to the camera's far plane, so a ray or a contact shadow that leaves
+the counted cascades meets what lies far off.
 
 A mesh drawn in the same place for eight frames is built into the cascades around it from its
 triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around it,
@@ -364,7 +365,12 @@ of a crown as dense as the presets', and a double-sided surface letting light th
 are, is held cell by cell by the area of its cards in each, so a crown's sparse edge passes more of
 the sky than its core. A probe's ray lights what a crown stops where the crown's leaves stop it, and
 a probe among a crown's leaves is not taken for one inside a mesh, so the probes about a crown hold
-the light its leaves scatter between them.
+the light its leaves scatter between them. A surface that sends a share of its diffuse light through
+to its far side, its `DiffuseTransmission` times its texture's alpha over the texels its base color
+shows, is lit as Bevy and the leaf material light it, that share by the light reaching the side away
+from the ray and the rest by the side its face looks out of, so a sunlit leaf seen from outside its
+crown sends back what its lit side keeps rather than its whole color. The field holds the share in
+an image of its own, a half float a cell.
 
 Beside the probes in cascades stands a probe for every few pixels of the picture, every 16 at `Low`,
 12 at `Medium` and 8 at `High` up to a picture of 1080 rows and further apart as the picture grows

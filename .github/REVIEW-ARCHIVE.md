@@ -4602,6 +4602,19 @@ the port is offered upstream (Decision 18).
     exposure) for the same. A Reply first naming each pass that draws past its viewport, then the
     mend with a test of two viewports for each, and a reading.
 
+149. **A glow light gives the cascades about a hundred times a lamp's light.** Item 148's night has
+    the Bistro's paving near 0.06 of white at an exposure of about EV 9 from lanterns whose glass is
+    500 cd/m², where a glass of 0.15 m² at that luminance is about 75 cd and gives about 5 lux at 4
+    m, paving of about 0.3 cd/m² and 0.0005 of white. 3DEngine reads 0.07 to 0.21 cd/m² on the same
+    paving from the same pack. Asked, the read first, the power a glow light is given from its
+    material's emission and its faces' area followed through to what a surface at a distance takes,
+    against the arithmetic, in a scene of one emissive square over a floor, then the mend where the
+    factor is lost, with a test that holds a floor's luminance under a square of known luminance and
+    area within a fifth of the closed form at three distances. Sponza's and the feature test's lit
+    rooms read again after it, their sheets retaken where they move, and the Bistro's strengths set
+    once more after it, a lantern's glass near what gives a street 10 to 30 lux. The pack keeps 500,
+    200 and 100 until then.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -14025,6 +14038,105 @@ them. NormTests passed, 19.
 Shared: the renderer's parts are dealt from the least each test took over several runs, the longest
 21 minutes on the faster processor, and the page names the runner's processor beside each part's
 time, which a sibling dealing its tests on lavapipe reads the same way.
+
+149, a glTF material's emission read as nits and exposed, the feature test's two night lenses, and
+the Bistro's street lantern at 10,000, in the commit carrying this Reply.
+
+The factor was lost where the bridge makes a glTF file's materials. Bevy's glTF loader gives each
+standard material an emissive_exposure_weight of 0, which shows the emission as written, and
+`scene_field` hands the cascades a material's emission as the picture shows it, so a glTF emitter
+entered the picture and the cascades about a thousand times its light at EV 9.7.
+`native/bevy_csharp/src/render/exposure.rs` puts a glTF extension handler after Bevy's, which makes
+each material of a file again with a weight of 1 under the label Bevy's gave it, so its emission
+takes the camera's exposure, drawn and in the cascades alike. A material made in code keeps the
+weight its maker sets, as MaterialSettings.Emissive's remarks and a paragraph of docs/materials.md
+say. The three profiles check with no warning, the bridge's tests pass with no feature and with
+render, and Cargo.lock is unmoved.
+
+No test loads an emissive glTF, GlobalIlluminationTests' Cornell box being made in code. Of the
+examples, lightmaps draws CornellBox's Emitter_Light_temp at 100, depth_of_field its lava at 20
+times a texture, pcss PalmTree's water at 1 times a texture, anisotropy the barn lamp's filament at
+25 in a warm color, and solari robot_01's material at 1, which the example puts out in code as it
+traces it, its robot's light set in code at a weight of 0. The first four move by the camera's
+exposure, 1/998 at the EV 9.7 each camera stands at, and solari does not move. Each of the four was
+tuned by eye against the unexposed value, so each gives its glTF material its strength in nits, the
+panel 100,000, the lava 20,000, the water 1,000 and the filament 25,000, 12,500 and 6,250, each
+within 0.3% of 998 times the file's. Captured on the mended bridge, with the file's value at a
+weight of 0 standing for before, the mean luma goes from 53.5, 60.7, 176.4 and 47.3 to 53.1, 59.3,
+171.5 and 47.2 at the file's strength, and reads 53.5, 60.7, 176.4 and 47.3 at the strengths in
+nits, no more than 0.06% of the pixels past 8 levels. The four pictures and their gallery's are
+retaken, lightmaps' the same byte for byte, and `build/examples-table.py --check` passes. The sheet
+is `2026-11-17-item-149-examples.webp`.
+
+`GlobalIlluminationTests.AGltfPanelLightsTheFloorUnderItAsItsClosedForm` writes a glTF of one panel
+0.3 square and a millimeter thick, every face emitting 4,000 nits, and reads the floor of the
+level's white under its middle at 0.5, 1 and 2 m against E = 4 L t atan(t), where t = a / sqrt(1 +
+a²) and a = s / d, in the picture's light at EV 9.7. Without the mend it read 969, 1,005 and 993
+times its closed form and failed, and with it 0.966, 1.007 and 0.995.
+
+The feature test's day is held at EV 9.7 and its night at a moonlit ground's ISO 3200, 1/15 s and
+f/1.4, EV -0.12, from 18:45 to 5:30, set from the C# side in Applied.cs. By night DayNight takes the
+sun, the moon, the ambient light and the night sky's and the dusk sky's nits down by 1/905, what
+that lens takes the picture up by, so the moon gives 0.99 lux and the night ambient 0.022, and they
+read as before. The Bistro's fitting holds a lamp-lit street's ISO 3200, 1/60 s and f/2.8, EV 3.88,
+while the eye is within 500 m of its place at a night hour, and the moonlit ground's lens comes back
+as the eye leaves or the pack is taken away. The guide's paragraph on the feature test's day names
+both.
+
+The lit rooms' lamps are numbers set against EV 9.7, which the night's lens shows some 905 times as
+bright, blown out. Setting them is a later item. Each is here with its light at its floor and a real
+lamp of its kind beside it.
+
+| Lamp | Set | At its floor | A real lamp of its kind |
+|---|---|---|---|
+| The hall's three aisle lamps | 60,000 lm, 5.1 m up | 184 lux | 6,000 lm, 18 lux |
+| Red, green and blue | 250,000 lm each, 3.6 m up | 1,535 lux | a stage lamp's 10,000 lm, 61 lux |
+| Spot through a cookie | 900,000 lm, 7.9 m from the wall | 1,148 lux on the wall | 20,000 lm, 26 lux |
+| The panel bay's light | 400,000 lm, 5.2 m up | 1,177 lux | 3,000 lm, 9 lux |
+| The panel bay's panel, 1.6 m square | 30,000 nits, 5.4 m up | 2,450 lux | an office panel's 3,500 nits, 290 lux |
+| Spot into the fog | 1,200,000 lm, 5.3 m up | 3,400 lux | 20,000 lm, 57 lux |
+| The probe and decal bays' lights | 300,000 lm each, 4.9 m up | 994 lux | 3,000 lm, 10 lux |
+| The neon bay's two lights | 30,000 lm each, 2 and 3.6 m up | 597 and 184 lux | a neon tube's 300 lm, 6 and 2 lux |
+| The Cornell box's light | 120,000 lm, 4.6 m up | 451 lux | 3,000 lm, 11 lux |
+| The Cornell box's panel, 1.2 m square | 40,000 nits, 4.9 m up | 2,210 lux | an office panel's 3,500 nits, 204 lux |
+
+At noon the light hall's eight bays read the same to a tenth before and after. The render gallery's
+room and Cornell box read 156.9 and 189.2 before and 169.8 and 206.5 after, the first session's
+weather still easing to clear under cloud there, and 169.7 and 206.5 again in a third session, and
+both are made in code, which the mend leaves as it was. Sponza reads 184.9 and 180.6 outside its
+door, 28.9 and 27.0 in its hall and 74.8 and 75.0 in its gallery, its light_bulb's emission of 1,
+which entered the cascades unexposed, gone.
+
+The Bistro's Emissive_StreetLight is 10,000, its texture's mean linear luminance of 0.42 making the
+glass 4,200 nits and a lantern of 0.61 m² of glass about 8,000 lumens, a street lamp's, and the
+spotlights, string lights and signs keep 500, 200 and 100. BUILDING.md gives the Bistro's three
+commands and a table of the strengths with their reasons. The pack is 310,838,883 bytes, SHA-256
+a93668915528079d60632c4cc25ac6a857394d9c58da012d895b9bf00bd07947, which the manifest names. At 23:00
+the street reads a mean luma of 88.0 with the moon and 87.9 without under its lens, where it read
+95.1 and 92.0 unmended and 213.5 under the moonlit ground's lens. The sheet is
+`2026-11-17-item-149-bistro-street-lens.webp`. Read from the render's light over the paving
+texture's mean albedo, the moon out, the cobbles 2 m off a street lantern take 91 lux, where its
+glass gives 16 in closed form and every lamp's 37, and the bricks under a wall lantern take 86 lux,
+where its glass gives 58 and every lamp's 97. The six wall lanterns share the material, so each
+gives about 58 lux under it, some three times a wall lamp's 1,000 lumens 2 m up, which a material of
+their own would mend, not made in this item. The path-traced reference read NaN on the blend-shader
+paving, so it stands beside neither reading.
+
+A finding, not mended here. Global illumination carries a lantern as its box, every face emitting by
+the share of the box its glass makes. The street lantern's four upright panels make 0.91 of its box,
+so the box's lower face, which the lantern lacks, gives the cobbles 2 m off 15.9 lux of the box's
+34, about twice the glass's 16. Under the wall lantern the box gives 56 against the glass's 58.
+
+Shared: a glTF material's emission is read as nits and exposed here, drawn and in the cascades, as
+3DEngine reads it, and the Bistro's pack gives its street lantern 10,000 for the sibling's pack to
+follow.
+
+The whole suite passed from one tree, 2,175 passed, 0 failed and 4 skipped, 2,179 in all where the
+listing is 2,168, the solution built from nothing with warnings as errors, in 15 parts and the rest
+dealt by the last run's times, each part of 2 m 15 s to 5 m 21 s, a part at a time under the GPU
+lock.
+
+NormTests passed, 19.
 
 ## Items closed, parked or shortened
 

@@ -1,12 +1,12 @@
 // Stamps the boxes of the meshes that moved into the field the shaders read, a workgroup a brick of
 // 4 by 4 by 4 cells. Each cell takes the least of its distance in the field the still meshes make
-// and its distance to each box that comes within its brick, a box around a mesh in its own space, so
-// a brick stamped last frame and not this one goes back to what the still meshes make. A brick reads
-// the boxes of its own run alone, so a frame's cost grows with the boxes of each brick and not with
-// every box the frame stamps. Each cell is painted the color of the nearer surface, the still
-// meshes' or a box's, with that surface's face, as the build paints a cell its nearest triangle's,
-// so indirect light from a moving mesh takes its color, and a cell a box painted takes the still
-// meshes' color again once the box has left.
+// and its distance to each box that comes within its brick, a box around a mesh in its own space,
+// so a brick stamped last frame and not this one goes back to what the still meshes make. A brick
+// reads the boxes of its own run alone, so a frame's cost grows with the boxes of each brick and
+// not with every box the frame stamps. Each cell is painted the color of the nearer surface, the
+// still meshes' or a box's, with that surface's face and the share of its light it sends through,
+// as the build paints a cell its nearest triangle's, so indirect light from a moving mesh takes its
+// color, and a cell a box painted takes the still meshes' color again once the box has left.
 //
 // The still images are read as textures, since an image of half floats or of bytes is written here
 // and not read and written at once.
@@ -26,7 +26,8 @@ struct FieldShape
     // rgb: the mesh's color, linear. w: the share of light that passes a unit of its depth
     // (lightThroughPaint in bcs_field.slang).
     float4 color;
-    // xyz: the mesh's perceptual roughness, metallic share and reflectance.
+    // xyz: the mesh's perceptual roughness, metallic share and reflectance. w: the share of its
+    // diffuse light it sends through to its far side, its diffuse transmission.
     float4 gloss;
 };
 
@@ -41,12 +42,14 @@ Texture3D<float> still_field;
 
 [format("r16f")] RWTexture3D<float> field;
 
-// The colors and the faces the still meshes paint, as field_resolve.slang wrote them, and those the
-// passes read.
+// The colors, the faces and the shares sent through the still meshes paint, as field_resolve.slang
+// wrote them, and those the passes read.
 Texture3D<float4> still_paint;
 Texture3D<uint> still_faces;
+Texture3D<float> still_transmission;
 [format("rgba8")] RWTexture3D<float4> albedo_field;
 [format("r32ui")] RWTexture3D<uint> face_field;
+[format("r16f")] RWTexture3D<float> transmission_field;
 
 StructuredBuffer<FieldInfo> info;
 
@@ -77,6 +80,7 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
     float nearest = abs(d);
     float4 paint = still_paint.Load(int4(int3(at), 0));
     uint face = still_faces.Load(int4(int3(at), 0));
+    float sends = still_transmission.Load(int4(int3(at), 0));
     for (uint i = 0; i < brick.w; i++)
     {
         uint run = stamp_counts.x * 4u + brick.z + i;
@@ -95,9 +99,11 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
             int axis = q.x >= q.y && q.x >= q.z ? 0 : q.y >= q.z ? 1 : 2;
             float3 outward = float3(axis == 0 ? sign(own.x) : 0.0, axis == 1 ? sign(own.y) : 0.0, axis == 2 ? sign(own.z) : 0.0);
             face = faceBits(normalize(shape.row0.xyz * outward.x + shape.row1.xyz * outward.y + shape.row2.xyz * outward.z)) | glossBits(shape.gloss.xyz);
+            sends = saturate(shape.gloss.w);
         }
     }
     field[at] = d;
     albedo_field[at] = paint;
     face_field[at] = face;
+    transmission_field[at] = sends;
 }

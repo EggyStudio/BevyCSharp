@@ -10,6 +10,10 @@
 //! asset until Bevy says it changed or went. A color's mean is its linear light where its format is
 //! sRGB, and a map's, as a metallic and roughness map is, its levels as they are.
 //!
+//! A material's diffuse transmission is a factor times its texture's alpha, and the share the field
+//! carries is that alpha's mean over the texels its base color shows, since a leaf's card lets its
+//! light through only where the leaf is (`alpha_where`).
+//!
 //! The mean is taken over the level of the image's mipmaps of 64 texels a side or fewer where it
 //! has one, and over 64 texels along each row and column of the level it stops at otherwise, so a
 //! large texture costs no more than a small one. The formats read are those of eight bits a channel
@@ -26,9 +30,13 @@ use bevy::render::render_resource::{TextureDataOrder, TextureFormat};
 #[cfg(test)]
 mod tests;
 
-/// Each image's mean by its asset, measured once, none where its format or data is not read.
+/// Each image's mean by its asset, measured once, none where its format or data is not read, and
+/// each image's alpha over the texels another shows (`alpha_where`), by the two and the cutoff.
 #[derive(Default)]
-pub struct TextureMeans(HashMap<AssetId<Image>, Option<Mean>>);
+pub struct TextureMeans {
+    means: HashMap<AssetId<Image>, Option<Mean>>,
+    shares: HashMap<(AssetId<Image>, AssetId<Image>, Option<u32>), Option<f32>>,
+}
 
 /// A texture's mean, from 0 to 1 a channel, of every texel alike and of each texel by its alpha.
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -41,18 +49,32 @@ impl TextureMeans {
     /// The mean of an image, measured the first time it is asked for once the image has loaded, and
     /// none while it loads.
     pub fn of(&mut self, images: Option<&Assets<Image>>, id: AssetId<Image>) -> Option<Mean> {
-        if let Some(&kept) = self.0.get(&id) {
+        if let Some(&kept) = self.means.get(&id) {
             return kept;
         }
         let image = images?.get(id)?;
         let mean = mean_of(image);
-        self.0.insert(id, mean);
+        self.means.insert(id, mean);
         mean
     }
 
-    /// Forgets an image's mean, so it is measured again as it next loads.
+    /// The mean of an image's alpha over the texels another shows (`alpha_where`), measured the first
+    /// time it is asked for once both have loaded, and none while either loads.
+    pub fn alpha_where(&mut self, images: Option<&Assets<Image>>, id: AssetId<Image>, shown: AssetId<Image>, cutoff: Option<f32>) -> Option<f32> {
+        let key = (id, shown, cutoff.map(f32::to_bits));
+        if let Some(&kept) = self.shares.get(&key) {
+            return kept;
+        }
+        let images = images?;
+        let share = alpha_where(images.get(id)?, images.get(shown)?, cutoff);
+        self.shares.insert(key, share);
+        share
+    }
+
+    /// Forgets what was measured of an image, so it is measured again as it next loads.
     pub fn forget(&mut self, id: AssetId<Image>) {
-        self.0.remove(&id);
+        self.means.remove(&id);
+        self.shares.retain(|&(image, shown, _), _| image != id && shown != id);
     }
 }
 
@@ -128,65 +150,121 @@ fn linear(level: u8) -> f32 {
     if v <= 0.04045 { v / 12.92 } else { ((v + 0.055) / 1.055).powf(2.4) }
 }
 
-/// An image's mean, none where its format is not read or its data is not kept.
-pub fn mean_of(image: &Image) -> Option<Mean> {
-    let data = image.data.as_ref()?;
-    let (kind, srgb) = kind_of(image.texture_descriptor.format)?;
-    let size = image.texture_descriptor.size;
-    let (width, height) = (size.width as usize, size.height as usize);
-    let levels = image.texture_descriptor.mip_level_count.max(1) as usize;
-    // Layer by layer each level of the first layer follows the one above it, and level by level
-    // each level of every layer does.
-    let layers = match image.data_order {
-        TextureDataOrder::LayerMajor => 1,
-        _ => size.depth_or_array_layers.max(1) as usize,
-    };
-    let (mut level, mut start) = (0, 0);
-    while level + 1 < levels && (width >> level).max(height >> level) > 64 {
-        start += kind.bytes((width >> level).max(1), (height >> level).max(1)) * layers;
-        level += 1;
-    }
-    let (w, h) = ((width >> level).max(1), (height >> level).max(1));
-    let texels = data.get(start..start + kind.bytes(w, h))?;
+/// The level of an image's mipmaps a mean is taken over, the one of 64 texels a side or fewer where
+/// it has one and the largest otherwise, read a texel at a time.
+struct Level<'a> {
+    kind: Kind,
+    srgb: bool,
+    width: usize,
+    height: usize,
+    texels: &'a [u8],
+    // The block read last, by its place, since the texels read lie row by row.
+    kept: (usize, [[u8; 4]; 16]),
+}
 
-    // At most 64 texels along each row and column, each in the middle of its share.
-    let (across, down) = (w.min(64), h.min(64));
-    let (mut all, mut solid, mut covered) = ([0f32; 3], [0f32; 3], 0f32);
-    let mut kept = (usize::MAX, [[0u8; 4]; 16]);
-    for row in 0..down {
-        let y = (2 * row + 1) * h / (2 * down);
-        for column in 0..across {
-            let x = (2 * column + 1) * w / (2 * across);
-            let texel = match kind {
-                Kind::Texels(order, size) => {
-                    let at = (y * w + x) * size;
-                    order.map(|channel| if channel == NONE { 0 } else { texels[at + channel] })
-                }
-                _ => {
-                    let block = (y / 4) * w.div_ceil(4) + x / 4;
-                    if kept.0 != block {
-                        let bytes = kind.bytes(4, 4);
-                        kept = (block, kind.block(&texels[block * bytes..(block + 1) * bytes]));
-                    }
-                    kept.1[(y % 4) * 4 + x % 4]
-                }
-            };
-            let alpha = match kind {
-                Kind::Texels(order, _) if order[3] == NONE => 1.0,
-                _ => f32::from(texel[3]) / 255.0,
-            };
-            for channel in 0..3 {
-                let value = if srgb { linear(texel[channel]) } else { f32::from(texel[channel]) / 255.0 };
-                all[channel] += value;
-                solid[channel] += value * alpha;
+impl<'a> Level<'a> {
+    /// The level of an image, none where its format is not read or its data is not kept.
+    fn of(image: &'a Image) -> Option<Self> {
+        let data = image.data.as_ref()?;
+        let (kind, srgb) = kind_of(image.texture_descriptor.format)?;
+        let size = image.texture_descriptor.size;
+        let (width, height) = (size.width as usize, size.height as usize);
+        let levels = image.texture_descriptor.mip_level_count.max(1) as usize;
+        // Layer by layer each level of the first layer follows the one above it, and level by level
+        // each level of every layer does.
+        let layers = match image.data_order {
+            TextureDataOrder::LayerMajor => 1,
+            _ => size.depth_or_array_layers.max(1) as usize,
+        };
+        let (mut level, mut start) = (0, 0);
+        while level + 1 < levels && (width >> level).max(height >> level) > 64 {
+            start += kind.bytes((width >> level).max(1), (height >> level).max(1)) * layers;
+            level += 1;
+        }
+        let (width, height) = ((width >> level).max(1), (height >> level).max(1));
+        let texels = data.get(start..start + kind.bytes(width, height))?;
+        Some(Self { kind, srgb, width, height, texels, kept: (usize::MAX, [[0; 4]; 16]) })
+    }
+
+    /// The places of at most 64 texels along each row and column, each in the middle of its share,
+    /// row by row.
+    fn places(&self) -> impl Iterator<Item = (usize, usize)> + use<> {
+        let (width, height) = (self.width, self.height);
+        let (across, down) = (width.min(64), height.min(64));
+        (0..down).flat_map(move |row| (0..across).map(move |column| ((2 * column + 1) * width / (2 * across), (2 * row + 1) * height / (2 * down))))
+    }
+
+    /// The texel at a place, red, green, blue and alpha from 0 to 255, a channel the format lacks
+    /// reading 0 and its alpha 255.
+    fn texel(&mut self, x: usize, y: usize) -> [u8; 4] {
+        match self.kind {
+            Kind::Texels(order, size) => {
+                let at = (y * self.width + x) * size;
+                order.map(|channel| if channel == NONE { 0 } else { self.texels[at + channel] })
             }
-            covered += alpha;
+            kind => {
+                let block = (y / 4) * self.width.div_ceil(4) + x / 4;
+                if self.kept.0 != block {
+                    let bytes = kind.bytes(4, 4);
+                    self.kept = (block, kind.block(&self.texels[block * bytes..(block + 1) * bytes]));
+                }
+                self.kept.1[(y % 4) * 4 + x % 4]
+            }
         }
     }
-    let count = (across * down) as f32;
+
+    /// The texel at a place as light or as levels from 0 to 1, red, green and blue, and its alpha.
+    fn read(&mut self, x: usize, y: usize) -> ([f32; 3], f32) {
+        let texel = self.texel(x, y);
+        let alpha = match self.kind {
+            Kind::Texels(order, _) if order[3] == NONE => 1.0,
+            _ => f32::from(texel[3]) / 255.0,
+        };
+        let srgb = self.srgb;
+        (std::array::from_fn(|channel| if srgb { linear(texel[channel]) } else { f32::from(texel[channel]) / 255.0 }), alpha)
+    }
+}
+
+/// An image's mean, none where its format is not read or its data is not kept.
+pub fn mean_of(image: &Image) -> Option<Mean> {
+    let mut level = Level::of(image)?;
+    let (mut all, mut solid, mut covered, mut count) = ([0f32; 3], [0f32; 3], 0f32, 0f32);
+    for (x, y) in level.places() {
+        let (color, alpha) = level.read(x, y);
+        for channel in 0..3 {
+            all[channel] += color[channel];
+            solid[channel] += color[channel] * alpha;
+        }
+        covered += alpha;
+        count += 1.0;
+    }
     let all = all.map(|sum| sum / count);
     let solid = if covered > 0.0 { solid.map(|sum| sum / covered) } else { all };
     Some(Mean { all, solid })
+}
+
+/// The mean of an image's alpha over the texels another shows, as a diffuse transmission texture's
+/// over the leaf its base color cuts out of its card, each of the other's texels read beside the
+/// image's texel at the same place, where its alpha is `cutoff` or more, or by its alpha where there
+/// is no cutoff, as a blended surface shows it. None where either is not read or the other shows
+/// nothing.
+pub fn alpha_where(image: &Image, shown: &Image, cutoff: Option<f32>) -> Option<f32> {
+    let (mut level, mut over) = (Level::of(image)?, Level::of(shown)?);
+    let (mut sum, mut weight) = (0f32, 0f32);
+    for (x, y) in over.places() {
+        let (_, shows) = over.read(x, y);
+        let by = match cutoff {
+            Some(cutoff) => f32::from(u8::from(shows >= cutoff)),
+            None => shows,
+        };
+        if by > 0.0 {
+            let (u, v) = ((x * 2 + 1) as f32 / (2 * over.width) as f32, (y * 2 + 1) as f32 / (2 * over.height) as f32);
+            let at = (((u * level.width as f32) as usize).min(level.width - 1), ((v * level.height as f32) as usize).min(level.height - 1));
+            sum += level.read(at.0, at.1).1 * by;
+            weight += by;
+        }
+    }
+    (weight > 0.0).then(|| sum / weight)
 }
 
 /// Sixteen texels of a BC1 block, eight bytes, red, green, blue and alpha from 0 to 255 row by row.

@@ -53,7 +53,8 @@ pub struct BcsFieldDraw {
     /// The material's gloss, its perceptual roughness, its metallic share and its reflectance,
     /// Bevy's defaults of 0.5, 0 and 0.5 for a material the bridge cannot read, which the field
     /// paints beside each face so a probe's ray lights what it meets by its gloss as well as its
-    /// color.
+    /// color, and in its fourth channel the share of its diffuse light it sends through to its far
+    /// side, its diffuse transmission, none for a material the bridge cannot read.
     pub gloss: [f32; 4],
 }
 
@@ -380,11 +381,12 @@ mod built {
     /// A mesh drawn with the standard material, or with one of the trees' materials built over it,
     /// the leaves' and the bark's, is painted its base color times its texture's mean, or times its
     /// field color where it has one, its roughness, metal and emission times their textures' means
-    /// alike (`field_means`), and lets through the share its material was given. A tree's impostor is left out, its
-    /// one quad standing for the whole tree only as it is drawn. A mesh with a visibility range is
-    /// taken where the eye the field lies around stands within it, as Bevy draws it for that eye,
-    /// since its visibility range hides it from each view and not from what it inherits, and a
-    /// planted tree's every level stood in the field at once.
+    /// alike (`field_means`), sends through to its far side the share its diffuse transmission and
+    /// its texture give, and lets through the share its material was given. A tree's impostor is
+    /// left out, its one quad standing for the whole tree only as it is drawn. A mesh with a
+    /// visibility range is taken where the eye the field lies around stands within it, as Bevy
+    /// draws it for that eye, since its visibility range hides it from each view and not from what
+    /// it inherits, and a planted tree's every level stood in the field at once.
     pub fn gather(world: &mut World, out: &mut [BcsFieldDraw]) -> (usize, BcsFieldEye) {
         use bevy::camera::primitives::Aabb;
         use bevy::camera::visibility::InheritedVisibility;
@@ -508,11 +510,28 @@ mod built {
                     let [tr, tg, tb] = glowing.unwrap_or([1.0; 3]);
                     [r * shown * tr, g * shown * tg, b * shown * tb, 0.0]
                 });
+                // The share of its diffuse light the material sends through to its far side, its
+                // diffuse transmission times its texture's alpha over the texels its base color
+                // shows, every one of them where it cuts nothing, as Bevy lights a leaf's back where
+                // the leaf is.
+                let transmission = standard.map_or(0.0, |standard| {
+                    let cutoff = match standard.alpha_mode {
+                        bevy::material::AlphaMode::Opaque => Some(0.0),
+                        bevy::material::AlphaMode::Mask(cutoff) => Some(cutoff),
+                        _ => None,
+                    };
+                    let share = standard.diffuse_transmission_texture.as_ref().and_then(|texture| {
+                        let shown = standard.base_color_texture.as_ref().unwrap_or(texture);
+                        let cutoff = if shown == texture { Some(0.0) } else { cutoff };
+                        meshes.means.alpha_where(images, texture.id(), shown.id(), cutoff)
+                    });
+                    standard.diffuse_transmission * share.unwrap_or(1.0)
+                });
                 // Green the roughness and blue the metal, as a glTF metallic and roughness map holds
                 // them.
                 let [_, rough, metal] = surfaced.unwrap_or([1.0; 3]);
                 let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| {
-                    [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, 0.0]
+                    [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, transmission]
                 });
                 let open = standard.is_some_and(|standard| standard.double_sided || standard.cull_mode.is_none());
                 // The surface an emitter emits from, read once a generation and for an emitter

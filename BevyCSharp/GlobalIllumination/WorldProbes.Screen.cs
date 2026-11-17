@@ -238,7 +238,7 @@ internal static partial class WorldProbes
         var (field, info, albedo, faces, glow) = (SceneField.Image, SceneField.InfoBuffer, SceneField.Albedo, SceneField.Faces, SceneField.Glow);
         ReadOnlySpan<uint> texels = [(uint)made.Texels[0], cascades > 1 ? (uint)made.Texels[1] : 0, SceneField.LightThrough ? 1u : 0u, LoggedScreenPixel];
         _screenTrace.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
-            .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_glow", glow)
+            .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_transmission", SceneField.Transmission).SetTexture("scene_glow", glow)
             .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows).SetBuffer("ray_log", _screenRayLog)
             .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach).SetTexture("probe_ways", made.Ways)
             .SetTexture("merged_first", made.Merged[0]).SetTexture("merged_second", made.Merged[Math.Min(1, cascades - 1)])

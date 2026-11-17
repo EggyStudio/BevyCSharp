@@ -49,7 +49,9 @@ internal unsafe struct NativeFieldDraw
 
     /// <summary>
     /// The material's perceptual roughness, metallic share and reflectance, Bevy's defaults of 0.5,
-    /// 0 and 0.5 where the bridge cannot read the material.
+    /// 0 and 0.5 where the bridge cannot read the material, and the share of its diffuse light it
+    /// sends through to its far side, its diffuse transmission, none where the bridge cannot read
+    /// it.
     /// </summary>
     [FieldOffset(128)] public fixed float Gloss[4];
 }

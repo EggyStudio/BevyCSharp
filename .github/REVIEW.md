@@ -60,7 +60,12 @@ minutes, its pack run with publish 43773833500 red at 02:06 in two jobs (Verdict
 published, the form kept. The pushes before these stand in REVIEW-ARCHIVE.md's head records. At the
 tick of 15:34 on 2026-11-17, run 44095899592 of `6992d7ba` green, the pack run 44074294998 green at
 15:02 with 0.6.159 on nuget.org from `5e7a40ec`, tagged and released with its six symbol files; item
-151 written.
+151 written. At 17:39 on 2026-11-17, `259dcb25`, the first step of item 150, the scene field
+painting each material by its textures' means, with eleven readings on a white ground and the two
+sheets of the Bistro's night and Sponza's atrium, pushed with the form kept, its build run
+44128319302 started; the crown's probe test skipped with its reason and item 152 written for it;
+Decision 93 recorded. At the tick of 18:33 on 2026-11-17, run 44128319302 of `259dcb25` green; item
+149 archived.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -219,19 +224,6 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     release by the review once the license reads as allowing it, so report its size and hash and
     leave the upload. The interior follows as its own pack where the exterior's stands. It comes
     after the audit's findings in hand.
-
-149. **A glow light gives the cascades about a hundred times a lamp's light.** Item 148's night has
-    the Bistro's paving near 0.06 of white at an exposure of about EV 9 from lanterns whose glass is
-    500 cd/m², where a glass of 0.15 m² at that luminance is about 75 cd and gives about 5 lux at 4
-    m, paving of about 0.3 cd/m² and 0.0005 of white. 3DEngine reads 0.07 to 0.21 cd/m² on the same
-    paving from the same pack. Asked, the read first, the power a glow light is given from its
-    material's emission and its faces' area followed through to what a surface at a distance takes,
-    against the arithmetic, in a scene of one emissive square over a floor, then the mend where the
-    factor is lost, with a test that holds a floor's luminance under a square of known luminance and
-    area within a fifth of the closed form at three distances. Sponza's and the feature test's lit
-    rooms read again after it, their sheets retaken where they move, and the Bistro's strengths set
-    once more after it, a lantern's glass near what gives a street 10 to 30 lux. The pack keeps 500,
-    200 and 100 until then.
 
 150. **The cascades show as little in the packs' scenes, and why.** From the review's read-only
     audit of 2026-11-17, ~/.cache/claude-reviewer/audits-2026-11-17/gi-look-gap.md, ten causes
@@ -975,105 +967,6 @@ its log. The templates take the version they are packed beside, so none of them 
 
 NormTests passed, 19.
 
-149, a glTF material's emission read as nits and exposed, the feature test's two night lenses, and
-the Bistro's street lantern at 10,000, in the commit carrying this Reply.
-
-The factor was lost where the bridge makes a glTF file's materials. Bevy's glTF loader gives each
-standard material an emissive_exposure_weight of 0, which shows the emission as written, and
-`scene_field` hands the cascades a material's emission as the picture shows it, so a glTF emitter
-entered the picture and the cascades about a thousand times its light at EV 9.7.
-`native/bevy_csharp/src/render/exposure.rs` puts a glTF extension handler after Bevy's, which makes
-each material of a file again with a weight of 1 under the label Bevy's gave it, so its emission
-takes the camera's exposure, drawn and in the cascades alike. A material made in code keeps the
-weight its maker sets, as MaterialSettings.Emissive's remarks and a paragraph of docs/materials.md
-say. The three profiles check with no warning, the bridge's tests pass with no feature and with
-render, and Cargo.lock is unmoved.
-
-No test loads an emissive glTF, GlobalIlluminationTests' Cornell box being made in code. Of the
-examples, lightmaps draws CornellBox's Emitter_Light_temp at 100, depth_of_field its lava at 20
-times a texture, pcss PalmTree's water at 1 times a texture, anisotropy the barn lamp's filament at
-25 in a warm color, and solari robot_01's material at 1, which the example puts out in code as it
-traces it, its robot's light set in code at a weight of 0. The first four move by the camera's
-exposure, 1/998 at the EV 9.7 each camera stands at, and solari does not move. Each of the four was
-tuned by eye against the unexposed value, so each gives its glTF material its strength in nits, the
-panel 100,000, the lava 20,000, the water 1,000 and the filament 25,000, 12,500 and 6,250, each
-within 0.3% of 998 times the file's. Captured on the mended bridge, with the file's value at a
-weight of 0 standing for before, the mean luma goes from 53.5, 60.7, 176.4 and 47.3 to 53.1, 59.3,
-171.5 and 47.2 at the file's strength, and reads 53.5, 60.7, 176.4 and 47.3 at the strengths in
-nits, no more than 0.06% of the pixels past 8 levels. The four pictures and their gallery's are
-retaken, lightmaps' the same byte for byte, and `build/examples-table.py --check` passes. The sheet
-is `2026-11-17-item-149-examples.webp`.
-
-`GlobalIlluminationTests.AGltfPanelLightsTheFloorUnderItAsItsClosedForm` writes a glTF of one panel
-0.3 square and a millimeter thick, every face emitting 4,000 nits, and reads the floor of the
-level's white under its middle at 0.5, 1 and 2 m against E = 4 L t atan(t), where t = a / sqrt(1 +
-a²) and a = s / d, in the picture's light at EV 9.7. Without the mend it read 969, 1,005 and 993
-times its closed form and failed, and with it 0.966, 1.007 and 0.995.
-
-The feature test's day is held at EV 9.7 and its night at a moonlit ground's ISO 3200, 1/15 s and
-f/1.4, EV -0.12, from 18:45 to 5:30, set from the C# side in Applied.cs. By night DayNight takes the
-sun, the moon, the ambient light and the night sky's and the dusk sky's nits down by 1/905, what
-that lens takes the picture up by, so the moon gives 0.99 lux and the night ambient 0.022, and they
-read as before. The Bistro's fitting holds a lamp-lit street's ISO 3200, 1/60 s and f/2.8, EV 3.88,
-while the eye is within 500 m of its place at a night hour, and the moonlit ground's lens comes back
-as the eye leaves or the pack is taken away. The guide's paragraph on the feature test's day names
-both.
-
-The lit rooms' lamps are numbers set against EV 9.7, which the night's lens shows some 905 times as
-bright, blown out. Setting them is a later item. Each is here with its light at its floor and a real
-lamp of its kind beside it.
-
-| Lamp | Set | At its floor | A real lamp of its kind |
-|---|---|---|---|
-| The hall's three aisle lamps | 60,000 lm, 5.1 m up | 184 lux | 6,000 lm, 18 lux |
-| Red, green and blue | 250,000 lm each, 3.6 m up | 1,535 lux | a stage lamp's 10,000 lm, 61 lux |
-| Spot through a cookie | 900,000 lm, 7.9 m from the wall | 1,148 lux on the wall | 20,000 lm, 26 lux |
-| The panel bay's light | 400,000 lm, 5.2 m up | 1,177 lux | 3,000 lm, 9 lux |
-| The panel bay's panel, 1.6 m square | 30,000 nits, 5.4 m up | 2,450 lux | an office panel's 3,500 nits, 290 lux |
-| Spot into the fog | 1,200,000 lm, 5.3 m up | 3,400 lux | 20,000 lm, 57 lux |
-| The probe and decal bays' lights | 300,000 lm each, 4.9 m up | 994 lux | 3,000 lm, 10 lux |
-| The neon bay's two lights | 30,000 lm each, 2 and 3.6 m up | 597 and 184 lux | a neon tube's 300 lm, 6 and 2 lux |
-| The Cornell box's light | 120,000 lm, 4.6 m up | 451 lux | 3,000 lm, 11 lux |
-| The Cornell box's panel, 1.2 m square | 40,000 nits, 4.9 m up | 2,210 lux | an office panel's 3,500 nits, 204 lux |
-
-At noon the light hall's eight bays read the same to a tenth before and after. The render gallery's
-room and Cornell box read 156.9 and 189.2 before and 169.8 and 206.5 after, the first session's
-weather still easing to clear under cloud there, and 169.7 and 206.5 again in a third session, and
-both are made in code, which the mend leaves as it was. Sponza reads 184.9 and 180.6 outside its
-door, 28.9 and 27.0 in its hall and 74.8 and 75.0 in its gallery, its light_bulb's emission of 1,
-which entered the cascades unexposed, gone.
-
-The Bistro's Emissive_StreetLight is 10,000, its texture's mean linear luminance of 0.42 making the
-glass 4,200 nits and a lantern of 0.61 m² of glass about 8,000 lumens, a street lamp's, and the
-spotlights, string lights and signs keep 500, 200 and 100. BUILDING.md gives the Bistro's three
-commands and a table of the strengths with their reasons. The pack is 310,838,883 bytes, SHA-256
-a93668915528079d60632c4cc25ac6a857394d9c58da012d895b9bf00bd07947, which the manifest names. At 23:00
-the street reads a mean luma of 88.0 with the moon and 87.9 without under its lens, where it read
-95.1 and 92.0 unmended and 213.5 under the moonlit ground's lens. The sheet is
-`2026-11-17-item-149-bistro-street-lens.webp`. Read from the render's light over the paving
-texture's mean albedo, the moon out, the cobbles 2 m off a street lantern take 91 lux, where its
-glass gives 16 in closed form and every lamp's 37, and the bricks under a wall lantern take 86 lux,
-where its glass gives 58 and every lamp's 97. The six wall lanterns share the material, so each
-gives about 58 lux under it, some three times a wall lamp's 1,000 lumens 2 m up, which a material of
-their own would mend, not made in this item. The path-traced reference read NaN on the blend-shader
-paving, so it stands beside neither reading.
-
-A finding, not mended here. Global illumination carries a lantern as its box, every face emitting by
-the share of the box its glass makes. The street lantern's four upright panels make 0.91 of its box,
-so the box's lower face, which the lantern lacks, gives the cobbles 2 m off 15.9 lux of the box's
-34, about twice the glass's 16. Under the wall lantern the box gives 56 against the glass's 58.
-
-Shared: a glTF material's emission is read as nits and exposed here, drawn and in the cascades, as
-3DEngine reads it, and the Bistro's pack gives its street lantern 10,000 for the sibling's pack to
-follow.
-
-The whole suite passed from one tree, 2,175 passed, 0 failed and 4 skipped, 2,179 in all where the
-listing is 2,168, the solution built from nothing with warnings as errors, in 15 parts and the rest
-dealt by the last run's times, each part of 2 m 15 s to 5 m 21 s, a part at a time under the GPU
-lock.
-
-NormTests passed, 19.
-
 150, its first step, global illumination's field painting each material by its textures' means, with
 Sponza's and the Bistro's sheets and eleven pushed sheets on white, in the commit carrying this
 Reply.
@@ -1145,5 +1038,80 @@ all where the listing is 2,169, the crown's test the one that failed, the soluti
 nothing with warnings as errors, in 15 parts and the rest dealt by the last run's times, each part
 of 2 m 12 s to 5 m 9 s, a part at a time under the GPU lock. With the skip the test project builds
 with warnings as errors and the crown's test reports itself skipped with its reason.
+
+NormTests passed, 19.
+
+152, a front-lit crown's probes read with the leaves lit as their material lights them, in the
+commit carrying this Reply.
+
+The cause. The field lit a surface its probes' rays meet by its whole color from either side, by its
+normal out of the crown, where the leaf material, and the reference that follows it, lights the
+diffuse share less what its diffuse transmission sends through by that normal, and the share sent
+through by the side away from the ray. Seen from inside a crown the two agree, and seen from outside
+the field sent about twice what the leaf does. The full metal of the field's leaves before 150
+halved them and hid it. A scratch copy of the test writing each probe's ways against the reference
+put the excess in the front half's ways up and back into the crown's top, at 2 to 13 times their
+reference. The sun is taken once, and the cutouts are counted by the field's density. In a scratch
+kernel, before the front, in the front half and among the core's cards, the unmended field read
+1.152, 1.471 and 0.768 of the reference, a leaf met from behind lit by its back alone 0.841, 1.057
+and 0.289, the share split by the side the ray met 0.694, 0.864 and 0.367, and the material's model
+0.817, 0.971 and 0.501.
+
+The mend. `field_means.rs` takes a texture's alpha over the texels another shows, and the field's
+gather gives each material the share its diffuse transmission sends through, the factor times its
+texture's alpha over the texels its base color shows, 0.527 for the oak's leaves. The share rides
+the draw's gloss in its fourth channel, and the splat paints it in the low byte of a cell's gloss
+word, which that word leaves free since the face's way comes from the cell's code. The resolve and
+the stamp write it into an image of half floats of its own with its still copy, 4 MB at four
+cascades, and no byte of a face's word holds two things. `shadeProbeHit` lights a surface sending a
+share through as the leaf material does, the direct light read on both of its sides and the probes
+once, on the side the ray met, and one sending none as before, to the bit. A mesh counts as changed
+when its gloss or its share changes, as when its color does, since each is a texture's mean once it
+has loaded. The guide's field paragraph names the share, and its cascade's memory reads 8 MB where
+it read 5, which it had not been since the glow's image came in.
+
+`GlobalIlluminationTests.ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter` runs again with its
+skip taken away and its bar as it stood, reading 0.817, 0.972 and 0.500 of its reference where the
+head read 1.152, 1.471 and 0.768.
+`GlobalIlluminationTests.AProbeBeforeASunlitWallSendingHalfItsLightThroughHoldsAboutHalfTheLight`
+holds a probe before a sunlit wall sending half its light through to 0.45 to 0.6 of the light it
+holds before the same wall sending none, and reads 0.508, where the head takes no share and holds
+the same before both.
+`GlobalIlluminationTests.TheFieldKeepsTheShareEachCellsNearestSurfaceSendsThrough` reads the share
+back beside an opaque block and a block sending 0.6 through, 0 and 0.6. `field_means`'
+`a_transmission_is_averaged_over_the_texels_its_base_color_shows` holds the share over the texels
+shown, cut out and blended. The three profiles check with no warning, the bridge's tests pass with
+no feature and with render, 126 and 230, and Cargo.lock is unmoved.
+
+The cost, gi_trace's mean over 600 frames in the feature test's meadow at 8:00 at High at 1280 by
+720, two runs a session, sessions by turns with the head's build under the lock taken exclusive.
+Reading the probes on both sides of a surface sending light through took 5.24 to 5.35 ms where the
+head took 4.07 to 4.12, and reading them once, which the commit holds, takes 4.74 to 4.88 where the
+head took 3.99 to 4.12, about 0.8 ms or a fifth more, since every leaf and blade of grass in the
+meadow sends light through and each such hit reads the light on both of its sides. The crown's
+probes and the wall's read the same either way, to the third figure.
+
+The sheet is `2026-11-17-item-152-meadow-oak.webp`, the meadow's oak before the texture means, with
+them and with the mend, then the mend beside the path-traced reference, each pair with its
+difference at four times, red lighter and blue darker. The means and the mend each move the leaves
+and the grass by a few levels. Against the reference, the oak's leaves facing the eye read 30% under
+before the means, 30% under with them and 31% under with the mend, and the far trees stand red where
+the reference draws no fog. It stands for the meadow's pair 150's Reply named.
+
+Findings left open. The sun crossing a crown into its core, where a face's ray to the sun stops at
+the crown whole and the reference lets in the light between the leaves, which a scratch kernel
+crossing it at the crown's share a meter took the core's probe from 0.501 to 0.754 and the front
+half's from 0.971 to 0.682. The field's density, which takes a leaf as covering 0.6 of its card,
+where the oak's covers about 0.45 of its box in the atlas. And the trace's 0.8 ms more in a meadow
+of leaves and grass.
+
+Shared: the field holds the share of its diffuse light a surface sends through to its far side, a
+half float a cell beside its faces, and a probe's hit lights such a surface as the leaf material
+does. 3DEngine's field holds no such share, and a shared module's interface would carry it beside
+the face.
+
+The whole suite passed from one tree, 2,178 passed, 0 failed and 4 skipped, 2,182 in all where the
+listing is 2,171, the solution built from nothing with warnings as errors, in 17 parts and the rest
+dealt by the last run's times, each part of 23 s to 4 m 48 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.

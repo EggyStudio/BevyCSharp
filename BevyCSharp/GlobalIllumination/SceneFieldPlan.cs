@@ -84,11 +84,12 @@ internal sealed partial class SceneFieldPlan
     /// A mesh drawn this frame, its number and generation, where it is drawn, whether it has an
     /// inside, the box around it in its own space, its surface's color and emission, linear, the
     /// share of global illumination's light that passes a unit of its depth, where it emits, the
-    /// area of its triangles in its own space, none where the bridge did not work it out, and its
-    /// surface's gloss, its perceptual roughness, metallic share and reflectance.
+    /// area of its triangles in its own space, none where the bridge did not work it out, its
+    /// surface's gloss, its perceptual roughness, metallic share and reflectance, and the share of
+    /// its diffuse light it sends through to its far side, its diffuse transmission.
     /// </summary>
     internal readonly record struct Instance(uint Mesh, uint Generation, Matrix4x4 World, bool DoubleSided, Box Bounds,
-        Vector3 Color = default, Vector3 Emission = default, float Through = 0f, float Surface = 0f, Vector3 Gloss = default)
+        Vector3 Color = default, Vector3 Emission = default, float Through = 0f, float Surface = 0f, Vector3 Gloss = default, float Transmission = 0f)
     {
         /// <summary>Whether two instances draw the same mesh as it stands.</summary>
         public bool SameMesh(in Instance other) => Mesh == other.Mesh && Generation == other.Generation;
@@ -136,10 +137,11 @@ internal sealed partial class SceneFieldPlan
     /// <summary>
     /// A mesh stamped as a box, from the world into its own space, the box's middle and half extents
     /// there, the least scale from there to the world, the mesh's color in linear light, the share
-    /// of light that passes a unit of its depth, and its gloss.
+    /// of light that passes a unit of its depth, its gloss, and the share of its diffuse light it
+    /// sends through to its far side.
     /// </summary>
     internal readonly record struct Shape(Matrix4x4 ToOwn, Vector3 Center, Vector3 Extents, float Scale, Vector3 Color = default, float Through = 0f,
-        Vector3 Gloss = default);
+        Vector3 Gloss = default, float Transmission = 0f);
 
     private Dictionary<Instance, int> _seen = new(Keys.Shared);
     // In a frame read whole, the frame each mesh drawn the frame before last moved where that was
@@ -550,7 +552,8 @@ internal sealed partial class SceneFieldPlan
             var w = instance.World;
             if (!Matrix4x4.Invert(w, out var toOwn)) continue;
             var scale = MathF.Min(new Vector3(w.M11, w.M12, w.M13).Length(), MathF.Min(new Vector3(w.M21, w.M22, w.M23).Length(), new Vector3(w.M31, w.M32, w.M33).Length()));
-            Shapes.Add(new Shape(toOwn, (own.Min + own.Max) / 2, (own.Max - own.Min) / 2, scale, instance.Color, instance.Through, instance.Gloss));
+            Shapes.Add(new Shape(toOwn, (own.Min + own.Max) / 2, (own.Max - own.Min) / 2, scale, instance.Color, instance.Through, instance.Gloss,
+                instance.Transmission));
             var (min, max) = own.Transformed(w);
             for (int c = 0; c < Cascades; c++)
             {
@@ -684,9 +687,11 @@ internal sealed partial class SceneFieldPlan
 
     // Whether two meshes are drawn the same, through the same world matrix too where `placed` is
     // set, compared in place, where a record's equality copies each and calls a comparer a field.
+    // The gloss and the share sent through are compared with the color, since each is a texture's
+    // mean once it has loaded, and a map that loads after its mesh was built paints it again.
     private static bool Same(in Instance a, in Instance b, bool placed) =>
         a.SameMesh(b) && (!placed || a.World == b.World) && a.DoubleSided == b.DoubleSided && a.Color == b.Color && a.Emission == b.Emission
-        && a.Through == b.Through && a.Bounds == b.Bounds;
+        && a.Through == b.Through && a.Bounds == b.Bounds && a.Gloss == b.Gloss && a.Transmission == b.Transmission;
 
     // The meshes drawn, read in place where they are a list or an array, as the field's are.
     private static ReadOnlySpan<(Instance Instance, bool Skinned)> Span(IReadOnlyList<(Instance Instance, bool Skinned)> drawn) => drawn switch

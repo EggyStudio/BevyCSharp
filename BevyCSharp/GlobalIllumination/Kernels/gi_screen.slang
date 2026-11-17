@@ -30,6 +30,9 @@ SamplerState scene_field_sampler;
 StructuredBuffer<FieldInfo> scene_field_info;
 Texture3D<float4> scene_albedo;
 Texture3D<uint> scene_faces;
+// The share of its diffuse light each cell's surface sends through to its far side
+// (transmissionAt).
+Texture3D<float> scene_transmission;
 Texture3D<float4> scene_glow;
 StructuredBuffer<GiLights> gi_lights;
 StructuredBuffer<GlowLight> glow_lights;
@@ -662,7 +665,7 @@ void main(uint3 id : SV_DispatchThreadID)
                 float passes = 0.0;
                 float deep = passing > 0.0 ? lightThroughCrossed(scene_field, scene_field_sampler, scene_albedo, info, start, way, t, length - t, inside, passes) : -1.0;
                 float3 own;
-                light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_glow, lights, glow_lights,
+                light += shadeProbeHit(scene_field, scene_field_sampler, info, info, scene_albedo, scene_faces, scene_transmission, scene_glow, lights, glow_lights,
                     probe_cubes, probe_cubes_at, probe_ways, at, way, probes.x, probes.y, probes.z, float3(1.0), own) * (through * (1.0 - passes));
                 if (layer == 0)
                     metOwn = own;

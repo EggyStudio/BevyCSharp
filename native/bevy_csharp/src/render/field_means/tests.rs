@@ -2,7 +2,7 @@ use bevy::asset::RenderAssetUsages;
 use bevy::image::Image;
 use bevy::render::render_resource::{Extent3d, TextureDimension, TextureFormat};
 
-use super::{Mean, bc1, bc4, bc7, mean_of};
+use super::{Mean, alpha_where, bc1, bc4, bc7, mean_of};
 
 /// One block of each kind, random but for a BC7 block's mode, with the sixteen texels Pillow's
 /// decoder reads from it, red, green, blue and alpha.
@@ -121,4 +121,26 @@ fn a_bc7_texture_is_averaged_from_its_blocks() {
         assert!((channel - expected).abs() < 1e-6, "{channel} against {expected}");
     }
     assert!(mean_of(&image(8, 4, vec![0; 32], TextureFormat::Rgba16Float)).is_none());
+}
+
+#[test]
+fn a_transmission_is_averaged_over_the_texels_its_base_color_shows() {
+    // A base color whose left texel shows and whose right one is mostly clear, over a transmission
+    // texture twice as wide whose alpha is 204 under the left texel and 0 under the right.
+    let shown = image(2, 1, vec![255, 255, 255, 255, 255, 255, 255, 100], TextureFormat::Rgba8Unorm);
+    let through = image(4, 1, [255, 255, 255, 204, 255, 255, 255, 204, 255, 255, 255, 0, 255, 255, 255, 0].to_vec(), TextureFormat::Rgba8Unorm);
+    let leaf = 204.0 / 255.0;
+
+    // Cut out at a half, the left texel alone.
+    let cut = alpha_where(&through, &shown, Some(0.5)).unwrap();
+    assert!((cut - leaf).abs() < 1e-6, "{cut} against {leaf}");
+
+    // Blended, each by how much it shows.
+    let blended = alpha_where(&through, &shown, None).unwrap();
+    let expected = leaf / (1.0 + 100.0 / 255.0);
+    assert!((blended - expected).abs() < 1e-6, "{blended} against {expected}");
+
+    // A base color that shows nothing gives no share.
+    let clear = image(2, 1, vec![0; 8], TextureFormat::Rgba8Unorm);
+    assert_eq!(alpha_where(&through, &clear, Some(0.5)), None);
 }

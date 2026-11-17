@@ -671,6 +671,47 @@ public float2 splitSum(float roughness, float nv)
     return float2(-1.04, 1.04) * a004 + r.zw;
 }
 
+/// The light reaching a face at `p` facing `n` from the sun and the lights, the lamps that cast
+/// shadows hidden where the field stands between, and from the two brightest glow lights, as
+/// `shadeProbeHit` takes it, the ray along `way`.
+float3 lightsReaching(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, StructuredBuffer<GlowLight> glows, float3 p, float3 n, float3 way)
+{
+    return directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
+        + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi;
+}
+
+/// `shadeProbeHit` for a surface at `p` facing `n`, painted `paint` with `gloss`, that sends `through`
+/// of its diffuse light to its far side: the diffuse share less it lit by the side `n` is on, the
+/// share by the side away from the ray and the gloss by the side toward it, each side's light read
+/// once. The probes are read once, on the side toward the ray, and the indirect light reaching the
+/// far side is taken as that, since a second read on the far side costs the trace about a tenth more
+/// in a meadow whose every leaf and blade of grass sends light through, and moves no probe about a
+/// crown by a point.
+float3 shadeSendingThrough(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<float4> glow,
+    GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p, float3 n,
+    float3 paint, float3 gloss, float through, float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
+{
+    // The ray meets the side away from `n` where it runs out of a surface letting light through.
+    bool far = dot(n, way) > 0.0 && lightThroughAt(albedo, info, p) > 0.0;
+    float3 seen = far ? -n : n;
+    float2 ab = splitSum(gloss.x, saturate(dot(seen, -way)));
+    float3 f0 = lerp(float3(0.16 * gloss.z * gloss.z), paint, gloss.y);
+    float3 glossy = f0 * ab.x + ab.y;
+    float3 diffuse = paint * (1.0 - gloss.y) * saturate(1.0 - glossy);
+    // The light reaching the side `n` is on and the other, and the probes' light on the side the
+    // ray met and along its mirror way.
+    float3 along;
+    float3 bounced = bouncedSeenAt(field, linear, info, gathered, cubes, cubesAt, ways, p, seen, reflect(way, seen), gloss.x, probes, spacing, cascades, along);
+    float3 litOn = lightsReaching(field, linear, info, lights, glows, p, n, way);
+    float3 litOff = lightsReaching(field, linear, info, lights, glows, p, -n, way);
+    // The side away from the ray is the one `n` is on where the ray met the far side, and the other
+    // where it met the near one.
+    float3 litAway = far ? litOn : litOff, litSeen = far ? litOff : litOn;
+    float3 back = diffuse * (1.0 - through), sent = diffuse * through;
+    own = back * litOn + sent * litAway + glossy * litSeen + surfaceGlowUncarried(glow, albedo, linear, info, p);
+    return own + (diffuse / Pi * bounced + glossy * along) * (lights.counts.z * kept);
+}
+
 /// The light a surface the field holds at `p` sends back along a probe's ray that met it, what it
 /// reflects of the light that reaches it from the sun and the lights, the lamps that cast shadows
 /// hidden where the field stands between, so a lamp's light is not reflected off the far side of a
@@ -694,13 +735,27 @@ public float2 splitSum(float roughness, float nv)
 /// its emission, which a probe weighs the frame before's light by. The sun and the lights are given
 /// as the light a white surface facing one returns, and the probes hold the light reaching a face,
 /// so the indirect light reaching it is taken over pi.
+///
+/// A surface that sends a share of its diffuse light through to its far side (`transmissionAt`),
+/// as a leaf does, is lit as the leaf material lights it and the reference follows: its diffuse
+/// share less that share by the light reaching the side its normal is on, that share by the light
+/// reaching the side away from the ray, and its gloss by the side toward the ray. A ray from inside
+/// a surface letting light through, as from a probe in a crown, meets its far side. So a crown's
+/// leaf seen from outside sends back what its lit side keeps and what its shaded side lets through,
+/// and seen from inside, what both send that way, where taken whole from either side it sent its
+/// whole color back toward the sun and read a probe in the crown's front half half again over the
+/// reference. A surface that sends none through is lit as before, to the bit.
 public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
-    Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p,
-    float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
+    Texture3D<float> transmission, Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
+    Texture3D<float4> ways, float3 p, float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
 {
     float3 n = fieldNormal(field, linear, info, p);
     float3 gloss;
     float3 paint = surfaceFacing(faces, albedo, linear, info, p, n, gloss);
+    float through = transmissionAt(transmission, info, p);
+    if (through > 0.0)
+        return shadeSendingThrough(field, linear, info, gathered, albedo, glow, lights, glows, cubes, cubesAt, ways, p, n, paint, gloss, through, way, probes,
+            spacing, cascades, kept, own);
     float2 ab = splitSum(gloss.x, saturate(dot(n, -way)));
     float3 f0 = lerp(float3(0.16 * gloss.z * gloss.z), paint, gloss.y);
     float3 glossy = f0 * ab.x + ab.y;

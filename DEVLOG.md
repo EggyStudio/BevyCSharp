@@ -49,6 +49,13 @@ the shaded floor and an upper gallery wall read in nits beneath, the means takin
 as the walls' white mirrors give way to their dark stone, not judged against the reference until it
 reads sRGB textures by their flag.
 
+![](.github/assets/readings/2026-11-17-item-152-meadow-oak.webp)
+The feature test's meadow at 8:00 at High before the texture means, with them and with the leaves
+lit as their material lights them, then the mend beside the path-traced reference, each pair with
+its difference at four times, red lighter and blue darker, the leaves and the grass moving by a few
+levels and the oak's leaves facing the eye reading 30% under the reference before and 31% after, the
+far trees red against a reference that draws no fog.
+
 ## 2026-11-16
 
 ![](.github/assets/readings/2026-11-16-verdict-60-life.webp)
