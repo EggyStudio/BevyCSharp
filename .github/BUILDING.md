@@ -469,15 +469,18 @@ each game whose default does not build, with the version the run pushed as the o
 A wait that ends unlisted says the package was pushed and stands, and the run's summary says so
 before the games are built.
 
-The feature test is run through Intel Sponza by hand on a machine with a GPU rather than in a
-workflow, since its pack is hundreds of megabytes. `build/scenes.sh` builds the bridge with meshlets
-and ray-traced lighting, fetches `slangc` and the pack (`./bcs scenes fetch intel-sponza`), builds
-the feature test with warnings as errors and runs it through its course with its captures in
-`build/scenes`, where the run loads the fetched pack and captures its reference views from outside
-its door and inside its hall with their frame times. A pack itself is made by
+The feature test is run through Intel Sponza and the Amazon Lumberyard Bistro's exterior by hand on
+a machine with a GPU rather than in a workflow, since their packs are hundreds of megabytes.
+`build/scenes.sh` builds the bridge with meshlets and ray-traced lighting, fetches `slangc` and the
+packs (`./bcs scenes fetch <name>`), builds the feature test with warnings as errors and runs it
+through its course with its captures in `build/scenes`, where the run loads each fetched pack and
+captures its reference views, Sponza's from outside its door and inside its hall and the Bistro's
+street by day and by night, with their frame times. A pack itself is made by
 `build/make-scene-pack.py` from the scene as its makers publish it, needs Python 3.14 and Pillow,
 and is published by hand as an asset of the release `scene-packs`, at the address its manifest
-names.
+names. A scene published as FBX is turned into glTF first by `build/fbx-to-gltf.sh`, Blender from
+Fedora's repository in a container with no network, and one of NVIDIA's ORCA is then set to the
+archive's texture convention by `build/orca-gltf.py`, whose own words name the steps.
 
 The testers' zips are made by hand as well, each on the system it is for, since native code is
 published for the system it is made on. A zip holds the feature test published as native code from

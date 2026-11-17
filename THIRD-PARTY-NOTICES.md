@@ -691,6 +691,7 @@ The scenes the manifests in `scenes/` name are fetched as packs when they are as
 kept in neither this repository nor the package. Each pack holds its makers' own license file
 beside its model.
 
+- **Amazon Lumberyard Bistro, exterior** (https://developer.nvidia.com/orca/amazon-lumberyard-bistro), under CC BY 4.0. Amazon Lumberyard Bistro (2017) by Amazon Lumberyard, from NVIDIA's Open Research Content Archive (ORCA), https://developer.nvidia.com/orca/amazon-lumberyard-bistro, under CC BY 4.0, https://creativecommons.org/licenses/by/4.0/, given as it is and without warranties as the license's Section 5 says, with NVIDIA's changes its CHANGELOG lists. Here its exterior is converted from FBX to glTF by Blender 5.2.2 and scaled to meters, its materials set to the archive's own texture convention and its lamps, string lights and signs given a strength, its textures resized to 1K and compressed for the GPU, and its camera left out.
 - **Intel Sponza** (https://www.intel.com/content/www/us/en/developer/topic-technology/graphics-research/samples.html), under CC BY 4.0. Intel Sponza (2022) by Frank Meinl and Anton Kaplanyan, from Intel's Sample Library, under CC BY 4.0. Its textures are resized to 1K and compressed for the GPU here, and its lights and cameras left out.
 
 ## Texts

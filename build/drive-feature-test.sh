@@ -85,7 +85,7 @@ bound() {
   case "$1" in
     frames.wait | frame.profile) if [ "$views" = 1 ]; then echo 900; else echo $((60 + 3 * $2)); fi ;;
     input.hold) echo $((60 + 3 * $3)) ;;
-    pipelines.wait | scene.load) echo 900 ;;
+    pipelines.wait | scene.pack) echo 900 ;;
     *) echo 120 ;;
   esac
 }
@@ -435,14 +435,32 @@ quiet setting "Backdrop $backdrop"
 # Sponza, where its pack has been fetched, which no workflow does, from outside its door and from
 # inside its hall, each view's frame time written beside the captures, as build/scenes.sh keeps
 # them.
+timed() { view "$@"; frame_time "$1"; }
 if ./bcs scenes | awk '$1 == "intel-sponza" && $4 == "fetched" { found = 1 } END { exit !found }'; then
-  quiet scene.load intel-sponza
+  quiet scene.pack intel-sponza
   for _ in $(seq 1 60); do grep -q "Intel Sponza stands" "$log" && break; quiet frames.wait 10; done
   grep -q "Intel Sponza stands" "$log" || fail "Sponza did not load from its pack"
-  timed() { view "$@"; frame_time "$1"; }
   timed 17-sponza 45 4 -45 60 3 -60 120
   timed 18-sponza-hall 57 2.5 -57 80 2 -80 120
   timed 19-sponza-gallery 74 6.5 -66 62 5.5 -78 120
+  quiet scene.unload
+fi
+
+# The Bistro's exterior, where its pack has been fetched, down one of its streets toward the
+# restaurant at noon, the sun over the street, and at night, the night lit by its lamps, string
+# lights and signs through global illumination alone, so the moon's light is put out for the view,
+# the next hour set giving it back. Each view settles over 300 frames, the probes' light gathering
+# from the lamps over that many.
+if ./bcs scenes | awk '$1 == "bistro-exterior" && $4 == "fetched" { found = 1 } END { exit !found }'; then
+  quiet scene.pack bistro-exterior
+  for _ in $(seq 1 60); do grep -q "Bistro, exterior stands" "$log" && break; quiet frames.wait 10; done
+  grep -q "Bistro, exterior stands" "$log" || fail "the Bistro did not load from its pack"
+  quiet day.hour 12
+  timed 20-bistro-day 48.8 0.5 -70 70 1.3 -70 300
+  quiet day.hour 23
+  quiet entity.set Moon DirectionalLight.illuminance 0
+  timed 20-bistro-night 48.8 0.5 -70 70 1.3 -70 300
+  quiet day.hour 8
   quiet scene.unload
 fi
 

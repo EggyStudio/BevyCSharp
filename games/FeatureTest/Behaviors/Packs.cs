@@ -24,7 +24,10 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// main door, at the end of its long axis, turned down the corridor from the hub and swung open, so
 /// the player walks in, and its floors, walls, columns and arches are mesh colliders once their
 /// meshes have loaded. Its attribution is written over the doorway while it stands, as its license
-/// asks.
+/// asks. The Bistro's exterior is larger than the yard, so its streets lie in the yard and its outer
+/// buildings stand through the yard's walls, the player coming in past the arch the hub's corridor
+/// ends in, where its attribution is written, and round a building's corner into its street. A
+/// scene's own sun is taken off, since the zone's sky has the sun of the hour.
 /// </para>
 /// <para>
 /// Where meshlets run (the graphics page, from the next start), the scene's heaviest meshes, of
@@ -49,8 +52,22 @@ public partial struct Packs
     /// </summary>
     private const float Lift = 0.02f;
 
-    /// <summary>The pieces of a scene the player stands on or is stopped by, by their names.</summary>
-    private static readonly Regex Solid = new("floor|wall|column|arch|stair|step|exterior", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+    /// <summary>
+    /// What the zone makes of each scene it knows, by its pack's name: the pieces the player stands
+    /// on or is stopped by, by their names, and where the attribution is written, in the scene's own
+    /// frame, turned about its Y to face the way it is read from.
+    /// </summary>
+    /// <remarks>
+    /// Sponza's names say what each piece is, its outer walls named exterior among them. Every piece
+    /// of the Bistro's exterior carries the scene's name, exterior and all, so its street, sidewalks
+    /// and buildings are taken by their own words. A scene the zone does not know is drawn with no
+    /// piece solid and its attribution over its middle.
+    /// </remarks>
+    private static readonly Dictionary<string, (Regex Solid, Vec3 Credit, float Turn)> Fittings = new(StringComparer.Ordinal)
+    {
+        ["intel-sponza"] = (Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f),
+        ["bistro-exterior"] = (Words("street|sidewalk|building"), new Vec3(31f, 4f, -1.5f), MathF.PI / 2f),
+    };
 
     private static readonly ConcurrentDictionary<string, double> Fetching = new(StringComparer.Ordinal);
     private static readonly ConcurrentDictionary<string, string> Problems = new(StringComparer.Ordinal);
@@ -144,19 +161,23 @@ public partial struct Packs
     /// <summary>
     /// Loads a fetched pack into the zone, from the console and build/drive-feature-test.sh.
     /// </summary>
-    [Command("scene.load", "Loads a fetched scene pack into the scenes zone: scene.load <name>")]
+    /// <remarks>
+    /// Named apart from the engine's <c>scene.load</c>, which spawns a scene file, since of two
+    /// commands of one name the engine's is the one answered.
+    /// </remarks>
+    [Command("scene.pack", "Loads a fetched scene pack into the scenes zone: scene.pack <name>")]
     internal static string LoadCommand(string name)
     {
         if (Known.FirstOrDefault(pack => pack.Name.Equals(name.Trim(), StringComparison.OrdinalIgnoreCase)) is not { } pack)
         {
             ConsoleHost.Fail("NO_SUCH_SCENE", $"There is no scene pack called {name.Trim()}. The packs are {string.Join(", ", Known.Select(known => known.Name))}.");
-            return "scene.load <name>";
+            return "scene.pack <name>";
         }
 
         if (!ScenePacks.IsFetched(pack))
         {
             ConsoleHost.Fail("NOT_FETCHED", $"{pack.Title} has not been fetched. Run bcs scenes fetch {pack.Name}, or fetch it from the panel's Scenes page.");
-            return "scene.load <name>";
+            return "scene.pack <name>";
         }
 
         return ConsoleHost.World is { } world ? Load(new BehaviorContext(world), pack) : "there is no world to load into";
@@ -321,11 +342,13 @@ public partial struct Packs
     {
         if (_shown is not { } pack || !ctx.Ecs.IsAlive(_root) || !App.HasRenderer || ctx.Res<Config>().Headless) return;
 
-        // Over Sponza's main door, facing out along its axis toward the hub.
+        // Over Sponza's main door, or past the arch where the hub's corridor comes into the yard
+        // the Bistro's street lies beyond, each facing out along the scene's axis toward the hub.
         var (site, facing) = _site;
-        var outward = facing * Vec3.UnitX;
-        var at = site + (facing * new Vec3(20f, 0f, 0f)) + new Vec3(0f, 4.2f, 0f);
-        var turned = facing * Quat.FromRotationY(MathF.PI / 2f);
+        var fitting = FittingOf(pack);
+        var turned = facing * Quat.FromRotationY(fitting.Turn);
+        var outward = turned * Vec3.UnitZ;
+        var at = site + (facing * fitting.Credit);
         Gizmos.Text(Wrap(pack.Attribution, 60), at + (outward * 0.1f), turned, 0.16f, (0f, 0f), (0.95f, 0.92f, 0.8f, 1f), inFront: false);
     }
 
@@ -365,10 +388,22 @@ public partial struct Packs
         return null;
     }
 
+    /// <summary>A pattern of words, read in any case.</summary>
+    private static Regex Words(string pattern) => new(pattern, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+    /// <summary>The fitting of a scene, or that of one the zone does not know.</summary>
+    private static (Regex Solid, Vec3 Credit, float Turn) FittingOf(ScenePack pack) =>
+        Fittings.TryGetValue(pack.Name, out var fitting) ? fitting : (Words("(?!)"), new Vec3(0f, 4.2f, 0f), 0f);
+
     /// <summary>
-    /// Opens Sponza's main door and makes its solid pieces mesh colliders, once the scene's entities
-    /// are there, answering whether they were.
+    /// Opens Sponza's main door, makes the scene's solid pieces mesh colliders and takes off the
+    /// scene's own sun, once the scene's entities are there, answering whether they were.
     /// </summary>
+    /// <remarks>
+    /// The zone's sky has the sun of the hour, which lights the scene by day, and a sun the scene
+    /// carries would light it a second time by day and alone by night, where the night is the
+    /// scene's lamps and signs.
+    /// </remarks>
     private static bool Fit(EcsWorld ecs)
     {
         var parts = ecs.Descendants(_root).Select(entity => (Entity: entity, Name: ecs.NameOf(entity) ?? string.Empty)).ToList();
@@ -383,16 +418,24 @@ public partial struct Packs
         }
 
         var solid = 0;
+        var suns = 0;
+        var fitting = _shown is { } pack ? FittingOf(pack) : default;
         foreach (var (piece, name) in parts)
         {
-            if (!Solid.IsMatch(name) || name.Contains('.', StringComparison.Ordinal)) continue;
+            if (ecs.Get<DirectionalLightRef>(piece) is not null)
+            {
+                ecs.RemoveReflected(piece, DirectionalLightRef.TypePath);
+                suns++;
+            }
+
+            if (fitting.Solid?.IsMatch(name) != true || name.Contains('.', StringComparison.Ordinal)) continue;
 
             ecs.Add(piece, new RigidBody { Kind = BodyKind.Static });
             ecs.Add(piece, new Collider { Shape = ColliderShape.Mesh });
             solid++;
         }
 
-        Console.WriteLine($"[Packs] {solid} pieces of {_shown?.Title} are solid, and its door is open");
+        Console.WriteLine($"[Packs] {solid} pieces of {_shown?.Title} are solid, {suns} suns of its own taken off, and its door is open where it has one");
         return true;
     }
 

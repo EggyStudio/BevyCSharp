@@ -2,8 +2,8 @@
 """Makes a scene pack from a glTF scene as its makers publish it, for ScenePacks to fetch.
 
     build/make-scene-pack.py <scene.gltf> <out.pack> [--size 1024] [--name sponza]
-        [--extra FILE ...] [--manifest scenes/NAME.json --url URL --title T --source S
-         --license L --attribution A]
+        [--extra FILE ...] [--directx-normals] [--manifest scenes/NAME.json --url URL --title T
+         --source S --license L --attribution A]
 
 Every texture the scene's materials use is resized to at most --size on a side, a power of two,
 mipmapped down to a texel, and written as KTX2 with the blocks a GPU reads without unpacking: BC7
@@ -13,7 +13,10 @@ supercompressed with zstd, which Bevy's KTX2 loader undoes, so the pack is small
 GPU is handed blocks. The glTF is written again pointing at the KTX2 files and its buffer, its
 cameras taken out, since a camera in a scene a game spawns would draw the game twice. The meshes are
 kept as they are. --extra copies a file such as the scene's license into the pack beside the model,
-and --no-lights leaves out the scene's punctual lights.
+--attribution is written into it as ATTRIBUTION.txt with the title, the source and the license,
+--no-lights leaves out the scene's punctual lights, and --directx-normals turns over the green of
+each normal map, for a scene whose normals are written as DirectX reads them, their green pointing
+down the texture where glTF's points up.
 
 The folder is written as one pack by `bcs scenes pack`, and the pack's size and SHA-256 printed,
 or written into a manifest with --manifest, whose address is where the pack will be published.
@@ -313,12 +316,17 @@ def power_below(n):
 
 def convert(job):
     """Writes one texture as KTX2, in a process of its own."""
-    source, target, kind, srgb, size = job
+    source, target, kind, srgb, size, flip = job
     image = Image.open(source)
     mode, channels, encode = {'bc7': ('RGBA', 4, bc7), 'bc5': ('RGB', 3, bc5), 'bc1': ('RGB', 3, bc1)}[kind]
     image = image.convert(mode)
-    width = min(power_below(image.width), size)
-    height = min(power_below(image.height), size)
+    if flip:
+        red, green, blue = image.split()
+        image = Image.merge('RGB', (red, green.point(lambda value: 255 - value), blue))
+    # A block is four texels on a side, and a GPU takes no texture of blocks whose top level is
+    # narrower, so a texture of a texel or two, a flat color, is drawn at four.
+    width = max(4, min(power_below(image.width), size))
+    height = max(4, min(power_below(image.height), size))
     if (width, height) != image.size:
         image = image.resize((width, height), Image.Resampling.LANCZOS)
 
@@ -376,6 +384,7 @@ def main():
     parser.add_argument('--attribution', default='')
     parser.add_argument('--keep', help='a folder to leave the pack\'s files in, to look at')
     parser.add_argument('--no-lights', action='store_true', help='leave out the scene\'s punctual lights')
+    parser.add_argument('--directx-normals', action='store_true', help='turn over the green of each normal map')
     args = parser.parse_args()
 
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -398,7 +407,8 @@ def main():
         kind, srgb = used[index]
         stem = os.path.splitext(os.path.basename(image['uri']))[0]
         target = os.path.join('textures', stem + '.ktx2')
-        jobs.append((os.path.join(source_folder, image['uri']), os.path.join(work, target), kind, srgb, args.size))
+        jobs.append((os.path.join(source_folder, image['uri']), os.path.join(work, target), kind, srgb, args.size,
+                     args.directx_normals and kind == 'bc5'))
         image['uri'] = target.replace(os.sep, '/')
         image.pop('mimeType', None)
 
@@ -434,6 +444,9 @@ def main():
         json.dump(gltf, file, separators=(',', ':'), sort_keys=True)
     for extra in args.extra:
         shutil.copyfile(extra, os.path.join(work, os.path.basename(extra)))
+    if args.attribution:
+        with open(os.path.join(work, 'ATTRIBUTION.txt'), 'w', encoding='utf-8') as file:
+            file.write('\n'.join(line for line in (args.title, args.source, args.license, args.attribution) if line) + '\n')
 
     bcs = os.path.join(root, 'bcs')
     subprocess.run([bcs, 'scenes', 'pack', work, os.path.abspath(args.pack)], check=True)
