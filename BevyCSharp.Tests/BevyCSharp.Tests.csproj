@@ -26,8 +26,16 @@
 
     <ItemGroup>
         <ProjectReference Include="../BevyCSharp/BevyCSharp.csproj"/>
-        <!-- The Levels module's types, which the library keeps to itself and the level tests read. -->
+        <!--
+          The Levels module's types, which the library keeps to itself and the level tests read.
+        -->
         <ProjectReference Include="../modules/Levels/Levels/Levels.csproj"/>
+        <!--
+          The feature test's rule for the scenes yard's floor under a scene, one file of the game
+          compiled in for its test (FeatureTestSceneFloorTests), since the suite references no game.
+          The file uses nothing else of the game.
+        -->
+        <Compile Include="../games/FeatureTest/Behaviors/SceneFloor.cs" Link="Levels/SceneFloor.cs"/>
 
         <!--
           The editor, for the tables under it: what is on the menu, what an entity looks like in a

@@ -77,6 +77,8 @@ white ground, pushed at 02:05 on 2026-11-18, the form kept, its build run 442130
 `f7612252`, a mesh painted again where it stands held as not moved, the dark start of 7 in 54
 mended, pushed at 07:21 on 2026-11-18, build 44250687691 green at 08:30. `9b869a3d`, the reference
 meeting a blended face by its alpha, pushed at 12:51 on 2026-11-18, build 44298529506 green.
+`8e7fa0f5`, the scene's field leaving out a draw blended under half its alpha, with its sheet on a
+white ground, pushed at 16:23 on 2026-11-18, build run 44335142706 started.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -282,6 +284,11 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     mend, and a sheet on a white ground shows the crown before and after beside the reference. After
     item 150's second step.
 
+154. **The edit mesh gives way to the Modeling module's.** Shared: Modeling's item 3 part 1
+    (27e2dc9) holds the edit mesh as Modeling.EditMesh, its recipe and EditMeshBuild, reading files
+    through IModelFiles; an engine can bind it, its own copy giving way to the module's, with the
+    kernel tests already moved. After item 138.
+
 ## Verdicts
 
 Verdict 67 is settled at 11:39 on 2026-11-17, the build run 44059324245 on `364cac79` green, the
@@ -408,7 +415,7 @@ The cloud sessions take GPU-free items on branches of their own; 54 Branches are
 work, never claude/ or a random string, and work stays on main where one session writes; 55 Every
 commit carries the repository's author identity, and the cloud session's branch was deleted for not
 carrying it; 56 Slang reads the same in both engines, plain names and no module prefix; 57 Until a
-full release, both engines are used by nobody; 58 The two cheat sheets have one form; 59 A devlog
+full release, both engines are used by nobody; 58 The two cheatsheets have one form; 59 A devlog
 under `.github/devlog`, with AGENTS.md's row for it; 60 A session saves the pictures of its work in
 the repository, N 4.8; 61 The feature test's level is redone, the look, the sky, the file, the
 entities' connections and an editor; 62 The fog, the clouds and the rest of the weather are written
@@ -571,6 +578,24 @@ in full under Decisions in REVIEW-ARCHIVE.md.
     hand and is not moved to the front. Every commit is read by the review's mechanical checks, a
     larger one by a fresh read-only reader given NORM.md and the diff, and the whole tree by such
     readers once a day; no standing session is kept for it.
+
+94. **The kernels' move comes forward.** Decided at 16:28 on 2026-11-18, in place of Decision 93's
+    first half. Item 138 begins when the wall's split by source and the matched sheet of the atrium
+    against the sibling are in, before 153 and 151, and the sibling reaches its item 265 after its
+    glow lights' commit. The cause is the two copies' drift, ten kernels of one name differing in
+    every one between the engines and a fault of one mended twice, and the atrium reading dark here
+    where the sibling's reads lit. The order within 138 stands, the read with the sibling's coder
+    first as a Reply in both files, then a kernel at a time with the tests and rooms holding. The
+    read's first question is which of the dark atrium the kernels' differences carry and which the
+    field and Bevy's light pass carry, answered by figures of one room in both engines; item 150's
+    second part goes on only where the split shows a cause outside the kernels.
+
+95. **The modules are agnostic to any engine and their assemblies are 3DEngine.<Module> (2026-11-18
+    17:29).** Each module's namespace stays its own name. The engine keeps taking the modules as git
+    submodules, compiled with it and carried inside its one package; a module's own package is for a
+    reader who takes it alone and is published on the owner's word. What names a module's assembly
+    or its file follows in the commit that moves the submodule pointers. N 4.12 holds a comment line
+    to 100 columns, existing lines rewrapped as their files are touched.
 
 ## Replies
 
@@ -1014,5 +1039,106 @@ where the probes see the stone under the decals.
 The whole suite passed from one tree, 2,187 passed, 0 failed and 4 skipped, 2,191 in all where the
 listing is 2,180, the solution built from nothing with warnings as errors, in 18 parts and the rest
 dealt by the last run's times, each part of 22 s to 4 m 12 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+150, its second part read before any setting is fitted, the brick walls' surplus split by where
+their light comes from, its main cause the scenes yard's white floor under Sponza's, mended in the
+commit carrying this Reply.
+
+Sponza's atrium at the sibling's view, noon and lens, each session from the feature test's own
+settings, its figures linear light before tonemapping at the camera's EV100 of 9.7, the lens's 4.944
+stops under it laid on after, so the reference's 0.094 on the brick walls facing -x reads 0.0031 at
+the lens's EV 14.64. The brick walls facing -x take no light straight from the sun, the reference at
+no bounce reading 0.000 on them, and of the reference's 0.094 its first bounce gives 0.066. The
+probes holding the first bounce alone gave the walls 0.155, so most of the surplus lay there. In
+three screen probes on the wall it came by the rays past their 4 m reach, which take the world
+probes' light, +0.34 to +0.59 of sums lying +0.38 to +0.64 over the reference's, and the world probe
+at the arcade's edge, at 73, 1, -69, held its first bounce's surplus in the ways that see the sunlit
+atrium floor at the distance the reference meets it, 6.0 to 7.4 against 3.6 drawn across the same
+texels. No way there met the sky.
+
+The yard's floor, the white prototype grid at 0.90, lies 3 cm under Sponza's, Packs' lift and the
+floor's own centimeter, inside one of the field's cells of 0.25 m, and the field paints a cell by
+its nearest surface, so the cells of Sponza's stone floor took the yard's white and the probes the
+light it sent back. With the level's floor hidden by hand and the field built again from nothing in
+one session, the walls facing -x read 0.122 against 0.092, the world probe 0.486 against 0.540 drawn
+where it read 0.873, and the picture lay 0.348 of its light from the reference where 0.508.
+
+The mend. The level's generator writes the yard's floor as four pieces round Sponza's outline, the
+exterior's box in its own frame 2 cm inside its walls' outer faces turned with the site, and the
+floor within it as a brush entity of its own of the class `func_scene_floor` (`SiteFloor`). The
+feature test's `SceneFloor` hides it while a scene whose fitting covers the site stands, Sponza's
+alone (`Covers`), and shows it again when the scene is taken away, so it neither draws nor stands in
+the field while the scene's own floor covers it. `SceneFloor.cs` uses nothing else of the game, and
+the test project compiles it in by a linked file, as its project file says. Packs' remarks and its
+fitting's say so, no listing line changes, and the comment lines of the files touched hold to 100
+columns (N 4.12).
+
+`FeatureTestLevelTests.TheYardsFloorUnderTheScenesSiteIsAnEntityOfItsOwnDrawnToSponzasOutline` casts
+a ray down at each meter of the yard and holds the site's floor alone under the points within the
+outline and the world's alone under those outside it, where the head's level held no such floor.
+`FeatureTestSceneFloorTests.TheYardsFloorUnderASceneStandsOutOfTheFieldWhileTheSceneStandsAndInItAgainWhenItGoes`
+builds the feature test's level with a red floor 2 cm over the site and reads the field's cell under
+the yard floor's top white, red while `SceneFloor` hides the yard's floor and white again once it
+shows it, where at the head the rule hid none.
+`GlobalIlluminationTests.AnEntityHiddenStandsOutOfTheFieldAndInItAgainWhenShown` holds the engine's
+own rule on a red floor 2 cm over a white one and passes at the head, kept as the guard.
+
+On the commit's tree, the head's Packs and level built for the head's reading in the same hour, the
+walls facing -x read 0.129 against 0.094 where they read 0.234, 35% over the reference and short of
+the bar of 0.122, which the hand's reading met at 0.122 against 0.092. The arcade's ceiling reads
+0.212 against 0.217 where 0.432, the brick walls facing +x and +z lie 5% and 12% over where 115% and
+126%, the floor 10% over where 13%, and the picture 0.349 of its light from the reference where
+0.505.
+
+What the split shows of the rest. The picture read 2.4 to 3.0 times the reference at the head on the
+walls under the arcades, 2.49 on the brick facing -x and 2.6 to 3.0 on the decals, where the
+sibling's reads 1.03 to 1.60 of its own, so the gap between the engines lay in this side's surplus.
+Mended, the brick reads 1.37, 1.05 and 1.12 of the reference by the way it faces and the arcade's
+ceiling 0.98, so the same mend closes the brick's, and the decal walls facing -x read 2.13, 115%
+over where 197%. A decal is blended and drawn forward, and the light pass leaves a forward surface
+Bevy's own light, so with the probes off the decals read 1.6 to 2.0 and with them on 0.31 to 0.84,
+and the share the probes do not light reads as Bevy's own light on the decal, not read to its cause
+here. Its read and its mend come after the haze's, held by a test that fails first of a decal
+blended over a wall under the probes against the reference, which bounds it as the decals' own tests
+do. The floor's 10% is the direct light's.
+
+A finding for the kernels' read, left unmended as the review asks. Two surfaces of unlike color
+sharing a cell of 0.25 m paint it by whichever lies nearer its middle, and the field's surface
+between them reads the mix, which any thin layered floor meets, a rug on a floor or a road's paint
+on its asphalt. It goes to the read as a question for both engines.
+
+The sheet against the sibling is `2026-11-18-item-150-atrium-matched.webp`, the atrium from its view
+(`Views[0]`) under its noon sun, `SunToward(12, 6)` carried by Sponza's placement and set here by
+the clock at latitude -4.25 and 12:17, 119,343 lux outside the air at 5,633 K, and its camera at ISO
+200, 1/25 s and f/16, beside its picture from its item-291 sheet. 3DEngine's means read 79 of 255
+and blue over red 0.79, the bridge's 102 and 0.93 as it stood, 100 and 0.96 with the yard's floor
+out and 54 and 0.79 with the dusk backdrop alone, which takes off the atmosphere, its sky light and
+the sky's fog. The fog alone and the bloom alone each moved the means by under 0.2, so the veil is
+Bevy's atmosphere, which grows with distance and grays the far arch 25 m off. With it off the shade
+lies darker than the sibling's, its sky's fill and its grade. The haze is mended next.
+
+The sheet is `2026-11-18-item-150-yard-floor.webp`, the atrium's picture at the head and mended with
+their difference at four times, red lighter and blue darker, the walls under the arcades darker
+toward the reference.
+
+The whole suite passed from one tree, 2,190 passed, 0 failed and 4 skipped, 2,194 in all where the
+listing is 2,183, the solution built from nothing with warnings as errors, in 16 parts and the rest
+dealt by the last run's times, each part of 6 s to 6 m 16 s, a part at a time under the GPU lock. A
+run before it failed the scene floor's test under N 3.7, the level's trees capturing their cards'
+pictures as the run ended, and the test builds the level without its trees.
+
+Handoff. Item 150's second part stands at this commit, the brick walls facing -x at 0.129 against
+0.094, short of the bar of 0.122, and whether that holds or the fitting's cells of 0.125 and High
+take it further is open for the review. Next in order is the atmosphere's near haze. Bevy 0.20's
+aerial table (`aerial_view_lut_max_distance` and the fade over its first slice in bevy_pbr's
+functions.wesl) and the atmosphere's sky light through Bevy's own reflections are the two parts the
+dusk backdrop takes off together, to be told apart first. Beside them, `ScatteringTerm.Earth`'s Mie
+term holds absorption 3.996e-6 and scattering 0.444e-6 as Bevy's own earth medium does, where
+Bruneton's figures give them the other way round. Then one row against the sibling at its quality
+tier, item 138's read, the decals' forward light, a program ending with tree cards' captures
+pending, and the modules' pointers as the review places them. A fresh session reads this Reply,
+Decisions 94 and 95, items 138 and 154, and the matched sheet first.
 
 NormTests passed, 19.

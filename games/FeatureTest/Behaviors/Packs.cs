@@ -7,8 +7,8 @@ using Bevy.Reflected;
 namespace BevyCSharp.FeatureTest.Behaviors;
 
 /// <summary>
-/// The scenes zone north-east of the hub, where a well-known graphics scene fetched as a pack stands
-/// at ground level, the packs listed on the panel's Scenes page.
+/// The scenes zone north-east of the hub, where a well-known graphics scene fetched as a pack
+/// stands at ground level, the packs listed on the panel's Scenes page.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -24,10 +24,11 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// main door, at the end of its long axis, turned down the corridor from the hub and swung open, so
 /// the player walks in, and its floors, walls, columns and arches are mesh colliders once their
 /// meshes have loaded. Its attribution is written over the doorway while it stands, as its license
-/// asks. The Bistro's exterior is larger than the yard, so it stands alone far from the level's
-/// rooms, the player carried into one of its streets once it stands, where its attribution is
-/// written behind them, and back to the scenes yard when it is taken away. A scene's own sun is
-/// taken off, since the zone's sky has the sun of the hour.
+/// asks, and the yard's floor under it, drawn to its outline, is hidden, so the scene field holds
+/// Sponza's floor alone there (<see cref="SceneFloor"/>). The Bistro's exterior is larger than the
+/// yard, so it stands alone far from the level's rooms, the player carried into one of its streets
+/// once it stands, where its attribution is written behind them, and back to the scenes yard when
+/// it is taken away. A scene's own sun is taken off, since the zone's sky has the sun of the hour.
 /// </para>
 /// <para>
 /// Where meshlets run (the graphics page, from the next start), the scene's heaviest meshes, of
@@ -42,40 +43,46 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 [Behavior]
 public partial struct Packs
 {
-    /// <summary>The class of the level's point a scene stands at, its arrow the way the scene's +X faces.</summary>
+    /// <summary>
+    /// The class of the level's point a scene stands at, its arrow the way the scene's +X faces.
+    /// </summary>
     private const string SiteClass = "info_scene";
 
     /// <summary>
-    /// How far over the level's point a scene's origin stands, two centimeters, so a scene's ground at
-    /// its origin's height lies over the yard's floor rather than in its plane, where the two would
-    /// fight for the same depth and flicker as the view moves.
+    /// How far over the level's point a scene's origin stands, two centimeters, so a scene's ground
+    /// at its origin's height lies over the yard's floor rather than in its plane, where the two
+    /// would fight for the same depth and flicker as the view moves.
     /// </summary>
     private const float Lift = 0.02f;
 
     /// <summary>What the zone makes of each scene it knows, by its pack's name.</summary>
     /// <remarks>
-    /// Sponza's names say what each piece is, its outer walls named exterior among them. Every piece
-    /// of the Bistro's exterior carries the scene's name, exterior and all, so its street, sidewalks
-    /// and buildings are taken by their own words. The Bistro is larger than the scenes yard, so it
-    /// stands alone three kilometers north of the hub, out of sight of the level's rooms, the player
-    /// carried into one of its streets facing the restaurant. Its streets are lit by lanterns of some
-    /// 8,000 lumens, as a town's are, some 20 lux on the paving, which the moonlit ground's lens of the
-    /// night shows three stops over, so at a night hour the camera there holds a lamp-lit street's,
-    /// f/2.8 at a sixtieth of a second and ISO 3200. A scene the zone does not know is drawn with no
-    /// piece solid and its attribution over its middle.
+    /// Sponza's names say what each piece is, its outer walls named exterior among them. Every
+    /// piece of the Bistro's exterior carries the scene's name, exterior and all, so its street,
+    /// sidewalks and buildings are taken by their own words. The Bistro is larger than the scenes
+    /// yard, so it stands alone three kilometers north of the hub, out of sight of the level's
+    /// rooms, the player carried into one of its streets facing the restaurant. Its streets are lit
+    /// by lanterns of some 8,000 lumens, as a town's are, some 20 lux on the paving, which the
+    /// moonlit ground's lens of the night shows three stops over, so at a night hour the camera
+    /// there holds a lamp-lit street's, f/2.8 at a sixtieth of a second and ISO 3200. A scene the
+    /// zone does not know is drawn with no piece solid and its attribution over its middle.
     /// </remarks>
     private static readonly Dictionary<string, Fitting> Fittings = new(StringComparer.Ordinal)
     {
-        ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f),
+        ["intel-sponza"] = new(Words("floor|wall|column|arch|stair|step|exterior"), new Vec3(20f, 4.2f, 0f), MathF.PI / 2f, Covers: true),
         ["bistro-exterior"] = new(Words("street|sidewalk|building"), new Vec3(26f, 3.2f, 20f), -3f * MathF.PI / 4f,
             Alone: new Vec3(0f, Scene.GroundHeight, -3000f), Start: new Vec3(15f, 0.5f, 15f), Toward: new Vec3(0f, 1f, 0f),
             NightLens: new PhysicalLens(Aperture: 2.8f, Shutter: 1f / 60f, Sensitivity: 3200f)),
     };
 
-    /// <summary>How near the place of a scene standing alone the eye is in it, so its lens is held.</summary>
+    /// <summary>
+    /// How near the place of a scene standing alone the eye is in it, so its lens is held.
+    /// </summary>
     private const float LensReach = 500f;
 
-    /// <summary>The solid pieces of the scene standing, each a body once the physics has made it.</summary>
+    /// <summary>
+    /// The solid pieces of the scene standing, each a body once the physics has made it.
+    /// </summary>
     private static readonly List<Entity> Solids = [];
 
     private static readonly ConcurrentDictionary<string, double> Fetching = new(StringComparer.Ordinal);
@@ -109,7 +116,9 @@ public partial struct Packs
     private static Entity _root = Entity.None;
     private static bool _fitted;
 
-    /// <summary>Whether the player has been carried into the scene standing, where it stands alone.</summary>
+    /// <summary>
+    /// Whether the player has been carried into the scene standing, where it stands alone.
+    /// </summary>
     private static bool _carried;
 
     /// <summary>Where the scene standing stands and how it is turned.</summary>
@@ -166,7 +175,9 @@ public partial struct Packs
         : Problems.ContainsKey(pack.Name) ? "failed, fetch again"
         : $"fetch, {pack.Size / 1_000_000} MB";
 
-    /// <summary>How far a pack's fetch has come, or nothing where it is not being fetched.</summary>
+    /// <summary>
+    /// How far a pack's fetch has come, or nothing where it is not being fetched.
+    /// </summary>
     internal static float? ProgressOf(ScenePack pack) => Fetching.TryGetValue(pack.Name, out var done) ? (float)done : null;
 
     /// <summary>Fetches, loads or unloads a pack, by where it stands, and says which.</summary>
@@ -220,7 +231,9 @@ public partial struct Packs
     internal static string UnloadCommand() =>
         ConsoleHost.World is { } world ? Unload(new BehaviorContext(world)) : "there is no world to unload from";
 
-    /// <summary>Spawns a loaded scene in the zone, then opens its door and makes its walls solid.</summary>
+    /// <summary>
+    /// Spawns a loaded scene in the zone, then opens its door and makes its walls solid.
+    /// </summary>
     [OnUpdate]
     public static void Place(BehaviorContext ctx)
     {
@@ -253,6 +266,7 @@ public partial struct Packs
             _root = ecs.SpawnScene(_scene);
             ecs.Add(_root, new Transform(site.At, site.Facing, Vec3.One));
             ecs.SetName(_root, pack.Title);
+            if (alone is null && FittingOf(pack).Covers) SceneFloor.Show(ecs, shown: false);
             Console.WriteLine($"[Packs] {pack.Title} stands {(alone is null ? "in the scenes zone" : "alone, far from the level's rooms")}. {pack.Attribution}");
             return;
         }
@@ -363,9 +377,9 @@ public partial struct Packs
     private static string CacheFolder(ScenePack pack) => $"{ScenePacks.MountFolder}/{pack.Name}-meshlets";
 
     /// <summary>
-    /// Gives the camera the lens of the place the eye stands in, the scene standing alone's while the
-    /// eye is within <see cref="LensReach"/> of it, and the night's own once it is carried out or the
-    /// scene is taken away.
+    /// Gives the camera the lens of the place the eye stands in, the scene standing alone's while
+    /// the eye is within <see cref="LensReach"/> of it, and the night's own once it is carried out
+    /// or the scene is taken away.
     /// </summary>
     [OnUpdate]
     public static void Lens(BehaviorContext ctx)
@@ -383,7 +397,9 @@ public partial struct Packs
         Applied.Due();
     }
 
-    /// <summary>Writes the attribution over the doorway, every frame, while a scene stands.</summary>
+    /// <summary>
+    /// Writes the attribution over the doorway, every frame, while a scene stands.
+    /// </summary>
     [OnUpdate]
     public static void Credit(BehaviorContext ctx)
     {
@@ -553,6 +569,7 @@ public partial struct Packs
         if (_shown is not { } pack) return "no scene pack stands in the zone";
 
         if (ctx.Ecs.IsAlive(_root)) ctx.Ecs.Despawn(_root);
+        SceneFloor.Show(ctx.Ecs, shown: true);
         if (_carried && FittingOf(pack).Alone is not null) Zones.Go(ctx, Zones.All.First(zone => zone.Name == "Scenes"));
         _root = Entity.None;
         _scene = AssetHandle.None;
@@ -566,7 +583,9 @@ public partial struct Packs
         return $"took {pack.Title} away";
     }
 
-    /// <summary>Text broken into lines at spaces, none longer than a width where a word allows.</summary>
+    /// <summary>
+    /// Text broken into lines at spaces, none longer than a width where a word allows.
+    /// </summary>
     private static string Wrap(string text, int width)
     {
         var lines = new List<string>();
@@ -598,11 +617,13 @@ public partial struct Packs
 /// <summary>
 /// How the zone fits a scene, the pieces the player stands on or is stopped by, by their names,
 /// where the attribution is written in the scene's own frame, turned about its Y to face the way it
-/// is read from, and, for a scene that stands alone, where it stands, where in it the player is
-/// put and looks, in its own frame, and the lens the camera holds there at a night hour.
+/// is read from, and, for a scene that stands alone, where it stands, where in it the player is put
+/// and looks, in its own frame, and the lens the camera holds there at a night hour, and for a
+/// scene at the yard's site, whether its ground covers the yard's floor under the site, which
+/// stands hidden while it stands (<see cref="SceneFloor"/>).
 /// </summary>
 internal readonly record struct Fitting(Regex Solid, Vec3 Credit, float Turn, Vec3? Alone = null, Vec3 Start = default, Vec3 Toward = default,
-    PhysicalLens? NightLens = null);
+    PhysicalLens? NightLens = null, bool Covers = false);
 
 /// <summary>The time with plain meshes and with meshlets, as each was last measured.</summary>
 internal sealed record TimingRow() : Row("Time")
@@ -614,7 +635,9 @@ internal sealed record TimingRow() : Row("Time")
     }
 }
 
-/// <summary>A scene pack's row, fetching, loading or unloading it, its bar filling as it fetches.</summary>
+/// <summary>
+/// A scene pack's row, fetching, loading or unloading it, its bar filling as it fetches.
+/// </summary>
 internal sealed record PackRow(ScenePack Pack) : Row(Pack.Title)
 {
     public override string Value => Packs.StateOf(Pack);

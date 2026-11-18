@@ -223,15 +223,16 @@ pictures are the devlog's substance, and one left in a session's scratch space i
 session, as a day's radiance cascade captures were. Each is a WebP under `.github/assets/readings/`,
 named by the date and the item, as `2026-10-24-item-51-emitters.webp`, and its caption in DEVLOG.md,
 which is generated from them, is the line the folder's `captions.md` gives it, the file's name then
-a bar then one sentence, or the commit's sentence where the file has none; a picture of no item
-takes the day and a name. An item that changes what is seen ends with at least one such picture, a
-pair before and after where it mends, and an item built in phases one a phase, so the devlog shows
-the work as it goes and not at a day's end alone; DEVLOG.md is regenerated as each item ends, and
-the commit after carries it as it carries the review's files. A reading worth the devlog's reader
-with no picture to carry it, a table of numbers or a few sentences, is saved beside the pictures as
-a Markdown file named the same way, as `2026-10-25-item-122-resolution.md`, and DEVLOG.md carries it
-on its day under the pictures. By review, the reviewer reading each commit for the pictures its
-report names and regenerating DEVLOG.md as it archives an item.
+a bar then one sentence, which the commit that adds the picture carries, a picture with no such line
+being refused at the commit's check; a picture of no item takes the day and a name. An item that
+changes what is seen ends with at least one such picture, a pair before and after where it mends,
+and an item built in phases one a phase, so the devlog shows the work as it goes and not at a day's
+end alone; DEVLOG.md is regenerated as each item ends, and the commit after carries it as it carries
+the review's files. A reading worth the devlog's reader with no picture to carry it, a table of
+numbers or a few sentences, is saved beside the pictures as a Markdown file named the same way, as
+`2026-10-25-item-122-resolution.md`, and DEVLOG.md carries it on its day under the pictures. By
+review, the reviewer reading each commit for the pictures its report names and regenerating
+DEVLOG.md as it archives an item.
 
 **N 4.9 A picture shows what the words claim, and carries nothing for form's sake.** A plain
 capture, a pair before and after or a collage of views on a white ground, as the sessions made them
@@ -293,6 +294,12 @@ was decided, and the norm's own numbers are named freely. A commit's sentence na
 an audit or which commit of several it is, since the release notes are made of the messages. By
 review, and by STYLE.md's search for the products' and the sessions' words in comments, read rather
 than counted.
+
+**N 4.12 A comment line holds to 100 columns.** A comment is read in a diff and beside its code, and
+one running past the width is cut there or scrolled. A summary, a parameter or a remark too long for
+one line opens onto lines of its own, and a script's docstring holds to the same width. A line
+holding an address or a command alone is free of it. Existing lines are rewrapped as their files are
+touched. By the Tools module's sweep, which counts them.
 
 ## 5 Examples and games
 
@@ -513,6 +520,7 @@ not the code keeps the rule. `by review` is held by the reviewing session.
 | N 4.9 | by review | by review |
 | N 4.10 | by review | by review |
 | N 4.11 | by review, and STYLE.md's search | by review, and STYLE.md's search |
+| N 4.12 | to check, the Tools module's sweep | to check, the Tools module's sweep |
 | N 5.1 | checked, the pack workflow's capture of every example | checked, the pack workflow's capture of every example |
 | N 5.2 | checked, `NormTests.N_5_2` before a commit and `build/examples-table.py --check` in the workflow | checked, `build/examples-table.py --check` in the workflow |
 | N 5.3 | checked, the pack workflow's games | checked, the pack workflow's Courtyard |

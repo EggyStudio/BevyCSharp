@@ -823,7 +823,7 @@ a batch.
     the joints' give under load reads alike for a truss and a bare road, where the solver's
     accumulated impulse for the joint's own constraint over a substep is the force in newtons. So
     the physics API gains the read, the impulse magnitude of the joint's constraint over the last
-    step, its limit and motor apart, costing nothing until called, with its cheat sheet line, the
+    step, its limit and motor apart, costing nothing until called, with its cheatsheet line, the
     surface listing, the upgrading page's entry and the physics guide's paragraph on joints, and a
     test of a box hanging on a distance joint reading its weight within a percent at the substep
     counts the engine runs. One commit, carrying the review's files. Done at `d56e7cb7` on
@@ -871,7 +871,7 @@ a batch.
     through `CreateMesh` from a `MeshData`, written again in place through `WriteMesh` after a
     change, so an entity drawn with it follows the edit, and a collider through a
     `ColliderShape.Mesh` over the built mesh. The surface is a static class `Modeling` beside
-    `Meshes` and `MeshFiles`, over a sealed class `EditMesh`, each call with its cheat sheet line
+    `Meshes` and `MeshFiles`, over a sealed class `EditMesh`, each call with its cheatsheet line
     through the script and the surface listing, and a guide page `docs/modeling.md` with a section
     an operation showing the recipe and what it makes. Tests: a test an operation on exact counts of
     vertices, edges and faces, the signed volume of a closed mesh (a two by three by four box 24, a
@@ -1089,7 +1089,7 @@ a batch.
     and `.png` as an animated PNG, the frames as the format's frame chunks over the engine's PNG
     writer, lossless, which GitHub's pages play as they play a GIF; no library is taken, the
     dependency table allowing none for it and, for a program, `Capture.StartRecording(path,
-    intervalMs)` and `Capture.StopRecording()` with their cheat sheet lines through the script and
+    intervalMs)` and `Capture.StopRecording()` with their cheatsheet lines through the script and
     the surface listing; and a step of its own in the bcs client, `./bcs record <path> <length>
     [--every <step>]`, which sends the command and waits for the file. For captures on disk, a
     script `build/animate.py <out> <pictures...> --delay <ms> [--loop n] [--scale s]` assembles PNG
@@ -1113,7 +1113,7 @@ a batch.
     `2026-10-21_03.45.12.png` and a count where two fall in one second, the second file `_2` and the
     third `_3` as the source's own code counts, read by the game's coder, through the capture the
     `shot` command uses; a line in the log says the path; `Capture.ScreenshotKey` moves it or turns
-    it off with none, and a program that reads F2 itself still sees the press. The cheat sheet line
+    it off with none, and a program that reads F2 itself still sees the press. The cheatsheet line
     through the script, the surface listing and the tools guide's paragraph beside the captures.
     Tests: a press through the input writing a file of the frame's size into the folder in a
     headless run, two in one second given two names, the key moved and turned off. One commit, after
@@ -1163,7 +1163,7 @@ a batch.
     turning them off, and `Debug.AddOverlaySection(string name, Func<IEnumerable<string>> lines)`
     with a remove, the sections drawn in the left column under the engine's own in the order added;
     the diagnostics overlay folded into it where one overlaps. The same keys, layout, words and
-    registration in both engines. The guides' section on the debug keys, the cheat sheet lines
+    registration in both engines. The guides' section on the debug keys, the cheatsheet lines
     through the script, the surface listing and the upgrading entry; the feature test adding a
     section and the voxel game its own when the package comes. Tests: F1 dropping the scope's draws
     and the ImGui windows and keeping the overlay, read from the frame's pixels on the device; F3's
@@ -1315,8 +1315,8 @@ a batch.
     the kernels of item 50 are in its hands. Done at `fda2f62e` on 2026-10-23, the scheme and the
     second test in the head.
 
-58. **The cheat sheet's headers are 3DEngine's, plain group headings and no sub-heading a type
-    (Decision 58).** Decided at 21:39 on 2026-10-23, the cheat sheets are to be coherent: 3DEngine's
+58. **The cheatsheet's headers are 3DEngine's, plain group headings and no sub-heading a type
+    (Decision 58).** Decided at 21:39 on 2026-10-23, the cheatsheets are to be coherent: 3DEngine's
     lines one-liners as BevyCSharp's are, and BevyCSharp's section headers as 3DEngine's, plain
     words without the code styling. Here each group opens with a `##` heading and a guide link, then
     a `###` sub-heading in code styling for every type, `BevyApp`, `App`, `Config` and the rest,
@@ -2473,7 +2473,7 @@ the port is offered upstream (Decision 18).
     moved test classes out, users reading the module through its namespace, Vector3 to Vec3 through
     SkyWeather.FromSky for the wind into the clouds, the froxels, the precipitation and the trees,
     the guide naming the module and the Atmosphere collision; the public listing 108 lines fewer and
-    the cheat sheet 24; 1,982 in the suite, 2,002 less the 20 tests that moved. The module's item 4
+    the cheatsheet 24; 1,982 in the suite, 2,002 less the 20 tests that moved. The module's item 4
     is done for this engine by it.
 
 96. **The vegetation moves to the Vegetation module.** The module's item 3, SHARED.md's row.
@@ -3201,7 +3201,7 @@ the port is offered upstream (Decision 18).
     shadow mended and the crowns' scattered light item 116. Next 116.
 
 108. **The README's last top link is 3DEngine.** Decision 79 on 2026-11-05. The row over the
-    README's title, Devlog and Cheat sheet, ends with a third link, 3DEngine, to
+    README's title, Devlog and Cheatsheet, ends with a third link, 3DEngine, to
     https://github.com/EggyStudio/3DEngine, so each engine's page points at the other as the game's
     points at its engine; nothing else of the README moves. A docs-only change, carried by 105's
     second commit or by a commit of its own, whichever comes first. Done at `4ad66505`, the row
@@ -5890,7 +5890,7 @@ process, on the macOS suites of the push run and the pack run of `35ca43b1` and 
     upgrading page this engine never had stays absent, the Shared row's upgrading guide not kept. A
     decision ends this at the full release.
 
-58. **The two cheat sheets have one form.** Decided at 21:39 on 2026-10-23, the cheat sheets are to
+58. **The two cheatsheets have one form.** Decided at 21:39 on 2026-10-23, the cheatsheets are to
     be coherent: 3DEngine's lines one-liners as BevyCSharp's are, and BevyCSharp's section headers
     as 3DEngine's, plain words without the code styling. So both pages are a `# Cheatsheet` heading,
     a paragraph saying what the page is and what writes it, then `## Group` headings in plain words,
@@ -6631,7 +6631,7 @@ the probes' ninety frames in some runs and those read no pass at all.
 Item 61's colons, in the commit carrying this line. Each hit of STYLE.md's two checks was read, the
 labels, the named arguments, the quoted strings and the component labels of the shaders' comments
 left, and 36 joints recast, in RENDERING.md, docs/components.md, AGENTS.md's three by decision typed
-in this session, the cheat sheet's three through the summaries it is written from, and the comments
+in this session, the cheatsheet's three through the summaries it is written from, and the comments
 of the code, the scripts holding none. ASKS.md's two hits are left to the reviewing session, since
 AGENTS.md has this session write nothing there. STYLE.md's grep misses a colon after a closing tag,
 `</c>:` or `/>:`, which twenty XML summaries held, and `[a-z)\`>]` in its class finds them.
@@ -7058,7 +7058,7 @@ the ceiling a lighter one and stairs the prototyping orange, with door, window a
 were. docs/modeling.md's grid prototyping says both. The picture is 2026-10-26-item-65-palette.webp,
 the room again and a corner of it up close. The whole suite ran in one host at the 3 GB cap with the
 second commit's work beside it, 1,990 passed and 3 skipped, and the level and images tests on a
-headless bridge. No public line changed, and the cheat sheet's line for Images.Grid follows its
+headless bridge. No public line changed, and the cheatsheet's line for Images.Grid follows its
 summary.
 
 Shared: the prototyping look in Unreal's level prototyping palette and a level editor's grid steps,
@@ -7148,7 +7148,7 @@ hinge's motor and limit, a ball joint's cone and a slider's lock, travel and dri
 answers zero for a joint that is gone, a rope with slack, or before the first step. This engine's world solves a
 step in one substep, so the test reads at that count alone, a rope holding a three kilogram box at
 29.416 against its weight of 29.43. This engine has no upgrading page, so the change has the guide's
-paragraph, the cheat sheet's line and the surface listing without one.
+paragraph, the cheatsheet's line and the surface listing without one.
 
 ```
 box X Y Z                 plane X Z                 wedge X Y Z
@@ -7594,7 +7594,7 @@ waiting for one, a departure from the proposal's hulls. Level.Load reads a path 
 LevelSpawner.Load reads the asset through AssetFiles and parses it. EditMesh.Levels goes with the
 mesh it built. The TrenchBroom folder keeps the tree in BevyCSharp.fgd beside the module's
 Levels.fgd, both in the config. The public listing loses the format's 71 lines to the module's
-namespace and Bevy.Levels becomes Bevy.LevelSpawner with the same members (N 2.4); the cheat sheet's
+namespace and Bevy.Levels becomes Bevy.LevelSpawner with the same members (N 2.4); the cheatsheet's
 Levels group is LevelSpawner. docs/levels.md says the module and the binding, and the guide's blocks
 build on a local package with the module's types; the README and BUILDING.md say a clone takes the
 submodule; AGENTS.md's BevyCSharp/Levels row is the binding's by the decision of 2026-10-31 in the
@@ -9241,7 +9241,7 @@ cargo check passed on headless, render and editor, and cargo test passed, 118 wi
 ran, 2,025 passed and 3 skipped in 51 m 39 s at the 3 GB cap, none aborted, its largest process at
 2,746 MB, and one failed, ModifierTests.AStackOfFourBuildsWithinItsBudget at 252 ms against its 200,
 a modeling stack's build timed under the suite's load, which passed alone three times. NormTests
-passed, 18. The public listing gains MaterialBufferUnmasked and the cheat sheet its line.
+passed, 18. The public listing gains MaterialBufferUnmasked and the cheatsheet its line.
 
 Shared: the bridge's reference traces a mesh of a visibility range at the level the eye's distance
 gives, the nearer half of each margin the nearer level's, as Bevy dithers two across it, and its
@@ -9302,7 +9302,7 @@ world's, every yawed tree's bent normals turned wrong about the vertical, is ite
 cargo check passed on headless, render and editor, and cargo test passed, 118 with no feature and
 203 with render. The bridge was built with the editor profile, meshlets and Solari, the picture's
 old side read on a trial bridge and the real one put back. A first whole suite failed only on the
-public listing, MaterialSlotBytes at 80, which build/api.sh wrote again with the cheat sheet, and
+public listing, MaterialSlotBytes at 80, which build/api.sh wrote again with the cheatsheet, and
 the whole suite ran again, 2,028 passed and 3 skipped in 45 m 17 s at the 3 GB cap, none aborted,
 its largest process at 2,774 MB. NormTests passed, 18.
 
@@ -10403,8 +10403,8 @@ planting here draw from it until their parts move.
 The growth is the head's to the bit, the six presets at four seeds each and two trees grown round
 boxes giving the same 72,137 lines of points, parents and radii in the module as in the head. The
 tree guide grows its trees with TreeSkeleton.Grow and names the module, its namespace, its vectors
-and its colors, and the cheat sheet loses the two Grow lines, written again with SpawnPointLight's
-summary as item 121 reworded it, which the cheat sheet had not taken. TreeTests keeps the three
+and its colors, and the cheatsheet loses the two Grow lines, written again with SpawnPointLight's
+summary as item 121 reworded it, which the cheatsheet had not taken. TreeTests keeps the three
 cases that build meshes and the kept skeleton's mesh, split from the refusal that moved, as
 AKeptSkeletonBuildsAsOneGrownDoes. The table of areas in AGENTS.md names TreeSpecies and
 TreeSkeleton in the BevyCSharp/Vegetation row, which are the module's after this commit, and the row
@@ -10443,7 +10443,7 @@ folder added under the folder against the module's bytes. BarkDepthTests keeps i
 its check of the files moved. The recipe makes all 43 files and the sample the same to the byte from
 the module. The tree guide's section on the textures names the module and TreeTextureAssets,
 BUILDING.md's section points at the module's collection and its README, the .gitignore drops the
-waiting folder, which the module's leaves out, and the cheat sheet lists TreeTextureAssets in place
+waiting folder, which the module's leaves out, and the cheatsheet lists TreeTextureAssets in place
 of the two types.
 
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
@@ -10476,7 +10476,7 @@ and 161 patches' places over ten stretches, with the three refusals' types, argu
 GrassTests keeps five of its six, the test of a seed planting the same patch moving to the module
 with the scatter. The two GI test files that plant grass and the feature test's vegetation take the
 module's namespace for GrassSettings, and the tree guide's section on grass names GrassScatter. The
-cheat sheet is the same, GrassSettings having listed no method there.
+cheatsheet is the same, GrassSettings having listed no method there.
 
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
 run gave 2,032 passed and 3 skipped in 52 m 26 s at the 3 GB cap, none aborted, its largest process
@@ -10505,7 +10505,7 @@ AForestIsPlantedWhereTheModuleSpreadsIt, which plants a forest and reads each tr
 species against the module's spread, a forest of a species not registered refused. The feature
 test's level test reads its forests from TreePlanting.Forest, the tests that count the variants read
 TreePlanting.Variants, as the Tree component's documentation does, and the tree guide's section on
-planting names TreePlanting. The cheat sheet is the same, the constant having listed no method
+planting names TreePlanting. The cheatsheet is the same, the constant having listed no method
 there.
 
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
@@ -10576,7 +10576,7 @@ The bridge's comments changed alone, and cargo check passed on headless, render 
 test passed, 118 with no feature and 204 with render, and the bridge was built with the editor
 profile, meshlets and Solari, its shaders' comments with it. The whole suite ran with it, 2,032
 passed and 3 skipped in 52 m 25 s at the 3 GB cap, none aborted, its largest process at 3,003 MB.
-NormTests passed, 18. The public listing and the cheat sheet are unchanged.
+NormTests passed, 18. The public listing and the cheatsheet are unchanged.
 
 Shared: Decision 87's sweep, comments carrying no reading of before and after, no cost measured from
 a run and no account of the trials, a number standing only where the code's choice depends on it
@@ -10649,7 +10649,7 @@ back drawing nothing where a new entity with the same mesh and material draws it
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
 suite ran with the mend, 2,033 passed and 3 skipped in 53 m 46 s at the 3 GB cap, none aborted, its
 largest process at 3,065 MB, one more than item 123's run, the thin wall's probe test. NormTests
-passed, 18. The public listing and the cheat sheet are unchanged.
+passed, 18. The public listing and the cheatsheet are unchanged.
 
 Shared: a probe whose place lies on the middle of a wall thinner than a cell, where the field's hold
 of a thin wall reads nothing on either side and its normal falls back to up, is taken as inside
@@ -10770,7 +10770,7 @@ The guide's line, RENDERING.md's paragraph and Medium's comment in WorldProbes.c
 No native file changed, and the bridge was the editor profile's with meshlets and Solari. The whole
 suite ran with the mend, 2,034 passed and 3 skipped in 51 m 1 s at the 3 GB cap, none aborted, its
 largest process at 3,297 MB, one more than item 97's run, the Low far wall's test. NormTests passed,
-18. The public listing and the cheat sheet are unchanged.
+18. The public listing and the cheatsheet are unchanged.
 
 Shared: a face turned from a low sun reads the ground's sun past the probes as the share of the way
 along its normal out to 32 coarsest cells past the first point the sun reaches, short of the field's
@@ -11543,12 +11543,12 @@ Render.SetGlobalIllumination, Render.SetClouds and ecs.SpawnPointLight, and on 4
 CS0117 for the two members of Render, an instance member of a block compiling to a classic extension
 method as well, which 4.14 read. The generator and the code fixes stay on 4.14, since the compiler
 that runs them brings its own. The documentation file holds each member's comment under the block's
-type, which the class's method carrying the call points to with inheritdoc. The cheat sheet and
+type, which the class's method carrying the call points to with inheritdoc. The cheatsheet and
 CheatsheetTests read the members a block gives a named type as that type's own and leave out the
 classes that carry the calls, so CHEATSHEET.md keeps every line with its summary, 10 lines moving
 within their types' blocks. Nothing in the library, the editor, the script host or the player reads
 Render's or EcsWorld's members by reflection. Its two walks over types look for generated
-registrations alone, and the cheat sheet and the listing, which read members, read the blocks.
+registrations alone, and the cheatsheet and the listing, which read members, read the blocks.
 
 The listing's writer, PublicSurface with ExtensionMembers beside it, lists a member a block of a
 named type gives under that type and leaves out the block's types and a class that carries calls
@@ -11628,7 +11628,7 @@ since 001c630d.
 
 No native file changed. The solution builds with warnings as errors, and the whole suite passed,
 2,040 passed, none failed and 3 skipped. NormTests passed, 18. The public listing is unchanged, and
-the cheat sheet keeps every line, 4 moving within their types' blocks.
+the cheatsheet keeps every line, 4 moving within their types' blocks.
 
 Shared: a lower area that calls into a higher one at a point in its own work takes a hook the higher
 area's plugin adds, the forgetters of a released handle, the observers' watchers and the input's
@@ -11710,7 +11710,7 @@ after the split.
 
 No native file changed. The solution builds with warnings as errors, and the whole suite passed,
 2,043 passed, none failed and 3 skipped. NormTests passed, 19, N 1.6 on the folders. The public
-listing and the cheat sheet are unchanged.
+listing and the cheatsheet are unchanged.
 
 Item 119's split, its second commit, the projects, in the commit carrying this line. Each area's
 folder under BevyCSharp/ is a project, BevyCSharp.<Area>, the Cli folder's BevyCSharp.CliServer,
@@ -11768,12 +11768,12 @@ from. EngineAssemblies in Core loads every engine assembly by name and runs its 
 where an app is made or the console's or the schemas' registry is read, as the sibling's does, so
 Courtyard's ./bcs list names the same 135 commands on the twenty packages as on 0.6.91. Its flag was
 set before the loading in the sibling's form, so another thread read a partial set while the first
-loaded, which the cheat sheet's test caught beside the listing's, and a second flag keeps another
+loaded, which the cheatsheet's test caught beside the listing's, and a second flag keeps another
 thread waiting on the gate until the last is loaded. The reflected wrappers' generator reads
 Core/Generated/bevy-taken-names.txt, the six names the projects above Core give their types, which
 its wrappers keep apart from, so SpriteImageModeValue keeps its name beside SpriteImageMode, and
 ReflectedNameTests holds the list to the assemblies. The script host walks from the flat assembly.
-The listing's writer, the cheat sheet and its test, N 1.1, N 2.10 and the ABI check read every
+The listing's writer, the cheatsheet and its test, N 1.1, N 2.10 and the ABI check read every
 engine assembly.
 
 145 doc comments' crefs naming a type of a project above their own become the name as code text, as
@@ -11792,7 +11792,7 @@ twenty packages starting no slower than on 0.6.91, whose ground is ready in 124 
 
 No native file changed. The solution builds with warnings as errors, and the whole suite passed,
 2,045 passed, none failed and 3 skipped. NormTests passed, 19. The public listing is unchanged line
-for line, and the cheat sheet keeps every line, 6 moving within their types' blocks.
+for line, and the cheatsheet keeps every line, 6 moving within their types' blocks.
 
 Shared: an EngineAssemblies.Load that sets its flag before it loads lets a second thread return and
 read the assemblies loaded so far, which a second flag set after the last one ends, for the
@@ -11874,7 +11874,7 @@ The whole suite's first run on the change failed one test, N 1.4, with PackageSi
 Tests/Build outside an area's folder, and build/norm/1.4.txt lists it by its nature beside the other
 tests of the build scripts. No native file changed. The solution builds with warnings as errors, and
 the whole suite ran again after that line and passed, 2,048 passed, none failed and 3 skipped.
-NormTests passed, 19. The public listing and the cheat sheet are unchanged.
+NormTests passed, 19. The public listing and the cheatsheet are unchanged.
 
 Shared: an engine of several projects packed as one package, the flat project carrying its
 references' assemblies in its lib folder and holding its references private while packing by an item
@@ -11951,7 +11951,7 @@ nothing or a project reaches internals no opening gives, and the list's head say
 
 The whole suite passed, 2,048 passed, none failed and 3 skipped, the listing the same 2,040.
 NormTests passed, 19. No native file changed, the solution builds with warnings as errors, and the
-public listing and the cheat sheet are unchanged, the three types that move being internal.
+public listing and the cheatsheet are unchanged, the three types that move being internal.
 
 Shared: N 1.6's openings listed with why and found by a compilation of each project against the
 others' built assemblies, for the sibling's projects and their InternalsVisibleTo.
@@ -12003,7 +12003,7 @@ left for a read of its own.
 
 The whole suite passed, 2,052 passed, 0 failed and 3 skipped, 2,055 in all where the listing is
 2,044. NormTests passed, 19. No native file changed, the solution builds with warnings as errors,
-and the public listing and the cheat sheet are unchanged. The GI kernels on offsets come next, if on
+and the public listing and the cheatsheet are unchanged. The GI kernels on offsets come next, if on
 this they move no reading.
 
 Shared: a neighbor clamped to the picture's edge gives a step of nothing, whose facing turns with
@@ -12044,7 +12044,7 @@ AFloorUnderASlabThatLetsLightThroughTakesTheSkyLightItsShareLetsThrough on High 
 glow lights' pass this commit changes does not run there. Run alone after the suite, its four cases
 passed with the kernel as it was and as it is. The engine part took 77 minutes where the whole suite
 took 53 the evening before. NormTests passed, 19. No native file changed, the solution builds with
-warnings as errors, and the public listing and the cheat sheet are unchanged.
+warnings as errors, and the public listing and the cheatsheet are unchanged.
 
 Shared: a texel of a half-sized image whose point is its pixel's middle and not its own looks its
 history up less that part, or a still view reads as moving, for the sibling's glow texels, whose
@@ -12097,7 +12097,7 @@ probes off, so it tests something else, and goes with that loss to item 137 by t
 
 The whole suite passed, 2,050 passed, 0 failed and 3 skipped, 2,053 in all where the listing is
 2,042. NormTests passed, 19. The solution builds with warnings as errors, and the public listing and
-the cheat sheet are unchanged.
+the cheatsheet are unchanged.
 
 Shared: a pass's way into the sky taken from the view's own numbers turned by its rotation, and a
 clip position as the matrix's eye plus its turn of the way, for the sibling's sky and passes, and a
@@ -12128,7 +12128,7 @@ test's, and the bar does not read it as settled.
 
 No test is added, none failing before it. The whole suite passed, 2,052 passed, 0 failed and 3
 skipped, 2,055 in all where the listing is 2,044. NormTests passed, 19. No native file changed, the
-solution builds with warnings as errors, and the public listing and the cheat sheet are unchanged.
+solution builds with warnings as errors, and the public listing and the cheatsheet are unchanged.
 
 Shared: the kernels' points of the depth named fromEye as the sibling's are, toward item 138's one
 copy, and the A/B on the kernels alone, which found here none of the normals' loss the sibling met,
@@ -12289,7 +12289,7 @@ beside 0.6.106's.
 
 The whole suite passed, 2,054 passed, 0 failed and 3 skipped, 2,057 in all where the listing is
 2,046. NormTests passed, 19. The solution builds with warnings as errors, and the public listing and
-the cheat sheet are unchanged.
+the cheatsheet are unchanged.
 
 Shared: a library stripped after its build with the full one kept beside its build id, and a crash
 file writing each frame as an offset into the library with the build id, read from the image as it
@@ -12407,7 +12407,7 @@ here reads, is gone from Cargo.toml, interop.rs, Config.cs, the editor's Program
 names the documentation of Bevy's types, and build-native.sh, and from NativeConfig.cs, Native.cs,
 App.HasEditor and capabilities.rs, which said the same. The README, BUILDING.md's profile table,
 PLAY.md and the guide's Hot reload say the watcher is the render profile's, and the guide says the
-rule, Debug on, Release off, the program deciding where it sets it. The cheat sheet lists
+rule, Debug on, Release off, the program deciding where it sets it. The cheatsheet lists
 BuildDefaults beside Config, and its line for Prune follows the summary 140 wrote. PublicApi.txt
 gains AssetReloaded, BuildDefaults, Config.WatchAssetsVariable and WorldInstanceReady's Reloaded.
 
@@ -14609,7 +14609,7 @@ taken from [SHARED.md](SHARED.md).
    test that asks for it, and the third repeated line is the 67 errors `ShaderMaterialTests` asks
    for (Decision 7). Package 0.4 is ready to pack on Bevy 0.20 (Decision 8), `a54dda9e`'s run green
    and item 3's steps in at `c9c460df`, and Verdicts 2 and 3 settle on that pack run's page. The
-   cheat sheet is its writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which
+   cheatsheet is its writer's again at `d6764154`. N 4.7's list in `NormTests` names ASKS.md, which
    is in, and the hand-made `5a7f2c07` is on `build/norm/7.2.txt`, both at `5bbbe1a5`. The run of
    `60141490`, with `e9a8508e`'s mesh shaders and Verdict 9's mend, is green on all three, and each
    system skips three more than `2359425d`'s run, the three mesh shader tests, so the workflow's
@@ -15184,7 +15184,7 @@ taken from [SHARED.md](SHARED.md).
     as before it, the two counts said in its Reply. The extension blocks carry the global
     illumination's and the sky's parts of Render and EcsWorld's spawn helpers, and beside the
     listing reading the same lines the cut shows that the script host's compiler resolves an
-    extended member in a script, that the cheat sheet and the documentation comments follow, and
+    extended member in a script, that the cheatsheet and the documentation comments follow, and
     that nothing reads Render's or EcsWorld's members by reflection and so loses them. The sky's
     edge to the audio for the thunder is cut as the animation's events are, the audio's plugin
     playing an event the sky raises, unless a reason against it is found. Each cut is a commit with
@@ -15203,7 +15203,7 @@ taken from [SHARED.md](SHARED.md).
     The fifth is `04394b88`, global illumination's 5 members of Render in an extension block of
     RenderGlobalIllumination, the sky's 8 in one of RenderSky and the world's 3 spawn helpers in one
     of EcsWorldSpawning, no call site changed and PublicApi.txt the same line for line, the
-    listing's writer and the cheat sheet reading a block's members as their type's own. The review's
+    listing's writer and the cheatsheet reading a block's members as their type's own. The review's
     three checks hold. The script host's compiler was Roslyn 4.14, which reads a static member of a
     block as the block's class's alone, so the host and the tests' workspace layer go to 5.0.0, the
     SDK's compiler, the generator and the code fixes staying on 4.14, with a test that a script

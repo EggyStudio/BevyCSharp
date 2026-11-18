@@ -22,6 +22,24 @@ the difference.
 Sponza's atrium in the reference at noon, its dirt decals dark patches traced whole at the head and
 blended over the stone by their alpha as the picture shows them mended, red in the difference.
 
+![](.github/assets/readings/2026-11-18-item-150-field-decals.webp)
+Sponza's atrium at noon with its decals standing in the scene's field as walls of their dirt at the
+head and left out of it mended, the walls and arches lighter where the probes see the stone, red in
+the difference.
+
+![](.github/assets/readings/2026-11-18-item-150-atrium-matched.webp)
+Sponza's atrium at noon in 3DEngine and in the bridge from one view, the day held still under a
+clear sky at latitude -4.25 and 12:17 so the sun leans as the sibling's, the sun held at 119,343 lux
+and 5,633 K, the Tonemapper look with AgX and the camera at ISO 200, 1/25 s and f/16, the bridge
+veiled and gray under Bevy's atmosphere and as warm as 3DEngine with the dusk backdrop alone on its
+last row, darker there without the sky's light.
+
+![](.github/assets/readings/2026-11-18-item-150-yard-floor.webp)
+Sponza's atrium at noon with the scenes yard's white floor in the scene's field under Sponza's at
+the head and hidden while Sponza stands mended, the day held still under a clear sky at latitude 6,
+the sun held at 120,000 lux, the Tonemapper look with AgX and the camera at ISO 200, 1/200 s and
+f/16, the walls under the arcades darker toward the reference, blue in the difference.
+
 ## 2026-11-17
 
 ![](.github/assets/readings/2026-11-17-item-148-bistro-day-and-night.webp)
@@ -1703,7 +1721,7 @@ Done that day
 - Item 55 at `135e43b5`. The README's animated capture of Swarm goes.
 - Item 56 at `fda2f62e`. The bridge's Slang modules give their names plainly, as 3DEngine's do, with
   no `bcs_*::` before them (Decision 56).
-- Item 58 at `66e2b067`. The cheat sheet's headers are 3DEngine's, plain group headings and no sub-
+- Item 58 at `66e2b067`. The cheatsheet's headers are 3DEngine's, plain group headings and no sub-
   heading a type (Decision 58).
 
 ## 2026-10-21

@@ -8,19 +8,19 @@ namespace Bevy.Tests;
 /// <summary>
 /// The feature test's level, its plaza, a walled court round each zone where the zone stands, the
 /// corridors that join them, the light hall, the gallery's wall, the course's stations, the
-/// playground's mound, the meadow's raised walkway and trees and the place in the scenes yard where a
-/// scene stands, written by the generator here and held to it.
+/// playground's mound, the meadow's raised walkway and trees and the place in the scenes yard where
+/// a scene stands, written by the generator here and held to it.
 /// </summary>
 /// <remarks>
 /// <para>
 /// The file is the level the feature test loads, and an editor may change it. A change the
-/// generator should make, as one the shapes' helpers bring, is written by running this class's tests
-/// with <c>BCS_WRITE_LEVELS=1</c>, and the file is then held to the generator again.
+/// generator should make, as one the shapes' helpers bring, is written by running this class's
+/// tests with <c>BCS_WRITE_LEVELS=1</c>, and the file is then held to the generator again.
 /// </para>
 /// <para>
-/// The generator works in the feature test's meters, X east, Y up and Z south, and writes the file's
-/// units, 32 a meter with Z up, the file's Y the feature test's minus Z. The floors' tops are the
-/// ground's height, where the level's root stands, and the plaza's four units over it.
+/// The generator works in the feature test's meters, X east, Y up and Z south, and writes the
+/// file's units, 32 a meter with Z up, the file's Y the feature test's minus Z. The floors' tops
+/// are the ground's height, where the level's root stands, and the plaza's four units over it.
 /// </para>
 /// </remarks>
 public sealed class FeatureTestLevelTests
@@ -45,14 +45,20 @@ public sealed class FeatureTestLevelTests
     private const double CourtWall = 10;
     private const double YardWall = 16;
 
-    // Where each zone's player starts, as the feature test's Zones put it, eyes 1.7 m over the feet.
+    // Where each zone's player starts, as the feature test's Zones put it, eyes 1.7 m over the
+    // feet.
     private static readonly (string Zone, double X, double Y, double Z)[] Starts =
     [
         ("hub", 0, FloorTop / Units, 6), ("course", 46, 0, 0), ("gallery", -50, 0, 0),
         ("lights", 0, 0, -18), ("vegetation", 0, 0, 50), ("scenes", 45, 0, -45),
     ];
 
-    private static string LevelPath => Path.Combine(CheatsheetTests.RepositoryRoot(), "games", "FeatureTest", "assets", "levels", "feature-test.map");
+    internal static string LevelPath => Path.Combine(CheatsheetTests.RepositoryRoot(), "games", "FeatureTest", "assets", "levels", "feature-test.map");
+
+    // Sponza's outline at the ground, its exterior's box in its own frame, its middle along its
+    // length and across it and its half length and half width two centimeters inside its walls'
+    // outer faces, so the yard's floor reaches under the walls and none of it shows round them.
+    private const double SponzaAlong = 1.878, SponzaAcross = 0.497, SponzaHalfLength = 18.10, SponzaHalfWidth = 9.88;
 
     /// <summary>The level as the generator builds it.</summary>
     internal static Level Generate()
@@ -75,8 +81,8 @@ public sealed class FeatureTestLevelTests
         Course(brushes);
         Mound(brushes);
 
-        // The corridors from the plaza's doorways, each six meters wide, the west one an aisle and an
-        // arcade beside it, the south one under arches, the north-east one along the diagonal.
+        // The corridors from the plaza's doorways, each six meters wide, the west one an aisle and
+        // an arcade beside it, the south one under arches, the north-east one along the diagonal.
         Floor(brushes, 9, 44, -3, 3);
         brushes.AddRange(Wall((9.25, -3), (44, -3), CorridorWall));
         brushes.AddRange(Wall((9.25, 3), (44, 3), CorridorWall));
@@ -98,7 +104,8 @@ public sealed class FeatureTestLevelTests
         brushes.AddRange(Wall((3, -9.25), (3, -23.85), CorridorWall));
 
         // The north-east corridor runs from the plaza to the scenes yard's cut corner, where the
-        // corner's line, x minus z at 86, meets the diagonal 86 over the root of two from the middle.
+        // corner's line, x minus z at 86, meets the diagonal 86 over the root of two from the
+        // middle.
         var reach = 86 / Math.Sqrt(2);
         var diagonal = LevelBrush.Box(new LevelPoint(9 * Units, -3 * Units, -0.5 * Units), new LevelPoint(reach * Units, 3 * Units, 0), "proto/floor");
         brushes.Add(diagonal.Turned(45, new LevelPoint(0, 0, 0)));
@@ -106,7 +113,8 @@ public sealed class FeatureTestLevelTests
         foreach (var side in new[] { -3.0, 3 })
             brushes.AddRange(Wall((9.25 * way.Item1 + side * across.Item1, 9.25 * way.Item2 + side * across.Item2), (reach * way.Item1 + side * across.Item1, reach * way.Item2 + side * across.Item2), CorridorWall));
 
-        // Where the player starts, six meters south of the middle on the plaza's floor, facing north.
+        // Where the player starts, six meters south of the middle on the plaza's floor, facing
+        // north.
         var start = new LevelEntity();
         start["classname"] = "info_player_start";
         start["origin"] = $"0 -192 {FloorTop.ToString(System.Globalization.CultureInfo.InvariantCulture)}";
@@ -117,6 +125,7 @@ public sealed class FeatureTestLevelTests
         level.Entities.Add(start);
         level.Entities.AddRange(Meadow());
         level.Entities.Add(SceneSite());
+        level.Entities.Add(SiteFloor());
         return level;
     }
 
@@ -137,11 +146,39 @@ public sealed class FeatureTestLevelTests
     }
 
     /// <summary>
-    /// The meadow's trees, aspens and oaks by turns in a ring round its grass, two bushes and a fern
-    /// in it and a forest of tupelos and one of aspens behind it to the south, each a tree of the
-    /// engine's class standing at its trunk's foot with its species and its seed, the forests spread
-    /// as <see cref="Trees.PlantForest"/> spreads them. The grass and the soil under it stay the
-    /// feature test's own, since the engine draws grass over a place rather than from a class.
+    /// The yard's floor under the scenes' site, drawn to Sponza's outline, an entity of a class the
+    /// engine does not know, which the feature test's SceneFloor hides while a scene that covers it
+    /// stands, so the scene field holds the scene's own floor alone there.
+    /// </summary>
+    private static LevelEntity SiteFloor()
+    {
+        var (west, south, east, north) = SponzasCorners();
+        var floor = new LevelEntity();
+        floor["classname"] = "func_scene_floor";
+        floor.Brushes.Add(Slab([west, south, east, north]));
+        return floor;
+    }
+
+    /// <summary>
+    /// The corners of Sponza's outline at the site in meters, the one furthest west, then those
+    /// furthest south, east and north, the outline turned a quarter and a half off the yard's
+    /// sides.
+    /// </summary>
+    private static ((double X, double Z) West, (double X, double Z) South, (double X, double Z) East, (double X, double Z) North) SponzasCorners()
+    {
+        static (double X, double Z) Placed(double along, double across) =>
+            (Math.Round(70 - (along + across) / Math.Sqrt(2), 6), Math.Round(-70 + (along - across) / Math.Sqrt(2), 6));
+        var (along, across) = (SponzaHalfLength, SponzaHalfWidth);
+        return (Placed(SponzaAlong + along, SponzaAcross + across), Placed(SponzaAlong + along, SponzaAcross - across),
+            Placed(SponzaAlong - along, SponzaAcross - across), Placed(SponzaAlong - along, SponzaAcross + across));
+    }
+
+    /// <summary>
+    /// The meadow's trees, aspens and oaks by turns in a ring round its grass, two bushes and a
+    /// fern in it and a forest of tupelos and one of aspens behind it to the south, each a tree of
+    /// the engine's class standing at its trunk's foot with its species and its seed, the forests
+    /// spread as <see cref="Trees.PlantForest"/> spreads them. The grass and the soil under it stay
+    /// the feature test's own, since the engine draws grass over a place rather than from a class.
     /// </summary>
     private static IEnumerable<LevelEntity> Meadow()
     {
@@ -174,7 +211,10 @@ public sealed class FeatureTestLevelTests
         }
     }
 
-    /// <summary>The plaza, an octagon of walls round a floor of a square's planes and the same square's turned an eighth, a doorway in five of its walls.</summary>
+    /// <summary>
+    /// The plaza, an octagon of walls round a floor of a square's planes and the same square's
+    /// turned an eighth, a doorway in five of its walls.
+    /// </summary>
     private static void Plaza(List<LevelBrush> brushes)
     {
         var origin = new LevelPoint(0, 0, 0);
@@ -199,7 +239,8 @@ public sealed class FeatureTestLevelTests
 
     /// <summary>
     /// A court, a floor and four walls round it from one corner to the other, a doorway in a wall
-    /// where given, its distance along the wall from its west or north end, its width and its height.
+    /// where given, its distance along the wall from its west or north end, its width and its
+    /// height.
     /// </summary>
     private static void Court(
         List<LevelBrush> brushes, double x0, double x1, double z0, double z1, double height,
@@ -219,8 +260,8 @@ public sealed class FeatureTestLevelTests
 
     /// <summary>
     /// The meadow court's raised walkway along its west wall, four meters up on pillars with a rail
-    /// on its open side, and a ramp down from each end, so the meadow is seen from above inside walls
-    /// higher than an eye on it.
+    /// on its open side, and a ramp down from each end, so the meadow is seen from above inside
+    /// walls higher than an eye on it.
     /// </summary>
     private static void Walkway(List<LevelBrush> brushes)
     {
@@ -232,11 +273,22 @@ public sealed class FeatureTestLevelTests
         brushes.Add(Ramp((-28.25, 118), (-28.25, South), 3, Top));
     }
 
-    /// <summary>The scenes yard round Sponza's site, its corner toward the plaza cut away by a wall with the north-east corridor's doorway.</summary>
+    /// <summary>
+    /// The scenes yard round Sponza's site, its corner toward the plaza cut away by a wall with the
+    /// north-east corridor's doorway, and its floor round Sponza's outline, the floor within the
+    /// outline an entity of its own (<see cref="SiteFloor"/>).
+    /// </summary>
     private static void Yard(List<LevelBrush> brushes)
     {
         const double X0 = 38, X1 = 104, Z0 = -104, Z1 = -36;
-        Floor(brushes, X0, X1, Z0, Z1);
+
+        // A line due west, south, east and north from the outline's corner furthest that way to the
+        // yard's side parts the floor round the outline into four pieces, each convex.
+        var (west, south, east, north) = SponzasCorners();
+        brushes.Add(Slab([(X0, west.Z), west, south, (south.X, Z1), (X0, Z1)]));
+        brushes.Add(Slab([(south.X, Z1), south, east, (X1, east.Z), (X1, Z1)]));
+        brushes.Add(Slab([(X1, east.Z), east, north, (north.X, Z0), (X1, Z0)]));
+        brushes.Add(Slab([(north.X, Z0), north, west, (X0, west.Z), (X0, Z0)]));
         var cut = 12 * Math.Sqrt(2);
         brushes.AddRange(Wall((X0, Z0 - 0.25), (X0, -48), YardWall));
         brushes.AddRange(Wall((X0, -48), (50, Z1), YardWall, (cut / 2, 4, 5)));
@@ -246,11 +298,11 @@ public sealed class FeatureTestLevelTests
     }
 
     /// <summary>
-    /// The light hall at the end of the corridor north of the plaza, its floor, its walls five and a
-    /// half meters high, a rounded doorway toward the plaza, the partitions between its bays, the
-    /// walls along its aisle with an arch into each bay, their piers meeting the partitions, and its
-    /// roof, so its bays' lights light a shut room. The feature test's Lights stands its bays' lights
-    /// at the same front and back.
+    /// The light hall at the end of the corridor north of the plaza, its floor, its walls five and
+    /// a half meters high, a rounded doorway toward the plaza, the partitions between its bays, the
+    /// walls along its aisle with an arch into each bay, their piers meeting the partitions, and
+    /// its roof, so its bays' lights light a shut room. The feature test's Lights stands its bays'
+    /// lights at the same front and back.
     /// </summary>
     private static void Hall(List<LevelBrush> brushes)
     {
@@ -277,29 +329,29 @@ public sealed class FeatureTestLevelTests
 
     /// <summary>
     /// The wall across the gallery court that the spheres stand against, which parts the court into
-    /// two rooms, the spheres and the edit mesh's primitives east of it, where the corridor comes in,
-    /// and the Cornell box and the room cut by booleans west of it. An arch north of the spheres
-    /// frames the box from the east room, wide and high enough that the box and its name over it
-    /// show whole through it, and one south of them opens toward the room's door. The wall is lower
-    /// than the court's, so it reads as a partition.
+    /// two rooms, the spheres and the edit mesh's primitives east of it, where the corridor comes
+    /// in, and the Cornell box and the room cut by booleans west of it. An arch north of the
+    /// spheres frames the box from the east room, wide and high enough that the box and its name
+    /// over it show whole through it, and one south of them opens toward the room's door. The wall
+    /// is lower than the court's, so it reads as a partition.
     /// </summary>
     private static void Gallery(List<LevelBrush> brushes) =>
         brushes.AddRange(Walls((-64.2, -19.75), (-64.2, 20.75), 8.6, 0.3, (6.75, 5.4, 5.6), (27.75, 4, 4)));
 
     /// <summary>
     /// The course's stations that stand still, in three rows east of its start where the feature
-    /// test's Course tries the player on them, and a wall with two arches parting the course from the
-    /// playground south of it. What the character climbs is the prototyping orange, what it cannot
-    /// climb red and a ledge or a landing the walls' gray, so a station says at a look which it is.
-    /// The ice, the bounce pad, the conveyor, the pit and what moves are the feature test's own,
-    /// since what a surface does to the player is read from the entity under it.
+    /// test's Course tries the player on them, and a wall with two arches parting the course from
+    /// the playground south of it. What the character climbs is the prototyping orange, what it
+    /// cannot climb red and a ledge or a landing the walls' gray, so a station says at a look which
+    /// it is. The ice, the bounce pad, the conveyor, the pit and what moves are the feature test's
+    /// own, since what a surface does to the player is read from the entity under it.
     /// </summary>
     private static void Course(List<LevelBrush> brushes)
     {
-        // The north row climbs. Ramps at 15, 30, 45 and 60 degrees from a foot at x 50 to landings a
-        // meter and a half up, the last steeper than the character's 46 stands on, and east of them
-        // stairs of steps 0.15, 0.25 and 0.4 high, the last over its step height of 0.35, each lane
-        // two and a half meters wide.
+        // The north row climbs. Ramps at 15, 30, 45 and 60 degrees from a foot at x 50 to landings
+        // a meter and a half up, the last steeper than the character's 46 stands on, and east of
+        // them stairs of steps 0.15, 0.25 and 0.4 high, the last over its step height of 0.35, each
+        // lane two and a half meters wide.
         const double Rise = 1.5, Lane = 2.5, Tread = 0.35;
         double[] angles = [15, 30, 45, 60];
         for (var i = 0; i < angles.Length; i++)
@@ -322,8 +374,8 @@ public sealed class FeatureTestLevelTests
             brushes.Add(Block(landing, landing + 2, 0, steps[flight] * count, z - Lane / 2, z + Lane / 2, "proto/wall"));
         }
 
-        // A beam a third of a meter wide and a meter up between two landings, steps up to the first,
-        // and a tunnel 1.3 m high, too low to stand in and crawled through crouched.
+        // A beam a third of a meter wide and a meter up between two landings, steps up to the
+        // first, and a tunnel 1.3 m high, too low to stand in and crawled through crouched.
         Steps(brushes, 73.825, -8);
         brushes.Add(Block(75.75, 77.25, 0, 1, -9, -7, "proto/wall"));
         brushes.Add(Block(77.25, 86.75, 0.8, 1, -8.165, -7.835, "proto/stairs"));
@@ -332,10 +384,10 @@ public sealed class FeatureTestLevelTests
         brushes.Add(Block(78, 86, 0, 1.3, -12, -11.6, "proto/wall"));
         brushes.Add(Block(78, 86, 1.3, 1.7, -14.4, -11.6, "proto/ceiling"));
 
-        // The middle row tries the ground underfoot, and the ledge over its bounce pad stands too high
-        // to jump to. The south row moves, between ledges the platform runs to and fro over, the
-        // ledge the elevator lifts to, and six ledges with gaps from a meter to three between them, up
-        // steps at their start.
+        // The middle row tries the ground underfoot, and the ledge over its bounce pad stands too
+        // high to jump to. The south row moves, between ledges the platform runs to and fro over,
+        // the ledge the elevator lifts to, and six ledges with gaps from a meter to three between
+        // them, up steps at their start.
         brushes.Add(Block(68.5, 71.5, 0, 5, -2, 2, "proto/wall"));
         brushes.Add(Block(50.5, 53.5, 0, 1.5, 8.5, 11.5, "proto/wall"));
         brushes.Add(Block(62.5, 65.5, 0, 1.5, 8.5, 11.5, "proto/wall"));
@@ -349,12 +401,14 @@ public sealed class FeatureTestLevelTests
             x += gap + 1.5;
         }
 
-        // The wall between the course and the playground, lower than the court's, with an arch at each
-        // end of the playground.
+        // The wall between the course and the playground, lower than the court's, with an arch at
+        // each end of the playground.
         brushes.AddRange(Wall((44.25, 18), (115.75, 18), 5, (14, 4, 4), (50, 4, 4)));
     }
 
-    /// <summary>Four steps up to a meter, each a tread deep and a quarter meter higher, two meters wide.</summary>
+    /// <summary>
+    /// Four steps up to a meter, each a tread deep and a quarter meter higher, two meters wide.
+    /// </summary>
     private static void Steps(List<LevelBrush> brushes, double x, double z)
     {
         for (var i = 0; i < 4; i++)
@@ -362,8 +416,8 @@ public sealed class FeatureTestLevelTests
     }
 
     /// <summary>
-    /// The playground's mound, three terraces a meter over each other, each up a ramp from the west,
-    /// where a body dropped on it lands on the top.
+    /// The playground's mound, three terraces a meter over each other, each up a ramp from the
+    /// west, where a body dropped on it lands on the top.
     /// </summary>
     private static void Mound(List<LevelBrush> brushes)
     {
@@ -382,11 +436,46 @@ public sealed class FeatureTestLevelTests
     private static void Floor(List<LevelBrush> brushes, double x0, double x1, double z0, double z1) =>
         brushes.Add(Block(x0, x1, -0.5, 0, z0, z1, "proto/floor"));
 
+    /// <summary>
+    /// A floor half a meter deep over a convex outline of the ground, its corners in meters wound
+    /// either way, its top the ground's, each face's three points wound as the file winds them and
+    /// its material along the axes of the world's plane it is nearest, as a new face's runs.
+    /// </summary>
+    private static LevelBrush Slab(IReadOnlyList<(double X, double Z)> outline)
+    {
+        var corners = outline.Select(corner => At(corner.X, 0, corner.Z)).ToList();
+        var (low, high) = (-0.5 * Units, 0.0);
+        var inside = new LevelPoint(corners.Average(corner => corner.X), corners.Average(corner => corner.Y), (low + high) / 2);
+        var brush = new LevelBrush();
+        void Face(LevelPoint a, LevelPoint b, LevelPoint c)
+        {
+            var face = new LevelFace(a, b, c, "proto/floor", default, 0, default, 0, 0, LevelBrush.DefaultScale, LevelBrush.DefaultScale);
+            if (Dot(face.Normal, inside - b) > 0) face = face with { First = c, Third = a };
+            var (x, y, z) = (Math.Abs(face.Normal.X), Math.Abs(face.Normal.Y), Math.Abs(face.Normal.Z));
+            var (u, v) = z >= x && z >= y ? (new LevelPoint(1, 0, 0), new LevelPoint(0, -1, 0))
+                : x >= y ? (new LevelPoint(0, 1, 0), new LevelPoint(0, 0, -1)) : (new LevelPoint(1, 0, 0), new LevelPoint(0, 0, -1));
+            brush.Faces.Add(face with { UAxis = u, VAxis = v });
+        }
+
+        LevelPoint Raised(LevelPoint corner, double height) => new(corner.X, corner.Y, height);
+        for (var i = 0; i < corners.Count; i++)
+        {
+            var (a, b) = (corners[i], corners[(i + 1) % corners.Count]);
+            Face(Raised(a, low), Raised(b, low), Raised(a, high));
+        }
+
+        Face(Raised(corners[0], low), Raised(corners[1], low), Raised(corners[2], low));
+        Face(Raised(corners[0], high), Raised(corners[1], high), Raised(corners[2], high));
+        return brush;
+    }
+
     /// <summary>A block between two corners in meters.</summary>
     private static LevelBrush Block(double x0, double x1, double y0, double y1, double z0, double z1, string material) =>
         LevelBrush.Box(At(x0, y0, z1), At(x1, y1, z0), material);
 
-    /// <summary>A point in meters, X east, Y up over the ground and Z south, in the file's units.</summary>
+    /// <summary>
+    /// A point in meters, X east, Y up over the ground and Z south, in the file's units.
+    /// </summary>
     private static LevelPoint At(double x, double y, double z) => new(x * Units, -z * Units, y * Units);
 
     private static IEnumerable<LevelBrush> Wall((double X, double Z) from, (double X, double Z) to, double height, params (double Along, double Width, double Height)[] openings) =>
@@ -395,7 +484,8 @@ public sealed class FeatureTestLevelTests
     /// <summary>
     /// A wall from one point of the ground to another, centered on the line between them, its
     /// rounded openings at their distances along it from its start, each in a stretch of wall a
-    /// meter wider each side, made along the file's X at the origin and turned and moved into place.
+    /// meter wider each side, made along the file's X at the origin and turned and moved into
+    /// place.
     /// </summary>
     private static IEnumerable<LevelBrush> Walls((double X, double Z) from, (double X, double Z) to, double height, double thickness, params (double Along, double Width, double Height)[] openings)
     {
@@ -420,7 +510,10 @@ public sealed class FeatureTestLevelTests
         return pieces.Select(piece => (turn == 0 ? piece : piece.Turned(turn, origin)).Moved(At(from.X, 0, from.Z)));
     }
 
-    /// <summary>A ramp from one point to another at a height over the ground, as wide as given, rising from that height at its start by its rise at its end.</summary>
+    /// <summary>
+    /// A ramp from one point to another at a height over the ground, as wide as given, rising from
+    /// that height at its start by its rise at its end.
+    /// </summary>
     private static LevelBrush Ramp((double X, double Z) from, (double X, double Z) to, double width, double rise, string material = "proto/stairs", double foot = 0)
     {
         var (dx, dz) = (to.X - from.X, to.Z - from.Z);
@@ -462,8 +555,8 @@ public sealed class FeatureTestLevelTests
         var brushes = level.World!.Brushes;
         Assert.All(brushes, brush => Assert.NotEmpty(brush.Polygons().OfType<LevelPoint[]>()));
 
-        // Two meters up from the middle out past the plaza's walls, nothing stands in the way toward
-        // each zone, and a wall stands in it the three ways between.
+        // Two meters up from the middle out past the plaza's walls, nothing stands in the way
+        // toward each zone, and a wall stands in it the three ways between.
         bool Open(double turn)
         {
             var angle = (turn + 90) * Math.PI / 180;
@@ -500,14 +593,14 @@ public sealed class FeatureTestLevelTests
         var brushes = level.World!.Brushes;
         var trees = level.Entities.Where(entity => entity.ClassName == "tree").ToList();
 
-        // The ring's ten, the two bushes and the fern, and the forests' fifteen, each of a species the
-        // engine registers.
+        // The ring's ten, the two bushes and the fern, and the forests' fifteen, each of a species
+        // the engine registers.
         Assert.Equal(28, trees.Count);
         Assert.All(trees, tree => Assert.NotNull(Trees.Species(tree["species"] ?? "")));
 
         // Each stands on a floor with the sky over it and no wall within a meter and a half of its
-        // trunk, the walkway's pillars and ramps among them, and no other trunk within a meter and a
-        // half of it.
+        // trunk, the walkway's pillars and ramps among them, and no other trunk within a meter and
+        // a half of it.
         var feet = trees
             .Select(tree => tree["origin"]!.Split(' ').Select(part => double.Parse(part, System.Globalization.CultureInfo.InvariantCulture)).ToArray())
             .Select(at => new LevelPoint(at[0], at[1], at[2]))
@@ -531,19 +624,63 @@ public sealed class FeatureTestLevelTests
     public void TheScenesSiteStandsOnTheYardsFloorFacingTheWayFromThePlaza()
     {
         var level = Level.Parse(File.ReadAllText(LevelPath), LevelPath);
-        var brushes = level.World!.Brushes;
+        var brushes = level.World!.Brushes.Concat(level.Entities.Where(entity => entity.ClassName == "func_scene_floor").SelectMany(entity => entity.Brushes)).ToList();
         var site = level.Entities.Single(entity => entity.ClassName == "info_scene");
         Assert.Equal(("2240 2240 0", "225"), (site["origin"], site["angle"]));
 
-        // On the yard's floor with the sky over it, and from two meters up the way its arrow points,
-        // the file's yaw of 225 degrees, nothing stands before the corridor's doorway in the yard's
-        // cut corner, 38 m on, so the scene's door faces the way the player comes from the plaza.
+        // On the yard's floor with the sky over it, and from two meters up the way its arrow
+        // points, the file's yaw of 225 degrees, nothing stands before the corridor's doorway in
+        // the yard's cut corner, 38 m on, so the scene's door faces the way the player comes from
+        // the plaza.
         var foot = At(70, 0, -70);
         Assert.True(Hit(brushes, foot + new LevelPoint(0, 0, Units), new LevelPoint(0, 0, -1), 1.2 * Units) is { } below && below >= Units - 1, "the scenes' site stands on no floor");
         Assert.Null(Hit(brushes, foot + new LevelPoint(0, 0, 0.2 * Units), new LevelPoint(0, 0, 1), 40 * Units));
         var way = new LevelPoint(-Math.Sqrt(0.5), -Math.Sqrt(0.5), 0);
         Assert.Null(Hit(brushes, At(70, 2, -70), way, 40 * Units));
     }
+
+    [Fact]
+    public void TheYardsFloorUnderTheScenesSiteIsAnEntityOfItsOwnDrawnToSponzasOutline()
+    {
+        var level = Level.Parse(File.ReadAllText(LevelPath), LevelPath);
+        var world = level.World!.Brushes;
+        var floors = level.Entities.Where(entity => entity.ClassName == "func_scene_floor").ToList();
+        Assert.True(floors.Count == 1, $"the level holds {floors.Count} floors under the scenes' site");
+        var site = floors[0].Brushes;
+
+        // From a meter over the ground, a ray down within Sponza's outline meets that floor a meter
+        // on and the world's none, and one outside it within the yard meets the world's and not
+        // that floor, a meter apart across the yard but within ten centimeters of the outline.
+        var (inside, outside) = (0, 0);
+        var down = new LevelPoint(0, 0, -1);
+        for (var x = 38.5; x < 104; x += 1)
+        for (var z = -103.5; z < -36; z += 1)
+        {
+            var (along, across) = InSponza(x, z);
+            var past = Math.Max(Math.Abs(along - SponzaAlong) - SponzaHalfLength, Math.Abs(across - SponzaAcross) - SponzaHalfWidth);
+            if (Math.Abs(past) < 0.1) continue;
+            var (onSite, onWorld) = (Hit(site, At(x, 1, z), down, 1.2 * Units), Hit(world, At(x, 1, z), down, 1.2 * Units));
+            if (past < 0)
+            {
+                inside++;
+                Assert.True(onSite is { } met && Math.Abs(met - Units) < 1e-3 && onWorld is null, $"under {x}, {z} in Sponza's outline the site's floor lies {onSite} on and the world's {onWorld}");
+            }
+            else
+            {
+                outside++;
+                Assert.True(onSite is null && onWorld is not null, $"under {x}, {z} outside Sponza's outline the site's floor lies {onSite} on and the world's {onWorld}");
+            }
+        }
+
+        Assert.True(inside > 600 && outside > 3000, $"{inside} points within the outline and {outside} outside it");
+    }
+
+    /// <summary>
+    /// Where a point of the ground in meters lies in Sponza's frame at the site, along its length
+    /// toward its main door and across it.
+    /// </summary>
+    private static (double Along, double Across) InSponza(double x, double z) =>
+        (((70 - x) + (z + 70)) / Math.Sqrt(2), ((70 - x) - (z + 70)) / Math.Sqrt(2));
 
     [Fact]
     public void NoHorizonShowsFromAnyStartOrAnyHeightThePlayerReaches()
@@ -559,8 +696,9 @@ public sealed class FeatureTestLevelTests
         }
 
         // From every start, the walkway's middle, each of its ramps' tops, the ledge the course's
-        // elevator lifts to and the playground mound's top, at an eye's height, a wall stands across
-        // every level way within the level, so the sky shows over walls and never the horizon.
+        // elevator lifts to and the playground mound's top, at an eye's height, a wall stands
+        // across every level way within the level, so the sky shows over walls and never the
+        // horizon.
         (string, double, double, double)[] eyes =
         [
             .. Starts.Select(start => (start.Zone, start.X, start.Y + 1.7, start.Z)),
