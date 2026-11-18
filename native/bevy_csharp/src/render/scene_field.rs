@@ -377,10 +377,11 @@ mod built {
     /// field color where it has one, its roughness, metal and emission times their textures' means
     /// alike (`field_means`), sends through to its far side the share its diffuse transmission and
     /// its texture give, and lets through the share its material was given. A tree's impostor is
-    /// left out, its one quad standing for the whole tree only as it is drawn. A mesh with a
-    /// visibility range is taken where the eye the field lies around stands within it, as Bevy
-    /// draws it for that eye, since its visibility range hides it from each view and not from what
-    /// it inherits, and a planted tree's every level stood in the field at once.
+    /// left out, its one quad standing for the whole tree only as it is drawn, and so is a mesh
+    /// Bevy blends at less than half its base color's alpha, as a scene's decal (`see_through`). A
+    /// mesh with a visibility range is taken where the eye the field lies around stands within it,
+    /// as Bevy draws it for that eye, since its visibility range hides it from each view and not
+    /// from what it inherits, and a planted tree's every level stood in the field at once.
     pub fn gather(world: &mut World, out: &mut [BcsFieldDraw]) -> (usize, BcsFieldEye) {
         use bevy::camera::primitives::Aabb;
         use bevy::camera::visibility::InheritedVisibility;
@@ -445,6 +446,20 @@ mod built {
                     }
                 }
 
+                // The standard material itself, or the one a tree's material is built over.
+                let (standard, id) = if let Some(material) = standard {
+                    (materials.and_then(|materials| materials.get(&material.0)), Some(material.0.id().untyped()))
+                } else if let Some(material) = leaf {
+                    (leaves.and_then(|leaves| leaves.get(&material.0)).map(|leaf| &leaf.base), Some(material.0.id().untyped()))
+                } else if let Some(material) = bark {
+                    (barks.and_then(|barks| barks.get(&material.0)).map(|bark| &bark.base), Some(material.0.id().untyped()))
+                } else {
+                    (None, None)
+                };
+                if standard.is_some_and(see_through) {
+                    continue;
+                }
+
                 let number = meshes.number(mesh.id());
                 let index = found;
                 found += 1;
@@ -470,17 +485,7 @@ mod built {
                 let affine = place.affine();
                 let (x, y, z, t) = (affine.matrix3.x_axis, affine.matrix3.y_axis, affine.matrix3.z_axis, affine.translation);
 
-                // The standard material itself, or the one a tree's material is built over, and the
-                // look the field keeps for the material drawn.
-                let (standard, id) = if let Some(material) = standard {
-                    (materials.and_then(|materials| materials.get(&material.0)), Some(material.0.id().untyped()))
-                } else if let Some(material) = leaf {
-                    (leaves.and_then(|leaves| leaves.get(&material.0)).map(|leaf| &leaf.base), Some(material.0.id().untyped()))
-                } else if let Some(material) = bark {
-                    (barks.and_then(|barks| barks.get(&material.0)).map(|bark| &bark.base), Some(material.0.id().untyped()))
-                } else {
-                    (None, None)
-                };
+                // The look the field keeps for the material drawn.
                 let look = id.and_then(|id| looks.and_then(|looks| looks.0.get(&id))).copied().unwrap_or_default();
                 // What the material's textures make of its factors, from those that have loaded.
                 let painted = standard.map(|standard| means.painted(images, standard));
@@ -657,6 +662,14 @@ mod built {
         if grew {
             crate::render::compute::rebind_buffer(world, handle);
         }
+    }
+
+    /// Whether Bevy blends a material at less than half of it by its base color's alpha, as a
+    /// scene's decal or a pane of tinted glass, which stands in the field as nothing rather than as
+    /// a solid of its color, since the surface it lies on shows through it as it is drawn, and held
+    /// solid a decal would darken the wall beneath it in the field where the picture shows the wall.
+    fn see_through(material: &bevy::pbr::StandardMaterial) -> bool {
+        matches!(material.alpha_mode, bevy::material::AlphaMode::Blend) && material.base_color.to_linear().alpha < 0.5
     }
 }
 

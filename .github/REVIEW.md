@@ -75,7 +75,8 @@ started. Build run 44195286498 of `03e32732` ended green. `4981d5b5`, item 150's
 the light pass taking back the sky's reflection along the way Bevy reads it, with its sheet on a
 white ground, pushed at 02:05 on 2026-11-18, the form kept, its build run 44213053297 started.
 `f7612252`, a mesh painted again where it stands held as not moved, the dark start of 7 in 54
-mended, pushed at 07:21 on 2026-11-18, build 44250687691 green at 08:30.
+mended, pushed at 07:21 on 2026-11-18, build 44250687691 green at 08:30. `9b869a3d`, the reference
+meeting a blended face by its alpha, pushed at 12:51 on 2026-11-18, build 44298529506 green.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -829,213 +830,6 @@ its log. The templates take the version they are packed beside, so none of them 
 
 NormTests passed, 19.
 
-150, its first step, global illumination's field painting each material by its textures' means, with
-Sponza's and the Bistro's sheets and eleven pushed sheets on white, in the commit carrying this
-Reply.
-
-`native/bevy_csharp/src/render/field_means.rs` averages a texture once its image has loaded and
-keeps the mean by the image's asset until Bevy says it changed or went, in linear light by the
-image's sRGB flag, by alpha where the material cuts or blends, over the level of 64 texels a side or
-fewer, from eight-bit texels and from BC1, BC3, BC4, BC5 and BC7 blocks. The field's gather paints
-each standard material its factors times the means of its base color, metallic and roughness, and
-emissive textures, a tree's field color standing for its base color's. The BC7 decoder reads 1,600
-random blocks of every mode as Pillow does, and the other four kinds within a level. Five tests of
-the module come with it. The three profiles check with no warning, the bridge's tests pass with no
-feature and with render, 126 and 229, and Cargo.lock is unmoved.
-
-`GlobalIlluminationTests.ATexturedWallColorsTheFloorBesideItAsTheSameWallPaintedByItsFactors` stands
-a glTF wall, white and full metal by its factors with a checker of two reds and a map of no metal,
-beside the same wall painted the checker's mean, and holds the floor's red past its green within a
-fifth. Without the mend it read 0.000 against 0.508 and failed, and with it the two floors read
-alike to the fourth figure, 0.5084 each. A wall textured with Sponza's own floor KTX2 files lit the
-floor as their means painted as factors do, to the fourth figure.
-
-The field builds Sponza's 1.3 million triangles at the budget of 32,768 a frame in about 400 frames,
-its meshes standing as their boxes until then, so each picture of the sheets is taken once gi.state
-says nothing waits. Built, at the sibling's view, noon and lens, the means take the atrium's shade
-darker with the cascades on, the shaded floor from 36 nits to -90 and an upper gallery wall from 360
-to 164, against 883 and 1,942 with them off, as the walls' white mirrors give way to stone whose
-floor is 0.105 and its metal 0.04. The shaded floor below zero is the take-back of the sky's light
-outweighing the probes, a fault of its own and the step after the next. The fills change nothing
-with the cascades on. The lens is EV 9.7 graded 4.944 stops down, since the camera's Exposure lies
-out of entity.set's reach, which part two asks of the bridge. The sheet is
-`2026-11-17-item-150-sponza-atrium.webp`.
-
-The path-traced reference reads a pack's sRGB textures as linear, the sunlit floor 12,684 nits there
-against 4,177 here, where 119,000 lux on 0.105 gives 4,000, takes the emissive factor without its
-map and reads NaN on the Bistro's blended paving. Neither sheet is judged against it until it is
-mended, the next step, and their titles say so. The atmosphere costs the sunlit floor 14% at 84
-degrees, which reads 5,039 nits under the dusk backdrop.
-
-The Bistro at 23:00 at the camera the sibling solved for the scene's night picture reads the
-paving's red over green in levels, over that picture's three boxes, 1.02, 1.04 and 1.02 before the
-means and 2.01, 2.33 and 1.95 after, where the picture reads 1.77, 1.93 and 2.11. The lantern's
-emissive mean is red 3.53 times green in linear light and the paving's own 1.04. The street's
-luminance falls to about a third, the field's lanterns emitting their glass's mean of 0.42 in place
-of white, which is judged once the reference is mended. The sheet is
-`2026-11-17-item-150-bistro-night.webp`.
-
-ProbesAboutAFrontLitCrownHoldTheLightItsLeavesScatter is skipped with its bar untouched, its reason
-saying the probe in the crown's front half reads 1.47 of its reference's light with the leaves
-painted as dielectric. The oak's leaves and bark carry a metal and a roughness of 1 with a surface
-map whose blue is the metal, and the field read the factors alone, so it painted both full metal
-with no diffuse share. Their maps' means are a metal of 0.0008 and a roughness of 0.73 for the
-leaves and 0 and 0.85 for the bark, so the field paints them as Bevy draws them and as the reference
-reads them texel by texel. The probe two meters before the front reads 1.151 of its reference's
-light, the one in the front half 1.470 against its bar of 1.25 and the one among the core's cards
-0.769, where they read 0.98, 1.11 and 0.54 when the test came in. 152 finds why and takes the skip
-away, and the meadow's pair, which shows the bark's change, comes with it.
-
-The nine sheets pushed on a dark ground stand on white under their names, item 148's three, 147's
-clouds, 145's swarm, 143's two and Verdicts 59 and 60, and item 146's cloud drift and seeds take a
-title and labels. Eight of the nine had no words, so their titles and labels come from their
-captions alone, and every panel keeps its size, so each sheet is a little larger. The 149 Reply's
-table of lamps stands in rows again, which its append had joined.
-
-Shared: the field paints a surface its factors times its textures' means, as 3DEngine's field does,
-and a shared module's interface would say that a hit's color, metal and emission are texture means.
-
-The whole suite ran from one tree before the skip, 2,175 passed, 1 failed and 4 skipped, 2,180 in
-all where the listing is 2,169, the crown's test the one that failed, the solution built from
-nothing with warnings as errors, in 15 parts and the rest dealt by the last run's times, each part
-of 2 m 12 s to 5 m 9 s, a part at a time under the GPU lock. With the skip the test project builds
-with warnings as errors and the crown's test reports itself skipped with its reason.
-
-NormTests passed, 19.
-
-150, its reference mend, the path-traced reference painting a face its factors times its textures'
-means and holding every pixel a number, in the commit carrying this Reply.
-
-The cause was not as 150's Reply said. The reference read no sRGB texture as linear, since it reads
-no texture of an opaque material at all. The material buffer it takes its faces from held a
-material's factors alone but for a cut-out material's masks, and a pack's factors are white and full
-metal with the color and the metal in the maps, so Sponza's sunlit floor was a white mirror of
-roughness 1 to the reference, which sends about three times the light of the stone's 0.105 under a
-sun 84 degrees up, as an sRGB mean of 0.34 happens to. The Bistro's lanterns emitted white for the
-same reason, the emissive factor without its map.
-
-The pixels that are not a number came from the reference's draw. Its hash rounds to 1 as a float
-within 128 of 2^32, 128 of the 2^32 states counted on the processor, one draw in 2^25. A path at a
-face of full metal chooses its gloss where its draw falls under the gloss's weight, a share over
-itself there, which the GPU dividing by a reciprocal makes exactly 1 at some faces, and there a draw
-of 1 took the diffuse share the face does not have, 0 over 0, and the pixel's sum read not a number
-from then on. The Bistro's night reference held four such pixels of 921,600, on the wet paving, a
-door, a roof and concrete, which turned each region's mean to NaN, and Sponza's atrium held four in
-two regions, a dirt decal and a brick wall, every face full metal by its factors in both.
-
-The mend. The textures' means are one resource of the app's, the field's and the material buffers'
-alike, and `TextureMeans::painted` gives what a standard material's textures make of its factors, a
-color's mean in linear light by its image's sRGB flag. A material buffer's slot holds its base
-color, emission, roughness, metal and the share it sends through each its factor times its texture's
-mean, where no mask holds that texture, and a mask's texture is read at the hit as before. The
-reference's draw is held under 1, which leaves every other draw as it was.
-`Shaders.CreateMaterialBuffer`'s remarks, `bcs_scene`'s `Material`, the compute guide's paragraph
-and the ray tracing guide's reference say a texture is in the buffer as its mean, and no listing
-line changes.
-
-`ComputeShaderTests.AMaterialBufferTakesEachTextureAtItsMean` holds a slot's base color, emission,
-roughness and metal at their textures' means, an sRGB level of 188 at 0.503 and a linear one of 128
-at 0.502, where the head's buffer held the factor of 1.
-`GiReferenceTests.ATexturedFloorAndAPatchEmittingByItsTextureReadInTheReferenceAsThePictureDrawsThem`
-holds a floor white and full metal by its factors with its color and its metal in its maps, and a
-patch emitting by an orange emissive texture, within 8% of the picture, reading 0.998 and 1.000 of
-it, where the head's floor read 1.171.
-`GiReferenceTests.AReferenceOfAWallOfFullMetalHoldsEveryPixelANumber` traces the first eight seeds
-whose paths draw that 1 at a wall of full metal, found by the reference's own draws mirrored in the
-test, and holds every pixel a number, where the head's draw left one pixel not a number in seven of
-the eight, the eighth's weight a little under 1 as the GPU divides it, so the draw took the diffuse
-share at a weight of nothing. The reference's other tests pass, and the crown's test reads 0.855,
-1.086 and 0.561 of its reference where it read 0.817, 0.972 and 0.500, within its bars, since the
-oak's bark, white and full metal by its factors, stands in the reference painted its maps' means as
-it stands in the field. The three profiles check with no warning, the bridge's tests pass with no
-feature and with render, 126 and 230, and Cargo.lock is unmoved.
-
-Sponza's atrium at the sibling's view, noon and lens, cascades on, and the Bistro's night at the
-sibling's camera were each traced at 64 paths a pixel in a session of their own. The atrium's floor
-reads within 4% of the picture, 2.120 against 2.210 in the comparison's units, where the head's
-reference read 6.750, three times it. Against the mended reference the atrium's shade reads the
-picture over it, the walls, arches and frames by 36% to 158% and the ceiling by 102% to 153%, which
-150's later steps take up, the take-back floor first. The dirt decals are blended and traced whole
-at their texture's mean by its alpha, so the reference reads them as dark dirt where the picture
-shows the floor through them, 0.023 against 0.354, a fault of the reference's own left open. The
-Bistro's lanterns read red 3.69 times their green where the head's reference read them white, 14.2 a
-channel, near their emissive map's 3.53, and the wet paving reads within 4% of the picture. Neither
-reference holds a pixel that is not a number. The sheet is
-`2026-11-17-item-150-reference-mend.webp`, each scene's reference at the head and mended with their
-difference, red lighter and blue darker, the light drawn as x / (1 + x) and Sponza's at a quarter of
-it, so the sunlit floor keeps its level.
-
-Shared: the reference global illumination is measured against paints a face its factors times its
-textures' means, as both fields paint it, and draws under 1. 3DEngine's reference draws by the same
-hash and meets the same 1, and holds the gloss's weight between 0.05 and 0.95, so its draw of 1
-never takes 0 over 0.
-
-The whole suite passed from one tree, 2,181 passed, 0 failed and 4 skipped, 2,185 in all where the
-listing is 2,174, the solution built from nothing with warnings as errors, in 17 parts and the rest
-dealt by the last run's times, each part of 21 s to 4 m 49 s, a part at a time under the GPU lock.
-
-NormTests passed, 19.
-
-150, its take-back floor, the light pass taking back Bevy's reflection of the sky along the way Bevy
-reads it, so a floor in shade under an open sky keeps the probes' light, in the commit carrying this
-Reply.
-
-The atrium's shaded floor read below nothing since the pass took back more than Bevy gave there.
-Read one term at a time over its box at the sibling's view, noon and lens, Bevy's light there is
-0.493, 0.777 and 1.403 in the comparison's units, the light taken back 0.666, 0.927 and 1.470, the
-sky's reflection 0.404, 0.490 and 0.642 of it and the sky's diffuse light 0.262, 0.436 and 0.829,
-and the probes add 0.050, 0.043 and 0.042. Bevy reads the environment's reflection along the mirror
-way bent toward the normal as the surface grows rough, `radiance_sample_direction` in bevy_pbr
-0.20's environment_map, and the pass read it along the mirror way itself, which on a floor seen low
-meets the sky near the horizon, brighter and warmer than the sky Bevy's way meets.
-
-The mend. The pass reads Bevy's reflection along Bevy's way (`radianceWay` in gi_light.slang), by
-the roughness squared as Bevy's `perceptualRoughnessToRoughness` squares it. Over the box Bevy's
-light less the light taken back reads 0.006, 0.004 and -0.002 where it read -0.173, -0.150 and
--0.067, the reflection taken back 0.225, 0.336 and 0.577, and the shaded floor reads 62 nits, the
-probes' light alone, where it read -90. The upper gallery wall reads 137 nits where it read 164, and
-the sunlit floor 4,313 where it read 4,185. The ray tracing guide's paragraph on the pass says the
-reflection is taken back along Bevy's way, and no listing line changes.
-
-A bound by what Bevy gave was weighed, the picture copied after the opaque pass, as a view image
-copied there is, and the light taken back held under it, which would keep every pixel at the probes'
-light where the take-back cannot mirror Bevy's lighting, its screen-space occlusion, clearcoat and
-anisotropy among them. It costs a copy of eight bytes a pixel, 17 MB at 1080p and 66 MB at 4K. It is
-not taken, since the take-back mirrors Bevy's where the atrium went below nothing and the occlusion
-is part four's read, and it waits on the review's word.
-
-`GlobalIlluminationTests.AFloorInAWallsShadeUnderAnOpenSkyReadsItsReference` stands a floor of dark
-stone, roughness 0.7, in the shade a wall casts with the sun 45 degrees up under the camera's air
-and its sky lighting, seen from 1.5 m above it along the shade, and holds the shade's light within a
-tenth of its reference's with no pixel below nothing. Without the mend it read 0.185 under its
-reference and failed, and with it 0.008 over.
-
-One trial session of the three read the probes adding nothing anywhere over the atrium, the sunlit
-floor and the upper wall alike, its field built after 350 frames as in the others, and the next
-start of the same build read them as the head's session did. It is not chased here and waits on a
-place in the order.
-
-The lantern's color, as asked. The reference takes an emissive face's light as its emissive factor
-times its emissive texture's mean, every texel alike in linear light by the image's sRGB flag, over
-the level of the image's mipmaps of 64 texels a side, the same mean the field paints. 3DEngine's
-field and its reference, which traces the instances the field draws, take the factor times its
-texture store's average, decoded from sRGB over 64 pixels along each row and column. The two engines
-take the lantern's mean alike, and a linear red 3.69 times its green shows orange on the screen, a
-green of 0.27 encoding to 0.56. The blended decals come next, before 151.
-
-The sheet is `2026-11-18-item-150-take-back-floor.webp`, the atrium and its shaded floor at the head
-and mended with their difference at four times, red lighter and blue darker.
-
-Shared: nothing is offered, since the take-back mirrors Bevy's own lighting and the sibling's model
-pass lights its surfaces with nothing to take back.
-
-The whole suite passed from one tree, 2,182 passed, 0 failed and 4 skipped, 2,186 in all where the
-listing is 2,175, the solution built from nothing with warnings as errors, in 16 parts and the rest
-dealt by the last run's times, each part of 2 m 9 s to 5 m 10 s, a part at a time under the GPU
-lock.
-
-NormTests passed, 19.
-
 150, the start where the probes added nothing, a mesh painted again where it stands, as a texture
 that loads after its mesh was first drawn paints it with its mean, held as not moved, so no start of
 Sponza stands its walls and floors in the field as boxes, in the commit carrying this Reply.
@@ -1181,5 +975,44 @@ picture blends it, which is offered.
 The whole suite passed from one tree, 2,186 passed, 0 failed and 4 skipped, 2,190 in all where the
 listing is 2,179, the solution built from nothing with warnings as errors, in 17 parts and the rest
 dealt by the last run's times, each part of 22 s to 5 m 6 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+150, the decals in the scene's field, a draw Bevy blends under half its alpha left out of it as the
+sibling's field leaves one out, in the commit carrying this Reply.
+
+The field's gather passes over a mesh whose material Bevy blends at a base color alpha under one
+half (`see_through` in scene_field.rs), as 3DEngine's `SeeThrough` does, so Sponza's decals, at
+0.35, stand in it as nothing and the walls under them stand bare. The gather's doc and the ray
+tracing guide's paragraph on the field say so, and no listing line changes.
+
+`GlobalIlluminationTests.ADrawBlendedUnderHalfItsAlphaStandsInTheFieldAsNothing` stands a red pane
+blended at 0.35 and one at 0.8 over a white floor and reads the field's colors back once every mesh
+it gathered is still, the field holding two meshes, the cell beside the first pane unpainted and the
+one beside the second red. On the head the field held 3 and the cell beside the first pane read
+(204, 13, 13, 255).
+
+Sponza's atrium at the sibling's view, noon and lens, cascades on, traced at 64 paths a pixel, the
+head's bridge and this one each in a session of its own within the hour, the head reading as the
+decals' commit read and this one twice alike, to the third figure, the reference the same in all.
+With the decals out of the field the picture rises, on the first floor's decal walls facing -x to
+0.376 from 0.352 against the reference's 0.125, those facing +z to 0.438 from 0.425 against 0.168
+and the third floor's to 0.838 from 0.789 against 0.345, and on the brick walls facing -x beside
+them to 0.235 from 0.212 against 0.094. So the picture lies further from the reference, 0.508 of its
+light where it lay 0.475, the decal walls over it by 92% to 198% where they lay 82% to 181% and the
+brick walls facing -x by 149% where 126%. The change is kept all the same. A face of 0.35 alpha
+stood in the field as wholly dirt, and its darkness hid part of the probes' surplus, two errors
+meeting, and the field holds the stone the picture shows. The surplus over the brick walls is the
+probes' own and is read to its cause in item 150's second part, a pack's fitting of cells of 0.125,
+the far cascade and High, where the brick walls facing -x are to come within 30% of the reference,
+0.122 or under against its 0.094.
+
+The sheet is `2026-11-18-item-150-field-decals.webp`, the atrium's picture at the head and mended
+with their difference at sixteen times, red lighter and blue darker, the walls and arches lighter
+where the probes see the stone under the decals.
+
+The whole suite passed from one tree, 2,187 passed, 0 failed and 4 skipped, 2,191 in all where the
+listing is 2,180, the solution built from nothing with warnings as errors, in 18 parts and the rest
+dealt by the last run's times, each part of 22 s to 4 m 12 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.

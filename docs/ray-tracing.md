@@ -212,9 +212,10 @@ a running one paints the occlusion in place of the picture.
 
 A distance field of the scene around the camera holds, for each cell of a grid, how far its middle
 is from the nearest surface of the meshes that cast shadows, below zero inside a mesh that culls its
-back faces. A ray steps through it by the distance each point holds, never past a surface, on any
-GPU, which is how 3DEngine's global illumination traces its rays, and the field is the first of that
-illumination's three parts:
+back faces. A mesh Bevy blends at less than half its base color's alpha, as a scene's decal, stands
+in it as nothing, since the surface it lies on shows through it as it is drawn. A ray steps through
+it by the distance each point holds, never past a surface, on any GPU, which is how 3DEngine's
+global illumination traces its rays, and the field is the first of that illumination's three parts:
 
 ```csharp
 Render.SetSceneField(4, cellSize: 0.25f, budget: 1);  // four cascades, a quarter meter the finest
