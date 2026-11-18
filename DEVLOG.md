@@ -6,6 +6,13 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-18
+
+![](.github/assets/readings/2026-11-18-item-150-take-back-floor.webp)
+Sponza's atrium at noon with the light pass taking back the sky's reflection along the mirror way
+and along the way Bevy reads it, the shaded floor black below nothing at the head and its stone at
+the probes' light mended, red in the difference.
+
 ## 2026-11-17
 
 ![](.github/assets/readings/2026-11-17-item-148-bistro-day-and-night.webp)
@@ -55,6 +62,11 @@ lit as their material lights them, then the mend beside the path-traced referenc
 its difference at four times, red lighter and blue darker, the leaves and the grass moving by a few
 levels and the oak's leaves facing the eye reading 30% under the reference before and 31% after, the
 far trees red against a reference that draws no fog.
+
+![](.github/assets/readings/2026-11-17-item-150-reference-mend.webp)
+The path-traced reference of Sponza's atrium at noon and of the Bistro at 23:00 before and after it
+paints faces by their textures' means, the third panels blue where the factors' white mirrors give
+way to stone and the lanterns' white to their glass's orange.
 
 ## 2026-11-16
 

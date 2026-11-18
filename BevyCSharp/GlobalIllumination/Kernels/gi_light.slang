@@ -179,6 +179,17 @@ float3 distantAround(float3 sky, float3 n, float3 ground)
     return sky * (above + ground * (1.0 - above));
 }
 
+// The way Bevy reads the environment's reflection along for a surface facing n with the mirror way
+// r, as environment_map's radiance_sample_direction bends the mirror way toward the normal as the
+// surface grows rough, by its roughness as perceptualRoughnessToRoughness squares it.
+float3 radianceWay(float3 n, float3 r, float perceptualRoughness)
+{
+    float clamped = clamp(perceptualRoughness, 0.089, 1.0);
+    float roughness = clamped * clamped;
+    float smoothness = saturate(1.0 - roughness);
+    return lerp(n, r, smoothness * (sqrt(smoothness) + roughness));
+}
+
 // The diffuse share of the light the environment maps gave a surface, as Bevy's
 // environment_map_light works it out, the dielectric's and the metal's multiple scattering mixed by
 // the metalness and the diffuse color times what the dielectric's single and multiple scattering
@@ -738,13 +749,14 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 given = ((diffuse * F_ab.x + F_ab.y) * passLights.ambient_color.rgb + aroundGiven) * occlusion * passView.exposure;
 
     // The light from all around a glossy surface reflects, Bevy's from its ambient term and the
-    // camera's environment map along the mirror way, taken back and given again, the reflection
-    // traced through the picture and the field as far as it met a surface, fading out as the
-    // surface grows rough. In the rest, where the probes hold the surface, it is the light the
-    // probes it sees hold along the mirror way, read from each one's eight by eight directions and
-    // toward its faces as the surface grows rough past a half (reflectedAlong), the light reaching
-    // the surface standing in for the probes it does not see, times the share Bevy's table gives
-    // the surface's gloss, and Bevy's own past the probes.
+    // camera's environment map along the mirror way bent toward the normal as Bevy reads it
+    // (radianceWay), taken back and given again, the reflection traced through the picture and the
+    // field as far as it met a surface, fading out as the surface grows rough. In the rest, where
+    // the probes hold the surface, it is the light the probes it sees hold along the mirror way,
+    // read from each one's eight by eight directions and toward its faces as the surface grows
+    // rough past a half (reflectedAlong), the light reaching the surface standing in for the probes
+    // it does not see, times the share Bevy's table gives the surface's gloss, and Bevy's own past
+    // the probes.
     // Bevy's times the share of the sky the probes saw along the mirror way would give a closed
     // room's walls no reflection at all, where read along the mirror way from the probes they
     // reflect the room around them, and the probes' rays carry the gloss of what they meet
@@ -759,7 +771,7 @@ float4 fragment(FullscreenOutput input) : SV_Target
     float3 f0 = lerp(float3(0.16 * surface.reflectance * surface.reflectance), surface.base_color, surface.metallic);
     float2 F_ab_r = passF_AB(roughness, NdotV);
     float3 specularShare = f0 * F_ab_r.x + F_ab_r.y;
-    float3 environment = passHasEnvironment() ? passEnvironmentSpecular(r, roughness) : float3(0.0);
+    float3 environment = passHasEnvironment() ? passEnvironmentSpecular(radianceWay(n, r, roughness), roughness) : float3(0.0);
     float3 ambientShare = specularShare * saturate(dot(f0, float3(50.0 * 0.33))) * passLights.ambient_color.rgb * occlusion;
     float3 bevySpecular = (viewShare * specularShare * environment + ambientShare) * passView.exposure;
     float4 traced = tracedReflection(info, lights, world, fromEye, n, r, roughness);

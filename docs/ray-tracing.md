@@ -339,11 +339,13 @@ ambient light's is, so a closed room under a bright sky is dark inside where Bev
 would light it through the walls. A glossy surface reflects what is around it, traced through the
 picture and the field below a roughness of a half, and above it the light the probes around it hold
 along its mirror way, so a closed room's rough walls reflect one another and its polished floor
-shows no sky. Bevy's
-screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward, which the G-buffer
-does not hold, keeps Bevy's own light, but for a tree's leaves and the grass, whose material reads
-the probes itself as the pass reads them, their light and their gloss's reflection along the mirror
-way.
+shows no sky. Bevy's own reflection of the light from all around is taken back along the way Bevy
+reads it, the mirror way bent toward the normal as the surface grows rough, so a rough floor in
+shade under an open sky, which reflects along a way near the bright horizon, keeps the probes'
+light. Bevy's screen-space ambient occlusion is left as Bevy gives it. A surface drawn forward,
+which the G-buffer does not hold, keeps Bevy's own light, but for a tree's leaves and the grass,
+whose material reads the probes itself as the pass reads them, their light and their gloss's
+reflection along the mirror way.
 
 A surface may let a share of the indirect light through each meter of its depth, as a canopy's
 leaves do, which the probes' rays cross where they would stop at a solid surface, keeping that share

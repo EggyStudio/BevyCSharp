@@ -68,7 +68,10 @@ Decision 93 recorded. At the tick of 18:33 on 2026-11-17, run 44128319302 of `25
 149 archived. `e19b2575`, item 152, the field lighting a leaf by the share its diffuse transmission
 sends through, the crown's test running again, with its sheet on a white ground, pushed at 21:33 on
 2026-11-17, the form kept; item 153 written for what it left open. Run 44170517651 of `e19b2575`
-ended green; item 152 archived.
+ended green; item 152 archived. `03e32732`, item 150's second step, the path-traced reference
+painting each face by its factors times its textures' means and holding its draws under one, with
+its sheet on a white ground, pushed at 23:59 on 2026-11-17, the form kept, its build run 44195286498
+started. Build run 44195286498 of `03e32732` ended green.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -1117,5 +1120,65 @@ never takes 0 over 0.
 The whole suite passed from one tree, 2,181 passed, 0 failed and 4 skipped, 2,185 in all where the
 listing is 2,174, the solution built from nothing with warnings as errors, in 17 parts and the rest
 dealt by the last run's times, each part of 21 s to 4 m 49 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+150, its take-back floor, the light pass taking back Bevy's reflection of the sky along the way Bevy
+reads it, so a floor in shade under an open sky keeps the probes' light, in the commit carrying this
+Reply.
+
+The atrium's shaded floor read below nothing since the pass took back more than Bevy gave there.
+Read one term at a time over its box at the sibling's view, noon and lens, Bevy's light there is
+0.493, 0.777 and 1.403 in the comparison's units, the light taken back 0.666, 0.927 and 1.470, the
+sky's reflection 0.404, 0.490 and 0.642 of it and the sky's diffuse light 0.262, 0.436 and 0.829,
+and the probes add 0.050, 0.043 and 0.042. Bevy reads the environment's reflection along the mirror
+way bent toward the normal as the surface grows rough, `radiance_sample_direction` in bevy_pbr
+0.20's environment_map, and the pass read it along the mirror way itself, which on a floor seen low
+meets the sky near the horizon, brighter and warmer than the sky Bevy's way meets.
+
+The mend. The pass reads Bevy's reflection along Bevy's way (`radianceWay` in gi_light.slang), by
+the roughness squared as Bevy's `perceptualRoughnessToRoughness` squares it. Over the box Bevy's
+light less the light taken back reads 0.006, 0.004 and -0.002 where it read -0.173, -0.150 and
+-0.067, the reflection taken back 0.225, 0.336 and 0.577, and the shaded floor reads 62 nits, the
+probes' light alone, where it read -90. The upper gallery wall reads 137 nits where it read 164, and
+the sunlit floor 4,313 where it read 4,185. The ray tracing guide's paragraph on the pass says the
+reflection is taken back along Bevy's way, and no listing line changes.
+
+A bound by what Bevy gave was weighed, the picture copied after the opaque pass, as a view image
+copied there is, and the light taken back held under it, which would keep every pixel at the probes'
+light where the take-back cannot mirror Bevy's lighting, its screen-space occlusion, clearcoat and
+anisotropy among them. It costs a copy of eight bytes a pixel, 17 MB at 1080p and 66 MB at 4K. It is
+not taken, since the take-back mirrors Bevy's where the atrium went below nothing and the occlusion
+is part four's read, and it waits on the review's word.
+
+`GlobalIlluminationTests.AFloorInAWallsShadeUnderAnOpenSkyReadsItsReference` stands a floor of dark
+stone, roughness 0.7, in the shade a wall casts with the sun 45 degrees up under the camera's air
+and its sky lighting, seen from 1.5 m above it along the shade, and holds the shade's light within a
+tenth of its reference's with no pixel below nothing. Without the mend it read 0.185 under its
+reference and failed, and with it 0.008 over.
+
+One trial session of the three read the probes adding nothing anywhere over the atrium, the sunlit
+floor and the upper wall alike, its field built after 350 frames as in the others, and the next
+start of the same build read them as the head's session did. It is not chased here and waits on a
+place in the order.
+
+The lantern's color, as asked. The reference takes an emissive face's light as its emissive factor
+times its emissive texture's mean, every texel alike in linear light by the image's sRGB flag, over
+the level of the image's mipmaps of 64 texels a side, the same mean the field paints. 3DEngine's
+field and its reference, which traces the instances the field draws, take the factor times its
+texture store's average, decoded from sRGB over 64 pixels along each row and column. The two engines
+take the lantern's mean alike, and a linear red 3.69 times its green shows orange on the screen, a
+green of 0.27 encoding to 0.56. The blended decals come next, before 151.
+
+The sheet is `2026-11-18-item-150-take-back-floor.webp`, the atrium and its shaded floor at the head
+and mended with their difference at four times, red lighter and blue darker.
+
+Shared: nothing is offered, since the take-back mirrors Bevy's own lighting and the sibling's model
+pass lights its surfaces with nothing to take back.
+
+The whole suite passed from one tree, 2,182 passed, 0 failed and 4 skipped, 2,186 in all where the
+listing is 2,175, the solution built from nothing with warnings as errors, in 16 parts and the rest
+dealt by the last run's times, each part of 2 m 9 s to 5 m 10 s, a part at a time under the GPU
+lock.
 
 NormTests passed, 19.
