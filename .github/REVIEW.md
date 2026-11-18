@@ -1142,3 +1142,48 @@ pending, and the modules' pointers as the review places them. A fresh session re
 Decisions 94 and 95, items 138 and 154, and the matched sheet first.
 
 NormTests passed, 19.
+
+150, the near haze over the atrium read to its cause, the feature test's own fog over its map, set
+to the Sky module's clear air in the commit carrying this Reply.
+
+The bridge gives Bevy 0.20's atmosphere its planet one radius under the origin at a scale of 1, so a
+meter of the scene is a meter of its air, and Bevy lays its aerial table, 32 slices over 32 km, on
+each pixel by its distance, its first slice faded to nothing at the camera. With the table's reach
+cut to 1 m the atrium's far arch, 25 m off, reads 58.3 of 255 where it reads 59.1, and its shade
+13.0 where 13.4, so the atmosphere's own haze is near what clear air gives. The veil was the feature
+test's map fog, 700 m to 95% at its base and 40 m high in froxels, which the weather laid again
+every frame in clear weather and which hid 10.1% of a wall 25 m off with sunlit gray. `sky.fog off`
+had shown nothing since the weather laid it again the next frame, and the two trials I first gave
+the review for the aerial reach and the sky light ran builds without their patch, a session script
+holding BUILD at 0, which is mended.
+
+The mend. The fog over the map is the game's rule `MapFog`, a file of its own, the Earth's clear air
+of the Sky module, 178 km by Koschmieder's 2% contrast and 136.3 km on the fog's measure of 95%, 40
+m high in froxels as before, which the weather thickens toward 80 m for fog and rain as it did.
+`Applied` takes its fog from it, and the test project compiles the file in as it does
+`SceneFloor`'s, as its project file says.
+
+`FeatureTestMapFogTests.AWall25MetersOffLosesUnderATenthOfAPercentOfItsLightToTheMapsFogInClearWeather`
+holds the share the map's fog hides of a wall 25 m off in clear weather under 0.1%, 0.055% mended,
+where the head's 700 m hid 10.147%.
+
+In one hour, each build its own session from the feature test's own settings, the atrium at the
+sibling's view, sun and camera at 1/25 s reads its far arch 59 of 255 where 138, its shade 13 where
+70 and blue over red 0.76 where 0.95, the sibling's 0.79, and the scenes yard toward Sponza's
+exterior at 1/200 s reads its far wall 106 where 110. The sheet is
+`2026-11-18-item-150-map-fog.webp`, the atrium and the yard before and after with their difference
+at twice, red lighter and blue darker.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 4 skipped, 2,195 in all where the
+listing is 2,184, the solution built from nothing with warnings as errors, in 16 parts and the rest
+dealt by the last run's times, each part of 58 s to 4 m 25 s, a part at a time under the GPU lock,
+and a comment of the test project's file rewrapped to 100 columns after it, the project built again
+with warnings as errors and NormTests run on it.
+
+Handoff. The near haze is closed at this commit. The Mie term of `ScatteringTerm.Earth`, absorption
+3.996e-6 and scattering 0.444e-6 as Bevy 0.20's own earth medium holds them where Bruneton's figures
+give them the other way round, follows apart, then the shade's mean of 59 against the sibling's 79
+at one view and sun, the sky's fill and the grade each switched alone, then item 138's read. A fresh
+session reads this Reply, the yard floor's before it and the matched sheet first.
+
+NormTests passed, 19.

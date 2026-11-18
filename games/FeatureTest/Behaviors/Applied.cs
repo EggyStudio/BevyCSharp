@@ -23,23 +23,23 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// light's settings are given as it is made.
 /// </para>
 /// <para>
-/// Ambient occlusion and screen-space reflections both need the picture drawn once a pixel, so
-/// MSAA gives way to either. The occlusion is left to <see cref="RayTracedOcclusion"/> while that
-/// traces its own into the same texture. The reflections draw every material deferred, which is
-/// put back to forward as they go unless Solari keeps it deferred. The backdrop is the
-/// atmosphere the scene starts with, lighting the scene from its sky with the stars behind it, or
-/// a dusk sky drawn in code as a cubemap, made the first time it is asked for, and the dusk sky
-/// alone where meshlets run, since Bevy's meshlet pipelines end the app under an atmosphere.
-/// <see cref="DayNight"/> keeps the stars to the hour, and the camera's exposure, Bevy's EV 9.7 by
-/// day and a moonlit ground's lens by night, or the lens of the place the eye stands in where it
-/// names one (<see cref="Packs.NightLens"/>), the stars', the galaxy's, the moon's and the dusk sky's
-/// nits taken down by the moonlit ground's lens as the day's lights are.
+/// Ambient occlusion and screen-space reflections both need the picture drawn once a pixel, so MSAA
+/// gives way to either. The occlusion is left to <see cref="RayTracedOcclusion"/> while that traces
+/// its own into the same texture. The reflections draw every material deferred, which is put back
+/// to forward as they go unless Solari keeps it deferred. The backdrop is the atmosphere the scene
+/// starts with, lighting the scene from its sky with the stars behind it, or a dusk sky drawn in
+/// code as a cubemap, made the first time it is asked for, and the dusk sky alone where meshlets
+/// run, since Bevy's meshlet pipelines end the app under an atmosphere. <see cref="DayNight"/>
+/// keeps the stars to the hour, and the camera's exposure, Bevy's EV 9.7 by day and a moonlit
+/// ground's lens by night, or the lens of the place the eye stands in where it names one (<see
+/// cref="Packs.NightLens"/>), the stars', the galaxy's, the moon's and the dusk sky's nits taken
+/// down by the moonlit ground's lens as the day's lights are.
 /// </para>
 /// <para>
 /// The engine's weather runs over the atmosphere's sky at the quality the weather page sets, or not
-/// at all where that is off. With the forecast off, the kind of weather is set as a preset and eased
-/// into, from the kind before it, and at once where the weather comes on, since nothing drawn is
-/// left to ease from.
+/// at all where that is off. With the forecast off, the kind of weather is set as a preset and
+/// eased into, from the kind before it, and at once where the weather comes on, since nothing drawn
+/// is left to ease from.
 /// </para>
 /// </remarks>
 [Behavior]
@@ -51,7 +51,9 @@ public partial struct Applied
     private static Backdrop? _backdrop;
     private static AssetHandle _dusk = AssetHandle.None;
 
-    /// <summary>The lens's scale the backdrop's nits were last given, none before the first pass.</summary>
+    /// <summary>
+    /// The lens's scale the backdrop's nits were last given, none before the first pass.
+    /// </summary>
     private static float _lensScale = -1f;
 
     /// <summary>Where the depth of field is focused, eased toward what the view rests on.</summary>
@@ -197,8 +199,9 @@ public partial struct Applied
             _lensScale = -1f;
         }
 
-        // The dusk sky, or the stars, the galaxy and the moon behind the atmosphere, standing by the
-        // day's clock and coming out as the sun goes down, their nits taken by the lens's scale.
+        // The dusk sky, or the stars, the galaxy and the moon behind the atmosphere, standing by
+        // the day's clock and coming out as the sun goes down, their nits taken by the lens's
+        // scale.
         if (DayNight.LensScale != _lensScale)
         {
             var scale = DayNight.LensScale;
@@ -253,7 +256,9 @@ public partial struct Applied
     /// <summary>The engine's weather over the map.</summary>
     internal static readonly WeatherState MapWeather = new() { HalfLife = 20f };
 
-    /// <summary>Whether the engine's weather runs over the map, which the vegetation's wind follows.</summary>
+    /// <summary>
+    /// Whether the engine's weather runs over the map, which the vegetation's wind follows.
+    /// </summary>
     internal static bool MapWeatherOn { get; private set; }
 
     // The kind last given the engine's weather, none at the start, while the forecast writes it and
@@ -267,12 +272,8 @@ public partial struct Applied
     /// </summary>
     internal static AtmosphereSettings Sky() => new() { Medium = ScatteringTerm.EarthArc() };
 
-    /// <summary>
-    /// The fog over the map, thick enough that the ground's far edge, a few hundred meters off,
-    /// fades toward the horizon, and thinning upward so the zones' tops stand clear, worked out in
-    /// froxels near the camera so the zones' shadows cut it into shafts and their lamps glow in it.
-    /// </summary>
-    private static SkyFogSettings Fog(FroxelQuality quality) => new() { Visibility = 700f, Height = 40f, Froxels = new FroxelFogSettings { Quality = quality } };
+    /// <summary>The fog over the map in clear weather (<see cref="MapFog"/>).</summary>
+    private static SkyFogSettings Fog(FroxelQuality quality) => MapFog.Of(quality);
 
     /// <summary>
     /// Whether the camera's sky is the atmosphere this frame, rather than the dusk sky or the

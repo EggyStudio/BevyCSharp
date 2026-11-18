@@ -40,6 +40,13 @@ the head and hidden while Sponza stands mended, the day held still under a clear
 the sun held at 120,000 lux, the Tonemapper look with AgX and the camera at ISO 200, 1/200 s and
 f/16, the walls under the arcades darker toward the reference, blue in the difference.
 
+![](.github/assets/readings/2026-11-18-item-150-map-fog.webp)
+Sponza's atrium and the scenes yard at noon under the feature test's old map fog of 700 m and under
+the Sky module's clear air, the day held still under a clear sky at latitude -4.25 and 12:17, the
+sun held at 119,343 lux and 5,633 K, the Tonemapper look with AgX and the camera at ISO 200 and f/16
+at 1/25 s in the atrium and 1/200 s in the yard, the atrium's gray veil gone and its stone warm,
+blue in the difference.
+
 ## 2026-11-17
 
 ![](.github/assets/readings/2026-11-17-item-148-bistro-day-and-night.webp)

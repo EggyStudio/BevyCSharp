@@ -31,11 +31,13 @@
         -->
         <ProjectReference Include="../modules/Levels/Levels/Levels.csproj"/>
         <!--
-          The feature test's rule for the scenes yard's floor under a scene, one file of the game
-          compiled in for its test (FeatureTestSceneFloorTests), since the suite references no game.
-          The file uses nothing else of the game.
+          The feature test's rules for the scenes yard's floor under a scene and for the fog over
+          its map, each one file of the game compiled in for its test (FeatureTestSceneFloorTests
+          and FeatureTestMapFogTests), since the suite references no game. Neither file uses
+          anything else of the game.
         -->
         <Compile Include="../games/FeatureTest/Behaviors/SceneFloor.cs" Link="Levels/SceneFloor.cs"/>
+        <Compile Include="../games/FeatureTest/Behaviors/MapFog.cs" Link="Sky/MapFog.cs"/>
 
         <!--
           The editor, for the tables under it: what is on the menu, what an entity looks like in a
