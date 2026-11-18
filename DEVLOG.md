@@ -13,6 +13,11 @@ Sponza's atrium at noon with the light pass taking back the sky's reflection alo
 and along the way Bevy reads it, the shaded floor black below nothing at the head and its stone at
 the probes' light mended, red in the difference.
 
+![](.github/assets/readings/2026-11-18-item-150-dark-start.webp)
+Sponza's atrium at noon at a start whose textures load after its meshes first stand still, dark at
+the head where its meshes painted again stood as boxes and lit as a normal start is mended, red in
+the difference.
+
 ## 2026-11-17
 
 ![](.github/assets/readings/2026-11-17-item-148-bistro-day-and-night.webp)

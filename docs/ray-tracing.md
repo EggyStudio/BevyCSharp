@@ -237,9 +237,13 @@ the counted cascades meets what lies far off.
 
 A mesh drawn in the same place for eight frames is built into the cascades around it from its
 triangles on the GPU, and one that moves, or is skinned, is stamped each frame as the box around it,
-a frame behind it. A cascade is built again where the camera has gone past it or a mesh came or
-went, as many a frame as the budget allows, the finest first, so a scene that changes a lot takes a
-larger budget and a slow GPU a smaller one. A frame's builds splat 32,768 triangles at most unless
+a frame behind it. A mesh painted again where it stands has not moved. One that has stood still for
+eight frames is built in with its new paint at once, as a light put out, and one painted again
+sooner, as a mesh whose texture loads after it was first drawn and paints it with the texture's
+mean, once its new paint has stood for eight frames, the cascades that held it holding it as it was
+meanwhile. A cascade is built again where the camera has gone past it or a mesh came or went, as
+many a frame as the budget allows, the finest first, so a scene that changes a lot takes a larger
+budget and a slow GPU a smaller one. A frame's builds splat 32,768 triangles at most unless
 `triangleBudget` says otherwise, the meshes within a cascade nearest the camera first, a mesh at
 least. A build of more goes on over the frames after, its cascade read as it was last built until
 the build ends and the meshes not yet built in stamped as their boxes meanwhile, so hundreds of

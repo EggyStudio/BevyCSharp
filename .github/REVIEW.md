@@ -71,7 +71,9 @@ sends through, the crown's test running again, with its sheet on a white ground,
 ended green; item 152 archived. `03e32732`, item 150's second step, the path-traced reference
 painting each face by its factors times its textures' means and holding its draws under one, with
 its sheet on a white ground, pushed at 23:59 on 2026-11-17, the form kept, its build run 44195286498
-started. Build run 44195286498 of `03e32732` ended green.
+started. Build run 44195286498 of `03e32732` ended green. `4981d5b5`, item 150's take-back floor,
+the light pass taking back the sky's reflection along the way Bevy reads it, with its sheet on a
+white ground, pushed at 02:05 on 2026-11-18, the form kept, its build run 44213053297 started.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -214,22 +216,6 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     global illumination taken with 138 where they touch the kernels; a finding that does not hold
     says why. The six high ones beside 143's sweep, which runs in its containers on its own; the
     rest after 143, ahead of 93.
-
-148. **A second scene pack, the Amazon Lumberyard Bistro.** The scene is published in NVIDIA's Open
-    Research Content Archive, an exterior and an interior as FBX with DDS textures. Asked, in this
-    order. First the read, the archive fetched into a folder of its own and treated as untrusted,
-    its license file read and the license, the attribution it asks and whether it allows a changed
-    copy to be published written down before anything else is made; where the page gives the file
-    only to a signed-in reader, say so and stop, since the file then comes from the repository's
-    holder. Then the pack as the Sponza's was made, `build/make-scene-pack.py` and
-    `build/scenes.sh`, the exterior first, the FBX turned into glTF by a tool named with its
-    version, the textures resized and compressed for the GPU so the scene fits a device of 8 GB with
-    the cascades on, its emissive lamps and signs kept as lights, the license and the attribution
-    inside the pack. Then a scene's file beside `intel-sponza.json` and an example that opens it,
-    with one picture by day and one by night as a sheet. The pack is published to the `scene-packs`
-    release by the review once the license reads as allowing it, so report its size and hash and
-    leave the upload. The interior follows as its own pack where the exterior's stands. It comes
-    after the audit's findings in hand.
 
 150. **The cascades show as little in the packs' scenes, and why.** From the review's read-only
     audit of 2026-11-17, ~/.cache/claude-reviewer/audits-2026-11-17/gi-look-gap.md, ten causes
@@ -814,141 +800,6 @@ tests with no feature and with render. NormTests passed, 19.
 Of the 75, 63 are mended, none was found not to hold, and 12 remain, 68 to 75 and 34 to 36 and 40 of
 global illumination, which go with 138.
 
-148, the Amazon Lumberyard Bistro's exterior as a scene pack, in the commit carrying this Reply.
-
-The archive is NVIDIA's `Bistro_v5_2.zip` from https://developer.nvidia.com/bistro, which redirects
-to a signed address answered with no sign-in, 894,377,473 bytes, SHA-256
-0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1, fetched into a folder of its own
-and unpacked with no entry outside it. Its LICENSE.txt is the standard text of CC BY 4.0, nothing
-added, which allows a changed copy published with the creator named, the license noticed and linked,
-its disclaimer referred to, the material linked and the changes said, and its README asks the
-citation of Amazon Lumberyard, 2017, at https://developer.nvidia.com/orca/amazon-lumberyard-bistro.
-The attribution in the manifest and in the pack's ATTRIBUTION.txt says each of those and the changes
-made here.
-
-`build/fbx-to-gltf.sh` turns the FBX into glTF with Blender 5.2.2 LTS, Fedora 44's
-blender-5.2.2-3.fc44, run headless in a container with no network and the archive mounted read-only,
-in 26 s, 2,829,226 triangles in 1,296 meshes and 132 materials. `build/orca-gltf.py` then sets the
-glTF to the archive's convention. Specular, which holds occlusion, roughness and metalness in red,
-green and blue, becomes each material's metallic-roughness and occlusion texture, where Blender read
-it as a specular level and left metalness at glTF's one. Twelve materials whose base color's alpha
-falls below half are cut out at half as Falcor's raster tests them, the foliage, the railings, the
-curtains, the side letters, a masked glass, the bottles' labels and the lanterns, and the other 120
-are opaque, where Blender blended all 132. Both sides are drawn for those twelve and the six
-awnings' materials, a sheet the street sees from below, and one side for the rest, since the
-shopfronts' glass is a closed shape whose inner faces drawn hid the restaurant. The root's scale is
-set to 0.01, where Blender gave 0.016, at which a chair stood 1.64 m and a lantern 1.45 m, and at
-0.01 they stand 1.03 m and 0.91 m. `build/make-scene-pack.py` gains `--directx-normals`, which turns
-over the normal maps' green as it encodes them, and writes the attribution into the pack as
-ATTRIBUTION.txt beside the archive's LICENSE.txt, README.txt and CHANGELOG.txt. It also draws a
-texture at four texels a side at least, where a texture of one texel, of which the Bistro has 33,
-was encoded as blocks narrower than a block and wgpu refused it and stopped the program, a mend no
-test reaches, since no test runs the pack's encoder.
-
-The FBX holds one analytic light, a directional sun, which the pack keeps, and Blender read no
-other. The lamps, string lights, spotlights and signs are emissive surfaces with no light of their
-own. A lantern emissive texture lies in the archive, which no material of the FBX names, so the
-lanterns are left as the FBX gives them. The feature test takes the scene's sun off once it stands,
-since the zone's sky has the sun of the hour, so the day is the engine's sky and sun and the night
-the scene's emissive surfaces through global illumination. The feature test's moon gives 900 lux all
-night under the day's exposure, so the night view puts the moon's light out for its shot, as the
-course script does too. At first guesses ten times these, global illumination lit the street as
-bright as noon with the sun and the moon both at nothing, and at these it reads as night. Each
-strength is KHR_materials_emissive_strength, which Bevy reads as nits times the emissive texture's
-color.
-
-| Material | Kind | Strength | |---|---|---| | Emissive_StreetLight | lamp | 500 | |
-Spotlight_Glass_Emissive | lamp | 500 | | Paris_StringLights_01_Blue_Color_Emissive | string light |
-200 | | Paris_StringLights_01_Green_Color_Emissive | string light | 200 | |
-Paris_StringLights_01_Orange_Color_Emissive | string light | 200 | |
-Paris_StringLights_01_Pink_Color_Emissive | string light | 200 | |
-Paris_StringLights_01_Red_Color_Emissive | string light | 200 | |
-Paris_StringLights_01_White_Color_Emissive | string light | 200 | | Shopsign_Book_Store_Emissive |
-sign | 100 | | Shopsign_Pharmacy_Emissive | sign | 100 |
-
-The pack is `bistro-exterior.pack`, 310,843,168 bytes, SHA-256
-58ef6eab4a1692696abb0918bf36f12bf5d199c55e93822a0c9a4b94872f84a0, made in 160 s, its 405 textures
-171 MB, and its manifest `scenes/bistro-exterior.json` names the `scene-packs` release for the
-review to upload it to. Made again from the archive by the repository's three scripts alone with the
-same arguments, the pack came out the same byte for byte, its SHA-256 the manifest's.
-
-The feature test's Scenes page lists the pack beside Sponza. In this commit the Bistro stands at the
-scenes yard's point, and being larger than the yard of 66 m, its streets lie in the yard and its
-outer buildings stand through the yard's walls into the rooms beside it while it stands. The player
-comes in past the arch the hub's corridor ends in, where its attribution is written facing the hub,
-and round a building's corner into the street. The next commit gives it a place of its own, standing
-it alone far from the level's rooms, the player carried into its street when it stands and back to
-the yard when it is taken away, with the sheet taken again there. Its street, sidewalks, street
-lights and buildings, 1,018 pieces, are solid by their names, where Sponza's pattern would have
-taken every piece by the word exterior in each name. The feature test's command that loads a pack is
-renamed `scene.pack`, since the engine's `scene.load`, which spawns a scene file, answered in its
-place, so `scene.load intel-sponza` in the course script failed where Sponza was fetched, a mend no
-test reaches. The course script takes the Bistro's street at noon and at night where its pack is
-fetched, as `build/scenes.sh` fetches it, and BUILDING.md and the guide's page on running a game
-name it.
-
-The sheet, `2026-11-17-item-148-bistro-day-and-night.webp`, is one view down a street toward the
-restaurant at noon and at 23:00. The planters' box hedges and the ivy read whole in it, and a check
-by the terrace shows the ivy, the flowers and the chairs cut out whole and the awnings solid from
-below.
-
-On this machine's GPU of 8 GB, an RTX 4070 Laptop, the feature test held 2,127 MiB before the
-Bistro, 3,151 MiB with it at the street and at most 3,679 MiB looking down on it from 140 m, with
-global illumination at Medium, its four cascades and the scene's field holding 56 MB of it, and the
-machine at most 6,158 MiB with the desktop's. The first session stopped once on that view from 140
-m, wgpu answering out of memory for the sun's shadow map with the program at 3,665 MiB and the
-machine at 5.4 GB, which a fresh start over the same views did not repeat. A frame took 62 ms
-offscreen at the night view by frame.profile.
-
-In ASSETS.md's words, the line to enter reads as follows.
-
-The Amazon Lumberyard Bistro's pack is made from NVIDIA's ORCA archive `Bistro_v5_2.zip`, fetched by
-the page's Download link (https://developer.nvidia.com/bistro), 894,377,473 bytes, SHA-256
-`0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1`, its exterior turned into glTF by
-`build/fbx-to-gltf.sh`, set to the archive's texture convention by `build/orca-gltf.py` and packed
-by `build/make-scene-pack.py`.
-
-Shared: the scene packs' row gains a second scene made from FBX, Blender from Fedora's repository in
-a container with no network turning it into glTF, a pass setting ORCA's texture convention, and the
-pack's encoder drawing every texture a block wide at least.
-
-The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178 in all where the
-listing is 2,167, the solution built from nothing with warnings as errors, in 15 parts dealt by the
-last run's times, each of 2 m 14 s to 5 m 15 s, a part at a time under the GPU lock.
-
-NormTests passed, 19.
-
-148's Bistro given a place of its own and its empty occlusion left out, and Verdict 67's mend, in
-the commit carrying this Reply.
-
-The Bistro's exterior stands alone three kilometers north of the hub, where nothing of the level
-stands or shows, rather than at the scenes yard's point, through whose walls its outer buildings
-stood. Its fitting in the feature test names the far point, where in the scene the player is put and
-where they look, and once each of its 1,018 solid pieces is a body, the player is carried into one
-of its streets facing the restaurant, or the camera in spectator mode. Taking it away carries the
-player back to the scenes yard's start. Its attribution stands behind where the player is put, over
-the square, facing them. Sponza keeps the yard and its door. In walking mode the player was carried
-to 15.0, -1.00, -2985.0, grounded on the street, and back to 45.0, -1.2, -45.0, grounded in the
-yard, and from 140 m over the Bistro nothing but the sky stands round it. A fall from its streets
-puts the player back at the scenes yard, the last zone they stood in. The course script's two views
-stand at the far point, and the guide's sentence says where the Bistro stands. The sheet,
-`2026-11-17-item-148-bistro-alone.webp`, is the street the player is carried into at noon and at
-night, its caption saying the night's glow lights give about a hundred times a lamp's light, which
-item 149 mends.
-
-The archive's Specular textures, all 201 of them, 198 of 16 texels a side and 3 of 2K, hold nothing
-in their red, which the archive's README names occlusion, so the pack's occlusion texture put out
-every surface's light from all around, the bridge reading glTF's occlusion through Bevy's material.
-`build/orca-gltf.py` gives a material Specular as its occlusion only where its red reaches 8, which
-none does, and the pack is made again, 310,838,881 bytes, SHA-256
-d71c6c5b641263c214565129d521eeca8445048546fe54c1ac3cd71abc5faadd, on the release since 08:54 and
-named so by the manifest. At the alone place the picture's mean luma went from 59.7 to 112.6 of 255
-by day and from 40.8 to 92.1 by night, `2026-11-17-item-148-bistro-occlusion.webp` the pair with its
-difference. The strengths stay 500, 200 and 100. With no emission at all the night reads 1.5, with
-the signs alone 1.2, and with the string lights out 88.2, so the lamps' and spotlights' glass gives
-the night nearly all its light as the cascades' glow lights, about a hundred times what a lantern's
-glass of 0.15 m² at 500 nits gives paving 4 m off at Bevy's ev100 of 9.7.
-
 Verdict 67's test reads the process's resident memory after a full blocking collection with the
 large object heap compacted, waiting for no finalizer, so the heap left uncollected is not read as
 held and the native images a fault drops stay counted. Here it read 22 to 27 MB of growth over
@@ -1180,5 +1031,80 @@ The whole suite passed from one tree, 2,182 passed, 0 failed and 4 skipped, 2,18
 listing is 2,175, the solution built from nothing with warnings as errors, in 16 parts and the rest
 dealt by the last run's times, each part of 2 m 9 s to 5 m 10 s, a part at a time under the GPU
 lock.
+
+NormTests passed, 19.
+
+150, the start where the probes added nothing, a mesh painted again where it stands, as a texture
+that loads after its mesh was first drawn paints it with its mean, held as not moved, so no start of
+Sponza stands its walls and floors in the field as boxes, in the commit carrying this Reply.
+
+Fifty-four starts of the head's build offscreen, each its own session, Sponza at the sibling's noon
+and view, read the upper gallery wall at 0.161 in 47, dim at 0.150 and 0.107 in 2 and dark at 0.028
+to 0.031 in 5, the probes' light gone, and the four dark ones read again 600 frames on were dark
+still. The trial session that read so read its three boxes as the first twenty's dark start did, to
+the third place.
+
+What differs. The dark starts' fields held 42 to 177 boxes where every other start's held 29, as
+many more as meshes the plan took as moved at its ninth to seventeenth frame where they stood, a
+frame or more after they first stood still, and no other start's plan took one so. They are Sponza's
+own, between x 48 and 88 and z -90 and -49 around the view, painted again as their textures' means
+came in after they were first drawn. The plan tells a mesh by its paint as well as its mesh and
+place, so on a frame read whole the one painted again is a mesh of a number gone that frame, which
+it takes as moved, and a mesh that moved waits `MobileSettleFrames`, 1,024 frames, before it is
+still, stamped as its box meanwhile. The darkest start's 177 boxes filled 7,520 bricks where a
+normal start's 29 fill 128, the atrium's walls and floors solid around the probes. Those meshes
+settled at the plan's frame 1,032 and stayed stamped until the four cascades were built again, about
+118 frames each under the triangle budget, and the second reading, 600 frames on, found them waiting
+on the coarsest, so a start went dark for about 1,450 frames, 24 seconds at 60. Which textures come
+after their meshes' first draw falls to the order the asset server's loads end in, which differs
+from start to start.
+
+The mend. The plan takes a mesh drawn where one of its mesh and generation stood the frame before
+and is gone as painted again rather than moved, keeping the frame that one last moved. A still mesh
+painted again once it has stood still for eight frames is still at once with its new paint, stamped
+as the one painted was and not at all where the cascades held that one, so a light put out goes from
+the field with the next build. One painted again sooner, as Sponza's are at a start, stays in the
+field as it was until its new paint settles, as one replaced in place does, so its cascades are
+built again once with it and it is not stamped meanwhile (`ReplacedBy` and `Replacing` in
+SceneFieldPlan.cs), and a mesh painted each frame is not built into the cascades each frame. The
+class's remarks and the ray tracing guide's paragraph on the field say so, and no listing line
+changes.
+
+The first whole suite over the mend failed
+`GlobalIlluminationTests.TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark`, its room
+reading 69.95 for the seven frames after the panel went dark where it read 75.32 lit, since the mend
+then held every still mesh painted again in the field as it was until its new paint had stood eight
+frames, the panel among them. At the head the panel put out was taken as moved and left the field,
+its cascades built again without it, and the mend as committed takes it as still at once in its new
+paint, its cascades built again with it, and the test passes.
+
+`SceneFieldTests.AMeshPaintedAgainWhereItStandsHasNotMovedAndKeepsItsPlaceInTheField` paints a mesh
+again three frames after it is first drawn, again the frame after it is still, and again once it has
+stood still eight frames, as a light put out. It holds the mesh still eight frames after the first
+two and kept in the field meanwhile, and built in with the last paint in the frame it comes, never
+stamped. On the head it fails at the first, with the first half of the mend alone at the second, and
+with the mend as the first suite ran it at the third, its build empty. The plan's other 16 tests
+pass.
+
+Twenty starts of the mend as committed read the wall at 0.161 at both readings and their fields 29
+boxes, four of them with 19, 40, 15 and 40 meshes painted again where they stood at the plan's ninth
+to nineteenth frames, held as not moved and none still at once. Twenty starts of the mend as the
+first suite ran it read alike, two of them with 73 and 59 painted again.
+
+The sheet is `2026-11-18-item-150-dark-start.webp`, the atrium at the darkest head start and at a
+mended start with 40 meshes painted again at the same frame, with their difference at four times,
+red lighter and blue darker. The far arch's opening reads blue, brighter in the dark starts alone,
+82 of 255 where normal starts at the head and every mended start read 62 to 63.
+
+The decals come next, then 153, then 151.
+
+Shared: the sibling's `SceneFieldPlan` tells a mesh by its paint as well and takes a mesh drawn of
+vertices gone that frame as moved wherever it stands (`_departed.Contains(instance.Vertices) ?
+_frame`), so a mesh painted again in place there waits the 1,024 frames stamped as its box as this
+one's did, and the mend and its test are offered.
+
+The whole suite passed from one tree, 2,183 passed, 0 failed and 4 skipped, 2,187 in all where the
+listing is 2,176, the solution built from nothing with warnings as errors, in 16 parts and the rest
+dealt by the last run's times, each part of 2 m 6 s to 5 m 2 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.

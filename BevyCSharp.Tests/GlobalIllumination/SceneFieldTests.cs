@@ -111,6 +111,63 @@ public sealed partial class SceneFieldTests
         Assert.Empty(plan.Shapes);
     }
 
+    /// <summary>
+    /// A mesh painted again where it stands, as its texture's mean paints it once the texture loads
+    /// after the mesh was first drawn, has not moved, and settles as a mesh drawn the same does.
+    /// One painted again soon after it settled stays in the field as it was until its new paint
+    /// settles, and one that has stood still longer, as a light put out, is built in with its new
+    /// paint at once, neither stamped meanwhile.
+    /// </summary>
+    /// <remarks>
+    /// A mesh taken as moved waits <see cref="SceneFieldPlan.MobileSettleFrames"/> frames before it
+    /// is still, stamped as its box until then and until the cascades around it are built again,
+    /// so a scene some of whose textures load after its meshes are first drawn, as a pack's can,
+    /// would stand as boxes for that long, its walls and floors filling the probes' cells and the
+    /// light they add gone. Held as it was until its new paint settled, a panel put out would light
+    /// its room for as many frames.
+    /// </remarks>
+    [Fact]
+    public void AMeshPaintedAgainWhereItStandsHasNotMovedAndKeepsItsPlaceInTheField()
+    {
+        static (SceneFieldPlan.Instance, bool) Painted(float mean) => (At(Vector3.Zero).Item1 with { Color = new Vector3(mean) }, false);
+        var plan = new SceneFieldPlan(1, 0.25f, 1);
+        var eye = new Vector3(0.1f, 0.1f, 0.1f);
+
+        // Drawn by its factor for a few frames, then by its texture's mean.
+        for (var frame = 0; frame < 3; frame++) plan.Update(eye, [Painted(1f)]);
+        for (var frame = 1; frame < SceneFieldPlan.SettleFrames; frame++)
+        {
+            plan.Update(eye, [Painted(0.4f)]);
+            Assert.Equal(0, plan.StillCount);
+        }
+        plan.Update(eye, [Painted(0.4f)]);
+        Assert.Equal(1, plan.StillCount);
+        Assert.Equal(new Vector3(0.4f), Assert.Single(Assert.Single(plan.Builds).Instances).Color);
+
+        // Painted again once still, as a map that loads later does, kept as it was and not stamped.
+        for (var frame = 1; frame < SceneFieldPlan.SettleFrames; frame++)
+        {
+            plan.Update(eye, [Painted(0.6f)]);
+            Assert.Equal(1, plan.StillCount);
+            Assert.Empty(plan.Builds);
+            Assert.Empty(plan.Shapes);
+        }
+
+        // One build puts the new paint in.
+        plan.Update(eye, [Painted(0.6f)]);
+        Assert.Equal(1, plan.StillCount);
+        Assert.Equal(new Vector3(0.6f), Assert.Single(Assert.Single(plan.Builds).Instances).Color);
+        Assert.Empty(plan.Shapes);
+
+        // Painted again once it has stood still as long as it took to settle, as a light put out,
+        // built in with its new paint in the frame it comes.
+        for (var frame = 0; frame < SceneFieldPlan.SettleFrames; frame++) plan.Update(eye, [Painted(0.6f)]);
+        plan.Update(eye, [Painted(0f)]);
+        Assert.Equal(1, plan.StillCount);
+        Assert.Equal(Vector3.Zero, Assert.Single(Assert.Single(plan.Builds).Instances).Color);
+        Assert.Empty(plan.Shapes);
+    }
+
     [Fact]
     public void TheBudgetBuildsTheFinestDirtyCascadesFirst()
     {

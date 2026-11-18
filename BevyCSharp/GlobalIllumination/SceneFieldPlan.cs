@@ -30,13 +30,18 @@ namespace Bevy;
 /// <para>
 /// A mesh drawn the same, by its mesh, its matrix and its sides, for <see cref="SettleFrames"/>
 /// frames running is still and built into the cascades around it, or for
-/// <see cref="MobileSettleFrames"/> where it moved within as many frames, so a figure that stops for
-/// a while is not built into the cascades and out again. One that moved more recently, a skinned
-/// one, and a still one whose cascades have not been built again since it came, but for one that
-/// replaced a still mesh in place, which the cascades not yet built still hold, are stamped each
-/// frame as boxes, the nearest the eye first to <see cref="MaxShapes"/> boxes, into the bricks of
-/// cells each box comes within the band of, and the bricks stamped the frame before are stamped
-/// again so a box that left one is gone.
+/// <see cref="MobileSettleFrames"/> where it moved within as many frames, so a figure that stops
+/// for a while is not built into the cascades and out again. A mesh painted again where it stands
+/// has not moved. One that has stood still for <see cref="SettleFrames"/> frames is still at once
+/// with its new paint, so a light put out goes from the field with the next build of the cascades
+/// around it, and one painted again sooner, as a mesh whose textures' means come in one after
+/// another after it was first drawn, stays in the field as it was until its new paint settles, as
+/// one replaced in place does, so a mesh painted each frame is not built into the cascades each
+/// frame. One that moved more recently, a skinned one, and a still one whose cascades have not been
+/// built again since it came, but for one that replaced a still mesh in place, which the cascades
+/// not yet built still hold, are stamped each frame as boxes, the nearest the eye first to
+/// <see cref="MaxShapes"/> boxes, into the bricks of cells each box comes within the band of, and
+/// the bricks stamped the frame before are stamped again so a box that left one is gone.
 /// </para>
 /// </remarks>
 internal sealed partial class SceneFieldPlan
@@ -145,9 +150,11 @@ internal sealed partial class SceneFieldPlan
 
     private Dictionary<Instance, int> _seen = new(Keys.Shared);
     // In a frame read whole, the frame each mesh drawn the frame before last moved where that was
-    // within the longer count, each drawn now, and the meshes gone since.
+    // within the longer count, each drawn this frame, and the meshes gone since, by their mesh and
+    // by where each stood with the mesh as it was drawn and the frame it last moved.
     private readonly Dictionary<Instance, long> _movedBefore = new(Keys.Shared), _movedNow = new(Keys.Shared);
     private readonly HashSet<(uint Mesh, uint Generation)> _departed = [];
+    private readonly Dictionary<(uint Mesh, uint Generation, Matrix4x4 World), (Instance Gone, long MovedAt)> _departedAt = [];
     private readonly Dictionary<Instance, (Box Bounds, long Added)> _still = new(Keys.Shared);
     private readonly HashSet<Instance> _pending = new(Keys.Shared);
     // Still meshes that left, kept in the field for the meshes replacing them, by the frame they left.
@@ -446,18 +453,38 @@ internal sealed partial class SceneFieldPlan
             var seen = new Dictionary<Instance, int>(drawn.Count, Keys.Shared);
             foreach (var (instance, _) in drawn) seen.TryAdd(instance, unread);
             _departed.Clear();
+            _departedAt.Clear();
             for (int i = 0; i < _orderCount; i++)
-                if (!_orderSkinned[i] && !seen.ContainsKey(_order[i])) _departed.Add((_order[i].Mesh, _order[i].Generation));
-            // Each mesh's frames drawn the same, a skinned one never still.
+                if (!_orderSkinned[i] && !seen.ContainsKey(_order[i]))
+                {
+                    _departed.Add((_order[i].Mesh, _order[i].Generation));
+                    _departedAt[(_order[i].Mesh, _order[i].Generation, _order[i].World)] = (_order[i], _movedBefore.GetValueOrDefault(_order[i], Never));
+                }
+            // Each mesh's frames drawn the same, a skinned one never still. One drawn this frame of
+            // a mesh one gone had moved, where the one gone stood elsewhere, and one drawn where it
+            // stood was painted again there, as a texture that loads after its mesh was first drawn
+            // paints it with its mean, and keeps the frame the one gone last moved. One painted
+            // again where a still mesh had stood still for as many frames as a mesh takes to settle
+            // is still at once, and is stamped as the one painted was, not at all where the
+            // cascades held that one.
+            List<(Instance Painted, bool Stands)>? repainted = null;
             foreach (var (instance, skinned) in drawn)
             {
                 ref var counted = ref CollectionsMarshal.GetValueRefOrNullRef(seen, instance);
                 if (counted != unread) continue;
                 var movedAt = skinned ? Never
-                    : !_seen.ContainsKey(instance) && _departed.Contains((instance.Mesh, instance.Generation)) ? _frame : _movedBefore.GetValueOrDefault(instance, Never);
+                    : _seen.ContainsKey(instance) || !_departed.Contains((instance.Mesh, instance.Generation)) ? _movedBefore.GetValueOrDefault(instance, Never)
+                    : _departedAt.TryGetValue((instance.Mesh, instance.Generation, instance.World), out var then) ? then.MovedAt : _frame;
                 if (movedAt != Never) _movedNow[instance] = movedAt;
                 var before = _seen.GetValueOrDefault(instance);
                 var frames = skinned ? 0 : before >= Settled || before + 1 >= SettleAfter(movedAt) ? Settled : before + 1;
+                if (!skinned && frames < Settled && !_seen.ContainsKey(instance)
+                    && _departedAt.TryGetValue((instance.Mesh, instance.Generation, instance.World), out var gone)
+                    && _still.TryGetValue(gone.Gone, out var still) && _frame - still.Added >= SettleFrames)
+                {
+                    frames = Settled;
+                    (repainted ??= []).Add((instance, !_pending.Contains(gone.Gone) || _replacing.Contains(gone.Gone)));
+                }
                 counted = frames;
                 if (frames >= Settled) continue;
                 moving.Add(instance);
@@ -471,6 +498,8 @@ internal sealed partial class SceneFieldPlan
             // where the boxes that one would be stamped as stood in for it badly.
             foreach (var (instance, frames) in seen)
                 if (frames >= Settled && !_still.ContainsKey(instance)) Settle(instance);
+            foreach (var (instance, stands) in repainted ?? [])
+                if (stands) _replacing.Add(instance);
             foreach (var instance in _kept.Keys.Where(seen.ContainsKey).ToArray()) _kept.Remove(instance);
             foreach (var instance in _still.Keys.Where(instance => !seen.ContainsKey(instance) && !_kept.ContainsKey(instance)).ToArray())
             {
@@ -625,12 +654,13 @@ internal sealed partial class SceneFieldPlan
         _replacing.Remove(instance);
     }
 
-    // Whether another mesh drawn through a still mesh's matrix, unsettled, lies where it was.
+    // Whether another mesh drawn through a still mesh's matrix, or the same painted again there,
+    // unsettled, lies where it was.
     private bool ReplacedBy(Instance still, List<Instance> unsettled)
     {
         var bounds = _still[still].Bounds;
         foreach (var instance in unsettled)
-            if (instance.World == still.World && !instance.SameMesh(still) && instance.Bounds.Transformed(instance.World).Overlaps(bounds))
+            if (instance.World == still.World && !instance.Equals(still) && instance.Bounds.Transformed(instance.World).Overlaps(bounds))
                 return true;
         return false;
     }
@@ -644,9 +674,10 @@ internal sealed partial class SceneFieldPlan
         return false;
     }
 
-    // Whether another mesh drawn through a still mesh's matrix lies where it was.
+    // Whether another mesh drawn through a still mesh's matrix, or the same painted again there,
+    // lies where it was.
     private bool Replacing(Instance instance, Instance still) =>
-        instance.World == still.World && !instance.SameMesh(still) && instance.Bounds.Transformed(instance.World).Overlaps(_still[still].Bounds);
+        instance.World == still.World && !instance.Equals(still) && instance.Bounds.Transformed(instance.World).Overlaps(_still[still].Bounds);
 
     // A mesh drawn the same for SettleFrames frames running, which the cascades around it are built
     // again with and which is stamped until they have been.

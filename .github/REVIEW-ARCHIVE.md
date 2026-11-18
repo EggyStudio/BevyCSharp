@@ -4626,6 +4626,22 @@ the port is offered upstream (Decision 18).
     again with its bar as it stands, and a sheet of the crown before and after beside the reference.
     Before item 150's second step.
 
+148. **A second scene pack, the Amazon Lumberyard Bistro.** The scene is published in NVIDIA's Open
+    Research Content Archive, an exterior and an interior as FBX with DDS textures. Asked, in this
+    order. First the read, the archive fetched into a folder of its own and treated as untrusted,
+    its license file read and the license, the attribution it asks and whether it allows a changed
+    copy to be published written down before anything else is made; where the page gives the file
+    only to a signed-in reader, say so and stop, since the file then comes from the repository's
+    holder. Then the pack as the Sponza's was made, `build/make-scene-pack.py` and
+    `build/scenes.sh`, the exterior first, the FBX turned into glTF by a tool named with its
+    version, the textures resized and compressed for the GPU so the scene fits a device of 8 GB with
+    the cascades on, its emissive lamps and signs kept as lights, the license and the attribution
+    inside the pack. Then a scene's file beside `intel-sponza.json` and an example that opens it,
+    with one picture by day and one by night as a sheet. The pack is published to the `scene-packs`
+    release by the review once the license reads as allowing it, so report its size and hash and
+    leave the upload. The interior follows as its own pack where the exterior's stands. It comes
+    after the audit's findings in hand.
+
 ## Verdicts settled
 
 Verdicts 3 and 14 to 32 are settled: 15, the native job's four targets, on the pack run of
@@ -14223,6 +14239,141 @@ listing is 2,171, the solution built from nothing with warnings as errors, in 17
 dealt by the last run's times, each part of 23 s to 4 m 48 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.
+
+148, the Amazon Lumberyard Bistro's exterior as a scene pack, in the commit carrying this Reply.
+
+The archive is NVIDIA's `Bistro_v5_2.zip` from https://developer.nvidia.com/bistro, which redirects
+to a signed address answered with no sign-in, 894,377,473 bytes, SHA-256
+0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1, fetched into a folder of its own
+and unpacked with no entry outside it. Its LICENSE.txt is the standard text of CC BY 4.0, nothing
+added, which allows a changed copy published with the creator named, the license noticed and linked,
+its disclaimer referred to, the material linked and the changes said, and its README asks the
+citation of Amazon Lumberyard, 2017, at https://developer.nvidia.com/orca/amazon-lumberyard-bistro.
+The attribution in the manifest and in the pack's ATTRIBUTION.txt says each of those and the changes
+made here.
+
+`build/fbx-to-gltf.sh` turns the FBX into glTF with Blender 5.2.2 LTS, Fedora 44's
+blender-5.2.2-3.fc44, run headless in a container with no network and the archive mounted read-only,
+in 26 s, 2,829,226 triangles in 1,296 meshes and 132 materials. `build/orca-gltf.py` then sets the
+glTF to the archive's convention. Specular, which holds occlusion, roughness and metalness in red,
+green and blue, becomes each material's metallic-roughness and occlusion texture, where Blender read
+it as a specular level and left metalness at glTF's one. Twelve materials whose base color's alpha
+falls below half are cut out at half as Falcor's raster tests them, the foliage, the railings, the
+curtains, the side letters, a masked glass, the bottles' labels and the lanterns, and the other 120
+are opaque, where Blender blended all 132. Both sides are drawn for those twelve and the six
+awnings' materials, a sheet the street sees from below, and one side for the rest, since the
+shopfronts' glass is a closed shape whose inner faces drawn hid the restaurant. The root's scale is
+set to 0.01, where Blender gave 0.016, at which a chair stood 1.64 m and a lantern 1.45 m, and at
+0.01 they stand 1.03 m and 0.91 m. `build/make-scene-pack.py` gains `--directx-normals`, which turns
+over the normal maps' green as it encodes them, and writes the attribution into the pack as
+ATTRIBUTION.txt beside the archive's LICENSE.txt, README.txt and CHANGELOG.txt. It also draws a
+texture at four texels a side at least, where a texture of one texel, of which the Bistro has 33,
+was encoded as blocks narrower than a block and wgpu refused it and stopped the program, a mend no
+test reaches, since no test runs the pack's encoder.
+
+The FBX holds one analytic light, a directional sun, which the pack keeps, and Blender read no
+other. The lamps, string lights, spotlights and signs are emissive surfaces with no light of their
+own. A lantern emissive texture lies in the archive, which no material of the FBX names, so the
+lanterns are left as the FBX gives them. The feature test takes the scene's sun off once it stands,
+since the zone's sky has the sun of the hour, so the day is the engine's sky and sun and the night
+the scene's emissive surfaces through global illumination. The feature test's moon gives 900 lux all
+night under the day's exposure, so the night view puts the moon's light out for its shot, as the
+course script does too. At first guesses ten times these, global illumination lit the street as
+bright as noon with the sun and the moon both at nothing, and at these it reads as night. Each
+strength is KHR_materials_emissive_strength, which Bevy reads as nits times the emissive texture's
+color.
+
+| Material | Kind | Strength | |---|---|---| | Emissive_StreetLight | lamp | 500 | |
+Spotlight_Glass_Emissive | lamp | 500 | | Paris_StringLights_01_Blue_Color_Emissive | string light |
+200 | | Paris_StringLights_01_Green_Color_Emissive | string light | 200 | |
+Paris_StringLights_01_Orange_Color_Emissive | string light | 200 | |
+Paris_StringLights_01_Pink_Color_Emissive | string light | 200 | |
+Paris_StringLights_01_Red_Color_Emissive | string light | 200 | |
+Paris_StringLights_01_White_Color_Emissive | string light | 200 | | Shopsign_Book_Store_Emissive |
+sign | 100 | | Shopsign_Pharmacy_Emissive | sign | 100 |
+
+The pack is `bistro-exterior.pack`, 310,843,168 bytes, SHA-256
+58ef6eab4a1692696abb0918bf36f12bf5d199c55e93822a0c9a4b94872f84a0, made in 160 s, its 405 textures
+171 MB, and its manifest `scenes/bistro-exterior.json` names the `scene-packs` release for the
+review to upload it to. Made again from the archive by the repository's three scripts alone with the
+same arguments, the pack came out the same byte for byte, its SHA-256 the manifest's.
+
+The feature test's Scenes page lists the pack beside Sponza. In this commit the Bistro stands at the
+scenes yard's point, and being larger than the yard of 66 m, its streets lie in the yard and its
+outer buildings stand through the yard's walls into the rooms beside it while it stands. The player
+comes in past the arch the hub's corridor ends in, where its attribution is written facing the hub,
+and round a building's corner into the street. The next commit gives it a place of its own, standing
+it alone far from the level's rooms, the player carried into its street when it stands and back to
+the yard when it is taken away, with the sheet taken again there. Its street, sidewalks, street
+lights and buildings, 1,018 pieces, are solid by their names, where Sponza's pattern would have
+taken every piece by the word exterior in each name. The feature test's command that loads a pack is
+renamed `scene.pack`, since the engine's `scene.load`, which spawns a scene file, answered in its
+place, so `scene.load intel-sponza` in the course script failed where Sponza was fetched, a mend no
+test reaches. The course script takes the Bistro's street at noon and at night where its pack is
+fetched, as `build/scenes.sh` fetches it, and BUILDING.md and the guide's page on running a game
+name it.
+
+The sheet, `2026-11-17-item-148-bistro-day-and-night.webp`, is one view down a street toward the
+restaurant at noon and at 23:00. The planters' box hedges and the ivy read whole in it, and a check
+by the terrace shows the ivy, the flowers and the chairs cut out whole and the awnings solid from
+below.
+
+On this machine's GPU of 8 GB, an RTX 4070 Laptop, the feature test held 2,127 MiB before the
+Bistro, 3,151 MiB with it at the street and at most 3,679 MiB looking down on it from 140 m, with
+global illumination at Medium, its four cascades and the scene's field holding 56 MB of it, and the
+machine at most 6,158 MiB with the desktop's. The first session stopped once on that view from 140
+m, wgpu answering out of memory for the sun's shadow map with the program at 3,665 MiB and the
+machine at 5.4 GB, which a fresh start over the same views did not repeat. A frame took 62 ms
+offscreen at the night view by frame.profile.
+
+In ASSETS.md's words, the line to enter reads as follows.
+
+The Amazon Lumberyard Bistro's pack is made from NVIDIA's ORCA archive `Bistro_v5_2.zip`, fetched by
+the page's Download link (https://developer.nvidia.com/bistro), 894,377,473 bytes, SHA-256
+`0d50e3c724c6c5da19f8eb99ad3f53e36fec37ffa2df9621f9ccf0603f3934e1`, its exterior turned into glTF by
+`build/fbx-to-gltf.sh`, set to the archive's texture convention by `build/orca-gltf.py` and packed
+by `build/make-scene-pack.py`.
+
+Shared: the scene packs' row gains a second scene made from FBX, Blender from Fedora's repository in
+a container with no network turning it into glTF, a pass setting ORCA's texture convention, and the
+pack's encoder drawing every texture a block wide at least.
+
+The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178 in all where the
+listing is 2,167, the solution built from nothing with warnings as errors, in 15 parts dealt by the
+last run's times, each of 2 m 14 s to 5 m 15 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+148's Bistro given a place of its own and its empty occlusion left out, and Verdict 67's mend, in
+the commit carrying this Reply.
+
+The Bistro's exterior stands alone three kilometers north of the hub, where nothing of the level
+stands or shows, rather than at the scenes yard's point, through whose walls its outer buildings
+stood. Its fitting in the feature test names the far point, where in the scene the player is put and
+where they look, and once each of its 1,018 solid pieces is a body, the player is carried into one
+of its streets facing the restaurant, or the camera in spectator mode. Taking it away carries the
+player back to the scenes yard's start. Its attribution stands behind where the player is put, over
+the square, facing them. Sponza keeps the yard and its door. In walking mode the player was carried
+to 15.0, -1.00, -2985.0, grounded on the street, and back to 45.0, -1.2, -45.0, grounded in the
+yard, and from 140 m over the Bistro nothing but the sky stands round it. A fall from its streets
+puts the player back at the scenes yard, the last zone they stood in. The course script's two views
+stand at the far point, and the guide's sentence says where the Bistro stands. The sheet,
+`2026-11-17-item-148-bistro-alone.webp`, is the street the player is carried into at noon and at
+night, its caption saying the night's glow lights give about a hundred times a lamp's light, which
+item 149 mends.
+
+The archive's Specular textures, all 201 of them, 198 of 16 texels a side and 3 of 2K, hold nothing
+in their red, which the archive's README names occlusion, so the pack's occlusion texture put out
+every surface's light from all around, the bridge reading glTF's occlusion through Bevy's material.
+`build/orca-gltf.py` gives a material Specular as its occlusion only where its red reaches 8, which
+none does, and the pack is made again, 310,838,881 bytes, SHA-256
+d71c6c5b641263c214565129d521eeca8445048546fe54c1ac3cd71abc5faadd, on the release since 08:54 and
+named so by the manifest. At the alone place the picture's mean luma went from 59.7 to 112.6 of 255
+by day and from 40.8 to 92.1 by night, `2026-11-17-item-148-bistro-occlusion.webp` the pair with its
+difference. The strengths stay 500, 200 and 100. With no emission at all the night reads 1.5, with
+the signs alone 1.2, and with the string lights out 88.2, so the lamps' and spotlights' glass gives
+the night nearly all its light as the cascades' glow lights, about a hundred times what a lantern's
+glass of 0.15 m² at 500 nits gives paving 4 m off at Bevy's ev100 of 9.7.
 
 ## Items closed, parked or shortened
 
