@@ -74,6 +74,8 @@ its sheet on a white ground, pushed at 23:59 on 2026-11-17, the form kept, its b
 started. Build run 44195286498 of `03e32732` ended green. `4981d5b5`, item 150's take-back floor,
 the light pass taking back the sky's reflection along the way Bevy reads it, with its sheet on a
 white ground, pushed at 02:05 on 2026-11-18, the form kept, its build run 44213053297 started.
+`f7612252`, a mesh painted again where it stands held as not moved, the dark start of 7 in 54
+mended, pushed at 07:21 on 2026-11-18, build 44250687691 green at 08:30.
 
 Next 143, the renderer's tests on a runner, its read going on from RecordingTests with 101 of 172
 classes read by 18:56, then 93, the drive's course drawn smaller, and 66 and 67, the connections and
@@ -1106,5 +1108,78 @@ one's did, and the mend and its test are offered.
 The whole suite passed from one tree, 2,183 passed, 0 failed and 4 skipped, 2,187 in all where the
 listing is 2,176, the solution built from nothing with warnings as errors, in 16 parts and the rest
 dealt by the last run's times, each part of 2 m 6 s to 5 m 2 s, a part at a time under the GPU lock.
+
+NormTests passed, 19.
+
+150, the blended dirt decals, the reference meeting a blended face by its alpha as Bevy blends it
+over what lies behind it, in the commit carrying this Reply.
+
+Sponza's one blended material is its `dirt_decal`, an alpha of 0.35 by its factor times its
+texture's, drawn on one side, its decals on the first floor's floor lying a centimeter above it, and
+the Bistro's pack has none. The material buffer gave a blended material a cutoff of -1 and its
+textures at their means, so the reference traced each decal whole, dark dirt where the picture shows
+the stone through it.
+
+The mend. A blended material's slot holds as its cutoff 0.05, the alpha Bevy's shadow pass discards
+a blended texel under (`PREMULTIPLIED_ALPHA_CUTOFF`), its base color texture among the masks and its
+others at their means, and two flags, 8 where it is blended and 16 where Bevy culls its faces' backs
+(`flags_of` in instances.rs). The reference's paths stop at a blended face where a draw falls under
+its alpha and pass it elsewhere, and pass one met from behind where Bevy culls its back, so the
+floor's own paths pass the decal lying on it (`traceBlended` in gi_reference.slang). A shadow ray
+passes a blended face lying within 2 cm of the face it leaves along that face's normal, Bevy's
+default depth bias for the sun, which leaves the floor under a decal lit though the decal is drawn
+into the shadow map. The base color textures that say where a cut-out or blended face lies take the
+masks first, in the order of the slots, and the other textures the room left, since in the feature
+test its level's textures filled the 32 masks before Sponza's decal came, which was then laid over
+its whole square at the alpha of its factor. The slot's remarks in `Shaders.CreateMaterialBuffer`
+and `bcs_scene`'s `Material`, the compute guide's paragraph on the material buffer and the ray
+tracing guide's on the reference say so. Two listing lines are reshaped,
+`Shaders.MaterialBufferMask` naming a blended material's base color texture among the masks and
+`Shaders.MaterialBufferUnmasked` counting the cut-out and blended textures past them, as the
+reference's answer counts them. gi_reference.slang stands at 800 lines.
+
+`GiReferenceTests.ABlendedDecalOnAFloorReadsInTheReferenceAsThePictureBlendsIt` lays a red decal of
+half alpha a centimeter over a gray floor under a sun 60 degrees up that casts shadows and holds the
+reference over it within 8% of the picture, the direct light alone. On the head it read 1.226, 0.355
+and 0.355 of the picture's red, green and blue, mended 0.998, 1.002 and 1.002, and with the shadow's
+bias taken out 0.608, 0.176 and 0.176, the floor beneath in the decal's shadow.
+`ABlendedDecalUnderASkyReadsInTheReferenceAsItsShareOfItselfAndOfTheFloorBeneath` lays it under an
+even sky with two bounces and holds it at half its light drawn opaque and half the bare floor's,
+0.996, 0.999 and 0.999 of that mended and 0.804, 0.592 and 0.592 with the paths meeting the decal's
+back by its alpha. `ABlendedDecalAfterMoreTexturesThanTheMasksHoldKeepsItsShapeInTheReference` lays
+a decal checkered by its texture's alpha after 24 cut-out cards of two textures each and holds its
+square within 8% of the picture, 0.996, 1.007 and 1.007 mended and 1.219, 0.361 and 0.361 with the
+masks in the order of the slots alone, the decal laid whole. With the paths' draw taken out, as the
+head traces a decal whole, the first two read 1.226 and 1.225 of the red. The bridge's
+`a_blended_slot_says_so_and_which_sides_bevy_draws` holds the flags and the cutoff.
+
+Sponza's atrium at the sibling's view, noon and lens, cascades on, traced at 64 paths a pixel in a
+session of its own, reads its decals on the first floor's walls facing -x at 0.125 against the
+picture's 0.352 where they read 0.023 against 0.354, those facing +z at 0.168 against 0.425 where
+they read 0.040 against 0.473, and the third floor's facing -x at 0.345 against 0.789 where they
+read 0.084 against 0.844. The picture lies over them by 82% to 181%, where it lies over the brick
+walls beside them by 103% to 126%, the probes' light the later parts take up, and those facing -x
+cover 4.2% of the view where they covered 6.1%, the region ray passing the texels the shadow pass
+discards. Before the masks took the base color textures first the decals read 0.096 and 0.147 there,
+their texture past the 32 masks the feature test's level had filled. The picture lies 0.475 of its
+light from the reference where it lay 0.641 from it, and its answer counts one texture past the
+masks where it counted none, a surface or a normal map of the level's, since every base color
+texture comes first and Sponza has no cut-out material.
+
+The sheet is `2026-11-18-item-150-decals.webp`, the atrium's reference at the head and mended with
+their difference at four times, red lighter and blue darker, the decals' dark patches on the columns
+and walls gone over the stone.
+
+The scene's field builds the decals in as it builds any still mesh that casts a shadow, painted
+their texture's mean, where the sibling's field leaves a blended draw under half an alpha out
+(`SeeThrough` in its SceneField.cs). It is not chased here, and waits on the review's word.
+
+Shared: the sibling's reference leaves a blended draw under half an alpha out (`SeeThrough`), the
+stone under a decal read bare and none of the dirt, where this one's meets it by its alpha as the
+picture blends it, which is offered.
+
+The whole suite passed from one tree, 2,186 passed, 0 failed and 4 skipped, 2,190 in all where the
+listing is 2,179, the solution built from nothing with warnings as errors, in 17 parts and the rest
+dealt by the last run's times, each part of 22 s to 5 m 6 s, a part at a time under the GPU lock.
 
 NormTests passed, 19.

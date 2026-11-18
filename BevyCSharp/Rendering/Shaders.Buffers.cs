@@ -277,8 +277,8 @@ public static unsafe partial class Shaders
     /// Base color and emissive color, four floats each, then roughness, metallic, reflectance and
     /// one for unlit, then the alpha cutoff, the masks of its base color texture and of its
     /// metallic and roughness texture (<see cref="MaterialBufferMask"/>) and one unused, then its
-    /// diffuse transmission, the mask of that share's texture, one where its diffuse share is lit
-    /// by its mesh's way out of a crown as a leaf material's is, and one unused.
+    /// diffuse transmission, the mask of that share's texture, its flags, how a ray reads it, as
+    /// <c>bcs_scene</c>'s <c>Material</c> lists them, and the mask of its normal map.
     /// </remarks>
     public const int MaterialSlotBytes = 80;
 
@@ -308,6 +308,10 @@ public static unsafe partial class Shaders
     /// texture, its metallic and roughness texture and its diffuse transmission texture are among
     /// the buffer's masks (<see cref="MaterialBufferMask"/>), its slot holding the factors they
     /// multiply, so a ray reads at a hit whether it is cut out there and what the surface is there.
+    /// A blended material's holds as its cutoff the alpha Bevy's shadow pass discards its texels
+    /// under, its base color texture among the masks, and says it is blended and whether Bevy
+    /// culls its faces' backs, so a ray meets it by its alpha as Bevy blends it over what lies
+    /// behind it.
     /// A slot holds its diffuse transmission, the share of its light a face lets through from
     /// behind, and a leaf's and a grass card's say their diffuse share is lit by the way out of the
     /// crown their meshes carry in their second texture coordinates, as the leaf material lights
@@ -326,15 +330,17 @@ public static unsafe partial class Shaders
     /// <summary>
     /// Mask <paramref name="index"/> of a material buffer, the base color texture, the metallic and
     /// roughness texture, the diffuse transmission texture or the normal map of a cut-out material
-    /// its slots hold, which a slot's <c>mask</c>, <c>surface_mask</c>, <c>transmission_mask</c> or
-    /// <c>normal_mask</c> names, or <see cref="AssetHandle.None"/> where it has no such mask.
+    /// its slots hold or the base color texture of a blended one, which a slot's <c>mask</c>,
+    /// <c>surface_mask</c>, <c>transmission_mask</c> or <c>normal_mask</c> names, or <see
+    /// cref="AssetHandle.None"/> where it has no such mask.
     /// </summary>
     /// <remarks>
-    /// The masks are the first 32 such textures in the order the buffer's slots give them, a
-    /// texture several slots use one mask, and a slot past the last holds a mask of -1, its
-    /// cutout its base color's alpha alone. A shader binds them as textures of its own and reads
-    /// one at a hit's texture coordinates, as the reference global illumination is measured against
-    /// does to let a ray through a leaf's cutout.
+    /// The masks are the first 32 such textures, the base color textures first in the order the
+    /// buffer's slots give them and the others in the room left, a texture several slots use one
+    /// mask, and a slot past the last holds a mask of -1, its cutout its base color's alpha alone.
+    /// A shader binds them as textures of its own and reads one at a hit's texture coordinates, as
+    /// the reference global illumination is measured against does to let a ray through a leaf's
+    /// cutout.
     /// </remarks>
     public static AssetHandle MaterialBufferMask(AssetHandle buffer, int index)
     {
@@ -343,16 +349,16 @@ public static unsafe partial class Shaders
     }
 
     /// <summary>
-    /// How many cut-out textures a material buffer's slots name past its 32 masks
+    /// How many cut-out and blended textures a material buffer's slots name past its 32 masks
     /// (<see cref="MaterialBufferMask"/>), each texture counted once, as of the frame the buffer
     /// was last written.
     /// </summary>
     /// <remarks>
-    /// A slot whose cut-out texture has no mask holds a mask of -1 and is cut out by its base
-    /// color's alpha alone, so a shader reading the masks traces it whole and, where its metallic
-    /// is one for its texture to say where it is metal, as metal. The reference global illumination
-    /// is measured against says this count, since a scene of more cut-out textures than masks reads
-    /// apart from its picture there.
+    /// A slot whose cut-out or blended texture has no mask holds a mask of -1 and is cut out or
+    /// blended by its base color's alpha alone, so a shader reading the masks traces it whole and,
+    /// where its metallic is one for its texture to say where it is metal, as metal. The reference
+    /// global illumination is measured against says this count, since a scene of more such
+    /// textures than masks reads apart from its picture there.
     /// </remarks>
     /// <exception cref="BevyNativeException">The handle is not a material buffer.</exception>
     public static int MaterialBufferUnmasked(AssetHandle buffer) =>

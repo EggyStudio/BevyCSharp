@@ -24,16 +24,19 @@
 //! buffers and a shader has transform and material by one index. A leaf's, a grass card's and a
 //! bark's material are the standard material they extend. A cut-out material's base color texture,
 //! its metallic and roughness texture, its diffuse transmission texture and its normal map are
-//! among the buffer's masks, the first [`MOST_MASKS`] such textures among its slots, which a shader
-//! binds to read the cutout, the color, how metallic and rough the surface is, how much it lets
-//! through and which way it faces at a hit, a leaf's metal its texture's to say where the
-//! material's own is one. Every other texture is in it as its mean (`field_means`), the slot's
-//! base color, emission, roughness and metal and the share it lets through each its factor times
-//! its texture's mean, a color's in linear light by its image's sRGB flag, as global
-//! illumination's field paints the surface, since a scene made to be drawn holds its colors in its
-//! textures and leaves its factors white and its metal at one for its map to say. A tree's
-//! impostor stands in for a far tree, turned to the eye as it draws, and its slot's cutoff is above
-//! any alpha, so a ray passes it.
+//! among the buffer's masks, and a blended material's base color texture, the first [`MOST_MASKS`]
+//! such textures among its slots, which a shader binds to read the cutout, the color, how metallic
+//! and rough the surface is, how much it lets through and which way it faces at a hit, a leaf's
+//! metal its texture's to say where the material's own is one. Every other texture is in it as its
+//! mean (`field_means`), the slot's base color, emission, roughness and metal and the share it lets
+//! through each its factor times its texture's mean, a color's in linear light by its image's sRGB
+//! flag, as global illumination's field paints the surface, since a scene made to be drawn holds
+//! its colors in its textures and leaves its factors white and its metal at one for its map to say.
+//! A tree's impostor stands in for a far tree, turned to the eye as it draws, and its slot's cutoff
+//! is above any alpha, so a ray passes it. A blended material's slot holds as its cutoff the alpha
+//! Bevy's shadow pass discards its texels under, its base color texture among the masks, and says
+//! it is blended and whether Bevy culls its faces' backs, so a ray meets it by its alpha as Bevy
+//! blends it over what lies behind it.
 
 #![cfg(feature = "render")]
 
@@ -81,10 +84,11 @@ struct Tracked {
     previous: Vec<Mat4>,
     /// What was last written, so a frame on which nothing moved writes nothing.
     written: Vec<u8>,
-    /// A material buffer's masks, the base color textures of its cut-out materials, in the order
-    /// their slots give them.
+    /// A material buffer's masks, the textures of its cut-out materials and the base color
+    /// textures of its blended ones, those saying where a face lies first and the others in the
+    /// room left, each in the order their slots give them.
     masks: Vec<Handle<bevy::image::Image>>,
-    /// How many of its slots' cut-out textures there was no room for among the masks.
+    /// How many of its slots' cut-out and blended textures there was no room for among the masks.
     unmasked: usize,
 }
 
@@ -237,20 +241,35 @@ pub fn write_materials(
         None => &mut unkept,
     };
 
+    // An entity's standard material, a leaf's, a grass card's and a bark's the one theirs extends.
+    let material_of = |entity: Entity| {
+        standard
+            .get(entity)
+            .ok()
+            .and_then(|carried| standards.get(&carried.0))
+            .or_else(|| leaves.get(entity).ok().and_then(|carried| leaf_materials.get(&carried.0)).map(|leaf| &leaf.base))
+            .or_else(|| barks.get(entity).ok().and_then(|carried| bark_materials.get(&carried.0)).map(|bark| &bark.base))
+    };
+
     for tracked in buffers.0.values_mut().filter(|tracked| tracked.kind == Kind::Materials) {
         let mut bytes = Vec::with_capacity(tracked.slots.len() * MATERIAL_SLOT_BYTES);
         let mut masks: Vec<Handle<bevy::image::Image>> = Vec::new();
         let mut unmasked: Vec<AssetId<bevy::image::Image>> = Vec::new();
 
+        // The textures that say where a face lies, each cut-out and blended material's base color
+        // texture, take the masks first in the order of the slots, so a scene's decals loaded after
+        // a forest keep their shapes where the forest's surfaces and normal maps fill the room.
+        for &entity in tracked.slots.iter().flatten() {
+            if impostors.contains(entity) {
+                continue;
+            }
+            if let Some(texture) = material_of(entity).and_then(|material| cut_out_texture(material, cutoff_of(material.alpha_mode))) {
+                mask_of(&mut masks, &mut unmasked, texture);
+            }
+        }
+
         for entity in &tracked.slots {
-            let base = entity.and_then(|entity| {
-                standard
-                    .get(entity)
-                    .ok()
-                    .and_then(|carried| standards.get(&carried.0))
-                    .or_else(|| leaves.get(entity).ok().and_then(|carried| leaf_materials.get(&carried.0)).map(|leaf| &leaf.base))
-                    .or_else(|| barks.get(entity).ok().and_then(|carried| bark_materials.get(&carried.0)).map(|bark| &bark.base))
-            });
+            let base = entity.and_then(material_of);
             let passed = entity.is_some_and(|entity| impostors.contains(entity));
             let leaf = entity.is_some_and(|entity| leaves.contains(entity));
 
@@ -268,18 +287,22 @@ pub fn write_materials(
                     let reflectance = material.reflectance;
                     let cutoff = cutoff_of(material.alpha_mode);
                     let mask = cut_out_texture(material, cutoff).map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
-                    let surface = (cutoff >= 0.0)
+                    // A blended material's base color texture alone is among the masks, its alpha
+                    // saying where it lies and its color what it is, and its others are taken at
+                    // their means, which leaves the masks' room to a forest's cards.
+                    let cut = cutoff >= 0.0 && !matches!(material.alpha_mode, bevy::material::AlphaMode::Blend);
+                    let surface = cut
                         .then_some(material.metallic_roughness_texture.as_ref())
                         .flatten()
                         .map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
-                    let through = (cutoff >= 0.0)
+                    let through = cut
                         .then_some(material.diffuse_transmission_texture.as_ref())
                         .flatten()
                         .map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
-                    let normal_map = (cutoff >= 0.0).then_some(material.normal_map_texture.as_ref()).flatten();
+                    let normal_map = cut.then_some(material.normal_map_texture.as_ref()).flatten();
                     let bumps = normal_map.map_or(-1.0, |texture| mask_of(&mut masks, &mut unmasked, texture));
                     let two = normal_map.and_then(|texture| images.get(texture)).is_some_and(|image| two_component(image.texture_descriptor.format));
-                    let flags = (if leaf { WAY_OUT } else { 0 }) | (if two { TWO_COMPONENT } else { 0 }) | (if material.flip_normal_map_y { FLIP_Y } else { 0 });
+                    let flags = flags_of(material, leaf, two);
                     // A texture a mask holds is read where a ray hits, and every other is taken at
                     // its mean.
                     let [r, g, b] = if mask >= 0.0 { [1.0; 3] } else { painted.color };
@@ -335,6 +358,28 @@ pub const TWO_COMPONENT: u32 = 2;
 /// A slot's flag where its normal map's green is flipped, as for a map made for DirectX.
 pub const FLIP_Y: u32 = 4;
 
+/// A slot's flag where Bevy blends the material over what lies behind it by its alpha, as a
+/// scene's decals are drawn.
+pub const BLENDED: u32 = 8;
+
+/// A slot's flag where Bevy culls the backs of the material's faces, as it does but for a material
+/// drawn on both sides.
+pub const ONE_SIDED: u32 = 16;
+
+/// The alpha under which Bevy's shadow pass and its prepasses discard a blended material's texel,
+/// `PREMULTIPLIED_ALPHA_CUTOFF` in bevy_pbr's prepass functions.
+pub const BLENDED_CUTOFF: f32 = 0.05;
+
+/// A slot's flags, how a ray reads the material, by whether it is a leaf's and its normal map holds
+/// two channels.
+fn flags_of(material: &bevy::pbr::StandardMaterial, leaf: bool, two: bool) -> u32 {
+    (if leaf { WAY_OUT } else { 0 })
+        | (if two { TWO_COMPONENT } else { 0 })
+        | (if material.flip_normal_map_y { FLIP_Y } else { 0 })
+        | (if matches!(material.alpha_mode, bevy::material::AlphaMode::Blend) { BLENDED } else { 0 })
+        | (if material.cull_mode == Some(bevy::render::render_resource::Face::Back) { ONE_SIDED } else { 0 })
+}
+
 /// Whether Bevy reads a normal map of this format as two channels, as `StandardMaterial` decides.
 fn two_component(format: bevy::render::render_resource::TextureFormat) -> bool {
     use bevy::render::render_resource::{AstcChannel, TextureFormat};
@@ -348,12 +393,14 @@ fn two_component(format: bevy::render::render_resource::TextureFormat) -> bool {
     )
 }
 
-/// The alpha a material is cut out under as Bevy draws it, the cutoff of a masked material and a
-/// half where its coverage is spread over the picture's samples, or -1 where it is drawn whole.
+/// The alpha a material is cut out under as Bevy draws it, the cutoff of a masked material, a half
+/// where its coverage is spread over the picture's samples and the alpha Bevy's shadow pass discards
+/// a blended one's texels under, or -1 where it is drawn whole.
 fn cutoff_of(mode: bevy::material::AlphaMode) -> f32 {
     match mode {
         bevy::material::AlphaMode::Mask(cutoff) => cutoff,
         bevy::material::AlphaMode::AlphaToCoverage => 0.5,
+        bevy::material::AlphaMode::Blend => BLENDED_CUTOFF,
         _ => -1.0,
     }
 }
@@ -364,8 +411,8 @@ fn cut_out_texture(material: &bevy::pbr::StandardMaterial, cutoff: f32) -> Optio
 }
 
 /// Which of the buffer's masks a texture is, taking the next where it is none yet and there is
-/// room, or -1 where there is none, the material then cut out by its base color's alpha alone and
-/// the texture counted among those left out.
+/// room, or -1 where there is none, the material then cut out or blended by its base color's alpha
+/// alone and the texture counted among those left out.
 fn mask_of(
     masks: &mut Vec<Handle<bevy::image::Image>>,
     unmasked: &mut Vec<AssetId<bevy::image::Image>>,
@@ -401,8 +448,8 @@ pub fn mask(world: &mut World, key: i32, index: u32) -> i32 {
     }
 }
 
-/// How many cut-out textures the slots of the material buffer `key` name that there was no room
-/// for among its masks, or [`status::NO_COMPONENT`] where it is no material buffer.
+/// How many cut-out and blended textures the slots of the material buffer `key` name that there
+/// was no room for among its masks, or [`status::NO_COMPONENT`] where it is no material buffer.
 pub fn unmasked(world: &mut World, key: i32) -> i32 {
     let Some(handle) = super::compute::buffer_handle(world, key) else {
         return status::NO_COMPONENT;
@@ -448,12 +495,24 @@ mod tests {
         assert!(!two_component(bevy::render::render_resource::TextureFormat::Rgba8Unorm));
         assert_eq!(cutoff_of(bevy::material::AlphaMode::Mask(0.3)), 0.3);
         assert_eq!(cutoff_of(bevy::material::AlphaMode::Opaque), -1.0);
+        assert_eq!(cutoff_of(bevy::material::AlphaMode::Blend), BLENDED_CUTOFF);
         assert!(PASSED > 1.0);
     }
 
-    /// A buffer's masks are its cut-out textures in the order their slots give them, a texture met
-    /// again taking its first index, and none past the last there is room for, each texture left
-    /// out counted once however many slots name it.
+    /// A blended material's slot says it is blended and, but where it is drawn on both sides, that
+    /// Bevy culls its faces' backs, and an opaque one drawn on both sides says neither.
+    #[test]
+    fn a_blended_slot_says_so_and_which_sides_bevy_draws() {
+        let blended = bevy::pbr::StandardMaterial { alpha_mode: bevy::material::AlphaMode::Blend, ..Default::default() };
+        assert_eq!(flags_of(&blended, false, false), BLENDED | ONE_SIDED);
+        let both = bevy::pbr::StandardMaterial { cull_mode: None, double_sided: true, ..Default::default() };
+        assert_eq!(flags_of(&both, false, false), 0);
+        assert_eq!(flags_of(&both, true, true), WAY_OUT | TWO_COMPONENT);
+    }
+
+    /// A buffer's masks are the textures given them in the order they come, a texture met again
+    /// taking its first index, and none past the last there is room for, each texture left out
+    /// counted once however many slots name it.
     #[test]
     fn a_texture_takes_one_mask_however_many_slots_cut_it_out() {
         let (mut masks, mut unmasked) = (Vec::new(), Vec::new());

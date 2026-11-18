@@ -131,6 +131,16 @@ SamplerState mask_sampler;
 // crowns, where each card it crosses lets it through where its leaves are cut out.
 static const uint MostCutouts = 32u;
 
+// A slot's flags (instances.rs) where Bevy blends its material over what lies behind it by its
+// alpha, as a scene's decals, and where Bevy culls the backs of its faces.
+static const uint Blended = 8u;
+static const uint OneSided = 16u;
+
+// How near the face a shadow ray leaves, along that face's normal, a blended face lies at most for
+// the ray to pass it, Bevy's default depth bias for the sun's shadows, which leaves the floor a
+// decal lies on lit though the decal is drawn into the shadow map.
+static const float DecalBias = 0.02;
+
 // Mask `index` read at uv, at its largest level.
 float4 maskAt(int index, float2 uv)
 {
@@ -310,9 +320,17 @@ Material surfacedAt(RayHit hit, Material material)
     return material;
 }
 
+// A face's alpha where a ray met it, its base color's times its texture's.
+float alphaAt(RayHit hit, Material material)
+{
+    int index = int(material.mask);
+    return material.base_color.a * (index >= 0 ? maskAt(index, uvAt(hit)).a : 1.0);
+}
+
 // Whether a ray passes the face it met, a cut-out material's where its alpha is under the cutoff,
-// as the forward pass discards a leaf's or a grass card's texel, and a tree's impostor's
-// everywhere, since an impostor turned to the eye as it draws is no shape a ray meets.
+// as the forward pass discards a leaf's or a grass card's texel and the shadow pass a blended
+// one's, and a tree's impostor's everywhere, since an impostor turned to the eye as it draws is no
+// shape a ray meets.
 bool passesAt(RayHit hit)
 {
     Material material = materials[hit.instance];
@@ -320,9 +338,7 @@ bool passesAt(RayHit hit)
         return false;
     if (material.alpha_cutoff > 1.0)
         return true;
-    int index = int(material.mask);
-    float alpha = material.base_color.a * (index >= 0 ? maskAt(index, uvAt(hit)).a : 1.0);
-    return alpha < material.alpha_cutoff;
+    return alphaAt(hit, material) < material.alpha_cutoff;
 }
 
 // The instances every ray but the eye's first meets, a shadow ray's, a path's past its first face
@@ -360,14 +376,26 @@ RayHit traceThrough(float3 origin, float3 way, float tMin, float tMax, uint mask
 }
 
 // Whether nothing that casts a shadow stops a shadow ray between two points, the faces cut out
-// where it met them passed as a path passes them, and the face it leaves from.
-bool visibleThrough(float3 from, float3 to, uint2 leaving)
+// where it met them passed as a path passes them, and the face it leaves from, facing n, with a
+// blended face lying within DecalBias of it along n, as a decal lies on its floor.
+bool visibleThrough(float3 from, float3 to, uint2 leaving, float3 n)
 {
     float3 offset = to - from;
     float distance = length(offset);
     if (distance <= 0.0)
         return true;
-    return !traceThrough(from, offset / distance, 0.001, distance * 0.999, RayCastsShadows, leaving).hit;
+    float3 way = offset / distance;
+    float t = 0.001;
+    for (uint passed = 0u; passed <= MostCutouts; passed++)
+    {
+        RayHit hit = traceThrough(from, way, t, distance * 0.999, RayCastsShadows, leaving);
+        if (!hit.hit)
+            return true;
+        if ((uint(materials[hit.instance].flags + 0.5) & Blended) == 0u || hit.t * dot(way, n) > DecalBias)
+            return false;
+        t = hit.t + 1e-4 * (1.0 + hit.t);
+    }
+    return true;
 }
 
 // The way of the hemisphere's square at uv, and how far its point lies from the middle, as
@@ -477,8 +505,8 @@ float3 direct(GiLights given, float3 p, float3 n, float3 v, float3 color, Materi
     {
         float3 l = given.sunDirection.xyz;
         float3 arrives = float3(dot(lit.diffuseNormal, l), dot(lit.shadingNormal, l), lit.through > 0.0 ? dot(-lit.shadingNormal, l) : 0.0);
-        bool front = max(arrives.x, arrives.y) > 0.0 && (given.sunColor.w < 0.5 || visibleThrough(start, start + l * 1e5, face));
-        bool behind = arrives.z > 0.0 && (given.sunColor.w < 0.5 || visibleThrough(back, back + l * 1e5, face));
+        bool front = max(arrives.x, arrives.y) > 0.0 && (given.sunColor.w < 0.5 || visibleThrough(start, start + l * 1e5, face, n));
+        bool behind = arrives.z > 0.0 && (given.sunColor.w < 0.5 || visibleThrough(back, back + l * 1e5, face, -n));
         sum += given.sunColor.rgb * litBy(l, lit.shadingNormal, v, lit, diffuse, through, f0, roughness, arrives * float3(front ? 1.0 : 0.0, front ? 1.0 : 0.0, behind ? 1.0 : 0.0));
     }
     for (int i = 0; i < min(int(given.counts.x), 16); i++)
@@ -490,8 +518,8 @@ float3 direct(GiLights given, float3 p, float3 n, float3 v, float3 color, Materi
         float3 l = normalize(lamp.positionAndKind.xyz - p);
         float3 to = lamp.positionAndKind.xyz - l * NearShadow;
         bool shadowed = lamp.colorAndShadow.w > 0.5;
-        bool front = max(arrives.x, arrives.y) > 0.0 && (!shadowed || visibleThrough(start, to, face));
-        bool behind = arrives.z > 0.0 && (!shadowed || visibleThrough(back, to, face));
+        bool front = max(arrives.x, arrives.y) > 0.0 && (!shadowed || visibleThrough(start, to, face, n));
+        bool behind = arrives.z > 0.0 && (!shadowed || visibleThrough(back, to, face, -n));
         sum += lamp.colorAndShadow.rgb * litBy(l, lit.shadingNormal, v, lit, diffuse, through, f0, roughness, arrives * float3(front ? 1.0 : 0.0, front ? 1.0 : 0.0, behind ? 1.0 : 0.0));
     }
     return sum;
@@ -539,16 +567,46 @@ uint axisOf(float3 n)
     return m.x >= m.y && m.x >= m.z ? (n.x > 0.0 ? 0u : 1u) : m.y >= m.z ? (n.y > 0.0 ? 2u : 3u) : (n.z > 0.0 ? 4u : 5u);
 }
 
-// The face's normal in the world, toward the side the ray came from.
-float3 normalAt(RayHit hit, float3 way)
+// The face's normal in the world, out of its front, its corners counterclockwise seen from there.
+float3 frontAt(RayHit hit)
 {
     PoolMesh mesh = meshes[hit.mesh];
     Instance placed = instances[hit.instance];
     float3 a = instanceToWorld(placed, poolCorner(vertices, indices, mesh, hit.triangle, 0u).position.xyz);
     float3 b = instanceToWorld(placed, poolCorner(vertices, indices, mesh, hit.triangle, 1u).position.xyz);
     float3 c = instanceToWorld(placed, poolCorner(vertices, indices, mesh, hit.triangle, 2u).position.xyz);
-    float3 n = normalize(cross(b - a, c - a));
+    return normalize(cross(b - a, c - a));
+}
+
+// The face's normal in the world, toward the side the ray came from.
+float3 normalAt(RayHit hit, float3 way)
+{
+    float3 n = frontAt(hit);
     return dot(n, way) > 0.0 ? -n : n;
+}
+
+// What a path's ray meets past the blended faces it passes, each passed where the ray meets its
+// back and Bevy culls that, as a floor's paths pass the decal lying on it, and elsewhere where a
+// draw falls at or over its alpha, so a path sees a blended face in the share of its alpha, as
+// Bevy blends it over what lies behind it, up to MostCutouts of them, the last taken as met.
+RayHit traceBlended(float3 origin, float3 way, uint mask, uint2 leaving, inout uint state)
+{
+    float t = 0.0;
+    RayHit hit;
+    for (uint passed = 0u; passed <= MostCutouts; passed++)
+    {
+        hit = traceThrough(origin, way, t, 1e5, mask, leaving);
+        if (!hit.hit)
+            return hit;
+        Material material = materials[hit.instance];
+        uint flags = uint(material.flags + 0.5);
+        if ((flags & Blended) == 0u)
+            return hit;
+        if (((flags & OneSided) == 0u || dot(frontAt(hit), way) <= 0.0) && random(state) < alphaAt(hit, material))
+            return hit;
+        t = hit.t + 1e-4 * (1.0 + hit.t);
+    }
+    return hit;
 }
 
 // The light one path brings back from origin along way, from the camera where fromCamera says so,
@@ -561,7 +619,7 @@ float3 trace(GiLights given, float3 origin, float3 way, bool fromCamera, inout u
     uint2 leaving = NoFace;
     for (uint bounce = 0u; bounce < counts.z; bounce++)
     {
-        RayHit hit = traceThrough(origin, way, 0.0, 1e5, fromCamera && bounce == 0u ? RayEveryInstance : PastTheEye, leaving);
+        RayHit hit = traceBlended(origin, way, fromCamera && bounce == 0u ? RayEveryInstance : PastTheEye, leaving, state);
         if (fromCamera && bounce == 0u)
         {
             metLeaf = false;

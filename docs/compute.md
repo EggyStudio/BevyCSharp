@@ -99,16 +99,20 @@ hit with that. A texture is in it as its mean, the base color, the emission, the
 metal each the material's factor times its texture's mean, a color's in linear light by its image's
 sRGB flag, as global illumination's field paints the surface, but for a material cut out under an
 alpha, whose slot holds its cutoff and its factors and names which of the buffer's masks its base
-color texture and its metallic and roughness texture are.
+color texture and its metallic and roughness texture are. A blended material's slot holds as its
+cutoff the alpha Bevy's shadow pass discards a texel under and names its base color texture's mask,
+and its flags say that it is blended and whether Bevy culls its faces' backs, so a ray meets it by
+its alpha as Bevy blends it over what lies behind it.
 `Shaders.MaterialBufferMask(buffer, index)` gives each mask, and a shader that binds them reads at a
 hit, from the pool's texture coordinates, whether a ray passes there, what the surface is and which
 way its normal map turns it. There are 32, a leaf set's base color, its metallic and roughness and
-its normal map each one, and `Shaders.MaterialBufferUnmasked(buffer)` says how many cut-out textures
-its slots name past them, each traced whole and painted its mean. A tree's impostor holds a cutoff
-above any alpha, since it is turned to the eye as it draws and is no shape a ray meets. A slot holds
-the share of its light a face lets through from behind, its diffuse transmission, with its texture's
-mask, and a leaf's and a grass card's say that their diffuse light comes by the way out of the crown
-their meshes carry in their second texture coordinates, which the pool keeps beside the first.
+its normal map each one, and `Shaders.MaterialBufferUnmasked(buffer)` says how many cut-out and
+blended textures its slots name past them, each traced whole and painted its mean. A tree's impostor
+holds a cutoff above any alpha, since it is turned to the eye as it draws and is no shape a ray
+meets. A slot holds the share of its light a face lets through from behind, its diffuse
+transmission, with its texture's mask, and a leaf's and a grass card's say that their diffuse light
+comes by the way out of the crown their meshes carry in their second texture coordinates, which the
+pool keeps beside the first.
 
 The triangles themselves go in a geometry pool, for a ray traced in a compute shader or a scene
 voxelized by one, which meets whatever mesh is there:

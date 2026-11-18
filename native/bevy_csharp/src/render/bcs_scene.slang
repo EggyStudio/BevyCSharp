@@ -41,8 +41,8 @@ public struct Material
     /// One for an unlit material, which shows its color whatever lights it.
     public float unlit;
     /// The alpha its base color texture's alpha times its base color's is cut out under, as Bevy
-    /// draws a masked material, -1 for one drawn whole, and above one for a tree's impostor, which
-    /// a ray passes.
+    /// draws a masked material and its shadow pass a blended one, -1 for one drawn whole, and above
+    /// one for a tree's impostor, which a ray passes.
     public float alpha_cutoff;
     /// Which of the buffer's masks its base color texture is (`Shaders.MaterialBufferMask`), or -1
     /// for none, its cutout then its base color's alpha alone.
@@ -59,8 +59,9 @@ public struct Material
     /// How it reads its diffuse share and its normal map, as bits: 1 where it lights its diffuse
     /// share by its mesh's way out of a crown, the second texture coordinates folded onto a square
     /// (`PoolVertex.uv`'s `zw`), as the leaf material lights a leaf's and a grass card's, 2 where
-    /// its normal map holds two channels and its third is worked out from them, and 4 where the
-    /// map's green is flipped.
+    /// its normal map holds two channels and its third is worked out from them, 4 where the map's
+    /// green is flipped, 8 where Bevy blends it over what lies behind it by its alpha, as a
+    /// scene's decals, and 16 where Bevy culls the backs of its faces.
     public float flags;
     /// Which of the buffer's masks its normal map is, or -1 for none.
     public float normal_mask;

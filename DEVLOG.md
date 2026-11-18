@@ -18,6 +18,10 @@ Sponza's atrium at noon at a start whose textures load after its meshes first st
 the head where its meshes painted again stood as boxes and lit as a normal start is mended, red in
 the difference.
 
+![](.github/assets/readings/2026-11-18-item-150-decals.webp)
+Sponza's atrium in the reference at noon, its dirt decals dark patches traced whole at the head and
+blended over the stone by their alpha as the picture shows them mended, red in the difference.
+
 ## 2026-11-17
 
 ![](.github/assets/readings/2026-11-17-item-148-bistro-day-and-night.webp)

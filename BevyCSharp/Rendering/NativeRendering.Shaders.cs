@@ -254,12 +254,12 @@ internal static unsafe partial class NativeRendering
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_create(int capacity);
 
-    /// <summary>The asset key of a material buffer's mask, the base color texture of a cut-out material its slots hold.</summary>
+    /// <summary>The asset key of a material buffer's mask, a texture of a cut-out material its slots hold or a blended one's base color texture.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_mask(int buffer, int index);
 
-    /// <summary>How many cut-out textures a material buffer's slots name past its masks.</summary>
+    /// <summary>How many cut-out and blended textures a material buffer's slots name past its masks.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_shader_material_buffer_unmasked(int buffer);

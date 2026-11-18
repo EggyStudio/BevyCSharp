@@ -395,7 +395,7 @@ pub extern "C" fn bcs_shader_material_buffer_mask(buffer: i32, index: i32) -> i3
     })
 }
 
-/// How many cut-out textures the slots of a material buffer from
+/// How many cut-out and blended textures the slots of a material buffer from
 /// [`bcs_shader_material_buffer_create`] name past its masks, each traced by its material's base
 /// color alone, as of the frame it was last written, or [`status::NO_COMPONENT`] where the key is
 /// not a material buffer.
