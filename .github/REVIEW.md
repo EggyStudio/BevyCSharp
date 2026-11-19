@@ -1225,3 +1225,26 @@ the grade each switched alone, then the Mie swap of `ScatteringTerm.Earth`, then
 fresh session reads this Reply and the box test first.
 
 NormTests passed, 19.
+
+150, the shade's read, the grade and the sky's fill each switched alone on Sponza's matched atrium,
+a reading with its sheet in the commit carrying this Reply.
+
+At the sibling's view, sun and camera at ISO 200, 1/25 s and f/16, each session from the feature
+test's own settings, the bridge's picture means 53.6 of 255 and its shade 10.5 where 3DEngine's
+means 78.6. The sibling raises its light to one over 1.225 before its curve (`SetLiftGammaGain(0,
+0.225f, 0)`), and Bevy's grading does the same in its tone mapping (`powsafe(color * gain + lift,
+1.0 / gamma)`), so that gamma on the camera's three sections alone means 66.4 and the shade 21.3.
+The sky's fill alone, the environment map at 1.5 times for the clear day's share of the sun, means
+55.5 and the shade 10.4. So the grade carries about half of the 25 between the two engines and the
+sky's fill a tenth of it. The rest lies in what is not switched here, 3DEngine's own AgX lookup
+against Bevy's AgX, its bloom and its High tier with cells of 0.125 and a far cascade against the
+bridge's Medium, which the kernels' read takes up with one tier for both.
+
+The sheet is `2026-11-19-item-150-grade.webp`, the atrium as it stands beside each switch with their
+difference at twice, red lighter and blue darker.
+
+Handoff. The shade's read is closed with this reading and changes no default. Next in order is the
+Mie swap of `ScatteringTerm.Earth`, then item 138's read, taking the RadianceCascades passes with
+the open box test turned on. A fresh session reads this Reply and the box test's first.
+
+NormTests passed, 19.
