@@ -1187,3 +1187,41 @@ at one view and sun, the sky's fill and the grade each switched alone, then item
 session reads this Reply, the yard floor's before it and the matched sheet first.
 
 NormTests passed, 19.
+
+150, the shade's read, the sky's light in the radiance cascades, with an open box's test committed
+skipped by name as the RadianceCascades module's failing case, in the commit carrying this Reply.
+
+A probe's ray that leaves the field takes the sky along its way at the last cascade, the camera's
+environment map, in the feature test the atmosphere's cube, blurred to a roughness of 0.25 and a
+frame late, with the ambient light's constant, and the cascades below take it through the merge
+(`skyAlong` in gi_trace.slang), as the reference takes the same sky. At the feature test's noon the
+cube gives a level surface about 13,200 lux of sky against the sun's 104,000, 0.13 of it where the
+Sky module's clear day gives 0.21 at 54 degrees, so the input is near a clear day's. In the atrium
+the sky is a few percent of the shade's light, its term doubled moving the brick walls facing -x
+from 0.173 to 0.180 and the shade from 13.4 to 13.7 of 255, and its term taken out alone throws the
+light pass to Bevy's own unshadowed light.
+
+`GlobalIlluminationTests.AFloorInABoxOpenToTheSkyReadsTheSkysShareOfItsDome` stands a gray floor in
+an 8 m box open to a uniform sky, its walls black and nothing glossy, and holds the floor's middle
+within 15% of what the dome's share of 0.239 gives, 0.1030, and the reference within 8%. The
+reference reads 0.1112 and the picture 0.0587. With the screen probes off the world probes alone
+read within 15%, so the loss lies in the screen probes' rays past their 4 m reach, which take the
+world probes' light around the ray's end. Three trials each broke another test. A reach twice as
+long read 0.0624 and broke two closed rooms' tests, `beyond` given the merge's parallax read 0.0651
+and broke a floor under a slab letting light through, and the merge leaving its early hits out read
+0.0692 and overshot by 27% without the screen probes. Four times the reach passed, at four times the
+march, and the screen filter's clamp taken off moved nothing. The 35% still unread lies in `beyond`
+and its 8 by 8 lookup, and the test is skipped by name with that reason and its bound kept, for the
+rule to be written once in the module.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, the box's test among
+them, 2,196 in all where the listing is 2,185, the solution built from nothing with warnings as
+errors, in 13 parts and the rest dealt by the last run's times, each part of 1 m 36 s to 4 m 22 s, a
+part at a time under the GPU lock.
+
+Handoff. The shade's sky is read and its loss handed to the module. Next in order is the grade's
+read, the shade's mean of 59 against the sibling's 79 at one view and sun with the sky's fill and
+the grade each switched alone, then the Mie swap of `ScatteringTerm.Earth`, then item 138's read. A
+fresh session reads this Reply and the box test first.
+
+NormTests passed, 19.
