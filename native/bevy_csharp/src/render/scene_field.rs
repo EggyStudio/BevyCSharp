@@ -1,7 +1,7 @@
 //! What the scene's distance field is built from, which the managed side reads each frame, the
-//! meshes drawn that cast shadows, each with a number for its mesh, its matrix, its material's color
-//! and emission, whether it has an inside and its bounds in its own space, the camera the field
-//! lies around, and a pool of the meshes' triangles in one shader buffer.
+//! meshes drawn that cast shadows, each with a number for its mesh, its matrix, its material's
+//! color and emission, whether it has an inside and its bounds in its own space, the camera the
+//! field lies around, and a pool of the meshes' triangles in one shader buffer.
 //!
 //! The managed side works out which cascades to build and from which meshes (`SceneFieldPlan`), and
 //! runs the field's compute shaders over this pool, so the bridge holds only what it alone can
@@ -11,11 +11,11 @@
 //! moves on each time Bevy says its data changed, so a mesh written again in place is another mesh
 //! to the plan, as a game's section meshed again after an edit is, and is pooled again.
 //!
-//! Each triangle is three corners in the pool, sixteen bytes each, its place in the mesh's own space
-//! as three floats' bits, and in the fourth word its vertex's color as three sRGB bytes, white where
-//! the mesh has none, with the bit above them set where the edge from the corner to the triangle's
-//! next is open, shared by no other triangle by the places of its ends, which the splat reads to keep
-//! a cell past an open mesh's rim in front of it.
+//! Each triangle is three corners in the pool, sixteen bytes each, its place in the mesh's own
+//! space as three floats' bits, and in the fourth word its vertex's color as three sRGB bytes,
+//! white where the mesh has none, with the bit above them set where the edge from the corner to the
+//! triangle's next is open, shared by no other triangle by the places of its ends, which the splat
+//! reads to keep a cell past an open mesh's rim in front of it.
 
 use crate::interop::status;
 
@@ -329,8 +329,8 @@ mod built {
         pub(super) capacity: usize,
     }
 
-    /// Numbers the meshes and keeps their generations and the textures' means, from nothing for a new
-    /// app.
+    /// Numbers the meshes and keeps their generations and the textures' means, from nothing for a
+    /// new app.
     pub fn install(app: &mut bevy::app::App) {
         app.init_resource::<FieldMeshes>();
         app.init_resource::<FieldPool>();
@@ -355,10 +355,10 @@ mod built {
         }
     }
 
-    /// What the field takes from a material beyond Bevy's own settings, by the material's asset, the
-    /// share of global illumination's light that passes a unit of its depth, as a canopy's leaves
-    /// let it through, and a color its base color is painted times in place of its texture's mean,
-    /// as the trees give the mean of their pictures.
+    /// What the field takes from a material beyond Bevy's own settings, by the material's asset,
+    /// the share of global illumination's light that passes a unit of its depth, as a canopy's
+    /// leaves let it through, and a color its base color is painted times in place of its texture's
+    /// mean, as the trees give the mean of their pictures.
     #[derive(Resource, Default)]
     pub struct FieldLooks(pub HashMap<bevy::asset::UntypedAssetId, FieldLook>);
 
@@ -505,8 +505,8 @@ mod built {
                     [r * shown * tr, g * shown * tg, b * shown * tb, 0.0]
                 });
                 let transmission = painted.map_or(0.0, |painted| painted.transmission);
-                // Green the roughness and blue the metal, as a glTF metallic and roughness map holds
-                // them.
+                // Green the roughness and blue the metal, as a glTF metallic and roughness map
+                // holds them.
                 let [_, rough, metal] = painted.map_or([1.0; 3], |painted| painted.surface);
                 let gloss = standard.map_or([0.5, 0.0, 0.5, 0.0], |standard| {
                     [standard.perceptual_roughness * rough, standard.metallic * metal, standard.reflectance, transmission]
@@ -667,7 +667,8 @@ mod built {
     /// Whether Bevy blends a material at less than half of it by its base color's alpha, as a
     /// scene's decal or a pane of tinted glass, which stands in the field as nothing rather than as
     /// a solid of its color, since the surface it lies on shows through it as it is drawn, and held
-    /// solid a decal would darken the wall beneath it in the field where the picture shows the wall.
+    /// solid a decal would darken the wall beneath it in the field where the picture shows the
+    /// wall.
     fn see_through(material: &bevy::pbr::StandardMaterial) -> bool {
         matches!(material.alpha_mode, bevy::material::AlphaMode::Blend) && material.base_color.to_linear().alpha < 0.5
     }

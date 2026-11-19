@@ -119,24 +119,6 @@ the feature test, on at Medium with the fill off and its faults taken as items 9
 deep bounces' shortfall, closed with its sampling part open, the engine's 200 the same question;
 127, a probe carried from nothing, read and left out. Item 96's meshes wait on Modeling's item 3.
 
-66. **Entities connect through outputs and inputs as Source's do, in the engine.** From Decision 61.
-    An entity's output names a target entity, an input on it, a parameter, a delay and whether it
-    fires once, the engine firing them at run time in order with their delays, the level file
-    carrying the connections, and the classes of the feature test's level, a door, a button, a
-    trigger, a light and a sound, holding their inputs and outputs; a test of a button opening a
-    door after a delay and once. After item 65.
-
-67. **The level editor edits the file in Hammer's four panes or Unreal's single view, switchable.**
-    From Decision 61, level editing for artists who do not program. The editor opens a level file,
-    shows it in four panes, the view and the top, front and side, or in one view, switched by a key,
-    draws brushes with a block tool, moves their faces and vertices, applies textures with the
-    world-aligned mapping, places entities and edits their keyvalues, and holds the connections of
-    item 66 in a panel of outputs, targets, inputs, parameters, delays and fire once; it saves the
-    file the engine loads. Phases proposed by the coder; after item 66. The coder's phases are four
-    panes or one view, switchable, with a power-of-two grid; the block tool, select, move and resize
-    with snapping, undo and saving; the clip tool, vertex editing kept convex and face texturing;
-    entities, their properties and item 66's connections panel.
-
 93. **The drive's course is cheaper on lavapipe.** From Verdict 51's reading on 2026-11-02. The
     course's stations judge only where the player stands, yet each of its frames costs 1.1 to 1.7 s
     drawn at full size on the runner's llvmpipe, and the course is 60 of the drive's minutes; the
@@ -685,176 +667,6 @@ in all three profiles. NormTests passed, 19.
 Of the 75, 55 are mended, none was found not to hold, and 20 remain, 60 to 75 and 34 to 36 and 40 of
 global illumination, which go with 138.
 
-Verdict 65, ImGuiTests.APictureIsLoadedAgainForEachApp reading the checker 1 by 1 on the runner, in
-the commit carrying this Reply, with a test that failed without its mend.
-
-A picture whose file has not arrived answers 0 by 0 for its size, as ImGuiTextures.SizeOf and the
-bridge's own comment say, where bcs_imgui_picture_size fell back to the default of wgpu's Extent3d,
-1 by 1. The test waits until the size is other than 0 by 0, so its wait ended at the first frame it
-read, before the checker had arrived on the runner's lavapipe.
-ImGuiTests.APictureNotArrivedIsZeroByZero reads the size in the frame the picture is asked for,
-before its file can have arrived, and once it has. On lavapipe with a quarter of one processor and
-one thread of its own, the bridge as it stood read the checker 1 by 1 in both tests in each of three
-runs, and at full speed as well, and the bridge mended passed both in each of three runs and at full
-speed.
-
-The whole suite passed over this mend and those of the commit after it, from one tree, 2,171 passed,
-0 failed and 4 skipped, 2,175 in all where the listing is 2,164, the solution built from nothing
-with warnings as errors, a part at a time under the GPU lock, and the native checks passed in all
-three profiles, with the bridge's tests with no feature and with render. NormTests passed, 19.
-
-146's low findings 60 to 64, the workflows' and a test's, in the commit carrying this Reply, each
-with a test that failed without its mend.
-
-The build workflow's test job checks out the whole history, whose commit messages since the rule
-began N 7.2 reads, where its checkout of the last commit alone left the rule skipped on all three
-systems. N 7.2 says so where it skips a checkout that holds too little, where it said the checkout
-had no git, and fails in the test job in place of skipping.
-WorkflowTests.TheTestJobChecksOutTheWholeHistoryTheMessageRuleReads reads the job's checkout.
-Without the mend it found no fetch-depth, and with it 0. In a clone of the last commit N 7.2 skipped
-outside the test job and failed in it.
-
-MonitorsAreCountedWithoutThrowing holds that a run with no window counts no monitor, where it held
-the count at zero or more and returned at zero, which every run's count is, before its monitor half.
-That half is WindowStormTests.AWindowsMonitorsAreDescribedAndAnIndexPastTheLastIsRefused, which the
-pack run's storm job runs in its window under xvfb-run, whose screen winit lists as one monitor, and
-the step looks for two tests passed. The two tests read one run of the storm, since winit makes one
-event loop a process and refused the second app where each made its own. On a bridge whose
-bcs_monitor_info took an index past the last as the last, the test as it was passed and as it is
-failed, the monitor past the last described where it is refused, and on the bridge as it is both
-tests passed in their one run.
-
-A publish runs from the default branch alone, a job the build needs refusing one on another branch
-before the build's hour, since the version counts commits and a branch's count is one the default
-branch reaches at a commit of its own. The push keeps --skip-duplicate, so a second run of a commit
-that published passes, and the page counts the packages the push said it pushed and names each that
-nuget.org held, where it said Pushed to nuget.org whatever the push did. BUILDING.md says both.
-WorkflowTests.APublishOffTheDefaultBranchIsRefusedBeforeTheBuild reads the build job's needs, and
-ThePageSaysWhichPackagesWerePushedAndWhichNuGetHeld runs the page's step in bash on the lines dotnet
-nuget push prints, those a push here printed against a server answering 201 and 409. Without the
-mend no job refused, and the page said Pushed to nuget.org of one package held and of two, and with
-it the page counted one pushed and named the one held, and said nothing was pushed of two.
-
-The games job's upload of the plays keeps Blockout's folder beside the others.
-WorkflowTests.EveryFolderAStepLogsIntoIsKeptByAnUploadThatRunsAlways reads each folder a step names
-for its captures or its logs against the uploads of its job that run always. Without the mend it
-named the games job's blockout, and with it none.
-
-dtolnay/rust-toolchain, Swatinem/rust-cache and NuGet/login are named by the commits that stable, v2
-and v1 named at 21:00 on 2026-11-16, v2.9.3 and v1.2.0, each name beside its commit, and GitHub's
-own actions keep their tags, as the finding's direction allows.
-WorkflowTests.EveryActionFromOutsideGitHubIsNamedByACommit reads every action the workflows use.
-Without the mend it found seven named by a tag or a branch, and with it none.
-
-BUILDING.md's line on the renderer's parts gives some 21 minutes each on the faster of the runners'
-processors, where it gave 32 after the parts were dealt again in ca9f5d44.
-
-The whole suite passed over these mends and those of the commit before them, from one tree, 2,171
-passed, 0 failed and 4 skipped, 2,175 in all where the listing is 2,164, the solution built from
-nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
-in all three profiles, with the bridge's tests with no feature and with render. The storm's two
-tests are among the skipped, since they run where xvfb-run is asked for, and passed in their run
-above. NormTests passed, 19.
-
-Shared: a publish from the default branch alone, a page that names the packages nuget.org held, the
-actions from outside GitHub named by commit and the test job's checkout of the whole history its
-message rule reads, which the sibling's pack.yml, pushing with --skip-duplicate through
-NuGet/login@v1, reads the same way.
-
-Of the 75, 60 are mended, none was found not to hold, and 15 remain, 65 to 75 and 34 to 36 and 40 of
-global illumination, which go with 138.
-
-Verdict 66 is mended in the commit carrying this Reply. NormTests.Git starts git with both its
-streams read as UTF-8, the bytes git writes a commit's message in, where Windows read them by the
-console's code page, and build/norm/7.2.txt is as it was.
-NormGitTests.ASubjectsMarksReadThroughGitAreTheirOwnBytes makes a commit of the three marks in a
-folder of its own, reads its subject through Git and compares it with the marks by its bytes, and
-asks the start Git makes what it reads both streams as, since Linux and macOS read UTF-8 whatever is
-named. It sits at the tests' root beside the norm's own class, listed in build/norm/1.4.txt as N 1.4
-has it. With git started as it was the test failed, no encoding named where UTF-8 was asked, and
-with the mend it passed. The tests' other readers of a program's text name UTF-8, or read a hash,
-numbers or an exit code alone. The contributors example reads its authors from git as UTF-8 the same
-way, so a name past ASCII arrives whole on Windows, with no test of its own, since no test reaches
-its read. NormTests passed, 19.
-
-146's low findings 65 to 67, in the commit carrying this Reply, each with a test that failed without
-its mend.
-
-Each dispatch of a frame, and each dispatch, draw and pass of a camera, keeps its bind group and the
-buffers of its numbers from one frame to the next by its place in its list, where a new buffer and
-group were made for each every frame. Numbers that moved are written into the buffer kept for them,
-and the group is made again over the same buffers only where something else it binds is another than
-the last frame's, a camera's history image among them, or where it binds a ray scene, to which wgpu
-gives no identity to compare. The scene's information a camera's inputs bind is held in buffers
-bound again while they hold it and written where one was not bound that frame, where one was made at
-each point of the frame. The group of a camera's inputs is still made at each point, since it binds
-that point's picture. A pass's kept group is looked for by its place in the camera's list, where the
-list of the passes built was read at that place, which after a pass held back for a frame is another
-pass's. The memory command says the buffers and groups made for shaders as shaders. pairs, as
-docs/tools.md and the command's remarks say.
-KeptGroupTests.WhatRunsEveryFrameMakesNoBufferOrGroupOnceMade dispatches a number that moves every
-frame beside a camera's dispatch and draw, counts what was made over 60 frames, and reads the last
-number back. On a bridge with the counts and without the keeping the 60 frames made 300 buffers and
-180 groups, and with it none, the last number read back.
-
-A program's stages are shared between the table and each copy of it, so the copy of each program the
-render side looks up every frame copies none of them, where each stage's entry point, shader handle,
-SPIR-V and constants were copied, and a dispatch's stage is copied only where its pipeline is built.
-A compute program's ready mark is read first and written only where its generation moves, where the
-table's write lock was taken for every ready program every frame. The walk over a camera's
-dispatches reads in place whether a program reads the camera, where it copied the program to read
-it. A dispatch's label is still made each frame, since Bevy's span takes its name as a string of its
-own. The bridge's tests a_program_looked_up_shares_its_stages and
-a_mark_that_stands_is_not_written_again look a program up twice and compare where its entry point
-lies, and mark a program ready three times for one generation and count the writes. With the stages
-copied and every mark written both failed, the two entry points lying apart and one generation's
-mark written three times where once, and with the mend both passed, as the bridge's tests did with
-no feature and with render.
-
-state.set reads a value by its member's name alone, in any case, where Enum.TryParse took 7 for a
-value no member has and Playing,Paused for both members at once, and set either. A value refused
-fails the command with BAD_ARGUMENT, and a state named by none fails state.set and state.get with
-NOT_FOUND, or one named by two with BAD_ARGUMENT, where each refusal answered as a success and a
-script typing it went on. StateCommandTests.AValueOrAStateNamingNoneIsRefusedAndFailsTheCommand sets
-Screen to 7, to Playing,Paused and to a word naming no member, names a state there is none of to
-both commands, and reads Screen after. Without the mend it failed, "Screen goes to 7 at its next
-transition" answered with no failure, and with it passed.
-
-The whole suite passed over these mends, from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178
-in all where the listing is 2,167, the solution built from nothing with warnings as errors, a part
-at a time under the GPU lock, and the native checks passed in all three profiles, with the bridge's
-tests with no feature and with render. NormTests passed, 19.
-
-Of the 75, 63 are mended, none was found not to hold, and 12 remain, 68 to 75 and 34 to 36 and 40 of
-global illumination, which go with 138.
-
-Verdict 67's test reads the process's resident memory after a full blocking collection with the
-large object heap compacted, waiting for no finalizer, so the heap left uncollected is not read as
-held and the native images a fault drops stay counted. Here it read 22 to 27 MB of growth over
-ninety compilations before and 11 to 13 after. With the fault put back, every reference read again
-at each compilation, it failed twice, 815 MB after ten compilations and 1,078 MB after a hundred. In
-the runner's image, Ubuntu 24.04.5 with the SDK, ten runs in a row passed, 6 to 13 MB of growth
-each.
-
-The feature test with the Bistro stopped twice on wgpu's out-of-memory while the sibling's own
-Bistro example ran beside it under the shared lock, which N 7.9's sentence on programs over 1.5 GiB
-settles, and the runs after it took the lock exclusive. Alone it held 3,423 MiB.
-
-The whole suite passed from one tree, 2,174 passed, 0 failed and 4 skipped, 2,178 in all where the
-listing is 2,167, the solution built from nothing with warnings as errors, in 16 parts and the rest
-dealt by the last run's times, each part of 2 m 8 s to 4 m 51 s, a part at a time under the GPU
-lock.
-
-NormTests passed, 19.
-
-The games that pin a package name 0.6.156, the version published from 03ce47be, in the commit
-carrying this Reply. Blockout moves from 0.5.193, and Courtyard, Coins, Stress and Swarm from
-0.5.174. Each built on it from nuget.org with warnings as errors, 0 warnings and 0 errors, and
-Courtyard, Swarm and Blockout each played to its end by its own script, with no warning or error in
-its log. The templates take the version they are packed beside, so none of them pins one.
-
-NormTests passed, 19.
-
 150, the start where the probes added nothing, a mesh painted again where it stands, as a texture
 that loads after its mesh was first drawn paints it with its mean, held as not moved, so no start of
 Sponza stands its walls and floors in the field as boxes, in the commit carrying this Reply.
@@ -1246,5 +1058,55 @@ difference at twice, red lighter and blue darker.
 Handoff. The shade's read is closed with this reading and changes no default. Next in order is the
 Mie swap of `ScatteringTerm.Earth`, then item 138's read, taking the RadianceCascades passes with
 the open box test turned on. A fresh session reads this Reply and the box test's first.
+
+NormTests passed, 19.
+
+138, the read of the kernels' move and its first step, the probes' octahedron written once, in the
+commit carrying this Reply.
+
+The RadianceCascades module at 6622616 states its contract in its README. Its passes are thread
+functions an engine calls from its own `main` (`traceTexel`, `reachTexel`, `settleTexel`,
+`mergeTexel` and `gatherAt` in rc_probe_passes.slang), it reads through interfaces an engine gives
+it (`IFieldVolume`, `IProbeField` with `surfaceLightAt` and `throughAt`, `IFarProbes` and
+`IMarchSteps`), it writes through four more (`IProbeRays`, `IReachTexels`, `IMergedLight` and
+`ISurfacePoints`), and the field has functions of its own (`splatCodes`, `splatPaint`,
+`resolvedDistance`, `pinched`, `stampCell`, `paintFacing` and `paintAt`). The bridge's own, which
+stays, is bcs_pass and Bevy's view, gi_sky, gi_light, the screen probes' own trace and filter, the
+glow lights, the reference, the field's build in Rust and the C# side that runs them, with the
+probes' moves, their carried rays, the crown cards, transmission and the cube faces, which the
+module has no hook for.
+
+Where the two copies differ in what is seen, the merge first. The module weighs the far probes about
+the ray's end by their reach maps, gives a probe in a mesh nothing and marches on where no probe
+sees, where ours weighs them about the near probe and reads the merged light's alpha marks. The
+module's cascades start at 0 and end within twice and past root three times their spacing, where
+ours start at the spacing and end at four times. The module's light-through is a value of its own
+(`throughAt`) where ours reads the paint's alpha. The module reads a gloss byte of 0 as unpainted.
+Its field codes and sheet planes are the largest difference. So the move goes the octahedron first,
+then the face bits and the gloss, the faces' gather, the reach, the paint's facing, the trace, the
+ends with the merge, the screen probes' read past their reach with the open box's test turned on,
+the stamp, then the splat and the resolve, each its own commit with the suite whole.
+
+The step. The module is a submodule at `modules/RadianceCascades`, pinned at 78ef6b6, 6622616 with
+its fetch script reading a hash by the tools both systems carry (N 6.6), and the bridge carries its
+`rc_octahedron.slang` among the modules it writes for `import` (`MODULES` in slang.rs). `bcs_gi`
+imports it and gives it on to every reader in place of its own copies of `octahedron`,
+`octahedronPoint`, `fromOctahedron`, `octahedronShare`, `RaysAt`, `texelMark` and `texelNothing`,
+whose code is the module's line for line. No picture changes. The comments of the files touched hold
+to 100 columns (N 4.12), scene_field.rs's among them.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
+listing is 2,185, the solution built from nothing with warnings as errors, in 12 parts and the rest
+dealt by the last run's times, each part of 1 m 41 s to 4 m 59 s, a part at a time under the GPU
+lock. A run before it at 6622616 failed N 6.6 alone, on the module's fetch script's sha256sum, which
+its session mended as 78ef6b6. The module comments of scene_field.rs were rewrapped again after it,
+a tool of mine having joined their `//!` marks into the text, its code the same.
+
+Shared: the probes' octahedron is the RadianceCascades module's in this engine from this commit, its
+first kernel taken.
 
 NormTests passed, 19.

@@ -17,6 +17,10 @@ module bcs_gi;
 
 import bcs_field;
 import bcs_glow;
+// The probes' directions laid out on the octahedron folded flat, the rays a texel sends and the
+// marks its rays leave, written once in the RadianceCascades module for both engines and given on
+// to every reader of this one.
+__exported import rc_octahedron;
 
 public static const float Pi = 3.14159265358979;
 
@@ -29,72 +33,6 @@ public float3 surfaceNormal(float3 crossed, float3 toEye)
 {
     float length2 = dot(crossed, crossed);
     return length2 > 1e-20 && length2 < 1e30 ? crossed * rsqrt(length2) : normalize(toEye);
-}
-
-/// A unit direction as a point of the square from 0 to 1, the octahedron folded flat, which lays
-/// every direction on a square with texels of nearly even solid angle.
-public float2 octahedron(float3 d)
-{
-    d /= abs(d.x) + abs(d.y) + abs(d.z);
-    float2 p = d.xy;
-    if (d.z < 0.0)
-        p = (1.0 - abs(p.yx)) * float2(p.x >= 0.0 ? 1.0 : -1.0, p.y >= 0.0 ? 1.0 : -1.0);
-    return p * 0.5 + 0.5;
-}
-
-/// The point of the octahedron a point of the square stands for, not yet a direction.
-public float3 octahedronPoint(float2 uv)
-{
-    float2 p = uv * 2.0 - 1.0;
-    float3 d = float3(p, 1.0 - abs(p.x) - abs(p.y));
-    if (d.z < 0.0)
-        d.xy = (1.0 - abs(d.yx)) * float2(d.x >= 0.0 ? 1.0 : -1.0, d.y >= 0.0 ? 1.0 : -1.0);
-    return d;
-}
-
-/// The direction a point of the square stands for.
-public float3 fromOctahedron(float2 uv)
-{
-    return normalize(octahedronPoint(uv));
-}
-
-/// How much of the sphere a texel of the square spans at `uv`, against the others, one over the
-/// cube of its octahedron point's distance from the middle, as a patch of the octahedron there
-/// covers its area over that cube. The texels near the octahedron's corners span the least, those
-/// at the middles of its faces the most, near three times as much.
-public float octahedronShare(float2 uv)
-{
-    float l = length(octahedronPoint(uv));
-    return 1.0 / (l * l * l);
-}
-
-/// The rays a texel of a cascade's octahedron of `texels` along each side sends, four where it has
-/// 8, one from the middle of each quarter of the texel, and one from its middle where it has 16, so
-/// every probe sends 256. A texel of 8 a side spans a sixty-fourth of the sphere, which one ray takes
-/// a lamp's bright spot under a ceiling or misses it for.
-public uint RaysAt(uint texels)
-{
-    return texels <= 8u ? 4u : 1u;
-}
-
-/// A texel's mark as the trace writes it for `rays` rays, `nothing` of which met nothing, a part of
-/// one for a ray that crossed surfaces letting light through and met nothing past them, says what
-/// most of them met, 0 a surface, a half a surface before their interval began, a quarter the sky
-/// and 1 nothing, moved a sixteenth on for each that met nothing, up from 0 or a half and down from
-/// 1 for each that met something, so the mark stays within the band each reader tells what a
-/// texel's rays met by; `texelNothing` reads back how many met nothing.
-public float texelMark(float most, float nothing, uint rays)
-{
-    return most >= 0.75 ? 1.0 - 0.0625 * (float(rays) - nothing) : most + 0.0625 * nothing;
-}
-
-public float texelNothing(float mark, uint rays)
-{
-    if (mark >= 0.75)
-        return float(rays) - (1.0 - mark) / 0.0625;
-    if (mark >= 0.375)
-        return (mark - 0.5) / 0.0625;
-    return mark >= 0.1875 ? 0.0 : mark / 0.0625;
 }
 
 /// A point or spot light the indirect light is lit by, as the bridge gathers it.
@@ -246,9 +184,9 @@ public bool seesThrough(Texture3D<float> field, SamplerState linear, FieldInfo i
 }
 
 /// Whether nothing the field holds stands between `a` and `b` but surfaces that let light through,
-/// four of them at most, as `seesThrough` asks, the light a ray crossing them keeps being its own to
-/// take. The merge asks it of the probes of the cascade above, which a canopy hides from those under
-/// it, so the floor under a canopy takes the sky the leaves let through.
+/// four of them at most, as `seesThrough` asks, the light a ray crossing them keeps being its own
+/// to take. The merge asks it of the probes of the cascade above, which a canopy hides from those
+/// under it, so the floor under a canopy takes the sky the leaves let through.
 public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 a, float3 b, float clearance)
 {
     float3 toward = b - a;
@@ -283,10 +221,10 @@ public static const int ReachTexels = 16;
 /// which gi_ambient.slang gathers and the light pass reads a rough face's reflection from.
 public static const int WaysTexels = 10;
 
-/// How near a surface a probe may stand, and the most it is moved from its spot in the grid to stand
-/// so far off one or out of a mesh, in its spacing, so a probe in the plane of a wall or a ceiling
-/// stands in the room before it rather than inside it, as DDGI moves its probes. A probe moved stays
-/// within half the spacing of its spot, so the probes keep their order.
+/// How near a surface a probe may stand, and the most it is moved from its spot in the grid to
+/// stand so far off one or out of a mesh, in its spacing, so a probe in the plane of a wall or a
+/// ceiling stands in the room before it rather than inside it, as DDGI moves its probes. A probe
+/// moved stays within half the spacing of its spot, so the probes keep their order.
 public static const float Clearance = 0.1;
 public static const float MostMoved = 0.45;
 
@@ -303,10 +241,10 @@ public float faceMove(float alpha)
     return alpha > 0.5 ? alpha - 2.0 : 0.0;
 }
 
-/// How much of the frame before's own light a probe's may keep before the indirect light is taken at
-/// the share it kept, a fall by a fifth or more, which a light switched off or carried away gives
-/// and the field's cells settling after a camera moves do not, and a rise by a quarter or more, its
-/// inverse, so a light that flickers moves its indirect light down and up alike.
+/// How much of the frame before's own light a probe's may keep before the indirect light is taken
+/// at the share it kept, a fall by a fifth or more, which a light switched off or carried away
+/// gives and the field's cells settling after a camera moves do not, and a rise by a quarter or
+/// more, its inverse, so a light that flickers moves its indirect light down and up alike.
 public static const float Falls = 0.8;
 
 /// The most a probe's indirect light is raised by in a frame its own light rose by much, so a probe
@@ -328,10 +266,10 @@ public float3 followed(float3 now, float3 before)
     return select(fell < Falls || fell > 1.0 / Falls, clamp(fell, 0.0, Rises), float3(1.0));
 }
 
-/// How much of the light a probe's rays bring back must come straight from the sun and the lights for
-/// the probe to be judged by its own light, a quarter, where a probe lit mostly by indirect light, as
-/// one down a corridor from a lit room, is judged by the own light of the probes around it summed,
-/// since its own light is too little of its light to say what went out.
+/// How much of the light a probe's rays bring back must come straight from the sun and the lights
+/// for the probe to be judged by its own light, a quarter, where a probe lit mostly by indirect
+/// light, as one down a corridor from a lit room, is judged by the own light of the probes around
+/// it summed, since its own light is too little of its light to say what went out.
 public static const float OwnShare = 0.25;
 
 /// How far the probe of cascade `c` at `at` reached along `way` the frame before, its reach blended
@@ -355,16 +293,16 @@ float reachAlong(Texture3D<float> reach, float3 way, int3 at, int c, float probe
 }
 
 /// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
-/// `n`, 1 where `p`, taken three tenths of the probes' spacing off the surface along `n`, lies nearer
-/// the probe than its rays reached that way the frame before (`reachAlong`), falling to 0 over an
-/// eighth of the spacing past it, as DDGI weighs its probes by the distances they traced. Taken off
-/// the surface, the point comes nearer a probe on its own side and goes further from one past it,
-/// so a probe under a floor or beyond a wall, whose rays stop at the floor's or the wall's far face,
-/// lends a surface on this side none of the light it sees there. The reach is read between texels,
-/// since a probe under a floor thinner than a cell, whose rays stop within the slack of the foot of
-/// a wall standing on it, would take about half its weight where one texel's ray stops near the
-/// floor and a twentieth where the next one's stops short of it, and lend the foot its light in
-/// triangles as wide as the texels.
+/// `n`, 1 where `p`, taken three tenths of the probes' spacing off the surface along `n`, lies
+/// nearer the probe than its rays reached that way the frame before (`reachAlong`), falling to 0
+/// over an eighth of the spacing past it, as DDGI weighs its probes by the distances they traced.
+/// Taken off the surface, the point comes nearer a probe on its own side and goes further from one
+/// past it, so a probe under a floor or beyond a wall, whose rays stop at the floor's or the wall's
+/// far face, lends a surface on this side none of the light it sees there. The reach is read
+/// between texels, since a probe under a floor thinner than a cell, whose rays stop within the
+/// slack of the foot of a wall standing on it, would take about half its weight where one texel's
+/// ray stops near the floor and a twentieth where the next one's stops short of it, and lend the
+/// foot its light in triangles as wide as the texels.
 public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
 {
     float3 toward = p + n * (0.3 * apart) - probe;
@@ -377,11 +315,11 @@ public float probeSees(Texture3D<float> reach, float3 p, float3 n, float3 probe,
 
 /// How much the probe of cascade `c` at `at`, standing at `probe`, sees of a surface at `p` facing
 /// `n`, as `probeSees` weighs it, falling to 0 over half the probes' spacing past the reach rather
-/// than an eighth, so a probe the surface stops seeing fades out over about the angle a texel spans.
-/// The light a rough face reflects reads its probes so (`reflectedIn` in gi_light.slang), since
-/// along the mirror way the probes on either side of a mesh see unlike light, and weighed with the
-/// eighth's slack the edge of a mesh's shadow in that light stays sharp, where a rough face's
-/// reflection is soft.
+/// than an eighth, so a probe the surface stops seeing fades out over about the angle a texel
+/// spans. The light a rough face reflects reads its probes so (`reflectedIn` in gi_light.slang),
+/// since along the mirror way the probes on either side of a mesh see unlike light, and weighed
+/// with the eighth's slack the edge of a mesh's shadow in that light stays sharp, where a rough
+/// face's reflection is soft.
 public float probeSeesBlended(Texture3D<float> reach, float3 p, float3 n, float3 probe, int3 at, int c, float probes, float apart)
 {
     float3 toward = p + n * (0.3 * apart) - probe;
@@ -402,8 +340,8 @@ public static const float Lean = 0.5;
 /// (`bouncedHold`). Read from one cascade alone, the light stepped where each ended.
 public static const float CascadeBand = 8.0;
 
-/// How much of the indirect light a point `p` takes from cascade `c` rather than the next, all of it
-/// inside, falling to none across `c`'s outer band (`CascadeBand`), kept clear of the eye
+/// How much of the indirect light a point `p` takes from cascade `c` rather than the next, all of
+/// it inside, falling to none across `c`'s outer band (`CascadeBand`), kept clear of the eye
 /// (`bandHold`), past the cell `fieldCascade` keeps.
 public float cascadeHold(FieldInfo info, int c, float3 p)
 {
@@ -595,8 +533,8 @@ public float3 probeAlong(Texture3D<float4> ways, Texture3D<float4> cubes, Sample
 
 /// The indirect light reaching a surface at `p` facing `n`, as `bouncedAt` gives it, from those of
 /// the eight probes around it the surface sees, in front of its plane with nothing the field holds
-/// between, so a probe under a floor or beyond a wall lends the light it sees there to no surface on
-/// this side, and in `along` the light the same probes hold along `r` at the same weights
+/// between, so a probe under a floor or beyond a wall lends the light it sees there to no surface
+/// on this side, and in `along` the light the same probes hold along `r` at the same weights
 /// (`probeAlong`), which a face of perceptual roughness `roughness` reflects. The faces and the
 /// directions are read where the probes stood as `gatheredField` says, the frame before's corners
 /// for the world's probes' rays, and the field marched as `info` has it.
@@ -680,13 +618,13 @@ float3 lightsReaching(Texture3D<float> field, SamplerState linear, FieldInfo inf
         + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi;
 }
 
-/// `shadeProbeHit` for a surface at `p` facing `n`, painted `paint` with `gloss`, that sends `through`
-/// of its diffuse light to its far side: the diffuse share less it lit by the side `n` is on, the
-/// share by the side away from the ray and the gloss by the side toward it, each side's light read
-/// once. The probes are read once, on the side toward the ray, and the indirect light reaching the
-/// far side is taken as that, since a second read on the far side costs the trace about a tenth more
-/// in a meadow whose every leaf and blade of grass sends light through, and moves no probe about a
-/// crown by a point.
+/// `shadeProbeHit` for a surface at `p` facing `n`, painted `paint` with `gloss`, that sends
+/// `through` of its diffuse light to its far side: the diffuse share less it lit by the side `n` is
+/// on, the share by the side away from the ray and the gloss by the side toward it, each side's
+/// light read once. The probes are read once, on the side toward the ray, and the indirect light
+/// reaching the far side is taken as that, since a second read on the far side costs the trace
+/// about a tenth more in a meadow whose every leaf and blade of grass sends light through, and
+/// moves no probe about a crown by a point.
 float3 shadeSendingThrough(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<float4> glow,
     GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p, float3 n,
     float3 paint, float3 gloss, float through, float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)

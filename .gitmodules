@@ -7,3 +7,6 @@
 [submodule "modules/Vegetation"]
 	path = modules/Vegetation
 	url = https://github.com/EggyStudio/Vegetation.git
+[submodule "modules/RadianceCascades"]
+	path = modules/RadianceCascades
+	url = https://github.com/EggyStudio/RadianceCascades.git

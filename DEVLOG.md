@@ -6,6 +6,14 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-19
+
+![](.github/assets/readings/2026-11-19-item-150-grade.webp)
+Sponza's atrium at noon on the bridge with 3DEngine's gamma of 1.225 and with the sky's fill at 1.5
+times each switched alone, the day held still under a clear sky at latitude -4.25 and 12:17, the sun
+held at 119,343 lux and 5,633 K, the Tonemapper look with AgX and the camera at ISO 200, 1/25 s and
+f/16, the gamma lifting the shade and the sky's fill moving it little.
+
 ## 2026-11-18
 
 ![](.github/assets/readings/2026-11-18-item-150-take-back-floor.webp)
