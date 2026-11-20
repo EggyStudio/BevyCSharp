@@ -100,8 +100,12 @@ pub const RC_OCTAHEDRON: &str = include_str!("../../../../modules/RadianceCascad
 /// cell of the field keeps, as the RadianceCascades module writes them once for both engines.
 pub const RC_FIELD_CODE: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_code.slang");
 
+/// What `bcs_field` imports as `rc_field_paint`, a face's gloss in the bits above its way and the
+/// field's paint as the RadianceCascades module reads them once for both engines.
+pub const RC_FIELD_PAINT: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_paint.slang");
+
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 15] = [
+const MODULES: [(&str, &str); 16] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
@@ -117,6 +121,7 @@ const MODULES: [(&str, &str); 15] = [
     ("bcs_glow.slang", GLOW_PRELUDE),
     ("rc_octahedron.slang", RC_OCTAHEDRON),
     ("rc_field_code.slang", RC_FIELD_CODE),
+    ("rc_field_paint.slang", RC_FIELD_PAINT),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are

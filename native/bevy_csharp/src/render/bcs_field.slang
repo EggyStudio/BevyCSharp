@@ -13,6 +13,8 @@ module bcs_field;
 
 // The way a face looks in eight bits, written once in the RadianceCascades module for both engines.
 import rc_field_code;
+// A face's gloss in the bits above its way, written once in the same module.
+import rc_field_paint;
 
 
 /// A cascade, where it lies.
@@ -189,18 +191,20 @@ public float3 faceWay(uint bits)
 }
 
 /// A face's gloss, its perceptual roughness, metallic share and reflectance, in bits 8 to 31 of a
-/// cell of the faces image, where the way it looks takes bits 0 to 7 (`faceBits`).
+/// cell of the faces image, where the way it looks takes bits 0 to 7 (`faceBits`), as the
+/// RadianceCascades module packs it (`glossBits` in rc_field_paint), the roughness held to a 255th
+/// at least so a byte of 0 says no surface's gloss painted the cell.
 public uint glossBits(float3 gloss)
 {
-    uint3 bytes = uint3(saturate(gloss) * 255.0 + 0.5);
-    return (bytes.x << 8) | (bytes.y << 16) | (bytes.z << 24);
+    return glossBits(gloss.x, gloss.y, gloss.z);
 }
 
 /// The gloss a cell of the faces image holds (`glossBits`), its perceptual roughness, metallic
-/// share and reflectance.
+/// share and reflectance, or Bevy's default gloss where none painted it, as the module reads it
+/// (`glossOf`).
 public float3 faceGloss(uint bits)
 {
-    return float3(float((bits >> 8) & 255u), float((bits >> 16) & 255u), float(bits >> 24)) / 255.0;
+    return glossOf(bits);
 }
 
 /// A color of the field at `p`, the cells' colors blended and divided by how much of them a surface

@@ -1135,3 +1135,28 @@ Shared: the way a face looks in eight bits is the RadianceCascades module's in t
 commit.
 
 NormTests passed, 19.
+
+138, its third step, a face's gloss written once, in the commit carrying this Reply.
+
+The bridge carries the module's `rc_field_paint.slang`, and `bcs_field` imports it for itself alone,
+so `glossBits` and `faceGloss` answer the module's `glossBits` and `glossOf`. The bits are the same,
+the roughness in bits 8 to 15, the metal in 16 to 23 and the reflectance in 24 to 31, and two things
+differ. The module holds a painted roughness to a 255th at least, so a byte of 0 says no gloss
+painted the cell, and it reads such a cell as Bevy's default gloss where this engine read nothing.
+The one reader of a cell's gloss weighs it by the cell's paint, which is nothing where nothing
+painted, so a perfect mirror's roughness reading a 255th is all that moves. The low byte of the
+splat's gloss, which carries the light a surface lets through, is unchanged.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
+listing is 2,185, the solution built from nothing with warnings as errors, in 13 parts and the rest
+dealt by the last run's times, each part of 1 m 29 s to 4 m 48 s, a part at a time under the GPU
+lock.
+
+Shared: a face's gloss in the field is the RadianceCascades module's in this engine from this
+commit.
+
+NormTests passed, 19.
