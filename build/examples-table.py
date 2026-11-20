@@ -6,18 +6,19 @@
 
 The examples are read from the metadata of the Bevy this bridge builds against, the version
 native/Cargo.lock pins, in the cargo registry, so none is left out and a new Bevy brings its new
-ones in. An example is written when BevyCSharp.Examples holds its file, at <Bevy's folder>/<name>.cs,
-and otherwise its state is the line BevyCSharp.Examples/triage.tsv has for it. The groups are
-Bevy's own, in the order its examples/README.md lists them, and the examples it keeps out of that
-list come last.
+ones in. An example is written when BevyCSharp.Examples holds its file, at <Bevy's
+folder>/<name>.cs, and otherwise its state is the line BevyCSharp.Examples/triage.tsv has for it.
+The groups are Bevy's own, in the order its examples/README.md lists them, and the examples it keeps
+out of that list come last.
 
-The README's gallery shows every written example's capture, each picture opening the C# program
-that drew it, so a reader goes from what an example draws to the code that draws it. It is a table
-a group under a heading naming it, in the groups' order, each table one row of the group's examples
-in the order Bevy's README lists them, which scrolls sideways on GitHub and on nuget.org where it is
-wider than the page. Each picture is the capture made small, into .github/assets/gallery, at the
-width the gallery shows it, since the tables are Markdown, which nuget.org draws, where it prints
-HTML as its text, and a Markdown picture is shown at its own size.
+The README's gallery shows every written example's capture, each picture opening the C# program that
+drew it, so a reader goes from what an example draws to the code that draws it. It is a table a
+group under a heading naming it, the groups in the order GALLERY_GROUPS states, from what the bridge
+is most for to its plumbing, and each table one row of the group's examples, those whose pictures
+hold the most first and the plainest last, which scrolls sideways on GitHub and on nuget.org where
+it is wider than the page. Each picture is the capture made small, into .github/assets/gallery, at
+the width the gallery shows it, since the tables are Markdown, which nuget.org draws, where it
+prints HTML as its text, and a Markdown picture is shown at its own size.
 
 Each written example says at its head which of Bevy's it is written from, at which version and
 under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
@@ -61,6 +62,26 @@ BLOB = "https://github.com/EggyStudio/BevyCSharp/blob/main/"
 RAW = "https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/"
 STATES = {"written": "written", "part": "written in part", "can": "can be written", "missing": "missing", "n/a": "does not apply"}
 ORDER = ["written", "part", "can", "missing", "n/a"]
+
+# The gallery's groups by what a reader comes to the bridge for, 3D rendering and its lighting
+# first, then animation, the ECS and its behaviors, games, the camera, the interface, 2D, assets,
+# audio and diagnostics, with the application and its async tasks last. Each of Bevy's other groups
+# stands beside the one it serves, shaders by the 3D rendering, picking and input by the interface,
+# and a group Bevy adds that this list does not name stops the script until it is placed.
+GALLERY_GROUPS = [
+    "3D Rendering", "Shaders", "Shaders Advanced",
+    "Animation",
+    "ECS (Entity Component System)", "State", "Transforms",
+    "Games",
+    "Camera", "Movement",
+    "UI (User Interface)", "Picking", "Input",
+    "2D Rendering", "Gizmos",
+    "Assets", "glTF", "Scene",
+    "Audio",
+    "Diagnostics", "Dev tools", "Tools", "Stress Tests",
+    "Math", "Time", "Window", "Usage", "Reflection", "Remote Protocol", "Embedded",
+    "Application", "Async Tasks",
+]
 
 
 def bevy_version():
@@ -285,19 +306,29 @@ def build(version, examples, order, triage, written, source, followed):
 
     table = "\n".join(out) + "\n"
 
-    # Every written example's capture for the README, a table a group in the order of the groups
-    # above, each one row of the group's examples in the order Bevy's examples/README.md lists them,
-    # so a group wider than the page scrolls sideways rather than wrapping onto rows of its own.
-    # Each picture opens the C# file that drew it. The tables are Markdown, since nuget.org prints
-    # an HTML table as its text, where GitHub and nuget.org each draw a Markdown one as a block that
-    # scrolls sideways.
-    sections = []
+    # Every written example's capture for the README, a table a group in the order GALLERY_GROUPS
+    # states, each one row of the group's examples, the one whose small picture holds the most
+    # first, its size in bytes the measure, since a plain picture compresses small, so a group wider
+    # than the page scrolls sideways rather than wrapping onto rows of its own. Each picture opens
+    # the C# file that drew it. The tables are Markdown, since nuget.org prints an HTML table as its
+    # text, where GitHub and nuget.org each draw a Markdown one as a block that scrolls sideways.
+    unplaced = [group for group in groups if group != HIDDEN and group not in GALLERY_GROUPS]
+    if unplaced:
+        sys.exit(f"the gallery's order names no place for {', '.join(unplaced)}; add it to GALLERY_GROUPS")
+
+    def picture_size(example):
+        made = os.path.join(GALLERY, example["name"] + ".webp")
+        return os.path.getsize(made if os.path.exists(made) else os.path.join(CAPTURES, example["name"] + ".webp"))
+
+    sections = ["The groups run from what the bridge is most for, 3D rendering and its lighting, animation and "
+                "the ECS, to its plumbing last, and within a group the examples whose pictures hold the most "
+                "come first."]
     shown = []
-    for group in groups:
+    for group in [group for group in GALLERY_GROUPS if group in groups] + ([HIDDEN] if HIDDEN in groups else []):
         pictured = sorted(
             (example for example in examples if example["group"] == group and example["state"] in ("written", "part")
              and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))),
-            key=lambda example: (places.get(example["name"], len(places)), example["name"]))
+            key=lambda example: (-picture_size(example), example["name"]))
         if not pictured:
             continue
         heads, captions = [], []
@@ -307,9 +338,10 @@ def build(version, examples, order, triage, written, source, followed):
             heads.append(f"[![{name}]({RAW}.github/assets/gallery/{name}.webp)]({link})")
             # The caption sets each column's width, its name padded with spaces that do not break to
             # thirty-two characters, about the picture's width in code, so a column is as wide as
-            # its picture whatever the name. A browser laying out a table wider than the page shrinks
-            # each column to the widest thing in it that cannot break, and a picture that may be no
-            # wider than its column, as both sites have it, shrank to its name in a column without.
+            # its picture whatever the name. A browser laying out a table wider than the page
+            # shrinks each column to the widest thing in it that cannot break, and a picture that
+            # may be no wider than its column, as both sites have it, shrank to its name in a column
+            # without.
             captions.append(f"[`{name}" + "\u00a0" * max(0, 32 - len(name)) + f"`]({link})")
         # The heading says how many of the group's examples are written, and how many Bevy's group
         # holds where that is more, so a reader sees how far each group has come without counting
