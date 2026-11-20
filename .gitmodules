@@ -1,12 +1,12 @@
 [submodule "modules/Levels"]
 	path = modules/Levels
-	url = https://github.com/EggyStudio/Levels.git
+	url = https://github.com/EggyStudio/3DEngine.Levels.git
 [submodule "modules/Sky"]
 	path = modules/Sky
-	url = https://github.com/EggyStudio/Sky.git
+	url = https://github.com/EggyStudio/3DEngine.Sky.git
 [submodule "modules/Vegetation"]
 	path = modules/Vegetation
-	url = https://github.com/EggyStudio/Vegetation.git
+	url = https://github.com/EggyStudio/3DEngine.Vegetation.git
 [submodule "modules/RadianceCascades"]
 	path = modules/RadianceCascades
-	url = https://github.com/EggyStudio/RadianceCascades.git
+	url = https://github.com/EggyStudio/3DEngine.RadianceCascades.git

@@ -26,15 +26,18 @@
 // The held light is a buffer as gi_trace.slang lays it out.
 import bcs_field;
 import bcs_gi;
+// The probes' passes, written once in the RadianceCascades module for both engines, whose gather
+// takes a probe's light falling on each face.
+import rc_probe_passes;
 
 Texture3D<float4> merged;
 
 // Every cascade's probes, each face a block of the probes along x, the cascades one after another
 // along z.
 [format("rgba16f")] WTexture3D<float4> cubes;
-// Each face's light as the surface it is read for gathers it, laid out as the faces are, with how far
-// the probe's ray along the face's opposite way went to that surface, or the face's own light and 0
-// where that ray found none (bouncedSeenSum).
+// Each face's light as the surface it is read for gathers it, laid out as the faces are, with how
+// far the probe's ray along the face's opposite way went to that surface, or the face's own light
+// and 0 where that ray found none (bouncedSeenSum).
 [format("rgba16f")] WTexture3D<float4> cubes_at;
 
 // How far this cascade's rays went, as gi_trace.slang wrote them, a texel a ray, below zero where a
@@ -66,12 +69,13 @@ StructuredBuffer<float4> partial;
 // Each probe's own light and the luminance of all its rays brought, the frames of each parity side
 // by side, after them the share of the indirect light each probe's next rays take, a negative one
 // where the probe is judged by the probes around it, with in w a 1 where its rays met more faces
-// from behind than from in front, and after that where the trace moved each probe to, every cascade.
+// from behind than from in front, and after that where the trace moved each probe to, every
+// cascade.
 RWStructuredBuffer<float4> held;
 
 // x: the cascade. y: the probes along each side. z: the octahedron's texels along each side. w: the
-// frame's parity, plus 2 where the cascade lies where it lay the frame before, so the frame before's
-// own light is the same probes'.
+// frame's parity, plus 2 where the cascade lies where it lay the frame before, so the frame
+// before's own light is the same probes'.
 uniform uint4 cascade;
 // x: where the cascade's rays' interval ends, which a ray that met nothing reached. y: the probes'
 // spacing in their field cascade's cells. z: how many cascades of probes. w: unused.
@@ -124,9 +128,9 @@ void follow(uint3 at, uint probes, uint texels, float shares, bool walledIn)
 // Whether more of a probe's rays met a face from behind than from in front, as one inside a solid
 // does. The field holds a solid as the faces around it, so its cells deeper inside than the faces'
 // band read as the open, and a probe standing there traces through the rock to the backs of the
-// faces around it. As DDGI finds its probes inside geometry by the share of rays that met back faces,
-// a probe whose rays met more faces from behind, or more than a quarter of them so, is passed over
-// until it meets fewer.
+// faces around it. As DDGI finds its probes inside geometry by the share of rays that met back
+// faces, a probe whose rays met more faces from behind, or more than a quarter of them so, is
+// passed over until it meets fewer.
 bool walledIn(uint3 at, uint texels)
 {
     uint backs = 0u, fronts = 0u;
@@ -142,6 +146,91 @@ bool walledIn(uint3 at, uint texels)
     return backs > fronts || 4u * backs > texels * texels;
 }
 
+// The corner and cell of the field cascade a cascade of probes lies around, as probesOf lays them,
+// the far cascade's for the coarsest where one is built, read from the one cascade in place rather
+// than through a copy of the whole table, which a device can draw wrong.
+float4 probesCorner(uint c)
+{
+    int far = int(info[0].counts.w);
+    int k = far > 0 && int(c) == int(interval.z) - 1 ? far : int(c);
+    return info[0].cascades[k].origin_and_cell;
+}
+
+// The face's light the gather left (keepTaken), each thread's own.
+static float3 gathered;
+
+// The probe a face is gathered for, as the module's gather reads probes (IFarProbes): a texel's
+// light as the merge left it past the probe's interval times the share its early hits let through,
+// with the light met before its interval began, at this engine's layout of a cascade's texels.
+struct OneProbe : IFarProbes
+{
+    uint3 at;
+    uint texels;
+    float end;
+
+    float3 lightAt(int3 probe, uint2 texel)
+    {
+        int4 from = int4(int2(at.xy * texels + texel), int(at.z), 0);
+        float4 before = kept.Load(from);
+        return merged.Load(from).rgb * before.a + before.rgb;
+    }
+
+    // Never asked, since the gather reads a probe's reach only where its place lies off the point
+    // gathered for, which here is the probe's own place.
+    float reachAt(int3 probe, uint2 texel)
+    {
+        return end;
+    }
+}
+
+// The probe's moved place, the one the gather weighs (IProbePlaces).
+struct OnePlace : IProbePlaces
+{
+    float3 place;
+
+    float3 placeOf(int3 probe)
+    {
+        return place;
+    }
+}
+
+// No cascade of the field answers the gather, so whether the probe stands inside a mesh is its own
+// holds, as the trace placed it, and the field is read nowhere here (IProbeField).
+struct NoField : IProbeField
+{
+    int cascadeOf(float3 p, float margin) { return -1; }
+    float4 cornerAndCell(int cascade) { return float4(0.0); }
+    int size() { return 0; }
+    float4 between(int cascade, float3 cells) { return float4(0.0); }
+    float4 cellAt(int cascade, int3 cell) { return float4(0.0); }
+    float3 secondAt(int cascade, int3 cell) { return float3(0.0); }
+    float3 hitLight(float3 place, float3 way, int cascade, int3 cell) { return float3(0.0); }
+    float throughAt(int cascade, int3 cell) { return 0.0; }
+}
+
+// The face gathered for, at the probe's place and facing along its axis, its light kept for the
+// face (ISurfacePoints).
+struct OneFace : ISurfacePoints
+{
+    float3 place;
+    float3 axis;
+
+    float3 placeAt(uint index)
+    {
+        return place;
+    }
+
+    float3 normalAt(uint index)
+    {
+        return axis;
+    }
+
+    void keepTaken(uint index, float3 taken)
+    {
+        gathered = taken;
+    }
+}
+
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
@@ -154,41 +243,54 @@ void main(uint3 id : SV_DispatchThreadID)
         return;
     uint3 at = uint3(probe % probes, (probe / probes) % probes, probe / (probes * probes));
     float3 axis = Axes[face];
-    float3 sum = float3(0.0);
-    float weights = 0.0;
     float shares = 0.0;
     float valid = 0.0;
     for (uint v = 0u; v < texels; v++)
         for (uint u = 0u; u < texels; u++)
         {
             int4 from = int4(int2(at.xy * texels + uint2(u, v)), int(at.z), 0);
-            float4 light = merged.Load(from);
-            float2 uv = (float2(float(u), float(v)) + 0.5) / float(texels);
-            float share = octahedronShare(uv);
-            float weight = max(dot(fromOctahedron(uv), axis), 0.0) * share;
-            float4 before = kept.Load(from);
-            shares += share;
-            sum += (light.rgb * before.a + before.rgb) * weight;
-            weights += weight;
-            // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or 1.
-            valid = max(valid, light.a > 0.25 ? 1.0 : 0.0);
+            shares += octahedronShare((float2(float(u), float(v)) + 0.5) / float(texels));
+            // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or
+            // 1.
+            valid = max(valid, merged.Load(from).a > 0.25 ? 1.0 : 0.0);
         }
     // Its alpha 0 where the probe holds no light, and two more than its move along the face's axis
     // where it does (faceHolds and faceMove).
     float4 place = held[heldAt(int3(3 * int(probes) + int(at.x), int(at.y), int(cascade.x * probes + at.z)))];
     float holds = valid > 0.5 && place.w > 0.5 ? 1.0 : 0.0;
     uint3 into = uint3(face * probes + at.x, at.y, cascade.x * probes + at.z);
-    float3 layer = sum * (Pi / max(weights, 1e-6));
+
+    // The light falling on the face from all its probe's ways, each weighed by how squarely it
+    // falls and the solid angle its texel spans, as the module's gather takes it about a point,
+    // here a cascade of the one probe standing at its moved place, so the gather weighs that probe
+    // alone.
+    float4 oc = probesCorner(cascade.x);
+    float apart = oc.w * interval.y;
+    float3 origin = oc.xyz + (float3(at) + 0.5 + place.xyz) * apart;
+    ProbeCascade one;
+    one.corner = origin;
+    one.spacing = apart;
+    one.count = int3(1);
+    one.texels = texels;
+    one.start = 0.0;
+    one.end = interval.x;
+    one.stepCap = 0u;
+    OneProbe oneProbe = { at, texels, interval.x };
+    OnePlace onePlace = { origin };
+    OneFace oneFace = { origin, axis };
+    gatherAt(NoField(), oneProbe, onePlace, one, oneFace, face);
+    float3 layer = gathered;
     cubes.Store(into, float4(layer, holds * (2.0 + place[face / 2u])));
 
     // The surface the face is read for, where the probe's own ray along the face's opposite way met
     // one. Each merged direction is moved to start from that point. A ray that met a surface keeps
     // its point, seen from there along a new way, its texel's share of the sphere scaled by the
-    // square of how much nearer or farther that point lies from there, and one that met nothing keeps
-    // its way, since light from past the interval arrives alike at both. Each is weighed by how
-    // squarely it falls there and the whole scaled to pi, as the face's own light is. Where that ray
-    // met nothing in its interval, or met a face from behind, as over a drop or beside a doorway's
-    // edge, the face has no surface to be read for, and its light is its own with a distance of 0.
+    // square of how much nearer or farther that point lies from there, and one that met nothing
+    // keeps its way, since light from past the interval arrives alike at both. Each is weighed by
+    // how squarely it falls there and the whole scaled to pi, as the face's own light is. Where
+    // that ray met nothing in its interval, or met a face from behind, as over a drop or beside a
+    // doorway's edge, the face has no surface to be read for, and its light is its own with a
+    // distance of 0.
     int2 below = min(int2(octahedron(-axis) * float(texels)), int2(int(texels) - 1));
     float h = distances.Load(int4(int2(at.xy * texels) + below, int(at.z), 0));
     h = h > 0.0 && h < interval.x * 0.999 ? h : 0.0;
@@ -196,9 +298,6 @@ void main(uint3 id : SV_DispatchThreadID)
     if (h > 0.0)
     {
         FieldInfo fi = info[0];
-        float4 oc = probesOf(fi, int(interval.z)).cascades[cascade.x].origin_and_cell;
-        float apart = oc.w * interval.y;
-        float3 origin = oc.xyz + (float3(at) + 0.5 + place.xyz) * apart;
         float3 y = -axis * h;
         float3 sumAt = float3(0.0);
         float weightsAt = 0.0;
@@ -219,8 +318,8 @@ void main(uint3 id : SV_DispatchThreadID)
                 if (cosine <= 0.05)
                     continue;
                 float solid = far ? share : share * t * t / (length * length);
-                // How squarely the patch faces the surface against how squarely it faced the probe, and
-                // none of one the probe met from behind or along its face.
+                // How squarely the patch faces the surface against how squarely it faced the probe,
+                // and none of one the probe met from behind or along its face.
                 if (!far)
                 {
                     float3 normal = fieldNormal(field, field_sampler, fi, origin + d * t);

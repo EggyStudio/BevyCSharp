@@ -1160,3 +1160,42 @@ Shared: a face's gloss in the field is the RadianceCascades module's in this eng
 commit.
 
 NormTests passed, 19.
+
+138, its fourth step, the world probes' faces gathered by the module's pass, in the commit carrying
+this Reply.
+
+The submodule moves to 6b6f783, the passes the review named, whose octahedron, field codes and gloss
+are byte for byte those taken before, and the bridge carries the four files the passes import
+(`rc_field_read`, `rc_probes`, `rc_cascade_merge` and `rc_probe_passes`). gi_ambient imports
+`rc_probe_passes` and gathers each face of a world probe by `gatherAt`, handing it a cascade of the
+one probe standing at its moved place, so the gather weighs that probe alone and takes its light
+along every texel by how squarely it falls on the face and the solid angle its texel spans
+(`lightTaken`), where gi_ambient had summed the same and scaled the sum to pi. A sky of 1 reads pi
+within a thousandth on each face where it read pi exactly. The probe's light is read as before, the
+merged light times the share its early hits let through with the light met before its interval
+began, the probe's holds, its move and the faces read at the surface stay gi_ambient's own, and the
+gather is given no cascade of the field, so whether a probe stands in a mesh stays its own holds and
+the field is read nowhere in it. The field cascade a cascade of probes lies around is read from that
+one cascade in place (`probesCorner`) rather than through a copy of the whole table, after the
+sibling's finding that such a copy draws wrong on one device, and the test on the compiled kernel
+that holds a field read to one cascade comes with the step that binds the field, the trace.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
+listing is 2,185, the solution built from nothing with warnings as errors, in 12 parts and the rest
+dealt by the last run's times, each part of 1 m 37 s to 4 m 27 s, a part at a time under the GPU
+lock.
+
+Two changes on the review's word ride with it, made after the suite. The four modules' addresses in
+.gitmodules take their repositories' new names, 3DEngine.Levels, 3DEngine.Sky, 3DEngine.Vegetation
+and 3DEngine.RadianceCascades, synced, with no pointer moved and no other file of this repository
+naming them. The README shows `.github/assets/showcase_2.gif` in place of `showcase_3.gif`, which
+leaves the repository. The norm's, the scripts' and the documents' tests passed on them, 77.
+
+Shared: the world probes' faces are gathered by the RadianceCascades module's pass in this engine
+from this commit.
+
+NormTests passed, 19.

@@ -104,8 +104,15 @@ pub const RC_FIELD_CODE: &str = include_str!("../../../../modules/RadianceCascad
 /// field's paint as the RadianceCascades module reads them once for both engines.
 pub const RC_FIELD_PAINT: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_paint.slang");
 
+/// The RadianceCascades module's field read, probes, merge and passes, which the probes' kernels
+/// import as `rc_probe_passes` and it imports in turn, written once there for both engines.
+pub const RC_FIELD_READ: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_read.slang");
+pub const RC_PROBES: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_probes.slang");
+pub const RC_CASCADE_MERGE: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_cascade_merge.slang");
+pub const RC_PROBE_PASSES: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_probe_passes.slang");
+
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 16] = [
+const MODULES: [(&str, &str); 20] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
@@ -122,6 +129,10 @@ const MODULES: [(&str, &str); 16] = [
     ("rc_octahedron.slang", RC_OCTAHEDRON),
     ("rc_field_code.slang", RC_FIELD_CODE),
     ("rc_field_paint.slang", RC_FIELD_PAINT),
+    ("rc_field_read.slang", RC_FIELD_READ),
+    ("rc_probes.slang", RC_PROBES),
+    ("rc_cascade_merge.slang", RC_CASCADE_MERGE),
+    ("rc_probe_passes.slang", RC_PROBE_PASSES),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are
