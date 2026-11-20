@@ -13,12 +13,12 @@ out of that list come last.
 
 The README's gallery shows every written example's capture, each picture opening the C# program that
 drew it, so a reader goes from what an example draws to the code that draws it. It is a table a
-group under a heading naming it, the groups in the order GALLERY_GROUPS states, from what the bridge
-is most for to its plumbing, and each table one row of the group's examples, those whose pictures
-hold the most first and the plainest last, which scrolls sideways on GitHub and on nuget.org where
-it is wider than the page. Each picture is the capture made small, into .github/assets/gallery, at
-the width the gallery shows it, since the tables are Markdown, which nuget.org draws, where it
-prints HTML as its text, and a Markdown picture is shown at its own size.
+group under a heading naming it, the groups in the order GALLERY_GROUPS states, Bevy's, and each
+table one row of the group's examples in the order GALLERY_ORDER sets by hand, those that show the
+bridge best first and the plainest last, which scrolls sideways on GitHub and on nuget.org where it
+is wider than the page. Each picture is the capture made small, into .github/assets/gallery, at the
+width the gallery shows it, since the tables are Markdown, which nuget.org draws, where it prints
+HTML as its text, and a Markdown picture is shown at its own size.
 
 Each written example says at its head which of Bevy's it is written from, at which version and
 under which licenses, as THIRD-PARTY-NOTICES.md says of them all. The head is written here, so a new
@@ -63,25 +63,169 @@ RAW = "https://raw.githubusercontent.com/EggyStudio/BevyCSharp/main/"
 STATES = {"written": "written", "part": "written in part", "can": "can be written", "missing": "missing", "n/a": "does not apply"}
 ORDER = ["written", "part", "can", "missing", "n/a"]
 
-# The gallery's groups by what a reader comes to the bridge for, 3D rendering and its lighting
-# first, then animation, the ECS and its behaviors, games, the camera, the interface, 2D, assets,
-# audio and diagnostics, with the application and its async tasks last. Each of Bevy's other groups
-# stands beside the one it serves, shaders by the 3D rendering, picking and input by the interface,
-# and a group Bevy adds that this list does not name stops the script until it is placed.
+# The gallery's groups in the order Bevy's examples/README.md lists them, with the examples it keeps
+# out of that list last, and a group Bevy adds that this list does not name stops the script until
+# it is placed.
 GALLERY_GROUPS = [
-    "3D Rendering", "Shaders", "Shaders Advanced",
-    "Animation",
-    "ECS (Entity Component System)", "State", "Transforms",
-    "Games",
-    "Camera", "Movement",
-    "UI (User Interface)", "Picking", "Input",
-    "2D Rendering", "Gizmos",
-    "Assets", "glTF", "Scene",
-    "Audio",
-    "Diagnostics", "Dev tools", "Tools", "Stress Tests",
-    "Math", "Time", "Window", "Usage", "Reflection", "Remote Protocol", "Embedded",
-    "Application", "Async Tasks",
+    "Hello, World!", "2D Rendering", "3D Rendering", "Animation", "Application", "Assets",
+    "Async Tasks", "Audio", "Camera", "Dev tools", "Diagnostics", "ECS (Entity Component System)",
+    "Embedded", "Games", "Gizmos", "Input", "Math", "Movement", "Picking", "Reflection",
+    "Remote Protocol", "Scene", "Shaders", "Shaders Advanced", "State", "Stress Tests", "Time",
+    "Tools", "Transforms", "UI (User Interface)", "Usage", "Window", "glTF",
 ]
+
+# The examples of each group in the gallery by what they show of the bridge, the ones that show it
+# best first and the plainest last, an order set by hand, and a written example with a picture that
+# its group's list does not name, or a name with no such example, stops the script until it is set.
+GALLERY_ORDER = {
+    "3D Rendering": [
+        "atmosphere", "solari", "ssr", "volumetric_fog", "deferred_rendering", "pbr", "lighting",
+        "transmission", "bloom_3d", "motion_blur", "clustered_decals", "ssao", "meshlet",
+        "depth_of_field", "irradiance_volumes", "solari_reflections", "anisotropy", "clearcoat",
+        "pcss", "atmospheric_fog", "auto_exposure", "post_processing", "light_probe_blending",
+        "reflection_probes", "color_grading", "tonemapping", "specular_tint", "parallax_mapping",
+        "fog_volumes", "spherical_area_lights", "rect_light", "light_textures", "mixed_lighting",
+        "lightmaps", "contact_shadows", "clustered_decal_maps", "decal", "pccm", "mirror",
+        "scrolling_fog", "spotlight", "anti_aliasing", "skybox", "rotate_environment_map", "fog",
+        "shadow_biases", "order_independent_transparency", "transparency_3d", "blend_modes",
+        "occlusion_culling", "visibility_range", "split_screen", "animated_material",
+        "render_to_texture", "shadow_caster_receiver", "camera_sub_view", "texture",
+        "generate_custom_mesh", "3d_scene", "mesh_ray_cast", "lines", "vertex_colors",
+        "orthographic", "3d_shapes", "wireframe", "parenting", "3d_viewport_to_world", "two_passes",
+    ],
+    "Shaders": [
+        "compute_shader_game_of_life", "compute_mesh", "custom_post_processing", "shader_prepass",
+        "extended_material", "array_texture", "texture_binding_array", "animate_shader",
+        "custom_shader_instancing", "automatic_instancing", "gpu_component_array_buffer",
+        "storage_buffer", "shader_material_bindless", "extended_material_bindless",
+        "shader_material_screenspace_texture", "render_depth_to_texture", "custom_vertex_attribute",
+        "shader_defs", "pipeline_constants", "sprite_material", "shader_material_2d_bindless",
+        "shader_material", "shader_material_2d", "gpu_readback",
+    ],
+    "Shaders Advanced": [
+        "deferred_raymarch", "mesh_shader_intro", "fullscreen_material",
+    ],
+    "Animation": [
+        "animation_graph", "animated_mesh", "animation_masks", "animated_mesh_control",
+        "morph_targets", "animated_mesh_events", "custom_skinned_mesh", "animated_ui",
+        "animation_events", "easing_functions", "color_animation", "animated_transform",
+        "eased_motion",
+    ],
+    "ECS (Entity Component System)": [
+        "iter_combinations", "observers", "parallel_query", "hierarchy", "entity_disabling",
+        "state_scoped", "error_handling", "one_shot_systems", "delayed_commands",
+        "removal_detection", "hotpatching_systems",
+    ],
+    "State": [
+        "computed_states", "sub_states", "custom_transitions", "states",
+    ],
+    "Transforms": [
+        "transform", "align", "3d_rotation", "scale", "translation",
+    ],
+    "Games": [
+        "alien_cake_addict", "breakout", "contributors", "desk_toy", "mines", "loading_screen",
+        "game_menu",
+    ],
+    "Camera": [
+        "first_person_view_model", "free_camera_controller", "camera_orbit", "pan_orbit_camera_cad",
+        "2d_top_down_camera", "2d_screen_shake", "projection_zoom", "pan_orbit_camera_ortho",
+        "custom_projection", "pan_camera_controller", "2d_on_ui", "pan_orbit_camera_minimal",
+    ],
+    "Movement": [
+        "physics_in_fixed_timestep",
+    ],
+    "UI (User Interface)": [
+        "feathers_gallery", "render_ui_to_texture", "viewport_node", "gradients",
+        "stacked_gradients", "box_shadow", "ui_material", "standard_widgets", "ui_transform",
+        "virtual_keyboard", "ui_drag_and_drop", "scrollbars", "grid", "multiline_text_input",
+        "text_input", "multiple_text_inputs", "headless_tabs", "borders", "feathers_number_input",
+        "standard_widgets_observers", "vertical_slider", "directional_navigation", "scroll",
+        "flex_layout", "font_variations", "font_weights", "text_background_colors", "inline_image",
+        "ui_texture_slice", "ui_texture_atlas_slice", "ui_texture_slice_flip_and_tile",
+        "ui_texture_atlas", "display_and_visibility", "transparency_ui", "z_index",
+        "overflow_transform", "size_constraints", "directional_navigation_overrides",
+        "tab_navigation", "drag_to_scroll", "anchor_layout", "ghost_nodes", "editable_text_filter",
+        "feathers_counter", "strikethrough_and_underline", "letter_spacing", "font_query",
+        "ui_target_camera", "image_node", "image_node_resizing", "ui_scaling",
+        "relative_cursor_position", "overflow", "overflow_clip_margin", "overflow_debug",
+        "fixed_node", "window_fallthrough", "button", "text", "text_wrap_debug", "text_debug",
+        "font_atlas_debug",
+    ],
+    "Picking": [
+        "mesh_picking", "dragdrop_picking", "sprite_picking", "draggable_slider", "debug_picking",
+        "simple_picking",
+    ],
+    "Input": [
+        "mouse_grab",
+    ],
+    "2D Rendering": [
+        "bloom_2d", "tilemap_chunk", "sprite_animation", "sprite_sheet", "texture_atlas",
+        "pixel_grid_snap", "tilemap_chunk_orientation", "mesh2d_arcs", "sprite_slice",
+        "sprite_tile", "2d_shapes", "dynamic_mip_generation", "cpu_draw", "mesh2d_repeated_texture",
+        "mesh2d_vertex_color_texture", "wireframe_2d", "mesh2d_alpha_mode", "transparency_2d",
+        "rotate_to_cursor", "rotation", "text2d", "multi_window_text", "sprite_scale",
+        "2d_viewport_to_world", "sprite_flipping", "move_sprite", "mesh2d", "sprite",
+    ],
+    "Gizmos": [
+        "3d_gizmos", "light_gizmos", "transform_gizmo", "2d_gizmos", "3d_text_gizmos",
+        "anchored_text_gizmos", "2d_text_gizmos", "axes", "text_gizmos_font",
+    ],
+    "Assets": [
+        "hot_asset_reloading", "alter_mesh", "generated_assets", "alter_sprite", "repeated_texture",
+        "asset_loading", "multi_asset_sync", "asset_settings", "embedded_asset",
+        "extra_asset_source",
+    ],
+    "glTF": [
+        "load_gltf", "edit_material_on_gltf", "update_gltf_scene", "gltf_skinned_mesh",
+        "query_gltf_primitives", "load_gltf_extras",
+    ],
+    "Scene": [
+        "world_serialization",
+    ],
+    "Audio": [
+        "spatial_audio_3d", "spatial_audio_2d", "soundtrack", "audio_control", "play_sound_effect",
+        "pitch", "decodable", "audio",
+    ],
+    "Diagnostics": [
+        "log_diagnostics",
+    ],
+    "Dev tools": [
+        "infinite_grid", "fps_overlay",
+    ],
+    "Tools": [
+        "scene_viewer", "gamepad_viewer",
+    ],
+    "Stress Tests": [
+        "many_foxes", "many_lights", "many_cubes", "many_meshlet_materials", "many_morph_targets",
+        "many_materials", "bevymark_3d", "many_cameras_lights", "many_gradients",
+        "many_animated_sprites", "bevymark", "many_sprites", "many_gizmos", "transform_hierarchy",
+        "many_buttons", "many_glyphs", "many_text2d", "many_text", "text_pipeline",
+    ],
+    "Math": [
+        "render_primitives", "random_sampling", "cubic_splines", "bounding_2d", "smooth_follow",
+    ],
+    "Time": [
+        "virtual_time",
+    ],
+    "Window": [
+        "multiple_windows", "transparent_window", "custom_cursor_image", "window_drag_move",
+        "screenshot", "window_resizing", "scale_factor_override", "monitor_info", "low_power",
+        "window_settings", "clear_color",
+    ],
+    "Usage": [
+        "character_creation", "debug_frustum_culling", "context_menu", "cooldown",
+    ],
+    "Application": [
+        "headless_renderer", "render_recovery", "drag_and_drop", "settings",
+        "persisting_window_settings", "logs", "empty_defaults",
+    ],
+    "Async Tasks": [
+        "async_compute", "async_channel_pattern", "external_source_external_thread",
+    ],
+    "Kept out of Bevy's list": [
+        "test_meshlet", "resizing", "minimizing",
+    ],
+}
 
 
 def bevy_version():
@@ -307,8 +451,7 @@ def build(version, examples, order, triage, written, source, followed):
     table = "\n".join(out) + "\n"
 
     # Every written example's capture for the README, a table a group in the order GALLERY_GROUPS
-    # states, each one row of the group's examples, the one whose small picture holds the most
-    # first, its size in bytes the measure, since a plain picture compresses small, so a group wider
+    # states, each one row of the group's examples in the order GALLERY_ORDER sets, so a group wider
     # than the page scrolls sideways rather than wrapping onto rows of its own. Each picture opens
     # the C# file that drew it. The tables are Markdown, since nuget.org prints an HTML table as its
     # text, where GitHub and nuget.org each draw a Markdown one as a block that scrolls sideways.
@@ -316,21 +459,22 @@ def build(version, examples, order, triage, written, source, followed):
     if unplaced:
         sys.exit(f"the gallery's order names no place for {', '.join(unplaced)}; add it to GALLERY_GROUPS")
 
-    def picture_size(example):
-        made = os.path.join(GALLERY, example["name"] + ".webp")
-        return os.path.getsize(made if os.path.exists(made) else os.path.join(CAPTURES, example["name"] + ".webp"))
 
-    sections = ["The groups run from what the bridge is most for, 3D rendering and its lighting, animation and "
-                "the ECS, to its plumbing last, and within a group the examples whose pictures hold the most "
-                "come first."]
+    sections = ["The groups stand in the order Bevy lists them, and within a group the examples that show the "
+                "bridge best come first and the plainest last."]
     shown = []
     for group in [group for group in GALLERY_GROUPS if group in groups] + ([HIDDEN] if HIDDEN in groups else []):
-        pictured = sorted(
-            (example for example in examples if example["group"] == group and example["state"] in ("written", "part")
-             and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))),
-            key=lambda example: (-picture_size(example), example["name"]))
+        pictured = [example for example in examples if example["group"] == group and example["state"] in ("written", "part")
+                    and os.path.exists(os.path.join(CAPTURES, example["name"] + ".webp"))]
         if not pictured:
             continue
+        listed = GALLERY_ORDER.get(group, [])
+        names = {example["name"] for example in pictured}
+        if names != set(listed):
+            unset, stale = sorted(names - set(listed)), sorted(set(listed) - names)
+            sys.exit(f"the gallery's order of {group} lacks {', '.join(unset) or 'nothing'} and names "
+                     f"{', '.join(stale) or 'nothing'} it has no picture of; set it in GALLERY_ORDER")
+        pictured.sort(key=lambda example: listed.index(example["name"]))
         heads, captions = [], []
         for example in pictured:
             name, link = example["name"], BLOB + written[example["name"]]
