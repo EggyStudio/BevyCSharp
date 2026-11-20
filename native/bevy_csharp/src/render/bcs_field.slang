@@ -1,15 +1,18 @@
 // The scene's distance field as a shader that reads it sees it, which any shader can reach with
 // `import bcs_field;`.
 //
-// Cascades of cells around the camera, each twice as coarse and as wide as the one before, and after
-// them the far cascade where the program asks for one, its cells as wide as its reach takes, hold how
-// far each cell's middle is from the nearest surface of the meshes that cast shadows, below zero
-// inside a mesh with an inside, exact within a few cells of a surface and held at that many beyond.
-// They lie one after another along z in one 3D image of half floats, so a shader binds the field
-// once, with a buffer holding one `FieldInfo` that says where each cascade lies, and a cascade not
-// yet built has a cell width of zero and is passed over (see `Render.SetSceneField`).
+// Cascades of cells around the camera, each twice as coarse and as wide as the one before, and
+// after them the far cascade where the program asks for one, its cells as wide as its reach takes,
+// hold how far each cell's middle is from the nearest surface of the meshes that cast shadows,
+// below zero inside a mesh with an inside, exact within a few cells of a surface and held at that
+// many beyond. They lie one after another along z in one 3D image of half floats, so a shader binds
+// the field once, with a buffer holding one `FieldInfo` that says where each cascade lies, and a
+// cascade not yet built has a cell width of zero and is passed over (see `Render.SetSceneField`).
 
 module bcs_field;
+
+// The way a face looks in eight bits, written once in the RadianceCascades module for both engines.
+import rc_field_code;
 
 
 /// A cascade, where it lies.
@@ -166,28 +169,23 @@ public float fieldCell(FieldInfo info, float3 p)
 
 /// The way a face looks in eight bits, four along each side of the octahedron the sphere is folded
 /// onto, as the field's build keeps it in each cell's word, enough to tell faces that look apart
-/// from faces that meet square.
-/// A cell of the field's faces image holds the face that won it in 32 bits. Bits 0 to 7 are the way
-/// it looks (`faceBits`, `faceWay`), four bits along each side of the octahedron, and bits 8 to 31
-/// its gloss (`glossBits`, `faceGloss`), its perceptual roughness in bits 8 to 15, its metallic
-/// share in bits 16 to 23 and its reflectance in bits 24 to 31, each in 255ths, all painted by the
-/// triangle that painted the cell's color. A reader masks the bits it reads.
+/// from faces that meet square. A cell of the field's faces image holds the face that won it in 32
+/// bits. Bits 0 to 7 are the way it looks (`faceBits`, `faceWay`), four bits along each side of the
+/// octahedron as the RadianceCascades module codes a way once for both engines (`wayCode` and
+/// `wayOf` in rc_field_code), and bits 8 to 31 its gloss (`glossBits`, `faceGloss`), its perceptual
+/// roughness in bits 8 to 15, its metallic share in bits 16 to 23 and its reflectance in bits 24 to
+/// 31, each in 255ths, all painted by the triangle that painted the cell's color. A reader masks
+/// the bits it reads.
 public uint faceBits(float3 n)
 {
-    n /= abs(n.x) + abs(n.y) + abs(n.z);
-    float2 o = n.z >= 0.0 ? n.xy : (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
-    uint2 q = min(uint2((o * 0.5 + 0.5) * 16.0), uint2(15u));
-    return q.x | (q.y << 4);
+    return wayCode(n);
 }
 
-/// The way back from the eight bits `faceBits` keeps.
+/// The way back from the eight bits `faceBits` keeps, the middle of their square of the octahedron
+/// (`wayOf`).
 public float3 faceWay(uint bits)
 {
-    float2 o = (float2(float(bits & 15u), float((bits >> 4) & 15u)) + 0.5) / 16.0 * 2.0 - 1.0;
-    float3 n = float3(o, 1.0 - abs(o.x) - abs(o.y));
-    if (n.z < 0.0)
-        n.xy = (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
-    return normalize(n);
+    return wayOf(bits);
 }
 
 /// A face's gloss, its perceptual roughness, metallic share and reflectance, in bits 8 to 31 of a
@@ -224,8 +222,8 @@ public float3 surfaceAlbedo(Texture3D<float4> albedo, SamplerState linear, Field
 
 /// The light the field's surfaces emit at `p`, blended as their colors are, the glow's light over
 /// the share of the cells around `p` a surface painted, or none where no surface painted any. The
-/// glow holds a cell's nearest surface's emission, or the light an emitter thinner than a cell lends
-/// it where that is more, as field_resolve.slang writes it.
+/// glow holds a cell's nearest surface's emission, or the light an emitter thinner than a cell
+/// lends it where that is more, as field_resolve.slang writes it.
 public float3 surfaceGlow(Texture3D<float4> glow, Texture3D<float4> albedo, SamplerState linear, FieldInfo info, float3 p)
 {
     int c = fieldCascade(info, p, 1.0);
@@ -298,8 +296,8 @@ public float lightThroughPaint(float through)
 }
 
 /// The card area a cubic meter at which a crown's leaf cards let their material's share through a
-/// meter: by Beer and Lambert's law with half a leaf's area facing a ray, a leaf covering 0.6 of its
-/// card, as `ACrownLetsAboutHalfTheLightThroughAMeter` reads a preset's crown, a meter of cards
+/// meter: by Beer and Lambert's law with half a leaf's area facing a ray, a leaf covering 0.6 of
+/// its card, as `ACrownLetsAboutHalfTheLightThroughAMeter` reads a preset's crown, a meter of cards
 /// 2.31 square meters a cubic meter lets half through, the presets' crowns lying about it.
 public static const float CrownCardDensity = 2.31;
 
@@ -399,13 +397,14 @@ public float lightThroughKept(float passing, float depth, float cell, bool insid
 }
 
 /// How far a ray along `way` from `origin` that met a surface letting light through at `t` runs
-/// before it has left it, as `lightThroughDepth` gives it, and in `kept` the share of light it keeps
-/// across it. A crown's leaf cards (`lightThroughCards`) are crossed half a cell a step, each step at
-/// the share its own cell lets through, so a ray through a crown's sparse edge keeps what the edge's
-/// few cards let past and one through its core what the core's, a cell holding no card's middle
-/// keeping all and a solid's inside past half a cell none, so a trunk stops the ray and a limb
-/// thinner than a cell, which the field holds half a cell either side of it, does not. Any other
-/// surface keeps the share of the cell it was met in for its whole depth (`lightThroughKept`).
+/// before it has left it, as `lightThroughDepth` gives it, and in `kept` the share of light it
+/// keeps across it. A crown's leaf cards (`lightThroughCards`) are crossed half a cell a step, each
+/// step at the share its own cell lets through, so a ray through a crown's sparse edge keeps what
+/// the edge's few cards let past and one through its core what the core's, a cell holding no card's
+/// middle keeping all and a solid's inside past half a cell none, so a trunk stops the ray and a
+/// limb thinner than a cell, which the field holds half a cell either side of it, does not. Any
+/// other surface keeps the share of the cell it was met in for its whole depth
+/// (`lightThroughKept`).
 public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept)
 {
     float stopped;

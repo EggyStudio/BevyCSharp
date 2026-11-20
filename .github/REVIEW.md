@@ -1110,3 +1110,28 @@ Shared: the probes' octahedron is the RadianceCascades module's in this engine f
 first kernel taken.
 
 NormTests passed, 19.
+
+138, its second step, the way a face looks in eight bits written once, in the commit carrying this
+Reply.
+
+The bridge carries the module's `rc_field_code.slang` among the modules it writes for `import`, and
+`bcs_field` imports it for itself alone, so its codes and constants stay out of every kernel's names
+until the field's codes are taken. `faceBits` and `faceWay` keep their names for this engine's
+readers and answer the module's `wayCode` and `wayOf`, whose code was theirs line for line. The
+gloss in the same cell, which the module reads a byte of 0 of as unpainted where this engine reads
+it as nothing, waits for a step of its own with its tests. No picture changes, and the comments of
+the files touched hold to 100 columns (N 4.12).
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
+listing is 2,185, the solution built from nothing with warnings as errors, in 13 parts and the rest
+dealt by the last run's times, each part of 1 m 35 s to 4 m 43 s, a part at a time under the GPU
+lock.
+
+Shared: the way a face looks in eight bits is the RadianceCascades module's in this engine from this
+commit.
+
+NormTests passed, 19.
