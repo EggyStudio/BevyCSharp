@@ -72,8 +72,9 @@ RWStructuredBuffer<Atomic<uint>> cells;
 RWStructuredBuffer<Atomic<uint>> behind;
 
 // The color a cell's nearest surface paints it, sRGB bytes with 255 above them, which the painting
-// dispatch writes and field_resolve.slang reads.
-RWStructuredBuffer<uint> albedo;
+// dispatch keeps by an atomic maximum (PaintCells), a nearer code clears (CodeCells) and
+// field_resolve.slang reads.
+RWStructuredBuffer<Atomic<uint>> albedo;
 
 // The area of a crown's leaf cards, double-sided triangles letting light through, whose middles lie
 // in each cell, in 65536ths of a square meter, which field_resolve.slang turns into the share of
@@ -169,10 +170,18 @@ float3 cornerLight(uint packed)
     return select(c <= 0.04045, c / 12.92, pow((max(c, 0.0) + 0.055) / 1.055, 2.4));
 }
 
-// The cascade's cells as the module's splat keeps their codes (splatCodes), by atomic minima.
+// The cascade's cells as the module's splat keeps their codes (splatCodes), by atomic minima. A
+// cascade is splatted in several builds, each painting the cells after its codes, and a code
+// nearer than the one a cell kept clears the cell's paint, which an earlier build gave it from
+// another face. The paint is kept as the larger color (PaintCells), and a leaf card's, whose alpha
+// lies below 1, would otherwise stay under the floor's or a trunk's, the crown held solid.
 struct CodeCells : ISplatCells
 {
-    void keepLeast(uint index, uint code) { cells[index].min(code); }
+    void keepLeast(uint index, uint code)
+    {
+        if (cells[index].min(code) > code)
+            albedo[index].store(0u);
+    }
     void keepBehind(uint index, uint code) { behind[index].min(code); }
 }
 
@@ -180,6 +189,14 @@ struct CodeCells : ISplatCells
 // the color times the alpha and the alpha in bytes, the gloss as given, and the emission with alpha
 // 1 where global illumination carries the emitter as a glow light, which a probe's ray that meets
 // it leaves out (surfaceGlowUncarried).
+//
+// Two triangles of one mesh tie on a cell whose middle lies as near both along the same way, in
+// the code's steps, since the code holds the distance, the way and the mesh's instance and nothing
+// of the triangle, and both paint the cell, each the color of its own nearest point, which differs
+// where its corners do. The color is kept as the larger of the two in its bytes, an atomic maximum,
+// so a build paints the cell the same whichever triangle's thread comes first, where stored as they
+// came the cell kept the last, and 226 of a ball's 17,416 cells took another color in another
+// build. Their gloss and their emission are their mesh's, the same from both.
 struct PaintCells : IPaintCells
 {
     bool carried;
@@ -189,7 +206,7 @@ struct PaintCells : IPaintCells
     void paint(uint index, float4 paint, float3 emission, uint bits)
     {
         uint4 bytes = uint4(saturate(paint) * 255.0 + 0.5);
-        albedo[index] = bytes.r | (bytes.g << 8) | (bytes.b << 16) | (bytes.a << 24);
+        albedo[index].max(bytes.r | (bytes.g << 8) | (bytes.b << 16) | (bytes.a << 24));
         gloss[index] = bits;
         glow[index] = float4(emission, carried && any(emission > 0.0) ? 1.0 : 0.0);
     }
