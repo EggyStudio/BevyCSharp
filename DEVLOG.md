@@ -6,6 +6,20 @@ under `.github/assets/readings` as WebP files named by their day, each on the da
 the notes written beside them as Markdown files named the same way. A line under Done names the item
 of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 
+## 2026-11-21
+
+![](.github/assets/readings/2026-11-21-item-138-codes-and-sheets.webp)
+The scene field's probe scene with this engine's codes and with the RadianceCascades module's codes
+and the planes of double-sided faces, a crown's leaf cards held as before, its frame, the crossing
+walls' foot 4 times enlarged and its field's cascade 0 at 0.9 m from above, the walls' shaded side a
+little lighter and the field half a cell farther from a double-sided face past a cell of it or where
+its rim is nearest, red in the difference.
+
+![](.github/assets/readings/2026-11-21-item-138-planes.webp)
+The cells of the probe scene's field keeping the plane of a double-sided face, its cascade 0 at 0.9
+m from above, each colored by its plane's way, the crossing walls keeping theirs a cell either side
+of them and none past their ends, where their rims are nearest.
+
 ## 2026-11-19
 
 ![](.github/assets/readings/2026-11-19-item-150-grade.webp)

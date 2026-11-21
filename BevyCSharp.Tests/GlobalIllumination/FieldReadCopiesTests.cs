@@ -44,7 +44,7 @@ public sealed class FieldReadCopiesTests
             import bcs_field;
 
             StructuredBuffer<FieldInfo> info;
-            Texture3D<float> field;
+            Texture3D<float4> field;
             SamplerState linear;
             RWStructuredBuffer<float> read;
 

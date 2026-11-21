@@ -46,7 +46,7 @@ Texture3D<float> distances;
 
 // The field, for the normal of the patch each ray met, which turns it toward the surface a face is
 // read for.
-Texture3D<float> field;
+Texture3D<float4> field;
 SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 

@@ -41,9 +41,9 @@ StructuredBuffer<uint4> bricks;
 
 StructuredBuffer<FieldShape> shapes;
 
-Texture3D<float> still_field;
+Texture3D<float4> still_field;
 
-[format("r16f")] RWTexture3D<float> field;
+[format("rgba16f")] WTexture3D<float4> field;
 
 // The colors, the faces and the shares sent through the still meshes paint, as field_resolve.slang
 // wrote them, and those the passes read.
@@ -109,19 +109,20 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
     float3 p = oc.xyz + (float3(cell) + 0.5) * oc.w;
     float reach = field_info.counts.z * oc.w;
 
-    // The still cell as the module reads it, which keeps no plane of a double-sided face here and
-    // no glow the stamp writes.
+    // The still cell as the module reads it, its distance and the plane it keeps, with no glow the
+    // stamp writes.
     uint3 at = uint3(cell.xy, cell.z + cascade * size);
+    float4 kept = still_field.Load(int4(int3(at), 0));
     FieldCell still;
-    still.distance = still_field.Load(int4(int3(at), 0));
-    still.sheet = float3(0.0);
+    still.distance = kept.x;
+    still.sheet = kept.yzw;
     still.paint = still_paint.Load(int4(int3(at), 0));
     still.glow = float4(0.0);
     still.face = still_faces.Load(int4(int3(at), 0));
     still.through = still_transmission.Load(int4(int3(at), 0));
     BrickShapes shapes = { stamp_counts.x * 4u + brick.z, brick.w };
     FieldCell stamped = stampCell(shapes, p, reach, still);
-    field[at] = stamped.distance;
+    field.Store(at, float4(stamped.distance, stamped.sheet));
     albedo_field[at] = stamped.paint;
     face_field[at] = stamped.face;
     transmission_field[at] = stamped.through;

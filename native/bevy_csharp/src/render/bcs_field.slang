@@ -132,11 +132,11 @@ public int fieldCascade(FieldInfo info, float3 p, float margin)
 /// One cascade of the field as the module's reads take it (`IFieldVolume`), its corner and cell
 /// and the field's counts as the read was handed them, so a read copies no table of the cascades
 /// into a thread's own memory to index it there, which a device read wrong in the sibling engine.
-/// A cell here keeps no plane of a double-sided face, the resolve holding such a face below zero by
-/// half a cell instead, so a cell's plane reads as none and the module's distance is the blend.
+/// A cell keeps its distance in x and in yzw the plane of a double-sided face (sheetOf), and keeps
+/// no second plane.
 struct CascadeRead : IFieldVolume
 {
-    Texture3D<float> field;
+    Texture3D<float4> field;
     SamplerState linear;
     float4 oc;
     float4 counts;
@@ -151,12 +151,12 @@ struct CascadeRead : IFieldVolume
     {
         float size = counts.y;
         float3 uvw = float3(cells.xy / size, (cells.z + float(cascade) * size) / (size * counts.x));
-        return float4(field.SampleLevel(linear, uvw, 0.0), 0.0, 0.0, 0.0);
+        return field.SampleLevel(linear, uvw, 0.0);
     }
 
     float4 cellAt(int cascade, int3 cell)
     {
-        return float4(field.Load(int4(cell.xy, cell.z + cascade * int(counts.y), 0)), 0.0, 0.0, 0.0);
+        return field.Load(int4(cell.xy, cell.z + cascade * int(counts.y), 0));
     }
 
     float3 secondAt(int cascade, int3 cell) { return float3(0.0); }
@@ -165,7 +165,7 @@ struct CascadeRead : IFieldVolume
 /// The distance from `p` to the nearest surface in cascade `i`, in world units, blended between
 /// the eight cells around it by a linear sampler, each read no nearer a side than half a cell, so
 /// cascades stacked in the image do not bleed into each other.
-public float fieldDistanceIn(Texture3D<float> field, SamplerState linear, FieldInfo info, int i, float3 p)
+public float fieldDistanceIn(Texture3D<float4> field, SamplerState linear, FieldInfo info, int i, float3 p)
 {
     CascadeRead read = { field, linear, info.cascades[i].origin_and_cell, info.counts, i };
     return fieldDistanceIn(read, i, p);
@@ -173,7 +173,7 @@ public float fieldDistanceIn(Texture3D<float> field, SamplerState linear, FieldI
 
 /// The distance from `p` to the nearest surface, from the finest cascade around it, or far where
 /// none holds it.
-public float fieldDistance(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 p)
+public float fieldDistance(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 p)
 {
     int i = fieldCascade(info, p, 1.0);
     return i < 0 ? 1e6 : fieldDistanceIn(field, linear, info, i, p);
@@ -181,7 +181,7 @@ public float fieldDistance(Texture3D<float> field, SamplerState linear, FieldInf
 
 /// The way out from the nearest surface at `p`, the field's slope across half a cell, or up where
 /// the field is flat or holds nothing there.
-public float3 fieldNormal(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 p)
+public float3 fieldNormal(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 p)
 {
     int i = fieldCascade(info, p, 1.5);
     if (i < 0)
@@ -405,7 +405,7 @@ public float transmissionAt(Texture3D<float> transmission, FieldInfo info, float
 /// 64 steps, as a ray grazing a canopy is, where it ends that far in. A crown's leaves, cards the
 /// field holds half a cell either side, run together into one region where they lie closer than a
 /// cell, which a ray crosses whole.
-public float lightThroughDepth(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside)
+public float lightThroughDepth(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside)
 {
     float depth = 0.0;
     inside = true;
@@ -443,7 +443,7 @@ public float lightThroughKept(float passing, float depth, float cell, bool insid
 /// limb thinner than a cell, which the field holds half a cell either side of it, does not. Any
 /// other surface keeps the share of the cell it was met in for its whole depth
 /// (`lightThroughKept`).
-public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept)
+public float lightThroughCrossed(Texture3D<float4> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept)
 {
     float stopped;
     return lightThroughCrossedAt(field, linear, albedo, info, origin, way, t, most, inside, kept, stopped);
@@ -453,7 +453,7 @@ public float lightThroughCrossed(Texture3D<float> field, SamplerState linear, Te
 /// on average, each step's share at the step's middle, where it crossed a crown's leaf cards, or 0
 /// where it met any other surface, so a probe's ray lights what a crown stops where its leaves
 /// stopped it rather than where the ray met the crown.
-public float lightThroughCrossedAt(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept,
+public float lightThroughCrossedAt(Texture3D<float4> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 origin, float3 way, float t, float most, out bool inside, out float kept,
     out float stopped)
 {
     stopped = 0.0;

@@ -21,7 +21,7 @@ import bcs_pass;
 import bcs_field;
 
 Texture2D<uint4> gbuffer;
-Texture3D<float> scene_field;
+Texture3D<float4> scene_field;
 SamplerState scene_field_sampler;
 StructuredBuffer<FieldInfo> scene_field_info;
 

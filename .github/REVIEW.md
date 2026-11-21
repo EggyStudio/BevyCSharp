@@ -667,400 +667,6 @@ in all three profiles. NormTests passed, 19.
 Of the 75, 55 are mended, none was found not to hold, and 20 remain, 60 to 75 and 34 to 36 and 40 of
 global illumination, which go with 138.
 
-150, the start where the probes added nothing, a mesh painted again where it stands, as a texture
-that loads after its mesh was first drawn paints it with its mean, held as not moved, so no start of
-Sponza stands its walls and floors in the field as boxes, in the commit carrying this Reply.
-
-Fifty-four starts of the head's build offscreen, each its own session, Sponza at the sibling's noon
-and view, read the upper gallery wall at 0.161 in 47, dim at 0.150 and 0.107 in 2 and dark at 0.028
-to 0.031 in 5, the probes' light gone, and the four dark ones read again 600 frames on were dark
-still. The trial session that read so read its three boxes as the first twenty's dark start did, to
-the third place.
-
-What differs. The dark starts' fields held 42 to 177 boxes where every other start's held 29, as
-many more as meshes the plan took as moved at its ninth to seventeenth frame where they stood, a
-frame or more after they first stood still, and no other start's plan took one so. They are Sponza's
-own, between x 48 and 88 and z -90 and -49 around the view, painted again as their textures' means
-came in after they were first drawn. The plan tells a mesh by its paint as well as its mesh and
-place, so on a frame read whole the one painted again is a mesh of a number gone that frame, which
-it takes as moved, and a mesh that moved waits `MobileSettleFrames`, 1,024 frames, before it is
-still, stamped as its box meanwhile. The darkest start's 177 boxes filled 7,520 bricks where a
-normal start's 29 fill 128, the atrium's walls and floors solid around the probes. Those meshes
-settled at the plan's frame 1,032 and stayed stamped until the four cascades were built again, about
-118 frames each under the triangle budget, and the second reading, 600 frames on, found them waiting
-on the coarsest, so a start went dark for about 1,450 frames, 24 seconds at 60. Which textures come
-after their meshes' first draw falls to the order the asset server's loads end in, which differs
-from start to start.
-
-The mend. The plan takes a mesh drawn where one of its mesh and generation stood the frame before
-and is gone as painted again rather than moved, keeping the frame that one last moved. A still mesh
-painted again once it has stood still for eight frames is still at once with its new paint, stamped
-as the one painted was and not at all where the cascades held that one, so a light put out goes from
-the field with the next build. One painted again sooner, as Sponza's are at a start, stays in the
-field as it was until its new paint settles, as one replaced in place does, so its cascades are
-built again once with it and it is not stamped meanwhile (`ReplacedBy` and `Replacing` in
-SceneFieldPlan.cs), and a mesh painted each frame is not built into the cascades each frame. The
-class's remarks and the ray tracing guide's paragraph on the field say so, and no listing line
-changes.
-
-The first whole suite over the mend failed
-`GlobalIlluminationTests.TheIndirectLightGoesWithinTwoFramesOfThePanelThatWentDark`, its room
-reading 69.95 for the seven frames after the panel went dark where it read 75.32 lit, since the mend
-then held every still mesh painted again in the field as it was until its new paint had stood eight
-frames, the panel among them. At the head the panel put out was taken as moved and left the field,
-its cascades built again without it, and the mend as committed takes it as still at once in its new
-paint, its cascades built again with it, and the test passes.
-
-`SceneFieldTests.AMeshPaintedAgainWhereItStandsHasNotMovedAndKeepsItsPlaceInTheField` paints a mesh
-again three frames after it is first drawn, again the frame after it is still, and again once it has
-stood still eight frames, as a light put out. It holds the mesh still eight frames after the first
-two and kept in the field meanwhile, and built in with the last paint in the frame it comes, never
-stamped. On the head it fails at the first, with the first half of the mend alone at the second, and
-with the mend as the first suite ran it at the third, its build empty. The plan's other 16 tests
-pass.
-
-Twenty starts of the mend as committed read the wall at 0.161 at both readings and their fields 29
-boxes, four of them with 19, 40, 15 and 40 meshes painted again where they stood at the plan's ninth
-to nineteenth frames, held as not moved and none still at once. Twenty starts of the mend as the
-first suite ran it read alike, two of them with 73 and 59 painted again.
-
-The sheet is `2026-11-18-item-150-dark-start.webp`, the atrium at the darkest head start and at a
-mended start with 40 meshes painted again at the same frame, with their difference at four times,
-red lighter and blue darker. The far arch's opening reads blue, brighter in the dark starts alone,
-82 of 255 where normal starts at the head and every mended start read 62 to 63.
-
-The decals come next, then 153, then 151.
-
-Shared: the sibling's `SceneFieldPlan` tells a mesh by its paint as well and takes a mesh drawn of
-vertices gone that frame as moved wherever it stands (`_departed.Contains(instance.Vertices) ?
-_frame`), so a mesh painted again in place there waits the 1,024 frames stamped as its box as this
-one's did, and the mend and its test are offered.
-
-The whole suite passed from one tree, 2,183 passed, 0 failed and 4 skipped, 2,187 in all where the
-listing is 2,176, the solution built from nothing with warnings as errors, in 16 parts and the rest
-dealt by the last run's times, each part of 2 m 6 s to 5 m 2 s, a part at a time under the GPU lock.
-
-NormTests passed, 19.
-
-150, the blended dirt decals, the reference meeting a blended face by its alpha as Bevy blends it
-over what lies behind it, in the commit carrying this Reply.
-
-Sponza's one blended material is its `dirt_decal`, an alpha of 0.35 by its factor times its
-texture's, drawn on one side, its decals on the first floor's floor lying a centimeter above it, and
-the Bistro's pack has none. The material buffer gave a blended material a cutoff of -1 and its
-textures at their means, so the reference traced each decal whole, dark dirt where the picture shows
-the stone through it.
-
-The mend. A blended material's slot holds as its cutoff 0.05, the alpha Bevy's shadow pass discards
-a blended texel under (`PREMULTIPLIED_ALPHA_CUTOFF`), its base color texture among the masks and its
-others at their means, and two flags, 8 where it is blended and 16 where Bevy culls its faces' backs
-(`flags_of` in instances.rs). The reference's paths stop at a blended face where a draw falls under
-its alpha and pass it elsewhere, and pass one met from behind where Bevy culls its back, so the
-floor's own paths pass the decal lying on it (`traceBlended` in gi_reference.slang). A shadow ray
-passes a blended face lying within 2 cm of the face it leaves along that face's normal, Bevy's
-default depth bias for the sun, which leaves the floor under a decal lit though the decal is drawn
-into the shadow map. The base color textures that say where a cut-out or blended face lies take the
-masks first, in the order of the slots, and the other textures the room left, since in the feature
-test its level's textures filled the 32 masks before Sponza's decal came, which was then laid over
-its whole square at the alpha of its factor. The slot's remarks in `Shaders.CreateMaterialBuffer`
-and `bcs_scene`'s `Material`, the compute guide's paragraph on the material buffer and the ray
-tracing guide's on the reference say so. Two listing lines are reshaped,
-`Shaders.MaterialBufferMask` naming a blended material's base color texture among the masks and
-`Shaders.MaterialBufferUnmasked` counting the cut-out and blended textures past them, as the
-reference's answer counts them. gi_reference.slang stands at 800 lines.
-
-`GiReferenceTests.ABlendedDecalOnAFloorReadsInTheReferenceAsThePictureBlendsIt` lays a red decal of
-half alpha a centimeter over a gray floor under a sun 60 degrees up that casts shadows and holds the
-reference over it within 8% of the picture, the direct light alone. On the head it read 1.226, 0.355
-and 0.355 of the picture's red, green and blue, mended 0.998, 1.002 and 1.002, and with the shadow's
-bias taken out 0.608, 0.176 and 0.176, the floor beneath in the decal's shadow.
-`ABlendedDecalUnderASkyReadsInTheReferenceAsItsShareOfItselfAndOfTheFloorBeneath` lays it under an
-even sky with two bounces and holds it at half its light drawn opaque and half the bare floor's,
-0.996, 0.999 and 0.999 of that mended and 0.804, 0.592 and 0.592 with the paths meeting the decal's
-back by its alpha. `ABlendedDecalAfterMoreTexturesThanTheMasksHoldKeepsItsShapeInTheReference` lays
-a decal checkered by its texture's alpha after 24 cut-out cards of two textures each and holds its
-square within 8% of the picture, 0.996, 1.007 and 1.007 mended and 1.219, 0.361 and 0.361 with the
-masks in the order of the slots alone, the decal laid whole. With the paths' draw taken out, as the
-head traces a decal whole, the first two read 1.226 and 1.225 of the red. The bridge's
-`a_blended_slot_says_so_and_which_sides_bevy_draws` holds the flags and the cutoff.
-
-Sponza's atrium at the sibling's view, noon and lens, cascades on, traced at 64 paths a pixel in a
-session of its own, reads its decals on the first floor's walls facing -x at 0.125 against the
-picture's 0.352 where they read 0.023 against 0.354, those facing +z at 0.168 against 0.425 where
-they read 0.040 against 0.473, and the third floor's facing -x at 0.345 against 0.789 where they
-read 0.084 against 0.844. The picture lies over them by 82% to 181%, where it lies over the brick
-walls beside them by 103% to 126%, the probes' light the later parts take up, and those facing -x
-cover 4.2% of the view where they covered 6.1%, the region ray passing the texels the shadow pass
-discards. Before the masks took the base color textures first the decals read 0.096 and 0.147 there,
-their texture past the 32 masks the feature test's level had filled. The picture lies 0.475 of its
-light from the reference where it lay 0.641 from it, and its answer counts one texture past the
-masks where it counted none, a surface or a normal map of the level's, since every base color
-texture comes first and Sponza has no cut-out material.
-
-The sheet is `2026-11-18-item-150-decals.webp`, the atrium's reference at the head and mended with
-their difference at four times, red lighter and blue darker, the decals' dark patches on the columns
-and walls gone over the stone.
-
-The scene's field builds the decals in as it builds any still mesh that casts a shadow, painted
-their texture's mean, where the sibling's field leaves a blended draw under half an alpha out
-(`SeeThrough` in its SceneField.cs). It is not chased here, and waits on the review's word.
-
-Shared: the sibling's reference leaves a blended draw under half an alpha out (`SeeThrough`), the
-stone under a decal read bare and none of the dirt, where this one's meets it by its alpha as the
-picture blends it, which is offered.
-
-The whole suite passed from one tree, 2,186 passed, 0 failed and 4 skipped, 2,190 in all where the
-listing is 2,179, the solution built from nothing with warnings as errors, in 17 parts and the rest
-dealt by the last run's times, each part of 22 s to 5 m 6 s, a part at a time under the GPU lock.
-
-NormTests passed, 19.
-
-150, the decals in the scene's field, a draw Bevy blends under half its alpha left out of it as the
-sibling's field leaves one out, in the commit carrying this Reply.
-
-The field's gather passes over a mesh whose material Bevy blends at a base color alpha under one
-half (`see_through` in scene_field.rs), as 3DEngine's `SeeThrough` does, so Sponza's decals, at
-0.35, stand in it as nothing and the walls under them stand bare. The gather's doc and the ray
-tracing guide's paragraph on the field say so, and no listing line changes.
-
-`GlobalIlluminationTests.ADrawBlendedUnderHalfItsAlphaStandsInTheFieldAsNothing` stands a red pane
-blended at 0.35 and one at 0.8 over a white floor and reads the field's colors back once every mesh
-it gathered is still, the field holding two meshes, the cell beside the first pane unpainted and the
-one beside the second red. On the head the field held 3 and the cell beside the first pane read
-(204, 13, 13, 255).
-
-Sponza's atrium at the sibling's view, noon and lens, cascades on, traced at 64 paths a pixel, the
-head's bridge and this one each in a session of its own within the hour, the head reading as the
-decals' commit read and this one twice alike, to the third figure, the reference the same in all.
-With the decals out of the field the picture rises, on the first floor's decal walls facing -x to
-0.376 from 0.352 against the reference's 0.125, those facing +z to 0.438 from 0.425 against 0.168
-and the third floor's to 0.838 from 0.789 against 0.345, and on the brick walls facing -x beside
-them to 0.235 from 0.212 against 0.094. So the picture lies further from the reference, 0.508 of its
-light where it lay 0.475, the decal walls over it by 92% to 198% where they lay 82% to 181% and the
-brick walls facing -x by 149% where 126%. The change is kept all the same. A face of 0.35 alpha
-stood in the field as wholly dirt, and its darkness hid part of the probes' surplus, two errors
-meeting, and the field holds the stone the picture shows. The surplus over the brick walls is the
-probes' own and is read to its cause in item 150's second part, a pack's fitting of cells of 0.125,
-the far cascade and High, where the brick walls facing -x are to come within 30% of the reference,
-0.122 or under against its 0.094.
-
-The sheet is `2026-11-18-item-150-field-decals.webp`, the atrium's picture at the head and mended
-with their difference at sixteen times, red lighter and blue darker, the walls and arches lighter
-where the probes see the stone under the decals.
-
-The whole suite passed from one tree, 2,187 passed, 0 failed and 4 skipped, 2,191 in all where the
-listing is 2,180, the solution built from nothing with warnings as errors, in 18 parts and the rest
-dealt by the last run's times, each part of 22 s to 4 m 12 s, a part at a time under the GPU lock.
-
-NormTests passed, 19.
-
-150, its second part read before any setting is fitted, the brick walls' surplus split by where
-their light comes from, its main cause the scenes yard's white floor under Sponza's, mended in the
-commit carrying this Reply.
-
-Sponza's atrium at the sibling's view, noon and lens, each session from the feature test's own
-settings, its figures linear light before tonemapping at the camera's EV100 of 9.7, the lens's 4.944
-stops under it laid on after, so the reference's 0.094 on the brick walls facing -x reads 0.0031 at
-the lens's EV 14.64. The brick walls facing -x take no light straight from the sun, the reference at
-no bounce reading 0.000 on them, and of the reference's 0.094 its first bounce gives 0.066. The
-probes holding the first bounce alone gave the walls 0.155, so most of the surplus lay there. In
-three screen probes on the wall it came by the rays past their 4 m reach, which take the world
-probes' light, +0.34 to +0.59 of sums lying +0.38 to +0.64 over the reference's, and the world probe
-at the arcade's edge, at 73, 1, -69, held its first bounce's surplus in the ways that see the sunlit
-atrium floor at the distance the reference meets it, 6.0 to 7.4 against 3.6 drawn across the same
-texels. No way there met the sky.
-
-The yard's floor, the white prototype grid at 0.90, lies 3 cm under Sponza's, Packs' lift and the
-floor's own centimeter, inside one of the field's cells of 0.25 m, and the field paints a cell by
-its nearest surface, so the cells of Sponza's stone floor took the yard's white and the probes the
-light it sent back. With the level's floor hidden by hand and the field built again from nothing in
-one session, the walls facing -x read 0.122 against 0.092, the world probe 0.486 against 0.540 drawn
-where it read 0.873, and the picture lay 0.348 of its light from the reference where 0.508.
-
-The mend. The level's generator writes the yard's floor as four pieces round Sponza's outline, the
-exterior's box in its own frame 2 cm inside its walls' outer faces turned with the site, and the
-floor within it as a brush entity of its own of the class `func_scene_floor` (`SiteFloor`). The
-feature test's `SceneFloor` hides it while a scene whose fitting covers the site stands, Sponza's
-alone (`Covers`), and shows it again when the scene is taken away, so it neither draws nor stands in
-the field while the scene's own floor covers it. `SceneFloor.cs` uses nothing else of the game, and
-the test project compiles it in by a linked file, as its project file says. Packs' remarks and its
-fitting's say so, no listing line changes, and the comment lines of the files touched hold to 100
-columns (N 4.12).
-
-`FeatureTestLevelTests.TheYardsFloorUnderTheScenesSiteIsAnEntityOfItsOwnDrawnToSponzasOutline` casts
-a ray down at each meter of the yard and holds the site's floor alone under the points within the
-outline and the world's alone under those outside it, where the head's level held no such floor.
-`FeatureTestSceneFloorTests.TheYardsFloorUnderASceneStandsOutOfTheFieldWhileTheSceneStandsAndInItAgainWhenItGoes`
-builds the feature test's level with a red floor 2 cm over the site and reads the field's cell under
-the yard floor's top white, red while `SceneFloor` hides the yard's floor and white again once it
-shows it, where at the head the rule hid none.
-`GlobalIlluminationTests.AnEntityHiddenStandsOutOfTheFieldAndInItAgainWhenShown` holds the engine's
-own rule on a red floor 2 cm over a white one and passes at the head, kept as the guard.
-
-On the commit's tree, the head's Packs and level built for the head's reading in the same hour, the
-walls facing -x read 0.129 against 0.094 where they read 0.234, 35% over the reference and short of
-the bar of 0.122, which the hand's reading met at 0.122 against 0.092. The arcade's ceiling reads
-0.212 against 0.217 where 0.432, the brick walls facing +x and +z lie 5% and 12% over where 115% and
-126%, the floor 10% over where 13%, and the picture 0.349 of its light from the reference where
-0.505.
-
-What the split shows of the rest. The picture read 2.4 to 3.0 times the reference at the head on the
-walls under the arcades, 2.49 on the brick facing -x and 2.6 to 3.0 on the decals, where the
-sibling's reads 1.03 to 1.60 of its own, so the gap between the engines lay in this side's surplus.
-Mended, the brick reads 1.37, 1.05 and 1.12 of the reference by the way it faces and the arcade's
-ceiling 0.98, so the same mend closes the brick's, and the decal walls facing -x read 2.13, 115%
-over where 197%. A decal is blended and drawn forward, and the light pass leaves a forward surface
-Bevy's own light, so with the probes off the decals read 1.6 to 2.0 and with them on 0.31 to 0.84,
-and the share the probes do not light reads as Bevy's own light on the decal, not read to its cause
-here. Its read and its mend come after the haze's, held by a test that fails first of a decal
-blended over a wall under the probes against the reference, which bounds it as the decals' own tests
-do. The floor's 10% is the direct light's.
-
-A finding for the kernels' read, left unmended as the review asks. Two surfaces of unlike color
-sharing a cell of 0.25 m paint it by whichever lies nearer its middle, and the field's surface
-between them reads the mix, which any thin layered floor meets, a rug on a floor or a road's paint
-on its asphalt. It goes to the read as a question for both engines.
-
-The sheet against the sibling is `2026-11-18-item-150-atrium-matched.webp`, the atrium from its view
-(`Views[0]`) under its noon sun, `SunToward(12, 6)` carried by Sponza's placement and set here by
-the clock at latitude -4.25 and 12:17, 119,343 lux outside the air at 5,633 K, and its camera at ISO
-200, 1/25 s and f/16, beside its picture from its item-291 sheet. 3DEngine's means read 79 of 255
-and blue over red 0.79, the bridge's 102 and 0.93 as it stood, 100 and 0.96 with the yard's floor
-out and 54 and 0.79 with the dusk backdrop alone, which takes off the atmosphere, its sky light and
-the sky's fog. The fog alone and the bloom alone each moved the means by under 0.2, so the veil is
-Bevy's atmosphere, which grows with distance and grays the far arch 25 m off. With it off the shade
-lies darker than the sibling's, its sky's fill and its grade. The haze is mended next.
-
-The sheet is `2026-11-18-item-150-yard-floor.webp`, the atrium's picture at the head and mended with
-their difference at four times, red lighter and blue darker, the walls under the arcades darker
-toward the reference.
-
-The whole suite passed from one tree, 2,190 passed, 0 failed and 4 skipped, 2,194 in all where the
-listing is 2,183, the solution built from nothing with warnings as errors, in 16 parts and the rest
-dealt by the last run's times, each part of 6 s to 6 m 16 s, a part at a time under the GPU lock. A
-run before it failed the scene floor's test under N 3.7, the level's trees capturing their cards'
-pictures as the run ended, and the test builds the level without its trees.
-
-Handoff. Item 150's second part stands at this commit, the brick walls facing -x at 0.129 against
-0.094, short of the bar of 0.122, and whether that holds or the fitting's cells of 0.125 and High
-take it further is open for the review. Next in order is the atmosphere's near haze. Bevy 0.20's
-aerial table (`aerial_view_lut_max_distance` and the fade over its first slice in bevy_pbr's
-functions.wesl) and the atmosphere's sky light through Bevy's own reflections are the two parts the
-dusk backdrop takes off together, to be told apart first. Beside them, `ScatteringTerm.Earth`'s Mie
-term holds absorption 3.996e-6 and scattering 0.444e-6 as Bevy's own earth medium does, where
-Bruneton's figures give them the other way round. Then one row against the sibling at its quality
-tier, item 138's read, the decals' forward light, a program ending with tree cards' captures
-pending, and the modules' pointers as the review places them. A fresh session reads this Reply,
-Decisions 94 and 95, items 138 and 154, and the matched sheet first.
-
-NormTests passed, 19.
-
-150, the near haze over the atrium read to its cause, the feature test's own fog over its map, set
-to the Sky module's clear air in the commit carrying this Reply.
-
-The bridge gives Bevy 0.20's atmosphere its planet one radius under the origin at a scale of 1, so a
-meter of the scene is a meter of its air, and Bevy lays its aerial table, 32 slices over 32 km, on
-each pixel by its distance, its first slice faded to nothing at the camera. With the table's reach
-cut to 1 m the atrium's far arch, 25 m off, reads 58.3 of 255 where it reads 59.1, and its shade
-13.0 where 13.4, so the atmosphere's own haze is near what clear air gives. The veil was the feature
-test's map fog, 700 m to 95% at its base and 40 m high in froxels, which the weather laid again
-every frame in clear weather and which hid 10.1% of a wall 25 m off with sunlit gray. `sky.fog off`
-had shown nothing since the weather laid it again the next frame, and the two trials I first gave
-the review for the aerial reach and the sky light ran builds without their patch, a session script
-holding BUILD at 0, which is mended.
-
-The mend. The fog over the map is the game's rule `MapFog`, a file of its own, the Earth's clear air
-of the Sky module, 178 km by Koschmieder's 2% contrast and 136.3 km on the fog's measure of 95%, 40
-m high in froxels as before, which the weather thickens toward 80 m for fog and rain as it did.
-`Applied` takes its fog from it, and the test project compiles the file in as it does
-`SceneFloor`'s, as its project file says.
-
-`FeatureTestMapFogTests.AWall25MetersOffLosesUnderATenthOfAPercentOfItsLightToTheMapsFogInClearWeather`
-holds the share the map's fog hides of a wall 25 m off in clear weather under 0.1%, 0.055% mended,
-where the head's 700 m hid 10.147%.
-
-In one hour, each build its own session from the feature test's own settings, the atrium at the
-sibling's view, sun and camera at 1/25 s reads its far arch 59 of 255 where 138, its shade 13 where
-70 and blue over red 0.76 where 0.95, the sibling's 0.79, and the scenes yard toward Sponza's
-exterior at 1/200 s reads its far wall 106 where 110. The sheet is
-`2026-11-18-item-150-map-fog.webp`, the atrium and the yard before and after with their difference
-at twice, red lighter and blue darker.
-
-The whole suite passed from one tree, 2,191 passed, 0 failed and 4 skipped, 2,195 in all where the
-listing is 2,184, the solution built from nothing with warnings as errors, in 16 parts and the rest
-dealt by the last run's times, each part of 58 s to 4 m 25 s, a part at a time under the GPU lock,
-and a comment of the test project's file rewrapped to 100 columns after it, the project built again
-with warnings as errors and NormTests run on it.
-
-Handoff. The near haze is closed at this commit. The Mie term of `ScatteringTerm.Earth`, absorption
-3.996e-6 and scattering 0.444e-6 as Bevy 0.20's own earth medium holds them where Bruneton's figures
-give them the other way round, follows apart, then the shade's mean of 59 against the sibling's 79
-at one view and sun, the sky's fill and the grade each switched alone, then item 138's read. A fresh
-session reads this Reply, the yard floor's before it and the matched sheet first.
-
-NormTests passed, 19.
-
-150, the shade's read, the sky's light in the radiance cascades, with an open box's test committed
-skipped by name as the RadianceCascades module's failing case, in the commit carrying this Reply.
-
-A probe's ray that leaves the field takes the sky along its way at the last cascade, the camera's
-environment map, in the feature test the atmosphere's cube, blurred to a roughness of 0.25 and a
-frame late, with the ambient light's constant, and the cascades below take it through the merge
-(`skyAlong` in gi_trace.slang), as the reference takes the same sky. At the feature test's noon the
-cube gives a level surface about 13,200 lux of sky against the sun's 104,000, 0.13 of it where the
-Sky module's clear day gives 0.21 at 54 degrees, so the input is near a clear day's. In the atrium
-the sky is a few percent of the shade's light, its term doubled moving the brick walls facing -x
-from 0.173 to 0.180 and the shade from 13.4 to 13.7 of 255, and its term taken out alone throws the
-light pass to Bevy's own unshadowed light.
-
-`GlobalIlluminationTests.AFloorInABoxOpenToTheSkyReadsTheSkysShareOfItsDome` stands a gray floor in
-an 8 m box open to a uniform sky, its walls black and nothing glossy, and holds the floor's middle
-within 15% of what the dome's share of 0.239 gives, 0.1030, and the reference within 8%. The
-reference reads 0.1112 and the picture 0.0587. With the screen probes off the world probes alone
-read within 15%, so the loss lies in the screen probes' rays past their 4 m reach, which take the
-world probes' light around the ray's end. Three trials each broke another test. A reach twice as
-long read 0.0624 and broke two closed rooms' tests, `beyond` given the merge's parallax read 0.0651
-and broke a floor under a slab letting light through, and the merge leaving its early hits out read
-0.0692 and overshot by 27% without the screen probes. Four times the reach passed, at four times the
-march, and the screen filter's clamp taken off moved nothing. The 35% still unread lies in `beyond`
-and its 8 by 8 lookup, and the test is skipped by name with that reason and its bound kept, for the
-rule to be written once in the module.
-
-The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, the box's test among
-them, 2,196 in all where the listing is 2,185, the solution built from nothing with warnings as
-errors, in 13 parts and the rest dealt by the last run's times, each part of 1 m 36 s to 4 m 22 s, a
-part at a time under the GPU lock.
-
-Handoff. The shade's sky is read and its loss handed to the module. Next in order is the grade's
-read, the shade's mean of 59 against the sibling's 79 at one view and sun with the sky's fill and
-the grade each switched alone, then the Mie swap of `ScatteringTerm.Earth`, then item 138's read. A
-fresh session reads this Reply and the box test first.
-
-NormTests passed, 19.
-
-150, the shade's read, the grade and the sky's fill each switched alone on Sponza's matched atrium,
-a reading with its sheet in the commit carrying this Reply.
-
-At the sibling's view, sun and camera at ISO 200, 1/25 s and f/16, each session from the feature
-test's own settings, the bridge's picture means 53.6 of 255 and its shade 10.5 where 3DEngine's
-means 78.6. The sibling raises its light to one over 1.225 before its curve (`SetLiftGammaGain(0,
-0.225f, 0)`), and Bevy's grading does the same in its tone mapping (`powsafe(color * gain + lift,
-1.0 / gamma)`), so that gamma on the camera's three sections alone means 66.4 and the shade 21.3.
-The sky's fill alone, the environment map at 1.5 times for the clear day's share of the sun, means
-55.5 and the shade 10.4. So the grade carries about half of the 25 between the two engines and the
-sky's fill a tenth of it. The rest lies in what is not switched here, 3DEngine's own AgX lookup
-against Bevy's AgX, its bloom and its High tier with cells of 0.125 and a far cascade against the
-bridge's Medium, which the kernels' read takes up with one tier for both.
-
-The sheet is `2026-11-19-item-150-grade.webp`, the atrium as it stands beside each switch with their
-difference at twice, red lighter and blue darker.
-
-Handoff. The shade's read is closed with this reading and changes no default. Next in order is the
-Mie swap of `ScatteringTerm.Earth`, then item 138's read, taking the RadianceCascades passes with
-the open box test turned on. A fresh session reads this Reply and the box test's first.
-
-NormTests passed, 19.
-
 138, the read of the kernels' move and its first step, the probes' octahedron written once, in the
 commit carrying this Reply.
 
@@ -1301,5 +907,73 @@ Shared: the field's pinch, a triangle's nearest point, way, blend and band, the 
 stamp and a cascade's distance are the RadianceCascades module's in this engine from this commit.
 The module's cornerColor and this engine's differ by a max that NVIDIA's shader compiler builds to
 other last bits, and the stamp hands the module's paint this engine's even alpha.
+
+NormTests passed, 19.
+
+138, the field's codes and sheets as the module writes them, a step that changes the picture, in the
+commit carrying this Reply.
+
+The splat. `field_splat` keeps each cell's code by the module's `splatCodes` and paints the cells
+that kept a triangle's code by its `splatPaint`, over `CodeCells` and `PaintCells`, this engine's
+buffers as the module's `ISplatCells` and `IPaintCells`. A code is the module's `cellCode`, its
+distance above bit 19, a bit for a double-sided face nearest at its rim, one for a double-sided
+face, one for a cell in front, the face's way from bit 8 and the instance's place in the build in
+seven bits, so of two meshes' faces alike in all else the same one keeps a cell in every run. The
+corners' colors are handed over as this engine's `cornerLight` makes them, and the module's paint
+holds the color to one before the alpha where this engine's held it after, which differs only for a
+color brighter than one on a surface letting light through. The leaf cards' area and the light thin
+emitters lend stay this engine's.
+
+The resolve. A cell's distance is the module's `resolvedDistance`, a wall thinner than a cell held
+half a cell either side of its middle as before. A double-sided face is held at its distance with
+its plane (`sheetOf`), where this engine took half a cell off its distance across the whole band,
+save a crown's leaf card, a double-sided face letting light through, which the resolve holds half a
+cell either side across its band as before and keeps no plane of (`leafCard`). Held as the module
+holds a sheet, within a cell of its plane and not past its rim, a card as small as a leaf left the
+cells about its rims outside, and a probe's ray through a crown met it again at every card where the
+crossing (`lightThroughDepth`) takes a crown's cards as one region. The suite read the aspen's
+leaves at 1.27 of their reference against a bound of 1.25, the backlit aspen's at 1.11 against 1.1
+and the forest floor at 0.697 against 0.7, from 1.24, 1.09 and 0.749, and with the cards held as
+before the three read 1.24, 1.09 and 0.749 again, alike to the fourth place. The pinch runs as
+before, and after it the module's `seamSheet` gives a cell before a solid's face the plane of a
+sheet resting on it, over `CodedCells`, the cells beside read from their codes, since one dispatch
+resolves them all. A cell is cleared to `EmptyCode`, and the faces image takes the way from bit 8.
+
+The image and its readers. The field and the still meshes' field keep four half floats a cell, the
+distance in x and the plane in yzw, as the sibling's do, and every reader binds them as such and
+reads through the module's `fieldDistanceIn`, which takes half a cell off where the cells about keep
+a plane. The stamp keeps the still cell's plane where no box wins. The two images grow by 12 bytes a
+cell, 3 MB a cascade, which `gi.state`'s line of GPU memory counts. The module's
+`fieldDistanceSheetIn` and `traceFieldSheets`, the probes' rays meeting a sheet's plane a quarter of
+a cell either side, wait for the passes, and a cell keeps no second plane, which the sibling keeps
+in an image of its own.
+
+The pictures. The readback probe's scene at 640 by 384, its moving boxes held still, read once on
+this tree and once on the same build with the head's illumination library and bridge in place. 69 of
+the frame's pixels differ by more than 6 levels of 255, at most 9, all at the crossing double-sided
+walls' foot and shaded side, a little lighter after. In the field's finest cascade 253 cells keep a
+plane. 1,562 cells read half a cell farther at their middles, the cells of double-sided faces past a
+cell of them or where their rims are nearest, 14 beside them were pinched inside before between
+cells the hold put inside and stay outside after, and 4 by the floor at the double-sided faces' feet
+read half a cell nearer by the seam. The sheet of the frame, the walls' foot and the field from
+above, and the picture of the cells keeping a plane, are in the devlog.
+
+The tests. FieldReadCopiesTests compiles every kernel with its field read as four channels, its own
+kernel reading one cascade among them, and the copies stay at 23. SceneFieldTests reads the field's
+distances as the first of each cell's four halves.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,194 passed, 0 failed and 5 skipped, 2,199 in all where the
+listing is 2,188, the solution built from nothing with warnings as errors, in 15 parts and the rest,
+a part at a time under the GPU lock.
+
+Shared: the field's codes, their resolve to a distance and a plane, the seam and the paint are the
+RadianceCascades module's in this engine from this commit, its field kept in four half floats a cell
+as the sibling keeps it, and a crown's leaf cards held half a cell either side across their band as
+this engine's crossing of a crown takes them. The probes' rays meeting a sheet at its plane and a
+second plane are left for the passes.
 
 NormTests passed, 19.

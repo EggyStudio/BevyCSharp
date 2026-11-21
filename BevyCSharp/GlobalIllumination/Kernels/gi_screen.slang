@@ -25,7 +25,7 @@ import bcs_field;
 import bcs_gi;
 import bcs_glow;
 
-Texture3D<float> scene_field;
+Texture3D<float4> scene_field;
 SamplerState scene_field_sampler;
 StructuredBuffer<FieldInfo> scene_field_info;
 Texture3D<float4> scene_albedo;

@@ -7,23 +7,26 @@ namespace Bevy;
 /// <summary>
 /// The scene's distance field, built on the GPU each frame from the meshes drawn that cast shadows,
 /// around the camera the view is drawn by, as <see cref="SceneFieldPlan"/> works out, through the
-/// bridge's compute shaders (<see cref="RenderGlobalIllumination.extension(Render).SetSceneField"/>).
+/// bridge's compute shaders (<see
+/// cref="RenderGlobalIllumination.extension(Render).SetSceneField"/>).
 /// </summary>
 /// <remarks>
 /// <para>
-/// Each frame, from the engine's tick in a run that draws, it reads the meshes drawn from the bridge,
-/// works out the frame's builds and boxes, has the bridge pool the triangles of the meshes those
-/// builds read, and asks for the dispatches, for each cascade built the splat over its meshes'
-/// triangles, the paint over them and the resolve over its cells, then the stamp over the bricks
-/// the boxes come within. The cascades lie one after another along z in one image of half floats,
-/// the field the shaders read, beside one the still meshes alone make, which a brick goes back to
-/// once a box has left it, with the color each cell's nearest surface paints it and the way that
-/// surface's face looks laid out the same way, the still meshes' own beside them, and a buffer holds
-/// where each cascade lies.
+/// Each frame, from the engine's tick in a run that draws, it reads the meshes drawn from the
+/// bridge, works out the frame's builds and boxes, has the bridge pool the triangles of the meshes
+/// those builds read, and asks for the dispatches, for each cascade built the splat over its
+/// meshes' triangles, the paint over them and the resolve over its cells, then the stamp over the
+/// bricks the boxes come within. The cascades lie one after another along z in one image of four
+/// half floats a cell, its distance and the plane of a double-sided face it keeps, the field the
+/// shaders read, beside one the still meshes alone make, which a brick goes
+/// back to once a box has left it, with the color each cell's nearest surface paints it and the way
+/// that surface's face looks laid out the same way, the still meshes' own beside them, and a buffer
+/// holds where each cascade lies.
 /// </para>
 /// <para>
-/// The meshes are those of last frame's transforms, since the engine's tick runs before the program's
-/// systems and Bevy works the transforms out after them, so a box follows its mesh a frame behind.
+/// The meshes are those of last frame's transforms, since the engine's tick runs before the
+/// program's systems and Bevy works the transforms out after them, so a box follows its mesh a
+/// frame behind.
 /// </para>
 /// <para>
 /// Nothing is built before the three compute programs have compiled, and the plan does not move on
@@ -33,16 +36,22 @@ namespace Bevy;
 internal static unsafe partial class SceneField
 {
     /// <summary>
-    /// Whether a mesh drawn this frame lets a share of global illumination's light through
-    /// (<see cref="MaterialSettings.LightThrough"/>), so the probes' rays cross such surfaces, where
-    /// a frame of none traces with a build that leaves the crossing out.
+    /// Whether a mesh drawn this frame lets a share of global illumination's light through (<see
+    /// cref="MaterialSettings.LightThrough"/>), so the probes' rays cross such surfaces, where a
+    /// frame of none traces with a build that leaves the crossing out.
     /// </summary>
     internal static bool LightThrough { get; private set; }
 
-    /// <summary>The distance a cell holds before its cascade is built, which reads as nothing near, in world units.</summary>
+    /// <summary>
+    /// The distance a cell holds before its cascade is built, which reads as nothing near, in world
+    /// units.
+    /// </summary>
     internal const float Far = 10000f;
 
-    /// <summary>How far toward a light a surface is traced for its contact shadows, in cells of the finest cascade, half its width, so the length grows with the cell the field is built at.</summary>
+    /// <summary>
+    /// How far toward a light a surface is traced for its contact shadows, in cells of the finest
+    /// cascade, half its width, so the length grows with the cell the field is built at.
+    /// </summary>
     internal const int ContactCells = 32;
 
     // What the program asked for, and the app it asked in, so a new app starts with none.
@@ -55,16 +64,20 @@ internal static unsafe partial class SceneField
     private static Built? _built;
     private static ShaderInstance _splat, _resolve, _stamp, _shadows;
 
-    /// <summary>The name the field's draws and its prepass are kept under on a camera beside the engine's other parts.</summary>
+    /// <summary>
+    /// The name the field's draws and its prepass are kept under on a camera beside the engine's
+    /// other parts.
+    /// </summary>
     private const string DrawsOwner = "field";
     // The camera the contact shadows are drawn on and what they were drawn with, so they are set on
     // a camera once and taken off it when they stop or the field turns to another.
     private static Entity _shadowCamera = Entity.None;
     private static (AssetHandle Field, FieldShadows Shadows, float Reach, ShaderInstance Light) _engineDrawn;
-    // The field and the camera this frame's engine draws are for, which DrawEngine puts on the camera
-    // once global illumination's probes have been traced.
+    // The field and the camera this frame's engine draws are for, which DrawEngine puts on the
+    // camera once global illumination's probes have been traced.
     private static (Built? Built, Entity Camera) _drawFor = (null, Entity.None);
-    // Whether the shadows gave their camera Bevy's high dynamic range, which they take off it again.
+    // Whether the shadows gave their camera Bevy's high dynamic range, which they take off it
+    // again.
     private static bool _shadowsMadeHdr;
     private static NativeFieldDraw[] _draws = new NativeFieldDraw[256];
     private static readonly List<(SceneFieldPlan.Instance Instance, bool Skinned)> Drawn = [];
@@ -77,7 +90,9 @@ internal static unsafe partial class SceneField
     private static float[] _shapes = [];
     private static uint[] _words = [];
 
-    /// <summary>The field's images and buffers and its plan, for the settings they were made for.</summary>
+    /// <summary>
+    /// The field's images and buffers and its plan, for the settings they were made for.
+    /// </summary>
     private sealed class Built((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made, SceneFieldPlan plan)
     {
         public readonly (int Cascades, float CellSize, int Budget, float FarCell, int Triangles) Made = made;
@@ -85,8 +100,9 @@ internal static unsafe partial class SceneField
         public AssetHandle Field, Still, Albedo, StillPaint, Faces, StillFaces, Transmission, StillTransmission, Glow, Info, Cells, Behind, Paint, LeafArea, Gloss,
             Emission, Lent, Instances, Shapes, Bricks, Pool = AssetHandle.None;
         public int Draws, BuiltThisFrame, BuildsDone;
-        // Whether a build's parts were splatted into the buffers and no resolve has read and cleared
-        // them since, which the next build's first part clears where that build was left unfinished.
+        // Whether a build's parts were splatted into the buffers and no resolve has read and
+        // cleared them since, which the next build's first part clears where that build was left
+        // unfinished.
         public bool Splatted;
     }
 
@@ -97,14 +113,19 @@ internal static unsafe partial class SceneField
         _asked = (cascades, cellSize, budget, farCascade, triangles);
     }
 
-    /// <summary>Takes where the program asks the field to darken a directional light, for the running app.</summary>
+    /// <summary>
+    /// Takes where the program asks the field to darken a directional light, for the running app.
+    /// </summary>
     internal static void AskShadows(FieldShadows shadows)
     {
         _shadowsAskedIn = App.Running;
         _shadowsAsked = shadows;
     }
 
-    /// <summary>Where the running app asked the field to darken a directional light, past the shadow map by default.</summary>
+    /// <summary>
+    /// Where the running app asked the field to darken a directional light, past the shadow map by
+    /// default.
+    /// </summary>
     internal static FieldShadows Shadows =>
         App.Running is { } running && ReferenceEquals(_shadowsAskedIn, running) ? _shadowsAsked : FieldShadows.PastShadowMap;
 
@@ -113,9 +134,9 @@ internal static unsafe partial class SceneField
         App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : (0, 0.25f, 1, 0f, SceneFieldPlan.DefaultTriangleBudget);
 
     /// <summary>
-    /// The field the running app's settings build, those it asked for, or where it asked for none and
-    /// global illumination is on, four cascades of a quarter of a unit, which the probes are traced
-    /// through.
+    /// The field the running app's settings build, those it asked for, or where it asked for none
+    /// and global illumination is on, four cascades of a quarter of a unit, which the probes are
+    /// traced through.
     /// </summary>
     private static (int Cascades, float CellSize, int Budget, float FarCascade, int Triangles) Wanted =>
         Asked.Cascades > 0 || WorldProbes.Asked == GlobalIllumination.Off ? Asked : (4, 0.25f, 1, 0f, SceneFieldPlan.DefaultTriangleBudget);
@@ -123,10 +144,15 @@ internal static unsafe partial class SceneField
     /// <summary>The plan of the field being built, or null where none is.</summary>
     internal static SceneFieldPlan? Plan => ReferenceEquals(_app, App.Running) ? _built?.Plan : null;
 
-    /// <summary>The image the shaders read, every cascade along z, or none where no field is built.</summary>
+    /// <summary>
+    /// The image the shaders read, every cascade along z, or none where no field is built.
+    /// </summary>
     internal static AssetHandle Image => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Field : AssetHandle.None;
 
-    /// <summary>The buffer holding one <c>FieldInfo</c>, where each cascade lies, or none where no field is built.</summary>
+    /// <summary>
+    /// The buffer holding one <c>FieldInfo</c>, where each cascade lies, or none where no field is
+    /// built.
+    /// </summary>
     internal static AssetHandle InfoBuffer => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Info : AssetHandle.None;
 
     /// <summary>
@@ -136,42 +162,51 @@ internal static unsafe partial class SceneField
     internal static AssetHandle Albedo => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Albedo : AssetHandle.None;
 
     /// <summary>
-    /// The light each cell's nearest surface emits, or an emitter thinner than a cell lends it, in four
-    /// half floats laid out as the field, or none where no field is built.
+    /// The light each cell's nearest surface emits, or an emitter thinner than a cell lends it, in
+    /// four half floats laid out as the field, or none where no field is built.
     /// </summary>
     internal static AssetHandle Glow => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Glow : AssetHandle.None;
 
     /// <summary>
-    /// The face each cell's nearest surface paints it, laid out as the field, or none where no field
-    /// is built, 32 bits a cell, the way the face looks in bits 0 to 7 as <c>bcs_field</c>'s
+    /// The face each cell's nearest surface paints it, laid out as the field, or none where no
+    /// field is built, 32 bits a cell, the way the face looks in bits 0 to 7 as <c>bcs_field</c>'s
     /// <c>faceWay</c> reads them, and its gloss in bits 8 to 31, its perceptual roughness, metallic
     /// share and reflectance a byte each in 255ths, as <c>faceGloss</c> reads them.
     /// </summary>
     internal static AssetHandle Faces => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Faces : AssetHandle.None;
 
     /// <summary>
-    /// The share of its diffuse light each cell's nearest surface sends through to its far side, its
-    /// diffuse transmission, laid out as the field, or none where no field is built, a half float a
-    /// cell, as <c>bcs_field</c>'s <c>transmissionAt</c> reads it.
+    /// The share of its diffuse light each cell's nearest surface sends through to its far side,
+    /// its diffuse transmission, laid out as the field, or none where no field is built, a half
+    /// float a cell, as <c>bcs_field</c>'s <c>transmissionAt</c> reads it.
     /// </summary>
     internal static AssetHandle Transmission => ReferenceEquals(_app, App.Running) && _built is { } built ? built.Transmission : AssetHandle.None;
 
-    /// <summary>The camera the contact shadows and global illumination's light are drawn on, or none.</summary>
+    /// <summary>
+    /// The camera the contact shadows and global illumination's light are drawn on, or none.
+    /// </summary>
     internal static Entity ShadowCamera => ReferenceEquals(_app, App.Running) ? _shadowCamera : Entity.None;
 
-    /// <summary>The meshes the field gathered this frame, which global illumination's glow lights are found among.</summary>
+    /// <summary>
+    /// The meshes the field gathered this frame, which global illumination's glow lights are found
+    /// among.
+    /// </summary>
     internal static IReadOnlyList<(SceneFieldPlan.Instance Instance, bool Skinned)> DrawnThisFrame =>
         ReferenceEquals(_app, App.Running) ? Drawn : [];
 
-    /// <summary>The camera the field lies around this frame, or none where it lies around none.</summary>
+    /// <summary>
+    /// The camera the field lies around this frame, or none where it lies around none.
+    /// </summary>
     internal static Entity ViewCamera => ReferenceEquals(_app, App.Running) ? _drawFor.Camera : Entity.None;
 
-    /// <summary>How many cascades the last frame built whole, a build in parts counted on its last.</summary>
+    /// <summary>
+    /// How many cascades the last frame built whole, a build in parts counted on its last.
+    /// </summary>
     internal static int BuiltLastFrame => ReferenceEquals(_app, App.Running) ? _built?.BuiltThisFrame ?? 0 : 0;
 
     /// <summary>
-    /// What the field is, said in one line, for the debug overlay and <c>gi.state</c>, or that it is
-    /// off.
+    /// What the field is, said in one line, for the debug overlay and <c>gi.state</c>, or that it
+    /// is off.
     /// </summary>
     internal static string Said()
     {
@@ -185,9 +220,10 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>
-    /// The bytes of GPU memory the field holds, its four images of half floats, the distances and
-    /// the shares its surfaces send through each with its still copy, its two of colors and two of
-    /// faces with their gloss, four bytes a cell each, its image of light in four half floats, a
+    /// The bytes of GPU memory the field holds, its two images of the distances with the planes of
+    /// double-sided faces in four half floats a cell and its two of the shares its surfaces send
+    /// through in one, each with its still copy, its two of colors and two of faces with their
+    /// gloss, four bytes a cell each, its image of light in four half floats, a
     /// cascade's cells' codes, faces behind, colors, leaf cards' area and gloss, four bytes a cell
     /// each, their light in four floats and what thin emitters lend them in six codes, and the pool
     /// of triangles.
@@ -198,10 +234,13 @@ internal static unsafe partial class SceneField
         const long cells = SceneFieldPlan.Resolution * SceneFieldPlan.Resolution * SceneFieldPlan.Resolution;
         long pool = 0;
         Native.Check(NativeGlobalIllumination.bcs_scene_field_pool_bytes(&pool), "reading the size of the scene's distance field's pool");
-        return (4 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
+        return (2 * 8 + 2 * 2 + 4 * 4 + 8) * cells * plan.Cascades + (5 * 4 + 16 + 6 * 4) * cells + pool;
     }
 
-    /// <summary>Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a run that draws.</summary>
+    /// <summary>
+    /// Builds the frame's cascades and stamps its boxes, once a frame from the engine's tick in a
+    /// run that draws.
+    /// </summary>
     internal static void Tick(World world)
     {
         // The field's images, buffers and programs are an app's, and the next app makes its own.
@@ -234,8 +273,8 @@ internal static unsafe partial class SceneField
             || _stamp.Program.State != ShaderProgramState.Ready)
             return;
 
-        // The far cascade's cells from its reach, held to the camera's far plane, and kept as they were
-        // in a frame with no camera to read the plane from.
+        // The far cascade's cells from its reach, held to the camera's far plane, and kept as they
+        // were in a frame with no camera to read the plane from.
         var eye = Gather(_built?.Plan.DrewTwice ?? false);
         var (counted, cell) = (Math.Clamp(asked.Cascades, 1, 8), Math.Max(1e-3f, asked.CellSize));
         var farCell = asked.FarCascade <= 0 ? 0
@@ -273,10 +312,10 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>
-    /// Puts the contact shadows and global illumination's light on the camera the field lies around,
-    /// with the G-buffer they read and a picture in high dynamic range, or takes them off the camera
-    /// they were on, where both stop or the field turns to another, changing the camera only when one
-    /// of those changes.
+    /// Puts the contact shadows and global illumination's light on the camera the field lies
+    /// around, with the G-buffer they read and a picture in high dynamic range, or takes them off
+    /// the camera they were on, where both stop or the field turns to another, changing the camera
+    /// only when one of those changes.
     /// </summary>
     /// <remarks>
     /// The light taken back is added as less than nothing, which a picture of eight bits a channel
@@ -326,20 +365,27 @@ internal static unsafe partial class SceneField
         _shadowCamera = camera;
     }
 
-    /// <summary>An instance of one of the field's compute programs, compiled from the library's own copy.</summary>
+    /// <summary>
+    /// An instance of one of the field's compute programs, compiled from the library's own copy.
+    /// </summary>
     private static ShaderInstance Program(string file) => Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, file));
 
-    /// <summary>Makes the field's images and buffers for its settings, every cell far and unpainted and every word cleared.</summary>
+    /// <summary>
+    /// Makes the field's images and buffers for its settings, every cell far and unpainted and
+    /// every word cleared.
+    /// </summary>
     private static Built Make((int Cascades, float CellSize, int Budget, float FarCell, int Triangles) made)
     {
         const int size = SceneFieldPlan.Resolution;
         var built = new Built(made, new SceneFieldPlan(made.Cascades, made.CellSize, made.Budget, made.FarCell, made.Triangles, TrianglesOf));
         var depth = (uint)(size * built.Plan.Cascades);
 
-        var far = new Half[size * size * size * built.Plan.Cascades];
-        Array.Fill(far, (Half)Far);
-        built.Field = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, depth);
-        built.Still = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.R16Float, far, depth);
+        // A cell's distance in x and the plane of a double-sided face it keeps in yzw, far and
+        // none.
+        var far = new Half[size * size * size * built.Plan.Cascades * 4];
+        for (var i = 0; i < far.Length; i += 4) far[i] = (Half)Far;
+        built.Field = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.Rgba16Float, far, depth);
+        built.Still = Shaders.CreateImage<Half>(size, size, ShaderImageFormat.Rgba16Float, far, depth);
         built.Albedo = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
         built.StillPaint = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba8, depth);
         built.Faces = Shaders.CreateImage(size, size, ShaderImageFormat.R32UInt, depth);
@@ -348,12 +394,11 @@ internal static unsafe partial class SceneField
         built.StillTransmission = Shaders.CreateImage(size, size, ShaderImageFormat.R16Float, depth);
         built.Glow = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, depth);
 
-        // A cell's word cleared to the band's distance in front, and its face behind to none, as the
-        // resolve leaves them after each build.
+        // A cell's code cleared to no face near, which resolves to the band's distance, and its
+        // face behind to none, as the resolve leaves them after each build.
         var cleared = new uint[size * size * size];
-        Array.Fill(cleared, (uint)SceneFieldPlan.Band * 1024 << 10 | 1u << 8);
-        built.Cells = Shaders.CreateBuffer<uint>(cleared);
         Array.Fill(cleared, uint.MaxValue);
+        built.Cells = Shaders.CreateBuffer<uint>(cleared);
         built.Behind = Shaders.CreateBuffer<uint>(cleared);
         Array.Clear(cleared);
         built.Paint = Shaders.CreateBuffer<uint>(cleared);
@@ -382,7 +427,10 @@ internal static unsafe partial class SceneField
         return built;
     }
 
-    /// <summary>Lets the field's images and buffers go, on a frame it is off or made again, and its shadows off their camera.</summary>
+    /// <summary>
+    /// Lets the field's images and buffers go, on a frame it is off or made again, and its shadows
+    /// off their camera.
+    /// </summary>
     private static void Release(EcsWorld ecs)
     {
         if (_built is not { } built) return;
@@ -397,8 +445,8 @@ internal static unsafe partial class SceneField
 
     /// <summary>
     /// The meshes drawn this frame that cast shadows, into <see cref="Drawn"/>, each once where
-    /// <paramref name="once"/> asks, and the camera the field lies around with how far its far plane
-    /// lies, or null where there is none.
+    /// <paramref name="once"/> asks, and the camera the field lies around with how far its far
+    /// plane lies, or null where there is none.
     /// </summary>
     private static (Vector3 Position, Vector3 Forward, Entity Camera, float Far)? Gather(bool once)
     {
@@ -444,10 +492,14 @@ internal static unsafe partial class SceneField
         return (new Vector3(eye.X, eye.Y, eye.Z), forward.LengthSquared() > 1e-12f ? Vector3.Normalize(forward) : Vector3.Zero, new Entity(eye.Camera), eye.Far);
     }
 
-    /// <summary>The most cascades a <c>FieldInfo</c> holds, eight counted and the far one.</summary>
+    /// <summary>
+    /// The most cascades a <c>FieldInfo</c> holds, eight counted and the far one.
+    /// </summary>
     internal const int MostCascades = 9;
 
-    /// <summary>The bytes of one <c>FieldInfo</c>, a float4, nine cascades' float4 and the eye's.</summary>
+    /// <summary>
+    /// The bytes of one <c>FieldInfo</c>, a float4, nine cascades' float4 and the eye's.
+    /// </summary>
     internal const int InfoBytes = (1 + MostCascades + 1) * 16;
 
     // Bytes of an instance as field_splat.slang reads it, a shape as field_stamp.slang reads it.
@@ -469,7 +521,8 @@ internal static unsafe partial class SceneField
 
     private static void WriteInfo(Built built, SceneFieldPlan plan) => Shaders.WriteBuffer<float>(built.Info, InfoValues(plan));
 
-    // How many triangles a mesh drawn this frame has, which the plan's triangle budget weighs it by.
+    // How many triangles a mesh drawn this frame has, which the plan's triangle budget weighs it
+    // by.
     private static int TrianglesOf(SceneFieldPlan.Instance instance) => Weights.GetValueOrDefault((instance.Mesh, instance.Generation));
 
     /// <summary>
@@ -480,9 +533,9 @@ internal static unsafe partial class SceneField
     /// <remarks>
     /// A build's parts splat into the same buffers frame after frame, which the resolve of its last
     /// part reads and a dispatch of the resolve's that clears alone clears after it, since a cell's
-    /// resolve reads its neighbors' codes. A build left unfinished, a finer cascade coming first or a
-    /// mesh it splatted leaving, leaves its codes in them, so the first part of the next build clears
-    /// them first where nothing has since.
+    /// resolve reads its neighbors' codes. A build left unfinished, a finer cascade coming first or
+    /// a mesh it splatted leaving, leaves its codes in them, so the first part of the next build
+    /// clears them first where nothing has since.
     /// </remarks>
     private static void Build(Built built, SceneFieldPlan plan)
     {
@@ -520,8 +573,8 @@ internal static unsafe partial class SceneField
                 if (many == 0) continue;
                 var w = instance.World;
                 records.AddRange([w.M11, w.M21, w.M31, w.M41, w.M12, w.M22, w.M32, w.M42, w.M13, w.M23, w.M33, w.M43]);
-                // Whether it has no inside in the lowest bit, and the share of light it lets through
-                // in 255ths in the second byte.
+                // Whether it has no inside in the lowest bit, and the share of light it lets
+                // through in 255ths in the second byte.
                 var sides = (instance.DoubleSided ? 1u : 0u) | ((uint)MathF.Round(instance.Through * 255f) << 8);
                 records.AddRange([BitConverter.UInt32BitsToSingle(start), BitConverter.UInt32BitsToSingle(many),
                     BitConverter.UInt32BitsToSingle(sides), BitConverter.UInt32BitsToSingle((uint)triangles)]);
@@ -557,14 +610,14 @@ internal static unsafe partial class SceneField
                 _splat.Set("origin_and_cell", new Vector4(build.Origin, build.Cell)).SetNumbers("counts", 4, counts).SetNumbers("groups", 4, groups);
                 Shaders.Dispatch(_splat, across, down);
 
-                // Again over the same triangles once every cell holds its nearest, each cell painted
-                // the color and the emission of the triangle whose code it kept.
+                // Again over the same triangles once every cell holds its nearest, each cell
+                // painted the color and the emission of the triangle whose code it kept.
                 ReadOnlySpan<uint> painting = [across, (uint)first, 1, 0];
                 _splat.SetNumbers("groups", 4, painting);
                 Shaders.Dispatch(_splat, across, down);
 
-                // And once more where the build holds an emitter thinner than its cells, which lends
-                // the cells near it its light, as it paints none its own.
+                // And once more where the build holds an emitter thinner than its cells, which
+                // lends the cells near it its light, as it paints none its own.
                 if (build.Instances.Any(i => i.Emission != Vector3.Zero && Thinnest(i) < build.Cell && !Carried(i, plan.CellSize)))
                 {
                     ReadOnlySpan<uint> lending = [across, (uint)first, 2, 0];
@@ -601,8 +654,8 @@ internal static unsafe partial class SceneField
     }
 
     /// <summary>
-    /// How thin an instance is, the least of its mesh's bounds along each of its own axes scaled into
-    /// the world, which says whether an emitter is thinner than a cell.
+    /// How thin an instance is, the least of its mesh's bounds along each of its own axes scaled
+    /// into the world, which says whether an emitter is thinner than a cell.
     /// </summary>
     private static float Thinnest(in SceneFieldPlan.Instance instance)
     {
@@ -612,7 +665,9 @@ internal static unsafe partial class SceneField
             MathF.Min(size.Y * new Vector3(w.M21, w.M22, w.M23).Length(), size.Z * new Vector3(w.M31, w.M32, w.M33).Length()));
     }
 
-    /// <summary>Writes the frame's boxes and bricks and asks for the stamp over the bricks.</summary>
+    /// <summary>
+    /// Writes the frame's boxes and bricks and asks for the stamp over the bricks.
+    /// </summary>
     private static void Stamp(Built built, SceneFieldPlan plan)
     {
         var floats = Math.Max(1, plan.Shapes.Count) * (ShapeBytes / 4);
@@ -627,8 +682,8 @@ internal static unsafe partial class SceneField
         }
 
         // Each brick, its cascade, its place a byte an axis, where its run of boxes begins and how
-        // long it is, then the runs, made up to a whole element of four, since the shader reads four
-        // places at a time and would read past the end of a shorter buffer.
+        // long it is, then the runs, made up to a whole element of four, since the shader reads
+        // four places at a time and would read past the end of a shorter buffer.
         var (bricks, ranges, runs) = (plan.Bricks, plan.BrickRanges, plan.BrickShapes);
         var length = bricks.Count * 4 + (runs.Count + 3) / 4 * 4;
         if (_words.Length < length) _words = new uint[length * 2];

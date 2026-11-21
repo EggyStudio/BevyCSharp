@@ -348,7 +348,7 @@ public bool glowLightPassed(GlowLight light, float3 p, float3 way, float within)
 // under its edge the way passes, read once after the march by stepping out along p's normal and
 // across the field's slope from the step that lay deepest inside, since read at each step the march
 // can lose the device. Where nothing stands nearer, or the field does not hold p, all of it.
-float glowMarch(Texture3D<float> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell, float3 target,
+float glowMarch(Texture3D<float4> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell, float3 target,
     float radius, float lift)
 {
     float3 from = p + n * (cell * lift);
@@ -459,7 +459,7 @@ float glowMarch(Texture3D<float> field, SamplerState linear, FieldInfo info, Glo
 /// How much of a glow light a surface at p facing n, in cells of `cell`, sees, from 0 to 1, by one
 /// march from a cell and a half off the surface to where the way enters its box. Where the field
 /// does not hold p, all of it.
-public float glowLightSeen(Texture3D<float> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
+public float glowLightSeen(Texture3D<float4> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
 {
     if (cell <= 0.0)
         return 1.0;
@@ -479,7 +479,7 @@ public float glowLightSeen(Texture3D<float> field, SamplerState linear, FieldInf
 /// half, the cone the half's own rise, each half's share by its own light at p. Past a wall half as
 /// high as a lamp beside it, one march to the box's middle would find the lamp hidden from the whole
 /// floor past the wall, which sees the lamp's upper half. Where the field does not hold p, all of it.
-public float glowLightShown(Texture3D<float> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
+public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldInfo info, GlowLight light, float3 p, float3 n, float cell)
 {
     if (cell <= 0.0)
         return 1.0;
@@ -537,7 +537,7 @@ public float glowLightShown(Texture3D<float> field, SamplerState linear, FieldIn
 /// cell of a light's box takes the light as its mean over a square a cell wide about the hit on its
 /// plane, since a light thinner than a cell lights the wall it stands against within a few
 /// hundredths of its box, a patch one probe's ray meets and the next probe's misses.
-public float3 glowLightsAt(Texture3D<float> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows, uint lights,
+public float3 glowLightsAt(Texture3D<float4> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows, uint lights,
     float3 p, float3 n, int marches, bool halves, float3 way)
 {
     int count = min(int(lights), MostGlowLights);

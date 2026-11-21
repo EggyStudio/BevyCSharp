@@ -22,7 +22,7 @@ Texture3D<float4> above;
 [format("rgba16f")] WTexture3D<float4> merged;
 
 StructuredBuffer<FieldInfo> info;
-Texture3D<float> field;
+Texture3D<float4> field;
 // The field's colors, whose alpha says where a surface lets light through (seesPastLeaves).
 Texture3D<float4> albedo;
 SamplerState field_sampler;

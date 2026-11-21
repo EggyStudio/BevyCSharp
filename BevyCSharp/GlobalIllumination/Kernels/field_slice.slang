@@ -7,7 +7,7 @@
 // dark blue.
 import bcs_field;
 
-Texture3D<float> field;
+Texture3D<float4> field;
 SamplerState field_sampler;
 
 StructuredBuffer<FieldInfo> info;

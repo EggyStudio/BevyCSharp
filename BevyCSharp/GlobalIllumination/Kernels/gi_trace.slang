@@ -32,7 +32,7 @@ import bcs_field;
 import bcs_gi;
 import bcs_glow;
 
-Texture3D<float> field;
+Texture3D<float4> field;
 SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 Texture3D<float4> albedo;

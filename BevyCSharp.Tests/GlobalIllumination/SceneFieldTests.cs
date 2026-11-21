@@ -20,7 +20,10 @@ public sealed partial class SceneFieldTests
     private static (SceneFieldPlan.Instance, bool) At(Vector3 position, uint mesh = 1, uint generation = 0) =>
         (new SceneFieldPlan.Instance(mesh, generation, Matrix4x4.CreateTranslation(position), false, CubeBounds), false);
 
-    /// <summary>The draw and the eye at the offsets the bridge writes them, which its own test holds to the same numbers.</summary>
+    /// <summary>
+    /// The draw and the eye at the offsets the bridge writes them, which its own test holds to the
+    /// same numbers.
+    /// </summary>
     [Fact]
     public void ADrawLiesWhereTheBridgeWritesIt()
     {
@@ -272,8 +275,8 @@ public sealed partial class SceneFieldTests
     }
 
     /// <summary>
-    /// A tunnel between two walls one cell apart is clear along its middle, each cell there in front
-    /// of both walls by half a cell, where the walls themselves are inside.
+    /// A tunnel between two walls one cell apart is clear along its middle, each cell there in
+    /// front of both walls by half a cell, where the walls themselves are inside.
     /// </summary>
     [SkippableFact]
     public void ATunnelOneCellWideIsClearInItsMiddle()
@@ -368,8 +371,8 @@ public sealed partial class SceneFieldTests
     }
 
     /// <summary>
-    /// Four cascades at a budget of one are built a frame each, the finest first, and at a budget of
-    /// two in two frames, no frame building more than its budget.
+    /// Four cascades at a budget of one are built a frame each, the finest first, and at a budget
+    /// of two in two frames, no frame building more than its budget.
     /// </summary>
     [SkippableTheory]
     [InlineData(1)]
@@ -444,12 +447,17 @@ public sealed partial class SceneFieldTests
         return (distances!, origin, said);
     }
 
-    /// <summary>An image of half floats read back, as floats.</summary>
+    /// <summary>
+    /// The field's image read back, each cell's distance, the first of the four halves that keep it
+    /// with the plane of a double-sided face, as floats.
+    /// </summary>
     private static bool Halves(BufferRead read, out float[]? values)
     {
         values = null;
         if (!Shaders.TryReadBuffer(read, out var bytes) || bytes is null) return false;
-        values = [.. MemoryMarshal.Cast<byte, Half>(bytes).ToArray().Select(half => (float)half)];
+        var halves = MemoryMarshal.Cast<byte, Half>(bytes);
+        values = new float[halves.Length / 4];
+        for (var i = 0; i < values.Length; i++) values[i] = (float)halves[i * 4];
         return true;
     }
 }

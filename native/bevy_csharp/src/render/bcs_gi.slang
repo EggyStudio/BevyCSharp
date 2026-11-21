@@ -72,7 +72,7 @@ public struct GiLights
 /// Where a ray from `origin` along `way` first comes within a tenth of a cell of a surface between
 /// `tMin` and `tMax`, through the finest cascade that holds each point along it, or -1 where it
 /// reaches `tMax` first or leaves every cascade.
-public float traceField(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float tMin, float tMax)
+public float traceField(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float tMin, float tMax)
 {
     float t = tMin;
     for (int i = 0; i < 64 && t < tMax; i++)
@@ -92,7 +92,7 @@ public float traceField(Texture3D<float> field, SamplerState linear, FieldInfo i
 
 /// The same, stopping where the ray leaves cascade `most` and every finer one, as -1, since a wall
 /// thinner than a coarser cascade's cell may let it through.
-public float traceFieldWithin(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float tMin, float tMax, int most)
+public float traceFieldWithin(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 origin, float3 way, float tMin, float tMax, int most)
 {
     float t = tMin;
     for (int i = 0; i < 64 && t < tMax; i++)
@@ -139,7 +139,7 @@ public float lampLight(GiLight light, float3 p, float3 n)
 
 /// The light that reaches a surface at `p` facing `n` from the sun, where the field lets it
 /// through, and from each point and spot light, unshadowed.
-public float3 directLight(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
+public float3 directLight(Texture3D<float4> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
 {
     float3 arrived = float3(0.0);
     if (lights.sunDirection.w > 0.5)
@@ -176,7 +176,7 @@ public float probeFacing(float3 p, float3 n, float3 probe)
 
 /// Whether nothing the field holds stands between `a` and `b`, `clearance` kept clear at either end
 /// for the surfaces `a` and `b` lie near.
-public bool seesThrough(Texture3D<float> field, SamplerState linear, FieldInfo info, float3 a, float3 b, float clearance)
+public bool seesThrough(Texture3D<float4> field, SamplerState linear, FieldInfo info, float3 a, float3 b, float clearance)
 {
     float3 toward = b - a;
     float length = length(toward);
@@ -187,7 +187,7 @@ public bool seesThrough(Texture3D<float> field, SamplerState linear, FieldInfo i
 /// four of them at most, as `seesThrough` asks, the light a ray crossing them keeps being its own
 /// to take. The merge asks it of the probes of the cascade above, which a canopy hides from those
 /// under it, so the floor under a canopy takes the sky the leaves let through.
-public bool seesPastLeaves(Texture3D<float> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 a, float3 b, float clearance)
+public bool seesPastLeaves(Texture3D<float4> field, SamplerState linear, Texture3D<float4> albedo, FieldInfo info, float3 a, float3 b, float clearance)
 {
     float3 toward = b - a;
     float length = length(toward);
@@ -449,7 +449,7 @@ public float3 bouncedAt(Texture3D<float4> cubes, Texture3D<float4> cubesAt, Text
 /// `bouncedSeenSum` reads it, and how much it counts there besides how near it is, none where it
 /// stands inside a mesh, behind the surface's plane or past what the field holds between. `oc` is
 /// the cascade's corner and cell where the probes stood.
-float probeSeenFrom(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float4 oc, int3 at, int c,
+float probeSeenFrom(Texture3D<float4> field, SamplerState linear, FieldInfo info, Texture3D<float4> cubes, Texture3D<float4> cubesAt, float4 oc, int3 at, int c,
     float3 p, float3 n, float probes, float spacing, out float3 light)
 {
     float3 n2 = n * n;
@@ -488,7 +488,7 @@ float probeSeenFrom(Texture3D<float> field, SamplerState linear, FieldInfo info,
 /// `p` lies from the probe along `n` against how far that surface lay, so a hit on the floor a
 /// face's own ray met takes the light the floor gathers rather than the probe's over it, which the
 /// walls and the ceiling are nearer to.
-public float4 bouncedSeenSum(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
+public float4 bouncedSeenSum(Texture3D<float4> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
     float3 p, float3 n, float probes, float spacing, int c)
 {
     float4 oc = gathered.cascades[c].origin_and_cell;
@@ -538,7 +538,7 @@ public float3 probeAlong(Texture3D<float4> ways, Texture3D<float4> cubes, Sample
 /// (`probeAlong`), which a face of perceptual roughness `roughness` reflects. The faces and the
 /// directions are read where the probes stood as `gatheredField` says, the frame before's corners
 /// for the world's probes' rays, and the field marched as `info` has it.
-public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
+public float3 bouncedSeenAt(Texture3D<float4> field, SamplerState linear, FieldInfo info, FieldInfo gatheredField, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
     Texture3D<float4> ways, float3 p, float3 n, float3 r, float roughness, float probes, float spacing, float cascades, out float3 along)
 {
     along = float3(0.0);
@@ -579,7 +579,7 @@ public float3 bouncedSeenAt(Texture3D<float> field, SamplerState linear, FieldIn
 /// keeps none at its start, since one begun farther from its point passes over a wall that near the
 /// surface, and a lamp outside a closed room of thin walls would light the faces inside, where no
 /// light reaches them.
-public float3 hiddenLampLight(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
+public float3 hiddenLampLight(Texture3D<float4> field, SamplerState linear, FieldInfo info, GiLights lights, float3 p, float3 n)
 {
     float3 hidden = float3(0.0);
     float cell = fieldCell(info, p);
@@ -612,7 +612,7 @@ public float2 splitSum(float roughness, float nv)
 /// The light reaching a face at `p` facing `n` from the sun and the lights, the lamps that cast
 /// shadows hidden where the field stands between, and from the two brightest glow lights, as
 /// `shadeProbeHit` takes it, the ray along `way`.
-float3 lightsReaching(Texture3D<float> field, SamplerState linear, FieldInfo info, GiLights lights, StructuredBuffer<GlowLight> glows, float3 p, float3 n, float3 way)
+float3 lightsReaching(Texture3D<float4> field, SamplerState linear, FieldInfo info, GiLights lights, StructuredBuffer<GlowLight> glows, float3 p, float3 n, float3 way)
 {
     return directLight(field, linear, info, lights, p, n) - hiddenLampLight(field, linear, info, lights, p, n)
         + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, way) / Pi;
@@ -625,7 +625,7 @@ float3 lightsReaching(Texture3D<float> field, SamplerState linear, FieldInfo inf
 /// reaching the far side is taken as that, since a second read on the far side costs the trace
 /// about a tenth more in a meadow whose every leaf and blade of grass sends light through, and
 /// moves no probe about a crown by a point.
-float3 shadeSendingThrough(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<float4> glow,
+float3 shadeSendingThrough(Texture3D<float4> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<float4> glow,
     GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float4> ways, float3 p, float3 n,
     float3 paint, float3 gloss, float through, float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
 {
@@ -683,7 +683,7 @@ float3 shadeSendingThrough(Texture3D<float> field, SamplerState linear, FieldInf
 /// and seen from inside, what both send that way, where taken whole from either side it sent its
 /// whole color back toward the sun and read a probe in the crown's front half half again over the
 /// reference. A surface that sends none through is lit as before, to the bit.
-public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
+public float3 shadeProbeHit(Texture3D<float4> field, SamplerState linear, FieldInfo info, FieldInfo gathered, Texture3D<float4> albedo, Texture3D<uint> faces,
     Texture3D<float> transmission, Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt,
     Texture3D<float4> ways, float3 p, float3 way, float probes, float spacing, float cascades, float3 kept, out float3 own)
 {
@@ -711,7 +711,7 @@ public float3 shadeProbeHit(Texture3D<float> field, SamplerState linear, FieldIn
 /// hidden where the field stands between, and the indirect light that reached it the frame before,
 /// read between the probes around it (`bouncedAt`), and the two brightest glow lights', with the
 /// light it emits.
-public float3 shadeHit(Texture3D<float> field, SamplerState linear, FieldInfo info, Texture3D<float4> albedo, Texture3D<uint> faces,
+public float3 shadeHit(Texture3D<float4> field, SamplerState linear, FieldInfo info, Texture3D<float4> albedo, Texture3D<uint> faces,
     Texture3D<float4> glow, GiLights lights, StructuredBuffer<GlowLight> glows, Texture3D<float4> cubes, Texture3D<float4> cubesAt, Texture3D<float> reach,
     float3 p, float probes, float spacing, float cascades)
 {
