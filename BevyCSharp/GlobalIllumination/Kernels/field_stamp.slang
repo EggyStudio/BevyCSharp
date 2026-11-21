@@ -11,6 +11,9 @@
 // The still images are read as textures, since an image of half floats or of bytes is written here
 // and not read and written at once.
 import bcs_field;
+// A cell as the boxes of the meshes that moved stamp it over the still meshes' field, written once
+// in the RadianceCascades module for both engines.
+import rc_field_stamp;
 
 struct FieldShape
 {
@@ -24,7 +27,7 @@ struct FieldShape
     // xyz: the box's half extents in its own space.
     float4 extents;
     // rgb: the mesh's color, linear. w: the share of light that passes a unit of its depth
-    // (lightThroughPaint in bcs_field.slang).
+    // (lightThroughAlpha in bcs_field.slang).
     float4 color;
     // xyz: the mesh's perceptual roughness, metallic share and reflectance. w: the share of its
     // diffuse light it sends through to its far side, its diffuse transmission.
@@ -56,6 +59,37 @@ StructuredBuffer<FieldInfo> info;
 // x: how many bricks. y: how many boxes. zw: unused.
 uniform uint4 stamp_counts;
 
+// The boxes of a brick's run as the module's stamp reads them (IStampShapes), each this engine's
+// FieldShape laid out as the module's StampShape. The module paints a box's color times the alpha
+// of its lightThroughPaint, where this engine keeps a share's alpha on an even byte below a solid's
+// and a crown's leaf cards on an odd one (lightThroughAlpha), so a box is handed the share whose
+// alpha is this engine's, which the module's paint takes back exactly. A box emits nothing here,
+// the field's glow staying as the still meshes painted it, and the share of its diffuse light it
+// sends through is its gloss's w.
+struct BrickShapes : IStampShapes
+{
+    uint first;
+    uint length;
+
+    uint count() { return length; }
+
+    StampShape shape(uint i)
+    {
+        uint run = first + i;
+        FieldShape own = shapes[bricks[run / 4u][run % 4u]];
+        StampShape shape;
+        shape.row0 = own.row0;
+        shape.row1 = own.row1;
+        shape.row2 = own.row2;
+        shape.centerAndScale = own.center_and_scale;
+        shape.extents = own.extents;
+        shape.color = float4(own.color.rgb, 2.0 * (1.0 - lightThroughAlpha(own.color.w)));
+        shape.emission = float4(0.0, 0.0, 0.0, own.gloss.w);
+        shape.gloss = float4(own.gloss.xyz, 0.0);
+        return shape;
+    }
+}
+
 [shader("compute")]
 [numthreads(4, 4, 4)]
 void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
@@ -75,35 +109,20 @@ void main(uint3 group : SV_GroupID, uint3 local : SV_GroupThreadID)
     float3 p = oc.xyz + (float3(cell) + 0.5) * oc.w;
     float reach = field_info.counts.z * oc.w;
 
+    // The still cell as the module reads it, which keeps no plane of a double-sided face here and
+    // no glow the stamp writes.
     uint3 at = uint3(cell.xy, cell.z + cascade * size);
-    float d = still_field.Load(int4(int3(at), 0));
-    float nearest = abs(d);
-    float4 paint = still_paint.Load(int4(int3(at), 0));
-    uint face = still_faces.Load(int4(int3(at), 0));
-    float sends = still_transmission.Load(int4(int3(at), 0));
-    for (uint i = 0; i < brick.w; i++)
-    {
-        uint run = stamp_counts.x * 4u + brick.z + i;
-        FieldShape shape = shapes[bricks[run / 4u][run % 4u]];
-        float4 h = float4(p, 1.0);
-        float3 own = float3(dot(shape.row0, h), dot(shape.row1, h), dot(shape.row2, h)) - shape.center_and_scale.xyz;
-        float3 q = abs(own) - shape.extents.xyz;
-        float box = (length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0)) * shape.center_and_scale.w;
-        d = min(d, max(box, -reach));
-        if (abs(box) < min(nearest, reach))
-        {
-            nearest = abs(box);
-            float coverage = lightThroughPaint(shape.color.w);
-            paint = float4(shape.color.rgb * coverage, coverage);
-            // The box's face nearest the cell, the axis it lies furthest out along, in the world.
-            int axis = q.x >= q.y && q.x >= q.z ? 0 : q.y >= q.z ? 1 : 2;
-            float3 outward = float3(axis == 0 ? sign(own.x) : 0.0, axis == 1 ? sign(own.y) : 0.0, axis == 2 ? sign(own.z) : 0.0);
-            face = faceBits(normalize(shape.row0.xyz * outward.x + shape.row1.xyz * outward.y + shape.row2.xyz * outward.z)) | glossBits(shape.gloss.xyz);
-            sends = saturate(shape.gloss.w);
-        }
-    }
-    field[at] = d;
-    albedo_field[at] = paint;
-    face_field[at] = face;
-    transmission_field[at] = sends;
+    FieldCell still;
+    still.distance = still_field.Load(int4(int3(at), 0));
+    still.sheet = float3(0.0);
+    still.paint = still_paint.Load(int4(int3(at), 0));
+    still.glow = float4(0.0);
+    still.face = still_faces.Load(int4(int3(at), 0));
+    still.through = still_transmission.Load(int4(int3(at), 0));
+    BrickShapes shapes = { stamp_counts.x * 4u + brick.z, brick.w };
+    FieldCell stamped = stampCell(shapes, p, reach, still);
+    field[at] = stamped.distance;
+    albedo_field[at] = stamped.paint;
+    face_field[at] = stamped.face;
+    transmission_field[at] = stamped.through;
 }

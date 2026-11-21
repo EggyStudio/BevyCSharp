@@ -10,6 +10,9 @@
 // neighbors' codes, and the buffers start cleared.
 
 import bcs_field;
+// A face's way from its eight bits and the pinch of a cell between two blocks, written once in the
+// RadianceCascades module for both engines.
+import rc_field_code;
 
 // The codes of the cascade's cells, as field_splat.slang left them, and the nearest face each cell
 // lies behind, in 1024ths of a cell.
@@ -30,10 +33,10 @@ RWStructuredBuffer<uint> albedo;
 RWStructuredBuffer<uint> leaf_area;
 [format("rgba8")] RWTexture3D<float4> still_paint;
 
-// The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, and its
-// gloss as field_splat.slang painted it, in the bits faceBits and glossBits in bcs_field.slang lay
-// out, into the image the passes read and the still meshes' own, so a ray's hit takes its color and
-// its gloss from cells its own face painted (surfaceFacing).
+// The way each cell's nearest face looks, the eight bits field_splat.slang kept in its code, and
+// its gloss as field_splat.slang painted it, in the bits faceBits and glossBits in bcs_field.slang
+// lay out, into the image the passes read and the still meshes' own, so a ray's hit takes its color
+// and its gloss from cells its own face painted (surfaceFacing).
 RWStructuredBuffer<uint> gloss;
 [format("r32ui")] RWTexture3D<uint> face_field;
 [format("r32ui")] RWTexture3D<uint> still_faces;
@@ -58,16 +61,6 @@ uniform float4 cascade;
 // each resolve and before the first part of a build where a build left unfinished splatted into
 // them, 0 where it resolves them and leaves them as they are.
 uniform uint4 clearing;
-
-// A face's way from its eight bits, as field_splat.slang folded it.
-float3 way(uint bits)
-{
-    float2 o = (float2(float(bits & 15u), float((bits >> 4) & 15u)) + 0.5) / 16.0 * 2.0 - 1.0;
-    float3 n = float3(o, 1.0 - abs(o.x) - abs(o.y));
-    if (n.z < 0.0)
-        n.xy = (1.0 - abs(n.yx)) * float2(n.x >= 0.0 ? 1.0 : -1.0, n.y >= 0.0 ? 1.0 : -1.0);
-    return normalize(n);
-}
 
 [shader("compute")]
 [numthreads(4, 4, 4)]
@@ -97,21 +90,25 @@ void main(uint3 id : SV_DispatchThreadID)
 }
 
 // The distance a cell holds, from the code field_splat.slang left it and the face it lies behind.
-float resolvedAt(uint3 c, uint size)
+// The module's resolvedDistance reads a code laid out as its own splat lays it, its distance above
+// bit 19 with a rim and an instance below, and holds a double-sided face at its distance with its
+// plane kept beside it, where this engine's code keeps its distance above bit 10 and the resolve
+// takes half a cell off a double-sided face's, so the distance is this file's own.
+float cellDistance(uint3 c, uint size)
 {
     uint index = (c.z * size + c.y) * size + c.x;
     uint code = cells[index];
     float d = min(float(code >> 10) / 1024.0, cascade.w) * cascade.z;
     // A cell in front of one face and straight behind another that looks the other way, less than a
-    // cell beyond it, lies against a wall thinner than a cell, which is held as a double-sided sheet
-    // is, half a cell thick on either side of the wall's middle, so a ray between the cells on either
-    // side still meets it, where the faces of a box's edge, which meet square, do not make one. Held
-    // so only below half a cell, a wall of two thirds of a cell would lie between two cells' middles,
-    // each a sixth of a cell outside it, which a trace steps over.
+    // cell beyond it, lies against a wall thinner than a cell, which is held as a double-sided
+    // sheet is, half a cell thick on either side of the wall's middle, so a ray between the cells
+    // on either side still meets it, where the faces of a box's edge, which meet square, do not
+    // make one. Held so only below half a cell, a wall of two thirds of a cell would lie between
+    // two cells' middles, each a sixth of a cell outside it, which a trace steps over.
     uint hidden = behind[index];
     float beyond = float(hidden >> 8) / 1024.0 * cascade.z;
     bool thin = (code & 0x300u) == 0x100u && hidden != 0xFFFFFFFFu && beyond - d < cascade.z
-        && dot(way(code), way(hidden)) < -0.7;
+        && dot(wayOf(code), wayOf(hidden)) < -0.7;
     if ((code & 0x200u) != 0u)
         d -= cascade.z * 0.5;
     else if (thin)
@@ -121,28 +118,12 @@ float resolvedAt(uint3 c, uint size)
     return d;
 }
 
-// Whether a cell outside every surface lies between two cells beside it along two axes that lie
-// inside one while the cell across the diagonal from it lies outside, the pattern two blocks that
-// meet along an edge leave in the cells about it, which no single face makes.
-bool pinched(uint3 c, uint size)
+// The cascade's cells as the module's pinch reads them (pinched), each the distance this file
+// resolves its code to.
+struct ResolvedCells : IResolvedCells
 {
-    int3 axes[3] = { int3(1, 0, 0), int3(0, 1, 0), int3(0, 0, 1) };
-    [loop]
-    for (int a = 0; a < 3; a++)
-        [loop]
-        for (int b = a + 1; b < 3; b++)
-            [loop]
-            for (int signs = 0; signs < 4; signs++)
-            {
-                int3 one = int3(c) + axes[a] * ((signs & 1) != 0 ? 1 : -1);
-                int3 other = int3(c) + axes[b] * ((signs & 2) != 0 ? 1 : -1);
-                int3 across = one + other - int3(c);
-                if (any(min(min(one, other), across) < 0) || any(max(max(one, other), across) >= int(size)))
-                    continue;
-                if (resolvedAt(uint3(one), size) < 0.0 && resolvedAt(uint3(other), size) < 0.0 && resolvedAt(uint3(across), size) > 0.0)
-                    return true;
-            }
-    return false;
+    int size() { return int(cascade.y); }
+    float resolvedAt(int3 at) { return cellDistance(uint3(at), uint(cascade.y)); }
 }
 
 // The cell's codes turned into its distance, color, face and light in the cascade's place in the
@@ -151,12 +132,13 @@ void resolve(uint3 id, uint index, uint e)
 {
     uint size = uint(cascade.y);
     uint code = cells[index];
-    // A cell pinched between two blocks that meet along an edge is held inside at its distance, so a
-    // march through the edge meets the field there. Between the four cells about the edge the
-    // distance would otherwise stay above zero, and a march from the floor beside a wall whose halves
-    // meet along one edge would pass through the edge and see the light beyond the wall.
-    float d = resolvedAt(id, size);
-    if (d > 0.0 && pinched(id, size))
+    // A cell pinched between two blocks that meet along an edge is held inside at its distance, so
+    // a march through the edge meets the field there. Between the four cells about the edge the
+    // distance would otherwise stay above zero, and a march from the floor beside a wall whose
+    // halves meet along one edge would pass through the edge and see the light beyond the wall.
+    float d = cellDistance(id, size);
+    ResolvedCells resolved;
+    if (d > 0.0 && pinched(resolved, int3(id)))
         d = -d;
     uint3 at = uint3(id.xy, id.z + uint(cascade.x) * size);
     still_field[at] = d;
@@ -166,14 +148,14 @@ void resolve(uint3 id, uint index, uint e)
     // A cell a surface letting light through painted takes the share a meter of it lets through
     // again, a crown's leaf cards, whose nearest triangle is double-sided, the share their material
     // lets through a meter at a preset crown's density raised to the cell's own card area a cubic
-    // meter over it, so a crown's sparse edge lets more through than its core, and any other surface
-    // its material's share, the color staying the color over the alpha.
+    // meter over it, so a crown's sparse edge lets more through than its core, and any other
+    // surface its material's share, the color staying the color over the alpha.
     if (paint.a > 0.25 && paint.a < 1.0)
     {
         float through = lightThroughOf(paint.a);
         float alpha = (code & 0x200u) != 0u
             ? lightThroughCardsPaint(through, float(leaf_area[index]) / 65536.0 / (cascade.z * cascade.z * cascade.z))
-            : lightThroughPaint(through);
+            : lightThroughAlpha(through);
         paint = float4(paint.rgb * (alpha / paint.a), alpha);
     }
     still_paint[at] = paint;
@@ -186,13 +168,13 @@ void resolve(uint3 id, uint index, uint e)
     still_transmission[at] = sends;
     transmission_field[at] = sends;
 
-    // The lent light times the share of the cell's face the emitters cover along the axis they cover
-    // most of, a whole face at most, as the faces of a strip along a wall lend a cell beside it what
-    // it shows from the front and from above alike, where summed they would lend it twice that. The
-    // larger of that and the cell's own, since an emitter that painted the cell its own gives it its
-    // whole light, as an emissive panel under a ceiling does, times the paint's alpha where a
-    // surface painted the cell, as its color is (lightThroughPaint in bcs_field.slang), since a reader
-    // divides both by it.
+    // The lent light times the share of the cell's face the emitters cover along the axis they
+    // cover most of, a whole face at most, as the faces of a strip along a wall lend a cell beside
+    // it what it shows from the front and from above alike, where summed they would lend it twice
+    // that. The larger of that and the cell's own, since an emitter that painted the cell its own
+    // gives it its whole light, as an emissive panel under a ceiling does, times the paint's alpha
+    // where a surface painted the cell, as its color is (lightThroughAlpha in bcs_field.slang),
+    // since a reader divides both by it.
     float3 light = float3(float(emitted[e]), float(emitted[e + 1u]), float(emitted[e + 2u])) / 256.0;
     float3 seen = float3(float(emitted[e + 3u]), float(emitted[e + 4u]), float(emitted[e + 5u])) / 1024.0;
     float3 lent = light * min(max(seen.x, max(seen.y, seen.z)), 1.0);

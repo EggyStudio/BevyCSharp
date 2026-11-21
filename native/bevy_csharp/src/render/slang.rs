@@ -111,8 +111,18 @@ pub const RC_PROBES: &str = include_str!("../../../../modules/RadianceCascades/R
 pub const RC_CASCADE_MERGE: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_cascade_merge.slang");
 pub const RC_PROBE_PASSES: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_probe_passes.slang");
 
+/// What the field's splat imports as `rc_field_splat`, a triangle's nearest point, way, corners'
+/// colors and band of cells and the paint's alpha, as the RadianceCascades module writes them once
+/// for both engines.
+pub const RC_FIELD_SPLAT: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_splat.slang");
+
+/// What the field's stamp imports as `rc_field_stamp`, a cell as the boxes of the meshes that
+/// moved stamp it over the still meshes' field, as the RadianceCascades module writes it once for
+/// both engines.
+pub const RC_FIELD_STAMP: &str = include_str!("../../../../modules/RadianceCascades/RadianceCascades/Shaders/rc_field_stamp.slang");
+
 /// Every module the bridge writes out, by file name, which `import` finds them by.
-const MODULES: [(&str, &str); 20] = [
+const MODULES: [(&str, &str); 22] = [
     ("bcs.slang", PRELUDE),
     ("bcs2d.slang", PRELUDE_2D),
     ("bcs_ui.slang", UI_PRELUDE),
@@ -133,6 +143,8 @@ const MODULES: [(&str, &str); 20] = [
     ("rc_probes.slang", RC_PROBES),
     ("rc_cascade_merge.slang", RC_CASCADE_MERGE),
     ("rc_probe_passes.slang", RC_PROBE_PASSES),
+    ("rc_field_splat.slang", RC_FIELD_SPLAT),
+    ("rc_field_stamp.slang", RC_FIELD_STAMP),
 ];
 
 /// A hash of every module the bridge writes, which a cache entry and the scratch directory are

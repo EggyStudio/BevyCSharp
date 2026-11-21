@@ -1199,3 +1199,107 @@ Shared: the world probes' faces are gathered by the RadianceCascades module's pa
 from this commit.
 
 NormTests passed, 19.
+
+138, the field's code the module writes as this engine runs it, taken bit for bit, with a reading of
+a room lit through one opening, in the commit carrying this Reply.
+
+The resolve. `field_resolve` imports the module's `rc_field_code`, pinches a cell between two blocks
+that meet along an edge by its `pinched`, over `ResolvedCells`, the cells as this engine resolves
+them read as the module's `IResolvedCells`, and reads a face's way by its `wayOf`. A cell's distance
+stays the file's own (`cellDistance`), since the module's `resolvedDistance` reads a code with its
+distance above bit 19 and a rim bit and an instance below, and holds a double-sided face at its
+distance with its plane kept in the cell, where this engine's code keeps its distance above bit 10
+and the resolve takes half a cell off a double-sided face's distance.
+
+The splat. `field_splat` imports `rc_field_splat` alone and takes its `nearestOnTriangle`,
+`wayCode`, `barycentric`, `holdsSurface`, `bandCells`, `lightThroughPaint` and `glossBits`, the
+file's own `nearest`, `way8`, `barycentric` and box of band cells going. The module's `splatCodes`
+and `splatPaint` work on the module's codes, which this engine's resolve does not read, and wait
+with `resolvedDistance` for the step that takes the codes and their planes. The module's
+`cornerColor` is this engine's without the max that holds the color at zero or more before the add,
+and NVIDIA's shader compiler here builds the two to other last bits, so with the module's a gray
+painted on a 255th's boundary, as 0.7 is at 178.5, painted the byte beside in 234 of the probe's
+1,048,576 cells. The splat keeps this engine's as `cornerLight`.
+
+The stamp. The submodule moves to 109b457, whose `FieldCell` carries the share of its diffuse light
+a cell's surface sends through, which the module's session added at this engine's asking, and whose
+`pinched` makes its axes from the index where it kept them in an array. `field_stamp` imports
+`rc_field_stamp` and stamps each cell by its `stampCell` over `BrickShapes`, the brick's run of this
+engine's shapes as the module's `IStampShapes` reads them. The module paints a box by its
+`lightThroughPaint`, the alpha before a byte is kept, where this engine keeps a share's alpha on an
+even byte below a solid's and a crown's leaf cards on an odd one, so each box is handed the share
+whose alpha is this engine's, `2 × (1 − alpha)`, which the module's paint takes back exactly, `1 −
+alpha` being exact for an alpha of a half or more. This engine's `lightThroughPaint` in `bcs_field`
+is named `lightThroughAlpha`, apart from the module's. A box emits nothing in the stamp, and the
+glow stays as the still meshes painted it, as before.
+
+The read. `bcs_field` reads a cascade's distance by the module's `fieldDistanceIn` through
+`CascadeRead`, one cascade as the module's `IFieldVolume` takes it, its corner and cell and the
+field's counts handed over, so a read copies no table of the cascades into a thread's memory. A cell
+here keeps no plane, so the module's distance is the blend. The fade band at the field's edge is
+named `HoldBand`, apart from the module's `FieldBand`, as the sibling named it. The field's normal
+stays this engine's, whose slope is scaled by `rsqrt` where the module's divides it by its length.
+The bridge writes `rc_field_splat` and `rc_field_stamp` among its modules, 22.
+
+The test on the compiled kernel. `FieldReadCopiesTests` compiles with slangc to WGSL, as the bridge
+compiles the kernels, against the modules `slang.rs` lists, so a kernel importing a file the bridge
+leaves out fails there as it does in the engine, as the splat did in the probe's first run. A kernel
+reading one cascade's distance copies no table of the cascades, or field info holding one, into a
+function's memory, where a binding holding the whole table, as the sibling's first did, makes 2
+copies. The kernels that read the field are held to 23 copies, those of the marches that find a
+point's cascade through the whole table (`fieldCascade`) and of the probes' table built from the
+field's (`probesOf`), 8 in gi_trace, 6 in gi_light's fragment stage, 5 in gi_screen and 4 in
+gi_merge. gi_reference, which takes ray queries and compiles to SPIR-V, is left out of the test, and
+a count of its SPIR-V finds no copy.
+
+The bits. A probe, not committed, reads back every image of the field and of the world probes with
+the frame at the 300th traced frame of a scene holding a floor, a mesh of colored corners, two
+double-sided walls crossing, an emissive sheet thinner than a cell before a wall, a mesh letting
+light through and sending some through, cards like a crown's, two blocks meeting along an edge, a
+wall thinner than a cell, a metal block and a box sending light through moving every frame. Runs
+after the change are alike bit for bit with two before it, save 32 cells of the paint where two
+triangles of one mesh tie on a 255th's boundary, which vary from run to run before the change as
+after. One run's frame, the first after the bridge's modules changed, differed in a quarter of its
+pixels with every image alike, and seven runs after it held the frame bit for bit. The stamp is read
+against two runs of the tree before it with a second box moving that lets light through, alike bit
+for bit the same way, 574 cells stamped and 292 of them at that box's alpha. At its share of 0.45
+both alphas round to one byte, so the share handed over is held by its arithmetic.
+
+The reading. A room 8 m deep, 7 wide and 4 high, gray at 0.5 with no gloss, open at one end under a
+lintel hanging from its roof to 2 m, lit by a uniform sky alone, its field four cascades of 0.125 m
+and global illumination at Medium. Cascade 0's probes 1.5 m up and half a meter off the room's
+middle, 1 m apart from the opening to the far wall, are each read against the reference at 256 paths
+a way and every bounce (`gi.probe`), and each face's light is summed from the probe's ways as a
+share of the same sum of the reference's ways drawn across their texels, in the table below.
+
+| From the opening | Face toward it | Face looking up | Face looking down | All its ways |
+|---|---:|---:|---:|---:|
+| 0.5 m | 0.72 | 0.68 | 0.74 | 0.72 |
+| 1.5 m | 0.66 | 0.62 | 0.65 | 0.65 |
+| 2.5 m | 0.61 | 0.69 | 0.58 | 0.62 |
+| 3.5 m | 0.65 | 0.76 | 0.60 | 0.66 |
+| 4.5 m | 0.82 | 0.88 | 0.66 | 0.78 |
+| 5.5 m | 0.93 | 0.92 | 0.73 | 0.86 |
+| 6.5 m | 1.18 | 1.05 | 0.85 | 1.01 |
+| 7.5 m | 1.19 | 0.91 | 0.79 | 0.95 |
+
+The probes read about a third under the reference on every face from the opening to the room's
+middle, and toward the far wall the face toward the opening rises past it, to 1.18 and 1.19 of it in
+the last two meters. The module's rule before its split read the deep end of its own room 1.47 and
+1.41 of a fine trace. The row is the measure the passes' step reads again.
+
+The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
+the render profile in the portable image, the editor bridge built with meshlets and Solari, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree, 2,194 passed, 0 failed and 5 skipped, 2,199 in all where the
+listing is 2,188, the solution built from nothing with warnings as errors, in 13 parts and the rest,
+a part at a time under the GPU lock. The comment on the splat's `cornerLight` was recast after the
+suite's build, a change to a comment alone.
+
+Shared: the field's pinch, a triangle's nearest point, way, blend and band, the splat's alpha, the
+stamp and a cascade's distance are the RadianceCascades module's in this engine from this commit.
+The module's cornerColor and this engine's differ by a max that NVIDIA's shader compiler builds to
+other last bits, and the stamp hands the module's paint this engine's even alpha.
+
+NormTests passed, 19.

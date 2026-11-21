@@ -15,6 +15,9 @@ module bcs_field;
 import rc_field_code;
 // A face's gloss in the bits above its way, written once in the same module.
 import rc_field_paint;
+// The field's distance at a point, written once in the same module and read here through one
+// cascade (`CascadeRead`).
+import rc_field_read;
 
 
 /// A cascade, where it lies.
@@ -63,7 +66,7 @@ public FieldInfo probesOf(FieldInfo info, int probes)
 
 /// The cells of the field's last cascade's outer band, across which a shader that reads the
 /// field's distances fades to what it gives where the field holds nothing (`fieldHold`).
-public static const float FieldBand = 8.0;
+public static const float HoldBand = 8.0;
 
 /// The cells an outer band ends short of the eye on a side the eye stands near (`bandHold`).
 public static const float EyeClear = 6.0;
@@ -97,7 +100,7 @@ public int fieldCoarsestBuilt(FieldInfo info, int up_to)
 }
 
 /// How much of what the field holds at `p` a shader takes, all of it inside the field's cascades,
-/// falling to none across the outer band (`FieldBand`) of the coarsest one built, kept clear of the
+/// falling to none across the outer band (`HoldBand`) of the coarsest one built, kept clear of the
 /// eye (`bandHold`), and none past it, so a shader that reads the field to its edge fades there
 /// rather than stepping.
 public float fieldHold(FieldInfo info, float3 p)
@@ -106,7 +109,7 @@ public float fieldHold(FieldInfo info, float3 p)
     if (c < 0)
         return 0.0;
     float4 oc = info.cascades[c].origin_and_cell;
-    return bandHold(info, c, (p - oc.xyz) / oc.w, FieldBand, 1.0);
+    return bandHold(info, c, (p - oc.xyz) / oc.w, HoldBand, 1.0);
 }
 
 /// The finest built cascade `p` lies in, at least `margin` cells inside its sides, or -1 for none.
@@ -126,16 +129,46 @@ public int fieldCascade(FieldInfo info, float3 p, float margin)
     return -1;
 }
 
+/// One cascade of the field as the module's reads take it (`IFieldVolume`), its corner and cell
+/// and the field's counts as the read was handed them, so a read copies no table of the cascades
+/// into a thread's own memory to index it there, which a device read wrong in the sibling engine.
+/// A cell here keeps no plane of a double-sided face, the resolve holding such a face below zero by
+/// half a cell instead, so a cell's plane reads as none and the module's distance is the blend.
+struct CascadeRead : IFieldVolume
+{
+    Texture3D<float> field;
+    SamplerState linear;
+    float4 oc;
+    float4 counts;
+    int index;
+
+    int cascadeOf(float3 p, float margin) { return index; }
+    float4 cornerAndCell(int cascade) { return oc; }
+    int size() { return int(counts.y); }
+
+    // The cells read by a linear sampler, the cascades lying one after another along z.
+    float4 between(int cascade, float3 cells)
+    {
+        float size = counts.y;
+        float3 uvw = float3(cells.xy / size, (cells.z + float(cascade) * size) / (size * counts.x));
+        return float4(field.SampleLevel(linear, uvw, 0.0), 0.0, 0.0, 0.0);
+    }
+
+    float4 cellAt(int cascade, int3 cell)
+    {
+        return float4(field.Load(int4(cell.xy, cell.z + cascade * int(counts.y), 0)), 0.0, 0.0, 0.0);
+    }
+
+    float3 secondAt(int cascade, int3 cell) { return float3(0.0); }
+}
+
 /// The distance from `p` to the nearest surface in cascade `i`, in world units, blended between
 /// the eight cells around it by a linear sampler, each read no nearer a side than half a cell, so
 /// cascades stacked in the image do not bleed into each other.
 public float fieldDistanceIn(Texture3D<float> field, SamplerState linear, FieldInfo info, int i, float3 p)
 {
-    float4 oc = info.cascades[i].origin_and_cell;
-    float size = info.counts.y;
-    float3 cell = clamp((p - oc.xyz) / oc.w, 0.5, size - 0.5);
-    float3 uvw = float3(cell.xy / size, (cell.z + float(i) * size) / (size * info.counts.x));
-    return field.SampleLevel(linear, uvw, 0.0);
+    CascadeRead read = { field, linear, info.cascades[i].origin_and_cell, info.counts, i };
+    return fieldDistanceIn(read, i, p);
 }
 
 /// The distance from `p` to the nearest surface, from the finest cascade around it, or far where
@@ -292,8 +325,9 @@ public float3 surfaceFacing(Texture3D<uint> faces, Texture3D<float4> albedo, Sam
 /// for a solid surface down to a half for one that lets all of it through, so a reader that divides
 /// a blend of the colors by their alphas takes the colors back and weighs such a cell less, and one
 /// that reads a cell as it is takes the share back (`lightThroughOf`). Its byte is even below a
-/// solid's, the lowest bit kept for a crown's leaf cards (`lightThroughCards`).
-public float lightThroughPaint(float through)
+/// solid's, the lowest bit kept for a crown's leaf cards (`lightThroughCards`), where the
+/// RadianceCascades module's `lightThroughPaint` is the same alpha before its byte is kept.
+public float lightThroughAlpha(float through)
 {
     uint painted = uint((1.0 - 0.5 * saturate(through)) * 255.0 + 0.5);
     return float(painted < 255u ? painted & ~1u : painted) / 255.0;
