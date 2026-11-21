@@ -50,11 +50,6 @@ Texture3D<float4> field;
 SamplerState field_sampler;
 StructuredBuffer<FieldInfo> info;
 
-// The share of light this cascade's rays kept across surfaces that let light through before their
-// interval began, as gi_trace.slang wrote it, in w, which the probe's faces take their light times,
-// and in rgb the light those surfaces scattered along the rays, which the faces add.
-Texture3D<float4> kept;
-
 // Every cascade's probes' light along eight by eight directions, each the merged directions about
 // it weighed by the lobe a surface of roughness 0.5 spreads its reflection over, a block of ten by
 // ten texels a probe, its border each texel across the octahedron's edge, the cascades one after
@@ -160,8 +155,7 @@ float4 probesCorner(uint c)
 static float3 gathered;
 
 // The probe a face is gathered for, as the module's gather reads probes (IFarProbes): a texel's
-// light as the merge left it past the probe's interval times the share its early hits let through,
-// with the light met before its interval began, at this engine's layout of a cascade's texels.
+// light as the merge left it, at this engine's layout of a cascade's texels.
 struct OneProbe : IFarProbes
 {
     uint3 at;
@@ -170,9 +164,7 @@ struct OneProbe : IFarProbes
 
     float3 lightAt(int3 probe, uint2 texel)
     {
-        int4 from = int4(int2(at.xy * texels + texel), int(at.z), 0);
-        float4 before = kept.Load(from);
-        return merged.Load(from).rgb * before.a + before.rgb;
+        return merged.Load(int4(int2(at.xy * texels + texel), int(at.z), 0)).rgb;
     }
 
     // Never asked, since the gather reads a probe's reach only where its place lies off the point
@@ -250,8 +242,7 @@ void main(uint3 id : SV_DispatchThreadID)
         {
             int4 from = int4(int2(at.xy * texels + uint2(u, v)), int(at.z), 0);
             shares += octahedronShare((float2(float(u), float(v)) + 0.5) / float(texels));
-            // A probe inside a mesh holds alpha 0 in every texel, where every other's are a half or
-            // 1.
+            // A probe inside a mesh holds alpha 0 in every texel, where every other's are 1.
             valid = max(valid, merged.Load(from).a > 0.25 ? 1.0 : 0.0);
         }
     // Its alpha 0 where the probe holds no light, and two more than its move along the face's axis
@@ -327,8 +318,7 @@ void main(uint3 id : SV_DispatchThreadID)
                     float seenThere = max(-dot(w, normal), 0.0);
                     solid *= seenHere > 0.05 ? min(seenThere / seenHere, 8.0) : 0.0;
                 }
-                float4 before = kept.Load(from);
-                sumAt += (light.rgb * before.a + before.rgb) * cosine * solid;
+                sumAt += light.rgb * cosine * solid;
                 weightsAt += cosine * solid;
             }
         if (weightsAt > 1e-6)
@@ -363,8 +353,7 @@ void main(uint3 id : SV_DispatchThreadID)
                 if (weight <= 0.0)
                     continue;
                 int4 from = int4(int2(at.xy * texels + uint2(u, v)), int(at.z), 0);
-                float4 before = kept.Load(from);
-                light += (merged.Load(from).rgb * before.a + before.rgb) * weight;
+                light += merged.Load(from).rgb * weight;
                 weights += weight;
             }
         float4 way = float4(light / max(weights, 1e-6), 1.0);

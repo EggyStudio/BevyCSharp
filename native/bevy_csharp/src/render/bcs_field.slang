@@ -162,6 +162,60 @@ struct CascadeRead : IFieldVolume
     float3 secondAt(int cascade, int3 cell) { return float3(0.0); }
 }
 
+/// The whole field as the module's marches take it (`IFieldVolume`), the finest built cascade
+/// holding a point found as `fieldCascade` finds it, and each cascade's corner and cell read by its
+/// index from the buffer the field's info lies in, so a march copies no table of the cascades into
+/// a thread's own memory. A cell keeps its distance in x and in yzw the plane of a double-sided
+/// face (sheetOf), and keeps no second plane.
+public struct FieldMarch : IFieldVolume
+{
+    public Texture3D<float4> field;
+    public SamplerState linear;
+    public StructuredBuffer<FieldInfo> info;
+
+    public int cascadeOf(float3 p, float margin)
+    {
+        int count = int(info[0].counts.x);
+        float size = info[0].counts.y;
+        for (int i = 0; i < count; i++)
+        {
+            float4 oc = info[0].cascades[i].origin_and_cell;
+            if (oc.w <= 0.0)
+                continue;
+            float3 cell = (p - oc.xyz) / oc.w;
+            if (all(cell >= margin) && all(cell <= size - margin))
+                return i;
+        }
+        return -1;
+    }
+
+    public float4 cornerAndCell(int cascade) { return info[0].cascades[cascade].origin_and_cell; }
+    public int size() { return int(info[0].counts.y); }
+
+    // The cells read by a linear sampler, the cascades lying one after another along z.
+    public float4 between(int cascade, float3 cells)
+    {
+        float size = info[0].counts.y;
+        float3 uvw = float3(cells.xy / size, (cells.z + float(cascade) * size) / (size * info[0].counts.x));
+        return field.SampleLevel(linear, uvw, 0.0);
+    }
+
+    public float4 cellAt(int cascade, int3 cell)
+    {
+        return field.Load(int4(cell.xy, cell.z + cascade * int(info[0].counts.y), 0));
+    }
+
+    public float3 secondAt(int cascade, int3 cell) { return float3(0.0); }
+}
+
+/// The whole field of `field`, read through `linear`, laid out as `info` holds it, for the
+/// module's marches.
+public FieldMarch fieldMarch(Texture3D<float4> field, SamplerState linear, StructuredBuffer<FieldInfo> info)
+{
+    FieldMarch march = { field, linear, info };
+    return march;
+}
+
 /// The distance from `p` to the nearest surface in cascade `i`, in world units, blended between
 /// the eight cells around it by a linear sampler, each read no nearer a side than half a cell, so
 /// cascades stacked in the image do not bleed into each other.

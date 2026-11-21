@@ -21,6 +21,9 @@ import bcs_glow;
 // marks its rays leave, written once in the RadianceCascades module for both engines and given on
 // to every reader of this one.
 __exported import rc_octahedron;
+// The probes' rays and their reach maps' ways, written once in the same module, whose sky a probe's
+// ray takes past the field (ISky).
+import rc_probes;
 
 public static const float Pi = 3.14159265358979;
 
@@ -211,10 +214,6 @@ public bool seesPastLeaves(Texture3D<float4> field, SamplerState linear, Texture
     return false;
 }
 
-/// The directions each probe's reach is kept along, sixteen by sixteen of its octahedron, a ray's
-/// own each (gi_trace.slang).
-public static const int ReachTexels = 16;
-
 /// The texels along each side of a probe's block of its light by way, eight by eight directions
 /// with a texel's border, each border texel the one across the octahedron's edge from it, as DDGI
 /// borders its probes, so a filtered read across a fold blends the directions on either side of it,
@@ -278,6 +277,8 @@ public static const float OwnShare = 0.25;
 /// edges rather than folded across them.
 float reachAlong(Texture3D<float> reach, float3 way, int3 at, int c, float probes)
 {
+    // The directions the reach is kept along, sixteen by sixteen of the octahedron, a ray's own
+    // each (gi_trace.slang).
     float2 t = octahedron(way) * float(ReachTexels) - 0.5;
     int2 base = int2(floor(t));
     float2 f = t - float2(base);
@@ -285,9 +286,9 @@ float reachAlong(Texture3D<float> reach, float3 way, int3 at, int c, float probe
     for (int corner = 0; corner < 4; corner++)
     {
         int2 offset = int2(corner & 1, corner >> 1);
-        int2 texel = clamp(base + offset, int2(0), int2(ReachTexels - 1));
+        int2 texel = clamp(base + offset, int2(0), int2(int(ReachTexels) - 1));
         float2 lerps = lerp(1.0 - f, f, float2(offset));
-        reached += lerps.x * lerps.y * reach.Load(int4(int3(at.xy * ReachTexels + texel, c * int(probes) + at.z), 0));
+        reached += lerps.x * lerps.y * reach.Load(int4(int3(at.xy * int(ReachTexels) + texel, c * int(probes) + at.z), 0));
     }
     return reached;
 }
@@ -721,4 +722,36 @@ public float3 shadeHit(Texture3D<float4> field, SamplerState linear, FieldInfo i
         + bouncedAt(cubes, cubesAt, reach, info, p, n, probes, spacing, cascades) * lights.counts.z
         + glowLightsAt(field, linear, info, glows, uint(lights.counts.w), p, n, 2, false, float3(0.0));
     return color / Pi * arrived + surfaceGlowUncarried(glow, albedo, linear, info, p);
+}
+
+/// The field's layout with each of `cascades` cascades of probes at the corner it lay at the frame
+/// before (`lights.before`), where the faces of the indirect light a probe's ray reads were
+/// gathered. Read at this frame's corners, a cascade that moved with the eye would read each
+/// probe's faces from the probe a step or more beside it, and the light past the first bounce
+/// would take many frames to settle again after a turn moved every cascade.
+public FieldInfo gatheredAt(FieldInfo info, GiLights lights, int cascades)
+{
+    FieldInfo then = probesOf(info, cascades);
+    for (int c = 0; c < min(cascades, MostProbeCascades); c++)
+        then.cascades[c].origin_and_cell.xyz = lights.before[c].xyz;
+    return then;
+}
+
+/// The light from all around along a way where a probe's ray leaves the field (`ISky`), the ambient
+/// light's and the camera's environment map's folded onto an octahedron where the camera has one,
+/// its alpha 1 there (gi_sky.slang), or none where `open` is unset, as in a frame before the field
+/// holds every mesh in reach, where the sky reached through cascades not yet built would light a
+/// closed room.
+public struct ProbeSky : ISky
+{
+    public Texture2D<float4> map;
+    public SamplerState linear;
+    public float3 ambient;
+    public bool open;
+
+    public float3 skyAlong(float3 way)
+    {
+        float4 environment = map.SampleLevel(linear, octahedron(way), 0.0);
+        return open ? ambient + (environment.a > 0.5 ? environment.rgb : float3(0.0)) : float3(0.0);
+    }
 }

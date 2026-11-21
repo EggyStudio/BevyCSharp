@@ -27,8 +27,9 @@ public sealed class FieldReadCopiesTests
 
     // The copies the kernels make of the table, every one a march's, which finds the finest
     // cascade a point lies in through the whole table (fieldCascade), or the table of the probes'
-    // cascades that a march builds from the field's (probesOf).
-    private const int MarchCopies = 23;
+    // cascades that a march builds from the field's (probesOf), the merge's among them, whose
+    // marches past a ray's end light the surfaces they meet as the trace does.
+    private const int MarchCopies = 24;
 
     /// <summary>
     /// A kernel that reads the field's distance in one cascade copies no table of the cascades into

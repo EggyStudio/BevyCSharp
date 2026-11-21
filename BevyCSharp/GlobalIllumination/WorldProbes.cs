@@ -14,15 +14,16 @@ namespace Bevy;
 /// A cascade's probes lie every <see cref="ProbeSpacing"/> cells of the field's cascade of the same
 /// number, or of its far cascade for the last where it has one, eight a side, so each cascade's
 /// probes are twice as far apart as the one before's and cover eight times the room. Each frame,
-/// after the field, the lights the probes are lit by are read from the bridge and written with where
-/// each cascade lay the frame before, each cascade's rays are traced (<c>gi_trace.slang</c>), the
-/// cascades are merged from the last down (<c>gi_merge.slang</c>), and each probe's light is
-/// gathered into the six faces of a cube with its reach and its share of the sky
+/// after the field, the lights the probes are lit by are read from the bridge and written with
+/// where each cascade lay the frame before, each cascade's rays are traced (<c>gi_trace.slang</c>)
+/// and the merge's reach maps after them (<c>gi_reach.slang</c>), the cascades are merged from the
+/// last down by the RadianceCascades module's rule (<c>gi_merge.slang</c>), and each probe's light
+/// is gathered into the six faces of a cube with its reach and its share of the sky
 /// (<c>gi_ambient.slang</c>).
 /// </para>
 /// <para>
 /// The images are made for a quality and the field's cascades and made again where either changes,
-/// and nothing is traced before the three programs have compiled.
+/// and nothing is traced before the five programs have compiled.
 /// </para>
 /// </remarks>
 internal static unsafe partial class WorldProbes
@@ -30,20 +31,44 @@ internal static unsafe partial class WorldProbes
     /// <summary>How many cells of their field cascade the probes lie apart.</summary>
     internal const int ProbeSpacing = 8;
 
-    /// <summary>The most cascades of probes, the four <see cref="GlobalIllumination.High"/> traces and the far cascade's, as <c>bcs_gi</c>'s <c>MostProbeCascades</c>.</summary>
+    /// <summary>
+    /// The most cascades of probes, the four <see cref="GlobalIllumination.High"/> traces and the
+    /// far cascade's, as <c>bcs_gi</c>'s <c>MostProbeCascades</c>.
+    /// </summary>
     internal const int MostCascades = 5;
 
     /// <summary>The probes along each side of a cascade.</summary>
     internal const int Probes = SceneFieldPlan.Resolution / ProbeSpacing;
 
-    /// <summary>The bytes of the lights' buffer, <c>bcs_gi</c>'s <c>GiLights</c>, the bridge's lights and where each cascade lay the frame before.</summary>
+    /// <summary>
+    /// The bytes of the lights' buffer, <c>bcs_gi</c>'s <c>GiLights</c>, the bridge's lights and
+    /// where each cascade lay the frame before.
+    /// </summary>
     internal const int LightsBytes = NativeGiLights.Bytes + MostCascades * 16;
 
-    /// <summary>The directional lights whose air the camera's dispatch reads, as many as the light pass's <c>MostSuns</c> and the leaves' (<c>forward_probes.rs</c>).</summary>
+    /// <summary>
+    /// The directional lights whose air the camera's dispatch reads, as many as the light pass's
+    /// <c>MostSuns</c> and the leaves' (<c>forward_probes.rs</c>).
+    /// </summary>
     internal const int AirSuns = 10;
 
-    /// <summary>The texels along each side of a probe's block of its light by way, eight by eight directions with a texel's border, as <c>bcs_gi</c>'s <c>WaysTexels</c>.</summary>
+    /// <summary>
+    /// The texels along each side of a probe's block of its light by way, eight by eight directions
+    /// with a texel's border, as <c>bcs_gi</c>'s <c>WaysTexels</c>.
+    /// </summary>
     internal const int WaysTexels = 10;
+
+    /// <summary>
+    /// The reach of a probe's ray that met no surface before its end, the RadianceCascades module's
+    /// <c>ReachOpen</c>.
+    /// </summary>
+    internal const float ReachOpen = 1e30f;
+
+    /// <summary>
+    /// The rays along each side of a probe's octahedron, every cascade's, four a texel where it
+    /// keeps eight, as the trace sends them (<c>gi_trace.slang</c>).
+    /// </summary>
+    internal const uint RayTexels = 16;
 
     /// <summary>
     /// Whether the leaves and the grass are left Bevy's own light rather than given the probes',
@@ -68,7 +93,10 @@ internal static unsafe partial class WorldProbes
     // The frame a hold was asked at.
     private static long _heldFrom;
 
-    /// <summary>Holds the probes at <paramref name="bounces"/> bounces past the first, or every one where it is null (<see cref="HeldBounces"/>).</summary>
+    /// <summary>
+    /// Holds the probes at <paramref name="bounces"/> bounces past the first, or every one where it
+    /// is null (<see cref="HeldBounces"/>).
+    /// </summary>
     internal static void HoldBounces(int? bounces) => (HeldBounces, _heldFrom) = (bounces, _frame);
 
     /// <summary>Whether the probes stand still at a count of bounces they were held at.</summary>
@@ -89,7 +117,7 @@ internal static unsafe partial class WorldProbes
     // traced, and where each cascade lay the frame before.
     private static App? _app;
     private static Made? _made;
-    private static ShaderProgram _traceProgram, _mergeProgram, _ambientProgram;
+    private static ShaderProgram _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _holdProgram;
 
     // The trace built without the crossing of surfaces that let light through, which a frame where
     // nothing drawn lets light through traces with, so its light is the light the probes took
@@ -100,18 +128,25 @@ internal static unsafe partial class WorldProbes
     private static ShaderInstance _sky;
     private static Entity _skyCamera = Entity.None;
 
-    /// <summary>The texels along each side of the octahedron the camera's environment map is copied onto.</summary>
+    /// <summary>
+    /// The texels along each side of the octahedron the camera's environment map is copied onto.
+    /// </summary>
     private const uint SkySize = 64;
 
-    /// <summary>The name the copy's dispatch on a camera is kept under beside the engine's others.</summary>
+    /// <summary>
+    /// The name the copy's dispatch on a camera is kept under beside the engine's others.
+    /// </summary>
     private const string SkyOwner = "gi.sky";
 
-    /// <summary>The name the frame before's picture a glossy surface's reflection reads is kept under on a camera.</summary>
+    /// <summary>
+    /// The name the frame before's picture a glossy surface's reflection reads is kept under on a
+    /// camera.
+    /// </summary>
     private const string PictureOwner = "gi.reflection";
 
     /// <summary>
-    /// The steps a glossy surface's reflection is traced through the picture's depth in, and how far
-    /// in world units, at a quality.
+    /// The steps a glossy surface's reflection is traced through the picture's depth in, and how
+    /// far in world units, at a quality.
     /// </summary>
     internal static (int Steps, float Reach) ReflectionStepsAt(GlobalIllumination quality) => quality switch
     {
@@ -124,14 +159,21 @@ internal static unsafe partial class WorldProbes
     private static long _frame;
     private static Vector3?[] _origins = [];
 
-    /// <summary>The probes' images and buffers, for the quality and cascades they were made for.</summary>
+    /// <summary>
+    /// The probes' images and buffers, for the quality and cascades they were made for.
+    /// </summary>
     private sealed class Made(GlobalIllumination quality, int[] texels)
     {
         public readonly GlobalIllumination Quality = quality;
         public readonly int[] Texels = texels;
-        public AssetHandle[] Radiance = [], Merged = [], Distances = [], Kept = [];
-        public AssetHandle Cubes, CubesAt, Reach, Ways, Held, Partial, Lights, Glows, SkyMap, Air = AssetHandle.None;
-        public ShaderInstance[] Trace = [], Merge = [], Ambient = [];
+        public AssetHandle[] Rays = [], Merged = [], Distances = [];
+        public AssetHandle Cubes, CubesAt, Reach, ReachMaps, Ways, Held, Partial, Shares, Lights, Glows, SkyMap, Air = AssetHandle.None;
+        public ShaderInstance[] Trace = [], Reaches = [], Merge = [], Ambient = [];
+        // The light held for the field's cells, each side's own and its probes' (gi_hold.slang),
+        // for as many cascades of the field as it was made for, and the dispatch that holds it.
+        public AssetHandle HeldOwn, HeldProbes = AssetHandle.None;
+        public int HeldCascades;
+        public ShaderInstance Hold;
         // Whether the traces run the build that crosses surfaces letting light through.
         public bool Crossing = true;
         public (float Start, float End)[] Intervals = [];
@@ -152,7 +194,10 @@ internal static unsafe partial class WorldProbes
     internal static GlobalIllumination Asked =>
         App.Running is { } running && ReferenceEquals(_askedIn, running) ? _asked : GlobalIllumination.Off;
 
-    /// <summary>Each cascade's octahedron's texels along each side at a quality, before the field's cascades cut them short.</summary>
+    /// <summary>
+    /// Each cascade's octahedron's texels along each side at a quality, before the field's cascades
+    /// cut them short.
+    /// </summary>
     internal static int[] TexelsAt(GlobalIllumination quality) => quality switch
     {
         GlobalIllumination.Low => [8, 8],
@@ -176,7 +221,10 @@ internal static unsafe partial class WorldProbes
         return far ? [.. texels[..(cascades - 1)], texels[Math.Max(0, cascades - 2)]] : texels[..cascades];
     }
 
-    /// <summary>How many cascades of probes a quality traces over a field's plan, no more than its counted cascades, and one more in its far cascade.</summary>
+    /// <summary>
+    /// How many cascades of probes a quality traces over a field's plan, no more than its counted
+    /// cascades, and one more in its far cascade.
+    /// </summary>
     internal static int CascadesFor(GlobalIllumination quality, SceneFieldPlan plan) =>
         quality == GlobalIllumination.Off ? 0 : Math.Min(TexelsAt(quality).Length, plan.Counted) + (plan.HasFar ? 1 : 0);
 
@@ -187,36 +235,42 @@ internal static unsafe partial class WorldProbes
     internal static AssetHandle Cubes => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Cubes : AssetHandle.None;
 
     /// <summary>
-    /// Cascade <paramref name="cascade"/>'s merged light, what its rays kept and gathered before
-    /// their interval began and their distances, laid out as the trace and the merge lay them, its
-    /// octahedron's texels a side, and every cascade's held places, which <c>gi.probe</c> reads one
-    /// probe of, or none where that cascade is not traced.
+    /// Cascade <paramref name="cascade"/>'s merged light and its rays' distances, laid out as the
+    /// trace and the merge lay them, its octahedron's texels a side, and every cascade's held
+    /// places, which <c>gi.probe</c> reads one probe of, or none where that cascade is not traced.
     /// </summary>
-    internal static (AssetHandle Merged, AssetHandle Kept, AssetHandle Distances, int Texels, AssetHandle Held)? ProbeImages(int cascade) =>
+    internal static (AssetHandle Merged, AssetHandle Distances, int Texels, AssetHandle Held)? ProbeImages(int cascade) =>
         ReferenceEquals(_app, App.Running) && _made is { } made && cascade >= 0 && cascade < made.Cascades
-            ? (made.Merged[cascade], made.Kept[cascade], made.Distances[cascade], made.Texels[cascade], made.Held)
+            ? (made.Merged[cascade], made.Distances[cascade], made.Texels[cascade], made.Held)
             : null;
 
     /// <summary>
-    /// The pass that adds the probes' light to the picture of the camera the field lies around, bound
-    /// to this frame's probes, or none where none are traced or it has not compiled
+    /// The pass that adds the probes' light to the picture of the camera the field lies around,
+    /// bound to this frame's probes, or none where none are traced or it has not compiled
     /// (<c>gi_light.slang</c>).
     /// </summary>
     internal static ShaderInstance LightPass =>
         ReferenceEquals(_app, App.Running) && _made is not null && _light.IsValid && _light.Program.State == ShaderProgramState.Ready ? _light : default;
 
-    /// <summary>How many frames the running app's probes have been traced in, for a test to wait on.</summary>
+    /// <summary>
+    /// How many frames the running app's probes have been traced in, for a test to wait on.
+    /// </summary>
     internal static long TracedFrames => ReferenceEquals(_app, App.Running) && _made is not null ? _frame : 0;
 
-    /// <summary>Each cascade's octahedron's texels along each side, or none where no probes are traced.</summary>
+    /// <summary>
+    /// Each cascade's octahedron's texels along each side, or none where no probes are traced.
+    /// </summary>
     internal static IReadOnlyList<int> Texels => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Texels : [];
 
-    /// <summary>Each cascade's rays' interval, where they start and where they end, or none where no probes are traced.</summary>
+    /// <summary>
+    /// Each cascade's rays' interval, where they start and where they end, or none where no probes
+    /// are traced.
+    /// </summary>
     internal static IReadOnlyList<(float Start, float End)> Intervals => ReferenceEquals(_app, App.Running) && _made is { } made ? made.Intervals : [];
 
     /// <summary>
-    /// What the probes are, said in one line, for the debug overlay and <c>gi.state</c>, or that they
-    /// are off.
+    /// What the probes are, said in one line, for the debug overlay and <c>gi.state</c>, or that
+    /// they are off.
     /// </summary>
     internal static string Said()
     {
@@ -225,7 +279,10 @@ internal static unsafe partial class WorldProbes
             $"Global illumination {made.Quality}, {made.Cascades} cascades of {Probes} probes a side, {string.Join(", ", made.Texels.Select(n => n * n * RaysAt(n)))} rays a probe, GPU memory {Bytes() / 1048576.0:0.0} MB{HeldBounces switch { null => "", 0 => ", held at the first bounce", var n => $", held at {n} bounces past the first" }}");
     }
 
-    /// <summary>The rays each texel of an octahedron of <paramref name="texels"/> a side sends, as <c>bcs_gi</c>'s <c>RaysAt</c> has them.</summary>
+    /// <summary>
+    /// The rays each texel of an octahedron of <paramref name="texels"/> a side sends, as
+    /// <c>bcs_gi</c>'s <c>RaysAt</c> has them.
+    /// </summary>
     internal static int RaysAt(int texels) => texels <= 8 ? 4 : 1;
 
     /// <summary>The bytes of GPU memory the probes hold.</summary>
@@ -234,23 +291,27 @@ internal static unsafe partial class WorldProbes
         if (!ReferenceEquals(_app, App.Running) || _made is not { } made) return 0;
         const long p = Probes;
         long bytes = 0;
-        foreach (var n in made.Texels) bytes += p * n * p * n * p * (8 + 8 + 2 + 8);
+        foreach (var n in made.Texels) bytes += p * n * p * n * p * (8 + 2) + p * p * p * RayTexels * RayTexels * 16;
         var cascades = (long)made.Cascades;
-        bytes += 4 * p * p * p * cascades * 16 * 2;
+        bytes += 4 * p * p * p * cascades * 16 * 2 + p * p * p * cascades * 16;
         bytes += 6 * p * p * p * cascades * (8 + 8);
         bytes += WaysTexels * p * WaysTexels * p * p * cascades * 8;
-        bytes += 16 * p * 16 * p * p * cascades * 2;
+        bytes += 16 * p * 16 * p * p * cascades * (2 + 4);
         return bytes + LightsBytes;
     }
 
-    /// <summary>Traces, merges and gathers the frame's probes, once a frame after the field, or lets them go where light does not bounce.</summary>
+    /// <summary>
+    /// Traces, merges and gathers the frame's probes, once a frame after the field, or lets them go
+    /// where light does not bounce.
+    /// </summary>
     internal static void Tick(World world)
     {
         // The probes' images and programs are an app's, and the next app makes its own.
         if (!ReferenceEquals(App.Running, _app))
         {
             _app = App.Running;
-            (_made, _traceProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, 0, []);
+            (_made, _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, default, 0, []);
+            _holdProgram = default;
             (HeldBounces, _heldFrom) = (null, 0);
             _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
@@ -270,14 +331,17 @@ internal static unsafe partial class WorldProbes
         {
             _traceProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_trace.slang");
             _traceSolid = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_trace.slang", defines: new Dictionary<string, ShaderDefine> { ["NO_LIGHT_THROUGH"] = true });
+            _reachProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_reach.slang");
             _mergeProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_merge.slang");
+            _holdProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_hold.slang");
             _ambientProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_ambient.slang");
             _light = Shaders.KernelDraw(typeof(SceneField).Assembly, "gi_light.slang");
             _sky = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_sky.slang"));
         }
 
-        if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready
-            || _mergeProgram.State != ShaderProgramState.Ready || _ambientProgram.State != ShaderProgramState.Ready)
+        if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready || _reachProgram.State != ShaderProgramState.Ready
+            || _mergeProgram.State != ShaderProgramState.Ready || _ambientProgram.State != ShaderProgramState.Ready
+            || _holdProgram.State != ShaderProgramState.Ready)
             return;
 
         var texels = TexelsFor(quality, CascadesFor(quality, plan), plan.HasFar);
@@ -287,9 +351,9 @@ internal static unsafe partial class WorldProbes
             _made = Make(quality, texels);
         }
 
-        // The camera's environment map copied for the rays by a dispatch on the camera the field lies
-        // around, with the share of the sun's light the camera's air lets through, which the rays
-        // read the frame after.
+        // The camera's environment map copied for the rays by a dispatch on the camera the field
+        // lies around, with the share of the sun's light the camera's air lets through, which the
+        // rays read the frame after.
         var camera = SceneField.ViewCamera;
         _sky.SetTexture("sky_map", _made.SkyMap).SetBuffer("gi_lights", _made.Lights).SetBuffer("gi_air", _made.Air);
         if (camera != _skyCamera)
@@ -314,31 +378,34 @@ internal static unsafe partial class WorldProbes
         Trace(plan, _made);
     }
 
-    /// <summary>Makes the probes' images and buffers for a quality and its cascades' texels, every face dark and every probe seeing every way.</summary>
+    /// <summary>
+    /// Makes the probes' images and buffers for a quality and its cascades' texels, every face dark
+    /// and every probe seeing every way.
+    /// </summary>
     private static Made Make(GlobalIllumination quality, int[] texels)
     {
         const uint p = Probes;
         var made = new Made(quality, texels);
         var cascades = (uint)texels.Length;
-        (made.Radiance, made.Merged, made.Distances) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
-        made.Kept = new AssetHandle[cascades];
-        (made.Trace, made.Merge, made.Ambient) = (new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades]);
+        (made.Rays, made.Merged, made.Distances) = (new AssetHandle[cascades], new AssetHandle[cascades], new AssetHandle[cascades]);
+        (made.Trace, made.Reaches, made.Merge, made.Ambient) = (new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades], new ShaderInstance[cascades]);
         for (var c = 0; c < cascades; c++)
         {
             var n = (uint)texels[c];
-            made.Radiance[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
+            made.Rays[c] = Shaders.CreateBuffer((int)(p * p * p * RayTexels * RayTexels * 16));
             made.Merged[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
             made.Distances[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.R16Float, p);
-            made.Kept[c] = Shaders.CreateImage(p * n, p * n, ShaderImageFormat.Rgba16Float, p);
-            (made.Trace[c], made.Merge[c], made.Ambient[c]) =
-                (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
+            (made.Trace[c], made.Reaches[c], made.Merge[c], made.Ambient[c]) = (Shaders.CreateInstance(_traceProgram), Shaders.CreateInstance(_reachProgram),
+                Shaders.CreateInstance(_mergeProgram), Shaders.CreateInstance(_ambientProgram));
         }
+        made.Hold = Shaders.CreateInstance(_holdProgram);
 
         // No probe's own light known yet, and every probe taking the whole of the indirect light.
         var held = new Vector4[4 * p * p * p * cascades];
         Array.Fill(held, new Vector4(1, 1, 1, -1));
         made.Held = Shaders.CreateBuffer<Vector4>(held);
         made.Partial = Shaders.CreateBuffer((int)(4 * p * p * p * cascades * 16));
+        made.Shares = Shaders.CreateBuffer((int)(p * p * p * cascades * 16));
         made.Cubes = Shaders.CreateImage(6 * p, p, ShaderImageFormat.Rgba16Float, p * cascades);
         made.CubesAt = Shaders.CreateImage(6 * p, p, ShaderImageFormat.Rgba16Float, p * cascades);
         made.Ways = Shaders.CreateImage(WaysTexels * p, WaysTexels * p, ShaderImageFormat.Rgba16Float, p * cascades);
@@ -347,6 +414,12 @@ internal static unsafe partial class WorldProbes
         var far = new Half[16 * p * 16 * p * p * cascades];
         Array.Fill(far, (Half)10000f);
         made.Reach = Shaders.CreateImage<Half>(16 * p, 16 * p, ShaderImageFormat.R16Float, far, p * cascades);
+
+        // The merge's reach maps, every way reaching the module's ReachOpen until first traced,
+        // which a 32-bit float keeps.
+        var open = new float[16 * p * 16 * p * p * cascades];
+        Array.Fill(open, ReachOpen);
+        made.ReachMaps = Shaders.CreateImage<float>(16 * p, 16 * p, ShaderImageFormat.R32Float, open, p * cascades);
         made.Lights = Shaders.CreateBuffer(LightsBytes);
         made.Glows = Shaders.CreateBuffer(GlowLights.Most * GlowLights.Bytes);
         made.SkyMap = Shaders.CreateImage(SkySize, SkySize, ShaderImageFormat.Rgba16Float);
@@ -354,8 +427,8 @@ internal static unsafe partial class WorldProbes
         // The share of the sun's light the camera's air lets through, all of it until the camera's
         // dispatch has written it and where no camera does, then the environment map's light from
         // above, none until written, and the share each directional light's air lets through, each
-        // read at the camera (gi_sky.slang), the last two for a leaf drawn forward, which reads them
-        // past the probes as the light pass reads them.
+        // read at the camera (gi_sky.slang), the last two for a leaf drawn forward, which reads
+        // them past the probes as the light pass reads them.
         var air = new Vector4[2 + AirSuns];
         Array.Fill(air, Vector4.One);
         air[1] = Vector4.Zero;
@@ -363,7 +436,9 @@ internal static unsafe partial class WorldProbes
         return made;
     }
 
-    /// <summary>Lets the probes' images and buffers go, on a frame they are off or made again.</summary>
+    /// <summary>
+    /// Lets the probes' images and buffers go, on a frame they are off or made again.
+    /// </summary>
     private static void Release()
     {
         ReleaseScreen();
@@ -374,8 +449,8 @@ internal static unsafe partial class WorldProbes
             _skyCamera = Entity.None;
         }
         if (_made is not { } made) return;
-        foreach (var handle in made.Radiance.Concat(made.Merged).Concat(made.Distances).Concat(made.Kept)
-                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.Ways, made.Held, made.Partial, made.Lights, made.Glows, made.SkyMap, made.Air]))
+        foreach (var handle in made.Rays.Concat(made.Merged).Concat(made.Distances)
+                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.ReachMaps, made.Ways, made.Held, made.Partial, made.Shares, made.Lights, made.Glows, made.SkyMap, made.Air, made.HeldOwn, made.HeldProbes]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -394,24 +469,22 @@ internal static unsafe partial class WorldProbes
         var cascades = made.Cascades;
         var last = cascades - 1;
 
-        // Each cascade's interval, from its probes' spacing to four times that, the first's from the
-        // probe, so a ray reaches as far again as the next cascade's begin. The last cascade's ends at
-        // the field's edge, the diagonal of its coarsest cascade, since past it no cascade takes over,
-        // and the far cascade's begins half way along the one before's, as each cascade's does.
+        // Each cascade's rays from its probe to twice its probes' spacing, the RadianceCascades
+        // module's ends, which lie past the diagonal of the cell between its probes and no farther
+        // than twice their spacing, so a ray handed to the cascade above is handed where the probes
+        // about its end stand no more than a spacing of theirs off it. The last cascade's end at
+        // the field's edge, the diagonal of its coarsest cascade, since past it no cascade takes
+        // over.
         var fieldEdge = SceneFieldPlan.Resolution * plan.CellOf(plan.Cascades - 1) * MathF.Sqrt(3);
         made.Intervals = new (float, float)[cascades];
         for (var c = 0; c < cascades; c++)
-        {
-            var spacing = ProbeSpacing * plan.CellSize * (1 << c);
-            var start = c == 0 ? 0 : plan.HasFar && c == last ? 2 * ProbeSpacing * plan.CellSize * (1 << (c - 1)) : spacing;
-            made.Intervals[c] = (start, c == last ? fieldEdge : 4 * spacing);
-        }
+            made.Intervals[c] = (0, c == last ? fieldEdge : 2 * ProbeSpacing * plan.CellSize * (1 << c));
 
-        // The lights, from the bridge, with the frame's number, the indirect light of the frame before
-        // added whole, or none on the first frame of a hold and through a hold at the first bounce,
-        // and where each cascade lay the frame before, which the rays read the faces of the light
-        // that bounced at, since they were gathered there. A cascade lying where it lay the frame
-        // before has the same probes, so a probe's own light of the frame before is its own.
+        // The lights, from the bridge, with the frame's number, the indirect light of the frame
+        // before added whole, or none on the first frame of a hold and through a hold at the first
+        // bounce, and where each cascade lay the frame before, which the rays read the faces of the
+        // light that bounced at, since they were gathered there. A cascade lying where it lay the
+        // frame before has the same probes, so a probe's own light of the frame before is its own.
         var bytes = made.LightBytes.AsSpan();
         fixed (byte* lights = bytes)
             Native.Check(NativeGlobalIllumination.bcs_gi_lights((NativeGiLights*)lights), "reading the lights global illumination is lit by");
@@ -449,8 +522,8 @@ internal static unsafe partial class WorldProbes
         for (var c = 0; c < plan.Cascades; c++)
             whole &= plan.BuiltOrigin(c) is not null;
 
-        // The build that crosses surfaces letting light through where any drawn this frame lets some
-        // through, and the one that stops at the first surface where none does.
+        // The build that crosses surfaces letting light through where any drawn this frame lets
+        // some through, and the one that stops at the first surface where none does.
         if (made.Crossing != SceneField.LightThrough)
         {
             made.Crossing = SceneField.LightThrough;
@@ -461,35 +534,67 @@ internal static unsafe partial class WorldProbes
         {
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 1u : 0u];
-            ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, BitConverter.SingleToUInt32Bits(made.Intervals[last].End), parity, whole ? 1u : 0u];
+            ReadOnlySpan<uint> follow = [lying[c] ? 1u : 0u, 0, parity, whole ? 1u : 0u];
             made.Trace[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("transmission", transmission).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
                 .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows).SetTexture("sky_map", made.SkyMap)
-                .SetTexture("radiance", made.Radiance[c]).SetTexture("bounced", made.Cubes).SetTexture("bounced_at", made.CubesAt).SetTexture("distances", made.Distances[c])
-                .SetTexture("kept", made.Kept[c]).SetTexture("ways", made.Ways).SetTexture("reach", made.Reach).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial)
+                .SetBuffer("rays", made.Rays[c]).SetTexture("bounced", made.Cubes).SetTexture("bounced_at", made.CubesAt).SetTexture("distances", made.Distances[c])
+                .SetTexture("ways", made.Ways).SetTexture("reach", made.Reach).SetBuffer("held", made.Held).SetBuffer("partial", made.Partial).SetBuffer("shares", made.Shares)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].Start, made.Intervals[c].End, ProbeSpacing, cascades))
                 .SetNumbers("follow", 4, follow);
             if (!still) Shaders.Dispatch(made.Trace[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
+
+            // The cascade's reach maps, from where its trace left each probe standing.
+            ReadOnlySpan<uint> reached = [(uint)c, p, (uint)cascades, 0];
+            made.Reaches[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
+                .SetBuffer("held", made.Held).SetTexture("reach_maps", made.ReachMaps)
+                .SetNumbers("cascade", 4, reached).Set("interval", new Vector4(made.Intervals[c].End, ProbeSpacing, 0, 0));
+            if (!still) Shaders.Dispatch(made.Reaches[c], p * p * p * 16 * 16 / 64);
         }
+
+        // The light of each cell of the field within a cell of a surface, held once each frame from
+        // the faces the probes gathered the frame before, which the merges read where their marches
+        // meet a surface in place of shading it there, its images made again where the field's
+        // cascades change, a thread a cell of each cascade.
+        const uint size = SceneFieldPlan.Resolution;
+        if (made.HeldCascades != plan.Cascades)
+        {
+            foreach (var handle in (ReadOnlySpan<AssetHandle>)[made.HeldOwn, made.HeldProbes])
+                if (handle != AssetHandle.None) AssetServer.Release(handle);
+            made.HeldOwn = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, size * (uint)plan.Cascades * 2);
+            made.HeldProbes = Shaders.CreateImage(size, size, ShaderImageFormat.Rgba16Float, size * (uint)plan.Cascades * 2);
+            made.HeldCascades = plan.Cascades;
+        }
+        made.Hold.SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
+            .SetTexture("albedo", albedo).SetTexture("faces", faces).SetTexture("transmission", transmission).SetTexture("glow", glow).SetBuffer("lights", made.Lights)
+            .SetBuffer("air", made.Air).SetBuffer("glow_lights", made.Glows)
+            .SetTexture("bounced", made.Cubes).SetTexture("bounced_at", made.CubesAt).SetTexture("ways", made.Ways)
+            .SetTexture("held_own", made.HeldOwn).SetTexture("held_probes", made.HeldProbes)
+            .SetNumbers("cascade", 4, [0u, p, 0u, 0u]).Set("interval", new Vector4(0, 0, ProbeSpacing, cascades));
+        if (!still) Shaders.Dispatch(made.Hold, size * size * size * (uint)plan.Cascades / 64);
 
         for (var c = last; c >= 0; c--)
         {
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, c == last ? 0u : (uint)made.Texels[c + 1]];
-            ReadOnlySpan<uint> counts = [(uint)cascades, 0, 0, 0];
-            made.Merge[c].SetTexture("radiance", made.Radiance[c]).SetTexture("above", c == last ? made.Radiance[c] : made.Merged[c + 1])
-                .SetTexture("merged", made.Merged[c]).SetBuffer("info", info).SetTexture("field", field).SetTexture("albedo", albedo).SetSampler("field_sampler", SamplerSettings.ClampedTable)
-                .SetBuffer("held", made.Held).SetTexture("reach_above", made.Reach)
-                .SetNumbers("cascade", 4, cascade).Set("spacing", new Vector4(ProbeSpacing, 0, 0, c == last ? 0 : made.Intervals[c + 1].End))
-                .SetNumbers("counts", 4, counts);
-            if (!still) Shaders.Dispatch(made.Merge[c], (p * p * p * n * n + 63) / 64);
+            ReadOnlySpan<uint> follow = [0, BitConverter.SingleToUInt32Bits(made.Intervals[last].End), 0, whole ? 1u : 0u];
+            // The last cascade reads no cascade above, and binds the faces in its place.
+            made.Merge[c].SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
+                .SetTexture("albedo", albedo).SetBuffer("lights", made.Lights).SetTexture("sky_map", made.SkyMap)
+                .SetTexture("held_own", made.HeldOwn).SetTexture("held_probes", made.HeldProbes)
+                .SetBuffer("rays", made.Rays[c]).SetTexture("above", c == last ? made.Cubes : made.Merged[c + 1]).SetTexture("reach_maps", made.ReachMaps)
+                .SetBuffer("held", made.Held).SetBuffer("shares", made.Shares).SetTexture("merged", made.Merged[c])
+                .SetNumbers("cascade", 4, cascade)
+                .Set("interval", new Vector4(made.Intervals[c].End, c == last ? 0 : made.Intervals[c + 1].End, ProbeSpacing, cascades))
+                .SetNumbers("follow", 4, follow);
+            if (!still) Shaders.Dispatch(made.Merge[c], p * p * p * n * n * (uint)RaysAt((int)n) / 64);
         }
 
         for (var c = 0; c < cascades; c++)
         {
             var n = (uint)made.Texels[c];
             ReadOnlySpan<uint> cascade = [(uint)c, p, n, parity + (lying[c] ? 2u : 0u)];
-            made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("cubes_at", made.CubesAt).SetTexture("distances", made.Distances[c]).SetTexture("kept", made.Kept[c])
+            made.Ambient[c].SetTexture("merged", made.Merged[c]).SetTexture("cubes", made.Cubes).SetTexture("cubes_at", made.CubesAt).SetTexture("distances", made.Distances[c])
                 .SetTexture("ways", made.Ways).SetBuffer("partial", made.Partial).SetBuffer("held", made.Held)
                 .SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
                 .SetNumbers("cascade", 4, cascade).Set("interval", new Vector4(made.Intervals[c].End, ProbeSpacing, cascades, 0));
@@ -499,7 +604,7 @@ internal static unsafe partial class WorldProbes
         // The screen's probes on the camera, which read the faces and the merged light this frame's
         // probes left.
         NoteRebuilt(plan);
-        var screen = Screen(made, plan, SceneField.ViewCamera, glows);
+        var screen = Screen(made, plan, SceneField.ViewCamera, glows, whole);
 
         // The pass that adds the light, which reads the faces the gathers wrote this frame.
         _light.Set("screen", screen).SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)

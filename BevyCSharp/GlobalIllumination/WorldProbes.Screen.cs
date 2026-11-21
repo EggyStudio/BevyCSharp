@@ -5,19 +5,21 @@ namespace Bevy;
 
 /// <summary>
 /// Global illumination's screen probes, a probe on the surface the camera's depth holds every few
-/// pixels, traced, blended and held over the frames by dispatches on the camera the field lies around
-/// before its opaque surfaces are lit (<see cref="RenderGlobalIllumination.extension(Render).SetGlobalIlluminationScreenProbes"/>).
+/// pixels, traced, blended and held over the frames by dispatches on the camera the field lies
+/// around before its opaque surfaces are lit (<see
+/// cref="RenderGlobalIllumination.extension(Render).SetGlobalIlluminationScreenProbes"/>).
 /// </summary>
 /// <remarks>
 /// <para>
 /// Each probe sends sixteen rays over the hemisphere around its surface's normal through the depth
-/// and the field (<c>gi_screen.slang</c>), as far as twice the world's probes' spacing, and takes the
-/// world's first cascade's light from beyond them, so the light under a table or in a corner is seen
-/// at the size the picture draws it. Its light is blended with the probes around on like surfaces and
-/// with the frame before's (<c>gi_screen_filter.slang</c>), and the glow lights' light on the picture
-/// is blended from what the probes around each point see of each (<c>gi_screen_glow.slang</c>), so a
-/// pixel reads the glow lights at a cost they do not change. The pass blends the probes around each
-/// pixel that stand on a surface like its own (<c>gi_light.slang</c>).
+/// and the field (<c>gi_screen.slang</c>), as far as twice the world's probes' spacing, and takes
+/// the world's first cascade's light from beyond them, so the light under a table or in a corner is
+/// seen at the size the picture draws it. Its light is blended with the probes around on like
+/// surfaces and with the frame before's (<c>gi_screen_filter.slang</c>), and the glow lights' light
+/// on the picture is blended from what the probes around each point see of each
+/// (<c>gi_screen_glow.slang</c>), so a pixel reads the glow lights at a cost they do not change.
+/// The pass blends the probes around each pixel that stand on a surface like its own
+/// (<c>gi_light.slang</c>).
 /// </para>
 /// <para>
 /// The images are the camera's, a texel a probe and half the picture's size for the glow lights'
@@ -28,15 +30,18 @@ namespace Bevy;
 /// </remarks>
 internal static partial class WorldProbes
 {
-    /// <summary>The name the screen probes' images and dispatches are kept under on a camera beside the engine's others.</summary>
+    /// <summary>
+    /// The name the screen probes' images and dispatches are kept under on a camera beside the
+    /// engine's others.
+    /// </summary>
     private const string ScreenOwner = "gi.screen";
 
     // Whether the program asked for screen probes, and the app it asked in, so a new app has them.
     private static App? _screenAskedIn;
     private static bool _screenAsked = true;
 
-    // The screen probes' programs, the camera they run on, what its images and dispatches were set for,
-    // and the frame they were set in, the next frame reading the history they keep.
+    // The screen probes' programs, the camera they run on, what its images and dispatches were set
+    // for, and the frame they were set in, the next frame reading the history they keep.
     private static ShaderInstance _screenTrace, _screenFilter, _screenGlow;
     private static AssetHandle _screenRayLog;
     private static Entity _screenCamera = Entity.None;
@@ -44,8 +49,8 @@ internal static partial class WorldProbes
     private static (bool GlowOnly, bool Glows)? _screenDispatches;
     private static long _screenSince;
 
-    // The places the glow lights were written in, kept from frame to frame, and the field's cascades
-    // built this frame as meshes came or went with the box around those meshes.
+    // The places the glow lights were written in, kept from frame to frame, and the field's
+    // cascades built this frame as meshes came or went with the box around those meshes.
     private static readonly GlowPlaces Places = new();
     private static uint _fieldRebuilt;
     private static SceneFieldPlan.Box _fieldChanged;
@@ -57,16 +62,22 @@ internal static partial class WorldProbes
         _screenAsked = on;
     }
 
-    /// <summary>Whether the running app has the screen's probes, which it does unless it left them out.</summary>
+    /// <summary>
+    /// Whether the running app has the screen's probes, which it does unless it left them out.
+    /// </summary>
     internal static bool ScreenAsked => App.Running is not { } running || !ReferenceEquals(_screenAskedIn, running) || _screenAsked;
 
     /// <summary>
-    /// Whether the pass leaves the screen's probes it traced unread, every pixel reading the world's
-    /// probes and marching to the glow lights itself, which a test compares the probes' reading with.
+    /// Whether the pass leaves the screen's probes it traced unread, every pixel reading the
+    /// world's probes and marching to the glow lights itself, which a test compares the probes'
+    /// reading with.
     /// </summary>
     internal static bool ScreenUnread { get; set; }
 
-    /// <summary>One more than the screen probe whose light is written as a value that is not a number, as a test feeds it, or 0 for none.</summary>
+    /// <summary>
+    /// One more than the screen probe whose light is written as a value that is not a number, as a
+    /// test feeds it, or 0 for none.
+    /// </summary>
     internal static int FedScreenProbe { get; set; }
 
     /// <summary>
@@ -76,7 +87,10 @@ internal static partial class WorldProbes
     /// </summary>
     internal static uint LoggedScreenPixel { get; set; }
 
-    /// <summary>The values of <see cref="ScreenRayLog"/>, four of the probe and four for each of its sixteen rays.</summary>
+    /// <summary>
+    /// The values of <see cref="ScreenRayLog"/>, four of the probe and four for each of its sixteen
+    /// rays.
+    /// </summary>
     internal const int ScreenRayLogValues = 4 + 16 * 4;
 
     /// <summary>
@@ -88,14 +102,14 @@ internal static partial class WorldProbes
 
     /// <summary>
     /// The pixels along each side of the tile a screen probe stands in, at a quality, for a picture
-    /// <paramref name="height"/> pixels high, the same up to 1080 and growing with the height past it,
-    /// so a probe stands for about the same share of the picture on any screen.
+    /// <paramref name="height"/> pixels high, the same up to 1080 and growing with the height past
+    /// it, so a probe stands for about the same share of the picture on any screen.
     /// </summary>
     /// <remarks>
-    /// The probes' cost grows with how many there are, and at a tile of 8 pixels at High whatever the
-    /// screen, a picture of 3840 by 2160 would hold nine times the probes of one of 1280 by 720.
-    /// Scaled past 1080, the tile is 8, 11 and 16 pixels at High at 1080p, 1440p and 4K, so the
-    /// probes' count and their cost hold near 1080p's.
+    /// The probes' cost grows with how many there are, and at a tile of 8 pixels at High whatever
+    /// the screen, a picture of 3840 by 2160 would hold nine times the probes of one of 1280 by
+    /// 720. Scaled past 1080, the tile is 8, 11 and 16 pixels at High at 1080p, 1440p and 4K, so
+    /// the probes' count and their cost hold near 1080p's.
     /// </remarks>
     internal static int TileAt(GlobalIllumination quality, uint height = 1080)
     {
@@ -108,7 +122,10 @@ internal static partial class WorldProbes
         return Math.Max(at1080, (int)MathF.Round(at1080 * height / 1080f));
     }
 
-    /// <summary>The height of a camera's picture in physical pixels, its viewport's where it has one, or 1080 before its target is first measured.</summary>
+    /// <summary>
+    /// The height of a camera's picture in physical pixels, its viewport's where it has one, or
+    /// 1080 before its target is first measured.
+    /// </summary>
     private static unsafe uint HeightOf(Entity camera)
     {
         var size = stackalloc uint[2];
@@ -117,14 +134,14 @@ internal static partial class WorldProbes
 
     /// <summary>
     /// How far from its tile's middle each screen probe marches to the glow lights from in frame
-    /// <paramref name="frame"/>, in pixels, the same for every probe, the middles of the tile's four
-    /// by four cells in the order of Bayer's matrix, sixteen frames a round, so a round visits each
-    /// cell once and each frame's cell lies far from the last.
+    /// <paramref name="frame"/>, in pixels, the same for every probe, the middles of the tile's
+    /// four by four cells in the order of Bayer's matrix, sixteen frames a round, so a round visits
+    /// each cell once and each frame's cell lies far from the last.
     /// </summary>
     /// <remarks>
-    /// The Halton points of bases 2 and 3 fall on one row of a tile's cells five times a round and on
-    /// another three, so the cells are visited unevenly and the light along a lamp's penumbra moves
-    /// further as the view turns than in Bayer's order.
+    /// The Halton points of bases 2 and 3 fall on one row of a tile's cells five times a round and
+    /// on another three, so the cells are visited unevenly and the light along a lamp's penumbra
+    /// moves further as the view turns than in Bayer's order.
     /// </remarks>
     internal static Vector2 JitterAt(long frame, int tile)
     {
@@ -134,13 +151,13 @@ internal static partial class WorldProbes
     }
 
     /// <summary>
-    /// Whether the screen's probes stand for the glow lights alone this frame, which they do where the
-    /// program left them out and some glow light is lit.
+    /// Whether the screen's probes stand for the glow lights alone this frame, which they do where
+    /// the program left them out and some glow light is lit.
     /// </summary>
     /// <remarks>
-    /// Without them each pixel marches to the four brightest glow lights itself, four marches at every
-    /// pixel, so they are marched to once a tile and a pixel reads the texels around it, its cost the
-    /// same however many lights there are.
+    /// Without them each pixel marches to the four brightest glow lights itself, four marches at
+    /// every pixel, so they are marched to once a tile and a pixel reads the texels around it, its
+    /// cost the same however many lights there are.
     /// </remarks>
     private static bool GlowOnly(int glows) => !ScreenAsked && glows > 0;
 
@@ -154,13 +171,16 @@ internal static partial class WorldProbes
             : FormattableString.Invariant($"Screen probes every {images.Tile} pixels, sixteen rays each{(ScreenUnread ? ", left unread" : "")}");
     }
 
-    /// <summary>Whether the screen's probes stand on a camera this frame, and whether for the glow lights alone.</summary>
+    /// <summary>
+    /// Whether the screen's probes stand on a camera this frame, and whether for the glow lights
+    /// alone.
+    /// </summary>
     internal static (bool On, bool GlowOnly) ScreenState =>
         ReferenceEquals(_app, App.Running) && _screenImages is { } images ? (true, images.GlowOnly) : (false, false);
 
     /// <summary>
-    /// Notes the field's cascades this frame's builds finished as meshes came or went within them, and
-    /// the box around those meshes, which the glow lights' blend drops what it held within.
+    /// Notes the field's cascades this frame's builds finished as meshes came or went within them,
+    /// and the box around those meshes, which the glow lights' blend drops what it held within.
     /// </summary>
     private static void NoteRebuilt(SceneFieldPlan plan)
     {
@@ -174,11 +194,11 @@ internal static partial class WorldProbes
     }
 
     /// <summary>
-    /// Puts the screen's probes on the camera the field lies around, their images and dispatches where
-    /// they change and their values each frame, or takes them off where they stop, and gives the
-    /// pass's <c>screen</c> values.
+    /// Puts the screen's probes on the camera the field lies around, their images and dispatches
+    /// where they change and their values each frame, or takes them off where they stop, and gives
+    /// the pass's <c>screen</c> values.
     /// </summary>
-    private static Vector4 Screen(Made made, SceneFieldPlan plan, Entity camera, int glows)
+    private static Vector4 Screen(Made made, SceneFieldPlan plan, Entity camera, int glows, bool whole)
     {
         var glowOnly = GlowOnly(glows);
         var on = (ScreenAsked || glowOnly) && !camera.IsNone;
@@ -196,8 +216,8 @@ internal static partial class WorldProbes
             _screenRayLog = Shaders.CreateBuffer<Vector4>(new Vector4[ScreenRayLogValues]);
         }
 
-        // The images a texel a probe, the probes' blend and surfaces and the glow lights' light kept
-        // with their history, which the next frame's blends read.
+        // The images a texel a probe, the probes' blend and surfaces and the glow lights' light
+        // kept with their history, which the next frame's blends read.
         if (_screenImages != (tile, glowOnly))
         {
             var probe = 1f / tile;
@@ -217,9 +237,9 @@ internal static partial class WorldProbes
             (_screenImages, _screenDispatches, _screenSince, _screenCamera) = ((tile, glowOnly), null, _frame, camera);
         }
 
-        // Traced, then blended where they trace rays, then the glow lights' light where some are lit,
-        // after the prepass that gives the depth they stand on. A frame with no glow lights skips the
-        // last, the pass reading none of it then.
+        // Traced, then blended where they trace rays, then the glow lights' light where some are
+        // lit, after the prepass that gives the depth they stand on. A frame with no glow lights
+        // skips the last, the pass reading none of it then.
         if (_screenDispatches != (glowOnly, glows > 0))
         {
             var probe = 1f / tile;
@@ -240,10 +260,12 @@ internal static partial class WorldProbes
         _screenTrace.SetTexture("scene_field", field).SetSampler("scene_field_sampler", SamplerSettings.ClampedTable).SetBuffer("scene_field_info", info)
             .SetTexture("scene_albedo", albedo).SetTexture("scene_faces", faces).SetTexture("scene_transmission", SceneField.Transmission).SetTexture("scene_glow", glow)
             .SetBuffer("gi_lights", made.Lights).SetBuffer("glow_lights", made.Glows).SetBuffer("ray_log", _screenRayLog)
-            .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach", made.Reach).SetTexture("probe_ways", made.Ways)
+            .SetTexture("probe_cubes", made.Cubes).SetTexture("probe_cubes_at", made.CubesAt).SetTexture("probe_reach_maps", made.ReachMaps).SetTexture("probe_ways", made.Ways)
+            .SetTexture("sky_map", made.SkyMap)
             .SetTexture("merged_first", made.Merged[0]).SetTexture("merged_second", made.Merged[Math.Min(1, cascades - 1)])
             .Set("screen", new Vector4(tile, reach, glowOnly ? 1 : 0, FedScreenProbe))
             .Set("probes", new Vector4(Probes, ProbeSpacing, cascades, 0))
+            .Set("ends", new Vector4(made.Intervals[0].End, cascades > 1 ? made.Intervals[1].End : 0, made.Intervals[cascades - 1].End, whole ? 1 : 0))
             .SetNumbers("texels", 4, texels)
             .Set("jitter", new Vector4(jitter, 0, 0));
         _screenFilter.Set("screen", new Vector4(tile, history, 0, 0));

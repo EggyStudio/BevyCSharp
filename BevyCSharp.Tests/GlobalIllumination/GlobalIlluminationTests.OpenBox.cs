@@ -18,9 +18,7 @@ public sealed partial class GlobalIlluminationTests
     /// way down. The share of a dome a point sees of a square straight over it is four times a
     /// corner's, the view factor of a point to a parallel rectangle at its corner.
     /// </remarks>
-    [SkippableFact(Skip = "The screen probes take 43% too little of the sky through the opening, 0.0587 where the dome gives 0.1030, "
-        + "the world probes alone reading within 15%. The rule that loses it, the screen probes' reading of the world probes past their reach, "
-        + "is written once in the RadianceCascades module with the kernels' move (item 138), where this test is its failing case.")]
+    [SkippableFact]
     public void AFloorInABoxOpenToTheSkyReadsTheSkysShareOfItsDome()
     {
         Needs.Shaders();
