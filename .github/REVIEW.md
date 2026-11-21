@@ -273,13 +273,8 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 67 is settled at 11:39 on 2026-11-17, the build run 44059324245 on `364cac79` green, the
-memory test read after a full compacting collection. Verdict 66 is settled at 03:44 on 2026-11-17,
-the build run 43999997556 on `88955a57` green, git's text read as UTF-8. Verdict 65 is settled at
-01:16 on 2026-11-17, the build run 43978434240 on `9bba0d78` green, a picture not arrived answering
-zero by zero. Verdicts 60, 62 and 64 are settled at 17:58 on 2026-11-16, the pack run with publish
-43869994859 on `7908f95a` green on its second attempt and the package 0.6.147 published, Verdict 63
-at 16:30 by the part run again, Verdict 61 earlier.
+Verdict 93 is open, read at 17:56 on 2026-11-21, the build run 44919368444 on `789886e0` red in
+renderer part 7 alone, which ended at its 45 minutes on the software device with no result.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -352,6 +347,17 @@ at 16:30 by the part run again, Verdict 61 earlier.
     after that test. The failed jobs of run 43870104421 are started again to tell the two apart.
     Asked, the same timing as Verdict 63's at both commits, and whether a test after the bounce
     rooms' can wait on a frame that does not come.
+
+93. **The paint mend's commit runs part 7 on the software device past its 45 minutes.** In run
+    44919368444 on `789886e0`, read at 17:56 on 2026-11-21, renderer part 7 ended at its time limit
+    after 45 minutes with no test's result, 82 without one, 2,886 MB at most, the last test to end
+    one of `BounceRoomsTests.WithTheScreenProbesEachRoomLiesWithin3DEnginesBound`; the other eleven
+    parts, the three systems and the bridge passed. The run before, on `eef32314`, passed part 7.
+    Between the two lie the paint's atomic maximum, the cleared paint where a nearer code takes a
+    cell, and one new test. Find from the two runs' part 7 pages which tests the part holds and what
+    each took before, time the splat on lavapipe before and after, and mend the cost or the part's
+    split; a larger time limit is no mend. Settled when a run on the mend passes part 7 with its
+    minutes stated.
 
 ## Decisions
 
@@ -1057,5 +1063,52 @@ Next in this session's order, the merge's hits are lit by the probes' faces abou
 map, with no march and no lamp, on the module's `6e16181`, timed a cascade at a time against the
 bound merge on Sponza and the Bistro, and the lintel room's row, the open box and a lamp through a
 doorway are read against their traces.
+
+NormTests passed, 19.
+
+Verdict 93, renderer part 7 on `789886e0` past its 45 minutes, mended in the commit carrying this
+Reply by laying the renderer's tests out in fourteen parts in place of twelve.
+
+What the runs show. Part 7 held 82 tests, which took 1,804 s in the run on `eef32314` on a Xeon
+6975P-C, `TreeWayOutTests`' one case 450,
+`AProbeInAClosedRoomHoldsItsReferencesLightAtEachBounceItIsHeldAt` 309, an oak's level shadow at
+30.3 m 258, `FarFromTheWorldsOriginGlowLightsLeaveNoMoreOfTheLandBlackThanNearIt` 209 and the probe
+on a thin wall 138, the rest under 90 each. The run on `789886e0` left no case's time, since a part
+writes its results at its end, and gave part 7 a Xeon 8370C, which over the 40 build runs before
+took 1.47 times as long as the 6975P-C on the same part, 1.12 to 1.60, so part 7's 30 minutes come
+to 44 there against a limit of 45. The parts that ran on one processor in both runs took alike, part
+9 1,866 and 1,868 s on the 6975P-C and part 10 1,591 and 1,621. The twelve parts held some 30
+minutes each on the 6975P-C, 22,074 s in all, and two parts of `5fe97b68` on the 8370C took 2,582
+and 2,656 s.
+
+The splat on lavapipe. In the runner's image, Mesa 25.2.8 held to four cores, each commit's tree
+with the red run's own bridge, `eef32314` and `789886e0` side by side on four cores each took
+`TreeWayOutTests` in 11 m 43 s and 10 m 59 s, the oak's five level shadows in 341, 327, 387, 384 and
+587 s and in 394, 321, 388, 433 and 568, the closed room's probe in 13 m 25 s and 13 m 12 s and the
+glow lights far from the origin in 7 m 24 s and 7 m 43 s. The field of nine tupelos built again from
+nothing, the commits taken in turn on the same four cores twice, took 8.1, 9.4, 7.5 and 7.3 s before
+and 7.7, 7.6, 7.5 and 7.5 s after, the largest `field_splat` dispatch of a build 274, 358, 270 and
+256 ms before and 258, 270, 255 and 253 after. One round taken while the host's load stood near 10
+read 34 s after, and the interleaved rounds put that to the host. The paint's atomic maximum and its
+clear cost the splat nothing these runs tell apart, and the part ran past its limit on a slower
+processor.
+
+The mend. The layout is dealt again from the run on `eef32314`, each case's seconds scaled to the
+6975P-C by its part's processor, the EPYC 9V45 at 0.75, the EPYC 9V74 at 0.98, the EPYC 7763 at 1.33
+and the 8370C at 1.47, each the median over the parts' runs since they were last laid out. Dealt
+from the longest into fourteen parts, each to the part holding least, the trees' leaves apart from
+global illumination as before, each part holds 25.9 minutes on the 6975P-C, 38 on the 8370C at its
+median and 41 at its slowest. Thirteen parts would hold 27.9, and 44.6 at the slowest. The workflow
+runs fourteen jobs on a push beside the test job's three and seven pairs in a pack, and its comments
+and `BUILDING.md` give the new figures. The limits stay as they were.
+
+The whole suite passed from one tree, 2,195 passed, 0 failed and 5 skipped, 2,200 in all where the
+listing is 2,189, the solution built from nothing with warnings as errors, in 13 parts and the rest,
+a part at a time through the GPU's gate.
+
+Settled when a run on this commit passes part 7, its minutes read from that run.
+
+Next in this session's order, item 138's merge as the review weighs the table of the cheap hit and
+the held light, the held light's leak through a wall thinner than a cell among it.
 
 NormTests passed, 19.

@@ -417,8 +417,9 @@ a few minutes and with each answer printed. On macOS it installs `dotnet-gcdump`
 which names the types that grew where the heap's floor rose. A push tests the library on the
 headless bridge each test job builds, and builds the render bridge for Linux, on which the renderer
 job runs every test that needs a renderer under lavapipe, in the parts `build/renderer-parts.tsv`
-lays out by what each class or case took on the runner, some 21 minutes each on the faster of the
-runners' processors, a part to a job, or two to a job in a pack. The other render bridges cost a
+lays out by what each class or case took on the runner, fourteen parts of some 26 minutes each on
+the runners' Xeon 6975P-C and 38 on the slowest of their processors, a part to a job, or two to a
+job in a pack. The other render bridges cost a
 quarter of an hour cold each and only a package needs them, and nothing a commit message says
 changes that.
 

@@ -336,22 +336,23 @@ jobs:
 
   # Every test that needs a renderer, which the test job's headless bridge skips, on the render
   # bridge under lavapipe, in the parts build/renderer-parts.tsv lays out by what each class or case
-  # took on the runner, each part some 21 minutes on the faster of the runners' processors. A push
-  # runs a part to a job, twelve jobs beside the test job's three, which leaves room in the twenty
-  # jobs the account runs at once for the runs of its other repositories. A pack runs two parts to a
-  # job, six, since its ten jobs on the native job's bridge run beside these. Three cases and seven
-  # readings of a cost skip themselves on a device that draws on the processor, each saying why.
+  # took on the runner, each part some 26 minutes on the runners' Xeon 6975P-C and 38 on the slowest
+  # of their processors. A push runs a part to a job, fourteen jobs beside the test job's three,
+  # which leaves three of the twenty jobs the account runs at once for the runs of its other
+  # repositories. A pack runs two parts to a job, seven, since its ten jobs on the native job's
+  # bridge run beside these. Three cases and seven readings of a cost skip themselves on a device
+  # that draws on the processor, each saying why.
   renderer:
     needs: [render-bridge]
     runs-on: ubuntu-24.04
-    # A part takes some 24 minutes with the setup and the build and a pair some 45, and up to 1.8
-    # times as long on the slowest of the runners' processors, so the limit holds a part, or two in
-    # a pack, and a part that hangs ends within it.
+    # A part takes some 28 minutes with the setup and the build on the 6975P-C and a pair some 54,
+    # and up to 1.5 times as long on the slowest of the runners' processors, so the limit holds a
+    # part, or two in a pack, and a part that hangs ends within it.
     timeout-minutes: ${{ inputs.pack && 105 || 60 }}
     strategy:
       fail-fast: false
       matrix:
-        parts: ${{ fromJSON(inputs.pack && '["1 2", "3 4", "5 6", "7 8", "9 10", "11 12"]' || '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"]') }}
+        parts: ${{ fromJSON(inputs.pack && '["1 2", "3 4", "5 6", "7 8", "9 10", "11 12", "13 14"]' || '["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14"]') }}
 
     steps:
       - uses: actions/checkout@v5
