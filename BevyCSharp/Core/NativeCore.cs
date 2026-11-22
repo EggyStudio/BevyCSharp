@@ -154,6 +154,15 @@ internal static unsafe partial class NativeCore
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
     internal static partial int bcs_input_key(int key, int action, byte* text, uint length);
 
+    /// <summary>
+    /// Holds the input from Bevy's own camera controllers while <paramref name="held"/> is not
+    /// zero, and lets it go when it is, what is down then staying hidden from them until it comes
+    /// up.
+    /// </summary>
+    [LibraryImport(Library)]
+    [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]
+    internal static partial int bcs_input_hold(int held);
+
     /// <summary>Copies Bevy's input messages since the last call, answering how many.</summary>
     [LibraryImport(Library)]
     [UnmanagedCallConv(CallConvs = [typeof(System.Runtime.CompilerServices.CallConvCdecl)])]

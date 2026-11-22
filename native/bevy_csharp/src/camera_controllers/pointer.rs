@@ -48,7 +48,8 @@ impl Plugin for PointerInputPlugin {
 }
 
 /// Starts a motion when a button is pressed or the wheel turns over a camera's viewport, and ends
-/// it when the button is let go or a zoom has run down.
+/// it when the button is let go or a zoom has run down. While a panel holds the program's input
+/// the motion under way ends and none starts.
 fn read_inputs(
     pointers: Query<(&PointerId, &PointerLocation)>,
     pointer_map: Res<CameraPointerMap>,
@@ -57,7 +58,16 @@ fn read_inputs(
     mouse_input: Res<ButtonInput<MouseButton>>,
     cameras: Query<(Entity, &Camera, &RenderTarget, &PanOrbitCamera)>,
     primary_window: Query<Entity, With<PrimaryWindow>>,
+    hold: Res<crate::input_hold::InputHold>,
 ) {
+    if hold.held() {
+        if let Some(&camera) = pointer_map.get(&PointerId::Mouse) {
+            controller.write(PanOrbitInput::End { camera });
+        }
+        mouse_wheel.clear();
+        return;
+    }
+
     let orbit_start = MouseButton::Right;
     let pan_start = MouseButton::Left;
     let zoom_stop = 0.0;
@@ -224,7 +234,15 @@ impl PanOrbitInput {
         mut camera_controllers: Query<&mut PanOrbitCamera>,
         mut mouse_wheel: MessageReader<MouseWheel>,
         mut moves: MessageReader<PointerInput>,
+        hold: Res<crate::input_hold::InputHold>,
     ) {
+        // Nothing moves a camera while a panel holds the program's input.
+        if hold.held() {
+            moves.clear();
+            mouse_wheel.clear();
+            return;
+        }
+
         let moves_list: Vec<_> = moves.read().collect();
         for (pointer, camera) in camera_map.iter() {
             let Ok(mut camera_controller) = camera_controllers.get_mut(*camera) else {

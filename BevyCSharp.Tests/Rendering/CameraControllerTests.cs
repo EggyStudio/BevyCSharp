@@ -109,6 +109,76 @@ public sealed unsafe class CameraControllerTests
     }
 
     /// <summary>
+    /// The free camera stands still while the settings panel is open, with its forward key pressed
+    /// under the panel and held as the panel closes, and moves once the key is let go and pressed
+    /// again.
+    /// </summary>
+    /// <remarks>
+    /// Bevy's controller reads Bevy's input in the bridge and not the managed side's, so the bridge
+    /// holds it by the managed side's word, and a panel the managed side holds the program's input
+    /// for and the bridge does not shows here as a camera walking under it.
+    /// </remarks>
+    [SkippableFact]
+    public void TheFreeCameraStandsStillWhileThePanelIsOpen()
+    {
+        Needs.Renderer();
+
+        var camera = Entity.None;
+        float before = 0f, open = 0f, closed = 0f, again = 0f;
+
+        var run = new PictureRun
+        {
+            Configure = config => config.CameraControllers = CameraControllers.Free,
+            Scene = ecs =>
+            {
+                camera = PictureRun.Camera(ecs);
+                Render.SetFreeCamera(camera, new FreeCameraSettings { WalkSpeed = 7f, Forward = Key.I });
+            },
+        };
+
+        try
+        {
+            run.Until("started", world => world.Resource<Time>().FrameCount >= 3)
+                .Do("open", world =>
+                {
+                    before = Z(world, camera);
+                    Debug.Panel.Open = true;
+                })
+                .Wait(3)
+                .Do("pressed under the panel", _ => SyntheticInput.Press(Key.I))
+                .Wait(20)
+                .Do("close", world =>
+                {
+                    open = Z(world, camera);
+                    Debug.Panel.Open = false;
+                })
+                .Wait(20)
+                .Do("let go", world =>
+                {
+                    closed = Z(world, camera);
+                    SyntheticInput.Lift(Key.I);
+                })
+                .Wait(5)
+                .Do("pressed again", _ => SyntheticInput.Press(Key.I))
+                .Wait(20)
+                .Do("moved", world =>
+                {
+                    SyntheticInput.Lift(Key.I);
+                    again = Z(world, camera);
+                })
+                .Go();
+        }
+        finally
+        {
+            Debug.Panel.Open = false;
+        }
+
+        Assert.True(MathF.Abs(open - before) < 0.01f, $"the camera walked from z {before} to {open} under the panel");
+        Assert.True(MathF.Abs(closed - before) < 0.01f, $"the camera walked from z {before} to {closed} on the key held as the panel closed");
+        Assert.True(again < closed - 0.1f, $"the camera stood at z {again} after the key was pressed again, from {closed}");
+    }
+
+    /// <summary>
     /// The pan camera zooms its 2D camera while its zoom key is held, and its settings read back the
     /// zoom it came to, which is the camera's scale.
     /// </summary>

@@ -348,8 +348,8 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 94 is open, the build on `284819d0` red on one scripted run's test in three jobs, its mend
-named for step 3's commit.
+Verdict 94 is settled at 23:11 on 2026-11-22, the build on `8089a06e` green with the scripted run's
+test mended. A drive script's change is followed by `ScriptedRunTests` before its report.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -1039,5 +1039,42 @@ with it. This engine posts the input as messages as well, so they keep to what t
 release for each press it read and a value back at rest always coming, and a touch down as the panel
 closes stays unseen until it ends, which 3DEngine's touches, held only while the hold lasts, leave
 out.
+
+NormTests passed, 19.
+
+159, part two, the bridge's hold on Bevy's camera controllers, in the commit carrying this.
+
+The hold. As the managed side's hold begins and ends it tells the bridge by a new entry point,
+`bcs_input_hold`, under the guard, with the ABI at 328 on both sides. Bevy's free and pan cameras
+read Bevy's input resources in the fixed main loop's first set, so the bridge swaps the keys, the
+mouse buttons, the mouse's motion and scroll and the touches for held copies around that set alone
+and puts them back after it, and every other reader in the frame, the interface and the managed side
+among them, reads them as they came. While the hold lasts every key and button comes up for the
+controllers in its first frame, so the free camera eases to a stop and lets the cursor go as it does
+when a hand lets go, and after that nothing is down and the mouse is still. As it ends, what is down
+stays hidden from them until it comes up, its release with it, as the managed side keeps it from the
+program. The pan-orbit camera's pointer, which the bridge reads itself, ends the drag under way as
+the hold begins and starts none and moves none while it lasts. No controller of Bevy's reads a pad,
+so the pads are left as they are. The swap is added only where the app asks for a controller.
+
+The test. `CameraControllerTests.TheFreeCameraStandsStillWhileThePanelIsOpen` opens the settings
+panel over a free camera, presses its forward key under the panel, holds it as the panel closes, and
+lets it go and presses it again, and the camera stands still through the first two and walks on the
+third. With the managed side's word to the bridge taken out, the camera walks under the panel and
+the test fails (N 3.1). The pan camera and the pan-orbit camera have no test of the hold of their
+own, as the review asked for one controller's, the pan camera's swap being the free camera's.
+
+The guides. The input guide's section says Bevy's controllers are held alike, the cameras guide's
+controllers part gains a paragraph pointing at it, and `Input`'s remarks say it.
+
+The bridge checks clean on its three profiles, its tests pass, 126 with no feature, and
+native/Cargo.lock is unmoved.
+
+The whole suite passed from one tree on an editor bridge with meshlets and Solari, 2,204 passed, 0
+failed and 5 skipped, 2,209 in all where the listing is 2,198, the solution built from nothing with
+warnings as errors, in 13 parts and the rest. The public listing and the cheatsheet are unchanged.
+
+Shared: 3DEngine's cameras read its managed input (`E3D.Cameras`), which its hold covers, so the
+bridge's part has no counterpart there.
 
 NormTests passed, 19.

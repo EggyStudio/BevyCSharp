@@ -28,7 +28,7 @@ namespace Bevy;
 /// nothing, and the keys that open and close the panels act as ever. A key, a button, a touch or a
 /// stick a hand holds as a panel closes stays unseen until it is let go, a stick until it comes
 /// back within a quarter of its travel of rest, so it is no fresh press. Bevy's own camera
-/// controllers, which read the input in the bridge, are not held.
+/// controllers, which read Bevy's input in the bridge, are held there alike.
 /// </para>
 /// </remarks>
 /// <example>

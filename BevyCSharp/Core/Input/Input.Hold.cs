@@ -57,12 +57,17 @@ public sealed partial class Input
     /// once the areas' work has opened or closed a panel, so the stages after read one answer, and
     /// as the hold ends keeps what is still down from the program.
     /// </summary>
+    /// <remarks>
+    /// The bridge is told as well, since Bevy's own camera controllers read Bevy's input there and
+    /// not this, and it holds them as this holds the program.
+    /// </remarks>
     internal void SyncHold()
     {
         var held = InterfaceHoldsInput();
         if (held == Held) return;
 
         Held = held;
+        _ = NativeCore.bcs_input_hold(held ? 1 : 0);
         if (held)
         {
             _heldAt = (_mouseX, _mouseY);

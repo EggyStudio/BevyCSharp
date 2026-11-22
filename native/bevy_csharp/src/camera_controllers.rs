@@ -110,6 +110,10 @@ pub struct BcsPanCamera {
 pub fn install(app: &mut bevy::app::App, controllers: u32) {
     use bevy::camera_controller::{free_camera, pan_camera, pan_orbit_camera};
 
+    // Each controller is held while a panel holds the program's input.
+    if controllers & (FREE | PAN | PAN_ORBIT) != 0 {
+        crate::input_hold::install(app);
+    }
     if controllers & FREE != 0 {
         app.add_plugins(free_camera::FreeCameraPlugin);
     }

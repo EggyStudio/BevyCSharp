@@ -145,6 +145,11 @@ Render.LookTo(camera, -Vec3.UnitY);                         // look down from th
 Render.DollyZoom(camera, CameraProjection.Orthographic);    // narrow to an orthographic view
 ```
 
+While the Diagnostics module's console or settings panel is open, each controller reads nothing
+pressed or moved, as the program does, and a key held as the panel closes moves no camera until it
+is let go and pressed again
+([An open console holds the program's input](input.md#an-open-console-holds-the-programs-input)).
+
 ### Shadows
 
 Shadows are tuned per light and sized globally:

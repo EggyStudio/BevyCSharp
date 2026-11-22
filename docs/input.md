@@ -123,7 +123,9 @@ and the overlay, which only shows, holds nothing.
 A key, a button, a touch or a stick a hand holds as the panel closes stays unseen until it is let
 go, a stick until it comes back within a quarter of its travel of rest, so the key that closed the
 console and a stick pushed through the panel's rows are no fresh press of the program's. Bevy's own
-camera controllers, which read the input in the bridge, are not held.
+camera controllers, which read Bevy's input in the bridge, are held alike, every key and button
+coming up for them as the panel opens, so the free camera eases to a stop and lets the cursor go,
+and a pan-orbit camera's drag ends.
 
 ## Each change as a message
 
