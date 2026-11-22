@@ -15,12 +15,12 @@
     </ItemGroup>
 
     <!--
-      The Vegetation module, and the Sky module whose weather the wind reads, whose assemblies
-      packages below this one carry, so they are referenced for the compile alone.
+      The Vegetation module, and the Atmosphere module whose weather the wind reads, whose
+      assemblies packages below this one carry, so they are referenced for the compile alone.
     -->
     <ItemGroup>
         <ProjectReference Include="../../modules/Vegetation/Vegetation/Vegetation.csproj" PrivateAssets="all"/>
-        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../../modules/Atmosphere/Atmosphere/Atmosphere.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
 

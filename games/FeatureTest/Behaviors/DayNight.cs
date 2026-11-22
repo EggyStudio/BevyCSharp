@@ -1,7 +1,7 @@
+using Atmosphere;
 using Bevy;
 using Bevy.Reflected;
 using Diagnostics;
-using Sky;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 
@@ -22,18 +22,19 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// <para>
 /// Bevy's atmosphere scatters the light of every directional light, so the pale blue of a moonlit
 /// sky comes from it, and <see cref="Render.SetSkyLighting"/> lights the scene from that sky as it
-/// changes. The moon's own disc, with its phase, is the night sky's, so its light draws none. The atmosphere
-/// also dims and reddens a low sun's light on whatever it falls on, so the sun's color curve warms
-/// it a little only. The lights' strengths and colors are curves by the hour, each light's
-/// strength brought to nothing as it reaches the horizon, and the one that is up casts the shadows,
-/// so a night costs no more shadow views than a day.
+/// changes. The moon's own disc, with its phase, is the night sky's, so its light draws none. The
+/// atmosphere also dims and reddens a low sun's light on whatever it falls on, so the sun's color
+/// curve warms it a little only. The lights' strengths and colors are curves by the hour, each
+/// light's strength brought to nothing as it reaches the horizon, and the one that is up casts the
+/// shadows, so a night costs no more shadow views than a day.
 /// </para>
 /// <para>
-/// The stars, the galaxy and the moon are the engine's night sky (<see cref="RenderSky.extension(Render).SetNightSky"/>),
-/// which <see cref="Applied"/> gives the camera under the atmosphere with this clock, so they turn
-/// about the pole star with the hours and come out as the sun goes down. The moon's light is its
-/// curve by the hour times the share of its face the sun lights. Under the dusk backdrop the sky
-/// stays the dusk one, and the sun and the moon go on moving.
+/// The stars, the galaxy and the moon are the engine's night sky
+/// (<see cref="RenderSky.extension(Render).SetNightSky"/>), which <see cref="Applied"/> gives the
+/// camera under the atmosphere with this clock, so they turn about the pole star with the hours and
+/// come out as the sun goes down. The moon's light is its curve by the hour times the share of its
+/// face the sun lights. Under the dusk backdrop the sky stays the dusk one, and the sun and the
+/// moon go on moving.
 /// </para>
 /// <para>
 /// The camera is held at Bevy's own exposure of EV 9.7 by day and at a moonlit ground's camera,
@@ -60,10 +61,15 @@ public partial struct DayNight
     /// <summary>A light's strength and color at an hour, one key of a curve.</summary>
     private readonly record struct Key(float Hour, float Light, float R, float G, float B);
 
-    /// <summary>The sun above the air, the curve's noon strength in lux and white, which the atmosphere dims.</summary>
+    /// <summary>
+    /// The sun above the air, the curve's noon strength in lux and white, which the atmosphere
+    /// dims.
+    /// </summary>
     private static readonly (float Light, Color Color) RawSun = (12_500f, new Color(1f, 0.98f, 0.95f));
 
-    /// <summary>The sun's illuminance in lux and its color, by the hour, where no atmosphere dims it.</summary>
+    /// <summary>
+    /// The sun's illuminance in lux and its color, by the hour, where no atmosphere dims it.
+    /// </summary>
     private static readonly Key[] Sunlight =
     [
         new(0f, 0f, 1f, 0.6f, 0.4f),
@@ -78,7 +84,9 @@ public partial struct DayNight
         new(24f, 0f, 1f, 0.6f, 0.4f),
     ];
 
-    /// <summary>The moon's illuminance in lux and its color, by the hour, in the day's terms.</summary>
+    /// <summary>
+    /// The moon's illuminance in lux and its color, by the hour, in the day's terms.
+    /// </summary>
     /// <remarks>
     /// Under the night's lens it gives about a lux, some three times a full moon's 0.31, so a night
     /// here can still be walked in by a tester.
@@ -162,12 +170,15 @@ public partial struct DayNight
     private static readonly float NightEv100 =
         MathF.Log2(NightLens.Aperture * NightLens.Aperture / NightLens.Shutter) - MathF.Log2(NightLens.Sensitivity / 100f);
 
-    /// <summary>Whether the camera holds the night's lens, from 18:45 to 5:30, while the moon gives its whole light.</summary>
+    /// <summary>
+    /// Whether the camera holds the night's lens, from 18:45 to 5:30, while the moon gives its
+    /// whole light.
+    /// </summary>
     internal static bool Night => Sky.Hour is >= 18.75f or <= 5.5f;
 
     /// <summary>
-    /// What the lights the day steers and the night sky's nits are taken by, 1 by day and about 1/905
-    /// by night, what the moonlit ground's lens takes the picture up by.
+    /// What the lights the day steers and the night sky's nits are taken by, 1 by day and about
+    /// 1/905 by night, what the moonlit ground's lens takes the picture up by.
     /// </summary>
     internal static float LensScale => Night ? MathF.Pow(2f, NightEv100 - DayEv100) : 1f;
 
@@ -233,10 +244,11 @@ public partial struct DayNight
         var moon = Of(Sky.MoonDirection);
         var shadows = settings.Shadows && !Render.RayTracingActive;
 
-        // Under the atmosphere the sun shines as it does above the air, its noon strength and white,
-        // and Bevy's lighting dims and reddens it through the air the atmosphere describes, setting
-        // it behind the planet, so the curve's reddening and its fade at the horizon, which would
-        // count the air twice and leave the sunset no light to scatter, are kept for the dusk sky.
+        // Under the atmosphere the sun shines as it does above the air, its noon strength and
+        // white, and Bevy's lighting dims and reddens it through the air the atmosphere describes,
+        // setting it behind the planet, so the curve's reddening and its fade at the horizon, which
+        // would count the air twice and leave the sunset no light to scatter, are kept for the dusk
+        // sky.
         var raw = Applied.AtmosphereDrawn;
         Shine(ctx.Ecs, Scene.Sun, sun, raw ? RawSun : At(Sunlight, hour), scale, shadows && sun.Y > 0f, fade: !raw);
         var (moonlight, moonColor) = At(Moonlight, hour);
@@ -254,7 +266,10 @@ public partial struct DayNight
             Render.SetLook(camera, Cycle.At(Sky.SunAltitude));
     }
 
-    /// <summary>The day's look, keyed by the sun's height, which the camera follows while the graphics page asks for it.</summary>
+    /// <summary>
+    /// The day's look, keyed by the sun's height, which the camera follows while the graphics page
+    /// asks for it.
+    /// </summary>
     private static readonly LookCycle Cycle = Calmer(LookCycle.Day());
 
     /// <summary>
@@ -387,6 +402,8 @@ public partial struct DayNight
     /// <summary>An hour brought into the day, from zero up to twenty four.</summary>
     private static float Wrap(float hour) => ((hour % 24f) + 24f) % 24f;
 
-    /// <summary>A way the Sky module gives, in System.Numerics' vectors, as one of the engine's.</summary>
+    /// <summary>
+    /// A way the Atmosphere module gives, in System.Numerics' vectors, as one of the engine's.
+    /// </summary>
     private static Vec3 Of(System.Numerics.Vector3 value) => new(value.X, value.Y, value.Z);
 }

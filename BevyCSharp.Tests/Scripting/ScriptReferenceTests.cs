@@ -10,10 +10,11 @@ namespace Bevy.Tests;
 /// compiled code does, the host compiling it against every assembly the library names.
 /// </summary>
 /// <remarks>
-/// <c>Render.SetWeather</c> takes the Sky module's WeatherState, whose assembly the process loads
-/// only once something has set a weather, so a host compiling against the loaded assemblies alone
-/// fails the script for want of the type, though nothing in it is wrong. The assemblies the host
-/// walks are read from it as well, since what a test process has loaded before covers a gap there.
+/// <c>Render.SetWeather</c> takes the Atmosphere module's WeatherState, whose assembly the process
+/// loads only once something has set a weather, so a host compiling against the loaded assemblies
+/// alone fails the script for want of the type, though nothing in it is wrong. The assemblies the
+/// host walks are read from it as well, since what a test process has loaded before covers a gap
+/// there.
 /// </remarks>
 [Collection("engine")]
 public sealed class ScriptReferenceTests : IDisposable
@@ -31,8 +32,8 @@ public sealed class ScriptReferenceTests : IDisposable
         try
         {
             File.WriteAllText(_folder.File("Weathered.cs"), """
+                using Atmosphere;
                 using Bevy;
-                using Sky;
 
                 namespace Weathered;
 
@@ -61,7 +62,7 @@ public sealed class ScriptReferenceTests : IDisposable
     {
         var named = (Assembly[])typeof(ScriptHost).GetField("Named", BindingFlags.NonPublic | BindingFlags.Static)!.GetValue(null)!;
         var names = named.Select(assembly => assembly.GetName().Name).ToHashSet(StringComparer.Ordinal);
-        var missing = EngineAssemblies.Names.Concat(["Levels", "Sky", "Vegetation"]).Where(name => !names.Contains(name)).ToList();
+        var missing = EngineAssemblies.Names.Concat(["Levels", "Vegetation", "3DEngine.Atmosphere"]).Where(name => !names.Contains(name)).ToList();
         Assert.True(missing.Count == 0, $"the script host compiles against no {string.Join(", ", missing)}");
     }
 }

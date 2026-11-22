@@ -298,7 +298,7 @@ to the engine's own grading.
 A look takes the tonemapper's place:
 
 <!-- compiled with:
-using Sky;
+using Atmosphere;
 Entity camera = default;
 -->
 ```csharp
@@ -317,13 +317,13 @@ shaders tonemap Minecraft by, set by the same four numbers, and `LookSettings.Vi
 after bloom and the effects and before the antialiasing, and needs `Hdr`. While it is on, the
 tonemapper and what Bevy applies as it tonemaps, the grade above, its dithering and its auto
 exposure, are left out, and `null` gives them back. The console's `camera.look` sets it while the
-app runs. The look's settings, its curves and the cycle below are the Sky module's, in the namespace
-`Sky`, as the sky's clock is ([the sky](sky-and-reflections.md)).
+app runs. The look's settings, its curves and the cycle below are the Atmosphere module's, in the
+namespace `Atmosphere`, as the sky's clock is ([the sky](sky-and-reflections.md)).
 
 A look can follow the sun through the day, a timecycle keyed by the sun's height:
 
 <!-- compiled with:
-using Sky;
+using Atmosphere;
 Entity camera = default;
 float sunDegrees = default;
 -->

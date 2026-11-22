@@ -1,10 +1,13 @@
+using Atmosphere;
 using Bevy;
-using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, read off pictures of the sky.</summary>
+/// <summary>
+/// The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, read
+/// off pictures of the sky.
+/// </summary>
 [Collection("engine")]
 public sealed class NightSkyTests
 {
@@ -20,8 +23,8 @@ public sealed class NightSkyTests
     }
 
     /// <summary>
-    /// The night sky drawn 4,450 units from the world's origin along two axes is the one drawn at it,
-    /// each star where it stands at the origin and as round.
+    /// The night sky drawn 4,450 units from the world's origin along two axes is the one drawn at
+    /// it, each star where it stands at the origin and as round.
     /// </summary>
     /// <remarks>
     /// A pixel's way into the sky is taken from the view's own numbers and turned into the world's
@@ -77,7 +80,8 @@ public sealed class NightSkyTests
         var settings = new NightSkySettings { Clock = clock, Stars = 0f, Galaxy = 0f, MoonSize = 6f };
         var picture = Sky(settings, clock, towardMoon: true);
 
-        // Half the moon's radius toward the sun and away from it, along the sun's way across the picture.
+        // Half the moon's radius toward the sun and away from it, along the sun's way across the
+        // picture.
         var forward = Of(clock.MoonDirection);
         var right = Vec3.Cross(forward, Vec3.UnitY).Normalized;
         var up = Vec3.Cross(right, forward);
@@ -126,8 +130,8 @@ public sealed class NightSkyTests
     }
 
     // The sky from two meters over `at`, looking sixty degrees up toward the south, or at the moon,
-    // under an atmosphere lit by the clock's sun or under none, with the night sky or none, over the
-    // whole window or its left half beside a camera seeing nothing (PictureRun.Beside).
+    // under an atmosphere lit by the clock's sun or under none, with the night sky or none, over
+    // the whole window or its left half beside a camera seeing nothing (PictureRun.Beside).
     private static CapturedImage Sky(NightSkySettings? settings, SkyClock clock, bool atmosphere = false, bool towardMoon = false, Vec3 at = default, bool split = false)
     {
         var run = new PictureRun
@@ -163,6 +167,6 @@ public sealed class NightSkyTests
         return run.Picture("sky");
     }
 
-    // The Sky module works in System.Numerics' vectors.
+    // The Atmosphere module works in System.Numerics' vectors.
     private static Vec3 Of(System.Numerics.Vector3 value) => new(value.X, value.Y, value.Z);
 }

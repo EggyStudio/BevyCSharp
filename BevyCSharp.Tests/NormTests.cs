@@ -365,7 +365,7 @@ public sealed partial class NormTests
         // Every project's assembly with its documentation in the lib folder, the modules' beside
         // them, since none of them is a package of its own, and the generator, its code fixes and
         // the props and targets a game's build takes.
-        var wanted = EngineAssemblies.Names.Concat(["Levels", "Sky", "Vegetation", "3DEngine.Diagnostics", "3DEngine.Diagnostics.ImGui"])
+        var wanted = EngineAssemblies.Names.Concat(["Levels", "Vegetation", "3DEngine.Atmosphere", "3DEngine.Diagnostics", "3DEngine.Diagnostics.ImGui"])
             .SelectMany(name => new[] { $"lib/net10.0/{name}.dll", $"lib/net10.0/{name}.xml" })
             .Concat(["README.md", "analyzers/dotnet/cs/BevyCSharp.Generator.dll", "analyzers/dotnet/cs/BevyCSharp.CodeFixes.dll", "build/BevyCSharp.props", "build/BevyCSharp.targets"])
             .ToList();

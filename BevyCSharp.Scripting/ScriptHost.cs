@@ -51,7 +51,10 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>What went wrong with the last build, or null when it worked.</summary>
     public string? LastError { get; private set; }
 
-    /// <summary>Whether the last build failed because a script could not be read, which a later try may get past.</summary>
+    /// <summary>
+    /// Whether the last build failed because a script could not be read, which a later try may get
+    /// past.
+    /// </summary>
     public bool Unread { get; private set; }
 
     /// <summary>Whether a generation runs.</summary>
@@ -60,7 +63,9 @@ public sealed class ScriptHost(App app, string directory)
     /// <summary>
     /// Compiles the directory and puts the result in place of whatever was there.
     /// </summary>
-    /// <returns>Whether the build succeeded. A failure leaves the previous generation running.</returns>
+    /// <returns>
+    /// Whether the build succeeded. A failure leaves the previous generation running.
+    /// </returns>
     public bool Reload()
     {
         var sources = Sources();
@@ -142,7 +147,10 @@ public sealed class ScriptHost(App app, string directory)
         return true;
     }
 
-    /// <summary>Retires the running generation and forgets what it was built from, as a folder emptied of scripts asks.</summary>
+    /// <summary>
+    /// Retires the running generation and forgets what it was built from, as a folder emptied of
+    /// scripts asks.
+    /// </summary>
     public void Clear()
     {
         Retire();
@@ -318,10 +326,10 @@ public sealed class ScriptHost(App app, string directory)
     /// <para>
     /// The process loads an assembly the first time code that runs names one of its types, so the
     /// loaded ones leave out an assembly the library's members name that nothing has run into, as
-    /// the Sky module's before any weather is set, whose WeatherState <c>Render.SetWeather</c>
-    /// takes. A script calling such a member does not compile without the assembly that declares
-    /// the type, though a game's compiled code calls it freely, its build referencing what the
-    /// library does.
+    /// the Atmosphere module's before any weather is set, whose WeatherState
+    /// <c>Render.SetWeather</c> takes. A script calling such a member does not compile without the
+    /// assembly that declares the type, though a game's compiled code calls it freely, its build
+    /// referencing what the library does.
     /// </para>
     /// </remarks>
     public static MetadataReference[] References() => [.. AppDomain.CurrentDomain

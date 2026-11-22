@@ -16,11 +16,11 @@
     </ItemGroup>
 
     <!--
-      The Sky module, whose assembly a package below this one carries, so it is referenced for
-      the compile alone.
+      The Atmosphere module, whose assembly a package below this one carries, so it is
+      referenced for the compile alone.
     -->
     <ItemGroup>
-        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../../modules/Atmosphere/Atmosphere/Atmosphere.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
     <!--

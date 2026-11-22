@@ -1,10 +1,10 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using Atmosphere;
 using Bevy;
 using Bevy.Reflected;
 using Diagnostics;
-using Sky;
 
 namespace BevyCSharp.FeatureTest;
 
@@ -39,19 +39,26 @@ public enum Backdrop
     Dusk,
 }
 
-/// <summary>How the picture's light becomes what the screen shows, as the graphics page offers it.</summary>
+/// <summary>
+/// How the picture's light becomes what the screen shows, as the graphics page offers it.
+/// </summary>
 public enum Look
 {
     /// <summary>The tonemapper the graphics page names.</summary>
     Tonemapper,
 
-    /// <summary>The engine's curve in the tonemapper's place, everything under its knee as drawn.</summary>
+    /// <summary>
+    /// The engine's curve in the tonemapper's place, everything under its knee as drawn.
+    /// </summary>
     Engine,
 
     /// <summary>The vivid look, the shadows darkened and the colors deepened.</summary>
     Vivid,
 
-    /// <summary>The vivid look by day with its saturation calmed, warmer toward sunset, bluer through the twilight and cool at night.</summary>
+    /// <summary>
+    /// The vivid look by day with its saturation calmed, warmer toward sunset, bluer through the
+    /// twilight and cool at night.
+    /// </summary>
     Day,
 }
 
@@ -81,13 +88,17 @@ public enum WeatherQuality
     /// </summary>
     Off,
 
-    /// <summary>The clouds marched in the fewest steps, the fog in the fewest froxels and the fewest drops.</summary>
+    /// <summary>
+    /// The clouds marched in the fewest steps, the fog in the fewest froxels and the fewest drops.
+    /// </summary>
     Low,
 
     /// <summary>The engine's own for each.</summary>
     Medium,
 
-    /// <summary>The clouds in the most steps, the fog in the most froxels and the most drops.</summary>
+    /// <summary>
+    /// The clouds in the most steps, the fog in the most froxels and the most drops.
+    /// </summary>
     High,
 }
 
@@ -132,10 +143,15 @@ public sealed record FeatureSettings
     /// <summary>The tier last chosen, which set the four above.</summary>
     public Quality Quality { get; init; } = Quality.High;
 
-    /// <summary>How the picture's light is brought into what a screen can show, where the look leaves it to a tonemapper.</summary>
+    /// <summary>
+    /// How the picture's light is brought into what a screen can show, where the look leaves it to
+    /// a tonemapper.
+    /// </summary>
     public Tonemapper Tonemapper { get; init; } = Tonemapper.TonyMcMapface;
 
-    /// <summary>The look the picture is shown with in the tonemapper's place, or the tonemapper.</summary>
+    /// <summary>
+    /// The look the picture is shown with in the tonemapper's place, or the tonemapper.
+    /// </summary>
     public Look Look { get; init; } = Look.Day;
 
     /// <summary>

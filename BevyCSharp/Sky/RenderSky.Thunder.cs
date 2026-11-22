@@ -9,31 +9,35 @@ public static partial class RenderSky
     extension(Render)
     {
         /// <summary>
-        /// Brings a thunderstorm about a camera, lightning striking as <paramref name="settings"/> says,
-        /// or with <see langword="null"/> ends it. Only valid inside a system.
+        /// Brings a thunderstorm about a camera, lightning striking as <paramref name="settings"/>
+        /// says, or with <see langword="null"/> ends it. Only valid inside a system.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The strikes are timed and placed on the CPU every frame from the game's clock. A strike's
-        /// flash lights the scene through a point light at its bolt, which the fog in froxels takes as
-        /// it takes any lamp, lights the camera's clouds from within (<see cref="SetClouds"/>), and
-        /// draws its bolt added to the picture after temporal antialiasing, from the clouds' base, or a
-        /// kilometer and a half up where the camera has no clouds, to the ground at the camera's height
-        /// less two meters. The thunder is written into a stream of samples as it plays (see
-        /// <see cref="Audio.CreateSampleStream"/>), where the app has audio, and none is heard where it
-        /// has none.
+        /// The strikes are timed and placed on the CPU every frame from the game's clock. A
+        /// strike's flash lights the scene through a point light at its bolt, which the fog in
+        /// froxels takes as it takes any lamp, lights the camera's clouds from within
+        /// (<see cref="SetClouds"/>), and draws its bolt added to the picture after temporal
+        /// antialiasing, from the clouds' base, or a kilometer and a half up where the camera has
+        /// no clouds, to the ground at the camera's height less two meters. The thunder is written
+        /// into a stream of samples as it plays (see <see cref="Audio.CreateSampleStream"/>), where
+        /// the app has audio, and none is heard where it has none.
         /// </para>
         /// <para>
-        /// Settings given again every frame, as <see cref="SetWeather"/> gives them, keep the storm's
-        /// strikes and clock and take the numbers alone.
+        /// Settings given again every frame, as <see cref="SetWeather"/> gives them, keep the
+        /// storm's strikes and clock and take the numbers alone.
         /// </para>
         /// </remarks>
         /// <param name="camera">The camera.</param>
         /// <param name="settings">How the storm strikes, or null to end it.</param>
-        /// <exception cref="ArgumentOutOfRangeException">The rate, the brightness or the volume is under none or not a number, or the nearest strike is not nearer than the farthest.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The rate, the brightness or the volume is under none or not a number, or the nearest
+        /// strike is not nearer than the farthest.
+        /// </exception>
         /// <example>
         /// <code>
-        /// Render.SetThunder(camera, new ThunderSettings { Rate = 4f, Struck = strike => Shake(strike.Distance) });
+        /// Render.SetThunder(camera,
+        ///     new ThunderSettings { Rate = 4f, Struck = strike => Shake(strike.Distance) });
         /// </code>
         /// </example>
         public static void SetThunder(Entity camera, ThunderSettings? settings)
@@ -54,18 +58,26 @@ public static partial class RenderSky
         }
 
         /// <summary>
-        /// Strikes lightning about a camera with a thunderstorm at once, at a place on the ground or
-        /// somewhere between its storm's nearest and farthest. Only valid inside a system.
+        /// Strikes lightning about a camera with a thunderstorm at once, at a place on the ground
+        /// or somewhere between its storm's nearest and farthest. Only valid inside a system.
         /// </summary>
-        /// <remarks>For a storm a game times itself, a strike at a story's turn or at a tower.</remarks>
+        /// <remarks>
+        /// For a storm a game times itself, a strike at a story's turn or at a tower.
+        /// </remarks>
         /// <param name="camera">A camera given a storm by <see cref="SetThunder"/>.</param>
-        /// <param name="at">Where on the ground the bolt lands, or none for the storm to choose. A height not a number lands it at the camera's height less two meters.</param>
+        /// <param name="at">
+        /// Where on the ground the bolt lands, or none for the storm to choose. A height not a
+        /// number lands it at the camera's height less two meters.
+        /// </param>
         /// <returns>The strike, or none where the camera has no storm.</returns>
-        public static LightningStrike? StrikeLightning(Entity camera, Vec3? at = null) => SkyThunder.Strike(camera, at, toGround: true);
+        public static ThunderStrike? StrikeLightning(Entity camera, Vec3? at = null) => SkyThunder.Strike(camera, at, toGround: true);
     }
 }
 
-/// <summary>The thunderstorms <see cref="RenderSky.extension(Render).SetThunder"/> brings about cameras, an app's own.</summary>
+/// <summary>
+/// The thunderstorms <see cref="RenderSky.extension(Render).SetThunder"/> brings about cameras, an
+/// app's own.
+/// </summary>
 internal static class SkyThunder
 {
     // Drawn before the rain, its owner's name sorting before the rain's, so the drops in front of a
@@ -81,8 +93,8 @@ internal static class SkyThunder
     private static App? _app;
     private static readonly Dictionary<ulong, Storm> Storms = [];
     private static readonly List<Entity> Dropped = [];
-    // Streams the thunder is written into, kept for the next clap once one is heard out, and whether
-    // the app has audio to play them.
+    // Streams the thunder is written into, kept for the next clap once one is heard out, and
+    // whether the app has audio to play them.
     private static readonly Stack<AssetHandle> Streams = [];
     private static bool _soundless;
 
@@ -90,7 +102,8 @@ internal static class SkyThunder
     {
         internal required ThunderSettings Settings { get; set; }
         internal required Random Random { get; init; }
-        // What is left of the share of a strike the storm spends at its rate, none until it is drawn.
+        // What is left of the share of a strike the storm spends at its rate, none until it is
+        // drawn.
         internal float Left { get; set; } = float.NaN;
         internal Flash? Flash { get; set; }
         internal Entity Light { get; set; } = Entity.None;
@@ -155,14 +168,19 @@ internal static class SkyThunder
         foreach (var clap in storm.Claps) Hush(clap);
     }
 
-    /// <summary>The cameras with a storm in the running app, with the settings each was given.</summary>
+    /// <summary>
+    /// The cameras with a storm in the running app, with the settings each was given.
+    /// </summary>
     internal static IEnumerable<(Entity Camera, ThunderSettings Settings)> All()
     {
         ForgetOtherApps();
         return Storms.Select(storm => (new Entity(storm.Key), storm.Value.Settings));
     }
 
-    /// <summary>The glow of the strike flashing in a camera's clouds this frame, its middle and its light, or none.</summary>
+    /// <summary>
+    /// The glow of the strike flashing in a camera's clouds this frame, its middle and its light,
+    /// or none.
+    /// </summary>
     internal static (Vec3 Middle, float Light, Vector3 Color, float Radius)? GlowFor(Entity camera)
     {
         ForgetOtherApps();
@@ -175,8 +193,10 @@ internal static class SkyThunder
         return (flash.Glow, light * strength, FlashColor, GlowRadius);
     }
 
-    /// <summary>Strikes at once about a camera with a storm, at a place or where the storm chooses.</summary>
-    internal static LightningStrike? Strike(Entity camera, Vec3? at, bool toGround)
+    /// <summary>
+    /// Strikes at once about a camera with a storm, at a place or where the storm chooses.
+    /// </summary>
+    internal static ThunderStrike? Strike(Entity camera, Vec3? at, bool toGround)
     {
         ForgetOtherApps();
         if (!Storms.TryGetValue(camera.Bits, out var storm) || App.Running is not { } app) return null;
@@ -202,11 +222,11 @@ internal static class SkyThunder
             var camera = new Entity(bits);
             if (!ecs.IsAlive(camera)) continue;
 
-            // The strikes a Poisson process at the rate the storm has each frame, as many a minute on
-            // average with no beat to them however the rate moves. The storm holds a share of one
-            // strike drawn from an exponential spread and spends it at the frame's rate, striking
-            // when it is spent, so a storm a weather eases into strikes as its rate climbs rather
-            // than after a gap drawn once from the first, smallest rate it had.
+            // The strikes a Poisson process at the rate the storm has each frame, as many a minute
+            // on average with no beat to them however the rate moves. The storm holds a share of
+            // one strike drawn from an exponential spread and spends it at the frame's rate,
+            // striking when it is spent, so a storm a weather eases into strikes as its rate climbs
+            // rather than after a gap drawn once from the first, smallest rate it had.
             var rate = storm.Settings.Rate;
             if (float.IsNaN(storm.Left)) storm.Left = Share(storm.Random);
             if (rate > 0f)
@@ -225,8 +245,8 @@ internal static class SkyThunder
     }
 
     /// <summary>
-    /// The brightness of a strike's flash, from 0 to 1, so far through it, a fast rise and a fall with
-    /// the flicker of two or three return strokes at the seed's times on top.
+    /// The brightness of a strike's flash, from 0 to 1, so far through it, a fast rise and a fall
+    /// with the flicker of two or three return strokes at the seed's times on top.
     /// </summary>
     internal static float Envelope(float elapsed, float duration, uint seed)
     {
@@ -245,13 +265,15 @@ internal static class SkyThunder
     }
 
     /// <summary>A share of one strike from an exponential spread, one on average.</summary>
-    /// <remarks>Spent at a steady rate a minute, it is a gap of sixty over the rate seconds on average.</remarks>
+    /// <remarks>
+    /// Spent at a steady rate a minute, it is a gap of sixty over the rate seconds on average.
+    /// </remarks>
     internal static float Share(Random random) =>
         -MathF.Log(Math.Clamp(random.NextSingle(), 1e-6f, 1f - 1e-6f));
 
-    // Begins a strike about the camera, at a place or at a distance spread as evenly over the ground
-    // as rings of it grow, and tells the game.
-    private static LightningStrike Begin(EcsWorld ecs, Entity camera, Storm storm, Vec3? at, bool toGround)
+    // Begins a strike about the camera, at a place or at a distance spread as evenly over the
+    // ground as rings of it grow, and tells the game.
+    private static ThunderStrike Begin(EcsWorld ecs, Entity camera, Storm storm, Vec3? at, bool toGround)
     {
         var settings = storm.Settings;
         var eye = ecs.GetOrDefault<GlobalTransform>(camera).Translation;
@@ -319,7 +341,7 @@ internal static class SkyThunder
         }
 
         var distance = (new Vec3(ground.X, eye.Y, ground.Z) - eye).Length;
-        var strike = new LightningStrike(toGround ? ground : glow, distance, distance / SpeedOfSound, toGround);
+        var strike = new ThunderStrike(toGround ? ground : glow, distance, distance / SpeedOfSound, toGround);
         if (settings.Sound && !_soundless)
             storm.Claps.Add(new Clap { Sound = new ThunderSound(Math.Max(distance, settings.Nearest), settings.Volume, seed), Bus = settings.Bus, Delay = strike.ThunderDelay });
         settings.Struck?.Invoke(strike);

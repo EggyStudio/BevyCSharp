@@ -6,7 +6,7 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The feature test's fog over its map in clear weather (<see cref="MapFog"/>, one file of the game
-/// compiled in for this test), held to the clear air of the Sky module's Earth.
+/// compiled in for this test), held to the clear air of the Atmosphere module's Earth.
 /// </summary>
 public sealed class FeatureTestMapFogTests
 {

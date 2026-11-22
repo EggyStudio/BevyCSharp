@@ -1,10 +1,10 @@
-using Sky;
+using Atmosphere;
 
 namespace Bevy;
 
 /// <summary>
-/// The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, the stars, the galaxy and
-/// the moon, standing where <see cref="Clock"/> puts them.
+/// The sky behind the atmosphere <see cref="RenderSky.extension(Render).SetNightSky"/> draws, the
+/// stars, the galaxy and the moon, standing where <see cref="Clock"/> puts them.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -23,16 +23,25 @@ namespace Bevy;
 /// </remarks>
 public sealed class NightSkySettings
 {
-    /// <summary>The clock the sky stands by, which the program moves on and the sky reads every frame.</summary>
+    /// <summary>
+    /// The clock the sky stands by, which the program moves on and the sky reads every frame.
+    /// </summary>
     public SkyClock Clock { get; set; } = new();
 
-    /// <summary>The brightest star's light, in nits, 600 unless set, most a small share of it.</summary>
+    /// <summary>
+    /// The brightest star's light, in nits, 600 unless set, most a small share of it.
+    /// </summary>
     public float Stars { get; set; } = 600f;
 
-    /// <summary>How many cells the stars' grid has along each face of the cube about the sky, a star in one cell of five, 160 unless set.</summary>
+    /// <summary>
+    /// How many cells the stars' grid has along each face of the cube about the sky, a star in one
+    /// cell of five, 160 unless set.
+    /// </summary>
     public float StarGrid { get; set; } = 160f;
 
-    /// <summary>How much the stars twinkle near the horizon, from none at 0, 0.35 unless set.</summary>
+    /// <summary>
+    /// How much the stars twinkle near the horizon, from none at 0, 0.35 unless set.
+    /// </summary>
     public float Twinkle { get; set; } = 0.35f;
 
     /// <summary>The galaxy's light where its band is brightest, in nits, 25 unless set.</summary>
@@ -41,9 +50,14 @@ public sealed class NightSkySettings
     /// <summary>The full moon's light, in nits, 4,000 unless set.</summary>
     public float Moon { get; set; } = 4000f;
 
-    /// <summary>How wide the moon looks, in degrees, 0.7 unless set, a little larger than the real one's half a degree.</summary>
+    /// <summary>
+    /// How wide the moon looks, in degrees, 0.7 unless set, a little larger than the real one's
+    /// half a degree.
+    /// </summary>
     public float MoonSize { get; set; } = 0.7f;
 
-    /// <summary>The share of the full moon's light the earth sends to its dark part, 0.012 unless set.</summary>
+    /// <summary>
+    /// The share of the full moon's light the earth sends to its dark part, 0.012 unless set.
+    /// </summary>
     public float Earthshine { get; set; } = 0.012f;
 }

@@ -324,6 +324,28 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     Escape with the panel open goes back a page and the window stays, the guides and the cheatsheet
     say it, and it goes with the held commit's follow-up or as a small commit of its own.
 
+159. **An open console or settings panel holds all input from the program.** With the settings panel
+    open, the pad and the keys that change a row also drive the scene behind it. The Diagnostics
+    module answers whether a panel that takes input is open, and while it does the bridge's input,
+    keyboard, pointer, wheel and pad, reads to a program as though nothing were pressed or moved.
+    The overlay holds nothing, the diagnostics' own keys still act, and a held key or stick at the
+    moment a panel closes does not fire as a fresh press. A test holds it for the feature test with
+    a pad's stick and a key, the guides say it, and it comes with the module's pin as a small commit
+    of its own after step 3.
+
+160. **The window's settings in the panel.** The settings panel holds nothing of the window itself.
+    A page `window` gains `window.mode` with the choices windowed, borderless and fullscreen,
+    `window.resizable`, `window.width` and `window.height` for the windowed mode as two settings,
+    `window.monitor` naming the screen where more than one is there, and `window.vsync` where it is
+    not listed already. A command of a setting's name gives the name to the setting. Each acts at
+    once where the system allows it and says "at the next start" on its row where it does not, they
+    are saved with the other settings and applied at the next start before the first frame is shown,
+    and a mode the system refuses answers in the console and keeps the one before. Borderless covers
+    the screen the window is on with no change of the screen's own mode, fullscreen takes the
+    screen's mode. A window not shown has the page read-only. The names and choices are the same in
+    both engines. Tests hold each setting's round through the file and the refusal, a sheet shows
+    the page and the three modes, and the guides say it. It comes after item 159.
+
 ## Verdicts
 
 Verdict 93 is settled at 22:56 on 2026-11-21, the build run 44944582195 on `a65613b3` green with the
@@ -995,5 +1017,62 @@ whole suite runs once 156's second part lands on this, a suite at a time on the 
 
 Shared: Escape held from the program while the module's console or settings panel or a field is
 open, decided by the press's message, is offered to 3DEngine's binding of the module.
+
+NormTests passed, 19.
+
+156, part two, the Atmosphere module, in the commit carrying this.
+
+The module. `modules/Sky` at fbc385e gives way to `modules/Atmosphere` at 8891e10, the repository
+3DEngine.Atmosphere, whose assembly `3DEngine.Atmosphere` the package carries in its place, in the
+area's projects, the build's targets and N 6.4's list. Each `using Sky;` is `using Atmosphere;`, the
+script host's references with them, and the sky guide names the module's `Air` as the air as data
+beside the engine's `PlanetAtmosphere`. The guides, the rendering notes and the cheatsheet take the
+name, the README holds no table of modules and the solution named none.
+
+The figures. Of what the engine takes from the module, `LookSettings`, `LookCycle`, `LookCurve`,
+`SkyClock` and the weather's types, one member changed between the pins,
+`WeatherConditions.CloudDensity`, a multiplier of 1 unless set, which is `CloudOpticalDepth`, the
+deck's optical depth straight through it, 100 unless set. Each preset's depth is its old density
+times 0.04 a meter times its deck's thickness, rain's 1.6 by 0.04 by 1,600 m being 102.4, so the
+extinction a meter the binding gives the clouds is the old one to the digit. No test's figure moved
+and no bound widened. `SkyWeatherTests.ARainyDeckCoversTheSkyThickensTheFogAndRains` gains one
+assertion, the clouds' density equal to the rain's optical depth over its deck's thickness, 0.064 to
+five places, since that is the one number the binding works out from the module's. The thirteen
+classes the commit touches passed 108 of 108.
+
+The strike. The module's `Atmosphere.LightningStrike` meets the engine's record of that name in a
+file naming both namespaces, so the engine's is `ThunderStrike`, in `ThunderStrike.cs`, in its nine
+places. Under N 2.4, the listing's `readonly struct Bevy.LightningStrike :
+IEquatable<LightningStrike>` is `readonly struct Bevy.ThunderStrike : IEquatable<ThunderStrike>`
+with its thirteen lines, `RenderSky.StrikeLightning` answers `ThunderStrike?` and `RenderSky.Struck`
+takes `Action<ThunderStrike>?`.
+
+Later work. The engine's thunder can take the module's `Thunderstorm` and drop its own
+`ThunderStrike`, since the two records carry the same facts, an item for the reviewer to place after
+this and 155's step 3.
+
+For the owner. AGENTS.md's `BevyCSharp/Sky` row reads "over the Sky module" and waits for the
+owner's word to read "over the Atmosphere module".
+
+The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-156-sky-pins.webp`, of the
+feature test's noon, sunset and night at the old pin and the new from one view at one fixed
+exposure, each pair with its difference sixteen times over, black, since below the frame counter no
+pixel moves past 1 of 255 but two at the red block's foot at sunset and three on one star at night,
+with its line in the readings' captions.
+
+The checks. The whole suite on this commit's tree ran 2201, the 2190 listed and 11, with 2192
+passed, 7 skipped and 2 failed, neither this commit's.
+`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` fails at 284819d0 alone and is mended in
+the next commit. `GlobalIlluminationTests`' slab under High at 5.5 read 0.18 against at least 0.2 in
+a part that ran 364 s against its 201 on a shared card, and alone it read 0.26 twice on this tree
+and once at 284819d0, every earlier suite's figure. The solution builds with warnings as errors, the
+cheatsheet and the listing come out of their generators unchanged, and a package of this tree,
+`0.0.0-diag9`, which holds the next commit's settings beside this one's files, carries the
+Atmosphere assembly N 6.4 names, with the 52 blocks of the three guides this commit touches and the
+tools guide building on it. The module holds a nested `modules/Tools` that the workflow's checkout
+leaves out, and the library builds without it.
+
+Shared: the engine reads the Atmosphere module at 8891e10, its clouds from the optical depth it
+gives, offered to SHARED.md's row of the module.
 
 NormTests passed, 19.

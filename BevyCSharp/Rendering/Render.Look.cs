@@ -1,5 +1,5 @@
 using System.Numerics;
-using Sky;
+using Atmosphere;
 
 namespace Bevy;
 
@@ -19,12 +19,13 @@ public static partial class Render
     /// materials, and on such a camera Bevy's tonemapper stays and the engine says so once.
     /// </para>
     /// <para>
-    /// The camera's tonemapper (<see cref="PostSettings.Tonemapper"/>) is left out while the look is
-    /// on and comes back when it goes, and with it the parts Bevy applies as it tonemaps, its grade
-    /// (<see cref="SetColorGrading"/>), its dithering and its auto exposure, which do nothing under
-    /// a look. The look dithers by itself where <see cref="LookSettings.Dither"/> asks. The setting
-    /// lasts while the app runs, and a look given again to a camera that has one changes its numbers
-    /// alone, so one that follows the day (<see cref="LookCycle"/>) can be given every frame.
+    /// The camera's tonemapper (<see cref="PostSettings.Tonemapper"/>) is left out while the look
+    /// is on and comes back when it goes, and with it the parts Bevy applies as it tonemaps, its
+    /// grade (<see cref="SetColorGrading"/>), its dithering and its auto exposure, which do nothing
+    /// under a look. The look dithers by itself where <see cref="LookSettings.Dither"/> asks. The
+    /// setting lasts while the app runs, and a look given again to a camera that has one changes
+    /// its numbers alone, so one that follows the day (<see cref="LookCycle"/>) can be given every
+    /// frame.
     /// </para>
     /// </remarks>
     /// <param name="camera">The camera.</param>
@@ -54,8 +55,8 @@ public static partial class Render
             throw new ArgumentOutOfRangeException(nameof(look), "A setting of the look is not a number.");
 
         // Held where the curves are defined, the curve's own numbers off zero so its powers and its
-        // white stay finite. A camera whose look is on keeps its pass, and only the numbers move, so
-        // a look changed every frame costs the values alone.
+        // white stay finite. A camera whose look is on keeps its pass, and only the numbers move,
+        // so a look changed every frame costs the values alone.
         var on = Looks.IsOn(camera);
         var pass = Looks.PassFor(camera, look);
         pass.Set("curve", new Vector4(look.Curve == LookCurve.Numbered ? 1f : 0f, Math.Max(0f, look.Exposure),
@@ -68,13 +69,19 @@ public static partial class Render
     }
 }
 
-/// <summary>The passes <see cref="Render.SetLook"/> puts on cameras, an instance a camera, an app's own.</summary>
+/// <summary>
+/// The passes <see cref="Render.SetLook"/> puts on cameras, an instance a camera, an app's own.
+/// </summary>
 internal static class Looks
 {
-    /// <summary>The name the look's pass is kept under on a camera beside the engine's other parts.</summary>
+    /// <summary>
+    /// The name the look's pass is kept under on a camera beside the engine's other parts.
+    /// </summary>
     internal const string Owner = "look";
 
-    /// <summary>The place of the frame in the tonemapper's place, as the bridge numbers it.</summary>
+    /// <summary>
+    /// The place of the frame in the tonemapper's place, as the bridge numbers it.
+    /// </summary>
     internal const int Place = 3;
 
     private static App? _app;
@@ -83,7 +90,10 @@ internal static class Looks
     // console turns it on again where it was, with no compile.
     private static readonly Dictionary<ulong, (ShaderInstance Pass, LookSettings Settings, bool On)> Kept = [];
 
-    /// <summary>The look's pass for a camera, made the first time the camera asks in an app, kept with the settings it was given.</summary>
+    /// <summary>
+    /// The look's pass for a camera, made the first time the camera asks in an app, kept with the
+    /// settings it was given.
+    /// </summary>
     internal static ShaderInstance PassFor(Entity camera, LookSettings settings)
     {
         ForgetOtherApps();
@@ -99,14 +109,19 @@ internal static class Looks
         return Kept.TryGetValue(camera.Bits, out var look) && look.On;
     }
 
-    /// <summary>Marks a camera's look taken off, keeping its pass and settings for <see cref="Off"/>.</summary>
+    /// <summary>
+    /// Marks a camera's look taken off, keeping its pass and settings for <see cref="Off"/>.
+    /// </summary>
     internal static void Forget(Entity camera)
     {
         ForgetOtherApps();
         if (Kept.TryGetValue(camera.Bits, out var look)) Kept[camera.Bits] = look with { On = false };
     }
 
-    /// <summary>The cameras with a look in the running app, with the settings each was given and whether its pass has compiled.</summary>
+    /// <summary>
+    /// The cameras with a look in the running app, with the settings each was given and whether its
+    /// pass has compiled.
+    /// </summary>
     internal static IEnumerable<(Entity Camera, LookSettings Settings, bool Ready)> All()
     {
         ForgetOtherApps();
@@ -114,7 +129,9 @@ internal static class Looks
             .Select(look => (new Entity(look.Key), look.Value.Settings, look.Value.Pass.Program.State == ShaderProgramState.Ready));
     }
 
-    /// <summary>The cameras whose look was taken off in the running app, with the settings each last had.</summary>
+    /// <summary>
+    /// The cameras whose look was taken off in the running app, with the settings each last had.
+    /// </summary>
     internal static IEnumerable<(Entity Camera, LookSettings Settings)> Off()
     {
         ForgetOtherApps();

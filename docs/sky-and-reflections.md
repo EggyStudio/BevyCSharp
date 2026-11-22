@@ -219,7 +219,7 @@ console's `sky.clouds` sets them while the app runs.
 The sky has a clock, and behind the atmosphere the stars, the galaxy and the moon stand by it:
 
 <!-- compiled with:
-using Sky;
+using Atmosphere;
 Entity camera = default, sun = default, moon = default;
 float delta = default;
 -->
@@ -231,11 +231,11 @@ Render.SetSunDisk(moon, SunDisk.Off);              // the night sky draws the mo
 clock.Advance(delta / 60f);                        // an hour a minute, every frame
 ```
 
-The clock, the weather below and the looks by the sun's height are the Sky module's, a library both
-engines share, checked out under `modules/Sky` and named in the namespace `Sky`, which the package
-carries beside the engine, so both engines light from the same astronomy while each draws its own
-sky. Its `Atmosphere` is the air as data, and the engine's `PlanetAtmosphere` marks the planet
-whose air Bevy scatters a sky through.
+The clock, the weather below and the looks by the sun's height are the Atmosphere module's, a
+library both engines share, checked out under `modules/Atmosphere` and named in the namespace
+`Atmosphere`, which the package carries beside the engine, so both engines light from the same
+astronomy while each draws its own sky. Its `Air` is the air as data, and the engine's
+`PlanetAtmosphere` marks the planet whose air Bevy scatters a sky through.
 
 `SkyClock` works out where the sun, the moon and the stars stand at an hour of a day of the year for
 a latitude, by the usual spherical astronomy, with north along negative Z and east along positive X.
@@ -332,7 +332,7 @@ Lightning strikes in a storm about the camera:
 
 <!-- compiled with:
 Entity camera = default;
-LightningStrike? last = null;
+ThunderStrike? last = null;
 -->
 ```csharp
 Render.SetThunder(camera, new ThunderSettings { Rate = 4f, Struck = strike => last = strike });
@@ -354,7 +354,7 @@ costs some 0.02 ms of the GPU while it flashes.
 A weather moves the clouds, the fog, the rain and the lightning together:
 
 <!-- compiled with:
-using Sky;
+using Atmosphere;
 Entity camera = default, sun = default;
 SkyClock clock = new();
 -->

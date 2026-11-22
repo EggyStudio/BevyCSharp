@@ -1,10 +1,13 @@
+using Atmosphere;
 using Bevy;
-using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
 
-/// <summary>The weather on a camera (<see cref="RenderSky.extension(Render).SetWeather"/>), which moves its clouds, its fog and its rain.</summary>
+/// <summary>
+/// The weather on a camera (<see cref="RenderSky.extension(Render).SetWeather"/>), which moves its
+/// clouds, its fog and its rain.
+/// </summary>
 [Collection("engine")]
 public sealed class SkyWeatherTests
 {
@@ -33,8 +36,8 @@ public sealed class SkyWeatherTests
                 Render.SetSkyLighting(camera);
                 var sun = Render.SpawnLight(new LightSettings { Kind = LightKind.Directional, Intensity = 12_500f, Shadows = false });
                 ecs.Add(sun, Transform.LookingAt(new Vec3(-0.5f, 0.8f, -0.3f), Vec3.Zero, Vec3.UnitY));
-                // The clouds shadowing the sun, so the shadow's dispatch takes the weather's numbers
-                // every frame beside the march.
+                // The clouds shadowing the sun, so the shadow's dispatch takes the weather's
+                // numbers every frame beside the march.
                 Render.SetWeather(camera, weather, new CloudSettings { ShadowLight = sun }, new SkyFogSettings { Visibility = 2000f }, new PrecipitationSettings { Roofs = false }, new ThunderSettings { Sound = false });
             },
         };
@@ -48,6 +51,8 @@ public sealed class SkyWeatherTests
 
         var rain = WeatherConditions.Of(WeatherPreset.Rain);
         Assert.Equal((rain.CloudCover, rain.Stratus, rain.CloudBase), (given!.Coverage, given.Stratus, given.Bottom));
+        // The deck's optical depth spread over its thickness, the rain's 102.4 over 1,600 meters.
+        Assert.Equal(rain.CloudOpticalDepth / (rain.CloudTop - rain.CloudBase), given.Density, 5);
         Assert.True(fog!.Visibility < 1500f, $"the rain's haze leaves the fog seen to {fog.Visibility}");
         Assert.Equal(rain.Rain, rained!.Rain, 3);
         Assert.True(rained.Wind.Length > 3f, $"the rain drifts on a wind of {rained.Wind.Length} meters a second");
@@ -68,9 +73,9 @@ public sealed class SkyWeatherTests
     }
 
     /// <summary>
-    /// The console says the wind's speed in meters a second, which the Sky module's vector gives by a
-    /// method where the engine's gave it as a property, so the line said the method's name once the
-    /// weather moved there.
+    /// The console says the wind's speed in meters a second, which the Atmosphere module's vector
+    /// gives by a method where the engine's gave it as a property, so the line said the method's
+    /// name once the weather moved there.
     /// </summary>
     [SkippableFact]
     public void TheConsoleSaysTheWindsSpeed()

@@ -1,12 +1,13 @@
+using Atmosphere;
 using Bevy;
-using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
 
 /// <summary>
-/// The thunderstorm <see cref="RenderSky.extension(Render).SetThunder"/> brings, its strikes' timing, flash, bolt and
-/// thunder worked out alone, and a strike read off pictures of a night it lights.
+/// The thunderstorm <see cref="RenderSky.extension(Render).SetThunder"/> brings, its strikes'
+/// timing, flash, bolt and thunder worked out alone, and a strike read off pictures of a night it
+/// lights.
 /// </summary>
 [Collection("engine")]
 public sealed class ThunderTests
@@ -35,18 +36,19 @@ public sealed class ThunderTests
     }
 
     /// <summary>
-    /// A storm a weather eases into strikes once its rate has climbed, its strikes a Poisson process
-    /// at the rate it has each frame. A gap drawn once from the first frame's rate, a few thousandths
-    /// of a strike a minute, would keep it silent for hours. Three minutes of the game at a fifth of
-    /// a second a frame, which Bevy's longest step lets through whole, bring about nine strikes as
-    /// the thunderstorm's rate of four a minute comes in over its half-life of thirty seconds.
+    /// A storm a weather eases into strikes once its rate has climbed, its strikes a Poisson
+    /// process at the rate it has each frame. A gap drawn once from the first frame's rate, a few
+    /// thousandths of a strike a minute, would keep it silent for hours. Three minutes of the game
+    /// at a fifth of a second a frame, which Bevy's longest step lets through whole, bring about
+    /// nine strikes as the thunderstorm's rate of four a minute comes in over its half-life of
+    /// thirty seconds.
     /// </summary>
     [SkippableFact]
     public void AStormAWeatherEasesIntoStrikesOnceItsRateHasClimbed()
     {
         Needs.Renderer();
         var weather = new WeatherState();
-        var strikes = new List<LightningStrike>();
+        var strikes = new List<ThunderStrike>();
         var run = new PictureRun
         {
             Frames = 1100,
@@ -107,7 +109,7 @@ public sealed class ThunderTests
     {
         Needs.Shaders();
         Entity camera = default;
-        var strikes = new List<LightningStrike>();
+        var strikes = new List<ThunderStrike>();
         var run = new PictureRun
         {
             Width = 320,
@@ -156,7 +158,8 @@ public sealed class ThunderTests
             return sum / ((to - from) * picture.Width);
         }
 
-        // The ground lit by the strike's light, and the bolt a bright thread up the middle of the sky.
+        // The ground lit by the strike's light, and the bolt a bright thread up the middle of the
+        // sky.
         Assert.True(Mean(lit, lit.Height * 3 / 4, lit.Height) > Mean(dark, dark.Height * 3 / 4, dark.Height) + 10, "the strike does not light the ground");
         var bolt = 0;
         for (var y = 0u; y < lit.Height / 2; y++)

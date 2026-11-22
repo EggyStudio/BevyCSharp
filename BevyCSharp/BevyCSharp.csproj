@@ -66,7 +66,7 @@
     -->
     <ItemGroup>
         <ProjectReference Include="../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
-        <ProjectReference Include="../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../modules/Atmosphere/Atmosphere/Atmosphere.csproj" PrivateAssets="all"/>
         <ProjectReference Include="../modules/Vegetation/Vegetation/Vegetation.csproj" PrivateAssets="all"/>
         <ProjectReference Include="../modules/Diagnostics/Diagnostics/Diagnostics.csproj" PrivateAssets="all"/>
         <ProjectReference Include="../modules/Diagnostics/Diagnostics.ImGui/Diagnostics.ImGui.csproj" PrivateAssets="all"/>

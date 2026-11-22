@@ -11,12 +11,12 @@
     </ItemGroup>
 
     <!--
-      The Sky module both engines share, a git submodule under modules/, kept out of what
-      a project referencing this one sees, since the module is not a package of its own. The
+      The Atmosphere module both engines share, a git submodule under modules/, kept out of
+      what a project referencing this one sees, since the module is not a package of its own. The
       flat project's package carries its assembly in its lib folder beside the areas'.
     -->
     <ItemGroup>
-        <ProjectReference Include="../../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../../modules/Atmosphere/Atmosphere/Atmosphere.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
     <!-- The area's own programs, read as Slang source when each is first built, so the area
@@ -50,7 +50,10 @@
         <InternalsVisibleTo Include="BevyCSharp.Animation"/>
         <!-- Looks, Recorder -->
         <InternalsVisibleTo Include="BevyCSharp.Diagnostics"/>
-        <!-- PngWriter, SamplerSettings.ClampedTable, Shaders.KernelDraw, Shaders.KernelProgram, Shaders.SampledTexturesPerStage, Shaders.SetEnginePrepass, Shaders.SetEngineViewDispatches, Shaders.SetEngineViewDraws, Shaders.SetEngineViewImages -->
+        <!-- PngWriter, SamplerSettings.ClampedTable, Shaders.KernelDraw, Shaders.KernelProgram,
+             Shaders.SampledTexturesPerStage, Shaders.SetEnginePrepass,
+             Shaders.SetEngineViewDispatches, Shaders.SetEngineViewDraws,
+             Shaders.SetEngineViewImages -->
         <InternalsVisibleTo Include="BevyCSharp.GlobalIllumination"/>
         <!-- PngWriter, Render.CreateMesh -->
         <InternalsVisibleTo Include="BevyCSharp.Levels"/>
@@ -60,11 +63,15 @@
         <InternalsVisibleTo Include="BevyCSharp.Render2d"/>
         <!-- MaterialJson, MeshJson -->
         <InternalsVisibleTo Include="BevyCSharp.Scenes"/>
-        <!-- SamplerSettings.ClampedTable, SamplerSettings.LinearTable, Shaders.KernelDraw, Shaders.KernelProgram, Shaders.SetEnginePrepass, Shaders.SetEngineViewDispatches, Shaders.SetEngineViewDraws, Shaders.SetEngineViewImages -->
+        <!-- SamplerSettings.ClampedTable, SamplerSettings.LinearTable, Shaders.KernelDraw,
+             Shaders.KernelProgram, Shaders.SetEnginePrepass, Shaders.SetEngineViewDispatches,
+             Shaders.SetEngineViewDraws, Shaders.SetEngineViewImages -->
         <InternalsVisibleTo Include="BevyCSharp.Sky"/>
         <!-- Render.Attach, Render.NoRenderer -->
         <InternalsVisibleTo Include="BevyCSharp.Ui"/>
-        <!-- Render.CreateBarkMaterial, Render.CreateImageLevels, Render.CreateImpostorMaterial, Render.CreateLeafMaterial, Render.CreateMesh, Render.MipChain, Render.SetFieldTint, Render.SetTreeWind -->
+        <!-- Render.CreateBarkMaterial, Render.CreateImageLevels, Render.CreateImpostorMaterial,
+             Render.CreateLeafMaterial, Render.CreateMesh, Render.MipChain, Render.SetFieldTint,
+             Render.SetTreeWind -->
         <InternalsVisibleTo Include="BevyCSharp.Vegetation"/>
         <!-- AnimationReader, GifWriter, PngWriter, RgbaFrame -->
         <InternalsVisibleTo Include="bcs"/>

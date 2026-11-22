@@ -27,8 +27,8 @@ worker while a level loads, and the two meshes are made in a system as any mesh 
 The species and the growth are the Vegetation module's, a library both engines share, checked out
 under `modules/Vegetation` and named in the namespace `Vegetation`, which the package carries beside
 the engine, so a species and a seed grow the same skeleton in both. Its places are System.Numerics'
-`Vector3`, and its bark's and leaves' colors are linear sRGB in a `Vector3`, as the Sky module's
-colors are.
+`Vector3`, and its bark's and leaves' colors are linear sRGB in a `Vector3`, as the Atmosphere
+module's colors are.
 
 ## Planting and forests
 

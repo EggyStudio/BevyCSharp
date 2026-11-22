@@ -1,5 +1,5 @@
 using System.Numerics;
-using Sky;
+using Atmosphere;
 
 namespace Bevy;
 
@@ -8,19 +8,22 @@ public static partial class RenderSky
     extension(Render)
     {
         /// <summary>
-        /// Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon, standing
-        /// where the settings' clock puts them, or with <see langword="null"/> takes it off. Only valid
-        /// inside a system.
+        /// Draws the sky behind the atmosphere on a camera, the stars, the galaxy and the moon,
+        /// standing where the settings' clock puts them, or with <see langword="null"/> takes it
+        /// off. Only valid inside a system.
         /// </summary>
         /// <remarks>
-        /// The sky is added over the sky's pixels before tonemapping, ahead of the clouds and the fog,
-        /// so a cloud hides the stars behind it, each frame reading the clock the program moves on. It
-        /// needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one), whose depth says
-        /// where the sky is. The setting lasts while the app runs.
+        /// The sky is added over the sky's pixels before tonemapping, ahead of the clouds and the
+        /// fog, so a cloud hides the stars behind it, each frame reading the clock the program
+        /// moves on. It needs a camera drawn once a pixel (<see cref="PostSettings.Msaa"/> of one),
+        /// whose depth says where the sky is. The setting lasts while the app runs.
         /// </remarks>
         /// <param name="camera">The camera.</param>
         /// <param name="settings">The sky, or null to take it off.</param>
-        /// <exception cref="ArgumentOutOfRangeException">A brightness or the moon's size is under none or not a number, or the stars' grid has none.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// A brightness or the moon's size is under none or not a number, or the stars' grid has
+        /// none.
+        /// </exception>
         /// <example>
         /// <code>
         /// var clock = new SkyClock { Latitude = 50f, DayOfYear = 172f };
@@ -48,10 +51,16 @@ public static partial class RenderSky
     }
 }
 
-/// <summary>The draws <see cref="RenderSky.extension(Render).SetNightSky"/> puts on cameras, an instance a camera, an app's own.</summary>
+/// <summary>
+/// The draws <see cref="RenderSky.extension(Render).SetNightSky"/> puts on cameras, an instance a
+/// camera, an app's own.
+/// </summary>
 internal static class NightSky
 {
-    /// <summary>The name the sky's draw and prepass are kept under, ahead of the clouds and the fog by its order.</summary>
+    /// <summary>
+    /// The name the sky's draw and prepass are kept under, ahead of the clouds and the fog by its
+    /// order.
+    /// </summary>
     internal const string Owner = "celestial";
 
     private static App? _app;
@@ -83,7 +92,9 @@ internal static class NightSky
         return Skies.Values.All(s => s.Draw.Program.State == ShaderProgramState.Ready);
     }
 
-    /// <summary>Gives every camera's sky where its clock stands this frame, and the time it twinkles by.</summary>
+    /// <summary>
+    /// Gives every camera's sky where its clock stands this frame, and the time it twinkles by.
+    /// </summary>
     internal static void Tick(World world)
     {
         ForgetOtherApps();

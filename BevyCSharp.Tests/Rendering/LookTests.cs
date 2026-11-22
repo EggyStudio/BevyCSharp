@@ -1,5 +1,5 @@
+using Atmosphere;
 using Bevy;
-using Sky;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -132,8 +132,8 @@ public sealed class LookTests
         Assert.True(colored.R - Math.Max(colored.G, colored.B) > 100, $"the red row given its color back reads {colored}");
     }
 
-    // The ramp's rows, gray, red, green and blue alone, cyan, magenta and yellow, and the value with
-    // half of it and a quarter of it.
+    // The ramp's rows, gray, red, green and blue alone, cyan, magenta and yellow, and the value
+    // with half of it and a quarter of it.
     private static readonly (double R, double G, double B)[] Rows =
     [
         (1, 1, 1), (1, 0, 0), (0, 1, 0), (0, 0, 1), (0, 1, 1), (1, 0, 1), (1, 1, 0), (1, 0.5, 0.25),
@@ -147,7 +147,8 @@ public sealed class LookTests
         _ => new LookSettings { Exposure = 2f, Saturation = 0.5f, Contrast = 1.3f, Tint = (1f, 0.9f, 0.8f) },
     };
 
-    // SHARED.md's ramp drawn through a look with no dither, on a camera in high dynamic range or not.
+    // SHARED.md's ramp drawn through a look with no dither, on a camera in high dynamic range or
+    // not.
     private static CapturedImage Ramp(LookSettings look, bool hdr = true)
     {
         var run = RampRun(look, hdr);
