@@ -7,9 +7,18 @@ namespace Bevy;
 /// This frame's keyboard and mouse state, mirrored from Bevy.
 /// </summary>
 /// <remarks>
+/// <para>
 /// Refreshed once per frame during <see cref="Stage.FrameSync"/>, before any user system runs,
 /// so every system in a frame observes the same input. Reads are plain managed field accesses,
 /// no call crosses into the engine.
+/// </para>
+/// <para>
+/// Escape goes to what is open first. While the console or the settings panel is open, or a field
+/// of the interface has the caret, a press of Escape is theirs, the settings panel going back a
+/// page with it, and the program reads it neither here nor as a <see cref="KeyboardInput"/> until
+/// the key comes up. With none of them open it is the program's, which an example may end on, and
+/// the overlay takes no key, so it holds none.
+/// </para>
 /// </remarks>
 /// <example>
 /// <code>
@@ -26,6 +35,8 @@ public sealed class Input
     private readonly ulong[] _down = new ulong[NativeInput.KeyBitsetUlongs];
     private readonly ulong[] _pressed = new ulong[NativeInput.KeyBitsetUlongs];
     private readonly ulong[] _released = new ulong[NativeInput.KeyBitsetUlongs];
+    private readonly ulong[] _held = new ulong[NativeInput.KeyBitsetUlongs];
+    private bool _escapeTaken;
     private readonly HashSet<LogicalKey> _logicalDown = [];
     private readonly HashSet<LogicalKey> _logicalPressed = [];
     private readonly HashSet<LogicalKey> _logicalReleased = [];
@@ -63,13 +74,16 @@ public sealed class Input
     public float WheelY { get; private set; }
 
     /// <summary>True while <paramref name="key"/> is held down.</summary>
-    public bool KeyDown(Key key) => TestBit(_down, key);
+    public bool KeyDown(Key key) => Seen(_down, key);
 
-    /// <summary>True on the single frame <paramref name="key"/> went down.</summary>
-    public bool KeyPressed(Key key) => TestBit(_pressed, key);
+    /// <summary>
+    /// True on the single frame <paramref name="key"/> went down, Escape not while the console, the
+    /// settings panel or a field takes it.
+    /// </summary>
+    public bool KeyPressed(Key key) => Seen(_pressed, key);
 
     /// <summary>True on the single frame <paramref name="key"/> went up.</summary>
-    public bool KeyReleased(Key key) => TestBit(_released, key);
+    public bool KeyReleased(Key key) => Seen(_released, key);
 
     /// <summary>True while the key that reads as <paramref name="key"/> is held down.</summary>
     /// <remarks>
@@ -85,10 +99,10 @@ public sealed class Input
     public bool KeyReleased(LogicalKey key) => _logicalReleased.Contains(key);
 
     /// <summary>True while any key at all is held.</summary>
-    public bool AnyKeyDown() => AnyBit(_down);
+    public bool AnyKeyDown() => AnySeen(_down);
 
     /// <summary>True when any key at all went down this frame.</summary>
-    public bool AnyKeyPressed() => AnyBit(_pressed);
+    public bool AnyKeyPressed() => AnySeen(_pressed);
 
     /// <summary>True while at least one of <paramref name="keys"/> is held.</summary>
     /// <remarks>
@@ -98,7 +112,7 @@ public sealed class Input
     public bool AnyKeyDown(ReadOnlySpan<Key> keys)
     {
         foreach (var key in keys)
-            if (TestBit(_down, key))
+            if (Seen(_down, key))
                 return true;
 
         return false;
@@ -109,7 +123,7 @@ public sealed class Input
     public bool AllKeysDown(ReadOnlySpan<Key> keys)
     {
         foreach (var key in keys)
-            if (!TestBit(_down, key))
+            if (!Seen(_down, key))
                 return false;
 
         return true;
@@ -120,7 +134,7 @@ public sealed class Input
     public bool AnyKeyPressed(ReadOnlySpan<Key> keys)
     {
         foreach (var key in keys)
-            if (TestBit(_pressed, key))
+            if (Seen(_pressed, key))
                 return true;
 
         return false;
@@ -131,7 +145,7 @@ public sealed class Input
     public bool AnyKeyReleased(ReadOnlySpan<Key> keys)
     {
         foreach (var key in keys)
-            if (TestBit(_released, key))
+            if (Seen(_released, key))
                 return true;
 
         return false;
@@ -161,10 +175,21 @@ public sealed class Input
         return (bits[index / 64] & (1UL << (index % 64))) != 0;
     }
 
-    private static bool AnyBit(ulong[] bits)
+    private static void SetBit(ulong[] bits, Key key, bool on)
     {
-        foreach (var packed in bits)
-            if (packed != 0)
+        var index = (int)key;
+        if ((uint)index >= KeyTable.Count) return;
+        if (on) bits[index / 64] |= 1UL << (index % 64);
+        else bits[index / 64] &= ~(1UL << (index % 64));
+    }
+
+    // A key the interface took reads to the program as a key that was never touched.
+    private bool Seen(ulong[] bits, Key key) => TestBit(bits, key) && !TestBit(_held, key);
+
+    private bool AnySeen(ulong[] bits)
+    {
+        for (var slot = 0; slot < bits.Length; slot++)
+            if ((bits[slot] & ~_held[slot]) != 0)
                 return true;
 
         return false;
@@ -223,6 +248,64 @@ public sealed class Input
             if ((native.Flags & 2) != 0) _logicalPressed.Add(key);
             if ((native.Flags & 4) != 0) _logicalReleased.Add(key);
         }
+    }
+
+    /// <summary>
+    /// Whether the interface takes Escape as it is pressed, the console or the settings panel open
+    /// or a field with the caret, which the diagnostics area answers in each app it is built into.
+    /// </summary>
+    internal static Func<bool> InterfaceTakesEscape { get; set; } = () => false;
+
+    /// <summary>
+    /// Whether a keyboard message is kept from the program, as Escape's is while the interface
+    /// takes it, its press deciding and its repeats and its release keeping to that.
+    /// </summary>
+    /// <remarks>
+    /// The press's message comes a frame before the key's state says it went down, so it decides
+    /// for the state as well (<see cref="HoldForInterface"/>), and a panel the press closes in the
+    /// frame between changes neither.
+    /// </remarks>
+    internal bool HoldsMessage(Key? key, ButtonState state, bool repeat)
+    {
+        if (key != Key.Escape) return false;
+        if (state == ButtonState.Pressed && !repeat) _escapeTaken = InterfaceTakesEscape();
+        return _escapeTaken;
+    }
+
+    /// <summary>
+    /// True while <paramref name="key"/> is held down, a key the program is kept from included, for
+    /// the interface that took it.
+    /// </summary>
+    internal bool InterfaceKeyDown(Key key) => TestBit(_down, key);
+
+    /// <summary>
+    /// Keeps a press of Escape from the program where the interface takes it, from the frame it
+    /// went down to the frame it came up, its logical key with it.
+    /// </summary>
+    /// <remarks>
+    /// Decided once, as the key goes down, by its message where one came
+    /// (<see cref="HoldsMessage"/>), so a panel the press closes does not hand the release to the
+    /// program, which would read a key come up that it never saw go down, and a key held into a
+    /// panel opening stays the program's. Called once the logical keys are read and before the
+    /// frame's messages are.
+    /// </remarks>
+    internal void HoldForInterface()
+    {
+        if (TestBit(_pressed, Key.Escape))
+        {
+            SetBit(_held, Key.Escape, _escapeTaken || InterfaceTakesEscape());
+        }
+        else if (!TestBit(_down, Key.Escape) && !TestBit(_released, Key.Escape))
+        {
+            SetBit(_held, Key.Escape, false);
+            _escapeTaken = false;
+        }
+
+        if (!TestBit(_held, Key.Escape)) return;
+
+        _logicalDown.Remove(LogicalKey.Escape);
+        _logicalPressed.Remove(LogicalKey.Escape);
+        _logicalReleased.Remove(LogicalKey.Escape);
     }
 
     /// <summary>The connected gamepads, in the order Bevy found them, as they stood at the start of this frame.</summary>

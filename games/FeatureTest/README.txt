@@ -34,16 +34,19 @@ Keys
   Space            jump, and in creative mode a double tap flies
   Shift            sprint
   C                crouch
-  F3 held with F4  step through walking, creative mode and spectator mode
-  F5               step the view, from the eyes, from behind and from in front
+  V                step the view, from the eyes, from behind and from in front, or a pad's Select
   F11              fullscreen
-  F4               the panel
-  F1               hide the HUD, the engine's key, the panel and the console staying
+  F1               hide the HUD, the panels and the console staying
   F2               a screenshot, into the screenshots folder beside the program
   F3               the engine's overlay, the frame, where you stand, the system and the renderer,
                    with what the program holds as the memory command says it
   Shift+F3         the overlay with the profiler's passes, timed in a run started with --timings
-  Key under Esc    the console
+  F4               the console
+  F5               the settings panel, its Feature test row opening the panel below
+  Escape           back a page in a panel, closing it from the first, and never the window
+
+F1 to F5 are the engine's keys and are rebound on the settings panel's keys page. The player page of
+the panel below steps through walking, creative mode and spectator mode.
 
 In spectator mode the right button held looks and flies with W A S D, Q and E, the middle button
 slides, the wheel moves along the view, Alt with the left button orbits and F frames the middle.
@@ -51,18 +54,18 @@ slides, the wheel moves along the view, Alt with the left button orbits and F fr
 The panel
 ---------
 
-F4 opens it, a list steered with the arrow keys or a pad. Its pages set the graphics, the effects,
-the weather, the audio and the controls, turn on the debug draws, teleport you to each zone, fetch
-and stand the scenes, spawn things and set the time of day. A setting marked "from the next start"
-needs the program started again. Every setting is kept for the next run in feature-test.json, in
-~/.local/share/BevyCSharp Feature Test on Linux and %APPDATA%\BevyCSharp Feature Test on Windows.
-Deleting the file puts everything back as it came.
+The settings panel's Feature test row or a pad's Start opens it, a list steered with the arrow keys
+or a pad. Its pages set the graphics, the effects, the weather, the audio and the controls, turn on
+the debug draws, teleport you to each zone, fetch and stand the scenes, spawn things and set the
+time of day. A setting marked "from the next start" needs the program started again. Every setting
+is kept for the next run in feature-test.json, in ~/.local/share/BevyCSharp Feature Test on Linux
+and %APPDATA%\BevyCSharp Feature Test on Windows. Deleting the file puts everything back as it came.
 
 The console
 -----------
 
-The key under Escape opens it. Type "help" for the commands, Tab completes one, and the arrows step
-through what you typed before. A few to start with:
+F4 opens it. Type "help" for the commands, Tab completes one, and the arrows step through what you
+typed before. A few to start with:
 
   player                   where you stand and how you move
   mode creative            walking, creative or spectator

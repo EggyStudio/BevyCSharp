@@ -304,14 +304,20 @@ same script host that reloads behavior scripts.
 ## Debug keys
 
 Five keys are the Diagnostics module's actions in every program, F1 hiding the interface, F2 taking
-a screenshot, F3 showing the debug overlay, F4 opening the settings panel and F5 the console
+a screenshot, F3 showing the debug overlay, F4 opening the console and F5 the settings panel
 (`Debug.Keys`). Each is a setting of the registry a player rebinds, `keys.hide_interface`,
-`keys.screenshot`, `keys.overlay`, `keys.panel` and `keys.console`, so `keys.overlay F6` typed into
+`keys.screenshot`, `keys.overlay`, `keys.console` and `keys.panel`, so `keys.overlay F6` typed into
 the console moves the overlay to F6 and `keys.overlay ""` unbinds it, for a game that uses the key
-for something of its own. An action is taken as its key is let go where no other key went down
-while it was held, so a program's own chord on one of them is the program's, and a key of one
-character is the field's while a field has the caret. The press is left for the program to read as
-well.
+for something of its own. An action is taken as its key is let go where no other key went down while
+it was held, so a program's own chord on one of them is the program's, and a key of one character is
+the field's while a field has the caret. The press is left for the program to read as well.
+
+Escape is none of them and goes to what is open first. While the console or the settings panel is
+open, or a field of the interface has the caret, a press of Escape is theirs, the settings panel
+going back a page with it, and the program reads it neither in `Input` nor as a `KeyboardInput`
+until the key comes up. With none of them open it is the program's, which an example may end on, and
+a game or a template ends on no key unless it sets one. The overlay takes no key, so it holds none,
+and a panel of the game's own reads Escape as the program does.
 
 F1 hides the program's interface as Minecraft hides its HUD, what is drawn inside the hidden scope
 and nothing outside it, so a pause menu or an inventory drawn outside the scope stays whatever F1
@@ -389,7 +395,7 @@ takes one from code. A run that draws nothing, headless, takes none.
 
 ## The settings panel
 
-F4 opens the module's settings panel (`Debug.Panel`) in the middle of the window, a page for each
+F5 opens the module's settings panel (`Debug.Panel`) in the middle of the window, a page for each
 first word of the settings' names, the keys' page among them, and a program's own pages and actions
 on its first page, steered by the arrows, Enter and Escape or a pad. `Debug.Draw` draws it with the
 console between `ImGuiRuntime.Begin` and `ImGuiRuntime.End`. What the panel moves or runs answers

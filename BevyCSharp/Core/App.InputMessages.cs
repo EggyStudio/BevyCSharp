@@ -17,8 +17,12 @@ public sealed unsafe partial class App
     /// A frame can carry more than one buffer's worth, a mouse polled a thousand times a second
     /// moving a dozen times in it, so the buffer is filled again until the bridge has no more.
     /// </para>
+    /// <para>
+    /// A key the interface took from the program, Escape while the console or the settings panel is
+    /// open, is left out, as <see cref="Input"/> leaves it out.
+    /// </para>
     /// </remarks>
-    private static void PostInputMessages(MessageBus bus)
+    private static void PostInputMessages(MessageBus bus, Input input)
     {
         const int Capacity = 64;
         NativeInputMessage* buffer = stackalloc NativeInputMessage[Capacity];
@@ -27,7 +31,7 @@ public sealed unsafe partial class App
         do
         {
             count = NativeCore.bcs_input_messages(buffer, Capacity);
-            for (var i = 0; i < count; i++) Post(bus, ref buffer[i]);
+            for (var i = 0; i < count; i++) Post(bus, input, ref buffer[i]);
         }
         while (count == Capacity);
     }
@@ -35,15 +39,17 @@ public sealed unsafe partial class App
     // The bridge's flags, which optional fields hold something.
     private const uint Repeat = 1, HasText = 2, HasDelta = 4, HasForce = 8, HasVendor = 16, HasProduct = 32, Calibrated = 64, HasAltitude = 128;
 
-    private static void Post(MessageBus bus, ref NativeInputMessage m)
+    private static void Post(MessageBus bus, Input input, ref NativeInputMessage m)
     {
         var state = m.State == 1 ? ButtonState.Pressed : ButtonState.Released;
         var entity = new Entity(m.Entity);
         switch (m.Kind)
         {
             case 0:
+                Key? key = m.Code >= 0 && m.Code < KeyTable.Count ? (Key)m.Code : null;
+                if (input.HoldsMessage(key, state, (m.Flags & Repeat) != 0)) break;
                 bus.Send(new KeyboardInput(
-                    m.Code >= 0 && m.Code < KeyTable.Count ? (Key)m.Code : null,
+                    key,
                     LogicalOf(ref m),
                     state,
                     (m.Flags & HasText) != 0 ? Utf8(ref m.Text[0], m.TextLength) : null,

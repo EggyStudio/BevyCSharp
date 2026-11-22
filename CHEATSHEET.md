@@ -1467,7 +1467,7 @@ The guide's page is [input.md](https://github.com/EggyStudio/BevyCSharp/blob/mai
 ```csharp
 // Input
 bool KeyDown(Key key);                                          // True while key is held down
-bool KeyPressed(Key key);                                       // True on the single frame key went down
+bool KeyPressed(Key key);                                       // True on the single frame key went down, Escape not while the console, the settings panel or a field takes it
 bool KeyReleased(Key key);                                      // True on the single frame key went up
 bool KeyDown(LogicalKey key);                                   // True while the key that reads as key is held down
 bool KeyPressed(LogicalKey key);                                // True on the single frame the key that reads as key went down

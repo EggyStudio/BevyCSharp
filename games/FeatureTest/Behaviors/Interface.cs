@@ -15,8 +15,8 @@ namespace BevyCSharp.FeatureTest.Behaviors;
 /// </para>
 /// <para>
 /// It needs a bridge that draws and <c>Config.Gui</c> asked for, and says so rather than drawing
-/// nothing. The engine's F4 opens its settings panel, whose row Feature test opens the admin
-/// panel, and F5 the console, both drawn with the program's interface (<see cref="Debug.Draw"/>).
+/// nothing. The engine's F5 opens its settings panel, whose row Feature test opens the admin
+/// panel, and F4 the console, both drawn with the program's interface (<see cref="Debug.Draw"/>).
 /// The mode's label is the HUD, drawn inside the hidden scope (<see cref="Ui.BeginHidden"/>), so
 /// the engine's F1 hides it while the panels and the console, screens over the game, stay. The
 /// engine's F3 shows its debug
@@ -43,7 +43,7 @@ public partial struct Interface
         }
 
         if (ImGuiRuntime.IsRunning)
-            Console.WriteLine("[Interface] F4 opens the settings panel and its Feature test row the admin panel, F3 the overlay, F1 hides the HUD, F5 the console");
+            Console.WriteLine("[Interface] F5 opens the settings panel and its Feature test row the admin panel, F3 the overlay, F1 hides the HUD, F4 the console");
     }
 
     /// <summary>Draws it, once a frame.</summary>

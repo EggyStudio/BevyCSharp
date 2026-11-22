@@ -186,6 +186,41 @@ frame_time() {
 frame_time "1-hub, the weather $quality"
 took "the hub's shot"
 
+# Escape goes to what is open first. The settings panel, opened by its key, goes back a page on
+# Escape and closes from its first, and the admin panel, which reads Escape as the program does,
+# does the same, the program answering after each, since the feature test ends on no key. Escape is
+# held for frames as a hand holds it, since the settings panel reads it as the interface does, from
+# a key held down across a frame.
+quiet input.key F5
+quiet frames.wait 5
+first=$(c panels)
+[[ $first == "panel "* ]] || fail "F5 opened no settings panel, and panels says $first"
+quiet input.uikey Enter
+quiet frames.wait 5
+page=$(c panels)
+[ "$page" != "$first" ] || fail "Enter on the settings panel's first row opened no page"
+quiet input.hold Escape 3
+quiet frames.wait 5
+back=$(c panels)
+[ "$back" = "$first" ] || fail "Escape on the settings panel's page went to $back, not back to $first"
+quiet input.hold Escape 3
+quiet frames.wait 5
+closed=$(c panels)
+[ "$closed" = none ] || fail "Escape on the settings panel's first page left $closed open"
+quiet feature.panel
+quiet input.key Enter
+quiet frames.wait 5
+quiet input.hold Escape 3
+quiet frames.wait 5
+back=$(c panels)
+[ "$back" = admin ] || fail "Escape on the admin panel's page left $back open, not the admin panel"
+quiet input.hold Escape 3
+quiet frames.wait 5
+closed=$(c panels)
+[ "$closed" = none ] || fail "Escape on the admin panel's first page left $closed open"
+quiet app.status
+took "Escape through the panels"
+
 # The hub, with a walk north that the turning cube stops, and a jump. A held key answers once its
 # frames have passed, the clock held still between commands, so the wait after each hold is the
 # settling alone, where a wait of the hold's frames again would run the course's walking frames

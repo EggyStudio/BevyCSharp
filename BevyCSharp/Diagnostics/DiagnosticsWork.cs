@@ -9,6 +9,11 @@ internal sealed class DiagnosticsWork : IPlugin
     {
         Debug.FreshKeys();
 
+        // Escape is the console's, the settings panel's or a field's while one is open, and the
+        // program's with none of them open, in every app, a headless one with a panel opened by a
+        // call included.
+        Input.InterfaceTakesEscape = Debug.TakesEscape;
+
         // The keys F1 to F5, in a run that draws and has a window to read them from, before the
         // hidden scope F1 turns over is kept (2900).
         app.AreasWork.Add(2800, world =>

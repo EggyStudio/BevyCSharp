@@ -101,7 +101,7 @@ internal sealed record Page(string Title, IReadOnlyList<Row> Rows);
 /// </summary>
 /// <remarks>
 /// <para>
-/// The settings panel's row Feature test (F4) or the pad's start button opens it, and the pad's
+/// The settings panel's row Feature test (F5) or the pad's start button opens it, and the pad's
 /// start button closes it. It is one of the Diagnostics module's open panels
 /// (<c>Debug.Keys.Panels</c>), so opening it closes the settings panel, the console and the
 /// overlay, and opening one of them closes it. The arrows or the pad's cross move through the rows,

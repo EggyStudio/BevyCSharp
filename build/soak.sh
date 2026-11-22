@@ -103,7 +103,7 @@ round() {
         courtyard)
             quiet input.key Enter
             quiet frames.wait 10
-            quiet input.key F5
+            quiet input.key F6
             quiet input.hold D 30
             quiet input.hold S 30
             quiet input.hold A 30

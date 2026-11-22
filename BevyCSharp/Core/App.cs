@@ -385,6 +385,7 @@ public sealed unsafe partial class App : IDisposable
             world.Resource<Input>().Update(state.Input);
             world.Resource<Input>().UpdateGamepads(world.Resource<MessageBus>());
             world.Resource<Input>().UpdateLogicalKeys();
+            world.Resource<Input>().HoldForInterface();
 
             // A new frame's worth of streamed bytes to hand over.
             Streaming.BeginFrame();
@@ -392,7 +393,7 @@ public sealed unsafe partial class App : IDisposable
             // Posted before the swap, so what the window reported at the top of this frame is
             // readable during it rather than during the next one.
             PostWindowMessages(world.Resource<MessageBus>());
-            PostInputMessages(world.Resource<MessageBus>());
+            PostInputMessages(world.Resource<MessageBus>(), world.Resource<Input>());
             StateRegistry.PostTransitions(world.Resource<MessageBus>(), world.Resource<EcsWorld>());
             PostFileDrops(world.Resource<MessageBus>());
             PostIme(world.Resource<MessageBus>());

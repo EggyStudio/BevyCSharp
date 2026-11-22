@@ -5,7 +5,7 @@ namespace Bevy;
 /// <summary>
 /// The engine's debug overlay, settings panel and keys, the Diagnostics module's models over the
 /// process's registry, which every program has, F1 hiding the program's interface, F2 taking a
-/// screenshot, F3 showing the overlay, F4 opening the settings panel and F5 the console.
+/// screenshot, F3 showing the overlay, F4 opening the console and F5 the settings panel.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -50,7 +50,7 @@ public static partial class Debug
 
     /// <summary>
     /// The settings panel, a page for each first word of the settings' names and a program's own
-    /// pages, which F4 opens.
+    /// pages, which F5 opens.
     /// </summary>
     public static PanelModel Panel { get; } = MadePanel();
 
@@ -81,6 +81,29 @@ public static partial class Debug
         };
         return panel;
     }
+
+    /// <summary>
+    /// Whether the console or the settings panel is open or a field of the interface has the caret,
+    /// each of which takes Escape before the program does (<see cref="Input"/>).
+    /// </summary>
+    /// <remarks>
+    /// The overlay takes no key, so it is not counted, and a panel a host joined to
+    /// <c>Keys.Panels</c> reads its keys as the program does and is not counted either.
+    /// </remarks>
+    internal static bool TakesEscape() =>
+        Keys.Panels.Open is OpenPanels.PanelName or OpenPanels.ConsoleName || ImGuiRuntime.Typing;
+
+    /// <summary>
+    /// Says which of the program's panels is open, the settings panel with the title of its page,
+    /// for a check that a key opened one, stepped it or closed it.
+    /// </summary>
+    [Command("panels", "Says which panel is open, the settings panel with its page, or none")]
+    internal static string OpenPanel() => Keys.Panels.Open switch
+    {
+        null => "none",
+        OpenPanels.PanelName => $"panel {Panel.Title}",
+        var name => name,
+    };
 
     /// <summary>The keys made again for an app being built, as <see cref="Keys"/> says.</summary>
     internal static void FreshKeys()

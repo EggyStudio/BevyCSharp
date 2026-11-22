@@ -30,10 +30,11 @@ public partial struct EditorBoot
 
         // F1 is the editor's, opening its menu, and every panel is a screen F1 would leave, so the
         // key for hiding a HUD is unbound rather than hiding nothing. The console is the tab along
-        // the bottom, raised by the key under Escape, so the console's key is unbound as well and
-        // F5 is the editor's, which plays the scene.
+        // the bottom, raised by the key under Escape, so the console's key is unbound as well, and
+        // the settings panel takes F4 from it, since F5 is the editor's, which plays the scene.
         Debug.Keys.KeyOf(KeyAction.HideInterface).TrySet(string.Empty);
         Debug.Keys.KeyOf(KeyAction.Console).TrySet(string.Empty);
+        Debug.Keys.KeyOf(KeyAction.Panel).TrySet("F4");
 
         var camera = Scene(ctx);
 

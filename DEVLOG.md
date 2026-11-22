@@ -9,10 +9,10 @@ of .github/REVIEW.md or .github/REVIEW-ARCHIVE.md and the commit that closed it.
 ## 2026-11-22
 
 ![](.github/assets/readings/2026-11-22-item-155-console-and-panel.webp)
-The feature test offscreen on the Diagnostics module at 918de6e, its console on F5 with help
-keys.console answered, the candidates of keys. opening below the field on an opaque ground and the
-log wrapped at the window's width, and its settings panel on F4 on its first page, one panel open at
-a time, both in the module's neutral gray look.
+The feature test offscreen on the Diagnostics module at a9c9ff4, its console on F4 with help
+keys.console answered, the candidates of keys. opening below a field that runs the window's whole
+width on an opaque ground and the log wrapped at that width, and its settings panel on F5 on its
+first page on the same opaque black, one panel open at a time.
 
 ## 2026-11-21
 

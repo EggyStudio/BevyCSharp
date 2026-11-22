@@ -98,6 +98,16 @@ gilrs in the render and editor profiles, and every profile reads a pad pretended
 `SyntheticInput.ConnectGamepad`, which is how a test or `./bcs command input.button 0 South 10`
 presses a button on a machine with none attached.
 
+## Escape goes to what is open first
+
+While the Diagnostics module's console or settings panel is open, or a field of the interface has
+the caret, a press of Escape is theirs, and `Input` reads it as a key never touched, the logical key
+with it, and no `KeyboardInput` carries it, from the frame it went down to the frame it came up. The
+settings panel goes back a page with it, closing from its first. With none of them open it is the
+program's, the overlay taking no key and a panel of the game's own reading Escape as the rest of the
+program does, so a game that pauses on Escape pauses with the overlay shown, and an example that
+ends on Escape ends only once the console is put away.
+
 ## Each change as a message
 
 `Input` holds where each frame leaves things, which says what is down and what changed, but not in

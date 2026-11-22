@@ -23,7 +23,7 @@ dotnet run --project games/FeatureTest -- --offscreen --frames 120
 ```
 
 The feature test opens a window by default on a hub with a signpost to each zone of its map, and a
-lit cube turning in the middle. F4 opens the engine's settings panel, whose Feature test row opens
+lit cube turning in the middle. F5 opens the engine's settings panel, whose Feature test row opens
 the game's admin panel, a list steered by the arrows or a pad, which the pad's start button opens
 too, with pages for the graphics, the audio, the weather, the controls, the debug draws, teleports
 to the zones, things to spawn and the time, each setting kept in the player's folder for the next
@@ -37,7 +37,7 @@ engine's weather runs over it where meshlets do not, clouds, fog, rain, snow and
 kind of weather its page sets, or from a forecast by the day's clock, as finely as the page's
 quality asks or not at all, and `./bcs command sky.weather Storm now` sets it from a terminal. F3
 shows an overlay of the frame time, the view's place and facing, the entities and what the program
-holds, and F5 opens the console. The player is a capsule on a `CharacterController`, walked with
+holds, and F4 opens the console. The player is a capsule on a `CharacterController`, walked with
 WASD or a pad's stick, jumping with Space, sprinting with Shift and crouching with C, its view
 turned by the mouse while Tab locks the cursor. The admin panel's player page steps it through
 walking, creative mode, where a double tap of jump flies, and spectator mode, a free camera through

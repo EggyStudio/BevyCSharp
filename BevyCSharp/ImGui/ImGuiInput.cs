@@ -109,7 +109,9 @@ internal static class ImGuiInput
         for (var index = 0; index < Table.Length; index++)
         {
             var (key, mapped) = Table[index];
-            var down = input.KeyDown(key);
+            // The key as it is, Escape included where the program is kept from it, since the
+            // interface took it.
+            var down = input.InterfaceKeyDown(key);
 
             if (down == Held[index]) continue;
 

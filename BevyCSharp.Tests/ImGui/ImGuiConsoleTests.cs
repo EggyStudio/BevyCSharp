@@ -7,7 +7,7 @@ namespace Bevy.Tests;
 
 /// <summary>
 /// The console a game draws with one call (<see cref="Debug.Draw"/>), the Diagnostics module's
-/// drawing of the process's console, opened by F5 over the top of the window, running what is typed
+/// drawing of the process's console, opened by F4 over the top of the window, running what is typed
 /// into it, and closed by the same key.
 /// </summary>
 /// <remarks>
@@ -19,7 +19,7 @@ namespace Bevy.Tests;
 [Collection("engine")]
 public sealed class ImGuiConsoleTests : IDisposable
 {
-    // The console's key put back to F5, since the editor's start unbinds it in the process the
+    // The console's key put back to F4, since the editor's start unbinds it in the process the
     // suite shares with it.
     public ImGuiConsoleTests() => Debug.Keys.KeyOf(KeyAction.Console).Reset();
 
@@ -54,7 +54,7 @@ public sealed class ImGuiConsoleTests : IDisposable
         // own color until it has.
         run.Wait(15)
             .Capture("before")
-            .Do("pressing the key", _ => SyntheticInput.Tap(Key.F5))
+            .Do("pressing the key", _ => SyntheticInput.Tap(Key.F4))
             .Until("opening", _ => ConsoleLog.Model.Open)
             .Wait(3)
             .Capture("open")
@@ -62,7 +62,7 @@ public sealed class ImGuiConsoleTests : IDisposable
             .Wait(2)
             .Do("entering it", _ => SyntheticInput.Key(ImGuiKey.Enter))
             .Wait(3)
-            .Do("pressing the key again", _ => SyntheticInput.Tap(Key.F5))
+            .Do("pressing the key again", _ => SyntheticInput.Tap(Key.F4))
             .Until("closing", _ => !ConsoleLog.Model.Open)
             .Wait(3)
             .Capture("closed")
