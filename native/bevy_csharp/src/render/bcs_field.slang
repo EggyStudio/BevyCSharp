@@ -562,3 +562,69 @@ public float lightThroughCrossedAt(Texture3D<float4> field, SamplerState linear,
     stopped = kept < 1.0 - 1e-6 ? stoppedSum / (1.0 - kept) : 0.0;
     return depth;
 }
+
+/// What a map of the field seen from a light keeps for a texel whose march met no surface.
+public static const float MapFar = 1e30;
+
+/// A square map of the field as the sun sees it (gi_sun.slang), laid across one of the field's
+/// cascades square to the way toward the sun `l`. It holds the middle of that cascade, the radius
+/// of the sphere about it the map spans, the map's two axes `u` and `v` square to `l`, and how far
+/// toward the sun of the middle the map's plane lies, past the sphere about the field's coarsest
+/// cascade, so a march from the plane down the sun's light meets every surface the field holds
+/// between the sun and the cascade the map lies across.
+public struct SunMap
+{
+    public float3 middle;
+    public float radius;
+    public float3 l;
+    public float3 u;
+    public float3 v;
+    public float plane;
+};
+
+/// The sun's map across the cascade whose corner and cell are `oc`, `size` cells a side, for the
+/// sun along `l`, its plane past the cascade whose corner and cell are `outer`, the field's
+/// coarsest.
+public SunMap sunMapAcross(float4 oc, float size, float3 l, float4 outer)
+{
+    SunMap map;
+    float side = size * oc.w;
+    map.middle = oc.xyz + 0.5 * side;
+    map.radius = 0.5 * sqrt(3.0) * side;
+    map.l = l;
+    map.u = normalize(cross(abs(l.y) < 0.99 ? float3(0.0, 1.0, 0.0) : float3(1.0, 0.0, 0.0), l));
+    map.v = cross(l, map.u);
+    float outerSide = size * outer.w;
+    map.plane = length(outer.xyz + 0.5 * outerSide - map.middle) + 0.5 * sqrt(3.0) * outerSide;
+    return map;
+}
+
+/// How far down the sun's light from the plane of `map` the point `p` lies, which a texel's march
+/// from the plane keeps for the first surface it meets, and in `xy` where `p` falls across the map,
+/// -1 to 1 along each of its axes.
+public float sunMapDepth(SunMap map, float3 p, out float2 xy)
+{
+    float3 local = p - map.middle;
+    xy = float2(dot(local, map.u), dot(local, map.v)) / map.radius;
+    return map.plane - dot(local, map.l);
+}
+
+/// The way out from a lamp of the texel at `uv` of one face of its map (gi_lamps.slang), -1 to 1
+/// along each of the face's axes, the six faces of a cube looking along +x, -x, +y, -y, +z and -z.
+public float3 lampMapWay(uint face, float2 uv)
+{
+    float s = (face & 1u) == 0u ? 1.0 : -1.0;
+    uint axis = face >> 1u;
+    float3 way = axis == 0u ? float3(s, uv.x, uv.y) : axis == 1u ? float3(uv.x, s, uv.y) : float3(uv.x, uv.y, s);
+    return normalize(way);
+}
+
+/// The face of a lamp's map a way out from the lamp falls on, and in `uv` where across it, as
+/// `lampMapWay` lays them out.
+public uint lampMapFace(float3 way, out float2 uv)
+{
+    float3 a = abs(way);
+    uint axis = a.x >= a.y && a.x >= a.z ? 0u : a.y >= a.z ? 1u : 2u;
+    uv = axis == 0u ? way.yz / a.x : axis == 1u ? way.xz / a.y : way.xy / a.z;
+    return axis * 2u + (way[axis] < 0.0 ? 1u : 0u);
+}
