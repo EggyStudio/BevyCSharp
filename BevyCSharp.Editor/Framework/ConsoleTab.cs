@@ -1,5 +1,6 @@
 using System.Numerics;
 using Bevy;
+using Diagnostics;
 using ImGuiNET;
 
 namespace BevyCSharp.Editor.Framework;
@@ -18,7 +19,7 @@ public static class ConsoleTab
     private static readonly ConsoleView View = new();
 
     private static string _typed = string.Empty;
-    private static int _seen;
+    private static long _seen;
 
     /// <summary>How many times an earlier command has been put back in the box.</summary>
     private static int _recalls;
@@ -27,7 +28,7 @@ public static class ConsoleTab
     /// How tall each line is once wrapped, by the line and how many times it was said, since the
     /// count is part of what is drawn. Kept for one width, and measured again when it changes.
     /// </summary>
-    private static readonly Dictionary<(int Index, int Count), float> Heights = [];
+    private static readonly Dictionary<(long Index, int Count), float> Heights = [];
 
     /// <summary>The width the heights were measured at.</summary>
     private static float _measuredAt;
@@ -49,7 +50,7 @@ public static class ConsoleTab
     /// drawn among all the others.
     /// </para>
     /// </remarks>
-    private static void Visible(LogLine[] lines)
+    private static void Visible(ConsoleLine[] lines)
     {
         var width = ImGui.GetContentRegionAvail().X;
         if (width != _measuredAt || Heights.Count > ConsoleLog.Depth * 2)
@@ -96,7 +97,7 @@ public static class ConsoleTab
     }
 
     /// <summary>A line's height once wrapped at a width, measured the first time it is asked.</summary>
-    private static float HeightOf(LogLine line, float width)
+    private static float HeightOf(ConsoleLine line, float width)
     {
         if (!Heights.TryGetValue((line.Index, line.Count), out var height))
         {
@@ -108,7 +109,7 @@ public static class ConsoleTab
     }
 
     /// <summary>Draws one line in its level's color.</summary>
-    private static void Line(LogLine line)
+    private static void Line(ConsoleLine line)
     {
         var theme = EditorTheme.Current;
 
@@ -116,9 +117,9 @@ public static class ConsoleTab
         // colors the palette already has rather than four of this file's own.
         var color = line.Level switch
         {
-            LogLevel.Warning => theme.Warn,
-            LogLevel.Error => theme.Bad,
-            LogLevel.Echo => EditorTheme.LiveText,
+            ConsoleLevel.Warning => theme.Warn,
+            ConsoleLevel.Error => theme.Bad,
+            ConsoleLevel.Input => EditorTheme.LiveText,
             _ => theme.Dim,
         };
 

@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;

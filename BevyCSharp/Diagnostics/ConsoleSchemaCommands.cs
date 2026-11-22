@@ -1,5 +1,6 @@
 using System.Text;
 using Bevy.Interop;
+using Diagnostics;
 
 namespace Bevy;
 

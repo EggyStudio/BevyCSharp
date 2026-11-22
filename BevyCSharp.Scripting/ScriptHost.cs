@@ -252,14 +252,16 @@ public sealed class ScriptHost(App app, string directory)
         image = null;
         error = null;
 
-        // The usings the projects get from ImplicitUsings, plus Bevy itself. A script is meant to
-        // be a short file someone edits while the editor runs, and starting every one with the
-        // same handful of lines is ceremony that teaches nothing.
+        // The usings the projects get from ImplicitUsings, plus Bevy itself and the Diagnostics
+        // module, whose attribute marks a command. A script is meant to be a short file someone
+        // edits while the editor runs, and starting every one with the same handful of lines is
+        // ceremony that teaches nothing.
         const string Preamble =
             "global using System;\n"
             + "global using System.Collections.Generic;\n"
             + "global using System.Linq;\n"
-            + "global using Bevy;\n";
+            + "global using Bevy;\n"
+            + "global using Diagnostics;\n";
 
         var trees = sources
             .Select(source => CSharpSyntaxTree.ParseText(source.Text, path: source.Path))

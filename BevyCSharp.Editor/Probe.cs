@@ -540,9 +540,10 @@ public partial struct Probe
 
         if (script.Contains("console"))
         {
-            Console.WriteLine($"[probe] the log holds {ConsoleLog.All().Length} lines");
+            var logged = ConsoleLog.All();
+            Console.WriteLine($"[probe] the log holds {logged.Count} lines");
 
-            foreach (var line in ConsoleLog.All()[^Math.Min(3, ConsoleLog.All().Length)..])
+            foreach (var line in logged.Skip(Math.Max(0, logged.Count - 3)))
             {
                 Console.WriteLine($"[probe] log: {line.Text}");
             }

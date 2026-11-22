@@ -183,7 +183,7 @@ public sealed class ReflectedComponentTests
             ecs.Add(entity, new Sprung { Mass = 1f });
 
             using (ConsoleHost.Lend(world))
-                answer = ConsoleCommands.Run("entity.set Sprung Sprung.Front.Damping 0.5");
+                answer = ConsoleHost.Run("entity.set Sprung Sprung.Front.Damping 0.5").Text;
 
             damping = ecs.GetOrDefault<Sprung>(entity).Front.Damping;
         });
@@ -302,7 +302,7 @@ public sealed class ReflectedComponentTests
             // Pascal case a C# field would have.
             using (ConsoleHost.Lend(world))
             {
-                var answer = ConsoleCommands.Run("entity.set Lamp PointLight.Intensity 42");
+                var answer = ConsoleHost.Run("entity.set Lamp PointLight.Intensity 42").Text;
                 Assert.Contains("PointLight.Intensity = 42", answer);
             }
 

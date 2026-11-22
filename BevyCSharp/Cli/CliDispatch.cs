@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 /// <summary>
@@ -47,7 +49,7 @@ internal static class CliDispatch
             writer.WriteNumber("elapsed", Math.Round(time.ElapsedSeconds, 3));
             writer.WriteBoolean("renderer", App.HasRenderer);
             writer.WriteBoolean("editor", App.HasEditor);
-            writer.WriteNumber("commands", ConsoleCommands.All.Count);
+            writer.WriteNumber("commands", ConsoleHost.Commands.Commands.Count);
         }, request.Id);
     }
 
@@ -64,17 +66,17 @@ internal static class CliDispatch
         writer.WritePropertyName("commands");
         writer.WriteStartArray();
 
-        foreach (var command in ConsoleCommands.All)
+        foreach (var command in ConsoleHost.Commands.Commands)
         {
             writer.WriteStartObject();
             writer.WriteString("name", command.Name);
-            writer.WriteString("help", command.Help);
+            writer.WriteString("help", command.Summary);
             writer.WriteString("usage", command.Usage);
 
             writer.WritePropertyName("parameters");
             writer.WriteStartArray();
 
-            foreach (var parameter in command.Parameters)
+            foreach (var parameter in command.Arguments)
             {
                 writer.WriteStartObject();
                 writer.WriteString("name", parameter.Name);
@@ -97,8 +99,9 @@ internal static class CliDispatch
     /// <remarks>
     /// The name is looked up before the line is run, so a caller that misspelled a command is told
     /// so with a code rather than with a sentence it would have to read. Everything past that is
-    /// the command's own business. Its answer is the payload, and whether that counts as a failure
-    /// depends on what it said through <see cref="ConsoleHost.Fail"/>.
+    /// the command's own business. Its answer's text is the payload, and the answer fails with the
+    /// code the module gave it, as for a word it could not read, or the command gave
+    /// <see cref="ConsoleHost.Fail"/>.
     /// </remarks>
     private static string? Run(CliRequest request, World world)
     {
@@ -113,7 +116,7 @@ internal static class CliDispatch
         var cut = line.IndexOf(' ');
         var name = cut < 0 ? line : line[..cut];
 
-        if (ConsoleCommands.Find(name) is null)
+        if (ConsoleHost.Commands.FindCommand(name) is null && ConsoleHost.Commands.FindSetting(name) is null)
         {
             return CliJson.Fail(
                 "command",
@@ -122,13 +125,16 @@ internal static class CliDispatch
                 request.Id);
         }
 
-        string? answer;
+        Answer said;
 
-        using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run(line);
+        using (ConsoleHost.Lend(world)) said = ConsoleHost.Run(line);
 
+        // A command that answers nothing answers no result.
+        var answer = said.Text.Length > 0 ? said.Text : null;
         var frame = world.Resource<Time>().FrameCount;
 
-        if (ConsoleHost.Failure is { } failure)
+        // The sentence a command gave ConsoleHost.Fail, or the module's own for a line it refused.
+        if ((ConsoleHost.Failure ?? (said.Code is { } code ? new CliError(code, said.Text) : null)) is { } failure)
         {
             return CliJson.Envelope(
                 "command",

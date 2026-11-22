@@ -181,7 +181,7 @@ public sealed class RayTracingTests
             .Wait(ShaderMaterialTests.Settled + 90)
             .Until("reading the timings over 600 frames", _ =>
             {
-                if (Diagnostics.TryRead("render/bcs_denoiser/elapsed_gpu", out var reading) && reading.Value is { } taken)
+                if (DiagnosticsStore.TryRead("render/bcs_denoiser/elapsed_gpu", out var reading) && reading.Value is { } taken)
                     least = Math.Min(least ?? taken, taken);
                 return ++frames >= 600;
             })

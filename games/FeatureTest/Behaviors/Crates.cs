@@ -1,5 +1,6 @@
 using Bevy;
 using Bevy.Physics;
+using Diagnostics;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 

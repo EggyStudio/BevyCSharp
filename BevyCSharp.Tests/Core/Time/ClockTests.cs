@@ -124,12 +124,12 @@ public sealed class ClockTests
             {
                 if (frame == 1)
                 {
-                    answers.Add(ConsoleCommands.Run("app.frametime 0.025"));
-                    answers.Add(ConsoleCommands.Run("app.frametime"));
-                    answers.Add(ConsoleCommands.Run("app.frametime -1"));
+                    answers.Add(ConsoleHost.Run("app.frametime 0.025").Text);
+                    answers.Add(ConsoleHost.Run("app.frametime").Text);
+                    answers.Add(ConsoleHost.Run("app.frametime -1").Text);
                 }
 
-                if (frame == 3) answers.Add(ConsoleCommands.Run("app.frametime off"));
+                if (frame == 3) answers.Add(ConsoleHost.Run("app.frametime off").Text);
             }
 
             frame++;

@@ -1,6 +1,7 @@
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Bevy;
+using Diagnostics;
 using Bevy.Interop;
 using Xunit;
 
@@ -308,7 +309,7 @@ public sealed class ComputeShaderTests
         void Count(World world)
         {
             using (ConsoleHost.Lend(world))
-                held.Add(MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "").GetValueOrDefault("asset.ShaderBuffer"));
+                held.Add(MemoryCommandTests.Pairs(ConsoleHost.Run("memory").Text).GetValueOrDefault("asset.ShaderBuffer"));
         }
 
         new PictureRun { Width = 64, Height = 36, Frames = 100, Scene = _ => { } }

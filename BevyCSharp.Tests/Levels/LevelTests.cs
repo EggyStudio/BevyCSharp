@@ -142,9 +142,9 @@ public sealed class LevelTests
             if (built is not null) return;
             using (ConsoleHost.Lend(world))
             {
-                built = ConsoleCommands.Run($"level.load {room}");
-                refused = ConsoleCommands.Run($"level.load {broken}");
-                missing = ConsoleCommands.Run($"level.load {folder.File("none.map")}");
+                built = ConsoleHost.Run($"level.load {room}").Text;
+                refused = ConsoleHost.Run($"level.load {broken}").Text;
+                missing = ConsoleHost.Run($"level.load {folder.File("none.map")}").Text;
             }
 
             var ecs = world.Resource<EcsWorld>();

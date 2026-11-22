@@ -155,23 +155,23 @@ public sealed class ScriptsPluginTests : IDisposable
                     switch (frame++)
                     {
                         case 2:
-                            answers.Add(ConsoleCommands.Run("scripts.status") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.status").Text);
                             Write("second");
                             break;
 
                         // Past the time a watcher lets a file sit still, at the rate the app runs.
                         case 92:
                             seen.Add(Names(world.Resource<EcsWorld>()));
-                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.reload").Text);
                             failures.Add(ConsoleHost.Failure?.Code);
                             break;
 
                         case 96:
                             seen.Add(Names(world.Resource<EcsWorld>()));
                             File.WriteAllText(_folder.File("Marker.cs"), "this is no C#");
-                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.reload").Text);
                             failures.Add(ConsoleHost.Failure?.Code);
-                            answers.Add(ConsoleCommands.Run("scripts.status") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.status").Text);
                             break;
                     }
                 });
@@ -243,7 +243,7 @@ public sealed class ScriptsPluginTests : IDisposable
                                 public static void Start(BehaviorContext ctx) => throw new InvalidOperationException("a startup that throws");
                             }
                             """);
-                        ConsoleCommands.Run("scripts.reload");
+                        ConsoleHost.Run("scripts.reload");
                         failure = ConsoleHost.Failure?.Code;
                         break;
 
@@ -305,7 +305,7 @@ public sealed class ScriptsPluginTests : IDisposable
                     switch (frame++)
                     {
                         case 2:
-                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.reload").Text);
                             failures.Add(ConsoleHost.Failure?.Code);
                             break;
 
@@ -313,7 +313,7 @@ public sealed class ScriptsPluginTests : IDisposable
                             var shut = _folder.File("Shut.cs");
                             File.WriteAllText(shut, "namespace Watched; public static class Shut { }");
                             File.SetUnixFileMode(shut, UnixFileMode.None);
-                            answers.Add(ConsoleCommands.Run("scripts.reload") ?? "");
+                            answers.Add(ConsoleHost.Run("scripts.reload").Text);
                             failures.Add(ConsoleHost.Failure?.Code);
                             File.SetUnixFileMode(shut, UnixFileMode.UserRead | UnixFileMode.UserWrite);
                             break;
@@ -359,8 +359,8 @@ public sealed class ScriptsPluginTests : IDisposable
                     case 2:
                         foreach (var entity in ecs.All().Where(entity => ecs.NameOf(entity) == "first").ToArray()) ecs.Despawn(entity);
                         File.Delete(_folder.File("Marker.cs"));
-                        answer = ConsoleCommands.Run("scripts.reload") ?? "";
-                        status = ConsoleCommands.Run("scripts.status") ?? "";
+                        answer = ConsoleHost.Run("scripts.reload").Text;
+                        status = ConsoleHost.Run("scripts.status").Text;
                         break;
 
                     case 10:
@@ -397,7 +397,7 @@ public sealed class ScriptsPluginTests : IDisposable
                 harness.On(Stage.Update, world =>
                 {
                     using var lent = ConsoleHost.Lend(world);
-                    status = ConsoleCommands.Run("scripts.status") ?? "";
+                    status = ConsoleHost.Run("scripts.status").Text;
                 });
                 harness.Run();
             }
@@ -426,7 +426,7 @@ public sealed class ScriptsPluginTests : IDisposable
         harness.On(Stage.Update, world =>
         {
             using var lent = ConsoleHost.Lend(world);
-            answer = ConsoleCommands.Run("scripts.status") ?? "";
+            answer = ConsoleHost.Run("scripts.status").Text;
             failure = ConsoleHost.Failure?.Code;
         });
         harness.Run();

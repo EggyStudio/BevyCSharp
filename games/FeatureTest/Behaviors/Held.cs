@@ -43,7 +43,7 @@ public partial struct Held
     internal static string[] Lines(World world)
     {
         string answer;
-        using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run("memory") ?? string.Empty;
+        using (ConsoleHost.Lend(world)) answer = ConsoleHost.Run("memory").Text;
 
         var words = answer.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         var lines = new List<string>();

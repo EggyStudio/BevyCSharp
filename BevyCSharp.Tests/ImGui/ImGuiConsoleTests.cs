@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using ImGuiNET;
 using Xunit;
 
@@ -27,7 +28,7 @@ public sealed class ImGuiConsoleTests : IDisposable
     public void TheKeyOpensItOverTheTopRunsWhatIsTypedAndClosesIt()
     {
         Needs.Renderer();
-        ConsoleLog.Write(LogLevel.Error, "a line the console shows");
+        ConsoleLog.Write(ConsoleLevel.Error, "a line the console shows");
 
         var run = new PictureRun
         {
@@ -67,8 +68,8 @@ public sealed class ImGuiConsoleTests : IDisposable
             .Go();
 
         var lines = ConsoleLog.All();
-        Assert.Contains(lines, line => line is { Level: LogLevel.Echo, Text: "> echo typed into the console" });
-        Assert.Contains(lines, line => line is { Level: LogLevel.Echo, Text: "typed into the console" });
+        Assert.Contains(lines, line => line is { Level: ConsoleLevel.Input, Text: "> echo typed into the console" });
+        Assert.Contains(lines, line => line is { Level: ConsoleLevel.Info, Text: "typed into the console" });
 
         // Drawn over the top of the picture and nowhere else, the share of its height it takes, and
         // gone again once closed.

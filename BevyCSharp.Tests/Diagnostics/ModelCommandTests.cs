@@ -22,12 +22,12 @@ public sealed class ModelCommandTests : IDisposable
     [Fact]
     public void TheGuidesRoomIsMadeALineAtATimeAndSavedAndLoadedAsTheSame()
     {
-        Assert.Equal("hall1: 16 vertices, 24 edges, 12 faces, 12 faces and 16 vertices selected", ConsoleCommands.Run("model.room hall1 6 3 5 0.2"));
-        Assert.StartsWith("hall1: 16 vertices, 24 edges, 12 faces, 2 faces", ConsoleCommands.Run("model.select hall1 -z"));
+        Assert.Equal("hall1: 16 vertices, 24 edges, 12 faces, 12 faces and 16 vertices selected", ConsoleHost.Run("model.room hall1 6 3 5 0.2").Text);
+        Assert.StartsWith("hall1: 16 vertices, 24 edges, 12 faces, 2 faces", ConsoleHost.Run("model.select hall1 -z").Text);
 
         // The window's four sides selected, a corner more than their eight where the wall's pieces
         // meet one of their edges.
-        var cut = ConsoleCommands.Run("model.cut hall1 window 1 1.2 2 0.9");
+        var cut = ConsoleHost.Run("model.cut hall1 window 1 1.2 2 0.9").Text;
         Assert.NotNull(cut);
         Assert.EndsWith("4 faces and 9 vertices selected", cut);
 
@@ -35,126 +35,126 @@ public sealed class ModelCommandTests : IDisposable
         Assert.True(mesh.IsClosed);
         Assert.Equal(new[] { "room 6 3 5 0.2", "select -z", "cut window 1 1.2 2 0.9" }, mesh.Recipe);
 
-        var info = ConsoleCommands.Run("model.info hall1");
+        var info = ConsoleHost.Run("model.info hall1").Text;
         Assert.Contains("closed", info);
         Assert.Contains("slots default", info);
         Assert.Contains("3 lines of recipe", info);
 
         var path = _folder.File("hall.model");
-        Assert.Equal($"wrote hall1 to {path}", ConsoleCommands.Run($"model.save hall1 {path}"));
-        Assert.Equal(cut.Replace("hall1", "hall2"), ConsoleCommands.Run($"model.load hall2 {path}"));
+        Assert.Equal($"wrote hall1 to {path}", ConsoleHost.Run($"model.save hall1 {path}").Text);
+        Assert.Equal(cut.Replace("hall1", "hall2"), ConsoleHost.Run($"model.load hall2 {path}").Text);
         Assert.Equal(mesh.Recipe, Modeling.Find("hall2")!.Recipe);
 
-        Assert.Contains("hall1: ", ConsoleCommands.Run("model.list"));
-        Assert.Contains("hall2: ", ConsoleCommands.Run("model.list"));
-        Assert.StartsWith(EditMesh.Header + "\nroom 6 3 5 0.2", ConsoleCommands.Run("model.recipe hall1"));
+        Assert.Contains("hall1: ", ConsoleHost.Run("model.list").Text);
+        Assert.Contains("hall2: ", ConsoleHost.Run("model.list").Text);
+        Assert.StartsWith(EditMesh.Header + "\nroom 6 3 5 0.2", ConsoleHost.Run("model.recipe hall1").Text);
 
-        Assert.StartsWith("hall1: 16 vertices", ConsoleCommands.Run("model.undo hall1"));
-        Assert.Equal(cut, ConsoleCommands.Run("model.redo hall1"));
+        Assert.StartsWith("hall1: 16 vertices", ConsoleHost.Run("model.undo hall1").Text);
+        Assert.Equal(cut, ConsoleHost.Run("model.redo hall1").Text);
 
-        Assert.Equal("forgot hall1", ConsoleCommands.Run("model.free hall1"));
-        Assert.Equal("forgot hall2", ConsoleCommands.Run("model.free hall2"));
+        Assert.Equal("forgot hall1", ConsoleHost.Run("model.free hall1").Text);
+        Assert.Equal("forgot hall2", ConsoleHost.Run("model.free hall2").Text);
         Assert.DoesNotContain("hall1", Modeling.Names);
     }
 
     [Fact]
     public void AnOperationOnANameNoModelHasIsRefusedAndAPrimitiveMakesOne()
     {
-        Assert.StartsWith("There is no model called absent3", ConsoleCommands.Run("model.select absent3 +y"));
+        Assert.StartsWith("There is no model called absent3", ConsoleHost.Run("model.select absent3 +y").Text);
         Assert.Null(Modeling.Find("absent3"));
 
-        Assert.StartsWith("plane3: 4 vertices", ConsoleCommands.Run("model.plane plane3 2 2"));
-        Assert.Contains("is not a number", ConsoleCommands.Run("model.move plane3 1 up 0"));
-        Assert.Contains("needs another number", ConsoleCommands.Run("model.extrude plane3 0 1"));
-        Assert.StartsWith("plane3: 8 vertices", ConsoleCommands.Run("model.extrude plane3 1"));
-        Assert.StartsWith("plane3 has no operation", ConsoleCommands.Run("model.redo plane3"));
+        Assert.StartsWith("plane3: 4 vertices", ConsoleHost.Run("model.plane plane3 2 2").Text);
+        Assert.Contains("is not a number", ConsoleHost.Run("model.move plane3 1 up 0").Text);
+        Assert.Contains("needs another number", ConsoleHost.Run("model.extrude plane3 0 1").Text);
+        Assert.StartsWith("plane3: 8 vertices", ConsoleHost.Run("model.extrude plane3 1").Text);
+        Assert.StartsWith("plane3 has no operation", ConsoleHost.Run("model.redo plane3").Text);
 
-        Assert.Equal("forgot plane3", ConsoleCommands.Run("model.free plane3"));
+        Assert.Equal("forgot plane3", ConsoleHost.Run("model.free plane3").Text);
     }
 
     [Fact]
     public void AnEdgeIsSelectedByItsEndsAndBeveledLoopCutAndSubdividedByTheCommands()
     {
-        Assert.StartsWith("cube6: 8 vertices", ConsoleCommands.Run("model.box cube6 2 2 2"));
-        Assert.Equal("cube6: 8 vertices, 12 edges, 6 faces, 0 faces and 2 vertices selected", ConsoleCommands.Run("model.select cube6 edge 0 4"));
-        Assert.Equal("cube6: 12 vertices, 20 edges, 10 faces, 0 faces and 4 vertices selected", ConsoleCommands.Run("model.loopcut cube6 0.5"));
-        Assert.StartsWith("cube6: 12 vertices", ConsoleCommands.Run("model.select cube6 +y"));
-        Assert.Equal("cube6: 24 vertices, 40 edges, 18 faces, 9 faces and 16 vertices selected", ConsoleCommands.Run("model.subdivide cube6 2"));
-        Assert.StartsWith("cube6: ", ConsoleCommands.Run("model.select cube6 all"));
-        Assert.StartsWith("cube6: ", ConsoleCommands.Run("model.bevel cube6 0.1 2"));
+        Assert.StartsWith("cube6: 8 vertices", ConsoleHost.Run("model.box cube6 2 2 2").Text);
+        Assert.Equal("cube6: 8 vertices, 12 edges, 6 faces, 0 faces and 2 vertices selected", ConsoleHost.Run("model.select cube6 edge 0 4").Text);
+        Assert.Equal("cube6: 12 vertices, 20 edges, 10 faces, 0 faces and 4 vertices selected", ConsoleHost.Run("model.loopcut cube6 0.5").Text);
+        Assert.StartsWith("cube6: 12 vertices", ConsoleHost.Run("model.select cube6 +y").Text);
+        Assert.Equal("cube6: 24 vertices, 40 edges, 18 faces, 9 faces and 16 vertices selected", ConsoleHost.Run("model.subdivide cube6 2").Text);
+        Assert.StartsWith("cube6: ", ConsoleHost.Run("model.select cube6 all").Text);
+        Assert.StartsWith("cube6: ", ConsoleHost.Run("model.bevel cube6 0.1 2").Text);
         Assert.True(Modeling.Find("cube6")!.IsClosed);
 
-        Assert.Contains("No face runs from vertex 0 to vertex 99", ConsoleCommands.Run("model.select cube6 edge 0 99"));
-        Assert.Contains("is not a whole number", ConsoleCommands.Run("model.bevel cube6 0.1 two"));
-        Assert.EndsWith("select edge 0 4\nloopcut 0.5\nselect +y\nsubdivide 2\nselect all\nbevel 0.1 2", ConsoleCommands.Run("model.recipe cube6"));
-        Assert.Equal("forgot cube6", ConsoleCommands.Run("model.free cube6"));
+        Assert.Contains("No face runs from vertex 0 to vertex 99", ConsoleHost.Run("model.select cube6 edge 0 99").Text);
+        Assert.Contains("is not a whole number", ConsoleHost.Run("model.bevel cube6 0.1 two").Text);
+        Assert.EndsWith("select edge 0 4\nloopcut 0.5\nselect +y\nsubdivide 2\nselect all\nbevel 0.1 2", ConsoleHost.Run("model.recipe cube6").Text);
+        Assert.Equal("forgot cube6", ConsoleHost.Run("model.free cube6").Text);
     }
 
     [Fact]
     public void AHalfIsMirroredCutFilledAndSmoothedByTheCommands()
     {
-        Assert.StartsWith("half7: 8 vertices", ConsoleCommands.Run("model.box half7 1 2 2"));
-        Assert.Equal("half7: 12 vertices, 20 edges, 10 faces, 10 faces and 12 vertices selected", ConsoleCommands.Run("model.mirror half7 x"));
+        Assert.StartsWith("half7: 8 vertices", ConsoleHost.Run("model.box half7 1 2 2").Text);
+        Assert.Equal("half7: 12 vertices, 20 edges, 10 faces, 10 faces and 12 vertices selected", ConsoleHost.Run("model.mirror half7 x").Text);
 
         // The front, the back and both ends crossed at a meter up, six faces cut and six points made.
-        Assert.Equal("half7: 18 vertices, 32 edges, 16 faces, 16 faces and 18 vertices selected", ConsoleCommands.Run("model.knife half7 y at 0 1 0"));
-        Assert.StartsWith("half7: 18 vertices, 32 edges, 16 faces, 2 faces", ConsoleCommands.Run("model.select half7 +y"));
-        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleCommands.Run("model.dissolve half7"));
-        Assert.StartsWith("half7: 18 vertices, 31 edges, 14 faces, 0 faces", ConsoleCommands.Run("model.delete half7"));
-        Assert.StartsWith("half7: ", ConsoleCommands.Run("model.select half7 all"));
-        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleCommands.Run("model.fill half7"));
-        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces", ConsoleCommands.Run("model.smooth half7 0.1 2"));
+        Assert.Equal("half7: 18 vertices, 32 edges, 16 faces, 16 faces and 18 vertices selected", ConsoleHost.Run("model.knife half7 y at 0 1 0").Text);
+        Assert.StartsWith("half7: 18 vertices, 32 edges, 16 faces, 2 faces", ConsoleHost.Run("model.select half7 +y").Text);
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleHost.Run("model.dissolve half7").Text);
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 14 faces, 0 faces", ConsoleHost.Run("model.delete half7").Text);
+        Assert.StartsWith("half7: ", ConsoleHost.Run("model.select half7 all").Text);
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces, 1 faces", ConsoleHost.Run("model.fill half7").Text);
+        Assert.StartsWith("half7: 18 vertices, 31 edges, 15 faces", ConsoleHost.Run("model.smooth half7 0.1 2").Text);
         Assert.True(Modeling.Find("half7")!.IsClosed);
 
-        Assert.StartsWith("half7: ", ConsoleCommands.Run("model.select half7 none"));
-        Assert.Contains("no edge is selected", ConsoleCommands.Run("model.spin half7 y 90 4"));
-        Assert.Contains("two regions", ConsoleCommands.Run("model.bridge half7"));
-        Assert.EndsWith("mirror x\nknife y at 0 1 0\nselect +y\ndissolve\ndelete\nselect all\nfill\nsmooth 0.1 2\nselect none", ConsoleCommands.Run("model.recipe half7"));
-        Assert.Equal("forgot half7", ConsoleCommands.Run("model.free half7"));
+        Assert.StartsWith("half7: ", ConsoleHost.Run("model.select half7 none").Text);
+        Assert.Contains("no edge is selected", ConsoleHost.Run("model.spin half7 y 90 4").Text);
+        Assert.Contains("two regions", ConsoleHost.Run("model.bridge half7").Text);
+        Assert.EndsWith("mirror x\nknife y at 0 1 0\nselect +y\ndissolve\ndelete\nselect all\nfill\nsmooth 0.1 2\nselect none", ConsoleHost.Run("model.recipe half7").Text);
+        Assert.Equal("forgot half7", ConsoleHost.Run("model.free half7").Text);
     }
 
     [Fact]
     public void TheModifierStackIsChangedByTheCommandAndInfoSaysWhatItBuilds()
     {
-        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.box stack9 2 2 2"));
+        Assert.StartsWith("stack9: 8 vertices", ConsoleHost.Run("model.box stack9 2 2 2").Text);
 
         // A modifier leaves the model's own counts, which each command answers, and info says
         // the stack and what it builds.
-        Assert.StartsWith("stack9: 8 vertices, 12 edges, 6 faces", ConsoleCommands.Run("model.modifier stack9 add subdivision 1"));
-        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.modifier stack9 add array 2 3 0 0"));
-        Assert.Contains("modifiers subdivision 1, array 2 3 0 0, built as 52 vertices and 48 faces", ConsoleCommands.Run("model.info stack9"));
+        Assert.StartsWith("stack9: 8 vertices, 12 edges, 6 faces", ConsoleHost.Run("model.modifier stack9 add subdivision 1").Text);
+        Assert.StartsWith("stack9: 8 vertices", ConsoleHost.Run("model.modifier stack9 add array 2 3 0 0").Text);
+        Assert.Contains("modifiers subdivision 1, array 2 3 0 0, built as 52 vertices and 48 faces", ConsoleHost.Run("model.info stack9").Text);
 
-        Assert.Contains("is no modifier", ConsoleCommands.Run("model.modifier stack9 add twist 90"));
-        Assert.Contains("There is no model at models/none.model", ConsoleCommands.Run("model.modifier stack9 add boolean union models/none.model"));
+        Assert.Contains("is no modifier", ConsoleHost.Run("model.modifier stack9 add twist 90").Text);
+        Assert.Contains("There is no model at models/none.model", ConsoleHost.Run("model.modifier stack9 add boolean union models/none.model").Text);
 
-        Assert.StartsWith("stack9: 8 vertices", ConsoleCommands.Run("model.modifier stack9 remove 1"));
-        Assert.StartsWith("stack9: 26 vertices, 48 edges, 24 faces", ConsoleCommands.Run("model.modifier stack9 apply 0"));
-        Assert.Contains("no modifiers", ConsoleCommands.Run("model.info stack9"));
-        Assert.EndsWith("modifier add subdivision 1\nmodifier add array 2 3 0 0\nmodifier remove 1\nmodifier apply 0", ConsoleCommands.Run("model.recipe stack9"));
-        Assert.Equal("forgot stack9", ConsoleCommands.Run("model.free stack9"));
+        Assert.StartsWith("stack9: 8 vertices", ConsoleHost.Run("model.modifier stack9 remove 1").Text);
+        Assert.StartsWith("stack9: 26 vertices, 48 edges, 24 faces", ConsoleHost.Run("model.modifier stack9 apply 0").Text);
+        Assert.Contains("no modifiers", ConsoleHost.Run("model.info stack9").Text);
+        Assert.EndsWith("modifier add subdivision 1\nmodifier add array 2 3 0 0\nmodifier remove 1\nmodifier apply 0", ConsoleHost.Run("model.recipe stack9").Text);
+        Assert.Equal("forgot stack9", ConsoleHost.Run("model.free stack9").Text);
     }
 
     [Fact]
     public void ADensityTypedWithOneNumberTakesTheWidthOfItsSlotsTextureAndInfoSaysTheLooks()
     {
-        Assert.StartsWith("uvs5: 8 vertices", ConsoleCommands.Run("model.box uvs5 2 2 2"));
-        ConsoleCommands.Run("model.select uvs5 +z");
+        Assert.StartsWith("uvs5: 8 vertices", ConsoleHost.Run("model.box uvs5 2 2 2").Text);
+        ConsoleHost.Run("model.select uvs5 +z");
 
         // A slot with no texture shows the grid, a meter of 1024 pixels.
-        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.uv uvs5 density 512"));
+        Assert.StartsWith("uvs5: ", ConsoleHost.Run("model.uv uvs5 density 512").Text);
         Assert.Equal("uv density 512 1024", Modeling.Find("uvs5")!.Recipe[^1]);
 
         // A texture's width is read once it has loaded, which no app runs to do here, so the
         // density is refused with how to give the width, and given it the line runs.
-        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.slot uvs5 texture default textures/checker.png"));
-        Assert.Contains("Give it after the density", ConsoleCommands.Run("model.uv uvs5 density 512"));
-        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.uv uvs5 density 512 256"));
-        Assert.StartsWith("uvs5: ", ConsoleCommands.Run("model.slot uvs5 roughness default 0.9"));
-        Assert.Contains("is none of", ConsoleCommands.Run("model.uv uvs5 wrap"));
+        Assert.StartsWith("uvs5: ", ConsoleHost.Run("model.slot uvs5 texture default textures/checker.png").Text);
+        Assert.Contains("Give it after the density", ConsoleHost.Run("model.uv uvs5 density 512").Text);
+        Assert.StartsWith("uvs5: ", ConsoleHost.Run("model.uv uvs5 density 512 256").Text);
+        Assert.StartsWith("uvs5: ", ConsoleHost.Run("model.slot uvs5 roughness default 0.9").Text);
+        Assert.Contains("is none of", ConsoleHost.Run("model.uv uvs5 wrap").Text);
 
-        Assert.Contains("slots default (texture textures/checker.png, roughness 0.9)", ConsoleCommands.Run("model.info uvs5"));
-        Assert.EndsWith("uv density 512 256\nslot roughness default 0.9", ConsoleCommands.Run("model.recipe uvs5"));
-        Assert.Equal("forgot uvs5", ConsoleCommands.Run("model.free uvs5"));
+        Assert.Contains("slots default (texture textures/checker.png, roughness 0.9)", ConsoleHost.Run("model.info uvs5").Text);
+        Assert.EndsWith("uv density 512 256\nslot roughness default 0.9", ConsoleHost.Run("model.recipe uvs5").Text);
+        Assert.Equal("forgot uvs5", ConsoleHost.Run("model.free uvs5").Text);
     }
 
     [SkippableFact]
@@ -170,8 +170,8 @@ public sealed class ModelCommandTests : IDisposable
             {
                 using (ConsoleHost.Lend(world))
                 {
-                    ConsoleCommands.Run("model.box shown4 1 1 1");
-                    ConsoleCommands.Run("model.show shown4 2 0 0");
+                    ConsoleHost.Run("model.box shown4 1 1 1");
+                    ConsoleHost.Run("model.show shown4 2 0 0");
                 }
             })
             .Wait(2)
@@ -181,9 +181,9 @@ public sealed class ModelCommandTests : IDisposable
                 prototype = Render.MaterialOf(world.Resource<EcsWorld>(), Modeling.Entry("shown4")!.Parts[0]);
                 using (ConsoleHost.Lend(world))
                 {
-                    ConsoleCommands.Run("model.select shown4 +y");
-                    ConsoleCommands.Run("model.move shown4 0 1 0");
-                    ConsoleCommands.Run("model.slot shown4 color default 1 0 0");
+                    ConsoleHost.Run("model.select shown4 +y");
+                    ConsoleHost.Run("model.move shown4 0 1 0");
+                    ConsoleHost.Run("model.slot shown4 color default 1 0 0");
                 }
             })
             .Wait(2)
@@ -192,7 +192,7 @@ public sealed class ModelCommandTests : IDisposable
                 after = Highest(world);
                 given = Render.MaterialOf(world.Resource<EcsWorld>(), Modeling.Entry("shown4")!.Parts[0]);
                 expected = Modeling.Materials(Modeling.Find("shown4")!)[0];
-                using (ConsoleHost.Lend(world)) freed = ConsoleCommands.Run("model.free shown4");
+                using (ConsoleHost.Lend(world)) freed = ConsoleHost.Run("model.free shown4").Text;
             })
             .Go();
 

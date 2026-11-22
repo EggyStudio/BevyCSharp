@@ -1,9 +1,12 @@
 namespace Bevy;
 
-/// <summary>What one of Bevy's diagnostics holds, as <see cref="Diagnostics"/> reads it.</summary>
+/// <summary>
+/// What one of Bevy's diagnostics holds, as <see cref="DiagnosticsStore"/> reads it.
+/// </summary>
 /// <remarks>
 /// A value the diagnostic has none of yet, before its first measurement, is null. The suffix comes
-/// with <see cref="Diagnostics.All"/> and is empty from <see cref="Diagnostics.TryRead"/>.
+/// with <see cref="DiagnosticsStore.All"/> and is empty from
+/// <see cref="DiagnosticsStore.TryRead"/>.
 /// </remarks>
 /// <param name="Path">What it is called, such as <c>fps</c>.</param>
 /// <param name="Suffix">What Bevy's log prints after its numbers, such as <c>" ms"</c>.</param>

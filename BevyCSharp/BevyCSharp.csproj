@@ -68,6 +68,7 @@
         <ProjectReference Include="../modules/Levels/Levels/Levels.csproj" PrivateAssets="all"/>
         <ProjectReference Include="../modules/Sky/Sky/Sky.csproj" PrivateAssets="all"/>
         <ProjectReference Include="../modules/Vegetation/Vegetation/Vegetation.csproj" PrivateAssets="all"/>
+        <ProjectReference Include="../modules/Diagnostics/Diagnostics/Diagnostics.csproj" PrivateAssets="all"/>
     </ItemGroup>
 
     <!--

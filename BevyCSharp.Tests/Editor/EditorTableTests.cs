@@ -1,4 +1,5 @@
 using BevyCSharp.Editor.Framework;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -141,7 +142,7 @@ public sealed class EditorTableTests
         // anything, so none of it needs a window.
         EditorCommands.Register(Entity.None);
 
-        var listed = ConsoleCommands.Run("do");
+        var listed = ConsoleHost.Run("do").Text;
 
         Assert.NotNull(listed);
         Assert.Contains("Spawn/Cube", listed);
@@ -150,7 +151,7 @@ public sealed class EditorTableTests
         // A branch is a place to look, not something to run, so it is not offered as one.
         Assert.DoesNotContain("Spawn\n", listed);
 
-        Assert.Equal("nothing at Spawn/Teapot", ConsoleCommands.Run("do Spawn/Teapot"));
+        Assert.Equal("nothing at Spawn/Teapot", ConsoleHost.Run("do Spawn/Teapot").Text);
     }
 
     [Fact]
@@ -158,29 +159,32 @@ public sealed class EditorTableTests
     {
         // The generator found it at compile time and a module initializer registered it, so the
         // console has it without anything having scanned for it.
-        var help = ConsoleCommands.Find("help");
+        var echo = ConsoleHost.Commands.FindCommand("echo");
 
-        Assert.NotNull(help);
-        Assert.Contains("Lists commands", help.Help);
+        Assert.NotNull(echo);
+        Assert.Contains("Writes what follows", echo.Summary);
 
-        var listed = ConsoleCommands.Run("help");
+        // The registry's own help lists it beside the rest.
+        var listed = ConsoleHost.Run("help").Text;
         Assert.Contains("echo", listed);
 
         // One string parameter takes the whole of what was typed after the name.
-        Assert.Equal("two words", ConsoleCommands.Run("echo two words"));
+        Assert.Equal("two words", ConsoleHost.Run("echo two words").Text);
 
         // And a name nobody declared is answered rather than thrown.
-        Assert.Equal("unknown command: nonesuch", ConsoleCommands.Run("nonesuch"));
+        var unknown = ConsoleHost.Run("nonesuch");
+        Assert.Equal("No command and no setting is named nonesuch.", unknown.Text);
+        Assert.Equal(Answer.NoSuchCommand, unknown.Code);
     }
 
     [Fact]
     public void ACommandTakesTypedArguments()
     {
-        Assert.Equal("counted 3 twice: True", ConsoleCommands.Run("test.count 3 yes"));
+        Assert.Equal("counted 3 twice: True", ConsoleHost.Run("test.count 3 yes").Text);
 
         // A word that is not a number is refused with a sentence, not an exception.
-        Assert.Equal("not a whole: three", ConsoleCommands.Run("test.count three yes"));
-        Assert.Equal("needs 2 arguments", ConsoleCommands.Run("test.count"));
+        Assert.Equal("not a whole: three", ConsoleHost.Run("test.count three yes").Text);
+        Assert.Equal("needs 2 arguments", ConsoleHost.Run("test.count").Text);
     }
 
     /// <summary>A command with arguments, for the test above.</summary>

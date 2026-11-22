@@ -1,4 +1,5 @@
 using System.Globalization;
+using Diagnostics;
 
 namespace Bevy;
 
@@ -40,16 +41,16 @@ internal static partial class ConsoleWorldCommands
     internal static string Tail(int count)
     {
         var lines = ConsoleLog.All();
-        if (lines.Length == 0) return "the log is empty";
+        if (lines.Count == 0) return "the log is empty";
 
-        var wanted = Math.Clamp(count, 1, lines.Length);
-        var chosen = lines[^wanted..];
+        var wanted = Math.Clamp(count, 1, lines.Count);
+        var chosen = lines.Skip(lines.Count - wanted);
 
         return string.Join(
             "\n",
             chosen.Select(line => line.Count > 1
-                ? $"[{line.Frame}] {line.Text} (x{line.Count})"
-                : $"[{line.Frame}] {line.Text}"));
+                ? $"[{line.Stamp}] {line.Text} (x{line.Count})"
+                : $"[{line.Stamp}] {line.Text}"));
     }
 
     /// <summary>Lists what is in the world.</summary>

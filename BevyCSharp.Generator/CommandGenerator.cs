@@ -18,16 +18,21 @@ namespace Bevy.Generator;
 /// usually does and which makes it the slowest thing in a program to open.
 /// </para>
 /// <para>
-/// What is emitted per method is a small function that takes the words after the command's name,
-/// turns them into the parameters the method declares, and calls it. Anything that cannot be
-/// turned into a parameter is answered with a sentence, because a console is a place where people
-/// type things that are not quite right.
+/// The attribute is the Diagnostics module's, and what is emitted per method is a call that adds a
+/// <c>Command</c> to the module's <c>Registry.Process</c>, as the module's README says a host's
+/// generator emits. Its run takes the words after the command's name, turns them into the
+/// parameters the method declares, and calls it. A word that cannot be turned into a parameter is
+/// answered with a sentence and the module's <c>BAD_ARGUMENT</c>, because a console is a place
+/// where people type things that are not quite right, and the method's text comes back through
+/// <c>ConsoleHost.Answered</c>, which fails the answer with the code the method gave
+/// <c>ConsoleHost.Fail</c>.
 /// </para>
 /// </remarks>
 [Generator(LanguageNames.CSharp)]
 public sealed class CommandGenerator : IIncrementalGenerator
 {
-    private const string CommandAttribute = RecognizedAttributes.Namespace + "." + RecognizedAttributes.Command;
+    // The attribute is the Diagnostics module's, in its namespace rather than the engine's.
+    private const string CommandAttribute = "Diagnostics." + RecognizedAttributes.Command;
 
     /// <inheritdoc/>
     public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -146,7 +151,7 @@ public sealed class CommandGenerator : IIncrementalGenerator
         return new CommandModel(
             name,
             help,
-            Usage(parameters),
+            Usage(name, parameters),
             method.ContainingType.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)
                 + "." + method.Name,
             new EquatableArray<ParameterModel>([.. parameters]),
@@ -179,12 +184,18 @@ public sealed class CommandGenerator : IIncrementalGenerator
         _ => null,
     };
 
-    /// <summary>What the arguments look like, as a person would write them, one that can be left off in brackets.</summary>
-    private static string Usage(List<ParameterModel> parameters) => string.Join(
+    /// <summary>
+    /// The command's name and what its arguments look like, as a person would write them, one that
+    /// can be left off in brackets, as the module's usage has them.
+    /// </summary>
+    private static string Usage(string name, List<ParameterModel> parameters) => string.Join(
         " ",
-        parameters.Select(parameter => parameter.Default is null ? "<" + parameter.Name + ">" : "[" + parameter.Name + "]"));
+        new[] { name }.Concat(parameters.Select(parameter => parameter.Default is null ? "<" + parameter.Name + ">" : "[" + parameter.Name + "]")));
 
-    /// <summary>A default value as C# source, in the invariant culture, so a command reads the same everywhere.</summary>
+    /// <summary>
+    /// A default value as C# source, in the invariant culture, so a command reads the same
+    /// everywhere.
+    /// </summary>
     /// <remarks>
     /// NaN and the infinities have no literal, and printed as numbers they are names nothing
     /// declares, so they are written as the constants that hold them.
@@ -226,19 +237,19 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
         foreach (var model in models.OrderBy(command => command.Name, System.StringComparer.Ordinal))
         {
-            source.Append("        global::Bevy.ConsoleCommands.Add(new global::Bevy.ConsoleCommand(\n")
+            source.Append("        global::Diagnostics.Registry.Process.Add(new global::Diagnostics.Command(\n")
                 .Append("            ").Append(Quote(model.Name)).Append(",\n")
                 .Append("            ").Append(Quote(model.Help)).Append(",\n")
                 .Append("            ").Append(Quote(model.Usage)).Append(",\n")
-                .Append("            static words =>\n")
+                .Append("            static line =>\n")
                 .Append("            {\n");
 
             EmitBody(source, model);
 
             source.Append("            })");
 
-            // A command with no arguments gets no initializer, so the common case reads the way it
-            // did before there was a schema to carry.
+            // A command with no arguments gets no initializer, its arguments the module's empty
+            // list.
             if (model.Parameters.Items.Count == 0)
             {
                 source.Append(");\n\n");
@@ -264,24 +275,23 @@ public sealed class CommandGenerator : IIncrementalGenerator
 
         if (model.TakesLine)
         {
-            source.Append("                var line = string.Join(\" \", words);\n");
+            source.Append("                var text = global::Bevy.ConsoleHost.Unwrap(line.Rest);\n");
 
             // A line left empty is the default where the method gives one, rather than nothing.
-            if (parameters[0].Default is { } fallback) source.Append("                if (line.Length == 0) line = ").Append(fallback).Append(";\n");
-            source.Append("                ");
-            if (model.ReturnsText) source.Append("return ");
-            source.Append(model.Call).Append("(line);\n");
-            if (!model.ReturnsText) source.Append("                return null;\n");
+            if (parameters[0].Default is { } fallback) source.Append("                if (text.Length == 0) text = ").Append(fallback).Append(";\n");
+            EmitCall(source, model, "text");
             return;
         }
+
+        source.Append("                var words = line.Words;\n");
 
         // The ones with defaults come last, as C# has them, so the words needed are those before.
         var required = parameters.Count(parameter => parameter.Default is null);
         if (required > 0)
         {
-            source.Append("                if (words.Length < ").Append(required)
-                .Append(") return \"needs ").Append(required)
-                .Append(required == 1 ? " argument\";\n\n" : " arguments\";\n\n");
+            source.Append("                if (words.Count < ").Append(required)
+                .Append(") return ").Append(Refusal).Append("\"needs ").Append(required)
+                .Append(required == 1 ? " argument\");\n\n" : " arguments\");\n\n");
         }
 
         for (var i = 0; i < parameters.Count; i++)
@@ -291,34 +301,41 @@ public sealed class CommandGenerator : IIncrementalGenerator
             {
                 // Its default where the words stop before it.
                 source.Append("                var argument").Append(i).Append(" = ").Append(fallback).Append(";\n")
-                    .Append("                if (words.Length > ").Append(i).Append(" && !").Append(reader)
+                    .Append("                if (words.Count > ").Append(i).Append(" && !").Append(reader)
                     .Append("(words[").Append(i).Append("], out argument").Append(i)
-                    .Append(")) return $\"not a ").Append(parameters[i].Kind)
-                    .Append(": {words[").Append(i).Append("]}\";\n");
+                    .Append(")) return ").Append(Refusal).Append("$\"not a ").Append(parameters[i].Kind)
+                    .Append(": {words[").Append(i).Append("]}\");\n");
                 continue;
             }
 
             source.Append("                if (!").Append(reader)
                 .Append("(words[").Append(i).Append("], out var argument").Append(i)
-                .Append(")) return $\"not a ").Append(parameters[i].Kind)
-                .Append(": {words[").Append(i).Append("]}\";\n");
+                .Append(")) return ").Append(Refusal).Append("$\"not a ").Append(parameters[i].Kind)
+                .Append(": {words[").Append(i).Append("]}\");\n");
         }
 
         if (parameters.Count > 0) source.Append('\n');
 
-        source.Append("                ");
-        if (model.ReturnsText) source.Append("return ");
-        source.Append(model.Call).Append('(');
+        EmitCall(source, model, string.Join(", ", Enumerable.Range(0, parameters.Count).Select(i => "argument" + i)));
+    }
 
-        for (var i = 0; i < parameters.Count; i++)
+    // The start of an answer refusing a word, the module's code for a word that cannot be read.
+    private const string Refusal = "global::Diagnostics.Answer.Fail(global::Diagnostics.Answer.BadArgument, ";
+
+    /// <summary>
+    /// Writes the call of the method and the answer of its text, or of nothing for a method that
+    /// returns none, through the host, which fails it with the code the method gave.
+    /// </summary>
+    private static void EmitCall(StringBuilder source, CommandModel model, string arguments)
+    {
+        if (model.ReturnsText)
         {
-            if (i > 0) source.Append(", ");
-            source.Append("argument").Append(i);
+            source.Append("                return global::Bevy.ConsoleHost.Answered(").Append(model.Call).Append('(').Append(arguments).Append("));\n");
+            return;
         }
 
-        source.Append(");\n");
-
-        if (!model.ReturnsText) source.Append("                return null;\n");
+        source.Append("                ").Append(model.Call).Append('(').Append(arguments).Append(");\n")
+            .Append("                return global::Bevy.ConsoleHost.Answered(null);\n");
     }
 
     /// <summary>
@@ -333,16 +350,16 @@ public sealed class CommandGenerator : IIncrementalGenerator
         var parameters = model.Parameters.Items;
 
         source.Append("            {\n")
-            .Append("                Parameters =\n")
+            .Append("                Arguments =\n")
             .Append("                [\n");
 
         foreach (var parameter in parameters)
         {
-            source.Append("                    new global::Bevy.CommandParameter(")
+            source.Append("                    new global::Diagnostics.Argument(")
                 .Append(Quote(parameter.Name)).Append(", ")
                 .Append(Quote(parameter.Kind)).Append(", ")
-                .Append(model.TakesLine ? "true" : "false").Append(", ")
-                .Append(parameter.Default is null ? "false" : "true")
+                .Append("Optional: ").Append(parameter.Default is null ? "false" : "true").Append(", ")
+                .Append("TakesLine: ").Append(model.TakesLine ? "true" : "false")
                 .Append("),\n");
         }
 

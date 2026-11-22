@@ -930,23 +930,6 @@ enum Bevy.ColorSpace : int
   Oklch = 8
   Srgb = 0
   Xyz = 12
-sealed class Bevy.CommandAttribute : Attribute
-  CommandAttribute(string name = "", string help = "")
-  string Help { get; }
-  string Name { get; }
-readonly struct Bevy.CommandParameter : IEquatable<CommandParameter>
-  CommandParameter(string Name, string Kind, bool TakesLine = false, bool Optional = false)
-  bool Equals(CommandParameter other)
-  bool Optional { get; init; }
-  bool TakesLine { get; init; }
-  override bool Equals(object obj)
-  override int GetHashCode()
-  override string ToString()
-  static bool op_Equality(CommandParameter left, CommandParameter right)
-  static bool op_Inequality(CommandParameter left, CommandParameter right)
-  string Kind { get; init; }
-  string Name { get; init; }
-  void Deconstruct(out string Name, out string Kind, out bool TakesLine, out bool Optional)
 enum Bevy.CompassOctant : int
   East = 2
   North = 0
@@ -1106,37 +1089,18 @@ sealed class Bevy.Config
   uint Height { get; set; }
   uint MeshletClusters { get; set; }
   uint Width { get; set; }
-sealed class Bevy.ConsoleCommand : IEquatable<ConsoleCommand>
-  ConsoleCommand(string Name, string Help, string Usage, Func<string[], string?> Run)
-  Func<string[], string?> Run { get; init; }
-  IReadOnlyList<CommandParameter> Parameters { get; init; }
-  bool Equals(ConsoleCommand? other)
-  override bool Equals(object? obj)
-  override int GetHashCode()
-  override string ToString()
-  static bool op_Equality(ConsoleCommand? left, ConsoleCommand? right)
-  static bool op_Inequality(ConsoleCommand? left, ConsoleCommand? right)
-  string Help { get; init; }
-  string Name { get; init; }
-  string Usage { get; init; }
-  void Deconstruct(out string Name, out string Help, out string Usage, out Func<string[], string?> Run)
-static class Bevy.ConsoleCommands
-  static ConsoleCommand? Find(string name)
-  static IReadOnlyList<ConsoleCommand> All { get; }
-  static IReadOnlyList<ConsoleCommand> Starting(string prefix)
-  static bool Remove(string name)
-  static string Unwrap(string line)
-  static string? Run(string line)
-  static string[] Split(string line)
-  static void Add(ConsoleCommand command)
-  static void Add(string name, string help, Func<string[], string?> run)
 static class Bevy.ConsoleHost
   const ulong LaterFrames = 600UL
+  static Answer Answered(string? text)
+  static Answer Run(string line)
+  static Answer Submit(string line, World? world = null)
   static ConsoleHost.Scope Lend(World world)
   static EcsWorld Ecs { get; }
   static Func<string?>? Pending { get; }
+  static Registry Commands { get; }
   static Time Time { get; }
   static World? World { get; }
+  static string Unwrap(string line)
   static void Fail(string code, string message)
   static void Hold(ulong frame)
   static void Later(Func<string?> poll)
@@ -1144,21 +1108,22 @@ readonly struct Bevy.ConsoleHost.Scope : IDisposable
   void Dispose()
 static class Bevy.ConsoleLog
   const int Depth = 2000
-  static LogLine[] All()
-  static int Written { get; }
+  static ConsoleModel Model { get; }
+  static IReadOnlyList<ConsoleLine> All()
+  static long Written { get; }
   static ulong Frame { get; set; }
   static void Clear()
   static void Start()
-  static void Write(LogLevel level, string text)
+  static void Write(ConsoleLevel level, string text)
   static void Write(string text)
 sealed class Bevy.ConsoleView
+  ConsoleLine[] Lines()
   ConsoleView()
-  LogLine[] Lines()
   bool ShowErrors { get; set; }
   bool ShowInfo { get; set; }
   bool ShowWarnings { get; set; }
   int Scroll { get; set; }
-  static string Written(LogLine line)
+  static string Written(ConsoleLine line)
   static void AnswerLater(World world)
   string Back(string current)
   string Forward(string current)
@@ -1415,7 +1380,7 @@ readonly struct Bevy.DiagnosticReading : IEquatable<DiagnosticReading>
   string Path { get; init; }
   string Suffix { get; init; }
   void Deconstruct(out string Path, out string Suffix, out bool Enabled, out int History, out double? Value, out double? Smoothed, out double? Average)
-static class Bevy.Diagnostics
+static class Bevy.DiagnosticsStore
   const string EntityCount = "entity_count"
   const string Fps = "fps"
   const string FrameCount = "frame_count"
@@ -4240,25 +4205,6 @@ static class Bevy.Log
   static void TraceOnce(string message, string file = "", int line = 0)
   static void Warn(string message)
   static void WarnOnce(string message, string file = "", int line = 0)
-enum Bevy.LogLevel : int
-  Echo = 3
-  Error = 2
-  Info = 0
-  Warning = 1
-readonly struct Bevy.LogLine : IEquatable<LogLine>
-  LogLevel Level { get; init; }
-  LogLine(int Index, ulong Frame, LogLevel Level, string Text, int Count = 1)
-  bool Equals(LogLine other)
-  int Count { get; init; }
-  int Index { get; init; }
-  override bool Equals(object obj)
-  override int GetHashCode()
-  override string ToString()
-  static bool op_Equality(LogLine left, LogLine right)
-  static bool op_Inequality(LogLine left, LogLine right)
-  string Text { get; init; }
-  ulong Frame { get; init; }
-  void Deconstruct(out int Index, out ulong Frame, out LogLevel Level, out string Text, out int Count)
 readonly struct Bevy.LogicalKey : IEquatable<LogicalKey>
   LogicalKeyKind Kind { get; }
   bool Equals(LogicalKey other)

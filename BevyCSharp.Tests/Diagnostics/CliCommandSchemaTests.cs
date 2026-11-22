@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -18,8 +19,8 @@ public sealed class CliCommandSchemaTests
     {
         var command = Find("tests.nothing");
 
-        Assert.Empty(command.Parameters);
-        Assert.Equal(string.Empty, command.Usage);
+        Assert.Empty(command.Arguments);
+        Assert.Equal("tests.nothing", command.Usage);
     }
 
     [Fact]
@@ -28,7 +29,7 @@ public sealed class CliCommandSchemaTests
         var command = Find("tests.several");
 
         Assert.Collection(
-            command.Parameters,
+            command.Arguments,
             first =>
             {
                 Assert.Equal("which", first.Name);
@@ -50,15 +51,15 @@ public sealed class CliCommandSchemaTests
                 Assert.Equal("flag", fourth.Kind);
             });
 
-        Assert.All(command.Parameters, parameter => Assert.False(parameter.TakesLine));
-        Assert.Equal("<which> <count> <scale> <on>", command.Usage);
+        Assert.All(command.Arguments, parameter => Assert.False(parameter.TakesLine));
+        Assert.Equal("tests.several <which> <count> <scale> <on>", command.Usage);
     }
 
     /// <summary>The one case where a parameter is the rest of the line rather than a word.</summary>
     [Fact]
     public void ASingleStringTakesTheWholeLine()
     {
-        var parameter = Assert.Single(Find("tests.line").Parameters);
+        var parameter = Assert.Single(Find("tests.line").Arguments);
 
         Assert.Equal("text", parameter.Kind);
         Assert.True(parameter.TakesLine);
@@ -67,21 +68,25 @@ public sealed class CliCommandSchemaTests
     [Fact]
     public void AndTheWholeLineIsWhatItReceives()
     {
-        Assert.Equal("a  b \"c\"", ConsoleCommands.Run("tests.line a  b \"c\""));
-        Assert.Equal("a b", ConsoleCommands.Run("tests.line \"a b\""));
+        Assert.Equal("a  b \"c\"", ConsoleHost.Run("tests.line a  b \"c\"").Text);
+        Assert.Equal("a b", ConsoleHost.Run("tests.line \"a b\"").Text);
     }
 
     [Fact]
     public void WordsAreReadIntoTheTypesDeclared() =>
-        Assert.Equal("cube 3 1.5 True", ConsoleCommands.Run("tests.several cube 3 1.5 on"));
+        Assert.Equal("cube 3 1.5 True", ConsoleHost.Run("tests.several cube 3 1.5 on").Text);
 
     [Fact]
-    public void AWordThatWillNotGoIsAnsweredWithASentence() =>
-        Assert.Equal("not a whole: many", ConsoleCommands.Run("tests.several cube many 1.5 on"));
+    public void AWordThatWillNotGoIsAnsweredWithASentence()
+    {
+        var answer = ConsoleHost.Run("tests.several cube many 1.5 on");
+        Assert.Equal("not a whole: many", answer.Text);
+        Assert.Equal(Answer.BadArgument, answer.Code);
+    }
 
     /// <summary>The command of that name, or a failure that says which one was missing.</summary>
-    private static ConsoleCommand Find(string name) =>
-        ConsoleCommands.Find(name) ?? throw new Xunit.Sdk.XunitException(
+    private static Command Find(string name) =>
+        ConsoleHost.Commands.FindCommand(name) ?? throw new Xunit.Sdk.XunitException(
             $"{name} was not registered; the generator should have emitted it.");
 }
 

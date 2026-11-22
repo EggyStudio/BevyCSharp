@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -9,7 +10,7 @@ namespace Bevy.Tests;
 /// <remarks>
 /// None of this needs an engine, because a console is a list of lines, a list of commands and a
 /// history, and the panels that draw it are the only part that needs a window. In the engine
-/// collection all the same, since the ring is the process's and <c>CrashLogTests</c> tee the
+/// collection all the same, since the console is the process's and <c>CrashLogTests</c> tee the
 /// output into it and write lines of their own while they run.
 /// </remarks>
 [Collection("engine")]
@@ -20,16 +21,16 @@ public sealed class ConsoleTests
     {
         ConsoleLog.Clear();
 
-        ConsoleLog.Write(LogLevel.Warning, "the same thing");
-        ConsoleLog.Write(LogLevel.Warning, "the same thing");
-        ConsoleLog.Write(LogLevel.Warning, "the same thing");
-        ConsoleLog.Write(LogLevel.Info, "something else");
+        ConsoleLog.Write(ConsoleLevel.Warning, "the same thing");
+        ConsoleLog.Write(ConsoleLevel.Warning, "the same thing");
+        ConsoleLog.Write(ConsoleLevel.Warning, "the same thing");
+        ConsoleLog.Write(ConsoleLevel.Info, "something else");
 
         var lines = ConsoleLog.All();
 
         // What produces a repeat is a warning inside something that runs every frame, and sixty
         // copies a second is a log that holds nothing else.
-        Assert.Equal(2, lines.Length);
+        Assert.Equal(2, lines.Count);
         Assert.Equal(3, lines[0].Count);
         Assert.Equal("the same thing", lines[0].Text);
         Assert.Equal(1, lines[1].Count);
@@ -43,9 +44,9 @@ public sealed class ConsoleTests
     {
         ConsoleLog.Clear();
 
-        ConsoleLog.Write(LogLevel.Info, "ordinary");
-        ConsoleLog.Write(LogLevel.Warning, "careful");
-        ConsoleLog.Write(LogLevel.Error, "broken");
+        ConsoleLog.Write(ConsoleLevel.Info, "ordinary");
+        ConsoleLog.Write(ConsoleLevel.Warning, "careful");
+        ConsoleLog.Write(ConsoleLevel.Error, "broken");
 
         var view = new ConsoleView { ShowInfo = false };
 
@@ -76,7 +77,7 @@ public sealed class ConsoleTests
         // answering what.
         Assert.Equal("> echo hello", lines[0].Text);
         Assert.Equal("hello", lines[1].Text);
-        Assert.Equal(LogLevel.Echo, lines[0].Level);
+        Assert.Equal(ConsoleLevel.Input, lines[0].Level);
     }
 
     [Fact]
@@ -119,9 +120,9 @@ public sealed class ConsoleTests
     [Fact]
     public void QuotedWordsStayTogether()
     {
-        Assert.Equal(["one", "two"], ConsoleCommands.Split("one two"));
-        Assert.Equal(["one two", "three"], ConsoleCommands.Split("\"one two\" three"));
-        Assert.Empty(ConsoleCommands.Split("   "));
+        Assert.Equal(["one", "two"], CommandLine.Split("one two"));
+        Assert.Equal(["one two", "three"], CommandLine.Split("\"one two\" three"));
+        Assert.Empty(CommandLine.Split("   "));
     }
     [Fact]
     public void WhatWasTypedComesBackInOrder()

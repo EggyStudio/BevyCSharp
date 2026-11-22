@@ -112,7 +112,7 @@ public sealed class CloudTests
         void Count(World world)
         {
             using (ConsoleHost.Lend(world))
-                images.Add(MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "").GetValueOrDefault("asset.Image"));
+                images.Add(MemoryCommandTests.Pairs(ConsoleHost.Run("memory").Text).GetValueOrDefault("asset.Image"));
         }
 
         new PictureRun

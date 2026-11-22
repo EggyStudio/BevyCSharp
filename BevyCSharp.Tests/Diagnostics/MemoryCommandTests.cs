@@ -26,12 +26,12 @@ public sealed class MemoryCommandTests
         harness.On(Stage.Update, world =>
         {
             var ecs = world.Resource<EcsWorld>();
-            using (ConsoleHost.Lend(world)) before = Pairs(ConsoleCommands.Run("memory.collect") ?? "");
+            using (ConsoleHost.Lend(world)) before = Pairs(ConsoleHost.Run("memory.collect").Text);
 
             for (var i = 0; i < 10; i++) ecs.Spawn();
             if (App.HasRenderer) Render.CreateMesh(MeshShape.Cuboid);
 
-            using (ConsoleHost.Lend(world)) after = Pairs(ConsoleCommands.Run("memory") ?? "");
+            using (ConsoleHost.Lend(world)) after = Pairs(ConsoleHost.Run("memory").Text);
         });
 
         harness.Run();

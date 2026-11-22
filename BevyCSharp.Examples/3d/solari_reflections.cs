@@ -515,7 +515,7 @@ internal static class SolariReflections
             ("Lighting", "render/solari_lighting/lighting/elapsed_gpu"),
         })
         {
-            if (!Diagnostics.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
+            if (!DiagnosticsStore.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
             performance.Append(FormattableString.Invariant($"{label,-17}  {milliseconds:0.00} ms\n"));
             total += milliseconds;
         }

@@ -84,5 +84,5 @@ public sealed class CliEnvelopeTests
     [InlineData("\"a\" and \"b\"", "\"a\" and \"b\"")]
     [InlineData("plain", "plain")]
     public void OneEnclosingPairOfQuotesComesOff(string line, string expected) =>
-        Assert.Equal(expected, ConsoleCommands.Unwrap(line));
+        Assert.Equal(expected, ConsoleHost.Unwrap(line));
 }

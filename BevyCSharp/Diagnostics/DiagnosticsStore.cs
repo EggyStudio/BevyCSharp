@@ -23,11 +23,12 @@ namespace Bevy;
 /// </remarks>
 /// <example>
 /// <code>
-/// app.Startup(ctx => Diagnostics.Register("game/enemies", " enemies"));
-/// app.Update(ctx => Diagnostics.Measure("game/enemies", ctx.Ecs.EntitiesWith&lt;Enemy&gt;().Length));
+/// app.Startup(ctx => DiagnosticsStore.Register("game/enemies", " enemies"));
+/// app.Update(ctx => DiagnosticsStore.Measure("game/enemies",
+///     ctx.Ecs.EntitiesWith&lt;Enemy&gt;().Length));
 /// </code>
 /// </example>
-public static unsafe class Diagnostics
+public static unsafe class DiagnosticsStore
 {
     /// <summary>Frames a second, which <see cref="DiagnosticPlugins.FrameTime"/> measures.</summary>
     public const string Fps = "fps";

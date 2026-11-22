@@ -314,7 +314,7 @@ internal static class Solari
             ("Lighting", "render/solari_lighting/lighting/elapsed_gpu"),
         } : [])
         {
-            if (!Diagnostics.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
+            if (!DiagnosticsStore.TryRead(path, out var reading) || reading.Smoothed is not { } milliseconds) continue;
             performance.Append(FormattableString.Invariant($"{label,-17}  {milliseconds:0.00} ms\n"));
             total += milliseconds;
         }
@@ -322,7 +322,7 @@ internal static class Solari
         if (timed) performance.Append(FormattableString.Invariant($"{"Total",-17}  {total:0.00} ms\n"));
 
         // Out of the cache's two to the twentieth.
-        if (Diagnostics.TryRead("render/solari_lighting/world_cache_active_cells_count", out var cells) && cells.Smoothed is { } count)
+        if (DiagnosticsStore.TryRead("render/solari_lighting/world_cache_active_cells_count", out var cells) && cells.Smoothed is { } count)
             performance.Append(FormattableString.Invariant($"\nWorld cache cells {(uint)count} ({count * 100.0 / (1 << 20):0}%)"));
 
         return performance.ToString();

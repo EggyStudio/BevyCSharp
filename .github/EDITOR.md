@@ -540,12 +540,13 @@ Escape raises or puts away that tab. `ConsoleTab` draws it and `ConsoleView` dec
 which is a search, a switch per level, and what was typed before, reached with the arrows.
 `ConsoleView` is the library's, and `ImGuiConsole` draws it over a game in one call, so a game's
 console and the editor's are the same console.
-Everything either of them shows lives outside both. `ConsoleLog` is a ring of leveled lines that the
-output and error streams are teed into, and `ConsoleCommands` is the list of what can be typed.
+Everything either of them shows lives outside both. `ConsoleLog` tees the output and error streams
+into the process's console, the Diagnostics module's `ConsoleModel`, which keeps the leveled lines,
+and the module's `Registry.Process` holds what can be typed.
 
-A command is a static method with `[Command]` on it, found at compile time by a generator and
-registered by a module initializer, so nothing scans for them and one that does not compile is not
-a command:
+A command is a static method with the module's `[Command]` on it, found at compile time by a
+generator and added to the registry by a module initializer, so nothing scans for them and one that
+does not compile is not a command:
 
 ```csharp
 [Command("select", "Selects the first entity with a name: select <name>")]
@@ -555,8 +556,8 @@ internal static string Select(string name) { … }
 Its parameters are read from the words that follow the name and may be strings, numbers or flags;
 one string parameter takes everything typed after the name, and a name with a space in it is one
 word when it is quoted. Returning a string writes that line back. Anything a person can get wrong
-is answered with a sentence rather than an exception, since a console is where people type things
-that are not quite right.
+is answered with a sentence and a code rather than an exception, since a console is where people
+type things that are not quite right.
 
 **The menu is reachable from the console.** `do` runs any row of the menu by its path and, with
 nothing after it, lists the paths there are. One command rather than one per row, so the console

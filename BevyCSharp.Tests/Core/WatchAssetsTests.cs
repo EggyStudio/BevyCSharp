@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -101,7 +102,7 @@ public sealed class WatchAssetsTests : IDisposable
             CrashLog.Stop();
         }
 
-        Assert.Contains(ConsoleLog.All(), line => line.Level == LogLevel.Info
+        Assert.Contains(ConsoleLog.All(), line => line.Level == ConsoleLevel.Info
             && line.Text.Contains($"for changes, turned on by the environment's {Config.WatchAssetsVariable}", StringComparison.Ordinal));
     }
 
@@ -124,7 +125,7 @@ public sealed class WatchAssetsTests : IDisposable
                 var config = world.Resource<Config>();
                 watching = config.WatchAssets;
                 data = DataAssets.Watching;
-                using (ConsoleHost.Lend(world)) status = ConsoleCommands.Run("live.status") ?? "";
+                using (ConsoleHost.Lend(world)) status = ConsoleHost.Run("live.status").Text;
                 refused = Record.Exception(() => config.WatchAssets = true);
             });
             harness.Run();
@@ -189,7 +190,7 @@ public sealed class WatchAssetsTests : IDisposable
         {
             harness.On(Stage.Update, world =>
             {
-                using (ConsoleHost.Lend(world)) status = ConsoleCommands.Run("live.status") ?? "";
+                using (ConsoleHost.Lend(world)) status = ConsoleHost.Run("live.status").Text;
             });
             harness.Run();
         }

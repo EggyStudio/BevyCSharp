@@ -1,4 +1,5 @@
 using System.Globalization;
+using Diagnostics;
 
 namespace Bevy;
 
@@ -105,8 +106,8 @@ internal static class ConsoleProfileCommands
     [Command("diagnostics", "Lists Bevy's diagnostics store, its measures and a game's: diagnostics")]
     internal static string ListDiagnostics(string line)
     {
-        var all = Diagnostics.All();
-        if (all.Count == 0) return "no diagnostics; Config.DiagnosticPlugins adds Bevy's, and Diagnostics.Register a game's";
+        var all = DiagnosticsStore.All();
+        if (all.Count == 0) return "no diagnostics; Config.DiagnosticPlugins adds Bevy's, and DiagnosticsStore.Register a game's";
 
         static string N(double? value) => value?.ToString("0.000000", CultureInfo.InvariantCulture) ?? "-";
         var width = all.Max(reading => reading.Path.Length);

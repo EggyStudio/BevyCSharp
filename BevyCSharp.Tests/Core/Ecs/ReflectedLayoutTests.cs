@@ -293,7 +293,7 @@ public sealed class ReflectedLayoutTests
         using var harness = new EngineHarness(frames: 1);
         harness.On(Stage.Startup, world =>
         {
-            using (ConsoleHost.Lend(world)) said = ConsoleCommands.Run("schema.layouts");
+            using (ConsoleHost.Lend(world)) said = ConsoleHost.Run("schema.layouts").Text;
         });
 
         harness.Run();

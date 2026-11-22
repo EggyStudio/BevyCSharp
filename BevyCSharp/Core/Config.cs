@@ -558,7 +558,7 @@ public sealed class Config
     /// <remarks>
     /// <c>Diagnostics</c> reads what they measure and is where a game's own measures go.
     /// The log prints every diagnostic once a second, a game's among them, unless
-    /// <c>Diagnostics.SetLogFilter</c> says which.
+    /// <c>DiagnosticsStore.SetLogFilter</c> says which.
     /// </remarks>
     public DiagnosticPlugins DiagnosticPlugins { get; set; }
 

@@ -40,7 +40,7 @@ public sealed class KeptGroupTests
         {
             using (ConsoleHost.Lend(world))
             {
-                var pairs = MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "");
+                var pairs = MemoryCommandTests.Pairs(ConsoleHost.Run("memory").Text);
                 made.Add((pairs["shaders.buffersMade"], pairs["shaders.groupsMade"]));
             }
         }

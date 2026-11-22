@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Bevy.Interop;
 using Xunit;
 
@@ -194,7 +195,7 @@ public sealed class CrashLogTests : IDisposable
         harness.OnContext(Stage.Startup, _ => Log.Warn("a warning from C#"));
         harness.Run();
 
-        Assert.Contains(ConsoleLog.All(), line => line is { Level: LogLevel.Warning, Text: "a warning from C#" });
+        Assert.Contains(ConsoleLog.All(), line => line is { Level: ConsoleLevel.Warning, Text: "a warning from C#" });
         Assert.Contains("WARN  a warning from C#", Latest);
     }
 }

@@ -12,19 +12,19 @@ public enum DiagnosticPlugins
     None = 0,
 
     /// <summary>Bevy's log of every diagnostic once a second (<c>LogDiagnosticsPlugin</c>).</summary>
-    /// <remarks>Which it prints is <c>Diagnostics.SetLogFilter</c>'s to say.</remarks>
+    /// <remarks>Which it prints is <c>DiagnosticsStore.SetLogFilter</c>'s to say.</remarks>
     Log = 1,
 
     /// <summary>
     /// Frame time, frames a second and the frame count (<c>FrameTimeDiagnosticsPlugin</c>), as
-    /// <c>Diagnostics.FrameTime</c>, <c>Diagnostics.Fps</c> and
-    /// <c>Diagnostics.FrameCount</c>.
+    /// <c>DiagnosticsStore.FrameTime</c>, <c>DiagnosticsStore.Fps</c> and
+    /// <c>DiagnosticsStore.FrameCount</c>.
     /// </summary>
     FrameTime = 2,
 
     /// <summary>
     /// How many entities the world has (<c>EntityCountDiagnosticsPlugin</c>), as
-    /// <c>Diagnostics.EntityCount</c>.
+    /// <c>DiagnosticsStore.EntityCount</c>.
     /// </summary>
     EntityCount = 4,
 
@@ -40,9 +40,9 @@ public enum DiagnosticPlugins
 
     /// <summary>
     /// How much of the CPU and the memory the machine and the process use
-    /// (<c>SystemInformationDiagnosticsPlugin</c>), as <c>Diagnostics.SystemCpuUsage</c>,
-    /// <c>Diagnostics.SystemMemUsage</c>, <c>Diagnostics.ProcessCpuUsage</c> and
-    /// <c>Diagnostics.ProcessMemUsage</c>.
+    /// (<c>SystemInformationDiagnosticsPlugin</c>), as <c>DiagnosticsStore.SystemCpuUsage</c>,
+    /// <c>DiagnosticsStore.SystemMemUsage</c>, <c>DiagnosticsStore.ProcessCpuUsage</c> and
+    /// <c>DiagnosticsStore.ProcessMemUsage</c>.
     /// </summary>
     /// <remarks>
     /// Read on a task of Bevy's own no oftener than the system can measure the CPU, so the first

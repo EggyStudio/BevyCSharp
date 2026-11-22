@@ -26,10 +26,10 @@ internal static class EnablingDisablingDiagnostic
 
     private static void Toggle(BehaviorContext ctx)
     {
-        foreach (var diagnostic in Diagnostics.All())
+        foreach (var diagnostic in DiagnosticsStore.All())
         {
             Log.Info($"toggling diagnostic {diagnostic.Path}");
-            Diagnostics.SetEnabled(diagnostic.Path, !diagnostic.Enabled);
+            DiagnosticsStore.SetEnabled(diagnostic.Path, !diagnostic.Enabled);
         }
     }
 }

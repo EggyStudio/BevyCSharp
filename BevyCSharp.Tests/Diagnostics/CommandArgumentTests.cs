@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Bevy.Physics;
 using Xunit;
 
@@ -19,17 +20,17 @@ public sealed class CommandArgumentTests
     [Fact]
     public void AParameterWithADefaultIsLeftOff()
     {
-        Assert.Equal("cube 2 1.5 none", ConsoleCommands.Run("tests.defaults cube"));
-        Assert.Equal("cube 3 1.5 none", ConsoleCommands.Run("tests.defaults cube 3"));
-        Assert.Equal("cube 3 0.5 lid", ConsoleCommands.Run("tests.defaults cube 3 0.5 lid"));
-        Assert.Equal("needs 1 argument", ConsoleCommands.Run("tests.defaults"));
-        Assert.Equal("not a whole: many", ConsoleCommands.Run("tests.defaults cube many"));
-        Assert.Equal("all of it", ConsoleCommands.Run("tests.lined"));
-        Assert.Equal("a b", ConsoleCommands.Run("tests.lined a b"));
+        Assert.Equal("cube 2 1.5 none", ConsoleHost.Run("tests.defaults cube").Text);
+        Assert.Equal("cube 3 1.5 none", ConsoleHost.Run("tests.defaults cube 3").Text);
+        Assert.Equal("cube 3 0.5 lid", ConsoleHost.Run("tests.defaults cube 3 0.5 lid").Text);
+        Assert.Equal("needs 1 argument", ConsoleHost.Run("tests.defaults").Text);
+        Assert.Equal("not a whole: many", ConsoleHost.Run("tests.defaults cube many").Text);
+        Assert.Equal("all of it", ConsoleHost.Run("tests.lined").Text);
+        Assert.Equal("a b", ConsoleHost.Run("tests.lined a b").Text);
 
-        var command = ConsoleCommands.Find("tests.defaults")!;
-        Assert.Equal([false, true, true, true], command.Parameters.Select(parameter => parameter.Optional));
-        Assert.Equal("<which> [count] [scale] [label]", command.Usage);
+        var command = ConsoleHost.Commands.FindCommand("tests.defaults")!;
+        Assert.Equal([false, true, true, true], command.Arguments.Select(parameter => parameter.Optional));
+        Assert.Equal("tests.defaults <which> [count] [scale] [label]", command.Usage);
     }
 
     /// <summary>An enum's member is read by its name in any case, an alias too, and a number or a list of names is not.</summary>
@@ -72,11 +73,11 @@ public sealed class CommandArgumentTests
 
             using (ConsoleHost.Lend(world))
             {
-                answers.Add(ConsoleCommands.Run("entity.set Path Route.Speeds 1;2.5;4"));
-                answers.Add(ConsoleCommands.Run("entity.set Path Route.Moods restless;Calm"));
-                answers.Add(ConsoleCommands.Run("entity.set Path Route.Moods calm;7"));
-                answers.Add(ConsoleCommands.Run("entity.set Path RigidBody.Kind 1"));
-                answers.Add(ConsoleCommands.Run("entity.set Path RigidBody.Kind kinematic"));
+                answers.Add(ConsoleHost.Run("entity.set Path Route.Speeds 1;2.5;4").Text);
+                answers.Add(ConsoleHost.Run("entity.set Path Route.Moods restless;Calm").Text);
+                answers.Add(ConsoleHost.Run("entity.set Path Route.Moods calm;7").Text);
+                answers.Add(ConsoleHost.Run("entity.set Path RigidBody.Kind 1").Text);
+                answers.Add(ConsoleHost.Run("entity.set Path RigidBody.Kind kinematic").Text);
             }
 
             route = ecs.GetOrDefault<Route>(path);
@@ -104,7 +105,7 @@ public sealed class CommandArgumentTests
         harness.On(Stage.Update, world =>
         {
             if (++frame != 1) return;
-            using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run("input.drop /levels/the yard.scene.json; /notes.txt");
+            using (ConsoleHost.Lend(world)) answer = ConsoleHost.Run("input.drop /levels/the yard.scene.json; /notes.txt").Text;
         });
 
         harness.OnContext(Stage.Update, ctx =>

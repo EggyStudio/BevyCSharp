@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Numerics;
 using Bevy;
 using Bevy.Physics;
+using Diagnostics;
 using ImGuiNET;
 
 namespace BevyCSharp.FeatureTest.Behaviors;

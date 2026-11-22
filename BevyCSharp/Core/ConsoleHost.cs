@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 /// <summary>
@@ -5,10 +7,10 @@ namespace Bevy;
 /// </summary>
 /// <remarks>
 /// <para>
-/// A <c>[Command]</c> method takes words and returns a sentence, which is the whole of its signature
-/// and the reason adding one is writing one. That leaves three things it sometimes needs and cannot
-/// be handed, the world, a way to say it failed rather than merely answered, and a way to say its
-/// answer is not ready yet. All three live here, set around the call by whatever ran it.
+/// A <c>[Command]</c> method takes words and returns a sentence, which is the whole of its
+/// signature and the reason adding one is writing one. That leaves three things it sometimes needs
+/// and cannot be handed, the world, a way to say it failed rather than merely answered, and a way
+/// to say its answer is not ready yet. All three live here, set around the call by whatever ran it.
 /// </para>
 /// <para>
 /// Everything ECS-touching is ambient on the world Bevy lends the running system, so a command is
@@ -18,6 +20,12 @@ namespace Bevy;
 /// <para>
 /// It also reads the words the commands of every area read alike, a line's first word and an
 /// entity named by its name or its <c>#index</c>.
+/// </para>
+/// <para>
+/// The commands are the Diagnostics module's <see cref="Registry.Process"/>, which the generated
+/// registrations of every assembly add to, and <see cref="Run(string)"/> runs a line through it,
+/// with this host's own word about the command, its failure, its hold and its later answer,
+/// forgotten before the line runs.
 /// </para>
 /// </remarks>
 public static class ConsoleHost
@@ -34,7 +42,9 @@ public static class ConsoleHost
     /// </summary>
     internal static ulong? Held { get; private set; }
 
-    /// <summary>What the last command said to ask each frame for its real answer, or null.</summary>
+    /// <summary>
+    /// What the last command said to ask each frame for its real answer, or null.
+    /// </summary>
     /// <remarks>
     /// For whatever runs commands. One that has frames to wait through asks this once a frame, with
     /// the world lent, until it answers, as <see cref="Later"/> describes.
@@ -55,24 +65,28 @@ public static class ConsoleHost
     /// </summary>
     internal static bool PendingStill { get; private set; }
 
-    /// <summary>The frame a runner gives <see cref="Pending"/> up at, counted from <paramref name="now"/> or a later frame the command named.</summary>
+    /// <summary>
+    /// The frame a runner gives <see cref="Pending"/> up at, counted from <paramref name="now"/> or
+    /// a later frame the command named.
+    /// </summary>
     internal static ulong GiveUpAt(ulong now) => Math.Max(now, PendingFrom ?? now) + LaterFrames;
 
     /// <summary>
-    /// How many frames a runner asks <see cref="Later"/>'s question before answering that it gave up.
+    /// How many frames a runner asks <see cref="Later"/>'s question before answering that it gave
+    /// up.
     /// </summary>
     public const ulong LaterFrames = 600;
 
-    /// <summary>The entities, for a command that reads or changes the world.</summary>
-    /// <exception cref="InvalidOperationException">Called from outside a running system.</exception>
+    /// <summary>The entities, for a command that reads or changes the world.</summary> <exception
+    /// cref="InvalidOperationException">Called from outside a running system.</exception>
     public static EcsWorld Ecs =>
         World?.Resource<EcsWorld>()
         ?? throw new InvalidOperationException(
             "This command touches the world, so it can only run inside a system. The console runs "
             + "commands from a system; something else ran this one from outside the frame.");
 
-    /// <summary>The clock, for a command that says when it is.</summary>
-    /// <exception cref="InvalidOperationException">Called from outside a running system.</exception>
+    /// <summary>The clock, for a command that says when it is.</summary> <exception
+    /// cref="InvalidOperationException">Called from outside a running system.</exception>
     public static Time Time =>
         World?.Resource<Time>()
         ?? throw new InvalidOperationException(
@@ -92,7 +106,8 @@ public static class ConsoleHost
         Failure = new CliError(code, message);
 
     /// <summary>
-    /// Holds this command's answer until the clock's count of frames reaches <paramref name="frame"/>.
+    /// Holds this command's answer until the clock's count of frames reaches <paramref
+    /// name="frame"/>.
     /// </summary>
     /// <remarks>
     /// For a command whose point is the waiting. The command runs once, now, and says when its
@@ -121,8 +136,8 @@ public static class ConsoleHost
     public static void Later(Func<string?> poll) => Pending = poll ?? throw new ArgumentNullException(nameof(poll));
 
     /// <summary>
-    /// <see cref="Later"/> for a command whose answer waits on a frame it names,
-    /// which a runner gives as long as <see cref="LaterFrames"/> past that frame rather than past now.
+    /// <see cref="Later"/> for a command whose answer waits on a frame it names, which a runner
+    /// gives as long as <see cref="LaterFrames"/> past that frame rather than past now.
     /// </summary>
     /// <remarks>
     /// For a capture taken at a frame further off than a runner would otherwise wait, such as a
@@ -155,10 +170,117 @@ public static class ConsoleHost
     /// </summary>
     /// <example>
     /// <code>
-    /// using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run(line);
+    /// using (ConsoleHost.Lend(world)) answer = ConsoleHost.Run(line);
     /// </code>
     /// </example>
     public static Scope Lend(World world) => new(world);
+
+    /// <summary>
+    /// The commands and the settings every assembly of the engine adds, the module's
+    /// <see cref="Registry.Process"/> with each of those assemblies loaded, so their registrations
+    /// have run.
+    /// </summary>
+    public static Registry Commands
+    {
+        get
+        {
+            EngineAssemblies.Load();
+            return Registry.Process;
+        }
+    }
+
+    /// <summary>Runs a line as it was typed, through <see cref="Commands"/>.</summary>
+    /// <remarks>
+    /// What the last command said about itself is forgotten first, so the failure, the hold and the
+    /// later answer read after it are this line's. Everything a command can do wrong is answered
+    /// rather than thrown, the module's own codes among them, because the console is a place where
+    /// people type things that are not quite right.
+    /// </remarks>
+    public static Answer Run(string line)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        Reset();
+        return Commands.Run(line);
+    }
+
+    /// <summary>
+    /// Runs a line the player entered through the process's console (<see
+    /// cref="ConsoleLog.Model"/>), which writes it and its answer, with the world lent where one is
+    /// given.
+    /// </summary>
+    /// <remarks>
+    /// The line and its answer are the console's, never counted on a line before them as a
+    /// repeated line the program writes is, so each line typed shows each time it was typed.
+    /// </remarks>
+    /// <param name="line">What was typed.</param>
+    /// <param name="world">
+    /// The world to lend the command, which a command that reads or changes an entity needs, or
+    /// nothing outside a frame.
+    /// </param>
+    public static Answer Submit(string line, World? world = null)
+    {
+        ArgumentNullException.ThrowIfNull(line);
+        EngineAssemblies.Load();
+        if (world is null)
+        {
+            Reset();
+            return ConsoleLog.Model.Submit(line);
+        }
+
+        using (Lend(world)) return ConsoleLog.Model.Submit(line);
+    }
+
+    /// <summary>
+    /// The answer of a command's text, or of nothing, as the generated registrations answer, failed
+    /// with the code the command gave <see cref="Fail"/> where it called it.
+    /// </summary>
+    /// <remarks>
+    /// The text is the command's own where it gave one, as a console shows it, and the sentence it
+    /// gave <see cref="Fail"/> where it returned none. Whoever runs the line reads that sentence
+    /// from <see cref="Failure"/> as well, as the command line reports it beside the text.
+    /// </remarks>
+    /// <param name="text">
+    /// What the command returned, or null for a command that returns nothing.
+    /// </param>
+    public static Answer Answered(string? text) => Failure is { } failure
+        ? Answer.Fail(failure.Code, string.IsNullOrEmpty(text) ? failure.Message : text)
+        : new Answer(text ?? string.Empty);
+
+    /// <summary>
+    /// A line with one pair of enclosing quotes taken off, if it has them.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For the command that takes everything after its name. Somebody typing <c>do "Spawn/Cube"</c>
+    /// means the path without the quotes, and something sending a line over a socket has to quote a
+    /// value that contains spaces for it to survive as one. Both need the same thing back.
+    /// </para>
+    /// <para>
+    /// Only a line that is entirely one quoted run is unwrapped, so a fragment that merely contains
+    /// quotes, such as <c>eval world.SetName(e, "x")</c>, is left exactly as it was written.
+    /// </para>
+    /// </remarks>
+    public static string Unwrap(string line)
+    {
+        if (line.Length < 2 || line[0] != '"' || line[^1] != '"') return line;
+
+        var inside = line[1..^1];
+        var escaped = false;
+
+        foreach (var character in inside)
+        {
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+
+            if (character == '\\') escaped = true;
+            else if (character == '"') return line;
+        }
+
+        return inside.Replace("\\\"", "\"").Replace("\\\\", "\\");
+    }
 
     /// <summary>Forgets what the last command said about itself.</summary>
     internal static void Reset()

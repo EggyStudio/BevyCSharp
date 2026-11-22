@@ -166,7 +166,7 @@ public sealed class PrecipitationTests
                 {
                     using (ConsoleHost.Lend(world))
                     {
-                        var pairs = MemoryCommandTests.Pairs(ConsoleCommands.Run("memory") ?? "");
+                        var pairs = MemoryCommandTests.Pairs(ConsoleHost.Run("memory").Text);
                         held.Add((pairs.GetValueOrDefault("asset.Image"), pairs.GetValueOrDefault("asset.ShaderBuffer")));
                     }
                 });

@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 internal static partial class ConsoleWorldCommands

@@ -28,7 +28,7 @@ public sealed class CliConsoleHostTests
             var entity = world.Resource<EcsWorld>().Spawn();
             world.Resource<EcsWorld>().SetName(entity, "Lent");
 
-            using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run("entity.list");
+            using (ConsoleHost.Lend(world)) answer = ConsoleHost.Run("entity.list").Text;
         });
 
         harness.Run();
@@ -65,7 +65,7 @@ public sealed class CliConsoleHostTests
     {
         Assert.Null(ConsoleHost.World);
 
-        var answer = ConsoleCommands.Run("entity.list");
+        var answer = ConsoleHost.Run("entity.list").Text;
 
         Assert.NotNull(answer);
         Assert.Contains("failed", answer);

@@ -104,7 +104,7 @@ Its rays meet only the meshes given to `SetRayTraced`, and what is rasterized un
 drawn for nothing, so Bevy's solari example takes the raster meshes away, as the last line does.
 Solari's passes and the cells its world cache holds are among Bevy's diagnostics,
 `render/solari_lighting/lighting/elapsed_gpu` and `render/solari_lighting/world_cache_active_cells_count`
-among them, which `Diagnostics.TryRead` reads where `Config.GpuTimings` is on.
+among them, which `DiagnosticsStore.TryRead` reads where `Config.GpuTimings` is on.
 
 ### Tracing rays of your own
 

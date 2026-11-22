@@ -178,9 +178,9 @@ public sealed class GamepadTests
                 if (frame != 3) return;
 
                 ConsoleHost.Reset();
-                refused = ConsoleCommands.Run("input.button 4 South 5");
+                refused = ConsoleHost.Run("input.button 4 South 5").Text;
                 ConsoleHost.Reset();
-                ConsoleCommands.Run("input.button 1 South 5");
+                ConsoleHost.Run("input.button 1 South 5");
                 waiting = ConsoleHost.Pending;
             }
         }, "Test.Drive"));

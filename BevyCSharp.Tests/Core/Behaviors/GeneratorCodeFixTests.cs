@@ -25,7 +25,8 @@ public sealed class GeneratorCodeFixTests
         var references = ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
             .Split(Path.PathSeparator)
             .Select(path => MetadataReference.CreateFromFile(path))
-            .Append(MetadataReference.CreateFromFile(typeof(App).Assembly.Location));
+            .Append(MetadataReference.CreateFromFile(typeof(App).Assembly.Location))
+            .Append(MetadataReference.CreateFromFile(typeof(global::Diagnostics.CommandAttribute).Assembly.Location));
         var project = workspace.AddProject("Fixed", LanguageNames.CSharp)
             .WithCompilationOptions(new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary))
             .WithMetadataReferences(references);
@@ -127,6 +128,7 @@ public sealed class GeneratorCodeFixTests
     {
         var (text, after) = await Fix(Commands, """
             using Bevy;
+            using Diagnostics;
             public class Tools
             {
                 [Command("hello", "Says hello: hello")]
@@ -143,6 +145,7 @@ public sealed class GeneratorCodeFixTests
     {
         var (text, after) = await Fix(Commands, """
             using Bevy;
+            using Diagnostics;
             public static class Tools
             {
                 [Command("hello", "Says hello: hello")]

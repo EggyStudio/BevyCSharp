@@ -213,7 +213,7 @@ public sealed class RecordingTests : IDisposable
         // its log rather than failing the test.
         Record(world =>
         {
-            if (world.Resource<Time>().FrameCount == 30) answer = ConsoleCommands.Run($"record {path} 8 every 250ms");
+            if (world.Resource<Time>().FrameCount == 30) answer = ConsoleHost.Run($"record {path} 8 every 250ms").Text;
         });
 
         Assert.StartsWith("recording 8 pictures", answer);

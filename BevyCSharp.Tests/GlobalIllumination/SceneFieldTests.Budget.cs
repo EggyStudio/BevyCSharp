@@ -233,7 +233,7 @@ public sealed partial class SceneFieldTests
                 if (SceneField.Plan is not { } plan) return;
                 most = Math.Max(most, plan.Splatted);
                 if (plan.Splatted > 0) frames++;
-                if (Diagnostics.TryRead("render/shader field_splat/elapsed_gpu", out var reading) && reading.Value is { } ms) slowest = Math.Max(slowest, ms);
+                if (DiagnosticsStore.TryRead("render/shader field_splat/elapsed_gpu", out var reading) && reading.Value is { } ms) slowest = Math.Max(slowest, ms);
             },
         }
             .Until("built", _ => SceneField.Plan is { } plan && plan.StillCount == Sections && plan.Waiting == 0 && plan.Builds.Count == 0

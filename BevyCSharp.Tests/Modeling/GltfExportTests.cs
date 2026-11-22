@@ -184,13 +184,13 @@ public sealed class GltfExportTests : IDisposable
         Assert.Equal(new[] { $"import {path}", "select +y", "extrude 1" }, mesh.Recipe);
         Assert.Equal(12f, EditMesh.FromRecipe(mesh.RecipeText).Volume, Close);
 
-        Assert.StartsWith("crate10: 8 vertices", ConsoleCommands.Run("model.box crate10 2 2 2"));
-        Assert.Equal($"wrote crate10 to {_folder.File("out.gltf")}", ConsoleCommands.Run($"model.export crate10 {_folder.File("out.gltf")} embedded"));
+        Assert.StartsWith("crate10: 8 vertices", ConsoleHost.Run("model.box crate10 2 2 2").Text);
+        Assert.Equal($"wrote crate10 to {_folder.File("out.gltf")}", ConsoleHost.Run($"model.export crate10 {_folder.File("out.gltf")} embedded").Text);
         Assert.False(File.Exists(_folder.File("out.bin")));
-        Assert.Equal("crate11: 8 vertices, 12 edges, 6 faces, 6 faces and 8 vertices selected", ConsoleCommands.Run($"model.import crate11 {_folder.File("out.gltf")}"));
-        Assert.Contains("takes a model's name, a path", ConsoleCommands.Run("model.export crate10"));
-        Assert.Equal("forgot crate10", ConsoleCommands.Run("model.free crate10"));
-        Assert.Equal("forgot crate11", ConsoleCommands.Run("model.free crate11"));
+        Assert.Equal("crate11: 8 vertices, 12 edges, 6 faces, 6 faces and 8 vertices selected", ConsoleHost.Run($"model.import crate11 {_folder.File("out.gltf")}").Text);
+        Assert.Contains("takes a model's name, a path", ConsoleHost.Run("model.export crate10").Text);
+        Assert.Equal("forgot crate10", ConsoleHost.Run("model.free crate10").Text);
+        Assert.Equal("forgot crate11", ConsoleHost.Run("model.free crate11").Text);
     }
 
     [Fact]

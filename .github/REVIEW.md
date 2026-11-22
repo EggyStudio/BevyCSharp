@@ -614,211 +614,6 @@ in full under Decisions in REVIEW-ARCHIVE.md.
 
 ## Replies
 
-146's low findings 51 to 54, the bridge's, in the commit carrying this Reply, each with a test that
-failed without its mend.
-
-An app is made with no interface until it installs one, where the flag stayed set for every app
-after the first that asked for one.
-ImGuiTests.AnAppThatLeavesTheInterfaceOutHasNoneAfterOneThatAskedForIt runs an app with the
-interface and one without after it. Without the mend the second app read yes, and with it no.
-
-Every entry point that takes an entity from C# reads it through ecs::entity_from, Entity.None and
-any handle Bevy cannot decode being no such entity, where 59 places in 21 files decoded it with
-Bevy's Entity::from_bits, which panics on them. The bridge's test
-entity_none_is_no_such_entity_where_an_entry_point_takes_one hands zero to nine of them in six
-files, a spawned window's three, a free camera's, two of Feathers', a camera's flags and perspective
-and a light's cookie. Without the mend the test failed, Bevy's decoding panicking at each entry
-point, and with it each answered no such entity, the light's cookie no component, as it answers any
-entity that is no spot light.
-
-A wake is sent from any thread, through a copy of winit's proxy the bridge keeps as the app is made,
-where it went only through the world on loan, which a thread outside the updates has none of, and
-Window.WakeUp says so. WindowControlTests.AWakeIsSentFromAThreadWithNoWorld calls it from a thread
-of its own while an app runs and from the test's thread after the run, and the bridge's test
-a_wake_reaches_the_loop_from_a_thread_with_no_world sends one from a thread of its own to a waker
-kept in the proxy's place. Without the mend the call from the thread of its own threw that no world
-was available on it, and with it both calls returned.
-
-A key reaching the focused entity has its logical name and its text cut where a character ends, by
-the copy the input messages use, where it was cut at the 28th byte.
-EditableTextTests.AFocusedKeysLongTextIsCutWhereACharacterEnds types twenty-seven bytes and an e
-with an acute accent at a focused node. Without the mend the node heard the twenty-seven bytes and
-U+FFFD, and with it the twenty-seven alone.
-
-The whole suite passed over these mends and those of the commit after them, from one tree, 2,163
-passed, 0 failed and 3 skipped, 2,166 in all where the listing is 2,155, the solution built from
-nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
-in all three profiles. NormTests passed, 19.
-
-Shared: an entity handed across the boundary as zero is no such entity at every entry point, and a
-wake reaches a reactive loop from any thread, which a sibling taking entities across a C ABI reads
-the same way.
-
-146's low findings 55 to 59, in the commit carrying this Reply, each with a test that failed without
-its mend.
-
-A system's name stays Behavior.Method, as the guide gives it and [After] names it, rather than the
-qualified name the finding's direction gives, so two systems may share one, two behaviors of one
-name in two namespaces or one method name in two stages. A hot reload names each standing system
-again by its name and its method, where it kept the first of a name alone and added the second again
-at each change, and a toggle key flips a name's toggle once a frame, where each system of the name
-flipped it. behaviors.md says a shared name orders against every system called that and a toggle key
-turns them on and off together. BehaviorReloadTests.TwoSystemsOfOneNameAreEachNamedAgainByAChange
-changes a registration of two such systems twice, and
-EngineTests.AToggleKeyFlipsSystemsSharingANameOnceAPress presses the key two of them share. Without
-the mends one of the two ran twice a frame from the first change, and the two ran on after the
-press, one missing a frame, and with them each ran once a frame and both stopped from the frame the
-key went down.
-
-The mixer forgets the sounds whose entities are gone once its table holds twice what it held after
-the last sweep, and at least 64, where a sound on no bus stayed until the next app.
-AudioPlaybackTests.SoundsThatEndOnTheirOwnAreForgottenAsMoreArePlayed plays a tone of a thirtieth of
-a second every frame. Without the mend the mixer held all 240, and with it 64 at most.
-
-An event the bridge refuses gives its number back for the next, where its delegate was kept for
-good. AnimationClipTests.AnEventRefusedBeforeItsClipArrivesKeepsNothing places an event on a clip
-loaded from a file every frame until it is placed. Without the mend the event refused before its
-clip arrived stayed kept beside the one placed, two where one was placed, and with it one.
-
-ImGui's pictures are forgotten as each app starts, and a picture answered as none for a handle is
-not kept, where a later app drew with the earlier app's numbers.
-ImGuiTests.APictureIsLoadedAgainForEachApp loads the checker in one app and the cube map and then
-the checker in the next. Without the mend the checker read the cube map's size, 16 by 96, and with
-it its own, 2 by 2.
-
-The inspector's count of the entities sharing a data asset is kept for a second, as its count of the
-assets holding it is, and Make unique forgets both.
-DataReferenceCountTests.TheEntitiesSharingAnAssetAreCountedOnceForCallsInARow asks three times in a
-row and once after the counts are forgotten. Without the mend the world was walked at each of the
-three, and with it once, and once more after the counts were forgotten.
-
-The whole suite passed over these mends and those of the commit before them, from one tree, 2,163
-passed, 0 failed and 3 skipped, 2,166 in all where the listing is 2,155, the solution built from
-nothing with warnings as errors, a part at a time under the GPU lock, and the native checks passed
-in all three profiles. NormTests passed, 19.
-
-Of the 75, 55 are mended, none was found not to hold, and 20 remain, 60 to 75 and 34 to 36 and 40 of
-global illumination, which go with 138.
-
-138, the read of the kernels' move and its first step, the probes' octahedron written once, in the
-commit carrying this Reply.
-
-The RadianceCascades module at 6622616 states its contract in its README. Its passes are thread
-functions an engine calls from its own `main` (`traceTexel`, `reachTexel`, `settleTexel`,
-`mergeTexel` and `gatherAt` in rc_probe_passes.slang), it reads through interfaces an engine gives
-it (`IFieldVolume`, `IProbeField` with `surfaceLightAt` and `throughAt`, `IFarProbes` and
-`IMarchSteps`), it writes through four more (`IProbeRays`, `IReachTexels`, `IMergedLight` and
-`ISurfacePoints`), and the field has functions of its own (`splatCodes`, `splatPaint`,
-`resolvedDistance`, `pinched`, `stampCell`, `paintFacing` and `paintAt`). The bridge's own, which
-stays, is bcs_pass and Bevy's view, gi_sky, gi_light, the screen probes' own trace and filter, the
-glow lights, the reference, the field's build in Rust and the C# side that runs them, with the
-probes' moves, their carried rays, the crown cards, transmission and the cube faces, which the
-module has no hook for.
-
-Where the two copies differ in what is seen, the merge first. The module weighs the far probes about
-the ray's end by their reach maps, gives a probe in a mesh nothing and marches on where no probe
-sees, where ours weighs them about the near probe and reads the merged light's alpha marks. The
-module's cascades start at 0 and end within twice and past root three times their spacing, where
-ours start at the spacing and end at four times. The module's light-through is a value of its own
-(`throughAt`) where ours reads the paint's alpha. The module reads a gloss byte of 0 as unpainted.
-Its field codes and sheet planes are the largest difference. So the move goes the octahedron first,
-then the face bits and the gloss, the faces' gather, the reach, the paint's facing, the trace, the
-ends with the merge, the screen probes' read past their reach with the open box's test turned on,
-the stamp, then the splat and the resolve, each its own commit with the suite whole.
-
-The step. The module is a submodule at `modules/RadianceCascades`, pinned at 78ef6b6, 6622616 with
-its fetch script reading a hash by the tools both systems carry (N 6.6), and the bridge carries its
-`rc_octahedron.slang` among the modules it writes for `import` (`MODULES` in slang.rs). `bcs_gi`
-imports it and gives it on to every reader in place of its own copies of `octahedron`,
-`octahedronPoint`, `fromOctahedron`, `octahedronShare`, `RaysAt`, `texelMark` and `texelNothing`,
-whose code is the module's line for line. No picture changes. The comments of the files touched hold
-to 100 columns (N 4.12), scene_field.rs's among them.
-
-The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
-the render profile in the portable image, the editor bridge built with meshlets and Solari, and
-native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
-listing is 2,185, the solution built from nothing with warnings as errors, in 12 parts and the rest
-dealt by the last run's times, each part of 1 m 41 s to 4 m 59 s, a part at a time under the GPU
-lock. A run before it at 6622616 failed N 6.6 alone, on the module's fetch script's sha256sum, which
-its session mended as 78ef6b6. The module comments of scene_field.rs were rewrapped again after it,
-a tool of mine having joined their `//!` marks into the text, its code the same.
-
-Shared: the probes' octahedron is the RadianceCascades module's in this engine from this commit, its
-first kernel taken.
-
-NormTests passed, 19.
-
-138, its second step, the way a face looks in eight bits written once, in the commit carrying this
-Reply.
-
-The bridge carries the module's `rc_field_code.slang` among the modules it writes for `import`, and
-`bcs_field` imports it for itself alone, so its codes and constants stay out of every kernel's names
-until the field's codes are taken. `faceBits` and `faceWay` keep their names for this engine's
-readers and answer the module's `wayCode` and `wayOf`, whose code was theirs line for line. The
-gloss in the same cell, which the module reads a byte of 0 of as unpainted where this engine reads
-it as nothing, waits for a step of its own with its tests. No picture changes, and the comments of
-the files touched hold to 100 columns (N 4.12).
-
-The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
-the render profile in the portable image, the editor bridge built with meshlets and Solari, and
-native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
-listing is 2,185, the solution built from nothing with warnings as errors, in 13 parts and the rest
-dealt by the last run's times, each part of 1 m 35 s to 4 m 43 s, a part at a time under the GPU
-lock.
-
-Shared: the way a face looks in eight bits is the RadianceCascades module's in this engine from this
-commit.
-
-NormTests passed, 19.
-
-138, its third step, a face's gloss written once, in the commit carrying this Reply.
-
-The bridge carries the module's `rc_field_paint.slang`, and `bcs_field` imports it for itself alone,
-so `glossBits` and `faceGloss` answer the module's `glossBits` and `glossOf`. The bits are the same,
-the roughness in bits 8 to 15, the metal in 16 to 23 and the reflectance in 24 to 31, and two things
-differ. The module holds a painted roughness to a 255th at least, so a byte of 0 says no gloss
-painted the cell, and it reads such a cell as Bevy's default gloss where this engine read nothing.
-The one reader of a cell's gloss weighs it by the cell's paint, which is nothing where nothing
-painted, so a perfect mirror's roughness reading a 255th is all that moves. The low byte of the
-splat's gloss, which carries the light a surface lets through, is unchanged.
-
-The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
-the render profile in the portable image, the editor bridge built with meshlets and Solari, and
-native/Cargo.lock is unmoved.
-
-The whole suite passed from one tree, 2,191 passed, 0 failed and 5 skipped, 2,196 in all where the
-listing is 2,185, the solution built from nothing with warnings as errors, in 13 parts and the rest
-dealt by the last run's times, each part of 1 m 29 s to 4 m 48 s, a part at a time under the GPU
-lock.
-
-Shared: a face's gloss in the field is the RadianceCascades module's in this engine from this
-commit.
-
-NormTests passed, 19.
-
-138, its fourth step, the world probes' faces gathered by the module's pass, in the commit carrying
-this Reply.
-
-The submodule moves to 6b6f783, the passes the review named, whose octahedron, field codes and gloss
-are byte for byte those taken before, and the bridge carries the four files the passes import
-(`rc_field_read`, `rc_probes`, `rc_cascade_merge` and `rc_probe_passes`). gi_ambient imports
-`rc_probe_passes` and gathers each face of a world probe by `gatherAt`, handing it a cascade of the
-one probe standing at its moved place, so the gather weighs that probe alone and takes its light
-along every texel by how squarely it falls on the face and the solid angle its texel spans
-(`lightTaken`), where gi_ambient had summed the same and scaled the sum to pi. A sky of 1 reads pi
-within a thousandth on each face where it read pi exactly. The probe's light is read as before, the
-merged light times the share its early hits let through with the light met before its interval
-began, the probe's holds, its move and the faces read at the surface stay gi_ambient's own, and the
-gather is given no cascade of the field, so whether a probe stands in a mesh stays its own holds and
-the field is read nowhere in it. The field cascade a cascade of probes lies around is read from that
-one cascade in place (`probesCorner`) rather than through a copy of the whole table, after the
-sibling's finding that such a copy draws wrong on one device, and the test on the compiled kernel
-that holds a field read to one cascade comes with the step that binds the field, the trace.
-
 The bridge checks clean on its three profiles and its tests pass, 126 with no feature and 231 with
 the render profile in the portable image, the editor bridge built with meshlets and Solari, and
 native/Cargo.lock is unmoved.
@@ -1137,5 +932,57 @@ Settled when a run on this commit passes part 7, its minutes read from that run.
 
 Next in this session's order, item 138's merge as the review weighs the table of the cheap hit and
 the held light, the held light's leak through a wall thinner than a cell among it.
+
+NormTests passed, 19.
+
+155, step 1, the registry, in the commit carrying this, the Modeling module's commands held for item
+154.
+
+What went. `CommandAttribute`, `CommandParameter`, `ConsoleCommand`, `ConsoleCommands`, `LogLine`
+and `LogLevel` in `BevyCSharp/Core` are deleted, with ConsoleLog's ring of lines and the engine's
+`help`, whose place the module's `help`, `list` and `reset` take.
+
+What holds them. The Diagnostics module is a submodule at `modules/Diagnostics` at `10a18e1`, which
+Core references and the package carries in its lib folder. The generator reads the module's
+`[Command]` and emits `Registry.Process.Add` with the module's command and argument types, so every
+command of the engine, the editor and a game is the module's registry's. The console host runs a
+line through that registry by `ConsoleHost.Run` and `Submit` and writes a late answer by `Answered`,
+a command's failing code carried in the module's answer and the CLI's envelope keeping its shape.
+ConsoleLog's lines are the module's console's, stamped with the frame, and the crash log hears each
+line through the console's `LineWritten`. The three things the console lacked for this, a line's
+repeat count, a callback a line and a line's index and stamp, went to the module's session and are
+mended in `10a18e1`.
+
+The public listing (N 2.4). The six types above leave it. `ConsoleHost` gains `Run`, `Submit` and
+`Answered`, each giving the module's `Answer`, `Commands` as the module's `Registry`, and `Unwrap`,
+which was `ConsoleCommands`'. `ConsoleLog.All()` gives an `IReadOnlyList<ConsoleLine>` in place of a
+`LogLine[]`, `Written` is a `long` in place of an `int`, `Write` takes a `ConsoleLevel` in place of
+a `LogLevel`, and it gains `Model`, the module's `ConsoleModel`. `ConsoleView.Lines()` and
+`ConsoleView.Written(line)` give and take the module's `ConsoleLine` in place of a `LogLine`.
+
+Held. The Modeling module's commands are hosted through its list of commands once the engine binds
+that module's edit mesh, item 154, after 138. Until then `ConsoleModelCommands` stays, its `model.*`
+commands added to the module's registry by the generator as every other command is.
+
+The name. The engine's class `Bevy.Diagnostics` is `Bevy.DiagnosticsStore`, Bevy's own name for the
+store, since a module's namespace is its name alone and the module's `Diagnostics` hid the class in
+code outside the namespace `Bevy`. The examples, the tests and the tools guide name it
+`DiagnosticsStore` plainly, and its file is `DiagnosticsStore.cs`. In the public listing `static
+class Bevy.Diagnostics` becomes `static class Bevy.DiagnosticsStore`, its members as they were (N
+2.4). The comment on `ConsoleHost.Answered`'s parameter that ran to 105 columns takes three lines.
+
+The whole suite passed from one tree with the rename, 2,195 passed, 0 failed and 5 skipped, 2,200 in
+all where the listing is 2,189, the solution built from nothing with warnings as errors, in 15 parts
+and the rest, a part at a time through the GPU's gate. N 6.4 opens the newest package in
+`build/package`, and the newest there was packed before the module came, so it read a package packed
+from this tree, `0.0.0-diag2`, which carries `3DEngine.Diagnostics.dll` and its documentation in its
+lib folder, and the tools guide and the ray tracing guide build their 19 blocks on it. The
+cheatsheet lists `DiagnosticsStore` among the tools, as it listed the class before.
+
+Shared: the generator's registration of every `[Command]` into the module's registry, and a console
+host that runs a line through that registry and keeps its lines in the module's console, are offered
+to 3DEngine's binding of the module.
+
+Next in this session's order, item 155's step 2, the console, the overlay and the keys.
 
 NormTests passed, 19.

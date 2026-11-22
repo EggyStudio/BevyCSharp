@@ -64,7 +64,7 @@ public sealed class ClickCommandTests
 
                 var (x, y) = points[next++];
                 ConsoleHost.Reset();
-                var said = ConsoleCommands.Run(FormattableString.Invariant($"input.click {x} {y}"));
+                var said = ConsoleHost.Run(FormattableString.Invariant($"input.click {x} {y}")).Text;
                 waiting = ConsoleHost.Pending;
                 if (waiting is null && said is not null) answers.Add(said);
             }
@@ -128,7 +128,7 @@ public sealed class ClickCommandTests
                 if (frame != 10) return;
 
                 ConsoleHost.Reset();
-                ConsoleCommands.Run("input.click 40 40 2");
+                ConsoleHost.Run("input.click 40 40 2");
                 waiting = ConsoleHost.Pending;
             }
         }, "Test.Drive"));

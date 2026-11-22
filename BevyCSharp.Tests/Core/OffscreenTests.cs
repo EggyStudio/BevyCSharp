@@ -106,7 +106,7 @@ public sealed class OffscreenTests : IDisposable
         {
             using (ConsoleHost.Lend(world))
             {
-                var answer = ConsoleCommands.Run($"shot {Path.Combine(_folder.Path, "none.png")}");
+                var answer = ConsoleHost.Run($"shot {Path.Combine(_folder.Path, "none.png")}").Text;
 
                 Assert.Contains("nothing", answer);
             }

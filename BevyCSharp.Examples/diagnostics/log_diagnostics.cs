@@ -12,9 +12,9 @@ namespace BevyCSharp.Examples.Measuring;
 // rows at the top left say which.
 internal static class LogDiagnostics
 {
-    private static readonly string[] FrameTimeDiagnostics = [Diagnostics.Fps, Diagnostics.FrameCount, Diagnostics.FrameTime];
-    private static readonly string[] EntityCountDiagnostics = [Diagnostics.EntityCount];
-    private static readonly string[] SystemInfoDiagnostics = [Diagnostics.ProcessCpuUsage, Diagnostics.ProcessMemUsage, Diagnostics.SystemCpuUsage, Diagnostics.SystemMemUsage];
+    private static readonly string[] FrameTimeDiagnostics = [DiagnosticsStore.Fps, DiagnosticsStore.FrameCount, DiagnosticsStore.FrameTime];
+    private static readonly string[] EntityCountDiagnostics = [DiagnosticsStore.EntityCount];
+    private static readonly string[] SystemInfoDiagnostics = [DiagnosticsStore.ProcessCpuUsage, DiagnosticsStore.ProcessMemUsage, DiagnosticsStore.SystemCpuUsage, DiagnosticsStore.SystemMemUsage];
 
     // Tailwind's green-400 and red-400.
     private static readonly Color Green = Color.FromHex("4ade80");
@@ -86,7 +86,7 @@ internal static class LogDiagnostics
         if (_frameTime) Filter.UnionWith(FrameTimeDiagnostics);
         if (_entityCount) Filter.UnionWith(EntityCountDiagnostics);
         if (_systemInfo) Filter.UnionWith(SystemInfoDiagnostics);
-        Diagnostics.SetLogFilter(_filtering ? Filter : null);
+        DiagnosticsStore.SetLogFilter(_filtering ? Filter : null);
 
         UpdateCommands(ctx.Ecs);
     }

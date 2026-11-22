@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 
 namespace BevyCSharp.Editor.Framework;
 

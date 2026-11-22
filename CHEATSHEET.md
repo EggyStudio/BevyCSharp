@@ -1634,17 +1634,7 @@ static Task<string> StartRecording(string path, int intervalMs = 100, float scal
 static string Screenshot();                                     // Saves a picture of the frame being drawn into ScreenshotFolder, as the key does
 static Task<string>? StopRecording();                           // Stops a recording, whose file is written once the pictures it asked for have come back
 
-// ConsoleCommands
-static void Add(ConsoleCommand command);                        // Adds a command, replacing one of the same name
-static void Add(string name, string help, Func<string[], string> run);  // Adds a command written out in place
-static bool Remove(string name);                                // Takes one back out
-static ConsoleCommand? Find(string name);                       // The command of a given name, or null
-static IReadOnlyList<ConsoleCommand> Starting(string prefix);   // The commands whose names start with what has been typed so far
-static string? Run(string line);                                // Runs a line as it was typed, and answers with what to write back
-static string Unwrap(string line);                              // A line with one pair of enclosing quotes taken off, if it has them
-static string[] Split(string line);                             // A line of arguments as words, keeping quoted runs together
-
-// Diagnostics
+// DiagnosticsStore
 static void Register(string path, string suffix = "", int history = 0);  // Registers a diagnostic, so measurements of it are kept
 static bool Measure(string path, double value);                 // Adds a measurement to a diagnostic, taken now
 static bool TryRead(string path, out DiagnosticReading reading);  // What a diagnostic holds now
@@ -1657,15 +1647,19 @@ static void Fail(string code, string message);                  // Says the comm
 static void Hold(ulong frame);                                  // Holds this command's answer until the clock's count of frames reaches frame
 static void Later(Func<string> poll);                           // Says this command's answer is not ready yet, and how to ask for it
 static ConsoleHost.Scope Lend(World world);                     // Lends the world to commands run inside the returned scope
+static Answer Run(string line);                                 // Runs a line as it was typed, through Commands
+static Answer Submit(string line, World? world = null);         // Runs a line the player entered through the process's console (Model), which writes it and its answer, with the world lent where one is given
+static Answer Answered(string? text);                           // The answer of a command's text, or of nothing, as the generated registrations answer, failed with the code the command gave Fail where it called it
+static string Unwrap(string line);                              // A line with one pair of enclosing quotes taken off, if it has them
 
 // ConsoleHost.Scope
 void Dispose();                                                 // Ends it, putting back whatever was lent before
 
 // ConsoleLog
-static void Start();                                            // Starts teeing the output and error streams into the ring
-static void Write(LogLevel level, string text);                 // Adds a line
+static void Start();                                            // Starts teeing the output and error streams into the console
+static void Write(ConsoleLevel level, string text);             // Adds a line, a line for each of its lines, and nothing for no text
 static void Write(string text);                                 // Adds a line at the ordinary level
-static LogLine[] All();                                         // The lines kept, oldest first
+static IReadOnlyList<ConsoleLine> All();                        // The lines kept, oldest first
 static void Clear();                                            // Forgets everything
 
 // CliClient
@@ -1744,14 +1738,14 @@ BoundingCircle BoundingCircleAt(Isometry2d isometry);           // A circle abou
 static CompassOctant? Of(Vec2 direction);                       // The octant a direction points in, north being positive Y as on a stick, or null for no direction at all
 
 // ConsoleView
-LogLine[] Lines();                                              // The lines worth showing, oldest first
+ConsoleLine[] Lines();                                          // The lines worth showing, oldest first
 void Run(string line, World? world = null);                     // Runs a line, and writes both it and its answer into the log
 static void AnswerLater(World world);                           // Asks each command waiting on an answer for it, and writes any that arrive into the log
 string Back(string current);                                    // What was typed before this, or what is already there at the end of the list
 string Forward(string current);                                 // The other way, and back to nothing once the end is reached
 string? Completion(string typed);                               // The command a half-typed name would become, or nothing
 string Hint(string typed);                                      // What it would complete to, or what it takes, said under the input
-static string Written(LogLine line);                            // How a line reads on screen, with its repeat count when it has one
+static string Written(ConsoleLine line);                        // How a line reads on screen, with its repeat count when it has one
 
 // CrashLog
 static string? Write(string title, string what);                // Writes a crash to this run's crash file, made the first time, and says where on the log

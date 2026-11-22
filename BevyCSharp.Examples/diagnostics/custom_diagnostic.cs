@@ -19,9 +19,9 @@ internal static class CustomDiagnostic
     {
         // Registered before it is measured, since the store keeps only the measurements of a path
         // it has.
-        app.Startup(_ => Diagnostics.Register(SystemIterationCount, " iterations"), "custom_diagnostic.Register");
+        app.Startup(_ => DiagnosticsStore.Register(SystemIterationCount, " iterations"), "custom_diagnostic.Register");
 
         // A measurement of ten each time the system runs.
-        app.Update(_ => Diagnostics.Measure(SystemIterationCount, 10.0), "custom_diagnostic.MySystem");
+        app.Update(_ => DiagnosticsStore.Measure(SystemIterationCount, 10.0), "custom_diagnostic.MySystem");
     }
 }

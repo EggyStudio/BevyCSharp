@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using Bevy.Interop;
+using Diagnostics;
 
 namespace Bevy;
 
@@ -103,7 +104,7 @@ public static unsafe class CrashLog
 
         _teed = !ConsoleLog.Teeing;
         ConsoleLog.Start();
-        ConsoleLog.Added += Written;
+        ConsoleLog.Model.LineWritten += Written;
         AppDomain.CurrentDomain.UnhandledException += Unhandled;
         TaskScheduler.UnobservedTaskException += Unobserved;
         Native.Check(Native.bcs_log_collect(1), "collecting Bevy's log lines");
@@ -132,7 +133,7 @@ public static unsafe class CrashLog
         Native.Check(Native.bcs_log_collect(0), "stopping the collection of Bevy's log lines");
         AppDomain.CurrentDomain.UnhandledException -= Unhandled;
         TaskScheduler.UnobservedTaskException -= Unobserved;
-        ConsoleLog.Added -= Written;
+        ConsoleLog.Model.LineWritten -= Written;
         if (_teed) ConsoleLog.Stop();
 
         lock (Gate)
@@ -182,7 +183,7 @@ public static unsafe class CrashLog
 
             if (line.Length == 0) return;
 
-            ConsoleLog.Write(*level switch { >= 4 => LogLevel.Error, 3 => LogLevel.Warning, _ => LogLevel.Info }, line);
+            ConsoleLog.Write(*level switch { >= 4 => ConsoleLevel.Error, 3 => ConsoleLevel.Warning, _ => ConsoleLevel.Info }, line);
         }
     }
 
@@ -258,7 +259,7 @@ public static unsafe class CrashLog
         text.AppendLine($"== The last {Tail} lines of the log");
         text.AppendLine();
         var lines = ConsoleLog.All();
-        foreach (var line in lines.Skip(Math.Max(0, lines.Length - Tail))) text.AppendLine(Line(line));
+        foreach (var line in lines.Skip(Math.Max(0, lines.Count - Tail))) text.AppendLine(Line(line));
 
         try
         {
@@ -289,23 +290,23 @@ public static unsafe class CrashLog
     }
 
     /// <summary>A log line as the files write it, with its level and frame.</summary>
-    private static string Line(LogLine line)
+    private static string Line(ConsoleLine line)
     {
         var level = line.Level switch
         {
-            LogLevel.Warning => "WARN ",
-            LogLevel.Error => "ERROR",
-            LogLevel.Echo => "ECHO ",
+            ConsoleLevel.Warning => "WARN ",
+            ConsoleLevel.Error => "ERROR",
+            ConsoleLevel.Input => "ECHO ",
             _ => "INFO ",
         };
 
-        return $"[{line.Frame,6}] {level} {line.Text}";
+        return $"[{line.Stamp,6}] {level} {line.Text}";
     }
 
     /// <summary>
     /// Writes a line the console's log took to the run's log, a repeat as a count once it ends.
     /// </summary>
-    private static void Written(LogLine line, bool repeat)
+    private static void Written(ConsoleLine line, bool repeat)
     {
         lock (Gate)
         {

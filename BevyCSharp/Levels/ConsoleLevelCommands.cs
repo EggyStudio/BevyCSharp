@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 /// <summary>Building a level file into the running app's world, from the console and the command line.</summary>

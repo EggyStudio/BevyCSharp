@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 /// <summary>
@@ -44,9 +46,9 @@ public sealed class ConsoleView
     private int _recalled = -1;
 
     /// <summary>The lines worth showing, oldest first.</summary>
-    public LogLine[] Lines()
+    public ConsoleLine[] Lines()
     {
-        var kept = new List<LogLine>();
+        var kept = new List<ConsoleLine>();
 
         // Trimmed, because a filter that finds nothing on account of a space somebody typed after
         // the word is a filter that looks broken.
@@ -69,11 +71,11 @@ public sealed class ConsoleView
     }
 
     /// <summary>Whether a level is one of the ones being shown.</summary>
-    private bool Shows(LogLevel level) => level switch
+    private bool Shows(ConsoleLevel level) => level switch
     {
-        LogLevel.Warning => ShowWarnings,
-        LogLevel.Error => ShowErrors,
-        LogLevel.Echo => true,
+        ConsoleLevel.Warning => ShowWarnings,
+        ConsoleLevel.Error => ShowErrors,
+        ConsoleLevel.Input => true,
         _ => ShowInfo,
     };
 
@@ -97,8 +99,6 @@ public sealed class ConsoleView
         var typed = line.Trim();
         if (typed.Length == 0) return;
 
-        ConsoleLog.Write(LogLevel.Echo, "> " + typed);
-
         // Remembered once, however many times in a row it is run, because what the arrows are for
         // is getting back to a command, and ten copies of the same one is nine presses of nothing.
         if (_history.Count == 0 || _history[^1] != typed) _history.Add(typed);
@@ -109,19 +109,9 @@ public sealed class ConsoleView
         // The world is lent for the length of the call, because a command that reads or changes an
         // entity can only do it from inside a frame and has no other way to be handed one. A
         // console is drawn from a system, so the frame is already here; without the loan every
-        // command about the world would answer that it was called from outside one.
-        string? answer;
-
-        if (world is not null)
-        {
-            using (ConsoleHost.Lend(world)) answer = ConsoleCommands.Run(typed);
-        }
-        else
-        {
-            answer = ConsoleCommands.Run(typed);
-        }
-
-        if (answer is { Length: > 0 }) ConsoleLog.Write(LogLevel.Echo, answer);
+        // command about the world would answer that it was called from outside one. The process's
+        // console writes the line and then its answer.
+        ConsoleHost.Submit(typed, world);
 
         if (ConsoleHost.Pending is { } poll)
         {
@@ -159,12 +149,12 @@ public sealed class ConsoleView
 
             if (answer is not null)
             {
-                ConsoleLog.Write(LogLevel.Echo, answer);
+                ConsoleLog.Write(ConsoleLevel.Info, answer);
                 Waiting.RemoveAt(index);
             }
             else if (frame >= giveUp)
             {
-                ConsoleLog.Write(LogLevel.Warning, $"{name} had no answer after {ConsoleHost.LaterFrames} frames");
+                ConsoleLog.Write(ConsoleLevel.Warning, $"{name} had no answer after {ConsoleHost.LaterFrames} frames");
                 Waiting.RemoveAt(index);
             }
         }
@@ -212,11 +202,11 @@ public sealed class ConsoleView
         var word = typed.Trim();
         if (word.Length == 0 || word.Contains(' ')) return null;
 
-        foreach (var command in ConsoleCommands.Starting(word))
+        foreach (var name in ConsoleHost.Commands.Starting(word))
         {
-            if (string.Equals(command.Name, word, StringComparison.OrdinalIgnoreCase)) return null;
+            if (name == word) return null;
 
-            return command.Name;
+            return name;
         }
 
         return null;
@@ -227,19 +217,17 @@ public sealed class ConsoleView
     {
         if (Completion(typed) is { } completion)
         {
-            var found = ConsoleCommands.Find(completion);
-            return found is { Help.Length: > 0 } ? $"{completion}: {found.Help}" : completion;
+            var found = ConsoleHost.Commands.FindCommand(completion);
+            return found is { Summary.Length: > 0 } ? $"{completion}: {found.Summary}" : completion;
         }
 
         var word = typed.Trim();
         var cut = word.IndexOf(' ');
         var name = cut < 0 ? word : word[..cut];
 
-        if (name.Length == 0 || ConsoleCommands.Find(name) is not { } command) return string.Empty;
+        if (name.Length == 0 || ConsoleHost.Commands.FindCommand(name) is not { } command) return string.Empty;
 
-        return command.Usage.Length > 0
-            ? $"{command.Name} {command.Usage}: {command.Help}"
-            : $"{command.Name}: {command.Help}";
+        return $"{command.Usage}: {command.Summary}";
     }
 
     /// <summary>
@@ -249,7 +237,7 @@ public sealed class ConsoleView
     /// Cut if it is very long. A log row is one line and does not wrap, so what is past the edge
     /// cannot be read however wide the window is.
     /// </remarks>
-    public static string Written(LogLine line)
+    public static string Written(ConsoleLine line)
     {
         var text = line.Count > 1 ? $"{line.Text}  ({line.Count})" : line.Text;
 

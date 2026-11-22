@@ -1,3 +1,5 @@
+using Diagnostics;
+
 namespace Bevy;
 
 // The recorder's commands, beside shot, which takes one picture where these take many.

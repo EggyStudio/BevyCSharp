@@ -107,7 +107,7 @@ public sealed class SceneFileReloadTests : IDisposable
                         cameraKept = ecs.IsAlive(camera);
                         rugOnTable = ecs.ParentOf(rug) == table;
                         oldGone = !ecs.IsAlive(oldTable);
-                        using (ConsoleHost.Lend(world)) status = ConsoleCommands.Run("live.status") ?? "";
+                        using (ConsoleHost.Lend(world)) status = ConsoleHost.Run("live.status").Text;
                         App.RequestExit();
                     }
 

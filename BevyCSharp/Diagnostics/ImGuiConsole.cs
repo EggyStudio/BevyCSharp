@@ -1,4 +1,5 @@
 using System.Numerics;
+using Diagnostics;
 using ImGuiNET;
 
 namespace Bevy;
@@ -10,10 +11,10 @@ namespace Bevy;
 /// <remarks>
 /// <para>
 /// One call a frame, between <see cref="ImGuiRuntime.Begin"/> and <see cref="ImGuiRuntime.End"/>,
-/// gives a game the console the editor has, over the same two lists, the lines
-/// <see cref="ConsoleLog"/> keeps, the program's own and Bevy's, and every <c>[Command]</c> the
-/// game and the engine declare (<see cref="ConsoleCommands"/>). The key opens and closes it, and
-/// it draws nothing while closed, so a game draws it always and decides nothing.
+/// gives a game the console the editor has, over the same two lists, the lines <see
+/// cref="ConsoleLog"/> keeps, the program's own and Bevy's, and every <c>[Command]</c> the game and
+/// the engine declare (<see cref="ConsoleHost.Commands"/>). The key opens and closes it, and it
+/// draws nothing while closed, so a game draws it always and decides nothing.
 /// </para>
 /// <code>
 /// ImGuiRuntime.Begin(ctx);
@@ -35,7 +36,7 @@ public static unsafe class ImGuiConsole
 {
     private static readonly ConsoleView Shown = new();
     private static string _typed = string.Empty;
-    private static int _seen = -1;
+    private static long _seen = -1;
     private static int _recalls;
     private static bool _focus;
 
@@ -209,11 +210,11 @@ public static unsafe class ImGuiConsole
     /// </summary>
     private static int NoChange(ImGuiInputTextCallbackData* data) => 0;
 
-    private static Vector4 ColorOf(LogLevel level) => level switch
+    private static Vector4 ColorOf(ConsoleLevel level) => level switch
     {
-        LogLevel.Warning => new Vector4(1f, 0.78f, 0.35f, 1f),
-        LogLevel.Error => new Vector4(1f, 0.42f, 0.42f, 1f),
-        LogLevel.Echo => new Vector4(0.55f, 0.85f, 1f, 1f),
+        ConsoleLevel.Warning => new Vector4(1f, 0.78f, 0.35f, 1f),
+        ConsoleLevel.Error => new Vector4(1f, 0.42f, 0.42f, 1f),
+        ConsoleLevel.Input => new Vector4(0.55f, 0.85f, 1f, 1f),
         _ => new Vector4(0.82f, 0.82f, 0.82f, 1f),
     };
 }

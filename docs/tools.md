@@ -138,26 +138,32 @@ without a way back, and the console says so.
 
 ## The console
 
-Everything written to the output and error streams is teed into `ConsoleLog`, a ring of leveled
-lines that collapses repeats, so a console can show it without anything that writes a line knowing
-a console exists. What can be typed into one is a static method with `[Command]` on it:
+Everything written to the output and error streams is teed into `ConsoleLog`, the process's console,
+the Diagnostics module's `ConsoleModel`, which keeps the leveled lines and keeps a line the program
+writes again in a row as one line with a count, so a console can show it without anything that
+writes a line knowing a console exists. What can be typed into one is a static method with the
+module's `[Command]` on it, in the namespace `Diagnostics`:
 
 ```csharp
+using Diagnostics;
+
 [Command("select", "Selects the first entity with a name: select <name>")]
 internal static string Select(string name) => $"selected {name}";
 ```
 
-A generator finds them at compile time and a module initializer registers them, so nothing reflects
-at runtime and a command survives trimming. Parameters are read from the words after the name and
-may be strings, numbers or flags, and one the method gives a default can be left off, the last ones
-first. A single string parameter takes the whole of what was typed after it. Returning a string
-writes that line back, and anything a person can get wrong is answered with a sentence rather than
+A generator finds them at compile time and a module initializer adds them to the module's
+`Registry.Process`, so nothing reflects at runtime and a command survives trimming. Parameters are
+read from the words after the name and may be strings, numbers or flags, and one the method gives a
+default can be left off, the last ones first. A single string parameter takes the whole of what was
+typed after it. Returning a string writes that line back, and anything a person can get wrong is
+answered with a sentence and a code, as `BAD_ARGUMENT` for a word that cannot be read, rather than
 an exception. An enum's member is read by its name alone, so a number that names no member is
 refused rather than handed to code that was never written for it.
 
-`ConsoleCommands.Run(line)` is the whole of the runtime surface, so a game gets a console by
-drawing one. The editor's is the tab along the bottom, which the key under Escape raises and puts
-away, and everything it knows about the log and the commands it asks the library for.
+`ConsoleHost.Run(line)` is the whole of the runtime surface, an answer with its text and its code
+where it failed, so a game gets a console by drawing one. The editor's is the tab along the bottom,
+which the key under Escape raises and puts away, and everything it knows about the log and the
+commands it asks the library for.
 
 ## Diagnostics
 
@@ -173,20 +179,19 @@ beside Bevy's, a suffix after each number:
 struct Enemy { }
 -->
 ```csharp
-app.Startup(ctx => Diagnostics.Register("game/enemies", " enemies"));
-app.Update(ctx => Diagnostics.Measure("game/enemies", ctx.Ecs.EntitiesWith<Enemy>().Length));
+app.Startup(ctx => DiagnosticsStore.Register("game/enemies", " enemies"));
+app.Update(ctx => DiagnosticsStore.Measure("game/enemies", ctx.Ecs.EntitiesWith<Enemy>().Length));
 ```
 
 A diagnostic is registered before it is measured, since the store drops a measurement of a path it
-does not have. A path is names apart by slashes. `Diagnostics.TryRead` gives one's last, smoothed
-and average values, and `Diagnostics.All` gives every one, which an overlay of the frame rate reads.
-`Diagnostics.SetEnabled` stops one being measured and logged and keeps its history, and
-`Diagnostics.SetLogFilter` has the log print only the paths it is given, or none for an empty list,
-or all of them again for null. The system's measures are read on a task of Bevy's own no oftener
-than the system can measure the CPU, so their first values come some frames after the app starts.
-On macOS Bevy builds them for the App Store's sandbox, which reads no process, so the process's two
-are zero there.
-The `diagnostics` command lists the store as the log prints it.
+does not have. A path is names apart by slashes. `DiagnosticsStore.TryRead` gives one's last,
+smoothed and average values, and `DiagnosticsStore.All` gives every one, which an overlay of the
+frame rate reads. `DiagnosticsStore.SetEnabled` stops one being measured and logged and keeps its
+history, and `DiagnosticsStore.SetLogFilter` has the log print only the paths it is given, or none
+for an empty list, or all of them again for null. The system's measures are read on a task of Bevy's
+own no oftener than the system can measure the CPU, so their first values come some frames after the
+app starts. On macOS Bevy builds them for the App Store's sandbox, which reads no process, so the
+process's two are zero there. The `diagnostics` command lists the store as the log prints it.
 
 ## Bevy's dev tools
 

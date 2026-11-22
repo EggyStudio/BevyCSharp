@@ -1,4 +1,5 @@
 using Bevy.Interop;
+using Diagnostics;
 
 namespace Bevy;
 

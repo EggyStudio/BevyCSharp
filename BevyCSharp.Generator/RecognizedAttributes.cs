@@ -14,9 +14,9 @@ namespace Bevy.Generator;
 /// compiling, or never did, is found before a game is the first to use it.
 /// </para>
 /// <para>
-/// The names are the classes' own, in the <c>Bevy</c> namespace but for
-/// <see cref="Flags"/>, which is .NET's. A generator matching by full name puts
-/// <see cref="Namespace"/> in front.
+/// The names are the classes' own, in the <c>Bevy</c> namespace but for <see cref="Flags"/>,
+/// which is .NET's, and <see cref="Command"/>, which is the Diagnostics module's, in its namespace
+/// <c>Diagnostics</c>. A generator matching by full name puts the namespace in front.
 /// </para>
 /// </remarks>
 public static class RecognizedAttributes

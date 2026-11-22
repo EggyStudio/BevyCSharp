@@ -34,6 +34,7 @@ public sealed class GeneratorAttributeTests
         global using System.Collections.Generic;
         global using System.Linq;
         global using Bevy;
+        global using Diagnostics;
         using System.Text.Json.Nodes;
 
         namespace Probes;
@@ -449,7 +450,7 @@ public sealed class GeneratorAttributeTests
         [RecognizedAttributes.Command] = () =>
         {
             _ = Probes.Value;
-            Assert.Equal("said hello", ConsoleCommands.Run("probe.say hello"));
+            Assert.Equal("said hello", ConsoleHost.Run("probe.say hello").Text);
         },
 
         [RecognizedAttributes.Label] = () => Assert.Equal("Shown name", Hints("Measured").Label),

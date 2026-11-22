@@ -1,4 +1,5 @@
 using Bevy;
+using Diagnostics;
 using Xunit;
 
 namespace Bevy.Tests;
@@ -29,14 +30,14 @@ public sealed class StateCommandTests
             switch (frame++)
             {
                 case 0:
-                    answers.Add(ConsoleCommands.Run("state.get") ?? "");
-                    answers.Add(ConsoleCommands.Run("state.set screen PLAYING") ?? "");
-                    answers.Add(ConsoleCommands.Run("state.set Screen Lost") ?? "");
-                    answers.Add(ConsoleCommands.Run("state.set Weather Rain") ?? "");
-                    answers.Add(ConsoleCommands.Run("state.get Screen") ?? "");
+                    answers.Add(ConsoleHost.Run("state.get").Text);
+                    answers.Add(ConsoleHost.Run("state.set screen PLAYING").Text);
+                    answers.Add(ConsoleHost.Run("state.set Screen Lost").Text);
+                    answers.Add(ConsoleHost.Run("state.set Weather Rain").Text);
+                    answers.Add(ConsoleHost.Run("state.get Screen").Text);
                     break;
                 case 1:
-                    answers.Add(ConsoleCommands.Run("state.get Screen") ?? "");
+                    answers.Add(ConsoleHost.Run("state.get Screen").Text);
                     break;
             }
         });
@@ -71,7 +72,7 @@ public sealed class StateCommandTests
             (string, string?) Run(string line)
             {
                 ConsoleHost.Reset();
-                var answer = ConsoleCommands.Run(line) ?? "";
+                var answer = ConsoleHost.Run(line).Text;
                 return (answer, ConsoleHost.Failure?.Code);
             }
 

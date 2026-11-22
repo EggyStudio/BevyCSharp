@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Bevy;
 using Bevy.Physics;
 using Bevy.Reflected;
+using Diagnostics;
 
 namespace BevyCSharp.FeatureTest.Behaviors;
 

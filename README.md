@@ -338,7 +338,7 @@ which is how a change is checked without a person at the window:
 ./bcs stop
 ```
 
-A game adds commands of its own with `[Command]` on a static method, and
+A game adds commands of its own with the Diagnostics module's `[Command]` on a static method, and
 [the tools](https://github.com/EggyStudio/BevyCSharp/blob/main/docs/tools.md) page has the rest.
 
 ## Status and limitations
