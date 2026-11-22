@@ -11,7 +11,7 @@
 // are asked, and the probes about it are seen through the reach their rays had (probeSees) rather
 // than a march to each. The table of the field's cascades is read from its buffer by index, never
 // copied into a thread's memory. A thread holds one of the cells the listing found to hold this
-// frame (gi_hold_cells.slang, holdCellLight), so every thread of a workgroup shades.
+// frame (gi_hold_cells.slang, holdListedCell), so every thread of a workgroup shades.
 import bcs_field;
 import bcs_gi;
 import bcs_glow;
@@ -295,14 +295,21 @@ struct HeldCells : IHeldLight
     }
 }
 
+// The cells the listing found (IHeldList), which the hold reads and adds none to.
+struct Listed : IHeldList
+{
+    void list(uint at) {}
+    uint count() { return held_listed[0]; }
+    uint listedAt(uint index) { return held_list[index]; }
+}
+
 [shader("compute")]
 [numthreads(64, 1, 1)]
 void main(uint3 id : SV_DispatchThreadID)
 {
-    if (id.x >= held_listed[0])
-        return;
     FieldMarch march = fieldMarch(field, field_sampler, info);
     HoldShading shading;
     HeldCells cells = { march.size(), int(info[0].counts.x) };
-    holdCellLight(march, shading, cells, uint(info[0].counts.x), 1u, 0u, held_list[id.x]);
+    Listed listed;
+    holdListedCell(march, shading, cells, listed, id.x);
 }
