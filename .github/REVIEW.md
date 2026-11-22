@@ -271,10 +271,33 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
     through IModelFiles; an engine can bind it, its own copy giving way to the module's, with the
     kernel tests already moved. After item 138.
 
+155. **The Diagnostics module takes the console, the overlay's model, the keys and the settings.**
+    Both engines carry nearly the same command registry, console host and overlay model, with keys
+    that drifted apart, and neither has a registry of settings. The module `3DEngine.Diagnostics`
+    holds them once. In steps, each its own commit on main with the suite whole. Step 1, the
+    registry. The module comes as a submodule at `modules/Diagnostics`, embedded as the other
+    modules are and never a package. The `[Command]` attribute is the module's, the generator stays
+    here and emits `Registry.Process.Add` as the module's README says a generator emits, and the
+    engine's own command registry, its command and parameter types go; the console host runs a line
+    through the module's registry, a late answer written to the console by the host; the Modeling
+    module's commands are hosted through its list of commands in place of the engine's own `model.*`
+    ones. Step 2, the console, the overlay and the keys. The console's model and its ImGui drawing
+    are the module's, the overlay's lines come as sections the engine fills, and the keys are the
+    module's actions, F1 hide the interface, F2 screenshot, F3 overlay, F4 settings panel, F5
+    console, each a setting a player rebinds, no chord of F3 with F4. Step 3, the settings. Every
+    engine value a console command or an environment variable sets today is registered as a setting
+    with its range, its default, whether it takes effect at the next start and the variable that
+    overrides it, the panel draws them by page, and a game's settings are saved to one file in the
+    player's folder through the module's file. A picture of the console and of the panel in a
+    running example with each of steps 2 and 3. What the module lacks for a step goes to its session
+    in five lines and is mended there, never worked round here. The lighting branch goes on beside
+    this.
+
 ## Verdicts
 
-Verdict 93 is open, read at 17:56 on 2026-11-21, the build run 44919368444 on `789886e0` red in
-renderer part 7 alone, which ended at its 45 minutes on the software device with no result.
+Verdict 93 is settled at 22:56 on 2026-11-21, the build run 44944582195 on `a65613b3` green with the
+renderer's tests in fourteen parts, the longest 38 minutes and part 7 34, after a slower processor
+on a runner had carried the twelfth of the suite past its 45.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -584,6 +607,10 @@ in full under Decisions in REVIEW-ARCHIVE.md.
     reader who takes it alone and is published on the owner's word. What names a module's assembly
     or its file follows in the commit that moves the submodule pointers. N 4.12 holds a comment line
     to 100 columns, existing lines rewrapped as their files are touched.
+
+96. **The Diagnostics module is taken at once, beside the lighting branch.** The console, the
+    overlay's model, the keys F1 to F5 and a registry of settings with a paged panel come from the
+    module in both engines, the engine's own copies deleted as each step lands.
 
 ## Replies
 

@@ -7,17 +7,17 @@ namespace Bevy.Tests;
 public sealed partial class GlobalIlluminationTests
 {
     /// <summary>
-    /// Each cell of the field keeps its nearest surface's gloss beside the way its face looks, a cell
-    /// nearer a polished metal block's face holding the metal's roughness, metallic share and
-    /// reflectance and the face's way, and one nearer a rough dielectric block's face across a gap of a
-    /// meter the dielectric's, each the winner's own values and no blend of the two, read back from the
-    /// image the probes' rays read.
+    /// Each cell of the field keeps its nearest surface's gloss beside the way its face looks, a
+    /// cell nearer a polished metal block's face holding the metal's roughness, metallic share and
+    /// reflectance and the face's way, and one nearer a rough dielectric block's face across a gap
+    /// of a meter the dielectric's, each the winner's own values and no blend of the two, read back
+    /// from the image the probes' rays read.
     /// </summary>
     /// <remarks>
-    /// A cell of the faces image holds the face that won it in 32 bits, the way it looks in bits 0 to
-    /// 7 and its gloss in bits 8 to 31 (<c>faceBits</c> and <c>glossBits</c> in bcs_field.slang),
-    /// painted by the triangle that painted the cell's color, so a probe's ray lights what it meets by
-    /// its gloss as well as its color (<c>shadeProbeHit</c>).
+    /// A cell of the faces image holds the face that won it in 32 bits, the way it looks in bits 0
+    /// to 7 and its gloss in bits 8 to 31 (<c>faceBits</c> and <c>glossBits</c> in
+    /// bcs_field.slang), painted by the triangle that painted the cell's color, so a probe's ray
+    /// lights what it meets by its gloss as well as its color (<c>shadeProbeHit</c>).
     /// </remarks>
     [SkippableFact]
     public void TheFieldKeepsEachCellsNearestSurfacesGlossBesideItsFace()
@@ -57,10 +57,10 @@ public sealed partial class GlobalIlluminationTests
     }
 
     /// <summary>
-    /// Each cell of the field keeps the share of its diffuse light its nearest surface sends through
-    /// to its far side, a cell nearer an opaque block's face holding none and one nearer a block of
-    /// a material sending 0.6 through, as a leaf's does, holding 0.6, read back from the image the
-    /// probes' rays read.
+    /// Each cell of the field keeps the share of its diffuse light its nearest surface sends
+    /// through to its far side, a cell nearer an opaque block's face holding none and one nearer a
+    /// block of a material sending 0.6 through, as a leaf's does, holding 0.6, read back from the
+    /// image the probes' rays read.
     /// </summary>
     /// <remarks>
     /// The share has its own image of half floats beside the faces (<c>transmissionAt</c> in
@@ -103,18 +103,20 @@ public sealed partial class GlobalIlluminationTests
 
     /// <summary>
     /// A probe in a closed room of 8 of smooth walls of the level's white, at a roughness of 0.1,
-    /// reads the light its second bounce adds within 12% of its reference's, the walls its rays meet
+    /// reads the light its second bounce adds within 8% of its reference's, the walls its rays meet
     /// reflecting by their gloss the light the probes around them hold along each ray's mirror way.
     /// </summary>
     /// <remarks>
     /// The probe stands at (1, 1.5, 1) in the first cascade, held at its first bounce and at its
-    /// second (<c>WorldProbes.HoldBounces</c>), against 256 paths a way of one face and of two past
-    /// the first. A ray's hit reflects the indirect light by its gloss along the ray's mirror way,
-    /// rather than as though it reached the face evenly from all around. What is left is the sun's
-    /// and the lights' light, which a hit reflects evenly by its gloss, since the probe's rays
-    /// leave along the same ways each frame and would catch or miss a highlight as sharp as a
-    /// roughness of 0.1 gives. The second bounce reads about 11% over its reference, which the
-    /// bound of 12% holds.
+    /// second (<c>WorldProbes.HoldBounces</c>), against 4,096 paths a way of one face and of two
+    /// past the first. The smooth walls send each path on along a narrow lobe, so the reference
+    /// spreads with the paths drawn far more than a matte room's, by as much as the bound at 256
+    /// paths a way and within a point of the reading at 4,096. A ray's hit reflects the indirect
+    /// light by its gloss along the ray's mirror way, rather than as though it reached the face
+    /// evenly from all around. What is left is the sun's and the lights' light, which a hit
+    /// reflects evenly by its gloss, since the probe's rays leave along the same ways each frame
+    /// and would catch or miss a highlight as sharp as a roughness of 0.1 gives. The second bounce
+    /// reads about 5% over its reference, which the bound of 8% holds.
     /// </remarks>
     [SkippableFact]
     public void ASmoothRoomsProbeReflectsItsSecondBounceAlongEachRaysMirrorWay()
@@ -151,7 +153,7 @@ public sealed partial class GlobalIlluminationTests
                     if (!begun)
                     {
                         begun = true;
-                        Assert.Null(GiReference.BeginProbe(ecs, at, 0, 256, bounces));
+                        Assert.Null(GiReference.BeginProbe(ecs, at, 0, 4096, bounces));
                         return false;
                     }
                     if (GiReference.StepProbe(ecs) is not { } said) return false;
@@ -166,10 +168,13 @@ public sealed partial class GlobalIlluminationTests
 
         var second = (read[1].Probe - read[0].Probe) / (read[1].Drawn - read[0].Drawn) - 1;
         output.WriteLine($"the second bounce reads {second:+0.0%;-0.0%} against its reference");
-        Assert.True(Math.Abs(second) < 0.12, $"the second bounce reads {second:+0.0%;-0.0%} against its reference");
+        Assert.True(Math.Abs(second) < 0.08, $"the second bounce reads {second:+0.0%;-0.0%} against its reference");
     }
 
-    /// <summary>A cube two meters a side of <paramref name="material"/> standing with its middle at <paramref name="at"/>.</summary>
+    /// <summary>
+    /// A cube two meters a side of <paramref name="material"/> standing with its middle at
+    /// <paramref name="at"/>.
+    /// </summary>
     private static void Glossy(EcsWorld ecs, MaterialSettings material, Vec3 at)
     {
         var block = ecs.Spawn();
@@ -178,7 +183,10 @@ public sealed partial class GlobalIlluminationTests
         ecs.Add(block, Transform.At(at.X, at.Y, at.Z));
     }
 
-    /// <summary>The way a face looks from the eight bits a cell of the faces image keeps it in, as faceWay in bcs_field.slang unfolds them.</summary>
+    /// <summary>
+    /// The way a face looks from the eight bits a cell of the faces image keeps it in, as faceWay
+    /// in bcs_field.slang unfolds them.
+    /// </summary>
     private static Vector3 FaceWay(uint bits)
     {
         var o = new Vector2(((bits & 15) + 0.5f) / 16f * 2f - 1f, (((bits >> 4) & 15) + 0.5f) / 16f * 2f - 1f);
