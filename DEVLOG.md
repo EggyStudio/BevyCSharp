@@ -14,6 +14,21 @@ keys.console answered, the candidates of keys. opening below a field that runs t
 width on an opaque ground and the log wrapped at that width, and its settings panel on F5 on its
 first page on the same opaque black, one panel open at a time.
 
+![](.github/assets/readings/2026-11-22-item-156-sky-pins.webp)
+The feature test's noon, sunset and night at the Sky module's fbc385e and the Atmosphere module's
+8891e10, offscreen from one view at the same fixed exposure, each pair with its difference sixteen
+times over, black, since below the counter no pixel moves past 1 of 255 but a few at an edge and a
+star.
+
+![](.github/assets/readings/2026-11-22-item-155-settings.webp)
+The feature test offscreen with the engine's settings in the Diagnostics module's registry, the
+console on F4 answering help time.hold, time.speed, gi.quality at High, run.offscreen on and
+field.cell, time.hold both refused in red and the candidates of time. below the field, the settings
+panel on F5 on its first page with a page for each first word, field, gi, keys, run, scenes and
+time, and the feature test's row, its time page of the game's clock, frame, hold, paused and speed,
+and its run page of how the run was started, which only reads, the memory cap at 8 and offscreen and
+serve on.
+
 ## 2026-11-21
 
 ![](.github/assets/readings/2026-11-21-item-138-codes-and-sheets.webp)

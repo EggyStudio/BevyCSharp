@@ -308,7 +308,7 @@ a screenshot, F3 showing the debug overlay, F4 opening the console and F5 the se
 (`Debug.Keys`). Each is a setting of the registry a player rebinds, `keys.hide_interface`,
 `keys.screenshot`, `keys.overlay`, `keys.console` and `keys.panel`, so `keys.overlay F6` typed into
 the console moves the overlay to F6 and `keys.overlay ""` unbinds it, for a game that uses the key
-for something of its own. An action is taken as its key is let go where no other key went down while
+for something of its own, and a key a player rebinds is kept in the settings file (Settings below). An action is taken as its key is let go where no other key went down while
 it was held, so a program's own chord on one of them is the program's, and a key of one character is
 the field's while a field has the caret. The press is left for the program to read as well.
 
@@ -405,6 +405,66 @@ test adds a row that opens its admin panel:
 ```csharp
 Debug.Panel.Root.AddAction("Feature test", "feature.panel");
 ```
+
+## Settings
+
+The engine's values a console line or the environment sets are settings of the Diagnostics module's
+registry (`Registry.Process`), each with its default, its range or its choices, whether it only
+reads, and the variable of the environment that overrides it. A line names one as it names a
+command, `time.speed` saying it, `time.speed 2` setting it and `list` naming every one, and the
+settings panel draws them on a page for each first word of their names.
+
+| Setting | What it holds | Default | Variable |
+|---|---|---|---|
+| `time.frame` | The seconds each frame moves the game's clock by, 0 for the machine's clock | 0 | `BCS_FRAME_TIME` |
+| `time.hold` | What holds a set clock still, `loads`, `commands`, both with a comma between, or `off` | off | `BCS_HOLD_CLOCK` |
+| `time.speed` | How fast the game's clock runs, 1 being the machine's pace | 1 | |
+| `time.paused` | Whether the game's clock is stopped | off | |
+| `gi.quality` | The quality global illumination is traced at, `Off`, `Low`, `Medium` or `High` | Off | |
+| `gi.screen_probes` | Whether global illumination traces its screen's probes | on | |
+| `gi.held_bounces` | The bounces past the first the probes are held at for a reading, -1 for every one | -1 | |
+| `field.cascades` | The cascades the scene's distance field is built in, 0 to 8, 0 for none | 0 | |
+| `field.cell` | How wide the finest cascade's cells are, in meters | 0.25 | |
+| `field.budget` | The most cascades built a frame | 1 | |
+| `field.far` | How far ahead a far cascade reaches, in meters, 0 for none | 0 | |
+| `field.triangles` | The most triangles splatted into the field a frame | 32768 | |
+| `scenes.folder` | The folder the scene packs are fetched into and read from | the shared one | `BCS_SCENE_PACKS` |
+| `run.offscreen` | Whether the run draws into images of its own with no window | off | `BCS_OFFSCREEN` |
+| `run.frames` | The frames a run with no window stops after, 0 to run on | 0 | `BCS_FRAMES` |
+| `run.serve` | Whether the run answers `bcs` | off | `BCS_SERVE` |
+| `run.watch` | Whether the run reads its asset files again as they change | off | `BCS_WATCH_ASSETS` |
+| `run.memory_cap` | The gigabytes the process may hold before it is stopped, 0 for no cap | 0 | `BCS_MEMORY_CAP_GB` |
+| `run.sessions` | The folder the session files of served runs are written to | empty | `BCS_SESSIONS` |
+| `run.slangc` | The Slang compiler the shaders are compiled with | empty | `BCS_SLANGC` |
+| `run.shuffle` | The seed each schedule's systems are shuffled by as the app starts | empty | `BCS_SCHEDULE_SHUFFLE_SEED` |
+
+The `run` settings say how the run was started and only read, since no start reads a value set while
+the program runs. The others set the running app, and the commands that set them stand beside them,
+`app.frametime`, `app.hold`, `app.speed`, `app.pause`, `gi.set`, `gi.screen`, `gi.bounces` and
+`field.set`. A variable the environment holds overrides its setting for the whole run, and a set is
+then kept for the settings file alone.
+
+### The settings file
+
+A run that shows a window reads `settings.txt` from the player's folder (`user://settings.txt`, see
+`UserData`) as it starts, and writes it as a saved setting changes and as the app ends. It holds
+what the player set that differs from its default, the keys among them, and every line of a name the
+run does not know as it stood, so a setting of a part of the game that did not load is kept for the
+run that loads it. The engine's settings above are the run's and are never saved. A run with no
+window, headless or offscreen, reads no file and writes none, so a test or a tool leaves the
+player's choices as they were. A game's own setting is saved there once it is in the registry, and
+the game reads it as it runs:
+
+```csharp
+using Diagnostics;
+
+var subtitles = new Setting<bool>("game.subtitles", "Whether the game shows its subtitles.", true);
+Registry.Process.Add(subtitles);
+Console.WriteLine(subtitles.Value ? "subtitles on" : "subtitles off");
+```
+
+The registry is the process's, so a game adds a setting once, as its program starts, and not in each
+app it builds.
 
 ## Animated captures
 

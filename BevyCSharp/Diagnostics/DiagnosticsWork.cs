@@ -14,6 +14,10 @@ internal sealed class DiagnosticsWork : IPlugin
         // call included.
         Input.InterfaceTakesEscape = Debug.TakesEscape;
 
+        // The player's settings file, read as the app starts in a run that shows a window, and
+        // written from then on.
+        app.AddSystem(Stage.Startup, new SystemDescriptor(KeptSettings.Open, "Engine.Settings"));
+
         // The keys F1 to F5, in a run that draws and has a window to read them from, before the
         // hidden scope F1 turns over is kept (2900).
         app.AreasWork.Add(2800, world =>

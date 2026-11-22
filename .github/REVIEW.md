@@ -348,9 +348,8 @@ deep bounces' shortfall, closed with its sampling part open, the engine's 200 th
 
 ## Verdicts
 
-Verdict 93 is settled at 22:56 on 2026-11-21, the build run 44944582195 on `a65613b3` green with the
-renderer's tests in fourteen parts, the longest 38 minutes and part 7 34, after a slower processor
-on a runner had carried the twelfth of the suite past its 45.
+Verdict 94 is open, the build on `284819d0` red on one scripted run's test in three jobs, its mend
+named for step 3's commit.
 
 60. **The pack run with publish on `ca8c50b4` is red in two jobs, a renderer pair's part stopped at
     its memory cap and the first captures job one picture off, so no package is published.** Run
@@ -434,6 +433,14 @@ on a runner had carried the twelfth of the suite past its 45.
     each took before, time the splat on lavapipe before and after, and mend the cost or the part's
     split; a larger time limit is no mend. Settled when a run on the mend passes part 7 with its
     minutes stated.
+
+94. **The build on `284819d0` is red on one test, in the macOS, Linux and renderer jobs alike.**
+    Read at 20:30 on 2026-11-22 from the jobs' logs.
+    `ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` looks for "the player did not walk
+    north" in a failed course's output and finds a course that ended another way, 1 failed of 1,643
+    on macOS. The session names the mend as part of step 3's commit. The mend goes up with item
+    156's second part and step 3 together, over the red, and the verdict settles on that run's
+    green.
 
 ## Decisions
 
@@ -1074,5 +1081,80 @@ leaves out, and the library builds without it.
 
 Shared: the engine reads the Atmosphere module at 8891e10, its clouds from the optical depth it
 gives, offered to SHARED.md's row of the module.
+
+NormTests passed, 19.
+
+155, step 3, the settings, in the commit carrying this.
+
+The settings. Every value of the engine's a console command or an environment variable sets is a
+setting of the module's registry, in `EngineSettings` in the diagnostics area, added as its assembly
+loads as its commands are, each with its default, its range or its choices, whether it only reads
+and the variable that overrides it. The `time` page holds `time.frame` (`BCS_FRAME_TIME`),
+`time.hold` (`BCS_HOLD_CLOCK`), `time.speed` and `time.paused`, the `gi` page `gi.quality`,
+`gi.screen_probes` and `gi.held_bounces`, the `field` page the five values `field.set` takes,
+`field.cascades`, `field.cell`, `field.budget`, `field.far` and `field.triangles`, and
+`scenes.folder` takes `BCS_SCENE_PACKS`. The `run` page says how the run was started and only reads,
+`run.offscreen`, `run.frames`, `run.serve`, `run.watch`, `run.memory_cap`, `run.sessions`,
+`run.slangc` and `run.shuffle`, each naming its variable, since no start reads a value set while the
+program runs, so no setting waits for the next start. A setting of the running app refuses a set
+where none runs, with the reason. The commands that set them stand beside them for the scripts and
+guides that name them. Left out are the commands that set an entity, a state, a camera's look or an
+input, which hold no value of the engine's, `BEVY_ASSET_PATH`, which a build of the bridge reads and
+a run does not, and `BCS_MEMORY_CAP_SAID`, which the memory guard writes for itself. The `sky.*`
+commands become settings in a commit of their own on the Atmosphere module, which the commit before
+this brings, and the feature test's `feature-test.json` stays its own until its later item.
+
+The file. `KeptSettings` reads `settings.txt` from the player's folder, `user://settings.txt` beside
+a game's saves, as the app starts with the world lent, writes it as a saved setting changes and once
+more as the world goes, since the file is a resource of the world. It holds the keys and a game's
+own settings that differ from their defaults, with every line of a name the run does not know as it
+stood. A run with no window, headless, offscreen or with no renderer, reads none and writes none, so
+a test, a tool and every run of this session's leave the player's file as it was. A file that cannot
+be read is left alone, every setting starting at its default, and a refused line or a failed write
+is a warning in the console. The engine's player folder is `UserData`'s, `~/.local/share` on Linux
+and `%APPDATA%` on Windows, where the module's `SettingsFile.For` names the system's application
+data, `~/.config` on Linux, so the engine names the path itself. The editor gives its settings panel
+F4 and unbinds the console's key as a set, so the editor's own file holds those two once it writes.
+
+The panel draws the settings by the first word of their names, `field`, `gi`, `keys`, `run`,
+`scenes` and `time`, with the feature test's row after them. The tools guide gains a Settings
+section, a table of every setting with its default and variable and how the file is kept, with a
+block of a game's own setting built on the package, its keys paragraph says a rebound key is kept,
+and the feature test's README names `settings.txt` beside its own file.
+
+The tests. `EngineSettingsTests` holds every setting in the registry on the page of its first word,
+a run setting refusing a set and a clock setting refused with no app, the clock's and the field's
+settings set through console lines in a running app, the file read as the app starts and written as
+a key changes with a note and a line of no setting kept, and no file for a run with no window. With
+the registration and the file's system taken out, the first three fail (N 3.1).
+
+The picture. A sheet under `.github/assets/readings`, `2026-11-22-item-155-settings.webp`, of the
+feature test offscreen, its console answering the settings with a refused value in red and the
+candidates of `time.`, and its settings panel on its first page, its time page and its run page,
+with its line in the readings' captions.
+
+A mend of 158's in the same commit, for Verdict 94. Its Escape station in
+`build/drive-feature-test.sh` ran before the hub's walk, and
+`ScriptedRunTests.ARunThatFailsPutsTheTestersSettingsBack` runs the script against a stand-in for
+bcs that keeps no panels and answers done to a command it does not know, so the run stopped at F5
+opening no panel where the test looks for the walk. The station, unchanged, follows the hub's walk
+and the modes, before the course, and the test passes with it there and fails at 284819d0. 158's
+whole suite ran from 15:52 to 17:09 and the station went in at 18:49, with only the touched classes
+run after it, so a run of the test alone, two seconds with no device, would have found it before
+284819d0. A batch that changes a script under `build` runs the tests that read it, and the whole
+suite after its last change.
+
+The checks. The whole suite on this commit's tree, the commit before it with these files, ran 2205,
+the 2194 listed and 11, with 2200 passed, 5 skipped and none failed. The classes of the diagnostics,
+the command line, ImGui, the editor and scenes passed 241 with one skipped before it, the solution
+builds with warnings as errors, and the cheatsheet and the listing come out of their generators
+unchanged, since every type this adds is internal. The package of the commit before, `0.0.0-diag9`,
+was packed from a tree holding these files, and the tools guide's blocks, the game's own setting
+among them, build on it.
+
+Shared: the engine's settings in the module's registry as 3DEngine's `EngineSettings` holds them,
+the run's own unsaved and the run's start only reading, and the player's settings file kept for a
+run that shows a window, in the player's folder of the engine, are offered to SHARED.md as both
+engines having them.
 
 NormTests passed, 19.

@@ -59,7 +59,8 @@ or a pad. Its pages set the graphics, the effects, the weather, the audio and th
 the debug draws, teleport you to each zone, fetch and stand the scenes, spawn things and set the
 time of day. A setting marked "from the next start" needs the program started again. Every setting
 is kept for the next run in feature-test.json, in ~/.local/share/BevyCSharp Feature Test on Linux
-and %APPDATA%\BevyCSharp Feature Test on Windows. Deleting the file puts everything back as it came.
+and %APPDATA%\BevyCSharp Feature Test on Windows. The engine's keys, rebound on the settings panel,
+are kept beside it in settings.txt. Deleting the files puts everything back as it came.
 
 The console
 -----------
