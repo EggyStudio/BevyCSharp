@@ -40,6 +40,10 @@ Texture3D<float> sun_map;
 Texture3D<float> lamp_maps;
 StructuredBuffer<uint> lamps_reaching;
 
+// The glow lights whose reach meets each block of cells (gi_glow_blocks.slang), each block's count
+// and then their indices.
+StructuredBuffer<uint> glow_blocks;
+
 // The light each side of each cell's surface sends of its own and of the probes it reflects, the
 // field's cascades one after another along z, all their side 0s and then all their side 1s.
 // The cells the listing found to hold this frame, by their index, and how many.
@@ -57,6 +61,8 @@ uniform float4 interval;
 uniform uint4 sun;
 // x: the texels along each side of a face of a lamp's map.
 uniform uint4 lamp;
+// x: the cells along each side of a block the glow lights are listed for.
+uniform uint4 glow_block;
 
 // The sun's light reaching a face at p facing n in the field's cascade c, whose cells are cell
 // wide, as directLight takes it, none where the face looks away or there is no sun. A march toward
@@ -122,10 +128,29 @@ bool lampHidden(GiLight light, uint i, FieldMarch march, float3 from, float3 n, 
     return length > met + 1.5 * cell + 2.0 * length / float(texels) * min(slant, 4.0);
 }
 
+// The glow lights listed for the block of cells holding a held cell (IGlowLightList).
+struct BlockGlowLights : IGlowLightList
+{
+    uint first;
+
+    uint count() { return glow_blocks[first]; }
+
+    uint at(uint i) { return glow_blocks[first + 1u + i]; }
+}
+
+// The glow lights listed for the block holding the cell of the field's cascade c.
+BlockGlowLights glowLightsNear(int c, int3 cell)
+{
+    uint side = uint(info[0].counts.y) / glow_block.x;
+    uint3 block = uint3(cell) / glow_block.x;
+    BlockGlowLights near = { (((uint(c) * side + block.z) * side + block.y) * side + block.x) * (1u + uint(MostGlowLights)) };
+    return near;
+}
+
 // The light reaching a face at p facing n from the sun, from each lamp whose range meets the field,
 // those that cast shadows hidden where the field stands between, and from the two brightest glow
 // lights, as shadeProbeHit takes it, the ray along way.
-float3 lightsReachingHeld(GiLights lit, FieldInfo fieldInfo, FieldMarch march, int c, float3 p, float3 n, float3 way, float cell)
+float3 lightsReachingHeld(GiLights lit, FieldInfo fieldInfo, FieldMarch march, int c, int3 at, float3 p, float3 n, float3 way, float cell)
 {
     float3 arrived = sunReaching(lit, march, c, p, n, cell);
     float3 from = p + n * (cell * 1.5);
@@ -138,7 +163,7 @@ float3 lightsReachingHeld(GiLights lit, FieldInfo fieldInfo, FieldMarch march, i
         if (result > 0.0 && !(light.colorAndShadow.w >= 0.5 && lampHidden(light, i, march, from, n, cell)))
             arrived += light.colorAndShadow.rgb * result;
     }
-    return arrived + glowLightsAt(field, field_sampler, fieldInfo, glow_lights, uint(lit.counts.w), p, n, 2, false, way) / Pi;
+    return arrived + glowLightsIn(field, field_sampler, fieldInfo, glow_lights, glowLightsNear(c, at), p, n, 2, false, way) / Pi;
 }
 
 // The cascade of probes the gather left holding p, at least a cell inside its sides, and in oc its
@@ -261,10 +286,10 @@ struct HoldShading : IHeldShading
         float3 along;
         float3 bounce = bounceReaching(place, seen, reflect(way, seen), gloss.x, along);
         float3 own = surfaceGlowUncarried(glow, albedo, field_sampler, fieldInfo, place);
-        float3 litOn = lightsReachingHeld(lit, fieldInfo, march, c, place, n, way, wide);
+        float3 litOn = lightsReachingHeld(lit, fieldInfo, march, c, cell, place, n, way, wide);
         if (through > 0.0)
         {
-            float3 litOff = lightsReachingHeld(lit, fieldInfo, march, c, place, -n, way, wide);
+            float3 litOff = lightsReachingHeld(lit, fieldInfo, march, c, cell, place, -n, way, wide);
             float3 litAway = farSide ? litOn : litOff, litSeen = farSide ? litOff : litOn;
             own += diffuse * (1.0 - through) * litOn + diffuse * through * litAway + glossy * litSeen;
         }

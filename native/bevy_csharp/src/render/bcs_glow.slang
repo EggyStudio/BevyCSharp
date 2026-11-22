@@ -522,6 +522,28 @@ public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldI
     return lit > 0.0 ? lerp(1.0, seen / lit, fieldHold(info, p)) : 1.0;
 }
 
+/// The glow lights a surface asks for their light (glowLightsIn), by their index into the lights'
+/// buffer in rising order, every light (EveryGlowLight) or those an engine lists as able to reach
+/// the surface.
+public interface IGlowLightList
+{
+    /// How many lights the list holds.
+    uint count();
+
+    /// The index of the list's light at i.
+    uint at(uint i);
+}
+
+/// The first `lights` glow lights of the buffer, every one in turn.
+public struct EveryGlowLight : IGlowLightList
+{
+    public uint lights;
+
+    public uint count() { return min(lights, uint(MostGlowLights)); }
+
+    public uint at(uint i) { return i; }
+}
+
 /// The light reaching a surface at p facing n from the glow lights, irradiance, each light's in
 /// closed form faded by its reach, and the `marches` brightest of them, four at most, by how much
 /// of each the surface sees through the field, by the halves of its faces where `halves` asks
@@ -536,11 +558,13 @@ public float glowLightShown(Texture3D<float4> field, SamplerState linear, FieldI
 /// before it met the field gives the hit none of its light (glowLightPassed), and a hit within a
 /// cell of a light's box takes the light as its mean over a square a cell wide about the hit on its
 /// plane, since a light thinner than a cell lights the wall it stands against within a few
-/// hundredths of its box, a patch one probe's ray meets and the next probe's misses.
-public float3 glowLightsAt(Texture3D<float4> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows, uint lights,
-    float3 p, float3 n, int marches, bool halves, float3 way)
+/// hundredths of its box, a patch one probe's ray meets and the next probe's misses. The lights
+/// asked are those the list holds, and a list that leaves out only lights whose reach ends short
+/// of p gives the light every light gives.
+public float3 glowLightsIn<L : IGlowLightList>(Texture3D<float4> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows,
+    L list, float3 p, float3 n, int marches, bool halves, float3 way)
 {
-    int count = min(int(lights), MostGlowLights);
+    uint count = list.count();
     float cell = fieldCell(info, p);
     float margin = max(cell, 0.0) * 0.5;
     float3 kept[4] = { float3(0.0), float3(0.0), float3(0.0), float3(0.0) };
@@ -553,8 +577,9 @@ public float3 glowLightsAt(Texture3D<float4> field, SamplerState linear, FieldIn
     int groupOne[4] = { -1, -1, -1, -1 };
     int groups = 0;
     [loop]
-    for (int i = 0; i < count; i++)
+    for (uint k = 0u; k < count; k++)
     {
+        int i = int(list.at(k));
         GlowLight light = glows[i];
         float faded = glowLightFade(light, p, n);
         if (faded <= 0.0 || (dot(way, way) > 0.0 && glowLightPassed(light, p, way, 2.0 * margin)))
@@ -637,6 +662,15 @@ public float3 glowLightsAt(Texture3D<float4> field, SamplerState linear, FieldIn
             sum += grouped[k] * (halves ? glowLightShown(field, linear, info, light, p, n, cell) : glowLightSeen(field, linear, info, light, p, n, cell));
         }
     return sum;
+}
+
+/// The light reaching a surface at p facing n from every one of the first `lights` glow lights, as
+/// glowLightsIn takes it.
+public float3 glowLightsAt(Texture3D<float4> field, SamplerState linear, FieldInfo info, StructuredBuffer<GlowLight> glows, uint lights,
+    float3 p, float3 n, int marches, bool halves, float3 way)
+{
+    EveryGlowLight every = { lights };
+    return glowLightsIn(field, linear, info, glows, every, p, n, marches, halves, way);
 }
 
 /// The light the field's surfaces emit at `p` as surfaceGlow blends it, less that of the surfaces

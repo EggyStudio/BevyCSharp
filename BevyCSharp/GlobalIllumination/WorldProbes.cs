@@ -77,6 +77,16 @@ internal static unsafe partial class WorldProbes
     /// </summary>
     internal const uint MostLamps = 16;
 
+    /// <summary>
+    /// The cells along each side of a block of the field the glow lights are listed for by their
+    /// reach (<c>gi_glow_blocks.slang</c>), which the hold asks of in place of every light.
+    /// </summary>
+    internal const uint GlowBlockCells = 8;
+
+    // The blocks of a cascade of the field the glow lights are listed for, size cells along each
+    // side.
+    private static uint GlowBlocksOf(uint size) => (size / GlowBlockCells) * (size / GlowBlockCells) * (size / GlowBlockCells);
+
     // No cell listed yet this frame, which the listing counts up from (gi_hold_cells.slang).
     private static readonly uint[] NoneListed = new uint[4];
 
@@ -139,7 +149,7 @@ internal static unsafe partial class WorldProbes
     // traced, and where each cascade lay the frame before.
     private static App? _app;
     private static Made? _made;
-    private static ShaderProgram _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram;
+    private static ShaderProgram _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram, _glowBlocksProgram;
 
     // The trace built without the crossing of surfaces that let light through, which a frame where
     // nothing drawn lets light through traces with, so its light is the light the probes took
@@ -194,9 +204,9 @@ internal static unsafe partial class WorldProbes
         // The light held for the field's cells, each side's own and its probes' (gi_hold.slang),
         // for as many cascades of the field as it was made for, and the dispatch that holds it.
         public AssetHandle HeldOwn, HeldProbes, HeldReached = AssetHandle.None;
-        public AssetHandle SunMap, LampMaps, LampsReaching, HeldList, HeldListed = AssetHandle.None;
+        public AssetHandle SunMap, LampMaps, LampsReaching, HeldList, HeldListed, GlowBlockList = AssetHandle.None;
         public int HeldCascades;
-        public ShaderInstance Hold, Sun, Lamps, Cells;
+        public ShaderInstance Hold, Sun, Lamps, Cells, GlowBlocks;
         // Whether the traces run the build that crosses surfaces letting light through.
         public bool Crossing = true;
         public (float Start, float End)[] Intervals = [];
@@ -334,7 +344,7 @@ internal static unsafe partial class WorldProbes
         {
             _app = App.Running;
             (_made, _traceProgram, _reachProgram, _mergeProgram, _ambientProgram, _light, _frame, _origins) = (null, default, default, default, default, default, 0, []);
-            (_holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram) = (default, default, default, default, default);
+            (_holdProgram, _sunProgram, _lampsProgram, _cellsProgram, _marksProgram, _glowBlocksProgram) = (default, default, default, default, default, default);
             (HeldBounces, _heldFrom) = (null, 0);
             _traceSolid = default;
             (_sky, _skyCamera) = (default, Entity.None);
@@ -361,6 +371,7 @@ internal static unsafe partial class WorldProbes
             _sunProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_sun.slang");
             _lampsProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_lamps.slang");
             _cellsProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_hold_cells.slang");
+            _glowBlocksProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_glow_blocks.slang");
             _ambientProgram = Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_ambient.slang");
             _light = Shaders.KernelDraw(typeof(SceneField).Assembly, "gi_light.slang");
             _sky = Shaders.CreateInstance(Shaders.KernelProgram(typeof(SceneField).Assembly, "gi_sky.slang"));
@@ -369,7 +380,8 @@ internal static unsafe partial class WorldProbes
         if (_traceProgram.State != ShaderProgramState.Ready || _traceSolid.State != ShaderProgramState.Ready || _reachProgram.State != ShaderProgramState.Ready
             || _mergeProgram.State != ShaderProgramState.Ready || _ambientProgram.State != ShaderProgramState.Ready
             || _holdProgram.State != ShaderProgramState.Ready || _sunProgram.State != ShaderProgramState.Ready || _lampsProgram.State != ShaderProgramState.Ready
-            || _cellsProgram.State != ShaderProgramState.Ready || _marksProgram.State != ShaderProgramState.Ready)
+            || _cellsProgram.State != ShaderProgramState.Ready || _marksProgram.State != ShaderProgramState.Ready
+            || _glowBlocksProgram.State != ShaderProgramState.Ready)
             return;
 
         var texels = TexelsFor(quality, CascadesFor(quality, plan), plan.HasFar);
@@ -434,6 +446,7 @@ internal static unsafe partial class WorldProbes
         made.LampsReaching = Shaders.CreateBuffer((int)(1 + MostLamps) * 4);
         made.Cells = Shaders.CreateInstance(_cellsProgram);
         made.HeldListed = Shaders.CreateBuffer(16);
+        made.GlowBlocks = Shaders.CreateInstance(_glowBlocksProgram);
 
         // No probe's own light known yet, and every probe taking the whole of the indirect light.
         var held = new Vector4[4 * p * p * p * cascades];
@@ -485,7 +498,7 @@ internal static unsafe partial class WorldProbes
         }
         if (_made is not { } made) return;
         foreach (var handle in made.Rays.Concat(made.Merged).Concat(made.Distances)
-                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.ReachMaps, made.Ways, made.Held, made.Partial, made.Shares, made.Lights, made.Glows, made.SkyMap, made.Air, made.HeldOwn, made.HeldProbes, made.HeldReached, made.SunMap, made.LampMaps, made.LampsReaching, made.HeldList, made.HeldListed]))
+                     .Concat([made.Cubes, made.CubesAt, made.Reach, made.ReachMaps, made.Ways, made.Held, made.Partial, made.Shares, made.Lights, made.Glows, made.SkyMap, made.Air, made.HeldOwn, made.HeldProbes, made.HeldReached, made.SunMap, made.LampMaps, made.LampsReaching, made.HeldList, made.HeldListed, made.GlowBlockList]))
             AssetServer.Release(handle);
         _made = null;
         _origins = [];
@@ -602,6 +615,8 @@ internal static unsafe partial class WorldProbes
             made.SunMap = Shaders.CreateImage(SunTexels, SunTexels, ShaderImageFormat.R32Float, (uint)plan.Cascades);
             if (made.HeldList != AssetHandle.None) AssetServer.Release(made.HeldList);
             made.HeldList = Shaders.CreateBuffer((int)(size * size * size * (uint)plan.Cascades * 4));
+            if (made.GlowBlockList != AssetHandle.None) AssetServer.Release(made.GlowBlockList);
+            made.GlowBlockList = Shaders.CreateBuffer((int)(GlowBlocksOf(size) * (uint)plan.Cascades * (1 + GlowLights.Most) * 4));
             made.HeldCascades = plan.Cascades;
         }
         // The field as the sun sees it across each of its cascades, and as each lamp that casts
@@ -647,10 +662,16 @@ internal static unsafe partial class WorldProbes
         made.Cells.SetTexture("field", field).SetSampler("field_sampler", SamplerSettings.ClampedTable).SetBuffer("info", info)
             .SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed)
             .SetTexture("held_reached", made.HeldReached).SetNumbers("frame", 4, [(uint)_frame, 0u, 0u, 0u]);
-        made.Hold.SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed);
+        made.Hold.SetBuffer("held_list", made.HeldList).SetBuffer("held_listed", made.HeldListed)
+            .SetBuffer("glow_blocks", made.GlowBlockList).SetNumbers("glow_block", 4, [GlowBlockCells, 0u, 0u, 0u]);
+        // The glow lights whose reach meets each block of cells, which the hold asks in place of
+        // every light.
+        made.GlowBlocks.SetBuffer("info", info).SetBuffer("lights", made.Lights).SetBuffer("glow_lights", made.Glows)
+            .SetBuffer("glow_blocks", made.GlowBlockList).SetNumbers("glow_block", 4, [GlowBlockCells, 0u, 0u, 0u]);
         if (!still)
         {
             Shaders.Dispatch(made.Cells, size * size * size * (uint)plan.Cascades / 64);
+            Shaders.Dispatch(made.GlowBlocks, (GlowBlocksOf(size) * (uint)plan.Cascades + 63) / 64);
             Shaders.Dispatch(made.Hold, size * size * size * (uint)plan.Cascades / 64);
         }
 
